@@ -1,8 +1,140 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Modular Arithmetic
 
-_TODO: write this page. Curated topic — draw the through-line across the tags below yourself._
+[Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
+remainders: instead of tracking a number's full value, you track only what is left after dividing
+by a fixed **modulus** $m$. It is the single most useful trick in the Euler toolbox, because a
+huge fraction of problems ask a question that only depends on a remainder — *the last ten digits
+of a number*, *is this divisible by that*, *how many arrangements up to a symmetry* — and the full
+value is astronomically large while its residue fits in a machine word. Learn to spot when a
+problem is secretly modular, and a computation with millions of digits collapses to one that never
+leaves the range $[0, m)$.
+
+## The arithmetic of remainders
+
+Two integers are [**congruent**](https://en.wikipedia.org/wiki/Modular_arithmetic) modulo $m$,
+written $a \equiv b \pmod m$, when they leave the same remainder on division by $m$ — equivalently,
+when $m$ divides $a - b$. The reason this is *arithmetic* and not just notation is that congruence
+is preserved by addition, subtraction, and multiplication:
+
+$$(a + b) \bmod m = ((a \bmod m) + (b \bmod m)) \bmod m,$$
+
+and the same for $a - b$ and $a \times b$. So you may reduce at every step and never let an
+intermediate value grow. That single closure property is what powers the classic reframe: "the last
+$k$ decimal digits of $N$" is exactly $N \bmod 10^k$. Problem 97 asks for the last ten digits of
+$28433 \times 2^{7830457} + 1$ — a number with over two million digits — but working modulo
+$10^{10}$ throughout, it never handles anything bigger than $10^{20}$. Problem 19 (public,
+`solutions/public/p0019/`) is the same idea wearing a calendar: the day of the week is a residue
+modulo 7, so counting how often the first of a month is a Sunday is pure arithmetic mod 7, no date
+library required.
+
+The catch is that congruence is preserved by $+$, $-$, and $\times$ **but not by division** — and
+not, in general, by exponentiation done naively. Those two operations are what the rest of this page
+is about.
+
+## Exponentiation: square-and-multiply
+
+Computing $a^b \bmod m$ by multiplying $a$ into a running product $b$ times is $O(b)$, and $b$ is
+often the very thing that is astronomically large ($b = 7830457$ in problem 97; $b = i$ up to $1000$
+per term in problem 48). [**Modular exponentiation**](https://en.wikipedia.org/wiki/Modular_exponentiation)
+via [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) reads the
+exponent's binary digits instead: repeatedly square the base, and fold it into the result only where
+a bit of $b$ is set. That computes the power in $O(\log b)$ multiplications — about 23 instead of 7.8
+million for problem 97.
+
+In Python you almost never write the loop yourself; the built-in three-argument `pow` does the
+reduction *inside* the squaring loop, so the full power is never materialised. Problem 48 (public,
+`solutions/public/p0048/`) — the sum $1^1 + 2^2 + \dots + 1000^{1000}$ modulo $10^{10}$ — is three
+lines because of it:
+
+```python
+result = 0
+for i in range(1, limit + 1):
+    result = (result + pow(i, i, modulo)) % modulo   # note: pow(i, i, modulo), not pow(i, i) % modulo
+```
+
+The parenthetical matters: `pow(i, i) % modulo` first builds the multi-thousand-digit power and only
+then reduces, throwing away the entire benefit. Two further levers keep the *exponent* itself small.
+By [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), if $p$ is
+prime and $\gcd(a, p) = 1$ then $a^{p-1} \equiv 1 \pmod p$, so exponents may be reduced modulo
+$p - 1$; its generalisation, [Euler's theorem](https://en.wikipedia.org/wiki/Euler%27s_theorem),
+does the same modulo any $m$ using [Euler's totient](https://en.wikipedia.org/wiki/Euler%27s_totient_function)
+$\varphi(m)$. That is how "tower of powers" problems (188's hyperexponentiation) stay finite: you
+reduce each exponent modulo the totient of the modulus one level up.
+
+## Division: the modular inverse
+
+You cannot divide by $a$ modulo $m$ directly, but you can multiply by its
+[**modular multiplicative inverse**](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) —
+the number $a^{-1}$ with $a \cdot a^{-1} \equiv 1 \pmod m$. It exists **precisely when $a$ and $m$
+are [coprime](https://en.wikipedia.org/wiki/Coprime_integers)** ($\gcd(a, m) = 1$); otherwise $a$ has
+no inverse and division is genuinely undefined. There are two standard ways to compute it:
+
+- The [extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)
+  finds $x, y$ with $a x + m y = \gcd(a, m)$; when the gcd is 1, that $x$ is $a^{-1} \bmod m$. This
+  works for **any** modulus.
+- When the modulus is prime, Fermat's little theorem gives it for free: $a^{-1} \equiv a^{p-2}
+  \pmod p$, one modular exponentiation.
+
+In Python both collapse to `pow(a, -1, m)` (a negative exponent asks for the inverse). The inverse is
+what turns a [**linear congruence**](https://en.wikipedia.org/wiki/Linear_congruence_theorem) into a
+closed form: to solve $a x \equiv c \pmod m$ you write $x \equiv c \cdot a^{-1} \pmod m$ — no search.
+Problem 134 does exactly this: "the number ending in the digits of prime $p_1$ and divisible by
+$p_2$" becomes $10^d k \equiv -p_1 \pmod{p_2}$, solved in one line as
+`k = (-p1 * pow(d, -1, p2)) % p2`; the inverse exists because $p_2 > 5$ shares no factor with
+$10^d$. Inverses also appear as the object of study in their own right — problem 451 hunts for
+*self-inverse* residues ($m$ with $m^2 \equiv 1 \pmod n$), and modular binomial coefficients (needed
+whenever a count is asked "modulo a prime") are computed with inverse factorials.
+
+## Combining moduli: the Chinese Remainder Theorem
+
+When a modulus factors into coprime pieces, the
+[**Chinese Remainder Theorem**](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) (CRT) says a
+system of congruences with pairwise-coprime moduli has a unique solution modulo the product:
+
+$$x \equiv a_1 \pmod{m_1}, \quad x \equiv a_2 \pmod{m_2} \;\Longrightarrow\; \text{a unique } x
+\pmod{m_1 m_2}.$$
+
+This is a workhorse for two reasons. First, it lets you *combine* separately-derived constraints:
+problem 531 asks for the smallest $x$ with $x \equiv a \pmod n$ and $x \equiv b \pmod m$ — a direct
+CRT solve (returning nothing when the moduli are not coprime and the residues clash). Second, it lets
+you *decompose* a hard modulus: to solve a polynomial congruence like $x^3 \equiv 1 \pmod n$
+(problem 271) you factor $n$, solve modulo each prime power separately where the structure is simple,
+and glue the residue sets back together with CRT. The number of solutions multiplies across the
+factors — which is why $S(91) = S(7 \cdot 13)$ in problem 271 has $2 \times 4 = 8$ roots.
+
+## The overflow trap
+
+Modular arithmetic's one sharp edge is a language pitfall, not a mathematical one. Two residues below
+$m$ multiply to a product approaching $m^2$; with $m = 10^{10}$ that is $10^{20}$, past the
+$\approx 9.2 \times 10^{18}$ ceiling of a signed 64-bit integer. Python's arbitrary-precision
+integers make this invisible, but in C the intermediate product overflows and silently corrupts the
+answer. The fix used throughout the C solutions here is to widen just the multiply — cast one operand
+to `__int128`, form the product at 128-bit precision, and reduce back to 64 bits immediately — so the
+oversized value is transient and never stored. Whenever a modulus exceeds about $3 \times 10^9$, that
+widening (or a modulus small enough that $m^2$ still fits) is mandatory.
+
+## How to reason about it
+
+The recurring cue is a question that depends only on a remainder — *last digits*, *divisibility*,
+*a count modulo a prime*, *a periodic or cyclic structure* — attached to a value too large to form
+directly. When you see it:
+
+- Reduce **early and often**. Never build the full number; reduce after every $+$ or $\times$ so
+  operands stay in $[0, m)$.
+- Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
+  Fermat/Euler when the base is coprime to the modulus.
+- Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
+  for a prime one — and remember it exists only when $\gcd(a, m) = 1$.
+- Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
+  Remainder Theorem, working prime power by prime power.
+- Writing **C** (or any fixed-width language)? Guard every modular multiply against overflow.
+
+The classic mistake is to compute the honest quantity first and reduce at the end — materialising the
+million-digit power, or the true factorial, before taking the remainder. The whole point is that you
+never have to: reduce as you go, and a problem that looks like big-integer arithmetic becomes a
+handful of operations on small numbers.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
