@@ -298,6 +298,19 @@ class SolverShell:
                 bottom_toolbar=self._bottom_toolbar,
             )
             try:
+                if config.subject.channel == 'web':
+                    prev_quiet, self.console.quiet = self.console.quiet, True
+                    try:
+                        sync_rc = self.dispatch('git-sync')
+                    finally:
+                        self.console.quiet = prev_quiet
+                    # The one thing the quiet must not swallow: a sync that did NOT happen.
+                    # Silence would open the shell on a stale clone with no hint — a diverged
+                    # branch, a locked vault, no network. One line, printed after the quiet is
+                    # restored, naming the command that shows why (it reports what it refused).
+                    if sync_rc != 0:
+                        self.console.print('[warning]could not sync with origin/master — this clone may be stale; '
+                                           'run [accent]git-sync[/accent] to see why.[/warning]')
                 previous_eof: float = 0.0
                 while True:
                     try:

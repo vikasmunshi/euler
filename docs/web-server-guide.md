@@ -1198,7 +1198,9 @@ acted. The git commands emit `OSC 5379` `git;<token>` on their success paths
 `{euler: 'git-changed'}`; `site.js` dispatches `euler:git-changed` on `<body>`; the chip's
 own `hx-get="/git"` (`hx-trigger="… from:body"`, `hx-swap="outerHTML"`) replaces itself.
 One read, at the one moment the state changed. It fires for a **hand-typed** `git-sync`
-exactly as for the menu's item — the menu types the same command, so there is one path.
+exactly as for the menu's item — the menu types the same command, so there is one path —
+and for the sync a web shell runs at startup (§12.1), which dispatches that same command:
+the nudge rides `sys.stdout` directly, so the quiet that hides the sync never hides it.
 A lost or replayed sequence costs a stale chip until the next navigation, never a wrong one.
 
 **Three states that are not "clean".** With no readable `.git` — the shared content tier
@@ -1297,6 +1299,23 @@ one-time ticket at the fork — so the only residual risk a persistent shell car
 stale authority *inside an already-running process*. The revocation push removes exactly
 that, at its source, rather than having the shell tier poll for something it cannot
 observe.
+
+**A web shell syncs its clone as it starts.** `run_interactive` dispatches `git-sync`
+before the first prompt, on the **web channel only** (`config.subject.channel`) — a
+terminal user drives their own clone and did not ask for a fetch. Without it a
+collaborator opened onto whatever their clone held when they last used it, and the
+enc-key pull flow (§9) that wires their filter waited on them remembering to type the
+command. It runs with the shared console quiet, which also routes the sync script's own
+output to `DEVNULL` (`run_cmdline`), so the banner is followed by a prompt rather than a
+wall of git; a **failed** sync still prints one line, because a stale clone with no hint
+is the one outcome silence must not cover. An interrupt during the fetch is absorbed by
+the register adapter, so a Ctrl-C at startup still lands at a prompt.
+
+Note what "at startup" means against the persistence above: this is once per **shell**,
+not once per attach. Re-opening the tab re-attaches to the running shell and syncs
+nothing — the fresh fetch comes with a new shell, i.e. after a teardown or the 24 h
+detached reaper. The chip's own remote-fetch freshness (§11.9) is what keeps a
+long-running shell's *view* current in between.
 
 ### 12.2 Three client-side subtleties
 
