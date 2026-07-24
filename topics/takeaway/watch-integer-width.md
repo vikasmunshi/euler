@@ -1,8 +1,102 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Watch integer width
 
-_TODO: write this page. No reference on the tag._
+Every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
+`int` is an [arbitrary-precision](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
+"bignum" that grows to fit whatever you compute, while C's integers are
+[fixed-width](https://en.wikipedia.org/wiki/C_data_types#Basic_types) boxes that
+[overflow](https://en.wikipedia.org/wiki/Integer_overflow) the moment a value outgrows them. The
+takeaway is a habit: when you translate a working Python solution to C — as every problem here does
+— stop at each multiply, sum, and power and ask *how big can this actually get?* The number that
+matters is not the final answer but the largest **intermediate** value on the way to it.
+
+## The idea
+
+Python never makes you think about width. `2**1000`, `product`, `pow(i, i, 10**10)` — the
+interpreter promotes to a bignum silently and the arithmetic is exact up to the limits of memory.
+C gives you a fixed menu, and picking the wrong item is a silent, data-dependent bug: signed
+overflow is [undefined behaviour](https://en.wikipedia.org/wiki/Integer_overflow#Security_ramifications_and_bugs),
+so a value that fits on your test case and wraps on the real one may still "run fine" and just
+print the wrong number. The widths worth memorising:
+
+| C type | signed max | roughly |
+| --- | --- | --- |
+| `int` (32-bit) | $2^{31}-1$ | $2.1 \times 10^{9}$ |
+| `long long` / `int64_t` | $2^{63}-1$ | $9.2 \times 10^{18}$ |
+| `unsigned long long` | $2^{64}-1$ | $1.8 \times 10^{19}$ |
+| `__int128` (GCC/Clang) | $2^{127}-1$ | $1.7 \times 10^{38}$ |
+
+Against that menu, the problems in this topic fall into three tiers, and each tier has a standard
+C response.
+
+**Tier 1 — reach for 64 bits.** The value overflows a 32-bit `int` but fits comfortably in a
+`long long`. Problem 8 multiplies thirteen digits: $9^{13} \approx 2.5 \times 10^{12}$, past `int`
+but far short of `long long`. Problem 6 squares a sum near $n(n+1)/2$; for the real $n$ the square
+lands around $10^{10}$. The whole fix is to declare the accumulators `long long` and move on:
+
+```c
+long long product = 1;                 /* not int — 9^13 overflows 32 bits */
+for (int j = i; j < i + length; j++)
+    product *= (number[j] - '0');
+```
+
+**Tier 2 — the intermediate overflows 64 bits, even though the answer doesn't.** Problem 48 sums
+$i^i \bmod 10^{10}$. The *answer* is a ten-digit number, but computing it multiplies two operands
+each near $10^{10}$, and their product $\approx 10^{20}$ blows past a signed 64-bit `long long`.
+The reduced result fits; the multiply on the way to it does not. Two mitigations, often combined:
+reduce modulo at every step so operands stay small, and **widen the multiply itself** to a type
+that holds the product before you reduce:
+
+```c
+/* operands near 10^10, product ~10^20 — widen to __int128 before reducing */
+result = (__int128)result * base % mod;
+```
+
+Where `__int128` isn't available, the same job is done by a `mulmod` built from repeated
+doubling, or by splitting the operands into high and low halves.
+
+**Tier 3 — no fixed width is enough; you must build the bignum yourself.** Problem 16 wants the
+digit sum of $2^{1000}$ — a 302-digit number — and problem 25 hunts the first 1000-digit
+[Fibonacci](https://en.wikipedia.org/wiki/Fibonacci_sequence) term. No C integer comes close.
+Here you re-implement, by hand, the arbitrary precision Python gave you for free: store the number
+as an array of decimal digits and do
+[schoolbook long multiplication](https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication)
+with carries.
+
+```c
+/* digits[] little-endian; multiply the whole big number by base, once */
+int carry = 0;
+for (int j = 0; j < len; j++) {
+    int val = digits[j] * base + carry;
+    digits[j] = (unsigned char)(val % 10);
+    carry = val / 10;
+}
+while (carry > 0) { digits[len++] = (unsigned char)(carry % 10); carry /= 10; }
+```
+
+That is the whole spectrum: pick a wider built-in, widen just the risky operation, or hand-roll a
+bignum — in rising order of effort, chosen by how far the biggest intermediate exceeds the box.
+
+## How to reason about it
+
+- **Bound the intermediate, not the answer.** A ten-digit result computed through a twenty-digit
+  product is Tier 2, not Tier 1. Trace the largest value that ever exists, including inside a
+  multiply before the `% mod` lands (problem 48), or a factorial or power that is reduced later
+  (problems 97, 288). This is where a Python-to-C port most often goes wrong.
+- **Reduce early to stay small.** In modular problems, take the remainder after *every* operation
+  so operands never grow. That is what keeps [modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation)
+  (problems 48, 97) inside 64 bits between multiplies — leaving only the single product to widen.
+- **Mind the order and exactness of mixed operations.** `(2*n+1)*(n+1)*n / 6` (problem 6) must
+  keep the product exact before the division; reorder or widen so no partial product overflows and
+  the final divide stays whole.
+- **Signed overflow is undefined, so it hides.** Unlike Python, a C overflow throws no error and
+  may pass small tests. When a C port disagrees with a verified Python solution only on the large
+  input, an overflowed intermediate is the first suspect — reach for `long long`, then `__int128`,
+  then a digit array.
+- **Let the Python version be the oracle.** Because Python can't overflow, its answer is
+  trustworthy by construction. Port to C for speed, but keep the Python solution as the reference
+  the C output must match — the discipline these problems teach.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
