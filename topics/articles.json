@@ -2495,7 +2495,7 @@
     {
       "path": "takeaway/decompose-overlap",
       "title": "Decompose overlapping conditions",
-      "status": "draft",
+      "status": "final",
       "tags": ["decompose-overlap"],
       "refs": ["p0001", "p0004", "p0035", "p0043", "p0162", "p0178", "p0182", "p0184", "p0202", "p0205", "p0213", "p0269", "p0679", "p0710", "p0725", "p0745", "p0940"]
     },
