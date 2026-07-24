@@ -948,7 +948,7 @@
     {
       "path": "domain/expected-value",
       "title": "Expected value",
-      "status": "draft",
+      "status": "final",
       "solved": 5,
       "problems": 79,
       "tags": ["expected-value"],
