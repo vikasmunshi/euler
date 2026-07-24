@@ -1830,7 +1830,7 @@
     {
       "path": "domain/modular-arithmetic",
       "title": "Modular arithmetic",
-      "status": "draft",
+      "status": "final",
       "solved": 40,
       "problems": 239,
       "tags": ["modular-arithmetic"],

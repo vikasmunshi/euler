@@ -1,8 +1,103 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Modular arithmetic
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Modular_arithmetic>._
+[Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
+remainders: you fix a **modulus** $m$ and track only what a number leaves behind on division by
+$m$, working inside the finite ring $\mathbb{Z}/m\mathbb{Z} = \{0, 1, \dots, m-1\}$ instead of on
+the full integers. As a *domain* it is less a topic than a lens — an enormous share of the archive
+poses a question that, read carefully, depends only on a residue, even when the word "modulo"
+never appears. The skill this page is about is **recognising** that a problem lives here: once you
+see that the quantity asked for is a remainder, an astronomically large computation collapses to
+one that never leaves $[0, m)$. The mechanics that follow from that — fast exponentiation, the
+modular inverse, the Chinese Remainder Theorem, the overflow trap — are the subject of the deeper
+[Modular Arithmetic](/topics/number-theory/modular-arithmetic) note; here I want to catalogue the
+disguises the domain wears, so you learn to spot it.
+
+## The one property, in one line
+
+The reason any of this works is that congruence — $a \equiv b \pmod m$, meaning $m$ divides
+$a - b$ — is preserved by addition, subtraction, and multiplication. So
+
+$$(a + b) \bmod m = ((a \bmod m) + (b \bmod m)) \bmod m,$$
+
+and likewise for $a - b$ and $a \times b$. You may therefore reduce after every step and never let
+an intermediate value grow. Every disguise below is ultimately a chance to apply that one closure
+property early instead of late.
+
+## The disguises
+
+**"The last $k$ digits of …"** is the tell that gives the game away most directly: the last $k$
+decimal digits of $N$ are exactly $N \bmod 10^k$. Problem 97 wants the final ten digits of
+$28433 \times 2^{7830457} + 1$, a number with over two million digits; working modulo $10^{10}$
+throughout, nothing bigger than $10^{20}$ is ever formed. Problem 48 (public,
+`solutions/public/p0048/`) sums $1^1 + 2^2 + \dots + 1000^{1000}$ and asks the same "last ten
+digits", and the private problems 104 (Fibonacci terminal digits) and 250 (subset sums whose total
+ends in a run of zeros) are the same instinct dressed differently.
+
+**"Is this divisible by …?"** is a residue-is-zero question. Problem 78 (public,
+`solutions/public/p0078/`) asks for the first $n$ whose partition count $p(n)$ is divisible by one
+million — and because only divisibility matters, the whole [dynamic
+programming](/topics/technique/dynamic-programming) table can be carried mod $10^6$, so the
+values that in truth run to hundreds of digits stay in a machine word:
+
+```python
+partition_value += (-1) ** (k - 1) * partitions[n - pent_k1]
+# ... accumulate the pentagonal recurrence ...
+partition_value %= divisor          # only the residue matters, so reduce and store that
+partitions.append(partition_value)
+```
+
+The private problems 129 and 132 (when does a [repunit](https://en.wikipedia.org/wiki/Repunit)
+become divisible by $n$?) and columns of "$B$-trivisible" or "unlucky prime" divisibility tests
+across the later archive are the same shape.
+
+**"Give the answer modulo $1\,000\,000\,007$."** Counting problems whose true answer overflows any
+integer type hand you the modulus explicitly — the residue *is* the deliverable. Here the domain is
+not a shortcut you discover but a contract you are handed: every count, product, and
+[binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient) is computed in the ring
+from the start. The prime modulus is chosen deliberately, because it makes division available (see
+the [modular inverse](/topics/domain/modular-multiplicative-inverse)); this is the register a large
+fraction of the combinatorial problems past 300 are written in.
+
+**Periodicity and cyclic structure.** Residues wrap around, so any process defined by "$+$" or
+"$\times$ a constant" is eventually periodic modulo $m$, and the period is often the real question.
+Problem 19 (public, `solutions/public/p0019/`) is a calendar: the day of the week is a residue mod
+7, so counting how often the first of a month is a Sunday is arithmetic mod 7, no date library
+needed. [Pisano periods](https://en.wikipedia.org/wiki/Pisano_period) (the cycle length of Fibonacci
+numbers mod $m$, problem 854), the [multiplicative order](https://en.wikipedia.org/wiki/Multiplicative_order)
+of an element, and "clock"-flavoured problems (506, 790, 891) all turn on the same idea: find the
+cycle, then jump across billions of steps by reducing the step count modulo its length.
+
+**Congruences as the object of study.** Sometimes the residues are not a tool but the thing being
+counted. Problems 271 and 272 (Modular Cubes) ask for the solutions of $x^3 \equiv 1 \pmod n$;
+problem 451 hunts *self-inverse* residues with $m^2 \equiv 1 \pmod n$; problem 801 studies pairs
+with $x^y \equiv y^x$. These are number theory proper — you factor the modulus, understand the
+structure prime power by prime power, and glue the answer back with the Chinese Remainder Theorem —
+and they are where the domain stops being a convenience and becomes the subject.
+
+## How to reason about it
+
+The recurring cue is a question about a **remainder** — last digits, divisibility, a count returned
+mod a prime, a periodic or cyclic structure — hung on a value far too large to form directly. When
+you catch it:
+
+- **Name the modulus first.** "Last $k$ digits" means mod $10^k$; "divisible by $d$" means residue
+  $0$ mod $d$; a stated `1_000_000_007` means work in that ring from line one.
+- **Reduce early and often.** Never build the honest quantity and take its remainder at the end —
+  reduce after each $+$ and $\times$ so operands stay in $[0, m)$. The classic mistake is to
+  materialise the million-digit power or the true factorial first; the whole point is that you
+  never have to.
+- **Look for the cycle.** If a sequence is defined by adding or multiplying a constant, it is
+  periodic mod $m$; find the period and you can leap over an astronomical number of steps.
+- **Then reach for the machinery.** Powers, division, and composite moduli each have a standard
+  device — [modular exponentiation](/topics/technique/modular-exponentiation), the
+  [modular inverse](/topics/domain/modular-multiplicative-inverse), and the Chinese Remainder
+  Theorem — all collected, with the fixed-width overflow trap, in the
+  [Modular Arithmetic](/topics/number-theory/modular-arithmetic) note.
+
+Learn to hear the question underneath the wording, and a problem that looks like big-integer
+arithmetic turns out to be a handful of operations on small numbers.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
