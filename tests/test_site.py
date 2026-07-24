@@ -809,17 +809,20 @@ class TopicCardStatusTests(unittest.TestCase):
     pill on every card there would carry no information.
     """
 
-    def _render(self, status: str, *, show_status: bool = True) -> str:
+    def _render(self, status: str, *, show_status: bool = True,
+                problems: int | None = None, total: int = 0) -> str:
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
                                            / 'solver/web/site/templates'),
             autoescape=True)
         entry = content.DocEntry(name='number-theory/primes', heading='Primes',
-                                 title='Generating and testing primes', status=status)
+                                 title='Generating and testing primes', status=status,
+                                 solved=1, problems=problems)
         group = content.TopicGroup(name='number-theory', heading='Number Theory', entries=[entry])
         return render_block(env, 'topics.html', 'content',
                             {'groups': [group], 'crumbs': [], 'actions': [], 'git': None,
-                             'show_status': show_status, 'csp_nonce': '', 'subject': None})
+                             'total': total, 'show_status': show_status, 'csp_nonce': '',
+                             'subject': None})
 
     def test_the_reader_index_marks_nothing(self) -> None:
         """Without show_status there is no pill and no muting: everything listed is final."""
@@ -836,6 +839,20 @@ class TopicCardStatusTests(unittest.TestCase):
         body = self._render('final')
         self.assertIn('pill-final', body)
         self.assertNotIn('is-draft', body)
+
+    def test_the_count_line_is_the_topics_reach(self) -> None:
+        """The card's second line reads `referenced of all published` — 12 of the 950
+        problems carry this topic's tags — and the hairline fills to that same fraction,
+        not to how many of the twelve are solved."""
+        body = self._render('final', problems=12, total=950)
+        self.assertIn('<b>12</b> of 950', body)
+        self.assertIn('width: 1.3%', body)
+
+    def test_a_card_without_counts_falls_back_to_the_title(self) -> None:
+        """A tree read without the article index knows no counts (None, not zero)."""
+        body = self._render('final', total=950)
+        self.assertIn('Generating and testing primes', body)
+        self.assertNotIn('card-bar', body)
 
 
 class CollapseProblemsTests(unittest.TestCase):

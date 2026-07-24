@@ -18,12 +18,12 @@
 <input type="search" class="topic-filter" placeholder="Filter by name, slug or facet…"
        aria-label="Filter topics by name, slug or facet" autocomplete="off">
 {# One section per folder of topics/: the folder is the heading, so the cards below
-   carry only their leaf name and pack four to a row. A card's second line is how much
-   of the topic is already worked through — "solved n of m" over the problems its tags
-   cover, maintained in topics/articles.json by `update-tags`. It replaces the page's
-   own title there, which on the per-tag pages only repeated the card's first line; the
-   title stays as the card's tooltip and in the filter's haystack. A tree read without
-   the index has no counts, and falls back to the title. #}
+   carry only their leaf name and pack four to a row. A card's second line is the
+   topic's REACH — "n of m", the problems its tags cover (from topics/articles.json,
+   maintained by `update-tags`) against every published problem (problems.json). It
+   replaces the page's own title there, which on the per-tag pages only repeated the
+   card's first line; the title stays as the card's tooltip and in the filter's
+   haystack. A tree read without the index has no counts, and falls back to the title. #}
 {% for g in groups %}
 <div class="subrule"><h3>{{ g.heading }}</h3><span class="count">{{ g.entries | length }}</span></div>
 <nav class="cards" aria-label="{{ g.heading }} topics">
@@ -49,8 +49,8 @@
     {# A tree read without the index has no counts (they are None, not zero), and falls
        back to the page's own title — prose, so the body face. #}
     {% if e.problems is not none %}
-    <span class="card-meta"><b>{{ e.solved }}</b> of {{ e.problems }} solved</span>
-    <span class="card-bar"><i style="width: {{ (100 * e.solved / e.problems) | round(1) if e.problems else 0 }}%"></i></span>
+    <span class="card-meta"><b>{{ e.problems }}</b> of {{ total }}</span>
+    <span class="card-bar"><i style="width: {{ (100 * e.problems / total) | round(1) if total else 0 }}%"></i></span>
     {% else %}
     <span class="card-desc">{{ e.title }}</span>
     {% endif %}

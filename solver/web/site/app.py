@@ -466,11 +466,13 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
     The maintainer's way into the drafts is an Action, not a link on the page — page verbs live
     in the header's Actions menu (web-server-guide § The site).
     """
+    repo_root = request.app[CONFIG_KEY].repo_root
     actions: list[Action] = []
     if _subject(request).has('maintainer'):
         actions.append(Action(label='Show drafts', kind='get', path='/topics/all'))
     return render(request, 'topics.html', {
-        'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root),
+        'groups': content.list_topic_groups(repo_root),
+        'total': len(content.load_problems(repo_root)),
         'crumbs': [_HOME, ('topics', None)],
         'actions': actions,
     }, block='content')
@@ -484,8 +486,10 @@ async def topics_all(request: web.Request) -> web.StreamResponse:
     finished ones are marked. Registered ahead of the ``{name:.+}`` page route, which would
     otherwise swallow it — the cost is that a topic may not be called ``all``.
     """
+    repo_root = request.app[CONFIG_KEY].repo_root
     return render(request, 'topics.html', {
-        'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root, drafts=True),
+        'groups': content.list_topic_groups(repo_root, drafts=True),
+        'total': len(content.load_problems(repo_root)),
         'show_status': True,
         'crumbs': [_HOME, ('topics', '/topics/'), ('all', None)],
         'actions': [Action(label='Hide drafts', kind='get', path='/topics/')],
