@@ -2502,7 +2502,7 @@
     {
       "path": "takeaway/exact-arithmetic-for-equality",
       "title": "Use exact arithmetic for equality checks",
-      "status": "draft",
+      "status": "final",
       "tags": ["exact-arithmetic-for-equality"],
       "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0243", "p0259", "p0493", "p0751", "p0800"]
     },
