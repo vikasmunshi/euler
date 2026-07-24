@@ -2537,7 +2537,7 @@
     {
       "path": "takeaway/right-tool-per-cost",
       "title": "Match the abstraction to the hot path",
-      "status": "draft",
+      "status": "final",
       "tags": ["right-tool-per-cost"],
       "refs": ["p0001", "p0020", "p0074", "p0077", "p0104", "p0143", "p0501"]
     },
