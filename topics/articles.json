@@ -3666,7 +3666,7 @@
     {
       "path": "technique/closed-form-expression",
       "title": "Closed-form expression",
-      "status": "draft",
+      "status": "final",
       "solved": 58,
       "problems": 58,
       "tags": ["closed-form-expression"],

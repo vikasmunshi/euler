@@ -1,8 +1,81 @@
 <!-- tags: [closed-form-expression] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Closed-form expression
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Closed-form_expression>._
+A [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression) computes an
+answer with a bounded formula — a finite chain of arithmetic, powers, roots and a few named
+functions — instead of a loop that walks every case. It is the sharpest single lever in this
+whole problem set: where the obvious program is a sum over $n$ terms or a simulation of an
+$N \times N$ grid, a closed form collapses the work to $O(1)$ evaluation of an expression whose
+size does not grow with the input. The problems below recur because each hides such a formula
+behind a process, and the whole game is to find it.
+
+## The idea
+
+The move is always the same in spirit: stop *enumerating* the objects and start *counting* or
+*summing* them algebraically. Three shapes cover most of it.
+
+**Sums that telescope into polynomials.** The [arithmetic series](https://en.wikipedia.org/wiki/Arithmetic_progression)
+$d + 2d + \dots + nd = d\,\frac{n(n+1)}{2}$ is the seed. Problem 1 sums the multiples of 3 or 5
+below a limit not by looping but by adding three such closed forms under the
+[inclusion–exclusion principle](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
+(multiples of 3, plus of 5, minus of 15):
+
+```python
+def sum_arithmetic_series(common_difference, *, max_limit):
+    n = (max_limit - 1) // common_difference
+    return common_difference * (n * (n + 1)) // 2
+```
+
+The same family reaches further: the sum of squares $\frac{n(n+1)(2n+1)}{6}$ and the square of
+the sum $\left(\frac{n(n+1)}{2}\right)^2$ give Problem 6 in one line, and higher power sums are
+the [Faulhaber](https://en.wikipedia.org/wiki/Faulhaber%27s_formula) polynomials. Problem 28 is
+the same trick worn as geometry: the four corners of each ring of a number spiral form an
+arithmetic pattern, and [summing](https://en.wikipedia.org/wiki/Summation) it over every ring
+folds an $O(N^2)$ grid simulation into a single cubic in $N$.
+
+**Counting without listing.** [Combinatorial](https://en.wikipedia.org/wiki/Combinatorics)
+identities count arrangements directly. Problem 15 counts monotone lattice paths across an
+$n \times n$ grid as the [central binomial coefficient](https://en.wikipedia.org/wiki/Central_binomial_coefficient)
+$\binom{2n}{n}$ — no path is ever generated.
+
+**Recurrences that have a formula.** A linear recurrence with constant coefficients has a
+closed form. [Binet's formula](https://en.wikipedia.org/wiki/Fibonacci_sequence#Closed-form_expression)
+gives the $n$-th Fibonacci number from powers of the golden ratio; the "golden nuggets" of
+Problem 137 and the Pell-equation families sit on this same machinery, turning an unbounded search
+into a formula you evaluate.
+
+A fourth, quieter use is the **inverse** direction: a closed form for a sequence's $k$-th term
+often inverts into an $O(1)$ *membership test*. Because the $k$-th [pentagonal number](https://en.wikipedia.org/wiki/Pentagonal_number)
+is $\frac{k(3k-1)}{2}$, you can test whether a given integer is pentagonal by solving the quadratic
+and checking the root is an integer — which is what makes Problem 44's search over pairs feasible.
+
+## How to reason about it
+
+Reach for a closed form when the naive solution is a sum, a count of arrangements, or a linear
+recurrence, and the input is large enough that $O(n)$ or $O(n^2)$ will not finish. The payoff is
+enormous — constant time — but it is bought with derivation effort, and it comes with three
+standing hazards.
+
+- **"$O(1)$" can still hide real cost.** Problem 15's $\binom{2n}{n}$ is a formula, but the
+  factorials are big integers, so the evaluation is $O(n)$ big-integer multiplications, not truly
+  constant. Count the arithmetic on the *values*, not just the terms.
+- **Prefer exact integers; distrust roots.** Formulas built from `//` on integers are exact —
+  Problem 28's cubic is always divisible by 6 for odd $N$, so no rounding ever enters. But the
+  moment a closed form contains a $\sqrt{\cdot}$ (Binet, the pentagonal test), floating point can
+  round $\sqrt{k^2}$ to the wrong side of an integer for large $k$. Do the root in integers
+  ([`math.isqrt`](https://docs.python.org/3/library/math.html#math.isqrt)) and verify by squaring
+  back, rather than trusting a float compare.
+- **Evaluate polynomials with [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method).**
+  Write $aN^3 + bN^2 + cN + d$ as nested multiplication (`N * (N * (a*N + b) + c) + d`): three
+  multiplications, no large intermediate powers. Problem 28's `(N * (N * (4*N + 3) + 8) - 9) // 6`
+  is exactly this.
+
+The last discipline worth keeping is a **cross-check**. A closed form is only as good as its
+derivation, and a sign slip is invisible once the loop is gone. Several of these solutions keep the
+slow, obvious method — the $O(N^2)$ spiral in Problem 28, for instance — behind a `--show` flag,
+running it on small inputs purely to confirm the formula agrees. Derive the formula, then prove it
+against the brute force you replaced.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
