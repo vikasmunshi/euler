@@ -494,11 +494,16 @@ def build_admin_app(service: AuthService) -> web.Application:
                 state = 'disabled' if srp[name].disabled else 'registered'
             else:
                 state = 'invited'
-            roster.append({'user': name, 'profile': profile, 'scope': scope, 'state': state})
+            # The per-user unix name (uid/home/socket/branch) for a web account; a local
+            # OS login has no per-user instance, so it carries none.
+            slug = system_slug(name) if scope == 'web' else ''
+            roster.append({'user': name, 'profile': profile, 'scope': scope,
+                           'state': state, 'slug': slug})
         for email in sorted(srp):                                # registered but unmapped → default reader
             if email not in authz_users:
                 roster.append({'user': email, 'profile': 'reader (unmapped)', 'scope': 'web',
-                               'state': 'disabled' if srp[email].disabled else 'registered'})
+                               'state': 'disabled' if srp[email].disabled else 'registered',
+                               'slug': system_slug(email)})
         return web.json_response({
             'roster': roster,
             'pending': [record.summary() for record in service.pending.all()],
