@@ -14,7 +14,7 @@
         deploy-smtp remove-smtp upgrade-smtp \
         deploy-auth remove-auth upgrade-auth redeploy-auth \
         deploy-user remove-user upgrade-user redeploy-user \
-        deploy-web remove-web upgrade-web redeploy-web \
+        deploy-web remove-web upgrade-web redeploy-web status-web \
         test run audit uninstall version release check-version
 
 VENV   := .venv
@@ -275,7 +275,7 @@ deploy-user:
 	./scripts/setup/user.sh deploy
 	@printf "✓ deploy-user complete: per-user provisioning layer deployed\n"
 
-## Remove the per-user layer (refuses while any euler-user-<slug> remains)
+## Remove the per-user layer (refuses while any provisioned collaborator remains)
 remove-user:
 	./scripts/setup/user.sh remove
 	@printf "✓ remove-user complete: per-user provisioning layer removed\n"
@@ -319,3 +319,30 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 ## origin (run serially — the default — so the guard runs before any deploy step).
 redeploy-web: check-version redeploy-auth redeploy-user redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
+
+## Report the whole web stack in one read-only sweep, in deploy order: the edge, the
+## egress proxy, DDNS, the kernel firewall, the mail relay, the auth service, and the
+## per-user tier. The last section is the collaborator roster — one entry per unix name
+## (the slug: the uid, home, socket and unit instance are all called this) with the
+## e-mail as an alias, and per user whether their instance is running and whether their
+## web shell is live and currently connected to a terminal.
+##
+## Read-only, but needs sudo: the state it reads is root-owned (nftables, /etc/euler),
+## the clones sit under 0700 homes, and the shell report is a query on each running
+## instance's own socket. Each kit is run best-effort so one missing component (or a
+## failing egress probe) never truncates the sweep.
+status-web:
+	@printf "══ edge (Caddy + ACME) ═══════════════════════════════════════════════\n"
+	@./scripts/setup/frontend.sh status || true
+	@printf "\n══ egress proxy (Squid) ══════════════════════════════════════════════\n"
+	@./scripts/setup/egress.sh status || true
+	@printf "\n══ dynamic DNS ═══════════════════════════════════════════════════════\n"
+	@./scripts/setup/ddns.sh status || true
+	@printf "\n══ kernel egress firewall (nftables) ═════════════════════════════════\n"
+	@./scripts/setup/firewall.sh status || true
+	@printf "\n══ mail relay (loopback SMTP) ════════════════════════════════════════\n"
+	@./scripts/setup/smtp.sh status || true
+	@printf "\n══ auth service ══════════════════════════════════════════════════════\n"
+	@./scripts/setup/auth.sh status || true
+	@printf "\n══ per-user tier (collaborators + their web shells) ══════════════════\n"
+	@./scripts/setup/user.sh status || true

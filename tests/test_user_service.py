@@ -207,6 +207,31 @@ class ShellAttachTests(_UserServiceCase):
         await ws.close()
 
     @unittest_run_loop
+    async def test_internal_status_reports_the_shell_and_its_terminals(self) -> None:
+        """The operator's ``status-web`` probe: no shell → empty, attached → connected,
+        and the record survives the terminal closing (the shell keeps running detached)."""
+        empty = await (await self.client.get('/internal/status')).json()
+        self.assertEqual(empty, {'slug': _SLUG, 'shells': []})
+
+        ws = await self.client.ws_connect('/ws', headers=_OWN_WS)
+        await _read_until(ws, b'auth_socket=')
+        live = await (await self.client.get('/internal/status')).json()
+        self.assertEqual(live['slug'], _SLUG)
+        self.assertEqual(len(live['shells']), 1)
+        record = live['shells'][0]
+        self.assertEqual(record['user'], _EMAIL)
+        self.assertTrue(record['alive'])
+        self.assertEqual(record['attached'], 1)                  # one terminal connected
+        self.assertEqual(record['detached_for'], 0.0)
+        self.assertGreater(record['pid'], 0)
+
+        await ws.close()
+        await asyncio.sleep(0.1)                                 # let the detach land
+        after = await (await self.client.get('/internal/status')).json()
+        self.assertEqual(after['shells'][0]['attached'], 0)      # live, but nobody connected
+        self.assertTrue(after['shells'][0]['alive'])
+
+    @unittest_run_loop
     async def test_internal_logout_reaps_the_shell(self) -> None:
         ws = await self.client.ws_connect('/ws', headers=_OWN_WS)
         await _read_until(ws, b'auth_socket=')

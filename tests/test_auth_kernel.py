@@ -112,10 +112,11 @@ class ResolveSubjectTest(unittest.TestCase):
                 self._resolve()
 
     def test_instance_identity_plane_resolves_a_ticketless_descendant(self) -> None:
-        """A euler-user-<slug> uid whose ticket has been scrubbed resolves from
-        the handed-down e-mail; profile comes from policy (alice → maintainer)."""
+        """A per-user uid (named for the slug) whose ticket has been scrubbed resolves
+        from the handed-down e-mail; profile comes from policy (alice → maintainer)."""
         slug = system_slug('alice@example.com')
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{slug}'):
+        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
+             mock.patch('solver.auth.identity.getpass.getuser', return_value=slug):
             subj = self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
         self.assertEqual(subj.channel, 'web')
         self.assertEqual(subj.auth_method, 'instance-identity')
@@ -125,7 +126,8 @@ class ResolveSubjectTest(unittest.TestCase):
 
     def test_instance_identity_unlisted_user_floors_to_the_weakest_rung(self) -> None:
         slug = system_slug('nobody@example.com')
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{slug}'):
+        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
+             mock.patch('solver.auth.identity.getpass.getuser', return_value=slug):
             subj = self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='nobody@example.com')
         self.assertEqual(subj.profile, 'reader')          # fail closed low, never admin
 
@@ -133,17 +135,40 @@ class ResolveSubjectTest(unittest.TestCase):
         """A child cannot swap in a different e-mail: its system_slug no longer matches the
         uid's pin, so the plane declines and the service account aborts."""
         pin = system_slug('alice@example.com')
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{pin}'):
+        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
+             mock.patch('solver.auth.identity.getpass.getuser', return_value=pin):
             with self.assertRaises(SystemExit):
                 self._resolve(EULER_USER_SLUG=pin, EULER_USER_EMAIL='attacker@evil.com')
 
-    def test_instance_identity_requires_the_per_user_prefix(self) -> None:
+    def test_instance_identity_requires_the_uid_to_be_the_pin(self) -> None:
         """A shared service uid (euler-ws) is not a per-user instance even with the env set."""
         slug = system_slug('alice@example.com')
         with mock.patch('solver.auth.identity.getpass.getuser', return_value='euler-ws'), \
              mock.patch('solver.auth.identity._owns_checkout', return_value=False):
             with self.assertRaises(SystemExit):
                 self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
+
+    def test_group_membership_makes_a_prefixless_uid_a_service_account(self) -> None:
+        """The discriminator that replaced the euler-user- name prefix: a login in the
+        root-owned euler-user group must resolve through the instance plane or abort —
+        it can no longer fall through to the local-terminal plane and pick up a profile.
+        """
+        slug = system_slug('alice@example.com')
+        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
+             mock.patch('solver.auth.identity.getpass.getuser', return_value=slug), \
+             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
+            with self.assertRaises(SystemExit):
+                self._resolve()                    # no pin, no e-mail → no identity at all
+
+    def test_a_non_member_login_is_still_an_ordinary_terminal_identity(self) -> None:
+        """The group check must not swallow real logins: a name-shaped-like-a-slug login
+        that is NOT in the group resolves on the terminal plane as usual."""
+        with mock.patch('solver.auth.identity.per_user_login', return_value=False), \
+             mock.patch('solver.auth.identity.getpass.getuser', return_value='carol'), \
+             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
+            subj = self._resolve()
+        self.assertEqual(subj.channel, 'terminal')
+        self.assertEqual(subj.profile, 'contributor')
 
     def test_ticket_plane_web_is_not_capped(self) -> None:
         """The per-user model drops the admin→maintainer web cap — an admin
@@ -181,33 +206,36 @@ class ResolveSubjectTest(unittest.TestCase):
 
 
 class SystemSlugTest(unittest.TestCase):
-    """The system slug: a ``useradd``-safe name derived from an e-mail identity."""
+    """The system slug: the ``useradd``-safe uid name derived from an e-mail identity.
 
-    #: ``useradd`` NAME_REGEX: start with a letter/underscore, then [a-z0-9_-]; we emit no '_'.
-    _USERADD_SAFE = re.compile(r'^[a-z][a-z0-9-]*$')
+    It IS the unix account name now (no ``euler-user-`` prefix), so the shape it must
+    hold to is the one ``scripts/setup/user.sh`` validates: ``u`` + a hex digest.
+    """
+
+    #: What user.sh's valid_slug accepts — and, being letter-led [a-z0-9], also what
+    #: ``useradd``'s NAME_REGEX accepts.
+    _SLUG_SHAPE = re.compile(r'^u[0-9a-f]{6,16}$')
 
     def test_slug_is_useradd_safe(self) -> None:
         for email in ('MercAnther@gmail.com', 'a.b+tag@x.co', '123@host', 'x@y.z',
                       'UPPER.CASE@EXAMPLE.COM', 'weird!!name@d.com', '@leading', '_under@d.com'):
             slug = system_slug(email)
-            self.assertRegex(slug, self._USERADD_SAFE, f'{email!r} → {slug!r} not useradd-safe')
-            self.assertLess(len(f'euler-user-{slug}'), 32, f'{slug!r} too long for a system name')
+            self.assertRegex(slug, self._SLUG_SHAPE, f'{email!r} → {slug!r} not a valid uid name')
 
-    def test_slug_has_no_dot(self) -> None:
-        # The bug that motivated the system slug: slugify emitted '.', which useradd rejects.
+    def test_slug_carries_no_localpart(self) -> None:
+        # The uid, the home path and the branch are public-ish; the e-mail is not.
+        self.assertNotIn('merc', system_slug('merc.anther@gmail.com'))
         self.assertNotIn('.', system_slug('merc.anther@gmail.com'))
 
     def test_slug_is_stable_and_case_insensitive(self) -> None:
         self.assertEqual(system_slug('Alice@Example.com'), system_slug('  alice@example.COM '))
 
     def test_distinct_emails_do_not_collide(self) -> None:
-        # Same sanitised local-part, different domains → the hash keeps them apart.
-        a, b = system_slug('sam@one.com'), system_slug('sam@two.com')
-        self.assertNotEqual(a, b)
-        self.assertTrue(a.startswith('sam-') and b.startswith('sam-'))
+        # Same local-part, different domains → different digests, different uids.
+        self.assertNotEqual(system_slug('sam@one.com'), system_slug('sam@two.com'))
 
-    def test_digit_leading_localpart_gets_a_letter_prefix(self) -> None:
-        self.assertTrue(system_slug('42@host.com').startswith('u42-'))
+    def test_digit_leading_localpart_still_starts_with_a_letter(self) -> None:
+        self.assertTrue(system_slug('42@host.com').startswith('u'))
 
 
 if __name__ == '__main__':

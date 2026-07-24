@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """Per-user service entry point: ``python -m solver.web.user``.
 
-Run by ``euler-user@<slug>.service`` as that collaborator's own
-``euler-user-<slug>`` uid from the ``/opt/euler`` system venv, configured entirely by
+Run by ``euler-user@<slug>.service`` as that collaborator's own uid — named for the
+slug itself (``ue0f4a1``) — from the ``/opt/euler`` system venv, configured entirely by
 the environment (``EULER_USER_SLUG``, ``EULER_REPO_ROOT`` → their ``~/euler`` clone).
 
 Three ways to get a listener, in order:

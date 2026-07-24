@@ -73,6 +73,11 @@ class PersistentPty:
         """Seconds this shell has had zero attached sockets (0.0 while attached)."""
         return 0.0 if self._subscribers else time.monotonic() - self._detached_since
 
+    @property
+    def attached(self) -> int:
+        """How many browser terminals are currently attached (0 = running detached)."""
+        return len(self._subscribers)
+
     # -- output path --------------------------------------------------------
 
     def _append(self, data: bytes) -> None:
@@ -220,6 +225,21 @@ class PtyManager:
         for email in stale:
             await self.close(email)
         return stale
+
+    def snapshot(self) -> list[dict[str, object]]:
+        """Describe every shell this manager holds — the operator's ``status-web`` view.
+
+        One record per shell: whose it is, whether the process is still alive, how many
+        terminals are attached right now, and how long it has been running with none.
+        Read-only and allocation-cheap; the reporting path (``GET /internal/status``)
+        must never disturb a live shell.
+        """
+        return [{'user': email,
+                 'alive': pty.alive,
+                 'attached': pty.attached,
+                 'detached_for': round(pty.detached_for, 1),
+                 'pid': pty.session.pid}
+                for email, pty in self._shells.items()]
 
     async def close_all(self) -> None:
         """Terminate every shell (server stop / app cleanup)."""

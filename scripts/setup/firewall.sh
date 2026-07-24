@@ -16,7 +16,7 @@
 #     inbound public connections on :443 while still being unable to *initiate*
 #     anything off-host (its NEW outbound is dropped).
 #   - Relay guard: of the app tier, only euler-auth may connect to the loopback
-#     mail relay (euler-smtp's listener) — a hostile euler-user-<slug> web shell
+#     mail relay (euler-smtp's listener) — a hostile per-user web shell
 #     cannot use it to send mail.
 #   - The ruleset is generated with *numeric* uids resolved at generation time and
 #     includes only the euler-* users that exist; rerun `reload` (or the installing
@@ -54,7 +54,7 @@ SMTP_RELAY_PORT="8025"
 # ── The euler service tier ───────────────────────────────────────
 # Every euler-* uid subject to the egress drop. Generated rules include only the
 # users that exist at generation time. The web app tier runs as per-user uids
-# (euler-user-<slug>), resolved dynamically by prefix (see euler_user_names);
+# (one uid per collaborator), resolved dynamically by group (see euler_user_names);
 # only the fixed infra uids are listed statically here.
 ALL_USERS=(euler-caddy euler-auth
            euler-proxy euler-acme euler-ddns euler-smtp)
@@ -62,7 +62,7 @@ ALL_USERS=(euler-caddy euler-auth
 DNS_USERS=(euler-proxy euler-acme euler-ddns euler-smtp)
 # App-tier uids barred from the mail relay port (euler-auth is the one legit client).
 # The per-user web shells are RCE by design (AR-1), so they are barred from it like the
-# rest — folded in dynamically via the euler-user-<slug> prefix (see per_user below).
+# rest — folded in dynamically via the euler-user group (see per_user below).
 RELAY_BARRED=(euler-caddy euler-proxy euler-acme euler-ddns)
 
 usage() {
@@ -73,7 +73,7 @@ Usage: $0 [deploy|remove|reload|render|status|help]
              boot-enabled ${SERVICE_NAME} (oneshot: loads the euler table).
              Idempotent — it is also its own upgrade path.
   remove     Flush the euler table and remove the ruleset + unit.
-  reload     Regenerate the ruleset (picking up newly created euler-* users) and
+  reload     Regenerate the ruleset (picking up newly created euler-* and per-user uids) and
              re-apply it.
   render     Print the generated ruleset to stdout (no changes made).
   status     Show the unit state, the live rule count, and egress probes.
@@ -134,19 +134,23 @@ describe_uids() {
 
 uid_of() { id -u "$1" 2>/dev/null || true; }
 
-# The per-user web tier creates euler-user-<slug> uids dynamically at provision
-# time, so they cannot be listed ahead of time like the fixed service uids. Enumerate
-# whatever exists now by the euler-user- prefix, so a reload after each provision folds
-# the new uid into the egress drop (chain policy is accept — an unlisted uid would reach
-# the internet directly, bypassing Squid). They are RCE-by-design (AR-1), so they are
-# also barred from the mail relay.
-euler_user_names() { getent passwd | awk -F: '/^euler-user-/{print $1}'; }
+# The per-user web tier creates its uids dynamically at provision time, so they cannot be
+# listed ahead of time like the fixed service uids. They are named for the collaborator's
+# system slug alone (ue0f4a1 — no euler- prefix), so the enumerable set is the euler-user
+# PARENT GROUP every provisioned uid joins (user.sh), not a name pattern. A reload after
+# each provision folds the new uid into the egress drop (chain policy is accept — an
+# unlisted uid would reach the internet directly, bypassing Squid). They are
+# RCE-by-design (AR-1), so they are also barred from the mail relay.
+USER_GROUP="euler-user"
+euler_user_names() {
+    getent group "${USER_GROUP}" 2>/dev/null | awk -F: '{print $4}' | tr ',' '\n' | sed '/^$/d'
+}
 
 # Generate the ruleset to stdout. Uses the declare-then-flush pattern so re-applying
 # with `nft -f` is idempotent.
 render_conf() {
     local all_uids dns_uids barred_uids per_user
-    # Read the dynamic per-user uids (euler-user-<slug>) once; they join both the egress
+    # Read the dynamic per-user uids (the euler-user group) once; they join both the egress
     # drop and the relay bar alongside the fixed service uids.
     mapfile -t per_user < <(euler_user_names)
     all_uids="$(resolve_uids "${ALL_USERS[@]}" "${per_user[@]}")"

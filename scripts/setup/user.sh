@@ -18,7 +18,7 @@
 #       deferred until solver.web.user lands in the /opt/euler venv (step 4).
 #
 #   provision / deprovision <slug>  — ONE collaborator:
-#     provision   create euler-user-<slug> + home (0700), clone ~/euler DIRECTLY from
+#     provision   create the uid <slug> + home /home/<slug> (0700), clone ~/euler DIRECTLY from
 #                 the public GitHub repo (anonymous read — no credentials) on branch
 #                 user/<slug> with the crypt filter DISABLED (so solutions/private/**
 #                 stays ciphertext at rest — GitHub holds only the filter's ciphertext,
@@ -39,7 +39,8 @@
 # Because the units live in root's systemd and run as locked-down users, lifecycle
 # requires sudo.
 #
-# Actions: deploy | remove | upgrade | redeploy | provision | deprovision | status | help
+# Actions: deploy | remove | upgrade | redeploy | provision | deprovision | purge-legacy |
+#          status | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -55,8 +56,12 @@ USER_ENV="${SYS_DIR}/user.env"                         # scoped runtime config (
 EGRESS_ENV="${SYS_DIR}/egress.env"                     # HTTPS_PROXY (egress.sh)
 
 WEB_GROUP="euler-web"
-USER_GROUP="euler-user"                                # parent group: every per-user uid joins it
-USER_HOME_BASE="/home"                                 # euler-user-<slug> homes live here
+# Parent group: every per-user uid joins it. It is also the ROSTER — the per-user uids are
+# named for the slug alone (ue0f4a1), so there is no name prefix left to enumerate them by,
+# and this root-owned membership is what identifies them here, in firewall.sh, and in
+# solver.auth.identity (per_user_login).
+USER_GROUP="euler-user"
+USER_HOME_BASE="/home"                                 # per-user homes: /home/<slug>
 
 SERVICE_TEMPLATE="euler-user@.service"
 SOCKET_TEMPLATE="euler-user@.socket"
@@ -82,7 +87,7 @@ Usage: $0 <action> [args]
                                instances so their sockets re-activate them against a
                                freshly rebuilt venv (drops live shells).
   provision <slug> <email> <profile>
-                               Provision one collaborator: uid + home (0700), a
+                               Provision one collaborator: the uid <slug> + /home/<slug> (0700), a
                                filter-disabled clone of ~/euler from the public GitHub
                                repo on branch user/<slug> (cloned AS the user, through
                                Squid), git hooks rendered from THIS repo's templates,
@@ -93,7 +98,11 @@ Usage: $0 <action> [args]
   deprovision <slug>           Tear one collaborator down: stop/disable the instance,
                                then (prompted) userdel + remove the home. Reports the
                                required 'key-rekey' to drop master-key access.
-  status [<slug>]              Show the shared layer, or one user's instance health.
+  purge-legacy                 One-shot migration sweep: remove any euler-user account
+                               left from the retired euler-user-<slug> naming scheme
+                               (prompted — accounts, homes and units all go).
+  status [<slug>]              Show the shared layer, or one user's instance health,
+                               including whether their web shell is live and connected.
 
   Requires: the /opt/euler venv (auth.sh). The Caddy X-User-Slug routing that dials
   these sockets is wired by frontend.sh in step 4 (the per-user service).
@@ -127,16 +136,18 @@ require_python() {
     fi
 }
 
-# A slug is exactly what solver.auth.identity.system_slug emits: a useradd-safe name,
-# letter-led, [a-z0-9-] only. Refuse anything else — this value becomes a uid,
-# a home path, a socket name, and a git branch, so it must not carry surprises.
+# A slug is exactly what solver.auth.identity.system_slug emits: 'u' + a hex digest of the
+# e-mail. Matching that shape exactly matters more now than it did behind the retired
+# euler-user- prefix: the slug IS the uid, so it is a bare name in the shared account
+# namespace, and a loose pattern would let a typo'd call provision (or, worse, adopt) an
+# ordinary login name. It also becomes a home path, a socket name, and a git branch.
 valid_slug() {
-    [[ "$1" =~ ^[a-z][a-z0-9-]*$ ]] && [ ${#1} -le 20 ]
+    [[ "$1" =~ ^u[0-9a-f]{6,16}$ ]]
 }
 
 require_slug() {
     if ! valid_slug "${1:-}"; then
-        echo "Error: '${1:-}' is not a valid system slug (expected ^[a-z][a-z0-9-]*\$, <=20)." >&2
+        echo "Error: '${1:-}' is not a valid system slug (expected ^u[0-9a-f]{6,16}\$)." >&2
         echo "       The slug comes from solver.auth.identity.system_slug(email)." >&2
         return 1
     fi
@@ -200,7 +211,7 @@ Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-g
 [Socket]
 ListenStream=/run/euler/user-%i.sock
 SocketMode=0660
-SocketUser=euler-user-%i
+SocketUser=%i
 SocketGroup=${WEB_GROUP}
 # Caddy (euler-caddy, in ${WEB_GROUP}) connects; the instance is spawned on demand.
 
@@ -224,20 +235,21 @@ Requires=euler-user@%i.socket
 # .socket unit is the real readiness gate anyway — it queues connections until the
 # listener is up.
 Type=simple
-# Born as the collaborator's own uid — no setuid, no root. The uid owns its home,
-# its clone, and its vault; the kernel (SO_PEERCRED) is the authoritative identity.
-User=euler-user-%i
+# Born as the collaborator's own uid — no setuid, no root. The uid IS the slug (%i); it
+# owns its home, its clone, and its vault, and the kernel (SO_PEERCRED) is the
+# authoritative identity.
+User=%i
 EnvironmentFile=${USER_ENV}
 # HTTPS_PROXY: the problem scraper egresses only through Squid.
 EnvironmentFile=-${EGRESS_ENV}
 Environment=EULER_USER_SLUG=%i
-Environment=EULER_REPO_ROOT=${USER_HOME_BASE}/euler-user-%i/euler
+Environment=EULER_REPO_ROOT=${USER_HOME_BASE}/%i/euler
 ExecStart=${VENV_PY} -m solver.web.user
 Restart=on-failure
 RestartSec=5s
 
 # Egress layer 1: loopback only — the /run/euler sockets and the Squid proxy. The kernel
-# firewall (firewall.sh, scoped to the euler-user-* uids) is layer 2.
+# firewall (firewall.sh, scoped to the euler-user group's uids) is layer 2.
 IPAddressDeny=any
 IPAddressAllow=localhost
 
@@ -248,7 +260,7 @@ IPAddressAllow=localhost
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=false
-ReadWritePaths=/run/euler ${USER_HOME_BASE}/euler-user-%i
+ReadWritePaths=/run/euler ${USER_HOME_BASE}/%i
 PrivateTmp=true
 PrivateDevices=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
@@ -270,14 +282,36 @@ EOF
 
 # ── per-user provision / deprovision ──────────────────────────────────────────────────
 
-user_of()  { echo "euler-user-$1"; }
-home_of()  { echo "${USER_HOME_BASE}/euler-user-$1"; }
+# The uid IS the slug (ue0f4a1) — no prefix, so the home is /home/<slug> and the unit
+# instance name, the socket, the uid and the home all read the same.
+user_of()  { echo "$1"; }
+home_of()  { echo "${USER_HOME_BASE}/$1"; }
 sock_of()  { echo "/run/euler/user-$1.sock"; }
+
+# The per-user roster, by group membership. With the euler-user- name prefix gone there is
+# nothing to grep /etc/passwd for; the parent group is the enumerable set (and the same one
+# solver.auth.identity.per_user_login and firewall.sh read). Lists the group's members,
+# one per line, most-recent-last; empty when none are provisioned.
+euler_user_names() {
+    getent group "${USER_GROUP}" 2>/dev/null | awk -F: '{print $4}' | tr ',' '\n' | sed '/^$/d'
+}
+
+# True if <name> is one of ours. Provisioning must never ADOPT an account it did not
+# create: the slug is now a bare name in the shared login namespace, so a pre-existing
+# 'ue0f4a1' would otherwise be handed a service unit, a home rewrite, and a clone.
+is_euler_user() {
+    euler_user_names | grep -qx "$1"
+}
 
 ensure_user_identity() {
     local slug="$1" user home
     user="$(user_of "${slug}")"
     home="$(home_of "${slug}")"
+    if getent passwd "${user}" > /dev/null && ! is_euler_user "${user}"; then
+        echo "Error: an account named '${user}' already exists and is not in ${USER_GROUP}." >&2
+        echo "       Refusing to adopt it — a per-user instance must own its uid outright." >&2
+        return 1
+    fi
     if ! getent passwd "${user}" > /dev/null; then
         echo "Creating system user ${user} (home ${home}, group ${USER_GROUP})..."
         sudo useradd --system --create-home --home-dir "${home}" \
@@ -294,7 +328,7 @@ ensure_user_identity() {
 # Run a provisioning step AS the collaborator's own uid (never root): a heredoc
 # script under `sudo -Hu`, so every file it creates is born with the right owner —
 # no chown sweep, and no window where root-owned files sit in a user's home. The
-# euler-user-* uids are inside the egress lock (firewall.sh), so the script first
+# The per-user uids are inside the egress lock (firewall.sh), so the script first
 # sources /etc/euler/egress.env: outbound HTTP(S) goes through Squid or not at all
 # (root, by contrast, bypassed the lock — one more reason not to work as root).
 as_user() {
@@ -317,7 +351,7 @@ as_user() {
 # is correct in any checkout, which is what makes copying them in sound at all.
 #
 # Rendered as the operator and installed by root, because this is the one provisioning step
-# whose source sits in the operator's 0750 home: the euler-user uids cannot read it, so
+# whose source sits in the operator's 0750 home: the per-user uids cannot read it, so
 # as_user has nothing to read and root must place the file. `install` sets the owner as it
 # copies, so the hook is never a root-owned file in the user's home, not even briefly.
 provision_hooks() {
@@ -429,7 +463,7 @@ do_provision() {
     provision_claude "${slug}"
     enable_socket "${slug}"
     # The new uid must be inside the egress lock, or (chain policy accept) it would reach
-    # the internet directly, bypassing Squid. firewall.sh enumerates euler-user-* by group.
+    # the internet directly, bypassing Squid. firewall.sh enumerates the per-user uids by group.
     if [ -f /etc/systemd/system/euler-firewall.service ]; then
         echo "Reloading the egress firewall to cover $(user_of "${slug}")..."
         "${SCRIPT_DIR}/firewall.sh" reload || echo "warn: firewall reload failed — run 'make deploy-firewall'"
@@ -478,6 +512,48 @@ do_deprovision() {
     fi
 }
 
+# Sweep out accounts from the RETIRED naming scheme — the `euler-user-<slug>` uids
+# provisioned before the uid became the slug itself. They are still euler-user group
+# members, so they still hold an egress-locked uid and a home full of a collaborator's
+# clone, but nothing else lines up any more: `deprovision` rejects their name (it is not
+# a valid slug), their unit instance is named for the suffix, and Caddy would dial a
+# socket named for the NEW slug of the same e-mail. Rather than teach every path two
+# naming schemes for a handful of accounts, this removes them wholesale; the affected
+# collaborators are re-invited and re-onboarded under their new uid.
+do_purge_legacy() {
+    check_can_sudo || return 1
+    local legacy=() name reply instance
+    while read -r name; do
+        [ -n "${name}" ] && ! valid_slug "${name}" && legacy+=("${name}")
+    done < <(euler_user_names || true)
+    if [ ${#legacy[@]} -eq 0 ]; then
+        echo "No legacy per-user accounts found — every ${USER_GROUP} member is a valid slug."
+        return 0
+    fi
+    echo "Legacy per-user accounts (retired naming scheme):"
+    printf '  %s\n' "${legacy[@]}"
+    echo
+    echo "IMPORTANT: removing an account does NOT revoke its master-key access. For any of"
+    echo "           these whose key was user-authorized, run \`key-rekey\` in the shell"
+    echo "           afterwards to rotate the master key onto the remaining users."
+    echo
+    read -r -p "Remove these accounts and their homes? [y/N] " reply
+    [[ "${reply}" =~ ^[Yy]$ ]] || { echo "Left in place."; return 0; }
+    for name in "${legacy[@]}"; do
+        instance="${name#euler-user-}"                   # how the old unit was instantiated
+        sudo systemctl disable --now "euler-user@${instance}.socket"  2>/dev/null || true
+        sudo systemctl disable --now "euler-user@${instance}.service" 2>/dev/null || true
+        sudo rm -f "$(sock_of "${instance}")"
+        sudo userdel --remove "${name}" 2>/dev/null || sudo userdel "${name}" 2>/dev/null || true
+        getent group "${name}" > /dev/null && sudo groupdel "${name}" 2>/dev/null || true
+        sudo rm -rf "${USER_HOME_BASE:?}/${name}"
+        echo "Removed ${name} and ${USER_HOME_BASE}/${name}."
+    done
+    if [ -f /etc/systemd/system/euler-firewall.service ]; then
+        "${SCRIPT_DIR}/firewall.sh" reload 2>/dev/null || true
+    fi
+}
+
 # ── install / uninstall / status ──────────────────────────────────────────────────────
 
 do_deploy() {
@@ -513,10 +589,9 @@ do_redeploy() {
     # provisioned user, so it is where a template change (a new gate) actually lands for
     # everyone — otherwise a hook fix would only reach a user who happened to be
     # reprovisioned.
-    local users u slug
-    users="$(getent passwd | awk -F: '/^euler-user-/{print $1}' || true)"
-    for u in ${users}; do
-        slug="${u#euler-user-}"
+    local users slug
+    users="$(euler_user_names || true)"
+    for slug in ${users}; do
         provision_hooks "${slug}"
         if systemctl is-active --quiet "euler-user@${slug}.service" 2>/dev/null; then
             echo "Stopping euler-user@${slug}.service (its socket re-activates it on the next request)..."
@@ -530,7 +605,7 @@ do_remove() {
     check_can_sudo || return 1
     # Any provisioned users left? Refuse to strip the shared layer out from under them.
     local leftover
-    leftover="$(getent passwd | awk -F: '/^euler-user-/{print $1}' || true)"
+    leftover="$(euler_user_names || true)"
     if [ -n "${leftover}" ]; then
         echo "Refusing to uninstall — provisioned users remain:" >&2
         echo "${leftover}" | sed 's/^/  /' >&2
@@ -588,51 +663,157 @@ do_status() {
         status_line "template" "${DEFER}" "deferred (solver.web.user not yet deployed)"
     fi
 
-    # Per-user roster (or one slug's instance).
+    # Per-user roster (or one slug's instance), each reported by unix name + e-mail alias.
+    load_aliases
     local slug="${1:-}"
     if [ -n "${slug}" ]; then
         status_line "users" "${OK}" "1 requested"
         status_one "${slug}"
         return 0
     fi
-    local users u
-    users="$(getent passwd | awk -F: '/^euler-user-/{print $1}' || true)"
+    local users slug_
+    users="$(euler_user_names || true)"
     if [ -z "${users}" ]; then
         status_line "users" "${DEFER}" "none provisioned"
         return 0
     fi
     status_line "users" "${OK}" "$(wc -l <<< "${users}") provisioned"
-    for u in ${users}; do
-        status_one "${u#euler-user-}"
+    for slug_ in ${users}; do
+        status_one "${slug_}"
     done
 }
 
-# One indented line per collaborator, every field marked. The slug column is fixed at 20 —
-# valid_slug's own ceiling — so the fields line up and a ✗ sits in a column you can scan.
+# ── the per-user report ───────────────────────────────────────────────────────────────
+#
+# A collaborator is reported BY UNIX NAME (the slug — that is what the uid, the home, the
+# socket, the unit instance and the branch are all called) with their **e-mail as an
+# alias**. The alias has to be looked up rather than read off the name: the slug is a hash
+# of the e-mail, so the only way back is to recompute system_slug() for every identity in
+# the deployed policy and index by the result. A slug with no alias is an account the
+# policy no longer maps (deprovision it, or re-add the user).
+
+AUTHZ_FILE="${SYS_DIR}/authorizations.json"
+
+# system_slug(email) for each mapped web identity → "<slug> <email> <profile>".
+_ALIAS_PY='
+import json, sys
+from solver.auth.identity import system_slug
+try:
+    users = json.load(open(sys.argv[1])).get("users", {})
+except (OSError, ValueError):
+    raise SystemExit(0)
+for email, profile in sorted(users.items()):
+    if "@" in email:
+        print(system_slug(email), email, profile)
+'
+
+declare -A USER_ALIAS=()
+
+# Populate USER_ALIAS[slug] = "<email> <profile>". Needs the deployed venv (it imports
+# solver.auth.identity, the one definition of the mapping); silently leaves the map empty
+# when the venv or the policy file is absent — the report then shows slugs alone.
+load_aliases() {
+    [ -x "${VENV_PY}" ] || return 0
+    local slug email profile
+    while read -r slug email profile; do
+        [ -n "${slug}" ] && USER_ALIAS["${slug}"]="${email} (${profile})"
+    done < <(sudo "${VENV_PY}" -P -c "${_ALIAS_PY}" "${AUTHZ_FILE}" 2>/dev/null || true)
+}
+
+# Ask a RUNNING instance what its web shell is doing: GET /internal/status over that
+# user's own socket. Root can connect whatever the 0660 mode says.
+#
+# Only ever called when the service is already active. Dialing the socket is what
+# *starts* an instance (it is socket-activated), so an unconditional probe would fork a
+# service — and a whole PTY-less python process — for every idle collaborator, which is a
+# strange thing for a status command to do.
+#
+# The reply is reduced by _SHELL_PY to one line — "none", "unreadable", or
+# "live <attached> <detached-seconds> <pid>" — and this function turns that into the
+# marked phrase; there is at most one shell per instance (one user, one PtyManager key).
+_SHELL_PY='
+import json, sys
+try:
+    shells = json.loads(sys.argv[1]).get("shells") or []
+except ValueError:
+    print("unreadable"); raise SystemExit(0)
+live = [s for s in shells if s.get("alive")]
+if not live:
+    print("none"); raise SystemExit(0)
+s = live[0]
+print("live", int(s.get("attached", 0)), int(float(s.get("detached_for", 0))), s.get("pid", "?"))
+'
+
+shell_state() {
+    local slug="$1" payload state attached detached pid
+    if ! command -v curl > /dev/null 2>&1; then
+        printf '%s unknown (curl not installed)' "${DEFER}"
+        return 0
+    fi
+    payload="$(sudo curl -sS --max-time 3 --unix-socket "$(sock_of "${slug}")" \
+                    http://localhost/internal/status 2>/dev/null || true)"
+    if [ -z "${payload}" ]; then
+        printf '%s unreachable (instance running, /internal/status silent)' "${BAD}"
+        return 0
+    fi
+    # `|| true`: a silent reducer leaves read at EOF, and a bare failing read would take
+    # `set -e` down with it — a status probe must never abort the sweep.
+    read -r state attached detached pid \
+        < <("${PYTHON}" -c "${_SHELL_PY}" "${payload}" 2>/dev/null || true) || true
+    case "${state:-}" in                    # ':-' — a failed read leaves it unset (set -u)
+        live)
+            if [ "${attached:-0}" -gt 0 ]; then
+                printf '%s live · connected (%s terminal(s)) · pid %s' "${OK}" "${attached}" "${pid}"
+            else
+                printf '%s live · NOT connected (detached %ss) · pid %s' "${OK}" "${detached}" "${pid}"
+            fi ;;
+        none) printf '%s none (instance running, no shell forked)' "${DEFER}" ;;
+        *)    printf '%s unreadable reply from /internal/status' "${BAD}" ;;
+    esac
+}
+
+# Two lines per collaborator: the identity line (unix name + e-mail alias), then the
+# instance line and the shell line, every field marked.
 status_one() {
-    local slug="$1" user home clone socket
+    local slug="$1" user home clone socket service shell
     user="$(user_of "${slug}")"
     home="$(home_of "${slug}")"
     clone="${home}/euler"
+    printf '  %-10s %s\n' "${slug}" "${USER_ALIAS[${slug}]:-<no mapped e-mail>}"
     if ! getent passwd "${user}" > /dev/null 2>&1; then
-        printf '  %-20s %s %s missing\n' "${slug}" "${BAD}" "${user}"
+        printf '  %-10s %s uid missing (nothing provisioned under this name)\n' '' "${BAD}"
         return 0
     fi
     if [ ! -f "${SOCKET_DEST}" ]; then
         socket="${DEFER} deferred"
-    elif systemctl is-active --quiet "euler-user@${slug}.socket" 2>/dev/null; then
-        socket="${OK} active"
+        service="${DEFER} deferred"
+        shell="${DEFER} deferred"
     else
-        socket="${BAD} inactive"
+        if systemctl is-active --quiet "euler-user@${slug}.socket" 2>/dev/null; then
+            socket="${OK} listening"
+        else
+            socket="${BAD} inactive"
+        fi
+        # Not running is NORMAL, not a fault: the socket activates the instance on the
+        # first request and the reaper/logout tears it down again, so an idle
+        # collaborator legitimately has no process — hence '…', not '✗'.
+        if systemctl is-active --quiet "euler-user@${slug}.service" 2>/dev/null; then
+            service="${OK} running"
+            shell="$(shell_state "${slug}")"
+        else
+            service="${DEFER} idle (socket-activated on demand)"
+            shell="${DEFER} none (instance idle)"
+        fi
     fi
     # The clone and its hooks live under a 0700 home — only root can see them (as vikas the
     # test silently reads "absent", which is exactly how "no-clone" got misreported).
-    printf '  %-20s uid %s · clone %s · hooks %s · socket %s\n' \
-        "${slug}" \
+    printf '  %-10s uid %s · clone %s · hooks %s · socket %s · service %s\n' '' \
         "${OK}" \
         "$(check_mark sudo test -d "${clone}/.git")" \
         "$(check_mark sudo test -x "${clone}/.git/hooks/pre-commit" -a -x "${clone}/.git/hooks/pre-push")" \
-        "${socket}"
+        "${socket}" \
+        "${service}"
+    printf '  %-10s web shell %s\n' '' "${shell}"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────────────
@@ -645,6 +826,7 @@ case "${ACTION}" in
     remove)      do_remove ;;
     provision)   do_provision "$@" ;;
     deprovision) do_deprovision "$@" ;;
+    purge-legacy) do_purge_legacy ;;
     status)      do_status "$@" ;;
     -h | --help | help) usage ;;
     *) echo "Unknown action: ${ACTION}"; usage; exit 1 ;;

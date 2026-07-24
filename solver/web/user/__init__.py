@@ -4,7 +4,7 @@
 
 Replaces the per-*profile* content (:mod:`solver.web.site`) and web-shell
 (:mod:`solver.web.ws`) instances with a single per-*user* service: one process per
-collaborator, born as their own ``euler-user-<slug>`` uid, reading their own clone
+collaborator, born as their own uid (named for their ``system_slug``), reading their own clone
 and vault, serving both the content routes and ``/ws`` on one socket that Caddy
 dials by ``X-User-Slug``. The old per-profile services stay as the
 libraries this composes — the content handlers (:mod:`solver.web.site.app`) and the

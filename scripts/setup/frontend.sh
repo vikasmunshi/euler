@@ -18,7 +18,7 @@
 #     401 redirects to /login). Client-supplied copies of all three identity headers
 #     are stripped. Authenticated requests are then routed **by X-User-Slug**
 #     to that collaborator's own per-user instance: content pages AND /ws (the
-#     terminal's WebSocket) both go to euler-user-<slug>'s /run/euler/user-<slug>.sock —
+#     terminal's WebSocket) both go to that collaborator's own /run/euler/user-<slug>.sock —
 #     the slug in the dial address is a request-header placeholder, so one static
 #     Caddyfile covers every provisioned user (verified on Caddy 2.11.4). A
 #     missing slug falls through to the static "under maintenance" holding page
@@ -29,7 +29,7 @@
 # Service identity:
 #   - group  `euler-web` — the shared group whose members may reach the app sockets.
 #   - user   `euler-caddy` — runs the edge; member of `euler-web`; binds :443 via
-#     CAP_NET_BIND_SERVICE. (euler-auth / euler-user-<slug> / euler-proxy are
+#     CAP_NET_BIND_SERVICE. (euler-auth / the per-user uids / euler-proxy are
 #     created by their own phases.)
 #
 # Config + secrets live under /etc/euler, NOT in the repo: the dedicated service users
@@ -236,7 +236,7 @@ ensure_group_and_users() {
         echo "Creating group ${WEB_GROUP}..."
         sudo groupadd --system "${WEB_GROUP}"
     fi
-    # euler-caddy — the edge, in euler-web. (euler-auth / euler-user-<slug> /
+    # euler-caddy — the edge, in euler-web. (euler-auth / the per-user uids /
     # euler-proxy are created by their own phases.)
     if ! getent passwd "${CADDY_USER}" > /dev/null; then
         echo "Creating system user ${CADDY_USER} (group ${WEB_GROUP})..."
@@ -505,6 +505,16 @@ ${DOMAIN} {
 	# defined at site scope, evaluated where referenced (after forward_auth has set
 	# the header). Content and /ws share the one per-user instance, so no path split.
 	@user header_regexp X-User-Slug ^[a-z][a-z0-9-]{1,30}$
+
+	# The per-user instances' socket-peer plane (/internal/logout — the auth service's
+	# teardown push; /internal/status — the operator's shell report). Answered here so
+	# it is never proxied: those handlers trust their caller precisely because only
+	# root and the euler-web tier can reach that user's socket, and the catch-all route
+	# below would otherwise let any signed-in browser reach its own instance's copy.
+	handle /internal/* {
+		header Cache-Control "no-store"
+		respond 404
+	}
 
 	# Health probe — Caddy-native, no upstream. no-store because a probe answers
 	# "is the edge up *now*": a monitor that got its "ok" from a cache is not

@@ -41,6 +41,10 @@ solver "eval 42; benchmark 42"
 # Deploy the web front end (systemd services behind a TLS edge — needs sudo).
 # There is no local server: see docs/web-server-guide.md.
 make deploy-web         # also: remove-web | redeploy-web | upgrade-web
+# Read-only health sweep of every web component, ending with the collaborator roster:
+# each unix name (the slug) + e-mail alias, whether their instance runs, and whether
+# their web shell is live and connected. Needs sudo; changes nothing.
+make status-web
 
 # Cut a release, then ship it (see "Versioning" below):
 make release            # bump solver/version.py → commit → tag vX.Y.Z → push (ARGS=--dry-run|--no-push)
@@ -295,7 +299,7 @@ Two AI entry points, both calling the Claude API. Install the optional deps with
 
 There is **no local server and no `solver-web` script**. The front end is a deployed stack of isolated systemd services behind a Caddy TLS edge, each on its own unix socket under `/run/euler/`, run from the root-owned `/opt/euler` venv. The design of record is **`docs/web-server-guide.md`** — read it before changing anything under `solver/web/`.
 
-The shape in one paragraph: Caddy terminates TLS, strips client identity headers, authenticates every request through the auth service's `forward_auth`, and routes by the returned `X-User-Slug` to **one service per collaborator** (`euler-user@<slug>`, `User=euler-user-<slug>`), which serves that user's content routes **and** their `/ws` terminal from their own `~/euler` clone. Authentication is browser-side SRP-6a (`solver/web/auth`); authorization is the profile ladder (`solver/auth`). Each collaborator has their own uid, home, clone, branch, and encrypted vault (`solver/crypto/vault.py`), so their keys are exposed only to their own code.
+The shape in one paragraph: Caddy terminates TLS, strips client identity headers, authenticates every request through the auth service's `forward_auth`, and routes by the returned `X-User-Slug` to **one service per collaborator** (`euler-user@<slug>`, `User=<slug>` — the uid, home `/home/<slug>`, socket and branch are all named for the collaborator's `system_slug`), which serves that user's content routes **and** their `/ws` terminal from their own `~/euler` clone. Authentication is browser-side SRP-6a (`solver/web/auth`); authorization is the profile ladder (`solver/auth`). Each collaborator has their own uid, home, clone, branch, and encrypted vault (`solver/crypto/vault.py`), so their keys are exposed only to their own code.
 
 The `show`/`edit` commands (`solver/core/viewer.py`) drive the browser over a channel-aware bridge: from a **web** shell an `OSC 5379` sequence rides the PTY → WebSocket pipe and swaps the app shell's left pane; from a **terminal** they open `config.base_url` (`$EULER_BASE_URL`) in a named browser tab (`solver-doc`). Per-user shell state — history, session log, last active problem — lives under `.state/<slug>/`, the slug resolved by `solver/auth` and wired into `config`.
 

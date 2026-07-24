@@ -45,7 +45,7 @@ because each user pushes as themselves.
                           ▼                               │  (aiohttp)   │ invites,
         ┌──────────────────────────────────┐              └──────┬──────┘ shell tickets
         │  euler-user@<slug>               │◀────────────────────┘
-        │  User=euler-user-<slug>          │   200 + X-User + X-Profile + X-User-Slug
+        │  User=<slug>                     │   200 + X-User + X-Profile + X-User-Slug
         │  serves this collaborator's      │   or 401 → /login
         │  content routes AND /ws          │
         │                                  │       ┌─────────┐  allowlist egress only
@@ -68,7 +68,7 @@ runs as root**.
 |---|---|---|---|
 | edge | `euler-caddy` | `:443` (public) | TLS, header stripping, `forward_auth`, routing |
 | auth | `euler-auth` | `/run/euler/auth.sock` | SRP login, sessions, invites, shell tickets |
-| per-user app | `euler-user-<slug>` | `/run/euler/user-<slug>.sock` | one collaborator's content routes + `/ws` |
+| per-user app | `<slug>` (e.g. `ue0f4a1`) | `/run/euler/user-<slug>.sock` | one collaborator's content routes + `/ws` |
 | admin plane | `euler-auth` | `/run/euler-adm/auth-admin.sock` (`0600`) | account mutations; never routed by Caddy |
 | egress proxy | `euler-proxy` | `127.0.0.1:3128` | Squid domain allowlist |
 | mail relay | `euler-smtp` | `127.0.0.1:8025` | sole holder of the Gmail credentials |
@@ -177,10 +177,12 @@ Two details matter and are easy to get wrong:
   still passed on `ct state established`, so only *new* service-to-service connections
   broke. The address space is also the actual security intent.
 
-Per-user uids are created dynamically at provision time, so the generator enumerates
-them **by prefix** (`euler-user-*`) and folds them into the drop. Because the chain is
-policy-accept, an un-enumerated uid would reach the internet directly, bypassing Squid —
-which is why `provision` reloads the firewall.
+Per-user uids are created dynamically at provision time and are named for the
+collaborator's slug alone, so the generator enumerates them **by the `euler-user` parent
+group** every provisioned uid joins — there is no name prefix left to match on — and
+folds them into the drop. Because the chain is policy-accept, an un-enumerated uid would
+reach the internet directly, bypassing Squid — which is why `provision` reloads the
+firewall.
 
 **Mail** is the founding case of the principle that a secret lives only with the service
 that performs its operation. Rather than granting the app tier a direct-internet
@@ -315,7 +317,7 @@ Three planes, each with an explicit voucher, tried in order:
 | Plane | Voucher | Mechanism |
 |---|---|---|
 | Web shell | auth service | `SOLVER_TICKET` — a one-time ticket redeemed over `auth.sock` |
-| Per-user instance | the OS | a `euler-user-<slug>` uid whose `EULER_USER_SLUG` pin maps back to its own handed-down email |
+| Per-user instance | the OS | a `<slug>`-named uid (in the `euler-user` group) whose `EULER_USER_SLUG` pin maps back to its own handed-down email |
 | Local terminal | the OS | `os.getuid()` owns the repo checkout → `admin`; a real non-owner login → `contributor` |
 
 **The shell ticket.** Nothing carried in the environment can be a credential:
@@ -332,10 +334,14 @@ instance's `EULER_USER_SLUG` **aborts**. That instance *is* that user's uid — 
 home, keys, and clone — so a ticket for anyone else means misrouting or a bypass, and
 the process must not run.
 
-**Service uids.** A `euler-*` uid that is neither a ticketed web shell nor a properly
+**Service uids.** A service uid that is neither a ticketed web shell nor a properly
 pinned per-user instance **aborts**. This is what stops a web shell from running `unset
-SOLVER_TICKET; solver` to re-resolve itself into a different identity. There is no
-assume-an-identity path: `SOLVER_USER` is display-only.
+SOLVER_TICKET; solver` to re-resolve itself into a different identity. Two things count
+as a service uid: an infra `euler-*` account (by name), and a **member of the root-owned
+`euler-user` group** — the per-user instances, whose uids carry no distinguishing name.
+The group is what makes the check un-forgeable from inside a web shell: a shell cannot
+add or remove its own membership, so it cannot demote itself into the local-terminal
+plane. There is no assume-an-identity path: `SOLVER_USER` is display-only.
 
 **The local terminal.** The profile is the `authorizations.json` `users`-map value for
 the OS login. The **checkout owner floors to `admin`** when unlisted — you cannot lock
@@ -346,10 +352,16 @@ deliberately run local at a lower rung. Anyone else with an entry-less real logi
 The slug scheme is worth one note. `slugify` emits a `.`-bearing form
 (`mercanther_gmail.com-3f9e97`) that **fails `useradd`'s `NAME_REGEX`**, so the system
 slug used for uids, homes, sockets, and `X-User-Slug` is a stricter derivation:
-`[a-z][a-z0-9-]*`, a sanitized and truncated local-part plus a short hash suffix,
-bounded so `euler-user-<slug>` stays well under the name limit (e.g.
-`euler-user-vikas-munshi-0a68e0`, 30 chars). The email remains the login identity; the
-slug is the derived system identity.
+`u` + a six-hex-digit hash of the normalised e-mail (`u0a68e0`), matching
+`^u[0-9a-f]{6,16}$`. It **is** the unix account name — the uid, `/home/<slug>`, the
+socket, the unit instance, and the `user/<slug>` branch all read the same, with no
+`euler-user-` prefix in front of it. Two consequences are deliberate: the name is short
+enough to stay well inside the system limit whatever the address, and it publishes
+nothing about who the collaborator is (`/home`, `ps`, and the branch list are all
+readable by the other collaborators). The e-mail remains the login identity; the slug is
+the derived system identity, and the only way back from one to the other is to recompute
+`system_slug` over the policy's identities — which is what `make status-web` does to
+show each unix name with its e-mail alias.
 
 ## 6 · Authorization
 
@@ -490,7 +502,7 @@ vault — it is their spend, not the operator's.
 ## 7 · The per-user tier
 
 One systemd template instance per collaborator — `euler-user@<slug>.service`,
-`User=euler-user-<slug>` — serves **both** that user's content routes and their `/ws`
+`User=<slug>` — serves **both** that user's content routes and their `/ws`
 shell, all operating on their own `~/euler`. Caddy routes every request for a user to
 their one socket by `X-User-Slug`.
 
@@ -503,7 +515,7 @@ them would separate two things that already share a sandbox — one service kind
 socket per user.
 
 ```
-home  /home/euler-user-<slug>/                     (0700, uid-private)
+home  /home/<slug>/                                (0700, uid-private)
   ├─ euler/          their repo clone — content, branch user/<slug>
   │    └─ solutions/private/**   ciphertext until enc-key authorized (§9)
   └─ .euler/         their vault (§8)
@@ -534,7 +546,9 @@ backstop if the edge is ever misconfigured.
 Account creation is an admin act, from a terminal, under sudo, and **it handles no
 secrets at all**. `users add <email> <profile>` drives `scripts/setup/user.sh`:
 
-1. create the system user `euler-user-<slug>` and its `0700` home;
+1. create the system user `<slug>` (in the `euler-user` parent group) and its `0700`
+   home at `/home/<slug>` — an existing account of that name is **never adopted**, since
+   the slug is a bare name in the shared login namespace;
 2. clone `~/euler` **directly from the public GitHub repo** — anonymous read, no
    credentials — with the crypt filter **disabled**, checked out on a fresh branch
    `user/<slug>`. Origin stays the GitHub URL, so the user pushes as themselves later;
@@ -1527,7 +1541,7 @@ decision recorded here.
   maintainer may run but only for a pull request confined to `solutions/`.
 - **Network posture**: only Caddy is network-bound; the app tier is loopback-only
   (systemd `IPAddressDeny` + host nftables); all egress — including every dynamic
-  `euler-user-*` uid, enumerated by prefix — via the Squid allowlist.
+  per-user uid, enumerated by the `euler-user` group — via the Squid allowlist.
 - **Cookies**: `Secure; HttpOnly; SameSite=Lax`, site-wide.
 
 ## 14 · Operating it
@@ -1604,6 +1618,41 @@ it to do that `deploy` does not already do:
 `make remove-web` tears the stack down in reverse; the kits prompt before deleting
 state.
 
+### 14.2.1 Status
+
+**`make status-web`** is the read-only counterpart: it runs every kit's `status` in
+deploy order — edge, egress, DDNS, firewall, mail relay, auth service, per-user tier —
+and never changes anything. It needs `sudo` all the same, because what it reads is
+root-owned (nftables, `/etc/euler`), the clones sit under `0700` homes, and the shell
+report is a query on each running instance's own socket.
+
+The last section is the collaborator roster, keyed on the **unix name** — the slug, which
+is equally the uid, the home, the socket and the unit instance — with the **e-mail as an
+alias**. The alias is looked up, not read off the name: the slug is a hash, so the report
+recomputes `system_slug` over every identity in `/etc/euler/authorizations.json` and
+indexes by the result. A slug with no alias is an account the policy no longer maps.
+
+```
+  ue0f4a1    vikas.munshi@gmail.com (admin)
+             uid ✓ · clone ✓ · hooks ✓ · socket ✓ listening · service ✓ running
+             web shell ✓ live · connected (1 terminal(s)) · pid 41207
+  ufc2398    alice@example.com (contributor)
+             uid ✓ · clone ✓ · hooks ✓ · socket ✓ listening · service … idle (socket-activated on demand)
+             web shell … none (instance idle)
+```
+
+Read the two shell facts separately: **live** means that user's persistent PTY shell is
+running (it survives a closed laptop — see § 12), and **connected** means a browser
+terminal is attached to it right now. A live-but-`NOT connected` shell is normal and
+shows how long it has been detached; the reaper collects it after the TTL.
+
+An idle `service` is likewise not a fault — instances are socket-activated, so a
+collaborator who is not browsing has no process. That is also why the shell query is only
+made for a *running* instance: dialing the socket is what starts one, and a status
+command must not fork a service for every idle invitee. The instance answers on
+`GET /internal/status` over its own socket — socket-peer only, and Caddy answers
+`/internal/*` with 404 rather than routing it.
+
 ### 14.3 Going public
 
 Only needed for access beyond the LAN.
@@ -1642,7 +1691,7 @@ expiry and `/healthz`.
 | Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
 | Auth | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
 | Policy | `/etc/euler/authorizations.json` (`root:root 0644`) |
-| Per-user tier | `/etc/euler/user.env` (no secrets); `/home/euler-user-<slug>/` (`0700`) |
+| Per-user tier | `/etc/euler/user.env` (no secrets); `/home/<slug>/` (`0700`) |
 | Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` (`0600`) |
 
 ### 14.6 Verify

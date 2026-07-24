@@ -9,8 +9,10 @@
   account, the edit routes). Nothing about those handlers is per-profile; they read
   the request's :class:`~solver.auth.subject.Subject` and gate on it.
 - **shell** — ``GET /ws`` attaches the browser terminal to *this user's* persistent
-  PTY shell (:mod:`solver.web.ws` machinery), and ``POST /internal/logout`` is the
-  auth service's teardown push (socket-peer only; Caddy never routes it).
+  PTY shell (:mod:`solver.web.ws` machinery); ``POST /internal/logout`` is the auth
+  service's teardown push and ``GET /internal/status`` the operator's shell report
+  (both socket-peer only — Caddy answers ``/internal/*`` with 404 rather than
+  routing it).
 
 The difference from the retired per-profile services is **identity**: this process
 *is* one user's uid (``EULER_USER_SLUG``), so the identity middleware refuses any
@@ -190,6 +192,16 @@ def build_app(config: UserConfig) -> web.Application:
         log.info('logout push for %s (shell %s)', email, 'closed' if closed else 'absent')
         return web.json_response({'closed': closed})
 
+    async def internal_status(request: web.Request) -> web.Response:
+        """Report this instance's shell state for the operator's ``status-web`` sweep.
+
+        Socket-peer only, like the logout push: Caddy answers ``/internal/*`` itself
+        (404) rather than routing it, so the only callers are root and the ``euler-web``
+        tier over this user's own socket. Read-only — it never touches a live shell.
+        """
+        manager_ = request.app[PTY_MANAGER]
+        return web.json_response({'slug': pin_slug, 'shells': manager_.snapshot()})
+
     async def _reaper() -> None:
         """Reap shells detached longer than the TTL (hygiene, not security). Never dies."""
         ttl = config.detached_ttl
@@ -222,6 +234,7 @@ def build_app(config: UserConfig) -> web.Application:
     app.add_routes([
         web.get('/ws', websocket),
         web.post('/internal/logout', internal_logout),
+        web.get('/internal/status', internal_status),
     ])
     app.on_startup.append(_on_startup)
     app.on_cleanup.append(_cancel_reaper)
