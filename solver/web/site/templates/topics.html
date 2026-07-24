@@ -18,26 +18,42 @@
 <input type="search" class="topic-filter" placeholder="Filter by name, slug or facet…"
        aria-label="Filter topics by name, slug or facet" autocomplete="off">
 {# One section per folder of topics/: the folder is the heading, so the cards below
-   carry only their leaf name and pack four to a row. A card's second line is the
-   page's own title — dropped where it only repeats the name (the per-tag pages). #}
+   carry only their leaf name and pack four to a row. A card's second line is how much
+   of the topic is already worked through — "solved n of m" over the problems its tags
+   cover, maintained in topics/articles.json by `update-tags`. It replaces the page's
+   own title there, which on the per-tag pages only repeated the card's first line; the
+   title stays as the card's tooltip and in the filter's haystack. A tree read without
+   the index has no counts, and falls back to the title. #}
 {% for g in groups %}
 <div class="subrule"><h3>{{ g.heading }}</h3><span class="count">{{ g.entries | length }}</span></div>
 <nav class="cards" aria-label="{{ g.heading }} topics">
   {% for e in g.entries %}
-  {# The same card shape as the home and docs indexes: glyph · name + page title · arrow,
-     so the three read as one family. Status comes from the article index
-     (topics/articles.json); it is only shown on the maintainer's all-pages view — on
-     `/topics/` everything listed is final, so a "final" pill on every card would say
-     nothing, and there the arrow takes the trailing slot instead. #}
+  {# The same tile the home, docs and solutions pages wear (site.css § the tile): glyph ·
+     corner slot · name · one supporting line. Here that line is a COUNT, so it is the
+     mono data line, and the tile carries the progress hairline filled to the same
+     fraction — the mark that ties a topic to a century grid, which is the same idea at
+     a different scale.
+
+     Status comes from the article index (topics/articles.json); it is only shown on the
+     maintainer's all-pages view — on `/topics/` everything listed is final, so a "final"
+     pill on every card would say nothing, and there the arrow takes the corner slot. #}
   <a class="card{% if show_status and e.status == 'draft' %} is-draft{% endif %}"
      href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
-     data-filter="{{ e.name }} {{ g.heading }} {{ e.heading }} {{ e.title }}">
-    <span class="card-ic">&lambda;</span>
-    <span><span class="card-title">{{ e.heading }}</span>
-      <span class="card-desc">{{ e.title }}</span></span>
-    {% if show_status and e.status == 'final' %}<span class="pill pill-final">final</span>
-    {% else %}<span class="card-go">&rarr;</span>{% endif %}
+     data-filter="{{ e.name }} {{ g.heading }} {{ e.heading }} {{ e.title }}"
+     title="{{ e.title }}">
+    <span class="card-head"><span class="card-ic">&lambda;</span>
+      <span class="card-title">{{ e.heading }}</span>
+      {% if show_status and e.status == 'final' %}<span class="pill pill-final">final</span>
+      {% else %}<span class="card-go">&rarr;</span>{% endif %}</span>
+    {# A tree read without the index has no counts (they are None, not zero), and falls
+       back to the page's own title — prose, so the body face. #}
+    {% if e.problems is not none %}
+    <span class="card-meta"><b>{{ e.solved }}</b> of {{ e.problems }} solved</span>
+    <span class="card-bar"><i style="width: {{ (100 * e.solved / e.problems) | round(1) if e.problems else 0 }}%"></i></span>
+    {% else %}
+    <span class="card-desc">{{ e.title }}</span>
+    {% endif %}
   </a>
   {% endfor %}
 </nav>

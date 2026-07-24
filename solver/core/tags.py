@@ -11,8 +11,9 @@ facets (domain, takeaway) and ``pNNNN_sN`` for per-solution techniques.
 ``update-tags`` is the reconciler that keeps them consistent and feeds the topic
 articles under ``topics/``, and it maintains ``topics/articles.json`` — the article
 index: one row per *writable* topic (every tag in the vocabulary, plus the curated
-pages that are not a tag), carrying the page's title, its declared tags, the number
-of problems behind it, and its **status**:
+pages that are not a tag), carrying the page's title, its declared tags, the problems
+behind it (``refs``, and the ``solved``/``problems`` counts the web index shows as the
+page's subtitle), and its **status**:
 
 ``missing``
     No page on disk yet — the tag is vocabulary only.
@@ -504,6 +505,19 @@ def _article_refs(declared: list[str], by_slug: dict[str, Any]) -> list[str]:
                   key=_ref_key)
 
 
+def _article_counts(refs: list[str], solved: set[int]) -> tuple[int, int]:
+    """``(solved, problems)`` behind an article: its ``refs`` collapsed to distinct problems,
+    and how many of those we have a solution for.
+
+    The pair the topics index shows as the page's subtitle ("solved n of m"), so the reader
+    picking a topic sees how much of it is already worked through. Counted at ``pNNNN``
+    granularity — a technique leg naming two solution indices of one problem is one problem,
+    the same collapse the article's own Problems list makes.
+    """
+    nums = {int(r.split('_')[0][1:]) for r in refs}
+    return len(nums & solved), len(nums)
+
+
 def _problem_meta() -> tuple[dict[int, str], set[int]]:
     """``(number → title, {solved numbers})`` for the generated Problems lists.
 
@@ -590,17 +604,23 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
     rather than from the vocabulary — a row exists because a page does. Curated pages that are not
     a tag (``number-theory/primes``) join on the same footing. Each row carries the page's own
     ``refs``, the same list the page's generated comment holds, so a consumer can rank or filter
-    without re-deriving it from the vocabulary.
+    without re-deriving it from the vocabulary — plus the ``solved``/``problems`` pair derived
+    from those refs, which is what the web topics index shows as each card's subtitle. It is
+    stored rather than recomputed per request: the derivation needs the whole vocabulary and the
+    solved set, and the index is exactly the place that already holds both.
     """
     by_slug = {t['slug']: t for t in central['tags']}
+    _, solved = _problem_meta()
     rows: dict[str, dict[str, Any]] = {}
     for file in _iter_articles():
         text = file.read_text()
         path = file.relative_to(config.topics_dir).with_suffix('').as_posix()
         declared = _article_tags(text)
+        refs = _article_refs(declared, by_slug)
+        n_solved, n_problems = _article_counts(refs, solved)
         rows[path] = {'path': path, 'title': _article_title(text, file.stem),
-                      'status': article_status(text), 'tags': declared,
-                      'refs': _article_refs(declared, by_slug)}
+                      'status': article_status(text), 'solved': n_solved, 'problems': n_problems,
+                      'tags': declared, 'refs': refs}
     return {'articles': [rows[path] for path in sorted(rows)]}
 
 
@@ -626,7 +646,7 @@ def update_tags(check: bool = False) -> int:
     vocabulary (vs HEAD) into the per-problem files first; promote ``new-tags`` proposals into
     the vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
     topic articles' problem lists and rewrite the article index ``topics/articles.json`` (one
-    row per writable topic: title, tags, problem count and status). A problem with notes but no
+    row per writable topic: title, status, solved/problem counts, tags and refs). A problem with notes but no
     ``tags.json`` is reported, not created here — the ``claude-api tags`` target (or the skill)
     authors it.
 

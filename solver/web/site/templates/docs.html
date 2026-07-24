@@ -7,14 +7,17 @@
   <p class="lede">{{ entries | length }} guides stand between you and the next
      unsolved problem. Read one, ignore the rest, feel briefly invincible.</p>
 </header>
+{# The tile (site.css § the tile), four to a row — the same object the start page,
+   topics and the century grids wear. A guide has no count to show, so its supporting
+   line is prose: the page's own leading heading, under the filename. #}
 <nav class="cards" aria-label="Guides">
   {% for e in entries %}
   <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
-    <span class="card-ic">&sect;</span>
-    <span><span class="card-title">{{ e.heading }}</span>
-      <span class="card-desc">{{ e.title }}</span></span>
-    <span class="card-go">&rarr;</span>
+    <span class="card-head"><span class="card-ic">&sect;</span>
+      <span class="card-title">{{ e.heading }}</span>
+      <span class="card-go">&rarr;</span></span>
+    <span class="card-desc">{{ e.title }}</span>
   </a>
   {% endfor %}
 </nav>

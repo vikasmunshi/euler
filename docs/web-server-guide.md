@@ -782,50 +782,68 @@ pane scrolls its own overflow.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs…  │ ⑂ main │ 🯅 │  fixed
+│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs… │ ❯● │ ⑂ main │ 🯅 │ fixed
 ├──────────────────────────────────────┬───────────────────────────────────────┤
-│  LEFT PANE  (#content)                │  RIGHT PANE  (#ws)                    │
-│  navigable content, htmx-swapped;     │  the solver PTY terminal over /ws     │  equal
-│  deep-linkable; scrolls ↕ and ↔       │  persists across left-pane swaps      │  width
+│  LEFT PANE  (#content)                │  ┌ solver terminal ─── ● Connect ─ ─┐ │
+│  navigable content, htmx-swapped;     │  │ the solver PTY terminal over /ws │ │  equal
+│  deep-linkable; scrolls ↕ and ↔       │  └ persists across left-pane swaps ─┘ │  width
 ├──────────────────────────────────────┴───────────────────────────────────────┤
-│ FOOTER   © · license · terms of use · acknowledgements                        │  fixed
+│ FOOTER                       © · license · terms · acknowledgements │▭ terminal│  fixed
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Header** — one control surface, identical on every page: the brand (→ `/`), primary
   nav, the **Actions** menu (page-specific verbs, always present even when empty), a
-  **back arrow**, **breadcrumbs**, the **git chip** (§11.9), and the **user glyph**
-  (Account, the terminal connect/disconnect item, Logout).
+  **back arrow**, **breadcrumbs**, the **terminal chip**, the **git chip** (§11.9), and
+  the **user glyph** (Account, Logout).
 
   The back arrow is not redundant with the browser's. The browser's back navigates the
   *document* and would take the terminal with it, so the pane keeps a history of its own
   and performs a swap, not a navigation.
 
-  Git sits inside `.app-who`, before the user glyph: `margin-left: auto` pushes that
-  group right, and the chip belongs on the *identity* side of the gap — it is state about
-  **your clone**, not about the page in the pane.
+  The terminal chip and git sit inside `.app-who`, before the user glyph: `margin-left:
+  auto` pushes that group right, and both belong on the *identity* side of the gap — they
+  are state about **your session** and **your clone**, not about the page in the pane.
 
-  The terminal item is **one** entry, not two: it names the act it offers
-  ("Disconnect") and the dot beside it carries the state. The iframe reports
-  `{euler: 'term-state', connected}` on every open and close, and the menu follows it —
-  so a session that drops on its own never leaves the menu offering to disconnect
-  something already gone.
+  **Connect/disconnect lives on the terminal window's own titlebar** (§ Right pane), next
+  to minimize: the session is a property of that window, and a control on the thing it
+  acts on needs no explaining. It is **one** entry, not two, and it is **just the dot** —
+  state and act in one mark, sized to the minimize button beside it. No verb: a word in a
+  1.6rem titlebar competes with the terminal's own name, for a control whose two states a
+  colour already tells apart. What it will do is its `title`, which is also its accessible
+  name and which `site.js` flips with the state. The user menu carries no terminal item at
+  all; it is for getting places.
 
-  A terminal **control** is any `[data-term-toggle]` carrying a `[data-term-label]` and a
-  `[data-term-dot]`; `site.js` paints every one of them from the single state the iframe
-  reports, so the menu's item and the start page's Terminal card cannot disagree. They
-  render **disconnected** and are painted on load: markup is served before the socket has
-  said anything, and a control that claims a live session it has not been told about is a
-  claim nothing can correct.
+  The header's **terminal chip** only *reports* — a glyph and a dot, with the state in its
+  tooltip. It exists because the titlebar can be minimized away (§ Footer), and the one
+  thing that must never become unreadable is whether the session is live.
+
+  A terminal **control** is any `[data-term-toggle]` carrying a `[data-term-dot]` (its
+  title and accessible name are painted, so a control needs no text of its own); a
+  **readout** is any `[data-term-status]`. The iframe reports
+  `{euler: 'term-state', connected}` on every open and close and `site.js` paints all of
+  them from that single state, so the titlebar's toggle, the header's chip and the git
+  panel's offline note cannot disagree — and a session that drops on its own never leaves
+  a control offering to disconnect something already gone. They render **disconnected**
+  and are painted on load: markup is served before the socket has said anything, and a
+  control that claims a live session it has not been told about is a claim nothing can
+  correct.
 - **Left pane `#content`** — the navigable region. Links `hx-get` a route and swap it
   here; `hx-push-url` updates the URL, so every view is deep-linkable.
 - **Right pane `#ws`** — a same-origin **iframe** onto `/terminal`, its own document.
   This is what makes terminal persistence structural rather than a matter of discipline:
   htmx swaps, content-page JS, and history restores **cannot reach** another browsing
   context's document.
-- **Footer** — © · license · terms · acknowledgements, all swapping into the left pane.
-  Auth-tier pages (terms, change password) return a bare fragment on `HX-Request` so they
-  render in `#content` without nesting a page.
+- **Footer** — right-aligned: © · license · terms · acknowledgements, all swapping into
+  the left pane (auth-tier pages — terms, change password — return a bare fragment on
+  `HX-Request` so they render in `#content` without nesting a page), and — only while the
+  terminal is minimized — its **window** at the very end.
+
+  Nothing is reserved for it: it is `display: none` while the terminal is open, so the
+  documents hold the right edge on their own and minimizing pushes them left by exactly
+  the window's width. What appears there is a window collapsed to its titlebar — window
+  figure · name · restore glyph — so what it is and what clicking it does are the same
+  picture.
 
 `body` is a viewport-high grid (`auto 1fr auto`); the panes are equal (`1fr 1fr`)
 independent scroll containers (`min-height: 0`). Controls never move between pages; only
@@ -1005,16 +1023,56 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
 ### 11.6 Content pages
 
 - **Landing, docs index, topics index** — a short hero over a **card grid**. The landing
-  stacks its entry points one per row (Solutions · Docs · Topics · Terminal), then the
+  puts its four entry points (Solutions · Docs · Topics · Terminal) in one row, then the
   **README** below them under a mono eyebrow — an eyebrow rather than a heading, because
   the README is the same page continuing, not a new section competing with the hero. The
-  indexes list two or three per row, showing the filename as the first line and the
-  markdown `#` title as the second, sorted by filename.
+  indexes list four per row, sorted by filename.
+
+  **The tile is one object across four pages** — home, docs, topics, and the head of every
+  century grid on solutions — and it is **two lines**, because that is what it has to say:
+  what it is, and one fact about it.
+
+  | line | what it holds |
+  |------|---------------|
+  | first | the section's mono glyph (π · § · λ · ❯), the **title** beside it, and the corner slot — arrow / padlock / `final` pill |
+  | second | the **supporting line** |
+
+  The glyph sits with the name it marks rather than on a line of its own, so a 16-tile
+  grid reads as 16 short blocks and not as a column of floating glyphs. A title too long
+  for its track takes a second line (then ellipsis), with the glyph and the corner mark
+  staying on the first.
+
+  The supporting line is the rule that makes the four pages one system: **mono when it is
+  a number, body face when it is a sentence**. Topics and centuries carry a count
+  (`95 of 240 solved`, from `topics/articles.json` and `problems.json`); home and docs
+  carry prose (the start page's own copy, a guide's `#` title). Nothing carries both — a
+  tile says one thing about itself, and the count that would go on a home tile is already
+  in the hero above it.
+
+  Where the count is a **fraction of work done**, the tile also carries a 2px **progress
+  hairline** on its bottom edge, filled to that fraction. It appears on topic tiles and
+  century tiles and nowhere else: its absence on a guide says "not a progress thing"
+  rather than "zero". The width is the app's one inline `style` — it *is* the datum, and
+  there is no class-per-percent worth having (`style-src 'unsafe-inline'` is already a
+  recorded exception, below).
+
+  The corner slot holds affordance or state, never decoration. The `→` fades in on
+  hover/focus — sixteen resting grey arrows in a grid this dense is noise, and a bordered
+  box on a card grid already reads as clickable — while the padlock (signed out) and the
+  `final` pill are state and stay put.
+
+  Four per row is set for the pane the terminal leaves (half the viewport); below a 1200px
+  viewport the grid drops to two and below 700px to one, because under ~150px a tile
+  truncates its own title.
 
   The **Terminal** card is the one card that is not a place to go — the terminal is
-  already here, in the right pane — so it is a `<button>` rather than a link and does the
-  only thing the page usefully can: connect or disconnect, with the dot as its indicator.
-  It is a terminal control like the user menu's item (§ Header) and shares its state.
+  already here, in the right pane — so it is a `<button>` rather than a link. Like the
+  header's Terminal item it *restores* the pane when it has been minimized to the footer
+  and *focuses* it either way: restore means "take me to the terminal", and a control that
+  shows you the shell but leaves the next keystroke going nowhere has done half its job.
+  Focus is the iframe's to give (`{euler: 'focus'}` — the parent cannot reach xterm's
+  hidden textarea across the boundary). The socket is untouched: connecting is the
+  titlebar's act (§ Header).
 - **Account** — identity (email, and the slug that names the system user, home and clone
   that are theirs alone), then the **profile ladder**: the four rungs with theirs lit and
   the ones below it filled, because the ladder is cumulative and a reader who saw only
@@ -1025,7 +1083,11 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   getting places.
 - **Solutions** — the 10×10 century grids: square cells (and so square grids, via
   `aspect-ratio`), packed as many per row as fit (`auto-fill`), shaded by difficulty with
-  the heat tokens, title and pct on hover.
+  the heat tokens, title and pct on hover. Each grid is **headed by the tile**: the range
+  where the glyph goes, `36 of 100 solved` on the data line, and the hairline along the
+  bottom edge pointing straight into the grid it measures — a century is a topic you have
+  or have not worked through, so it says so the same way. It is an `<h2>`, not a link
+  (there is no per-century page), so it keeps the chassis and drops the hover.
 - **Progress upload** — an **empty** paste buffer, because this is a *replace*, not an
   edit: the previous `.progress.html` is superseded wholesale, parse-or-reject before
   anything lands.

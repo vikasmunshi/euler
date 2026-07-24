@@ -121,10 +121,15 @@ class ArticleIndexTests(unittest.TestCase):
     def test_index_is_built_from_the_pages_and_carries_their_refs(self) -> None:
         """A row exists because a page does — update-tags creates one per tag, so there is no
         vocabulary-only row and no `missing`. Each row carries the page's own refs, at the legs'
-        granularity, so a consumer can rank or filter without re-deriving them."""
+        granularity, plus the solved/problems pair the web index shows as the page's subtitle,
+        so a consumer can rank, filter or label without re-deriving them.
+
+        The solved set is pinned here: it is real progress in a real clone, and a test that
+        read it would pass or fail on which problems this checkout has solved."""
         self._article('domain/alpha.md', '<!-- tags: [alpha] -->\n<!-- status: final -->\n# Alpha, at length\n')
         self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
-        index = tags._build_index(_central())
+        with patch.object(tags, '_problem_meta', return_value=({}, {2})):
+            index = tags._build_index(_central())
         rows = {row['path']: row for row in index['articles']}
         self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
         self.assertEqual(set(rows), {'domain/alpha', 'curated/mix'})                 # pages only
@@ -133,7 +138,14 @@ class ArticleIndexTests(unittest.TestCase):
         self.assertEqual(rows['domain/alpha']['refs'], ['p0002', 'p0003'])
         self.assertEqual(rows['curated/mix']['status'], 'draft')                     # no comment → draft
         self.assertEqual(rows['curated/mix']['refs'], ['p0002', 'p0003'])            # union of both tags
-        self.assertNotIn('problems', rows['curated/mix'])                            # replaced by refs
+        # the counts: two distinct problems behind the page, one of them solved
+        self.assertEqual((rows['curated/mix']['solved'], rows['curated/mix']['problems']), (1, 2))
+
+    def test_counts_collapse_solution_refs_to_problems(self) -> None:
+        """A technique leg names solution indices (`p0002_s0`, `p0002_s1`); the subtitle counts
+        problems, so the two are one."""
+        self.assertEqual(tags._article_counts(['p0002_s0', 'p0002_s1', 'p0003'], {3}), (1, 2))
+        self.assertEqual(tags._article_counts([], {3}), (0, 0))                      # an untagged page
 
     def test_a_tag_without_a_page_gets_one_from_the_template(self) -> None:
         """This is what removes `missing`: every tag has a file, so status only answers whether

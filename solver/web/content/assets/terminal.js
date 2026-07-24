@@ -6,14 +6,16 @@
 
    - down (parent → here): {euler: 'disarm'} before a deliberate exit (logout),
      so the beforeunload guard does not fire on a navigation the user chose;
-     {euler: 'connect'|'disconnect'} from the user menu's terminal item;
+     {euler: 'connect'|'disconnect'} from the terminal titlebar's toggle;
+     {euler: 'focus'} from a restore control, which brings the pane back but cannot
+     reach across this boundary to put the caret in the shell itself;
    - up (here → parent): {euler: 'navigate', path} when the shell's `show`/`edit`
      emits its OSC 5379 sequence — the shell drives the left pane, and only ever
      through the parent (this document never touches the parent's DOM);
      {euler: 'git-changed'} when a git command reports it moved this clone, so the
      header's chip re-reads itself;
      {euler: 'term-state', connected} whenever the socket opens or closes, so the
-     user menu's item can name the act it offers.
+     titlebar's toggle can name the act it offers.
 
    Wire protocol (solver/web/ws/app.py): binary frames are raw PTY bytes both
    ways; a text frame {"resize": [cols, rows]} carries the geometry. */
@@ -52,14 +54,14 @@
   fit.fit();
 
   // ── the socket ───────────────────────────────────────────────────────────
-  // Connect and disconnect are the USER'S acts (the ☰ user menu; the first
+  // Connect and disconnect are the USER'S acts (the titlebar's toggle; the first
   // connect rides the page load). There is deliberately no automatic reconnect:
   // a dropped transport stays dropped, visibly, until the user asks — the
   // server-side shell survives a disconnect and replays on the next attach.
   var socket = null;
   var closedByUs = false;
 
-  //: Tell the shell where we stand. The user menu's terminal item follows this and
+  //: Tell the shell where we stand. The titlebar's toggle follows this and
   //: never the other way round: a session that drops on its own (the shell exits,
   //: the transport dies) must not leave the menu offering to disconnect something
   //: that is already gone. Unframed (a direct visit to /terminal) there is no one
@@ -111,7 +113,7 @@
       report(false);
       if (closedByUs) {
         term.write('\r\n\x1b[33mdisconnected — your shell keeps running; '
-                   + 'reconnect from the user menu.\x1b[0m\r\n');
+                   + 'reconnect from the titlebar above.\x1b[0m\r\n');
         return;
       }
       // 1008 = the service refused us (no ticket / not permitted): say so.
@@ -120,8 +122,8 @@
         return;
       }
       // Anything else: the transport dropped. No automatic reconnect — say what
-      // happened and leave the next move to the user (☰ → Connect terminal).
-      term.write('\r\n\x1b[33mconnection lost — reconnect from the user menu '
+      // happened and leave the next move to the user (the titlebar's Connect).
+      term.write('\r\n\x1b[33mconnection lost — reconnect from the titlebar above '
                  + '(your shell keeps running).\x1b[0m\r\n');
     };
   }
@@ -251,8 +253,8 @@
     if (guard) { window.removeEventListener('beforeunload', guard); guard = null; }
   }
 
-  // Parent → here (site.js): the user-menu terminal controls, plus 'disarm'
-  // before a deliberate exit (logout) so the beforeunload dialog stays quiet.
+  // Parent → here (site.js): the shell's terminal controls, plus 'disarm' before a
+  // deliberate exit (logout) so the beforeunload dialog stays quiet.
   window.addEventListener('message', function (ev) {
     if (ev.origin !== location.origin || !ev.data) { return; }
     switch (ev.data.euler) {
@@ -261,15 +263,22 @@
         disarm();
         if (socket) { socket.close(1000, 'leaving'); }
         break;
-      case 'disconnect':                // ☰ → Disconnect terminal
+      case 'disconnect':                // titlebar → Disconnect
         closedByUs = true;
         if (socket) { socket.close(1000, 'user disconnect'); }
         break;
-      case 'connect':                   // ☰ → Connect terminal (idempotent)
+      case 'connect':                   // titlebar → Connect (idempotent)
         if (!socket) {
           if (window.Vault) { window.Vault.unlock().then(connect, connect); }
           else { connect(); }
         }
+        break;
+      case 'focus':                     // a restore control: put the caret in the shell
+        // Focus is this document's to give — the parent cannot reach across the
+        // iframe boundary to xterm's hidden textarea. Sent whether or not a socket
+        // is up: an unfocused terminal is one the next keystroke misses, and
+        // connecting is a separate act with its own control.
+        term.focus();
         break;
       case 'run':                       // the account page's tool rows
         // Type the command and press return, exactly as the user would: it lands in

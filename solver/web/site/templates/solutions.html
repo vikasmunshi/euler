@@ -15,10 +15,19 @@
 <div class="grid-row">
   {% for grid in grids %}
   <div class="century">
-    {# The grid heading in the shared tile/eyebrow idiom — a monospace accent kicker,
-       matching the hero's kicker and the workbench/readme eyebrows across the app. #}
-    <h2 class="century-label">{{ '%04d' % grid.start }} – {{ '%04d' % (grid.start + 99) }}
-        <span class="muted">({{ grid.solved }} solved)</span></h2>
+    {# The grid is headed by the TILE (site.css § the tile), the same object the home,
+       docs and topics pages wear: the range where the glyph goes, the count on the mono
+       data line, and the progress hairline along the bottom edge — pointing straight
+       into the grid it measures. A century is a topic you have or have not worked
+       through, so it says so the same way.
+
+       It is an <h2>, not a link: the heading of the grid below it, and there is no
+       per-century page to go to. #}
+    <h2 class="card">
+      <span class="card-head"><span class="card-ic">{{ '%04d' % grid.start }}&ndash;{{ '%04d' % (grid.start + 99) }}</span></span>
+      <span class="card-meta"><b>{{ grid.solved }}</b> of {{ grid.total }} solved</span>
+      <span class="card-bar"><i style="width: {{ (100 * grid.solved / grid.total) | round(1) if grid.total else 0 }}%"></i></span>
+    </h2>
     <div class="century-grid">
       {% for cell in grid.cells %}
         {% set n = grid.start + loop.index0 %}

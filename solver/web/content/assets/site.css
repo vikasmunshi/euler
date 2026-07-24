@@ -188,6 +188,17 @@ summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
 summary.user-glyph.is-anon { border-style: dashed; background: none; color: var(--muted); }
 summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--accent); }
 
+/* ── the terminal chip (_nav.html) ───────────────────────────────────────────
+   A readout, not a control: the acts live on the terminal's own titlebar, and this
+   says where the session stands when that titlebar is minimized away. First in
+   `.app-who`, before the git chip — both are state about YOUR side of the app, and
+   the terminal is the one that is a live connection. Same .dot idiom every terminal
+   control wears, so the colour means one thing site-wide. */
+.term-chip { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--muted); }
+.term-chip.is-on { color: var(--text); }
+.term-glyph { width: 0.95rem; height: 0.95rem; display: block; flex: none; }
+.term-chip .dot { flex: none; }
+
 /* ── the git chip (_git.html) ────────────────────────────────────────────────
    Inside `.app-who`, before the user pill: state about YOUR CLONE, so it sits on
    the identity side of the header's gap, not with the page's own controls. Same
@@ -356,6 +367,22 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.72rem; letter-spacing: 0.04em; color: var(--muted);
 }
+/* The window's own controls, in titlebar order: session (connect/disconnect), then
+   layout (minimize). */
+.ws-bar-controls { display: inline-flex; align-items: center; gap: 0.25rem; }
+/* Connect/disconnect lives on the terminal it acts on, and it is just the dot: state
+   and act in one mark. No verb beside it — the titlebar is 1.6rem tall and a word there
+   competes with the terminal's own name for a control that has exactly two states a
+   colour already tells apart. What it will DO is its title (§ base.html), which site.js
+   flips with the state. Sized to match the minimize button next to it. */
+.ws-conn {
+  width: 1.6rem; height: 1.6rem; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 6px;
+  background: none; cursor: pointer;
+}
+.ws-conn:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ws-conn .dot { flex: none; }
 
 /* ── Minimize the terminal to the footer (F1): layout only, socket untouched ─── */
 /* Minimized: the panes become a single column and the terminal pane is hidden, so
@@ -372,14 +399,34 @@ body.ws-minimized .pane-ws { display: none; }
 }
 .ws-min:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .ws-min svg { width: 1rem; height: 1rem; }
-/* The footer restore strip: hidden until minimized, then parked at the footer's right. */
+/* The minimized terminal, in the footer's right-hand slot: a window collapsed to its
+   titlebar — window figure · name in the terminal's mono · restore glyph — so what it
+   is and what clicking does are the same picture. It is not a link and not a strip of
+   text: the pane it stands for is a window, and this is that window, small.
+
+   It is the last thing in the footer's right-aligned row and takes no space until it is
+   there: `display: none` while the terminal is open, so nothing is reserved and the
+   documents hold the right edge on their own. */
 .ws-restore {
-  display: none; margin-left: auto;
-  font: inherit; color: var(--muted); cursor: pointer;
-  background: none; border: 0; padding: 0;
+  display: none; align-items: center; gap: 0.4rem;
+  padding: 0.12rem 0.3rem 0.12rem 0.4rem;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: var(--surface-hi); color: var(--muted); cursor: pointer;
+  font: inherit; font-size: 0.78rem;
 }
-.ws-restore:hover { color: var(--accent); }
-body.ws-minimized .ws-restore { display: inline-flex; align-items: center; }
+body.ws-minimized .ws-restore { display: inline-flex; }
+.ws-restore:hover { color: var(--accent); border-color: var(--accent); }
+/* The window figure: a box whose top edge is its titlebar. */
+.ws-restore-figure {
+  width: 0.8rem; height: 0.62rem; flex: none;
+  border: 1px solid currentColor; border-top-width: 0.2rem; border-radius: 2px;
+}
+.ws-restore-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem; letter-spacing: 0.03em;
+}
+.ws-restore-glyph { display: inline-flex; }
+.ws-restore-glyph svg { width: 0.9rem; height: 0.9rem; display: block; }
 
 /* /terminal — the iframe's own document: the terminal fills it edge to edge
    (the pane's own border and radius come from .pane-ws in the shell). */
@@ -462,61 +509,119 @@ body.terminal-doc {
 }
 .hero h1 { margin: 0 0 0.4rem; font-size: 1.6rem; letter-spacing: -0.01em; }
 .hero .lede { margin: 0; color: var(--muted); }
+/* ── The tile (§7) ────────────────────────────────────────────────────────────
+   ONE object, four pages: home, docs, topics, and the head of every century grid
+   on solutions. Four to a row, and inside each tile the same three slots:
+
+     glyph · title · state  the mono mark, the name, and the corner slot — ONE line
+     supporting line        ONE line about it
+
+   Two lines, because that is what the tile has to say: what it is, and one fact about
+   it. The glyph sits with the name it marks rather than on a line of its own, so a
+   16-tile grid is 16 short blocks rather than a column of floating glyphs.
+
+   The supporting line is the rule that makes the four pages one system: **mono
+   when it is a number, body face when it is a sentence**. Topics and centuries
+   carry a count (`95 of 240 solved`); home and docs carry prose. Nothing carries
+   both — a tile says one thing about itself.
+
+   The corner slot holds AFFORDANCE or STATE, never decoration: the arrow fades in
+   on hover/focus (sixteen resting grey arrows in a grid this dense is noise, and a
+   bordered box on a card grid already reads as clickable), while the padlock
+   (signed out) and the `final` pill are state and stay put. */
 .cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.6rem;
-  /* A little right padding so the rightmost tile's hover (a 2px shift + the accent
+  /* A little right padding so the rightmost tile's hover (a 2px lift + the accent
      border) and its keyboard focus ring (a 2px outline at 2px offset) are not clipped
      by the content pane's overflow edge. Left stays flush, so the grid still lines up
      with the hero above it. */
   padding-right: 0.5rem;
 }
-.cards.cards-3 { grid-template-columns: repeat(3, 1fr); }
-/* A draft is a page that exists but is not written yet — readable, not advertised. */
-.card.is-draft .card-ic, .card.is-draft .card-title { color: var(--muted); }
-.card .pill-final { font-size: 0.6rem; padding: 0.05rem 0.4rem; }
-@media (max-width: 1200px) { .cards.cards-3 { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px) { .cards, .cards.cards-3 { grid-template-columns: 1fr; } }
+/* The breakpoints are the VIEWPORT's, but the grid lives in a half-viewport pane, so
+   they are set by what the pane holds with the terminal open — the normal case. Below
+   ~150px a tile truncates its own title, so it drops to two, then to one. */
+@media (max-width: 1200px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .cards { grid-template-columns: 1fr; } }
 .card {
-  display: grid;
-  grid-template-columns: 1.7rem 1fr auto;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.8rem 1rem;
+  position: relative;                 /* the progress hairline pins to its bottom edge */
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.75rem 0.85rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   text-decoration: none;
+  overflow: hidden;                   /* the hairline follows the rounded corners */
   transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
 }
-.card:hover { border-color: var(--accent); background: var(--surface-hi); transform: translateX(2px); }
-.card.full { grid-column: 1 / -1; }
-.card-ic { font-family: ui-monospace, Menlo, Consolas, monospace; text-align: center; color: var(--accent); }
-.card-title { display: block; font-weight: 600; color: var(--text); }
-.card-desc { display: block; margin-top: 1px; font-size: 0.82rem; color: var(--muted); }
+.card:hover { border-color: var(--accent); background: var(--surface-hi); transform: translateY(-2px); }
+/* The tile's first line: glyph · title · corner slot. `flex-start` rather than centre,
+   so the glyph and the corner mark stay on the title's FIRST line when a long name takes
+   a second one. */
+.card-head { display: flex; align-items: flex-start; gap: 0.45rem; }
+.card-ic {
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem; line-height: 1.3; color: var(--accent);
+}
+.card-title {
+  flex: 1; min-width: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font-weight: 600; line-height: 1.3; color: var(--text);
+}
+/* The data line: mono, because it is data (§ the tile). `margin-top: auto` drops it to
+   the tile's foot, so every count in a row sits on the same baseline directly above its
+   hairline however many lines the titles above them took. */
+.card-meta {
+  display: block; margin-top: auto; padding-top: 0.3rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem; letter-spacing: 0.06em; color: var(--muted);
+}
+.card-meta b { color: var(--text); font-weight: 600; }
+/* The prose line: the page's own words, in the body face, clamped so a long one
+   cannot make its tile taller than the row. */
+.card-desc {
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  margin-top: 0.15rem; font-size: 0.74rem; line-height: 1.35; color: var(--muted);
+}
 .card-desc code { color: var(--accent); }
-.card-go { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--muted); transition: color 0.15s ease; }
-.card:hover .card-go { color: var(--accent); }
+/* The progress hairline, welded to the tile's bottom edge and filled to the fraction
+   solved. It appears ONLY where a fraction is a real fact about the thing — a topic's
+   problems, a century's hundred — so its absence on a guide or the start page's tiles
+   says "not a progress thing" rather than "zero". The width is the one inline style in
+   the app: it is the datum itself, and there is no class-per-percent worth having. */
+.card-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--border); }
+.card-bar i { display: block; height: 100%; background: var(--accent); }
+.card-go {
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem; line-height: 1.65; color: var(--accent);
+  opacity: 0; transition: opacity 0.15s ease;
+}
+.card:hover .card-go, .card:focus-visible .card-go { opacity: 1; }
+/* A draft is a page that exists but is not written yet — readable, not advertised. */
+.card.is-draft .card-ic, .card.is-draft .card-title { color: var(--muted); }
+.card .pill-final { flex: none; font-size: 0.6rem; padding: 0.05rem 0.4rem; }
 @media (prefers-reduced-motion: reduce) {
   .card, .card:hover { transition: none; transform: none; }
+  .card-go { transition: none; }
 }
 /* A locked card keeps its box and its copy — the visitor should see exactly what
-   is behind the login — and trades the arrow for a padlock. It is a <span>, not
+   is behind the login — and puts a padlock in the corner slot. It is a <span>, not
    an <a>, so the element-typed hover rules above never reach it. */
 .card.is-locked .card-ic, .card.is-locked .card-title { color: var(--muted); }
-.card-lock { width: 0.9rem; height: 0.9rem; color: var(--muted); display: block; }
+.card-lock { flex: none; width: 0.9rem; height: 0.9rem; margin-top: 0.2rem; color: var(--muted); display: block; }
 /* The Terminal card is a <button> (it acts, it does not navigate) — the only one.
-   A button brings its own font, background and centring, none of which the grid
-   above expects, so reset it back to the card the <a>s already are. */
+   A button brings its own font, background and centring, none of which the tile
+   above expects, so reset it back to the tile the <a>s already are. */
 button.card {
   width: 100%;
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
-.card-term .card-title { display: inline-flex; align-items: center; gap: 0.45rem; }
-.card-term .card-go { font-size: 0.82rem; }
 
 /* ── The README, below the cards on the start page ───────────────────────── */
 .readme { margin-top: 0.8rem; }
@@ -550,21 +655,24 @@ button.card {
   align-items: start;
 }
 .century { margin: 0; min-width: 0; }
-/* The grid heading in the shared eyebrow idiom (F7): a monospace accent kicker, like
-   the hero's kicker and the readme/workbench eyebrows, so headings read alike app-wide.
-   nowrap keeps every label on one line — the 17rem track below comfortably holds the
-   widest ("NNNN – NNNN (100 SOLVED)") at this size, so all grids stay identical. */
-.grid-row .century-label {
-  margin: 0 0 0.4rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  white-space: nowrap;
+/* Each century is HEADED BY THE TILE (§ the tile): the range where the glyph goes, the
+   count on the data line, and the progress hairline on the bottom edge pointing straight
+   into the grid it measures. That is what puts this page in the same system as topics —
+   a century is a topic you have or have not worked through.
+
+   It is a label, not a link: there is no per-century page, and a tile that looks
+   clickable and is not would be the one thing a control must never be. So it keeps the
+   chassis and drops the hover — no lift, no border flare, no arrow. */
+.century > .card {
+  margin: 0 0 0.45rem; padding: 0.55rem 0.7rem 0.6rem;
+  font-size: 1rem; font-weight: 400; cursor: default;
 }
-.grid-row .century-label .muted { letter-spacing: 0.04em; }
+.century > .card:hover {
+  border-color: var(--border); background: var(--surface); transform: none;
+}
+/* The range is the century's name, so it takes the title's weight in the glyph's slot —
+   nowrap because "NNNN–NNNN" is one word however narrow the track gets. */
+.century .card-ic { font-size: 0.86rem; letter-spacing: 0.08em; white-space: nowrap; }
 .century-grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -1089,11 +1197,15 @@ dl.account dd { margin: 0; min-width: 0; }
   background: var(--border); border-radius: 6px;
 }
 
-/* ── Footer (fixed) ──────────────────────────────────────────────────────── */
+/* ── Footer (fixed) ──────────────────────────────────────────────────────────
+   Right-aligned: © · the documents, and — only while the terminal is minimized — its
+   window at the very end (§ .ws-restore). Nothing is reserved for it: with the terminal
+   open the documents hold the right edge themselves, and minimizing pushes them left by
+   exactly the window's width. */
 .app-footer {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.6rem;
   padding: 0.55rem 1rem;
   border-top: 1px solid var(--border);

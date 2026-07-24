@@ -68,6 +68,13 @@ class Century(NamedTuple):
     cells: list[ProblemInfo | None]
     solved: int
 
+    @property
+    def total(self) -> int:
+        """Problems this century actually has — 100, except the last, which stops at the
+        highest number projecteuler.net has published. The tile heading the grid reads
+        ``n of total solved``, so it must count cells, not assume a hundred."""
+        return sum(1 for cell in self.cells if cell is not None)
+
 
 class DocEntry(NamedTuple):
     """A docs/topics index row (web-server-guide § The site): the URL *name*, the *heading*
@@ -76,12 +83,17 @@ class DocEntry(NamedTuple):
     line). Index lists are sorted by *name* (the filename).
 
     *status* is carried by topic articles only (``draft`` / ``final``, from the article
-    index); the docs tree leaves it empty."""
+    index); the docs tree leaves it empty. *solved* / *problems* likewise come from the
+    article index — how many of the problems behind a topic we have solved — and are
+    ``None`` for any entry read from a bare tree walk, where the counts are unknown
+    rather than zero."""
 
     name: str
     heading: str
     title: str
     status: str = ''
+    solved: int | None = None
+    problems: int | None = None
 
 
 class TopicGroup(NamedTuple):
@@ -710,15 +722,25 @@ def list_topics(repo_root: Path) -> list[DocEntry]:
 
 def _indexed_topics(repo_root: Path) -> list[DocEntry]:
     """The written pages of the article index (``topics/articles.json``, maintained by
-    ``update-tags``) — with their status. Its ``missing`` rows are vocabulary rather than
-    pages, so they are dropped: there is nothing to open. Empty when the index is absent
-    or unreadable, which sends the caller back to walking the tree."""
+    ``update-tags``) — with their status and their solved/problem counts. Its ``missing``
+    rows are vocabulary rather than pages, so they are dropped: there is nothing to open.
+    Empty when the index is absent or unreadable, which sends the caller back to walking
+    the tree.
+
+    A row written before the counts existed simply has none: they stay ``None`` and the
+    card falls back to the page's title, rather than claiming "solved 0 of 0"."""
     data = load_json(repo_root / 'topics' / 'articles.json')
     rows = data.get('articles', []) if isinstance(data, dict) else []
     return [DocEntry(name=str(row['path']), heading=str(row['path']),
-                     title=str(row.get('title', '')), status=str(row.get('status', '')))
+                     title=str(row.get('title', '')), status=str(row.get('status', '')),
+                     solved=_count(row.get('solved')), problems=_count(row.get('problems')))
             for row in rows
             if isinstance(row, dict) and row.get('path') and row.get('status') in ('draft', 'final')]
+
+
+def _count(value: Any) -> int | None:
+    """One index count: a non-negative int, or None when the row does not carry it."""
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
 def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGroup]:

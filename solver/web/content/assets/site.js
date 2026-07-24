@@ -183,11 +183,13 @@
   });
 
   // ── the terminal controls ──────────────────────────────────────────────────
-  // Any number of controls, one state. A control is [data-term-toggle]: it names
-  // the act it offers on its [data-term-label] and carries the state on its
-  // [data-term-dot]. Two exist today — the user menu's item (always there, in the
-  // header) and the start page's Terminal card (in the swappable pane) — and both
-  // are painted from the one `termConnected` below, so they can never disagree.
+  // Any number of controls, one state. A control is [data-term-toggle]: it carries
+  // the state on its [data-term-dot] and names the act it offers in its title (which
+  // is also its accessible name — the titlebar's is a dot with no text). The one that
+  // acts is on the terminal window's own titlebar (base.html); the header's
+  // [data-term-status] chip only reports, so the state stays readable while the window
+  // is minimized and its titlebar is gone. All of them are painted from the one
+  // `termConnected` below, so they can never disagree.
   //
   // Connecting and disconnecting are always the USER'S acts (the terminal never
   // reconnects on its own), so a click posts the act into the /terminal iframe and
@@ -200,11 +202,22 @@
   var termConnected = false;
 
   function paintTerminalControls() {
-    document.querySelectorAll('[data-term-label]').forEach(function (label) {
-      label.textContent = termConnected ? 'Disconnect' : 'Connect';
+    // The act on offer, in the title and the accessible name — the same words the git
+    // panel's spelled-out button wears, so a control with a label and one without say
+    // the same thing.
+    var act = (termConnected ? 'Disconnect' : 'Connect') + ' the terminal';
+    document.querySelectorAll('[data-term-toggle]').forEach(function (button) {
+      button.title = act;
+      button.setAttribute('aria-label', act);
     });
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
+    });
+    // The header's chip: a readout, not a control — it has no label to swap, so the
+    // state it carries beyond the dot is its tooltip.
+    document.querySelectorAll('[data-term-status]').forEach(function (chip) {
+      chip.title = 'terminal — ' + (termConnected ? 'connected' : 'disconnected');
+      chip.classList.toggle('is-on', termConnected);
     });
     // The git menu's verbs type into the shell, so they need one to be there. This
     // is the same single state, not a second reading of the socket: the panel joins
@@ -239,8 +252,15 @@
   //
   // Minimize and restore are SEPARATE acts, so each control does one predictable thing:
   //   [data-term-minimize] — the pane's handle — always minimizes;
-  //   [data-term-restore]  — the header's Terminal item, the Home tile, the footer strip
-  //                          — always restores, and is a no-op when already open.
+  //   [data-term-restore]  — the header's Terminal item, the Home tile, the footer's
+  //                          minimized window — always restores AND focuses.
+  //
+  // Restore means "take me to the terminal", so it also puts the caret there: a control
+  // that shows you the shell and then leaves the next keystroke going nowhere has done
+  // half its job. Focus is the iframe's to give (the parent cannot reach xterm's hidden
+  // textarea across the boundary), so it is asked for by message. Restoring an already-
+  // open terminal is layout-wise a no-op but still focuses — that is the whole of what
+  // the header's Terminal item then does.
   var WS_MIN_KEY = 'euler:ws-minimized';
 
   function wsMinimized() {
@@ -264,6 +284,9 @@
     if ((!minBtn && !resBtn) || !document.getElementById('terminal')) { return; }
     setWsMinimized(!!minBtn);           // minimize → true, restore → false (no-op if already open)
     paintWsMinimized();
+    // After the paint, so the pane is on screen before the frame takes focus (a hidden
+    // iframe cannot hold it, and the message is delivered asynchronously either way).
+    if (resBtn) { postToTerminal({ euler: 'focus' }); }
     var menu = (minBtn || resBtn).closest('details');
     if (menu) { menu.open = false; }
   });

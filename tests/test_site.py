@@ -98,7 +98,9 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('id="crumbs"', body)                  # chrome placed in the header
         self.assertIn('id="actions"', body)
         self.assertNotIn('theme-toggle', body)              # dark-only: there is no slider
-        self.assertIn('data-term-toggle', body)             # the terminal control, in the user menu
+        self.assertIn('data-term-toggle', body)             # the terminal control, on its titlebar
+        self.assertIn('data-term-status', body)             # …and its readout, in the header
+        self.assertIn('data-term-restore', body)            # the footer's minimized-terminal slot
         self.assertIn('/auth/logout', body)                 # the user menu
         self.assertIn('hx-get="/about/license"', body)      # footer → left pane…
         self.assertNotIn('/about/readme', body)             # …without readme

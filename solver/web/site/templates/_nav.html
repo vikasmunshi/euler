@@ -27,11 +27,12 @@
     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
     <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
     <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>
-    {# Terminal is not a page — it lives in the right pane. This item restores it when it
-       has been minimized to the footer, and is a no-op when it is already open (site.js).
-       Not a link: it swaps nothing and never navigates. #}
+    {# Terminal is not a page — it lives in the right pane. This item takes you to it:
+       restores it when it has been minimized to the footer, and focuses it either way
+       (site.js), so the next keystroke lands in the shell. Not a link: it swaps nothing
+       and never navigates. #}
     <button type="button" class="nav-term" data-term-restore
-            title="restore the terminal">Terminal</button>
+            title="go to the terminal">Terminal</button>
     {% else %}
     <span class="is-locked" aria-disabled="true">Solutions</span>
     <span class="is-locked" aria-disabled="true">Docs</span>
@@ -69,9 +70,33 @@
   <span class="hsep" aria-hidden="true"></span>
   {% include "_crumbs.html" %}
   <div class="app-who">
-    {# Git sits inside `.app-who`, before the pill: `margin-left: auto` pushes this
-       group right, and the chip belongs on the identity side of that gap — it is
-       state about *your clone*, not about the page in the pane. #}
+    {# The terminal's state, first in the identity group. The controls that CHANGE it
+       live on the terminal window itself (base.html's titlebar); this only reports —
+       so the state stays readable when the window is minimized to the footer and its
+       titlebar is gone. Same [data-term-dot] every other terminal control carries, so
+       site.js paints it from the one state the iframe reports. #}
+    {% if subject %}
+    <span class="term-chip" data-term-status title="terminal — disconnected">
+      <svg class="term-glyph" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" d="M5 7l4 4-4 4M12 16h7"/>
+      </svg>
+      <span class="dot off" data-term-dot></span>
+    </span>
+    {% else %}
+    {# Signed out there is no session to report — the right pane holds the sign-in
+       dialogue, not a terminal. Inert, never absent: the header keeps its shape. #}
+    <span class="term-chip is-locked" aria-disabled="true" title="no terminal">
+      <svg class="term-glyph" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" d="M5 7l4 4-4 4M12 16h7"/>
+      </svg>
+      <span class="dot"></span>
+    </span>
+    {% endif %}
+    {# Git sits inside `.app-who`, after the terminal chip and before the pill:
+       `margin-left: auto` pushes this group right, and the chip belongs on the identity
+       side of that gap — it is state about *your clone*, not about the page in the pane. #}
     {% include "_git.html" %}
     {% if subject %}
     {# The chip's 10-minute remote refresh, so an external push shows without the user
@@ -97,17 +122,9 @@
             <span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span></li>
         <li><a href="/account" hx-get="/account" hx-target="#content"
                hx-swap="innerHTML" hx-push-url="true">Account</a></li>
-        {# One terminal item, not two: it names the act it offers and the dot
-           carries the state. Connect/disconnect is always the user's own act —
-           the terminal never reconnects on its own. site.js swaps the label and
-           the dot from the iframe's reports, and posts the act into it.
-           It renders DISCONNECTED: the markup is served before the terminal has
-           said anything, and the start page's card (_home.html) says the same
-           thing — site.js paints both from the one state the iframe reports. #}
-        <li><button type="button" data-term-toggle>
-              <span data-term-label>Connect</span>
-              <span class="menu-state"><span class="dot off" data-term-dot></span></span>
-            </button></li>
+        {# No terminal item here: connect/disconnect belongs on the terminal's own
+           titlebar (base.html), where the act and the thing it acts on are one
+           control. The header's chip beside the git menu carries the state. #}
         <li><form method="post" action="/auth/logout"><button type="submit">Logout</button></form></li>
       </ul>
       {% else %}

@@ -1624,7 +1624,7 @@ Order (maintainer beats solver/contributor): apply maintainer edits to the centr
 vocabulary (vs HEAD) into the per-problem files first; promote ``new-tags`` proposals into
 the vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
 topic articles' problem lists and rewrite the article index ``topics/articles.json`` (one
-row per writable topic: title, tags, problem count and status). A problem with notes but no
+row per writable topic: title, status, solved/problem counts, tags and refs). A problem with notes but no
 ``tags.json`` is reported, not created here — the ``claude-api tags`` target (or the skill)
 authors it.
 
