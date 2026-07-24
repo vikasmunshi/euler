@@ -12,7 +12,9 @@
    match, and a folder heading whose cards are all hidden goes with them. No server
    round-trip — the whole tree is already on the page. Each card's data-filter carries the
    full path (facet/slug), the folder heading and the display name, so the facet
-   ('technique') and the slug ('np-where') both match even though the card shows 'Np Where'. #}
+   ('technique') and the slug ('np-where') both match even though the card shows 'Np Where'.
+   The box renders empty and the grid whole: site.js paints the session's remembered query
+   back onto it once the markup lands, so a revisit resumes where the reader left off. #}
 <input type="search" class="topic-filter" placeholder="Filter by name, slug or facet…"
        aria-label="Filter topics by name, slug or facet" autocomplete="off">
 {# One section per folder of topics/: the folder is the heading, so the cards below

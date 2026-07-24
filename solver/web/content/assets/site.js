@@ -53,6 +53,9 @@
     // of the live socket / minimize state, so paint them from the state we hold.
     paintTerminalControls();
     paintWsMinimized();
+    // A swapped-in topics index arrives with an empty filter box and the whole tree
+    // showing — restore the session's query onto it (§ the topics filter).
+    paintTopicFilter();
   });
 
   // ── the pane's back arrow (web-server-guide § The site) ─────────────────────────────────
@@ -350,9 +353,25 @@
   // already in the pane — and delegated, so it survives the htmx swap that brings the
   // page in. [hidden] is beaten by the display rules on .card/.cards in site.css, so
   // those elements carry a matching [hidden] override there.
-  document.addEventListener('input', function (ev) {
-    var input = ev.target.closest && ev.target.closest('.topic-filter');
-    if (!input) { return; }
+  //
+  // The query is remembered for the browser session: leaving /topics/ and coming back —
+  // by the nav, by the pane's back arrow, or by the drafts toggle, which is a second
+  // route (/topics/all) onto the same grid — restores the narrowed view rather than
+  // silently reopening the whole tree. sessionStorage, not localStorage: a filter is
+  // where you are in a sitting, not a standing preference like the minimized terminal,
+  // so it dies with the tab. Emptying the box forgets it.
+  var TOPIC_FILTER_KEY = 'euler:topic-filter';
+
+  function topicQuery() {
+    try { return sessionStorage.getItem(TOPIC_FILTER_KEY) || ''; } catch (e) { return ''; }
+  }
+  function setTopicQuery(q) {
+    try {
+      if (q) { sessionStorage.setItem(TOPIC_FILTER_KEY, q); } else { sessionStorage.removeItem(TOPIC_FILTER_KEY); }
+    } catch (e) { /* private mode */ }
+  }
+
+  function applyTopicFilter(input) {
     var q = input.value.trim().toLowerCase();
     var pane = document.getElementById('content') || document;
     pane.querySelectorAll('nav.cards').forEach(function (nav) {
@@ -367,6 +386,25 @@
       var heading = nav.previousElementSibling;
       if (heading && heading.classList.contains('subrule')) { heading.hidden = !anyVisible; }
     });
+  }
+
+  // Paint the remembered query onto a topics page as it arrives — the first load and
+  // every swap that brings one in. The server always renders the box empty and the grid
+  // whole, so this runs after the markup lands, never before. Any other route has no
+  // box: nothing to do, and the query keeps until the next visit.
+  function paintTopicFilter() {
+    var input = document.querySelector('.topic-filter');
+    if (!input) { return; }
+    input.value = topicQuery();
+    applyTopicFilter(input);
+  }
+  document.addEventListener('DOMContentLoaded', paintTopicFilter);
+
+  document.addEventListener('input', function (ev) {
+    var input = ev.target.closest && ev.target.closest('.topic-filter');
+    if (!input) { return; }
+    setTopicQuery(input.value.trim());
+    applyTopicFilter(input);
   });
 
   // ── the vault: auto-unlock + account-panel recovery ────────────────
