@@ -4521,7 +4521,7 @@
     {
       "path": "technique/int128",
       "title": "__int128",
-      "status": "draft",
+      "status": "final",
       "solved": 45,
       "problems": 45,
       "tags": ["int128"],
