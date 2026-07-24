@@ -530,7 +530,8 @@ ${DOMAIN} {
 		file_server
 	}
 
-	# Vendored front-end libraries (htmx, MathJax + its fonts) — Caddy-native,
+	# Vendored front-end libraries (htmx, MathJax + its fonts and the TeX extensions
+	# its autoload fetches on first use) — Caddy-native,
 	# same-origin, per the web-server-guide path-ownership table. Same unversioned
 	# paths, same rule: revalidate rather than guess (an upgrade must not need every
 	# user to hard-refresh). The SRI hashes in the templates pin the *content*, so a

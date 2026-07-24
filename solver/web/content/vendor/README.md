@@ -12,7 +12,7 @@ update the `<script integrity="…">` in the templates that load it.
 | File | Package | Version | License | SRI (sha384) |
 |------|---------|---------|---------|--------------|
 | `htmx.min.js` | [htmx](https://htmx.org) | 2.0.4 | 0BSD | `HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+` |
-| `mathjax/tex-mml-chtml.js` (+ `mathjax/output/…/woff-v2/*.woff`) | [MathJax](https://www.mathjax.org) | 3.2.2 | Apache-2.0 | `Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei` |
+| `mathjax/tex-mml-chtml.js` (+ `mathjax/output/…/woff-v2/*.woff`, `mathjax/input/tex/extensions/*.js`) | [MathJax](https://www.mathjax.org) | 3.2.2 | Apache-2.0 | `Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei` (bundle; the autoloaded extensions are `'self'`, no SRI) |
 | `codemirror/*.js` (entry `codemirror/cm6.js`) | [CodeMirror 6](https://codemirror.net) (+ lang-python/cpp/json, theme-one-dark, @lezer/\*) | 6.0.2 | MIT | ES modules — dynamic-imported, `'self'` (no SRI) |
 | `xterm/xterm.js` | [xterm.js](https://xtermjs.org) (`@xterm/xterm`) | 5.5.0 | MIT | `M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/` |
 | `xterm/xterm-addon-fit.js` | [`@xterm/addon-fit`](https://github.com/xtermjs/xterm.js) | 0.10.0 | MIT | `iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn` |
@@ -23,6 +23,28 @@ in `/assets/site.js`); the woff fonts are loaded by the bundle relative to its
 own URL, so the whole tree ships together. Its full license text is at
 `mathjax/LICENSE`. Note: MathJax injects its stylesheet at runtime — the reason
 `style-src` carries `'unsafe-inline'` (docs/web-server-guide.md § Content-Security-Policy).
+
+**The TeX extensions under `mathjax/input/tex/extensions/`** ship for the same
+reason as the fonts: the combined bundle carries only the default packages, and its
+`autoload` package fetches the rest **on first use** — relative to the bundle's own
+URL, so `/vendor/mathjax/input/tex/extensions/<name>.js`. Vendored, that request is
+same-origin and `script-src 'self'` admits it; *not* vendored it 404s, and the
+`noundefined` package then renders the macro as its own name in red — which is what a
+statement using `\color` used to show (problem 230). One file per package actually
+used by a cached statement, found by scanning them for each autoload trigger:
+
+| Package | Macros | Statements |
+|---------|--------|------------|
+| `color` | `\color`, `\textcolor`, … | 12, e.g. 40 · 66 · 230 |
+| `mhchem` | `\pu`, `\ce` | 5, e.g. 75 · 155 · 222 |
+| `html` | `\style`, `\class`, `\href` | 3: 282 · 326 · 334 |
+| `boldsymbol` | `\boldsymbol` | 2: 323 · 462 |
+| `enclose` | `\enclose` | 1: 535 |
+| `unicode` | `\unicode` | 1: 991 |
+
+A statement that starts using another one is the same fix: add the file, re-run the
+scan. There is no SRI — these are same-origin scripts MathJax injects itself, exactly
+like the CodeMirror modules.
 
 **CodeMirror 6** is the code editor on the edit page (`/assets/editor.js`,
 lazy-imported by `site.js` only when an editor appears, so the ~630 KB graph
@@ -58,6 +80,12 @@ printf 'sha384-%s\n' "$(openssl dgst -sha384 -binary htmx.min.js | openssl base6
 V=3.2.2   # MathJax: the single-file combined component + its woff-v2 fonts
 curl -sSfL -o mathjax/tex-mml-chtml.js "https://cdn.jsdelivr.net/npm/mathjax@${V}/es5/tex-mml-chtml.js"
 # fonts: es5/output/chtml/fonts/woff-v2/*.woff from the same release
+# the autoloaded TeX extensions the cached statements use (see the table above)
+mkdir -p mathjax/input/tex/extensions
+for e in color mhchem html boldsymbol enclose unicode; do
+  curl -sSfL -o "mathjax/input/tex/extensions/$e.js" \
+    "https://cdn.jsdelivr.net/npm/mathjax@${V}/es5/input/tex/extensions/$e.js"
+done
 
 XV=5.5.0; FV=0.10.0    # xterm.js + the fit addon (the Phase-6 terminal)
 curl -sSfL -o xterm/xterm.js            "https://unpkg.com/@xterm/xterm@${XV}/lib/xterm.js"

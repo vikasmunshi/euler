@@ -907,6 +907,15 @@ Everything is self-contained and same-origin: no external fonts or CDNs, a syste
 stack, vendored htmx and MathJax from `/vendor`. Statements and notes carry math as TeX
 text (`$…$`); MathJax typesets on load and after every swap.
 
+That vendoring has to include what MathJax fetches **at runtime**: its woff fonts, and the
+TeX extension for every macro outside the bundle's default packages — `autoload` requests
+`<bundle root>/input/tex/extensions/<pkg>.js` the first time it sees `\color`, `\pu`,
+`\style`, `\boldsymbol`, `\enclose` or `\unicode`. Same-origin, so `script-src 'self'`
+admits it; missing, it 404s and the `noundefined` package renders the macro as its own
+name in red — the "`\color` in red" a cached statement showed before the extensions were
+vendored. The set that ships is the set the cached statements actually use
+(`solver/web/content/vendor/README.md` lists it, and how to re-scan).
+
 **The terminal pins its own dark**, in literal hex rather than the tokens. It renders the
 *shell's own* output, and the shell paints with absolute xterm-256 indices chosen for a
 dark terminal (near-whites like 254/247, 238 for rules). Its darkness is the shell's
