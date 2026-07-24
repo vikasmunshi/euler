@@ -1,8 +1,100 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
-_TODO: write this page. No reference on the tag._
+Before you write a loop, ask what the loop is really computing — and whether the
+mathematics will hand you the answer with less work, or none. Reducing
+algebraically before coding is the habit of spending five minutes with pen and
+paper on a problem's structure so the program that follows is smaller, tighter,
+or gone entirely. The payoff runs from the modest (one nested loop removed) to
+the total (an $O(n)$ scan collapsed to a formula), but it is the same move every
+time: simplify the math first, because the cheapest loop is the one you never
+have to run.
+
+## The reduction, in degrees
+
+A reduction is any algebraic step that shrinks the work *before* it becomes code.
+The problems below reach for it at four escalating strengths.
+
+**Eliminate a variable.** A constraint that ties two unknowns together lets you
+solve for one and delete a whole dimension of search. In
+[Special Pythagorean Triplet](/solutions/0009/) the sum condition $a + b + c = S$
+means $c$ is never searched — it is computed, $c = S - a - b$ — so a naive
+three-nested-loop hunt over $(a, b, c)$ becomes a two-loop scan over $(a, b)$,
+$O(S^3)$ down to $O(S^2)$. Nothing clever happened; one line of algebra removed
+an entire loop.
+
+**Prune the domain.** The same ordering $a < b < c$ that eliminates $c$ also
+*bounds* what is left: $a$ cannot exceed $S/4$ and $b$ cannot exceed $S/2$, or no
+valid larger values fit. Deriving the tightest bounds before the loop is written
+keeps the search inside the region that can actually contain an answer. The
+[cheap-checks-first](/topics/takeaway/cheap-checks-first/) and
+[exploit-symmetry](/topics/takeaway/exploit-symmetry/) takeaways are this same
+instinct pointed at the loop body and the coordinate system.
+
+**Exploit structure to skip work.** Sometimes the sequence itself has a pattern
+that lets you step over most of it. [Even Fibonacci Numbers](/solutions/0002/)
+never tests a single term for evenness: the parities of the
+[Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence) run
+odd, even, odd with period three forever, so every third term is even, and
+expanding the recurrence three times gives a direct rule
+$E(k+1) = 4E(k) + E(k-1)$ that walks the even terms alone. The divisibility test
+is not optimised — it is *derived away*.
+
+**Close the form.** At the far end, the structure is regular enough that the loop
+disappears into a single expression. [Counting Rectangles](/solutions/0085/)
+sees that a sub-rectangle is fixed by choosing two of $H+1$ horizontal and two of
+$W+1$ vertical grid lines, so the count *factors* into
+$T(H)\cdot T(W)$ with $T(n) = \tfrac{n(n+1)}{2}$ — two independent
+[triangular numbers](https://en.wikipedia.org/wiki/Triangular_number) instead of
+a two-dimensional enumeration. [Number Spiral Diagonals](/solutions/0028/) sums
+each ring's four corners in closed form to
+$\tfrac{N(N(4N+3)+8)-9}{6}$, an $O(N^2)$ grid replaced by one arithmetic line.
+This is the endpoint the [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration/)
+takeaway is about; reducing before coding is the wider discipline that *reaches*
+it — and that is content to stop one step short when the algebra will not close
+all the way.
+
+The heavier problems on the list are the same move dressed up. Several — the
+Diophantine-reciprocal problems [108](/solutions/0108/) and
+[110](/solutions/0110/) among them — turn a search for solution *pairs* into a
+[divisor-counting](https://en.wikipedia.org/wiki/Divisor_function) question by
+first transforming the defining equation, so the program counts divisors of a
+derived quantity rather than sweeping a plane. The reduction is done in the
+mathematics; the code merely reads it off.
+
+## How to reason about it
+
+Reach for a reduction whenever the quantities you are about to iterate over are
+*related by a rule* rather than being arbitrary data — a linear constraint, an
+ordering, a recurrence, a symmetry, a counting structure. The tell is that you
+can write down an equation the answer must satisfy. Spend the algebra there: each
+equation you solve is a loop you delete, a dimension you drop, or a bound you
+tighten.
+
+Three cautions keep the habit honest:
+
+- **Know when to stop.** Not every problem closes into a formula, and forcing one
+  produces fragile, wrong code. [Counting Rectangles](/solutions/0085/) reduces
+  the *count* to $T(H)\cdot T(W)$ but still searches grid shapes for the one
+  nearest a target, because that outer question has no closed form — the honest
+  reduction is partial, and that is fine. A reduction that removes one loop of
+  three is already a win.
+- **Derive, then verify.** An algebraic reduction is only as good as its
+  derivation, and an off-by-one in a bound or a dropped term fails silently. Keep
+  the brute-force version as an oracle and check the two against each other on
+  small inputs — [Number Spiral Diagonals](/solutions/0028/) ships exactly that,
+  running an $O(N^2)$ spiral simulation under `--show` purely to confirm its
+  formula.
+- **Mind the arithmetic you introduce.** Reductions multiply before they divide
+  and can form intermediates far larger than the answer — an overflow risk in C,
+  and a reason to keep the algebra in exact integers (compute $c = S - a - b$, not
+  $\sqrt{a^2+b^2}$) so equality checks stay reliable. See
+  [exact-arithmetic-for-equality](/topics/takeaway/exact-arithmetic-for-equality/).
+
+The discipline underneath all of it is order of operations, in the human sense:
+do the mathematics *first*. A loop written before the algebra is a loop you will
+optimise later; a loop written after it is often a loop you never write at all.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
