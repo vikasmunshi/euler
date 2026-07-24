@@ -22,7 +22,8 @@ computations — which is to say, when the queries overlap.
 
 **A sieve or lookup table, queried across a whole range.** The
 [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
-(or of Sundaram) computes *every* prime up to $N$ in $O(N \log \log N)$ — far
+(or of [Sundaram](https://en.wikipedia.org/wiki/Sieve_of_Sundaram)) computes
+*every* prime up to $N$ in $O(N \log \log N)$ — far
 less than testing each of $N$ numbers individually — and hands back a set in
 which membership is $O(1)$. [Circular Primes](/solutions/0035/) sieves once, then
 tests every digit rotation of every candidate by set lookup; [Prime Power
@@ -32,7 +33,9 @@ one list in all three exponent roles. The same idea generalises past primality:
 $i$ to every multiple of $i$ — to label all abundant numbers in one $O(N \log N)$
 sweep, rather than factoring each number on its own.
 
-**A memoised map over a functional graph.** When each input maps to exactly one
+**A memoised map over a
+[functional graph](https://mathworld.wolfram.com/FunctionalGraph.html).** When
+each input maps to exactly one
 successor and many inputs feed into shared tails, a
 [memoised](https://en.wikipedia.org/wiki/Memoization) walk records each node's
 answer once. [Longest Collatz Sequence](/solutions/0014/) caches each chain
@@ -41,7 +44,8 @@ cached value; [Digit Factorial Chains](/solutions/0074/) walks each chain forwar
 and *back-propagates* the length into every node it touched, so across all starts
 each node is resolved once and the whole scan is $O(N)$ amortised. This is
 [dynamic programming](/topics/technique/dynamic-programming/) read as caching:
-the overlapping subproblems are the shared graph tails.
+the [overlapping subproblems](https://en.wikipedia.org/wiki/Overlapping_subproblems)
+are the shared graph tails.
 
 **A cumulative table that answers range queries by subtraction.** A
 [prefix-sum](https://en.wikipedia.org/wiki/Prefix_sum) array built once turns the
@@ -50,7 +54,8 @@ Sum](/solutions/0050/) accumulates the running total of the sieved primes, so th
 sum of primes $j{+}1 \dots i$ is just `prefix[i] - prefix[j]` — one subtraction
 instead of re-adding the run. The [path-sum](/solutions/0081/) problems do the
 same in two dimensions: fill each cell with the best cost from it to the goal in
-one topological sweep, and every cell's answer is then a $O(1)$ read of its two
+one [topological](https://en.wikipedia.org/wiki/Topological_sorting) sweep, and
+every cell's answer is then a $O(1)$ read of its two
 finalised neighbours.
 
 ## How to reason about it
