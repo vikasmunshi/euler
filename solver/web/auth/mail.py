@@ -65,14 +65,19 @@ class Mailer:
         The requester's name/email/remarks ride in the **body** only (never a header),
         and reach here already control-char-stripped, so there is no header-injection
         surface — *rcpt* is the trusted operator address from config.
+
+        The mail reports the request and nothing else. It used to spell out the shell
+        commands to act on it and they rotted — naming two verbs that no longer exist —
+        because a mail body is the one copy of the interface that no rename touches and
+        no test reads. The queue itself is the instruction: it is on the operator's
+        `users` roster, which does carry the live verbs.
         """
         self._send(rcpt, 'euler account request',
                    f'Someone requested an account at {self._base_url}.\n\n'
                    f'Name:    {name or "(none)"}\n'
                    f'Email:   {email}\n'
                    f'Remarks: {remarks or "(none)"}\n\n'
-                   f'Review with `users requests`; invite with `users add {email} <profile>`,\n'
-                   'or drop it with `users dismiss <email>`.\n')
+                   'The request is queued for review in the solver shell.\n')
 
     def send_otp(self, rcpt: str, otp: str) -> None:
         """Email the one-time code proving live mailbox control."""
