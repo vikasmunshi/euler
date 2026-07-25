@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divide-and-con
 ## Problems
 
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
+- ○ [0230](/solutions/0230/) — Fibonacci Words
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 
 <!-- /problems -->
