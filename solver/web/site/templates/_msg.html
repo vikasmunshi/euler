@@ -1,0 +1,56 @@
+{# The message chip (web-server-guide § Messaging): how many threads want you, and the way
+   to them. Lives in the fixed header inside `.app-who`, beside the terminal and git
+   chips — your unread count is state about *you*, not about the page in the pane.
+
+   Two htmx concerns on one control, so two elements: the outer span refreshes ITSELF
+   (`hx-swap="outerHTML"` from `/messages/badge`), the inner link swaps the PANE to
+   `/messages/`. One element cannot do both — an `hx-trigger="load"` that targeted
+   #content would navigate the pane on every page load.
+
+   Deliberately NOT out-of-band on every navigation, unlike the git chip. The count
+   changes when someone writes to you, which is not something a page load can predict,
+   so paying a spool read per navigation would buy nothing. Two triggers instead:
+   · `load` — once per document, so a full page load is always current;
+   · `euler:message from:body` — the delivery nudge, pushed by euler-msg to this user's
+     instance, relayed over the terminal's WebSocket as a TEXT frame (terminal.js →
+     site.js). That is what makes a message arriving *now* show up now.
+
+   `msg_spool` (render._context) is the switch: True only on a tier that actually serves
+   /messages, so the auth service — which renders this same header and has no spool —
+   gets the inert chip instead of a dead fetch. It is a plain flag, never a count: the
+   header must not cost a spool read per navigation, so the number arrives from this
+   element's own `/messages/badge` fetch a moment later.
+
+   A count of 0 renders the chip bare rather than hiding it: a glyph that vanishes when
+   your inbox empties makes the reader wonder whether it went away or they simply have
+   no mail. #}
+{% if subject and msg_spool %}
+<span id="msg-chip" class="msg-chip{% if msg_unread %} is-unread{% endif %}"
+      hx-get="/messages/badge" hx-swap="outerHTML"
+      hx-trigger="load, euler:message from:body">
+  <a class="msg-link" href="/messages/" hx-get="/messages/" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true"
+     title="messages{% if msg_unread is defined %} — {{ msg_unread }} unread{% endif %}"
+     aria-label="messages{% if msg_unread is defined %}, {{ msg_unread }} unread{% endif %}">
+    {# An envelope, closed: the chip is about mail waiting, not mail read. #}
+    <svg class="msg-glyph" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2.5" y="5" width="19" height="14" rx="2" fill="none"
+            stroke="currentColor" stroke-width="2"/>
+      <path d="M3.5 7l8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    {% if msg_unread %}<span class="msg-count">{{ msg_unread }}</span>{% endif %}
+  </a>
+</span>
+{% else %}
+{# Signed out, or a tier with no spool: inert, never absent — the header keeps its shape
+   before the visitor is let in, exactly as the terminal and git chips do. #}
+<span class="msg-chip is-locked" aria-disabled="true" title="no messages">
+  <svg class="msg-glyph" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2.5" y="5" width="19" height="14" rx="2" fill="none"
+          stroke="currentColor" stroke-width="2"/>
+    <path d="M3.5 7l8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</span>
+{% endif %}

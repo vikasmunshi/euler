@@ -81,6 +81,7 @@ a parameter that accepts repetition.
 | [`ls`](#command-ls) | — | List the solutions dir for given/current problem. ❏ » |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. ❏ » |
+| [`msg`](#command-msg-messages) | `messages` | Read and send messages: your threads, questions to staff, staff notices. |
 | [`new`](#command-new) | — | Generate new solution/test-case file for a problem. ❏ » |
 | [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
@@ -1182,6 +1183,43 @@ Aliased as `mark-solved`.
 
 Args:
     problem:    The `problem` to mark solved; defaults to the current problem.
+```
+
+---
+
+#### Command: `msg` (`messages`)
+
+Read and send messages: your threads, questions to staff, staff notices.
+* profiles: admin, maintainer, contributor, reader
+
+```
+msg
+[action=list|read|send|reply|queue|notice|dismiss] (default list)
+[thread=<str>] (default '')
+[subject=<str>] (default '')
+[body=<str>] (default '')
+[to=<str>] (default '')
+[all_users=true|--all-users]
+```
+
+```text
+Read and write the message spool (web-server-guide § Messaging).
+
+Every message has staff (``maintainer``+) at one end: you can ask them something,
+they can answer, and they can send notices. There is deliberately no user-to-user
+messaging. Delivery is asynchronous — the spool holds the thread until you read it.
+
+Args:
+    action:    list (your threads, newest first), read (one thread, and mark it
+               read), send (ask staff a question), reply (answer on a thread you
+               are party to), queue (STAFF: the inbound work list), notice (STAFF:
+               send to named recipients or everyone), dismiss (STAFF: drop a
+               worked thread).
+    thread:    the thread id (read / reply / dismiss).
+    subject:   the subject line (send / notice).
+    body:      the message text (send / reply / notice).
+    to:        comma-separated recipient identities for a notice.
+    all_users: send the notice to every mapped identity (``--all-users``).
 ```
 
 ---

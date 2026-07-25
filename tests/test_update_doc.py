@@ -6,13 +6,11 @@ command's module and the rungs that may run it, distinct from the deployed
 ``authorizations.json`` policy."""
 from __future__ import annotations
 
-import unittest
 import unittest.mock
 
-from solver.auth import LADDER, Authorizations, Subject
-from solver.config import ExitCodes, config
+from solver.auth import Authorizations, LADDER, Subject
+from solver.config import config
 from solver.shell.command import registry
-from solver.utils import update_doc
 from solver.utils.loader import load_commands
 from solver.utils.update_doc import (GENERATORS, _least_profile, _module_of,
                                      gen_authorization_table)
@@ -28,9 +26,9 @@ def _admin_subject() -> Subject:
 class AuthorizationTableTests(unittest.TestCase):
     def setUp(self) -> None:
         self._saved_subject = config.subject
-        config.subject = _admin_subject()          # admin sees the whole registry
+        config.subject = _admin_subject()  # admin sees the whole registry
         self.addCleanup(self._restore)
-        load_commands()                            # populate the registry
+        load_commands()  # populate the registry
 
     def _restore(self) -> None:
         config.subject = self._saved_subject
@@ -41,15 +39,15 @@ class AuthorizationTableTests(unittest.TestCase):
     def test_table_covers_every_command(self) -> None:
         table = gen_authorization_table()
         for cmd in registry.all():
-            self.assertIn(f'`{cmd.name}`', table)                 # every command has a row
+            self.assertIn(f'`{cmd.name}`', table)  # every command has a row
 
     def test_table_has_a_column_per_rung(self) -> None:
         table = gen_authorization_table()
         header = table.splitlines()[0]
         for profile in LADDER:
-            self.assertIn(profile.capitalize(), header)           # one column per rung
+            self.assertIn(profile.capitalize(), header)  # one column per rung
         sample = registry.all()[0]
-        self.assertIn(f'`{_module_of(sample)}`', table)           # module column
+        self.assertIn(f'`{_module_of(sample)}`', table)  # module column
 
     def test_each_row_ticks_exactly_the_rungs_at_or_above_the_floor(self) -> None:
         """The tick grid must agree with the floor it is derived from: a run of ticks
@@ -96,8 +94,8 @@ class RegistryCompletenessTests(unittest.TestCase):
         config.subject = _admin_subject()
         load_commands(refresh_modules=True)
         admin_floored = {cmd.name for cmd in registry.all() if cmd.requires == 'admin'}
-        self.assertIn('users', admin_floored)             # the set is non-empty…
-        self.assertIn('git-publish', admin_floored)       # …and these are in it
+        self.assertIn('users', admin_floored)  # the set is non-empty…
+        self.assertIn('git-publish', admin_floored)  # …and these are in it
         self.assertTrue(admin_floored <= {cmd.name for cmd in registry.all()})
 
 

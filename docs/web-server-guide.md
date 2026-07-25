@@ -52,7 +52,10 @@ because each user pushes as themselves.
         │  ~/euler   their clone, branch   │──────▶│  Squid   │─▶ api.anthropic.com,
         │            user/<slug>           │       │ (egress) │   projecteuler.net,
         │  ~/.euler  their vault (0700)    │       └─────────┘   github, claude.com
-        └──────────────────────────────────┘
+        └───────┬──────────────────────────┘
+                │         ┌─────────────┐  message spool: threads + read-state;
+                └────────▶│  euler-msg  │  SO_PEERCRED identity, AF_UNIX only,
+                          └─────────────┘  never routed by Caddy
                           ▲
         policy: /etc/euler/authorizations.json — read by the shell and every service
 ```
@@ -70,6 +73,8 @@ runs as root**.
 | auth | `euler-auth` | `/run/euler/auth.sock` | SRP login, sessions, invites, shell tickets |
 | per-user app | `<slug>` (e.g. `ue0f4a1`) | `/run/euler/user-<slug>.sock` | one collaborator's content routes + `/ws` |
 | admin plane | `euler-auth` | `/run/euler-adm/auth-admin.sock` (`0600`) | account mutations; never routed by Caddy |
+| message spool | `euler-msg` | `/run/euler/msg.sock` | user↔staff message threads (§13) |
+| msg admin plane | `euler-msg` | `/run/euler-msg/admin.sock` (`0600`) | staff verbs from the operator's terminal |
 | egress proxy | `euler-proxy` | `127.0.0.1:3128` | Squid domain allowlist |
 | mail relay | `euler-smtp` | `127.0.0.1:8025` | sole holder of the Gmail credentials |
 | certificates | `euler-acme` | — | acme.sh DNS-01, on a daily timer |
@@ -476,7 +481,7 @@ by *being* that OS user.
 identity against `reader`/`contributor`/`maintainer`. The identity resolver, by
 contrast, does *not* cap a redeemed ticket — so an email mapped to `admin` out-of-band
 (a root edit of the policy file) would carry admin over the web. That is the accepted
-posture in §13, not an oversight: containment for the highest-privilege operations is the
+posture in §14, not an oversight: containment for the highest-privilege operations is the
 profile grant plus SRP plus uid isolation, with no channel backstop.
 
 There is no reset verb — reset is self-service.
@@ -488,9 +493,9 @@ Every command's declared floor is generated from the live registry into
 
 | Floor | Commands |
 |---|---|
-| `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
+| `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `msg` (own threads + send to staff), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), web file-delete |
+| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg queue`/`msg notice`, web file-delete |
 | `admin` | `users` mutations, `user-authorize`, `key-rekey`, `key-split`, `git-publish`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:
@@ -1005,6 +1010,9 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET | `/git` | the header's git chip alone — the refresh the shell asks for (§11.9) | reader |
+| GET | `/messages/` · `/messages/{id}` | this user's message threads · one thread (§13) | reader |
+| POST | `/messages/` · `/messages/{id}/reply` | compose to staff · reply on own thread | reader |
+| POST | `/messages/notice` | a notice to named users or to everyone | maintainer |
 | GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save | contributor |
 | GET/POST | `/edit/solutions/{n}/{filename}` | file editor → save | contributor |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete a bare `.py`/`.c` → the problem-page fragment | maintainer |
@@ -1451,7 +1459,270 @@ after it — sequenced *through* xterm's write queue, since `write()` is asynchr
 the bytes are still being parsed when the marker arrives. A monotonic token remains the
 within-session guard.
 
-## 13 · Security posture
+## 13 · Messaging
+
+Collaborators and the operator need a way to talk to each other in-app. Three flows, and
+only three:
+
+- any user → **staff** (`maintainer`+) — a question, a request, a bug report;
+- staff → **one or more named users**;
+- staff → **everyone** (a broadcast notice).
+
+Note what is absent: there is no user↔user leg. **Every message has staff at one end**,
+which makes this a helpdesk plus an announcements board rather than chat — no presence, no
+peer graph, no per-pair ACLs, no cross-peer ordering. The whole tier stays small because
+of that asymmetry, and widening it to peer-to-peer later is a redesign, not a setting.
+
+Delivery is **asynchronous by construction**: the spool is the system of record and the
+recipient reads when they next look. A message is never lost because someone was offline,
+and nothing in the path waits on a live connection.
+
+### 13.1 Why its own service
+
+The spool holds attacker-authored free text — by design, that is what a message *is*. The
+auth service was the obvious host (it is the only service every collaborator can already
+reach), and it was rejected: it holds the SRP verifier database, the session table and the
+ticket mint, so a parsing or authorization slip in a message path would land in the one
+process whose compromise is total. That is the same reasoning that keeps the Gmail
+credentials in `euler-smtp` rather than in auth (§3) — **a secret lives only with the
+service that performs its operation**, and the converse holds too: an untrusted-input
+surface lives *away* from the secrets it has no business near.
+
+Two cheaper designs were also rejected, and for reasons worth keeping:
+
+- **A shared spool directory with drop-box permissions** (`0730`, group-owned, senders
+  `O_EXCL`-create, `st_uid` attributes the sender unforgeably). Elegant, and needs no new
+  service at all — but restricting "only staff may write to a user's box" requires a unix
+  group shadowing the profile ladder, reintroducing exactly the per-path filesystem-ACL
+  layer the per-user model retired (§6.1). Worse, a demoted maintainer would keep
+  broadcast rights until their group membership was fixed, breaking the immediate-revocation
+  contract of §6.2.
+- **Per-user mailboxes in each collaborator's own tree**, pushed to their instance. Good
+  at-rest story, but offline recipients, deprovisioned instances and retries all need a
+  central spool anyway — and the operator is an os-login `admin` with no instance at all,
+  so the staff inbox would have nowhere to live.
+
+So: a dedicated `euler-msg`, and the isolation is real rather than nominal because of one
+observation — **`system_slug()` is a pure SHA-1 of the normalised e-mail**
+(`solver/auth/identity.py`), and `authorizations.json` is world-readable. The service can
+therefore build its own `slug → e-mail → profile` map from the policy file every other
+service already reads. It follows that `euler-msg`:
+
+- is **never routed by Caddy** — the per-user instance is its only web-facing consumer, and
+  `/messages` already routes there through `forward_auth` like any other content path, so
+  the edge needs no new rule;
+- **never talks to the auth service** — no cookie forwarding, no shared secret, no ordering
+  dependency between the two units;
+- runs **`RestrictAddressFamilies=AF_UNIX`** — it cannot open a socket to anything, ever,
+  which is strictly harder than auth (which needs `AF_INET` for the mail relay).
+
+Its blast radius is message bodies and read-state. Nothing else is in the process.
+
+The package is a sibling of the other service packages, and imports **nothing** from
+`solver.web.auth` — loading auth's modules into this process would recouple the two at
+review time and defeat the point:
+
+| Module | Role |
+|---|---|
+| `__main__.py` | Entry point: bind `msg.sock` (`0660 euler-web`) + `msg-admin.sock` (`0600`), serve until SIGTERM. |
+| `config.py` | `MsgConfig` from the environment, every path overridable for a scratch-dir dev run. |
+| `app.py` | The public and admin apps: endpoints, the peer-uid middleware, profile floors, the delivery push. |
+| `store.py` | The thread store — single-writer JSON, TTL sweep, caps, read-state. |
+| `identity.py` | Peer uid → login → e-mail → profile, over `authorizations.json`; re-read on mtime change. |
+| `admin.py` | The sudo-gated proxy behind the operator's terminal path (§13.3). |
+| `commands.py` | The `msg` shell command (§13.7). |
+
+Three utilities move up out of the auth package so both services can use them without
+either importing the other:
+
+| Was | Now | Why it is shared |
+|---|---|---|
+| `auth/client.py` | `solver/web/unixhttp.py` | the unix-socket JSON client, wanted by both admin CLIs |
+| `auth/storage.py` + `requests.py::sanitize` | `solver/web/store.py` | atomic `0600` JSON writes, and control-char hygiene for the two stores that hold user-authored text |
+| `auth/admin.py::_env_file_values` | `solver/web/envfile.py` | reading a scoped `/etc/euler/*.env` for a root-only admin token |
+
+`auth/client.py` and `auth/storage.py` remain as re-exports, so nothing downstream changes.
+
+### 13.2 Identity and authorization
+
+**The kernel is the identity.** Every request on `msg.sock` is authenticated by
+`SO_PEERCRED` — the same mechanism the per-user unit already calls authoritative (§7). The
+peer uid *is* the slug; the slug resolves to an e-mail through the `system_slug` reverse
+map; the e-mail resolves to a profile through `authorizations.json`. There is no `from`
+field on the wire, so there is nothing to forge, and no bearer token on the hot path to
+leak. The per-user service and its PTY children share a uid, which is correct — they are
+one principal.
+
+Authorization is the same rank comparison as everywhere else, resolved **per request**
+against the policy file, so a demote lands within one request rather than at next login:
+
+| Verb | Floor |
+|---|---|
+| read own inbox, mark read | `reader` |
+| send to staff, reply on own thread | `reader` |
+| read the inbound queue, reply on any thread | `maintainer` |
+| notice to named users, notice to everyone | `maintainer` |
+
+The `reader` floor on *sending* is deliberate: a new invitee's first need is often to ask
+a question, and the terminal is the front door for every rung (§12).
+
+### 13.3 The wire contract
+
+```
+GET  /messages?since=<iso>      this slug's threads + unread count      reader
+POST /messages                  {subject, body} → the staff queue       reader
+POST /messages/<id>/reply       {body}                                  reader (own thread)
+POST /messages/<id>/read        mark read                               reader
+GET  /staff/queue               the inbound queue                       maintainer
+POST /staff/notice              {to: [email…] | '*', subject, body}     maintainer
+```
+
+The **admin socket** (`/run/euler-msg/admin.sock`, `0600`, euler-msg-private) carries the
+same staff verbs for the operator's *terminal*, reached under `sudo` with a token from
+root-readable `msg.env` — exactly the wheel-gated shape of the auth admin plane (§6.3), and
+for the same reason: the operator's ordinary uid is the most exposed on the host and is
+deliberately **not** in `euler-web`, so it cannot dial `msg.sock` at all.
+
+It lives in the service's **own** runtime directory (systemd `RuntimeDirectory=euler-msg`,
+`0700 euler-msg`) rather than in `/run/euler-adm`, which is `0750 euler-auth` and so not
+writable here. Each admin plane owning its own directory is the better shape anyway: root
+traverses either, and nothing else traverses both.
+
+The CLI behind it (`solver/web/msg/admin.py`) is a **thin authenticated proxy**, not a
+second command surface — it takes a method and an admin path, injects the invoking
+identity, and prints the reply as one JSON line, so a single renderer serves both channels
+and the terminal cannot drift from the web. Two details there are deliberate: the request
+body arrives on **stdin**, never in `argv` (a message body in the process table is readable
+by every uid on the host through `/proc`), and the identity is `SUDO_USER` rather than an
+argument — root could assert anything, but a typo cannot file a message under a stranger's
+name, and the profile check still runs against the policy file.
+
+### 13.4 State
+
+`/var/lib/euler-msg`, `euler-msg`-only `0700`, single-writer (one process). One record per
+**thread**, not per recipient:
+
+```json
+{ "id": "…", "kind": "inbound|notice", "author": "<slug>",
+  "subject": "…", "body": "…",
+  "recipients": {"<slug>": {"read": "iso|null"}},
+  "replies": [{"author": "<slug>", "body": "…", "at": "iso"}],
+  "created": "iso", "updated": "iso", "expiry": 0 }
+```
+
+A broadcast is therefore **one record with N recipients**, not N copies: "everyone" is
+cheap, read-state stays per-person, and a collaborator provisioned after a notice was sent
+is simply not in it — which is the correct behaviour, not an omission.
+
+Bodies are **plaintext only**, `sanitize()`d on the way in (control characters stripped,
+length-capped) and rendered through Jinja autoescape. No markdown, no HTML, no rich
+rendering. That *deletes* the injection class rather than defending against it, which
+matters more here than anywhere else in the stack precisely because this store exists to
+hold text other people wrote.
+
+Bounded like the invite queue it resembles (§4.6's neighbour, `requests.json`): a per-sender
+standing cap, a global cap, and a TTL swept on every access, so an unworked queue cannot
+grow without limit.
+
+### 13.5 Delivery
+
+Three tiers, all reusing paths that already exist:
+
+1. **Live nudge.** `euler-msg` POSTs `/internal/message` to the recipient's own
+   `user-<slug>.sock` — the same socket-peer-only push the auth service uses for logout and
+   vault-reset teardown (§12.1); `euler-msg` carries `SupplementaryGroups=euler-web` to
+   reach it. The instance sends a `{"euler":"message","unread":n}` **TEXT frame** to any
+   attached browser terminal, which relays it to the page as an `euler:message` body event.
+   A recipient with no terminal open notifies nobody, and that is not a failure — the count
+   is waiting for them at (2).
+2. **On document load.** The chip fetches `/messages/badge` on `load`, so a full page load
+   is always current whether or not a push ever reached the user. It is deliberately **not**
+   sent out-of-band with every pane navigation the way the git chip is: the count moves when
+   someone *else* acts, which no navigation can predict, so a spool read per navigation would
+   buy nothing. The push is only a nudge — a lost one costs a stale count until the next
+   document load, never a lost message.
+3. **In the terminal.** `msg list` is a `reader`-floor command, so the count is always one
+   command away regardless of what the browser chrome is showing.
+
+**The push must not use `OSC 5379`.** That channel rides the PTY byte stream and is replayed
+into a reattaching terminal (§12.2), so a service-originated nudge sent that way would
+re-fire on every page load — and it would need the monotonic-token dance to be safe. A TEXT
+frame is out-of-band, is never replayed, and needs no token. The OSC channel stays what it
+is: *shell*-initiated chrome nudges.
+
+### 13.6 No mail
+
+`euler-msg` sends no e-mail, which is what lets it stay `AF_UNIX`-only. The consequence is
+stated plainly: **a user→staff message waits for staff to open a shell or a page.** For an
+invited set of collaborators with a host the operator works on daily, that is an acceptable
+latency, and the spool never drops the message.
+
+Adding a digest nudge later is a deliberate, separate decision with a real cost — it needs
+`AF_INET` in the unit, an entry in the mail relay's permitted-sender list in
+`firewall.sh`, and it gives up the "cannot open a socket" property above. Do not add it as
+a convenience.
+
+### 13.7 The `msg` command
+
+Verb-split like `users` (§6.3), registered from `solver/web/msg/commands.py`. Reader verbs
+dial `msg.sock` directly — a web shell's uid is in `euler-web`, so the PTY child reaches it
+with no credential. Staff verbs re-exec under `sudo` against the admin socket.
+
+```bash
+msg list                                       # own threads, newest activity first
+msg read <id>                                  # one thread, and mark it read
+msg send subject="…" body="…"                  # → the staff queue
+msg reply <id> body="…"                        # own thread (staff: any thread)
+msg queue                                      # STAFF: the inbound queue
+msg notice to=alice@example.com,bob@… subject="…" body="…"   # STAFF: named recipients
+msg notice --all-users subject="…" body="…"    # STAFF: broadcast
+msg dismiss <id>                               # STAFF: drop a worked thread
+```
+
+The subject and body are `name=value` tokens rather than bare positionals because the
+thread id is the one argument that reads naturally in the leading position — `msg read
+<id>` and `msg reply <id> body="…"` are the two forms typed most often.
+
+### 13.8 The kit
+
+`scripts/setup/msg.sh`, modelled on `smtp.sh` — the closest existing sibling, being a small
+single-purpose service with its own uid and no Caddy route. Actions `deploy | remove |
+upgrade | redeploy | status | help`; `upgrade` is an alias of `deploy`, like auth's and
+smtp's. It creates the `euler-msg` user and group, generates `/etc/euler/msg.env`
+(`root:euler-msg 0640`), and installs the root-owned unit. It does **not** own
+`/opt/euler` — `auth.sh` does — so `msg.sh redeploy` only restarts.
+
+The unit is harder than auth's, because this service needs nothing off the socket layer:
+
+```
+Type=simple
+User=euler-msg
+SupplementaryGroups=euler-web          # push to the per-user sockets; chgrp its own
+StateDirectory=euler-msg               # /var/lib/euler-msg, 0700
+StateDirectoryMode=0700
+RuntimeDirectory=euler-msg             # /run/euler-msg, 0700 — its own admin plane
+RuntimeDirectoryMode=0700
+RestrictAddressFamilies=AF_UNIX        # cannot reach the network at all
+IPAddressDeny=any
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/run/euler               # the shared socket dir; tmpfiles owns it
+MemoryDenyWriteExecute=true
+```
+
+There is no `After=`/`Wants=` on `euler-auth`: the spool never talks to it, so the two
+services have no ordering relationship to declare. `require_venv` refuses a deploy when
+`solver.web.msg` is not importable from `/opt/euler`, which is the one way this kit can
+fail confusingly — the venv belongs to `auth.sh`, and a checkout newer than the venv would
+otherwise install a unit that crash-loops on `ModuleNotFoundError`.
+
+`firewall.sh` still folds `euler-msg` into the egress drop set. The unit hardening already
+makes off-host traffic impossible, so this is defence in depth: the nftables chain is
+policy-accept, and an un-enumerated uid would reach the internet directly if the unit were
+ever loosened.
+
+## 14 · Security posture
 
 The trust boundary is the **invite list** — named, trusted collaborators. These are the
 risks accepted **by design**; each is a deliberate choice with its containment stated.
@@ -1543,8 +1814,13 @@ decision recorded here.
   (systemd `IPAddressDeny` + host nftables); all egress — including every dynamic
   per-user uid, enumerated by the `euler-user` group — via the Squid allowlist.
 - **Cookies**: `Secure; HttpOnly; SameSite=Lax`, site-wide.
+- **The message spool is off the auth process** (§13.1): attacker-authored free text lives in
+  `euler-msg`, which holds no verifiers, sessions or tickets, is unreachable from the edge,
+  and is `AF_UNIX`-only. Message bodies stay plaintext-with-autoescape — no markdown or HTML
+  renderer is added to that path — and its identity stays `SO_PEERCRED`, never a header or a
+  body field.
 
-## 14 · Operating it
+## 15 · Operating it
 
 Every service ships the same kit — `deploy` / `remove` / `status` (plus `upgrade` and
 `redeploy` where they mean something), config generation, and a health probe that reports
@@ -1557,15 +1833,15 @@ completions, Chrome, Claude Code — are `install` / `uninstall`. **System** thi
 stack needs are `deploy` / `remove` / `redeploy`, because they touch root's systemd, the
 `euler-*` identities, and `/etc/euler` rather than your checkout.
 
-### 14.1 Deploy
+### 15.1 Deploy
 
 ```bash
 echo 'EULER_TLS_DOMAIN=euler.example.com' >> ~/.euler/env   # if not already set
-make deploy-web    # frontend → egress → ddns → firewall → smtp → auth → user
+make deploy-web    # frontend → egress → ddns → firewall → smtp → auth → msg → user
 ```
 
 Or per kit: `make deploy-frontend | deploy-egress | deploy-ddns | deploy-firewall |
-deploy-smtp | deploy-auth | deploy-user`. Every kit's `deploy` is idempotent, so
+deploy-smtp | deploy-auth | deploy-msg | deploy-user`. Every kit's `deploy` is idempotent, so
 re-running it is the safe way to re-assert a drifted host.
 
 `~/.euler/env` is the **deploy-time authoring source of truth**, read by the deploy path
@@ -1579,7 +1855,7 @@ Gmail ones, and no runtime service ever reads the full file. It carries
 
 Register the first admin account with `users add`.
 
-### 14.2 Redeploy versus upgrade
+### 15.2 Redeploy versus upgrade
 
 **`make redeploy-web`** is the everyday turnaround after a source change: it pushes new
 code, templates, and static assets without touching identities, units, certs, or the
@@ -1612,17 +1888,17 @@ it to do that `deploy` does not already do:
 | kit | `upgrade` |
 |---|---|
 | `frontend.sh`, `egress.sh` | Genuinely distinct: upgrades the Caddy / acme.sh / Squid **packages** and regenerates config + unit, without issuing a cert. |
-| `auth.sh`, `smtp.sh`, `user.sh` | An alias of `deploy` — the deploy path is already the re-assert path. |
+| `auth.sh`, `smtp.sh`, `msg.sh`, `user.sh` | An alias of `deploy` — the deploy path is already the re-assert path. |
 | `ddns.sh`, `firewall.sh` | No `upgrade` action at all; their `deploy` is idempotent and doubles as one, which is why `upgrade-web` calls `deploy-ddns` and ends on a `firewall.sh reload`. |
 
 `make remove-web` tears the stack down in reverse; the kits prompt before deleting
 state.
 
-### 14.2.1 Status
+### 15.2.1 Status
 
 **`make status-web`** is the read-only counterpart: it runs every kit's `status` in
-deploy order — edge, egress, DDNS, firewall, mail relay, auth service, per-user tier —
-and never changes anything. It needs `sudo` all the same, because what it reads is
+deploy order — edge, egress, DDNS, firewall, mail relay, auth service, message spool,
+per-user tier — and never changes anything. It needs `sudo` all the same, because what it reads is
 root-owned (nftables, `/etc/euler`), the clones sit under `0700` homes, and the shell
 report is a query on each running instance's own socket.
 
@@ -1653,7 +1929,7 @@ command must not fork a service for every idle invitee. The instance answers on
 `GET /internal/status` over its own socket — socket-peer only, and Caddy answers
 `/internal/*` with 404 rather than routing it.
 
-### 14.3 Going public
+### 15.3 Going public
 
 Only needed for access beyond the LAN.
 
@@ -1673,7 +1949,7 @@ Only needed for access beyond the LAN.
   the public IP changes, using the same token as DNS-01. Being infra egress, it does not
   pass through Squid.
 
-### 14.4 Renewal
+### 15.4 Renewal
 
 acme.sh runs as non-root `euler-acme` on a daily timer; its `--reloadcmd` fixes the key
 mode and reloads via Caddy's admin API. Renewal needs no DNS credentials re-supplied —
@@ -1681,7 +1957,7 @@ acme.sh saved the token in the cert `.conf` at issue time. Force one with `front
 renew`. Each kit's `status` reports unit + health; `frontend.sh status` also shows cert
 expiry and `/healthz`.
 
-### 14.5 Configuration summary
+### 15.5 Configuration summary
 
 | Layer | Key config |
 |---|---|
@@ -1690,11 +1966,12 @@ expiry and `/healthz`.
 | Egress | `/etc/euler-proxy/{squid.conf,squid.allowlist}`; client `HTTPS_PROXY` in `/etc/euler/egress.env` |
 | Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
 | Auth | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
+| Messaging | `/etc/euler/msg.env` (`root:euler-msg 0640`); `/var/lib/euler-msg` (`0700`) |
 | Policy | `/etc/euler/authorizations.json` (`root:root 0644`) |
 | Per-user tier | `/etc/euler/user.env` (no secrets); `/home/<slug>/` (`0700`) |
-| Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` (`0600`) |
+| Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` and `/run/euler-msg/admin.sock` (`0600`, one per admin plane) |
 
-### 14.6 Verify
+### 15.6 Verify
 
 1. `solver "users add you@example.com"` emails a 7-day invite; opening it walks Terms
    (scroll-gated) → OTP → set-password and lands on `/login?registered=1`.

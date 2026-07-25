@@ -56,14 +56,16 @@ SMTP_RELAY_PORT="8025"
 # users that exist at generation time. The web app tier runs as per-user uids
 # (one uid per collaborator), resolved dynamically by group (see euler_user_names);
 # only the fixed infra uids are listed statically here.
-ALL_USERS=(euler-caddy euler-auth
+ALL_USERS=(euler-caddy euler-auth euler-msg
            euler-proxy euler-acme euler-ddns euler-smtp)
 # Infra uids allowed direct DNS (the app tier resolves via loopback only).
 DNS_USERS=(euler-proxy euler-acme euler-ddns euler-smtp)
 # App-tier uids barred from the mail relay port (euler-auth is the one legit client).
 # The per-user web shells are RCE by design (AR-1), so they are barred from it like the
 # rest — folded in dynamically via the euler-user group (see per_user below).
-RELAY_BARRED=(euler-caddy euler-proxy euler-acme euler-ddns)
+# euler-msg is barred deliberately: the message spool sends no e-mail, which is what
+# lets its unit run AF_UNIX-only (docs/web-server-guide.md § Messaging — No mail).
+RELAY_BARRED=(euler-caddy euler-msg euler-proxy euler-acme euler-ddns)
 
 usage() {
     cat <<USAGE

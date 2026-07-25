@@ -97,4 +97,5 @@ a profile on each channel.
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
 | `solver.web.auth.commands` | `users` |  |  |  | ✓ |
+| `solver.web.msg.commands` | `msg` | ✓ | ✓ | ✓ | ✓ |
 <!-- /GEN:authorization-table -->

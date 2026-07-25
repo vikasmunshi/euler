@@ -22,7 +22,7 @@ places the same partials in the header directly (``oob`` unset).
 """
 from __future__ import annotations
 
-__all__ = ['render', 'render_block', 'is_htmx', 'SUBJECT_KEY', 'GIT_KEY']
+__all__ = ['render', 'render_block', 'is_htmx', 'SUBJECT_KEY', 'GIT_KEY', 'MSG_SPOOL_KEY']
 
 from typing import Any
 
@@ -37,6 +37,12 @@ SUBJECT_KEY: str = 'subject'
 #: aiohttp request key under which the git middleware stores this clone's GitState
 #: (:mod:`solver.web.site.gitstate`) — None where there is no readable clone.
 GIT_KEY: str = 'git'
+#: aiohttp request key set by the per-user tier's message routes: True where this
+#: service actually serves ``/messages`` (:mod:`solver.web.user.msg_api`). The header's
+#: chip needs to know whether there is a spool behind it *without* reading one — the
+#: auth tier renders the same header and has none — so this is a plain flag, and the
+#: count arrives later from the chip's own ``/messages/badge`` fetch.
+MSG_SPOOL_KEY: str = 'msg_spool'
 #: htmx sets this on every fetch; its presence selects fragment rendering.
 _HX_HEADER = 'HX-Request'
 
@@ -51,8 +57,9 @@ def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, An
 
     ``crumbs`` / ``actions`` / ``git`` (the §6 page chrome) default empty so every
     template — and the chrome partials — can rely on them existing. ``git`` defaults
-    to None, which is the chip's own inert state: the auth tier builds its own
-    contexts and has no clone behind it, and neither does a signed-out visitor.
+    to None and ``msg_spool`` to False, which are the two chips' inert states: the auth
+    tier builds its own contexts and has neither a clone nor a spool behind it, and
+    neither does a signed-out visitor.
     """
     ctx: dict[str, Any] = {
         'csp_nonce': request.get(NONCE_KEY, ''),
@@ -60,6 +67,7 @@ def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, An
         'crumbs': [],
         'actions': [],
         'git': request.get(GIT_KEY),
+        'msg_spool': request.get(MSG_SPOOL_KEY, False),
     }
     if extra:
         ctx.update(extra)

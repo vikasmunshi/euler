@@ -353,6 +353,17 @@
     document.body.dispatchEvent(new CustomEvent('euler:account-changed'));
   });
 
+  // ── the message chip's refresh (a delivery nudge) ───────────────────────────
+  // Unlike the two above this does NOT start in the shell: euler-msg pushed it to this
+  // user's instance, which sent a text frame down the terminal's socket (terminal.js).
+  // So it is news from another person, arriving between navigations — exactly what a
+  // server-rendered header cannot know on its own. #msg-chip listens `from:body` and
+  // swaps ITSELF, so the count updates without touching the pane or the terminal.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'message') { return; }
+    document.body.dispatchEvent(new CustomEvent('euler:message'));
+  });
+
   // ── copy buttons ───────────────────────────────────────────────────────────
   // [data-copy] holds the text (the public key today). The label's flip to
   // "Copied" is the only feedback that the clipboard actually took it.

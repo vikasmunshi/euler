@@ -239,6 +239,7 @@ command name below links to its full entry — usage and description — in the
 | [`ls`](commands-index.md#command-ls) | — | List the solutions dir for given/current problem. ❏ » |
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. ❏ » |
+| [`msg`](commands-index.md#command-msg-messages) | `messages` | Read and send messages: your threads, questions to staff, staff notices. |
 | [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file for a problem. ❏ » |
 | [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |

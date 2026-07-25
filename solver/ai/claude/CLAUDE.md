@@ -77,7 +77,7 @@ underlying script in `scripts/setup/` takes:
   Chrome, Claude Code, Node.js): `install` / `uninstall`.
 - **system** (what the solver web needs — root's systemd, the `euler-*` identities,
   `/etc/euler`, `/opt/euler`): `deploy` / `remove` / `redeploy`, plus `upgrade` on the
-  kits where it differs from `deploy` (see docs/web-server-guide.md § 14.2).
+  kits where it differs from `deploy` (see docs/web-server-guide.md § 15.2).
 
 ## Git Hooks
 
@@ -183,11 +183,14 @@ solver/
   web/                — The web app services (see docs/web-server-guide.md).
     cache.py          — Cache-Control middleware: what a browser may reuse, and for how long (shared).
     csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
+    envfile.py        — Minimal ``KEY=VALUE`` reader for the scoped runtime env files under ``/etc/euler``.
+    store.py          — Shared JSON persistence and untrusted-text hygiene for the service stores.
+    unixhttp.py       — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
     auth/             — Web authentication: the auth service and its clients.
       __main__.py     — Auth service entry point: ``python -m solver.web.auth``.
       admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command.
       app.py          — The auth service: public + admin aiohttp apps over unix sockets.
-      client.py       — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
+      client.py       — HTTP-over-unix-socket client for the auth service — re-export of the shared one.
       commands.py     — The ``users`` shell command: account administration for the operator.
       config.py       — Auth-service runtime configuration, read from the environment.
       mail.py         — Outbound mail via the loopback relay.
@@ -199,9 +202,17 @@ solver/
       requests.py     — Prospective-collaborator invite requests at ``<state>/requests.json``.
       sessions.py     — In-memory web session table.
       srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
-      storage.py      — Shared JSON persistence for the auth stores.
+      storage.py      — JSON persistence for the auth stores — re-export of the shared implementation.
       tickets.py      — One-time shell tickets: web identity for PTY children.
       users.py        — User store: the SRP verifier database at ``<state>/users.json``.
+    msg/              — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
+      __main__.py     — Message service entry point: ``python -m solver.web.msg``.
+      admin.py        — The message admin plane CLI: run **under sudo** by the ``msg`` shell command.
+      app.py          — The message service: public + admin aiohttp apps over unix sockets.
+      commands.py     — The ``msg`` shell command: read and write the message spool.
+      config.py       — Message-service runtime configuration, read from the environment.
+      identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.
+      store.py        — The message spool at ``<state>/messages.json`` — threads, replies and read-state.
     site/             — The content service — server-rendered pages + htmx fragments.
       __main__.py     — Content service entry point: ``python -m solver.web.site``.
       app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
@@ -214,6 +225,7 @@ solver/
       __main__.py     — Per-user service entry point: ``python -m solver.web.user``.
       app.py          — The per-user aiohttp app: one collaborator's content **and** web shell.
       config.py       — Per-user service runtime configuration, read from the environment.
+      msg_api.py      — Message routes for the per-user service (web-server-guide § Messaging).
       vault_api.py    — Vault + account routes for the per-user service.
     ws/               — The web-shell service: the solver PTY terminal over WebSocket.
       __main__.py     — Web-shell service entry point: ``python -m solver.web.ws``.

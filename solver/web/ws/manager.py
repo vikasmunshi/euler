@@ -150,6 +150,28 @@ class PersistentPty:
         if not self._subscribers:
             self._detached_since = time.monotonic()
 
+    async def notify(self, message: str) -> int:
+        """Send a **text** frame to every attached socket; return how many took it.
+
+        For out-of-band news the *page* must act on — today a message arriving for this
+        user (:mod:`solver.web.user.msg_api`). It deliberately does not touch the PTY:
+        a service-originated nudge written into the shell's byte stream would land in
+        the replay buffer and re-fire on every reattach, which is the whole reason
+        ``OSC 5379`` needs its monotonic token (:meth:`attach`). A text frame is not
+        replayed, so it needs no token and cannot be mistaken for shell output.
+        """
+        sent = 0
+        for ws in list(self._subscribers):
+            if ws.closed:
+                self.detach(ws)
+                continue
+            try:
+                await ws.send_str(message)
+                sent += 1
+            except (ConnectionError, RuntimeError):
+                self.detach(ws)
+        return sent
+
     def write(self, data: bytes) -> None:
         """Forward keystrokes from an attached terminal to the shared shell."""
         self.session.write(data)
@@ -208,6 +230,19 @@ class PtyManager:
             return False
         await pty.close()
         return True
+
+    async def notify_all(self, message: str) -> int:
+        """Send a text frame to every attached socket of every shell here.
+
+        The per-user tier runs one instance per collaborator, so "every shell" is that
+        one collaborator's — no key is needed and none is invented. Returns how many
+        sockets took it, which is 0 for a user with no terminal open: the nudge is only
+        a nudge, and the count they missed is rendered server-side on their next load.
+        """
+        sent = 0
+        for pty in list(self._shells.values()):
+            sent += await pty.notify(message)
+        return sent
 
     async def reap_detached(self, ttl_seconds: int) -> list[str]:
         """Close and forget shells with **zero attached sockets** for longer than

@@ -94,6 +94,10 @@
       <span class="dot"></span>
     </span>
     {% endif %}
+    {# Messages sit between the terminal and git chips: all three are state about *you*
+       rather than about the page in the pane, and this one is the only one of them a
+       *person* can change, so it reads first of the two counts. #}
+    {% include "_msg.html" %}
     {# Git sits inside `.app-who`, after the terminal chip and before the pill:
        `margin-left: auto` pushes this group right, and the chip belongs on the identity
        side of that gap — it is state about *your clone*, not about the page in the pane. #}

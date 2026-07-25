@@ -199,6 +199,76 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 .term-glyph { width: 0.95rem; height: 0.95rem; display: block; flex: none; }
 .term-chip .dot { flex: none; }
 
+/* ── the message chip (_msg.html) ────────────────────────────────────────────
+   Between the terminal and git chips in `.app-who`: all three report state about YOU,
+   and this is the only one another person can change.
+
+   QUIET WHEN EMPTY, like the git chip: no unread means a muted envelope and no digit.
+   Every mark that appears is something to act on, which is what makes the header worth
+   a glance instead of wallpaper. */
+.msg-chip { display: inline-flex; align-items: center; color: var(--muted); }
+.msg-chip.is-unread { color: var(--text); }
+.msg-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding-inline: 0.5rem; color: inherit; text-decoration: none;
+}
+.msg-link:hover { color: var(--accent); }
+.msg-glyph { width: 1rem; height: 1rem; display: block; flex: none; }
+/* The count is the badge: accent-filled, so an unread thread is the one warm mark in
+   an otherwise muted header. Tabular digits keep the chip from twitching at 9 → 10. */
+.msg-count {
+  font-size: 0.7rem; font-weight: 600; font-variant-numeric: tabular-nums;
+  min-width: 1.15rem; text-align: center;
+  padding: 0.05rem 0.3rem; border-radius: 999px;
+  color: var(--accent-ink); background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* ── the messages pane (messages.html) ───────────────────────────────────────
+   A thread list and one thread, in the panel idiom the rest of the site uses. Rows are
+   links, not cards: a mailbox is scanned top-to-bottom, and the subject is what the
+   eye is looking for, so it leads and the metadata trails in --muted. */
+.msg-list { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.msg-row { border-top: 1px solid var(--border); }
+.msg-row:first-child { border-top: 0; }
+.msg-row > a {
+  display: grid; grid-template-columns: 0.75rem 1fr auto; align-items: baseline;
+  gap: 0.5rem; padding: 0.5rem 0.2rem; text-decoration: none; color: var(--text);
+}
+.msg-row > a:hover { background: var(--surface-hi); }
+.msg-row .msg-subject { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-row .msg-meta { font-size: 0.78rem; white-space: nowrap; }
+/* The dot is the unread marker, and it holds its column when read — a row that shifts
+   sideways as you read it makes the list feel unstable while you work down it. */
+.msg-row .msg-dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: transparent; }
+.msg-row.is-unread .msg-dot { background: var(--accent); }
+.msg-row.is-unread .msg-subject { font-weight: 600; }
+@media (max-width: 700px) {
+  .msg-row > a { grid-template-columns: 0.75rem 1fr; }
+  .msg-row .msg-meta { grid-column: 2; }
+}
+
+.msg-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.msg-body { margin: 0.5rem 0 0; }
+/* A reply is indented and rule-marked so the thread reads as a conversation rather
+   than one long body: the rule is the turn boundary. */
+.msg-reply {
+  margin-top: 0.9rem; padding-left: 0.8rem;
+  border-left: 2px solid var(--border);
+}
+.msg-form { margin-top: 0.9rem; flex-direction: column; align-items: flex-start; }
+.msg-form textarea {
+  width: 100%; font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.45rem 0.6rem; resize: vertical;
+}
+.msg-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* inbound vs notice: which direction a thread travelled. Muted on purpose — the pill
+   labels the thread, it is not the thing you came to read. */
+.pill-inbound, .pill-notice {
+  color: var(--muted); background: transparent; border-color: var(--border);
+}
+
 /* ── the git chip (_git.html) ────────────────────────────────────────────────
    Inside `.app-who`, before the user pill: state about YOUR CLONE, so it sits on
    the identity side of the header's gap, not with the page's own controls. Same

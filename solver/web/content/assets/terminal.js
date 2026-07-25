@@ -98,7 +98,16 @@
       if (typeof ev.data !== 'string') { return; }
       var msg;
       try { msg = JSON.parse(ev.data); } catch (e) { return; }
-      if (!msg || msg.replay !== 'end') { return; }
+      if (!msg) { return; }
+      // A message landed for this user: euler-msg nudged this instance, which sent this
+      // frame (solver/web/user/msg_api.py). It rides a TEXT frame, not the PTY, and so
+      // is NOT in the replay buffer — no `live` guard and no token are needed, and it
+      // cannot be mistaken for shell output. Tell the parent; the header's chip re-reads.
+      if (msg.euler === 'message' && window.parent !== window) {
+        window.parent.postMessage({ euler: 'message', unread: msg.unread }, location.origin);
+        return;
+      }
+      if (msg.replay !== 'end') { return; }
       // term.write() is asynchronous — the replayed bytes are queued for parsing,
       // so flipping the flag here would still let the queue's OSC sequences through.
       // Queue the flip *behind* them instead: a write's callback runs once that

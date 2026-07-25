@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}euler — messages{% endblock %}
+{% block content %}
+{# The messages pane (web-server-guide § Messaging). One template, two shapes: a thread
+   LIST when `thread` is unset, one THREAD when it is set — the same split every content
+   page here makes, so a deep link to a thread is reload-safe and shareable.
+
+   Every message has staff at one end. There is no user-to-user leg, so this page never
+   asks who to write to: an ordinary rung can only write *to staff*, and the recipient
+   picker exists solely on the staff notice form below.
+
+   Bodies are plaintext, printed through `.pre-line` — no markdown, no HTML. That is the
+   store's contract, not a limitation of this page: the spool holds text other people
+   wrote, and autoescaping it into a <div> is what keeps the injection class from
+   existing at all. #}
+{% if thread %}
+<section class="panel msg-thread">
+  <div class="msg-head">
+    <h1>{{ thread.subject }}</h1>
+    <span class="pill pill-{{ thread.kind }}">{{ thread.kind }}</span>
+  </div>
+  <p class="acct-sub muted">
+    <span>from <b>{{ thread.author_name }}</b></span>
+    <span>· {{ thread.created }}</span>
+    {% if thread.recipients | length > 1 %}
+    <span>· {{ thread.recipients | length }} recipients</span>
+    {% endif %}
+  </p>
+  <div class="msg-body pre-line">{{ thread.body }}</div>
+
+  {% for reply in thread.replies %}
+  <div class="msg-reply">
+    <p class="acct-sub muted"><span><b>{{ reply.author_name }}</b></span>
+       <span>· {{ reply.at }}</span></p>
+    <div class="msg-body pre-line">{{ reply.body }}</div>
+  </div>
+  {% endfor %}
+
+  {# Replying is open to every party to the thread, at the reader floor: the person who
+     asked must be able to answer a clarifying question, or the thread is a dead end. #}
+  <form class="vault-form msg-form" hx-post="/messages/{{ thread.id }}/reply"
+        hx-target="#content" hx-swap="innerHTML">
+    <textarea name="body" rows="4" required maxlength="{{ body_max }}"
+              placeholder="Write a reply…"></textarea>
+    <button class="btn btn-primary" type="submit">Reply</button>
+  </form>
+</section>
+{% else %}
+
+{% if flash %}<p class="flash flash-notice">{{ flash }}</p>{% endif %}
+
+{# Asking comes first: it is what an ordinary rung is here to do, and burying it under
+   a list of threads they may not have yet would put the empty state in the way of the
+   only action. Folded, like the account page's password form — deliberate, not idle. #}
+<section class="panel">
+  <details class="fold" {% if not threads %}open{% endif %}>
+    <summary class="fold-summary">
+      <span class="fold-title">Ask the maintainers</span>
+      <span class="muted">a question, a request, a bug</span>
+    </summary>
+    <p class="muted">Goes to everyone at maintainer or above. They answer in this pane;
+       you will see the reply as unread here and on the header's chip.</p>
+    <form class="vault-form msg-form" hx-post="/messages/" hx-target="#content"
+          hx-swap="innerHTML">
+      <input type="text" name="subject" required maxlength="{{ subject_max }}"
+             placeholder="Subject" autocomplete="off">
+      <textarea name="body" rows="5" required maxlength="{{ body_max }}"
+                placeholder="What do you need?"></textarea>
+      <button class="btn btn-primary" type="submit">Send</button>
+    </form>
+  </details>
+</section>
+
+<section class="panel">
+  <h2>Your threads {% if unread %}<span class="msg-count">{{ unread }}</span>{% endif %}</h2>
+  {% if threads %}
+  <ul class="msg-list">
+    {% for item in threads %}
+    <li class="msg-row{% if item.unread %} is-unread{% endif %}">
+      <a href="/messages/{{ item.id }}" hx-get="/messages/{{ item.id }}"
+         hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+        <span class="msg-dot" aria-hidden="true"></span>
+        <span class="msg-subject">{{ item.subject }}</span>
+        <span class="msg-meta muted">{{ item.author_name }} · {{ item.updated }}
+          {%- if item.replies %} · {{ item.replies | length }}
+            repl{{ 'y' if item.replies | length == 1 else 'ies' }}{% endif %}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">No messages. Ask the maintainers something above.</p>
+  {% endif %}
+</section>
+
+{# The staff half. Gated by the route's own floor as well — hiding is UX, the floor is
+   the boundary (web-server-guide § The site). #}
+{% if is_staff %}
+<section class="panel">
+  <h2>Inbound queue</h2>
+  <p class="muted">Every question, oldest first — shared across all maintainers.</p>
+  {% if queue %}
+  <ul class="msg-list">
+    {% for item in queue %}
+    <li class="msg-row{% if item.unread %} is-unread{% endif %}">
+      <a href="/messages/{{ item.id }}" hx-get="/messages/{{ item.id }}"
+         hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+        <span class="msg-dot" aria-hidden="true"></span>
+        <span class="msg-subject">{{ item.subject }}</span>
+        <span class="msg-meta muted">{{ item.author_name }} · {{ item.created }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">The queue is empty.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <details class="fold">
+    <summary class="fold-summary">
+      <span class="fold-title">Send a notice</span>
+      <span class="muted">named collaborators, or everyone</span>
+    </summary>
+    <p class="muted">Leave the recipients empty to send to everyone. An address the
+       policy does not know is refused, not silently filed.</p>
+    <form class="vault-form msg-form" hx-post="/messages/notice" hx-target="#content"
+          hx-swap="innerHTML">
+      {# A datalist, not a select: the roster is small, and typing an address is faster
+         than hunting a menu for the one you already know. #}
+      <input type="text" name="to" list="msg-recipients" autocomplete="off"
+             placeholder="recipients (comma-separated; empty = everyone)">
+      <datalist id="msg-recipients">
+        {% for identity in recipients %}<option value="{{ identity }}"></option>{% endfor %}
+      </datalist>
+      <input type="text" name="subject" required maxlength="{{ subject_max }}"
+             placeholder="Subject" autocomplete="off">
+      <textarea name="body" rows="4" required maxlength="{{ body_max }}"
+                placeholder="What should they know?"></textarea>
+      <button class="btn btn-primary" type="submit">Send notice</button>
+    </form>
+  </details>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

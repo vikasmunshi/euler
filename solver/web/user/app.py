@@ -42,6 +42,7 @@ from solver.web.csp import csp_middleware
 from solver.web.site.app import _MAX_BODY, install_content
 from solver.web.site.render import SUBJECT_KEY
 from solver.web.user.config import UserConfig
+from solver.web.user.msg_api import add_message_routes
 from solver.web.user.vault_api import add_vault_routes
 from solver.web.ws.manager import PtyManager
 from solver.web.ws.pty import PtySession
@@ -112,6 +113,10 @@ def build_app(config: UserConfig) -> web.Application:
     install_content(app, config.site_config(), authz)
     # The vault + account surface — this instance IS the user's uid.
     add_vault_routes(app)
+    # The message surface — the browser half of the spool (web-server-guide § Messaging).
+    # The manager goes in by argument: the app key below is defined here, and msg_api
+    # importing it back would close a cycle.
+    add_message_routes(app, manager)
     app[PTY_MANAGER] = manager
 
     async def _mint_ticket(cookie: str) -> str:

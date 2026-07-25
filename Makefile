@@ -13,6 +13,7 @@
         deploy-firewall remove-firewall \
         deploy-smtp remove-smtp upgrade-smtp \
         deploy-auth remove-auth upgrade-auth redeploy-auth \
+        deploy-msg remove-msg upgrade-msg redeploy-msg \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web status-web \
         test run audit uninstall version release check-version
@@ -266,6 +267,29 @@ redeploy-auth:
 	./scripts/setup/auth.sh redeploy
 	@printf "✓ redeploy-auth complete: venv + authorizations refreshed, auth restarted\n"
 
+## Deploy the message spool: the euler-msg user + /etc/euler/msg.env + euler-msg.service
+## (user<->staff threads; see docs/web-server-guide.md § Messaging). Needs the shared
+## /opt/euler venv, which auth.sh owns — run deploy-auth first
+deploy-msg:
+	./scripts/setup/msg.sh deploy
+	@printf "✓ deploy-msg complete: message spool deployed\n"
+
+## Remove the message spool (prompts before deleting the threads and the identity)
+remove-msg:
+	./scripts/setup/msg.sh remove
+	@printf "✓ remove-msg complete: message spool removed\n"
+
+## Upgrade the message spool (alias of deploy: refresh config + unit, restart)
+upgrade-msg:
+	./scripts/setup/msg.sh upgrade
+	@printf "✓ upgrade-msg complete: message spool upgraded\n"
+
+## Restart the message spool against the current /opt/euler venv (redeploy-auth
+## rebuilds that venv; this only bounces the service onto it)
+redeploy-msg:
+	./scripts/setup/msg.sh redeploy
+	@printf "✓ redeploy-msg complete: message spool restarted\n"
+
 ## Deploy the per-user provisioning layer (MT-7): the euler-user group,
 ## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
 ## uids/homes/clones are created later by `users add <email>`
@@ -296,17 +320,17 @@ redeploy-user:
 ## per-user provisioning layer (MT-4 — the retired per-profile content/ws kits are
 ## no longer deployed). Each kit stays independently operable; the later kits
 ## reload the firewall as their service users appear. (sudo required)
-deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smtp deploy-auth deploy-user
+deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smtp deploy-auth deploy-msg deploy-user
 	@printf "✓ deploy-web complete: full web stack deployed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-remove-web: remove-user remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
+remove-web: remove-user remove-msg remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
 	@printf "✓ remove-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
 ## ddns and firewall have no upgrade action — their deploy is idempotent and doubles
 ## as one, and the firewall reload is the final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-user
+upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-msg upgrade-user
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
@@ -317,12 +341,12 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 ## live terminals are dropped. The everyday "I changed Python/templates/CSS/JS,
 ## push it" turnaround. Gated on check-version so the deployed build's tag is on
 ## origin (run serially — the default — so the guard runs before any deploy step).
-redeploy-web: check-version redeploy-auth redeploy-user redeploy-frontend
+redeploy-web: check-version redeploy-auth redeploy-msg redeploy-user redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 ## Report the whole web stack in one read-only sweep, in deploy order: the edge, the
-## egress proxy, DDNS, the kernel firewall, the mail relay, the auth service, and the
-## per-user tier. The last section is the collaborator roster — one entry per unix name
+## egress proxy, DDNS, the kernel firewall, the mail relay, the auth service, the
+## message spool, and the per-user tier. The last section is the collaborator roster — one entry per unix name
 ## (the slug: the uid, home, socket and unit instance are all called this) with the
 ## e-mail as an alias, and per user whether their instance is running and whether their
 ## web shell is live and currently connected to a terminal.
@@ -344,5 +368,7 @@ status-web:
 	@./scripts/setup/smtp.sh status || true
 	@printf "\n══ auth service ══════════════════════════════════════════════════════\n"
 	@./scripts/setup/auth.sh status || true
+	@printf "\n══ message spool (user↔staff threads) ════════════════════════════════\n"
+	@./scripts/setup/msg.sh status || true
 	@printf "\n══ per-user tier (collaborators + their web shells) ══════════════════\n"
 	@./scripts/setup/user.sh status || true

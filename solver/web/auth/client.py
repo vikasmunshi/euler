@@ -1,64 +1,18 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
+"""HTTP-over-unix-socket client for the auth service — re-export of the shared one.
 
-Used by the two *callers* of the service that must not depend on aiohttp:
+The implementation moved to :mod:`solver.web.unixhttp` when the message spool
+(:mod:`solver.web.msg`) needed the same client: a second service must be able to
+talk over a unix socket without importing this package, since loading auth's
+modules into another service's process would recouple the two and defeat the
+isolation that gave the spool its own uid (web-server-guide § Messaging).
 
-- the ``users`` shell command (:mod:`solver.web.auth.commands`), talking to the
-  admin socket;
-- shell-ticket redemption in :mod:`solver.auth.identity`, talking to
-  the public socket.
-
-Deliberately tiny: JSON in/out, one request per connection, no retries — both
-sockets are local and the service answers immediately or not at all.
+This module stays as the auth tier's name for it, so its callers — the ``users``
+command and the identity resolver — need no edit.
 """
 from __future__ import annotations
 
 __all__ = ['request']
 
-import http.client
-import json
-import socket
-from typing import Any
-
-
-class _UnixConnection(http.client.HTTPConnection):
-    """An HTTPConnection whose transport is a unix domain socket."""
-
-    def __init__(self, socket_path: str, timeout: float) -> None:
-        super().__init__('localhost', timeout=timeout)
-        self._socket_path = socket_path
-
-    def connect(self) -> None:
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.settimeout(self.timeout)
-        sock.connect(self._socket_path)
-        self.sock = sock
-
-
-def request(socket_path: str, method: str, path: str, *,
-            body: dict[str, Any] | None = None,
-            headers: dict[str, str] | None = None,
-            timeout: float = 10.0) -> tuple[int, dict[str, Any] | str]:
-    """One HTTP request over the unix socket; return ``(status, parsed body)``.
-
-    The body comes back as a dict when the response is JSON, else as text.
-    Raises OSError if the socket is absent/refusing (service not running or the
-    caller lacks group access).
-    """
-    connection = _UnixConnection(socket_path, timeout)
-    try:
-        payload = json.dumps(body).encode() if body is not None else None
-        all_headers = {'Content-Type': 'application/json', **(headers or {})}
-        connection.request(method, path, body=payload, headers=all_headers)
-        response = connection.getresponse()
-        raw = response.read().decode('utf-8', 'replace')
-        try:
-            parsed: dict[str, Any] | str = json.loads(raw)
-            if not isinstance(parsed, dict):
-                parsed = raw
-        except json.JSONDecodeError:
-            parsed = raw
-        return response.status, parsed
-    finally:
-        connection.close()
+from solver.web.unixhttp import request

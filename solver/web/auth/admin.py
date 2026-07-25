@@ -40,6 +40,7 @@ from typing import Any
 
 from solver.web.auth import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
 from solver.web.auth.client import request
+from solver.web.envfile import env_file_values
 
 _ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove', 'requests-json', 'dismiss')
 _NO_IDENTITY = ('list', 'requests-json')                          # roster/queue views take no identity
@@ -86,26 +87,10 @@ def _authz_remove(identity: str) -> bool:
 
 # ── euler-auth admin socket (SRP operations) ────────────────────────────────────────
 
-def _env_file_values(path: Path) -> dict[str, str]:
-    """Minimal KEY=VALUE reader for the scoped auth env file."""
-    values: dict[str, str] = {}
-    try:
-        lines = path.read_text(encoding='utf-8').splitlines()
-    except OSError:
-        return values
-    for raw in lines:
-        line = raw.strip()
-        if not line or line.startswith('#') or '=' not in line:
-            continue
-        key, _, value = line.partition('=')
-        values[key.strip()] = value.strip().strip('\'"')
-    return values
-
-
 def _api(method: str, path: str, *, body: dict[str, Any] | None = None,
          timeout: float = 10.0) -> tuple[int, dict[str, Any] | str]:
     """One call to the euler-auth admin socket (raises SystemExit-style on failure)."""
-    env_file = _env_file_values(Path(os.environ.get('EULER_AUTH_ENV', '/etc/euler/auth.env')))
+    env_file = env_file_values(Path(os.environ.get('EULER_AUTH_ENV', '/etc/euler/auth.env')))
     token = os.environ.get('EULER_ADMIN_TOKEN') or env_file.get('EULER_ADMIN_TOKEN', '')
     socket_path = (os.environ.get(ADMIN_SOCKET_ENV) or env_file.get(ADMIN_SOCKET_ENV)
                    or DEFAULT_ADMIN_SOCKET)

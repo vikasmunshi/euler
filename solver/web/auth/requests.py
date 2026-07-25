@@ -43,6 +43,7 @@ from typing import Any, NamedTuple
 
 from solver.web.auth.storage import load_json, save_json
 from solver.web.auth.users import normalize_email
+from solver.web.store import sanitize
 
 #: Distinct emails the queue holds before further *new* requests are dropped (a
 #: resubmit from an already-queued email always updates in place). Bounds the
@@ -63,28 +64,6 @@ REMARKS_MAX: int = 1000
 def _now_iso() -> str:
     """Current UTC time in ISO-8601 (the store's display timestamp)."""
     return datetime.now(timezone.utc).isoformat(timespec='seconds')
-
-
-def sanitize(text: str, max_len: int, *, allow_newlines: bool = False) -> str:
-    """Strip control characters, cap length, and trim — for untrusted free text.
-
-    Drops C0/C1 control characters (so a name or remark cannot smuggle newlines
-    into a notification-mail header or control codes into the ``users list``
-    terminal listing); tabs become spaces. With *allow_newlines* the record keeps
-    its line breaks (remarks), which stay in the mail **body** where they are
-    inert. The cap is applied last, so the stored value never exceeds *max_len*.
-    """
-    out: list[str] = []
-    for ch in text:
-        if ch == '\n':
-            out.append(ch if allow_newlines else ' ')
-        elif ch == '\t':
-            out.append(' ')
-        elif ch < ' ' or ch == '\x7f' or '\x80' <= ch <= '\x9f':
-            continue
-        else:
-            out.append(ch)
-    return ''.join(out).strip()[:max_len]
 
 
 class RequestRecord(NamedTuple):
