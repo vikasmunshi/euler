@@ -35,6 +35,7 @@ from __future__ import annotations
 __all__ = ['main']
 
 import sys
+from pathlib import Path
 from subprocess import run
 from typing import BinaryIO
 
@@ -183,6 +184,34 @@ def _filter(action: str) -> int:
 # ==================================================================================================================== #
 #                                               install / status
 # ==================================================================================================================== #
+def _rule_present(attrs_path: Path) -> bool:
+    """Whether `.gitattributes` already routes the private tree through this filter.
+
+    Matched on the two things that carry meaning — the **path pattern** and
+    ``filter=<name>`` — not on the whole line. An exact-line comparison is what broke
+    here: `-diff` was added to the tracked rule without updating ``attr_line``, so the
+    match failed and :func:`_install` appended a second, *weaker* copy of the same rule
+    to a **tracked** file. Every collaborator clone then had a dirty `.gitattributes`
+    after `git-sync`, and the duplicate silently un-did `-diff` for the paths it
+    re-matched. Recognising the rule by its meaning makes a future flag change a
+    non-event.
+    """
+    try:
+        text = attrs_path.read_text(encoding='utf-8', errors='replace')
+    except OSError:
+        return False
+    needle: str = f'filter={config["filter_name"]}'
+    path: str = config['attr_path']
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith('#'):
+            continue
+        fields = line.split()
+        if fields[0] == path and needle in fields[1:]:
+            return True
+    return False
+
+
 def _install() -> int:
     """Verify the master key first, then register the filter in git config and ensure the
     .gitattributes rule exists.
@@ -213,15 +242,17 @@ def _install() -> int:
         print(f'git config {key} = {value}', file=sys.stderr)
 
     attrs_path = root / '.gitattributes'
-    attr_line: str = config['attr_line']
-    existing: str = attrs_path.read_text() if attrs_path.exists() else ''
-    if attr_line not in existing.splitlines():
-        header = '' if existing.endswith('\n') or not existing else '\n'
-        block = '# Transparent encryption for private solutions (solver.crypto.gitfilter).\n'
-        attrs_path.write_text(f'{existing}{header}{block}{attr_line}\n')
-        print(f'added rule to {attrs_path}', file=sys.stderr)
-    else:
+    if _rule_present(attrs_path):
         print(f'{attrs_path} already has the rule', file=sys.stderr)
+        return 0
+    # Only reached by a tree predating the tracked rule: `.gitattributes` ships **in the
+    # repo**, so a normal clone already carries it and this branch is a fallback, not the
+    # install path. Writing to a tracked file is exactly what must not happen routinely.
+    existing: str = attrs_path.read_text() if attrs_path.exists() else ''
+    header = '' if existing.endswith('\n') or not existing else '\n'
+    block = '# Transparent encryption for private solutions (solver.crypto.gitfilter).\n'
+    attrs_path.write_text(f'{existing}{header}{block}{config["attr_line"]}\n')
+    print(f'added rule to {attrs_path}', file=sys.stderr)
     return 0
 
 
@@ -234,8 +265,7 @@ def _status() -> int:
                      cwd=root, capture_output=True, text=True)
         print(f'filter.{name}.{action} = {result.stdout.strip() or "(unset)"}', file=sys.stderr)
     attrs_path = root / '.gitattributes'
-    has_rule: bool = attrs_path.exists() and config['attr_line'] in attrs_path.read_text().splitlines()
-    print(f'.gitattributes rule present: {has_rule}', file=sys.stderr)
+    print(f'.gitattributes rule present: {_rule_present(attrs_path)}', file=sys.stderr)
     try:
         read_master_key()
         print('master key: present and verified', file=sys.stderr)

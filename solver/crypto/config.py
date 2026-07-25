@@ -43,6 +43,7 @@ class CryptoConfig(TypedDict):
     nonce_len: int
     header_len: int
     filter_name: str
+    attr_path: str
     attr_line: str
     pkt_max: int  # max pkt-line payload (65520 - 4-byte length prefix)
     verify_text: bytes  # fixed known plaintext for the verify-by-decrypt master-key check
@@ -119,7 +120,12 @@ config: CryptoConfig = {
     'nonce_len': _NONCE_LEN,
     'header_len': len(_MAGIC) + _NONCE_LEN,
     'filter_name': _FILTER_NAME,
-    'attr_line': f'solutions/private/** filter={_FILTER_NAME} -text',
+    # Must stay identical to the rule in the **tracked** `.gitattributes`: the installer
+    # matches on it, and a drift makes it append a second, weaker copy of the rule to a
+    # tracked file — a dirty working tree in every collaborator clone. The path prefix is
+    # split out so the matcher can recognise the rule without pinning its flags.
+    'attr_path': 'solutions/private/**',
+    'attr_line': f'solutions/private/** filter={_FILTER_NAME} -text -diff',
     'pkt_max': 65516,  # max pkt-line payload (65520 - 4-byte length prefix)
     # Fixed known plaintext for the verify-by-decrypt master-key check: the opening quatrain of
     # "Auguries of Innocence" by William Blake.
