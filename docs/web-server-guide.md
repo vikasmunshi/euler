@@ -1658,7 +1658,18 @@ Three tiers, all reusing paths that already exist:
    someone *else* acts, which no navigation can predict, so a spool read per navigation would
    buy nothing. The push is only a nudge — a lost one costs a stale count until the next
    document load, never a lost message.
-3. **In the terminal.** `msg list` is a `reader`-floor command, so the count is always one
+3. **The shell's own nudge.** The three above cover a message *arriving*. Reading one is
+   the user's own act in their own shell, which no service sees — so the `msg` command
+   emits **`OSC 5379` `msg;<token>`** on every path that changes what the chip shows
+   (`read`, `send`, `reply`, `notice`, `dismiss`), exactly as `git-sync` does for the git
+   chip. `terminal.js` turns it into the *same* `euler:message` body event the delivery
+   frame produces, so the chip has one listener and does not care which side moved.
+   Read-only verbs (`list`, `queue`) emit nothing: a nudge that fires when nothing changed
+   trains the reader to ignore it.
+
+   Without this the chip is at its most wrong exactly after the user acted — they read the
+   one unread thread and the badge still says 1 until the next full page load.
+4. **In the terminal.** `msg list` is a `reader`-floor command, so the count is always one
    command away regardless of what the browser chrome is showing.
 
 **The chip** is a `<details class="menu">` on the same chassis as Actions, the git chip and
@@ -1676,11 +1687,14 @@ That mechanism is selected by the **`.term-menu`** marker every such menu carrie
 each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second
 menu to need it could not join without editing `site.js`.
 
-**The push must not use `OSC 5379`.** That channel rides the PTY byte stream and is replayed
-into a reattaching terminal (§12.2), so a service-originated nudge sent that way would
-re-fire on every page load — and would need the monotonic-token dance to be safe. A TEXT
-frame is out-of-band, is never replayed, and needs no token. The OSC channel stays what it
-is: *shell*-initiated chrome nudges.
+**The two nudges use different transports on purpose.** A *service*-originated push must
+not use `OSC 5379`: that channel rides the PTY byte stream and is replayed into a
+reattaching terminal (§12.2), so it would re-fire on every page load and would need the
+monotonic-token dance to be safe. A TEXT frame is out-of-band, is never replayed, and needs
+no token. A *shell*-originated nudge is the opposite case — it is already on the shell's
+stdout, the replay guard already covers it, and routing it out to the spool and back would
+invent a second mechanism for something the terminal already carries. So the rule stays
+exactly as it reads: OSC for what the shell did, TEXT frames for what the service did.
 
 ### 13.6 No mail
 

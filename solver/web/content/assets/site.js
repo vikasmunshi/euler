@@ -357,12 +357,16 @@
     document.body.dispatchEvent(new CustomEvent('euler:account-changed'));
   });
 
-  // ── the message chip's refresh (a delivery nudge) ───────────────────────────
-  // Unlike the two above this does NOT start in the shell: euler-msg pushed it to this
-  // user's instance, which sent a text frame down the terminal's socket (terminal.js).
-  // So it is news from another person, arriving between navigations — exactly what a
-  // server-rendered header cannot know on its own. #msg-chip listens `from:body` and
-  // swaps ITSELF, so the count updates without touching the pane or the terminal.
+  // ── the message chip's refresh (both nudges) ────────────────────────────────
+  // Two sources, one event, because the page's answer is the same either way: re-read
+  // the chip.
+  //   · euler-msg pushed a delivery to this user's instance, which sent a text frame
+  //     down the terminal's socket — news from another person, arriving between
+  //     navigations, which a server-rendered header cannot know on its own;
+  //   · the shell emitted OSC 5379 `msg` because the user themselves read, sent, replied
+  //     or dismissed — the same move `git-sync` makes for the git chip.
+  // #msg-chip listens `from:body` and swaps its own contents, so the count updates
+  // without touching the pane or the terminal.
   window.addEventListener('message', function (ev) {
     if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'message') { return; }
     document.body.dispatchEvent(new CustomEvent('euler:message'));

@@ -21,9 +21,12 @@ spool's whole identity story is "the connecting uid, resolved through
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import getpass
+import io
 import json
 import os
+import re
 import shutil
 import tempfile
 import time
@@ -611,6 +614,87 @@ class UserMessageChipReaderTests(UserMessageChipTests):
         self.assertEqual(body.count('data-term-cmd="msg read '), 5)
         self.assertIn('subject-6', body)
         self.assertIn('subject-7', body)
+
+
+class MsgCommandNudgeTests(_SpoolCase):
+    """The shell half of the chip's refresh: OSC 5379 `msg` after a mutating verb.
+
+    The spool pushes when a message *arrives*, but marking one read happens in the user's
+    own shell and no service sees it — so without this the badge still said 1 after they
+    read the only unread thread, until the next full page load. Same move `git-sync` makes
+    for the git chip, landing on the same `euler:message` event as the delivery push.
+    """
+
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        os.environ['EULER_MSG_SOCKET'] = str(self.config.socket_path)
+        self.addCleanup(os.environ.pop, 'EULER_MSG_SOCKET', None)
+        # The command reads its own identity and channel off the live config.
+        from solver.auth.subject import Subject
+        from solver.config import config as app_config
+        self._saved_subject = app_config.subject
+        self.addCleanup(setattr, app_config, 'subject', self._saved_subject)
+        app_config.subject = Subject(user=_ME, slug=_ME, channel='web',
+                                     auth_method='test', profile=self.my_profile)
+
+    def _run(self, *args: Any, **kwargs: Any) -> str:
+        """Run the `msg` command with stdout captured; return what it wrote."""
+        from solver.web.msg.commands import msg
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            msg(*args, **kwargs)
+        return buffer.getvalue()
+
+    @staticmethod
+    def _nudges(output: str) -> int:
+        """How many `msg` nudges the output carries (the token varies per emission)."""
+        return len(re.findall(r'\x1b\]5379;msg;\d+\x07', output))
+
+    async def _thread_from_alice(self) -> str:
+        status, data = await self.as_identity('POST', '/admin/messages', _ALICE,
+                                              {'subject': 'ping', 'body': 'hello'})
+        self.assertEqual(status, 201)
+        return str(data['id'])
+
+    @unittest_run_loop
+    async def test_reading_nudges_the_chip(self) -> None:
+        thread_id = await self._thread_from_alice()
+        _status, before = await self.call('GET', '/messages')
+        self.assertEqual(before['unread'], 1)
+        output = await asyncio.to_thread(self._run, 'read', thread_id)
+        self.assertEqual(self._nudges(output), 1)
+        _status, after = await self.call('GET', '/messages')
+        self.assertEqual(after['unread'], 0, 'the nudge must follow a real change')
+
+    @unittest_run_loop
+    async def test_every_mutating_verb_nudges(self) -> None:
+        thread_id = await self._thread_from_alice()
+        for label, call in (
+                ('send', lambda: self._run('send', subject='s', body='b')),
+                ('reply', lambda: self._run('reply', thread_id, body='b')),
+                ('notice', lambda: self._run('notice', to=_ALICE, subject='s', body='b')),
+                ('dismiss', lambda: self._run('dismiss', thread_id)),
+        ):
+            output = await asyncio.to_thread(call)
+            self.assertEqual(self._nudges(output), 1, f'{label} should nudge the chip')
+
+    @unittest_run_loop
+    async def test_read_only_verbs_do_not_nudge(self) -> None:
+        """A nudge that fires when nothing moved trains the reader to ignore it."""
+        await self._thread_from_alice()
+        for label, call in (('list', lambda: self._run('list')),
+                            ('queue', lambda: self._run('queue'))):
+            output = await asyncio.to_thread(call)
+            self.assertEqual(self._nudges(output), 0, f'{label} changes nothing')
+
+    @unittest_run_loop
+    async def test_a_terminal_shell_emits_nothing(self) -> None:
+        """Off the web channel the sequence is noise in a real terminal — osc.emit no-ops."""
+        from solver.config import config as app_config
+        app_config.subject = app_config.subject._replace(channel='terminal')
+        thread_id = await self._thread_from_alice()
+        output = await asyncio.to_thread(self._run, 'read', thread_id)
+        self.assertEqual(self._nudges(output), 0)
 
 
 class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):

@@ -168,6 +168,7 @@
   //   open;<NNNN>;<token>              → swap the pane to /solutions/NNNN/
   //   edit;<NNNN>;<token>;<relpath>    → swap the pane to /edit/solutions/NNNN/<relpath>
   //   git;<token>                      → the header's git chip re-reads itself
+  //   msg;<token>                      → the header's message chip re-reads itself
   //
   // Two guards, for two different re-runs of the same sequence:
   //   · `live` — the attach replay redraws commands that already ran. Acting on
@@ -185,6 +186,13 @@
     if (action === 'git') {
       return { euler: 'git-changed' };
     }
+    // The same message the SERVER's delivery nudge posts (the text frame above), because
+    // the page's answer is identical either way: re-read the chip. What differs is who
+    // moved — someone else sending you mail, or you reading it in your own shell — and
+    // the chip does not care.
+    if (action === 'msg') {
+      return { euler: 'message' };
+    }
     if (action === 'account') {
       return { euler: 'account-changed' };
     }
@@ -200,10 +208,11 @@
     return null;
   }
 
-  //: Where the token sits: second field for the fieldless nudges (`git`, `account`),
-  //: third for the pane actions that carry a problem number first (§ above).
+  //: Where the token sits: second field for the fieldless nudges (`git`, `msg`,
+  //: `account`), third for the pane actions that carry a problem number first (§ above).
   function oscToken(parts) {
-    return Number(parts[0] === 'git' || parts[0] === 'account' ? parts[1] : parts[2]) || 0;
+    var fieldless = parts[0] === 'git' || parts[0] === 'msg' || parts[0] === 'account';
+    return Number(fieldless ? parts[1] : parts[2]) || 0;
   }
 
   term.parser.registerOscHandler(5379, function (payload) {

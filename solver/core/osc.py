@@ -17,6 +17,8 @@ payload carries a *token* (:func:`token`):
   token sits *before* the path because a relpath may itself contain ``;``: it is
   the one field that must stay last and be rejoined by the reader.
 - ``git;<token>`` — this clone's git state changed; re-read the header's chip.
+- ``msg;<token>`` — this user's mailbox changed (they read, sent, replied or dismissed);
+  re-read the header's message chip.
 - ``account;<token>`` — this user's account state changed (a new identity, a GitHub
   sign-in); re-read the account page — *if it is the visible pane*.
 
@@ -32,7 +34,7 @@ other.
 """
 from __future__ import annotations
 
-__all__ = ['OSC_CODE', 'account_changed', 'emit', 'git_changed', 'token']
+__all__ = ['OSC_CODE', 'account_changed', 'emit', 'git_changed', 'messages_changed', 'token']
 
 import sys
 import time
@@ -82,6 +84,27 @@ def git_changed() -> None:
     so there is one path, not two.
     """
     emit('git', str(token()))
+
+
+def messages_changed() -> None:
+    """Tell the page this user's mailbox moved: the header re-reads its message chip.
+
+    Emitted by the ``msg`` command on every path that changes what the chip shows —
+    reading a thread (the unread count drops), sending, replying, dismissing.
+
+    This is the **shell's** half of a two-sided nudge, and the distinction matters. When
+    a message *arrives*, the sender's spool pushes to the recipient's instance and the
+    page hears it as a WebSocket text frame (web-server-guide § Messaging): the browser
+    could not have known, because someone else acted. When the user *reads* one, the act
+    happened in their own shell — no service saw it, and a round trip out to the spool and
+    back to say so would be inventing a second mechanism for something stdout already
+    carries. Both land on the same ``euler:message`` body event, so the chip has one
+    listener and does not care which side moved.
+
+    Without it the chip is at its most wrong exactly after the user acted: they read the
+    one unread thread and the badge still says 1 until the next full page load.
+    """
+    emit('msg', str(token()))
 
 
 def account_changed() -> None:

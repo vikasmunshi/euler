@@ -33,6 +33,7 @@ from typing import Any, Literal
 
 from solver.auth.subject import rank
 from solver.config import config
+from solver.core import osc
 from solver.shell import console, register
 from solver.web.msg import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET, DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
 from solver.web.msg.identity import STAFF_FLOOR
@@ -205,6 +206,7 @@ def _read(thread_id: str) -> int:
         return 1
     _print_thread(data)
     _call('read', thread_id=thread_id)      # attention, not activity — failure is harmless
+    osc.messages_changed()                  # the unread count just dropped
     return 0
 
 
@@ -219,6 +221,7 @@ def _send(subject: str, body: str) -> int:
         return 1
     console.print(f'[success]sent[/success] [muted]({data.get("id")})[/muted] — '
                   'staff will see it in their queue')
+    osc.messages_changed()
     return 0
 
 
@@ -232,6 +235,7 @@ def _reply(thread_id: str, body: str) -> int:
         console.print(f'[error]error:[/error] {status} {data}')
         return 1
     console.print(f'[success]replied[/success] [muted]({thread_id})[/muted]')
+    osc.messages_changed()
     return 0
 
 
@@ -271,6 +275,7 @@ def _notice(to: str, subject: str, body: str) -> int:
     count = data.get('recipients', 0)
     console.print(f'[success]notice sent[/success] to [accent]{count}[/accent] '
                   f'recipient(s) [muted]({data.get("id")})[/muted]')
+    osc.messages_changed()
     return 0
 
 
@@ -284,6 +289,7 @@ def _dismiss(thread_id: str) -> int:
         console.print(f'[error]error:[/error] {status} {data}')
         return 1
     console.print(f'[success]dismissed[/success] [muted]({thread_id})[/muted]')
+    osc.messages_changed()
     return 0
 
 
