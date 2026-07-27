@@ -134,7 +134,7 @@ Three cautions earn their keep:
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
-- ○ [0232](/solutions/0232/) — The Race
+- ● [0232](/solutions/0232/) — The Race
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
