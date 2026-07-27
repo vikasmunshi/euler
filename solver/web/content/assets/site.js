@@ -219,12 +219,16 @@
       chip.title = 'terminal — ' + (termConnected ? 'connected' : 'disconnected');
       chip.classList.toggle('is-on', termConnected);
     });
-    // The git menu's verbs type into the shell, so they need one to be there. This
-    // is the same single state, not a second reading of the socket: the panel joins
-    // the set above rather than tracking the terminal on its own. The chip's branch
-    // state is untouched — that is read server-side and owes the socket nothing.
-    document.querySelectorAll('.git-menu').forEach(function (menu) {
-      menu.classList.toggle('git-offline', !termConnected);
+    // A menu whose verbs type into the shell needs one to be there. This is the same
+    // single state, not a second reading of the socket: the panels join the set above
+    // rather than tracking the terminal on their own. Their server-side state (the git
+    // chip's branch, the message chip's count) is untouched — that owes the socket nothing.
+    //
+    // Selected by `.term-menu`, the marker EVERY such menu carries, rather than by each
+    // menu's own class: the git chip was first, and naming the mechanism after it meant
+    // the message chip could not have joined without editing this line.
+    document.querySelectorAll('.term-menu').forEach(function (menu) {
+      menu.classList.toggle('term-offline', !termConnected);
     });
   }
   document.addEventListener('DOMContentLoaded', paintTerminalControls);
@@ -303,7 +307,7 @@
     // menu paints itself offline and says so rather than letting a click do nothing
     // silently. Honour that here: the panel's own note is the answer, not a command
     // shouted into a closed socket.
-    if (button.closest('.git-offline')) { return; }
+    if (button.closest('.term-offline')) { return; }
     postToTerminal({ euler: 'run', command: button.getAttribute('data-term-cmd') });
     // The verb's answer belongs in the terminal, so close the menu that is now
     // covering it. The chip itself refreshes when the shell says so (§ git-changed).

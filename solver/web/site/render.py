@@ -41,7 +41,7 @@ GIT_KEY: str = 'git'
 #: service actually serves ``/messages`` (:mod:`solver.web.user.msg_api`). The header's
 #: chip needs to know whether there is a spool behind it *without* reading one — the
 #: auth tier renders the same header and has none — so this is a plain flag, and the
-#: count arrives later from the chip's own ``/messages/badge`` fetch.
+#: count arrives later from the chip's own ``/messages`` fetch.
 MSG_SPOOL_KEY: str = 'msg_spool'
 #: htmx sets this on every fetch; its presence selects fragment rendering.
 _HX_HEADER = 'HX-Request'

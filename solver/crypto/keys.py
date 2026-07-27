@@ -190,6 +190,7 @@ def user(regen: bool = False) -> int:
     console.print(f'[primary]solver user:[/primary] {app_user.user} [muted]({app_user.profile})[/muted]')
     id_file: Path = config['private_key_file']
     private_key: X25519PrivateKey | None = None
+    minted: bool = False        # a key was created here — the only path that files a request
     if id_file.exists():
         try:
             private_key = load_private_key()
@@ -231,6 +232,7 @@ def user(regen: bool = False) -> int:
         # nudge it to re-read (a no-op unless it is the visible pane). Only when a key
         # was actually minted: a bare `user` status view changed nothing.
         osc.account_changed()
+        minted = True
     pub: str = public_key_hex(private_key.public_key())
     try:
         read_master_key()
@@ -239,7 +241,33 @@ def user(regen: bool = False) -> int:
         console.print(f'[primary]public key:[/primary] {pub}\n[error]✗ cannot encrypt/decrypt[/error]')
         console.print('[muted]Have an existing user `authorize` this public key, or `key-reconstruct` '
                       'from shares.[/muted]')
+        if minted:
+            _request_authorization(app_user.user, pub)
     return 0
+
+
+def _request_authorization(identity: str, public_key: str) -> None:
+    """File a key-authorization request with staff for a freshly minted key.
+
+    Only on the path that needs it: a key was **just minted** *and* it cannot decrypt,
+    so somebody with the master key has to run ``user-authorize`` on it. A key that
+    already decrypts needs nothing, and a bare ``user`` status view is not a request.
+
+    This is why the message layer exists (:mod:`solver.web.msg.notify`) — before it, the
+    account page told the collaborator to "copy your public key to the admin and wait",
+    with no mechanism behind the waiting. Best-effort: the key is minted either way, so a
+    spool that is down or absent costs a nudge and nothing else, and the one line printed
+    here reflects which of the two happened rather than claiming a delivery that failed.
+    """
+    from solver.web.msg.notify import notify_staff
+    sent = notify_staff(
+        f'Key authorization request from {identity}',
+        f'{identity} minted a new key pair and cannot decrypt the private solutions yet.\n\n'
+        f'public key: {public_key}\n\n'
+        f'To grant access, run:\n'
+        f'    user-authorize {public_key}\n')
+    if sent:
+        console.print('[muted]A key-authorization request has been sent to the maintainers.[/muted]')
 
 
 # ==================================================================================================================== #

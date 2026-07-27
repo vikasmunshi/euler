@@ -1,26 +1,28 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Message routes for the per-user service (web-server-guide § Messaging).
+"""The header's message chip for the per-user service (web-server-guide § Messaging).
 
-The browser half of the message spool. These routes exist only on the per-user
-instance, and that is what makes them cheap: the process runs as the collaborator's own
-uid, so a call to ``msg.sock`` is authenticated by ``SO_PEERCRED`` alone — no session
-cookie is forwarded, no token is held, and the spool needs no contact with the auth
-service to know who is asking.
+The whole browser half of the message spool, and deliberately almost nothing: **one
+read-only fragment** and the delivery push. There is no messages page, no compose form
+and no thread view, because the spool is not a mailbox — it is how a *command* tells
+staff something they must act on (`user` filing a key-authorization request). Reading and
+writing happen in the shell, where `requires()` is the boundary; the chip reports, and
+its rows type `msg read <id>` into the terminal.
 
-Nothing here holds state. Every handler is a translation between the spool's JSON and a
-rendered fragment, so the store stays the single system of record and this tier cannot
-develop its own idea of what a thread says.
+The consequence worth stating: **the browser cannot write to the spool at all.** Every
+message and every reply arrives over ``msg.sock`` from a uid the kernel vouched for. This
+tier holds no write route to remove the temptation, which is a smaller surface than a
+guarded one.
 
-Two deliveries, both nudges over paths that already exist:
+Two deliveries, both over paths that already exist:
 
 - ``POST /internal/message`` — socket-peer only (Caddy answers ``/internal/*`` itself),
   pushed by ``euler-msg`` when something lands for this user. It sends a **text frame**
-  to any attached terminal, which ``terminal.js`` relays to the page and the header's
-  chip picks up. It never touches the PTY: a service-originated sequence in the shell's
-  byte stream would re-fire out of the replay buffer on every reattach.
-- the chip's own ``GET /messages/badge`` on document load, so a user who was away sees
-  the count without a push having reached them.
+  to any attached terminal, which ``terminal.js`` relays to the page so the chip re-reads.
+  It never touches the PTY: a service-originated sequence in the shell's byte stream would
+  land in the replay buffer and re-fire on every reattach.
+- ``GET /messages`` on document load, so a user who was away sees the count without a
+  push having reached them.
 """
 from __future__ import annotations
 
@@ -29,29 +31,28 @@ __all__ = ['add_message_routes']
 import json
 import logging
 import os
+from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
 from aiohttp import web
 
-from solver.auth import Authorizations
 from solver.web.msg import DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
 from solver.web.msg.identity import STAFF_FLOOR
-from solver.web.msg.store import BODY_MAX, SUBJECT_MAX
-from solver.web.site.app import redirect_slash, requires
-from solver.web.site.render import MSG_SPOOL_KEY, SUBJECT_KEY, render
+from solver.web.site.app import requires
+from solver.web.site.render import MSG_SPOOL_KEY, render
 from solver.web.ws.manager import PtyManager
 
 log = logging.getLogger('euler-user')
 
-#: Reading and writing your *own* mail sits at the reader floor — the terminal is the
-#: front door for every rung, and asking a question is often a new invitee's first act.
+#: Reading your own chip sits at the reader floor — every rung gets one.
 _MSG_REQUIRES: str = 'reader'
-#: Home crumb, matching the content tier's own.
-_HOME = ('euler', '/')
-#: How long to wait on the spool. It is a local socket doing a small JSON read; a
-#: slow answer means the service is wedged, and a page should say so rather than hang.
-_TIMEOUT = aiohttp.ClientTimeout(total=10)
+#: Rows in the menu. Enough to see what is waiting without turning the chip into a page;
+#: `msg list` in the shell is the complete view.
+_ROWS: int = 5
+#: How long to wait on the spool. It is a local socket doing a small JSON read; a slow
+#: answer means the service is wedged, and the header must not hold the page for it.
+_TIMEOUT = aiohttp.ClientTimeout(total=5)
 
 
 def _socket_path() -> str:
@@ -59,71 +60,58 @@ def _socket_path() -> str:
     return os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)
 
 
-async def _spool(request: web.Request, method: str, path: str,
-                 body: dict[str, Any] | None = None) -> tuple[int, Any]:
-    """One call to ``msg.sock`` as this uid; ``(status, parsed)``.
+async def _mailbox(request: web.Request) -> dict[str, Any]:
+    """This caller's threads and unread count; an empty mailbox when the spool is absent.
 
-    A dead or absent spool comes back as ``(503, {})`` rather than raising, so a page
-    renders an empty mailbox with a notice instead of a 500 — the rest of the site has
-    nothing to do with messaging and must not fail with it.
+    A dead or undeployed spool reads as "no messages" rather than raising: messaging is
+    the least important thing in the header, and it must not take a page render down with
+    it. The chip is identical either way — which is the honest rendering, since a spool
+    that cannot be reached genuinely has nothing to tell us.
     """
     try:
         connector = aiohttp.UnixConnector(path=_socket_path())
         async with aiohttp.ClientSession(connector=connector, timeout=_TIMEOUT) as http:
-            async with http.request(method, f'http://msg{path}', json=body) as resp:
-                try:
-                    return resp.status, await resp.json()
-                except (aiohttp.ContentTypeError, json.JSONDecodeError, ValueError):
-                    return resp.status, await resp.text()
-    except (OSError, aiohttp.ClientError, TimeoutError) as exc:
-        log.warning('message spool unreachable: %s', exc)
-        return 503, {}
+            async with http.get('http://msg/messages') as resp:
+                if resp.status != 200:
+                    log.warning('message spool refused the mailbox read (%s)', resp.status)
+                    return {}
+                data = await resp.json()
+                return data if isinstance(data, dict) else {}
+    except (OSError, aiohttp.ClientError, TimeoutError, ValueError) as exc:
+        log.debug('message spool unreachable: %s', exc)
+        return {}
 
 
-def _is_staff(request: web.Request) -> bool:
-    """Whether this request's subject is at or above the staff floor."""
-    subject = request.get(SUBJECT_KEY)
-    return subject is not None and subject.has(STAFF_FLOOR)
+def _when(stamp: str) -> str:
+    """A menu-width timestamp: the time for today, the date for anything older.
 
-
-def _recipients(request: web.Request) -> list[str]:
-    """Every identity the policy maps — the notice form's datalist.
-
-    Read straight from the world-readable policy file rather than asked of the spool:
-    it is the same source the spool itself validates against, and the answer is not
-    secret (a maintainer picking a recipient already knows the roster).
+    The row has one narrow column for this, and "when" at a glance is either "today, at
+    this time" or "a while ago, on this date" — a full ISO string in that space would be
+    truncated into neither.
     """
-    return sorted(Authorizations.load().all_users())
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    return stamp[11:16] if stamp[:10] == today else stamp[:10]
 
 
-async def _pane(request: web.Request, *, flash: str = '', status: int = 200) -> web.Response:
-    """Render the mailbox pane: your threads, plus the staff queue when you are staff."""
-    code, data = await _spool(request, 'GET', '/messages')
-    mailbox: dict[str, Any] = data if isinstance(data, dict) else {}
-    staff = _is_staff(request)
-    queue: list[Any] = []
-    if staff:
-        queue_code, queue_data = await _spool(request, 'GET', '/staff/queue')
-        if queue_code == 200 and isinstance(queue_data, dict):
-            queue = queue_data.get('queue') or []
-    if code == 503 and not flash:
-        flash = 'The message service is not reachable right now.'
-    return render(request, 'messages.html', {
-        'threads': mailbox.get('threads') or [],
-        'unread': mailbox.get('unread') or 0,
-        'queue': queue,
-        'is_staff': staff,
-        'recipients': _recipients(request) if staff else [],
-        'thread': None,
-        'flash': flash,
-        'subject_max': SUBJECT_MAX,
-        'body_max': BODY_MAX,
-        'crumbs': [_HOME, ('messages', None)],
-    }, block='content', status=status)
+def _rows(threads: list[Any]) -> list[dict[str, Any]]:
+    """The newest :data:`_ROWS` threads, unread first, as menu rows.
+
+    Unread first because the chip's job is "what wants you"; within each group the spool's
+    own newest-first order is kept. Only the fields the row shows survive the trip — the
+    body never reaches the browser, since it is read in the shell.
+    """
+    ordered = sorted((t for t in threads if isinstance(t, dict)),
+                     key=lambda t: not t.get('unread'))
+    return [{'id': str(t.get('id', '')),
+             'author_name': str(t.get('author_name', '')),
+             'subject': str(t.get('subject', '')),
+             'unread': bool(t.get('unread')),
+             'when': _when(str(t.get('updated', '')))}
+            for t in ordered[:_ROWS]]
 
 
 def add_message_routes(app: web.Application, manager: PtyManager) -> None:
-    """Register the message pane, its writes, and the delivery push on the per-user app.
+    """Register the header chip's fragment and the delivery push on the per-user app.
 
     *manager* is passed in rather than read from an app key: the key that holds it is
     defined in :mod:`solver.web.user.app`, which imports this module, so reaching for it
@@ -135,7 +123,7 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
         """Tell every render on this tier that a spool exists behind the header's chip.
 
         A flag, never a count: the chip must not cost a spool read per navigation, so it
-        fetches its own number once per document (:mod:`solver.web.site.render`).
+        fetches its own state once per document (:mod:`solver.web.site.render`).
         """
         request[MSG_SPOOL_KEY] = True
         return await handler(request)  # type: ignore[no-any-return]
@@ -143,79 +131,23 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
     app.middlewares.append(spool_present)
 
     @requires(_MSG_REQUIRES)
-    async def pane(request: web.Request) -> web.StreamResponse:
-        """``GET /messages/`` — the mailbox."""
-        return await _pane(request)
+    async def chip(request: web.Request) -> web.StreamResponse:
+        """``GET /messages`` — the header's message chip alone, with its rows.
 
-    @requires(_MSG_REQUIRES)
-    async def badge(request: web.Request) -> web.StreamResponse:
-        """``GET /messages/badge`` — the header chip alone, with the live unread count.
-
-        The refresh half of the chip's contract, the same shape ``/git`` has: the count
-        changes when someone *else* acts, which no navigation can predict, so the chip
-        asks for itself on load and on the delivery nudge.
+        The same shape ``/git`` has, and for the same reason: the count moves when someone
+        *else* acts, which no navigation can predict, so the chip asks for itself on load
+        and on the delivery nudge rather than riding every fragment out-of-band.
         """
-        code, data = await _spool(request, 'GET', '/messages')
-        unread = data.get('unread', 0) if code == 200 and isinstance(data, dict) else 0
-        return render(request, '_msg.html', {'msg_unread': unread})
-
-    @requires(_MSG_REQUIRES)
-    async def one_thread(request: web.Request) -> web.StreamResponse:
-        """``GET /messages/{id}`` — one thread, marked read as it is shown."""
-        thread_id = request.match_info['id']
-        code, data = await _spool(request, 'GET', f'/messages/{thread_id}')
-        if code != 200 or not isinstance(data, dict):
-            raise web.HTTPNotFound(text='no such thread')
-        await _spool(request, 'POST', f'/messages/{thread_id}/read')
-        return render(request, 'messages.html', {
-            'thread': data,
-            'is_staff': _is_staff(request),
-            'subject_max': SUBJECT_MAX,
-            'body_max': BODY_MAX,
-            'crumbs': [_HOME, ('messages', '/messages/'), (data.get('subject', 'thread'), None)],
-        }, block='content')
-
-    @requires(_MSG_REQUIRES)
-    async def compose(request: web.Request) -> web.StreamResponse:
-        """``POST /messages/`` — ask staff something; answers with the pane."""
-        form = await request.post()
-        code, data = await _spool(request, 'POST', '/messages', {
-            'subject': str(form.get('subject', '')), 'body': str(form.get('body', ''))})
-        if code == 201:
-            return await _pane(request, flash='Sent — the maintainers will see it in their queue.')
-        detail = data if isinstance(data, str) else 'message refused'
-        return await _pane(request, flash=detail, status=400 if code < 500 else 503)
-
-    @requires(_MSG_REQUIRES)
-    async def reply(request: web.Request) -> web.StreamResponse:
-        """``POST /messages/{id}/reply`` — answer on a thread you are party to."""
-        thread_id = request.match_info['id']
-        form = await request.post()
-        code, _data = await _spool(request, 'POST', f'/messages/{thread_id}/reply',
-                                   {'body': str(form.get('body', ''))})
-        if code != 200:
-            return await _pane(request, flash='Reply refused.', status=400)
-        return await one_thread(request)
-
-    @requires(STAFF_FLOOR)
-    async def notice(request: web.Request) -> web.StreamResponse:
-        """``POST /messages/notice`` — a staff notice to named recipients, or everyone.
-
-        An empty recipient box means everyone: the common case for a notice is "tell
-        the collaborators", and making that the default of an empty field beats a
-        checkbox that has to be found.
-        """
-        form = await request.post()
-        raw = str(form.get('to', '')).strip()
-        targets: Any = [part.strip() for part in raw.split(',') if part.strip()] if raw else '*'
-        code, data = await _spool(request, 'POST', '/staff/notice', {
-            'to': targets, 'subject': str(form.get('subject', '')),
-            'body': str(form.get('body', ''))})
-        if code == 201 and isinstance(data, dict):
-            count = data.get('recipients', 0)
-            return await _pane(request, flash=f'Notice sent to {count} recipient(s).')
-        detail = data if isinstance(data, str) else 'notice refused'
-        return await _pane(request, flash=detail, status=400 if code < 500 else 503)
+        mailbox = await _mailbox(request)
+        threads = mailbox.get('threads') or []
+        return render(request, '_msg.html', {
+            'unread': mailbox.get('unread') or 0,
+            'total': len(threads),
+            'threads': _rows(threads),
+            # The rung the queue verb needs, so the template does not carry a second
+            # copy of it — the floor lives with the service that enforces it.
+            'staff_floor': STAFF_FLOOR,
+        })
 
     async def internal_message(request: web.Request) -> web.Response:
         """``POST /internal/message`` — the spool's delivery nudge.
@@ -234,15 +166,7 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
         log.info('message nudge (%d unread) reached %d terminal(s)', unread, sent)
         return web.json_response({'notified': sent})
 
-    # `/messages/badge` before `/messages/{id}`: aiohttp matches in registration order,
-    # and the dynamic route would otherwise swallow the literal one.
     app.add_routes([
-        web.get('/messages', redirect_slash),      # canonical trailing slash (§ The site)
-        web.get('/messages/', pane),
-        web.post('/messages/', compose),
-        web.get('/messages/badge', badge),
-        web.post('/messages/notice', notice),
-        web.get('/messages/{id}', one_thread),
-        web.post('/messages/{id}/reply', reply),
+        web.get('/messages', chip),
         web.post('/internal/message', internal_message),
     ])

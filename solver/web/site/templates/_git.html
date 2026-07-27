@@ -16,7 +16,7 @@
    in render._context — so the auth tier's pages, and any tier that cannot read a
    clone, render the inert chip instead of failing. #}
 {% if git and not git.unknown %}
-<details id="git" class="menu git-menu {{ 'is-dirty' if git.dirty else 'is-clean' }}"
+<details id="git" class="menu git-menu term-menu {{ 'is-dirty' if git.dirty else 'is-clean' }}"
          {% if oob %}hx-swap-oob="true"{% endif %}
          hx-get="/git" hx-trigger="euler:git-changed from:body" hx-swap="outerHTML">
   {# The title carries the whole state in three counts: the chip is small, and it is
@@ -66,10 +66,11 @@
     {% endif %}
     <li class="menu-sep" aria-hidden="true"></li>
     {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the
-       frame on a closed socket), so site.js paints .git-offline on this panel from
+       frame on a closed socket), so site.js paints .term-offline on this panel from
        the same `termConnected` every other [data-term-*] control reads. Without it a
-       click would silently do nothing. #}
-    <li class="git-need-term">
+       click would silently do nothing. The `.term-menu` marker on the <details> above is
+       what selects this panel — every menu whose verbs type commands carries it. #}
+    <li class="term-need">
       These run in the terminal, and it is disconnected.<br>
       <button type="button" data-term-toggle>Connect the terminal</button>
     </li>

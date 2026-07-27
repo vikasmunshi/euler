@@ -1,37 +1,33 @@
-{# The message chip (web-server-guide § Messaging): how many threads want you, and the way
-   to them. Lives in the fixed header inside `.app-who`, beside the terminal and git
-   chips — your unread count is state about *you*, not about the page in the pane.
+{# The message chip (web-server-guide § Messaging): what wants your attention, and the way to
+   read it. Lives in the fixed header inside `.app-who`, between the terminal and git chips —
+   all three are state about *you* rather than about the page in the pane.
 
-   Two htmx concerns on one control, so two elements: the outer span refreshes ITSELF
-   (`hx-swap="outerHTML"` from `/messages/badge`), the inner link swaps the PANE to
-   `/messages/`. One element cannot do both — an `hx-trigger="load"` that targeted
-   #content would navigate the pane on every page load.
+   There is no messages page, and that is the design. The spool exists so a *command* can
+   tell staff something they must act on (`user` filing a key-authorization request), not so
+   people can write to each other in a browser. So this chip reports, and every verb on it
+   **types a real command into the web shell** — the same move the git chip's verbs and the
+   account page's tool rows make, for the same reason: one execution path, one audit trail,
+   and the command's own `requires()` is the boundary whatever this menu shows.
 
-   Deliberately NOT out-of-band on every navigation, unlike the git chip. The count
-   changes when someone writes to you, which is not something a page load can predict,
-   so paying a spool read per navigation would buy nothing. Two triggers instead:
-   · `load` — once per document, so a full page load is always current;
-   · `euler:message from:body` — the delivery nudge, pushed by euler-msg to this user's
-     instance, relayed over the terminal's WebSocket as a TEXT frame (terminal.js →
-     site.js). That is what makes a message arriving *now* show up now.
+   Same <details class="menu"> chassis as Actions, git and the user pill: one menu idiom in
+   the header, not four.
 
    `msg_spool` (render._context) is the switch: True only on a tier that actually serves
-   /messages, so the auth service — which renders this same header and has no spool —
-   gets the inert chip instead of a dead fetch. It is a plain flag, never a count: the
-   header must not cost a spool read per navigation, so the number arrives from this
-   element's own `/messages/badge` fetch a moment later.
+   /messages, so the auth service — which renders this same header and has no spool — gets
+   the inert chip instead of a dead fetch. It is a plain flag, never a count: the header must
+   not cost a spool read per navigation, so the number and the rows arrive from this
+   element's own fetch a moment later.
 
-   A count of 0 renders the chip bare rather than hiding it: a glyph that vanishes when
-   your inbox empties makes the reader wonder whether it went away or they simply have
-   no mail. #}
+   Two triggers, no polling:
+   · `load` — once per document, so a full page load is always current;
+   · `euler:message from:body` — the delivery nudge, pushed by euler-msg to this user's
+     instance and relayed over the terminal's WebSocket as a TEXT frame (terminal.js →
+     site.js). That is what makes a message arriving *now* show up now. #}
 {% if subject and msg_spool %}
-<span id="msg-chip" class="msg-chip{% if msg_unread %} is-unread{% endif %}"
-      hx-get="/messages/badge" hx-swap="outerHTML"
-      hx-trigger="load, euler:message from:body">
-  <a class="msg-link" href="/messages/" hx-get="/messages/" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true"
-     title="messages{% if msg_unread is defined %} — {{ msg_unread }} unread{% endif %}"
-     aria-label="messages{% if msg_unread is defined %}, {{ msg_unread }} unread{% endif %}">
+<details id="msg-chip" class="menu msg-menu term-menu{% if unread %} is-unread{% endif %}"
+         hx-get="/messages" hx-swap="outerHTML"
+         hx-trigger="load, euler:message from:body">
+  <summary title="messages — {{ unread }} unread">
     {# An envelope, closed: the chip is about mail waiting, not mail read. #}
     <svg class="msg-glyph" viewBox="0 0 24 24" aria-hidden="true">
       <rect x="2.5" y="5" width="19" height="14" rx="2" fill="none"
@@ -39,12 +35,61 @@
       <path d="M3.5 7l8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    {% if msg_unread %}<span class="msg-count">{{ msg_unread }}</span>{% endif %}
-  </a>
-</span>
+    {# The count appears only when there is one. Unlike the git chip's ahead/behind pair
+       there is no second axis to keep aligned, so a bare envelope is unambiguous: nothing
+       is waiting. #}
+    {% if unread %}<span class="msg-count">{{ unread }}</span>{% endif %}
+  </summary>
+  <ul class="menu-list menu-right msg-panel">
+    {# The state in two counts, shown even at zero — a readout that always names its axes
+       is read at a glance, where a disappearing line makes the reader wonder what it
+       dropped. #}
+    <li class="menu-info msg-summary">{{ unread }} unread, {{ total }} thread{{ '' if total == 1 else 's' }}</li>
+    {% if threads %}
+    <li class="menu-sep" aria-hidden="true"></li>
+    {% for item in threads %}
+    {# One row per thread, newest first, unread before read. The button types
+       `msg read <id>` — the thread prints in the shell and is marked read there, so the
+       browser never needs a thread view and never reads the body. #}
+    <li class="verb msg-row{% if item.unread %} is-unread{% endif %}">
+      <button type="button" data-term-cmd="msg read {{ item.id }}"
+              title="run `msg read {{ item.id }}` in your terminal">
+        <span class="msg-dot" aria-hidden="true"></span>
+        <span class="msg-from">{{ item.author_name }}</span>
+        <span class="msg-subject">{{ item.subject }}</span>
+        <span class="msg-when">{{ item.when }}</span>
+      </button>
+    </li>
+    {% endfor %}
+    {% endif %}
+    <li class="menu-sep" aria-hidden="true"></li>
+    {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the frame
+       on a closed socket), so site.js paints .term-offline on this panel from the same
+       `termConnected` every other [data-term-*] control reads. Without it a click would
+       silently do nothing. #}
+    <li class="term-need">
+      These run in the terminal, and it is disconnected.<br>
+      <button type="button" data-term-toggle>Connect the terminal</button>
+    </li>
+    {# The verbs, gated but SHOWN: the ladder is part of what the header teaches, and a
+       verb that vanishes makes two collaborators' screens differ silently. #}
+    {% macro verb(label, command, floor) %}
+    {% if subject.has(floor) %}
+    <li class="verb"><button type="button" data-term-cmd="{{ command }}"
+        title="run `{{ command }}` in your terminal">{{ label }}<span class="cmd">{{ command }}</span></button></li>
+    {% else %}
+    <li class="verb is-locked"><button type="button" aria-disabled="true"
+        title="{{ label }} needs the {{ floor }} profile">{{ label }}<span class="cmd">{{ floor }}</span></button></li>
+    {% endif %}
+    {% endmacro %}
+    {{ verb('All messages', 'msg list', 'reader') }}
+    {{ verb('Inbound queue', 'msg queue', staff_floor) }}
+  </ul>
+</details>
 {% else %}
-{# Signed out, or a tier with no spool: inert, never absent — the header keeps its shape
-   before the visitor is let in, exactly as the terminal and git chips do. #}
+{# Inert, never absent — signed out, or a tier with no spool. The header keeps its shape
+   before the visitor is let in, exactly as the terminal and git chips do. No hx- attributes:
+   the auth tier has no /messages route, and a dead fetch would be a promise nothing keeps. #}
 <span class="msg-chip is-locked" aria-disabled="true" title="no messages">
   <svg class="msg-glyph" viewBox="0 0 24 24" aria-hidden="true">
     <rect x="2.5" y="5" width="19" height="14" rx="2" fill="none"

@@ -403,8 +403,13 @@ async def _no_git_read(_repo_root: Any, *, fetch: bool = False) -> None:
     return None
 
 
-class UserMessagePaneTests(AioHTTPTestCase):
-    """The browser half: pane, badge, writes, and the delivery push."""
+class UserMessageChipTests(AioHTTPTestCase):
+    """The browser half — which is one read-only fragment and the delivery push.
+
+    What is *absent* is as much the contract as what is present: there is no pane, no
+    thread view and no write route, so the browser cannot put anything into the spool.
+    Those tests are the ones asserting a 404 below.
+    """
 
     profile: str = 'maintainer'
 
@@ -427,7 +432,7 @@ class UserMessagePaneTests(AioHTTPTestCase):
         gitstate.read = _no_git_read            # type: ignore[assignment]
         self.addCleanup(setattr, gitstate, 'read', saved_read)
 
-        # A real spool behind the tier: the pane must be tested against the store, not
+        # A real spool behind the tier: the chip must be tested against the store, not
         # against a stub that agrees with it.
         config = MsgConfig(
             state_dir=self.scratch / 'state', socket_path=self.scratch / 'msg.sock',
@@ -460,77 +465,79 @@ class UserMessagePaneTests(AioHTTPTestCase):
         return {'X-User': _ALICE, 'X-Profile': self.profile}
 
     @unittest_run_loop
-    async def test_pane_renders(self) -> None:
-        resp = await self.client.get('/messages/', headers=self.headers)
+    async def test_the_chip_renders_with_its_verbs(self) -> None:
+        resp = await self.client.get('/messages', headers=self.headers)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertIn('Ask the maintainers', body)
-
-    @unittest_run_loop
-    async def test_slashless_path_is_canonicalised(self) -> None:
-        resp = await self.client.get('/messages', headers=self.headers, allow_redirects=False)
-        self.assertEqual(resp.status, 301)
-        self.assertEqual(resp.headers['Location'], '/messages/')
+        self.assertIn('id="msg-chip"', body)
+        self.assertIn('msg list', body, 'the chip offers the shell verb, not a page')
 
     @unittest_run_loop
     async def test_unauthenticated_is_refused(self) -> None:
-        self.assertEqual((await self.client.get('/messages/')).status, 401)
+        self.assertEqual((await self.client.get('/messages')).status, 401)
 
     @unittest_run_loop
-    async def test_badge_reports_the_unread_count(self) -> None:
-        resp = await self.client.get('/messages/badge', headers=self.headers)
-        self.assertEqual(resp.status, 200)
-        self.assertIn('msg-chip', await resp.text())
-
-    @unittest_run_loop
-    async def test_compose_reaches_the_store_and_the_pane_shows_it(self) -> None:
-        resp = await self.client.post('/messages/', headers=self.headers,
-                                      data={'subject': 'from the web', 'body': 'hello'})
-        self.assertEqual(resp.status, 200)
-        self.assertIn('Sent', await resp.text())
-        self.assertEqual(len(self.spool.store.inbound(_ME)), 1)
-        pane = await (await self.client.get('/messages/', headers=self.headers)).text()
-        self.assertIn('from the web', pane)
-
-    @unittest_run_loop
-    async def test_a_thread_can_be_opened_and_replied_to(self) -> None:
-        thread_id = self.spool.store.submit(_ME, 'a question', 'the body', [_ME])
+    async def test_rows_type_a_read_command_into_the_shell(self) -> None:
+        """A row is a terminal verb, not a link: there is nowhere in the browser to go."""
+        thread_id = self.spool.store.submit(_ALICE_BOX, 'a question', 'the body', [_ME])
         assert thread_id is not None
-        page = await (await self.client.get(f'/messages/{thread_id}',
-                                            headers=self.headers)).text()
-        self.assertIn('the body', page)
-        resp = await self.client.post(f'/messages/{thread_id}/reply', headers=self.headers,
-                                      data={'body': 'the answer'})
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
+        self.assertIn('a question', body)
+        self.assertNotIn('the body', body, 'the body is read in the shell, never rendered here')
+
+    @unittest_run_loop
+    async def test_the_count_and_totals_come_from_the_spool(self) -> None:
+        self.spool.store.submit(_ALICE_BOX, 's1', 'b', [_ME])
+        self.spool.store.submit(_ALICE_BOX, 's2', 'b', [_ME])
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn('2 unread, 2 threads', body)
+        self.assertIn('is-unread', body)
+
+    @unittest_run_loop
+    async def test_an_empty_mailbox_still_names_its_axes(self) -> None:
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn('0 unread, 0 threads', body)
+
+    @unittest_run_loop
+    async def test_rows_are_capped_and_put_unread_first(self) -> None:
+        for index in range(8):
+            thread_id = self.spool.store.submit(_ALICE_BOX, f'subject-{index}', 'b', [_ME])
+            assert thread_id is not None
+            if index < 6:                       # leave the last two unread
+                self.spool.store.mark_read(thread_id, _ME, staff=True)
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertEqual(body.count('data-term-cmd="msg read '), 5, 'the menu is capped')
+        self.assertIn('subject-6', body)        # …and the unread ones are the ones kept
+        self.assertIn('subject-7', body)
+
+    @unittest_run_loop
+    async def test_the_chip_survives_an_unreachable_spool(self) -> None:
+        """Messaging is the least important thing in the header; it must not take a page
+        render down with it."""
+        await self._spool_runner.cleanup()
+        resp = await self.client.get('/messages', headers=self.headers)
         self.assertEqual(resp.status, 200)
-        self.assertIn('the answer', await resp.text())
+        self.assertIn('0 unread, 0 threads', await resp.text())
+        self._spool_runner = web.AppRunner(build_app(self.spool), access_log=None)
+        await self._spool_runner.setup()
+        await web.UnixSite(self._spool_runner, str(self.spool_config.socket_path)).start()
 
     @unittest_run_loop
-    async def test_opening_a_thread_marks_it_read(self) -> None:
-        thread_id = self.spool.store.submit(_ALICE_BOX, 's', 'b', [_ME])
-        assert thread_id is not None
-        self.assertEqual(self.spool.store.unread_count(_ME, staff=True), 1)
-        await self.client.get(f'/messages/{thread_id}', headers=self.headers)
-        self.assertEqual(self.spool.store.unread_count(_ME, staff=True), 0)
+    async def test_the_header_carries_the_chip_on_an_ordinary_page(self) -> None:
+        """Every page renders it with the spool flag but no count — no read per navigation."""
+        body = await (await self.client.get('/account', headers=self.headers)).text()
+        self.assertIn('id="msg-chip"', body)
+        self.assertIn('hx-get="/messages"', body)
 
     @unittest_run_loop
-    async def test_a_missing_thread_is_404(self) -> None:
-        resp = await self.client.get('/messages/deadbeefdeadbeef', headers=self.headers)
-        self.assertEqual(resp.status, 404)
-
-    @unittest_run_loop
-    async def test_notice_needs_the_staff_floor(self) -> None:
-        resp = await self.client.post('/messages/notice',
-                                      headers={'X-User': _ALICE, 'X-Profile': 'contributor'},
-                                      data={'subject': 's', 'body': 'b'})
-        self.assertEqual(resp.status, 403)
-
-    @unittest_run_loop
-    async def test_staff_notice_with_no_recipients_goes_to_everyone(self) -> None:
-        resp = await self.client.post('/messages/notice', headers=self.headers,
-                                      data={'subject': 'all hands', 'body': 'read this'})
-        self.assertEqual(resp.status, 200)
-        self.assertIn('Notice sent', await resp.text())
-        self.assertEqual(len(self.spool.store.threads_for(_ALICE_BOX)), 1)
+    async def test_there_is_no_pane_and_no_write_route(self) -> None:
+        """The browser cannot put anything into the spool — the surface simply is not there."""
+        for method, path in (('GET', '/messages/'), ('GET', '/messages/whatever'),
+                             ('POST', '/messages'), ('POST', '/messages/'),
+                             ('POST', '/messages/whatever/reply'), ('POST', '/messages/notice')):
+            resp = await self.client.request(method, path, headers=self.headers)
+            self.assertIn(resp.status, (404, 405), f'{method} {path} should not exist')
 
     @unittest_run_loop
     async def test_the_delivery_push_is_accepted_with_no_terminal_attached(self) -> None:
@@ -544,63 +551,94 @@ class UserMessagePaneTests(AioHTTPTestCase):
         resp = await self.client.post('/internal/message', data='not json')
         self.assertEqual(resp.status, 400)
 
-    @unittest_run_loop
-    async def test_the_header_chip_is_present_on_an_ordinary_page(self) -> None:
-        """Every page carries the chip, with a spool flag but no count (no per-nav read)."""
-        body = await (await self.client.get('/account', headers=self.headers)).text()
-        self.assertIn('id="msg-chip"', body)
-        self.assertIn('/messages/badge', body)
 
-    @unittest_run_loop
-    async def test_the_pane_survives_an_unreachable_spool(self) -> None:
-        """Messaging must not take the rest of the site down with it."""
-        await self._spool_runner.cleanup()
-        resp = await self.client.get('/messages/', headers=self.headers)
-        self.assertEqual(resp.status, 200)
-        self.assertIn('not reachable', await resp.text())
-        self._spool_runner = web.AppRunner(build_app(self.spool), access_log=None)
-        await self._spool_runner.setup()
-        await web.UnixSite(self._spool_runner, str(self.spool_config.socket_path)).start()
-
-
-class UserMessageReaderTests(UserMessagePaneTests):
-    """A reader sees their own mail and no staff surface."""
+class UserMessageChipReaderTests(UserMessageChipTests):
+    """A reader gets the same chip, with the staff verb shown but locked."""
 
     profile = 'reader'
 
     @unittest_run_loop
-    async def test_the_queue_is_absent_from_a_readers_pane(self) -> None:
-        body = await (await self.client.get('/messages/', headers=self.headers)).text()
-        self.assertNotIn('Inbound queue', body)
-        self.assertNotIn('Send a notice', body)
+    async def test_the_queue_verb_is_shown_but_locked(self) -> None:
+        """Shown, not hidden: the ladder is part of what the header teaches."""
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn('Inbound queue', body)
+        self.assertIn('needs the maintainer profile', body)
+        self.assertNotIn('data-term-cmd="msg queue"', body)
 
     @unittest_run_loop
-    async def test_notice_needs_the_staff_floor(self) -> None:
-        resp = await self.client.post('/messages/notice', headers=self.headers,
-                                      data={'subject': 's', 'body': 'b'})
-        self.assertEqual(resp.status, 403)
-
-    @unittest_run_loop
-    async def test_staff_notice_with_no_recipients_goes_to_everyone(self) -> None:
-        """Not a reader's verb — the inherited staff case does not apply."""
-        resp = await self.client.post('/messages/notice', headers=self.headers,
-                                      data={'subject': 's', 'body': 'b'})
-        self.assertEqual(resp.status, 403)
-
-    @unittest_run_loop
-    async def test_compose_reaches_the_store_and_the_pane_shows_it(self) -> None:
-        """With this login a reader, no staff are mapped, so the send is refused."""
-        resp = await self.client.post('/messages/', headers=self.headers,
-                                      data={'subject': 'from the web', 'body': 'hello'})
-        self.assertEqual(resp.status, 400)
-
-    @unittest_run_loop
-    async def test_opening_a_thread_marks_it_read(self) -> None:
-        thread_id = self.spool.store.submit(_ME, 's', 'b', [_ME])
+    async def test_rows_type_a_read_command_into_the_shell(self) -> None:
+        """As a reader this login is not staff, so the thread must be addressed to them."""
+        thread_id = self.spool.store.notice(_ALICE_BOX, 'a notice', 'the body', [_ME])
         assert thread_id is not None
-        self.assertEqual(self.spool.store.unread_count(_ME), 0, 'the author has read it')
-        await self.client.get(f'/messages/{thread_id}', headers=self.headers)
-        self.assertEqual(self.spool.store.unread_count(_ME), 0)
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
+        self.assertNotIn('the body', body)
+
+    @unittest_run_loop
+    async def test_the_count_and_totals_come_from_the_spool(self) -> None:
+        self.spool.store.notice(_ALICE_BOX, 's1', 'b', [_ME])
+        self.spool.store.notice(_ALICE_BOX, 's2', 'b', [_ME])
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn('2 unread, 2 threads', body)
+
+    @unittest_run_loop
+    async def test_rows_are_capped_and_put_unread_first(self) -> None:
+        for index in range(8):
+            thread_id = self.spool.store.notice(_ALICE_BOX, f'subject-{index}', 'b', [_ME])
+            assert thread_id is not None
+            if index < 6:
+                self.spool.store.mark_read(thread_id, _ME)
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertEqual(body.count('data-term-cmd="msg read '), 5)
+        self.assertIn('subject-6', body)
+        self.assertIn('subject-7', body)
+
+
+class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
+    """The programmatic sender — why the layer exists at all."""
+
+    async def asyncSetUp(self) -> None:
+        silence()
+        self.scratch = Path(tempfile.mkdtemp(prefix='euler-msg-notify-'))
+        self.addCleanup(shutil.rmtree, self.scratch, True)
+        policy = self.scratch / 'authorizations.json'
+        _write_policy(policy, {_ME: 'maintainer', _ALICE: 'reader'})
+        os.environ['EULER_AUTHZ_FILE'] = str(policy)
+        self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        os.environ['EULER_MSG_SOCKET'] = str(self.scratch / 'msg.sock')
+        self.addCleanup(os.environ.pop, 'EULER_MSG_SOCKET', None)
+
+        config = MsgConfig(
+            state_dir=self.scratch / 'state', socket_path=self.scratch / 'msg.sock',
+            admin_socket_path=self.scratch / 'admin.sock', socket_group='',
+            admin_socket_group='', admin_token=_ADMIN_TOKEN, user_socket_dir='')
+        config.state_dir.mkdir(parents=True, exist_ok=True)
+        self.spool = MessageService(config)
+        self.runner = web.AppRunner(build_app(self.spool), access_log=None)
+        await self.runner.setup()
+        await web.UnixSite(self.runner, str(config.socket_path)).start()
+        self.addAsyncCleanup(self.runner.cleanup)
+
+    async def test_a_command_can_queue_a_message_for_staff(self) -> None:
+        from solver.web.msg.notify import notify_staff
+        sent = await asyncio.to_thread(notify_staff, 'Key authorization request', 'public key: abc')
+        self.assertTrue(sent)
+        queue = self.spool.store.inbound()
+        self.assertEqual(len(queue), 1)
+        self.assertEqual(queue[0].subject, 'Key authorization request')
+        self.assertIn('abc', queue[0].body)
+
+    async def test_an_absent_spool_is_a_quiet_false_not_an_exception(self) -> None:
+        """A command must not fail because the thing reporting it could not report."""
+        from solver.web.msg.notify import notify_staff
+        os.environ['EULER_MSG_SOCKET'] = str(self.scratch / 'nothing-here.sock')
+        sent = await asyncio.to_thread(notify_staff, 's', 'b')
+        self.assertFalse(sent)
+
+    async def test_a_refusal_is_reported_as_false(self) -> None:
+        from solver.web.msg.notify import notify_staff
+        sent = await asyncio.to_thread(notify_staff, '', '')      # empty fields are refused
+        self.assertFalse(sent)
 
 
 class DeliveryNudgeTests(unittest.IsolatedAsyncioTestCase):

@@ -212,6 +212,7 @@ solver/
       commands.py     — The ``msg`` shell command: read and write the message spool.
       config.py       — Message-service runtime configuration, read from the environment.
       identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.
+      notify.py       — Send a message **from a command** — the message layer's actual purpose.
       store.py        — The message spool at ``<state>/messages.json`` — threads, replies and read-state.
     site/             — The content service — server-rendered pages + htmx fragments.
       __main__.py     — Content service entry point: ``python -m solver.web.site``.
@@ -225,7 +226,7 @@ solver/
       __main__.py     — Per-user service entry point: ``python -m solver.web.user``.
       app.py          — The per-user aiohttp app: one collaborator's content **and** web shell.
       config.py       — Per-user service runtime configuration, read from the environment.
-      msg_api.py      — Message routes for the per-user service (web-server-guide § Messaging).
+      msg_api.py      — The header's message chip for the per-user service (web-server-guide § Messaging).
       vault_api.py    — Vault + account routes for the per-user service.
     ws/               — The web-shell service: the solver PTY terminal over WebSocket.
       __main__.py     — Web-shell service entry point: ``python -m solver.web.ws``.

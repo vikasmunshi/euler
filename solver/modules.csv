@@ -79,6 +79,7 @@ solver.web.msg.app,
 solver.web.msg.commands,True
 solver.web.msg.config,
 solver.web.msg.identity,
+solver.web.msg.notify,
 solver.web.msg.store,
 solver.web.site.app,
 solver.web.site.config,

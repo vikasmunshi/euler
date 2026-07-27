@@ -35,8 +35,18 @@ class _UnixConnection(http.client.HTTPConnection):
 
     def connect(self) -> None:
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.settimeout(self.timeout)
-        sock.connect(self._socket_path)
+        try:
+            sock.settimeout(self.timeout)
+            sock.connect(self._socket_path)
+        except BaseException:
+            # A failed connect never reaches `self.sock`, so the caller's `close()` in
+            # `request()` cannot reach this socket either — without closing it here the fd
+            # leaks. That is the *expected* path for two callers, not a rare one: the `msg`
+            # command probes the public socket on every invocation from the operator's
+            # terminal (which is deliberately not in euler-web), and `notify_staff` runs on
+            # every checkout with no spool deployed.
+            sock.close()
+            raise
         self.sock = sock
 
 

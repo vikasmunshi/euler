@@ -206,13 +206,8 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
    QUIET WHEN EMPTY, like the git chip: no unread means a muted envelope and no digit.
    Every mark that appears is something to act on, which is what makes the header worth
    a glance instead of wallpaper. */
-.msg-chip { display: inline-flex; align-items: center; color: var(--muted); }
-.msg-chip.is-unread { color: var(--text); }
-.msg-link {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  padding-inline: 0.5rem; color: inherit; text-decoration: none;
-}
-.msg-link:hover { color: var(--accent); }
+.msg-chip { display: inline-flex; align-items: center; color: var(--muted); padding-inline: 0.5rem; }
+.msg-menu.is-unread > summary { color: var(--text); }
 .msg-glyph { width: 1rem; height: 1rem; display: block; flex: none; }
 /* The count is the badge: accent-filled, so an unread thread is the one warm mark in
    an otherwise muted header. Tabular digits keep the chip from twitching at 9 → 10. */
@@ -224,50 +219,28 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
   border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-/* ── the messages pane (messages.html) ───────────────────────────────────────
-   A thread list and one thread, in the panel idiom the rest of the site uses. Rows are
-   links, not cards: a mailbox is scanned top-to-bottom, and the subject is what the
-   eye is looking for, so it leads and the metadata trails in --muted. */
-.msg-list { list-style: none; margin: 0.6rem 0 0; padding: 0; }
-.msg-row { border-top: 1px solid var(--border); }
-.msg-row:first-child { border-top: 0; }
-.msg-row > a {
-  display: grid; grid-template-columns: 0.75rem 1fr auto; align-items: baseline;
-  gap: 0.5rem; padding: 0.5rem 0.2rem; text-decoration: none; color: var(--text);
+/* The chip's own menu: a summary line, then up to five threads, then the verbs. There
+   is no messages page — a row types `msg read <id>` into the shell and the thread prints
+   there — so this panel is the whole browser-side surface and it stays inside the shared
+   `.menu-list` chassis rather than growing a layout of its own. */
+.msg-menu > summary { display: inline-flex; align-items: center; gap: 0.35rem; padding-inline: 0.5rem; }
+.msg-panel { min-width: 20rem; }
+.msg-summary { white-space: nowrap; }
+/* A row is a verb button like the others, but with four columns instead of a label:
+   the dot holds its place when read, so the list does not shift sideways as you work
+   down it. The subject takes the slack and ellipsises; nothing else may wrap. */
+.msg-row button {
+  display: grid; grid-template-columns: 0.45rem auto 1fr auto; align-items: baseline;
+  gap: 0.45rem; text-align: left;
 }
-.msg-row > a:hover { background: var(--surface-hi); }
-.msg-row .msg-subject { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.msg-row .msg-meta { font-size: 0.78rem; white-space: nowrap; }
-/* The dot is the unread marker, and it holds its column when read — a row that shifts
-   sideways as you read it makes the list feel unstable while you work down it. */
 .msg-row .msg-dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: transparent; }
 .msg-row.is-unread .msg-dot { background: var(--accent); }
-.msg-row.is-unread .msg-subject { font-weight: 600; }
-@media (max-width: 700px) {
-  .msg-row > a { grid-template-columns: 0.75rem 1fr; }
-  .msg-row .msg-meta { grid-column: 2; }
-}
-
-.msg-head { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
-.msg-body { margin: 0.5rem 0 0; }
-/* A reply is indented and rule-marked so the thread reads as a conversation rather
-   than one long body: the rule is the turn boundary. */
-.msg-reply {
-  margin-top: 0.9rem; padding-left: 0.8rem;
-  border-left: 2px solid var(--border);
-}
-.msg-form { margin-top: 0.9rem; flex-direction: column; align-items: flex-start; }
-.msg-form textarea {
-  width: 100%; font: inherit; color: var(--text);
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 0.45rem 0.6rem; resize: vertical;
-}
-.msg-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-/* inbound vs notice: which direction a thread travelled. Muted on purpose — the pill
-   labels the thread, it is not the thing you came to read. */
-.pill-inbound, .pill-notice {
-  color: var(--muted); background: transparent; border-color: var(--border);
-}
+.msg-row .msg-from { color: var(--muted); font-size: 0.8rem; max-width: 8rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-row .msg-subject { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-row.is-unread .msg-subject { color: var(--text); font-weight: 600; }
+.msg-row .msg-when { color: var(--muted); font-size: 0.78rem; white-space: nowrap;
+  font-variant-numeric: tabular-nums; }
 
 /* ── the git chip (_git.html) ────────────────────────────────────────────────
    Inside `.app-who`, before the user pill: state about YOUR CLONE, so it sits on
@@ -359,18 +332,23 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
    halves are muted, not because half of it is unreadable. */
 .menu-list li.is-locked .cmd { color: var(--muted); }
 /* Terminal down: the verbs have nowhere to land (terminal.js's send() drops the
-   frame on a closed socket), so site.js paints .git-offline from the same
+   frame on a closed socket), so site.js paints .term-offline from the same
    `termConnected` every other control reads. Without this a click would silently
-   do nothing — the one outcome a control must never have. */
-.git-need-term { display: none; margin: 0.25rem 0.35rem 0.1rem; padding: 0.45rem 0.55rem;
+   do nothing — the one outcome a control must never have.
+
+   Named for the TERMINAL, not for whichever menu was first to need it: any menu whose
+   verbs type commands carries `.term-menu` and gets this for free (the git chip and the
+   message chip today). The rule this replaced was `.git-*`, which meant the second such
+   menu had to edit the JS to be included. */
+.term-need { display: none; margin: 0.25rem 0.35rem 0.1rem; padding: 0.45rem 0.55rem;
   border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-size: 0.82rem; }
-.git-offline .git-need-term { display: block; }
-.git-need-term button { display: inline; width: auto; padding: 0; margin-top: 0.15rem;
+.term-offline .term-need { display: block; }
+.term-need button { display: inline; width: auto; padding: 0; margin-top: 0.15rem;
   border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer;
   text-decoration: underline; }
-.git-need-term button:hover { background: none; color: var(--accent-ink); }
-.git-offline .verb button { color: var(--muted); cursor: default; }
-.git-offline .verb button:hover { background: none; }
+.term-need button:hover { background: none; color: var(--accent-ink); }
+.term-offline .verb button { color: var(--muted); cursor: default; }
+.term-offline .verb button:hover { background: none; }
 
 /* Terminal state, read at a glance inside the user menu. The dot is the state;
    the verb on the item is the act it offers (§ user pill). */

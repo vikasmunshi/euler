@@ -1010,9 +1010,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET | `/git` | the header's git chip alone — the refresh the shell asks for (§11.9) | reader |
-| GET | `/messages/` · `/messages/{id}` | this user's message threads · one thread (§13) | reader |
-| POST | `/messages/` · `/messages/{id}/reply` | compose to staff · reply on own thread | reader |
-| POST | `/messages/notice` | a notice to named users or to everyone | maintainer |
+| GET | `/messages` | the header's message chip alone — count, rows, verbs (§13) | reader |
 | GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save | contributor |
 | GET/POST | `/edit/solutions/{n}/{filename}` | file editor → save | contributor |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete a bare `.py`/`.c` → the problem-page fragment | maintainer |
@@ -1461,21 +1459,35 @@ within-session guard.
 
 ## 13 · Messaging
 
-Collaborators and the operator need a way to talk to each other in-app. Three flows, and
-only three:
+**This is a mechanism for commands, not a chat feature.** Its purpose is to let a command
+tell staff something they have to act on. The founding case is `user`: it mints a keypair,
+and the public key is inert until an admin runs `user-authorize` on it — so the command
+files that request itself, where before the account page said *"copy your public key to the
+admin and wait"* with nothing behind the waiting.
 
-- any user → **staff** (`maintainer`+) — a question, a request, a bug report;
+Everything below follows from that framing, and reading it the other way — as an inbox
+people write in — is what makes this tier look bigger than it is.
+
+Three flows, and only three:
+
+- any user (or a command running as them) → **staff** (`maintainer`+);
 - staff → **one or more named users**;
 - staff → **everyone** (a broadcast notice).
 
-Note what is absent: there is no user↔user leg. **Every message has staff at one end**,
-which makes this a helpdesk plus an announcements board rather than chat — no presence, no
-peer graph, no per-pair ACLs, no cross-peer ordering. The whole tier stays small because
-of that asymmetry, and widening it to peer-to-peer later is a redesign, not a setting.
+There is no user↔user leg. **Every message has staff at one end**, so there is no presence,
+no peer graph, no per-pair ACLs and no cross-peer ordering to get right. Widening it to
+peer-to-peer later is a redesign, not a setting.
 
 Delivery is **asynchronous by construction**: the spool is the system of record and the
 recipient reads when they next look. A message is never lost because someone was offline,
 and nothing in the path waits on a live connection.
+
+**Reading and writing happen in the shell.** The web surface is one header chip and
+nothing else — no page, no thread view, no compose form. That is not an omission to fill
+in later: the browser holds **no write route to the spool at all**, so every message and
+every reply arrives over `msg.sock` from a uid the kernel vouched for, and the command's
+own `requires()` is the only gate there is. A guarded write surface would be strictly more
+to get wrong than an absent one.
 
 ### 13.1 Why its own service
 
@@ -1531,6 +1543,7 @@ review time and defeat the point:
 | `identity.py` | Peer uid → login → e-mail → profile, over `authorizations.json`; re-read on mtime change. |
 | `admin.py` | The sudo-gated proxy behind the operator's terminal path (§13.3). |
 | `commands.py` | The `msg` shell command (§13.7). |
+| `notify.py` | `notify_staff()` — how a *command* sends, and the reason the tier exists. |
 
 Three utilities move up out of the auth package so both services can use them without
 either importing the other:
@@ -1635,8 +1648,8 @@ Three tiers, all reusing paths that already exist:
    attached browser terminal, which relays it to the page as an `euler:message` body event.
    A recipient with no terminal open notifies nobody, and that is not a failure — the count
    is waiting for them at (2).
-2. **On document load.** The chip fetches `/messages/badge` on `load`, so a full page load
-   is always current whether or not a push ever reached the user. It is deliberately **not**
+2. **On document load.** The chip fetches `/messages` on `load`, so a full page load is
+   always current whether or not a push ever reached the user. It is deliberately **not**
    sent out-of-band with every pane navigation the way the git chip is: the count moves when
    someone *else* acts, which no navigation can predict, so a spool read per navigation would
    buy nothing. The push is only a nudge — a lost one costs a stale count until the next
@@ -1644,9 +1657,24 @@ Three tiers, all reusing paths that already exist:
 3. **In the terminal.** `msg list` is a `reader`-floor command, so the count is always one
    command away regardless of what the browser chrome is showing.
 
+**The chip** is a `<details class="menu">` on the same chassis as Actions, the git chip and
+the user pill — one menu idiom in the header, not four. It carries the state in two counts
+(`N unread, M threads`, shown even at zero), then up to five threads newest-first with
+unread ahead of read, then the verbs. Every row and every verb is a `data-term-cmd` button:
+a row types `msg read <id>`, and the thread prints in the shell and is marked read there.
+So the body never reaches the browser at all, and the boundary is the command's own floor
+rather than anything this menu decides to show. When the terminal is disconnected the
+panel says so and offers to connect it, painted from the same `termConnected` every other
+`[data-term-*]` control reads — a verb that silently does nothing is the one outcome a
+control must never have.
+
+That mechanism is selected by the **`.term-menu`** marker every such menu carries, not by
+each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second
+menu to need it could not join without editing `site.js`.
+
 **The push must not use `OSC 5379`.** That channel rides the PTY byte stream and is replayed
 into a reattaching terminal (§12.2), so a service-originated nudge sent that way would
-re-fire on every page load — and it would need the monotonic-token dance to be safe. A TEXT
+re-fire on every page load — and would need the monotonic-token dance to be safe. A TEXT
 frame is out-of-band, is never replayed, and needs no token. The OSC channel stays what it
 is: *shell*-initiated chrome nudges.
 
@@ -1682,6 +1710,25 @@ msg dismiss <id>                               # STAFF: drop a worked thread
 The subject and body are `name=value` tokens rather than bare positionals because the
 thread id is the one argument that reads naturally in the leading position — `msg read
 <id>` and `msg reply <id> body="…"` are the two forms typed most often.
+
+**Commands send through `notify_staff`** (`solver/web/msg/notify.py`), not through the
+command layer:
+
+```python
+from solver.web.msg.notify import notify_staff
+notify_staff(subject, body)      # -> bool, best-effort, never raises
+```
+
+Two properties every caller depends on. It is **best-effort**: a wedged or undeployed spool
+must not fail the act that was trying to report itself — `user` still mints the keypair, and
+the operator learns of it the next time they look. And it **prints nothing**: these fire
+inside another command's flow, which owns what the user reads, so a failure is logged rather
+than dropped into the middle of someone's key output. It is stdlib-only, so a command can
+call it in a base install with no aiohttp.
+
+`user` is the first caller, and only on the path that needs it — a key was **just minted**
+*and* it cannot decrypt, so somebody with the master key has to act. A key that already
+decrypts needs nothing, and a bare `user` status view is not a request.
 
 ### 13.8 The kit
 
@@ -1819,6 +1866,11 @@ decision recorded here.
   and is `AF_UNIX`-only. Message bodies stay plaintext-with-autoescape — no markdown or HTML
   renderer is added to that path — and its identity stays `SO_PEERCRED`, never a header or a
   body field.
+- **The browser cannot write to the spool** (§13): the per-user tier serves one read-only
+  chip fragment and the delivery push, and holds no write route at all. Every message and
+  reply arrives over `msg.sock` from a uid the kernel vouched for, so the command's floor is
+  the only gate. Adding a compose or reply route would move that boundary into the web tier
+  for the first time.
 
 ## 15 · Operating it
 
