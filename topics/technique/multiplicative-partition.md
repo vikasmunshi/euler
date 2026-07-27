@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Multiplicative
 ## Problems
 
 - ● [0176](/solutions/0176/) — Common Cathetus Right-angled Triangles
+- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
 
 <!-- /problems -->

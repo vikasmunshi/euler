@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Branch_and_bou
 - ● [0103](/solutions/0103/) — Special Subset Sums: Optimum
 - ● [0108](/solutions/0108/) — Diophantine Reciprocals I
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
+- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
 
 <!-- /problems -->
