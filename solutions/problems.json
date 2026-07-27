@@ -1627,8 +1627,8 @@
     "title": "Lattice Points on a Circle",
     "level": 32,
     "pct": 81,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 27 Jul 2026, 20:03"
   },
   "234": {
     "title": "Semidivisible Numbers",
