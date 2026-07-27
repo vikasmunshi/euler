@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Probability_di
 - ● [0084](/solutions/0084/) — Monopoly Odds
 - ● [0100](/solutions/0100/) — Arranged Probability
 - ● [0205](/solutions/0205/) — Dice Game
-- ○ [0232](/solutions/0232/) — The Race
+- ● [0232](/solutions/0232/) — The Race
 - ○ [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ○ [0267](/solutions/0267/) — Billionaire
 - ○ [0286](/solutions/0286/) — Scoring Probabilities

@@ -1,8 +1,145 @@
 <!-- tags: [combinatorics] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Combinatorics
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Combinatorics>._
+[Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
+arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
+collection under some rule. It is the largest domain in this archive — 286 problems carry the tag,
+more than any other — and that is not an accident of tagging. Project Euler's favourite question
+shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
+discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
+so you must find the structure that lets you compute it instead.
+
+## Counting without enumerating
+
+The gap is worth making concrete. Problem 191 asks how many prize strings of length $n$ over a
+three-letter alphabet avoid three consecutive absences and contain at most one late mark. At
+$n = 4$ there are $3^4 = 81$ candidates and you can filter them by hand. At $n = 30$ there are
+over 200 trillion. At $n = 100$ the candidate space has 48 digits, and no amount of hardware
+closes that.
+
+What rescues it is an observation that recurs, in some form, in nearly every problem on this
+page: **whether a partial configuration can be legally extended depends only on a small, bounded
+summary of it, not on its full contents.** For problem 191 the summary is two facts — have I used
+my one late mark, and how many absences sit at the tail (0, 1, or 2, since 3 is illegal and any
+other letter resets the run). Everything else about the prefix is irrelevant to its future. That
+collapses an exponential history into six states, and the count falls out of a linear sweep.
+
+Finding that summary is the intellectual work. Once you have it, the code is short.
+
+## Model before you count
+
+Before any technique, settle the question every combinatorial problem quietly asks: **when are two
+configurations the same one?** Does order matter ([permutations](/topics/domain/permutation)) or
+not ([combinations](/topics/technique/combination))? Are the objects labelled or interchangeable?
+Is the result a set, a multiset, or a sequence? Get this wrong and a perfectly correct algorithm
+returns a perfectly wrong number.
+
+Problem 31 (public, `solutions/public/p0031/`) is the cleanest illustration in the archive. Counting
+the ways to make £2 from British coins is an unbounded knapsack count, and the entire
+order-matters-or-not distinction lives in the *nesting order of two loops*:
+
+```python
+result = [1] + [0] * target_amount
+for coin in coins:                              # coins outer: each coin folded in once,
+    for i in range(coin, target_amount + 1):    # in a fixed order, so {1,2} and {2,1}
+        result[i] += result[i - coin]           # have exactly one construction path
+```
+
+Swap the loops and you count ordered sequences instead of unordered combinations — a different
+question, off by orders of magnitude, with no error message. Problem 181 (grouping two colours of
+indistinguishable objects) is the same discipline in two dimensions: each group-type is folded in
+completely, in one canonical order, so every multiset is built exactly once.
+
+## The four shapes an answer takes
+
+Across these problems the resolution nearly always falls into one of four moves.
+
+**A closed form.** The best outcome: the count is a formula you evaluate in constant time. Choosing
+$k$ of $n$ is a [binomial coefficient](/topics/domain/binomial-coefficient); a sub-rectangle of a
+grid is fixed by choosing two of the $m+1$ vertical lines and two of the $n+1$ horizontal ones, so
+a grid holds $\binom{m+1}{2}\binom{n+1}{2}$ of them — problem 85's brute-force position count
+collapses to that. [Catalan numbers](/topics/domain/catalan-number) count balanced structures;
+[necklace counting](/topics/domain/necklace-counting) handles arrangements up to rotation. Problem
+24's rank-to-permutation unranking is a closed form in disguise: repeated `divmod` by $(n-1)!$ picks
+each digit directly, never touching the million permutations it skips. See
+[closed-form expression](/topics/technique/closed-form-expression).
+
+**A recurrence, evaluated as a table.** When no formula exists, decompose by the last decision. It
+is the single most common shape here — [dynamic programming](/topics/technique/dynamic-programming)
+is the most frequent technique across the solved problems on this list. Problem 116 asks for tilings
+of a row with one tile length $L$: the rightmost tile is either a unit square or a length-$L$ block,
+the two cases are disjoint and exhaustive, so $dp[i] = dp[i-1] + dp[i-L]$. Problems 114, 115 and 117
+vary the same skeleton; problem 215 stacks it, encoding each brick row as a bitmask of its internal
+seams so that "no running crack" becomes `mask_a & mask_b == 0`, and the wall count becomes a
+layered walk over a compatibility graph. The pattern is always: define the state, enumerate the last
+move, sum the disjoint cases. See also [recurrence relations](/topics/domain/recurrence-relation)
+and [generating functions](/topics/domain/generating-function), which are the same recurrences
+written as algebra.
+
+**Count the complement, or inclusion–exclusion.** "At least one" is usually harder than "none".
+Problem 116 subtracts the single all-grey tiling rather than tracking a "used a colour yet?" flag
+through the recurrence. When constraints overlap, [inclusion–exclusion](/topics/technique/inclusion-exclusion-principle)
+adds back what double-subtraction removed. Reach for it whenever the forbidden set is easier to
+describe than the permitted one.
+
+**Quotient by symmetry.** If configurations related by rotation, reflection, or relabelling count as
+one, do not enumerate and deduplicate — divide the work by the symmetry group up front, or count
+orbits directly. Problem 53 gets a small version free: Pascal's rows are symmetric and unimodal, so
+the first $r$ whose entry exceeds the threshold settles the whole middle of the row at once.
+
+```python
+for r in range(0, n // 2 + 1):
+    if c > threshold:
+        count += n - 2 * r + 1      # symmetry: entries r..n-r all qualify
+        break
+    c = c * (n - r) // (r + 1)      # Pascal's recurrence, no factorials
+```
+
+Note the second line as well: that recurrence sidesteps building $n!$ entirely. See
+[exploit symmetry](/topics/takeaway/exploit-symmetry).
+
+## The counts themselves are the other hazard
+
+Combinatorial answers grow explosively, and this domain's most common companion tag is
+[modular arithmetic](/topics/domain/modular-arithmetic) — 78 of these 286 problems carry it. That
+pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
+the deliverable and you work in the ring from line one), or it wants the honest integer and you
+need [arbitrary precision](/topics/technique/arbitrary-precision-arithmetic). Python gives you the
+latter free; in C the same count silently overflows, which is why
+[watch integer width](/topics/takeaway/watch-integer-width) shows up so often alongside these.
+Decide which régime you are in *before* writing the accumulator.
+
+Watch the intermediate values too, not just the answer. Computing $\binom{n}{k}$ as
+$n! / (k!(n-k)!)$ builds enormous factorials to produce a modest result; the Pascal recurrence above
+keeps every intermediate near the size of the answer.
+
+## How to reason about it
+
+The cue is a question that begins "how many" — arrangements, tilings, selections, colourings,
+paths, partitions — at a size where listing them is hopeless. When you catch it:
+
+- **Fix the equivalence first.** Ordered or unordered, labelled or identical, set or multiset.
+  Write the definition down before writing a loop; most wrong answers here are modelling errors,
+  not bugs.
+- **Look for the bounded summary.** What is the least you must remember about a prefix to know how
+  it may be extended? If that summary is small and finite, you have a DP state and the problem is
+  essentially solved.
+- **Try to decompose by the last decision.** Cases that are disjoint and exhaustive give a
+  recurrence directly; if they overlap, you need inclusion–exclusion instead.
+- **Ask whether a formula exists.** A binomial, a Catalan number, a product rule — a closed form
+  beats any table. Check [OEIS](https://oeis.org/) with the first few hand-computed terms; a
+  matching sequence often comes with the formula attached.
+- **Count the complement when "at least one" appears.** Constraints phrased as prohibitions are
+  usually cheaper counted the other way round.
+- **Decide the arithmetic régime up front.** A stated modulus means reduce after every operation;
+  no modulus means big integers, and in C that means thinking about width before the first
+  multiply.
+
+Brute force does have a place — it is how you get the small terms that verify a formula or seed a
+sequence lookup. Just never expect it to reach the answer. The domain is defined by the distance
+between what you can enumerate and what you are asked to count, and every technique here is a way
+of crossing it.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
