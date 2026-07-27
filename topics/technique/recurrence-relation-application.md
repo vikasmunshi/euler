@@ -22,7 +22,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Recurrence_rel
 - ● [0154](/solutions/0154/) — Exploring Pascal's Pyramid
 - ● [0169](/solutions/0169/) — Sums of Powers of Two
 - ● [0209](/solutions/0209/) — Circular Logic
-- ○ [0230](/solutions/0230/) — Fibonacci Words
+- ● [0230](/solutions/0230/) — Fibonacci Words
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0346](/solutions/0346/) — Strong Repunits

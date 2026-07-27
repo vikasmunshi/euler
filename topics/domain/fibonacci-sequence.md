@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fibonacci_sequ
 - ● [0025](/solutions/0025/) — $1000$-digit Fibonacci Number
 - ● [0104](/solutions/0104/) — Pandigital Fibonacci Ends
 - ● [0137](/solutions/0137/) — Fibonacci Golden Nuggets
-- ○ [0230](/solutions/0230/) — Fibonacci Words
+- ● [0230](/solutions/0230/) — Fibonacci Words
 - ○ [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0301](/solutions/0301/) — Nim
 - ● [0304](/solutions/0304/) — Primonacci

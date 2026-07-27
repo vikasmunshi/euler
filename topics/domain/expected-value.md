@@ -107,7 +107,6 @@ position that makes the recurrence exact.
 - ● [0121](/solutions/0121/) — Disc Game Prize Fund
 - ● [0151](/solutions/0151/) — A Preference for A5
 - ● [0213](/solutions/0213/) — Flea Circus
-- ○ [0232](/solutions/0232/) — The Race
 - ○ [0253](/solutions/0253/) — Tidying Up A
 - ○ [0255](/solutions/0255/) — Rounded Square Roots
 - ○ [0267](/solutions/0267/) — Billionaire

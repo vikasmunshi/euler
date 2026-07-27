@@ -128,6 +128,7 @@ that collapse in one guise or another.
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0220](/solutions/0220/) — Heighway Dragon
 - ● [0222](/solutions/0222/) — Sphere Packing
+- ○ [0232](/solutions/0232/) — The Race
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0301](/solutions/0301/) — Nim

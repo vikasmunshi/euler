@@ -14,6 +14,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Concatenation>
 - ● [0068](/solutions/0068/) — Magic 5-gon Ring
 - ● [0118](/solutions/0118/) — Pandigital Prime Sets
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
-- ○ [0230](/solutions/0230/) — Fibonacci Words
+- ● [0230](/solutions/0230/) — Fibonacci Words
 
 <!-- /problems -->
