@@ -146,7 +146,7 @@ clock.
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
-- ○ [0230](/solutions/0230/) — Fibonacci Words
+- ● [0230](/solutions/0230/) — Fibonacci Words
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0304](/solutions/0304/) — Primonacci
