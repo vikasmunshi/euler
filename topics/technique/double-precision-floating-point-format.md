@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Double-precisi
 
 - ● [0197](/solutions/0197/) — A Recursively Defined Sequence
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
-- ○ [0232](/solutions/0232/) — The Race
+- ● [0232](/solutions/0232/) — The Race
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 
 <!-- /problems -->

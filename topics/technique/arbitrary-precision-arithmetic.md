@@ -1,8 +1,116 @@
 <!-- tags: [arbitrary-precision-arithmetic] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Arbitrary-precision arithmetic
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic>._
+[Arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) is
+integer (or fractional) arithmetic whose operands are limited by memory rather than by a register
+width. It recurs across these problems for two quite different reasons. Sometimes the *answer* is a
+big number — the digits of $2^{1000}$, of $100!$, of the 1000-digit Fibonacci term. Far more often
+the big number is an *intermediate*: an exact rational, a convergent's numerator, a scaled square
+root, a binomial coefficient that must be compared for equality rather than approximated. In Python
+this is invisible — [`int`](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
+is unbounded and the arithmetic just works. In the C port it is a decision you have to make and
+implement, and that asymmetry is what makes this tag worth a page.
+
+## The idea
+
+A machine integer is a fixed number of bits: 64 in a `long long`, 128 if you reach for
+[`__int128`](/topics/technique/int128/). Arbitrary precision drops the ceiling by representing a
+number as a *sequence of limbs* — an array of small integers, each holding one digit in some base
+$B$, least-significant first — and implementing the schoolbook algorithms over that array. Addition
+walks the limbs propagating a carry; multiplication is the $O(n \cdot m)$ double loop; division is
+[Knuth's Algorithm D](https://en.wikipedia.org/wiki/Division_algorithm#Long_division). The number
+grows by appending limbs, so the only bound is memory.
+
+The choice of $B$ is the whole engineering decision, and the public solutions show both ends of it.
+Problem 16 builds $2^{n}$ in an array of **single decimal digits** — `unsigned char`, one digit per
+byte:
+
+```c
+for (int j = 0; j < len; j++) {
+    int val = digits[j] * base + carry;
+    digits[j] = (unsigned char)(val % 10);
+    carry = val / 10;
+}
+```
+
+That is the easiest version to write and to print, and it wastes about 96% of each byte. Problems
+25, 57, 65 and 80 instead pack **nine decimal digits into a 64-bit limb** with $B = 10^9$, chosen so
+that a limb-by-limb product $B^2 \approx 10^{18}$ still fits under the 64-bit ceiling — one multiply
+now does the work of nine, and the value is still trivially convertible to decimal because the base
+is a power of ten. CPython's own `int` makes the same trade in binary, using 30-bit digits inside a
+machine word.
+
+Above a certain complexity you stop hand-rolling. Several private solutions link
+[GMP](https://gmplib.org/) and work in `mpz_t` — problems 168, 169, 172, 176, 178, 180, 192, 203,
+321 and 387 all do — because once you need division, comparison, exact binomials and a sort over
+big values, a library that has already been tuned (with sub-quadratic multiplication above a
+threshold) beats anything you will write in an afternoon.
+
+Three shapes of use recur, and it is worth naming them separately:
+
+- **The answer is the digits.** Problems 13, 16, 20 and 25 want a digit sum or a digit count, so the
+  full expansion has to exist. Nothing clever avoids it; the only question is how efficiently you
+  build it.
+- **Exactness for an equality or a comparison.** A convergent recurrence
+  $(p, q) \to (p + 2q,\, p + q)$ (Problem 57), an exact
+  [`Fraction`](https://docs.python.org/3/library/fractions.html) chain for the continued fraction of
+  $e$ (Problem 65), the fundamental solution of a [Pell equation](https://en.wikipedia.org/wiki/Pell%27s_equation)
+  (Problem 66), squarefree tests on binomial coefficients (Problem 203) — in each case a `double`
+  would silently agree with itself to fifteen digits and give the wrong count. This is the same
+  instinct as [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality/).
+- **Fixed point in disguise.** To get $d$ digits of an irrational, scale by $10^{2d}$ and take an
+  *integer* square root. Problem 80 does exactly this — `number *= 10 ** (2 * digits)`, then
+  [Heron's method](https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method)
+  in integers — and the resulting digit string is exact by construction. Where the quantity is not a
+  root, [`decimal`](https://docs.python.org/3/library/decimal.html) with an explicit
+  `getcontext().prec` does the same job: problems 686 and 751 both set a precision in the hundreds of
+  digits and compute fractional parts of logarithms there rather than in binary floating point.
+
+## How to reason about it
+
+**Ask first whether you need the digits at all.** Arbitrary precision is the fallback, not the
+opening move. If the problem asks for a value modulo something, use
+[modular arithmetic](/topics/domain/modular-arithmetic/) and never let the number grow — Problem 97
+computes a digit-slice of a 7-million-digit prime with nothing wider than a 128-bit product. If it
+asks whether two quantities are equal, a well-chosen invariant often decides it without evaluating
+either. A big integer that exists only because you did not think about reduction first is a cost you
+chose.
+
+**When you do need it, the base and the algorithm dominate — not the language.** The benchmarks here
+make that unusually vivid. For Problem 25 (repeated addition, base-$10^9$ limbs), C runs in
+$0.66$ ms against Python's $12$ ms — an 18× win. For Problem 65 (exact rationals) the C `BigInt`
+beats Python's `Fraction` by 72× at $n = 100$ and by 500× at $n = 10\,000$, because `Fraction`
+normalises through a [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor) on every operation.
+But for Problem 16 the ranking inverts: at $2^{10000}$ the hand-rolled C takes $28.8$ ms and Python
+takes $0.24$ ms — Python is **122× faster**. Nothing about C is at fault; the C code multiplies by
+the base $n$ times over single-decimal-digit limbs, an $O(n^2)$ walk, while `2 ** 10000` uses
+[exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) over 30-bit
+limbs. A naive bignum in a fast language loses to a good bignum in a slow one, every time. This is
+[algorithm beats language](/topics/takeaway/algorithm-beats-language/) in its purest form.
+
+**Know the ladder, and stop at the lowest rung that holds.** 64-bit native → `__int128` (~38 digits,
+still machine speed) → a hand-rolled base-$10^9$ `BigInt` (fine for add/multiply/compare) → GMP
+(when you need division, roots, or performance at scale). Problem 80's two solutions bracket this:
+`s0` picks the algorithm that keeps the numbers small and finishes the 999-root sweep in $5.3$ ms in
+C, while `s1`'s heavier big-integer work takes $281$ ms for the same answer.
+
+**Two pitfalls specific to Python.** First, `int` being free is exactly why the C translation
+surprises you — the overflow you never saw is now yours to handle, and the port is not a
+transliteration but a design task. Second, Python 3.11 and later cap `int` ↔ `str` conversion at 4300
+digits by default (a denial-of-service mitigation, since the conversion is quadratic), so `str(n)` on
+a large value raises `ValueError`. Problem 57 handles it where it actually fires rather than lifting
+the limit up front:
+
+```python
+try:
+    result += len(str(numerator)) > len(str(denominator))
+except ValueError:
+    sys.set_int_max_str_digits(0)
+```
+
+Reaching for `n.bit_length()` or comparing against a precomputed power of ten sidesteps the
+conversion altogether, and is usually faster besides.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
