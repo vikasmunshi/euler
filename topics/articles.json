@@ -462,7 +462,7 @@
     {
       "path": "domain/combinatorial-optimization",
       "title": "Combinatorial optimization",
-      "status": "draft",
+      "status": "final",
       "solved": 7,
       "problems": 48,
       "tags": ["combinatorial-optimization"],
