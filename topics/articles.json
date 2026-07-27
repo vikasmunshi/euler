@@ -5520,7 +5520,7 @@
     {
       "path": "technique/sieve-of-sundaram",
       "title": "Sieve of Sundaram",
-      "status": "draft",
+      "status": "final",
       "solved": 10,
       "problems": 10,
       "tags": ["sieve-of-sundaram"],
