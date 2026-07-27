@@ -18,7 +18,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisor_functi
 - ● [0176](/solutions/0176/) — Common Cathetus Right-angled Triangles
 - ● [0179](/solutions/0179/) — Consecutive Positive Divisors
 - ● [0211](/solutions/0211/) — Divisor Square Sum
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
 - ○ [0241](/solutions/0241/) — Perfection Quotients
 - ○ [0378](/solutions/0378/) — Triangle Triples
 - ○ [0379](/solutions/0379/) — Least Common Multiple Count
