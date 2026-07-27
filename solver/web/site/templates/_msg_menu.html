@@ -1,0 +1,71 @@
+{# The message chip's CONTENTS — summary + panel (web-server-guide § Messaging).
+
+   Split from `_msg.html` because this is what `GET /messages` swaps into the chip. The
+   <details> element itself must survive the swap: it holds the open state, the htmx
+   triggers, and the `.term-offline` class site.js paints on it (see `_msg.html`).
+
+   Rendered twice, from the same file: inline by the header on a full page load, with none
+   of the values set — the chip's own fetch fills them a moment later — and by the route
+   with all of them. So every value defaults, and an un-fetched chip reads as an empty
+   mailbox rather than as a broken one. #}
+{% set unread = unread | default(0) %}
+{% set total = total | default(0) %}
+{% set threads = threads | default([]) %}
+{% set staff_floor = staff_floor | default('maintainer') %}
+<summary class="{{ 'is-unread' if unread else '' }}" title="messages — {{ unread }} unread">
+  {# An envelope, closed: the chip is about mail waiting, not mail read. #}
+  <svg class="msg-glyph" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="2.5" y="5" width="19" height="14" rx="2" fill="none"
+          stroke="currentColor" stroke-width="2"/>
+    <path d="M3.5 7l8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  {# The count appears only when there is one. Unlike the git chip's ahead/behind pair
+     there is no second axis to keep aligned, so a bare envelope is unambiguous: nothing
+     is waiting. #}
+  {% if unread %}<span class="msg-count">{{ unread }}</span>{% endif %}
+</summary>
+<ul class="menu-list menu-right msg-panel">
+  {# The state in two counts, shown even at zero — a readout that always names its axes is
+     read at a glance, where a disappearing line makes the reader wonder what it dropped. #}
+  <li class="menu-info msg-summary">{{ unread }} unread, {{ total }} thread{{ '' if total == 1 else 's' }}</li>
+  {% if threads %}
+  <li class="menu-sep" aria-hidden="true"></li>
+  {% for item in threads %}
+  {# One row per thread, newest first, unread before read. The button types
+     `msg read <id>` — the thread prints in the shell and is marked read there, so the
+     browser never needs a thread view and never reads the body. #}
+  <li class="verb msg-row{% if item.unread %} is-unread{% endif %}">
+    <button type="button" data-term-cmd="msg read {{ item.id }}"
+            title="run `msg read {{ item.id }}` in your terminal">
+      <span class="msg-dot" aria-hidden="true"></span>
+      <span class="msg-from">{{ item.author_name }}</span>
+      <span class="msg-subject">{{ item.subject }}</span>
+      <span class="msg-when">{{ item.when }}</span>
+    </button>
+  </li>
+  {% endfor %}
+  {% endif %}
+  <li class="menu-sep" aria-hidden="true"></li>
+  {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the frame
+     on a closed socket), so site.js paints .term-offline on the <details> from the same
+     `termConnected` every other [data-term-*] control reads. Without it a click would
+     silently do nothing. #}
+  <li class="term-need">
+    These run in the terminal, and it is disconnected.<br>
+    <button type="button" data-term-toggle>Connect the terminal</button>
+  </li>
+  {# The verbs, gated but SHOWN: the ladder is part of what the header teaches, and a verb
+     that vanishes makes two collaborators' screens differ silently. #}
+  {% macro verb(label, command, floor) %}
+  {% if subject.has(floor) %}
+  <li class="verb"><button type="button" data-term-cmd="{{ command }}"
+      title="run `{{ command }}` in your terminal">{{ label }}<span class="cmd">{{ command }}</span></button></li>
+  {% else %}
+  <li class="verb is-locked"><button type="button" aria-disabled="true"
+      title="{{ label }} needs the {{ floor }} profile">{{ label }}<span class="cmd">{{ floor }}</span></button></li>
+  {% endif %}
+  {% endmacro %}
+  {{ verb('All messages', 'msg list', 'reader') }}
+  {{ verb('Inbound queue', 'msg queue', staff_floor) }}
+</ul>

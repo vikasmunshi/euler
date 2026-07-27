@@ -132,15 +132,21 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
 
     @requires(_MSG_REQUIRES)
     async def chip(request: web.Request) -> web.StreamResponse:
-        """``GET /messages`` — the header's message chip alone, with its rows.
+        """``GET /messages`` — the header chip's summary and panel.
 
         The same shape ``/git`` has, and for the same reason: the count moves when someone
         *else* acts, which no navigation can predict, so the chip asks for itself on load
-        and on the delivery nudge rather than riding every fragment out-of-band.
+        and on the delivery nudge rather than riding every fragment out-of-band. Unlike
+        ``/git`` it answers with the chip's **contents**, because this one has a ``load``
+        trigger: replacing the element would re-arm that trigger on the replacement and
+        loop forever.
         """
         mailbox = await _mailbox(request)
         threads = mailbox.get('threads') or []
-        return render(request, '_msg.html', {
+        # The chip's CONTENTS, not the chip: the <details> holds the open state, the htmx
+        # triggers and the class site.js paints on it, so it must survive the swap
+        # (`hx-swap="innerHTML"` in `_msg.html`).
+        return render(request, '_msg_menu.html', {
             'unread': mailbox.get('unread') or 0,
             'total': len(threads),
             'threads': _rows(threads),

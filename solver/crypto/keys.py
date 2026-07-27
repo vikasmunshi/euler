@@ -152,7 +152,7 @@ def key_rekey() -> int:
     return 0
 
 
-@register(requires='admin',
+@register(requires='maintainer',
           help_text='Authorise another public key (hex) to access the enc key.', aliases=('authorize',))
 def user_authorize(public_key: str) -> int:
     """Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession)."""

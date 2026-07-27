@@ -495,8 +495,8 @@ Every command's declared floor is generated from the live registry into
 |---|---|
 | `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `msg` (own threads + send to staff), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg queue`/`msg notice`, web file-delete |
-| `admin` | `users` mutations, `user-authorize`, `key-rekey`, `key-split`, `git-publish`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
+| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg queue`/`msg notice`, `user-authorize` (grants enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, web file-delete |
+| `admin` | `users` mutations, `key-rekey`, `key-split`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:
 in the per-user model a shell escape grants nothing that `evaluate`'s arbitrary Python
@@ -723,12 +723,15 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
 
 - **Each user has their own X25519 keypair.** The private key lives in their vault; the
   public key is enrolled by an admin.
-- **Authorization is a deliberate admin trust act**, never self-service — it grants
-  decryption of the *whole* private corpus. The flow: the user generates their key in
-  their shell (`user`), reads the public key off their account page, and passes it to an
-  admin **out of band**; the admin runs `user-authorize <pubkey>` and commits and pushes
-  `keys/enc-key.json`; the user pulls, and their key now unwraps the master key. **The
-  distribution channel is git itself** — no side channel.
+- **Authorization is a deliberate staff trust act**, never self-service — it grants
+  decryption of the *whole* private corpus, so `user-authorize` sits at `maintainer`:
+  the floor that receives a key request is the floor that can act on it. The flow: the
+  user generates their key in their shell (`user`), which **files the request with staff
+  through the message spool** (§13) carrying the public key and the exact command to run;
+  a maintainer runs `user-authorize <pubkey>` and commits and pushes `keys/enc-key.json`;
+  the user pulls, and their key now unwraps the master key. **The distribution channel is
+  git itself** — no side channel. The out-of-band hand-off the account page used to
+  describe still works, but nothing depends on the two people finding each other.
 - **Revocation** is `key-rekey` (rotate the master key, re-wrap only to still-authorized
   keys) plus a push. The de-authorized user's next pull decrypts nothing.
 
@@ -1276,8 +1279,9 @@ admin to authorise their key first, and the chip cannot cheaply tell that apart 
 that merely has not been wired. So the row links to `/account`, where the state *is* known
 (`can_decrypt`, an X25519 unwrap too costly per-navigation) and the right action is offered:
 the public-key panel gives **Create identity** (`user`) when there is no keypair, and **Copy
-+ Sync** when there is a key that cannot decrypt yet — copy it to the admin for
-`user-authorize`, then `git-sync` pulls the grant and auto-wires the filter. `git-sync` is
++ Sync** when there is a key that cannot decrypt yet — `user` has already filed the
+request with staff (§13), so this is the follow-up: `git-sync` pulls the grant once a
+maintainer runs `user-authorize`, and auto-wires the filter. `git-sync` is
 the one command that advances every case and never errors, so it is what every locked path
 (the account tool row included) runs; the manual `git-filter install` stays a shell command
 for the rare has-access-but-unwired case, unsurfaced where it would mislead.
@@ -1461,7 +1465,7 @@ within-session guard.
 
 **This is a mechanism for commands, not a chat feature.** Its purpose is to let a command
 tell staff something they have to act on. The founding case is `user`: it mints a keypair,
-and the public key is inert until an admin runs `user-authorize` on it — so the command
+and the public key is inert until a maintainer runs `user-authorize` on it — so the command
 files that request itself, where before the account page said *"copy your public key to the
 admin and wait"* with nothing behind the waiting.
 
@@ -1854,9 +1858,15 @@ decision recorded here.
 - **Ciphertext by default**: a provisioned clone is born filter-unwired, so
   `solutions/private/**` rests as ciphertext until the deliberate `user-authorize`;
   `gitfilter install` verifies key access **before** wiring anything.
-- **Master-key gate to master**: pushing `master` needs `admin`; force-pushing it is
-  refused unconditionally; a collaborator's work lands only via `gh-pr merge`, which a
-  maintainer may run but only for a pull request confined to `solutions/`.
+- **Master-key gate to master**: `git-push` on `master` needs `admin` and force-pushing it
+  is refused unconditionally; a collaborator's work lands only via `gh-pr merge`, which a
+  maintainer may run but only for a pull request confined to `solutions/` — never one
+  touching `keys/`, the scripts or the framework. `git-publish` sits at `maintainer` so a
+  maintainer can publish an enc-key grant they just made, and that does **not** widen the
+  gate: `scripts/git/publish.sh` pushes `master` directly only when the authenticated
+  GitHub user is the repo owner, and routes everyone else to a branch plus a pull request.
+  The two legs are independent — a profile check on `git-push`, a GitHub-identity check in
+  the publish script — so weakening either alone still leaves `master` closed.
 - **Network posture**: only Caddy is network-bound; the app tier is loopback-only
   (systemd `IPAddressDeny` + host nftables); all egress — including every dynamic
   per-user uid, enumerated by the `euler-user` group — via the Squid allowlist.

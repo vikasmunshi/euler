@@ -368,7 +368,7 @@ def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
 # ── publish / status / sync / filter / identity ─────────────────────────────────────────
 
 @register(
-    requires='admin',
+    requires='maintainer',
     help_text='Push targets (keys|scripts|[accent]solutions[/accent]|solver) to remote.',
     aliases=('publish',),
     quietable=True,

@@ -95,7 +95,7 @@ class RegistryCompletenessTests(unittest.TestCase):
         load_commands(refresh_modules=True)
         admin_floored = {cmd.name for cmd in registry.all() if cmd.requires == 'admin'}
         self.assertIn('users', admin_floored)  # the set is non-empty…
-        self.assertIn('git-publish', admin_floored)  # …and these are in it
+        self.assertIn('key-rekey', admin_floored)  # …and these are in it
         self.assertTrue(admin_floored <= {cmd.name for cmd in registry.all()})
 
 

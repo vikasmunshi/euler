@@ -58,7 +58,7 @@ a profile on each channel.
 | `solver.core.git` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-hooks` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-identity` |  | ✓ | ✓ | ✓ |
-| `solver.core.git` | `git-publish` |  |  |  | ✓ |
+| `solver.core.git` | `git-publish` |  |  | ✓ | ✓ |
 | `solver.core.git` | `git-push` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-reset` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-status` | ✓ | ✓ | ✓ | ✓ |
@@ -78,7 +78,7 @@ a profile on each channel.
 | `solver.crypto.keys` | `key-rekey` |  |  |  | ✓ |
 | `solver.crypto.keys` | `key-split` |  |  |  | ✓ |
 | `solver.crypto.keys` | `user` | ✓ | ✓ | ✓ | ✓ |
-| `solver.crypto.keys` | `user-authorize` |  |  |  | ✓ |
+| `solver.crypto.keys` | `user-authorize` |  |  | ✓ | ✓ |
 | `solver.crypto.keys` | `vault` | ✓ | ✓ | ✓ | ✓ |
 | `solver.shell.bash` | `!` |  | ✓ | ✓ | ✓ |
 | `solver.shell.builtins` | `?` | ✓ | ✓ | ✓ | ✓ |

@@ -207,7 +207,10 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
    Every mark that appears is something to act on, which is what makes the header worth
    a glance instead of wallpaper. */
 .msg-chip { display: inline-flex; align-items: center; color: var(--muted); padding-inline: 0.5rem; }
-.msg-menu.is-unread > summary { color: var(--text); }
+/* The unread marker sits on the SUMMARY, not on the <details>: the summary is what the
+   chip's fetch swaps in (`_msg_menu.html`), and the element above it must survive that
+   swap untouched — it carries the open state and the htmx triggers. */
+.msg-menu > summary.is-unread { color: var(--text); }
 .msg-glyph { width: 1rem; height: 1rem; display: block; flex: none; }
 /* The count is the badge: accent-filled, so an unread thread is the one warm mark in
    an otherwise muted header. Tabular digits keep the chip from twitching at 9 → 10. */

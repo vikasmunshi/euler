@@ -882,7 +882,7 @@ Aliased as `identity`.
 #### Command: `git-publish` (`publish`)
 
 Push targets (keys|scripts|solutions|solver) to remote.
-* profiles: admin
+* profiles: admin, maintainer
 * » supports `--silent`
 
 ```
@@ -1698,7 +1698,7 @@ silently orphan the real one (and with it any enc-key authorization it carries).
 #### Command: `user-authorize` (`authorize`)
 
 Authorise another public key (hex) to access the enc key.
-* profiles: admin
+* profiles: admin, maintainer
 
 ```
 user-authorize <public_key>

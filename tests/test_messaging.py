@@ -469,8 +469,27 @@ class UserMessageChipTests(AioHTTPTestCase):
         resp = await self.client.get('/messages', headers=self.headers)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertIn('id="msg-chip"', body)
+        self.assertIn('<summary', body)
         self.assertIn('msg list', body, 'the chip offers the shell verb, not a page')
+
+    @unittest_run_loop
+    async def test_the_fragment_is_the_contents_and_cannot_re_arm_its_own_load(self) -> None:
+        """The swap must not replace the <details>.
+
+        With `hx-swap="outerHTML"` the replacement carried its own `hx-trigger="load"`,
+        which fired on insertion and re-fetched forever — and each swap reset `open`, so
+        the menu shut a few milliseconds after any click. The fragment therefore carries
+        neither the element nor its triggers.
+        """
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertNotIn('id="msg-chip"', body)
+        self.assertNotIn('hx-trigger', body)
+        self.assertNotIn('<details', body)
+
+    @unittest_run_loop
+    async def test_the_header_swaps_the_chips_contents_not_the_chip(self) -> None:
+        page = await (await self.client.get('/account', headers=self.headers)).text()
+        self.assertIn('hx-swap="innerHTML"', page.split('id="msg-chip"')[1][:200])
 
     @unittest_run_loop
     async def test_unauthenticated_is_refused(self) -> None:
