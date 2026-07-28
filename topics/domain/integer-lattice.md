@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_lattic
 - ● [0147](/solutions/0147/) — Rectangles in Cross-hatched Grids
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ○ [0246](/solutions/0246/) — Tangents to an Ellipse
 - ○ [0257](/solutions/0257/) — Angular Bisectors
 - ○ [0264](/solutions/0264/) — Triangle Centres

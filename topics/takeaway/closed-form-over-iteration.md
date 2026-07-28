@@ -135,6 +135,7 @@ Three cautions earn their keep:
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0232](/solutions/0232/) — The Race
+- ○ [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial

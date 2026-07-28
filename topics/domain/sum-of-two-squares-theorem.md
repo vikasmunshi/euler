@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sum_of_two_squ
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ○ [0273](/solutions/0273/) — Sum of Squares
 - ○ [0596](/solutions/0596/) — Number of Lattice Points in a Hyperball
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps

@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_
 
 - ● [0006](/solutions/0006/) — Sum Square Difference
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
+- ○ [0234](/solutions/0234/) — Semidivisible Numbers
 
 <!-- /problems -->
