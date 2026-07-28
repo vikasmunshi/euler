@@ -364,7 +364,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ○ [0234](/solutions/0234/) — Semidivisible Numbers
 - ○ [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0243](/solutions/0243/) — Resilience

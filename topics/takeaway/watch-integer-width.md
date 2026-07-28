@@ -153,7 +153,8 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
 - ● [0221](/solutions/0221/) — Alexandrian Integers
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0233](/solutions/0233/) — Lattice Points on a Circle
+- ○ [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial

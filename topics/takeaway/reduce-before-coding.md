@@ -190,7 +190,8 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0230](/solutions/0230/) — Fibonacci Words
 - ● [0232](/solutions/0232/) — The Race
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0233](/solutions/0233/) — Lattice Points on a Circle
+- ○ [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence

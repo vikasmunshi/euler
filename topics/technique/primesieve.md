@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://github.com/kimwalisch/primesieve>._
 - ● [0029](/solutions/0029/) — Distinct Powers
 - ● [0035](/solutions/0035/) — Circular Primes
 - ● [0187](/solutions/0187/) — Semiprimes
-- ○ [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0484](/solutions/0484/) — Arithmetic Derivative

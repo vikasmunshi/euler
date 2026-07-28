@@ -120,6 +120,7 @@ against the brute force you replaced.
 - ● [0222](/solutions/0222/) — Sphere Packing
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
 - ● [0232](/solutions/0232/) — The Race
+- ○ [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0313](/solutions/0313/) — Sliding Game
