@@ -34,7 +34,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Trial_division
 - ● [0188](/solutions/0188/) — Hyperexponentiation
 - ● [0202](/solutions/0202/) — Laserbeam
 - ● [0221](/solutions/0221/) — Alexandrian Integers
-- ○ [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0357](/solutions/0357/) — Prime Generating Integers

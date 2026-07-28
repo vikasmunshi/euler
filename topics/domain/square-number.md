@@ -25,7 +25,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Square_number>
 - ● [0206](/solutions/0206/) — Concealed Square
 - ● [0211](/solutions/0211/) — Divisor Square Sum
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
-- ○ [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ○ [0261](/solutions/0261/) — Pivotal Square Sums
 - ○ [0310](/solutions/0310/) — Nim Square
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube

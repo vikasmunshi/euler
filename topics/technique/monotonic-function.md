@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Monotonic_func
 - ● [0099](/solutions/0099/) — Largest Exponential
 - ● [0156](/solutions/0156/) — Counting Digits
 - ● [0168](/solutions/0168/) — Number Rotations
+- ○ [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0800](/solutions/0800/) — Hybrid Integers
 

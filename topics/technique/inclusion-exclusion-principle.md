@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Inclusion%E2%8
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
 - ● [0193](/solutions/0193/) — Squarefree Numbers
 - ● [0202](/solutions/0202/) — Laserbeam
-- ○ [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0725](/solutions/0725/) — Digit Sum Numbers

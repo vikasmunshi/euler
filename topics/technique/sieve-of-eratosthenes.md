@@ -121,7 +121,7 @@ the sieve exists to avoid when the question is about a whole range.
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
-- ○ [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes

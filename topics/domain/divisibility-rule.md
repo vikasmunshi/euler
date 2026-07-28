@@ -12,7 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisibility_r
 - ● [0041](/solutions/0041/) — Pandigital Prime
 - ● [0043](/solutions/0043/) — Sub-string Divisibility
 - ● [0139](/solutions/0139/) — Pythagorean Tiles
-- ○ [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ○ [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
