@@ -65,11 +65,24 @@ enc-key.json
 ├── <public-key-hex>    - the 32-byte master key wrapped for this X25519 public key
 │                         (ephemeral X25519 ECDH → HKDF-SHA256 → ChaCha20-Poly1305)
 ├── … one entry per authorised public key …
-└── verify              - MAGIC|nonce|ciphertext: the master key encrypting a fixed
-                          known text (Blake's "Auguries of Innocence", opening quatrain)
+├── verify              - MAGIC|nonce|ciphertext: the master key encrypting a fixed
+│                         known text (Blake's "Auguries of Innocence", opening quatrain)
+└── owners              - { <public-key-hex>: {slug, since, by} }: whose key each entry is
 ```
 
 No email is stored anywhere — a key is identified solely by its public-key value.
+`owners` records the **system slug** (`u` + a hash, the same opaque name the per-user
+uid, home and `user/<slug>` branch already carry), never an address: this file is
+committed to a public repository, and the slug publishes nothing the branch list does
+not. It is **attribution, not authority** — nothing in the decrypt path reads it, a key
+with no owner still unwraps, and a slug written here grants nothing. It exists so
+`users purge` can tell whose entry is whose.
+
+Both reserved entries are **additive**: every reader indexes the file by public key and
+takes `verify` by name, so a clone running an older solver ignores anything else it
+finds. That is why attribution is a sibling entry rather than a reshape — the filter
+reads this file on every checkout, and a shape it cannot parse is a collaborator who
+cannot decrypt.
 To use the master key the filter unwraps the current user's entry with the private
 key at `~/.euler/id` (PKCS8 PEM, plain/unencrypted; a machine-local `0600` file in
 the sibling secrets dir outside the checkout, so its file permissions are its
@@ -178,9 +191,17 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 
 ## 6. Multi-user and key rotation
 
-- **Add a user:** they run `solver user` to create their identity and share their
-  public key; any existing key holder runs `solver "authorize <public-key-hex>"` to
-  wrap the master key to it in `enc-key.json`. Commit the updated file.
+- **Add a user:** they run `solver user` to create their identity, which files a key
+  request with staff over the message spool. A maintainer runs `solver "authorize <id>"`
+  with that **message id** — the key comes from the request and the requester from the
+  thread's author, so the entry is attributed without anyone retyping a public key — or
+  `solver "authorize <public-key-hex> <identity>"` to do it by hand. Commit the updated
+  file.
+- **Purge unused entries:** `users purge` (admin) lists every authorised key against the
+  account roster and offers the ones whose owner is gone or disabled; `--apply` walks
+  them. Your own key is never offered, and an entry with no `owners` record — every entry
+  written before attribution existed — is only ever purged by naming its key. Purging
+  removes the entry, **not** the access: see rotation below.
 - **Rotate the master key:** `solver rekey`. It verifies the current key, generates
   a new one, re-wraps it to all authorised public keys, refreshes `verify`, and
   re-encrypts the tracked private files. Commit the new `enc-key.json` **and** the

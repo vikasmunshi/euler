@@ -313,6 +313,7 @@ solver/
       __main__.py     — Message service entry point: ``python -m solver.web.msg``.
       admin.py        — The message admin plane CLI: run **under sudo** by the ``msg`` shell command.
       app.py          — The message service: public + admin aiohttp apps over unix sockets.
+      client.py       — The shell tier's client for the message spool: one call, whichever plane answers.
       commands.py     — The ``msg`` shell command: read and write the message spool.
       config.py       — Message-service runtime configuration, read from the environment.
       identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.

@@ -209,6 +209,7 @@ solver/
       __main__.py     — Message service entry point: ``python -m solver.web.msg``.
       admin.py        — The message admin plane CLI: run **under sudo** by the ``msg`` shell command.
       app.py          — The message service: public + admin aiohttp apps over unix sockets.
+      client.py       — The shell tier's client for the message spool: one call, whichever plane answers.
       commands.py     — The ``msg`` shell command: read and write the message spool.
       config.py       — Message-service runtime configuration, read from the environment.
       identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.
@@ -277,9 +278,13 @@ the shell commands), and `gitfilter.py` (the git clean/smudge filter, depending 
   `~/.euler`), **outside** the checkout — so file permissions are its protection and the load path
   needs no password.
 - `keys/enc-key.json`: a single 32-byte master key, identified-by-public-key — `{<public-key-hex>:
-  <master key wrapped to that key>}` plus a `verify` ciphertext for self-checking. One entry per
-  authorised public key; no email is stored. Authority is proof-of-possession. (Stays in-repo:
-  wrapped master keys are useless without a private key.)
+  <master key wrapped to that key>}` plus a `verify` ciphertext for self-checking and an `owners`
+  map (`{<public-key-hex>: {slug, since, by}}`) recording whose key each entry is. One entry per
+  authorised public key; no email is stored — `owners` holds the opaque system slug, because this
+  file is committed to a public repo. Attribution is bookkeeping for `users purge`, never
+  authority: authority is proof-of-possession. Both reserved entries are additive — readers index
+  by public key — so an older clone still decrypts. (Stays in-repo: wrapped master keys are
+  useless without a private key.)
 - Decryption path: load private key → unwrap master key → verify → decrypt files.
 
 ### Solution file naming

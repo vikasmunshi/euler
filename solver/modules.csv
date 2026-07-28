@@ -76,6 +76,7 @@ solver.web.csp,
 solver.web.envfile,
 solver.web.msg.admin,
 solver.web.msg.app,
+solver.web.msg.client,
 solver.web.msg.commands,True
 solver.web.msg.config,
 solver.web.msg.identity,

@@ -9,115 +9,28 @@ a new invitee's first need is often to ask a question. The staff verbs (``queue`
 ``users list`` uses to self-scope for a non-admin: one command, one registration, and
 the ladder enforced where the verb is.
 
-**Two channels, one renderer.** A web shell's uid is in ``euler-web``, so its PTY child
-dials ``msg.sock`` directly — the kernel proves who it is and no credential is involved.
-The operator's terminal uid is not in that group by design, so it goes through
-``sudo python -m solver.web.msg.admin`` (:mod:`solver.web.msg.admin`), which injects the
-invoking identity and proxies the same call. Both come back as the same JSON, and
-everything below renders it identically.
+**Two channels, one renderer.** Which plane answers — the web shell's direct
+``msg.sock``, or the operator's ``sudo`` fallback — is :mod:`solver.web.msg.client`'s
+problem, not this module's. Both come back as the same JSON, and everything below
+renders it identically; a ``None`` from the client means neither plane answered, which
+:func:`_unreachable` says once for every verb.
 
-The channel is chosen by *what this process can reach*, not by a flag: the direct socket
-is tried first and the sudo path is the fallback, so a collaborator never sees a sudo
-prompt and the operator never needs to remember which plane they are on.
+That client is shared: ``user-authorize <thread-id>`` reads and answers a key-request
+thread through the same two planes (:mod:`solver.crypto.keys`), which is why the call
+lives beside the spool rather than inside this command.
 """
 from __future__ import annotations
 
 __all__ = ['msg']
 
-import json
-import os
-import subprocess
-import sys
-from pathlib import Path
 from typing import Any, Literal
 
 from solver.auth.subject import rank
 from solver.config import config
 from solver.core import osc
 from solver.shell import console, register
-from solver.web.msg import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET, DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
+from solver.web.msg.client import call as _call
 from solver.web.msg.identity import STAFF_FLOOR
-from solver.web.unixhttp import request
-
-#: The scoped env file the admin CLI reads its token from — its presence is what tells
-#: us a spool is deployed here at all, so a plain dev checkout never prompts for sudo.
-_MSG_ENV = '/etc/euler/msg.env'
-
-#: Logical operation → (method, public path, admin path). The two planes expose the same
-#: verbs under different prefixes; this table is the only place that knows both.
-_OPS: dict[str, tuple[str, str, str]] = {
-    'mailbox': ('GET', '/messages', '/admin/messages'),
-    'thread': ('GET', '/messages/{id}', '/admin/threads/{id}'),
-    'send': ('POST', '/messages', '/admin/messages'),
-    'reply': ('POST', '/messages/{id}/reply', '/admin/threads/{id}/reply'),
-    'read': ('POST', '/messages/{id}/read', '/admin/threads/{id}/read'),
-    'queue': ('GET', '/staff/queue', '/admin/queue'),
-    'notice': ('POST', '/staff/notice', '/admin/notice'),
-    'dismiss': ('DELETE', '/staff/queue/{id}', '/admin/threads/{id}'),
-}
-
-
-def _socket_path() -> str:
-    """The public spool socket (env-overridable, for tests and dev runs)."""
-    return os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)
-
-
-def _sudo_plane_present() -> bool:
-    """Whether a spool admin plane exists to sudo into.
-
-    Checked before spending a sudo prompt: on a plain dev checkout with no web stack
-    there is nothing behind the fallback, and asking for a password only to fail is
-    worse than saying the service is not reachable.
-    """
-    return (Path(os.environ.get('EULER_MSG_ENV', _MSG_ENV)).exists()
-            or Path(os.environ.get(ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET)).exists())
-
-
-def _direct(method: str, path: str, body: dict[str, Any] | None) -> tuple[int, Any] | None:
-    """Call the spool over ``msg.sock``; None when this uid cannot reach it.
-
-    An ``OSError`` here is the *expected* outcome for the operator's own uid (not in
-    ``euler-web``) and for a host with no spool deployed — it is the signal to try the
-    sudo plane, not an error to report.
-    """
-    try:
-        return request(_socket_path(), method, path, body=body, timeout=15.0)
-    except OSError:
-        return None
-
-
-def _via_sudo(method: str, path: str, body: dict[str, Any] | None) -> tuple[int, Any] | None:
-    """Call the spool through the sudo admin CLI; None when that fails outright.
-
-    The body goes in on **stdin**, never in ``argv`` — a message in the process table
-    would be readable by every uid on the host.
-    """
-    argv = ['sudo', sys.executable, '-m', 'solver.web.msg.admin', 'api', method, path]
-    try:
-        proc = subprocess.run(argv, input=json.dumps(body or {}), stdout=subprocess.PIPE,
-                              text=True, check=False)
-    except (OSError, KeyboardInterrupt) as exc:
-        console.print(f'[error]error:[/error] could not run the message admin CLI ({exc})')
-        return None
-    if proc.returncode != 0:
-        return None                         # the CLI already reported on stderr
-    try:
-        envelope = json.loads(proc.stdout or '{}')
-        return int(envelope['status']), envelope['body']
-    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
-        console.print('[error]error:[/error] malformed reply from the message admin plane')
-        return None
-
-
-def _call(op: str, *, thread_id: str = '', body: dict[str, Any] | None = None) -> tuple[int, Any] | None:
-    """Run *op* on whichever plane this process can reach; None when neither answered."""
-    method, public, admin = _OPS[op]
-    direct = _direct(method, public.format(id=thread_id), body)
-    if direct is not None:
-        return direct
-    if not _sudo_plane_present():
-        return None
-    return _via_sudo(method, admin.format(id=thread_id), body)
 
 
 def _unreachable() -> int:

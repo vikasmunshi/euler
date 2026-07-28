@@ -469,7 +469,27 @@ users change alice@example.com contributor    # promote / demote
 users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
 users remove  alice@example.com               # delete the account/entry, pending invites, and deprovision
+users purge                                   # REPO: classify keys/enc-key.json against the roster
+users purge --apply                           # …and walk the stale entries, one at a time
+users purge <public-key-hex> --apply          # …or purge one named entry (the only way to drop an
+                                              #    unattributed one)
 ```
+
+**`purge` is the odd verb out — it is a *repo* verb, not an account one.** Everything else
+here writes the host's state under sudo; purge edits `keys/enc-key.json` **in the
+operator's checkout, as the operator**, and leaves the commit to them, because that file
+belongs to the repository and reaches collaborators through git. Only the roster read is
+sudo (`admin roster-json`, the machine-readable sibling of `list`).
+
+It classifies every authorised key by joining the file's `owners` attribution (§9) to the
+roster: `self` · `active` · `unattributed` · `stale`, and offers only the stale ones. Three
+guards make it safe to run without thinking twice: your **own key is never a candidate**
+(and it refuses to run at all if it cannot read your public key, since then the entry it
+drops could be yours); an **unattributed** key — every entry written before attribution
+existed — is only ever purged by naming it, because the cost of a wrong purge (a
+collaborator loses decryption and needs re-authorizing) is far worse than one stale line in
+a JSON file; and it refuses a **dirty** `enc-key.json`, so it never decides from a
+`user --regen` stopgap that the next `git-sync` will discard.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
@@ -727,13 +747,35 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   decryption of the *whole* private corpus, so `user-authorize` sits at `maintainer`:
   the floor that receives a key request is the floor that can act on it. The flow: the
   user generates their key in their shell (`user`), which **files the request with staff
-  through the message spool** (§13) carrying the public key and the exact command to run;
-  a maintainer runs `user-authorize <pubkey>` and commits and pushes `keys/enc-key.json`;
-  the user pulls, and their key now unwraps the master key. **The distribution channel is
-  git itself** — no side channel. The out-of-band hand-off the account page used to
-  describe still works, but nothing depends on the two people finding each other.
+  through the message spool** (§13) carrying the public key; a maintainer runs
+  **`user-authorize <message-id>`** and commits and pushes `keys/enc-key.json`; the user
+  pulls, and their key now unwraps the master key. **The distribution channel is git
+  itself** — no side channel. The out-of-band hand-off the account page used to describe
+  still works, but nothing depends on the two people finding each other.
+- **The message id, not the key.** `user-authorize` takes either — they are told apart by
+  shape (64 hex is a key, 16 is a thread id) — but the message form is the one to reach
+  for: the key comes out of the request and the **requester comes from the thread's
+  author**, which the spool resolved from `SO_PEERCRED` when it was filed and which no
+  sender can dress up as somebody else. It refuses rather than guesses (the subject must
+  be the key-request one, the body must hold exactly one hex token), asks before granting,
+  and afterwards replies on the thread and marks it read — so the person waiting learns it
+  happened, and the thread survives as the record until `msg dismiss` closes it.
+- **Attribution** is written there and only there, into the `owners` entry of
+  `enc-key.json`: the requester's **system slug**, never their address (this file is
+  public). `user --regen`'s local re-wrap deliberately writes none — that edit is a
+  stopgap keeping the collaborator decrypting until the authorized file arrives by
+  `git-sync`, and attributing a file about to be overwritten would be attributing nothing.
+- **Purging** an entry is `users purge` (admin, §6.3): it joins `owners` against the
+  account roster and offers the keys whose owner is gone or disabled. It is a *repo* verb —
+  only the roster read is sudo; the edit lands in the operator's checkout and is committed
+  like any other change.
 - **Revocation** is `key-rekey` (rotate the master key, re-wrap only to still-authorized
-  keys) plus a push. The de-authorized user's next pull decrypts nothing.
+  keys) plus a push. The de-authorized user's next pull decrypts nothing. **Purge is not
+  revocation**: dropping an entry stops that key unwrapping *future* copies of the file,
+  but whoever held it still has the master key and every committed blob still decrypts
+  with it. `users purge` prints exactly that, and the `key-rekey` that follows through —
+  and deliberately does not run it, because re-encrypting the whole private tree is not a
+  thing to happen as the side effect of a bookkeeping verb.
 
 `user-authorize` and `key-rekey` never need a *user's* private key, so the vault never
 interferes with enrollment or rotation. A user can have a working vault and no master-key

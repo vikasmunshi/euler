@@ -11,8 +11,10 @@ import `solver.config`). On top of that, this module owns:
   (a machine-local `0600` file outside the repo), and `lock`/`unlock` (wrap/unwrap) a secret to an
   X25519 public key via ephemeral ECDH -> HKDF-SHA256 -> ChaCha20-Poly1305.
 - the master (symmetrical) key -- `read_master_key` unwraps the current user's entry from
-  `keys/enc-key.json` (a `{<public-key-hex>: <locked-master-key-hex>}` map plus a `verify` entry)
-  and proves it correct by decrypting `verify` before returning it.
+  `keys/enc-key.json` (a `{<public-key-hex>: <locked-master-key-hex>}` map plus the reserved
+  `verify` and `owners` entries) and proves it correct by decrypting `verify` before returning it.
+  `authorised_keys` / `key_owners` are the readers for those two: which keys may decrypt, and
+  whose key each one is (attribution for `users purge` -- never consulted by the decrypt path).
 - deterministic blob encryption -- the convergent-encryption core used by the git filter: one fixed
   AES-256 key + a content-derived nonce (`HMAC(plaintext)`), so identical plaintext always yields
   byte-identical ciphertext (no spurious git diffs).
@@ -27,12 +29,14 @@ Verified: `python -c "import solver.crypto.ciphers"` writes 0 bytes to stdout.
 from __future__ import annotations
 
 __all__ = [
+    'authorised_keys',
     'build_cipher',
     'decrypt_blob',
     'decrypt_blob_with',
     'encrypt_blob',
     'encrypt_blob_with',
     'is_encrypted',
+    'key_owners',
     'load_private_key',
     'lock',
     'public_key_hex',
@@ -47,7 +51,7 @@ from hashlib import sha256
 from hmac import new as hmac_new
 from json import loads
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.asymmetric import x25519
@@ -139,16 +143,43 @@ def unlock(private_key: X25519PrivateKey, locked: str) -> bytes:
 # ==================================================================================================================== #
 #                                               master (symmetrical) key
 # ==================================================================================================================== #
-def read_enc_key_file() -> dict[str, str]:
+def read_enc_key_file() -> dict[str, Any]:
     """Read and parse keys/enc-key.json; raises FileNotFoundError if it has not been generated."""
-    return cast(dict[str, str], loads(config['enc_key_file'].read_text()))
+    return cast(dict[str, Any], loads(config['enc_key_file'].read_text()))
 
 
-def verify_master_key(data: dict[str, str], master_key: bytes) -> bool:
+def authorised_keys(data: dict[str, Any]) -> list[str]:
+    """The public keys the file authorises — every entry that is not a reserved one.
+
+    The one place that knows which entries are keys and which are bookkeeping. Callers
+    that need "who may decrypt" ask here rather than each filtering out `verify` (and now
+    `owners`) for themselves — the bug that shape invites is a new reserved entry being
+    re-wrapped as if it were somebody's public key.
+    """
+    reserved = {config['enc_key_verify'], config['enc_key_owners']}
+    return [key for key in data if key not in reserved]
+
+
+def key_owners(data: dict[str, Any]) -> dict[str, dict[str, str]]:
+    """The attribution map: ``{<public-key-hex>: {slug, since, by}}``, empty when absent.
+
+    **Attribution, never authority.** Nothing in the decrypt path consults this: a key
+    with no owner still unwraps, and an owner recorded here grants nothing on its own.
+    It exists so an admin can tell whose key an entry is when deciding what to purge —
+    a question the file could not answer at all before.
+    """
+    owners = data.get(config['enc_key_owners'])
+    if not isinstance(owners, dict):
+        return {}
+    return {key: dict(record) for key, record in owners.items() if isinstance(record, dict)}
+
+
+def verify_master_key(data: dict[str, Any], master_key: bytes) -> bool:
     """Return True if `master_key` decrypts the stored `verify` ciphertext back to the known plaintext."""
     try:
-        return decrypt_blob(bytes.fromhex(data['verify']), master_key) == bytes(config['verify_text'])
-    except (InvalidTag, ValueError, KeyError):
+        blob = bytes.fromhex(str(data[config['enc_key_verify']]))
+        return decrypt_blob(blob, master_key) == bytes(config['verify_text'])
+    except (InvalidTag, ValueError, KeyError, TypeError):
         return False
 
 
@@ -166,12 +197,12 @@ def read_master_key() -> bytes:
     Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
     """
     private_key: X25519PrivateKey = load_private_key()
-    data: dict[str, str] = read_enc_key_file()
+    data: dict[str, Any] = read_enc_key_file()
     my_public: str = public_key_hex(private_key.public_key())
     if my_public not in data:
         raise KeyError(f'public key {my_public} has no entry in {config["enc_key_file"]}')
     try:
-        master_key: bytes = unlock(private_key, data[my_public])
+        master_key: bytes = unlock(private_key, str(data[my_public]))
     except InvalidTag as exc:
         raise ValueError('master key could not be unwrapped with this private key') from exc
     if not verify_master_key(data, master_key):

@@ -100,8 +100,8 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`update-tags`](#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
 | [`user`](#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
-| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
-| [`users`](#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
+| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise a public key (hex), or work a key request by message id. |
+| [`users`](#command-users) | — | Administer accounts, invite requests and enc-key entries (via sudo admin CLI). |
 | [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 | [`version`](#command-version) | — | Show the running solver build version. |
 
@@ -1697,50 +1697,85 @@ silently orphan the real one (and with it any enc-key authorization it carries).
 
 #### Command: `user-authorize` (`authorize`)
 
-Authorise another public key (hex) to access the enc key.
+Authorise a public key (hex), or work a key request by message id.
 * profiles: admin, maintainer
 
 ```
-user-authorize <public_key>
+user-authorize <target>
+[identity=<str>] (default '')
 ```
 
 ```text
-Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
+Wrap the current master key to a public key and record whose key it is.
+
+*target* is either form of the same act, told apart by shape:
+
+- a **64-hex public key** — the direct grant, as before. *identity* is optional and,
+  when given, is what the entry is attributed to.
+- a **16-hex message id** — the key-authorization request the collaborator's `user`
+  command filed (`msg queue` lists them). The key and the requester are read from the
+  thread, the grant is confirmed interactively, and the thread is replied to and marked
+  read, so the person waiting learns it happened without anyone composing a message.
+
+Attribution is written to the ``owners`` entry of enc-key.json and is **bookkeeping,
+not authority**: it grants nothing on its own, and a key with no owner still decrypts.
+It exists so `users purge` can tell whose entry is whose. Only this command writes it —
+`user --regen`'s local re-wrap is a stopgap until the authorized file arrives by
+`git-sync`, so recording ownership there would attribute a file about to be replaced.
+
+Args:
+    target:   a 64-hex public key, or the 16-hex id of a key-authorization message.
+    identity: the email or os-login the key belongs to (public-key form only; the
+              message form takes it from the thread's author). Omitted, the entry is
+              authorised but left unattributed — and says so.
+
+Aliased as `authorize`.
 ```
 
 ---
 
 #### Command: `users`
 
-Administer accounts + invite requests (re-executes the admin CLI under sudo).
+Administer accounts, invite requests and enc-key entries (via sudo admin CLI).
 * profiles: admin
 
 ```
 users
-[action=list|process-requests|add|change|enable|disable|remove|redeploy] (default list)
+[action=list|process-requests|add|change|enable|disable|remove|purge|redeploy] (default list)
 [identity=<str>] (default '')
 [profile=reader|contributor|maintainer|admin] (default reader)
+[apply=true|--apply]
 ```
 
 ```text
 Administer accounts on the authorization map + the auth service.
 
-The whole command is ``admin``-floored and every verb re-executes the admin CLI
+The whole command is ``admin``-floored and the account verbs re-execute the admin CLI
 under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
 tier here — a web shell cannot get sudo, so nothing runs over the web.
+
+``purge`` is the exception to the sudo shape: it *reads* the roster under sudo but does
+its work in **your checkout**, on ``keys/enc-key.json``, as you — because that file is
+the repo's, not the host's, and the change has to be committed and pushed like any
+other. It classifies every authorised key against the roster (via the ``owners``
+attribution ``user-authorize`` records) and offers the stale ones. Your own key is never
+a candidate, and an unattributed one is only ever purged by naming it.
 
 Args:
     action:   list (roster + pending + the invite-request queue), process-requests
               (walk the queue interactively — accept / ignore / dismiss each),
               add (map entry — ``@email`` also provisions + mints an invite; a bare
               os-login is local-only), change (reassign a profile), enable / disable
-              (web SRP state), remove (drop the account/entry), redeploy (re-assert
-              the per-user host layer and re-lay every collaborator's git hooks —
-              takes no identity, and drops live shells).
-    identity: a web email (``@``) or a local OS login (required for the account
-              verbs; not for list / process-requests / redeploy).
+              (web SRP state), remove (drop the account/entry), purge (report — or with
+              ``--apply`` work — the enc-key entries whose owner is gone), redeploy
+              (re-assert the per-user host layer and re-lay every collaborator's git
+              hooks — takes no identity, and drops live shells).
+    identity: a web email (``@``) or a local OS login for the account verbs; for
+              ``purge``, one public key (hex) to consider instead of the whole file.
+              Not used by list / process-requests / redeploy.
     profile:  the profile to assign (add / change). ``admin`` is valid only for a
               local os-login, never a web account.
+    apply:    ``purge`` only — actually remove, rather than report what it would offer.
 ```
 
 ---

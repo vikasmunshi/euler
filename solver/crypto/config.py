@@ -29,7 +29,9 @@ class CryptoConfig(TypedDict):
     root_dir: Path
     # key material
     private_key_file: Path  # plain (unencrypted) X25519 private key (PKCS8 PEM)
-    enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
+    enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + the reserved entries below
+    enc_key_verify: str  # reserved entry: the verify-by-decrypt ciphertext
+    enc_key_owners: str  # reserved entry: {<public-key-hex>: {slug, since, by}} -- attribution, not authority
     private_key_backups: int  # rolling backups kept of the private key file
     # per-user vault (envelope encryption of the private key + env)
     env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
@@ -102,7 +104,15 @@ config: CryptoConfig = {
     'root_dir': _ROOT,
     # key material
     'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
-    'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
+    'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + reserved
+    # The reserved (non-public-key) entries of enc-key.json. They are *additive*: every
+    # reader indexes the file by public key and takes `verify` by name, so a clone running
+    # an older solver ignores anything else it finds. That is the whole reason attribution
+    # is a sibling entry rather than a reshape into {"keys": {...}} -- the git filter reads
+    # this file on every checkout, and a shape it cannot parse is a collaborator who
+    # cannot decrypt.
+    'enc_key_verify': 'verify',
+    'enc_key_owners': 'owners',
     'private_key_backups': 5,  # rolling backups kept of the private key file
     # per-user vault: both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
