@@ -5,8 +5,8 @@
     "args": "",
     "answer": 2297,
     "verdict": "correct",
-    "average": 1.6590000000000001e-06,
-    "number_runs": 33
+    "average": 1.8144074074074076e-06,
+    "number_runs": 54
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "",
     "answer": 2297,
     "verdict": "correct",
-    "average": 4.486039644248332e-05,
-    "number_runs": 33
+    "average": 4.564250411931425e-05,
+    "number_runs": 54
   },
   {
     "category": "main",
@@ -23,8 +23,8 @@
     "args": "https://projecteuler.net/resources/documents/0083_matrix.txt",
     "answer": 425185,
     "verdict": "correct",
-    "average": 0.023140975269230764,
-    "number_runs": 26
+    "average": 0.023714850256410253,
+    "number_runs": 39
   },
   {
     "category": "main",
@@ -32,7 +32,7 @@
     "args": "https://projecteuler.net/resources/documents/0083_matrix.txt",
     "answer": 425185,
     "verdict": "correct",
-    "average": 1.570385561531741,
-    "number_runs": 26
+    "average": 1.6191339790977788,
+    "number_runs": 39
   }
 ]

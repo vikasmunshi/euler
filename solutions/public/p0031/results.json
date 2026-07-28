@@ -5,8 +5,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 0",
     "answer": 1,
     "verdict": "correct",
-    "average": 2.963809523809524e-07,
-    "number_runs": 42
+    "average": 3.0015873015873017e-07,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 0",
     "answer": 1,
     "verdict": "correct",
-    "average": 1.4355259260074013e-05,
-    "number_runs": 42
+    "average": 2.1993286079830592e-05,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -23,8 +23,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 200",
     "answer": 73682,
     "verdict": "correct",
-    "average": 1.7005714285714292e-06,
-    "number_runs": 42
+    "average": 1.6012698412698418e-06,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -32,8 +32,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 200",
     "answer": 73682,
     "verdict": "correct",
-    "average": 4.902343096632865e-05,
-    "number_runs": 42
+    "average": 5.609830721311035e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -41,8 +41,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 1000",
     "answer": 321335886,
     "verdict": "correct",
-    "average": 6.739785714285713e-06,
-    "number_runs": 42
+    "average": 6.612444444444444e-06,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -50,8 +50,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 1000",
     "answer": 321335886,
     "verdict": "correct",
-    "average": 0.00029514273600874557,
-    "number_runs": 42
+    "average": 0.00032895801880855174,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -59,8 +59,8 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 100000",
     "answer": 10056050940818192726001,
     "verdict": "correct",
-    "average": 0.00080991,
-    "number_runs": 42
+    "average": 0.0008742507619047619,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -68,7 +68,7 @@
     "args": "[1, 2, 5, 10, 20, 50, 100, 200] 100000",
     "answer": 10056050940818192726001,
     "verdict": "correct",
-    "average": 0.04065485142581608,
-    "number_runs": 42
+    "average": 0.040578907728934334,
+    "number_runs": 63
   }
 ]

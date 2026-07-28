@@ -5,8 +5,8 @@
     "args": "100",
     "answer": 60,
     "verdict": "correct",
-    "average": 5.771666666666669e-07,
-    "number_runs": 42
+    "average": 5.737301587301588e-07,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "100",
     "answer": 60,
     "verdict": "correct",
-    "average": 1.06679958878972e-05,
-    "number_runs": 42
+    "average": 9.97374272195711e-06,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -23,8 +23,8 @@
     "args": "1000",
     "answer": 840,
     "verdict": "correct",
-    "average": 1.9133333333333334e-06,
-    "number_runs": 42
+    "average": 2.02115873015873e-06,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -32,8 +32,8 @@
     "args": "1000",
     "answer": 840,
     "verdict": "correct",
-    "average": 5.485012315191506e-05,
-    "number_runs": 42
+    "average": 5.1287017182432234e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -41,8 +41,8 @@
     "args": "10000",
     "answer": 5040,
     "verdict": "correct",
-    "average": 1.6664404761904767e-05,
-    "number_runs": 42
+    "average": 1.8312777777777784e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -50,8 +50,8 @@
     "args": "10000",
     "answer": 5040,
     "verdict": "correct",
-    "average": 0.0005771157115564815,
-    "number_runs": 42
+    "average": 0.0005863882871049028,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -59,8 +59,8 @@
     "args": "100000",
     "answer": 55440,
     "verdict": "correct",
-    "average": 0.00027502002380952386,
-    "number_runs": 42
+    "average": 0.0002731188412698413,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -68,8 +68,8 @@
     "args": "100000",
     "answer": 55440,
     "verdict": "correct",
-    "average": 0.008297024212966096,
-    "number_runs": 42
+    "average": 0.008599164438367422,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -77,8 +77,8 @@
     "args": "1000000",
     "answer": 720720,
     "verdict": "correct",
-    "average": 0.0036017272142857154,
-    "number_runs": 42
+    "average": 0.0036281451111111122,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -86,7 +86,7 @@
     "args": "1000000",
     "answer": 720720,
     "verdict": "correct",
-    "average": 0.173973819263795,
-    "number_runs": 42
+    "average": 0.16332401990537562,
+    "number_runs": 63
   }
 ]

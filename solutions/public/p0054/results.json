@@ -5,8 +5,8 @@
     "args": "https://projecteuler.net/resources/documents/0054_poker.txt",
     "answer": 376,
     "verdict": "correct",
-    "average": 0.00042927119047619054,
-    "number_runs": 42
+    "average": 0.00043112973015873023,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "https://projecteuler.net/resources/documents/0054_poker.txt",
     "answer": 376,
     "verdict": "correct",
-    "average": 0.008534778928844303,
-    "number_runs": 42
+    "average": 0.008659826966264982,
+    "number_runs": 63
   }
 ]

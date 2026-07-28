@@ -5,8 +5,8 @@
     "args": "https://projecteuler.net/resources/documents/0022_names.txt",
     "answer": 871198282,
     "verdict": "correct",
-    "average": 0.0006611860000000001,
-    "number_runs": 42
+    "average": 0.0007197291904761907,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "https://projecteuler.net/resources/documents/0022_names.txt",
     "answer": 871198282,
     "verdict": "correct",
-    "average": 0.003466963210874902,
-    "number_runs": 42
+    "average": 0.0036629095067462277,
+    "number_runs": 63
   }
 ]
