@@ -1830,7 +1830,7 @@
     {
       "path": "domain/mobius-function",
       "title": "M\u00f6bius function",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["mobius-function"],
