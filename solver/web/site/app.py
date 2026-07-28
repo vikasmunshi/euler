@@ -238,6 +238,27 @@ async def home(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
+@requires(VIEW)
+async def shell_page(request: web.Request) -> web.StreamResponse:
+    """``GET /shell`` — the Terminal item's page: the start tiles + the user guide.
+
+    The header's Terminal item and the start page's Terminal tile show and focus the
+    right pane's shell (``data-term-show``, site.js); this is the left pane's half of
+    that click — the start page's shape, with ``docs/user-guide.md`` where the start
+    page carries the README summary. Not to be confused with ``/terminal``, the right
+    pane's own document: this is a page *about* the shell, that one *is* the shell.
+
+    The guide is read from this clone (``content.read_doc``) rather than the packaged
+    copy, so a collaborator editing it on their branch sees their own text; a tree
+    without it renders the tiles alone rather than 404ing.
+    """
+    return render(request, 'shell.html', {
+        'guide_html': content.render_markdown(
+            content.read_doc(request.app[CONFIG_KEY].repo_root, 'user-guide') or ''),
+        'crumbs': [_HOME, ('terminal', None)],
+    }, block='content')
+
+
 def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]:
     """The `/solutions/` view context: grids, counts, crumbs, and its actions."""
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
@@ -810,6 +831,7 @@ def add_content_routes(app: web.Application) -> None:
         web.get('/', home),
         web.get('/git', git_chip),
         web.get('/terminal', terminal),
+        web.get('/shell', shell_page),      # the page ABOUT the terminal (nav: Terminal)
         # solutions — canonical with the trailing slash (web-server-guide § The site)
         web.get('/solutions', redirect_slash),
         web.get('/solutions/', solutions_index),

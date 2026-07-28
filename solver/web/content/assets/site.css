@@ -76,16 +76,13 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .brand-name { font-weight: 700; letter-spacing: 0.02em; }
 .brand-name sup { font-size: 0.68em; }
 .app-nav { display: flex; gap: 0.25rem; align-items: center; }
-.app-nav a, .app-nav .nav-term {
+.app-nav a {
   padding: 0.3rem 0.65rem;
   border-radius: 8px;
   text-decoration: none;
   color: var(--muted);
 }
-/* The Terminal item is a <button> (it restores the pane, it does not navigate) — reset
-   it to the link look the rest of the nav wears. */
-.app-nav .nav-term { font: inherit; border: 0; background: none; cursor: pointer; }
-.app-nav a:hover, .app-nav .nav-term:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.app-nav a:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .app-nav span.is-locked { padding: 0.3rem 0.65rem; border-radius: 8px; color: var(--muted); }
 .app-who { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
 
@@ -190,14 +187,21 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 
 /* ── the terminal chip (_nav.html) ───────────────────────────────────────────
    A readout, not a control: the acts live on the terminal's own titlebar, and this
-   says where the session stands when that titlebar is minimized away. First in
+   says where the session stands when that titlebar is hidden away. First in
    `.app-who`, before the git chip — both are state about YOUR side of the app, and
    the terminal is the one that is a live connection. Same .dot idiom every terminal
-   control wears, so the colour means one thing site-wide. */
+   control wears, so the colour means one thing site-wide.
+
+   It reports BOTH of the terminal's independent states: the session in the dot
+   (on/off), and the layout as a slash struck through the glyph while the window is
+   hidden to the footer — crossed-out is what hidden looks like everywhere, and it
+   costs the header no width. site.js paints both, and the tooltip spells them out. */
 .term-chip { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--muted); }
 .term-chip.is-on { color: var(--text); }
 .term-glyph { width: 0.95rem; height: 0.95rem; display: block; flex: none; }
 .term-chip .dot { flex: none; }
+.term-slash { display: none; }
+.term-chip.is-hidden .term-slash { display: inline; }
 
 /* ── the message chip (_msg.html) ────────────────────────────────────────────
    Between the terminal and git chips in `.app-who`: all three report state about YOU,
@@ -407,7 +411,7 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
   background: var(--surface);
 }
 .terminal-frame { flex: 1; width: 100%; border: 0; background: var(--surface); }
-/* The titlebar: the terminal's name and, opposite it, the minimize button. */
+/* The titlebar: the terminal's name and, opposite it, the hide button. */
 .ws-bar {
   flex: none;
   display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
@@ -419,13 +423,13 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
   font-size: 0.72rem; letter-spacing: 0.04em; color: var(--muted);
 }
 /* The window's own controls, in titlebar order: session (connect/disconnect), then
-   layout (minimize). */
+   layout (hide). */
 .ws-bar-controls { display: inline-flex; align-items: center; gap: 0.25rem; }
 /* Connect/disconnect lives on the terminal it acts on, and it is just the dot: state
    and act in one mark. No verb beside it — the titlebar is 1.6rem tall and a word there
    competes with the terminal's own name for a control that has exactly two states a
    colour already tells apart. What it will DO is its title (§ base.html), which site.js
-   flips with the state. Sized to match the minimize button next to it. */
+   flips with the state. Sized to match the hide button next to it. */
 .ws-conn {
   width: 1.6rem; height: 1.6rem; padding: 0;
   display: flex; align-items: center; justify-content: center;
@@ -435,49 +439,49 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 .ws-conn:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .ws-conn .dot { flex: none; }
 
-/* ── Minimize the terminal to the footer (F1): layout only, socket untouched ─── */
-/* Minimized: the panes become a single column and the terminal pane is hidden, so
-   #content fills the width; the footer's restore strip appears. */
-body.ws-minimized .app-panes { grid-template-columns: 1fr; }
-body.ws-minimized .pane-ws { display: none; }
-/* The minimize button in the titlebar. */
-.ws-min {
+/* ── Hide the terminal to the footer: layout only, socket untouched ─────────── */
+/* Hidden: the panes become a single column and the terminal pane is not rendered, so
+   #content fills the width; the footer's hidden window appears. */
+body.ws-hidden .app-panes { grid-template-columns: 1fr; }
+body.ws-hidden .pane-ws { display: none; }
+/* The hide button in the titlebar. */
+.ws-hide {
   width: 1.6rem; height: 1.6rem; padding: 0;
   display: flex; align-items: center; justify-content: center;
   border: 0; border-radius: 6px;
   background: none; color: var(--muted); cursor: pointer;
   transition: color 0.15s ease, background 0.15s ease;
 }
-.ws-min:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
-.ws-min svg { width: 1rem; height: 1rem; }
-/* The minimized terminal, in the footer's right-hand slot: a window collapsed to its
-   titlebar — window figure · name in the terminal's mono · restore glyph — so what it
+.ws-hide:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ws-hide svg { width: 1rem; height: 1rem; }
+/* The hidden terminal, in the footer's right-hand slot: a window collapsed to its
+   titlebar — window figure · name in the terminal's mono · show glyph — so what it
    is and what clicking does are the same picture. It is not a link and not a strip of
    text: the pane it stands for is a window, and this is that window, small.
 
    It is the last thing in the footer's right-aligned row and takes no space until it is
-   there: `display: none` while the terminal is open, so nothing is reserved and the
+   there: `display: none` while the terminal is visible, so nothing is reserved and the
    documents hold the right edge on their own. */
-.ws-restore {
+.ws-show {
   display: none; align-items: center; gap: 0.4rem;
   padding: 0.12rem 0.3rem 0.12rem 0.4rem;
   border: 1px solid var(--border); border-radius: 6px;
   background: var(--surface-hi); color: var(--muted); cursor: pointer;
   font: inherit; font-size: 0.78rem;
 }
-body.ws-minimized .ws-restore { display: inline-flex; }
-.ws-restore:hover { color: var(--accent); border-color: var(--accent); }
+body.ws-hidden .ws-show { display: inline-flex; }
+.ws-show:hover { color: var(--accent); border-color: var(--accent); }
 /* The window figure: a box whose top edge is its titlebar. */
-.ws-restore-figure {
+.ws-show-figure {
   width: 0.8rem; height: 0.62rem; flex: none;
   border: 1px solid currentColor; border-top-width: 0.2rem; border-radius: 2px;
 }
-.ws-restore-title {
+.ws-show-title {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.72rem; letter-spacing: 0.03em;
 }
-.ws-restore-glyph { display: inline-flex; }
-.ws-restore-glyph svg { width: 0.9rem; height: 0.9rem; display: block; }
+.ws-show-glyph { display: inline-flex; }
+.ws-show-glyph svg { width: 0.9rem; height: 0.9rem; display: block; }
 
 /* /terminal — the iframe's own document: the terminal fills it edge to edge
    (the pane's own border and radius come from .pane-ws in the shell). */
@@ -664,15 +668,6 @@ body.terminal-doc {
    an <a>, so the element-typed hover rules above never reach it. */
 .card.is-locked .card-ic, .card.is-locked .card-title { color: var(--muted); }
 .card-lock { flex: none; width: 0.9rem; height: 0.9rem; margin-top: 0.2rem; color: var(--muted); display: block; }
-/* The Terminal card is a <button> (it acts, it does not navigate) — the only one.
-   A button brings its own font, background and centring, none of which the tile
-   above expects, so reset it back to the tile the <a>s already are. */
-button.card {
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
 
 /* ── The README, below the cards on the start page ───────────────────────── */
 .readme { margin-top: 0.8rem; }
@@ -1249,10 +1244,10 @@ dl.account dd { margin: 0; min-width: 0; }
 }
 
 /* ── Footer (fixed) ──────────────────────────────────────────────────────────
-   Right-aligned: © · the documents, and — only while the terminal is minimized — its
-   window at the very end (§ .ws-restore). Nothing is reserved for it: with the terminal
-   open the documents hold the right edge themselves, and minimizing pushes them left by
-   exactly the window's width. */
+   Right-aligned: © · the documents, and — only while the terminal is hidden — its
+   window at the very end (§ .ws-show). Nothing is reserved for it: with the terminal
+   visible the documents hold the right edge themselves, and hiding it pushes them left
+   by exactly the window's width. */
 .app-footer {
   display: flex;
   align-items: center;

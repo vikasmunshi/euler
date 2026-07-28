@@ -1,0 +1,37 @@
+{# `/shell` — the Terminal item's page (web-server-guide § The site).
+
+   The header's Terminal item and the start page's Terminal tile are the only two
+   controls that point at something already on screen: the shell in the right pane. They
+   still show it and focus it (data-term-show, site.js) — but a nav item that swaps
+   nothing left the left pane on whatever was there, so the click read as half an act.
+   This is the other half: the page ABOUT the thing you were just taken to.
+
+   It is the start page's shape — hero, then the same four tiles (`_cards.html`) — with
+   the user guide where the start page carries the README summary. That is the document
+   a reader who just arrived at the shell wants: how to invoke it, how commands compose,
+   what the catalogue holds.
+
+   Context: `guide_html` (the rendered docs/user-guide.md — our own file, pre-rendered
+   and trusted, exactly as the docs pages mark their bodies). #}
+{% extends "base.html" %}
+{% block title %}terminal — euler{% endblock %}
+{% block content %}
+<header class="hero">
+  <p class="kicker">a prompt is the shortest distance between a question and an answer</p>
+  <h1>The solver shell</h1>
+  <p class="lede">It is running on the right — yours, and only yours: forked the first
+     time you connect, and still there when you come back. Everything below is what to
+     type into it.</p>
+</header>
+
+{% include "_cards.html" %}
+
+{% if guide_html %}
+<section class="readme">
+  <p class="readme-eyebrow">user guide</p>
+  <div class="doc-body">{{ guide_html | safe }}</div>
+  <p class="readme-more"><a href="/docs/" hx-get="/docs/" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true">All the guides &rarr;</a></p>
+</section>
+{% endif %}
+{% endblock %}

@@ -100,7 +100,8 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('theme-toggle', body)              # dark-only: there is no slider
         self.assertIn('data-term-toggle', body)             # the terminal control, on its titlebar
         self.assertIn('data-term-status', body)             # …and its readout, in the header
-        self.assertIn('data-term-restore', body)            # the footer's minimized-terminal slot
+        self.assertIn('data-term-hide', body)               # the titlebar's hide handle
+        self.assertIn('data-term-show', body)               # the footer's hidden-terminal slot
         self.assertIn('/auth/logout', body)                 # the user menu
         self.assertIn('hx-get="/about/license"', body)      # footer → left pane…
         self.assertNotIn('/about/readme', body)             # …without readme
@@ -144,6 +145,20 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('app-header', body)                 # …not the shell
         self.assertNotIn('id="content"', body)
         resp = await self.client.get('/terminal')            # still gated
+        self.assertEqual(resp.status, 401)
+
+    @unittest_run_loop
+    async def test_shell_page_is_the_terminal_items_target(self) -> None:
+        """`/shell` is the page ABOUT the terminal: the start tiles + the user guide."""
+        resp = await self.client.get('/shell', headers=_READER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('<!DOCTYPE html>', body)               # the shell, not the frame
+        self.assertIn('data-term-show', body)                # the Terminal tile shows the pane
+        self.assertIn('hx-get="/solutions/"', body)          # the same four tiles as home
+        self.assertIn('User Guide', body)                    # …and the guide below them
+        self.assertNotIn('terminal-doc', body)               # not /terminal, which is the frame
+        resp = await self.client.get('/shell')               # gated like every content route
         self.assertEqual(resp.status, 401)
 
     @unittest_run_loop

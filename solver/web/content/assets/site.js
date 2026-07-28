@@ -49,10 +49,9 @@
     enhanceEditors();
     externalize(document);
     // A swapped-in pane may carry terminal controls of its own (the start page's
-    // Terminal card): they arrive with the server's static markup and know nothing
-    // of the live socket / minimize state, so paint them from the state we hold.
-    paintTerminalControls();
-    paintWsMinimized();
+    // Terminal tile): they arrive with the server's static markup and know nothing
+    // of the live socket / hidden state, so paint them from the state we hold.
+    paintWsHidden();
     // A swapped-in topics index arrives with an empty filter box and the whole tree
     // showing — restore the session's query onto it (§ the topics filter).
     paintTopicFilter();
@@ -188,7 +187,7 @@
   // is also its accessible name — the titlebar's is a dot with no text). The one that
   // acts is on the terminal window's own titlebar (base.html); the header's
   // [data-term-status] chip only reports, so the state stays readable while the window
-  // is minimized and its titlebar is gone. All of them are painted from the one
+  // is hidden and its titlebar is gone. All of them are painted from the one
   // `termConnected` below, so they can never disagree.
   //
   // Connecting and disconnecting are always the USER'S acts (the terminal never
@@ -213,11 +212,17 @@
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
     });
-    // The header's chip: a readout, not a control — it has no label to swap, so the
-    // state it carries beyond the dot is its tooltip.
+    // The header's chip: a readout, not a control — and the only place BOTH of the
+    // terminal's states are shown at once. They are independent (hiding the window
+    // never touches the socket) and either one explains a shell that is not answering,
+    // so the chip carries the session in its dot, layout as the struck-through glyph
+    // (.is-hidden), and both in words in the tooltip.
+    var hidden = wsHidden();
     document.querySelectorAll('[data-term-status]').forEach(function (chip) {
-      chip.title = 'terminal — ' + (termConnected ? 'connected' : 'disconnected');
+      chip.title = 'terminal — ' + (termConnected ? 'connected' : 'disconnected')
+        + ', ' + (hidden ? 'hidden' : 'visible');
       chip.classList.toggle('is-on', termConnected);
+      chip.classList.toggle('is-hidden', hidden);
     });
     // A menu whose verbs type into the shell needs one to be there. This is the same
     // single state, not a second reading of the socket: the panels join the set above
@@ -231,7 +236,8 @@
       menu.classList.toggle('term-offline', !termConnected);
     });
   }
-  document.addEventListener('DOMContentLoaded', paintTerminalControls);
+  // Not registered on DOMContentLoaded itself: paintWsHidden() below calls this after
+  // toggling the layout class, so the two readouts are always painted from one pass.
 
   //: Post an act into the terminal iframe. Unframed (or signed out) there is none.
   function postToTerminal(message) {
@@ -249,50 +255,57 @@
     if (menu) { menu.open = false; }
   });
 
-  // ── minimize the terminal to the footer (F1) ────────────────────────────────
-  // Layout only: a persisted flag collapses the right pane (body.ws-minimized in the
-  // CSS) so #content spans the full width, with a restore strip in the footer. The
-  // socket is never touched — Connect/Disconnect stays its own control.
+  // ── hide the terminal to the footer ─────────────────────────────────────────
+  // Layout only: a persisted flag collapses the right pane (body.ws-hidden in the CSS)
+  // so #content spans the full width, with the hidden window in the footer. The socket
+  // is never touched — Connect/Disconnect stays its own control, and the two states the
+  // terminal has (connected/disconnected, visible/hidden) are independent.
   //
-  // Minimize and restore are SEPARATE acts, so each control does one predictable thing:
-  //   [data-term-minimize] — the pane's handle — always minimizes;
-  //   [data-term-restore]  — the header's Terminal item, the Home tile, the footer's
-  //                          minimized window — always restores AND focuses.
+  // Hide and show are SEPARATE acts, so each control does one predictable thing:
+  //   [data-term-hide] — the pane's own titlebar handle — always hides;
+  //   [data-term-show] — the header's Terminal item, the Terminal tile, the footer's
+  //                      hidden window — always shows AND focuses.
   //
-  // Restore means "take me to the terminal", so it also puts the caret there: a control
-  // that shows you the shell and then leaves the next keystroke going nowhere has done
+  // Show means "take me to the terminal", so it also puts the caret there: a control
+  // that reveals the shell and then leaves the next keystroke going nowhere has done
   // half its job. Focus is the iframe's to give (the parent cannot reach xterm's hidden
-  // textarea across the boundary), so it is asked for by message. Restoring an already-
-  // open terminal is layout-wise a no-op but still focuses — that is the whole of what
-  // the header's Terminal item then does.
-  var WS_MIN_KEY = 'euler:ws-minimized';
+  // textarea across the boundary), so it is asked for by message. Showing an already-
+  // visible terminal is layout-wise a no-op but still focuses — that is what the
+  // header's Terminal item does beyond swapping /shell into the pane.
+  var WS_HIDDEN_KEY = 'euler:ws-hidden';
 
-  function wsMinimized() {
-    try { return localStorage.getItem(WS_MIN_KEY) === '1'; } catch (e) { return false; }
+  function wsHidden() {
+    // Only where there is a terminal to hide — the signed-out shell holds a sign-in box
+    // in the right pane, not a session, so a stale flag never collapses it (and the chip
+    // never reports "hidden" about a terminal that is not there).
+    if (!document.getElementById('terminal')) { return false; }
+    try { return localStorage.getItem(WS_HIDDEN_KEY) === '1'; } catch (e) { return false; }
   }
-  function setWsMinimized(on) {
-    try { localStorage.setItem(WS_MIN_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+  function setWsHidden(on) {
+    try { localStorage.setItem(WS_HIDDEN_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
   }
-  function paintWsMinimized() {
-    // Only where there is a terminal to minimize — the signed-out shell holds a sign-in
-    // box in the right pane, not a session, so a stale flag never collapses it.
-    document.body.classList.toggle('ws-minimized',
-      !!document.getElementById('terminal') && wsMinimized());
+  function paintWsHidden() {
+    document.body.classList.toggle('ws-hidden', wsHidden());
+    // The header chip reports this state too, so the one paint covers both readouts.
+    paintTerminalControls();
   }
-  document.addEventListener('DOMContentLoaded', paintWsMinimized);
+  document.addEventListener('DOMContentLoaded', paintWsHidden);
 
   document.addEventListener('click', function (ev) {
     if (!ev.target.closest) { return; }
-    var minBtn = ev.target.closest('[data-term-minimize]');
-    var resBtn = ev.target.closest('[data-term-restore]');
-    if ((!minBtn && !resBtn) || !document.getElementById('terminal')) { return; }
-    setWsMinimized(!!minBtn);           // minimize → true, restore → false (no-op if already open)
-    paintWsMinimized();
+    var hideBtn = ev.target.closest('[data-term-hide]');
+    var showBtn = ev.target.closest('[data-term-show]');
+    if ((!hideBtn && !showBtn) || !document.getElementById('terminal')) { return; }
+    setWsHidden(!!hideBtn);             // hide → true, show → false (no-op if already visible)
+    paintWsHidden();
     // After the paint, so the pane is on screen before the frame takes focus (a hidden
     // iframe cannot hold it, and the message is delivered asynchronously either way).
-    if (resBtn) { postToTerminal({ euler: 'focus' }); }
-    var menu = (minBtn || resBtn).closest('details');
+    if (showBtn) { postToTerminal({ euler: 'focus' }); }
+    var menu = (hideBtn || showBtn).closest('details');
     if (menu) { menu.open = false; }
+    // No preventDefault: the header's Terminal item and the start page's tile are real
+    // links (hx-get /shell) that carry [data-term-show], and both halves of that click
+    // must run — the pane swaps, the terminal shows and takes the caret.
   });
 
   // The account page's tool rows: a click types the command that fixes the row into
@@ -400,7 +413,7 @@
   // by the nav, by the pane's back arrow, or by the drafts toggle, which is a second
   // route (/topics/all) onto the same grid — restores the narrowed view rather than
   // silently reopening the whole tree. sessionStorage, not localStorage: a filter is
-  // where you are in a sitting, not a standing preference like the minimized terminal,
+  // where you are in a sitting, not a standing preference like the hidden terminal,
   // so it dies with the tab. Emptying the box forgets it.
   var TOPIC_FILTER_KEY = 'euler:topic-filter';
 

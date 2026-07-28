@@ -7,7 +7,7 @@
    - down (parent → here): {euler: 'disarm'} before a deliberate exit (logout),
      so the beforeunload guard does not fire on a navigation the user chose;
      {euler: 'connect'|'disconnect'} from the terminal titlebar's toggle;
-     {euler: 'focus'} from a restore control, which brings the pane back but cannot
+     {euler: 'focus'} from a show control, which reveals the pane but cannot
      reach across this boundary to put the caret in the shell itself;
    - up (here → parent): {euler: 'navigate', path} when the shell's `show`/`edit`
      emits its OSC 5379 sequence — the shell drives the left pane, and only ever
@@ -291,7 +291,7 @@
           else { connect(); }
         }
         break;
-      case 'focus':                     // a restore control: put the caret in the shell
+      case 'focus':                     // a show control: put the caret in the shell
         // Focus is this document's to give — the parent cannot reach across the
         // iframe boundary to xterm's hidden textarea. Sent whether or not a socket
         // is up: an unfocused terminal is one the next keystroke misses, and

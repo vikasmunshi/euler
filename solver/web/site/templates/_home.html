@@ -26,67 +26,9 @@
   {% endif %}
 </header>
 
-{# The tile (site.css § the tile), four to a row: the section's glyph and the corner
-   slot on top, the name, then the page's own words. These four keep prose rather than a
-   count — the hero above already says how many problems are down, and a tile that
-   repeats the line above it is saying nothing. #}
-{% macro card(href, glyph, title, desc) %}
-  {% if subject %}
-  <a class="card" href="{{ href }}" hx-get="{{ href }}" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">
-    <span class="card-head"><span class="card-ic">{{ glyph }}</span>
-      <span class="card-title">{{ title }}</span>
-      <span class="card-go">&rarr;</span></span>
-    <span class="card-desc">{{ desc }}</span>
-  </a>
-  {% else %}
-  {# A <span>, not a disabled <a>: there is no link here to follow, and the
-     element-typed hover rules in site.css never reach it. The copy stays — the
-     visitor should see exactly what is behind the login — and the padlock takes the
-     corner slot the arrow would have had. #}
-  <span class="card is-locked">
-    <span class="card-head"><span class="card-ic">{{ glyph }}</span>
-      <span class="card-title">{{ title }}</span>
-      <svg class="card-lock" viewBox="0 0 24 24" role="img" aria-label="sign in to open">
-        <path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0
-          0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm-3 5a3 3 0 1
-          1 6 0v3H9V6Z"/></svg></span>
-    <span class="card-desc">{{ desc }}</span>
-  </span>
-  {% endif %}
-{% endmacro %}
-
-<nav class="cards" aria-label="Start here">
-  {{ card('/solutions/', 'π', 'Solutions',
-          'Every problem as a century grid — the orange ones are victories.') }}
-  {{ card('/docs/', '§', 'Docs',
-          'The guides. Read one, ignore the rest, feel briefly invincible.') }}
-  {{ card('/topics/', 'λ', 'Topics',
-          'The mathematics behind the problems, written down before it was forgotten.') }}
-  {% if subject %}
-  {# The one card that is not a place to go: the terminal is already here, in the right
-     pane. This tile takes you there — restoring it when it has been minimized to the
-     footer, and focusing it either way — the same act as the header's Terminal item. The
-     socket is untouched (Connect/Disconnect lives on the terminal's own titlebar). It
-     wears the same arrow as the other tiles for one visual family. #}
-  <button type="button" class="card card-term" data-term-restore>
-    <span class="card-head"><span class="card-ic">&#10095;</span>
-      <span class="card-title">Terminal</span>
-      <span class="card-go">&rarr;</span></span>
-    <span class="card-desc">Put the caret in the shell — and bring it back first if you minimized it to the footer.</span>
-  </button>
-  {% else %}
-  <span class="card is-locked">
-    <span class="card-head"><span class="card-ic">&#10095;</span>
-      <span class="card-title">Terminal</span>
-      <svg class="card-lock" viewBox="0 0 24 24" role="img" aria-label="sign in to open">
-        <path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0
-          0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm-3 5a3 3 0 1
-          1 6 0v3H9V6Z"/></svg></span>
-    <span class="card-desc">A real solver shell, in the right pane. Yours once you sign in.</span>
-  </span>
-  {% endif %}
-</nav>
+{# The four tiles, shared with the terminal page (`_cards.html`) — one definition, so a
+   fifth section is added in one place and both pages grow it. #}
+{% include "_cards.html" %}
 
 {# The README *summary*, continuing the same page — the slice setup.py vendors
    between the README's HOME markers, not the whole file. `readme_html` is our own

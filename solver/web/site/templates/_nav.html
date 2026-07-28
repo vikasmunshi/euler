@@ -27,12 +27,14 @@
     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
     <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
     <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>
-    {# Terminal is not a page — it lives in the right pane. This item takes you to it:
-       restores it when it has been minimized to the footer, and focuses it either way
-       (site.js), so the next keystroke lands in the shell. Not a link: it swaps nothing
-       and never navigates. #}
-    <button type="button" class="nav-term" data-term-restore
-            title="go to the terminal">Terminal</button>
+    {# Terminal is two things at once, and this one item does both: it takes you to the
+       shell in the right pane — showing it when it has been hidden to the footer, and
+       focusing it either way (site.js), so the next keystroke lands there — and it swaps
+       the left pane to /shell, the page about the thing you were just taken to. A plain
+       hx-get link, so the swap is htmx's; site.js's [data-term-show] handler does not
+       preventDefault, so both halves run on the one click. #}
+    <a href="/shell" hx-get="/shell" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+       data-term-show title="go to the terminal">Terminal</a>
     {% else %}
     <span class="is-locked" aria-disabled="true">Solutions</span>
     <span class="is-locked" aria-disabled="true">Docs</span>
@@ -72,14 +74,22 @@
   <div class="app-who">
     {# The terminal's state, first in the identity group. The controls that CHANGE it
        live on the terminal window itself (base.html's titlebar); this only reports —
-       so the state stays readable when the window is minimized to the footer and its
+       so the state stays readable when the window is hidden to the footer and its
        titlebar is gone. Same [data-term-dot] every other terminal control carries, so
-       site.js paints it from the one state the iframe reports. #}
+       site.js paints it from the one state the iframe reports.
+
+       It carries BOTH of the terminal's states, because they are independent and either
+       one explains a shell that is not answering: the SESSION (connected/disconnected)
+       in the dot, and LAYOUT (visible/hidden) as a slash struck through the glyph —
+       hidden reads as crossed-out everywhere else, and it costs the chip no width. The
+       tooltip says both in words. #}
     {% if subject %}
-    <span class="term-chip" data-term-status title="terminal — disconnected">
+    <span class="term-chip" data-term-status title="terminal — disconnected, visible">
       <svg class="term-glyph" viewBox="0 0 24 24" aria-hidden="true">
         <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
               stroke-linejoin="round" d="M5 7l4 4-4 4M12 16h7"/>
+        <path class="term-slash" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" d="M3 21L21 3"/>
       </svg>
       <span class="dot off" data-term-dot></span>
     </span>

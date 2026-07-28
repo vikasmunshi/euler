@@ -804,7 +804,7 @@ pane scrolls its own overflow.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs… │ ❯● │ ⑂ main │ 🯅 │ fixed
+│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics · Terminal │ Actions │ ⌂ crumbs… │ ❯● │ ⑂ main │ 🯅 │
 ├──────────────────────────────────────┬───────────────────────────────────────┤
 │  LEFT PANE  (#content)                │  ┌ solver terminal ─── ● Connect ─ ─┐ │
 │  navigable content, htmx-swapped;     │  │ the solver PTY terminal over /ws │ │  equal
@@ -828,17 +828,21 @@ pane scrolls its own overflow.
   are state about **your session** and **your clone**, not about the page in the pane.
 
   **Connect/disconnect lives on the terminal window's own titlebar** (§ Right pane), next
-  to minimize: the session is a property of that window, and a control on the thing it
+  to hide: the session is a property of that window, and a control on the thing it
   acts on needs no explaining. It is **one** entry, not two, and it is **just the dot** —
-  state and act in one mark, sized to the minimize button beside it. No verb: a word in a
+  state and act in one mark, sized to the hide button beside it. No verb: a word in a
   1.6rem titlebar competes with the terminal's own name, for a control whose two states a
   colour already tells apart. What it will do is its `title`, which is also its accessible
   name and which `site.js` flips with the state. The user menu carries no terminal item at
   all; it is for getting places.
 
-  The header's **terminal chip** only *reports* — a glyph and a dot, with the state in its
-  tooltip. It exists because the titlebar can be minimized away (§ Footer), and the one
-  thing that must never become unreadable is whether the session is live.
+  The header's **terminal chip** only *reports*, and it reports **both** of the terminal's
+  states, because they are independent and either one explains a shell that is not
+  answering: the **session** (connected/disconnected) as the dot's colour, and **layout**
+  (visible/hidden) as a slash struck through the glyph. The tooltip says both in words
+  (`terminal — connected, hidden`). It exists because the titlebar can be hidden away
+  (§ Footer), and the one thing that must never become unreadable is where the session
+  stands.
 
   A terminal **control** is any `[data-term-toggle]` carrying a `[data-term-dot]` (its
   title and accessible name are painted, so a control needs no text of its own); a
@@ -859,12 +863,12 @@ pane scrolls its own overflow.
 - **Footer** — right-aligned: © · license · terms · acknowledgements, all swapping into
   the left pane (auth-tier pages — terms, change password — return a bare fragment on
   `HX-Request` so they render in `#content` without nesting a page), and — only while the
-  terminal is minimized — its **window** at the very end.
+  terminal is hidden — its **window** at the very end.
 
-  Nothing is reserved for it: it is `display: none` while the terminal is open, so the
-  documents hold the right edge on their own and minimizing pushes them left by exactly
+  Nothing is reserved for it: it is `display: none` while the terminal is visible, so the
+  documents hold the right edge on their own and hiding it pushes them left by exactly
   the window's width. What appears there is a window collapsed to its titlebar — window
-  figure · name · restore glyph — so what it is and what clicking it does are the same
+  figure · name · show glyph — so what it is and what clicking it does are the same
   picture.
 
 `body` is a viewport-high grid (`auto 1fr auto`); the panes are equal (`1fr 1fr`)
@@ -1004,6 +1008,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 |---|---|---|---|
 | GET | `/` | the app shell; left pane = landing (`_home.html` + README), right pane = the `/terminal` iframe | reader |
 | GET | `/terminal` | the right pane's standalone document: xterm.js + the `/ws` client | reader |
+| GET | `/shell` | the Terminal item's target page: the four start tiles + `docs/user-guide.md` | reader |
 | GET | `/solutions/` | `problems.json` as 10×10 century grids + summary | reader |
 | GET | `/solutions/{n}/` | statement, then test cases · results · files · notes | reader |
 | GET | `/solutions/{n}/{filename}` | one problem file | reader |
@@ -1051,6 +1056,13 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   the README is the same page continuing, not a new section competing with the hero. The
   indexes list four per row, sorted by filename.
 
+  `/shell` is the landing's shape again — the same four tiles, from the same partial
+  (`_cards.html`, so a fifth section is added once and both pages grow it) — with
+  `docs/user-guide.md` where the landing carries the README. It is what the header's
+  Terminal item and the Terminal tile swap into the pane while they show and focus the
+  shell: the page about the thing the click just took you to. Not to be confused with
+  `/terminal`, which *is* the shell (the right pane's own document).
+
   **The tile is one object across four pages** — home, docs, topics, and the head of every
   century grid on solutions — and it is **two lines**, because that is what it has to say:
   what it is, and one fact about it.
@@ -1088,14 +1100,15 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   viewport the grid drops to two and below 700px to one, because under ~150px a tile
   truncates its own title.
 
-  The **Terminal** card is the one card that is not a place to go — the terminal is
-  already here, in the right pane — so it is a `<button>` rather than a link. Like the
-  header's Terminal item it *restores* the pane when it has been minimized to the footer
-  and *focuses* it either way: restore means "take me to the terminal", and a control that
-  shows you the shell but leaves the next keystroke going nowhere has done half its job.
-  Focus is the iframe's to give (`{euler: 'focus'}` — the parent cannot reach xterm's
-  hidden textarea across the boundary). The socket is untouched: connecting is the
-  titlebar's act (§ Header).
+  The **Terminal** card, and the header's Terminal item with it, points at two things at
+  once: the shell already here in the right pane, and `/shell`, the page *about* it. So
+  each is an ordinary `hx-get` link that also carries `[data-term-show]` — the pane swaps
+  to `/shell`, and the terminal is *shown* when it has been hidden to the footer and
+  *focused* either way. Show means "take me to the terminal", and a control that reveals
+  the shell but leaves the next keystroke going nowhere has done half its job; `site.js`
+  does not `preventDefault`, so both halves run on the one click. Focus is the iframe's to
+  give (`{euler: 'focus'}` — the parent cannot reach xterm's hidden textarea across the
+  boundary). The socket is untouched: connecting is the titlebar's act (§ Header).
 - **Account** — identity (email, and the slug that names the system user, home and clone
   that are theirs alone), then the **profile ladder**: the four rungs with theirs lit and
   the ones below it filled, because the ladder is cumulative and a reader who saw only
@@ -1265,6 +1278,12 @@ command it types* — the menu is a way into the shell, not around it. The floor
 the command lands in a shell that already resolved this subject, and `requires()` there is
 the boundary whatever the menu shows. `git-commit` needs no argument, because the shell
 supplies the problem it is on.
+
+**Both merge gates, because the queue has two halves.** The panel carries `gh-merge merge`
+*and* `gh-merge-docs` (both `maintainer`), for the same reason it carries both commit
+verbs: the two gates are disjoint — a branch of docs is refused by `gh-merge`, a branch of
+solutions by `gh-merge-docs` — so a maintainer walking the open pull requests with only
+one verb here has no button for half of what is waiting.
 
 **A disconnected terminal is a designed state.** `terminal.js`'s `send()` drops the frame
 on a closed socket, so a click would silently do nothing — the one outcome a control must

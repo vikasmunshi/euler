@@ -131,13 +131,13 @@ class WebChannelCommandSetTest(unittest.TestCase):
         ``update-docs`` stays admin-floored for a reason of its own: registration is
         profile-filtered, so a lesser profile's registry is truncated and regenerating from
         it would silently drop the admin-floored commands from the generated docs.
-        ``update-models`` is maintainer work — it rewrites tracked files that land through
-        `git-commit-docs` — so it reaches a maintainer's shell, web included."""
-        for admin_only in ('users', 'update-docs'):
+        ``update-models`` is admin-floored too — it rewrites package *source*
+        (``solver/ai/models.py``, ``solver/config.json``), which is root-owned in a
+        deployed instance, so a lesser rung would reach the ECB/pricing feeds through the
+        egress allowlist and then fail on the write."""
+        for admin_only in ('users', 'update-docs', 'update-models'):
             for rung in _WEB_RUNGS:
                 self.assertNotIn(admin_only, self.web[rung], f'{admin_only} must not reach {rung}')
-        self.assertIn('update-models', self.web['maintainer'])
-        self.assertNotIn('update-models', self.web['contributor'])
 
 
 if __name__ == '__main__':

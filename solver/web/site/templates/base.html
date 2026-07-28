@@ -64,15 +64,15 @@
     <aside id="ws" class="pane pane-ws" aria-label="{% block ws_label %}solver terminal{% endblock %}">
       {% block ws %}
       {# The terminal's titlebar: its name, then the two controls this window owns —
-         connect/disconnect, and minimize. They sit here, on the window they act on,
+         connect/disconnect, and hide. They sit here, on the window they act on,
          rather than in the user menu: the session is a property of this pane, and a
          control that lives on the thing it changes needs no explaining.
 
          Connect/disconnect is the SESSION (site.js posts the act into the iframe and
-         waits to be told what happened); minimize is LAYOUT only (site.js toggles
-         body.ws-minimized) — it collapses this pane so #content spans full width and
-         drops the minimized window into the footer, never touching the socket. The
-         header's own chip keeps reporting the state while this bar is collapsed away.
+         waits to be told what happened); hide is LAYOUT only (site.js toggles
+         body.ws-hidden) — it collapses this pane so #content spans full width and
+         drops the hidden window into the footer, never touching the socket. The
+         header's own chip keeps reporting both states while this bar is collapsed away.
 
          In the default ws block, so the signed-out auth pages (which override it) get
          no titlebar. #}
@@ -80,7 +80,7 @@
         <span class="ws-bar-title">solver terminal</span>
         <span class="ws-bar-controls">
           {# One control, not two, and no label: the dot *is* the button — state and act
-             in one mark, the size of the minimize button beside it. The act it offers is
+             in one mark, the size of the hide button beside it. The act it offers is
              its title (and its accessible name), which site.js flips with the state. It
              renders DISCONNECTED — the markup is served before the terminal has said
              anything — and is painted from the iframe's first report. #}
@@ -88,8 +88,8 @@
                   title="Connect the terminal" aria-label="Connect the terminal">
             <span class="dot off" data-term-dot></span>
           </button>
-          <button type="button" class="ws-min" data-term-minimize
-                  aria-label="minimize terminal" title="minimize terminal">
+          <button type="button" class="ws-hide" data-term-hide
+                  aria-label="hide terminal" title="hide terminal">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 19h12v2H6z"/></svg>
           </button>
         </span>
@@ -133,19 +133,19 @@
     {% else %}
     <span class="is-locked">acknowledgements</span>
     {% endif %}
-    {# The minimized terminal, last in the row: present only while the terminal is
-       minimized (site.js toggles body.ws-minimized on the CSS), and taking no room at
+    {# The hidden terminal, last in the row: present only while the terminal is
+       hidden (site.js toggles body.ws-hidden on the CSS), and taking no room at
        all otherwise — the documents simply sit at the right edge until it appears. #}
     {% if subject %}
-    <button type="button" class="ws-restore" data-term-restore
-            title="restore the terminal">
+    <button type="button" class="ws-show" data-term-show
+            title="show the terminal">
       {# A window, collapsed to its titlebar: the window figure, its name in the
-         terminal's own mono, and the restore glyph where a real window keeps its
+         terminal's own mono, and the show glyph where a real window keeps its
          buttons. The figure is drawn in CSS (a box with a thick top edge) — one
          element, no icon file. #}
-      <span class="ws-restore-figure" aria-hidden="true"></span>
-      <span class="ws-restore-title">solver terminal</span>
-      <span class="ws-restore-glyph" aria-hidden="true">
+      <span class="ws-show-figure" aria-hidden="true"></span>
+      <span class="ws-show-title">solver terminal</span>
+      <span class="ws-show-glyph" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 8l6 7H6z"/></svg>
       </span>
     </button>

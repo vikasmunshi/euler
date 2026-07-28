@@ -1618,7 +1618,7 @@ Args:
 #### Command: `update-models`
 
 Update Model enum, pricing, and USD→EUR rate.
-* profiles: admin, maintainer
+* profiles: admin
 * » supports `--silent`
 
 ```
