@@ -13,8 +13,10 @@ wholly inside one of the content trees a collaborator authors — ``solutions/``
 ``topics/``, never both (:data:`PR_SCOPE`).
 
 The **docs set** (:data:`DOCS_PATHS`) is the third body of work with its own pair of
-maintainer verbs: `git-commit-docs` stages and commits exactly those paths, and
-`gh-merge-docs` is the merge gate that admits a pull request confined to them. Its
+verbs, floored like the others by blast radius: `git-commit-docs` stages and commits
+exactly those paths on the collaborator's own branch (``contributor``), and
+`gh-merge-docs` is the ``maintainer`` merge gate that admits a pull request confined to
+them — the same read/write/master split the solution verbs above follow. Its
 definition is *what the doc-maintaining commands write* — `update-docs`, `update-models` and
 `update-tags` — wherever that happens to live, so a regeneration lands as one reviewable
 commit that carries nothing else.
@@ -322,7 +324,7 @@ def _docs_message(message: str) -> str:
     return message if message.startswith(DOCS_TAG) else f'{DOCS_TAG} {message}'
 
 
-@register(requires='maintainer', quietable=True, aliases=('commit-docs',),
+@register(requires='contributor', quietable=True, aliases=('commit-docs',),
           help_text='Commit the docs set: everything update-docs, update-models and update-tags write.')
 def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
     """Stage and commit the documentation set — and nothing else.

@@ -764,7 +764,7 @@ Aliased as `amend`.
 #### Command: `git-commit-docs` (`commit-docs`)
 
 Commit the docs set: everything update-docs, update-models and update-tags write.
-* profiles: admin, maintainer
+* profiles: admin, maintainer, contributor
 * » supports `--silent`
 
 ```

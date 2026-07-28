@@ -48,7 +48,7 @@ class PolicyShapeTest(unittest.TestCase):
                     'git-reset': 'contributor',
                     'git-push': 'contributor', 'git-hooks': 'contributor',
                     'git-identity': 'contributor', 'gh-merge': 'maintainer',
-                    'git-commit-docs': 'maintainer', 'gh-merge-docs': 'maintainer',
+                    'git-commit-docs': 'contributor', 'gh-merge-docs': 'maintainer',
                     'git-publish': 'maintainer'}
         for name, floor in expected.items():
             cmd = registry.resolve(name)

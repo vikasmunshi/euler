@@ -54,7 +54,7 @@ a profile on each channel.
 | `solver.core.git` | `git-audit` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-commit` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
-| `solver.core.git` | `git-commit-docs` |  |  | ✓ | ✓ |
+| `solver.core.git` | `git-commit-docs` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-hooks` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-identity` |  | ✓ | ✓ | ✓ |

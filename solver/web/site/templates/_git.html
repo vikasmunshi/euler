@@ -96,6 +96,11 @@
     {# No problem argument: the shell supplies the one it is on. `git-commit`'s message
        is optional now — it defaults to "solution for pNNNN" — so a one-click commit works. #}
     {{ verb('Commit', 'git-commit', 'contributor') }}
+    {# The docs set is the other half of a commit: `git-commit` stages the problem the
+       shell is on, so a regeneration (update-docs / update-tags / update-models) has no
+       verb here at all without this one, and its files would sit uncommitted while the
+       chip counts them. Empty message: it becomes `(docs) update`. #}
+    {{ verb('Commit docs', 'git-commit-docs', 'contributor') }}
     {# Un-commit back to origin/master, keeping the changes staged — the undo
        `git-commit --reset` folds into a re-commit and never stops at. #}
     {{ verb('Reset to master', 'git-reset', 'contributor') }}
