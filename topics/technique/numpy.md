@@ -31,11 +31,13 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/>._
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0304](/solutions/0304/) — Primonacci
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0461](/solutions/0461/) — Almost Pi
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0501](/solutions/0501/) — Eight Divisors

@@ -15,6 +15,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Generation_of_
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 

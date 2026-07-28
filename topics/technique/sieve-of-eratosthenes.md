@@ -124,9 +124,11 @@ the sieve exists to avoid when the question is about a whole range.
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0313](/solutions/0313/) — Sliding Game
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas

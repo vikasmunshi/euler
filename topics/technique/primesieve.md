@@ -14,6 +14,7 @@ _TODO: write this page. Start from <https://github.com/kimwalisch/primesieve>._
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0808](/solutions/0808/) — Reversible Prime Squares

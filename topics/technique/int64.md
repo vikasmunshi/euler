@@ -27,6 +27,7 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/reference/array
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0694](/solutions/0694/) — Cube-full Divisors

@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/M%C3%B6bius_in
 - ● [0073](/solutions/0073/) — Counting Fractions in a Range
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
 - ● [0193](/solutions/0193/) — Squarefree Numbers
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0478](/solutions/0478/) — Mixtures
 
 <!-- /problems -->

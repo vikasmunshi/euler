@@ -192,7 +192,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0232](/solutions/0232/) — The Race
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
-- ○ [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
+- ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
@@ -200,11 +200,13 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0301](/solutions/0301/) — Nim
 - ● [0313](/solutions/0313/) — Sliding Game
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0487](/solutions/0487/) — Sums of Power Sums

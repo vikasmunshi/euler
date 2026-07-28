@@ -33,7 +33,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Recurrence_rel
 - ○ [0282](/solutions/0282/) — The Ackermann Function
 - ○ [0287](/solutions/0287/) — Quadtree Encoding (a Simple Compression Algorithm)
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
-- ○ [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0324](/solutions/0324/) — Building a Tower
 - ○ [0326](/solutions/0326/) — Modulo Summations
 - ○ [0327](/solutions/0327/) — Rooms of Doom

@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Geometric_seri
 
 - ● [0232](/solutions/0232/) — The Race
 - ● [0288](/solutions/0288/) — An Enormous Factorial
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 
 <!-- /problems -->

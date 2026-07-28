@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Geometric_prog
 ## Problems
 
 - ● [0141](/solutions/0141/) — Square Progressive Numbers
-- ○ [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
+- ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ○ [0370](/solutions/0370/) — Geometric Triangles
 - ○ [0394](/solutions/0394/) — Eating Pie

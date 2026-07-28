@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bisection_meth
 ## Problems
 
 - ● [0156](/solutions/0156/) — Counting Digits
-- ○ [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
+- ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 
 <!-- /problems -->

@@ -10,6 +10,8 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/reference/array
 - ● [0179](/solutions/0179/) — Consecutive Positive Divisors
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0304](/solutions/0304/) — Primonacci
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 
 <!-- /problems -->
