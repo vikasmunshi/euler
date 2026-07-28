@@ -253,7 +253,7 @@ claude-api <c|py|doc|notes|tags|test-cases>
 [problem=<n>] (default current)
 [force=true|--force]
 [major=true|--major]
-[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5|none] (default None)
+[model=claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5|none] (default None)
 ```
 
 ```text
@@ -285,7 +285,7 @@ claude-batch
 [start=<int>] (default 0)
 [batch_id=<str>] (default '')
 [problems_list=<str>] (default '')
-[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5] (default claude-sonnet-5)
+[model=claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5] (default claude-sonnet-5)
 ```
 
 ```text
@@ -437,7 +437,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1408)
+[ecb_usd_rate=<float>] (default 1.1389)
 ```
 
 ```text

@@ -66,10 +66,10 @@ def claude_api(problem: Problem,
 
     # Default models for each target
     default_models = {
-        'c': Model.CLAUDE_OPUS_4_8,
-        'py': Model.CLAUDE_OPUS_4_8,
-        'doc': Model.CLAUDE_OPUS_4_8,
-        'notes': Model.CLAUDE_OPUS_4_8,
+        'c': Model.CLAUDE_OPUS_5,
+        'py': Model.CLAUDE_OPUS_5,
+        'doc': Model.CLAUDE_OPUS_5,
+        'notes': Model.CLAUDE_OPUS_5,
         'tags': Model.CLAUDE_SONNET_4_6,
         'test-cases': Model.CLAUDE_SONNET_4_6,
     }

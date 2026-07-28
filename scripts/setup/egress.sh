@@ -54,6 +54,7 @@ PROXY_PORT="3128"
 # ── Default allowlist (leading dot = domain + subdomains). Edit ${ALLOWLIST} to change. ──
 DEFAULT_ALLOWLIST=(
     "api.anthropic.com"          # Claude API (AI features)
+    "www.ecb.europa.eu"          # ECB (Exchange Rate API)
     ".projecteuler.net"          # problem scraper
     ".github.com"                # gh: repo, API, codeload
     ".githubusercontent.com"     # gh: raw / release objects
