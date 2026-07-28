@@ -37,7 +37,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prime_number>.
 - ● [0203](/solutions/0203/) — Squarefree Binomial Coefficients
 - ● [0214](/solutions/0214/) — Totient Chains
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
-- ○ [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ○ [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ○ [0249](/solutions/0249/) — Prime Subset Sums
 - ○ [0263](/solutions/0263/) — An Engineers' Dream Come True
