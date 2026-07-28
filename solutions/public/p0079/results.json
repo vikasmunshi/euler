@@ -5,8 +5,8 @@
     "args": "3 https://projecteuler.net/resources/documents/0079_keylog.txt",
     "answer": 73162890,
     "verdict": "correct",
-    "average": 6.459785714285714e-06,
-    "number_runs": 42
+    "average": 3.0950253968253966e-05,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "3 https://projecteuler.net/resources/documents/0079_keylog.txt",
     "answer": 73162890,
     "verdict": "correct",
-    "average": 4.586493222242487e-05,
-    "number_runs": 42
+    "average": 5.0894825974301925e-05,
+    "number_runs": 63
   }
 ]

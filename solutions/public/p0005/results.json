@@ -5,8 +5,8 @@
     "args": "10",
     "answer": 2520,
     "verdict": "correct",
-    "average": 3.8752380952380953e-07,
-    "number_runs": 84
+    "average": 3.8860952380952384e-07,
+    "number_runs": 105
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "10",
     "answer": 2520,
     "verdict": "correct",
-    "average": 2.06704828001204e-06,
-    "number_runs": 84
+    "average": 2.0093594988187154e-06,
+    "number_runs": 105
   },
   {
     "category": "main",
@@ -23,8 +23,8 @@
     "args": "20",
     "answer": 232792560,
     "verdict": "correct",
-    "average": 7.358928571428572e-07,
-    "number_runs": 84
+    "average": 7.357523809523809e-07,
+    "number_runs": 105
   },
   {
     "category": "main",
@@ -32,8 +32,8 @@
     "args": "20",
     "answer": 232792560,
     "verdict": "correct",
-    "average": 2.9337007574559676e-06,
-    "number_runs": 84
+    "average": 2.892086991951579e-06,
+    "number_runs": 105
   },
   {
     "category": "extra",
@@ -41,8 +41,8 @@
     "args": "50",
     "answer": 3099044504245996706400,
     "verdict": "correct",
-    "average": 1.8944404761904768e-06,
-    "number_runs": 84
+    "average": 1.995971428571429e-06,
+    "number_runs": 105
   },
   {
     "category": "extra",
@@ -50,8 +50,8 @@
     "args": "50",
     "answer": 3099044504245996706400,
     "verdict": "correct",
-    "average": 6.159130688978448e-06,
-    "number_runs": 84
+    "average": 6.14117043802426e-06,
+    "number_runs": 105
   },
   {
     "category": "extra",
@@ -59,8 +59,8 @@
     "args": "100",
     "answer": 69720375229712477164533808935312303556800,
     "verdict": "correct",
-    "average": 4.632642857142857e-06,
-    "number_runs": 84
+    "average": 4.6487904761904766e-06,
+    "number_runs": 105
   },
   {
     "category": "extra",
@@ -68,7 +68,7 @@
     "args": "100",
     "answer": 69720375229712477164533808935312303556800,
     "verdict": "correct",
-    "average": 1.2843010024101074e-05,
-    "number_runs": 84
+    "average": 1.2984484644784104e-05,
+    "number_runs": 105
   }
 ]

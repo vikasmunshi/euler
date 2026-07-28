@@ -5,8 +5,8 @@
     "args": "10 28433 \u00d7 2^7830457 + 1",
     "answer": 8739992577,
     "verdict": "correct",
-    "average": 6.699999999999999e-07,
-    "number_runs": 42
+    "average": 7.897936507936508e-07,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "10 28433 \u00d7 2^7830457 + 1",
     "answer": 8739992577,
     "verdict": "correct",
-    "average": 0.5652063640965415,
-    "number_runs": 42
+    "average": 0.5596095944111723,
+    "number_runs": 63
   }
 ]

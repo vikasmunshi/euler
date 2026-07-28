@@ -5,8 +5,8 @@
     "args": "TRIANGLE_A",
     "answer": 23,
     "verdict": "correct",
-    "average": 1.0524285714285712e-06,
-    "number_runs": 63
+    "average": 1.1908571428571428e-06,
+    "number_runs": 84
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "TRIANGLE_A",
     "answer": 23,
     "verdict": "correct",
-    "average": 6.626667325488395e-06,
-    "number_runs": 63
+    "average": 6.8480235530019165e-06,
+    "number_runs": 84
   },
   {
     "category": "main",
@@ -23,8 +23,8 @@
     "args": "TRIANGLE_B",
     "answer": 1074,
     "verdict": "correct",
-    "average": 4.95552380952381e-06,
-    "number_runs": 63
+    "average": 5.816047619047619e-06,
+    "number_runs": 84
   },
   {
     "category": "main",
@@ -32,7 +32,7 @@
     "args": "TRIANGLE_B",
     "answer": 1074,
     "verdict": "correct",
-    "average": 3.4386985048296904e-05,
-    "number_runs": 63
+    "average": 3.791864617683348e-05,
+    "number_runs": 84
   }
 ]

@@ -8,8 +8,8 @@
       "2969 6299 9629"
     ],
     "verdict": "correct",
-    "average": 0.002746379357142857,
-    "number_runs": 42
+    "average": 0.002667856936507936,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -20,8 +20,8 @@
       "2969 6299 9629"
     ],
     "verdict": "correct",
-    "average": 0.011223982073715888,
-    "number_runs": 42
+    "average": 0.01075985477008443,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -72,8 +72,8 @@
       "92381 92831 93281"
     ],
     "verdict": "correct",
-    "average": 0.1675132875952381,
-    "number_runs": 42
+    "average": 0.16409803773015874,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -124,7 +124,7 @@
       "92381 92831 93281"
     ],
     "verdict": "correct",
-    "average": 0.4729707959257731,
-    "number_runs": 42
+    "average": 0.4654986620640441,
+    "number_runs": 63
   }
 ]

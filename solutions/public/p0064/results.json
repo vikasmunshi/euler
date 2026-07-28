@@ -5,8 +5,8 @@
     "args": "13",
     "answer": 4,
     "verdict": "correct",
-    "average": 7.402142857142857e-07,
-    "number_runs": 42
+    "average": 9.570634920634921e-07,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "13",
     "answer": 4,
     "verdict": "correct",
-    "average": 7.442189685423814e-06,
-    "number_runs": 42
+    "average": 7.290376021364142e-06,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -23,8 +23,8 @@
     "args": "10000",
     "answer": 1322,
     "verdict": "correct",
-    "average": 0.006633554571428573,
-    "number_runs": 42
+    "average": 0.0066916088888888895,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -32,7 +32,7 @@
     "args": "10000",
     "answer": 1322,
     "verdict": "correct",
-    "average": 0.10593510343183186,
-    "number_runs": 42
+    "average": 0.10725050928655065,
+    "number_runs": 63
   }
 ]

@@ -5,8 +5,8 @@
     "args": "2",
     "answer": 80,
     "verdict": "correct",
-    "average": 3.723547619047619e-06,
-    "number_runs": 42
+    "average": 4.22115873015873e-06,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -14,8 +14,8 @@
     "args": "2",
     "answer": 80,
     "verdict": "correct",
-    "average": 0.00011415916794378842,
-    "number_runs": 42
+    "average": 0.00012236866464335766,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -23,8 +23,8 @@
     "args": "3",
     "answer": 857,
     "verdict": "correct",
-    "average": 6.318500000000001e-06,
-    "number_runs": 42
+    "average": 7.026253968253969e-06,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -32,8 +32,8 @@
     "args": "3",
     "answer": 857,
     "verdict": "correct",
-    "average": 0.0002128677657483855,
-    "number_runs": 42
+    "average": 0.00027105853004041056,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -41,8 +41,8 @@
     "args": "4",
     "answer": 8558,
     "verdict": "correct",
-    "average": 9.080833333333335e-06,
-    "number_runs": 42
+    "average": 9.869698412698414e-06,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -50,8 +50,8 @@
     "args": "4",
     "answer": 8558,
     "verdict": "correct",
-    "average": 0.000330024619220889,
-    "number_runs": 42
+    "average": 0.000353680935592228,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -59,8 +59,8 @@
     "args": "5",
     "answer": 85623,
     "verdict": "correct",
-    "average": 1.2680023809523811e-05,
-    "number_runs": 42
+    "average": 1.3824126984126985e-05,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -68,8 +68,8 @@
     "args": "5",
     "answer": 85623,
     "verdict": "correct",
-    "average": 0.0004911457439274749,
-    "number_runs": 42
+    "average": 0.0005065341270343947,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -77,8 +77,8 @@
     "args": "6",
     "answer": 856929,
     "verdict": "correct",
-    "average": 1.6459833333333335e-05,
-    "number_runs": 42
+    "average": 1.8690761904761906e-05,
+    "number_runs": 63
   },
   {
     "category": "dev",
@@ -86,8 +86,8 @@
     "args": "6",
     "answer": 856929,
     "verdict": "correct",
-    "average": 0.0006861464297842412,
-    "number_runs": 42
+    "average": 0.0007064717485465937,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -95,8 +95,8 @@
     "args": "7",
     "answer": 8581146,
     "verdict": "correct",
-    "average": 2.0238952380952383e-05,
-    "number_runs": 42
+    "average": 2.183930158730159e-05,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -104,8 +104,8 @@
     "args": "7",
     "answer": 8581146,
     "verdict": "correct",
-    "average": 0.0009254933580190741,
-    "number_runs": 42
+    "average": 0.000978319965291857,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -113,8 +113,8 @@
     "args": "8",
     "answer": 85744333,
     "verdict": "correct",
-    "average": 2.5348976190476194e-05,
-    "number_runs": 42
+    "average": 2.6637634920634923e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -122,8 +122,8 @@
     "args": "8",
     "answer": 85744333,
     "verdict": "correct",
-    "average": 0.0011259874978956457,
-    "number_runs": 42
+    "average": 0.0011985522074927945,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -131,8 +131,8 @@
     "args": "9",
     "answer": 854325192,
     "verdict": "correct",
-    "average": 3.166916666666667e-05,
-    "number_runs": 42
+    "average": 3.2149666666666675e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -140,7 +140,7 @@
     "args": "9",
     "answer": 854325192,
     "verdict": "correct",
-    "average": 0.001437115904991515,
-    "number_runs": 42
+    "average": 0.0015780338911258335,
+    "number_runs": 63
   }
 ]
