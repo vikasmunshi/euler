@@ -18,6 +18,8 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prefix_sum>._
 - ● [0150](/solutions/0150/) — Sub-triangle Sums
 - ● [0205](/solutions/0205/) — Dice Game
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors

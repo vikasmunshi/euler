@@ -136,9 +136,10 @@ Three cautions earn their keep:
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0232](/solutions/0232/) — The Race
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
-- ○ [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
+- ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0313](/solutions/0313/) — Sliding Game
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0692](/solutions/0692/) — Siegbert and Jo

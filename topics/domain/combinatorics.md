@@ -208,7 +208,7 @@ of crossing it.
 - ○ [0292](/solutions/0292/) — Pythagorean Polygons
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ○ [0307](/solutions/0307/) — Chip Defects
-- ○ [0319](/solutions/0319/) — Bounded Sequences
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
 - ○ [0324](/solutions/0324/) — Building a Tower
 - ○ [0331](/solutions/0331/) — Cross Flips

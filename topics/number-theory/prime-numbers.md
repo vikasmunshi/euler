@@ -387,6 +387,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0308](/solutions/0308/) — An Amazing Prime-generating Automaton
 - ● [0313](/solutions/0313/) — Sliding Game
 - ○ [0315](/solutions/0315/) — Digital Root Clocks
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ○ [0329](/solutions/0329/) — Prime Frog
 - ○ [0333](/solutions/0333/) — Special Partitions
@@ -413,6 +414,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0446](/solutions/0446/) — Retractions B
 - ○ [0451](/solutions/0451/) — Modular Inverses
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ○ [0467](/solutions/0467/) — Superinteger
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
 - ● [0478](/solutions/0478/) — Mixtures

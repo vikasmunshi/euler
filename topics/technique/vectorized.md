@@ -29,6 +29,7 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/glossary.html>.
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0461](/solutions/0461/) — Almost Pi
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0757](/solutions/0757/) — Stealthy Numbers

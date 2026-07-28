@@ -102,8 +102,7 @@ and therefore a clean numerical solve, is available.
 - ● [0135](/solutions/0135/) — Same Differences
 - ● [0136](/solutions/0136/) — Singleton Difference
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
-- ○ [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
-- ○ [0319](/solutions/0319/) — Bounded Sequences
+- ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ○ [0828](/solutions/0828/) — Numbers Challenge
 

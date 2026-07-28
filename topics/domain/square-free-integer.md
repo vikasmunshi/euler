@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Square-free_in
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ○ [0362](/solutions/0362/) — Squarefree Factors
 - ○ [0399](/solutions/0399/) — Squarefree Fibonacci Numbers
-- ○ [0464](/solutions/0464/) — Möbius Function and Intervals
+- ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ○ [0536](/solutions/0536/) — Modulo Power Identity
 - ○ [0556](/solutions/0556/) — Squarefree Gaussian Integers
 - ○ [0580](/solutions/0580/) — Squarefree Hilbert Numbers

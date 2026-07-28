@@ -189,6 +189,7 @@ handful of operations on small numbers.
 - ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0304](/solutions/0304/) — Primonacci
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
 - ○ [0324](/solutions/0324/) — Building a Tower
 - ○ [0325](/solutions/0325/) — Stone Game II

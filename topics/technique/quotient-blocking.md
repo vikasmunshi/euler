@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://codeforces.com/blog/entry/53925>._
 ## Problems
 
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
+- ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors
