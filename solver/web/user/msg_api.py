@@ -37,7 +37,7 @@ from typing import Any
 import aiohttp
 from aiohttp import web
 
-from solver.web.msg import DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
+from solver.web.msg import DEFAULT_MSG_SOCKET, KEY_REQUEST_SUBJECT, MSG_SOCKET_ENV
 from solver.web.msg.identity import STAFF_FLOOR
 from solver.web.site.app import requires
 from solver.web.site.render import MSG_SPOOL_KEY, render
@@ -99,6 +99,13 @@ def _rows(threads: list[Any]) -> list[dict[str, Any]]:
     Unread first because the chip's job is "what wants you"; within each group the spool's
     own newest-first order is kept. Only the fields the row shows survive the trip — the
     body never reaches the browser, since it is read in the shell.
+
+    ``key_request`` marks the one message kind that has a *verb* rather than only a read:
+    a key-authorization request, which a maintainer answers with ``user-authorize <id>``.
+    It is decided from the subject here, against the shared constant the filing command
+    uses — the same test ``user-authorize`` itself applies, so the chip never offers a
+    verb the command would refuse. The public key stays out of the browser: the command
+    reads it from the thread, over the socket, where the identity is vouched for.
     """
     ordered = sorted((t for t in threads if isinstance(t, dict)),
                      key=lambda t: not t.get('unread'))
@@ -106,6 +113,7 @@ def _rows(threads: list[Any]) -> list[dict[str, Any]]:
              'author_name': str(t.get('author_name', '')),
              'subject': str(t.get('subject', '')),
              'unread': bool(t.get('unread')),
+             'key_request': str(t.get('subject', '')).startswith(KEY_REQUEST_SUBJECT),
              'when': _when(str(t.get('updated', '')))}
             for t in ordered[:_ROWS]]
 

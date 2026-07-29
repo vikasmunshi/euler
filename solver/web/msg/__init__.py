@@ -25,7 +25,16 @@ side and run from the deployed ``/opt/euler`` venv.
 """
 from __future__ import annotations
 
-__all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'MSG_SOCKET_ENV']
+__all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KEY_REQUEST_SUBJECT',
+           'MSG_SOCKET_ENV']
+
+#: The subject a key-authorization request is filed under — the one message *kind* the
+#: spool carries that another command can work. It lives here, with the socket paths,
+#: because it is a wire convention between three parties that must not drift: `user`
+#: files it (:mod:`solver.crypto.keys`), `user-authorize <id>` requires it before reading
+#: a public key out of a body, and the header's message chip offers the Authorize verb on
+#: the rows that carry it. Anything else in the spool is prose for a person to read.
+KEY_REQUEST_SUBJECT: str = 'Key authorization request from '
 
 #: Env var naming the public spool socket (the per-user service and the shell read it).
 MSG_SOCKET_ENV: str = 'EULER_MSG_SOCKET'

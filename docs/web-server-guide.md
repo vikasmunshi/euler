@@ -1744,6 +1744,21 @@ panel says so and offers to connect it, painted from the same `termConnected` ev
 `[data-term-*]` control reads — a verb that silently does nothing is the one outcome a
 control must never have.
 
+**One row kind carries an act as well as a read.** A key-authorization request — the message
+kind a *command* files (§9), and the only one another command can work — gets an
+**Authorize** button beside its read button, typing `user-authorize <message-id>`. The id is
+the whole point: the command reads the public key from the thread over the socket, where the
+requester's identity is vouched for, so the key never reaches the browser and nobody retypes
+64 hex characters off a screen. The row decides "is this a key request" from the same subject
+constant the filing command uses (`solver/web/msg/__init__.py`), so the chip can never offer
+a verb `user-authorize` would refuse.
+
+It appears **only when applicable** — the row is a key request *and* the reader is at the
+command's floor — which is a deliberate exception to this panel's shown-but-locked rule. A
+locked verb in the verb list teaches the ladder on a menu everyone sees; a locked one on a
+*row* would ride on every message of a kind most readers never receive, and on a reader's own
+key request it would offer them a grant they can never make.
+
 That mechanism is selected by the **`.term-menu`** marker every such menu carries, not by
 each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second
 menu to need it could not join without editing `site.js`.

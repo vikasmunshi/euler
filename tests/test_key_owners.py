@@ -33,6 +33,7 @@ from solver.crypto.ciphers import (authorised_keys, encrypt_blob, key_owners, lo
                                    read_enc_key_file, read_master_key)
 from solver.crypto.config import config as crypto_config
 from solver.web.auth import commands as users_mod
+from solver.web.msg import KEY_REQUEST_SUBJECT
 from tests import silence
 
 silence()   # the purge/authorize paths print refusals on purpose
@@ -203,7 +204,7 @@ class KeyRequestTests(EncKeyFileTestCase):
         self.addCleanup(setattr, notify, 'read_thread', saved)
 
     def test_a_well_formed_request_yields_the_key_and_its_author(self) -> None:
-        self._with_thread(self._thread(f'{keys_mod._KEY_REQUEST_SUBJECT}them@example.com',
+        self._with_thread(self._thread(f'{KEY_REQUEST_SUBJECT}them@example.com',
                                        f'minted a key\n\npublic key: {self.theirs}\n'))
         self.assertEqual(keys_mod._resolve_key_request('0123456789abcdef'),
                          (self.theirs, 'them@example.com'))
@@ -215,7 +216,7 @@ class KeyRequestTests(EncKeyFileTestCase):
 
     def test_two_keys_in_the_body_are_refused(self) -> None:
         """Ambiguity is not resolved by picking one — a grant is not inferred."""
-        self._with_thread(self._thread(f'{keys_mod._KEY_REQUEST_SUBJECT}them@example.com',
+        self._with_thread(self._thread(f'{KEY_REQUEST_SUBJECT}them@example.com',
                                        f'{self.theirs} and also {self.gone}'))
         self.assertIsNone(keys_mod._resolve_key_request('0123456789abcdef'))
 
@@ -236,7 +237,7 @@ class KeyRequestTests(EncKeyFileTestCase):
         self.addCleanup(setattr, notify, 'notify_staff', saved)
         keys_mod._request_authorization('them@example.com', self.theirs)
         subject, body = sent[0]
-        self.assertTrue(subject.startswith(keys_mod._KEY_REQUEST_SUBJECT))
+        self.assertTrue(subject.startswith(KEY_REQUEST_SUBJECT))
         self.assertEqual(len(keys_mod._PUBLIC_KEY_RE.findall(body)), 1)
 
 

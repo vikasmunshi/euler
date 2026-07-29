@@ -52,12 +52,8 @@ from solver.crypto.ciphers import (authorised_keys, encrypt_blob, key_owners, lo
                                    public_key_hex, read_enc_key_file, read_master_key, verify_master_key)
 from solver.crypto.config import config
 from solver.shell import console, register
+from solver.web.msg import KEY_REQUEST_SUBJECT
 from solver.utils.shell_utils import confirm
-
-#: The subject `_request_authorization` files a key request under, and the marker
-#: `user-authorize <msg-id>` requires before it will read a key out of a message body —
-#: so an arbitrary `msg send` is never mined for hex.
-_KEY_REQUEST_SUBJECT: str = 'Key authorization request from '
 
 #: A public key on the wire and in enc-key.json: 32 bytes of lowercase hex.
 _PUBLIC_KEY_RE = re.compile(r'\b[0-9a-f]{64}\b')
@@ -240,7 +236,7 @@ def _resolve_key_request(thread_id: str) -> tuple[str, str] | None:
         console.print(f'[error]error:[/error] cannot read message [accent]{thread_id}[/accent] '
                       '(no such thread, not yours to read, or the spool is unreachable)')
         return None
-    if not str(thread.get('subject', '')).startswith(_KEY_REQUEST_SUBJECT):
+    if not str(thread.get('subject', '')).startswith(KEY_REQUEST_SUBJECT):
         console.print(f'[error]error:[/error] message [accent]{thread_id}[/accent] is not a key '
                       'authorization request — authorise the public key directly instead')
         return None
@@ -440,7 +436,7 @@ def _request_authorization(identity: str, public_key: str) -> None:
     # true when editing this text: a reworded subject silently turns every future request back
     # into copy-and-paste, and a second hex token in the body makes it refuse.
     sent = notify_staff(
-        f'{_KEY_REQUEST_SUBJECT}{identity}',
+        f'{KEY_REQUEST_SUBJECT}{identity}',
         f'{identity} minted a new key pair and cannot decrypt the private solutions yet.\n\n'
         f'public key: {public_key}\n\n'
         f'To grant access, run:\n'
