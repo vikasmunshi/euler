@@ -2065,12 +2065,24 @@ Register the first admin account with `users add`.
 code, templates, and static assets without touching identities, units, certs, or the
 firewall. `auth.sh redeploy` reinstalls the repo into the shared `/opt/euler` venv,
 `user.sh redeploy` bounces running instances so their sockets re-activate them against
-the rebuilt venv, and `frontend.sh redeploy` refreshes `/etc/euler/web-content` plus the
+the rebuilt venv and re-lays each clone's per-clone setup from the operator's checkout, and `frontend.sh redeploy` refreshes `/etc/euler/web-content` plus the
 Caddyfile and reloads the edge. It is **gated on `make check-version`** (its first
 prerequisite): the version `solver/version.py` names — the number this build bakes into
 the venv — must have its `vX.Y.Z` tag on origin, or the redeploy refuses. That stops a
 release that was bumped and tagged locally but never pushed from running the deployed venv
 ahead of what any collaborator clone can `git-sync` to.
+
+**Per-clone setup travels with the redeploy.** Two things inside a collaborator's clone are
+laid down from *this* checkout rather than by them: their git hooks, and their crypt filter's
+command. Both are things they cannot receive any other way. A clone keeps whatever filter
+command was recorded the day it was wired, and only `git-filter install` rewrites it — which
+needs the master key, so it runs in their own session and nowhere else; writing the command,
+though, needs no key at all (only the re-checkout does), so the operator can push it. It has
+to carry **`-P`**: git runs a filter with the cwd at the top of the worktree, and a solver
+checkout has a `solver/` package sitting right there, so without it the filter imports the
+*clone's* source instead of the venv's — a clone that falls behind then runs an old filter
+against a current key file and stops decrypting. An unwired clone is left alone; wiring it is
+theirs to do when they are issued a key.
 
 **Cutting a release.** The version is one tracked file, `solver/version.py`, written only
 by `scripts/version/release.sh` (`make release`): it derives the SemVer bump from
