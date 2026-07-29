@@ -4,10 +4,17 @@
 #   sudo bash scripts/ops/reset-user.sh <slug> [--dry-run] [--yes] [--no-filter]
 #
 # Runs, as the collaborator, the two commands that make their clone match the remote
-# exactly:
+# exactly — branch, and tags:
 #
-#     git fetch --prune origin
+#     git fetch --prune --tags --force --prune-tags origin
 #     git reset --hard origin/master
+#
+# The tag flags are not decoration. Origin is the source of truth for release tags, and a
+# repair that fixes the branch but leaves a stale or *moved* tag behind has not finished:
+# a plain `git fetch --tags` refuses to clobber an existing tag and exits non-zero, which
+# is enough to fail the collaborator's next `git-sync` outright — and `git-sync` is the
+# only git verb a reader's profile has. That is not hypothetical; it is what a history
+# rewrite on master did to six clones at once.
 #
 # **This discards their local commits and every uncommitted change.** That is the point —
 # it is for a clone wedged in a state its owner cannot get out of with the verbs their
@@ -141,10 +148,7 @@ if [[ ${DRY_RUN} -ne 1 && ${ASSUME_YES} -ne 1 ]]; then
     fi
 fi
 
-echo "   fetching..."
-# --tags --force --prune-tags: leave the clone's tags mirroring origin. A repair tool that
-# fixes the branch and leaves a stale or conflicting release tag behind has not finished —
-# the next `git-sync` trips over exactly that tag.
+echo "   fetching (branch + tags, mirroring origin)..."
 if ! run_step fetch --prune --tags --force --prune-tags origin; then
     echo "Error: fetch failed." >&2
     if [[ ${#PROXY_ENV[@]} -eq 0 ]]; then
