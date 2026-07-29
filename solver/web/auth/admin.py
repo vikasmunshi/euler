@@ -43,8 +43,8 @@ from solver.web.auth.client import request
 from solver.web.envfile import env_file_values
 
 _ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove',
-            'set-key', 'roster-json', 'requests-json', 'dismiss')
-_NO_IDENTITY = ('list', 'roster-json', 'requests-json')            # roster/queue views take no identity
+            'set-key', 'set-keys', 'roster-json', 'requests-json', 'dismiss')
+_NO_IDENTITY = ('list', 'set-keys', 'roster-json', 'requests-json')   # sweeps + views take no identity
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
 _AUTHZ_PATH = os.environ.get('EULER_AUTHZ_FILE', '/etc/euler/authorizations.json')
@@ -102,6 +102,61 @@ def _api(method: str, path: str, *, body: dict[str, Any] | None = None,
 
 # ── dispatch ────────────────────────────────────────────────────────────────────────
 
+def _public_key_of(slug: str) -> str:
+    """The public key in *slug*'s own enc-key file, or ``''`` when there is not exactly one.
+
+    Their file holds two records — ``verify`` and the master key wrapped to their public key
+    — so the entry that is not ``verify`` *is* the key. No unwrapping, no private key, no
+    master key: this reads a name, not a secret.
+
+    It is the only place the key can be read from. `~/.euler/id` would be authoritative but is
+    vault-encrypted, and that vault opens only inside its owner's own session.
+    """
+    try:
+        home = Path(f'/home/{slug}')
+        data = json.loads((home / '.euler' / 'enc-key.json').read_text())
+    except (OSError, ValueError):
+        return ''
+    keys = [key for key in data if key != 'verify' and len(str(key)) == 64]
+    return str(keys[0]) if len(keys) == 1 else ''
+
+
+def _set_keys() -> int:
+    """Register every collaborator's public key from the file each of them already holds.
+
+    `user-authorize` records a key as it issues one — but only when it can reach this plane,
+    and a **web shell cannot sudo**, so a grant made from a browser leaves the registry empty.
+    Nothing breaks until a rotation, at which point an account with no registered key cannot
+    be re-issued to and loses access. This sweep is the repair, and it is idempotent: run it
+    whenever `users list` shows a blank column.
+
+    Reads from each holder's own enc-key file rather than asking them, because the operator
+    running a rotation cannot wait on six people to come online.
+    """
+    status, data = _api('GET', '/admin/users')
+    if status != 200 or not isinstance(data, dict):
+        return _fail(f'admin API: {status} {data}')
+    registered = missing = 0
+    for entry in data.get('roster', []):
+        identity, slug = str(entry.get('user', '')), str(entry.get('slug', ''))
+        if entry.get('scope') != 'web' or not slug:
+            continue                        # an os-login has no users.json record to write to
+        public_key = _public_key_of(slug)
+        if not public_key:
+            print(f'  {identity} ({slug}): no key yet — they must run `user` and be issued one')
+            missing += 1
+            continue
+        status, body = _api('POST', f'/admin/users/{identity}/public-key',
+                            body={'public_key': public_key})
+        if status != 200:
+            print(f'  {identity} ({slug}): FAILED ({status} {body})', file=sys.stderr)
+            continue
+        print(f'  {identity} ({slug}): {public_key[:16]}…')
+        registered += 1
+    print(f'registered {registered} key(s); {missing} account(s) still without one')
+    return 0
+
+
 def main(argv: list[str]) -> int:
     if not argv or argv[0] not in _ACTIONS:
         print(f'usage: python -m solver.web.auth.admin {{{"|".join(_ACTIONS)}}} [identity] [profile]',
@@ -133,6 +188,9 @@ def main(argv: list[str]) -> int:
                 return _fail(f'admin API: {status} {queue}')
             _print_requests(queue)
             return 0
+
+        if action == 'set-keys':
+            return _set_keys()
 
         if action == 'set-key':
             # The public-key registry `key-rekey` re-issues to. `profile` carries the key

@@ -469,15 +469,20 @@ users change alice@example.com contributor    # promote / demote
 users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
 users remove  alice@example.com               # delete the account/entry, pending invites, and deprovision
-users set-key alice@example.com <64-hex>      # register their public key (for key-rekey)
+users set-keys                                # register everyone's public key (for key-rekey)
 ```
 
-**`set-key` is the public-key registry.** With one enc-key file per machine (§9) there is no
-central list of who holds the master key, so `key-rekey` has to be told who to re-issue to.
-It holds *public* material only: losing it costs a round of re-registration, never access.
-`user-authorize` writes it for you when it can reach the admin plane, and prints this command
-when it cannot — a web shell has no sudo. An account with no registered key loses access at
-the next rotation, which `key-rekey` names before you confirm.
+**`set-keys` fills the public-key registry.** With one enc-key file per machine (§9) there is
+no central list of who holds the master key, so `key-rekey` has to be told who to re-issue to.
+The sweep takes no identity and reads no secret: a holder's own enc-key file has two records,
+`verify` and their public key, and the one that is not `verify` *is* the key. (Their
+`~/.euler/id` would be authoritative but is vault-encrypted, and that vault opens only inside
+their own session.)
+
+It holds *public* material only, so losing it costs a sweep, never access. `user-authorize`
+registers as it issues when it can reach the admin plane; a web shell has no sudo, so it
+prints this command instead. An account with no registered key loses access at the next
+rotation, which `key-rekey` names before you confirm.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the

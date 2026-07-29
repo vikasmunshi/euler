@@ -151,7 +151,7 @@ def key_rekey() -> int:
     access means rotating the key they hold and re-issuing the new one to everyone else.
 
     The list of who "everyone else" is comes from the **account roster** — each user's
-    ``public_key``, registered in ``users.json`` (``users set-key``). It used to be implicit
+    ``public_key``, registered in ``users.json`` (``users set-keys``). It used to be implicit
     in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
     found. With one file per machine there is nothing central to read, so the registry is
     explicit — and it holds only *public* keys, which is why losing it costs nothing but a
@@ -161,6 +161,7 @@ def key_rekey() -> int:
     ``user-authorize`` does; they run ``msg save`` to take it. An account with no registered
     public key cannot be re-issued to and is named, not skipped silently — that person loses
     access at this rotation, which is sometimes the intent and must never be a surprise.
+    ``users set-keys`` fills the registry from what every holder already has.
 
     Because the git filter is deterministic, every committed blob depends on the master key, so
     a rotation re-encrypts the tracked private files via `git add --renormalize`.
@@ -181,7 +182,7 @@ def key_rekey() -> int:
     console.print(f'[primary]re-issuing to {len(named)} registered public key(s)[/primary]')
     for identity in unregistered:
         console.print(f'  [warning]{identity}[/warning] has no registered public key — they LOSE '
-                      'access at this rotation (`users set-key` first to keep them)')
+                      'access at this rotation (`users set-keys` first to keep them)')
     if not confirm(f'Rotate the master key, re-encrypt all private files, and re-issue to '
                    f'{len(named)} holder(s)?'):
         console.print('[muted]Rekey cancelled.[/muted]')
@@ -257,8 +258,8 @@ def user_authorize(target: str, identity: str = '') -> int:
     could sit in a public repo: without their private key it is inert. They run `msg save` to
     take it; until they do, nothing has changed for them.
 
-    The public key is also registered on their account (`users set-key`), which is what
-    `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
+    The public key is also registered on their account (as `users set-keys` does in bulk),
+    which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
     so from a web shell it prints the command for the operator instead of failing the grant.
 
     Args:
@@ -388,8 +389,8 @@ def _register_public_key(identity: str, public_key: str) -> None:
     from solver.web.auth.commands import register_public_key
     if register_public_key(identity, public_key):
         return
-    console.print(f'[muted]Not registered for rekey (needs sudo). From the operator\'s terminal: '
-                  f'[accent]users set-key {identity} {public_key}[/accent][/muted]')
+    console.print('[muted]Not registered for rekey (needs sudo). From the operator\'s terminal: '
+                  '[accent]users set-keys[/accent] — it sweeps everyone.[/muted]')
 
 
 # ==================================================================================================================== #

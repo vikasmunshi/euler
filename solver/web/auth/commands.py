@@ -20,11 +20,12 @@ The verbs:
 - **mutations** (`add` / `change` / `enable` / `disable` / `remove`) — the direct
   account verbs, for identities that did not come through the request queue (a bare
   os-login, or an ad-hoc invite).
-- **`users set-key`** — register an account's X25519 **public** key. It is the registry
-  `key-rekey` reads: with one enc-key file per machine there is no central list of who holds
-  the master key, so a rotation needs to be told who to re-issue to. Public material only —
-  losing it costs a round of re-registration, never access. `user-authorize` writes it for
-  you when it can sudo, and prints this command when it cannot.
+- **`users set-keys`** — register every collaborator's X25519 **public** key, read from the
+  enc-key file each of them already holds. It is the registry `key-rekey` reads: with one
+  enc-key file per machine there is no central list of who holds the master key, so a
+  rotation needs to be told who to re-issue to. Public material only — losing it costs a
+  sweep, never access. `user-authorize` registers as it issues when it can sudo; from a web
+  shell it cannot, so this catches up. Idempotent, and takes no identity.
 - **`users redeploy`** — the host plane rather than an account verb: it drives the
   provisioning kit, never the admin CLI, and touches no account — so, like `list`, it
   takes no identity.
@@ -239,38 +240,46 @@ def register_public_key(identity: str, public_key: str) -> bool:
 @register(requires='admin',
           help_text='Administer accounts, invite requests and enc-key entries (via sudo admin CLI).')
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
-                          'remove', 'set-key', 'redeploy'] = 'list',
-          identity: str = '', profile: str = 'reader') -> int:
+                          'remove', 'set-keys', 'redeploy'] = 'list',
+          identity: str = '',
+          profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
 
     The whole command is ``admin``-floored and the account verbs re-execute the admin CLI
     under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
     tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-    ``set-key`` records an account's X25519 **public** key — the registry ``key-rekey``
-    re-issues a rotated master key to. `user-authorize` writes it for you when it can;
-    from a web shell it cannot sudo, so it prints this command instead.
+    ``set-keys`` sweeps every collaborator and registers the X25519 **public** key each of
+    them already holds — the registry ``key-rekey`` re-issues a rotated master key to. It
+    takes no identity and reads no secret: a holder's enc-key file names their public key,
+    and that is all it copies. `user-authorize` registers as it issues when it can reach the
+    admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
+    run it whenever ``users list`` shows a blank column.
 
     Args:
         action:   list (roster + pending + the invite-request queue), process-requests
                   (walk the queue interactively — accept / ignore / dismiss each),
                   add (map entry — ``@email`` also provisions + mints an invite; a bare
                   os-login is local-only), change (reassign a profile), enable / disable
-                  (web SRP state), remove (drop the account/entry), set-key (register their
-                  public key for rekey), redeploy (re-assert the per-user host layer and
-                  re-lay every collaborator's git hooks — takes no identity, and drops live
-                  shells).
+                  (web SRP state), remove (drop the account/entry), set-keys (register every
+                  collaborator's public key for rekey — takes no identity), redeploy
+                  (re-assert the per-user host layer and re-lay every collaborator's git
+                  hooks — takes no identity, and drops live shells).
         identity: a web email (``@``) or a local OS login (required for the account verbs;
-                  not for list / process-requests / redeploy).
-        profile:  the profile to assign (add / change), or the 64-hex **public key** for
-                  ``set-key``. ``admin`` is valid only for a local os-login, never a web
-                  account.
+                  not for list / process-requests / set-keys / redeploy).
+        profile:  the profile to assign (add / change). ``admin`` is valid only for a local
+                  os-login, never a web account.
     """
     if action == 'list':
         return _sudo_admin('list')                     # roster + pending + invite-request queue
 
     if action == 'process-requests':
         return _process_requests()                     # interactive: accept / ignore / dismiss
+
+    if action == 'set-keys':
+        # A sweep, not an account verb: it takes no identity and reads each collaborator's
+        # own enc-key file for the public key they already hold.
+        return _sudo_admin('set-keys')
 
     if action == 'redeploy':
         # The host plane, not an account verb — so it takes no identity and writes no SoR.

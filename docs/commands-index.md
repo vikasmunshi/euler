@@ -1053,7 +1053,7 @@ Rotate to a new master key, re-issue it to every registered public key, renormal
 access means rotating the key they hold and re-issuing the new one to everyone else.
 
 The list of who "everyone else" is comes from the **account roster** — each user's
-``public_key``, registered in ``users.json`` (``users set-key``). It used to be implicit
+``public_key``, registered in ``users.json`` (``users set-keys``). It used to be implicit
 in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
 found. With one file per machine there is nothing central to read, so the registry is
 explicit — and it holds only *public* keys, which is why losing it costs nothing but a
@@ -1063,6 +1063,7 @@ Each holder is sent their own payload through the message spool, exactly as
 ``user-authorize`` does; they run ``msg save`` to take it. An account with no registered
 public key cannot be re-issued to and is named, not skipped silently — that person loses
 access at this rotation, which is sometimes the intent and must never be a surprise.
+``users set-keys`` fills the registry from what every holder already has.
 
 Because the git filter is deterministic, every committed blob depends on the master key, so
 a rotation re-encrypts the tracked private files via `git add --renormalize`.
@@ -1739,8 +1740,8 @@ public key — and it travels through the spool for the same reason the old trac
 could sit in a public repo: without their private key it is inert. They run `msg save` to
 take it; until they do, nothing has changed for them.
 
-The public key is also registered on their account (`users set-key`), which is what
-`key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
+The public key is also registered on their account (as `users set-keys` does in bulk),
+which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
 so from a web shell it prints the command for the operator instead of failing the grant.
 
 Args:
@@ -1760,9 +1761,9 @@ Administer accounts, invite requests and enc-key entries (via sudo admin CLI).
 
 ```
 users
-[action=list|process-requests|add|change|enable|disable|remove|set-key|redeploy] (default list)
+[action=list|process-requests|add|change|enable|disable|remove|set-keys|redeploy] (default list)
 [identity=<str>] (default '')
-[profile=<str>] (default reader)
+[profile=reader|contributor|maintainer|admin] (default reader)
 ```
 
 ```text
@@ -1772,24 +1773,26 @@ The whole command is ``admin``-floored and the account verbs re-execute the admi
 under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
 tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-``set-key`` records an account's X25519 **public** key — the registry ``key-rekey``
-re-issues a rotated master key to. `user-authorize` writes it for you when it can;
-from a web shell it cannot sudo, so it prints this command instead.
+``set-keys`` sweeps every collaborator and registers the X25519 **public** key each of
+them already holds — the registry ``key-rekey`` re-issues a rotated master key to. It
+takes no identity and reads no secret: a holder's enc-key file names their public key,
+and that is all it copies. `user-authorize` registers as it issues when it can reach the
+admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
+run it whenever ``users list`` shows a blank column.
 
 Args:
     action:   list (roster + pending + the invite-request queue), process-requests
               (walk the queue interactively — accept / ignore / dismiss each),
               add (map entry — ``@email`` also provisions + mints an invite; a bare
               os-login is local-only), change (reassign a profile), enable / disable
-              (web SRP state), remove (drop the account/entry), set-key (register their
-              public key for rekey), redeploy (re-assert the per-user host layer and
-              re-lay every collaborator's git hooks — takes no identity, and drops live
-              shells).
+              (web SRP state), remove (drop the account/entry), set-keys (register every
+              collaborator's public key for rekey — takes no identity), redeploy
+              (re-assert the per-user host layer and re-lay every collaborator's git
+              hooks — takes no identity, and drops live shells).
     identity: a web email (``@``) or a local OS login (required for the account verbs;
-              not for list / process-requests / redeploy).
-    profile:  the profile to assign (add / change), or the 64-hex **public key** for
-              ``set-key``. ``admin`` is valid only for a local os-login, never a web
-              account.
+              not for list / process-requests / set-keys / redeploy).
+    profile:  the profile to assign (add / change). ``admin`` is valid only for a local
+              os-login, never a web account.
 ```
 
 ---
