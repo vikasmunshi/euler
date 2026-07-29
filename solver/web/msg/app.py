@@ -78,9 +78,7 @@ class MessageService:
 
     def render_thread(self, thread: Thread) -> dict[str, Any]:
         """One thread with display identities resolved through the policy view."""
-        return thread.summary(
-            author_name=self.policy.identity_of(thread.author),
-            reply_names=tuple(self.policy.identity_of(reply['author']) for reply in thread.replies))
+        return thread.summary(author_name=self.policy.identity_of(thread.author))
 
     def mailbox(self, box: str, profile: str, *, since: str = '') -> dict[str, Any]:
         """The caller's own view: their threads (newest first) and their unread count."""
@@ -124,18 +122,6 @@ class MessageService:
         if thread_id is not None:
             await self.notify(boxes)
         return thread_id, boxes
-
-    async def reply(self, thread_id: str, box: str, body: str, profile: str) -> bool:
-        """Append a reply and nudge every other party to the thread."""
-        staff = self.is_staff(profile)
-        if not self.store.reply(thread_id, box, body, staff=staff):
-            return False
-        thread = self.store.thread(thread_id, box, staff=staff)
-        if thread is not None:
-            await self.notify([target for target in thread.recipients if target != box])
-        return True
-
-    # ── delivery ───────────────────────────────────────────────────────────────────
 
     async def notify(self, boxes: list[str]) -> None:
         """Nudge each box's own instance so an attached terminal updates its badge.
@@ -230,16 +216,6 @@ def build_app(service: MessageService) -> web.Application:
         log.info('message queued by %s (%s)', identity, thread_id)
         return web.json_response({'id': thread_id}, status=201)
 
-    async def reply(request: web.Request) -> web.Response:
-        """``POST /messages/{id}/reply`` ``{body}`` — reply on a thread you are party to."""
-        box, identity, profile = caller(request)
-        body = await _json_body(request)
-        thread_id = request.match_info['id']
-        if not await service.reply(thread_id, box, str(body.get('body', '')), profile):
-            return web.Response(status=404, text='no such thread, or reply refused')
-        log.info('%s replied on %s', identity, thread_id)
-        return web.json_response({'id': thread_id, 'replied': True})
-
     async def mark_read(request: web.Request) -> web.Response:
         """``POST /messages/{id}/read`` — mark a thread read by this caller."""
         box, _identity, profile = caller(request)
@@ -290,7 +266,6 @@ def build_app(service: MessageService) -> web.Application:
         web.get('/messages', mailbox),
         web.post('/messages', submit),
         web.get('/messages/{id}', one_thread),
-        web.post('/messages/{id}/reply', reply),
         web.post('/messages/{id}/read', mark_read),
         web.get('/staff/queue', queue),
         web.delete('/staff/queue/{id}', dismiss),
@@ -357,16 +332,6 @@ def build_admin_app(service: MessageService) -> web.Application:
             return web.Response(status=400, text='message refused (empty, too long, or over quota)')
         return web.json_response({'id': thread_id}, status=201)
 
-    async def reply(request: web.Request) -> web.Response:
-        body = await _json_body(request)
-        who = resolve(request, body)
-        if who is None:
-            return web.Response(status=400, text='identity required')
-        thread_id = request.match_info['id']
-        if not await service.reply(thread_id, who[0], str(body.get('body', '')), who[1]):
-            return web.Response(status=404, text='no such thread, or reply refused')
-        return web.json_response({'id': thread_id, 'replied': True})
-
     async def mark_read(request: web.Request) -> web.Response:
         body = await _json_body(request)
         who = resolve(request, body)
@@ -419,7 +384,6 @@ def build_admin_app(service: MessageService) -> web.Application:
         web.get('/admin/messages', mailbox),
         web.post('/admin/messages', submit),
         web.get('/admin/threads/{id}', one_thread),
-        web.post('/admin/threads/{id}/reply', reply),
         web.post('/admin/threads/{id}/read', mark_read),
         web.get('/admin/queue', queue),
         web.post('/admin/notice', notice),

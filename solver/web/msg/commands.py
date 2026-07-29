@@ -71,25 +71,19 @@ def _print_thread_line(thread: dict[str, Any], *, show_kind: bool = True) -> Non
 
 
 def _print_thread(thread: dict[str, Any]) -> None:
-    """One thread in full: the opening message, then every reply in order."""
+    """One message in full — there is nothing else to it."""
     console.print(f'\n[accent]{thread.get("subject", "")}[/accent]  '
                   f'[muted]({thread.get("kind", "")} · {thread.get("id", "")})[/muted]')
     console.print(f'[muted]from[/muted] {thread.get("author_name", "")}  '
                   f'[muted]{_when(str(thread.get("created", "")))}[/muted]')
     for line in str(thread.get('body') or '').splitlines():
         console.print(f'  {line}')
-    for reply in thread.get('replies') or []:
-        console.print(f'\n[muted]reply from[/muted] {reply.get("author_name", "")}  '
-                      f'[muted]{_when(str(reply.get("at", "")))}[/muted]')
-        for line in str(reply.get('body') or '').splitlines():
-            console.print(f'  {line}')
-    console.print()
 
 
 # ── verbs ───────────────────────────────────────────────────────────────────────────
 
 def _list() -> int:
-    """Every thread this caller may read, newest activity first."""
+    """Every message this caller may read, newest first."""
     result = _call('mailbox')
     if result is None:
         return _unreachable()
@@ -139,20 +133,6 @@ def _send(subject: str, body: str) -> int:
     return 0
 
 
-def _reply(thread_id: str, body: str) -> int:
-    """Reply on a thread you are party to."""
-    result = _call('reply', thread_id=thread_id, body={'body': body})
-    if result is None:
-        return _unreachable()
-    status, data = result
-    if status != 200:
-        console.print(f'[error]error:[/error] {status} {data}')
-        return 1
-    console.print(f'[success]replied[/success] [muted]({thread_id})[/muted]')
-    osc.messages_changed()
-    return 0
-
-
 def _queue() -> int:
     """The inbound queue as a work list (staff)."""
     result = _call('queue')
@@ -167,7 +147,8 @@ def _queue() -> int:
         console.print('[muted]the inbound queue is empty[/muted]')
         return 0
     console.print(f'[accent]{len(queue)}[/accent] inbound thread(s), oldest first — '
-                  'answer with `msg reply <id> "…"`, drop with `msg dismiss <id>`')
+                  'work them with `user-authorize <id>` or `msg notice`, drop with '
+                  '`msg dismiss <id>`')
     for thread in queue:
         _print_thread_line(thread, show_kind=False)
     return 0
@@ -217,6 +198,8 @@ def _save(thread_id: str) -> int:
     if status != 200 or not isinstance(data, dict):
         console.print(f'[error]error:[/error] {status} {data}')
         return 1
+    # An issued key is always its own message: with no replies there is nowhere else for it
+    # to be, and one subject to check.
     if not str(data.get('subject', '')).startswith(KEY_ISSUE_SUBJECT):
         console.print(f'[error]error:[/error] message [accent]{thread_id}[/accent] does not carry '
                       'a master key — `msg save` writes key material and nothing else')
@@ -244,7 +227,7 @@ def _dismiss(thread_id: str) -> int:
 
 @register(requires='reader', aliases=('messages',),
           help_text='Read and send messages: your threads, questions to staff, staff notices.')
-def msg(action: Literal['list', 'read', 'save', 'send', 'reply', 'queue', 'notice',
+def msg(action: Literal['list', 'read', 'save', 'send', 'queue', 'notice',
                         'dismiss'] = 'list',
         thread: str = '', subject: str = '', body: str = '',
         to: str = '', all_users: bool = False) -> int:
@@ -257,13 +240,12 @@ def msg(action: Literal['list', 'read', 'save', 'send', 'reply', 'queue', 'notic
     Args:
         action:    list (your threads, newest first), read (one thread, and mark it
                    read), save (take the master key a maintainer issued you, writing it
-                   to your enc-key file), send (ask staff a question), reply (answer on a
-                   thread you are party to), queue (STAFF: the inbound work list), notice
-                   (STAFF: send to named recipients or everyone), dismiss (STAFF: drop a
-                   worked thread).
-        thread:    the thread id (read / save / reply / dismiss).
+                   to your enc-key file), send (ask staff a question), queue (STAFF: the
+                   inbound work list), notice (STAFF: send to named recipients or
+                   everyone), dismiss (STAFF: drop a worked message).
+        thread:    the message id (read / save / dismiss).
         subject:   the subject line (send / notice).
-        body:      the message text (send / reply / notice).
+        body:      the message text (send / notice).
         to:        comma-separated recipient identities for a notice.
         all_users: send the notice to every mapped identity (``--all-users``).
     """
@@ -273,8 +255,8 @@ def msg(action: Literal['list', 'read', 'save', 'send', 'reply', 'queue', 'notic
     if action == 'queue':
         return _queue() if _is_staff() else _refuse_below_staff('queue')
 
-    if action in ('read', 'save', 'dismiss', 'reply') and not thread:
-        console.print(f'[error]error:[/error] msg {action} requires a thread id '
+    if action in ('read', 'save', 'dismiss') and not thread:
+        console.print(f'[error]error:[/error] msg {action} requires a message id '
                       '(see `msg list`)')
         return 2
 
@@ -286,12 +268,6 @@ def msg(action: Literal['list', 'read', 'save', 'send', 'reply', 'queue', 'notic
 
     if action == 'dismiss':
         return _dismiss(thread) if _is_staff() else _refuse_below_staff('dismiss')
-
-    if action == 'reply':
-        if not body:
-            console.print('[error]error:[/error] msg reply requires body="…"')
-            return 2
-        return _reply(thread, body)
 
     if not subject or not body:
         console.print(f'[error]error:[/error] msg {action} requires subject="…" and body="…"')

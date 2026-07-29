@@ -763,7 +763,7 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   key request is the floor that can act on it. The flow: the user runs `user`, which files a
   request through the message spool (§13) carrying their public key; a maintainer runs
   **`user-authorize <message-id>`**, which wraps the master key to that public key and sends
-  the payload back as a reply; the user runs **`msg save <id>`**, which writes their enc-key
+  the payload back as **its own message**; the user runs **`msg save <id>`**, which writes their enc-key
   file and wires the filter. **The distribution channel is the spool**, and the payload
   travels through it for the same reason the old file could sit in a public repo: without
   their private key it is inert.
@@ -773,8 +773,8 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   the key comes out of the request and the **requester comes from the thread's author**, which
   the spool resolved from `SO_PEERCRED` when it was filed and which no sender can dress up as
   somebody else. It refuses rather than guesses (the subject must be the key-request one, the
-  body must hold exactly one hex token), asks before granting, and afterwards replies on the
-  thread and marks it read.
+  body must hold exactly one hex token) and asks before granting. The worked request is left
+  for the maintainer to `msg dismiss`.
 
 - **`msg save` proves before it writes.** The subject must be the key-issue one, the payload
   must unwrap with *this* machine's private key, and its `verify` must decrypt to the known
@@ -1563,6 +1563,14 @@ within-session guard.
 
 ## 13 · Messaging
 
+**Every message stands on its own — there are no replies.** The spool is not an email or
+chat replacement: it is how a *command* tells somebody something they must act on, and the
+act is always on one message. A request and the grant that answers it are two messages with
+two verbs, which is precisely what lets the header chip name the verb a row is for. Threading
+bought conversation nobody was having, and cost a second place for content to hide — an
+answer buried in a reply is invisible to anything reading the message it answers, which is
+exactly how `msg save` came to look in the wrong place for a key.
+
 **This is a mechanism for commands, not a chat feature.** Its purpose is to let a command
 tell staff something they have to act on. The founding case is `user`: it mints a keypair,
 and the public key is inert until a maintainer runs `user-authorize` on it — so the command
@@ -1589,7 +1597,7 @@ and nothing in the path waits on a live connection.
 **Reading and writing happen in the shell.** The web surface is one header chip and
 nothing else — no page, no thread view, no compose form. That is not an omission to fill
 in later: the browser holds **no write route to the spool at all**, so every message and
-every reply arrives over `msg.sock` from a uid the kernel vouched for, and the command's
+every message arrives over `msg.sock` from a uid the kernel vouched for, and the command's
 own `requires()` is the only gate there is. A guarded write surface would be strictly more
 to get wrong than an absent one.
 
@@ -1676,8 +1684,8 @@ against the policy file, so a demote lands within one request rather than at nex
 | Verb | Floor |
 |---|---|
 | read own inbox, mark read | `reader` |
-| send to staff, reply on own thread | `reader` |
-| read the inbound queue, reply on any thread | `maintainer` |
+| send to staff | `reader` |
+| read the inbound queue, send notices | `maintainer` |
 | notice to named users, notice to everyone | `maintainer` |
 
 The `reader` floor on *sending* is deliberate: a new invitee's first need is often to ask

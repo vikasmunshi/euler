@@ -10,7 +10,7 @@ writing happen in the shell, where `requires()` is the boundary; the chip report
 its rows type `msg read <id>` into the terminal.
 
 The consequence worth stating: **the browser cannot write to the spool at all.** Every
-message and every reply arrives over ``msg.sock`` from a uid the kernel vouched for. This
+message arrives over ``msg.sock`` from a uid the kernel vouched for. This
 tier holds no write route to remove the temptation, which is a smaller surface than a
 guarded one.
 
@@ -37,10 +37,11 @@ from typing import Any
 import aiohttp
 from aiohttp import web
 
-from solver.web.msg import DEFAULT_MSG_SOCKET, KEY_REQUEST_SUBJECT, MSG_SOCKET_ENV
+from solver.web.msg import (DEFAULT_MSG_SOCKET, KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT,
+                            MSG_SOCKET_ENV)
 from solver.web.msg.identity import STAFF_FLOOR
 from solver.web.site.app import requires
-from solver.web.site.render import MSG_SPOOL_KEY, render
+from solver.web.site.render import MSG_SPOOL_KEY, SUBJECT_KEY, render
 from solver.web.ws.manager import PtyManager
 
 log = logging.getLogger('euler-user')
@@ -93,29 +94,45 @@ def _when(stamp: str) -> str:
     return stamp[11:16] if stamp[:10] == today else stamp[:10]
 
 
-def _rows(threads: list[Any]) -> list[dict[str, Any]]:
+def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]]:
     """The newest :data:`_ROWS` threads, unread first, as menu rows.
 
     Unread first because the chip's job is "what wants you"; within each group the spool's
     own newest-first order is kept. Only the fields the row shows survive the trip — the
     body never reaches the browser, since it is read in the shell.
 
-    ``key_request`` marks the one message kind that has a *verb* rather than only a read:
-    a key-authorization request, which a maintainer answers with ``user-authorize <id>``.
-    It is decided from the subject here, against the shared constant the filing command
-    uses — the same test ``user-authorize`` itself applies, so the chip never offers a
-    verb the command would refuse. The public key stays out of the browser: the command
-    reads it from the thread, over the socket, where the identity is vouched for.
+    Each row carries **the verb that row is for**, not a generic read. Most threads are
+    prose and the useful act is `msg read`; a key thread is not, and offering "read" on the
+    grant you have been waiting for — with the real verb somewhere else — makes the reader
+    do the routing. The rules, decided from the subject against the shared constants the
+    commands themselves match on, so the chip can never offer a verb the command refuses:
+
+    - a **key issued to you** is `msg save`: the thing to do with a key is take it;
+    - a **key request**, seen by staff, is `user-authorize`;
+    - everything else is `msg read`.
+
+    Every message stands on its own (there are no replies), so a request and the grant that
+    answers it are two rows with two verbs — which is why the row can name one at all.
+
+    No key material reaches the browser either way: the row carries the thread id, and the
+    command reads the payload over the socket where the identity is vouched for.
     """
     ordered = sorted((t for t in threads if isinstance(t, dict)),
                      key=lambda t: not t.get('unread'))
-    return [{'id': str(t.get('id', '')),
-             'author_name': str(t.get('author_name', '')),
-             'subject': str(t.get('subject', '')),
-             'unread': bool(t.get('unread')),
-             'key_request': str(t.get('subject', '')).startswith(KEY_REQUEST_SUBJECT),
-             'when': _when(str(t.get('updated', '')))}
-            for t in ordered[:_ROWS]]
+    rows: list[dict[str, Any]] = []
+    for thread in ordered[:_ROWS]:
+        thread_id, subject = str(thread.get('id', '')), str(thread.get('subject', ''))
+        author = str(thread.get('author_name', ''))
+        if subject.startswith(KEY_ISSUE_SUBJECT):
+            verb, label = f'msg save {thread_id}', 'save'
+        elif subject.startswith(KEY_REQUEST_SUBJECT) and is_staff and author != me:
+            verb, label = f'user-authorize {thread_id}', 'authorize'
+        else:
+            verb, label = f'msg read {thread_id}', ''
+        rows.append({'id': thread_id, 'author_name': author, 'subject': subject,
+                     'unread': bool(thread.get('unread')), 'verb': verb, 'verb_label': label,
+                     'when': _when(str(thread.get('updated', '')))})
+    return rows
 
 
 def add_message_routes(app: web.Application, manager: PtyManager) -> None:
@@ -151,13 +168,16 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
         """
         mailbox = await _mailbox(request)
         threads = mailbox.get('threads') or []
+        subject = request.get(SUBJECT_KEY)
+        me = subject.user if subject is not None else ''
+        is_staff = subject is not None and subject.has(STAFF_FLOOR)
         # The chip's CONTENTS, not the chip: the <details> holds the open state, the htmx
         # triggers and the class site.js paints on it, so it must survive the swap
         # (`hx-swap="innerHTML"` in `_msg.html`).
         return render(request, '_msg_menu.html', {
             'unread': mailbox.get('unread') or 0,
             'total': len(threads),
-            'threads': _rows(threads),
+            'threads': _rows(threads, me, is_staff=is_staff),
             # The rung the queue verb needs, so the template does not carry a second
             # copy of it — the floor lives with the service that enforces it.
             'staff_floor': STAFF_FLOOR,

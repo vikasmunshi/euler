@@ -215,7 +215,7 @@ solver/
       config.py       — Message-service runtime configuration, read from the environment.
       identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.
       notify.py       — Send a message **from a command** — the message layer's actual purpose.
-      store.py        — The message spool at ``<state>/messages.json`` — threads, replies and read-state.
+      store.py        — The message spool at ``<state>/messages.json`` — messages and read-state.
     site/             — The content service — server-rendered pages + htmx fragments.
       __main__.py     — Content service entry point: ``python -m solver.web.site``.
       app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.

@@ -1211,7 +1211,7 @@ Read and send messages: your threads, questions to staff, staff notices.
 
 ```
 msg
-[action=list|read|save|send|reply|queue|notice|dismiss] (default list)
+[action=list|read|save|send|queue|notice|dismiss] (default list)
 [thread=<str>] (default '')
 [subject=<str>] (default '')
 [body=<str>] (default '')
@@ -1229,13 +1229,12 @@ messaging. Delivery is asynchronous — the spool holds the thread until you rea
 Args:
     action:    list (your threads, newest first), read (one thread, and mark it
                read), save (take the master key a maintainer issued you, writing it
-               to your enc-key file), send (ask staff a question), reply (answer on a
-               thread you are party to), queue (STAFF: the inbound work list), notice
-               (STAFF: send to named recipients or everyone), dismiss (STAFF: drop a
-               worked thread).
-    thread:    the thread id (read / save / reply / dismiss).
+               to your enc-key file), send (ask staff a question), queue (STAFF: the
+               inbound work list), notice (STAFF: send to named recipients or
+               everyone), dismiss (STAFF: drop a worked message).
+    thread:    the message id (read / save / dismiss).
     subject:   the subject line (send / notice).
-    body:      the message text (send / reply / notice).
+    body:      the message text (send / notice).
     to:        comma-separated recipient identities for a notice.
     all_users: send the notice to every mapped identity (``--all-users``).
 ```
@@ -1729,8 +1728,8 @@ Wrap the master key for someone else and send it to them.
 *target* is either form of the same act, told apart by shape:
 
 - a **16-hex message id** — the key-authorization request their `user` command filed
-  (`msg queue` lists them). The key and the requester come from the thread, the grant is
-  confirmed, and the payload is sent as a reply for them to `msg save`;
+  (`msg queue` lists them). The key and the requester come from that message, the grant
+  is confirmed, and the payload is sent as **its own message** for them to `msg save`;
 - a **64-hex public key** — the same act by hand, for a key that reached you some other
   way. *identity* names who to send it to.
 

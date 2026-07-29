@@ -50,7 +50,6 @@ OPS: dict[str, tuple[str, str, str]] = {
     'mailbox': ('GET', '/messages', '/admin/messages'),
     'thread': ('GET', '/messages/{id}', '/admin/threads/{id}'),
     'send': ('POST', '/messages', '/admin/messages'),
-    'reply': ('POST', '/messages/{id}/reply', '/admin/threads/{id}/reply'),
     'read': ('POST', '/messages/{id}/read', '/admin/threads/{id}/read'),
     'queue': ('GET', '/staff/queue', '/admin/queue'),
     'notice': ('POST', '/staff/notice', '/admin/notice'),

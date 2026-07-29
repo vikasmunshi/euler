@@ -5,7 +5,7 @@
 Three surfaces, in the order the request travels:
 
 - **the store** — thread semantics with no service around them: who may see what, how
-  read-state moves when someone replies, and the caps and sanitising that bound a store
+  read-state moves, and the caps and sanitising that bound a store
   holding text other people wrote.
 - **the spool service** — the real ``euler-msg`` apps over real unix sockets, so
   ``SO_PEERCRED`` identity is exercised rather than stubbed: the tests connect as *this*
@@ -38,11 +38,11 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
-from solver.web.msg import KEY_REQUEST_SUBJECT
+from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT
 from solver.web.msg.app import MessageService, build_admin_app, build_app
 from solver.web.msg.config import MsgConfig
 from solver.web.msg.identity import box_of
-from solver.web.msg.store import MAX_PER_AUTHOR, MAX_REPLIES, MessageStore
+from solver.web.msg.store import MAX_PER_AUTHOR, MessageStore
 from solver.web.site import gitstate
 from solver.web.unixhttp import request as unix_request
 from tests import silence
@@ -93,14 +93,6 @@ class MessageStoreTests(unittest.TestCase):
         self.assertEqual(self.store.unread_count(_ALICE_BOX), 0)
         self.assertEqual(self.store.unread_count(_ME, staff=True), 1)
 
-    def test_a_reply_makes_it_unread_for_the_other_side(self) -> None:
-        """The point of the whole design: an answer surfaces for whoever asked."""
-        thread_id = self.store.submit(_ALICE_BOX, 'help', 'please', [_ME])
-        assert thread_id is not None
-        self.assertTrue(self.store.reply(thread_id, _ME, 'here you go', staff=True))
-        self.assertEqual(self.store.unread_count(_ME, staff=True), 0)     # the replier
-        self.assertEqual(self.store.unread_count(_ALICE_BOX), 1)          # the asker
-
     def test_staff_promoted_later_still_sees_the_queue_unread(self) -> None:
         """A maintainer who was not on the roster at submit time is not shut out."""
         thread_id = self.store.submit(_ALICE_BOX, 'help', 'please', [_ME])
@@ -122,7 +114,7 @@ class MessageStoreTests(unittest.TestCase):
         thread_id = self.store.submit(_ALICE_BOX, 'private', 'text', [_ME])
         assert thread_id is not None
         self.assertIsNone(self.store.thread(thread_id, _BOB_BOX))
-        self.assertFalse(self.store.reply(thread_id, _BOB_BOX, 'butting in'))
+        self.assertIsNone(self.store.thread(thread_id, _BOB_BOX))
         self.assertFalse(self.store.mark_read(thread_id, _BOB_BOX))
 
     def test_control_characters_never_reach_the_store(self) -> None:
@@ -144,13 +136,6 @@ class MessageStoreTests(unittest.TestCase):
         self.assertIsNone(self.store.submit(_ALICE_BOX, 'one too many', 'b', [_ME]))
         self.assertIsNotNone(self.store.submit(_BOB_BOX, 'not my cap', 'b', [_ME]),
                              'the cap is per author, not global')
-
-    def test_reply_cap(self) -> None:
-        thread_id = self.store.submit(_ALICE_BOX, 's', 'b', [_ME])
-        assert thread_id is not None
-        for _ in range(MAX_REPLIES):
-            self.assertTrue(self.store.reply(thread_id, _ME, 'x', staff=True))
-        self.assertFalse(self.store.reply(thread_id, _ME, 'x', staff=True))
 
     def test_expired_threads_sweep_on_access(self) -> None:
         thread_id = self.store.submit(_ALICE_BOX, 's', 'b', [_ME])
@@ -276,11 +261,10 @@ class SpoolFlowTests(_SpoolCase):
     """The three flows, end to end over the sockets."""
 
     @unittest_run_loop
-    async def test_user_to_staff_then_a_reply_comes_back(self) -> None:
+    async def test_user_to_staff_then_an_answer_comes_back(self) -> None:
         status, data = await self.as_identity(
             'POST', '/admin/messages', _ALICE, {'subject': 'how?', 'body': 'tell me'})
         self.assertEqual(status, 201)
-        thread_id = data['id']
 
         status, queue = await self.call('GET', '/staff/queue')
         self.assertEqual(status, 200)
@@ -288,11 +272,8 @@ class SpoolFlowTests(_SpoolCase):
         self.assertEqual(queue['queue'][0]['author_name'], _ALICE,
                          'the queue names the sender by identity, not by box')
 
-        status, _ = await self.call('POST', f'/messages/{thread_id}/reply', {'body': 'like so'})
-        self.assertEqual(status, 200)
-        status, mail = await self.as_identity('GET', '/admin/messages', _ALICE)
-        self.assertEqual(mail['unread'], 1)
-        self.assertEqual(mail['threads'][0]['replies'][0]['author_name'], _ME)
+        status, _ = await self.call('POST', '/staff/notice',
+                                    {'to': [_ALICE], 'subject': 'about that', 'body': 'like so'})
 
     @unittest_run_loop
     async def test_broadcast_reaches_everyone_but_the_sender(self) -> None:
@@ -511,26 +492,42 @@ class UserMessageChipTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_a_key_request_row_offers_the_authorize_verb(self) -> None:
-        """The one message kind with an act: `user-authorize <id>`, on the row it belongs to.
+        """The row carries the verb it is FOR — here, somebody else's request seen by staff.
 
-        The id is the whole point — the command reads the public key from the thread over
-        the socket, so the key never reaches the browser and nobody retypes it.
+        Authored by somebody else — a request of *your own* is a `msg save` row instead, since
+        what you are waiting for on it is the reply.
+
+        The id is the whole point: the command reads the public key from the thread over the
+        socket, so the key never reaches the browser and nobody retypes it.
         """
-        thread_id = self.spool.store.submit(_ALICE_BOX, f'{KEY_REQUEST_SUBJECT}{_ALICE}',
+        thread_id = self.spool.store.submit(box_of(_ME), f'{KEY_REQUEST_SUBJECT}{_ME}',
                                             f'public key: {"ab" * 32}', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
         self.assertIn(f'data-term-cmd="user-authorize {thread_id}"', body)
+        self.assertNotIn(f'msg read {thread_id}', body, 'one verb per row, the relevant one')
+        self.assertIn('>authorize<', body, 'and the row says which')
         self.assertNotIn('ab' * 32, body, 'the key is read in the shell, never rendered here')
 
     @unittest_run_loop
-    async def test_an_ordinary_thread_offers_no_authorize_verb(self) -> None:
-        """"When applicable" is the subject test the command itself applies."""
+    async def test_a_key_issued_to_you_offers_save(self) -> None:
+        """A rotation's notice: the thing to do with a key is take it, not read about it."""
+        thread_id = self.spool.store.notice(_ALICE_BOX, f'{KEY_ISSUE_SUBJECT}rotated master key',
+                                            'payload here', [_ME])
+        assert thread_id is not None
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg save {thread_id}"', body)
+        self.assertIn('>save<', body)
+
+    @unittest_run_loop
+    async def test_an_ordinary_thread_is_still_a_read(self) -> None:
+        """Prose keeps the plain verb, and carries no chip — a label on every row is noise."""
         thread_id = self.spool.store.submit(_ALICE_BOX, 'a question', 'the body', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
         self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
         self.assertNotIn('user-authorize', body)
+        self.assertNotIn('msg-verb', body, 'no chip on an ordinary row')
 
     @unittest_run_loop
     async def test_the_count_and_totals_come_from_the_spool(self) -> None:
@@ -581,7 +578,7 @@ class UserMessageChipTests(AioHTTPTestCase):
         """The browser cannot put anything into the spool — the surface simply is not there."""
         for method, path in (('GET', '/messages/'), ('GET', '/messages/whatever'),
                              ('POST', '/messages'), ('POST', '/messages/'),
-                             ('POST', '/messages/whatever/reply'), ('POST', '/messages/notice')):
+                             ('POST', '/messages/notice')):
             resp = await self.client.request(method, path, headers=self.headers)
             self.assertIn(resp.status, (404, 405), f'{method} {path} should not exist')
 
@@ -615,11 +612,10 @@ class UserMessageChipReaderTests(UserMessageChipTests):
     async def test_a_key_request_row_offers_the_authorize_verb(self) -> None:
         """Overridden: a reader gets the row and **no** verb.
 
-        Not shown-but-locked, unlike the panel's own verbs: this rides on a row, and the row
-        a reader is most likely to see is their **own** key request — where a locked
-        Authorize would offer them a grant they can never make.
+        A reader cannot issue a key, so somebody else's request keeps the plain read —
+        offering them a grant they can never make would be worse than saying nothing.
         """
-        thread_id = self.spool.store.submit(_ALICE_BOX, f'{KEY_REQUEST_SUBJECT}{_ALICE}',
+        thread_id = self.spool.store.submit(box_of(_ME), f'{KEY_REQUEST_SUBJECT}{_ME}',
                                             f'public key: {"ab" * 32}', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
@@ -710,7 +706,6 @@ class MsgCommandNudgeTests(_SpoolCase):
         thread_id = await self._thread_from_alice()
         for label, call in (
                 ('send', lambda: self._run('send', subject='s', body='b')),
-                ('reply', lambda: self._run('reply', thread_id, body='b')),
                 ('notice', lambda: self._run('notice', to=_ALICE, subject='s', body='b')),
                 ('dismiss', lambda: self._run('dismiss', thread_id)),
         ):

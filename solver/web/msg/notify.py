@@ -3,8 +3,9 @@
 """Send a message **from a command** — the message layer's actual purpose.
 
 Both directions live here: :func:`notify_staff` files a request from inside another
-command, and :func:`read_thread` / :func:`answer_thread` let the command that *works*
-that request read it and answer it (``user-authorize <thread-id>``).
+command, :func:`read_thread` lets the command that *works* it read it, and
+:func:`notify_user` sends the result as **its own message** — there are no replies, and a
+grant that hid inside one would be invisible to everything reading the request.
 
 The spool is not a mailbox for people to write in; it is the mechanism by which a
 command tells staff something they have to act on. The founding case is ``user``: it
@@ -29,7 +30,7 @@ with no aiohttp — the shell tier has no web dependencies.
 """
 from __future__ import annotations
 
-__all__ = ['answer_thread', 'notify_staff', 'notify_user', 'read_thread']
+__all__ = ['notify_staff', 'notify_user', 'read_thread']
 
 import logging
 import os
@@ -106,24 +107,3 @@ def read_thread(thread_id: str) -> dict[str, Any] | None:
         return None
     status, data = result
     return data if status == 200 and isinstance(data, dict) else None
-
-
-def answer_thread(thread_id: str, body: str) -> bool:
-    """Reply on *thread_id* and mark it read; return whether the reply landed.
-
-    The pair is the point, and the pair is deliberate: replying tells the collaborator
-    the thing they were waiting for (their message chip lights up), and marking read
-    takes it off the staff unread count without **dismissing** it — the thread stays in
-    the spool as the record of what was granted, for the collaborator to read and for
-    ``msg dismiss`` to close explicitly when the operator wants it gone.
-
-    Best-effort in the same sense as :func:`notify_staff`: the grant itself is already
-    written to the enc-key file, so a spool that refuses the reply must not fail the
-    authorization — the caller reports which of the two happened.
-    """
-    result = call('reply', thread_id=thread_id, body={'body': body})
-    replied = result is not None and result[0] == 200
-    if not replied:
-        log.warning('reply to thread %s refused (%s)', thread_id, result and result[0])
-    call('read', thread_id=thread_id)       # attention, not activity — failure is harmless
-    return replied

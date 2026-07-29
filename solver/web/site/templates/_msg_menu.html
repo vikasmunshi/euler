@@ -36,30 +36,23 @@
      `msg read <id>` — the thread prints in the shell and is marked read there, so the
      browser never needs a thread view and never reads the body. #}
   <li class="verb msg-row{% if item.unread %} is-unread{% endif %}">
-    <button type="button" data-term-cmd="msg read {{ item.id }}"
-            title="run `msg read {{ item.id }}` in your terminal">
+    {# One button, carrying the verb THIS row is for — `msg read` for prose, `msg save` for a
+       key issued to you, `user-authorize` for somebody else's request seen by staff
+       (solver/web/user/msg_api.py decides, from the same subject constants the commands
+       match on). It used to be `msg read` on every row with an Authorize button bolted
+       beside the one kind that had an act: two controls where the row already knew which
+       one applied, and the reader left to do the routing.
+
+       The verb chip appears only when the act is not a plain read — a row that says "save"
+       or "authorize" is telling you something; one that says "read" on every line is noise. #}
+    <button type="button" data-term-cmd="{{ item.verb }}"
+            title="run `{{ item.verb }}` in your terminal">
       <span class="msg-dot" aria-hidden="true"></span>
       <span class="msg-from">{{ item.author_name }}</span>
       <span class="msg-subject">{{ item.subject }}</span>
+      {% if item.verb_label %}<span class="msg-verb">{{ item.verb_label }}</span>{% endif %}
       <span class="msg-when">{{ item.when }}</span>
     </button>
-    {# The one message kind that asks for an *act* rather than a read: a key-authorization
-       request, answered with `user-authorize <id>` (which takes the message id precisely so
-       nobody retypes a public key). It sits on the row it belongs to — the same reason
-       connect/disconnect lives on the terminal's titlebar — and types the command like every
-       other verb here, so the shell's `requires()` stays the boundary.
-
-       Shown only **when applicable**: the row is a key request, and the reader is at the
-       command's floor. That is a deliberate exception to the panel's shown-but-locked rule
-       below — a locked verb there teaches the ladder on a menu everyone sees, where a locked
-       one *here* would ride on every message of a kind most readers never receive, and on
-       their own request it would offer them a grant they cannot make. #}
-    {% if item.key_request and subject.has('maintainer') %}
-    <button type="button" class="msg-act" data-term-cmd="user-authorize {{ item.id }}"
-            title="run `user-authorize {{ item.id }}` in your terminal — grant this key access">
-      Authorize
-    </button>
-    {% endif %}
   </li>
   {% endfor %}
   {% endif %}

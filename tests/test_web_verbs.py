@@ -32,6 +32,12 @@ _VERB_RE = re.compile(r"verb\(\s*'[^']*'\s*,\s*'([^']+)'")
 #: An `Action(kind='term', command=f'claude-blog {name}')` — take the static prefix, which is
 #: the command and any literal flags before the first `{…}` interpolation.
 _ACTION_CMD_RE = re.compile(r"kind='term',\s*command=f?['\"]([^'\"{}]+)")
+#: A row verb chosen in Python: `verb, label = f'msg save {thread_id}'`. The message chip
+#: decides which command each row is for (solver/web/user/msg_api.py), so the command name
+#: left the template and the two regexes above stopped seeing it — silently dropping the row
+#: verbs out of this check. Anchored on the assignment rather than on f-strings generally: a
+#: loose rule would collect prose like f'requires {capability}' and turn the guard into noise.
+_VERB_ASSIGN_RE = re.compile(r"verb(?:,\s*\w+)?\s*=\s*f'([^'{}]+)")
 
 
 def _emitted_commands() -> set[str]:
@@ -41,7 +47,9 @@ def _emitted_commands() -> set[str]:
         commands.update(_TERM_CMD_RE.findall(text))
         commands.update(_VERB_RE.findall(text))
     for path in _SITE.rglob('*.py'):
-        commands.update(_ACTION_CMD_RE.findall(path.read_text(encoding='utf-8')))
+        text = path.read_text(encoding='utf-8')
+        commands.update(_ACTION_CMD_RE.findall(text))
+        commands.update(_VERB_ASSIGN_RE.findall(text))
     return {c.strip() for c in commands if c.strip()}
 
 

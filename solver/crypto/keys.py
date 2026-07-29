@@ -246,8 +246,8 @@ def user_authorize(target: str, identity: str = '') -> int:
     *target* is either form of the same act, told apart by shape:
 
     - a **16-hex message id** — the key-authorization request their `user` command filed
-      (`msg queue` lists them). The key and the requester come from the thread, the grant is
-      confirmed, and the payload is sent as a reply for them to `msg save`;
+      (`msg queue` lists them). The key and the requester come from that message, the grant
+      is confirmed, and the payload is sent as **its own message** for them to `msg save`;
     - a **64-hex public key** — the same act by hand, for a key that reached you some other
       way. *identity* names who to send it to.
 
@@ -268,7 +268,7 @@ def user_authorize(target: str, identity: str = '') -> int:
 
     Aliased as `authorize`.
     """
-    from solver.web.msg.notify import answer_thread, notify_user
+    from solver.web.msg.notify import notify_user
     token = target.strip().lower()
     thread_id = ''
     if _THREAD_ID_RE.fullmatch(token):
@@ -304,15 +304,20 @@ def user_authorize(target: str, identity: str = '') -> int:
         console.print('[muted]Not sent.[/muted]')
         return 1
 
-    body = _issue_body(enc_key_payload(pub, master_key))
-    delivered = (answer_thread(thread_id, body) if thread_id
-                 else notify_user(identity, f'{KEY_ISSUE_SUBJECT}{identity}', body))
+    # Its own message, always. There are no replies: a grant hidden inside the request it
+    # answers is invisible to everything that reads the request, and `msg save` would have
+    # to go looking for it.
+    delivered = notify_user(identity, f'{KEY_ISSUE_SUBJECT}{identity}',
+                            _issue_body(enc_key_payload(pub, master_key)))
     if not delivered:
         console.print('[error]error:[/error] could not deliver the key — nothing was sent. '
                       'Check the message spool and retry.')
         return 1
     console.print(f'[success]Sent to [accent]{identity}[/accent].[/success] '
                   '[muted]They run `msg save <id>` to take it.[/muted]')
+    if thread_id:
+        console.print(f'[muted]Their request [accent]{thread_id}[/accent] is worked — '
+                      '`msg dismiss` it when you are done with it.[/muted]')
     _register_public_key(identity, public_key)
     return 0
 
@@ -320,13 +325,18 @@ def user_authorize(target: str, identity: str = '') -> int:
 def save_issued_key(body: str) -> bool:
     """Take the enc-key payload out of an issue message and write it — verified first.
 
-    Called by ``msg save`` (:mod:`solver.web.msg.commands`), which has already checked that
-    the message is an *issue*. This checks the only thing that matters after that: the payload
-    must unwrap with **this machine's** private key and its ``verify`` must decrypt to the
-    known text. A payload wrapped to somebody else, or corrupted in transit, fails here —
-    before the write, because the file it replaces may be the only thing between this machine
-    and the whole private tree.
+    An issued key is always its own message, so there is one body to read and one payload in
+    it. Proving it is the whole gate: it must unwrap with **this machine's** private key and
+    its ``verify`` must decrypt to the known text. A payload wrapped to somebody else, or
+    corrupted in transit, fails here — before the write, because the file it replaces may be
+    the only thing between this machine and the whole private tree.
     """
+    try:
+        private_key = load_private_key()
+    except (FileNotFoundError, ValueError) as exc:
+        console.print(f'[error]error:[/error] cannot read your private key ({exc}); run `user`')
+        return False
+    mine = public_key_hex(private_key.public_key())
     match = _JSON_OBJECT_RE.search(body)
     if match is None:
         console.print('[error]error:[/error] no key payload found in that message')
@@ -336,12 +346,6 @@ def save_issued_key(body: str) -> bool:
     except (ValueError, AttributeError, TypeError):
         console.print('[error]error:[/error] the key payload in that message is not readable')
         return False
-    try:
-        private_key = load_private_key()
-    except (FileNotFoundError, ValueError) as exc:
-        console.print(f'[error]error:[/error] cannot read your private key ({exc}); run `user`')
-        return False
-    mine = public_key_hex(private_key.public_key())
     if mine not in payload:
         console.print(f'[error]error:[/error] that key was issued to a different public key — '
                       f'yours is [accent]{mine}[/accent]. Ask for it to be re-issued.')

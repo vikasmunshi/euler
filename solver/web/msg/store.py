@@ -1,23 +1,27 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The message spool at ``<state>/messages.json`` — threads, replies and read-state.
+"""The message spool at ``<state>/messages.json`` — messages and read-state.
 
-One record per **thread**, never per recipient. A broadcast is therefore a single
+One record per **message**, never per recipient. A broadcast is therefore a single
 record naming N recipients rather than N copies: "everyone" costs one write,
 read-state stays per-person, and a collaborator provisioned after a notice was sent is
 simply not in it — which is the correct behaviour, not an omission.
+
+**Every message stands on its own — there are no replies.** This is not an email or chat
+replacement: it is how a *command* tells somebody something they must act on, and the act
+is always on one message. Threading bought conversation nobody was having, and cost a
+second place for content to hide: an answer buried in a reply is invisible to anything
+reading the message it answers.
 
 Every party to a thread appears in ``recipients``, keyed by **box**
 (:func:`solver.web.msg.identity.box_of`), carrying that box's read timestamp:
 
 - the **author** is present and already read — they wrote it;
-- an **inbound** thread (user → staff) additionally names the staff boxes at submit
-  time, and :meth:`MessageStore.threads_for` shows *every* inbound thread to *any*
+- an **inbound** message (user → staff) additionally names the staff boxes at submit
+  time, and :meth:`MessageStore.threads_for` shows *every* inbound message to *any*
   staff reader regardless, adding them lazily when they read. So a maintainer promoted
   after the fact still sees the queue, rather than only what was addressed to the
-  roster as it stood;
-- a **reply** marks the replier read and everyone else unread, which is what makes an
-  answered question show up for the person who asked.
+  roster as it stood.
 
 Bounded like the invite-request queue it resembles: a global cap, a per-author standing
 cap, field length caps, and a TTL swept on every access, so an unworked spool cannot
@@ -28,7 +32,7 @@ Single-writer by construction: one ``euler-msg`` process owns the file.
 """
 from __future__ import annotations
 
-__all__ = ['BODY_MAX', 'MAX_PER_AUTHOR', 'MAX_REPLIES', 'MAX_THREADS', 'MessageStore',
+__all__ = ['BODY_MAX', 'MAX_PER_AUTHOR', 'MAX_THREADS', 'MessageStore',
            'SUBJECT_MAX', 'THREAD_TTL_SECONDS', 'Thread']
 
 import secrets
@@ -44,8 +48,6 @@ MAX_THREADS: int = 2000
 #: Live threads one author may hold open at once — bounds a single chatty sender
 #: without the rate limiter's burst-only view.
 MAX_PER_AUTHOR: int = 50
-#: Replies one thread may carry; past this the thread is full and a new one is needed.
-MAX_REPLIES: int = 100
 #: A thread lives this long after its last activity, then sweeps. Long enough that an
 #: answered question stays readable for a season, short enough to bound the file.
 THREAD_TTL_SECONDS: int = 90 * 24 * 3600
@@ -70,24 +72,21 @@ class Thread(NamedTuple):
     author: str                     # box key of whoever started it
     subject: str
     body: str
-    replies: list[dict[str, str]]   # [{author, body, at}] oldest first
     recipients: list[str]           # box keys party to the thread
     created: str
     updated: str
     unread: bool                    # for the box that asked
 
-    def summary(self, *, author_name: str = '', reply_names: tuple[str, ...] = ()) -> dict[str, Any]:
-        """A view for a reader. *author_name* / *reply_names* carry display identities.
+    def summary(self, *, author_name: str = '') -> dict[str, Any]:
+        """A view for a reader. *author_name* carries the display identity.
 
         The store holds box keys only — it never needs an e-mail address to route a
-        message — so the caller resolves names through the policy view and passes them
+        message — so the caller resolves the name through the policy view and passes it
         in. An unresolvable box degrades to itself rather than dropping the message.
         """
-        replies = [{**reply, 'author_name': reply_names[i] if i < len(reply_names) else reply['author']}
-                   for i, reply in enumerate(self.replies)]
         return {'id': self.id, 'kind': self.kind, 'author': self.author,
                 'author_name': author_name or self.author, 'subject': self.subject,
-                'body': self.body, 'replies': replies, 'recipients': self.recipients,
+                'body': self.body, 'recipients': self.recipients,
                 'created': self.created, 'updated': self.updated, 'unread': self.unread}
 
 
@@ -136,13 +135,10 @@ class MessageStore:
         return not (isinstance(entry, dict) and entry.get('read'))
 
     def _to_thread(self, raw: dict[str, Any], box: str) -> Thread:
-        replies = [reply for reply in (raw.get('replies') or []) if isinstance(reply, dict)]
         return Thread(
             id=str(raw.get('id', '')), kind=str(raw.get('kind', 'inbound')),
             author=str(raw.get('author', '')), subject=str(raw.get('subject', '')),
             body=str(raw.get('body', '')),
-            replies=[{'author': str(r.get('author', '')), 'body': str(r.get('body', '')),
-                      'at': str(r.get('at', ''))} for r in replies],
             recipients=sorted(raw.get('recipients') or {}),
             created=str(raw.get('created', '')), updated=str(raw.get('updated', '')),
             unread=self._unread_for(raw, box))
@@ -202,7 +198,7 @@ class MessageStore:
         for box in recipients:
             entries.setdefault(box, {'read': None})
         records[thread_id] = {'id': thread_id, 'kind': kind, 'author': author,
-                              'subject': clean_subject, 'body': clean_body, 'replies': [],
+                              'subject': clean_subject, 'body': clean_body,
                               'recipients': entries, 'created': iso, 'updated': iso,
                               'expiry': now + THREAD_TTL_SECONDS}
         self._save(records)
@@ -215,34 +211,6 @@ class MessageStore:
     def notice(self, author: str, subject: str, body: str, recipients: list[str]) -> str | None:
         """Send a staff notice to *recipients*; return the thread id or None."""
         return self._create('notice', author, subject, body, recipients)
-
-    def reply(self, thread_id: str, author: str, body: str, *, staff: bool = False) -> bool:
-        """Append a reply; mark the replier read and everyone else unread.
-
-        Refuses a thread the replier cannot see, an empty body, and a thread already at
-        :data:`MAX_REPLIES`. Marking the others unread is the point: an answer must
-        surface for the person who asked without them polling for it.
-        """
-        clean_body = sanitize(body, BODY_MAX, allow_newlines=True)
-        if not clean_body:
-            return False
-        records = self._load()
-        raw = records.get(thread_id)
-        if raw is None or not self._visible_to(raw, author, staff=staff):
-            return False
-        replies = raw.get('replies') or []
-        if len(replies) >= MAX_REPLIES:
-            return False
-        iso = _now_iso()
-        replies.append({'author': author, 'body': clean_body, 'at': iso})
-        recipients: dict[str, Any] = raw.get('recipients') or {}
-        for box in recipients:
-            recipients[box] = {'read': None}
-        recipients[author] = {'read': iso}
-        raw.update(replies=replies, recipients=recipients, updated=iso,
-                   expiry=time.time() + THREAD_TTL_SECONDS)
-        self._save(records)
-        return True
 
     def mark_read(self, thread_id: str, box: str, *, staff: bool = False) -> bool:
         """Mark *thread_id* read by *box*, joining the thread if they were not in it."""
