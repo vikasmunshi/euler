@@ -1758,8 +1758,9 @@ tier here — a web shell cannot get sudo, so nothing runs over the web.
 its work in **your checkout**, on ``keys/enc-key.json``, as you — because that file is
 the repo's, not the host's, and the change has to be committed and pushed like any
 other. It classifies every authorised key against the roster (via the ``owners``
-attribution ``user-authorize`` records) and offers the stale ones. Your own key is never
-a candidate, and an unattributed one is only ever purged by naming it.
+attribution ``user-authorize`` records, keyed by slug) and offers every key that is not
+some live account's *current* one — superseded, orphaned by a removal, or never
+attributed. Your own key is never a candidate.
 
 Args:
     action:   list (roster + pending + the invite-request queue), process-requests
