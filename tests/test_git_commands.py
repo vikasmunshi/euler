@@ -288,6 +288,10 @@ class PullRequestTest(unittest.TestCase):
 
 
 class GhPrTest(_GitCommandCase):
+    # The `git fetch` between the merge and the sync script belongs to `git-sync`, which reads
+    # the *published* private tree before deciding whether it can merge at all — see
+    # tests/test_rekey_rehome.py. It is asserted here so a change to that ordering is visible.
+
     """The gate to master: a maintainer merges a pull request, and only a
     solutions-only one. The file list is what is judged, so it is what is faked.
     `merge` itself walks the open PRs interactively (like `users process-requests`):
@@ -323,7 +327,9 @@ class GhPrTest(_GitCommandCase):
     def test_a_solutions_only_pr_is_rebase_merged(self) -> None:
         self.as_profile('maintainer')
         self.assertEqual(git._merge_pr(12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
@@ -336,7 +342,9 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.files = ['topics/technique/sieve-of-eratosthenes.md', 'topics/articles.json']
         self.assertEqual(git._merge_pr(12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
 
     def test_a_pr_spanning_both_trees_is_refused(self) -> None:
         """Either tree, never both: solving a problem and writing an article are two reviews."""
@@ -374,7 +382,9 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.answers = ['m']
         self.assertEqual(git.gh_merge('merge'), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
 
     def test_skip_leaves_the_pr_untouched(self) -> None:
         self.as_profile('maintainer')
@@ -411,7 +421,9 @@ class GhPrTest(_GitCommandCase):
                       'solver/modules.csv', 'solver/config.json', 'solver/ai/claude/CLAUDE.md']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
 
     def test_the_two_gates_refuse_each_other(self) -> None:
         """Whichever verb you reach for names the review you are doing."""
@@ -433,7 +445,9 @@ class GhPrTest(_GitCommandCase):
         self.files = ['solver/config.json']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
 
     def test_the_docs_gate_reaches_the_tag_leg_but_not_the_solution_beside_it(self) -> None:
         """`update-tags` writes each problem's tags.json, so a reconciliation must merge —
@@ -443,7 +457,9 @@ class GhPrTest(_GitCommandCase):
                       'solutions/private/p0100_0199/p0101/tags.json', 'topics/tags.json']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
         self.cmdlines.clear()
         self.files = ['solutions/public/p0042/tags.json', 'solutions/public/p0042/p0042_s0.py']
         self.answers = ['m']

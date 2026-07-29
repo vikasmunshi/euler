@@ -509,6 +509,16 @@ orphan them, so the clone is left alone and the situation named. `git-sync` perf
 re-home for a clone that wedged before any of this existed, minus the edits it can no longer
 identify.
 
+**Which side is unreadable says what to do.** A clone that has *not* yet been issued the new
+key is perfectly coherent — its own `HEAD` opens under the key it holds — and it is
+`origin/master` that it cannot read. Nothing local fixes that: the key is in the spool. So
+`git-sync` fetches first, asks both questions, and **refuses before merging** when the
+incoming blobs are the unreadable ones; merging anyway cost a live collaborator a filter
+traceback *and* a half-applied merge that left a private file deleted in their worktree. The
+login banner asks the same pair, so a stale clone is told to run `msg list` / `msg save`
+rather than the generic "run `git-sync` to see why" — which, after a rotation, points at the
+one command that cannot work.
+
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
 invite, so there is never a dangling invite to a box with no shell. A bare **os-login**

@@ -164,12 +164,26 @@ class RotationRehomeTests(unittest.TestCase):
         self._git('update-ref', 'refs/remotes/origin/master', 'HEAD')  # a clone that never fetched
         self.solution.write_bytes(working)
 
+    def rotate_without_the_key(self) -> None:
+        """Publish a rotation this clone was never issued: it keeps the key it has.
+
+        The live state at login — the collaborator is coherent, holding a superseded key,
+        and it is `origin/master` that no longer decrypts.
+        """
+        held = (self.secrets / 'enc-key.json').read_text()
+        self.rotate()
+        (self.secrets / 'enc-key.json').write_text(held)   # they never ran `msg save`
+        read_master_key.cache_clear()
+        load_private_key.cache_clear()
+        self._git('fetch', '-q', 'origin', 'master')
+        self._git('update-ref', 'refs/remotes/origin/master', 'FETCH_HEAD')
+
     def test_head_is_readable_before_a_rotation_and_not_after(self) -> None:
         """The trigger itself: the check must fire on exactly one of the two states."""
         from solver.core import git
-        self.assertTrue(git.head_private_opens(), 'own tree, own key — nothing to repair')
+        self.assertTrue(git.private_tree_opens(), 'own tree, own key — nothing to repair')
         self.rotate()
-        self.assertFalse(git.head_private_opens(), 'HEAD predates the rotation: unreadable')
+        self.assertFalse(git.private_tree_opens(), 'HEAD predates the rotation: unreadable')
 
     def test_the_wedge_is_real_git_cannot_stash(self) -> None:
         """Proof that this is worth repairing: the ordinary sync path cannot run at all.
@@ -190,7 +204,7 @@ class RotationRehomeTests(unittest.TestCase):
         self.assertEqual(self._git('rev-parse', 'HEAD').stdout.strip(),
                          self._git('rev-parse', 'origin/master').stdout.strip())
         self.assertEqual(self.solution.read_text(), _PLAINTEXT, 'decrypted in place')
-        self.assertTrue(git.head_private_opens(), 'and readable from here on')
+        self.assertTrue(git.private_tree_opens(), 'and readable from here on')
 
     def test_local_edits_collected_before_the_key_changed_survive(self) -> None:
         """Plaintext is key-agnostic, which is the only reason carrying edits across works.
@@ -211,6 +225,43 @@ class RotationRehomeTests(unittest.TestCase):
         # the new key, so what is pending is the edit rather than the rotation. Asked through
         # `git status`, for the reason the empty-file test above records.
         self.assertEqual(self._git('status', '--porcelain').stdout.split(), ['M', _SOLUTION])
+
+    def test_a_clone_holding_an_old_key_is_told_to_check_its_messages(self) -> None:
+        """The login hint, from the side the live shells were actually on.
+
+        At login the clone still held the *old* key and its *old* HEAD — which match, so
+        asking only about HEAD says "all fine" and the hint fell through to "run `git-sync`
+        to see why". The unreadable tree is the published one. Both sides now answer.
+        """
+        from solver.core import git
+        self.assertEqual(git.key_waiting_hint(), '', 'in step: nothing to say')
+        self.rotate_without_the_key()
+        self.assertTrue(git.private_tree_opens('HEAD'), 'own history, own key: still readable')
+        self.assertFalse(git.private_tree_opens('origin/master'), 'the published tree is not')
+        self.assertIn('msg save', git.key_waiting_hint(), 'and it names the verb that helps')
+
+    def test_a_sync_refuses_rather_than_merging_what_it_cannot_read(self) -> None:
+        """Merging anyway left a live clone with a filter traceback and a deleted file.
+
+        The assertion is that `sync.sh` is never reached — a non-zero return alone proves
+        nothing here, since the script would fail in this fixture regardless.
+        """
+        from solver.core import git
+        self.rotate_without_the_key()
+        commands: list[str] = []
+        real = git.run_cmdline
+
+        def recording(cmdline: str) -> int:
+            commands.append(cmdline)
+            return real(cmdline)
+
+        git.run_cmdline = recording                      # type: ignore[assignment]
+        self.addCleanup(setattr, git, 'run_cmdline', real)
+        before = self._git('rev-parse', 'HEAD').stdout.strip()
+        self.assertNotEqual(git.git_sync(), 0, 'a refusal, and a non-zero one')
+        self.assertEqual([c for c in commands if 'sync' in c], [], 'the merge was never started')
+        self.assertEqual(self._git('rev-parse', 'HEAD').stdout.strip(), before, 'nothing moved')
+        self.assertEqual(self._git('status', '--porcelain').stdout, '', 'nothing half-applied')
 
     def test_an_untouched_worktree_reports_nothing(self) -> None:
         """The 917 bug proper: empty files are not edits.
@@ -245,7 +296,7 @@ class RotationRehomeTests(unittest.TestCase):
         self._git('commit', '-qm', 'a plaintext file under the private tree')
         self._git('push', '-q', 'origin', 'master')
         self.rotate()
-        self.assertFalse(git.head_private_opens(), 'the encrypted blobs still decide')
+        self.assertFalse(git.private_tree_opens(), 'the encrypted blobs still decide')
 
     def test_a_wedged_clone_reports_no_edits_at_all(self) -> None:
         """The 917 bug: a clone already behind a rotation must not invent local edits.

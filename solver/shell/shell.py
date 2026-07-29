@@ -61,18 +61,12 @@ def _stale_clone_hint() -> str:
 
     The generic line — "run `git-sync` to see why" — is the right answer only when the reason
     is something git will explain: a diverged branch, no network. It is the wrong answer, and
-    a dead end, when a maintainer has rotated the master key: this clone's own history stops
-    decrypting, `git-sync` refuses rather than explains, and the thing that actually unblocks
-    it is a message sitting unread in the spool. So ask the local question first and name the
-    verb that fits.
+    a dead end, after a key rotation, where `git-sync` is the very thing that cannot work and
+    the fix is a message sitting unread in the spool. Ask that first.
     """
-    from solver.core.git import head_private_opens
-    if not head_private_opens():
-        return ('the master key was rotated, so this clone cannot read its own history — take '
-                'the new key from your messages: [accent]msg list[/accent], then '
-                '[accent]msg save <id>[/accent].')
-    return ('could not sync with origin/master — this clone may be stale; run '
-            '[accent]git-sync[/accent] to see why.')
+    from solver.core.git import key_waiting_hint
+    return key_waiting_hint() or ('could not sync with origin/master — this clone may be '
+                                  'stale; run [accent]git-sync[/accent] to see why.')
 
 
 def _current_fragment(text: str) -> str:

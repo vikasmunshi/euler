@@ -24,7 +24,8 @@ commit that carries nothing else.
 from __future__ import annotations
 
 __all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit',
-           'git_commit_amend', 'head_private_opens', 'private_local_edits', 'resmudge_private',
+           'git_commit_amend', 'key_waiting_hint', 'private_local_edits', 'private_tree_opens',
+           'resmudge_private',
            'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
            'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
 
@@ -486,7 +487,7 @@ def private_local_edits() -> dict[str, bytes]:
     which the re-home would then have written back over the published tree as stale content.
     So the same test the re-home uses gates the question: no readable HEAD, no answer.
     """
-    if not head_private_opens():
+    if not private_tree_opens():
         return {}
     # `git status`, not `git diff HEAD`. They disagree, and only one of them is answering the
     # question a person would recognise as theirs. Git does not run a clean filter on empty
@@ -511,17 +512,23 @@ def private_local_edits() -> dict[str, bytes]:
     return edits
 
 
-def head_private_opens() -> bool:
-    """Whether HEAD's private blobs decrypt under the master key this machine holds now.
+def private_tree_opens(ref: str = 'HEAD') -> bool:
+    """Whether *ref*'s private blobs decrypt under the master key this machine holds now.
 
-    False is the signature of a rotation that happened without this clone: the key is current,
-    the commit it belongs to is not. That state is worse than it looks — the worktree is fine,
-    but HEAD is unreadable, so *any* operation that materialises HEAD fails. `git stash` fails,
-    which means `git-sync` cannot even begin its merge, so the clone cannot sync its way out of
-    being unsynced.
+    A rotation puts the key and the commits out of step, and **which** side is unreadable says
+    what to do about it, so both get asked:
 
-    Undecidable cases answer True. No HEAD, no tracked private files, or a blob that was never
-    encrypted all mean "nothing here says the tree is stale", and inventing a re-home from
+    - ``HEAD`` unreadable means the key is current and this clone's own history is not. That is
+      worse than it looks — the worktree is fine, but *any* operation that materialises HEAD
+      fails, `git stash` included, so `git-sync` cannot even begin its merge and the clone
+      cannot sync its way out of being unsynced. The repair is :func:`_rehome_on_origin`.
+    - ``origin/master`` unreadable means the opposite: this clone is coherent, holding an
+      *old* key, and the published tree was re-encrypted without it. Nothing local can fix
+      that — the new key is sitting in the message spool. Merging anyway is what produced a
+      filter traceback and a half-applied merge on a live clone.
+
+    Undecidable cases answer True. No such ref, no tracked private files, or nothing encrypted
+    in the first handful all mean "nothing here says the tree is unreadable", and acting on
     silence would be the more destructive mistake.
     """
     tracked = run(['git', 'ls-files', '--', 'solutions/private'],
@@ -532,7 +539,7 @@ def head_private_opens() -> bool:
     # a repair. A handful of reads is enough; a tree with nothing encrypted in its first
     # dozen files is not one this check has anything to say about.
     for name in tracked[:12]:
-        blob = run(['git', 'cat-file', 'blob', f'HEAD:{name}'],
+        blob = run(['git', 'cat-file', 'blob', f'{ref}:{name}'],
                    cwd=config.root_dir, capture_output=True)
         if blob.returncode != 0 or not is_encrypted(blob.stdout):
             continue
@@ -542,6 +549,22 @@ def head_private_opens() -> bool:
             return False
         return True
     return True
+
+
+def key_waiting_hint() -> str:
+    """The one line to show when this clone cannot read the published solutions — else ''.
+
+    Both directions of a rotation end in the same instruction, because both are fixed by the
+    same act: take the key a maintainer has already sent. Naming that is the whole point. The
+    generic "run `git-sync` to see why" is a dead end here — `git-sync` is precisely what does
+    not work — and it was what a collaborator actually saw at login while the answer sat unread
+    in their spool.
+    """
+    if private_tree_opens('HEAD') and private_tree_opens('origin/master'):
+        return ''
+    return ('a new master key is waiting in your messages — this clone cannot read the '
+            'published solutions until you take it: run [accent]msg list[/accent], then '
+            '[accent]msg save <id>[/accent].')
 
 
 def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
@@ -618,7 +641,7 @@ def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
     read_master_key.cache_clear()
     # Order matters: a key that arrived from a rotation leaves HEAD unreadable, and every
     # repair below materialises HEAD. Re-home first, or the re-checkout fails on the way.
-    if not head_private_opens():
+    if not private_tree_opens():
         _rehome_on_origin(local_edits or {})
     name: str = crypto_config['filter_name']
     recorded = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
@@ -691,13 +714,18 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
+        # Fetch before deciding anything. Both questions below are about the *published*
+        # tree, and a clone that has not fetched since the rotation still sees the old one —
+        # it would answer "all fine" and then merge into the failure this is here to avoid.
+        # `sync.sh` fetches again a moment later; one extra round-trip buys a real answer.
+        read_master_key.cache_clear()
+        run_cmdline('git fetch --prune origin master')
         # A clone whose HEAD predates a key rotation cannot merge — the stash resets to HEAD
         # first, HEAD's blobs no longer decrypt, and the smudge filter fails the whole sync.
         # That is exactly the state someone is in when they reach for `git-sync`, so repair it
         # here rather than hand them a traceback that names a filter they cannot fix. The
         # re-home lands them on origin/master, which is what the sync was for.
-        read_master_key.cache_clear()
-        if not head_private_opens():
+        if not private_tree_opens():
             # No edits are carried across here, and that is not an oversight: proving a private
             # file is *your* edit needs the key that opened HEAD, and by now it is gone. Diffing
             # against origin/master instead would read content you simply have not pulled yet as
@@ -711,6 +739,13 @@ def git_sync(dry_run: bool = False) -> int:
             # Non-zero when it did not land, because at shell start-up the console is quiet
             # and the exit code is the only part of a refusal that survives.
             return int(ExitCodes.EXIT_OK if landed else ExitCodes.EXIT_ERROR)
+        # The other direction: this clone is coherent but holds a superseded key, so the
+        # incoming blobs are the unreadable ones. Refuse before merging. Letting it run cost a
+        # live collaborator a filter traceback *and* a half-applied merge that left a private
+        # file deleted in their worktree — from a command they ran to get back in step.
+        if hint := key_waiting_hint():
+            console.print(f'[warning]{hint}[/warning]')
+            return int(ExitCodes.EXIT_ERROR)
         result = run_cmdline(config.scripts.sync)
         if result == 0:
             osc.git_changed()       # the fetch moved origin/master, the merge moved the branch
