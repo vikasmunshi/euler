@@ -608,6 +608,12 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
                       f'private content in those commits is encrypted under the retired key and '
                       f'has to be recovered before this clone can move.[/warning]')
         return False
+    # Tags, best-effort and separately. A re-home lands on whatever origin/master is, which is
+    # usually a release commit — and without its tag `git describe` reaches back to the last
+    # tag the clone happens to hold, so `version` reported "3.2.4 / v3.2.2-8" about a clone
+    # sitting exactly on v3.2.4. Separate because a moved tag makes the fetch exit non-zero
+    # (`sync.sh` splits them for the same reason), and a stale tag must never block the repair.
+    run_cmdline('git fetch --tags --force --prune-tags origin')
     console.print('[primary]The master key was rotated — moving this clone to the re-encrypted '
                   'tree on origin/master...[/primary]')
     if run_cmdline('git reset --hard origin/master') != 0:

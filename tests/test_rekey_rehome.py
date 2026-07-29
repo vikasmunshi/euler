@@ -200,7 +200,11 @@ class RotationRehomeTests(unittest.TestCase):
         """The repair: after it, HEAD is origin/master and the solution reads as plaintext."""
         from solver.core import git
         self.rotate()
+        subprocess.run(['git', 'tag', 'v9.9.9', 'master'], cwd=self.origin, check=True)
         git.enc_key_arrived()
+        # The tag that names where it landed comes too, or `git describe` reaches back past it
+        # and `version` misreports a clone sitting exactly on a release.
+        self.assertEqual(self._git('describe', '--tags').stdout.strip(), 'v9.9.9')
         self.assertEqual(self._git('rev-parse', 'HEAD').stdout.strip(),
                          self._git('rev-parse', 'origin/master').stdout.strip())
         self.assertEqual(self.solution.read_text(), _PLAINTEXT, 'decrypted in place')
