@@ -238,7 +238,13 @@ class RotationRehomeTests(unittest.TestCase):
         self.rotate_without_the_key()
         self.assertTrue(git.private_tree_opens('HEAD'), 'own history, own key: still readable')
         self.assertFalse(git.private_tree_opens('origin/master'), 'the published tree is not')
-        self.assertIn('msg save', git.key_waiting_hint(), 'and it names the verb that helps')
+        # Named where the reader is looking: the header's message chip over the web, whose key
+        # row has its own save button, and the shell verbs in a terminal, which has no header.
+        app_config = import_module('solver.config').config
+        for channel, expected in (('web', 'header'), ('terminal', 'msg save')):
+            subject = app_config.subject._replace(channel=channel)
+            with patch.dict(app_config._data, {'subject': subject}):
+                self.assertIn(expected, git.key_waiting_hint(), f'{channel}: names its own way')
 
     def test_a_sync_refuses_rather_than_merging_what_it_cannot_read(self) -> None:
         """Merging anyway left a live clone with a filter traceback and a deleted file.

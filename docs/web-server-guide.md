@@ -515,9 +515,11 @@ key is perfectly coherent — its own `HEAD` opens under the key it holds — an
 `git-sync` fetches first, asks both questions, and **refuses before merging** when the
 incoming blobs are the unreadable ones; merging anyway cost a live collaborator a filter
 traceback *and* a half-applied merge that left a private file deleted in their worktree. The
-login banner asks the same pair, so a stale clone is told to run `msg list` / `msg save`
-rather than the generic "run `git-sync` to see why" — which, after a rotation, points at the
-one command that cannot work.
+login banner asks the same pair, so a stale clone is told how to take the key rather than the
+generic "run `git-sync` to see why" — which, after a rotation, points at the one command that
+cannot work. The instruction follows the channel: over the web it names the header's message
+chip, whose key row carries its own **save** button, so nobody has to find and type a message
+id; a terminal, having no header, gets `msg list` / `msg save <id>`.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the

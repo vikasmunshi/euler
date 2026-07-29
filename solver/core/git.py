@@ -562,9 +562,16 @@ def key_waiting_hint() -> str:
     """
     if private_tree_opens('HEAD') and private_tree_opens('origin/master'):
         return ''
-    return ('a new master key is waiting in your messages — this clone cannot read the '
-            'published solutions until you take it: run [accent]msg list[/accent], then '
-            '[accent]msg save <id>[/accent].')
+    waiting = ('a new master key is waiting for you — this clone cannot read the published '
+               'solutions until you take it: ')
+    # Point at whatever the reader is actually looking at. Over the web that is the envelope
+    # chip in the header, whose key row carries its own [save] button, so nobody has to type a
+    # message id they would have to go and find first. A terminal has no header — there, the
+    # verbs are the only answer there is.
+    if config.subject.channel == 'web':
+        return waiting + ('open the [accent]✉ messages[/accent] menu in the header and press '
+                          '[accent]save[/accent] on the master-key message.')
+    return waiting + 'run [accent]msg list[/accent], then [accent]msg save <id>[/accent].'
 
 
 def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
