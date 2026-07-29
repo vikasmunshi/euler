@@ -278,6 +278,7 @@ solver/
     loader.py         — Utility for loading command modules.
     misc.py           — The `problems` and `manage-config` commands.
     path_utils.py     — Utility functions for file and directory operations.
+    repo_root.py      — Where the working tree is — the one answer, for every part of the solver that needs it.
     scripts.py        — Dependency and system-resource setup commands.
     search.py         — 'find' command: grep the solution stack for a regular expression.
     shell_utils.py    — Utility for running shell commands and capturing their output.
@@ -313,6 +314,7 @@ solver/
       __main__.py     — Message service entry point: ``python -m solver.web.msg``.
       admin.py        — The message admin plane CLI: run **under sudo** by the ``msg`` shell command.
       app.py          — The message service: public + admin aiohttp apps over unix sockets.
+      client.py       — The shell tier's client for the message spool: one call, whichever plane answers.
       commands.py     — The ``msg`` shell command: read and write the message spool.
       config.py       — Message-service runtime configuration, read from the environment.
       identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.

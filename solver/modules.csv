@@ -47,6 +47,7 @@ solver.utils.linter,True
 solver.utils.loader,
 solver.utils.misc,True
 solver.utils.path_utils,
+solver.utils.repo_root,
 solver.utils.scripts,True
 solver.utils.search,True
 solver.utils.shell_utils,True
@@ -76,6 +77,7 @@ solver.web.csp,
 solver.web.envfile,
 solver.web.msg.admin,
 solver.web.msg.app,
+solver.web.msg.client,
 solver.web.msg.commands,True
 solver.web.msg.config,
 solver.web.msg.identity,

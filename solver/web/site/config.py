@@ -14,11 +14,11 @@ __all__ = ['SiteConfig']
 
 import os
 from pathlib import Path
+
+from solver.utils.repo_root import repo_root as find_repo_root
 from typing import NamedTuple
 
 #: Repo root as seen from this file (``solver/web/site/config.py`` → up 3): the
-#: default working tree for a dev run straight from a checkout.
-_REPO_ROOT = Path(__file__).resolve().parents[3]
 
 #: This repo on GitHub — the default for :attr:`SiteConfig.github_url`, overridable
 #: with ``EULER_GITHUB_URL`` (a fork serves its own source links).
@@ -61,7 +61,10 @@ class SiteConfig(NamedTuple):
     @classmethod
     def from_env(cls) -> SiteConfig:
         """Build the configuration from the process environment (all optional)."""
-        repo_root = Path(os.environ.get('EULER_REPO_ROOT', str(_REPO_ROOT)))
+        # EULER_REPO_ROOT first (every deployed unit sets it), then discovery —
+        # `solver.utils.repo_root`, which refuses to invent a root rather than
+        # silently adopting site-packages as one.
+        repo_root = find_repo_root()
         static_dir = Path(os.environ.get('EULER_CONTENT_STATIC_DIR',
                                          str(repo_root / 'solver/web/content')))
         return cls(

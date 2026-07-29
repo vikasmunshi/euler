@@ -10,9 +10,3 @@ dials by ``X-User-Slug``. The old per-profile services stay as the
 libraries this composes — the content handlers (:mod:`solver.web.site.app`) and the
 PTY machinery (:mod:`solver.web.ws`).
 """
-from __future__ import annotations
-
-__all__ = ['UserConfig', 'build_app']
-
-from solver.web.user.app import build_app
-from solver.web.user.config import UserConfig

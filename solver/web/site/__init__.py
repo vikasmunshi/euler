@@ -14,9 +14,3 @@ Import discipline mirrors :mod:`solver.web.auth`: this package imports the
 uid the shell's identity resolver would abort. All runtime configuration comes
 from the environment (:class:`~solver.web.site.config.SiteConfig`).
 """
-from __future__ import annotations
-
-__all__ = ['build_app', 'SiteConfig']
-
-from solver.web.site.app import build_app
-from solver.web.site.config import SiteConfig

@@ -19,12 +19,11 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from solver.utils.repo_root import repo_root as find_repo_root
 from solver.web.auth import AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET
 from solver.web.site.config import SiteConfig
 
 #: Repo root as seen from this file (``solver/web/user/config.py`` → up 3): the default
-#: working tree for a dev run straight from a checkout.
-_REPO_ROOT = Path(__file__).resolve().parents[3]
 _GITHUB_URL = 'https://github.com/vikasmunshi/euler'
 _GITHUB_BRANCH = 'master'
 
@@ -77,7 +76,10 @@ class UserConfig(NamedTuple):
     @classmethod
     def from_env(cls) -> UserConfig:
         """Build the configuration from the process environment (all optional)."""
-        repo_root = Path(os.environ.get('EULER_REPO_ROOT', str(_REPO_ROOT)))
+        # EULER_REPO_ROOT first (every deployed unit sets it), then discovery —
+        # `solver.utils.repo_root`, which refuses to invent a root rather than
+        # silently adopting site-packages as one.
+        repo_root = find_repo_root()
         static_dir = Path(os.environ.get('EULER_CONTENT_STATIC_DIR',
                                          str(repo_root / 'solver/web/content')))
         slug = os.environ.get('EULER_USER_SLUG', '').strip()

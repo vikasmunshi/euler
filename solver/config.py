@@ -8,7 +8,6 @@ __all__ = ['ExitCodes', 'config']
 import enum
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any, ClassVar
@@ -17,6 +16,7 @@ from prompt_toolkit.styles import Style
 from rich.theme import Theme
 
 from solver.auth import INSTANCE_EMAIL_ENV, Subject, TICKET_ENV, resolve_subject
+from solver.utils.repo_root import repo_root
 
 
 class ExitCodes(enum.IntEnum):
@@ -25,10 +25,6 @@ class ExitCodes(enum.IntEnum):
     EXIT_ERROR = 1  #: generic failure
     EXIT_USAGE = 2  #: parse / usage error
     EXIT_NOTFOUND = 127  #: unknown command
-
-
-#: Env var naming the repo working tree explicitly (the deployed web tier sets it).
-REPO_ROOT_ENV: str = 'EULER_REPO_ROOT'
 
 
 def _enter_root(root: Path) -> Path:
@@ -51,28 +47,14 @@ def _enter_root(root: Path) -> Path:
 
 
 def _root_dir() -> Path:
-    """Return the repo working-tree root, cd into it, and clean PATH (cached after first use).
+    """Return the repo working-tree root, cd into it, and clean PATH.
 
-    ``EULER_REPO_ROOT`` wins when set: the deployed web shell runs from the
-    ``/opt/euler`` venv, not a checkout, so ``git rev-parse`` from the package dir
-    finds nothing — and its service uid does not own the working tree, so git would
-    refuse it anyway (*dubious ownership*). The ws/content units set this to the real
-    tree. Otherwise ask git (the operator's local checkout, the normal case).
+    Discovery itself is :func:`solver.utils.repo_root.repo_root` — one implementation for
+    the shell, the crypto package and the web tier, because four copies of it drifted and
+    the drift cost a collaborator their decryption. What is *this* module's own is the side
+    effect: the shell runs from the tree it found, with a PATH that can see the venv.
     """
-    override = os.environ.get(REPO_ROOT_ENV, '').strip()
-    if override and (root := Path(override)).is_dir():
-        return _enter_root(root)
-
-    a_package_dir = Path(__file__).parent.resolve()
-    # Shed git's own environment (GIT_DIR etc.): inherited from a git-spawned parent
-    # (hooks, filters), it makes rev-parse report the CWD as the toplevel — the wrong
-    # root. Same guard as solver.crypto.config._root_dir.
-    probe_env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
-    result = subprocess.run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True,
-                            cwd=a_package_dir, env=probe_env)
-    if result.returncode == 0 and (git_root := result.stdout.strip()) != '':
-        return _enter_root(Path(git_root))
-    raise ValueError(f'Failed to get git root (set {REPO_ROOT_ENV} for a non-checkout deploy)')
+    return _enter_root(repo_root())
 
 
 class AttributeDict:
