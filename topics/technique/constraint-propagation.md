@@ -9,6 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Constraint_pro
 
 - ● [0043](/solutions/0043/) — Sub-string Divisibility
 - ● [0096](/solutions/0096/) — Su Doku
-- ○ [0236](/solutions/0236/) — Luxury Hampers
+- ● [0236](/solutions/0236/) — Luxury Hampers
 
 <!-- /problems -->
