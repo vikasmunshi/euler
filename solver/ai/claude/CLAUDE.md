@@ -278,20 +278,14 @@ the shell commands), and `gitfilter.py` (the git clean/smudge filter, depending 
   machine-local `0600` secrets dir — a sibling dot-directory named for the repo (`~/euler` →
   `~/.euler`), **outside** the checkout — so file permissions are its protection and the load path
   needs no password.
-- `keys/enc-key.json`: a single 32-byte master key, identified-by-public-key — `{<public-key-hex>:
-  <master key wrapped to that key>}` plus a `verify` ciphertext for self-checking and an `owners`
-  map (`{<public-key-hex>: {slug, since, by}}`) recording whose key each entry is. One entry per
-  authorised public key; no email is stored — `owners` holds the opaque system slug, because this
-  file is committed to a public repo. Attribution is bookkeeping for `users purge`, never
-  authority: authority is proof-of-possession. Both reserved entries are additive — readers index
-  by public key — so an older clone still decrypts. (Stays in-repo: wrapped master keys are
-  useless without a private key.)
-- `~/.euler/enc-key.local.json`: a machine-local **stopgap**, one entry — this user's own
-  key, wrapped by `user --regen` so a rotation keeps decrypting until an authorised
-  `enc-key.json` arrives by `git-sync`. Never in the checkout: a tracked file both the user
-  and a maintainer edit collides in `sync.sh`'s stash/pop and leaves unparseable JSON.
-- Decryption path: load private key → unwrap master key (tracked file first, deleting the
-  overlay once it wins; overlay only as fallback) → verify → decrypt files.
+- `~/.euler/enc-key.json`: **this machine's** two records — `verify` (a fixed ciphertext for
+  self-checking) and the 32-byte master key wrapped to this holder's public key. Machine-local,
+  `0600`, never in the checkout and never committed: it used to be a tracked multi-entry file,
+  which put per-machine key material into shared state and cost a long run of git conflicts,
+  an attribution map, a purge verb and an overlay to manage. Authority is proof-of-possession.
+  Distribution is the message spool — `user-authorize` sends a holder their payload, `msg save`
+  writes it after verifying — and `user --regen` re-wraps in place, needing nobody.
+- Decryption path: load private key → unwrap this machine's entry → verify → decrypt files.
 
 ### Solution file naming
 

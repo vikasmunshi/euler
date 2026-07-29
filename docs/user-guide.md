@@ -364,48 +364,42 @@ needs nothing. The mechanics of the filter itself are covered in the
 ### The two keys
 
 ```
-~/.euler/id             - your X25519 private key (PKCS8 PEM, plain; machine-local 0600, outside the repo)
-keys/enc-key.json       - { <public-key-hex>: <master key wrapped for that key>, "verify": <check ciphertext>,
-                            "owners": { <public-key-hex>: {slug, since, by} } }
+~/.euler/id             - your X25519 private key (PKCS8 PEM; machine-local 0600, outside the repo)
+~/.euler/enc-key.json   - { "verify": <check ciphertext>, <your-public-key-hex>: <master key wrapped for it> }
 ```
 
-`~/.euler` is a machine-local secrets dir — a sibling dot-directory named for the
-repo (`~/euler` → `~/.euler`) — that holds the private key and the project env file
-(`~/.euler/env`), kept **outside** the checkout so secrets never sit in the work tree.
-Only `enc-key.json` stays in-repo (wrapped master keys are useless without a private
-key). The private key carries no passphrase; its `0600` file permissions are its
-protection.
+`~/.euler` is a machine-local secrets dir — a sibling dot-directory named for the repo
+(`~/euler` → `~/.euler`) — kept **outside** the checkout so secrets never sit in the work
+tree. Both files are yours alone; nothing about key material is committed or pushed. The
+private key carries no passphrase (its `0600` permissions, or the per-user vault, are its
+protection), and the enc-key file is inert without it.
 
-There is a single 32-byte **master key**. It is never stored in the clear: each
-authorised user holds their own copy, wrapped to their X25519 public key with an
-ephemeral ECDH exchange (HKDF-SHA256 + ChaCha20-Poly1305). Keys are identified by
-their **public key**, not by email. Loading reads the private key from `~/.euler/id`,
-unwraps the master key, and proves it correct against the `verify` ciphertext before
-use. Authority is **proof-of-possession** — anyone who can unwrap and verify the master
-key may rotate it, authorise another key, or split it.
+There is a single 32-byte **master key**, shared by everyone who may read the private
+solutions and never stored in the clear: each holder keeps their own copy, wrapped to their
+X25519 public key with an ephemeral ECDH exchange (HKDF-SHA256 + ChaCha20-Poly1305). Loading
+it reads the private key, unwraps the entry, and proves it against the `verify` ciphertext
+before use.
 
 ### Gaining access (new user)
 
 ```bash
-solver "user"        # creates ~/.euler/id and prints your public key
+solver "user"        # creates ~/.euler/id, prints your public key, and files a request
 ```
 
-Creating a key also **files a request with the maintainers** through the message spool,
-carrying your public key — you do not have to find anyone. A maintainer works it from
-their queue:
+That request goes to the maintainers over the message spool — you do not have to find anyone.
+When one of them issues the key, it arrives as a message:
 
 ```bash
-msg queue                                  # the request, with its message id
-solver "authorize <message-id>"            # wraps the master key to the key in that request
-solver "authorize <public-key-hex>"        # …or by hand, if the request never arrived
+msg list                 # the reply is there
+msg save <message-id>    # writes ~/.euler/enc-key.json, verified before anything is written
 ```
 
-Then they commit and push `keys/enc-key.json`; you `git-sync`, and `solver "user"` reports
-`✓ can encrypt/decrypt`. The authorising maintainer's copy records **whose** key each entry
-is (the `owners` map above — your system slug, never your address, since this file is
-public), which is what lets an admin later `users purge` the entries of people who have
-moved on. As a fallback you can `key-reconstruct` the master key from `threshold`
-out-of-band shares produced by `key-split` (n-of-m secret sharing).
+`solver "user"` then reports `✓ can encrypt/decrypt`, and the private solutions decrypt in
+place. **Rotating your own key needs nobody**: `solver "user --regen"` re-wraps the master key
+to your new key itself. Only a machine that cannot load the master key at all files a request.
+
+As a fallback you can `key-reconstruct` the master key from `threshold` out-of-band shares
+produced by `key-split` (n-of-m secret sharing).
 
 ### Studying the solutions
 

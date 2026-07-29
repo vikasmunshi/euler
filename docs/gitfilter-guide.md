@@ -66,9 +66,7 @@ whose clone is behind then runs an *old* filter against a *current* key file.
 
 The signature to remember: **the shell and the filter disagree about the same clone.** `user`
 says the key is available (a console script, sane `sys.path`, current code) while `git-filter`
-says UNAVAILABLE (a filter process, shadowed import, stale code). Three readers were locked
-out of decryption this way — their clones predated the machine-local overlay, so the filter
-could not see the entry carrying their access.
+says UNAVAILABLE (a filter process, shadowed import, stale code).
 
 The flag is written into `.git/config` by `install`, so a clone wired before this fix keeps
 the old command until `git-filter install` is run again.
@@ -84,72 +82,41 @@ succeeds. That is the state an un-authorized clone is designed to sit in, and it
 
 Exiting before the handshake instead gives git a filter that dies on startup, reported as
 `fatal: the remote end hung up unexpectedly` — a *transport* failure, which `required=false`
-cannot soften because there is no filter result to fall back from. A collaborator whose vault
-was locked could then check nothing out at all, by any route.
+cannot soften because there is no filter result to fall back from.
 
 ### The master key file
 
-The master key lives in `keys/enc-key.json`, a flat map keyed by **public key**:
+The master key lives in **`~/.euler/enc-key.json`** — machine-local, `0600`, beside the
+private key that opens it, and **not in the checkout**. Two records:
 
 ```
-enc-key.json
-├── <public-key-hex>    - the 32-byte master key wrapped for this X25519 public key
-│                         (ephemeral X25519 ECDH → HKDF-SHA256 → ChaCha20-Poly1305)
-├── … one entry per authorised public key …
+~/.euler/enc-key.json
 ├── verify              - MAGIC|nonce|ciphertext: the master key encrypting a fixed
 │                         known text (Blake's "Auguries of Innocence", opening quatrain)
-└── owners              - { <slug>: {key, since, by} }: each collaborator's CURRENT key
+└── <your-public-key>   - the 32-byte master key wrapped for it (ephemeral X25519 ECDH
+                          → HKDF-SHA256 → ChaCha20-Poly1305)
 ```
 
-Beside it, **outside the checkout**, sits a machine-local stopgap:
+That is the whole file. It holds **your** entry and nobody else's, so there is no attribution
+to keep, nothing to purge, and no shared copy to reconcile with.
 
-```
-~/.euler/enc-key.local.json   - { <public-key-hex>: <master key wrapped for that key> }
-                                exactly ONE entry: this user's own, and only while the
-                                shared file has not caught up
-```
+It used to be tracked: `keys/enc-key.json`, every authorised key, committed and pulled. The
+cost was structural. A rotation had to edit that tracked file, `sync.sh` stashes a dirty tree
+around the merge and pops it after, and the authorised copy arriving from the other side made
+the pop conflict — leaving markers in JSON that every reader takes for "not authorised",
+decryption included. A reader could not even repair it: `git-reset` is contributor-floored. It
+also needed an attribution map to say whose entries were whose, a purge verb to remove the
+stale ones, a machine-local overlay to bridge rotations, and a repair path inside `git-sync`.
+All of that was the price of keeping per-machine key material in shared state.
 
-`user --regen` re-wraps the master key to the new public key so the user keeps decrypting
-until a maintainer's `user-authorize` reaches their clone by `git-sync`. That carry used to
-be written into the **tracked** file, which put per-machine state into shared state:
-`sync.sh` stashes a dirty tree around the merge and pops it afterwards, so the moment the
-authorised copy of the same file arrived the pop conflicted — and the conflict markers left
-the JSON unparseable, which every reader takes for "not authorised", killing decryption
-until someone reset the file (`git-reset` is contributor-floored, so a reader could not).
-Outside the repository there is nothing to stash and nothing to collide, and
-`git reset --hard` no longer costs anyone their access.
+**Distribution is the message spool.** A maintainer's `user-authorize` wraps the master key to
+your public key and sends you the payload — the whole of your file — and `msg save` writes it
+after checking it unwraps with your private key and passes `verify`. It travels by message for
+the same reason the old file could sit in a public repo: without your private key it is inert.
 
-The read order is the **tracked file first**, then the overlay, then no access. The `verify`
-check is the same either way, so a key reached through the overlay clears exactly the same bar.
-
-The read **never deletes** the overlay, even on a tracked hit. It runs inside the git filter,
-and mid-merge the tracked file is transient: git writes the incoming `keys/enc-key.json` into
-the worktree while it checks out `solutions/private/**`, so the filter sees a file that names
-the key — and a merge that then fails and rolls back leaves the worktree without it and the
-fallback already gone. Retiring the overlay happens where the tree is settled instead: after a
-*completed* `git-sync`, and in `user`.
-
-No email is stored anywhere — a key is identified solely by its public-key value.
-`owners` is keyed by the **system slug** (`u` + a hash, the same opaque name the per-user
-uid, home and `user/<slug>` branch already carry), never an address: this file is
-committed to a public repository, and the slug publishes nothing the branch list does
-not. Keyed by slug, a collaborator has exactly **one** authorised key at a time —
-authorising a new one replaces the record, and the key it named becomes an **orphan**,
-which is what `users purge` removes. Keyed the other way (as it briefly was) a rotation
-left two records both naming a live account, so both read as current and purge found
-nothing to do. The file was migrated when the shape changed; only this shape is read. It is **attribution, not authority** — nothing in the decrypt path reads it, a key
-with no owner still unwraps, and a slug written here grants nothing. It exists so
-`users purge` can tell whose entry is whose.
-
-Both reserved entries are **additive**: every reader indexes the file by public key and
-takes `verify` by name, so a clone running an older solver ignores anything else it
-finds. That is why attribution is a sibling entry rather than a reshape — the filter
-reads this file on every checkout, and a shape it cannot parse is a collaborator who
-cannot decrypt.
-To use the master key the filter unwraps the current user's entry with the private
-key at `~/.euler/id` (PKCS8 PEM, plain/unencrypted; a machine-local `0600` file in
-the sibling secrets dir outside the checkout, so its file permissions are its
-protection). All of this lives in `solver/crypto/ciphers.py`.
+**A rotation needs nobody.** `user --regen` re-wraps the master key to your new public key in
+place, because the file is yours alone. Only a machine that *cannot* load the master key —
+a first run, or a rotation whose carry failed — files a request.
 
 The `verify` field makes the key **self-checking**: loading the master key always
 decrypts `verify` and compares it to the known text. A wrong or corrupt key is
@@ -170,7 +137,7 @@ source of truth and the crypto package does not depend on `solver.config`.
 
 You need an X25519 identity with master-key access first. Run `solver user`; if it reports
 `✗ cannot encrypt/decrypt`, have an existing user `authorize` your public key (the master key is
-created once and committed in `keys/enc-key.json`). See
+created once, and held by each user in `~/.euler/enc-key.json`). See
 [User Guide §7](user-guide.md#7-key-exchange). Then:
 
 ```bash
@@ -254,21 +221,17 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 
 ## 6. Multi-user and key rotation
 
-- **Add a user:** they run `solver user` to create their identity, which files a key
-  request with staff over the message spool. A maintainer runs `solver "authorize <id>"`
-  with that **message id** — the key comes from the request and the requester from the
-  thread's author, so the entry is attributed without anyone retyping a public key — or
-  `solver "authorize <public-key-hex> <identity>"` to do it by hand. Commit the updated
-  file.
-- **Purge orphans:** `users purge` (admin) asks one question of every authorised key —
-  *is it still somebody's?* — and offers every key that is not some live account's current
-  one: superseded by its owner's later key, left behind by a removed or disabled account,
-  or never attributed at all. `--apply` walks them. Your own key is never offered. Purging
-  removes the entry, **not** the access: see rotation below.
-- **Rotate the master key:** `solver rekey`. It verifies the current key, generates
-  a new one, re-wraps it to all authorised public keys, refreshes `verify`, and
-  re-encrypts the tracked private files. Commit the new `enc-key.json` **and** the
-  re-encrypted blobs together.
+- **Add a user:** they run `solver user`, which creates their identity and files a key
+  request over the message spool. A maintainer works it with `solver "authorize <message-id>"`
+  — the key and the requester come from the thread — and the payload is sent back as a reply.
+  The user runs `msg save <id>` to write it, and their private solutions decrypt in place.
+- **Rotate your own key:** `solver "user --regen"`. It carries the master key to the new key
+  itself; nobody else is involved, and nothing is published.
+- **Rotate the master key:** `solver rekey` (admin). It verifies the current key, generates a
+  new one, writes yours, re-issues it by message to every `public_key` registered on the
+  account roster (`users set-key`), and re-encrypts the tracked private files. Commit the
+  re-encrypted blobs. An account with no registered public key **loses access at that
+  rotation** and is named before you confirm — sometimes the intent, never a surprise.
 
 > A rekey changes every encrypted blob (the derived keys change). Make sure all
 > private files are checked out (plaintext present) before rotating, then commit
@@ -330,7 +293,7 @@ filter wiring) were in place.
 | Symptom | Cause / fix |
 | --- | --- |
 | `git add` hangs | A stale `process` filter or `.git/index.lock` from an interrupted run. Kill leftover `gitfilter process` procs and remove `.git/index.lock`. |
-| `master key check FAILED` on `install` | No `keys/enc-key.json` yet, no `~/.euler/id`, or your public key has no entry. Run `solver user`, then have an existing user `authorize` your public key (the master key is committed in `keys/enc-key.json`). |
+| `master key check FAILED` on `install` | No `~/.euler/enc-key.json` yet, no `~/.euler/id`, or the file holds a key that is not yours. Run `solver user` — it files a request — then `msg save <id>` when a maintainer issues it. |
 | Checkout/commit of private files aborts | `required = true` and the master key is unavailable. Obtain master-key access (see §6), or you genuinely cannot read these files. |
 | Other clones see ciphertext in the working tree | `.gitattributes` was not committed, or the filter was never `install`-ed on that clone. Commit `.gitattributes`; run `solver-gitfilter install`. |
 | Spurious "modified" on `status` with no edits | Determinism broke — the master key in use differs from the one a blob was encrypted with (e.g. after a partial rekey). Reconcile the master key, then `git add --renormalize`. |
