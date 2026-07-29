@@ -40,6 +40,7 @@ from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
 from solver.crypto.ciphers import read_master_key
+from solver.crypto.gitfilter import filter_settings
 from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
 from solver.utils.shell_utils import run_cmdline, run_command
@@ -430,20 +431,29 @@ def enc_key_arrived() -> None:
     It used to hang off `git-sync`, because access arrived *through git*: the enc-key file was
     tracked, and a pull delivered it. Nothing about key material travels by git any more, so
     the trigger moved to the commands that actually change what this machine can open. A
-    silent no-op while the filter is already wired or the key is not readable.
+    Also re-wires a clone whose recorded filter command has drifted from what `install`
+    writes today — see below. A silent no-op while the wiring is current, or the key is not
+    readable.
     """
     name: str = crypto_config['filter_name']
-    wired: bool = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
-                      cwd=config.root_dir, capture_output=True).returncode == 0
-    if wired:
+    recorded = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
+                   cwd=config.root_dir, capture_output=True, text=True)
+    wanted = filter_settings(name)[f'filter.{name}.process']
+    # Wired is not the same as wired CORRECTLY. A clone keeps whatever command was recorded
+    # the day it was set up, so a change to that command — `-P`, most consequentially — never
+    # reaches the clones that need it most: the ones already working, which stop working the
+    # moment they fall behind and start importing their own stale source. Comparing against
+    # what `install` would write today makes every such change self-healing, at the cost of
+    # one `git config` read.
+    if recorded.returncode == 0 and recorded.stdout.strip() == wanted:
         return
     read_master_key.cache_clear()
     try:
         read_master_key()
     except (FileNotFoundError, KeyError, ValueError):
         return  # no keypair / not issued yet — nothing to do
-    console.print('[primary]Master-key access detected — wiring the git filter and '
-                  'decrypting private solutions...[/primary]')
+    console.print('[primary]Wiring the git filter and decrypting private '
+                  'solutions...[/primary]')
     if run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter install') == 0:
         run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
                     '&& git checkout -- solutions/private')

@@ -19,6 +19,8 @@ from unittest.mock import MagicMock
 from solver.auth import Subject
 from solver.config import ExitCodes, config
 from solver.core import git
+from solver.crypto.config import config as crypto_config
+from solver.crypto.gitfilter import filter_settings
 from solver.shell.command import registry
 from solver.utils.loader import load_commands
 from tests import silence
@@ -87,6 +89,14 @@ class _GitCommandCase(unittest.TestCase):
         self._saved_subject = config.subject
         self._saved_emit = git.osc.emit
         git.run_cmdline = fake_run_cmdline  # type: ignore[assignment]
+        # `git-sync`'s tail asks git for the recorded filter command (enc_key_arrived).
+        # Unstubbed it reads the REAL checkout — which is how this fixture noticed the
+        # operator's own clone still carried a pre-`-P` command. These tests are about the
+        # verbs, not the wiring, so answer "wired, and current".
+        self._saved_run_proc_base = git.run
+        current = filter_settings(crypto_config['filter_name'])[
+            f"filter.{crypto_config['filter_name']}.process"]
+        git.run = lambda *a, **k: MagicMock(returncode=0, stdout=current)  # type: ignore[assignment]
         git._current_branch = lambda: self.branch  # type: ignore[assignment]
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
         # like run_cmdline, so no test can touch a real remote (module docstring).
@@ -97,6 +107,7 @@ class _GitCommandCase(unittest.TestCase):
         git.osc.emit = lambda *a, **k: None  # type: ignore[assignment]
 
     def tearDown(self) -> None:
+        git.run = self._saved_run_proc_base  # type: ignore[assignment]
         git.run_cmdline = self._saved_run  # type: ignore[assignment]
         git._current_branch = self._saved_branch  # type: ignore[assignment]
         git._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
@@ -506,9 +517,18 @@ class EncKeyPullFlowTest(_GitCommandCase):
         git.run = self._saved_run_proc  # type: ignore[assignment]
         super().tearDown()
 
-    def _wire_state(self, wired: bool) -> None:
+    def _wire_state(self, wired: bool, recorded: str | None = None) -> None:
+        """Stand in for `git config --get filter.<name>.process`.
+
+        *recorded* defaults to exactly what `install` writes today, so "wired" means
+        "wired correctly" unless a test says otherwise.
+        """
+        current = filter_settings(crypto_config['filter_name'])[
+            f"filter.{crypto_config['filter_name']}.process"]
+
         def fake_run(*_a: Any, **_k: Any) -> Any:
-            return MagicMock(returncode=0 if wired else 1)
+            return MagicMock(returncode=0 if wired else 1,
+                             stdout=(current if recorded is None else recorded))
 
         git.run = fake_run  # type: ignore[assignment]
 
@@ -517,6 +537,21 @@ class EncKeyPullFlowTest(_GitCommandCase):
         git.enc_key_arrived()
         self.assertEqual(self.cmdlines, [])
         self.master.assert_not_called()
+
+    def test_a_drifted_filter_command_is_rewired(self) -> None:
+        """Wired is not the same as wired CORRECTLY.
+
+        A clone keeps the command recorded the day it was set up, so `-P` — added after the
+        clones existed — never reached them. They keep working until they fall behind, at
+        which point the filter imports the clone's own stale source and stops being able to
+        decrypt: the failure that cost an afternoon. Comparing against what `install` would
+        write today makes the repair automatic.
+        """
+        self._wire_state(wired=True, recorded='/opt/euler/venv/bin/python '
+                                              '-m solver.crypto.gitfilter process')
+        git.enc_key_arrived()
+        self.assertEqual(len(self.cmdlines), 2)
+        self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
 
     def test_unauthorized_is_a_silent_noop(self) -> None:
         self._wire_state(wired=False)
