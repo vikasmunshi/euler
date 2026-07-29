@@ -427,8 +427,8 @@ def resmudge_private() -> int:
     Existing ciphertext in the worktree only decrypts on a *fresh* checkout, and git will not
     re-materialise a file it considers unchanged — hence the delete-then-checkout. That makes
     this destructive by construction, so it is guarded, and both callers share the guard:
-    `git-filter install` (asked for explicitly) and :func:`enc_key_arrived` (the automatic
-    repair, which now runs before every sync and must not eat anyone's work).
+    `git-filter install` (asked for explicitly) and :func:`enc_key_arrived` (after a key is
+    saved) — neither may eat anyone's work.
 
     Genuine local edits are never clobbered — the re-checkout is skipped and says so. A
     freshly wired clone is NOT dirty (clean() passes ciphertext through, matching the stored
@@ -466,7 +466,7 @@ def resmudge_private() -> int:
 
 
 def enc_key_arrived() -> None:
-    """Wire the git filter once this machine can decrypt — the tail of a sync, and of `msg save`.
+    """Wire the git filter once this machine can decrypt — the tail of `msg save`.
 
     A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as ciphertext.
     The moment the master key becomes readable — a maintainer issued it and `msg save` wrote
@@ -552,21 +552,14 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
-        # BEFORE the sync, not after. A stale or unwired filter is a reason the sync
-        # FAILS — git cannot check out solutions/private without one that decrypts — so
-        # repairing only on success never reached the clones that needed it most, and a
-        # clone stuck that way stayed stuck: every retry failed at the same step, and the
-        # repair sat behind the success it was waiting for.
-        #
-        # Nothing a sync delivers changes what this machine can decrypt: key material has
-        # not travelled by git since the enc-key file became machine-local, so there is
-        # nothing to wait for. It is a no-op when the wiring is already current.
-        enc_key_arrived()
+        # No filter wiring here. `git-sync` moves commits; it does not change what this
+        # machine can decrypt — key material stopped travelling by git when the enc-key file
+        # became machine-local. Wiring belongs to the one command that DOES change it,
+        # `msg save`, and hanging it off a sync only put filter chatter in front of readers
+        # who have no private-file access and no use for any of it.
         result = run_cmdline(config.scripts.sync)
         if result == 0:
-            # The fetch moved origin/master, the merge moved the branch, and the flow
-            # above may have wired the filter: everything the chip shows.
-            osc.git_changed()
+            osc.git_changed()       # the fetch moved origin/master, the merge moved the branch
     return result
 
 

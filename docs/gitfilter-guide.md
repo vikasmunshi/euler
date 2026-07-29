@@ -69,19 +69,17 @@ says the key is available (a console script, sane `sys.path`, current code) whil
 says UNAVAILABLE (a filter process, shadowed import, stale code).
 
 The flag is written into `.git/config` by `install`. A clone keeps whatever command was
-recorded the day it was set up, so **`git-sync` compares the recorded command with what
+recorded the day it was set up, so **`msg save` compares the recorded command with what
 `install` would write today** and re-wires when they differ — any change to that command
-repairs itself, at the cost of one `git config` read.
+repairs itself the next time a key is saved.
 
-That check runs **before** the sync, not after it. A stale filter is a *reason* a sync fails
-(git cannot check out `solutions/private` without one that decrypts), so a repair gated on
-success would never reach the clones that needed it: every retry would fail at the same step,
-with the fix sitting behind the success it was waiting for. Nothing a sync delivers changes
-what a machine can decrypt — key material stopped travelling by git when the enc-key file
-became machine-local — so there is nothing to wait for.
+It hangs off `msg save` and nothing else, because that is the one command that changes what a
+machine can decrypt. A sync does not, and putting filter chatter in front of a reader with no
+private-file access would be noise about something they do not have. The cost is that a
+drifted clone waits for its owner's next save; `git-filter install` is the manual repair.
 
-The re-checkout that follows is guarded: local plaintext edits are never clobbered, and the
-repair says so and skips rather than running `rm -f` over somebody's work.
+The re-checkout either does is guarded: local plaintext edits are never clobbered — it says so
+and skips, rather than running `rm -f` over somebody's work.
 
 ### When the key cannot be reached
 

@@ -583,6 +583,19 @@ class UserMessageChipTests(AioHTTPTestCase):
             self.assertIn(resp.status, (404, 405), f'{method} {path} should not exist')
 
     @unittest_run_loop
+    async def test_a_recipient_may_dismiss_their_own_message(self) -> None:
+        """What lets an act clean up after itself.
+
+        Dismiss used to be staff-only, so the rung that most needs the tidying — a reader,
+        who cannot reach the staff queue — was the one left with a mailbox of worked
+        messages. `msg save` takes the key; the message it came in is then spent.
+        """
+        thread_id = self.spool.store.notice(box_of(_ME), 'yours', 'take it', [_ME])
+        assert thread_id is not None
+        self.assertTrue(self.spool.store.drop(thread_id))
+        self.assertIsNone(self.spool.store.thread(thread_id, _ME, staff=True))
+
+    @unittest_run_loop
     async def test_the_delivery_push_is_accepted_with_no_terminal_attached(self) -> None:
         """The nudge is best-effort: no shell open means nothing to notify, not an error."""
         resp = await self.client.post('/internal/message', json={'slug': 'x', 'unread': 3})

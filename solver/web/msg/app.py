@@ -250,14 +250,21 @@ def build_app(service: MessageService) -> web.Application:
         return web.json_response({'id': thread_id, 'recipients': len(boxes)}, status=201)
 
     async def dismiss(request: web.Request) -> web.Response:
-        """``DELETE /staff/queue/{id}`` — drop a worked thread (staff only)."""
-        refused = refuse_below(request, STAFF_FLOOR)
-        if refused is not None:
-            return refused
+        """``DELETE /staff/queue/{id}`` — drop a worked message.
+
+        Staff dismiss anything (the queue is theirs to clear). Anyone else may dismiss a
+        message **they are a party to**, which is what lets an act clean up after itself:
+        `msg save` takes the key and the message it came in is spent. Without that, the one
+        rung that most needs the tidying — a reader, who cannot reach the staff queue —
+        would be the one left with a mailbox of worked messages.
+        """
+        box, _identity, profile = caller(request)
         thread_id = request.match_info['id']
+        if not service.is_staff(profile) and service.store.thread(thread_id, box) is None:
+            return web.Response(status=403, text='not yours to dismiss')
         if not service.store.drop(thread_id):
-            return web.Response(status=404, text='no such thread')
-        log.info('thread %s dismissed', thread_id)
+            return web.Response(status=404, text='no such message')
+        log.info('message %s dismissed', thread_id)
         return web.json_response({'id': thread_id, 'dismissed': True})
 
     app = web.Application(middlewares=[peer_identity])
@@ -371,11 +378,11 @@ def build_admin_app(service: MessageService) -> web.Application:
         who = resolve(request, body)
         if who is None:
             return web.Response(status=400, text='identity required')
-        if not service.is_staff(who[1]):
-            return web.Response(status=403, text=f'requires {STAFF_FLOOR}')
         thread_id = request.match_info['id']
+        if not service.is_staff(who[1]) and service.store.thread(thread_id, who[0]) is None:
+            return web.Response(status=403, text='not yours to dismiss')
         if not service.store.drop(thread_id):
-            return web.Response(status=404, text='no such thread')
+            return web.Response(status=404, text='no such message')
         return web.json_response({'id': thread_id, 'dismissed': True})
 
     app = web.Application(middlewares=[require_token])

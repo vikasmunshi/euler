@@ -248,7 +248,9 @@ def user_authorize(target: str, identity: str = '') -> int:
 
     - a **16-hex message id** — the key-authorization request their `user` command filed
       (`msg queue` lists them). The key and the requester come from that message, the grant
-      is confirmed, and the payload is sent as **its own message** for them to `msg save`;
+      is confirmed, the payload is sent as **its own message** for them to `msg save`, and
+      the request is dismissed — it is worked, and a queue that keeps worked requests is a
+      queue nobody trusts;
     - a **64-hex public key** — the same act by hand, for a key that reached you some other
       way. *identity* names who to send it to.
 
@@ -269,7 +271,7 @@ def user_authorize(target: str, identity: str = '') -> int:
 
     Aliased as `authorize`.
     """
-    from solver.web.msg.notify import notify_user
+    from solver.web.msg.notify import dismiss_thread, notify_user
     token = target.strip().lower()
     thread_id = ''
     if _THREAD_ID_RE.fullmatch(token):
@@ -316,9 +318,11 @@ def user_authorize(target: str, identity: str = '') -> int:
         return 1
     console.print(f'[success]Sent to [accent]{identity}[/accent].[/success] '
                   '[muted]They run `msg save <id>` to take it.[/muted]')
-    if thread_id:
-        console.print(f'[muted]Their request [accent]{thread_id}[/accent] is worked — '
-                      '`msg dismiss` it when you are done with it.[/muted]')
+    if thread_id and not dismiss_thread(thread_id):
+        # The grant is delivered either way; an undismissed request is only clutter, and
+        # saying so beats a silent one that reappears in the queue tomorrow looking unworked.
+        console.print(f'[muted]Could not dismiss the request [accent]{thread_id}[/accent] — '
+                      '`msg dismiss` it yourself.[/muted]')
     _register_public_key(identity, public_key)
     return 0
 

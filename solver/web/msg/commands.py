@@ -186,6 +186,9 @@ def _save(thread_id: str) -> int:
     - the payload must **unwrap with your private key** and its `verify` must decrypt to the
       known text. Only then does it replace what you have.
 
+    The message is **dismissed** once the key is written: its whole content is now in your
+    enc-key file, and a spool that keeps every taken key is storing key material for nobody.
+
     That order matters. The file it overwrites may be the only thing standing between this
     machine and the whole private tree, so a bad or mistargeted payload has to fail *before*
     the write, not be discovered after it.
@@ -206,7 +209,13 @@ def _save(thread_id: str) -> int:
         return 1
     if not save_issued_key(str(data.get('body', ''))):
         return 1
-    _call('read', thread_id=thread_id)      # worked, so it is read
+    # Worked, so gone. A message whose whole content is now in your enc-key file has nothing
+    # left to say, and leaving it would mean a mailbox that fills with keys you have already
+    # taken — each one a copy of key material sitting in the spool for no reason. Failure to
+    # dismiss is not failure to save: the key is written either way.
+    if _call('dismiss', thread_id=thread_id) is None:
+        console.print(f'[muted]Saved, but could not dismiss [accent]{thread_id}[/accent] — '
+                      '`msg dismiss` it yourself.[/muted]')
     osc.messages_changed()
     return 0
 

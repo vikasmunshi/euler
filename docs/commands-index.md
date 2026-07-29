@@ -1730,7 +1730,9 @@ Wrap the master key for someone else and send it to them.
 
 - a **16-hex message id** — the key-authorization request their `user` command filed
   (`msg queue` lists them). The key and the requester come from that message, the grant
-  is confirmed, and the payload is sent as **its own message** for them to `msg save`;
+  is confirmed, the payload is sent as **its own message** for them to `msg save`, and
+  the request is dismissed — it is worked, and a queue that keeps worked requests is a
+  queue nobody trusts;
 - a **64-hex public key** — the same act by hand, for a key that reached you some other
   way. *identity* names who to send it to.
 

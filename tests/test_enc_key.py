@@ -141,6 +141,14 @@ class SaveIssuedKeyTests(EncKeyTestCase):
         read_master_key.cache_clear()
         return read_master_key()
 
+    def test_a_failed_save_leaves_the_message_alone(self) -> None:
+        """Dismissal follows a *successful* act. A payload that did not prove out leaves the
+        message where it is — it is the only copy of a key somebody has to re-issue."""
+        keys_mod.write_enc_key_file(self._issue_to(self.mine_key.public_key()))
+        self.assertFalse(keys_mod.save_issued_key(self._message(
+            self._issue_to(self.theirs_key.public_key()))))
+        self.assertEqual(self._master_on_disk(), self.master)
+
     def test_a_good_payload_is_saved_and_wires_the_filter(self) -> None:
         self.assertTrue(keys_mod.save_issued_key(self._message(
             self._issue_to(self.mine_key.public_key()))))

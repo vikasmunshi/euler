@@ -30,7 +30,7 @@ with no aiohttp — the shell tier has no web dependencies.
 """
 from __future__ import annotations
 
-__all__ = ['notify_staff', 'notify_user', 'read_thread']
+__all__ = ['dismiss_thread', 'notify_staff', 'notify_user', 'read_thread']
 
 import logging
 import os
@@ -107,3 +107,18 @@ def read_thread(thread_id: str) -> dict[str, Any] | None:
         return None
     status, data = result
     return data if status == 200 and isinstance(data, dict) else None
+
+
+def dismiss_thread(thread_id: str) -> bool:
+    """Drop a message that has been acted on; return whether it went.
+
+    An act that leaves its own instruction lying around is half an act — the request a key
+    was issued for is worked, and a queue that keeps worked requests is a queue nobody
+    trusts. Best-effort, like everything else here: the grant is already delivered, so a
+    spool that refuses must not fail it.
+    """
+    result = call('dismiss', thread_id=thread_id)
+    dismissed = result is not None and result[0] == 200
+    if not dismissed:
+        log.warning('could not dismiss %s (%s)', thread_id, result and result[0])
+    return dismissed

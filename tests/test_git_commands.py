@@ -501,29 +501,6 @@ class GitFilterCommandTest(_GitCommandCase):
         self.assertEqual(len(self.cmdlines), 1)  # wired, but nothing clobbered
 
 
-class SyncRepairOrderTest(_GitCommandCase):
-    """`git-sync` repairs the filter BEFORE syncing, whatever the sync then does."""
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.order: list[str] = []
-        saved = git.enc_key_arrived
-        git.enc_key_arrived = lambda: self.order.append('repair')   # type: ignore[assignment]
-        self.addCleanup(setattr, git, 'enc_key_arrived', saved)
-
-    def test_the_repair_runs_even_when_the_sync_fails(self) -> None:
-        """The trap this closes: a stale filter is a reason the sync fails, so repairing
-        only on success left those clones failing the same way for ever."""
-        self.rcs = [1]                                  # sync.sh refuses
-        self.assertEqual(git.git_sync(), 1)
-        self.assertEqual(self.order, ['repair'], 'the repair must not wait on success')
-
-    def test_the_repair_runs_before_the_sync(self) -> None:
-        self.assertEqual(git.git_sync(), 0)
-        self.assertEqual(self.order, ['repair'])
-        self.assertIn('sync.sh', self.cmdlines[0])      # …and the sync came after it
-
-
 class EncKeyPullFlowTest(_GitCommandCase):
     """The sync tail: wire the filter exactly when unwired AND key-authorized."""
 
