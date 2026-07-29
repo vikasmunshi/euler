@@ -334,7 +334,11 @@ do_status() {
     else
         echo "spool:       ✗ ${STATE_DIR} missing"
     fi
-    if [ -S "${ADMIN_SOCKET}" ]; then
+    # Under sudo, like the spool read above. The socket lives in a 0700 dir owned by
+    # euler-msg, so a plain `test -S` from the operator's uid cannot traverse to it and
+    # answers "missing" whatever the truth is — which it did, on a service that was serving
+    # perfectly well, sending the operator hunting for a fault that was not there.
+    if sudo test -S "${ADMIN_SOCKET}"; then
         echo "admin plane: ✓ ${ADMIN_SOCKET} (wheel-gated: sudo required)"
     else
         echo "admin plane: ✗ ${ADMIN_SOCKET} missing (service not running?)"
