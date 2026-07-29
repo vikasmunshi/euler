@@ -230,6 +230,24 @@ class RegenTests(EncKeyTestCase):
         self.assertEqual(self.requests, [], 'a locked vault must not look like missing access')
 
 
+class PublicKeyRegistryTests(unittest.TestCase):
+    """Registering a key for `key-rekey` is best-effort, and must fail quietly."""
+
+    def test_a_shell_that_cannot_elevate_does_not_try(self) -> None:
+        """A web shell's unit sets NoNewPrivileges, so sudo cannot work there — and does not
+        merely fail, it prints two lines about container configuration at somebody who asked
+        to authorise a key. Asking the kernel first turns that into a path not taken."""
+        from solver.web.auth import commands as users_mod
+        calls: list[tuple[str, ...]] = []
+        for name, stub in (('_can_elevate', lambda: False),
+                           ('_sudo_admin', lambda *a: calls.append(a) or 0)):
+            saved = getattr(users_mod, name)
+            setattr(users_mod, name, stub)
+            self.addCleanup(setattr, users_mod, name, saved)
+        self.assertFalse(users_mod.register_public_key('them@example.com', 'ab' * 32))
+        self.assertEqual(calls, [], 'no sudo should be spawned at all')
+
+
 class KeyReconstructTests(EncKeyTestCase):
     """Shares are typed by hand, so a wrong reconstruction must not overwrite a good file."""
 

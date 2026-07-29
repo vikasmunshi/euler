@@ -208,6 +208,21 @@ def registered_public_keys() -> dict[str, str] | None:
             for row in roster if row.get('scope') == 'web'}
 
 
+def _can_elevate() -> bool:
+    """Whether ``sudo`` could possibly work in this process.
+
+    A web shell's service unit sets ``NoNewPrivileges=true``, which makes elevation
+    impossible for it and every child — so sudo does not merely fail there, it fails
+    *loudly*, printing two lines about container configuration that mean nothing to the
+    person reading them. Asking the kernel first turns a confusing diagnostic into a path
+    not taken.
+    """
+    try:
+        return 'NoNewPrivs:\t1' not in Path('/proc/self/status').read_text()
+    except OSError:
+        return True                     # no procfs: let sudo speak for itself
+
+
 def register_public_key(identity: str, public_key: str) -> bool:
     """Record *public_key* against *identity*; False when the admin plane is out of reach.
 
@@ -216,6 +231,8 @@ def register_public_key(identity: str, public_key: str) -> bool:
     for the operator. The grant itself has already been delivered by then; registration only
     decides whether the next rotation can find them.
     """
+    if not _can_elevate():
+        return False
     return _sudo_admin('set-key', identity, public_key) == 0
 
 
