@@ -32,6 +32,7 @@ __all__ = [
     'authorised_keys',
     'build_cipher',
     'clear_local_enc_key',
+    'current_key_slugs',
     'decrypt_blob',
     'decrypt_blob_with',
     'encrypt_blob',
@@ -165,17 +166,40 @@ def authorised_keys(data: dict[str, Any]) -> list[str]:
 
 
 def key_owners(data: dict[str, Any]) -> dict[str, dict[str, str]]:
-    """The attribution map: ``{<public-key-hex>: {slug, since, by}}``, empty when absent.
+    """The attribution map: ``{<slug>: {key, since, by}}``, empty when absent.
 
-    **Attribution, never authority.** Nothing in the decrypt path consults this: a key
-    with no owner still unwraps, and an owner recorded here grants nothing on its own.
-    It exists so an admin can tell whose key an entry is when deciding what to purge —
-    a question the file could not answer at all before.
+    **Keyed by slug, not by public key**, and that is the whole model: a collaborator has
+    exactly one authorised key at any moment, so authorising a new one *replaces* the
+    record and the key it named stops being anybody's. Keyed the other way the file grew a
+    second live entry per rotation and both read as current — which is how one
+    collaborator ended up with two "active" keys and `users purge` found nothing to do.
+
+    **Attribution, never authority.** Nothing in the decrypt path consults this: a key with
+    no owner still unwraps. It exists so an admin can ask the only question that matters
+    for purging — *is this key still somebody's?* — which the file could not answer at all
+    before, and answered wrongly while it was keyed by key.
+
+    One shape, not two: a record without a ``key`` is ignored. The file was migrated when
+    this became the shape, so nothing in the wild carries the older key-keyed form, and
+    keeping a reader for it would mean keeping a second definition of "whose key is this"
+    alive to drift against the first.
     """
     owners = data.get(config['enc_key_owners'])
     if not isinstance(owners, dict):
         return {}
-    return {key: dict(record) for key, record in owners.items() if isinstance(record, dict)}
+    return {str(slug): {str(field): str(value) for field, value in record.items()}
+            for slug, record in owners.items()
+            if isinstance(record, dict) and record.get('key')}
+
+
+def current_key_slugs(data: dict[str, Any]) -> dict[str, str]:
+    """Invert :func:`key_owners` — ``{<public-key-hex>: <slug>}`` for the *current* keys.
+
+    Every authorised key absent from this map is an **orphan**: superseded by its owner's
+    later key, left behind by a removed account, or never attributed at all. The three are
+    one thing — a key that is nobody's — and `users purge` treats them alike.
+    """
+    return {record['key']: slug for slug, record in key_owners(data).items()}
 
 
 def read_local_enc_key() -> dict[str, str]:

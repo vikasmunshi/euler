@@ -150,7 +150,7 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str],
     data: dict[str, Any] = {pub: lock(X25519PublicKey.from_public_bytes(bytes.fromhex(pub)), master_key)
                             for pub in public_keys}
     data[config['enc_key_verify']] = encrypt_blob(config['verify_text'], master_key).hex()
-    kept = {pub: record for pub, record in (owners or {}).items() if pub in data}
+    kept = {slug: record for slug, record in (owners or {}).items() if record.get('key') in data}
     if kept:
         data[config['enc_key_owners']] = kept
     return data
@@ -183,7 +183,8 @@ def revoke_keys(public_keys: Iterable[str]) -> int:
     removed = [key for key in authorised_keys(data) if key in drop]
     if not removed:
         return 0
-    owners = {pub: record for pub, record in key_owners(data).items() if pub not in drop}
+    owners = {slug: record for slug, record in key_owners(data).items()
+              if record.get('key') not in drop}
     for key in removed:
         del data[key]
     if owners:
@@ -317,20 +318,30 @@ def user_authorize(target: str, identity: str = '') -> int:
 
     data: dict[str, Any] = read_enc_key_file()
     data[public_key_hex(pub)] = lock(pub, master_key)
+    superseded = ''
     if identity:
+        # Keyed by SLUG: a collaborator has one authorised key at a time, so this replaces
+        # whatever they had. The key it named is not removed here — it stops being anybody's,
+        # which is precisely what `users purge` is for, and dropping a key is an admin's act
+        # rather than a side effect of granting one.
         owners: dict[str, dict[str, str]] = key_owners(data)
-        owners[public_key_hex(pub)] = {'slug': system_slug(identity), 'since': _now_stamp(),
-                                       'by': system_slug(app_config['subject'].user)}
+        slug = system_slug(identity)
+        superseded = owners.get(slug, {}).get('key', '')
+        owners[slug] = {'key': public_key_hex(pub), 'since': _now_stamp(),
+                        'by': system_slug(app_config['subject'].user)}
         data[config['enc_key_owners']] = owners
     _write_enc_key_file(data)
     console.print(f'[success]Public key [accent]{public_key}[/accent] authorised'
                   f'{f" for [accent]{identity}[/accent]" if identity else ""}.[/success]')
     if not identity:
-        # Unattributed by choice, and said out loud: `users purge` will not offer this entry
-        # as stale (it cannot know whose it is), so the operator should know they have opted
-        # into keeping it forever unless they purge it by key.
-        console.print('[muted]No identity recorded — this entry stays unattributed and '
-                      '`users purge` will never offer it.[/muted]')
+        # An unattributed key is an orphan the moment it is written — `users purge` cannot
+        # tell it apart from one whose owner is gone, because there is nothing to tell.
+        console.print('[warning]note:[/warning] no identity recorded, so this key belongs to '
+                      'nobody — `users purge` will offer to remove it. Re-run with the '
+                      'identity to attribute it.')
+    if superseded and superseded != public_key_hex(pub):
+        console.print(f'[muted]This supersedes their previous key [accent]{superseded[:16]}…[/accent], '
+                      'which is now nobody\'s — [accent]users purge[/accent] removes it.[/muted]')
     console.print('[muted]Commit and push keys/enc-key.json (`git-publish keys`) — the grant '
                   'reaches the collaborator when they `git-sync`.[/muted]')
     if thread_id:

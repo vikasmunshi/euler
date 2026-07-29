@@ -17,11 +17,13 @@ from __future__ import annotations
 import asyncio
 import os
 import select
+import subprocess
 import sys
 import tempfile
 import time
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import aiohttp
 from aiohttp import WSMsgType, web
@@ -367,6 +369,19 @@ class RealShellTest(_WsServiceCase):
     async def test_real_shell_attach_and_exit(self) -> None:
         os.environ['EULER_AUTH_SOCKET'] = str(self.auth_socket)   # inherited by the child
         self.addCleanup(os.environ.pop, 'EULER_AUTH_SOCKET', None)
+        # …and point the child at a SCRATCH repo. A web-channel shell runs `git-sync` at
+        # startup (solver/shell/shell.py), so without this the forked shell syncs whatever
+        # checkout the suite happens to run in: stash → merge → pop over the operator's live
+        # working tree, and — since `git-sync` repairs a locally-modified keys/enc-key.json —
+        # a `git checkout HEAD --` over their uncommitted key material. It silently reverted
+        # real key edits, on every test run and on every `git push`, because the pre-push
+        # hook runs this suite. The sync fails in here (no remote) and the shell says so,
+        # which is all this test needs it to do.
+        scratch = TemporaryDirectory()
+        self.addCleanup(scratch.cleanup)
+        subprocess.run(['git', 'init', '-q'], cwd=scratch.name, check=False)
+        os.environ['EULER_REPO_ROOT'] = scratch.name
+        self.addCleanup(os.environ.pop, 'EULER_REPO_ROOT', None)
 
         ws = await self.client.ws_connect('/ws', headers=_HEADERS)
         await ws.send_str('{"resize": [120, 32]}')

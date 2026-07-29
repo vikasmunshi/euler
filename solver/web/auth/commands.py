@@ -21,12 +21,13 @@ The verbs:
   account verbs, for identities that did not come through the request queue (a bare
   os-login, or an ad-hoc invite).
 - **`users purge`** — the *repo* plane: which entries in `keys/enc-key.json` still belong
-  to somebody. It joins the file's `owners` attribution (written by `user-authorize`)
-  against the roster and offers the keys whose owner is gone or disabled. Only the roster
-  read is sudo; the edit happens in your checkout, as you, and is committed like any other
-  change. Your own key is never offered, an unattributed key is only purged by name, and
-  what it does **not** do — take back a master key somebody already unwrapped — is printed
-  every time, with the `key-rekey` that does.
+  to somebody. `owners` is keyed by **slug**, so it names each collaborator's *current* key
+  and nothing else; every authorised key it does not name is an **orphan** — superseded by
+  its owner's later key, left by a removed account, or never attributed — and all of them
+  are offered. Only the roster read is sudo; the edit happens in your checkout, as you, and
+  is committed like any other change. Your own key is never offered, and what a purge does
+  **not** do — take back a master key somebody already unwrapped — is printed every time,
+  with the `key-rekey` that does.
 - **`users redeploy`** — the host plane rather than an account verb: it drives the
   provisioning kit, never the admin CLI, and touches no account — so, like `list`, it
   takes no identity.
@@ -54,7 +55,8 @@ from typing import Literal
 
 from solver.auth.identity import system_slug
 from solver.config import config
-from solver.crypto.ciphers import authorised_keys, key_owners, load_private_key, public_key_hex, read_enc_key_file
+from solver.crypto.ciphers import (authorised_keys, current_key_slugs, load_private_key,
+                                   public_key_hex, read_enc_key_file)
 from solver.crypto.keys import revoke_keys
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
@@ -185,7 +187,12 @@ def _process_requests() -> int:
 
 #: Where a purge candidate's class is decided (`_classify_keys`). The order is the order
 #: rows print in: what you must not touch, then what is safe, then what is on offer.
-_KEY_CLASSES = ('self', 'active', 'unattributed', 'stale')
+#:
+#: Three, not four. "Unattributed" used to be its own class, kept out of the walk on the
+#: reasoning that an unknown key might still be someone's — but a key nobody is recorded as
+#: owning IS an orphan, exactly like one whose owner was removed or who has since rotated.
+#: Splitting them only made the walk skip real candidates.
+_KEY_CLASSES = ('self', 'active', 'orphan')
 
 
 def _own_public_key() -> str:
@@ -229,26 +236,31 @@ def _roster() -> list[dict[str, str]] | None:
 def _classify_keys(roster: list[dict[str, str]], mine: str) -> list[tuple[str, str, str]]:
     """Classify every authorised key as (public_key, class, description).
 
+    One question decides it: **is this key still somebody's?** The `owners` map answers it —
+    keyed by slug, so it names each collaborator's *current* key and nothing else. A key it
+    does not name is an orphan, whether because its owner rotated past it, because the
+    account is gone, or because it was never attributed. Those were three separate stories
+    and one outcome; they are one class now.
+
     The join is slug → identity, computed **here** from each roster identity rather than
     read from the roster's own `slug` column: that column is empty for a local os-login
     (which has no per-user instance), and the operator is usually exactly that — so
     trusting it would classify the operator's own key as belonging to nobody.
     """
     data = read_enc_key_file()
-    owners = key_owners(data)
+    slug_of = current_key_slugs(data)
     by_slug = {system_slug(str(row.get('user', ''))): row for row in roster}
     rows: list[tuple[str, str, str]] = []
     for key in authorised_keys(data):
-        record = owners.get(key, {})
-        slug = record.get('slug', '')
+        slug = slug_of.get(key, '')
         if key == mine:
             rows.append((key, 'self', 'yours — never purged'))
         elif not slug:
-            rows.append((key, 'unattributed', 'no owner recorded — purge by key only'))
+            rows.append((key, 'orphan', 'nobody\'s — superseded, or never attributed'))
         elif (row := by_slug.get(slug)) is None:
-            rows.append((key, 'stale', f'{slug}: no such account (removed)'))
+            rows.append((key, 'orphan', f'{slug}: no such account (removed)'))
         elif row.get('state') == 'disabled':
-            rows.append((key, 'stale', f'{row.get("user")}: account disabled'))
+            rows.append((key, 'orphan', f'{row.get("user")}: account disabled'))
         else:
             rows.append((key, 'active', f'{row.get("user")} ({row.get("profile")})'))
     return sorted(rows, key=lambda row: _KEY_CLASSES.index(row[1]))
@@ -256,7 +268,7 @@ def _classify_keys(roster: list[dict[str, str]], mine: str) -> list[tuple[str, s
 
 def _print_keys(rows: list[tuple[str, str, str]]) -> None:
     """Render the classification — the whole file, every time, not only the candidates."""
-    styles = {'self': 'accent', 'active': 'success', 'unattributed': 'muted', 'stale': 'warning'}
+    styles = {'self': 'accent', 'active': 'success', 'orphan': 'warning'}
     for key, klass, note in rows:
         console.print(f'  [{styles[klass]}]{klass:13}[/{styles[klass]}] [muted]{key[:16]}…[/muted]  {note}')
 
@@ -306,9 +318,9 @@ def _purge(key: str, apply: bool) -> int:
             return 1
     console.print(f'[primary]{len(rows)} authorised key(s)[/primary]')
     _print_keys(rows)
-    # An explicit key is the escape hatch for the unattributed ones, which are never
-    # offered by the walk: the operator has identified it out of band and says so by
-    # naming it, so this asks once and takes them at their word.
+    # Naming a key is the escape hatch for anything the classification refuses to offer —
+    # the operator has identified it out of band and says so by naming it, so this asks once
+    # and takes them at their word.
     if key:
         if not apply:
             console.print('[muted]add [accent]--apply[/accent] to purge it[/muted]')
@@ -317,15 +329,15 @@ def _purge(key: str, apply: bool) -> int:
             console.print('[muted]nothing purged[/muted]')
             return 0
         return 0 if _purge_keys([rows[0][0]]) else 1
-    candidates = [row for row in rows if row[1] == 'stale']
+    candidates = [row for row in rows if row[1] == 'orphan']
     if not candidates:
-        console.print('[muted]no stale keys — every attributed key belongs to a live account[/muted]')
+        console.print('[muted]no orphans — every key is the current key of a live account[/muted]')
         return 0
     if not apply:
-        console.print(f'[muted]{len(candidates)} stale key(s); add [accent]--apply[/accent] to work '
-                      'them one at a time[/muted]')
+        console.print(f'[muted]{len(candidates)} orphaned key(s); add [accent]--apply[/accent] to '
+                      'work them one at a time[/muted]')
         return 0
-    console.print(f'[accent]{len(candidates)}[/accent] stale key(s) — per key: '
+    console.print(f'[accent]{len(candidates)}[/accent] orphaned key(s) — per key: '
                   '[accent]p[/accent]urge · [accent]s[/accent]kip · [accent]q[/accent]uit')
     drop: list[str] = []
     for candidate, _klass, note in candidates:
@@ -368,8 +380,9 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
     its work in **your checkout**, on ``keys/enc-key.json``, as you — because that file is
     the repo's, not the host's, and the change has to be committed and pushed like any
     other. It classifies every authorised key against the roster (via the ``owners``
-    attribution ``user-authorize`` records) and offers the stale ones. Your own key is never
-    a candidate, and an unattributed one is only ever purged by naming it.
+    attribution ``user-authorize`` records, keyed by slug) and offers every key that is not
+    some live account's *current* one — superseded, orphaned by a removal, or never
+    attributed. Your own key is never a candidate.
 
     Args:
         action:   list (roster + pending + the invite-request queue), process-requests

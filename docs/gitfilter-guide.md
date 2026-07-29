@@ -98,7 +98,7 @@ enc-key.json
 ├── … one entry per authorised public key …
 ├── verify              - MAGIC|nonce|ciphertext: the master key encrypting a fixed
 │                         known text (Blake's "Auguries of Innocence", opening quatrain)
-└── owners              - { <public-key-hex>: {slug, since, by} }: whose key each entry is
+└── owners              - { <slug>: {key, since, by} }: each collaborator's CURRENT key
 ```
 
 Beside it, **outside the checkout**, sits a machine-local stopgap:
@@ -130,10 +130,14 @@ fallback already gone. Retiring the overlay happens where the tree is settled in
 *completed* `git-sync`, and in `user`.
 
 No email is stored anywhere — a key is identified solely by its public-key value.
-`owners` records the **system slug** (`u` + a hash, the same opaque name the per-user
+`owners` is keyed by the **system slug** (`u` + a hash, the same opaque name the per-user
 uid, home and `user/<slug>` branch already carry), never an address: this file is
 committed to a public repository, and the slug publishes nothing the branch list does
-not. It is **attribution, not authority** — nothing in the decrypt path reads it, a key
+not. Keyed by slug, a collaborator has exactly **one** authorised key at a time —
+authorising a new one replaces the record, and the key it named becomes an **orphan**,
+which is what `users purge` removes. Keyed the other way (as it briefly was) a rotation
+left two records both naming a live account, so both read as current and purge found
+nothing to do. The file was migrated when the shape changed; only this shape is read. It is **attribution, not authority** — nothing in the decrypt path reads it, a key
 with no owner still unwraps, and a slug written here grants nothing. It exists so
 `users purge` can tell whose entry is whose.
 
@@ -256,10 +260,10 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
   thread's author, so the entry is attributed without anyone retyping a public key — or
   `solver "authorize <public-key-hex> <identity>"` to do it by hand. Commit the updated
   file.
-- **Purge unused entries:** `users purge` (admin) lists every authorised key against the
-  account roster and offers the ones whose owner is gone or disabled; `--apply` walks
-  them. Your own key is never offered, and an entry with no `owners` record — every entry
-  written before attribution existed — is only ever purged by naming its key. Purging
+- **Purge orphans:** `users purge` (admin) asks one question of every authorised key —
+  *is it still somebody's?* — and offers every key that is not some live account's current
+  one: superseded by its owner's later key, left behind by a removed or disabled account,
+  or never attributed at all. `--apply` walks them. Your own key is never offered. Purging
   removes the entry, **not** the access: see rotation below.
 - **Rotate the master key:** `solver rekey`. It verifies the current key, generates
   a new one, re-wraps it to all authorised public keys, refreshes `verify`, and

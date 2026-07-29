@@ -1,45 +1,40 @@
 {
   "verify": "534c565201e302e8acf427d274df1450e47f29426a634e405361d692d8f9027e269658131bbab358866de008d1a6d6319c41b633751383fc276ac6a6048dc629349d072f7be564cf5fc077e80f0b7c601e90a685f9362eddde31ef9066ab57e3c2030df70bbb4fed2efb628d474ec38e38546132e027967f54a0ec1103c1b7ca5e289cf9e82527c3f1da02c8393bed4203be01a93c482cb20c1be977c609ceac",
   "owners": {
-    "33affabb1580fda4c740bdf79aa5a073aeedffca409109f9c567e5b7e5f96001": {
-      "slug": "u0a68e0",
-      "since": "2026-07-29T07:12:31+00:00",
-      "by": "u11749e"
+    "u0a68e0": {
+      "key": "74635243ef9258270434b10dcaf5f46ff7c35951ee5a7b0ea13b43ef32c55e78",
+      "since": "2026-07-29T11:39:33+00:00",
+      "by": "u0a68e0"
     },
-    "575e8f6e15dfc05e9a8119db8ea19954737376daac8ac1b8b012ac79f1cc7d24": {
-      "slug": "uaa7d3c",
+    "uaa7d3c": {
+      "key": "575e8f6e15dfc05e9a8119db8ea19954737376daac8ac1b8b012ac79f1cc7d24",
       "since": "2026-07-29T07:25:18+00:00",
       "by": "u0a68e0"
     },
-    "43ee4f92038279b6aa7ddf24c271141855192e875759bb81730beef8f15a7051": {
-      "slug": "u3f9e97",
+    "u3f9e97": {
+      "key": "43ee4f92038279b6aa7ddf24c271141855192e875759bb81730beef8f15a7051",
       "since": "2026-07-29T07:30:02+00:00",
       "by": "u0a68e0"
     },
-    "b57ae236e7561cf1dec12b9393152690a402c16c08740989625242010389067d": {
-      "slug": "uc448f9",
+    "uc448f9": {
+      "key": "b57ae236e7561cf1dec12b9393152690a402c16c08740989625242010389067d",
       "since": "2026-07-29T07:30:08+00:00",
       "by": "u0a68e0"
     },
-    "a5febeced405007559aa31be05ef387c89a89bd3b9e342b63c12ac6f73acb605": {
-      "slug": "u6ac7a5",
+    "u6ac7a5": {
+      "key": "a5febeced405007559aa31be05ef387c89a89bd3b9e342b63c12ac6f73acb605",
       "since": "2026-07-29T07:30:15+00:00",
       "by": "u0a68e0"
     },
-    "3e300a82254162d11f3d52c63da838b4c1e1bd7f4beff4d5219c80f5ea744d7b": {
-      "slug": "u3cc4d2",
+    "u3cc4d2": {
+      "key": "3e300a82254162d11f3d52c63da838b4c1e1bd7f4beff4d5219c80f5ea744d7b",
       "since": "2026-07-29T07:30:22+00:00",
       "by": "u0a68e0"
     },
-    "e350d2c31c597c66928d1e427b78aac70307fa1de0c741be05522ef89362392b": {
-      "slug": "u11749e",
+    "u11749e": {
+      "key": "e350d2c31c597c66928d1e427b78aac70307fa1de0c741be05522ef89362392b",
       "since": "2026-07-29T11:30:52+00:00",
       "by": "u11749e"
-    },
-    "74635243ef9258270434b10dcaf5f46ff7c35951ee5a7b0ea13b43ef32c55e78": {
-      "slug": "u0a68e0",
-      "since": "2026-07-29T11:39:33+00:00",
-      "by": "u0a68e0"
     }
   },
   "33affabb1580fda4c740bdf79aa5a073aeedffca409109f9c567e5b7e5f96001": "1b0ffc3822dff1b6d29b17b1e3be1238bbc9f50d8b29964cd18f9d8f47d5e956245bf6b0b35ec9d1d590b05632cec9f3ce32d84b20a0964e8aaba3aecf9cb8953bcd6ac273392c38549eb0410a69bc6c",

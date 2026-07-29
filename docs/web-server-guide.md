@@ -482,14 +482,17 @@ belongs to the repository and reaches collaborators through git. Only the roster
 sudo (`admin roster-json`, the machine-readable sibling of `list`).
 
 It classifies every authorised key by joining the file's `owners` attribution (§9) to the
-roster: `self` · `active` · `unattributed` · `stale`, and offers only the stale ones. Three
-guards make it safe to run without thinking twice: your **own key is never a candidate**
-(and it refuses to run at all if it cannot read your public key, since then the entry it
-drops could be yours); an **unattributed** key — every entry written before attribution
-existed — is only ever purged by naming it, because the cost of a wrong purge (a
-collaborator loses decryption and needs re-authorizing) is far worse than one stale line in
-a JSON file; and it refuses a **dirty** `enc-key.json`, so it never decides from a
-`user --regen` stopgap that the next `git-sync` will discard.
+roster: `self` · `active` · `orphan`. `owners` is keyed by **slug**, so it names each
+collaborator's *current* key and nothing else, and every key it does not name is an
+orphan — superseded by its owner's later key, abandoned by a removed or disabled account,
+or never attributed at all. Those were three classes with one meaning; splitting them only
+made the walk skip real candidates, which is how a rotation's leftover key sat in the file
+being reported as active.
+
+Two guards make it safe to run without thinking twice: your **own key is never a
+candidate** (and it refuses to run at all if it cannot read your public key, since then the
+entry it drops could be yours), and it refuses a **dirty** `enc-key.json`, so it never
+decides from a `user --regen` stopgap that the next `git-sync` will discard.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
@@ -776,8 +779,9 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   and afterwards replies on the thread and marks it read — so the person waiting learns it
   happened, and the thread survives as the record until `msg dismiss` closes it.
 - **Attribution** is written there and only there, into the `owners` entry of
-  `enc-key.json`: the requester's **system slug**, never their address (this file is
-  public). `user --regen`'s local re-wrap deliberately writes none — that edit is a
+  `enc-key.json`, **keyed by the requester's system slug** — never their address (this file
+  is public). One key per collaborator: authorising replaces their record, and the key it
+  named becomes an orphan for `users purge` to remove. `user --regen`'s local re-wrap deliberately writes none — that edit is a
   stopgap keeping the collaborator decrypting until the authorized file arrives by
   `git-sync`, and attributing a file about to be overwritten would be attributing nothing.
 - **The carry lives outside the checkout** — `~/.euler/enc-key.local.json`, one entry,
@@ -801,8 +805,9 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   out loud when delivery fails instead of leaving a request nobody is coming to work.
   `notify_staff` gets no sudo fallback: it fires inside another command's flow, and a
   password prompt in the middle of a key mint is worse than a printed instruction.
-- **Purging** an entry is `users purge` (admin, §6.3): it joins `owners` against the
-  account roster and offers the keys whose owner is gone or disabled. It is a *repo* verb —
+- **Purging** an entry is `users purge` (admin, §6.3): every authorised key that is not
+  some live account's *current* key is an orphan — superseded, abandoned by a removed
+  account, or never attributed — and all of them are offered. It is a *repo* verb —
   only the roster read is sudo; the edit lands in the operator's checkout and is committed
   like any other change.
 - **Revocation** is `key-rekey` (rotate the master key, re-wrap only to still-authorized

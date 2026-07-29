@@ -34,9 +34,10 @@ from solver.auth.subject import Subject
 from solver.config import config as app_config
 from solver.core import git
 from solver.crypto import keys as keys_mod
-from solver.crypto.ciphers import (authorised_keys, encrypt_blob, key_owners, load_private_key, lock,
-                                   prune_local_enc_key, public_key_hex, read_enc_key_file,
-                                   read_local_enc_key, read_master_key, write_local_enc_key)
+from solver.crypto.ciphers import (authorised_keys, current_key_slugs, encrypt_blob, key_owners,
+                                   load_private_key, lock, prune_local_enc_key, public_key_hex,
+                                   read_enc_key_file, read_local_enc_key, read_master_key,
+                                   write_local_enc_key)
 from solver.crypto.config import config as crypto_config
 from solver.web.auth import commands as users_mod
 from solver.web.msg import KEY_REQUEST_SUBJECT
@@ -87,7 +88,7 @@ class FileShapeTests(EncKeyFileTestCase):
     """`owners` is a sibling entry: additive, and invisible to everything but purge."""
 
     def test_authorised_keys_excludes_both_reserved_entries(self) -> None:
-        self.write(owners={self.mine: {'slug': 'ua1b2c3', 'since': 'now', 'by': 'ua1b2c3'}})
+        self.write(owners={'ua1b2c3': {'key': self.mine, 'since': 'now', 'by': 'ua1b2c3'}})
         found = authorised_keys(read_enc_key_file())
         self.assertCountEqual(found, [self.mine, self.theirs, self.gone])
         self.assertNotIn('owners', found)
@@ -106,29 +107,41 @@ class FileShapeTests(EncKeyFileTestCase):
         `read_master_key` indexes by public key and takes `verify` by name — exactly what a
         clone running an older solver does — so a file carrying attribution unwraps there too.
         """
-        self.write(owners={self.mine: {'slug': 'ua1b2c3', 'since': 'now', 'by': 'ua1b2c3'}})
+        self.write(owners={'ua1b2c3': {'key': self.mine, 'since': 'now', 'by': 'ua1b2c3'}})
         data = read_enc_key_file()
         from solver.crypto.ciphers import unlock
         self.assertEqual(unlock(self.mine_key, data[self.mine]), self.master)
 
-    def test_key_owners_ignores_a_malformed_entry(self) -> None:
+    def test_a_malformed_record_is_ignored(self) -> None:
         self.write()
         data = read_enc_key_file()
-        data['owners'] = {self.mine: 'not-a-record'}
+        data['owners'] = {'ua1b2c3': 'not-a-record', 'ud4e5f6': {'since': 'now'}}
         self.assertEqual(key_owners(data), {})
+        self.assertEqual(current_key_slugs(data), {})
+
+    def test_one_key_per_slug(self) -> None:
+        """The model: authorising replaces, so a collaborator never has two live keys.
+
+        Keyed by public key the file grew a second record per rotation and both read as
+        current — one collaborator ended up with two 'active' keys and purge found nothing.
+        """
+        self.write(owners={'umine': {'key': self.mine, 'since': '1', 'by': 'umine'},
+                           'uthem': {'key': self.theirs, 'since': '2', 'by': 'umine'}})
+        self.assertEqual(current_key_slugs(read_enc_key_file()),
+                         {self.mine: 'umine', self.theirs: 'uthem'})
 
 
 class RewriteTests(EncKeyFileTestCase):
     """The two commands that rewrite the file wholesale keep attribution honest."""
 
     def test_rekey_carries_owners_forward_pruned_to_survivors(self) -> None:
-        owners = {self.mine: {'slug': 'umine', 'since': 'now', 'by': 'umine'},
-                  self.gone: {'slug': 'ugone', 'since': 'now', 'by': 'umine'}}
+        owners = {'umine': {'key': self.mine, 'since': 'now', 'by': 'umine'},
+                  'ugone': {'key': self.gone, 'since': 'now', 'by': 'umine'}}
         body = keys_mod._wrapped_for_all(token_bytes(32), [self.mine, self.theirs], owners)
-        self.assertEqual(set(key_owners(body)), {self.mine})     # the dropped key's record goes with it
+        self.assertEqual(set(key_owners(body)), {'umine'})       # the dropped key's record goes with it
 
     def test_revoke_drops_the_key_and_its_owner(self) -> None:
-        self.write(owners={self.gone: {'slug': 'ugone', 'since': 'now', 'by': 'umine'}})
+        self.write(owners={'ugone': {'key': self.gone, 'since': 'now', 'by': 'umine'}})
         self.assertEqual(keys_mod.revoke_keys([self.gone]), 1)
         data = read_enc_key_file()
         self.assertNotIn(self.gone, authorised_keys(data))
@@ -149,50 +162,76 @@ class RewriteTests(EncKeyFileTestCase):
 
 
 class ClassificationTests(EncKeyFileTestCase):
-    """`users purge`'s decision: which entry still belongs to somebody."""
+    """`users purge`'s decision: is this key still somebody's?"""
 
-    def test_the_four_classes(self) -> None:
+    @staticmethod
+    def _roster(*rows: tuple[str, str, str]) -> list[dict[str, str]]:
+        """Roster entries as the admin plane returns them: (identity, profile, state)."""
+        return [{'user': user, 'profile': profile, 'scope': 'web', 'state': state,
+                 'slug': system_slug(user)} for user, profile, state in rows]
+
+    def _classes(self, roster: list[dict[str, str]]) -> dict[str, str]:
+        return {key: klass for key, klass, _note in users_mod._classify_keys(roster, self.mine)}
+
+    def test_the_three_classes(self) -> None:
         self.write(owners={
-            self.theirs: {'slug': system_slug('them@example.com'), 'since': 'now', 'by': 'umine'},
-            self.gone: {'slug': system_slug('left@example.com'), 'since': 'now', 'by': 'umine'}})
-        roster = [{'user': 'them@example.com', 'profile': 'contributor', 'scope': 'web',
-                   'state': 'registered', 'slug': system_slug('them@example.com')}]
-        found = {key: klass for key, klass, _note in users_mod._classify_keys(roster, self.mine)}
-        self.assertEqual(found[self.mine], 'self')            # the running operator's own key
-        self.assertEqual(found[self.theirs], 'active')        # owner is on the roster
-        self.assertEqual(found[self.gone], 'stale')           # owner is not
-        _, orphan = _keypair()
-        self.write(public_keys=(self.mine, orphan))
-        rows = users_mod._classify_keys(roster, self.mine)
-        self.assertEqual(dict((k, c) for k, c, _ in rows)[orphan], 'unattributed')
+            system_slug('them@example.com'): {'key': self.theirs, 'since': 'now', 'by': 'umine'},
+            system_slug('left@example.com'): {'key': self.gone, 'since': 'now', 'by': 'umine'}})
+        found = self._classes(self._roster(('them@example.com', 'contributor', 'registered')))
+        self.assertEqual(found[self.mine], 'self')          # the running operator's own key
+        self.assertEqual(found[self.theirs], 'active')      # the owner's CURRENT key
+        self.assertEqual(found[self.gone], 'orphan')        # owner is not on the roster
 
-    def test_a_disabled_account_is_stale(self) -> None:
-        self.write(owners={self.theirs: {'slug': system_slug('them@example.com'),
-                                         'since': 'now', 'by': 'umine'}})
-        roster = [{'user': 'them@example.com', 'profile': 'reader', 'scope': 'web',
-                   'state': 'disabled', 'slug': system_slug('them@example.com')}]
-        found = {key: klass for key, klass, _note in users_mod._classify_keys(roster, self.mine)}
-        self.assertEqual(found[self.theirs], 'stale')
+    def test_a_superseded_key_is_an_orphan(self) -> None:
+        """The bug this rewrite is for.
+
+        A collaborator rotates: `user-authorize` records the new key against their slug, and
+        the old one stops being theirs. Keyed by public key the file kept BOTH records, both
+        naming a live account, so both read as active and purge reported nothing to do — the
+        operator watched their own second key sit there being called current.
+        """
+        self.write(public_keys=(self.mine, self.theirs, self.gone))
+        # `gone` was their key; `theirs` is what they rotated to. One slug, one record.
+        self.write(public_keys=(self.mine, self.theirs, self.gone), owners={
+            system_slug('them@example.com'): {'key': self.theirs, 'since': 'now', 'by': 'umine'}})
+        found = self._classes(self._roster(('them@example.com', 'contributor', 'registered')))
+        self.assertEqual(found[self.theirs], 'active')
+        self.assertEqual(found[self.gone], 'orphan', 'the key they rotated away from')
+
+    def test_an_unattributed_key_is_an_orphan_too(self) -> None:
+        """No record is not a reason to keep it — it is the same "nobody's" as the rest.
+
+        It used to be its own class, held back from the walk in case it was still someone's.
+        That is exactly the key nobody can vouch for.
+        """
+        self.write(public_keys=(self.mine, self.theirs))
+        found = self._classes([])
+        self.assertEqual(found[self.theirs], 'orphan')
+
+    def test_a_disabled_account_is_an_orphan(self) -> None:
+        self.write(owners={system_slug('them@example.com'): {'key': self.theirs, 'since': 'now',
+                                                             'by': 'umine'}})
+        found = self._classes(self._roster(('them@example.com', 'reader', 'disabled')))
+        self.assertEqual(found[self.theirs], 'orphan')
 
     def test_a_local_os_login_classifies_by_computed_slug(self) -> None:
-        """The roster's own `slug` column is empty for a local login — the operator's usual shape.
+        """The roster's own `slug` column is empty for a local login — the operator's shape.
 
-        Reading that column instead of computing the slug would classify the operator's
-        colleague-on-an-os-login as belonging to nobody, and offer their key for purge.
+        Reading that column instead of computing the slug would classify a colleague on an
+        os-login as belonging to nobody, and offer their key for purge.
         """
-        self.write(owners={self.theirs: {'slug': system_slug('vikas'), 'since': 'now', 'by': 'umine'}})
+        self.write(owners={system_slug('vikas'): {'key': self.theirs, 'since': 'now', 'by': 'umine'}})
         roster = [{'user': 'vikas', 'profile': 'admin', 'scope': 'local',
                    'state': 'os-login', 'slug': ''}]
-        found = {key: klass for key, klass, _note in users_mod._classify_keys(roster, self.mine)}
-        self.assertEqual(found[self.theirs], 'active')
+        self.assertEqual(self._classes(roster)[self.theirs], 'active')
 
-    def test_self_sorts_first_and_stale_last(self) -> None:
+    def test_self_sorts_first_and_orphans_last(self) -> None:
         """Print order is the reading order: what you must not touch, then what is on offer."""
-        self.write(owners={self.gone: {'slug': system_slug('left@example.com'),
-                                       'since': 'now', 'by': 'umine'}})
+        self.write(owners={system_slug('left@example.com'): {'key': self.gone, 'since': 'now',
+                                                             'by': 'umine'}})
         rows = users_mod._classify_keys([], self.mine)
         self.assertEqual(rows[0][1], 'self')
-        self.assertEqual(rows[-1][1], 'stale')
+        self.assertEqual(rows[-1][1], 'orphan')
 
 
 class LocalOverlayTests(EncKeyFileTestCase):
