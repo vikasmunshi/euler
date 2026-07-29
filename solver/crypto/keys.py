@@ -193,6 +193,8 @@ def key_rekey() -> int:
     # decrypt, or the operator has locked themselves out of the tree they just re-encrypted.
     write_enc_key_file(enc_key_payload(load_private_key().public_key(), new_master))
     console.print(f'[success]master key rotated[/success] [muted]({config["enc_key_file"]})[/muted]')
+    if (landed := _land_reencrypted_blobs()) != 0:
+        return landed
     for identity, public_key in named.items():
         if public_key == mine:
             continue
@@ -200,9 +202,51 @@ def key_rekey() -> int:
         sent = notify_user(identity, f'{KEY_ISSUE_SUBJECT}rotated master key',
                            _issue_body(enc_key_payload(pub, new_master)))
         console.print(f'  {"sent to" if sent else "COULD NOT REACH"} [accent]{identity}[/accent]')
+    console.print('[success]Rotated, published, and issued.[/success]')
+    return 0
+
+
+def _land_reencrypted_blobs() -> int:
+    """Re-encrypt the tracked private files under the new key and get them onto origin.
+
+    **This must finish before anybody is issued the new key**, and that ordering is the whole
+    point of the function. A rotation makes every blob committed before it unreadable, so a
+    holder who saves the new key while the re-encrypted tree is still sitting in the operator's
+    worktree is stranded: their own HEAD no longer opens, which means no checkout, no stash and
+    therefore no merge — they cannot even sync their way out. Publishing first makes the window
+    zero-width; a clone that saves the key always has somewhere to land.
+
+    Only ``solutions/private`` is committed, by pathspec. `git commit` otherwise commits the
+    whole index, and a rotation that swept an operator's unrelated staged work into a commit
+    labelled as re-encryption has happened here before.
+
+    A failed push is fatal to the rotation: returning non-zero leaves the keys unissued, so the
+    operator can fix the remote and run `key-rekey` again. The second run mints a further key —
+    which costs nothing, because nobody ever received this one.
+    """
     console.print('[muted]Re-encrypting tracked private files...[/muted]')
-    run(['git', 'add', '--renormalize', '--', 'solutions/private'], cwd=config['root_dir'], check=False)
-    console.print('[success]Rotated; review `git status` and commit the re-encrypted blobs.[/success]')
+    root = config['root_dir']
+    run(['git', 'add', '--renormalize', '--', 'solutions/private'], cwd=root, check=False)
+    staged = run(['git', 'diff', '--cached', '--name-only', '--', 'solutions/private'],
+                 cwd=root, capture_output=True, text=True).stdout.split()
+    if not staged:
+        console.print('[muted]No tracked private files changed — nothing to publish.[/muted]')
+        return 0
+    console.print(f'[muted]committing [accent]{len(staged)}[/accent] re-encrypted blob(s)[/muted]')
+    message = (f'chore(crypto): re-encrypt private solutions under the rotated master key\n\n'
+               f'{len(staged)} blob(s) renormalised by `key-rekey`. Every commit before this one '
+               f'is encrypted under the retired key.\n')
+    if run(['git', 'commit', '-m', message, '--', 'solutions/private'],
+           cwd=root, check=False).returncode != 0:
+        console.print('[error]error:[/error] the re-encrypted blobs would not commit — '
+                      'keys NOT issued. Fix the commit, then run `key-rekey` again.')
+        return 1
+    if run(['git', 'push', 'origin', 'HEAD:master'], cwd=root, check=False).returncode != 0:
+        console.print('[error]error:[/error] the re-encrypted blobs would not reach origin — '
+                      'keys NOT issued, because a holder who saved one now could not sync to a '
+                      'tree their key opens. Push, then run `key-rekey` again.')
+        return 1
+    console.print('[success]re-encrypted tree published to origin/master[/success]')
     return 0
 
 
@@ -363,10 +407,14 @@ def save_issued_key(body: str) -> bool:
     if not verify_master_key(payload, master_key):
         console.print('[error]error:[/error] the payload fails verification — nothing written')
         return False
+    # Last moment at which the key that opens HEAD is still the key in place. If this payload
+    # is a rotation, everything committed becomes unreadable one line down, and with it any way
+    # of telling which private files carry local edits — so ask now, and hand the answer on.
+    from solver.core.git import enc_key_arrived, private_local_edits
+    local_edits = private_local_edits()
     write_enc_key_file(payload)
     console.print(f'[success]Master key saved[/success] [muted]({config["enc_key_file"]})[/muted]')
-    from solver.core.git import enc_key_arrived
-    enc_key_arrived()
+    enc_key_arrived(local_edits)
     return True
 
 

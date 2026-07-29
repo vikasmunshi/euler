@@ -484,6 +484,28 @@ registers as it issues when it can reach the admin plane; a web shell has no sud
 prints this command instead. An account with no registered key loses access at the next
 rotation, which `key-rekey` names before you confirm.
 
+**A rotation publishes before it issues, and that order is load-bearing.** `key-rekey`
+re-encrypts the tracked private tree under the new key, commits *only* `solutions/private`
+(by pathspec — `git commit` otherwise sweeps in whatever else is staged) and pushes it to
+`origin/master`, and only then sends anybody their payload. Publishing second would strand
+the first person to act on their message: a rotation makes every earlier blob unreadable, so
+the instant they run `msg save` their own `HEAD` stops decrypting, and *every* way out goes
+through `HEAD` — `git stash` materialises it, so `git-sync` cannot even reach its merge.
+They would be stuck being stale with no self-service repair. A push that fails is therefore
+fatal to the rotation: nothing is issued, and re-running mints a further key, which costs
+nothing because nobody ever received the last one.
+
+**The receiving half re-homes the clone.** Even publishing first, a collaborator's own `HEAD`
+predates the rotation, so `msg save` checks whether it still decrypts and moves the clone onto
+the published tree when it does not — `git reset --hard origin/master`, the one worktree-wide
+command that never has to materialise the unreadable `HEAD` on the way. Uncommitted private
+edits are carried across as plaintext, collected *before* the new key is written, which is the
+only moment they can be told apart from the rotation's own churn; plaintext is key-agnostic,
+so they re-encrypt cleanly on the next commit. Unpushed **commits** stop it: reset would
+orphan them, so the clone is left alone and the situation named. `git-sync` performs the same
+re-home for a clone that wedged before any of this existed, minus the edits it can no longer
+identify.
+
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
 invite, so there is never a dangling invite to a box with no shell. A bare **os-login**

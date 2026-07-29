@@ -124,7 +124,10 @@ class SaveIssuedKeyTests(EncKeyTestCase):
         self._wired: list[str] = []
         import solver.core.git as git_mod
         saved = git_mod.enc_key_arrived
-        git_mod.enc_key_arrived = lambda: self._wired.append('wired')   # type: ignore[assignment]
+        # It now takes the local edits `save_issued_key` collected before the write, so the
+        # stub has to accept them — see tests/test_rekey_rehome.py for what they are for.
+        git_mod.enc_key_arrived = (          # type: ignore[assignment]
+            lambda edits=None: self._wired.append('wired'))
         self.addCleanup(setattr, git_mod, 'enc_key_arrived', saved)
 
     def _message(self, payload: dict[str, str]) -> str:

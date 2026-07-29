@@ -24,7 +24,7 @@ commit that carries nothing else.
 from __future__ import annotations
 
 __all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit',
-           'git_commit_amend', 'resmudge_private',
+           'git_commit_amend', 'private_local_edits', 'resmudge_private',
            'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
            'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
 
@@ -37,10 +37,12 @@ from pathlib import PurePosixPath
 from subprocess import run
 from typing import Literal
 
+from cryptography.exceptions import InvalidTag
+
 from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
-from solver.crypto.ciphers import read_master_key
+from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
 from solver.crypto.gitfilter import filter_settings
 from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
@@ -465,7 +467,104 @@ def resmudge_private() -> int:
     return result
 
 
-def enc_key_arrived() -> None:
+def private_local_edits() -> dict[str, bytes]:
+    """The plaintext of every private file this worktree has changed, by path.
+
+    **Call this while the key that opens HEAD is still the key in place** — it asks git for the
+    diff, and git answers by running the clean filter over the worktree, so the answer is only
+    truthful before a rotated key lands. Afterwards every private file reads as modified (the
+    same plaintext encrypts to a different blob) and there is nothing left to tell a real edit
+    from the rotation itself.
+
+    Kept in memory, never spilled to a file: this is decrypted solution content, and the one
+    place it is allowed to exist is the worktree it came from.
+    """
+    names = run(['git', 'diff', '--name-only', 'HEAD', '--', 'solutions/private'],
+                cwd=config.root_dir, capture_output=True, text=True).stdout.split()
+    edits = {name: path.read_bytes() for name in names
+             if (path := config.root_dir / name).is_file()}
+    return edits
+
+
+def _head_private_opens() -> bool:
+    """Whether HEAD's private blobs decrypt under the master key this machine holds now.
+
+    False is the signature of a rotation that happened without this clone: the key is current,
+    the commit it belongs to is not. That state is worse than it looks — the worktree is fine,
+    but HEAD is unreadable, so *any* operation that materialises HEAD fails. `git stash` fails,
+    which means `git-sync` cannot even begin its merge, so the clone cannot sync its way out of
+    being unsynced.
+
+    Undecidable cases answer True. No HEAD, no tracked private files, or a blob that was never
+    encrypted all mean "nothing here says the tree is stale", and inventing a re-home from
+    silence would be the more destructive mistake.
+    """
+    tracked = run(['git', 'ls-files', '--', 'solutions/private'],
+                  cwd=config.root_dir, capture_output=True, text=True).stdout.split()
+    if not tracked:
+        return True
+    blob = run(['git', 'cat-file', 'blob', f'HEAD:{tracked[0]}'],
+               cwd=config.root_dir, capture_output=True)
+    if blob.returncode != 0 or not is_encrypted(blob.stdout):
+        return True
+    try:
+        decrypt_blob(blob.stdout, read_master_key())
+    except (FileNotFoundError, KeyError, ValueError, InvalidTag):
+        return False
+    return True
+
+
+def _rehome_on_origin(local_edits: dict[str, bytes]) -> None:
+    """Move a clone whose HEAD predates a rotation onto origin/master, keeping its edits.
+
+    The only tree this machine's key opens is the one the rotation published, so the repair is
+    to go there — `git reset --hard origin/master`, which is the one worktree-rewriting command
+    that never has to materialise the unreadable HEAD on the way. Merging cannot do it (the
+    stash resets to HEAD first), and neither can a re-checkout.
+
+    *local_edits* is carried across as plaintext and written back afterwards, which works
+    precisely because plaintext is key-agnostic: the same bytes re-encrypt cleanly under the
+    new key on the next commit, and `git status` afterwards shows the same edits it showed
+    before. They are the reason this is not simply reset-user.sh in Python.
+
+    Unpushed commits stop it. Reset would orphan them, and for private paths their content is
+    already encrypted under the retired key — unreadable to everyone, this machine included. So
+    the clone is left exactly as it is and the situation is named, because quietly discarding
+    work is worse than an error message, and this is the operator's to sort out.
+    """
+    if run_cmdline('git fetch --prune origin master') != 0:
+        console.print('[error]error:[/error] the private solutions were re-encrypted under a new '
+                      'key and this clone is still on the old tree, but origin is unreachable — '
+                      'so the tree that matches your key cannot be fetched. Try again when the '
+                      'network is back.')
+        return
+    unpushed = run(['git', 'rev-list', '--count', 'origin/master..HEAD'],
+                   cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
+    if unpushed not in ('', '0'):
+        console.print(f'[warning]The master key was rotated, so this clone\'s history no longer '
+                      f'decrypts — but it carries [accent]{unpushed}[/accent] commit(s) that are '
+                      f'not on origin/master, and moving to the re-encrypted tree would orphan '
+                      f'them.[/warning]\n[warning]Nothing has been changed. Ask a maintainer: any '
+                      f'private content in those commits is encrypted under the retired key and '
+                      f'has to be recovered before this clone can move.[/warning]')
+        return
+    console.print('[primary]The master key was rotated — moving this clone to the re-encrypted '
+                  'tree on origin/master...[/primary]')
+    if run_cmdline('git reset --hard origin/master') != 0:
+        console.print('[error]error:[/error] could not reset onto origin/master; this clone still '
+                      'cannot read its own history. Ask a maintainer to reset it.')
+        return
+    for name, plaintext in local_edits.items():
+        path = config.root_dir / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(plaintext)
+    if local_edits:
+        console.print(f'[muted]kept your [accent]{len(local_edits)}[/accent] local edit(s) to '
+                      'solutions/private[/muted]')
+    osc.git_changed()
+
+
+def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
     """Wire the git filter once this machine can decrypt — the tail of `msg save`.
 
     A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as ciphertext.
@@ -479,7 +578,17 @@ def enc_key_arrived() -> None:
     Also re-wires a clone whose recorded filter command has drifted from what `install`
     writes today — see below. A silent no-op while the wiring is current, or the key is not
     readable.
+
+    Args:
+        local_edits: the private worktree's edits, read by :func:`private_local_edits` *before*
+            the key was written. Only a re-home needs them, and only the caller can collect
+            them, because by the time this runs the old key is gone.
     """
+    read_master_key.cache_clear()
+    # Order matters: a key that arrived from a rotation leaves HEAD unreadable, and every
+    # repair below materialises HEAD. Re-home first, or the re-checkout fails on the way.
+    if not _head_private_opens():
+        _rehome_on_origin(local_edits or {})
     name: str = crypto_config['filter_name']
     recorded = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
                    cwd=config.root_dir, capture_output=True, text=True)
@@ -492,7 +601,6 @@ def enc_key_arrived() -> None:
     # one `git config` read.
     if recorded.returncode == 0 and recorded.stdout.strip() == wanted:
         return
-    read_master_key.cache_clear()
     try:
         read_master_key()
     except (FileNotFoundError, KeyError, ValueError):
@@ -552,6 +660,24 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
+        # A clone whose HEAD predates a key rotation cannot merge — the stash resets to HEAD
+        # first, HEAD's blobs no longer decrypt, and the smudge filter fails the whole sync.
+        # That is exactly the state someone is in when they reach for `git-sync`, so repair it
+        # here rather than hand them a traceback that names a filter they cannot fix. The
+        # re-home lands them on origin/master, which is what the sync was for.
+        read_master_key.cache_clear()
+        if not _head_private_opens():
+            # No edits are carried across here, and that is not an oversight: proving a private
+            # file is *your* edit needs the key that opened HEAD, and by now it is gone. Diffing
+            # against origin/master instead would read content you simply have not pulled yet as
+            # a local change and write it back over the incoming version. `msg save` collects
+            # the edits at the one moment they can be told apart, which is why this path exists
+            # only for clones already wedged before it did.
+            console.print('[warning]Note: uncommitted changes under solutions/private cannot be '
+                          'carried across a key rotation from here, and will be replaced by the '
+                          'published versions.[/warning]')
+            _rehome_on_origin({})
+            return int(ExitCodes.EXIT_OK)
         result = run_cmdline(config.scripts.sync)
         if result == 0:
             osc.git_changed()       # the fetch moved origin/master, the merge moved the branch

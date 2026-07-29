@@ -107,6 +107,11 @@ class _GitCommandCase(unittest.TestCase):
         git.osc.emit = lambda *a, **k: None  # type: ignore[assignment]
 
     def tearDown(self) -> None:
+        # Every subclass that stubs `git.run` further leaves the restore to here, and must:
+        # `addCleanup` fires *after* tearDown, so a subclass cleanup that re-seats its own
+        # saved value re-installs the stub on the way out and leaks it into whatever module
+        # runs next. That is not hypothetical — it made tests/test_rekey_rehome.py, which
+        # drives a real repo through `git.run`, fail only under `discover`.
         git.run = self._saved_run_proc_base  # type: ignore[assignment]
         git.run_cmdline = self._saved_run  # type: ignore[assignment]
         git._current_branch = self._saved_branch  # type: ignore[assignment]
@@ -182,13 +187,11 @@ class GitResetTest(_GitCommandCase):
     def setUp(self) -> None:
         super().setUp()
         self.ahead: str = '2\n'  # commits `git rev-list --count` reports
-        self._saved_run_proc = git.run
 
         def fake_run(argv: list[str], **kwargs: Any) -> Any:
             return MagicMock(returncode=0, stdout=self.ahead)
 
         git.run = fake_run  # type: ignore[assignment]
-        self.addCleanup(lambda: setattr(git, 'run', self._saved_run_proc))
         self.as_profile('contributor')
 
     def test_it_soft_resets_to_origin_master(self) -> None:
@@ -727,9 +730,7 @@ class GitCommitDocsTest(_GitCommandCase):
             assert 'status' in argv, f'unexpected run: {argv}'
             return MagicMock(returncode=0, stdout=self.dirty)
 
-        self._saved_run_proc = git.run
         git.run = fake_run  # type: ignore[assignment]
-        self.addCleanup(lambda: setattr(git, 'run', self._saved_run_proc))
         self.as_profile('maintainer')
 
     def test_it_stages_exactly_the_docs_set(self) -> None:
