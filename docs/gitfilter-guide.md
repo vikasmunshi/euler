@@ -73,10 +73,9 @@ recorded the day it was set up, so **`msg save` compares the recorded command wi
 `install` would write today** and re-wires when they differ — any change to that command
 repairs itself the next time a key is saved.
 
-It hangs off `msg save` and nothing else, because that is the one command that changes what a
-machine can decrypt. A sync does not, and putting filter chatter in front of a reader with no
-private-file access would be noise about something they do not have. The cost is that a
-drifted clone waits for its owner's next save; `git-filter install` is the manual repair.
+It hangs off `msg save`, because taking a key is the one act that changes what a machine can
+decrypt. A drifted clone therefore waits for its owner's next save; `git-filter install` is
+the manual repair.
 
 The re-checkout either does is guarded: local plaintext edits are never clobbered — it says so
 and skips, rather than running `rm -f` over somebody's work.

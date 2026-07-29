@@ -552,11 +552,6 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
-        # No filter wiring here. `git-sync` moves commits; it does not change what this
-        # machine can decrypt — key material stopped travelling by git when the enc-key file
-        # became machine-local. Wiring belongs to the one command that DOES change it,
-        # `msg save`, and hanging it off a sync only put filter chatter in front of readers
-        # who have no private-file access and no use for any of it.
         result = run_cmdline(config.scripts.sync)
         if result == 0:
             osc.git_changed()       # the fetch moved origin/master, the merge moved the branch
