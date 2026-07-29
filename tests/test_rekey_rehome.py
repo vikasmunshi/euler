@@ -163,9 +163,9 @@ class RotationRehomeTests(unittest.TestCase):
     def test_head_is_readable_before_a_rotation_and_not_after(self) -> None:
         """The trigger itself: the check must fire on exactly one of the two states."""
         from solver.core import git
-        self.assertTrue(git._head_private_opens(), 'own tree, own key — nothing to repair')
+        self.assertTrue(git.head_private_opens(), 'own tree, own key — nothing to repair')
         self.rotate()
-        self.assertFalse(git._head_private_opens(), 'HEAD predates the rotation: unreadable')
+        self.assertFalse(git.head_private_opens(), 'HEAD predates the rotation: unreadable')
 
     def test_the_wedge_is_real_git_cannot_stash(self) -> None:
         """Proof that this is worth repairing: the ordinary sync path cannot run at all.
@@ -186,7 +186,7 @@ class RotationRehomeTests(unittest.TestCase):
         self.assertEqual(self._git('rev-parse', 'HEAD').stdout.strip(),
                          self._git('rev-parse', 'origin/master').stdout.strip())
         self.assertEqual(self.solution.read_text(), _PLAINTEXT, 'decrypted in place')
-        self.assertTrue(git._head_private_opens(), 'and readable from here on')
+        self.assertTrue(git.head_private_opens(), 'and readable from here on')
 
     def test_local_edits_collected_before_the_key_changed_survive(self) -> None:
         """Plaintext is key-agnostic, which is the only reason carrying edits across works.
@@ -206,6 +206,22 @@ class RotationRehomeTests(unittest.TestCase):
         # And it reads as a normal local change again — the clean filter re-encrypts it under
         # the new key, so the diff is the edit rather than the rotation.
         self.assertEqual(self._git('diff', '--name-only').stdout.split(), [_SOLUTION])
+
+    def test_a_wedged_clone_reports_no_edits_at_all(self) -> None:
+        """The 917 bug: a clone already behind a rotation must not invent local edits.
+
+        Reported live — `msg save` on a clone that had never re-homed from the *previous*
+        rotation announced "kept your 917 local edit(s)" on a worktree with none. With the
+        held key not matching HEAD, git cleans every present private file to a different blob
+        than HEAD's and reports it as changed; writing those back would have pinned stale
+        content over the published tree.
+        """
+        from solver.core import git
+        self.rotate()                                    # HEAD no longer opens: already wedged
+        self.assertEqual(git.private_local_edits(), {}, 'no readable HEAD, no answer')
+        git.enc_key_arrived(git.private_local_edits())
+        self.assertEqual(self.solution.read_text(), _PLAINTEXT, 'the published content, intact')
+        self.assertEqual(self._git('status', '--porcelain').stdout, '', 'and a clean tree')
 
     def test_unpushed_commits_are_never_orphaned(self) -> None:
         """Refusing is the correct answer when the alternative is discarding someone's work."""

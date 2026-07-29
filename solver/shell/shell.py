@@ -56,6 +56,25 @@ def _var_meta(name: str) -> str:
     return text if len(text) <= 40 else f'{text[:37]}...'
 
 
+def _stale_clone_hint() -> str:
+    """Why the start-up sync did not happen, in the terms the reader can act on.
+
+    The generic line — "run `git-sync` to see why" — is the right answer only when the reason
+    is something git will explain: a diverged branch, no network. It is the wrong answer, and
+    a dead end, when a maintainer has rotated the master key: this clone's own history stops
+    decrypting, `git-sync` refuses rather than explains, and the thing that actually unblocks
+    it is a message sitting unread in the spool. So ask the local question first and name the
+    verb that fits.
+    """
+    from solver.core.git import head_private_opens
+    if not head_private_opens():
+        return ('the master key was rotated, so this clone cannot read its own history — take '
+                'the new key from your messages: [accent]msg list[/accent], then '
+                '[accent]msg save <id>[/accent].')
+    return ('could not sync with origin/master — this clone may be stale; run '
+            '[accent]git-sync[/accent] to see why.')
+
+
 def _current_fragment(text: str) -> str:
     """Return the command being typed after the last unquoted statement separator."""
     quote: str | None = None
@@ -309,8 +328,7 @@ class SolverShell:
                     # branch, a locked vault, no network. One line, printed after the quiet is
                     # restored, naming the command that shows why (it reports what it refused).
                     if sync_rc != 0:
-                        self.console.print('[warning]could not sync with origin/master — this clone may be stale; '
-                                           'run [accent]git-sync[/accent] to see why.[/warning]')
+                        self.console.print(f'[warning]{_stale_clone_hint()}[/warning]')
                 previous_eof: float = 0.0
                 while True:
                     try:

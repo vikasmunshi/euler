@@ -24,7 +24,7 @@ commit that carries nothing else.
 from __future__ import annotations
 
 __all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit',
-           'git_commit_amend', 'private_local_edits', 'resmudge_private',
+           'git_commit_amend', 'head_private_opens', 'private_local_edits', 'resmudge_private',
            'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
            'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
 
@@ -478,7 +478,16 @@ def private_local_edits() -> dict[str, bytes]:
 
     Kept in memory, never spilled to a file: this is decrypted solution content, and the one
     place it is allowed to exist is the worktree it came from.
+
+    A clone whose HEAD *already* does not open — wedged by an earlier rotation it never
+    re-homed from — has no truthful answer to give, and the untruth is spectacular: with the
+    held key not matching HEAD, every private file present cleans to a different blob and reads
+    as an edit. That happened live, on a clone with no edits at all, and reported 917 of them —
+    which the re-home would then have written back over the published tree as stale content.
+    So the same test the re-home uses gates the question: no readable HEAD, no answer.
     """
+    if not head_private_opens():
+        return {}
     names = run(['git', 'diff', '--name-only', 'HEAD', '--', 'solutions/private'],
                 cwd=config.root_dir, capture_output=True, text=True).stdout.split()
     edits = {name: path.read_bytes() for name in names
@@ -486,7 +495,7 @@ def private_local_edits() -> dict[str, bytes]:
     return edits
 
 
-def _head_private_opens() -> bool:
+def head_private_opens() -> bool:
     """Whether HEAD's private blobs decrypt under the master key this machine holds now.
 
     False is the signature of a rotation that happened without this clone: the key is current,
@@ -514,7 +523,7 @@ def _head_private_opens() -> bool:
     return True
 
 
-def _rehome_on_origin(local_edits: dict[str, bytes]) -> None:
+def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
     """Move a clone whose HEAD predates a rotation onto origin/master, keeping its edits.
 
     The only tree this machine's key opens is the one the rotation published, so the repair is
@@ -537,7 +546,7 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> None:
                       'key and this clone is still on the old tree, but origin is unreachable — '
                       'so the tree that matches your key cannot be fetched. Try again when the '
                       'network is back.')
-        return
+        return False
     unpushed = run(['git', 'rev-list', '--count', 'origin/master..HEAD'],
                    cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
     if unpushed not in ('', '0'):
@@ -547,13 +556,13 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> None:
                       f'them.[/warning]\n[warning]Nothing has been changed. Ask a maintainer: any '
                       f'private content in those commits is encrypted under the retired key and '
                       f'has to be recovered before this clone can move.[/warning]')
-        return
+        return False
     console.print('[primary]The master key was rotated — moving this clone to the re-encrypted '
                   'tree on origin/master...[/primary]')
     if run_cmdline('git reset --hard origin/master') != 0:
         console.print('[error]error:[/error] could not reset onto origin/master; this clone still '
                       'cannot read its own history. Ask a maintainer to reset it.')
-        return
+        return False
     for name, plaintext in local_edits.items():
         path = config.root_dir / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -562,6 +571,7 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> None:
         console.print(f'[muted]kept your [accent]{len(local_edits)}[/accent] local edit(s) to '
                       'solutions/private[/muted]')
     osc.git_changed()
+    return True
 
 
 def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
@@ -587,7 +597,7 @@ def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
     read_master_key.cache_clear()
     # Order matters: a key that arrived from a rotation leaves HEAD unreadable, and every
     # repair below materialises HEAD. Re-home first, or the re-checkout fails on the way.
-    if not _head_private_opens():
+    if not head_private_opens():
         _rehome_on_origin(local_edits or {})
     name: str = crypto_config['filter_name']
     recorded = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
@@ -666,7 +676,7 @@ def git_sync(dry_run: bool = False) -> int:
         # here rather than hand them a traceback that names a filter they cannot fix. The
         # re-home lands them on origin/master, which is what the sync was for.
         read_master_key.cache_clear()
-        if not _head_private_opens():
+        if not head_private_opens():
             # No edits are carried across here, and that is not an oversight: proving a private
             # file is *your* edit needs the key that opened HEAD, and by now it is gone. Diffing
             # against origin/master instead would read content you simply have not pulled yet as
@@ -676,8 +686,10 @@ def git_sync(dry_run: bool = False) -> int:
             console.print('[warning]Note: uncommitted changes under solutions/private cannot be '
                           'carried across a key rotation from here, and will be replaced by the '
                           'published versions.[/warning]')
-            _rehome_on_origin({})
-            return int(ExitCodes.EXIT_OK)
+            landed = _rehome_on_origin({})
+            # Non-zero when it did not land, because at shell start-up the console is quiet
+            # and the exit code is the only part of a refusal that survives.
+            return int(ExitCodes.EXIT_OK if landed else ExitCodes.EXIT_ERROR)
         result = run_cmdline(config.scripts.sync)
         if result == 0:
             osc.git_changed()       # the fetch moved origin/master, the merge moved the branch

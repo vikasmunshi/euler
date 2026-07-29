@@ -501,7 +501,10 @@ the published tree when it does not — `git reset --hard origin/master`, the on
 command that never has to materialise the unreadable `HEAD` on the way. Uncommitted private
 edits are carried across as plaintext, collected *before* the new key is written, which is the
 only moment they can be told apart from the rotation's own churn; plaintext is key-agnostic,
-so they re-encrypt cleanly on the next commit. Unpushed **commits** stop it: reset would
+so they re-encrypt cleanly on the next commit. A clone whose `HEAD` *already* does not open —
+wedged by an earlier rotation it never re-homed from — is asked nothing, because it has no
+truthful answer: with the held key not matching `HEAD` every present private file cleans to a
+different blob and reads as an edit. Unpushed **commits** stop it: reset would
 orphan them, so the clone is left alone and the situation named. `git-sync` performs the same
 re-home for a clone that wedged before any of this existed, minus the edits it can no longer
 identify.
