@@ -375,6 +375,36 @@ provision_hooks() {
         rm -f "${rendered}"
         echo "Installed hook: ${hook}"
     done
+    provision_filter_command "${slug}"
+}
+
+# Point a clone's crypt filter at the deployed venv, with -P.
+#
+# A clone keeps whatever filter command was recorded the day it was wired, and only
+# `git-filter install` rewrites it — which needs the master key, so it can run in the
+# collaborator's own session and nowhere else. That makes a change to this command the one
+# piece of per-clone setup they cannot receive: it waits for them to happen to save a key.
+#
+# -P is why that matters. git runs a filter with the cwd at the top of the worktree, and a
+# solver checkout has a `solver/` package sitting right there — without -P the filter imports
+# THE CLONE's source instead of the venv's, so a clone that falls behind runs an old filter
+# against a current key file and stops decrypting. Writing the command here needs no key
+# (only the re-checkout does, and their tree is already plaintext), so the operator can push
+# it to every clone at once, the same way the hooks go out.
+provision_filter_command() {
+    local slug="$1" user clone base
+    user="$(user_of "${slug}")"
+    clone="$(home_of "${slug}")/euler"
+    base="${VENV_DIR}/bin/python -P -m solver.crypto.gitfilter"
+    if ! sudo -u "${user}" git -C "${clone}" config --local --get filter.solver-crypt.process \
+        > /dev/null 2>&1; then
+        return 0                    # unwired: theirs to wire when they are issued a key
+    fi
+    for action in process clean smudge; do
+        sudo -u "${user}" git -C "${clone}" config --local \
+            "filter.solver-crypt.${action}" "${base} ${action}"
+    done
+    echo "Filter command points at ${VENV_DIR} (-P)"
 }
 
 # Clone the repo into ~/euler on branch user/<slug>, filter DISABLED → ciphertext at
