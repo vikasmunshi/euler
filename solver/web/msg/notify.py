@@ -118,7 +118,7 @@ def answer_thread(thread_id: str, body: str) -> bool:
     ``msg dismiss`` to close explicitly when the operator wants it gone.
 
     Best-effort in the same sense as :func:`notify_staff`: the grant itself is already
-    written to ``enc-key.json``, so a spool that refuses the reply must not fail the
+    written to the enc-key file, so a spool that refuses the reply must not fail the
     authorization — the caller reports which of the two happened.
     """
     result = call('reply', thread_id=thread_id, body={'body': body})

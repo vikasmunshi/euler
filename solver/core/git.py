@@ -518,9 +518,8 @@ def git_sync(dry_run: bool = False) -> int:
 
     On a per-user clone (branch `user/<slug>`) this is the pull flow: fetch
     origin/master and merge/rebase it into your branch — bringing in merged work
-    and, notably, `keys/enc-key.json`. When that pull first delivers master-key
-    access for your key, the git filter is wired automatically and the private
-    solutions decrypt in place.
+    merged work. Key material does not travel this way -- it is issued by message
+    (`user-authorize` / `msg save`), and that is what wires the filter.
 
     Stale remote-tracking refs are pruned as part of the fetch, so a branch deleted
     when its pull request merged stops shadowing the branch you push next.

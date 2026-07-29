@@ -55,7 +55,8 @@ _ROOT: Path = repo_root()
 #: Machine-local secrets dir: a sibling dot-directory named for the repo (e.g.
 #: repo `~/euler` -> `~/.euler`), *outside* the checkout so secrets never sit in
 #: the work tree. Holds the plain private key and the project env file; only
-#: `enc-key.json` (wrapped master keys, useless without a private key) stays in-repo.
+#: Holds the private key, the project env file, and the wrapped master key -- nothing about
+#: key material lives in the checkout any more.
 _SECRETS_DIR: Path = _ROOT.parent / f'.{_ROOT.name}'
 _MAGIC: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
 _NONCE_LEN: int = 12

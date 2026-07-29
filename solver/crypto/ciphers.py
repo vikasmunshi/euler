@@ -10,11 +10,10 @@ import `solver.config`). On top of that, this module owns:
 - the asymmetric primitives -- load the plain (unencrypted) X25519 private key from `~/.euler/id`
   (a machine-local `0600` file outside the repo), and `lock`/`unlock` (wrap/unwrap) a secret to an
   X25519 public key via ephemeral ECDH -> HKDF-SHA256 -> ChaCha20-Poly1305.
-- the master (symmetrical) key -- `read_master_key` unwraps the current user's entry from
-  `keys/enc-key.json` (a `{<public-key-hex>: <locked-master-key-hex>}` map plus the reserved
-  `verify` and `owners` entries) and proves it correct by decrypting `verify` before returning it.
-  `authorised_keys` / `key_owners` are the readers for those two: which keys may decrypt, and
-  whose key each one is (attribution for `users purge` -- never consulted by the decrypt path).
+- the master (symmetrical) key -- `read_master_key` unwraps this machine's entry from
+  `~/.euler/enc-key.json` (two records: `verify`, and the master key wrapped to this holder's
+  public key) and proves it correct by decrypting `verify` before returning it. `enc_key_payload`
+  builds that pair for somebody else -- the unit `user-authorize` sends and `msg save` writes.
 - deterministic blob encryption -- the convergent-encryption core used by the git filter: one fixed
   AES-256 key + a content-derived nonce (`HMAC(plaintext)`), so identical plaintext always yields
   byte-identical ciphertext (no spurious git diffs).
@@ -68,7 +67,7 @@ from solver.crypto.vault import decrypt_secret, is_vault_encrypted, session_vaul
 #                                               asymmetric key load + wrap/unwrap
 # ==================================================================================================================== #
 def public_key_hex(public_key: X25519PublicKey) -> str:
-    """Return the raw 32-byte X25519 public key as a lowercase hex string (its identity in enc-key.json)."""
+    """Return the raw 32-byte X25519 public key as a lowercase hex string (its identity in the enc-key file)."""
     return public_key.public_bytes(Encoding.Raw, PublicFormat.Raw).hex()
 
 

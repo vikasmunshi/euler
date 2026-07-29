@@ -469,30 +469,15 @@ users change alice@example.com contributor    # promote / demote
 users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
 users remove  alice@example.com               # delete the account/entry, pending invites, and deprovision
-users purge                                   # REPO: classify keys/enc-key.json against the roster
-users purge --apply                           # …and walk the stale entries, one at a time
-users purge <public-key-hex> --apply          # …or purge one named entry (the only way to drop an
-                                              #    unattributed one)
+users set-key alice@example.com <64-hex>      # register their public key (for key-rekey)
 ```
 
-**`purge` is the odd verb out — it is a *repo* verb, not an account one.** Everything else
-here writes the host's state under sudo; purge edits `keys/enc-key.json` **in the
-operator's checkout, as the operator**, and leaves the commit to them, because that file
-belongs to the repository and reaches collaborators through git. Only the roster read is
-sudo (`admin roster-json`, the machine-readable sibling of `list`).
-
-It classifies every authorised key by joining the file's `owners` attribution (§9) to the
-roster: `self` · `active` · `orphan`. `owners` is keyed by **slug**, so it names each
-collaborator's *current* key and nothing else, and every key it does not name is an
-orphan — superseded by its owner's later key, abandoned by a removed or disabled account,
-or never attributed at all. Those were three classes with one meaning; splitting them only
-made the walk skip real candidates, which is how a rotation's leftover key sat in the file
-being reported as active.
-
-Two guards make it safe to run without thinking twice: your **own key is never a
-candidate** (and it refuses to run at all if it cannot read your public key, since then the
-entry it drops could be yours), and it refuses a **dirty** `enc-key.json`, so it never
-decides from a `user --regen` stopgap that the next `git-sync` will discard.
+**`set-key` is the public-key registry.** With one enc-key file per machine (§9) there is no
+central list of who holds the master key, so `key-rekey` has to be told who to re-issue to.
+It holds *public* material only: losing it costs a round of re-registration, never access.
+`user-authorize` writes it for you when it can reach the admin plane, and prints this command
+when it cannot — a web shell has no sudo. An account with no registered key loses access at
+the next rotation, which `key-rekey` names before you confirm.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
@@ -759,64 +744,62 @@ The crypto master key is wrapped, per authorized public key, in the tracked file
 `keys/enc-key.json` — proof of possession: hold the matching private key, unwrap the
 master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
 
-- **Each user has their own X25519 keypair.** The private key lives in their vault; the
-  public key is enrolled by an admin.
-- **Authorization is a deliberate staff trust act**, never self-service — it grants
-  decryption of the *whole* private corpus, so `user-authorize` sits at `maintainer`:
-  the floor that receives a key request is the floor that can act on it. The flow: the
-  user generates their key in their shell (`user`), which **files the request with staff
-  through the message spool** (§13) carrying the public key; a maintainer runs
-  **`user-authorize <message-id>`** and commits and pushes `keys/enc-key.json`; the user
-  pulls, and their key now unwraps the master key. **The distribution channel is git
-  itself** — no side channel. The out-of-band hand-off the account page used to describe
-  still works, but nothing depends on the two people finding each other.
+- **Each user has their own X25519 keypair**, and their own **enc-key file**:
+  `~/.euler/enc-key.json`, two records — `verify`, and the master key wrapped to their public
+  key. Machine-local, `0600`, beside the private key that opens it. Nothing about key material
+  is in the checkout, committed, or pulled.
+
+  It was tracked until v1.6.0: `keys/enc-key.json`, every authorised key, distributed by git.
+  That put per-machine key material into shared state and everything painful followed — a
+  rotation dirtied a tracked file, `sync.sh` stashed and popped it around the merge, the pop
+  conflicted with the authorised copy coming the other way, and the markers left the JSON
+  unparseable, which every reader takes for "not authorised". A reader could not even repair
+  it (`git-reset` is contributor-floored). It also needed an attribution map, a purge verb, a
+  machine-local overlay and a repair path in `git-sync` — all to manage a sharing nobody
+  wanted.
+
+- **Issuing is a deliberate staff act**, never self-service — it grants decryption of the
+  *whole* private corpus, so `user-authorize` sits at `maintainer`: the floor that receives a
+  key request is the floor that can act on it. The flow: the user runs `user`, which files a
+  request through the message spool (§13) carrying their public key; a maintainer runs
+  **`user-authorize <message-id>`**, which wraps the master key to that public key and sends
+  the payload back as a reply; the user runs **`msg save <id>`**, which writes their enc-key
+  file and wires the filter. **The distribution channel is the spool**, and the payload
+  travels through it for the same reason the old file could sit in a public repo: without
+  their private key it is inert.
+
 - **The message id, not the key.** `user-authorize` takes either — they are told apart by
-  shape (64 hex is a key, 16 is a thread id) — but the message form is the one to reach
-  for: the key comes out of the request and the **requester comes from the thread's
-  author**, which the spool resolved from `SO_PEERCRED` when it was filed and which no
-  sender can dress up as somebody else. It refuses rather than guesses (the subject must
-  be the key-request one, the body must hold exactly one hex token), asks before granting,
-  and afterwards replies on the thread and marks it read — so the person waiting learns it
-  happened, and the thread survives as the record until `msg dismiss` closes it.
-- **Attribution** is written there and only there, into the `owners` entry of
-  `enc-key.json`, **keyed by the requester's system slug** — never their address (this file
-  is public). One key per collaborator: authorising replaces their record, and the key it
-  named becomes an orphan for `users purge` to remove. `user --regen`'s local re-wrap deliberately writes none — that edit is a
-  stopgap keeping the collaborator decrypting until the authorized file arrives by
-  `git-sync`, and attributing a file about to be overwritten would be attributing nothing.
-- **The carry lives outside the checkout** — `~/.euler/enc-key.local.json`, one entry,
-  this user's own key. It was written into the tracked `keys/enc-key.json` until v1.4.2,
-  which collided by construction: `sync.sh` stashes a dirty tree around the merge and pops
-  it after, so an authorised copy of that same file coming the other way made the pop
-  conflict, and the markers left the JSON unparseable — read as "not authorised" by
-  everything, including the smudge filter. `git-sync` carries a one-time repair for clones
-  already in that state (below `maintainer`, where a modified enc-key.json can only be this
-  stopgap): lift the user's own entry into the overlay, restore the file from HEAD.
-- **A rotation needs the same follow-through as a first mint**, precisely because that
-  re-wrap is local: the tree decrypts, but the shared file still authorises the *old* key.
-  So `user --regen` does not go quiet on a green tick. Below the `user-authorize` floor it **files a key request** worded as a
-  rotation (the old entry is now nobody's, so the staff-side act is authorise-then-purge);
-  at or above it — where filing a request with staff would be filing it with yourself — it
-  prints the two commands that make the grant durable, `user-authorize <key> <identity>`
-  and `git-publish keys`.
-- **The operator's own terminal cannot reach the spool**, by design: `/run/euler/msg.sock`
-  is `euler-web`-only and the operator's uid deliberately is not. That is why the
-  maintainer path above prints rather than files, and why `_request_authorization` says so
-  out loud when delivery fails instead of leaving a request nobody is coming to work.
-  `notify_staff` gets no sudo fallback: it fires inside another command's flow, and a
-  password prompt in the middle of a key mint is worse than a printed instruction.
-- **Purging** an entry is `users purge` (admin, §6.3): every authorised key that is not
-  some live account's *current* key is an orphan — superseded, abandoned by a removed
-  account, or never attributed — and all of them are offered. It is a *repo* verb —
-  only the roster read is sudo; the edit lands in the operator's checkout and is committed
-  like any other change.
-- **Revocation** is `key-rekey` (rotate the master key, re-wrap only to still-authorized
-  keys) plus a push. The de-authorized user's next pull decrypts nothing. **Purge is not
-  revocation**: dropping an entry stops that key unwrapping *future* copies of the file,
-  but whoever held it still has the master key and every committed blob still decrypts
-  with it. `users purge` prints exactly that, and the `key-rekey` that follows through —
-  and deliberately does not run it, because re-encrypting the whole private tree is not a
-  thing to happen as the side effect of a bookkeeping verb.
+  shape (64 hex is a key, 16 is a thread id) — but the message form is the one to reach for:
+  the key comes out of the request and the **requester comes from the thread's author**, which
+  the spool resolved from `SO_PEERCRED` when it was filed and which no sender can dress up as
+  somebody else. It refuses rather than guesses (the subject must be the key-request one, the
+  body must hold exactly one hex token), asks before granting, and afterwards replies on the
+  thread and marks it read.
+
+- **`msg save` proves before it writes.** The subject must be the key-issue one, the payload
+  must unwrap with *this* machine's private key, and its `verify` must decrypt to the known
+  text. Only then does it replace the file — which may be the only thing between this machine
+  and the whole private tree, so a mistargeted or corrupted payload has to fail *before* the
+  write, not be discovered after it.
+
+- **A rotation needs nobody.** `user --regen` mints a key pair and re-wraps the master key to
+  it in place, because the file is this machine's alone. A request is filed only when the
+  master key cannot be loaded at all — a first run, or a rotation whose carry failed. A locked
+  vault never reaches that path: the private-key persist refuses first, so nobody is asked to
+  re-issue to somebody who already holds the key.
+
+- **Revocation is `key-rekey`** (admin), and it is the only thing that revokes. It rotates the
+  master key, writes the operator's own file first (a rotation that fails half way must still
+  leave the operator able to decrypt the tree it just re-encrypted), re-issues by message to
+  every `public_key` on the roster (§6.3), and re-encrypts the private tree. An account with
+  no registered public key cannot be re-issued to and is **named before you confirm** — that
+  person loses access at this rotation, which is sometimes the intent and must never be a
+  surprise.
+
+- **The operator's own terminal cannot reach the spool**, by design: `/run/euler/msg.sock` is
+  `euler-web`-only and the operator's uid deliberately is not. Both directions therefore go
+  through the sudo plane (`solver.web.msg.client`), which is why a rotation or a grant may
+  prompt for a password and a collaborator's own commands never do.
 
 `user-authorize` and `key-rekey` never need a *user's* private key, so the vault never
 interferes with enrollment or rotation. A user can have a working vault and no master-key

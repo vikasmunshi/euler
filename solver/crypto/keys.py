@@ -10,13 +10,11 @@ entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two
   **plain** (unencrypted PKCS8 PEM) to `~/.euler/id` -- a machine-local `0600` file outside the
   repo, whose file permissions are its protection -- so the non-interactive load path
   (`solver.crypto.ciphers.load_private_key`) needs no password.
-- The **symmetric** master key: a single 32-byte AES key, wrapped to each authorised user's public
-  key in `keys/enc-key.json` -- a `{<public-key-hex>: <locked-master-key-hex>}` map plus the
-  reserved `verify` ciphertext and `owners` attribution map. Authority is
-  **proof-of-possession**: anyone who can unwrap and verify the current master key may rotate it,
-  authorise another public key, or split it into shares. `owners` records *whose* key each entry
-  is, written only by `user-authorize`, read only by `users purge` -- it is bookkeeping and grants
-  nothing.
+- The **symmetric** master key: a single 32-byte AES key, held by each user in their own
+  `~/.euler/enc-key.json` -- two records, `verify` and the key wrapped to their public key.
+  Authority is **proof-of-possession**: anyone who can unwrap and verify it may rotate it, issue
+  it to another public key, or split it into shares. Issuing goes through the message spool
+  (`user-authorize` sends, `msg save` writes); a rotation of one's own key pair needs nobody.
 
 The non-interactive primitives (load, lock/unlock, encrypt/decrypt) come from `solver.crypto.ciphers`
 and the configuration from `solver.crypto.config`; this module never re-implements them. The git
@@ -55,7 +53,7 @@ from solver.utils.shell_utils import confirm
 from solver.web.auth.commands import registered_public_keys
 from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT
 
-#: A public key on the wire and in enc-key.json: 32 bytes of lowercase hex.
+#: A public key on the wire and in the enc-key file: 32 bytes of lowercase hex.
 _PUBLIC_KEY_RE = re.compile(r'\b[0-9a-f]{64}\b')
 
 #: The JSON object an issue message carries — the payload, wherever it sits in the prose.

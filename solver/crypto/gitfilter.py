@@ -27,7 +27,7 @@ both of which emit **nothing on stdout when imported** -- in every filter mode s
 that property when editing these modules (verified: `python -c "import solver.crypto.gitfilter"`
 writes 0 bytes to stdout).
 
-The master key lives in `keys/enc-key.json` (managed by `solver.crypto.keys`); run `install` to
+The master key lives in `~/.euler/enc-key.json` (managed by `solver.crypto.keys`); run `install` to
 register the filter in the local git config and `.gitattributes`; `status` reports the wiring.
 """
 from __future__ import annotations

@@ -146,7 +146,7 @@ def main(argv: list[str]) -> int:
             return _fail(f'{status} {data}')
 
         if action == 'roster-json':
-            # The roster as data, for `users purge`: every identity on the map with its
+            # The roster as data, for `key-rekey`: every identity on the map with its
             # profile, its per-user slug and its registration state. Machine-readable
             # sibling of `list`, exactly as `requests-json` is for the queue — purge has
             # to *decide* from the roster, not read it off a terminal.
