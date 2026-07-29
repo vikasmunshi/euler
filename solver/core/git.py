@@ -23,7 +23,8 @@ commit that carries nothing else.
 """
 from __future__ import annotations
 
-__all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit', 'git_commit_amend',
+__all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit',
+           'git_commit_amend', 'resmudge_private',
            'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
            'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
 
@@ -420,6 +421,50 @@ def git_status(details: bool = False) -> int:
     return result
 
 
+def resmudge_private() -> int:
+    """Re-checkout ``solutions/private`` so stored ciphertext decrypts in place.
+
+    Existing ciphertext in the worktree only decrypts on a *fresh* checkout, and git will not
+    re-materialise a file it considers unchanged — hence the delete-then-checkout. That makes
+    this destructive by construction, so it is guarded, and both callers share the guard:
+    `git-filter install` (asked for explicitly) and :func:`enc_key_arrived` (the automatic
+    repair, which now runs before every sync and must not eat anyone's work).
+
+    Genuine local edits are never clobbered — the re-checkout is skipped and says so. A
+    freshly wired clone is NOT dirty (clean() passes ciphertext through, matching the stored
+    blob), so the guard only trips on real plaintext changes.
+
+    A **deletion** is not an edit anyone authored: it is the residue of exactly this operation
+    having been interrupted — the `rm` lands, the checkout then fails (a filter that cannot
+    decrypt makes it fail, since the rule is `required`), and the files are simply gone.
+    Treating that as "local changes to protect" left a reader wedged, told to commit or stash,
+    which names two verbs no reader has. The checkout restores deleted files, so let it.
+    """
+    dirty: str = run(['git', 'status', '--porcelain', '--', 'solutions/private'],
+                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
+    lines = dirty.splitlines()
+    deletions = [line for line in lines if line[:2] in (' D', 'D ', 'DD')]
+    blocking = [line for line in lines if line not in deletions]
+    if blocking:
+        console.print('[warning]solutions/private has local changes — skipping the re-checkout; '
+                      'commit or stash, then run [accent]git-filter install[/accent] again.[/warning]')
+        return int(ExitCodes.EXIT_OK)
+    if deletions:
+        console.print(f'[muted]restoring [accent]{len(deletions)}[/accent] file(s) missing from the '
+                      'worktree (an interrupted decrypt, not your edits)[/muted]')
+    console.print('[primary]Decrypting private solutions in place...[/primary]')
+    # Two steps, not one `&&` chain, so a failed checkout is reported as what it is: the
+    # worktree is mid-way through the swap and the files are NOT there. Silence would leave
+    # someone staring at an empty solutions/private with no idea it is recoverable.
+    run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f --')
+    result = run_cmdline('git checkout -- solutions/private')
+    if result != 0:
+        console.print('[error]error:[/error] the re-checkout failed, so solutions/private is '
+                      'currently EMPTY in your worktree. Nothing is lost — the content is in git. '
+                      'Run [accent]git-filter install[/accent] again once the filter can decrypt.')
+    return result
+
+
 def enc_key_arrived() -> None:
     """Wire the git filter once this machine can decrypt — the tail of a sync, and of `msg save`.
 
@@ -455,8 +500,7 @@ def enc_key_arrived() -> None:
     console.print('[primary]Wiring the git filter and decrypting private '
                   'solutions...[/primary]')
     if run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter install') == 0:
-        run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
-                    '&& git checkout -- solutions/private')
+        resmudge_private()
 
 
 @register(requires='reader', aliases=('filter',),
@@ -484,39 +528,7 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
         return result
     # The filter is wired from here on, whatever the re-checkout below does — so both
     # tails nudge the header's chip (its private-solutions row just changed).
-    # Re-smudge: existing ciphertext in the worktree only decrypts on a fresh
-    # checkout. Genuine local edits must not be clobbered — but a freshly wired
-    # clone is NOT dirty (clean() passes ciphertext through, matching the stored
-    # blob), so the guard only trips on real plaintext changes.
-    dirty: str = run(['git', 'status', '--porcelain', '--', 'solutions/private'],
-                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
-    # A *deletion* is not an edit anyone authored — it is the residue of exactly this
-    # re-checkout having been interrupted: the `rm` below lands, the checkout then fails
-    # (a filter that cannot decrypt makes it fail, since the rule is `required`), and the
-    # files are simply gone. Treating that as "local changes to protect" is what left a
-    # reader wedged: the re-checkout refused, and the advice it printed — commit or stash —
-    # names two verbs no reader has. The checkout restores deleted files, so let it.
-    lines = dirty.splitlines()
-    deletions = [line for line in lines if line[:2] in (' D', 'D ', 'DD')]
-    blocking = [line for line in lines if line not in deletions]
-    if blocking:
-        console.print('[warning]solutions/private has local changes — skipping the re-checkout; '
-                      'commit or stash, then run [accent]git-filter install[/accent] again.[/warning]')
-        osc.git_changed()
-        return int(ExitCodes.EXIT_OK)
-    if deletions:
-        console.print(f'[muted]restoring [accent]{len(deletions)}[/accent] file(s) missing from the '
-                      'worktree (an interrupted decrypt, not your edits)[/muted]')
-    console.print('[primary]Decrypting private solutions in place...[/primary]')
-    # Two steps, not one `&&` chain, so a failed checkout is reported as what it is: the
-    # worktree is mid-way through the swap and the files are NOT there. Silence would leave
-    # someone staring at an empty solutions/private with no idea it is recoverable.
-    run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f --')
-    result = run_cmdline('git checkout -- solutions/private')
-    if result != 0:
-        console.print('[error]error:[/error] the re-checkout failed, so solutions/private is '
-                      'currently EMPTY in your worktree. Nothing is lost — the content is in git. '
-                      'Run [accent]git-filter install[/accent] again once the filter can decrypt.')
+    result = resmudge_private()
     osc.git_changed()
     return result
 
@@ -540,9 +552,18 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
+        # BEFORE the sync, not after. A stale or unwired filter is a reason the sync
+        # FAILS — git cannot check out solutions/private without one that decrypts — so
+        # repairing only on success never reached the clones that needed it most, and a
+        # clone stuck that way stayed stuck: every retry failed at the same step, and the
+        # repair sat behind the success it was waiting for.
+        #
+        # Nothing a sync delivers changes what this machine can decrypt: key material has
+        # not travelled by git since the enc-key file became machine-local, so there is
+        # nothing to wait for. It is a no-op when the wiring is already current.
+        enc_key_arrived()
         result = run_cmdline(config.scripts.sync)
         if result == 0:
-            enc_key_arrived()
             # The fetch moved origin/master, the merge moved the branch, and the flow
             # above may have wired the filter: everything the chip shows.
             osc.git_changed()

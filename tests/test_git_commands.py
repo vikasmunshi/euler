@@ -501,6 +501,29 @@ class GitFilterCommandTest(_GitCommandCase):
         self.assertEqual(len(self.cmdlines), 1)  # wired, but nothing clobbered
 
 
+class SyncRepairOrderTest(_GitCommandCase):
+    """`git-sync` repairs the filter BEFORE syncing, whatever the sync then does."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.order: list[str] = []
+        saved = git.enc_key_arrived
+        git.enc_key_arrived = lambda: self.order.append('repair')   # type: ignore[assignment]
+        self.addCleanup(setattr, git, 'enc_key_arrived', saved)
+
+    def test_the_repair_runs_even_when_the_sync_fails(self) -> None:
+        """The trap this closes: a stale filter is a reason the sync fails, so repairing
+        only on success left those clones failing the same way for ever."""
+        self.rcs = [1]                                  # sync.sh refuses
+        self.assertEqual(git.git_sync(), 1)
+        self.assertEqual(self.order, ['repair'], 'the repair must not wait on success')
+
+    def test_the_repair_runs_before_the_sync(self) -> None:
+        self.assertEqual(git.git_sync(), 0)
+        self.assertEqual(self.order, ['repair'])
+        self.assertIn('sync.sh', self.cmdlines[0])      # …and the sync came after it
+
+
 class EncKeyPullFlowTest(_GitCommandCase):
     """The sync tail: wire the filter exactly when unwired AND key-authorized."""
 
@@ -526,7 +549,12 @@ class EncKeyPullFlowTest(_GitCommandCase):
         current = filter_settings(crypto_config['filter_name'])[
             f"filter.{crypto_config['filter_name']}.process"]
 
-        def fake_run(*_a: Any, **_k: Any) -> Any:
+        def fake_run(argv: Any = (), *_a: Any, **_k: Any) -> Any:
+            # Two different reads go through `run` here: the recorded filter command, and
+            # `git status -- solutions/private` (the re-smudge guard). Answering both with
+            # the same string made the guard read the command as a dirty worktree.
+            if 'status' in tuple(argv):
+                return MagicMock(returncode=0, stdout='')      # a clean private tree
             return MagicMock(returncode=0 if wired else 1,
                              stdout=(current if recorded is None else recorded))
 
@@ -550,8 +578,9 @@ class EncKeyPullFlowTest(_GitCommandCase):
         self._wire_state(wired=True, recorded='/opt/euler/venv/bin/python '
                                               '-m solver.crypto.gitfilter process')
         git.enc_key_arrived()
-        self.assertEqual(len(self.cmdlines), 2)
+        self.assertEqual(len(self.cmdlines), 3)              # install, rm, checkout
         self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
+        self.assertIn('git checkout -- solutions/private', self.cmdlines[-1])
 
     def test_unauthorized_is_a_silent_noop(self) -> None:
         self._wire_state(wired=False)
@@ -562,10 +591,27 @@ class EncKeyPullFlowTest(_GitCommandCase):
     def test_newly_authorized_wires_and_rechecks_out(self) -> None:
         self._wire_state(wired=False)
         git.enc_key_arrived()
-        self.master.cache_clear.assert_called_once()  # the pull may have delivered access
-        self.assertEqual(len(self.cmdlines), 2)
+        self.master.cache_clear.assert_called_once()
+        self.assertEqual(len(self.cmdlines), 3)              # install, rm, checkout
         self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
-        self.assertIn('git checkout -- solutions/private', self.cmdlines[1])
+        self.assertIn('git checkout -- solutions/private', self.cmdlines[-1])
+
+    def test_local_edits_are_never_clobbered_by_the_repair(self) -> None:
+        """The repair now runs before EVERY sync, so its re-checkout must respect work.
+
+        `git-filter install` always guarded this; `enc_key_arrived` did not, which was
+        tolerable only while it fired on fresh clones alone. Moving it in front of the sync
+        would otherwise have made an automatic `rm -f` over somebody's uncommitted plaintext.
+        """
+        def fake_run(argv: Any = (), *_a: Any, **_k: Any) -> Any:
+            if 'status' in tuple(argv):
+                return MagicMock(returncode=0, stdout=' M solutions/private/p0101/p0101_s0.py')
+            return MagicMock(returncode=1, stdout='')        # unwired
+
+        git.run = fake_run  # type: ignore[assignment]
+        git.enc_key_arrived()
+        self.assertEqual(len(self.cmdlines), 1, 'wired, but nothing checked out over the edits')
+        self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
 
     def test_failed_install_skips_the_recheckout(self) -> None:
         self._wire_state(wired=False)
