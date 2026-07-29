@@ -207,6 +207,27 @@ class RotationRehomeTests(unittest.TestCase):
         # the new key, so the diff is the edit rather than the rotation.
         self.assertEqual(self._git('diff', '--name-only').stdout.split(), [_SOLUTION])
 
+    def test_an_unfiltered_file_does_not_mask_an_unreadable_tree(self) -> None:
+        """A plaintext file sorting first under solutions/private must not answer for the tree.
+
+        The check samples blobs, and sampling one is sampling the wrong one as soon as
+        something lands under the tree that the attributes do not match. Answering "readable"
+        from that would disable the repair silently.
+        """
+        from solver.core import git
+        plain = self.repo / 'solutions/private/README.md'   # sorts before p0100_0199/
+        plain.write_text('not a solution, not filtered\n')
+        # Genuinely exempt, or the `**` rule would encrypt it and the test would pass for the
+        # wrong reason — the whole point is a blob the filter never touched.
+        (self.repo / '.gitattributes').write_text(
+            'solutions/private/** filter=solver-crypt -text -diff\n'
+            'solutions/private/README.md !filter\n')
+        self._git('add', '-A')
+        self._git('commit', '-qm', 'a plaintext file under the private tree')
+        self._git('push', '-q', 'origin', 'master')
+        self.rotate()
+        self.assertFalse(git.head_private_opens(), 'the encrypted blobs still decide')
+
     def test_a_wedged_clone_reports_no_edits_at_all(self) -> None:
         """The 917 bug: a clone already behind a rotation must not invent local edits.
 

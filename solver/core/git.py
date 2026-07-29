@@ -510,16 +510,21 @@ def head_private_opens() -> bool:
     """
     tracked = run(['git', 'ls-files', '--', 'solutions/private'],
                   cwd=config.root_dir, capture_output=True, text=True).stdout.split()
-    if not tracked:
+    # Sample until an encrypted blob turns up rather than trusting the first name: a tracked
+    # file the attributes do not match — anything added under this tree without the filter —
+    # would otherwise answer "readable" for the whole tree, every time, and the answer gates
+    # a repair. A handful of reads is enough; a tree with nothing encrypted in its first
+    # dozen files is not one this check has anything to say about.
+    for name in tracked[:12]:
+        blob = run(['git', 'cat-file', 'blob', f'HEAD:{name}'],
+                   cwd=config.root_dir, capture_output=True)
+        if blob.returncode != 0 or not is_encrypted(blob.stdout):
+            continue
+        try:
+            decrypt_blob(blob.stdout, read_master_key())
+        except (FileNotFoundError, KeyError, ValueError, InvalidTag):
+            return False
         return True
-    blob = run(['git', 'cat-file', 'blob', f'HEAD:{tracked[0]}'],
-               cwd=config.root_dir, capture_output=True)
-    if blob.returncode != 0 or not is_encrypted(blob.stdout):
-        return True
-    try:
-        decrypt_blob(blob.stdout, read_master_key())
-    except (FileNotFoundError, KeyError, ValueError, InvalidTag):
-        return False
     return True
 
 
