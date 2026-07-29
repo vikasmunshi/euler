@@ -145,7 +145,8 @@ publish() {
     # Behaviour:
     #   - Fetches origin/master and resets HEAD to it (soft, preserving working tree)
     #   - Stages all target directories and creates a commit
-    #   - If gh_user_email == repo_owner_email: pushes to origin/master directly
+    #   - If gh_user_email == repo_owner_email: pushes HEAD to origin/master directly
+    #     (HEAD, not the local `master` branch — see the push itself)
     #   - Otherwise: pushes to a named branch and opens a pull request
     #   - If dry_run=1: skips push and PR; prints the commands that would run instead
     #
@@ -168,7 +169,15 @@ publish() {
     echo "Created commit: ${commit_msg}"
 
     if [[ "${gh_user_email}" == "${repo_owner_email}" ]]; then
-        eval_with_dry_run git push origin master
+        # HEAD:master, never `master`. `git push origin master` pushes the local BRANCH of
+        # that name — but the commit above was made on whatever branch is checked out, and
+        # in a per-user clone that is `user/<slug>`, whose local `master` ref has sat frozen
+        # since the clone was created. So the new commit was never sent, and git was asked
+        # to rewind a stale master instead: "[rejected] (non-fast-forward) … a pushed branch
+        # tip is behind its remote counterpart". It only ever worked from the operator's own
+        # checkout, where HEAD *is* master. The pull-request path below always got this
+        # right (`HEAD:${branch_name}`); this one was the odd one out.
+        eval_with_dry_run git push origin HEAD:master
     else
         local branch_name
         branch_name="${gh_user_name}_$(date +%y%m%d)"
@@ -231,7 +240,7 @@ Behaviour:
   - Updates the local git index to track any new or deleted files in the targets
   - Fetches origin/master and resets HEAD to it (soft, preserving working tree)
   - Stages target directories and commits (message includes target list and yymmdd date)
-  - If the authenticated user is the repo owner: pushes to origin/master directly
+  - If the authenticated user is the repo owner: pushes HEAD to origin/master directly
   - Otherwise: pushes to a named branch and opens a pull request
 EOF
 }
