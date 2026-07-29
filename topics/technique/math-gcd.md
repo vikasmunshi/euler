@@ -15,6 +15,7 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/math.html#
 - ● [0155](/solutions/0155/) — Counting Capacitor Circuits
 - ● [0175](/solutions/0175/) — Fractions and Sum of Powers of Two
 - ● [0183](/solutions/0183/) — Maximum Product of Parts
+- ○ [0236](/solutions/0236/) — Luxury Hampers
 - ● [0504](/solutions/0504/) — Square on the Inside
 
 <!-- /problems -->

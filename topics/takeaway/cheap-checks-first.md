@@ -113,6 +113,7 @@ expensive checks off the candidates that were never going to survive.
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
 - ● [0206](/solutions/0206/) — Concealed Square
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
+- ○ [0236](/solutions/0236/) — Luxury Hampers
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0719](/solutions/0719/) — Number Splitting
