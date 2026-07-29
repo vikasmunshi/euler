@@ -14,5 +14,6 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/fractions.
 - ● [0101](/solutions/0101/) — Optimum Polynomial
 - ● [0180](/solutions/0180/) — Golden Triplets
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
+- ○ [0236](/solutions/0236/) — Luxury Hampers
 
 <!-- /problems -->

@@ -165,7 +165,6 @@ optimisation inside the loop.
 - ● [0185](/solutions/0185/) — Number Mind
 - ● [0190](/solutions/0190/) — Maximising a Weighted Product
 - ● [0222](/solutions/0222/) — Sphere Packing
-- ○ [0236](/solutions/0236/) — Luxury Hampers
 - ○ [0252](/solutions/0252/) — Convex Holes
 - ○ [0275](/solutions/0275/) — Balanced Sculptures
 - ○ [0300](/solutions/0300/) — Protein Folding

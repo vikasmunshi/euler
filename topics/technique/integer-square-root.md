@@ -23,6 +23,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_square
 - ● [0206](/solutions/0206/) — Concealed Square
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
+- ○ [0236](/solutions/0236/) — Luxury Hampers
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0932](/solutions/0932/) — $2025$
