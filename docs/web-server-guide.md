@@ -469,7 +469,27 @@ users change alice@example.com contributor    # promote / demote
 users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
 users remove  alice@example.com               # delete the account/entry, pending invites, and deprovision
+users purge                                   # REPO: classify keys/enc-key.json against the roster
+users purge --apply                           # …and walk the stale entries, one at a time
+users purge <public-key-hex> --apply          # …or purge one named entry (the only way to drop an
+                                              #    unattributed one)
 ```
+
+**`purge` is the odd verb out — it is a *repo* verb, not an account one.** Everything else
+here writes the host's state under sudo; purge edits `keys/enc-key.json` **in the
+operator's checkout, as the operator**, and leaves the commit to them, because that file
+belongs to the repository and reaches collaborators through git. Only the roster read is
+sudo (`admin roster-json`, the machine-readable sibling of `list`).
+
+It classifies every authorised key by joining the file's `owners` attribution (§9) to the
+roster: `self` · `active` · `unattributed` · `stale`, and offers only the stale ones. Three
+guards make it safe to run without thinking twice: your **own key is never a candidate**
+(and it refuses to run at all if it cannot read your public key, since then the entry it
+drops could be yours); an **unattributed** key — every entry written before attribution
+existed — is only ever purged by naming it, because the cost of a wrong purge (a
+collaborator loses decryption and needs re-authorizing) is far worse than one stale line in
+a JSON file; and it refuses a **dirty** `enc-key.json`, so it never decides from a
+`user --regen` stopgap that the next `git-sync` will discard.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
@@ -568,6 +588,21 @@ fresh clone inherits the attribute but not the filter definition, so encrypted b
 through untouched. GitHub only ever holds the filter's ciphertext anyway. So a user who
 is not yet key-authorized cannot read private plaintext even though the files sit in
 their own home — the git filter enforces the enc-key layer with no extra machinery.
+
+**Repair** — `sudo bash scripts/ops/reset-user.sh <slug>` fetches and hard-resets one
+collaborator's clone to origin/master, as that user. It exists because a clone can reach a
+state its owner cannot leave with the verbs their profile has: a reader has no `git-reset`
+and no `!`, so a conflicted or half-checked-out worktree is terminal for them. It discards
+their local commits and uncommitted changes — that is the point, and it prints what it is
+about to destroy and asks first. It runs git **as them**, never as root, because
+root-owned objects in their home turn one wedged clone into a permanently wedged one. It
+also passes `/etc/euler/egress.env` through explicitly: the host is default-deny outbound
+and Squid is the only route to github.com, which the services get via `EnvironmentFile=`
+and a `sudo -u` shell inherits not at all — without it the fetch fails at DNS rather than
+at the network. If
+the reset fails decrypting `solutions/private` — their vault is unlocked only inside their
+own session, and a `sudo -u` shell has none — `--no-filter` resets with the filter not
+required, leaving ciphertext for their own `git-filter install` to decrypt in place.
 
 **Teardown** (`users disable` / `remove`) stops and disables the instance and removes the
 home. Dropping the account's master-key access is a **separate admin act** (`key-rekey`,
@@ -727,13 +762,56 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   decryption of the *whole* private corpus, so `user-authorize` sits at `maintainer`:
   the floor that receives a key request is the floor that can act on it. The flow: the
   user generates their key in their shell (`user`), which **files the request with staff
-  through the message spool** (§13) carrying the public key and the exact command to run;
-  a maintainer runs `user-authorize <pubkey>` and commits and pushes `keys/enc-key.json`;
-  the user pulls, and their key now unwraps the master key. **The distribution channel is
-  git itself** — no side channel. The out-of-band hand-off the account page used to
-  describe still works, but nothing depends on the two people finding each other.
+  through the message spool** (§13) carrying the public key; a maintainer runs
+  **`user-authorize <message-id>`** and commits and pushes `keys/enc-key.json`; the user
+  pulls, and their key now unwraps the master key. **The distribution channel is git
+  itself** — no side channel. The out-of-band hand-off the account page used to describe
+  still works, but nothing depends on the two people finding each other.
+- **The message id, not the key.** `user-authorize` takes either — they are told apart by
+  shape (64 hex is a key, 16 is a thread id) — but the message form is the one to reach
+  for: the key comes out of the request and the **requester comes from the thread's
+  author**, which the spool resolved from `SO_PEERCRED` when it was filed and which no
+  sender can dress up as somebody else. It refuses rather than guesses (the subject must
+  be the key-request one, the body must hold exactly one hex token), asks before granting,
+  and afterwards replies on the thread and marks it read — so the person waiting learns it
+  happened, and the thread survives as the record until `msg dismiss` closes it.
+- **Attribution** is written there and only there, into the `owners` entry of
+  `enc-key.json`: the requester's **system slug**, never their address (this file is
+  public). `user --regen`'s local re-wrap deliberately writes none — that edit is a
+  stopgap keeping the collaborator decrypting until the authorized file arrives by
+  `git-sync`, and attributing a file about to be overwritten would be attributing nothing.
+- **The carry lives outside the checkout** — `~/.euler/enc-key.local.json`, one entry,
+  this user's own key. It was written into the tracked `keys/enc-key.json` until v1.4.2,
+  which collided by construction: `sync.sh` stashes a dirty tree around the merge and pops
+  it after, so an authorised copy of that same file coming the other way made the pop
+  conflict, and the markers left the JSON unparseable — read as "not authorised" by
+  everything, including the smudge filter. `git-sync` carries a one-time repair for clones
+  already in that state (below `maintainer`, where a modified enc-key.json can only be this
+  stopgap): lift the user's own entry into the overlay, restore the file from HEAD.
+- **A rotation needs the same follow-through as a first mint**, precisely because that
+  re-wrap is local: the tree decrypts, but the shared file still authorises the *old* key.
+  So `user --regen` does not go quiet on a green tick. Below the `user-authorize` floor it **files a key request** worded as a
+  rotation (the old entry is now nobody's, so the staff-side act is authorise-then-purge);
+  at or above it — where filing a request with staff would be filing it with yourself — it
+  prints the two commands that make the grant durable, `user-authorize <key> <identity>`
+  and `git-publish keys`.
+- **The operator's own terminal cannot reach the spool**, by design: `/run/euler/msg.sock`
+  is `euler-web`-only and the operator's uid deliberately is not. That is why the
+  maintainer path above prints rather than files, and why `_request_authorization` says so
+  out loud when delivery fails instead of leaving a request nobody is coming to work.
+  `notify_staff` gets no sudo fallback: it fires inside another command's flow, and a
+  password prompt in the middle of a key mint is worse than a printed instruction.
+- **Purging** an entry is `users purge` (admin, §6.3): it joins `owners` against the
+  account roster and offers the keys whose owner is gone or disabled. It is a *repo* verb —
+  only the roster read is sudo; the edit lands in the operator's checkout and is committed
+  like any other change.
 - **Revocation** is `key-rekey` (rotate the master key, re-wrap only to still-authorized
-  keys) plus a push. The de-authorized user's next pull decrypts nothing.
+  keys) plus a push. The de-authorized user's next pull decrypts nothing. **Purge is not
+  revocation**: dropping an entry stops that key unwrapping *future* copies of the file,
+  but whoever held it still has the master key and every committed blob still decrypts
+  with it. `users purge` prints exactly that, and the `key-rekey` that follows through —
+  and deliberately does not run it, because re-encrypting the whole private tree is not a
+  thing to happen as the side effect of a bookkeeping verb.
 
 `user-authorize` and `key-rekey` never need a *user's* private key, so the vault never
 interferes with enrollment or rotation. A user can have a working vault and no master-key
@@ -795,6 +873,21 @@ branch lingers as a stale `origin/user/<slug>`; without auto-delete, there is no
 prune and the old branch shadows the next push.
 
 ## 11 · The site
+
+**Importing this package must stay free.** `solver/web/site/__init__.py` re-exports nothing:
+the content service's app, its `gitstate` reader and, through that, `solver.crypto.config`
+are reached by naming the submodule, never by importing the package. The auth service reads
+exactly one module from here (`content`, for the start page's README), and it is the
+untrusted-input surface that holds no key material — so it must not acquire the crypt
+filter's configuration as a side effect of an import.
+
+That was not hypothetical. The package used to re-export `build_app` for convenience, which
+made `from solver.web.site import content` execute the whole content app. It stayed invisible
+while `crypto.config` invented a repo root whenever it could not find one; the moment that
+started refusing (§ Git), the auth service — which has no `EULER_REPO_ROOT`, because it needs
+no working tree — raised at import, never signalled readiness under `Type=notify`, and sat in
+`activating`. Caddy authenticates every request through it, so the site went down with it.
+Nothing had ever imported those names from the package.
 
 ### 11.1 The app shell
 
@@ -1701,6 +1794,21 @@ rather than anything this menu decides to show. When the terminal is disconnecte
 panel says so and offers to connect it, painted from the same `termConnected` every other
 `[data-term-*]` control reads — a verb that silently does nothing is the one outcome a
 control must never have.
+
+**One row kind carries an act as well as a read.** A key-authorization request — the message
+kind a *command* files (§9), and the only one another command can work — gets an
+**Authorize** button beside its read button, typing `user-authorize <message-id>`. The id is
+the whole point: the command reads the public key from the thread over the socket, where the
+requester's identity is vouched for, so the key never reaches the browser and nobody retypes
+64 hex characters off a screen. The row decides "is this a key request" from the same subject
+constant the filing command uses (`solver/web/msg/__init__.py`), so the chip can never offer
+a verb `user-authorize` would refuse.
+
+It appears **only when applicable** — the row is a key request *and* the reader is at the
+command's floor — which is a deliberate exception to this panel's shown-but-locked rule. A
+locked verb in the verb list teaches the ladder on a menu everyone sees; a locked one on a
+*row* would ride on every message of a kind most readers never receive, and on a reader's own
+key request it would offer them a grant they can never make.
 
 That mechanism is selected by the **`.term-menu`** marker every such menu carries, not by
 each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second

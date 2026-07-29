@@ -3,8 +3,9 @@
 """
 Crypto configuration: the single source of truth for every file location and git-filter wire constant.
 
-The crypto package does **not** import `solver.config` -- the repo root is discovered here with
-`git rev-parse` and everything else hangs off it. `config` is a `CryptoConfig` TypedDict, so every
+The crypto package does **not** import `solver.config` -- the repo root comes from
+`solver.utils.repo_root` (stdlib-only, one implementation for the whole solver) and everything
+else hangs off it. `config` is a `CryptoConfig` TypedDict, so every
 `config['...']` access elsewhere in `solver.crypto` is type-checked against the field's declared type.
 
 This module is imported (transitively) on the git-filter path, where stdout carries file content, so
@@ -14,10 +15,10 @@ from __future__ import annotations
 
 __all__ = ['config']
 
-import os
 from pathlib import Path
-from subprocess import run
 from typing import TypedDict
+
+from solver.utils.repo_root import repo_root
 
 
 # ==================================================================================================================== #
@@ -29,7 +30,10 @@ class CryptoConfig(TypedDict):
     root_dir: Path
     # key material
     private_key_file: Path  # plain (unencrypted) X25519 private key (PKCS8 PEM)
-    enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
+    enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + the reserved entries below
+    enc_key_verify: str  # reserved entry: the verify-by-decrypt ciphertext
+    enc_key_owners: str  # reserved entry: {<public-key-hex>: {slug, since, by}} -- attribution, not authority
+    enc_key_local_file: Path  # machine-local stopgap: THIS user's own wrapped master key, one entry
     private_key_backups: int  # rolling backups kept of the private key file
     # per-user vault (envelope encryption of the private key + env)
     env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
@@ -49,44 +53,7 @@ class CryptoConfig(TypedDict):
     verify_text: bytes  # fixed known plaintext for the verify-by-decrypt master-key check
 
 
-def _root_dir() -> Path:
-    """Return the repository root (pure: captures git's output, no chdir / PATH side-effects).
-
-    ``EULER_REPO_ROOT`` wins when set — the deployed web tier points every service
-    at the real working tree with it (``solver.config`` honours the same var), and
-    the git filter must agree with the shell on where the tree is. Otherwise ask git
-    (authoritative for a checkout), and finally fall back to this file's own location
-    (``solver/crypto/config.py`` → up 2). The fallbacks matter: the **web shells run
-    as ``euler-ws-*`` uids that do not own the checkout**, so git refuses
-    with *detected dubious ownership*, and git may not be installed at all in a deployed
-    tier that does no git operations by design. This module is imported at shell startup
-    (the crypto commands register from it), so a hard failure here would take the whole
-    shell down over a path this package can derive itself.
-    """
-    override = os.environ.get('EULER_REPO_ROOT', '').strip()
-    if override and (root_override := Path(override)).is_dir():
-        return root_override
-    # Shed git's own environment before probing: when git runs the filter (stash,
-    # rebase, checkout) it exports GIT_DIR — and with GIT_DIR set but no
-    # GIT_WORK_TREE, `rev-parse --show-toplevel` reports the CWD as the toplevel,
-    # deriving a root of solver/crypto and a secrets dir of solver/.crypto — the
-    # filter then can't find the key and dies mid-protocol. The probe must resolve
-    # from its own cwd path alone.
-    probe_env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
-    try:
-        result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
-                     cwd=Path(__file__).parent, env=probe_env)
-    except OSError:                                   # git not installed at all
-        result = None
-    if result is not None and result.returncode == 0 and (root := result.stdout.strip()):
-        return Path(root)
-    fallback = Path(__file__).resolve().parents[2]
-    if not (fallback / 'solver').is_dir():
-        raise ValueError('solver.crypto: failed to locate the repository root')
-    return fallback
-
-
-_ROOT: Path = _root_dir()
+_ROOT: Path = repo_root()
 #: Machine-local secrets dir: a sibling dot-directory named for the repo (e.g.
 #: repo `~/euler` -> `~/.euler`), *outside* the checkout so secrets never sit in
 #: the work tree. Holds the plain private key and the project env file; only
@@ -102,7 +69,25 @@ config: CryptoConfig = {
     'root_dir': _ROOT,
     # key material
     'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
-    'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
+    'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + reserved
+    # The reserved (non-public-key) entries of enc-key.json. They are *additive*: every
+    # reader indexes the file by public key and takes `verify` by name, so a clone running
+    # an older solver ignores anything else it finds. That is the whole reason attribution
+    # is a sibling entry rather than a reshape into {"keys": {...}} -- the git filter reads
+    # this file on every checkout, and a shape it cannot parse is a collaborator who
+    # cannot decrypt.
+    'enc_key_verify': 'verify',
+    'enc_key_owners': 'owners',
+    # The stopgap overlay, in the machine-local secrets dir and NOT in the checkout. A
+    # rotation re-wraps the master key to the new public key so the user keeps decrypting
+    # until an authorised copy of enc-key.json arrives by git-sync -- but writing that into
+    # the TRACKED file put per-machine state into shared state, and `sync.sh` stashes a
+    # dirty tree and pops it after the merge: both sides had edited the same entry, the pop
+    # conflicted, and the conflict markers left enc-key.json unparseable, which reads as
+    # "not authorised" everywhere and takes decryption down with it. Outside the repo there
+    # is nothing to stash and nothing to collide. It holds exactly ONE entry -- this user's
+    # own key -- and is deleted the moment the tracked file authorises that key.
+    'enc_key_local_file': _SECRETS_DIR / 'enc-key.local.json',
     'private_key_backups': 5,  # rolling backups kept of the private key file
     # per-user vault: both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.

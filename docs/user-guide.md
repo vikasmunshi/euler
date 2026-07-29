@@ -258,8 +258,8 @@ command name below links to its full entry — usage and description — in the
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`update-tags`](commands-index.md#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
 | [`user`](commands-index.md#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
-| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
-| [`users`](commands-index.md#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
+| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise a public key (hex), or work a key request by message id. |
+| [`users`](commands-index.md#command-users) | — | Administer accounts, invite requests and enc-key entries (via sudo admin CLI). |
 | [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 | [`version`](commands-index.md#command-version) | — | Show the running solver build version. |
 
@@ -365,7 +365,8 @@ needs nothing. The mechanics of the filter itself are covered in the
 
 ```
 ~/.euler/id             - your X25519 private key (PKCS8 PEM, plain; machine-local 0600, outside the repo)
-keys/enc-key.json       - { <public-key-hex>: <master key wrapped for that key>, "verify": <check ciphertext> }
+keys/enc-key.json       - { <public-key-hex>: <master key wrapped for that key>, "verify": <check ciphertext>,
+                            "owners": { <public-key-hex>: {slug, since, by} } }
 ```
 
 `~/.euler` is a machine-local secrets dir — a sibling dot-directory named for the
@@ -389,15 +390,22 @@ key may rotate it, authorise another key, or split it.
 solver "user"        # creates ~/.euler/id and prints your public key
 ```
 
-Send your public key to an existing user, who authorises it:
+Creating a key also **files a request with the maintainers** through the message spool,
+carrying your public key — you do not have to find anyone. A maintainer works it from
+their queue:
 
 ```bash
-solver "authorize <your-public-key-hex>"   # wraps the master key to your public key in enc-key.json
+msg queue                                  # the request, with its message id
+solver "authorize <message-id>"            # wraps the master key to the key in that request
+solver "authorize <public-key-hex>"        # …or by hand, if the request never arrived
 ```
 
-Commit and push `keys/enc-key.json`; pull it, and `solver "user"` will now report
-`✓ can encrypt/decrypt`. As a fallback you can `key-reconstruct` the master key from
-`threshold` out-of-band shares produced by `key-split` (n-of-m secret sharing).
+Then they commit and push `keys/enc-key.json`; you `git-sync`, and `solver "user"` reports
+`✓ can encrypt/decrypt`. The authorising maintainer's copy records **whose** key each entry
+is (the `owners` map above — your system slug, never your address, since this file is
+public), which is what lets an admin later `users purge` the entries of people who have
+moved on. As a fallback you can `key-reconstruct` the master key from `threshold`
+out-of-band shares produced by `key-split` (n-of-m secret sharing).
 
 ### Studying the solutions
 

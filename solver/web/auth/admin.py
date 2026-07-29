@@ -42,8 +42,9 @@ from solver.web.auth import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
 from solver.web.auth.client import request
 from solver.web.envfile import env_file_values
 
-_ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove', 'requests-json', 'dismiss')
-_NO_IDENTITY = ('list', 'requests-json')                          # roster/queue views take no identity
+_ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove',
+            'roster-json', 'requests-json', 'dismiss')
+_NO_IDENTITY = ('list', 'roster-json', 'requests-json')            # roster/queue views take no identity
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
 _AUTHZ_PATH = os.environ.get('EULER_AUTHZ_FILE', '/etc/euler/authorizations.json')
@@ -131,6 +132,17 @@ def main(argv: list[str]) -> int:
             if status != 200 or not isinstance(queue, dict):
                 return _fail(f'admin API: {status} {queue}')
             _print_requests(queue)
+            return 0
+
+        if action == 'roster-json':
+            # The roster as data, for `users purge`: every identity on the map with its
+            # profile, its per-user slug and its registration state. Machine-readable
+            # sibling of `list`, exactly as `requests-json` is for the queue — purge has
+            # to *decide* from the roster, not read it off a terminal.
+            status, data = _api('GET', '/admin/users')
+            if status != 200 or not isinstance(data, dict):
+                return _fail(f'admin API: {status} {data}')
+            print(json.dumps(data.get('roster', [])))
             return 0
 
         if action == 'requests-json':
