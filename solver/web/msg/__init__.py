@@ -25,8 +25,8 @@ side and run from the deployed ``/opt/euler`` venv.
 """
 from __future__ import annotations
 
-__all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KEY_REQUEST_SUBJECT',
-           'MSG_SOCKET_ENV']
+__all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KEY_ISSUE_SUBJECT',
+           'KEY_REQUEST_SUBJECT', 'MSG_SOCKET_ENV']
 
 #: The subject a key-authorization request is filed under — the one message *kind* the
 #: spool carries that another command can work. It lives here, with the socket paths,
@@ -35,6 +35,12 @@ __all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KE
 #: a public key out of a body, and the header's message chip offers the Authorize verb on
 #: the rows that carry it. Anything else in the spool is prose for a person to read.
 KEY_REQUEST_SUBJECT: str = 'Key authorization request from '
+
+#: The subject a *granted* key is delivered under — `user-authorize`'s reply and
+#: `key-rekey`'s re-issue. `msg save` requires it before it will write anything to the
+#: enc-key file: the payload is the whole of a holder's key material, so the one message
+#: kind that can overwrite it is named, not guessed at from the presence of some JSON.
+KEY_ISSUE_SUBJECT: str = 'Master key for '
 
 #: Env var naming the public spool socket (the per-user service and the shell read it).
 MSG_SOCKET_ENV: str = 'EULER_MSG_SOCKET'

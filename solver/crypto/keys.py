@@ -26,39 +26,40 @@ Shell commands registered here: `user`, `rekey`, `authorize`, `key-split`, `key-
 """
 from __future__ import annotations
 
-__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'revoke_keys', 'unlock_session', 'user',
-           'user_authorize', 'vault']
+__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'save_issued_key', 'unlock_session',
+           'user', 'user_authorize', 'vault', 'write_enc_key_file']
 
 import atexit
 import os
 import re
 from datetime import datetime, timezone
-from json import dumps
+from json import dumps, loads
 from pathlib import Path
 from secrets import randbelow, token_bytes
 from subprocess import run
-from typing import Any, Iterable, Literal
+from typing import Any, Literal
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
-from solver.auth.identity import system_slug
-from solver.auth.subject import Subject
 from solver.config import config as app_config
 from solver.core import osc
 from solver.crypto import vault as vault_mod
-from solver.crypto.ciphers import (authorised_keys, encrypt_blob, key_owners, load_private_key, lock,
-                                   prune_local_enc_key, public_key_hex, read_enc_key_file, read_master_key,
-                                   verify_master_key, write_local_enc_key)
+from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key_hex,
+                                   read_enc_key_file, read_master_key, unlock, verify_master_key)
 from solver.crypto.config import config
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
-from solver.web.msg import KEY_REQUEST_SUBJECT
+from solver.web.auth.commands import registered_public_keys
+from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT
 
 #: A public key on the wire and in enc-key.json: 32 bytes of lowercase hex.
 _PUBLIC_KEY_RE = re.compile(r'\b[0-9a-f]{64}\b')
+
+#: The JSON object an issue message carries — the payload, wherever it sits in the prose.
+_JSON_OBJECT_RE = re.compile(r'\{.*\}', re.DOTALL)
 
 #: A spool thread id (`secrets.token_hex(8)`) — half a public key's length, which is what
 #: lets `user-authorize` take either without a flag to say which it was given.
@@ -129,93 +130,80 @@ def _create_user_key() -> X25519PrivateKey:
 # ==================================================================================================================== #
 #                                       master (symmetrical) key: persist + rotate
 # ==================================================================================================================== #
-def _write_enc_key_file(data: dict[str, Any]) -> None:
-    """Serialise keys/enc-key.json and clear the cached master key so the next read picks it up."""
+def write_enc_key_file(data: dict[str, str]) -> None:
+    """Write this machine's enc-key file (``0600``) and drop the cached master key.
+
+    The file is two records and belongs to this machine alone, so writing it is a local act:
+    no commit, no push, nobody else's copy to reconcile with. That is the whole point of
+    having moved it out of the checkout.
+    """
     enc_file: Path = config['enc_key_file']
     enc_file.parent.mkdir(parents=True, exist_ok=True)
+    enc_file.parent.chmod(0o700)
     enc_file.write_text(dumps(data, indent=2))
+    enc_file.chmod(0o600)
     read_master_key.cache_clear()
-    pubkeys: int = len(authorised_keys(data))
-    console.print(f'[success]Wrote [accent]{enc_file}[/accent] ({pubkeys} authorised public key(s))[/success]')
-
-
-def _wrapped_for_all(master_key: bytes, public_keys: list[str],
-                     owners: dict[str, dict[str, str]] | None = None) -> dict[str, Any]:
-    """Build the enc-key.json body: master_key wrapped to each public key, plus the reserved entries.
-
-    *owners* is carried through **pruned to the keys being wrapped** — a rotation that drops a
-    key must drop its attribution with it, or the file would keep naming the owner of an entry
-    that no longer exists and `users purge` would count a ghost.
-    """
-    data: dict[str, Any] = {pub: lock(X25519PublicKey.from_public_bytes(bytes.fromhex(pub)), master_key)
-                            for pub in public_keys}
-    data[config['enc_key_verify']] = encrypt_blob(config['verify_text'], master_key).hex()
-    kept = {slug: record for slug, record in (owners or {}).items() if record.get('key') in data}
-    if kept:
-        data[config['enc_key_owners']] = kept
-    return data
-
-
-def revoke_keys(public_keys: Iterable[str]) -> int:
-    """Drop *public_keys* and their ownership records from enc-key.json; return how many went.
-
-    The removal half of :func:`user_authorize`, and the mutation behind ``users purge`` —
-    which owns *deciding* what is stale (it needs the account roster, which is the auth
-    service's to know) while every write to this file stays here, in the one module that
-    persists key material.
-
-    **This is not revocation.** A holder who has already unwrapped the master key still has
-    it, and every committed blob stays decryptable with it forever; dropping an entry only
-    stops that key unwrapping *future* copies of the file. Revoking access means purging and
-    then :func:`key_rekey`, which re-wraps a *new* master key to the survivors and
-    re-encrypts the tree. Callers must say so rather than let a purge read as a lock-out.
-
-    Refuses to empty the file: a keys/enc-key.json with no public keys in it is one nobody
-    can decrypt and nobody can rekey — an unrecoverable state, reached by a typo.
-    """
-    data: dict[str, Any] = read_enc_key_file()
-    drop = {key.strip().lower() for key in public_keys}
-    keep = [key for key in authorised_keys(data) if key not in drop]
-    if not keep:
-        console.print('[error]error:[/error] refusing to remove every authorised key — '
-                      'the file would be unreadable and unrecoverable')
-        return 0
-    removed = [key for key in authorised_keys(data) if key in drop]
-    if not removed:
-        return 0
-    owners = {slug: record for slug, record in key_owners(data).items()
-              if record.get('key') not in drop}
-    for key in removed:
-        del data[key]
-    if owners:
-        data[config['enc_key_owners']] = owners
-    else:
-        data.pop(config['enc_key_owners'], None)
-    _write_enc_key_file(data)
-    return len(removed)
 
 
 @register(requires='admin', help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
 def key_rekey() -> int:
-    """Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
+    """Rotate to a new master key, re-issue it to every registered public key, renormalise blobs.
 
-    Because the git filter is deterministic, every committed blob depends on the master key, so a
-    rotation re-encrypts the tracked private files via `git add --renormalize`.
+    **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
+    access means rotating the key they hold and re-issuing the new one to everyone else.
+
+    The list of who "everyone else" is comes from the **account roster** — each user's
+    ``public_key``, registered in ``users.json`` (``users set-key``). It used to be implicit
+    in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
+    found. With one file per machine there is nothing central to read, so the registry is
+    explicit — and it holds only *public* keys, which is why losing it costs nothing but a
+    round of re-registration.
+
+    Each holder is sent their own payload through the message spool, exactly as
+    ``user-authorize`` does; they run ``msg save`` to take it. An account with no registered
+    public key cannot be re-issued to and is named, not skipped silently — that person loses
+    access at this rotation, which is sometimes the intent and must never be a surprise.
+
+    Because the git filter is deterministic, every committed blob depends on the master key, so
+    a rotation re-encrypts the tracked private files via `git add --renormalize`.
     """
+    from solver.web.msg.notify import notify_user
     try:
         read_master_key()  # proof of authority: must currently hold and verify the master key
     except (FileNotFoundError, KeyError, ValueError) as exc:
         console.print(f'[error]error:[/error] refusing to rekey -- current key check failed ({exc})')
         return 1
-    if not confirm('Rotate the master key and re-encrypt all private files?'):
+    holders = registered_public_keys()
+    if holders is None:
+        console.print('[error]error:[/error] could not read the account roster — rekey needs it to '
+                      'know who to re-issue to (is euler-auth.service running, and can you sudo?)')
+        return 1
+    mine = public_key_hex(load_private_key().public_key())
+    named, unregistered = {i: k for i, k in holders.items() if k}, [i for i, k in holders.items() if not k]
+    console.print(f'[primary]re-issuing to {len(named)} registered public key(s)[/primary]')
+    for identity in unregistered:
+        console.print(f'  [warning]{identity}[/warning] has no registered public key — they LOSE '
+                      'access at this rotation (`users set-key` first to keep them)')
+    if not confirm(f'Rotate the master key, re-encrypt all private files, and re-issue to '
+                   f'{len(named)} holder(s)?'):
         console.print('[muted]Rekey cancelled.[/muted]')
         return 1
-    data: dict[str, Any] = read_enc_key_file()
+
     new_master: bytes = token_bytes(32)
-    _write_enc_key_file(_wrapped_for_all(new_master, authorised_keys(data), key_owners(data)))
+    # Ourselves first: a rotation that fails half way must still leave THIS machine able to
+    # decrypt, or the operator has locked themselves out of the tree they just re-encrypted.
+    write_enc_key_file(enc_key_payload(load_private_key().public_key(), new_master))
+    console.print(f'[success]master key rotated[/success] [muted]({config["enc_key_file"]})[/muted]')
+    for identity, public_key in named.items():
+        if public_key == mine:
+            continue
+        pub = X25519PublicKey.from_public_bytes(bytes.fromhex(public_key))
+        sent = notify_user(identity, f'{KEY_ISSUE_SUBJECT}rotated master key',
+                           _issue_body(enc_key_payload(pub, new_master)))
+        console.print(f'  {"sent to" if sent else "COULD NOT REACH"} [accent]{identity}[/accent]')
     console.print('[muted]Re-encrypting tracked private files...[/muted]')
     run(['git', 'add', '--renormalize', '--', 'solutions/private'], cwd=config['root_dir'], check=False)
-    console.print('[success]Master key rotated; review `git status` and commit the re-encrypted blobs.[/success]')
+    console.print('[success]Rotated; review `git status` and commit the re-encrypted blobs.[/success]')
     return 0
 
 
@@ -253,34 +241,36 @@ def _resolve_key_request(thread_id: str) -> tuple[str, str] | None:
 
 
 @register(requires='maintainer', aliases=('authorize',),
-          help_text='Authorise a public key (hex), or work a key request by message id.')
+          help_text='Issue the master key to a public key, or work a key request by message id.')
 def user_authorize(target: str, identity: str = '') -> int:
-    """Wrap the current master key to a public key and record whose key it is.
+    """Wrap the master key for someone else and send it to them.
 
     *target* is either form of the same act, told apart by shape:
 
-    - a **64-hex public key** — the direct grant, as before. *identity* is optional and,
-      when given, is what the entry is attributed to.
-    - a **16-hex message id** — the key-authorization request the collaborator's `user`
-      command filed (`msg queue` lists them). The key and the requester are read from the
-      thread, the grant is confirmed interactively, and the thread is replied to and marked
-      read, so the person waiting learns it happened without anyone composing a message.
+    - a **16-hex message id** — the key-authorization request their `user` command filed
+      (`msg queue` lists them). The key and the requester come from the thread, the grant is
+      confirmed, and the payload is sent as a reply for them to `msg save`;
+    - a **64-hex public key** — the same act by hand, for a key that reached you some other
+      way. *identity* names who to send it to.
 
-    Attribution is written to the ``owners`` entry of enc-key.json and is **bookkeeping,
-    not authority**: it grants nothing on its own, and a key with no owner still decrypts.
-    It exists so `users purge` can tell whose entry is whose. Only this command writes it —
-    `user --regen`'s local re-wrap is a stopgap until the authorized file arrives by
-    `git-sync`, so recording ownership there would attribute a file about to be replaced.
+    **Nothing is written to a shared file, because there is no shared file.** The payload is
+    the whole of the recipient's enc-key file — `verify` plus the master key wrapped to their
+    public key — and it travels through the spool for the same reason the old tracked file
+    could sit in a public repo: without their private key it is inert. They run `msg save` to
+    take it; until they do, nothing has changed for them.
+
+    The public key is also registered on their account (`users set-key`), which is what
+    `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
+    so from a web shell it prints the command for the operator instead of failing the grant.
 
     Args:
-        target:   a 64-hex public key, or the 16-hex id of a key-authorization message.
-        identity: the email or os-login the key belongs to (public-key form only; the
-                  message form takes it from the thread's author). Omitted, the entry is
-                  authorised but left unattributed — and says so.
+        target:   the 16-hex id of a key-authorization message, or a 64-hex public key.
+        identity: who the key belongs to — taken from the thread for the message form,
+                  required for the bare-key form (there is nobody to send it to otherwise).
 
     Aliased as `authorize`.
     """
-    from solver.web.msg.notify import answer_thread
+    from solver.web.msg.notify import answer_thread, notify_user
     token = target.strip().lower()
     thread_id = ''
     if _THREAD_ID_RE.fullmatch(token):
@@ -290,6 +280,10 @@ def user_authorize(target: str, identity: str = '') -> int:
         thread_id, public_key, identity = token, resolved[0], resolved[1]
     elif _PUBLIC_KEY_RE.fullmatch(token):
         public_key = token
+        if not identity:
+            console.print('[error]error:[/error] a bare public key needs an identity — there is '
+                          'nobody to send the key to otherwise')
+            return 1
     else:
         console.print('[error]error:[/error] expected a 64-character public key or a '
                       '16-character message id')
@@ -306,55 +300,94 @@ def user_authorize(target: str, identity: str = '') -> int:
         console.print('[error]error:[/error] public_key must be 32 bytes of hex')
         return 1
 
-    # The message form asks before granting: its key came out of free text a collaborator
-    # can write, so the operator sees who and what before it lands. The direct form does
-    # not — it is the scriptable one, and the operator typed the key themselves.
-    if thread_id:
-        console.print(f'[primary]request from:[/primary] {identity or "unknown"}\n'
-                      f'[primary]public key:[/primary]   {public_key}')
-        if not confirm('Authorise this key for master-key access?'):
-            console.print('[muted]Not authorised.[/muted]')
-            return 1
+    console.print(f'[primary]issuing to:[/primary] {identity}\n'
+                  f'[primary]public key:[/primary] {public_key}')
+    if not confirm('Send this key the master key?'):
+        console.print('[muted]Not sent.[/muted]')
+        return 1
 
-    data: dict[str, Any] = read_enc_key_file()
-    data[public_key_hex(pub)] = lock(pub, master_key)
-    superseded = ''
-    if identity:
-        # Keyed by SLUG: a collaborator has one authorised key at a time, so this replaces
-        # whatever they had. The key it named is not removed here — it stops being anybody's,
-        # which is precisely what `users purge` is for, and dropping a key is an admin's act
-        # rather than a side effect of granting one.
-        owners: dict[str, dict[str, str]] = key_owners(data)
-        slug = system_slug(identity)
-        superseded = owners.get(slug, {}).get('key', '')
-        owners[slug] = {'key': public_key_hex(pub), 'since': _now_stamp(),
-                        'by': system_slug(app_config['subject'].user)}
-        data[config['enc_key_owners']] = owners
-    _write_enc_key_file(data)
-    console.print(f'[success]Public key [accent]{public_key}[/accent] authorised'
-                  f'{f" for [accent]{identity}[/accent]" if identity else ""}.[/success]')
-    if not identity:
-        # An unattributed key is an orphan the moment it is written — `users purge` cannot
-        # tell it apart from one whose owner is gone, because there is nothing to tell.
-        console.print('[warning]note:[/warning] no identity recorded, so this key belongs to '
-                      'nobody — `users purge` will offer to remove it. Re-run with the '
-                      'identity to attribute it.')
-    if superseded and superseded != public_key_hex(pub):
-        console.print(f'[muted]This supersedes their previous key [accent]{superseded[:16]}…[/accent], '
-                      'which is now nobody\'s — [accent]users purge[/accent] removes it.[/muted]')
-    console.print('[muted]Commit and push keys/enc-key.json (`git-publish keys`) — the grant '
-                  'reaches the collaborator when they `git-sync`.[/muted]')
-    if thread_id:
-        if answer_thread(thread_id, f'Your public key {public_key} is authorised for the private '
-                                    f'solutions.\n\nIt reaches your clone once the updated '
-                                    f'keys/enc-key.json is pushed — run `git-sync` then, and the '
-                                    f'private solutions decrypt in place.'):
-            console.print(f'[muted]Replied on message [accent]{thread_id}[/accent] and marked it '
-                          'read (dismiss it with `msg dismiss` when you are done with it).[/muted]')
-        else:
-            console.print(f'[warning]note:[/warning] could not reply on message {thread_id} — '
-                          'the authorization stands; tell them yourself.')
+    body = _issue_body(enc_key_payload(pub, master_key))
+    delivered = (answer_thread(thread_id, body) if thread_id
+                 else notify_user(identity, f'{KEY_ISSUE_SUBJECT}{identity}', body))
+    if not delivered:
+        console.print('[error]error:[/error] could not deliver the key — nothing was sent. '
+                      'Check the message spool and retry.')
+        return 1
+    console.print(f'[success]Sent to [accent]{identity}[/accent].[/success] '
+                  '[muted]They run `msg save <id>` to take it.[/muted]')
+    _register_public_key(identity, public_key)
     return 0
+
+
+def save_issued_key(body: str) -> bool:
+    """Take the enc-key payload out of an issue message and write it — verified first.
+
+    Called by ``msg save`` (:mod:`solver.web.msg.commands`), which has already checked that
+    the message is an *issue*. This checks the only thing that matters after that: the payload
+    must unwrap with **this machine's** private key and its ``verify`` must decrypt to the
+    known text. A payload wrapped to somebody else, or corrupted in transit, fails here —
+    before the write, because the file it replaces may be the only thing between this machine
+    and the whole private tree.
+    """
+    match = _JSON_OBJECT_RE.search(body)
+    if match is None:
+        console.print('[error]error:[/error] no key payload found in that message')
+        return False
+    try:
+        payload = {str(k): str(v) for k, v in loads(match.group(0)).items()}
+    except (ValueError, AttributeError, TypeError):
+        console.print('[error]error:[/error] the key payload in that message is not readable')
+        return False
+    try:
+        private_key = load_private_key()
+    except (FileNotFoundError, ValueError) as exc:
+        console.print(f'[error]error:[/error] cannot read your private key ({exc}); run `user`')
+        return False
+    mine = public_key_hex(private_key.public_key())
+    if mine not in payload:
+        console.print(f'[error]error:[/error] that key was issued to a different public key — '
+                      f'yours is [accent]{mine}[/accent]. Ask for it to be re-issued.')
+        return False
+    try:
+        master_key = unlock(private_key, payload[mine])
+    except InvalidTag:
+        console.print('[error]error:[/error] the payload does not unwrap with your private key')
+        return False
+    if not verify_master_key(payload, master_key):
+        console.print('[error]error:[/error] the payload fails verification — nothing written')
+        return False
+    write_enc_key_file(payload)
+    console.print(f'[success]Master key saved[/success] [muted]({config["enc_key_file"]})[/muted]')
+    from solver.core.git import enc_key_arrived
+    enc_key_arrived()
+    return True
+
+
+def _issue_body(payload: dict[str, str]) -> str:
+    """The message body carrying an enc-key payload — a line of prose, then the JSON.
+
+    `msg save` reads the JSON object out of it, so the prose above is free to change and the
+    braces are the contract. Kept human-readable on purpose: the recipient sees what arrived
+    and what to do with it, not an opaque blob.
+    """
+    return ('Your master-key access. Run `msg save <id of this message>` to write it to '
+            'your enc-key file; the private solutions decrypt in place once you do.\n\n'
+            + dumps(payload, indent=2) + '\n')
+
+
+def _register_public_key(identity: str, public_key: str) -> None:
+    """Record *public_key* on the account, best-effort — the registry `key-rekey` reads.
+
+    It needs the auth admin plane, which needs sudo, which a web shell cannot get. Rather
+    than fail a grant that has already been delivered, print the one command that finishes
+    the job. A missing registration costs nothing until the next rotation, when it costs
+    that person their access — which is why `key-rekey` names them rather than skipping on.
+    """
+    from solver.web.auth.commands import register_public_key
+    if register_public_key(identity, public_key):
+        return
+    console.print(f'[muted]Not registered for rekey (needs sudo). From the operator\'s terminal: '
+                  f'[accent]users set-key {identity} {public_key}[/accent][/muted]')
 
 
 # ==================================================================================================================== #
@@ -394,44 +427,35 @@ def user(regen: bool = False) -> int:
         console.print('[muted]Keeping the existing private key.[/muted]')
         regen = False
     if regen or private_key is None:
-        # Carry master-key access across the rotation: capture it with the outgoing key *before*
-        # replacing it, then re-wrap it to the new key (and revoke the old entry) afterwards.
-        carry: tuple[str, bytes] | None = None
-        if private_key is not None:
-            try:
-                carry = (public_key_hex(private_key.public_key()), read_master_key())
-            except (FileNotFoundError, KeyError, ValueError):
-                carry = None
+        # Capture the master key with the OUTGOING key before replacing it. Whether that
+        # succeeds is the whole decision below: hold it, and the rotation is self-service —
+        # re-wrap to the new key and you are done, because the enc-key file is this machine's
+        # and nobody else's copy has to agree. Fail, and there is nothing to carry, so the
+        # new key needs issuing by somebody who does hold it.
+        carry: bytes | None = None
+        try:
+            carry = read_master_key()
+        except (FileNotFoundError, KeyError, ValueError):
+            carry = None
         try:
             private_key = _create_user_key()
         except PermissionError:
-            return 1                     # vault present but locked — persist refused (message printed)
+            # A vault that exists but is locked: the persist refused, so nothing was minted
+            # and nothing was lost. It must NOT reach the request path below — a locked vault
+            # is not missing access, and filing a key request for someone who already has the
+            # master key has staff re-issuing for nothing.
+            return 1
         if carry is not None:
-            # Into the machine-local overlay, NEVER the tracked file. Writing this into
-            # keys/enc-key.json put per-machine state into shared state: `sync.sh` stashes a
-            # dirty tree around the merge and pops it after, so when the maintainer's
-            # authorised copy of the same file came the other way the pop conflicted — and
-            # the conflict markers left the JSON unparseable, which every reader sees as
-            # "not authorised" and which takes decryption down until someone resets. A
-            # reader cannot even do that (`git-reset` is contributor-floored). Outside the
-            # checkout there is nothing to stash, nothing to collide, and `git reset --hard`
-            # no longer costs anyone their access.
-            _old_pub, master_key = carry
-            write_local_enc_key(public_key_hex(private_key.public_key()),
-                                lock(private_key.public_key(), master_key))
-            console.print('[muted]Master-key access carried over locally '
-                          f'([accent]{config["enc_key_local_file"]}[/accent]) until an authorised '
-                          'keys/enc-key.json arrives.[/muted]')
+            write_enc_key_file(enc_key_payload(private_key.public_key(), carry))
+            console.print('[success]Master-key access carried to the new key[/success] '
+                          f'[muted]({config["enc_key_file"]})[/muted]')
         # A new identity is exactly what the account page's public-key panel shows —
         # nudge it to re-read (a no-op unless it is the visible pane). Only when a key
         # was actually minted: a bare `user` status view changed nothing.
         osc.account_changed()
         minted = True
     pub: str = public_key_hex(private_key.public_key())
-    # `user` reads a tree at rest, so it is a safe place to retire a superseded overlay —
-    # unlike the decrypt path, which also runs inside the git filter mid-merge.
-    prune_local_enc_key()
-    # …and it must answer for the key material as it is NOW. `read_master_key` is
+    # It must answer for the key material as it is NOW. `read_master_key` is
     # lru_cached, and a web shell is long-lived: without this, `user` in a shell that read
     # the key successfully an hour ago reports "✓ can encrypt/decrypt" from that cache while
     # every fresh process — the git filter above all — fails. This command exists to say
@@ -440,52 +464,20 @@ def user(regen: bool = False) -> int:
     try:
         read_master_key()
         console.print(f'[primary]public key:[/primary] {pub}\n[success]✓ can encrypt/decrypt[/success]')
-        # Decrypting is NOT the same as being authorised, and on a rotation it is usually
-        # not: the carry above re-wrapped the master key to the new key **in this working
-        # tree only**, and the next `git-sync` replaces that file with master's — which
-        # still names the old key. So a minted key needs the same follow-through whether or
-        # not it currently decrypts. Skipping it here was the bug: a collaborator rotated,
-        # saw a tick, and silently lost access at their next sync with nobody ever asked to
-        # authorise the new key.
-        if minted:
-            _make_the_rotation_durable(app_user, pub)
     except (FileNotFoundError, KeyError, ValueError):
+        # The enc-key file is missing, or holds nothing this key opens. That is the whole
+        # test: it does not matter whether this is a first run or a rotation whose carry
+        # failed — either way the key needs issuing by somebody who holds the master key.
         console.print(f'[primary]public key:[/primary] {pub}\n[error]✗ cannot encrypt/decrypt[/error]')
-        console.print('[muted]Have an existing user `authorize` this public key, or `key-reconstruct` '
-                      'from shares.[/muted]')
         if minted:
             _request_authorization(app_user.user, pub)
+        else:
+            console.print('[muted]Ask a maintainer to `user-authorize` this public key, or '
+                          '`key-reconstruct` from shares.[/muted]')
     return 0
 
 
-def _make_the_rotation_durable(subject: Subject, public_key: str) -> None:
-    """Say how a freshly minted key that *already* decrypts becomes durable.
-
-    Two answers, because there are two positions to be in — and the split is "can you run
-    the fix yourself", not a rung for its own sake:
-
-    - **You can.** Holding the master key (you just used it) *and* standing at
-      `user-authorize`'s floor means the grant is one command away, and filing a request
-      with staff would be filing it with yourself. Print the two commands instead.
-    - **You cannot.** A contributor or reader who rotated has a working tree that decrypts
-      and an authorised entry that no longer names them. That is precisely a key request,
-      so file one — the same message the mint-with-no-access path files, worded for a
-      rotation, because the old entry now wants purging as well as the new one authorising.
-    """
-    console.print('[muted]That carry is LOCAL to this machine: the shared keys/enc-key.json still '
-                  'authorises your OLD key, and the overlay goes away the moment it names the new '
-                  'one.[/muted]')
-    if subject.has('maintainer'):
-        console.print('[muted]Make it durable:[/muted]')
-        console.print(f'  [accent]user-authorize[/accent] {public_key} {subject.user}')
-        console.print('  [accent]git-publish keys[/accent]')
-        console.print('[muted]Your old entry is then unattributed and stale — '
-                      '[accent]users purge[/accent] drops it.[/muted]')
-        return
-    _request_authorization(subject.user, public_key, rotated=True)
-
-
-def _request_authorization(identity: str, public_key: str, *, rotated: bool = False) -> None:
+def _request_authorization(identity: str, public_key: str) -> None:
     """File a key-authorization request with staff for a freshly minted key.
 
     Only on the paths that need it: a key was **just minted** and somebody holding the
@@ -493,9 +485,9 @@ def _request_authorization(identity: str, public_key: str, *, rotated: bool = Fa
     this working tree. A bare ``user`` status view is not a request, and neither is a mint
     by someone who can authorise it themselves (:func:`_make_the_rotation_durable`).
 
-    *rotated* distinguishes the two mints. Without it the requester still decrypts — their
-    tree carries a local re-wrap — so the staff-side act is *two* acts: authorise the new
-    key, and purge the old entry that is now nobody's.
+    One condition reaches here: a key was minted and the master key could not be loaded —
+    missing file, or nothing in it this key opens. Whether that is a first run or a rotation
+    whose carry failed makes no difference to what has to happen next.
 
     This is why the message layer exists (:mod:`solver.web.msg.notify`) — before it, the
     account page told the collaborator to "copy your public key to the admin and wait",
@@ -508,16 +500,13 @@ def _request_authorization(identity: str, public_key: str, *, rotated: bool = Fa
     # exactly one public key — the two rules that make this thread machine-workable. Keep both
     # true when editing this text: a reworded subject silently turns every future request back
     # into copy-and-paste, and a second hex token in the body makes it refuse.
-    standing = ('rotated their key pair; their working tree still decrypts through a local '
-                're-wrap, but master authorises their OLD key' if rotated else
-                'minted a new key pair and cannot decrypt the private solutions yet')
-    tail = ('\n\nTheir previous entry is now nobody\'s — `users purge` drops it.\n' if rotated else '\n')
     sent = notify_staff(
         f'{KEY_REQUEST_SUBJECT}{identity}',
-        f'{identity} {standing}.\n\n'
+        f'{identity} holds a key pair but not the master key, so the private solutions do '
+        f'not decrypt for them yet.\n\n'
         f'public key: {public_key}\n\n'
-        f'To grant access, run:\n'
-        f'    user-authorize <the id of this message>\n' + tail)
+        f'To issue it, run:\n'
+        f'    user-authorize <the id of this message>\n')
     if sent:
         console.print('[muted]A key-authorization request has been sent to the maintainers.[/muted]')
     else:
@@ -834,12 +823,14 @@ def key_reconstruct(threshold: int = 2) -> int:
     except ValueError as exc:
         console.print(f'[error]error:[/error] {exc}')
         return 1
-    data: dict[str, Any] = read_enc_key_file() if config['enc_key_file'].exists() else {}
-    if config['enc_key_verify'] in data and not verify_master_key(data, master_key):
-        console.print('[error]error:[/error] reconstructed key fails verification; wrong shares?')
-        return 1
-    data[public_key_hex(private_key.public_key())] = lock(private_key.public_key(), master_key)
-    data.setdefault(config['enc_key_verify'], encrypt_blob(config['verify_text'], master_key).hex())
-    _write_enc_key_file(data)
+    # Check the reconstruction against the file we already have, when there is one: the
+    # shares are typed by hand, and writing an unverified key over a working one would trade
+    # a recovery for a lock-out.
+    if config['enc_key_file'].exists():
+        existing: dict[str, Any] = read_enc_key_file()
+        if config['enc_key_verify'] in existing and not verify_master_key(existing, master_key):
+            console.print('[error]error:[/error] reconstructed key fails verification; wrong shares?')
+            return 1
+    write_enc_key_file(enc_key_payload(private_key.public_key(), master_key))
     console.print(f'[success]Master key reconstructed from {threshold} shares and stored.[/success]')
     return 0

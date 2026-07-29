@@ -29,32 +29,26 @@ Verified: `python -c "import solver.crypto.ciphers"` writes 0 bytes to stdout.
 from __future__ import annotations
 
 __all__ = [
-    'authorised_keys',
     'build_cipher',
-    'clear_local_enc_key',
-    'current_key_slugs',
     'decrypt_blob',
     'decrypt_blob_with',
     'encrypt_blob',
     'encrypt_blob_with',
+    'enc_key_payload',
     'is_encrypted',
-    'key_owners',
     'load_private_key',
     'lock',
-    'prune_local_enc_key',
     'public_key_hex',
     'read_enc_key_file',
-    'read_local_enc_key',
     'read_master_key',
     'unlock',
     'verify_master_key',
-    'write_local_enc_key',
 ]
 
 from functools import lru_cache
 from hashlib import sha256
 from hmac import new as hmac_new
-from json import dumps, loads
+from json import loads
 from pathlib import Path
 from typing import Any, cast
 
@@ -149,122 +143,8 @@ def unlock(private_key: X25519PrivateKey, locked: str) -> bytes:
 #                                               master (symmetrical) key
 # ==================================================================================================================== #
 def read_enc_key_file() -> dict[str, Any]:
-    """Read and parse keys/enc-key.json; raises FileNotFoundError if it has not been generated."""
+    """Read and parse this machine's enc-key file; FileNotFoundError when there is none."""
     return cast(dict[str, Any], loads(config['enc_key_file'].read_text()))
-
-
-def authorised_keys(data: dict[str, Any]) -> list[str]:
-    """The public keys the file authorises — every entry that is not a reserved one.
-
-    The one place that knows which entries are keys and which are bookkeeping. Callers
-    that need "who may decrypt" ask here rather than each filtering out `verify` (and now
-    `owners`) for themselves — the bug that shape invites is a new reserved entry being
-    re-wrapped as if it were somebody's public key.
-    """
-    reserved = {config['enc_key_verify'], config['enc_key_owners']}
-    return [key for key in data if key not in reserved]
-
-
-def key_owners(data: dict[str, Any]) -> dict[str, dict[str, str]]:
-    """The attribution map: ``{<slug>: {key, since, by}}``, empty when absent.
-
-    **Keyed by slug, not by public key**, and that is the whole model: a collaborator has
-    exactly one authorised key at any moment, so authorising a new one *replaces* the
-    record and the key it named stops being anybody's. Keyed the other way the file grew a
-    second live entry per rotation and both read as current — which is how one
-    collaborator ended up with two "active" keys and `users purge` found nothing to do.
-
-    **Attribution, never authority.** Nothing in the decrypt path consults this: a key with
-    no owner still unwraps. It exists so an admin can ask the only question that matters
-    for purging — *is this key still somebody's?* — which the file could not answer at all
-    before, and answered wrongly while it was keyed by key.
-
-    One shape, not two: a record without a ``key`` is ignored. The file was migrated when
-    this became the shape, so nothing in the wild carries the older key-keyed form, and
-    keeping a reader for it would mean keeping a second definition of "whose key is this"
-    alive to drift against the first.
-    """
-    owners = data.get(config['enc_key_owners'])
-    if not isinstance(owners, dict):
-        return {}
-    return {str(slug): {str(field): str(value) for field, value in record.items()}
-            for slug, record in owners.items()
-            if isinstance(record, dict) and record.get('key')}
-
-
-def current_key_slugs(data: dict[str, Any]) -> dict[str, str]:
-    """Invert :func:`key_owners` — ``{<public-key-hex>: <slug>}`` for the *current* keys.
-
-    Every authorised key absent from this map is an **orphan**: superseded by its owner's
-    later key, left behind by a removed account, or never attributed at all. The three are
-    one thing — a key that is nobody's — and `users purge` treats them alike.
-    """
-    return {record['key']: slug for slug, record in key_owners(data).items()}
-
-
-def read_local_enc_key() -> dict[str, str]:
-    """The machine-local overlay: ``{<public-key-hex>: <wrapped master key>}``, or ``{}``.
-
-    Exactly one entry — this user's own key — and it exists only in the window between
-    rotating a key and an authorised ``enc-key.json`` arriving by ``git-sync``. Keyed by
-    public key rather than holding a bare string so a *stale* overlay (written for a key
-    since rotated away) simply does not match and is ignored, instead of being fed to an
-    unwrap that would fail further downstream.
-
-    Unreadable or malformed reads as absent: this is a stopgap, and a broken one must
-    degrade to "no access yet", never to an exception on the git filter's path.
-    """
-    try:
-        loaded = loads(config['enc_key_local_file'].read_text())
-    except (OSError, ValueError):
-        return {}
-    return {str(k): str(v) for k, v in loaded.items()} if isinstance(loaded, dict) else {}
-
-
-def write_local_enc_key(public_key: str, wrapped: str) -> None:
-    """Replace the overlay with the single entry *public_key* → *wrapped* (``0600``).
-
-    Replace, never merge: the file's whole purpose is "the one key this machine holds that
-    the shared file does not authorise yet", so a second rotation supersedes the first
-    rather than accumulating keys nobody will ever purge.
-
-    Lives here rather than with the other writers in :mod:`solver.crypto.keys` because the
-    reader and the delete are here — the overlay's three operations belong together, and
-    this module's contract is *no stdout*, not *no writes*.
-    """
-    target: Path = config['enc_key_local_file']
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.parent.chmod(0o700)
-    target.write_text(dumps({public_key: wrapped}, indent=2))
-    target.chmod(0o600)
-
-
-def clear_local_enc_key() -> None:
-    """Delete the overlay; best-effort, and silent about a file that was never there."""
-    try:
-        config['enc_key_local_file'].unlink(missing_ok=True)
-    except OSError:
-        pass        # a read-only secrets dir must not take decryption down with it
-
-
-def prune_local_enc_key() -> None:
-    """Drop the overlay once the shared file authorises this key — from a settled tree only.
-
-    The counterpart to :func:`read_master_key` not doing this itself. Call it where the
-    working tree is known to be at rest — after a *completed* ``git-sync``, or from ``user``
-    — never from the decrypt path, which also runs inside the git filter mid-merge where
-    the tracked file is a state git is still in the middle of writing.
-
-    Silent and best-effort throughout: an unreadable identity or an unparseable tracked
-    file simply means "cannot tell yet", which is a reason to keep the fallback, never to
-    fail the command that called this in passing.
-    """
-    try:
-        my_public = public_key_hex(load_private_key().public_key())
-        if my_public in read_enc_key_file():
-            clear_local_enc_key()
-    except (FileNotFoundError, ValueError, OSError):
-        return
 
 
 def verify_master_key(data: dict[str, Any], master_key: bytes) -> bool:
@@ -278,52 +158,49 @@ def verify_master_key(data: dict[str, Any], master_key: bytes) -> bool:
 
 @lru_cache(maxsize=None)
 def read_master_key() -> bytes:
-    """Unlock the current user's master key and prove it correct.
+    """Unlock this machine's master key and prove it correct.
 
-    Two sources, in this order — the shared file always wins:
+    One file, two records: ``verify``, and this holder's own wrapped key. Read the entry that
+    matches the private key, unwrap it, and check it against ``verify`` before returning —
+    the same proof as ever, on a file that is now nobody's but this machine's.
 
-    1. **keys/enc-key.json**, the authorised grant list, whenever it names this public key.
-    2. **the machine-local overlay**, when it does not — the window between rotating a key
-       and a maintainer's ``user-authorize`` reaching this clone by ``git-sync``.
-
-    **This read never deletes the overlay**, even though a tracked hit means the stopgap has
-    been superseded. It runs inside the git filter, and mid-merge the tracked file is
-    *transient*: git writes the incoming ``keys/enc-key.json`` into the worktree while it
-    checks out ``solutions/private/**``, so the filter sees a file that names this key — and
-    if the merge then fails and ``sync.sh`` rolls it back, the worktree reverts to the copy
-    that does not, with the fallback already deleted. The user ends up worse off than before
-    they synced, which is how this was found. Pruning happens at points that see a
-    *settled* tree instead (:func:`prune_local_enc_key`).
-
-    Neither present is simply no access. The ``verify`` check is unchanged either way: it
-    reads the *shared* file's ciphertext, so a master key reached through the overlay is
-    held to exactly the same proof as one reached normally.
+    There is no second source and no fallback. The tracked, shared file this replaced needed
+    both (an overlay for the window between rotating and being re-authorised, a repair for
+    when git mangled it); a file that only this machine writes has no such windows.
 
     Returns:
         The verified 32-byte master key.
 
     Raises:
-        FileNotFoundError: If the private key, password, or enc-key file is missing.
-        KeyError:          If the current user's public key is in neither source.
+        FileNotFoundError: If the private key or the enc-key file is missing.
+        KeyError:          If the file holds no entry for this public key.
         ValueError:        If the key cannot be unwrapped or fails verification.
     Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
     """
     private_key: X25519PrivateKey = load_private_key()
     data: dict[str, Any] = read_enc_key_file()
     my_public: str = public_key_hex(private_key.public_key())
-    if my_public in data:
-        wrapped = str(data[my_public])
-    elif (local := read_local_enc_key().get(my_public)) is not None:
-        wrapped = local
-    else:
+    if my_public not in data:
         raise KeyError(f'public key {my_public} has no entry in {config["enc_key_file"]}')
     try:
-        master_key: bytes = unlock(private_key, wrapped)
+        master_key: bytes = unlock(private_key, str(data[my_public]))
     except InvalidTag as exc:
         raise ValueError('master key could not be unwrapped with this private key') from exc
     if not verify_master_key(data, master_key):
         raise ValueError('master key failed verification against the stored ciphertext')
     return master_key
+
+
+def enc_key_payload(public_key: X25519PublicKey, master_key: bytes) -> dict[str, str]:
+    """The whole file, for one holder: ``{verify, <their-public-key>: <wrapped master key>}``.
+
+    What `user-authorize` sends and `msg save` writes — the unit of key distribution now that
+    there is no shared file to append to. Wrapped to *their* public key, so it is theirs alone
+    to open, and it travels through the message spool for the same reason the old file could
+    sit in a public repo: without the matching private key it is inert.
+    """
+    return {config['enc_key_verify']: encrypt_blob(config['verify_text'], master_key).hex(),
+            public_key_hex(public_key): lock(public_key, master_key)}
 
 
 # ==================================================================================================================== #

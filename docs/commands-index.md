@@ -100,7 +100,7 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`update-tags`](#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
 | [`user`](#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
-| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise a public key (hex), or work a key request by message id. |
+| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Issue the master key to a public key, or work a key request by message id. |
 | [`users`](#command-users) | — | Administer accounts, invite requests and enc-key entries (via sudo admin CLI). |
 | [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 | [`version`](#command-version) | — | Show the running solver build version. |
@@ -887,7 +887,7 @@ Push targets (keys|scripts|solutions|solver) to remote.
 
 ```
 git-publish
-[keys|scripts|solutions|solver ...]
+[scripts|solutions|solver ...]
 [dry_run=true|--dry-run]
 [silent=true|--silent]
 ```
@@ -896,7 +896,10 @@ git-publish
 Publish changed files for named targets to the remote repository.
 
 Args:
-    targets: Scopes of files to publish — one or more of 'keys', 'scripts', 'solutions', or 'solver'.
+    targets: Scopes of files to publish — one or more of 'scripts', 'solutions', or 'solver'.
+             There is no `keys` scope: key material is not distributed by git any more.
+             A holder's enc-key file is machine-local, and issuing one is
+             `user-authorize` sending it through the message spool.
              Defaults to 'solutions'.
     dry_run: Print the push and pull-request commands instead of running them.  Defaults to False.
 
@@ -1045,10 +1048,25 @@ key-rekey
 ```
 
 ```text
-Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
+Rotate to a new master key, re-issue it to every registered public key, renormalise blobs.
 
-Because the git filter is deterministic, every committed blob depends on the master key, so a
-rotation re-encrypts the tracked private files via `git add --renormalize`.
+**Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
+access means rotating the key they hold and re-issuing the new one to everyone else.
+
+The list of who "everyone else" is comes from the **account roster** — each user's
+``public_key``, registered in ``users.json`` (``users set-key``). It used to be implicit
+in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
+found. With one file per machine there is nothing central to read, so the registry is
+explicit — and it holds only *public* keys, which is why losing it costs nothing but a
+round of re-registration.
+
+Each holder is sent their own payload through the message spool, exactly as
+``user-authorize`` does; they run ``msg save`` to take it. An account with no registered
+public key cannot be re-issued to and is named, not skipped silently — that person loses
+access at this rotation, which is sometimes the intent and must never be a surprise.
+
+Because the git filter is deterministic, every committed blob depends on the master key, so
+a rotation re-encrypts the tracked private files via `git add --renormalize`.
 ```
 
 ---
@@ -1194,7 +1212,7 @@ Read and send messages: your threads, questions to staff, staff notices.
 
 ```
 msg
-[action=list|read|send|reply|queue|notice|dismiss] (default list)
+[action=list|read|save|send|reply|queue|notice|dismiss] (default list)
 [thread=<str>] (default '')
 [subject=<str>] (default '')
 [body=<str>] (default '')
@@ -1211,11 +1229,12 @@ messaging. Delivery is asynchronous — the spool holds the thread until you rea
 
 Args:
     action:    list (your threads, newest first), read (one thread, and mark it
-               read), send (ask staff a question), reply (answer on a thread you
-               are party to), queue (STAFF: the inbound work list), notice (STAFF:
-               send to named recipients or everyone), dismiss (STAFF: drop a
+               read), save (take the master key a maintainer issued you, writing it
+               to your enc-key file), send (ask staff a question), reply (answer on a
+               thread you are party to), queue (STAFF: the inbound work list), notice
+               (STAFF: send to named recipients or everyone), dismiss (STAFF: drop a
                worked thread).
-    thread:    the thread id (read / reply / dismiss).
+    thread:    the thread id (read / save / reply / dismiss).
     subject:   the subject line (send / notice).
     body:      the message text (send / reply / notice).
     to:        comma-separated recipient identities for a notice.
@@ -1697,7 +1716,7 @@ silently orphan the real one (and with it any enc-key authorization it carries).
 
 #### Command: `user-authorize` (`authorize`)
 
-Authorise a public key (hex), or work a key request by message id.
+Issue the master key to a public key, or work a key request by message id.
 * profiles: admin, maintainer
 
 ```
@@ -1706,28 +1725,30 @@ user-authorize <target>
 ```
 
 ```text
-Wrap the current master key to a public key and record whose key it is.
+Wrap the master key for someone else and send it to them.
 
 *target* is either form of the same act, told apart by shape:
 
-- a **64-hex public key** — the direct grant, as before. *identity* is optional and,
-  when given, is what the entry is attributed to.
-- a **16-hex message id** — the key-authorization request the collaborator's `user`
-  command filed (`msg queue` lists them). The key and the requester are read from the
-  thread, the grant is confirmed interactively, and the thread is replied to and marked
-  read, so the person waiting learns it happened without anyone composing a message.
+- a **16-hex message id** — the key-authorization request their `user` command filed
+  (`msg queue` lists them). The key and the requester come from the thread, the grant is
+  confirmed, and the payload is sent as a reply for them to `msg save`;
+- a **64-hex public key** — the same act by hand, for a key that reached you some other
+  way. *identity* names who to send it to.
 
-Attribution is written to the ``owners`` entry of enc-key.json and is **bookkeeping,
-not authority**: it grants nothing on its own, and a key with no owner still decrypts.
-It exists so `users purge` can tell whose entry is whose. Only this command writes it —
-`user --regen`'s local re-wrap is a stopgap until the authorized file arrives by
-`git-sync`, so recording ownership there would attribute a file about to be replaced.
+**Nothing is written to a shared file, because there is no shared file.** The payload is
+the whole of the recipient's enc-key file — `verify` plus the master key wrapped to their
+public key — and it travels through the spool for the same reason the old tracked file
+could sit in a public repo: without their private key it is inert. They run `msg save` to
+take it; until they do, nothing has changed for them.
+
+The public key is also registered on their account (`users set-key`), which is what
+`key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
+so from a web shell it prints the command for the operator instead of failing the grant.
 
 Args:
-    target:   a 64-hex public key, or the 16-hex id of a key-authorization message.
-    identity: the email or os-login the key belongs to (public-key form only; the
-              message form takes it from the thread's author). Omitted, the entry is
-              authorised but left unattributed — and says so.
+    target:   the 16-hex id of a key-authorization message, or a 64-hex public key.
+    identity: who the key belongs to — taken from the thread for the message form,
+              required for the bare-key form (there is nobody to send it to otherwise).
 
 Aliased as `authorize`.
 ```
@@ -1741,10 +1762,9 @@ Administer accounts, invite requests and enc-key entries (via sudo admin CLI).
 
 ```
 users
-[action=list|process-requests|add|change|enable|disable|remove|purge|redeploy] (default list)
+[action=list|process-requests|add|change|enable|disable|remove|set-key|redeploy] (default list)
 [identity=<str>] (default '')
-[profile=reader|contributor|maintainer|admin] (default reader)
-[apply=true|--apply]
+[profile=<str>] (default reader)
 ```
 
 ```text
@@ -1754,29 +1774,24 @@ The whole command is ``admin``-floored and the account verbs re-execute the admi
 under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
 tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-``purge`` is the exception to the sudo shape: it *reads* the roster under sudo but does
-its work in **your checkout**, on ``keys/enc-key.json``, as you — because that file is
-the repo's, not the host's, and the change has to be committed and pushed like any
-other. It classifies every authorised key against the roster (via the ``owners``
-attribution ``user-authorize`` records, keyed by slug) and offers every key that is not
-some live account's *current* one — superseded, orphaned by a removal, or never
-attributed. Your own key is never a candidate.
+``set-key`` records an account's X25519 **public** key — the registry ``key-rekey``
+re-issues a rotated master key to. `user-authorize` writes it for you when it can;
+from a web shell it cannot sudo, so it prints this command instead.
 
 Args:
     action:   list (roster + pending + the invite-request queue), process-requests
               (walk the queue interactively — accept / ignore / dismiss each),
               add (map entry — ``@email`` also provisions + mints an invite; a bare
               os-login is local-only), change (reassign a profile), enable / disable
-              (web SRP state), remove (drop the account/entry), purge (report — or with
-              ``--apply`` work — the enc-key entries whose owner is gone), redeploy
-              (re-assert the per-user host layer and re-lay every collaborator's git
-              hooks — takes no identity, and drops live shells).
-    identity: a web email (``@``) or a local OS login for the account verbs; for
-              ``purge``, one public key (hex) to consider instead of the whole file.
-              Not used by list / process-requests / redeploy.
-    profile:  the profile to assign (add / change). ``admin`` is valid only for a
-              local os-login, never a web account.
-    apply:    ``purge`` only — actually remove, rather than report what it would offer.
+              (web SRP state), remove (drop the account/entry), set-key (register their
+              public key for rekey), redeploy (re-assert the per-user host layer and
+              re-lay every collaborator's git hooks — takes no identity, and drops live
+              shells).
+    identity: a web email (``@``) or a local OS login (required for the account verbs;
+              not for list / process-requests / redeploy).
+    profile:  the profile to assign (add / change), or the 64-hex **public key** for
+              ``set-key``. ``admin`` is valid only for a local os-login, never a web
+              account.
 ```
 
 ---

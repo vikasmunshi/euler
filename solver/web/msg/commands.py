@@ -30,6 +30,7 @@ from solver.config import config
 from solver.core import osc
 from solver.shell import console, register
 from solver.web.msg.client import call as _call
+from solver.web.msg import KEY_ISSUE_SUBJECT
 from solver.web.msg.identity import STAFF_FLOOR
 
 
@@ -192,6 +193,41 @@ def _notice(to: str, subject: str, body: str) -> int:
     return 0
 
 
+def _save(thread_id: str) -> int:
+    """Write the master key delivered in *thread_id* to this machine's enc-key file.
+
+    The receiving half of key distribution. `user-authorize` (or `key-rekey`) wraps the master
+    key to your public key and sends it; this takes it. Nothing else can write that file, and
+    nothing writes it without proving the payload first:
+
+    - the thread's **subject** must be the key-issue one, so no other message can be mined
+      for something that looks like key material;
+    - the payload must **unwrap with your private key** and its `verify` must decrypt to the
+      known text. Only then does it replace what you have.
+
+    That order matters. The file it overwrites may be the only thing standing between this
+    machine and the whole private tree, so a bad or mistargeted payload has to fail *before*
+    the write, not be discovered after it.
+    """
+    from solver.crypto.keys import save_issued_key
+    result = _call('thread', thread_id=thread_id)
+    if result is None:
+        return _unreachable()
+    status, data = result
+    if status != 200 or not isinstance(data, dict):
+        console.print(f'[error]error:[/error] {status} {data}')
+        return 1
+    if not str(data.get('subject', '')).startswith(KEY_ISSUE_SUBJECT):
+        console.print(f'[error]error:[/error] message [accent]{thread_id}[/accent] does not carry '
+                      'a master key — `msg save` writes key material and nothing else')
+        return 1
+    if not save_issued_key(str(data.get('body', ''))):
+        return 1
+    _call('read', thread_id=thread_id)      # worked, so it is read
+    osc.messages_changed()
+    return 0
+
+
 def _dismiss(thread_id: str) -> int:
     """Drop a worked thread from the spool (staff)."""
     result = _call('dismiss', thread_id=thread_id)
@@ -208,7 +244,8 @@ def _dismiss(thread_id: str) -> int:
 
 @register(requires='reader', aliases=('messages',),
           help_text='Read and send messages: your threads, questions to staff, staff notices.')
-def msg(action: Literal['list', 'read', 'send', 'reply', 'queue', 'notice', 'dismiss'] = 'list',
+def msg(action: Literal['list', 'read', 'save', 'send', 'reply', 'queue', 'notice',
+                        'dismiss'] = 'list',
         thread: str = '', subject: str = '', body: str = '',
         to: str = '', all_users: bool = False) -> int:
     """Read and write the message spool (web-server-guide § Messaging).
@@ -219,11 +256,12 @@ def msg(action: Literal['list', 'read', 'send', 'reply', 'queue', 'notice', 'dis
 
     Args:
         action:    list (your threads, newest first), read (one thread, and mark it
-                   read), send (ask staff a question), reply (answer on a thread you
-                   are party to), queue (STAFF: the inbound work list), notice (STAFF:
-                   send to named recipients or everyone), dismiss (STAFF: drop a
+                   read), save (take the master key a maintainer issued you, writing it
+                   to your enc-key file), send (ask staff a question), reply (answer on a
+                   thread you are party to), queue (STAFF: the inbound work list), notice
+                   (STAFF: send to named recipients or everyone), dismiss (STAFF: drop a
                    worked thread).
-        thread:    the thread id (read / reply / dismiss).
+        thread:    the thread id (read / save / reply / dismiss).
         subject:   the subject line (send / notice).
         body:      the message text (send / reply / notice).
         to:        comma-separated recipient identities for a notice.
@@ -235,13 +273,16 @@ def msg(action: Literal['list', 'read', 'send', 'reply', 'queue', 'notice', 'dis
     if action == 'queue':
         return _queue() if _is_staff() else _refuse_below_staff('queue')
 
-    if action in ('read', 'dismiss', 'reply') and not thread:
+    if action in ('read', 'save', 'dismiss', 'reply') and not thread:
         console.print(f'[error]error:[/error] msg {action} requires a thread id '
                       '(see `msg list`)')
         return 2
 
     if action == 'read':
         return _read(thread)
+
+    if action == 'save':
+        return _save(thread)
 
     if action == 'dismiss':
         return _dismiss(thread) if _is_staff() else _refuse_below_staff('dismiss')

@@ -57,6 +57,7 @@ class UserRecord(NamedTuple):
     terms_accepted_at: str
     created: str
     disabled: bool
+    public_key: str      # X25519 public key hex, or '' — the registry `key-rekey` re-issues to
 
     @property
     def srp_token(self) -> SrpToken:
@@ -66,8 +67,8 @@ class UserRecord(NamedTuple):
     def summary(self) -> dict[str, Any]:
         """A secret-free view for listings (no salt/verifier). The **profile** is not
         here — it lives in ``authorizations.json``, joined in by the caller."""
-        return {'email': self.email, 'created': self.created,
-                'disabled': self.disabled, 'terms_version': self.terms_version}
+        return {'email': self.email, 'created': self.created, 'disabled': self.disabled,
+                'terms_version': self.terms_version, 'public_key': self.public_key}
 
 
 class UserStore:
@@ -93,7 +94,8 @@ class UserStore:
             verifier=str(raw.get('verifier', '')),
             terms_version=str(raw.get('terms_version', '')),
             terms_accepted_at=str(raw.get('terms_accepted_at', '')),
-            created=str(raw.get('created', '')), disabled=bool(raw.get('disabled', True)))
+            created=str(raw.get('created', '')), disabled=bool(raw.get('disabled', True)),
+            public_key=str(raw.get('public_key', '')))
 
     def create(self, email: str, salt: str, verifier: str,
                terms_version: str, terms_accepted_at: str) -> UserRecord:
@@ -117,6 +119,23 @@ class UserStore:
             return False
         users[key]['salt'] = salt
         users[key]['verifier'] = verifier
+        self._save(users)
+        return True
+
+    def set_public_key(self, email: str, public_key: str) -> bool:
+        """Record the account's X25519 **public** key; False if the user is unknown.
+
+        The registry :func:`~solver.crypto.keys.key_rekey` re-issues to. It is public
+        material — losing it costs a round of re-registration, never access — and it is the
+        one thing that stayed central when the wrapped keys stopped being: a rotation has to
+        know who to send the new key to, and with one enc-key file per machine there is
+        nothing else to enumerate.
+        """
+        users = self._load()
+        key = normalize_email(email)
+        if key not in users:
+            return False
+        users[key]['public_key'] = public_key
         self._save(users)
         return True
 

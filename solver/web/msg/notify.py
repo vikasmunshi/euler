@@ -29,7 +29,7 @@ with no aiohttp — the shell tier has no web dependencies.
 """
 from __future__ import annotations
 
-__all__ = ['answer_thread', 'notify_staff', 'read_thread']
+__all__ = ['answer_thread', 'notify_staff', 'notify_user', 'read_thread']
 
 import logging
 import os
@@ -67,6 +67,24 @@ def notify_staff(subject: str, body: str) -> bool:
         log.warning('staff notification refused (%s)', status)
         return False
     return True
+
+
+def notify_user(identity: str, subject: str, body: str) -> bool:
+    """Send *identity* a staff notice; return whether it was accepted.
+
+    The other direction from :func:`notify_staff`, and the delivery half of key issuance:
+    `user-authorize` answers a request on its own thread, but `key-rekey` has no thread to
+    answer — it is telling people something they never asked for — so it opens one.
+
+    Goes through :mod:`solver.web.msg.client`, so it reaches the spool from the operator's
+    terminal (deliberately outside ``euler-web``) via the sudo plane. A rotation is already
+    an interactive admin act, so a sudo prompt here surprises nobody.
+    """
+    result = call('notice', body={'to': [identity], 'subject': subject, 'body': body})
+    accepted = result is not None and result[0] == 201
+    if not accepted:
+        log.warning('notice to %s refused (%s)', identity, result and result[0])
+    return accepted
 
 
 def read_thread(thread_id: str) -> dict[str, Any] | None:

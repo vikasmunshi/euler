@@ -43,7 +43,7 @@ from solver.web.auth.client import request
 from solver.web.envfile import env_file_values
 
 _ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove',
-            'roster-json', 'requests-json', 'dismiss')
+            'set-key', 'roster-json', 'requests-json', 'dismiss')
 _NO_IDENTITY = ('list', 'roster-json', 'requests-json')            # roster/queue views take no identity
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
@@ -133,6 +133,17 @@ def main(argv: list[str]) -> int:
                 return _fail(f'admin API: {status} {queue}')
             _print_requests(queue)
             return 0
+
+        if action == 'set-key':
+            # The public-key registry `key-rekey` re-issues to. `profile` carries the key
+            # here: the CLI's positional shape is (action, identity, value), and inventing a
+            # fourth slot for one verb would ripple through every caller.
+            status, data = _api('POST', f'/admin/users/{identity}/public-key',
+                                body={'public_key': profile})
+            if status == 200:
+                print(f'registered public key for {identity}')
+                return 0
+            return _fail(f'{status} {data}')
 
         if action == 'roster-json':
             # The roster as data, for `users purge`: every identity on the map with its

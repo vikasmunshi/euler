@@ -30,10 +30,8 @@ class CryptoConfig(TypedDict):
     root_dir: Path
     # key material
     private_key_file: Path  # plain (unencrypted) X25519 private key (PKCS8 PEM)
-    enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + the reserved entries below
-    enc_key_verify: str  # reserved entry: the verify-by-decrypt ciphertext
-    enc_key_owners: str  # reserved entry: {<public-key-hex>: {slug, since, by}} -- attribution, not authority
-    enc_key_local_file: Path  # machine-local stopgap: THIS user's own wrapped master key, one entry
+    enc_key_file: Path  # THIS machine's two records: {verify, <my-public-key-hex>: <wrapped master key>}
+    enc_key_verify: str  # the reserved entry name: the verify-by-decrypt ciphertext
     private_key_backups: int  # rolling backups kept of the private key file
     # per-user vault (envelope encryption of the private key + env)
     env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
@@ -69,25 +67,24 @@ config: CryptoConfig = {
     'root_dir': _ROOT,
     # key material
     'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
-    'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + reserved
-    # The reserved (non-public-key) entries of enc-key.json. They are *additive*: every
-    # reader indexes the file by public key and takes `verify` by name, so a clone running
-    # an older solver ignores anything else it finds. That is the whole reason attribution
-    # is a sibling entry rather than a reshape into {"keys": {...}} -- the git filter reads
-    # this file on every checkout, and a shape it cannot parse is a collaborator who
-    # cannot decrypt.
+    # The master key, wrapped to THIS machine's public key. Two records and nothing else:
+    # `verify`, and the holder's own entry. It lives in the machine-local secrets dir beside
+    # the private key that opens it — NOT in the checkout.
+    #
+    # It used to be a tracked, multi-entry file: every authorised key, committed, distributed
+    # by git. That put per-machine key material into shared state, and everything that hurt
+    # followed from it — a rotation dirtied a tracked file, `sync.sh` stashed and popped it
+    # around the merge, the pop conflicted with the authorised copy coming the other way, and
+    # the conflict markers left the JSON unparseable, which every reader takes for "not
+    # authorised". A reader could not even recover: `git-reset` is contributor-floored. It
+    # also needed an attribution map and a purge verb to answer "whose entries are these",
+    # a machine-local overlay to bridge rotations, and a repair path in `git-sync`.
+    #
+    # One file per machine needs none of that. Distribution is the message spool (a
+    # maintainer's `user-authorize` replies with the payload, `msg save` writes it), and a
+    # rotation just re-wraps in place.
+    'enc_key_file': _SECRETS_DIR / 'enc-key.json',
     'enc_key_verify': 'verify',
-    'enc_key_owners': 'owners',
-    # The stopgap overlay, in the machine-local secrets dir and NOT in the checkout. A
-    # rotation re-wraps the master key to the new public key so the user keeps decrypting
-    # until an authorised copy of enc-key.json arrives by git-sync -- but writing that into
-    # the TRACKED file put per-machine state into shared state, and `sync.sh` stashes a
-    # dirty tree and pops it after the merge: both sides had edited the same entry, the pop
-    # conflicted, and the conflict markers left enc-key.json unparseable, which reads as
-    # "not authorised" everywhere and takes decryption down with it. Outside the repo there
-    # is nothing to stash and nothing to collide. It holds exactly ONE entry -- this user's
-    # own key -- and is deleted the moment the tracked file authorises that key.
-    'enc_key_local_file': _SECRETS_DIR / 'enc-key.local.json',
     'private_key_backups': 5,  # rolling backups kept of the private key file
     # per-user vault: both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.

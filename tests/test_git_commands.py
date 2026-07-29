@@ -514,19 +514,19 @@ class EncKeyPullFlowTest(_GitCommandCase):
 
     def test_already_wired_is_a_silent_noop(self) -> None:
         self._wire_state(wired=True)
-        git._enc_key_pull_flow()
+        git.enc_key_arrived()
         self.assertEqual(self.cmdlines, [])
         self.master.assert_not_called()
 
     def test_unauthorized_is_a_silent_noop(self) -> None:
         self._wire_state(wired=False)
         self.master.side_effect = KeyError('no entry for this public key')
-        git._enc_key_pull_flow()
+        git.enc_key_arrived()
         self.assertEqual(self.cmdlines, [])
 
     def test_newly_authorized_wires_and_rechecks_out(self) -> None:
         self._wire_state(wired=False)
-        git._enc_key_pull_flow()
+        git.enc_key_arrived()
         self.master.cache_clear.assert_called_once()  # the pull may have delivered access
         self.assertEqual(len(self.cmdlines), 2)
         self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
@@ -535,7 +535,7 @@ class EncKeyPullFlowTest(_GitCommandCase):
     def test_failed_install_skips_the_recheckout(self) -> None:
         self._wire_state(wired=False)
         self.rcs = [1]  # install refused (key check failed late)
-        git._enc_key_pull_flow()
+        git.enc_key_arrived()
         self.assertEqual(len(self.cmdlines), 1)
 
 

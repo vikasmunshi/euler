@@ -23,7 +23,7 @@ commit that carries nothing else.
 """
 from __future__ import annotations
 
-__all__ = ['get_gh_user_email', 'get_repo_owner_email', 'git_commit', 'git_commit_amend',
+__all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit', 'git_commit_amend',
            'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
            'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
 
@@ -39,8 +39,7 @@ from typing import Literal
 from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
-from solver.crypto.ciphers import (load_private_key, prune_local_enc_key, public_key_hex,
-                                   read_enc_key_file, read_master_key, write_local_enc_key)
+from solver.crypto.ciphers import read_master_key
 from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
 from solver.utils.shell_utils import run_cmdline, run_command
@@ -376,12 +375,15 @@ def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
     aliases=('publish',),
     quietable=True,
 )
-def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
+def git_publish(*targets: Literal['scripts', 'solutions', 'solver'],
                 dry_run: bool = False) -> int:
     """Publish changed files for named targets to the remote repository.
 
     Args:
-        targets: Scopes of files to publish — one or more of 'keys', 'scripts', 'solutions', or 'solver'.
+        targets: Scopes of files to publish — one or more of 'scripts', 'solutions', or 'solver'.
+                 There is no `keys` scope: key material is not distributed by git any more.
+                 A holder's enc-key file is machine-local, and issuing one is
+                 `user-authorize` sending it through the message spool.
                  Defaults to 'solutions'.
         dry_run: Print the push and pull-request commands instead of running them.  Defaults to False.
 
@@ -390,7 +392,7 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
     """
     if not targets:
         targets = ('solutions',)
-    if not all(target in ['keys', 'scripts', 'solutions', 'solver'] for target in targets):
+    if not all(target in ['scripts', 'solutions', 'solver'] for target in targets):
         raise ValueError(f'Invalid targets: {", ".join(targets)}')
     if dry_run:
         result = run_cmdline(f'{config.scripts.publish} --dry-run {" ".join(targets)}')
@@ -417,74 +419,29 @@ def git_status(details: bool = False) -> int:
     return result
 
 
-#: The one tracked file a *user* command used to write, and the reason this heal exists.
-_ENC_KEY_PATH = 'keys/enc-key.json'
+def enc_key_arrived() -> None:
+    """Wire the git filter once this machine can decrypt — the tail of a sync, and of `msg save`.
 
+    A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as ciphertext.
+    The moment the master key becomes readable — a maintainer issued it and `msg save` wrote
+    it, or a rotation was carried across by `user --regen` — wire the clean/smudge filter and
+    re-checkout the private tree, so ciphertext becomes plaintext in place.
 
-def _heal_local_enc_key() -> None:
-    """Restore a locally-modified ``keys/enc-key.json`` before a sync touches it.
-
-    A one-time repair for clones dirtied by the old rotation behaviour, which wrote the
-    carry into the *tracked* file. ``sync.sh`` stashes a dirty tree and pops it after the
-    merge, so the moment the maintainer's authorised copy of that same file came the other
-    way the pop conflicted — leaving conflict markers in the JSON, which every reader takes
-    for "not authorised" and which kills decryption outright. Syncing again just repeats it.
-
-    So the file is put back to ``HEAD`` *before* the sync runs, after lifting this user's
-    own entry into the machine-local overlay if the shared file does not carry it yet —
-    the same stopgap a rotation writes now, so the repair cannot cost anyone their access.
-    A file too broken to parse (the conflicted case) has nothing to lift, and restoring it
-    is strictly better than the markers.
-
-    **Only below `maintainer`.** At that floor and above a modified ``enc-key.json`` is
-    ordinary work — an authorization awaiting ``git-publish keys`` — and must never be
-    reverted from under them; they get a note instead.
-    """
-    dirty = run(['git', '--no-optional-locks', 'status', '--porcelain', '--', _ENC_KEY_PATH],
-                cwd=config.root_dir, capture_output=True, text=True)
-    if dirty.returncode != 0 or not dirty.stdout.strip():
-        return
-    if config.subject.has('maintainer'):
-        console.print(f'[muted]note: {_ENC_KEY_PATH} has local changes — yours to land with '
-                      '[accent]git-publish keys[/accent] (not touching them).[/muted]')
-        return
-    try:
-        mine = public_key_hex(load_private_key().public_key())
-        local_entry = str(read_enc_key_file().get(mine, ''))
-    except (FileNotFoundError, ValueError, OSError):
-        mine, local_entry = '', ''          # unparseable (conflicted) or no identity: nothing to lift
-    if local_entry:
-        head = run(['git', 'show', f'HEAD:{_ENC_KEY_PATH}'], cwd=config.root_dir,
-                   capture_output=True, text=True)
-        if head.returncode != 0 or mine not in head.stdout:
-            write_local_enc_key(mine, local_entry)
-    run(['git', 'checkout', 'HEAD', '--', _ENC_KEY_PATH], cwd=config.root_dir, capture_output=True)
-    read_master_key.cache_clear()
-    console.print(f'[warning]note:[/warning] restored {_ENC_KEY_PATH} from HEAD — a local edit to it '
-                  'cannot survive a sync, and your own key access was carried to the machine-local '
-                  'overlay first.')
-
-
-def _enc_key_pull_flow() -> None:
-    """The self-service tail of a sync: wire the git filter once key access exists.
-
-    A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as
-    ciphertext. When a pull delivers a ``keys/enc-key.json`` that wraps the master key to
-    this user's public key (an admin ran ``user-authorize`` and pushed), wire the
-    clean/smudge filter and re-checkout the private tree — ciphertext becomes plaintext
-    in place. A silent no-op while the filter is already wired or the user is not (yet)
-    key-authorized, so every sync may call it.
+    It used to hang off `git-sync`, because access arrived *through git*: the enc-key file was
+    tracked, and a pull delivered it. Nothing about key material travels by git any more, so
+    the trigger moved to the commands that actually change what this machine can open. A
+    silent no-op while the filter is already wired or the key is not readable.
     """
     name: str = crypto_config['filter_name']
     wired: bool = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
                       cwd=config.root_dir, capture_output=True).returncode == 0
     if wired:
         return
-    read_master_key.cache_clear()  # this very pull may have delivered access
+    read_master_key.cache_clear()
     try:
         read_master_key()
     except (FileNotFoundError, KeyError, ValueError):
-        return  # no keypair / not authorized — nothing to do
+        return  # no keypair / not issued yet — nothing to do
     console.print('[primary]Master-key access detected — wiring the git filter and '
                   'decrypting private solutions...[/primary]')
     if run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter install') == 0:
@@ -574,18 +531,9 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
-        # Before the sync, never after: sync.sh stashes a dirty tree and pops it once the
-        # merge has landed, and this is the one file where that pop is guaranteed to
-        # conflict (§ _heal_local_enc_key).
-        _heal_local_enc_key()
         result = run_cmdline(config.scripts.sync)
         if result == 0:
-            # A COMPLETED sync is the settled tree the overlay's pruning needs: the read
-            # path deliberately never deletes it, because mid-merge the tracked file is a
-            # state git is still writing and a rolled-back merge would take the fallback
-            # with it (solver.crypto.ciphers.read_master_key).
-            prune_local_enc_key()
-            _enc_key_pull_flow()
+            enc_key_arrived()
             # The fetch moved origin/master, the merge moved the branch, and the flow
             # above may have wired the filter: everything the chip shows.
             osc.git_changed()

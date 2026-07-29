@@ -20,14 +20,11 @@ The verbs:
 - **mutations** (`add` / `change` / `enable` / `disable` / `remove`) — the direct
   account verbs, for identities that did not come through the request queue (a bare
   os-login, or an ad-hoc invite).
-- **`users purge`** — the *repo* plane: which entries in `keys/enc-key.json` still belong
-  to somebody. `owners` is keyed by **slug**, so it names each collaborator's *current* key
-  and nothing else; every authorised key it does not name is an **orphan** — superseded by
-  its owner's later key, left by a removed account, or never attributed — and all of them
-  are offered. Only the roster read is sudo; the edit happens in your checkout, as you, and
-  is committed like any other change. Your own key is never offered, and what a purge does
-  **not** do — take back a master key somebody already unwrapped — is printed every time,
-  with the `key-rekey` that does.
+- **`users set-key`** — register an account's X25519 **public** key. It is the registry
+  `key-rekey` reads: with one enc-key file per machine there is no central list of who holds
+  the master key, so a rotation needs to be told who to re-issue to. Public material only —
+  losing it costs a round of re-registration, never access. `user-authorize` writes it for
+  you when it can sudo, and prints this command when it cannot.
 - **`users redeploy`** — the host plane rather than an account verb: it drives the
   provisioning kit, never the admin CLI, and touches no account — so, like `list`, it
   takes no identity.
@@ -55,11 +52,7 @@ from typing import Literal
 
 from solver.auth.identity import system_slug
 from solver.config import config
-from solver.crypto.ciphers import (authorised_keys, current_key_slugs, load_private_key,
-                                   public_key_hex, read_enc_key_file)
-from solver.crypto.keys import revoke_keys
 from solver.shell import console, register
-from solver.utils.shell_utils import confirm
 
 #: Profiles assignable to a web account (``admin`` is local-os-login-only).
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')
@@ -185,42 +178,6 @@ def _process_requests() -> int:
     return 0
 
 
-#: Where a purge candidate's class is decided (`_classify_keys`). The order is the order
-#: rows print in: what you must not touch, then what is safe, then what is on offer.
-#:
-#: Three, not four. "Unattributed" used to be its own class, kept out of the walk on the
-#: reasoning that an unknown key might still be someone's — but a key nobody is recorded as
-#: owning IS an orphan, exactly like one whose owner was removed or who has since rotated.
-#: Splitting them only made the walk skip real candidates.
-_KEY_CLASSES = ('self', 'active', 'orphan')
-
-
-def _own_public_key() -> str:
-    """This operator's own public key, or '' when it cannot be read.
-
-    The hard guard on purge: an admin who cannot identify their own entry must not be
-    allowed to choose entries to delete, because the one they delete may be theirs — and
-    with it their access to every private solution in the tree.
-    """
-    try:
-        return public_key_hex(load_private_key().public_key())
-    except (FileNotFoundError, ValueError):
-        return ''
-
-
-def _enc_key_is_clean() -> bool:
-    """Whether keys/enc-key.json has no uncommitted local changes.
-
-    Purge classifies from the file as committed. A `user --regen` re-wrap is a *local
-    stopgap* — deliberately not attributed, and overwritten by the next `git-sync` — so
-    purging against a dirty file would decide from a state that is about to be discarded.
-    """
-    result = subprocess.run(['git', '--no-optional-locks', 'status', '--porcelain', '--',
-                             'keys/enc-key.json'], cwd=config.root_dir,
-                            stdout=subprocess.PIPE, text=True, check=False)
-    return result.returncode == 0 and not result.stdout.strip()
-
-
 def _roster() -> list[dict[str, str]] | None:
     """The account roster as data (sudo read), or None when the admin plane did not answer."""
     rc, payload = _sudo_admin_capture('roster-json')
@@ -233,184 +190,70 @@ def _roster() -> list[dict[str, str]] | None:
     return [row for row in rows if isinstance(row, dict)]
 
 
-def _classify_keys(roster: list[dict[str, str]], mine: str) -> list[tuple[str, str, str]]:
-    """Classify every authorised key as (public_key, class, description).
+def registered_public_keys() -> dict[str, str] | None:
+    """``{identity: public_key}`` for every web account — ``''`` where none is registered.
 
-    One question decides it: **is this key still somebody's?** The `owners` map answers it —
-    keyed by slug, so it names each collaborator's *current* key and nothing else. A key it
-    does not name is an orphan, whether because its owner rotated past it, because the
-    account is gone, or because it was never attributed. Those were three separate stories
-    and one outcome; they are one class now.
+    The registry :func:`~solver.crypto.keys.key_rekey` re-issues a rotated master key to.
+    Lives on this side because reading it is a sudo call to the auth admin plane, and the
+    crypto package holds no opinion about accounts.
 
-    The join is slug → identity, computed **here** from each roster identity rather than
-    read from the roster's own `slug` column: that column is empty for a local os-login
-    (which has no per-user instance), and the operator is usually exactly that — so
-    trusting it would classify the operator's own key as belonging to nobody.
+    None means the plane did not answer at all — which a rotation must treat as a refusal,
+    not as "nobody to tell": re-encrypting the tree and then failing to reach the holders
+    would lock out everybody at once.
     """
-    data = read_enc_key_file()
-    slug_of = current_key_slugs(data)
-    by_slug = {system_slug(str(row.get('user', ''))): row for row in roster}
-    rows: list[tuple[str, str, str]] = []
-    for key in authorised_keys(data):
-        slug = slug_of.get(key, '')
-        if key == mine:
-            rows.append((key, 'self', 'yours — never purged'))
-        elif not slug:
-            rows.append((key, 'orphan', 'nobody\'s — superseded, or never attributed'))
-        elif (row := by_slug.get(slug)) is None:
-            rows.append((key, 'orphan', f'{slug}: no such account (removed)'))
-        elif row.get('state') == 'disabled':
-            rows.append((key, 'orphan', f'{row.get("user")}: account disabled'))
-        else:
-            rows.append((key, 'active', f'{row.get("user")} ({row.get("profile")})'))
-    return sorted(rows, key=lambda row: _KEY_CLASSES.index(row[1]))
-
-
-def _print_keys(rows: list[tuple[str, str, str]]) -> None:
-    """Render the classification — the whole file, every time, not only the candidates."""
-    styles = {'self': 'accent', 'active': 'success', 'orphan': 'warning'}
-    for key, klass, note in rows:
-        console.print(f'  [{styles[klass]}]{klass:13}[/{styles[klass]}] [muted]{key[:16]}…[/muted]  {note}')
-
-
-def _purge_after(count: int) -> None:
-    """What a purge does *not* do, said at the moment it matters.
-
-    Dropping an entry stops that key unwrapping future copies of the file; it does not
-    take the master key back from anyone who already holds it, and every committed blob
-    stays decryptable with it. So the follow-through is spelled out rather than implied —
-    and deliberately not run for you: `key-rekey` re-encrypts the whole private tree, and
-    that is not a thing to have happen as a side effect of a bookkeeping verb.
-    """
-    console.print(f'[success]purged {count} key(s)[/success] from keys/enc-key.json')
-    console.print('[muted]This removes the entry, not the access: whoever held that key still has the '
-                  'master key, and every committed blob still decrypts with it. To actually revoke:[/muted]')
-    console.print('  [accent]key-rekey[/accent]        [muted]# new master key, re-wrapped to the survivors[/muted]')
-    console.print('  [accent]git-publish keys[/accent] [muted]# land it — until this, nothing changed '
-                  'for anyone[/muted]')
-
-
-def _purge(key: str, apply: bool) -> int:
-    """Report, or work, the purge candidates in keys/enc-key.json."""
-    mine = _own_public_key()
-    if not mine:
-        console.print('[error]error:[/error] cannot read your own public key (no identity, or a locked '
-                      'vault) — refusing to purge, since the entry you drop could be your own')
-        return 1
-    if apply and not _enc_key_is_clean():
-        console.print('[error]error:[/error] keys/enc-key.json has uncommitted changes — commit or '
-                      'reset them first, so the purge decides from the file everyone shares')
-        return 1
     roster = _roster()
     if roster is None:
-        console.print('[error]error:[/error] could not read the account roster (is euler-auth.service '
-                      'running, and are you able to sudo?)')
-        return 1
-    rows = _classify_keys(roster, mine)
-    if key:
-        wanted = key.strip().lower()
-        rows = [row for row in rows if row[0] == wanted]
-        if not rows:
-            console.print(f'[error]error:[/error] {wanted} is not an authorised key in keys/enc-key.json')
-            return 1
-        if rows[0][1] == 'self':
-            console.print('[error]error:[/error] that is your own key — refusing')
-            return 1
-    console.print(f'[primary]{len(rows)} authorised key(s)[/primary]')
-    _print_keys(rows)
-    # Naming a key is the escape hatch for anything the classification refuses to offer —
-    # the operator has identified it out of band and says so by naming it, so this asks once
-    # and takes them at their word.
-    if key:
-        if not apply:
-            console.print('[muted]add [accent]--apply[/accent] to purge it[/muted]')
-            return 0
-        if not confirm(f'Purge {rows[0][0]} ({rows[0][2]})?'):
-            console.print('[muted]nothing purged[/muted]')
-            return 0
-        return 0 if _purge_keys([rows[0][0]]) else 1
-    candidates = [row for row in rows if row[1] == 'orphan']
-    if not candidates:
-        console.print('[muted]no orphans — every key is the current key of a live account[/muted]')
-        return 0
-    if not apply:
-        console.print(f'[muted]{len(candidates)} orphaned key(s); add [accent]--apply[/accent] to '
-                      'work them one at a time[/muted]')
-        return 0
-    console.print(f'[accent]{len(candidates)}[/accent] orphaned key(s) — per key: '
-                  '[accent]p[/accent]urge · [accent]s[/accent]kip · [accent]q[/accent]uit')
-    drop: list[str] = []
-    for candidate, _klass, note in candidates:
-        console.print(f'  [accent]{candidate[:16]}…[/accent]  {note}')
-        choice = console.input('  [accent]p/s/q[/accent] > ').strip().lower()[:1]
-        if choice == 'q':
-            break
-        if choice != 'p':
-            console.print('  [muted]skipped[/muted]')
-            continue
-        drop.append(candidate)
-    if not drop:
-        console.print('[muted]nothing purged[/muted]')
-        return 0
-    return 0 if _purge_keys(drop) else 1
+        return None
+    return {str(row.get('user', '')): str(row.get('public_key', ''))
+            for row in roster if row.get('scope') == 'web'}
 
 
-def _purge_keys(keys: list[str]) -> bool:
-    """Drop *keys* through the crypto package (every enc-key.json write lives there)."""
-    count = revoke_keys(keys)
-    if not count:
-        return False
-    _purge_after(count)
-    return True
+def register_public_key(identity: str, public_key: str) -> bool:
+    """Record *public_key* against *identity*; False when the admin plane is out of reach.
+
+    Out of reach is the normal case in a **web shell** — `user-authorize` runs at maintainer,
+    which cannot sudo — so this reports rather than raises, and the caller prints the command
+    for the operator. The grant itself has already been delivered by then; registration only
+    decides whether the next rotation can find them.
+    """
+    return _sudo_admin('set-key', identity, public_key) == 0
 
 
 @register(requires='admin',
           help_text='Administer accounts, invite requests and enc-key entries (via sudo admin CLI).')
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
-                          'remove', 'purge', 'redeploy'] = 'list',
-          identity: str = '', profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader',
-          apply: bool = False) -> int:
+                          'remove', 'set-key', 'redeploy'] = 'list',
+          identity: str = '', profile: str = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
 
     The whole command is ``admin``-floored and the account verbs re-execute the admin CLI
     under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
     tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-    ``purge`` is the exception to the sudo shape: it *reads* the roster under sudo but does
-    its work in **your checkout**, on ``keys/enc-key.json``, as you — because that file is
-    the repo's, not the host's, and the change has to be committed and pushed like any
-    other. It classifies every authorised key against the roster (via the ``owners``
-    attribution ``user-authorize`` records, keyed by slug) and offers every key that is not
-    some live account's *current* one — superseded, orphaned by a removal, or never
-    attributed. Your own key is never a candidate.
+    ``set-key`` records an account's X25519 **public** key — the registry ``key-rekey``
+    re-issues a rotated master key to. `user-authorize` writes it for you when it can;
+    from a web shell it cannot sudo, so it prints this command instead.
 
     Args:
         action:   list (roster + pending + the invite-request queue), process-requests
                   (walk the queue interactively — accept / ignore / dismiss each),
                   add (map entry — ``@email`` also provisions + mints an invite; a bare
                   os-login is local-only), change (reassign a profile), enable / disable
-                  (web SRP state), remove (drop the account/entry), purge (report — or with
-                  ``--apply`` work — the enc-key entries whose owner is gone), redeploy
-                  (re-assert the per-user host layer and re-lay every collaborator's git
-                  hooks — takes no identity, and drops live shells).
-        identity: a web email (``@``) or a local OS login for the account verbs; for
-                  ``purge``, one public key (hex) to consider instead of the whole file.
-                  Not used by list / process-requests / redeploy.
-        profile:  the profile to assign (add / change). ``admin`` is valid only for a
-                  local os-login, never a web account.
-        apply:    ``purge`` only — actually remove, rather than report what it would offer.
+                  (web SRP state), remove (drop the account/entry), set-key (register their
+                  public key for rekey), redeploy (re-assert the per-user host layer and
+                  re-lay every collaborator's git hooks — takes no identity, and drops live
+                  shells).
+        identity: a web email (``@``) or a local OS login (required for the account verbs;
+                  not for list / process-requests / redeploy).
+        profile:  the profile to assign (add / change), or the 64-hex **public key** for
+                  ``set-key``. ``admin`` is valid only for a local os-login, never a web
+                  account.
     """
     if action == 'list':
         return _sudo_admin('list')                     # roster + pending + invite-request queue
 
     if action == 'process-requests':
         return _process_requests()                     # interactive: accept / ignore / dismiss
-
-    if action == 'purge':
-        # Not an account verb and not a host verb: a repo verb. It edits keys/enc-key.json
-        # in this checkout, so it runs as the operator (the roster read is the only sudo
-        # part) and leaves the commit to them.
-        return _purge(identity, apply)
 
     if action == 'redeploy':
         # The host plane, not an account verb — so it takes no identity and writes no SoR.

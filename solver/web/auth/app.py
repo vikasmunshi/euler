@@ -497,17 +497,36 @@ def build_admin_app(service: AuthService) -> web.Application:
             # The per-user unix name (uid/home/socket/branch) for a web account; a local
             # OS login has no per-user instance, so it carries none.
             slug = system_slug(name) if scope == 'web' else ''
-            roster.append({'user': name, 'profile': profile, 'scope': scope,
-                           'state': state, 'slug': slug})
+            # public_key: the registry `key-rekey` re-issues a rotated master key to. Public
+            # material, so it rides along with the roster rather than needing its own read.
+            roster.append({'user': name, 'profile': profile, 'scope': scope, 'state': state,
+                           'slug': slug, 'public_key': srp[name].public_key if name in srp else ''})
         for email in sorted(srp):                                # registered but unmapped → default reader
             if email not in authz_users:
                 roster.append({'user': email, 'profile': 'reader (unmapped)', 'scope': 'web',
                                'state': 'disabled' if srp[email].disabled else 'registered',
-                               'slug': system_slug(email)})
+                               'slug': system_slug(email), 'public_key': srp[email].public_key})
         return web.json_response({
             'roster': roster,
             'pending': [record.summary() for record in service.pending.all()],
         })
+
+    async def set_public_key(request: web.Request) -> web.Response:
+        """``POST /admin/users/{email}/public-key`` ``{public_key}`` — register the account's key.
+
+        Public material, and the only thing that stayed central when the wrapped master keys
+        stopped being: `key-rekey` has to know whose public keys to re-issue a rotated key to,
+        and one enc-key file per machine leaves nothing else to enumerate.
+        """
+        email = normalize_email(request.match_info['email'])
+        body = await _json_body(request)
+        public_key = str(body.get('public_key', '')).strip().lower()
+        if len(public_key) != 64 or any(c not in '0123456789abcdef' for c in public_key):
+            return web.Response(status=400, text='public_key must be 32 bytes of hex')
+        if not service.users.set_public_key(email, public_key):
+            return web.Response(status=404, text='no such user')
+        log.info('registered public key for %s', email)
+        return web.json_response({'email': email, 'public_key': public_key})
 
     async def add_user(request: web.Request) -> web.Response:
         """Mint + mail an invite (the first registration step). No user record exists until completion."""
@@ -582,6 +601,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         web.get('/admin/users', list_users),
         web.post('/admin/users', add_user),
         web.post('/admin/users/{email}/{action:enable|disable}', set_enabled),
+        web.post('/admin/users/{email}/public-key', set_public_key),
         web.post('/admin/users/{email}/revoke', revoke_sessions),
         web.delete('/admin/users/{email}', remove_user),
         web.get('/admin/requests', list_requests),

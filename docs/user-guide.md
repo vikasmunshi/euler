@@ -258,7 +258,7 @@ command name below links to its full entry — usage and description — in the
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`update-tags`](commands-index.md#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
 | [`user`](commands-index.md#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
-| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise a public key (hex), or work a key request by message id. |
+| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Issue the master key to a public key, or work a key request by message id. |
 | [`users`](commands-index.md#command-users) | — | Administer accounts, invite requests and enc-key entries (via sudo admin CLI). |
 | [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 | [`version`](commands-index.md#command-version) | — | Show the running solver build version. |
