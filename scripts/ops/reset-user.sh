@@ -142,7 +142,10 @@ if [[ ${DRY_RUN} -ne 1 && ${ASSUME_YES} -ne 1 ]]; then
 fi
 
 echo "   fetching..."
-if ! run_step fetch --prune origin; then
+# --tags --force --prune-tags: leave the clone's tags mirroring origin. A repair tool that
+# fixes the branch and leaves a stale or conflicting release tag behind has not finished —
+# the next `git-sync` trips over exactly that tag.
+if ! run_step fetch --prune --tags --force --prune-tags origin; then
     echo "Error: fetch failed." >&2
     if [[ ${#PROXY_ENV[@]} -eq 0 ]]; then
         echo "  No proxy env found at ${EGRESS_ENV}: on a host whose egress is default-deny," >&2

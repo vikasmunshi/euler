@@ -131,15 +131,26 @@ main() {
     #   1 when the state could not be determined, or the sync itself failed
     local ahead behind has_changes state prune_out
 
-    # Fetch master AND all tags. The version mechanism reads release tags — the
-    # `version` command's `git describe` and release.sh's last-tag anchor — but normal
-    # fetch only auto-follows tags pointing at objects downloaded THIS fetch, so a
-    # clone that already has the tagged commit never picks up the `vX.Y.Z` tag and
-    # `git describe` falls back to a bare sha. `--tags` pulls every tag ref; it adds
-    # new tags without clobbering existing (immutable) release tags — no --force.
-    if ! git fetch --tags origin master 1>/dev/null 2>&1; then
-        echo "Error: could not fetch origin/master (with tags)." >&2
+    # Fetch master. This one must succeed — it is the sync.
+    if ! git fetch origin master 1>/dev/null 2>&1; then
+        echo "Error: could not fetch origin/master." >&2
         return 1
+    fi
+
+    # Then the tags, SEPARATELY and best-effort. The version mechanism reads release tags
+    # — the `version` command's `git describe` and release.sh's last-tag anchor — but a
+    # normal fetch only auto-follows tags pointing at objects downloaded this time, so a
+    # clone that already has the tagged commit never picks up its `vX.Y.Z` tag.
+    #
+    # `--force --prune-tags`: origin is the source of truth for release tags, so the clone
+    # mirrors it. This used to be a plain `--tags` on the fetch above, on the reasoning
+    # that release tags are immutable — until a history rewrite moved one. git then
+    # refuses to clobber the local tag, `fetch` exits non-zero, and the whole sync failed
+    # with it: every clone stuck, permanently, on a tag. For a reader that is terminal —
+    # `git-sync` is the only git verb they have. A tag is bookkeeping; it must never be
+    # able to fail the sync, so a failure here is a note, exactly like the prune below.
+    if ! git fetch --tags --force --prune-tags origin 1>/dev/null 2>&1; then
+        echo "Note: could not refresh tags (version reporting may be stale)." >&2
     fi
 
     # Drop remote-tracking refs for branches the remote no longer has — typically a
