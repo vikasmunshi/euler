@@ -43,6 +43,23 @@
       <span class="msg-subject">{{ item.subject }}</span>
       <span class="msg-when">{{ item.when }}</span>
     </button>
+    {# The one message kind that asks for an *act* rather than a read: a key-authorization
+       request, answered with `user-authorize <id>` (which takes the message id precisely so
+       nobody retypes a public key). It sits on the row it belongs to — the same reason
+       connect/disconnect lives on the terminal's titlebar — and types the command like every
+       other verb here, so the shell's `requires()` stays the boundary.
+
+       Shown only **when applicable**: the row is a key request, and the reader is at the
+       command's floor. That is a deliberate exception to the panel's shown-but-locked rule
+       below — a locked verb there teaches the ladder on a menu everyone sees, where a locked
+       one *here* would ride on every message of a kind most readers never receive, and on
+       their own request it would offer them a grant they cannot make. #}
+    {% if item.key_request and subject.has('maintainer') %}
+    <button type="button" class="msg-act" data-term-cmd="user-authorize {{ item.id }}"
+            title="run `user-authorize {{ item.id }}` in your terminal — grant this key access">
+      Authorize
+    </button>
+    {% endif %}
   </li>
   {% endfor %}
   {% endif %}

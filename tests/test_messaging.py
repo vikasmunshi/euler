@@ -38,6 +38,7 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
+from solver.web.msg import KEY_REQUEST_SUBJECT
 from solver.web.msg.app import MessageService, build_admin_app, build_app
 from solver.web.msg.config import MsgConfig
 from solver.web.msg.identity import box_of
@@ -509,6 +510,29 @@ class UserMessageChipTests(AioHTTPTestCase):
         self.assertNotIn('the body', body, 'the body is read in the shell, never rendered here')
 
     @unittest_run_loop
+    async def test_a_key_request_row_offers_the_authorize_verb(self) -> None:
+        """The one message kind with an act: `user-authorize <id>`, on the row it belongs to.
+
+        The id is the whole point — the command reads the public key from the thread over
+        the socket, so the key never reaches the browser and nobody retypes it.
+        """
+        thread_id = self.spool.store.submit(_ALICE_BOX, f'{KEY_REQUEST_SUBJECT}{_ALICE}',
+                                            f'public key: {"ab" * 32}', [_ME])
+        assert thread_id is not None
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="user-authorize {thread_id}"', body)
+        self.assertNotIn('ab' * 32, body, 'the key is read in the shell, never rendered here')
+
+    @unittest_run_loop
+    async def test_an_ordinary_thread_offers_no_authorize_verb(self) -> None:
+        """"When applicable" is the subject test the command itself applies."""
+        thread_id = self.spool.store.submit(_ALICE_BOX, 'a question', 'the body', [_ME])
+        assert thread_id is not None
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
+        self.assertNotIn('user-authorize', body)
+
+    @unittest_run_loop
     async def test_the_count_and_totals_come_from_the_spool(self) -> None:
         self.spool.store.submit(_ALICE_BOX, 's1', 'b', [_ME])
         self.spool.store.submit(_ALICE_BOX, 's2', 'b', [_ME])
@@ -586,6 +610,21 @@ class UserMessageChipReaderTests(UserMessageChipTests):
         self.assertIn('Inbound queue', body)
         self.assertIn('needs the maintainer profile', body)
         self.assertNotIn('data-term-cmd="msg queue"', body)
+
+    @unittest_run_loop
+    async def test_a_key_request_row_offers_the_authorize_verb(self) -> None:
+        """Overridden: a reader gets the row and **no** verb.
+
+        Not shown-but-locked, unlike the panel's own verbs: this rides on a row, and the row
+        a reader is most likely to see is their **own** key request — where a locked
+        Authorize would offer them a grant they can never make.
+        """
+        thread_id = self.spool.store.submit(_ALICE_BOX, f'{KEY_REQUEST_SUBJECT}{_ALICE}',
+                                            f'public key: {"ab" * 32}', [_ME])
+        assert thread_id is not None
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)   # the row is there…
+        self.assertNotIn('user-authorize', body)                       # …without the verb
 
     @unittest_run_loop
     async def test_rows_type_a_read_command_into_the_shell(self) -> None:

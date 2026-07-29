@@ -21,8 +21,12 @@ from solver.utils.loader import load_commands
 _ROOT = Path(__file__).resolve().parents[1]
 _SITE = _ROOT / 'solver' / 'web'
 
-#: A literal `data-term-cmd="git-sync"` (skip the Jinja-interpolated `{{ … }}` ones).
-_TERM_CMD_RE = re.compile(r'data-term-cmd="([^"{}]+)"')
+#: A `data-term-cmd="git-sync"`, or the **static prefix** of an interpolated one
+#: (`data-term-cmd="user-authorize {{ item.id }}"` → `user-authorize`) — the same treatment
+#: the Action regex below gives its f-strings. Taking only the literal head is what lets the
+#: check reach the row verbs, whose argument is a runtime id; a fully interpolated value
+#: (`data-term-cmd="{{ command }}"`, the git macro) yields an empty prefix and drops out.
+_TERM_CMD_RE = re.compile(r'data-term-cmd="([^"{}]*)')
 #: The git menu's macro: `{{ verb('Sync with master', 'git-sync', 'reader') }}`.
 _VERB_RE = re.compile(r"verb\(\s*'[^']*'\s*,\s*'([^']+)'")
 #: An `Action(kind='term', command=f'claude-blog {name}')` — take the static prefix, which is
@@ -56,7 +60,7 @@ class WebTerminalVerbTests(unittest.TestCase):
         """A guard on the guard: if a refactor stops the regexes matching, the test above would
         pass vacuously. Pin a few commands we know the UI emits."""
         emitted = {c.split()[0] for c in _emitted_commands()}
-        for expected in ('git-sync', 'gh-merge', 'claude-blog'):
+        for expected in ('git-sync', 'gh-merge', 'claude-blog', 'msg', 'user-authorize'):
             self.assertIn(expected, emitted)
 
 
