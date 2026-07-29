@@ -39,7 +39,8 @@ from typing import Literal
 from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
-from solver.crypto.ciphers import read_master_key
+from solver.crypto.ciphers import (load_private_key, prune_local_enc_key, public_key_hex,
+                                   read_enc_key_file, read_master_key, write_local_enc_key)
 from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
 from solver.utils.shell_utils import run_cmdline, run_command
@@ -416,6 +417,54 @@ def git_status(details: bool = False) -> int:
     return result
 
 
+#: The one tracked file a *user* command used to write, and the reason this heal exists.
+_ENC_KEY_PATH = 'keys/enc-key.json'
+
+
+def _heal_local_enc_key() -> None:
+    """Restore a locally-modified ``keys/enc-key.json`` before a sync touches it.
+
+    A one-time repair for clones dirtied by the old rotation behaviour, which wrote the
+    carry into the *tracked* file. ``sync.sh`` stashes a dirty tree and pops it after the
+    merge, so the moment the maintainer's authorised copy of that same file came the other
+    way the pop conflicted — leaving conflict markers in the JSON, which every reader takes
+    for "not authorised" and which kills decryption outright. Syncing again just repeats it.
+
+    So the file is put back to ``HEAD`` *before* the sync runs, after lifting this user's
+    own entry into the machine-local overlay if the shared file does not carry it yet —
+    the same stopgap a rotation writes now, so the repair cannot cost anyone their access.
+    A file too broken to parse (the conflicted case) has nothing to lift, and restoring it
+    is strictly better than the markers.
+
+    **Only below `maintainer`.** At that floor and above a modified ``enc-key.json`` is
+    ordinary work — an authorization awaiting ``git-publish keys`` — and must never be
+    reverted from under them; they get a note instead.
+    """
+    dirty = run(['git', '--no-optional-locks', 'status', '--porcelain', '--', _ENC_KEY_PATH],
+                cwd=config.root_dir, capture_output=True, text=True)
+    if dirty.returncode != 0 or not dirty.stdout.strip():
+        return
+    if config.subject.has('maintainer'):
+        console.print(f'[muted]note: {_ENC_KEY_PATH} has local changes — yours to land with '
+                      '[accent]git-publish keys[/accent] (not touching them).[/muted]')
+        return
+    try:
+        mine = public_key_hex(load_private_key().public_key())
+        local_entry = str(read_enc_key_file().get(mine, ''))
+    except (FileNotFoundError, ValueError, OSError):
+        mine, local_entry = '', ''          # unparseable (conflicted) or no identity: nothing to lift
+    if local_entry:
+        head = run(['git', 'show', f'HEAD:{_ENC_KEY_PATH}'], cwd=config.root_dir,
+                   capture_output=True, text=True)
+        if head.returncode != 0 or mine not in head.stdout:
+            write_local_enc_key(mine, local_entry)
+    run(['git', 'checkout', 'HEAD', '--', _ENC_KEY_PATH], cwd=config.root_dir, capture_output=True)
+    read_master_key.cache_clear()
+    console.print(f'[warning]note:[/warning] restored {_ENC_KEY_PATH} from HEAD — a local edit to it '
+                  'cannot survive a sync, and your own key access was carried to the machine-local '
+                  'overlay first.')
+
+
 def _enc_key_pull_flow() -> None:
     """The self-service tail of a sync: wire the git filter once key access exists.
 
@@ -438,7 +487,7 @@ def _enc_key_pull_flow() -> None:
         return  # no keypair / not authorized — nothing to do
     console.print('[primary]Master-key access detected — wiring the git filter and '
                   'decrypting private solutions...[/primary]')
-    if run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter install') == 0:
+    if run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter install') == 0:
         run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
                     '&& git checkout -- solutions/private')
 
@@ -462,8 +511,8 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     Aliased as `filter`.
     """
     if action == 'status':
-        return run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter status')
-    result = run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter install')
+        return run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter status')
+    result = run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter install')
     if result != 0:
         return result
     # The filter is wired from here on, whatever the re-checkout below does — so both
@@ -474,14 +523,33 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     # blob), so the guard only trips on real plaintext changes.
     dirty: str = run(['git', 'status', '--porcelain', '--', 'solutions/private'],
                      cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
-    if dirty:
+    # A *deletion* is not an edit anyone authored — it is the residue of exactly this
+    # re-checkout having been interrupted: the `rm` below lands, the checkout then fails
+    # (a filter that cannot decrypt makes it fail, since the rule is `required`), and the
+    # files are simply gone. Treating that as "local changes to protect" is what left a
+    # reader wedged: the re-checkout refused, and the advice it printed — commit or stash —
+    # names two verbs no reader has. The checkout restores deleted files, so let it.
+    lines = dirty.splitlines()
+    deletions = [line for line in lines if line[:2] in (' D', 'D ', 'DD')]
+    blocking = [line for line in lines if line not in deletions]
+    if blocking:
         console.print('[warning]solutions/private has local changes — skipping the re-checkout; '
                       'commit or stash, then run [accent]git-filter install[/accent] again.[/warning]')
         osc.git_changed()
         return int(ExitCodes.EXIT_OK)
+    if deletions:
+        console.print(f'[muted]restoring [accent]{len(deletions)}[/accent] file(s) missing from the '
+                      'worktree (an interrupted decrypt, not your edits)[/muted]')
     console.print('[primary]Decrypting private solutions in place...[/primary]')
-    result = run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
-                         '&& git checkout -- solutions/private')
+    # Two steps, not one `&&` chain, so a failed checkout is reported as what it is: the
+    # worktree is mid-way through the swap and the files are NOT there. Silence would leave
+    # someone staring at an empty solutions/private with no idea it is recoverable.
+    run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f --')
+    result = run_cmdline('git checkout -- solutions/private')
+    if result != 0:
+        console.print('[error]error:[/error] the re-checkout failed, so solutions/private is '
+                      'currently EMPTY in your worktree. Nothing is lost — the content is in git. '
+                      'Run [accent]git-filter install[/accent] again once the filter can decrypt.')
     osc.git_changed()
     return result
 
@@ -506,8 +574,17 @@ def git_sync(dry_run: bool = False) -> int:
     if dry_run:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
+        # Before the sync, never after: sync.sh stashes a dirty tree and pops it once the
+        # merge has landed, and this is the one file where that pop is guaranteed to
+        # conflict (§ _heal_local_enc_key).
+        _heal_local_enc_key()
         result = run_cmdline(config.scripts.sync)
         if result == 0:
+            # A COMPLETED sync is the settled tree the overlay's pruning needs: the read
+            # path deliberately never deletes it, because mid-merge the tracked file is a
+            # state git is still writing and a rolled-back merge would take the fallback
+            # with it (solver.crypto.ciphers.read_master_key).
+            prune_local_enc_key()
             _enc_key_pull_flow()
             # The fetch moved origin/master, the merge moved the branch, and the flow
             # above may have wired the filter: everything the chip shows.

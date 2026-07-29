@@ -23,7 +23,7 @@ import unittest
 from pathlib import Path
 
 from solver.crypto.config import config as crypto_config
-from solver.crypto.gitfilter import _rule_present
+from solver.crypto.gitfilter import _rule_present, filter_settings
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _TRACKED_ATTRS = _REPO_ROOT / '.gitattributes'
@@ -92,3 +92,21 @@ class RulePresentTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class FilterCommandTests(unittest.TestCase):
+    """The command git records for the filter must not be shadowed by the worktree.
+
+    git runs a filter with the cwd at the **top of the worktree**, and a solver checkout has
+    a `solver/` package sitting right there — so `python -m solver.crypto.gitfilter` imports
+    the *clone's* source instead of the venv's installed copy. That is not theoretical: three
+    readers whose clones were behind ran an old filter against a current key file and could
+    not decrypt, while their shell (a console script, sane sys.path) reported the key as
+    available. `-P` (PYTHONSAFEPATH) is what keeps the two agreeing.
+    """
+
+    def test_every_recorded_command_is_import_safe(self) -> None:
+        for setting, command in filter_settings('solver-crypt').items():
+            if setting.endswith('.required'):
+                continue
+            self.assertIn(' -P -m solver.crypto.gitfilter', command, setting)

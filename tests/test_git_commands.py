@@ -461,9 +461,23 @@ class GitFilterCommandTest(_GitCommandCase):
 
     def test_install_wires_then_rechecks_out(self) -> None:
         self.assertEqual(git.git_filter('install'), 0)
-        self.assertEqual(len(self.cmdlines), 2)
+        self.assertEqual(len(self.cmdlines), 3)
         self.assertIn('gitfilter install', self.cmdlines[0])
-        self.assertIn('git checkout -- solutions/private', self.cmdlines[1])
+        self.assertIn('rm -f', self.cmdlines[1])
+        self.assertIn('git checkout -- solutions/private', self.cmdlines[2])
+
+    def test_a_deletion_does_not_block_the_recheckout(self) -> None:
+        """A missing file is the residue of an interrupted decrypt, not somebody's edit.
+
+        The `rm` below lands, the checkout then fails — a filter that cannot decrypt makes it
+        fail, since the rule is `required` — and the files are gone. Reading that as "local
+        changes to protect" wedged a reader: the re-checkout refused and told them to commit
+        or stash, two verbs no reader has.
+        """
+        self.dirty = ' D solutions/private/__init__.py'
+        self.assertEqual(git.git_filter('install'), 0)
+        self.assertEqual(len(self.cmdlines), 3)          # wired, and the file restored
+        self.assertIn('git checkout -- solutions/private', self.cmdlines[2])
 
     def test_refused_install_stops_before_the_recheckout(self) -> None:
         self.rcs = [1]  # not key-authorized: install refuses

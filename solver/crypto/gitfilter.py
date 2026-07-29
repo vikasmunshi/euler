@@ -113,6 +113,28 @@ def _write_response(dst: BinaryIO, content: bytes) -> None:
     dst.flush()
 
 
+def _write_abort(dst: BinaryIO) -> None:
+    """Answer one request with ``status=abort`` — "not this file, and not any after it".
+
+    The protocol's own word for a filter that cannot work at all, and the difference between
+    degrading and exploding. git's response depends on `filter.<name>.required`:
+
+    - **not required** → git uses the *original* content and the checkout succeeds. For this
+      filter that means ciphertext lands in the worktree, which is precisely the state an
+      un-authorized clone is designed to sit in, and what `reset-user.sh --no-filter` asks for;
+    - **required** (the normal wiring) → git still fails, correctly, but with its own clear
+      message about the filter rather than a transport error.
+
+    Exiting before the handshake instead — which is what this did — gives git a filter process
+    that dies on startup, reported as `fatal: the remote end hung up unexpectedly`. That is a
+    protocol failure, so `required=false` cannot soften it: there is no filter result to fall
+    back from. A locked vault therefore made every checkout fatal with no way around it.
+    """
+    _write_text_pkt(dst, 'status=abort')
+    dst.write(b'0000')
+    dst.flush()
+
+
 def _process() -> int:
     """Serve git's long-running filter protocol: handshake, then clean/smudge every file in one process.
 
@@ -125,12 +147,17 @@ def _process() -> int:
     dst: BinaryIO = real_stdout.buffer
     sys.stdout = sys.stderr
     try:
+        # A missing key is answered through the PROTOCOL, not by dying: complete the
+        # handshake, then abort every request (see _write_abort). Dying here is what turned
+        # a locked vault into `fatal: the remote end hung up unexpectedly` on every checkout,
+        # with `required=false` powerless to help.
+        cipher = mac_key = None
         try:
             master_key: bytes = read_master_key()
         except _KEY_ERRORS as exc:
             print(f'gitfilter: cannot load master key: {exc}', file=sys.stderr)
-            return 1
-        cipher, mac_key = build_cipher(master_key)
+        else:
+            cipher, mac_key = build_cipher(master_key)
 
         _read_text_pkts(src)  # client intro: git-filter-client, version=2
         _write_text_pkt(dst, 'git-filter-server')
@@ -150,6 +177,9 @@ def _process() -> int:
                 return 0  # git closed the pipe: clean shutdown
             command: str = next((m.removeprefix('command=') for m in meta if m.startswith('command=')), '')
             content: bytes = _read_content(src)
+            if cipher is None or mac_key is None:
+                _write_abort(dst)          # no key: git decides what that means (§ _write_abort)
+                continue
             out: bytes = (encrypt_blob_with(content, cipher, mac_key) if command == 'clean'
                           else decrypt_blob_with(content, cipher))
             _write_response(dst, out)
@@ -212,6 +242,33 @@ def _rule_present(attrs_path: Path) -> bool:
     return False
 
 
+def filter_settings(name: str) -> dict[str, str]:
+    """The git config this filter is wired by — the four ``filter.<name>.*`` settings.
+
+    **``-P`` (PYTHONSAFEPATH) is load-bearing, not hygiene.** git runs a filter with the cwd
+    at the *top of the worktree*, and a solver checkout has a ``solver/`` package sitting
+    right there — so without it, ``python -m solver.crypto.gitfilter`` imports the **clone's**
+    source instead of the venv's installed copy. A collaborator whose clone is behind then
+    runs an old filter against a current key file.
+
+    That is not theoretical: three readers could not decrypt because their clones predated
+    the machine-local overlay, so the filter could not see the very entry carrying their
+    access — while their shell, a console script with a sane ``sys.path``, reported the key as
+    available. **A shell and a filter disagreeing about the same clone is the signature of
+    this bug**, and the trap is worth remembering: the same one bit a venv probe in the web
+    tier (docs/web-server-guide.md).
+
+    Extracted from :func:`_install` so the flag can be asserted without wiring up a repo.
+    """
+    base: str = f'{sys.executable} -P -m solver.crypto.gitfilter'
+    return {
+        f'filter.{name}.process': f'{base} process',
+        f'filter.{name}.clean': f'{base} clean',
+        f'filter.{name}.smudge': f'{base} smudge',
+        f'filter.{name}.required': 'true',
+    }
+
+
 def _install() -> int:
     """Verify the master key first, then register the filter in git config and ensure the
     .gitattributes rule exists.
@@ -230,13 +287,7 @@ def _install() -> int:
 
     name: str = config['filter_name']
     root = config['root_dir']
-    base: str = f'{sys.executable} -m solver.crypto.gitfilter'
-    settings: dict[str, str] = {
-        f'filter.{name}.process': f'{base} process',
-        f'filter.{name}.clean': f'{base} clean',
-        f'filter.{name}.smudge': f'{base} smudge',
-        f'filter.{name}.required': 'true',
-    }
+    settings: dict[str, str] = filter_settings(name)
     for key, value in settings.items():
         run(['git', 'config', '--local', key, value], cwd=root, check=True)
         print(f'git config {key} = {value}', file=sys.stderr)
