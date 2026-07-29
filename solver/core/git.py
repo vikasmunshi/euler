@@ -488,10 +488,26 @@ def private_local_edits() -> dict[str, bytes]:
     """
     if not head_private_opens():
         return {}
-    names = run(['git', 'diff', '--name-only', 'HEAD', '--', 'solutions/private'],
-                cwd=config.root_dir, capture_output=True, text=True).stdout.split()
-    edits = {name: path.read_bytes() for name in names
-             if (path := config.root_dir / name).is_file()}
+    # `git status`, not `git diff HEAD`. They disagree, and only one of them is answering the
+    # question a person would recognise as theirs. Git does not run a clean filter on empty
+    # content, so every empty `__init__.py` under this tree is 0 bytes in the worktree and 33
+    # bytes of ciphertext in the commit: `git diff HEAD` compares those directly and calls all
+    # 918 of them modified, for ever, on a pristine clone. Status compares through the index
+    # and says what it is — clean. Live, that difference announced "kept your 917 local
+    # edit(s)" to collaborators who had edited nothing.
+    raw = run(['git', 'status', '--porcelain', '-z', '--', 'solutions/private'],
+              cwd=config.root_dir, capture_output=True, text=True).stdout
+    edits: dict[str, bytes] = {}
+    tokens, index = raw.split('\0'), 0
+    while index < len(tokens):
+        entry, index = tokens[index], index + 1
+        if not entry:
+            continue
+        if entry[0] in 'RC':        # a rename carries its source as the next NUL-separated token
+            index += 1
+        name = entry[3:]
+        if (path := config.root_dir / name).is_file():
+            edits[name] = path.read_bytes()
     return edits
 
 

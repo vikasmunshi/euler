@@ -91,6 +91,10 @@ class RotationRehomeTests(unittest.TestCase):
         self.solution = self.repo / _SOLUTION
         self.solution.parent.mkdir(parents=True)
         self.solution.write_text(_PLAINTEXT)
+        # An empty package marker, as every private problem directory carries. Git runs no
+        # clean filter on empty content, so this is 0 bytes in the worktree and ciphertext in
+        # the commit — the asymmetry that made a pristine clone report hundreds of edits.
+        (self.solution.parent / '__init__.py').write_text('')
         self._git('add', '-A')
         self._git('commit', '-qm', 'the tree before the rotation')
         self._git('push', '-q', 'origin', 'master')
@@ -204,8 +208,23 @@ class RotationRehomeTests(unittest.TestCase):
         self.assertEqual(self._git('rev-parse', 'HEAD').stdout.strip(),
                          self._git('rev-parse', 'origin/master').stdout.strip())
         # And it reads as a normal local change again — the clean filter re-encrypts it under
-        # the new key, so the diff is the edit rather than the rotation.
-        self.assertEqual(self._git('diff', '--name-only').stdout.split(), [_SOLUTION])
+        # the new key, so what is pending is the edit rather than the rotation. Asked through
+        # `git status`, for the reason the empty-file test above records.
+        self.assertEqual(self._git('status', '--porcelain').stdout.split(), ['M', _SOLUTION])
+
+    def test_an_untouched_worktree_reports_nothing(self) -> None:
+        """The 917 bug proper: empty files are not edits.
+
+        `git diff HEAD` says otherwise and always will — it compares the worktree's 0 bytes
+        against the commit's ciphertext — which is why the question has to be `git status`.
+        Two collaborators were told their pristine clones held 917 local edits.
+        """
+        from solver.core import git
+        self.assertEqual(git.private_local_edits(), {}, 'nothing was edited')
+        marker = self.solution.parent / '__init__.py'
+        self.assertEqual(marker.stat().st_size, 0, 'the fixture must really be empty')
+        self.assertGreater(self._git('cat-file', '-s', 'HEAD:' + _SOLUTION.rsplit('/', 1)[0]
+                                     + '/__init__.py').stdout.strip(), '0', 'and encrypted')
 
     def test_an_unfiltered_file_does_not_mask_an_unreadable_tree(self) -> None:
         """A plaintext file sorting first under solutions/private must not answer for the tree.
