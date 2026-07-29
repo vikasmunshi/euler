@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Rational_numbe
 - ● [0033](/solutions/0033/) — Digit Cancelling Fractions
 - ● [0155](/solutions/0155/) — Counting Capacitor Circuits
 - ● [0180](/solutions/0180/) — Golden Triplets
-- ○ [0236](/solutions/0236/) — Luxury Hampers
+- ● [0236](/solutions/0236/) — Luxury Hampers
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ○ [0343](/solutions/0343/) — Fractional Sequences
 - ○ [0422](/solutions/0422/) — Sequence of Points on a Hyperbola
