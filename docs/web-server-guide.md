@@ -765,6 +765,20 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   public). `user --regen`'s local re-wrap deliberately writes none — that edit is a
   stopgap keeping the collaborator decrypting until the authorized file arrives by
   `git-sync`, and attributing a file about to be overwritten would be attributing nothing.
+- **A rotation needs the same follow-through as a first mint**, precisely because that
+  re-wrap is local: the tree decrypts, but master still authorises the *old* key, and the
+  next `git-sync` overwrites the tree's copy. So `user --regen` does not go quiet on a
+  green tick. Below the `user-authorize` floor it **files a key request** worded as a
+  rotation (the old entry is now nobody's, so the staff-side act is authorise-then-purge);
+  at or above it — where filing a request with staff would be filing it with yourself — it
+  prints the two commands that make the grant durable, `user-authorize <key> <identity>`
+  and `git-publish keys`.
+- **The operator's own terminal cannot reach the spool**, by design: `/run/euler/msg.sock`
+  is `euler-web`-only and the operator's uid deliberately is not. That is why the
+  maintainer path above prints rather than files, and why `_request_authorization` says so
+  out loud when delivery fails instead of leaving a request nobody is coming to work.
+  `notify_staff` gets no sudo fallback: it fires inside another command's flow, and a
+  password prompt in the middle of a key mint is worse than a printed instruction.
 - **Purging** an entry is `users purge` (admin, §6.3): it joins `owners` against the
   account roster and offers the keys whose owner is gone or disabled. It is a *repo* verb —
   only the roster read is sudo; the edit lands in the operator's checkout and is committed

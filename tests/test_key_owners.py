@@ -26,8 +26,11 @@ from secrets import token_bytes
 from tempfile import TemporaryDirectory
 
 from cryptography.hazmat.primitives.asymmetric import x25519
+from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
 from solver.auth.identity import system_slug
+from solver.auth.subject import Subject
+from solver.config import config as app_config
 from solver.crypto import keys as keys_mod
 from solver.crypto.ciphers import (authorised_keys, encrypt_blob, key_owners, lock, public_key_hex,
                                    read_enc_key_file, read_master_key)
@@ -187,6 +190,85 @@ class ClassificationTests(EncKeyFileTestCase):
         rows = users_mod._classify_keys([], self.mine)
         self.assertEqual(rows[0][1], 'self')
         self.assertEqual(rows[-1][1], 'stale')
+
+
+class RotationFollowThroughTests(EncKeyFileTestCase):
+    """A minted key needs the same follow-through whether or not it currently decrypts.
+
+    The regression these pin: `user --regen` carries master-key access to the new key **in
+    the working tree only**, so `read_master_key()` succeeds afterwards — and the request
+    was filed only from the failure branch. A collaborator rotated, saw a green tick, and
+    silently lost access at their next `git-sync`, with nobody ever asked to authorise the
+    new key.
+    """
+
+    def _capture(self) -> list[tuple[str, str]]:
+        """Record what would be filed with staff instead of dialling the spool."""
+        import solver.web.msg.notify as notify
+        sent: list[tuple[str, str]] = []
+        saved = notify.notify_staff
+        notify.notify_staff = lambda subject, body: (sent.append((subject, body)), True)[1]  # type: ignore
+        self.addCleanup(setattr, notify, 'notify_staff', saved)
+        return sent
+
+    @staticmethod
+    def _subject(profile: str) -> Subject:
+        return Subject(user='t@example.com', slug='t-000000', channel='web',
+                       auth_method='test', profile=profile)
+
+    def test_a_contributor_rotation_files_a_request(self) -> None:
+        """They cannot authorise their own key, so somebody has to be told."""
+        sent = self._capture()
+        keys_mod._make_the_rotation_durable(self._subject('contributor'), self.theirs)
+        self.assertEqual(len(sent), 1)
+        subject, body = sent[0]
+        self.assertTrue(subject.startswith(KEY_REQUEST_SUBJECT))
+        self.assertIn('OLD key', body)                       # worded as a rotation…
+        self.assertIn('users purge', body)                   # …whose old entry now wants purging
+        self.assertEqual(len(keys_mod._PUBLIC_KEY_RE.findall(body)), 1)   # still machine-workable
+
+    def test_a_maintainer_rotation_is_told_to_do_it_themselves(self) -> None:
+        """Filing a request with staff when you *are* staff is filing it with yourself."""
+        sent = self._capture()
+        keys_mod._make_the_rotation_durable(self._subject('maintainer'), self.theirs)
+        self.assertEqual(sent, [])
+
+    def test_a_reader_rotation_files_a_request(self) -> None:
+        sent = self._capture()
+        keys_mod._make_the_rotation_durable(self._subject('reader'), self.theirs)
+        self.assertEqual(len(sent), 1)
+
+    def test_regen_reaches_the_follow_through_even_though_it_still_decrypts(self) -> None:
+        """The branch itself — where the bug was.
+
+        Drives the real `user --regen` against a temp identity that *is* authorised, so the
+        carry succeeds and `read_master_key()` returns: the success path must still call the
+        follow-through. Testing only the helper would have left this exact regression open.
+        """
+        import solver.crypto.keys as mod
+        from solver.utils import shell_utils
+        self.write(public_keys=(self.mine,))                 # our identity is the authorised one
+        crypto_config['private_key_file'] = self.enc_file.parent / 'id'
+        crypto_config['private_key_file'].write_bytes(self.mine_key.private_bytes(
+            Encoding.PEM, PrivateFormat.PKCS8, NoEncryption()))
+        mod.load_private_key.cache_clear()
+        called: list[str] = []
+        for name, stub in (('confirm', lambda _p: True),
+                           ('_make_the_rotation_durable', lambda _s, pub: called.append(pub))):
+            saved = getattr(mod, name)
+            setattr(mod, name, stub)
+            self.addCleanup(setattr, mod, name, saved)
+        saved_confirm = shell_utils.confirm
+        self.addCleanup(setattr, shell_utils, 'confirm', saved_confirm)
+        saved_emit, mod.osc.emit = mod.osc.emit, lambda *a, **k: None
+        self.addCleanup(setattr, mod.osc, 'emit', saved_emit)
+        saved_subject = app_config.subject
+        app_config.subject = self._subject('contributor')
+        self.addCleanup(setattr, app_config, 'subject', saved_subject)
+
+        self.assertEqual(mod.user(regen=True), 0)
+        self.assertEqual(len(called), 1, 'the rotation follow-through must run on the success path')
+        mod.load_private_key.cache_clear()
 
 
 class KeyRequestTests(EncKeyFileTestCase):

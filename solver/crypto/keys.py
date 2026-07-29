@@ -45,6 +45,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
 from solver.auth.identity import system_slug
+from solver.auth.subject import Subject
 from solver.config import config as app_config
 from solver.core import osc
 from solver.crypto import vault as vault_mod
@@ -52,8 +53,8 @@ from solver.crypto.ciphers import (authorised_keys, encrypt_blob, key_owners, lo
                                    public_key_hex, read_enc_key_file, read_master_key, verify_master_key)
 from solver.crypto.config import config
 from solver.shell import console, register
-from solver.web.msg import KEY_REQUEST_SUBJECT
 from solver.utils.shell_utils import confirm
+from solver.web.msg import KEY_REQUEST_SUBJECT
 
 #: A public key on the wire and in enc-key.json: 32 bytes of lowercase hex.
 _PUBLIC_KEY_RE = re.compile(r'\b[0-9a-f]{64}\b')
@@ -408,6 +409,15 @@ def user(regen: bool = False) -> int:
     try:
         read_master_key()
         console.print(f'[primary]public key:[/primary] {pub}\n[success]✓ can encrypt/decrypt[/success]')
+        # Decrypting is NOT the same as being authorised, and on a rotation it is usually
+        # not: the carry above re-wrapped the master key to the new key **in this working
+        # tree only**, and the next `git-sync` replaces that file with master's — which
+        # still names the old key. So a minted key needs the same follow-through whether or
+        # not it currently decrypts. Skipping it here was the bug: a collaborator rotated,
+        # saw a tick, and silently lost access at their next sync with nobody ever asked to
+        # authorise the new key.
+        if minted:
+            _make_the_rotation_durable(app_user, pub)
     except (FileNotFoundError, KeyError, ValueError):
         console.print(f'[primary]public key:[/primary] {pub}\n[error]✗ cannot encrypt/decrypt[/error]')
         console.print('[muted]Have an existing user `authorize` this public key, or `key-reconstruct` '
@@ -417,12 +427,43 @@ def user(regen: bool = False) -> int:
     return 0
 
 
-def _request_authorization(identity: str, public_key: str) -> None:
+def _make_the_rotation_durable(subject: Subject, public_key: str) -> None:
+    """Say how a freshly minted key that *already* decrypts becomes durable.
+
+    Two answers, because there are two positions to be in — and the split is "can you run
+    the fix yourself", not a rung for its own sake:
+
+    - **You can.** Holding the master key (you just used it) *and* standing at
+      `user-authorize`'s floor means the grant is one command away, and filing a request
+      with staff would be filing it with yourself. Print the two commands instead.
+    - **You cannot.** A contributor or reader who rotated has a working tree that decrypts
+      and an authorised entry that no longer names them. That is precisely a key request,
+      so file one — the same message the mint-with-no-access path files, worded for a
+      rotation, because the old entry now wants purging as well as the new one authorising.
+    """
+    console.print('[muted]The re-wrap above is LOCAL: master still authorises your OLD key, and '
+                  'the next [accent]git-sync[/accent] will overwrite this file.[/muted]')
+    if subject.has('maintainer'):
+        console.print('[muted]Make it durable:[/muted]')
+        console.print(f'  [accent]user-authorize[/accent] {public_key} {subject.user}')
+        console.print('  [accent]git-publish keys[/accent]')
+        console.print('[muted]Your old entry is then unattributed and stale — '
+                      '[accent]users purge[/accent] drops it.[/muted]')
+        return
+    _request_authorization(subject.user, public_key, rotated=True)
+
+
+def _request_authorization(identity: str, public_key: str, *, rotated: bool = False) -> None:
     """File a key-authorization request with staff for a freshly minted key.
 
-    Only on the path that needs it: a key was **just minted** *and* it cannot decrypt,
-    so somebody with the master key has to run ``user-authorize`` on it. A key that
-    already decrypts needs nothing, and a bare ``user`` status view is not a request.
+    Only on the paths that need it: a key was **just minted** and somebody holding the
+    master key has to run ``user-authorize`` on it before the grant is real anywhere but
+    this working tree. A bare ``user`` status view is not a request, and neither is a mint
+    by someone who can authorise it themselves (:func:`_make_the_rotation_durable`).
+
+    *rotated* distinguishes the two mints. Without it the requester still decrypts — their
+    tree carries a local re-wrap — so the staff-side act is *two* acts: authorise the new
+    key, and purge the old entry that is now nobody's.
 
     This is why the message layer exists (:mod:`solver.web.msg.notify`) — before it, the
     account page told the collaborator to "copy your public key to the admin and wait",
@@ -435,14 +476,23 @@ def _request_authorization(identity: str, public_key: str) -> None:
     # exactly one public key — the two rules that make this thread machine-workable. Keep both
     # true when editing this text: a reworded subject silently turns every future request back
     # into copy-and-paste, and a second hex token in the body makes it refuse.
+    standing = ('rotated their key pair; their working tree still decrypts through a local '
+                're-wrap, but master authorises their OLD key' if rotated else
+                'minted a new key pair and cannot decrypt the private solutions yet')
+    tail = ('\n\nTheir previous entry is now nobody\'s — `users purge` drops it.\n' if rotated else '\n')
     sent = notify_staff(
         f'{KEY_REQUEST_SUBJECT}{identity}',
-        f'{identity} minted a new key pair and cannot decrypt the private solutions yet.\n\n'
+        f'{identity} {standing}.\n\n'
         f'public key: {public_key}\n\n'
         f'To grant access, run:\n'
-        f'    user-authorize <the id of this message>\n')
+        f'    user-authorize <the id of this message>\n' + tail)
     if sent:
         console.print('[muted]A key-authorization request has been sent to the maintainers.[/muted]')
+    else:
+        # The spool is how this reaches staff; when it cannot, say so and hand over the
+        # thing they need. Silence here would leave a rotation that nobody is coming to fix.
+        console.print('[muted]Could not reach the message spool — send this public key to a '
+                      'maintainer yourself.[/muted]')
 
 
 # ==================================================================================================================== #
