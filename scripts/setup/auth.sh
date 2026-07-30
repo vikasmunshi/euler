@@ -301,7 +301,7 @@ PY
 
 # True when the deployed venv contains the auth service module (build-order step 4).
 venv_has_auth() {
-    [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -c 'import solver.web.auth' 2>/dev/null
+    [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c 'import solver.web.auth' 2>/dev/null
 }
 
 # Install + enable the root-owned unit (only called when the module exists).
@@ -436,7 +436,20 @@ do_remove() {
 do_status() {
     if [ -x "${VENV_PY}" ]; then
         echo "venv:        ✓ ${VENV_DIR} ($(${VENV_PY} --version 2>&1))"
-        if "${VENV_PY}" -c 'import aiohttp, aiohttp_jinja2, jinja2, solver' 2>/dev/null; then
+        # The deployed build: the one thing in this report that changes on every release, and
+        # the answer to "did redeploy-web actually ship it?". Read from the installed
+        # dist-info rather than by importing, so it reports what pip put in the venv.
+        local deployed
+        deployed="$("${VENV_PY}" -P -c 'from importlib.metadata import version; print(version("solver"))' 2>/dev/null)"
+        if [ -n "${deployed}" ]; then
+            echo "solver:      ✓ v${deployed} deployed"
+        else
+            echo "solver:      ✗ version not readable (is the repo installed into the venv?)"
+        fi
+        # `-P` keeps the cwd off sys.path, as user.sh's probes already do. Without it, run from
+        # a checkout, `import solver` resolves the *working tree* — so this line reported on
+        # the clone it was run from rather than on the venv it names.
+        if "${VENV_PY}" -P -c 'import aiohttp, aiohttp_jinja2, jinja2, solver' 2>/dev/null; then
             echo "deps:        ✓ solver + aiohttp/aiohttp-jinja2/jinja2 importable"
         else
             echo "deps:        ✗ web deps or solver not importable from the venv"

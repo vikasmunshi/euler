@@ -107,7 +107,7 @@ require_venv() {
         echo "Error: ${VENV_DIR} is not deployed — run 'make deploy-auth' first (it owns the venv)." >&2
         return 1
     fi
-    if ! sudo "${VENV_PY}" -c 'import solver.web.msg' 2>/dev/null; then
+    if ! sudo "${VENV_PY}" -P -c 'import solver.web.msg' 2>/dev/null; then
         echo "Error: solver.web.msg is not importable from ${VENV_DIR}." >&2
         echo "       Run 'make redeploy-auth' to reinstall this checkout into the venv." >&2
         return 1
