@@ -156,6 +156,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0236](/solutions/0236/) — Luxury Hampers
+- ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
