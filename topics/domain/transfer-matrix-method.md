@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Transfer_matri
 
 - ● [0189](/solutions/0189/) — Tri-colouring a Triangular Grid
 - ● [0194](/solutions/0194/) — Coloured Configurations
+- ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ○ [0458](/solutions/0458/) — Permutations of Project
 - ○ [0544](/solutions/0544/) — Chromatic Conundrum
 - ○ [0654](/solutions/0654/) — Neighbourly Constraints

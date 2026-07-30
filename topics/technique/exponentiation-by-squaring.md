@@ -13,6 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Exponentiation
 - ● [0171](/solutions/0171/) — Square Sum of the Digital Squares
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
 - ● [0217](/solutions/0217/) — Balanced Numbers
+- ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0788](/solutions/0788/) — Dominating Numbers

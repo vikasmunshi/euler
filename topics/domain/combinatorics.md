@@ -188,7 +188,6 @@ of crossing it.
 - ● [0208](/solutions/0208/) — Robot Walks
 - ● [0215](/solutions/0215/) — Crack-free Walls
 - ● [0228](/solutions/0228/) — Minkowski Sums
-- ○ [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ○ [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ○ [0240](/solutions/0240/) — Top Dice
 - ○ [0242](/solutions/0242/) — Odd Triplets
