@@ -1655,8 +1655,8 @@
     "title": "Tours on a $4 \\times N$ Playing Board",
     "level": 17,
     "pct": 44,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "2026-07-30T13:43:01.646983"
   },
   "238": {
     "title": "Infinite String Tour",
