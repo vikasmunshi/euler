@@ -1833,20 +1833,36 @@ panel says so and offers to connect it, painted from the same `termConnected` ev
 `[data-term-*]` control reads — a verb that silently does nothing is the one outcome a
 control must never have.
 
-**One row kind carries an act as well as a read.** A key-authorization request — the message
-kind a *command* files (§9), and the only one another command can work — gets an
-**Authorize** button beside its read button, typing `user-authorize <message-id>`. The id is
-the whole point: the command reads the public key from the thread over the socket, where the
-requester's identity is vouched for, so the key never reaches the browser and nobody retypes
-64 hex characters off a screen. The row decides "is this a key request" from the same subject
-constant the filing command uses (`solver/web/msg/__init__.py`), so the chip can never offer
-a verb `user-authorize` would refuse.
+**Each row carries the verb that row is for**, not a generic read. Most threads are prose and
+the useful act is `msg read <id>`; the message kinds a *command* files are not, and offering
+"read" on the grant you have been waiting for — with the real verb somewhere else — makes the
+reader do the routing. The rules (`solver/web/user/msg_api.py`):
 
-It appears **only when applicable** — the row is a key request *and* the reader is at the
-command's floor — which is a deliberate exception to this panel's shown-but-locked rule. A
+| the row is | the verb it types | why the id is / is not in it |
+| --- | --- | --- |
+| a **key issued to you** | `msg save <id>` | the command reads the payload from the thread over the socket, so no key material reaches the browser |
+| a **key request**, read by staff | `user-authorize <id>` | same: the public key is read over the socket, and nobody retypes 64 hex characters off a screen |
+| a **pull request**, read by staff | `gh-merge merge` | no id — the verb walks the open pull requests as GitHub knows them; the row is what says one is waiting |
+| anything else | `msg read <id>` | prose, for a person to read |
+
+The row decides *which* from the subject, against the same constants the filing commands use
+(`solver/web/msg/__init__.py`), so the chip can never offer a verb the command would refuse.
+The verb chip beside the subject appears only when the act is not a plain read: a row that
+says "save", "authorize" or "merge" is telling you something, where "read" on every line is
+noise. This is also why a request and its answer being two messages matters — one message,
+one act, so a row can name a verb at all.
+
+A command verb appears **only when applicable** — the subject matches *and* the reader is at
+the command's floor — which is a deliberate exception to this panel's shown-but-locked rule. A
 locked verb in the verb list teaches the ladder on a menu everyone sees; a locked one on a
 *row* would ride on every message of a kind most readers never receive, and on a reader's own
 key request it would offer them a grant they can never make.
+
+In the terminal the same acts are the staff queue's keys — `msg queue` walks the inbound
+threads offering **read / grant / merge / dismiss / skip** on each. There the verbs are
+offered on every row rather than picked per subject: the walk shows the thread in full, so
+which act it wants is plain from what it says, where a button has to name one verb before
+anybody has read anything.
 
 That mechanism is selected by the **`.term-menu`** marker every such menu carries, not by
 each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second
@@ -1912,6 +1928,22 @@ call it in a base install with no aiohttp.
 `user` is the first caller, and only on the path that needs it — a key was **just minted**
 *and* it cannot decrypt, so somebody with the master key has to act. A key that already
 decrypts needs nothing, and a bare `user` status view is not a request.
+
+Two more callers, on the same terms — the act is the system of record, the message is a nudge
+on top, and each subject is a constant in `solver/web/msg/__init__.py` so the chip can offer
+the right verb:
+
+- **`git-push`**, when it opens a pull request (`PR_REVIEW_SUBJECT`): a pushed branch with a
+  request nobody has been told about is the same dead end `user` had before this layer
+  existed — the collaborator has done all they can, and the act that lands it belongs to
+  someone with no reason to be looking. Only for a *newly opened* request: re-pushing a branch
+  as it grows keeps the one open request, and a notice per push would turn the queue into a
+  changelog of somebody's afternoon. The reviewer's verb is `gh-merge merge`.
+- **`summary`**, when the progress page contradicts what is recorded as solved
+  (`UNREGISTERED_SUBJECT`): `mark` records a problem solved the moment its own results
+  confirm the answer, which can be long before the answer is given to projecteuler.net. The
+  import keeps the local record — it only ever *adds* solved problems — and reports the
+  problems whose answers were never registered upstream. Prose, so the verb is a plain read.
 
 ### 13.8 The kit
 

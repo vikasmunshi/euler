@@ -1045,7 +1045,9 @@ the `admin` floor, and force-pushing it is always refused.
 The PR is the second half of the push: an unreviewed branch on origin is not
 work anyone has been asked for. It is skipped on master (nothing to merge into
 itself) and on a branch level with origin/master (nothing to review), and a
-branch that already has one open keeps it.
+branch that already has one open keeps it. Opening one also **messages the
+maintainers** that it is waiting, so the review does not depend on somebody
+thinking to look; their verb is `gh-merge merge`.
 
 **usage**
 
@@ -1689,6 +1691,12 @@ authenticated https://projecteuler.net/progress page) and updates
 `problems.json` with which problems are solved and their metadata. This is
 how the shell learns your real progress, driving `{solved}` / `{unsolved}`,
 `progress`, and `solved`.
+
+The import only ever **adds** solved problems: a problem `mark` recorded as solved
+keeps that record, and its date, even when the page does not show it as solved —
+which is the normal state of a problem solved here but whose answer has not been
+registered on projecteuler.net yet. Each such disagreement is reported, and staff
+are sent a message naming the problems.
 
 Returns an error (with instructions) if `.progress.html` is missing: visit
 the progress page, copy its Page Source into that file, and retry.
