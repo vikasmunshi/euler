@@ -1662,8 +1662,8 @@
     "title": "Infinite String Tour",
     "level": 24,
     "pct": 63,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "2026-07-30T19:44:58.053164"
   },
   "239": {
     "title": "Twenty-two Foolish Primes",
