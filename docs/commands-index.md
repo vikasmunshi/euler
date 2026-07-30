@@ -1410,7 +1410,7 @@ msg
 [thread=<str>] (asked)
 [subject=<str>] (asked)
 [body=<str>] (asked)
-[to=<str>] (default '')
+[to=<str>] (asked)
 [all_users=true|--all-users]
 ```
 
@@ -1422,7 +1422,7 @@ msg
 | `thread` | The message to act on, for `read` / `save` / `dismiss`. Offered as a menu of your own threads, so the id never has to be typed out. |
 | `subject` | The subject line, for `send` / `notice`. |
 | `body` | The message text, for `send` / `notice`. |
-| `to` | Comma-separated recipient identities for a `notice`. |
+| `to` | Who a `notice` goes to: `*` for everyone, or one or more identities, comma-separated. Offered as a menu of the known accounts where the roster can be read. |
 | `all_users` | Send the notice to every mapped identity. Defaults to False. |
 
 *Defined in* `solver.web.msg.commands.msg`.

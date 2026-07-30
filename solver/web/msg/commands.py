@@ -78,6 +78,32 @@ def _threads(_: Context, bound: dict[str, Any]) -> list[Choice]:
     ]
 
 
+#: The wire form for "everyone", which the service resolves to every mapped identity.
+_EVERYONE: str = '*'
+
+
+def _recipients(_: Context, bound: dict[str, Any]) -> list[Choice]:
+    """Who a notice can go to: everyone, plus the known accounts when they can be read.
+
+    The roster is an admin-plane read, so a maintainer without sudo (or a web shell, which
+    cannot sudo at all) gets only the `everyone` option — which is why the menu is not strict:
+    identities can always be typed instead, comma-separated. Never raises; an unreadable
+    roster is a shorter menu, not a failed notice.
+    """
+    options = [Choice(_EVERYONE, 'everyone', 'every mapped identity')]
+    try:
+        from solver.web.auth.commands import account_identities
+        options.extend(Choice(identity) for identity in account_identities())
+    except Exception:                                        # noqa: BLE001 — a menu, not a gate
+        pass
+    return options
+
+
+def _needs_recipients(bound: dict[str, Any]) -> bool:
+    """Whether a notice still needs telling who it goes to (`--all-users` already says so)."""
+    return bound.get('action') == 'notice' and not bound.get('all_users')
+
+
 def _needs_thread(bound: dict[str, Any]) -> bool:
     """Whether the chosen verb names a thread."""
     return bound.get('action') in _ON_THREAD
@@ -242,11 +268,12 @@ def _queue() -> int:
 
 
 def _notice(to: str, subject: str, body: str) -> int:
-    """Send a notice to named recipients, or to everyone with `--all`."""
-    targets: str | list[str] = '*' if to == '*' else [part.strip() for part in to.split(',') if part.strip()]
+    """Send a notice to named recipients, or to everyone with `--all-users`."""
+    parts = [part.strip() for part in to.split(',') if part.strip()]
+    targets: str | list[str] = _EVERYONE if _EVERYONE in parts else parts
     if not targets:
-        console.print('[error]error:[/error] msg notice needs `to=<email[,email…]>` or `--all`')
-        return 2
+        raise Abort('msg notice needs `to=<email[,email…]>` or `--all-users`',
+                    rc=ExitCodes.EXIT_USAGE)
     result = _call('notice', body={'to': targets, 'subject': subject, 'body': body})
     if result is None:
         return _unreachable()
@@ -328,7 +355,9 @@ def msg(action: Annotated[Literal['list', 'read', 'save', 'send', 'queue', 'noti
                                    empty='no messages')] = '',
         subject: Annotated[str, Ask('Subject', when=_is_outbound)] = '',
         body: Annotated[str, Ask('Message', when=_is_outbound, multiline=True)] = '',
-        to: str = '', all_users: bool = False) -> int:
+        to: Annotated[str, Ask('Who should receive it?', choices=_recipients,
+                               when=_needs_recipients, strict=False)] = '',
+        all_users: bool = False) -> int:
     """Read and send messages: your threads, questions to staff, staff notices.
 
     Every message has staff (`maintainer`+) at one end: you can ask them something,
@@ -349,7 +378,9 @@ def msg(action: Annotated[Literal['list', 'read', 'save', 'send', 'queue', 'noti
             menu of your own threads, so the id never has to be typed out.
         subject: [asked] The subject line, for `send` / `notice`.
         body: [asked] The message text, for `send` / `notice`.
-        to: Comma-separated recipient identities for a `notice`.
+        to: [asked] Who a `notice` goes to: `*` for everyone, or one or more identities,
+            comma-separated. Offered as a menu of the known accounts where the roster can be
+            read.
         all_users: Send the notice to every mapped identity. Defaults to False.
     """
     if action == 'list':

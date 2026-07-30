@@ -345,5 +345,78 @@ class AskTests(_DialogueCase):
         self.assertEqual(['colour=blue'], [str(c.text) for c in offered])  # type: ignore[union-attr]
 
 
+class MsgNoDeadEndTests(_DialogueCase):
+    """No verb may ask for some answers and then refuse for one it never asked about.
+
+    The defect this pins: `msg notice` walked the user through subject and message, then failed
+    with `needs to=… or --all` — an argument no question had offered, naming a flag that did not
+    exist. A verb that asks must ask for everything the path it took needs.
+    """
+
+    def setUp(self) -> None:
+        from solver.web.auth import commands as auth_commands
+        from solver.web.msg import commands as msg_commands
+        self.commands = msg_commands
+        self.calls: list[tuple[str, Any]] = []
+        # The spool is not reachable under test: every verb's own call is stubbed to succeed,
+        # so what remains is the argument-gathering this test is about.
+        thread = {'id': 'abc123', 'subject': 'a thread', 'author_name': 'staff',
+                  'updated': '2026-07-30T09:00', 'unread': True}
+        self.enterContext(patch.object(
+            msg_commands, '_call',
+            lambda verb, **kw: (self.calls.append((verb, kw)),
+                                (200, {'threads': [thread], 'queue': [thread]}))[1]))
+        self.enterContext(patch.object(msg_commands, '_is_staff', lambda: True))
+        # `Ask(choices=fn)` captures the function *by value* at decoration time, so patching
+        # `_threads` / `_recipients` by name would not be seen. Stub what they read instead.
+        self.enterContext(patch.object(auth_commands, 'account_identities', lambda: ['a@x.com']))
+
+    def _verb(self, verb: str, *answers: str) -> int:
+        """Run one verb through the adapter, answering as a user would.
+
+        Through the registry, not by calling `msg()` directly: the `Ask` binding lives in the
+        adapter, and a command function stays a plain callable that asks nothing.
+        """
+        self.script(*answers)
+        command = registry.resolve('msg')
+        assert command is not None
+        return command.invoke(Context(argv=[verb]))
+
+    def test_notice_asks_for_its_recipients(self) -> None:
+        rc = self._verb('notice', 'a subject', 'the body', '', '1')
+        self.assertNotEqual(ExitCodes.EXIT_USAGE, rc, 'a notice must never ask then refuse')
+        self.assertIn('notice', [verb for verb, _ in self.calls])
+
+    def test_the_recipient_question_is_what_prevents_the_dead_end(self) -> None:
+        """Take the question away and the defect returns — which is what this class pins.
+
+        The adapter closes over the command's `_CommandSpec`, so dropping `to` from its `asks`
+        reproduces exactly what shipped: subject and message asked for, then a usage error
+        about an argument no question offered.
+        """
+        command = registry.resolve('msg')
+        assert command is not None
+        spec = next(cell.cell_contents for cell in (command.func.__closure__ or ())
+                    if type(cell.cell_contents).__name__ == '_CommandSpec')
+        without_to = {name: ask for name, ask in spec.asks.items() if name != 'to'}
+        with patch.object(spec, 'asks', without_to):
+            self.script('a subject', 'the body', '')          # '' ends the multiline message
+            self.assertEqual(ExitCodes.EXIT_USAGE, command.invoke(Context(argv=['notice'])))
+
+    def test_send_asks_for_subject_and_body(self) -> None:
+        rc = self._verb('send', 'a subject', 'the body', '')
+        self.assertNotEqual(ExitCodes.EXIT_USAGE, rc)
+        self.assertIn('send', [verb for verb, _ in self.calls])
+
+    def test_the_thread_verbs_ask_for_a_thread(self) -> None:
+        for verb in ('read', 'save', 'dismiss'):
+            with self.subTest(verb=verb):
+                try:
+                    rc = self._verb(verb, '1')
+                except Abort as abort:                       # a refusal is fine; a *usage* one is not
+                    rc = abort.rc
+                self.assertNotEqual(ExitCodes.EXIT_USAGE, rc, f'{verb} must not ask then refuse')
+
+
 if __name__ == '__main__':
     unittest.main()

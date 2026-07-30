@@ -74,18 +74,28 @@ def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
         return 1
 
 
-def _sudo_admin_capture(action: str) -> tuple[int, str]:
+def _sudo_admin_capture(action: str, *, prompt: bool = True) -> tuple[int, str]:
     """Run an admin CLI **read** under sudo, capturing stdout (JSON).
 
-    Only stdout is piped — stderr and the tty stay attached, so the sudo password
-    prompt still reaches the terminal while the machine-readable payload is captured.
+    Only stdout is piped — stderr and the tty stay attached, so the sudo password prompt still
+    reaches the terminal while the machine-readable payload is captured.
+
+    Args:
+        action: The admin CLI read to run.
+        prompt: Let sudo ask for a password when the credential is not cached. Defaults to
+            True. False adds `-n` and swallows the refusal, for a read whose value is a
+            convenience — a menu of known accounts — where interrupting the caller with a
+            password prompt would cost more than the read is worth.
     """
-    argv = ['sudo', sys.executable, '-m', 'solver.web.auth.admin', action]
+    argv = ['sudo', *([] if prompt else ['-n']), sys.executable,
+            '-m', 'solver.web.auth.admin', action]
     try:
-        proc = subprocess.run(argv, stdout=subprocess.PIPE, text=True, check=False)
+        proc = subprocess.run(argv, stdout=subprocess.PIPE, text=True, check=False,
+                              stderr=None if prompt else subprocess.DEVNULL)
         return proc.returncode, proc.stdout
     except (OSError, KeyboardInterrupt) as exc:
-        console.print(f'[error]error:[/error] could not run the admin CLI ({exc})')
+        if prompt:
+            console.print(f'[error]error:[/error] could not run the admin CLI ({exc})')
         return 1, ''
 
 
@@ -185,6 +195,29 @@ def _roster() -> list[dict[str, str]] | None:
     except json.JSONDecodeError:
         return None
     return [row for row in rows if isinstance(row, dict)]
+
+
+def account_identities() -> list[str]:
+    """The web account identities, for a menu — empty when the roster cannot be read cheaply.
+
+    Deliberately weaker than :func:`registered_public_keys`: the roster is a sudo read, and a
+    caller building a menu (`msg notice`'s recipients) must not stop to ask for a password. So
+    it asks with `sudo -n` and takes silence for an answer, leaving the menu shorter rather
+    than the dialogue interrupted. A rotation, which cannot afford that ambiguity, uses the
+    strict reader below.
+    """
+    rc, payload = _sudo_admin_capture('roster-json', prompt=False)
+    if rc != 0:
+        return []
+    try:
+        rows = json.loads(payload or '[]')
+    except json.JSONDecodeError:
+        return []
+    # `user` is the roster's identity column, and only a web-scoped row has a mailbox to
+    # deliver a notice to — a local os-login has no instance (`registered_public_keys` filters
+    # on the same pair of keys).
+    return sorted(str(row['user']) for row in rows
+                  if isinstance(row, dict) and row.get('user') and row.get('scope') == 'web')
 
 
 def registered_public_keys() -> dict[str, str] | None:
