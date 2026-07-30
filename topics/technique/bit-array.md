@@ -13,6 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bit_array>._
 - ● [0146](/solutions/0146/) — Investigating a Prime Pattern
 - ● [0196](/solutions/0196/) — Prime Triplets
 - ● [0201](/solutions/0201/) — Subsets with a Unique Sum
+- ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 
 <!-- /problems -->

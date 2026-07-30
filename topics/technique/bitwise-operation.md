@@ -15,6 +15,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bitwise_operat
 - ● [0215](/solutions/0215/) — Crack-free Walls
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
+- ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0301](/solutions/0301/) — Nim
 - ● [0679](/solutions/0679/) — Freefarea
 - ● [0899](/solutions/0899/) — DistribuNim I
