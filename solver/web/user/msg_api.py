@@ -38,7 +38,7 @@ import aiohttp
 from aiohttp import web
 
 from solver.web.msg import (DEFAULT_MSG_SOCKET, KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT,
-                            MSG_SOCKET_ENV)
+                            MSG_SOCKET_ENV, PR_REVIEW_SUBJECT)
 from solver.web.msg.identity import STAFF_FLOOR
 from solver.web.site.app import requires
 from solver.web.site.render import MSG_SPOOL_KEY, SUBJECT_KEY, render
@@ -109,6 +109,10 @@ def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]
 
     - a **key issued to you** is `msg save`: the thing to do with a key is take it;
     - a **key request**, seen by staff, is `user-authorize`;
+    - a **pull request**, seen by staff, is `gh-merge merge` — the one act it is asking for.
+      It carries no thread id, because the verb walks the open pull requests as GitHub knows
+      them rather than reading anything out of the message; the row is what says one is
+      waiting;
     - everything else is `msg read`.
 
     Every message stands on its own (there are no replies), so a request and the grant that
@@ -127,6 +131,10 @@ def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]
             verb, label = f'msg save {thread_id}', 'save'
         elif subject.startswith(KEY_REQUEST_SUBJECT) and is_staff and author != me:
             verb, label = f'user-authorize {thread_id}', 'authorize'
+        elif subject.startswith(PR_REVIEW_SUBJECT) and is_staff:
+            # No `author != me` here, unlike a key request: the owner pushes and merges
+            # their own branch as a matter of course, so their own row is still actionable.
+            verb, label = 'gh-merge merge', 'merge'
         else:
             verb, label = f'msg read {thread_id}', ''
         rows.append({'id': thread_id, 'author_name': author, 'subject': subject,

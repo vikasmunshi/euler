@@ -15,6 +15,7 @@ from solver.config import ExitCodes, config
 from solver.core.problems import Problem, problems
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
+from solver.web.msg import UNREGISTERED_SUBJECT
 
 
 def _parse_progress_html() -> dict[int, dict[str, str | int | bool]]:
@@ -68,15 +69,111 @@ def _parse_progress_html() -> dict[int, dict[str, str | int | bool]]:
     return _problems
 
 
+def _recorded_problems() -> dict[int, dict[str, str | int | bool]]:
+    """The problems file as it stands now, keyed by number — `{}` when it cannot be read.
+
+    A missing or unparsable file is not an error here: the first `summary` on a fresh clone
+    has nothing to compare against, and the write that follows is what creates it. Anything
+    unreadable is treated as "nothing recorded" rather than refused, since the parsed page is
+    the better of the two states either way.
+    """
+    try:
+        raw: Any = loads(config.static_file_problems.read_text())
+    except (OSError, JSONDecodeError):
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    recorded: dict[int, dict[str, str | int | bool]] = {}
+    for key, value in raw.items():
+        try:
+            number = int(key)
+        except (TypeError, ValueError):
+            continue
+        if isinstance(value, dict):
+            recorded[number] = value
+    return recorded
+
+
+def _carry_solved(_problems: dict[int, dict[str, str | int | bool]],
+                  recorded: dict[int, dict[str, str | int | bool]]) -> list[int]:
+    """Keep every `solved` record *recorded* already holds; return the numbers the page denies.
+
+    `solved` is written from two directions and only one of them is the progress page: `mark`
+    sets it the moment a problem's own `results.json` confirms the answer, which is *before*
+    the answer has been given to projecteuler.net (sometimes long before). A re-import that
+    simply overwrote the file would silently un-solve all of those, taking their dates with
+    them — so the merge is one-way: a solved record survives a page that does not carry it,
+    with its original date, and nothing here ever clears a `solved` flag.
+
+    The numbers returned are exactly the disagreements: solved in the file, not solved on the
+    page. Each one means the same thing — the answer was never registered upstream — which is
+    worth telling somebody about, because it is the half of solving a problem that the solver
+    cannot do for you.
+    """
+    unregistered: list[int] = []
+    for number, was in sorted(recorded.items()):
+        if not was.get('solved'):
+            continue
+        current = _problems.get(number)
+        if current is None:
+            # The page does not carry this problem at all (a partial save, or a problem
+            # withdrawn upstream). Carry the whole record over rather than drop a solution.
+            _problems[number] = dict(was)
+        elif not current.get('solved'):
+            current['solved'] = True
+            current['date'] = was.get('date') or current.get('date', '')
+        else:
+            continue
+        unregistered.append(number)
+    return unregistered
+
+
+def _report_unregistered(numbers: list[int]) -> None:
+    """Say — on the console, and to staff — which solved answers the progress page lacks.
+
+    Best-effort on the message, like every other :mod:`solver.web.msg.notify` caller: the
+    state is already written and correct, so a spool that is down or absent costs a nudge and
+    nothing else. The console line is printed either way, since the person who just ran
+    `summary` is the one who can go and register the answer.
+    """
+    from solver.web.msg.notify import notify_staff
+    listed: str = ', '.join(str(number) for number in numbers)
+    what: str = f'problem {listed}' if len(numbers) == 1 else f'{len(numbers)} problems'
+    if len(numbers) == 1:
+        console.print(f'[warning]answer for problem {listed} not registered on '
+                      'projecteuler.net[/warning]')
+    else:
+        console.print(f'[warning]answer not registered on projecteuler.net for '
+                      f'{len(numbers)} problems: {listed}[/warning]')
+    notify_staff(
+        f'{UNREGISTERED_SUBJECT}{what}',
+        'These problems are recorded as solved, but the progress page does not show them as '
+        'solved — so the answer was never registered on projecteuler.net:\n\n'
+        + ''.join(f'    answer for problem {number} not registered\n' for number in numbers)
+        + '\nThe recorded state has been kept as it was. Submit each answer on '
+          'https://projecteuler.net, then run `summary` again.\n')
+
+
 def _update_problems_state(_problems: dict[int, dict[str, str | int | bool]]) -> None:
     """Update the on-disk and in-memory problems state from parsed problem metadata.
+
+    The write is a merge, not a replacement: :func:`_carry_solved` folds the solved records
+    the file already holds into *_problems* first, so a re-imported progress page can add
+    solved problems but never take one away. Disagreements — solved here, not solved on the
+    page — are reported (:func:`_report_unregistered`).
 
     Args:
         _problems: Dictionary mapping problem numbers to their metadata
                   (title, level, pct, solved, date).
     """
-    config.static_file_problems.write_text(dumps(_problems, indent=2))
+    unregistered: list[int] = _carry_solved(_problems, _recorded_problems())
+    # By number, so a record carried over from the old file lands where it belongs rather
+    # than at the end. A no-op for a file the page already wrote in order.
+    ordered = {number: _problems[number] for number in sorted(_problems)}
+    config.static_file_problems.write_text(dumps(ordered, indent=2))
     problems.clear_cache()
+    if unregistered:
+        _report_unregistered(unregistered)
 
 
 @register(requires='maintainer', quietable=True)
@@ -88,6 +185,12 @@ def summary() -> int:
     `problems.json` with which problems are solved and their metadata. This is
     how the shell learns your real progress, driving `{solved}` / `{unsolved}`,
     `progress`, and `solved`.
+
+    The import only ever **adds** solved problems: a problem `mark` recorded as solved
+    keeps that record, and its date, even when the page does not show it as solved —
+    which is the normal state of a problem solved here but whose answer has not been
+    registered on projecteuler.net yet. Each such disagreement is reported, and staff
+    are sent a message naming the problems.
 
     Returns an error (with instructions) if `.progress.html` is missing: visit
     the progress page, copy its Page Source into that file, and retry.

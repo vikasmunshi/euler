@@ -51,6 +51,7 @@ from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
 from solver.shell.dialogue import SKIP, Action, walk
 from solver.utils.shell_utils import run_cmdline, run_command
+from solver.web.msg import PR_REVIEW_SUBJECT
 
 
 # ── GitHub identity (gh) ────────────────────────────────────────────────────────────────
@@ -803,6 +804,34 @@ def _commits_ahead(branch: str) -> int | None:
         return None
 
 
+def _announce_pull_request(branch: str, url: str) -> None:
+    """Tell staff a pull request is waiting — the delivery half of `git-push`.
+
+    A pull request nobody has been told about is the same dead end `user` had before the
+    message layer existed: the collaborator has done everything they can, and the act that
+    lands it belongs to somebody who has no reason to be looking. So the command that opens
+    the request also files it, under :data:`~solver.web.msg.PR_REVIEW_SUBJECT` — the subject
+    the header's chip reads to offer **merge** on that row.
+
+    Only for a **newly opened** request. Re-pushing a branch as it grows is the normal way
+    to work, and one open pull request quietly picks up the new commits; a notice per push
+    would turn the queue into a changelog of somebody's afternoon.
+
+    Best-effort and silent on failure, like every other :mod:`solver.web.msg.notify` caller:
+    the branch is pushed and the request is open either way, and a spool that is down must
+    not fail the push that reached GitHub.
+    """
+    from solver.web.msg.notify import notify_staff
+    sent = notify_staff(
+        f'{PR_REVIEW_SUBJECT}{branch}',
+        f'{branch} has a pull request open onto master:\n\n'
+        f'    {url}\n\n'
+        f'To review the open pull requests and land this one, run:\n'
+        f'    gh-merge merge\n')
+    if sent:
+        console.print('[muted]the maintainers have been notified.[/muted]')
+
+
 def _ensure_pull_request(branch: str) -> int:
     """Open a pull request for *branch* onto master, or report the one already open.
 
@@ -841,7 +870,9 @@ def _ensure_pull_request(branch: str) -> int:
         console.print('your branch [accent]is[/accent] pushed — run [accent]git-identity[/accent] if gh is '
                       'not signed in, or open the PR on GitHub yourself.')
         return int(ExitCodes.EXIT_ERROR)
-    console.print(f'pull request opened: [accent]{proc.stdout.strip()}[/accent]')
+    url: str = proc.stdout.strip()
+    console.print(f'pull request opened: [accent]{url}[/accent]')
+    _announce_pull_request(branch, url)
     return int(ExitCodes.EXIT_OK)
 
 
@@ -857,7 +888,9 @@ def git_push(force: bool = False, pr: bool = True) -> int:
     The PR is the second half of the push: an unreviewed branch on origin is not
     work anyone has been asked for. It is skipped on master (nothing to merge into
     itself) and on a branch level with origin/master (nothing to review), and a
-    branch that already has one open keeps it.
+    branch that already has one open keeps it. Opening one also **messages the
+    maintainers** that it is waiting, so the review does not depend on somebody
+    thinking to look; their verb is `gh-merge merge`.
 
     Args:
         force: Push with `--force-with-lease` — needed after `git-sync` rebased your branch

@@ -9,7 +9,7 @@ description: Use when Claude is launched by the `claude-skill` command via
   document and summarise) and `review` (audit an existing solution for C↔Python
   algorithmic parity, in-source documentation, and `notes.html` standards). Do NOT
   activate for a generic "solve this" or for codebase questions.
-version: 0.3.0
+version: 0.4.0
 model: opus
 ---
 
@@ -45,7 +45,9 @@ For exact `solver` command usage (aliases, flags, arguments), see
 **[docs/commands-index.md](docs/commands-index.md)** — e.g. [`ls`](docs/commands-index.md#command-ls),
 [`new`](docs/commands-index.md#command-new), [`evaluate`/`eval`](docs/commands-index.md#command-evaluate-eval),
 [`benchmark`](docs/commands-index.md#command-benchmark), [`lint`](docs/commands-index.md#command-lint),
-and [`mark`](docs/commands-index.md#command-mark-mark-solved). The solution interface
+[`mark`](docs/commands-index.md#command-mark-mark-solved),
+[`git-commit`](docs/commands-index.md#command-git-commit-commit) and
+[`git-push`](docs/commands-index.md#command-git-push-push). The solution interface
 (`@runner.main` / `runner.h`) is documented in
 **[docs/solver-guide.md](docs/solver-guide.md)**.
 
@@ -217,19 +219,34 @@ report that this is a `solve` job, not a `review`. Then, in order:
 
 ## Phase 3 — Finalize (always last)
 
-Files are edited in place in the solution directory. Make sure the work is clean,
-then summarise:
+Files are edited in place in the solution directory, so finishing means handing the
+work over: make it clean, record it as solved, commit it, and put it up for review.
+The four steps run **in order** — each one is worth nothing without the one before
+it — and any of them failing is a stop-and-report:
 
 1. **Lint and fix:** `solver "lint <n> --auto-fix"`. It clears the mechanical
    `flake8` issues automatically; fix any remaining `mypy`/`flake8` errors by hand
    and re-run until `lint(...) → 0`. If you cannot make it pass, **stop and report**;
    do not paper over it.
-2. **Commit:** `solver "commit <message>"`. Keep `<message>` short — a single line
-   that does **not** reveal the solution approach. Use a word or two from the problem
-   title and make it unique with a bit of personality, e.g.
-   `"p0042 de-coded triangles with a smile"`,
-   `"p0042 coded triangles bites the dust"`, etc.
+2. **Mark it solved:** `solver "mark"`. It records the problem as solved only once
+   the recorded results confirm it — there must be a `main` test case with an answer
+   and a `correct` verdict for it in `results.json`. A problem already marked is left
+   unchanged (still exit 0). If it refuses, run `solver "benchmark <n>"` to record
+   fresh results and try again; if it still refuses, **stop and report** — an
+   unconfirmed solution is not finished work.
+3. **Commit:** `solver "git-commit '<message>'"`. Keep `<message>` short — a single
+   line that does **not** reveal the solution approach. Use a word or two from the
+   problem title and make it unique with a bit of personality, e.g.
+   `solver "git-commit 'p0042 de-coded triangles with a smile'"`,
+   `solver "git-commit 'p0042 coded triangles bites the dust'"`, etc.
    Never mention the algorithm, formula, or any hint of how it was solved.
+4. **Push and open the pull request:** `solver "git-push"`. It pushes your branch to
+   origin as yourself and opens (or reports) its pull request onto master, which is
+   how the work is handed over for review — a commit that stays local has been
+   delivered to nobody. A branch that already has an open pull request keeps it, and
+   the new commits simply join it. If the push or the pull request fails, **report
+   what it said**: the commit is safe either way, so do not retry with `--force` and
+   do not merge anything yourself.
 
 Then **summarise the session** in one or two sentences (the action, and what was
 found or done) and end the turn.
@@ -252,4 +269,8 @@ found or done) and end the turn.
   solution that is already in parity, documented, and summarised is a valid
   "nothing to do".
 - In [Finalize](#phase-3--finalize-always-last): a non-zero `lint` exit, or an
-  unfixable lint error, is a stop-and-report, never a reason to push on.
+  unfixable lint error, is a stop-and-report, never a reason to push on. The same
+  goes for the three steps after it — a refused `mark`, a failed commit, or a push
+  that could not open its pull request each stop the phase and get reported as they
+  came back. Never work around one: no `--force`, no hand-edited `problems.json`, no
+  merging your own pull request.

@@ -26,7 +26,7 @@ side and run from the deployed `/opt/euler` venv.
 from __future__ import annotations
 
 __all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KEY_ISSUE_SUBJECT',
-           'KEY_REQUEST_SUBJECT', 'MSG_SOCKET_ENV']
+           'KEY_REQUEST_SUBJECT', 'MSG_SOCKET_ENV', 'PR_REVIEW_SUBJECT', 'UNREGISTERED_SUBJECT']
 
 #: The subject a key-authorization request is filed under — the one message *kind* the
 #: spool carries that another command can work. It lives here, with the socket paths,
@@ -41,6 +41,21 @@ KEY_REQUEST_SUBJECT: str = 'Key authorization request from '
 #: enc-key file: the payload is the whole of a holder's key material, so the one message
 #: kind that can overwrite it is named, not guessed at from the presence of some JSON.
 KEY_ISSUE_SUBJECT: str = 'Master key for '
+
+#: The subject a pull request is announced under — `git-push` files it the moment it opens
+#: one, and the header's message chip offers the **merge** verb on the rows that carry it.
+#: A wire convention like the two above, and for the same reason: the chip must never offer
+#: a verb the command would refuse. Unlike a key message the body is not a payload — the
+#: reviewer's verb is `gh-merge merge`, which reads the open pull requests from GitHub — so
+#: this is a nudge with a thread to dismiss once the queue is worked.
+PR_REVIEW_SUBJECT: str = 'Pull request ready for review: '
+
+#: The subject `summary` files under when the progress page disagrees with what is recorded
+#: as solved: a problem `mark` set solved whose answer projecteuler.net has never been given
+#: — so it is solved here and not there. Prose for a person to read (the verb is a plain
+#: `msg read`), named here so it sits with the other command-filed subjects rather than
+#: being invented at the call site.
+UNREGISTERED_SUBJECT: str = 'Answer not registered for '
 
 #: Env var naming the public spool socket (the per-user service and the shell read it).
 MSG_SOCKET_ENV: str = 'EULER_MSG_SOCKET'

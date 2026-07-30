@@ -232,8 +232,14 @@ def _queue() -> int:
     The counterpart of `users process-requests` and `gh-merge merge`, on the same
     `dialogue.walk`: each waiting thread is shown in full, then **read** it (opening the body
     and marking it read), **grant** the key it asks for (`user-authorize`, for a key request),
+    **merge** the pull request it announces (`gh-merge merge`, for a push notice),
     **dismiss** it as worked, or **skip** it for now. Quitting part-way is an abort, so a
     chain gated on the queue does not carry on as though it had been worked.
+
+    The work verbs are offered on every row rather than chosen per subject — the queue's job
+    is to put the acts in reach, and which one a thread wants is plain from what it says. The
+    web chip does pick per row (`solver/web/user/msg_api.py`), because a button has to name
+    one verb before anybody has read anything.
     """
     result = _call('queue')
     if result is None:
@@ -272,9 +278,21 @@ def _queue() -> int:
         from solver.crypto.keys import user_authorize
         return user_authorize(str(thread.get('id', '')))
 
+    def merge(_: dict[str, Any]) -> int | None:
+        """Land the pull request a `git-push` announced — `gh-merge merge`'s own walk, here.
+
+        It takes no thread: the announcement says one is waiting, and the queue it walks is
+        GitHub's. Reached only from a staff queue, whose floor (:data:`STAFF_FLOOR`) is the
+        one `gh-merge` requires, so calling the command function directly grants nothing the
+        caller does not already hold.
+        """
+        from solver.core.git import gh_merge
+        return gh_merge('merge')
+
     return walk(queue,
                 {'r': Action('read', lambda thread: _read(str(thread.get('id', '')))),
                  'g': Action('grant', grant),
+                 'm': Action('merge', merge),
                  'd': Action('dismiss', lambda thread: _dismiss(str(thread.get('id', '')))),
                  's': Action('skip', SKIP)},
                 render=render, label='inbound thread').rc
