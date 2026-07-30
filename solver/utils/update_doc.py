@@ -92,14 +92,6 @@ def _home_summary(readme: str) -> str:
     return body.strip() + '\n'
 
 
-#: Strips rich console markup (`[accent]`, `[/warning]`, …) from help strings.
-
-#: The catalogue legend. The floor has its own column, so `⚑` is not repeated here.
-_LEGEND: dict[str, str] = {
-    GLYPH_PROBLEM: 'takes an optional problem number (defaults to the current problem)',
-    GLYPH_SILENT: 'supports `--silent`',
-}
-
 #: The **flags** legend for the command index — every glyph a command's `?` panel can
 #: carry, in the order `help_model` appends them. Generated rather than written out,
 #: because the hand-kept version outlived three of its own glyphs: it still explained the
@@ -112,11 +104,6 @@ _FLAGS_LEGEND: dict[str, str] = {
     GLYPH_ASKS: 'asks for anything you leave out',
     GLYPH_SILENT: 'supports `--silent` to suppress its incidental output',
 }
-
-
-def _glyphs(cmd: Command) -> list[str]:
-    """The legend glyphs that apply to *cmd*, read from its registration flags."""
-    return [glyph for glyph, _ in help_model(cmd).notes if glyph in _LEGEND]
 
 
 def _aliases(cmd: Command) -> str:
@@ -157,18 +144,21 @@ def _usage_block(cmd: Command) -> str:
 def _command_table(link_prefix: str) -> str:
     """A compact `Command | Aliases | Requires | Description` table; names link to the index.
 
+    Four columns and nothing else: the descriptions used to trail `❏` / `»` under a legend
+    line, which asked a reader to carry a key to read a table whose every row already links
+    to the entry that says the same thing in words. The glyphs live where they are read
+    rather than decoded — a command's own index entry, and its `?` panel — so this table
+    and the shell's `?` catalogue now show the same four columns.
+
     *link_prefix* is prepended to each command's anchor — `commands-index.md#`
     when the table lives in another file, `#` when it lives in the index itself.
     """
     rows = ['| Command | Aliases | Requires | Description |',
             '|---------|---------|----------|-------------|']
     for cmd in registry.all():
-        glyphs = _glyphs(cmd)
-        suffix = (' ' + ' '.join(glyphs)) if glyphs else ''
         link = f'[`{cmd.name}`]({link_prefix}{_fragment(cmd)})'
-        rows.append(f'| {link} | {_aliases(cmd)} | `{cmd.requires}` | {cmd.help}{suffix} |')
-    legend = '\n*Legend: ' + ' · '.join(f'{g} {desc}' for g, desc in _LEGEND.items()) + '.*'
-    return '\n'.join(rows) + '\n' + legend
+        rows.append(f'| {link} | {_aliases(cmd)} | `{cmd.requires}` | {cmd.help} |')
+    return '\n'.join(rows)
 
 
 def gen_command_table() -> str:

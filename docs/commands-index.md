@@ -21,9 +21,9 @@ only; the channel (terminal / web) is not an axis. `requires` is mandatory, so
 every command declares its floor. See the
 [web server guide](web-server-guide.md) for the authorization model.
 
-A command's *flags* line lists the behaviours marked by these glyphs (the same
-ones shown after a command's help by `?`). The table is generated from the glyph
-constants themselves by `update-docs` — do not edit it by hand:
+A command's *flags* line lists the behaviours marked by these glyphs — the same
+ones a command's `?` panel carries at the prompt. The table is generated from the
+glyph constants themselves by `update-docs` — do not edit it by hand:
 
 <!-- GEN:flags-legend -->
 | glyph | meaning |
@@ -51,65 +51,63 @@ a parameter that accepts repetition.
 |---------|---------|----------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
 | [`?`](#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
-| [`benchmark`](#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. ❏ » |
-| [`check-commands`](#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. » |
-| [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. ❏ |
+| [`benchmark`](#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. |
+| [`check-commands`](#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. |
+| [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
 | [`claude-blog`](#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
-| [`claude-solve`](#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. ❏ |
+| [`claude-solve`](#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. |
 | [`clear`](#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
-| [`compile-c`](#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. ❏ » |
+| [`compile-c`](#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. |
 | [`costs`](#command-costs) | — | `contributor` | Print what this session's AI tokens have cost, per model. |
 | [`create-topic`](#command-create-topic) | — | `maintainer` | Seed a curated cross-cutting topic page. |
 | [`echo`](#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
-| [`edit`](#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. ❏ » |
-| [`evaluate`](#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. ❏ |
-| [`gh-merge`](#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or walk them one at a time to rebase-merge. » |
-| [`gh-merge-docs`](#command-gh-merge-docs-merge-docs) | `merge-docs` | `maintainer` | Walk the open pull requests, rebase-merging those that touch only the docs set. » |
-| [`git-audit`](#command-git-audit-audit) | `audit` | `contributor` | Audit what git actually stores, across the whole tracked tree. » |
-| [`git-commit`](#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the problem's solution directory. ❏ » |
-| [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | `contributor` | Fold this problem's current changes into the last commit, message unchanged. ❏ » |
-| [`git-commit-docs`](#command-git-commit-docs-commit-docs) | `commit-docs` | `contributor` | Stage and commit the documentation set — and nothing else. » |
+| [`edit`](#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. |
+| [`evaluate`](#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. |
+| [`gh-merge`](#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or walk them one at a time to rebase-merge. |
+| [`gh-merge-docs`](#command-gh-merge-docs-merge-docs) | `merge-docs` | `maintainer` | Walk the open pull requests, rebase-merging those that touch only the docs set. |
+| [`git-audit`](#command-git-audit-audit) | `audit` | `contributor` | Audit what git actually stores, across the whole tracked tree. |
+| [`git-commit`](#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the problem's solution directory. |
+| [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | `contributor` | Fold this problem's current changes into the last commit, message unchanged. |
+| [`git-commit-docs`](#command-git-commit-docs-commit-docs) | `commit-docs` | `contributor` | Stage and commit the documentation set — and nothing else. |
 | [`git-filter`](#command-git-filter-filter) | `filter` | `reader` | Report or wire the transparent encryption filter for `solutions/private`. |
-| [`git-hooks`](#command-git-hooks-hooks) | `hooks` | `contributor` | Run the git pre-commit and (simulated) pre-push checks on demand. » |
+| [`git-hooks`](#command-git-hooks-hooks) | `hooks` | `contributor` | Run the git pre-commit and (simulated) pre-push checks on demand. |
 | [`git-identity`](#command-git-identity-identity) | `identity` | `contributor` | Configure your git identity and push credential from your GitHub login. |
-| [`git-publish`](#command-git-publish-publish) | `publish` | `maintainer` | Publish changed files for named targets to the remote repository. » |
-| [`git-push`](#command-git-push-push) | `push` | `contributor` | Push the current branch to origin as yourself, then open its pull request. » |
-| [`git-reset`](#command-git-reset-reset) | `reset` | `contributor` | Soft-reset your branch to origin/master — un-commit, keep every change. » |
+| [`git-publish`](#command-git-publish-publish) | `publish` | `maintainer` | Publish changed files for named targets to the remote repository. |
+| [`git-push`](#command-git-push-push) | `push` | `contributor` | Push the current branch to origin as yourself, then open its pull request. |
+| [`git-reset`](#command-git-reset-reset) | `reset` | `contributor` | Soft-reset your branch to origin/master — un-commit, keep every change. |
 | [`git-status`](#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
 | [`key-split`](#command-key-split) | — | `admin` | Print Shamir shares of the current master key. |
-| [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. ❏ » |
-| [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. ❏ » |
+| [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
+| [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`manage-config`](#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
-| [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
+| [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. |
 | [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
-| [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
+| [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. |
 | [`pause`](#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
 | [`problems`](#command-problems) | — | `reader` | Print a list of problems and their count. |
 | [`progress`](#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
-| [`results`](#command-results) | — | `reader` | List the recorded results for a problem. ❏ |
+| [`results`](#command-results) | — | `reader` | List the recorded results for a problem. |
 | [`search`](#command-search-find) | `find` | `reader` | Search the solution stack for a case-insensitive regular expression. |
-| [`show`](#command-show-open-view) | `open`, `view` | `reader` | Open a problem's documentation page, in a browser or the web viewer panel. ❏ » |
-| [`summary`](#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. » |
+| [`show`](#command-show-open-view) | `open`, `view` | `reader` | Open a problem's documentation page, in a browser or the web viewer panel. |
+| [`summary`](#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. |
 | [`sys-setup`](#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
 | [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
-| [`test-cases`](#command-test-cases) | — | `reader` | List a problem's test cases. ❏ |
+| [`test-cases`](#command-test-cases) | — | `reader` | List a problem's test cases. |
 | [`topic`](#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
-| [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. ❏ |
-| [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. » |
-| [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and the USD→EUR rate. » |
+| [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
+| [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
+| [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and the USD→EUR rate. |
 | [`update-tags`](#command-update-tags) | — | `maintainer` | The glue for the double-entry tag graph. |
 | [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
 | [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 | [`vault`](#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
-
-*Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
 
 </details>
@@ -162,7 +160,9 @@ List every command, or show detailed help for one command.
 * ⚑ needs reader or above.
 
 With no argument, prints the catalogue: command, aliases, the profile it needs, and its
-description, with the `❏` / `»` glyphs of the panel subtitle's legend.
+description. Nothing there is abbreviated to a glyph — the facts one would stand for
+(the problem a command takes, the `--silent` it supports) are spelled out in words in
+the command's own panel, one `? <command>` away.
 
 With a command name or alias, prints that command's own panel — its description, the
 facts about it (the profile floor, and whether it takes a problem or supports

@@ -21,7 +21,7 @@ from rich.text import Text
 
 from solver.config import ExitCodes
 from solver.shell.command import Command, Context, command
-from solver.shell.docstring import GLYPH_REQUIRES, help_model
+from solver.shell.docstring import help_model
 
 
 # ------------------------------------------------------- echo ------------------------------------------------------- #
@@ -180,7 +180,9 @@ def _help(ctx: Context, *args: str) -> int:
     """List every command, or show detailed help for one command.
 
     With no argument, prints the catalogue: command, aliases, the profile it needs, and its
-    description, with the `❏` / `»` glyphs of the panel subtitle's legend.
+    description. Nothing there is abbreviated to a glyph — the facts one would stand for
+    (the problem a command takes, the `--silent` it supports) are spelled out in words in
+    the command's own panel, one `? <command>` away.
 
     With a command name or alias, prints that command's own panel — its description, the
     facts about it (the profile floor, and whether it takes a problem or supports
@@ -210,16 +212,12 @@ def _help(ctx: Context, *args: str) -> int:
     table.add_column('requires', style='accent.dim', no_wrap=True)
     table.add_column('description', style='cmd.help')
     for cmd in reg.all():
-        glyphs = ''.join(g for g, _ in help_model(cmd).notes if g != GLYPH_REQUIRES)
-        description = Text(cmd.help)
-        if glyphs:
-            description.append(f' {glyphs}', style='warning')
-        table.add_row(cmd.name, ' '.join(cmd.aliases), cmd.requires, description)
+        # Text(), not the bare string: a help line is prose we do not control, and rich
+        # would read a bracketed span in one of them as a style tag.
+        table.add_row(cmd.name, ' '.join(cmd.aliases), cmd.requires, Text(cmd.help))
     ctx.console.print(Panel(table,
                             border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
-                            subtitle='[warning][❏ uses/sets current problem | » supports --silent][/warning]',
-                            subtitle_align='right',
                             title_align='left',
                             padding=(1, 2)))
     return ExitCodes.EXIT_OK
