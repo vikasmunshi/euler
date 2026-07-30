@@ -60,16 +60,29 @@ _ON_THREAD: tuple[str, ...] = ('read', 'save', 'dismiss')
 def _threads(_: Context, bound: dict[str, Any]) -> list[Choice]:
     """This caller's threads as menu options — the same mailbox read `msg list` prints.
 
-    Narrowed by the verb already chosen: `save` writes a master key to disk, so it offers only
-    the threads that carry one, which is otherwise something the user has to spot for
-    themselves among a page of ids. Reached once, when the menu is shown.
+    Always the mailbox, for every thread verb. `dismiss` used to read the *staff queue*, which
+    holds inbound questions only (`store.inbound` filters on `kind == 'inbound'`), so a notice
+    could be listed by `msg list` and still leave `msg dismiss` saying "no messages". The
+    mailbox is also the wider set for staff — `_visible_to` lets them see inbound threads too —
+    and it is exactly what the service will accept: staff may dismiss anything, anyone else a
+    thread they are a party to.
+
+    `save` narrows to the threads that actually carry a key, which is otherwise something the
+    user has to spot among a page of ids. An empty result names *why* it is empty, since that
+    is more use than a menu with nothing in it.
     """
-    result = _call('queue' if bound.get('action') == 'dismiss' else 'mailbox')
+    action = str(bound.get('action') or '')
+    result = _call('mailbox')
     if result is None or result[0] != 200 or not isinstance(result[1], dict):
         return []
-    threads: list[dict[str, Any]] = result[1].get('queue') or result[1].get('threads') or []
-    if bound.get('action') == 'save':
+    threads: list[dict[str, Any]] = result[1].get('threads') or []
+    if action == 'save':
         threads = [thread for thread in threads if thread.get('subject') == KEY_ISSUE_SUBJECT]
+        if not threads:
+            raise Abort('no message carries a master key — ask a maintainer to issue one '
+                        '(`user` files the request)', rc=ExitCodes.EXIT_ERROR)
+    if not threads:
+        raise Abort(f'no messages to {action or "act on"}', rc=ExitCodes.EXIT_ERROR)
     return [
         Choice(str(thread.get('id', '')), str(thread.get('subject', '')),
                f'{str(thread.get("author_name", ""))} · {_when(str(thread.get("updated", "")))}'

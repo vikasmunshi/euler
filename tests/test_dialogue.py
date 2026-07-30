@@ -408,6 +408,35 @@ class MsgNoDeadEndTests(_DialogueCase):
         self.assertNotEqual(ExitCodes.EXIT_USAGE, rc)
         self.assertIn('send', [verb for verb, _ in self.calls])
 
+    def test_a_thread_verb_offers_what_msg_list_shows(self) -> None:
+        """The dismiss defect: the menu read the staff queue, which holds inbound only.
+
+        A notice is not inbound, so `msg list` showed a thread while `msg dismiss` said "no
+        messages" — and the id had to be copied by hand. Every thread verb reads the mailbox.
+        """
+        notice = {'id': 'n1', 'subject': 'a notice', 'author_name': 'staff',
+                  'updated': '', 'unread': False}
+
+        def call(verb: str, **kw: Any) -> tuple[int, dict[str, Any]]:
+            self.calls.append((verb, kw))
+            return 200, {'threads': [notice], 'queue': []}     # a notice is never inbound
+
+        self.enterContext(patch.object(self.commands, '_call', call))
+        self.script('1')
+        command = registry.resolve('msg')
+        assert command is not None
+        self.assertEqual(ExitCodes.EXIT_OK, command.invoke(Context(argv=['dismiss'])))
+        self.assertNotIn('queue', [verb for verb, _ in self.calls], 'dismiss reads the mailbox')
+        self.assertIn('dismiss', [verb for verb, _ in self.calls])
+
+    def test_an_empty_mailbox_says_why_rather_than_showing_an_empty_menu(self) -> None:
+        self.enterContext(patch.object(self.commands, '_call',
+                                       lambda verb, **kw: (200, {'threads': [], 'queue': []})))
+        self.script()
+        command = registry.resolve('msg')
+        assert command is not None
+        self.assertEqual(ExitCodes.EXIT_ERROR, command.invoke(Context(argv=['read'])))
+
     def test_the_thread_verbs_ask_for_a_thread(self) -> None:
         for verb in ('read', 'save', 'dismiss'):
             with self.subTest(verb=verb):

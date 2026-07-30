@@ -262,8 +262,20 @@ do_status() {
     load_config || return 1
     echo "DDNS target: ${FQDN}"
     if [ -f "${TIMER_DEST}" ] && command -v systemctl &> /dev/null; then
-        echo "${TIMER_NAME}: $(systemctl is-active "${TIMER_NAME}" 2>/dev/null)/$(systemctl is-enabled "${TIMER_NAME}" 2>/dev/null)"
-        systemctl list-timers "${TIMER_NAME}" --no-pager 2>/dev/null | sed -n '2p' | sed 's/^/  next: /'
+        # State, then the next run, in the shape frontend.sh uses for euler-acme.timer. Read
+        # as JSON rather than off the aligned table: its six columns (NEXT LEFT LAST PASSED
+        # UNIT ACTIVATES) ran together into one unreadable line, under a `next:` label that
+        # described only the first two. A monotonic timer publishes no `next` while it sits
+        # between elapses, so name the last run instead rather than mislabelling it.
+        local when=''
+        if command -v jq &> /dev/null; then
+            when="$(systemctl list-timers "${TIMER_NAME}" --no-pager --output=json 2>/dev/null | jq -r '
+                first
+                | if .next then "next: " + (.next / 1000000 | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))
+                  elif .last then "last: " + (.last / 1000000 | strflocaltime("%Y-%m-%d %H:%M:%S %Z"))
+                  else empty end' 2>/dev/null)"
+        fi
+        echo "${TIMER_NAME}: $(systemctl is-active "${TIMER_NAME}" 2>/dev/null)/$(systemctl is-enabled "${TIMER_NAME}" 2>/dev/null)${when:+ — ${when}}"
     else
         echo "${TIMER_NAME}: ✗ not installed"
     fi
