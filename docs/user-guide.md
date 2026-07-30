@@ -271,8 +271,10 @@ help:
 <!-- /GEN:command-table -->
 
 > The table above is generated from the live command registry by the
-> `update-docs` command. See [`commands-index.md`](commands-index.md)
-> for each command's full usage.
+> `update-docs` command. The same block stands on its own as
+> [`commands-catalogue.md`](commands-catalogue.md) — the page the web front end
+> renders beside the shell — and [`commands-index.md`](commands-index.md) carries
+> each command's full usage.
 
 ---
 

@@ -1382,6 +1382,20 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 /* The filter hides via the [hidden] attribute, which the display rules on these
    elements would otherwise override — so [hidden] wins here explicitly. */
 .card[hidden], nav.cards[hidden], .subrule[hidden], .century[hidden] { display: none !important; }
+.catalogue tr[hidden], .catalogue table[hidden] { display: none !important; }
+
+/* ── The command catalogue, below the shelf on the terminal page ─────────────
+   `docs/commands-catalogue.md` rendered in place. The file's own `#` heading and its
+   explanatory prose are for a reader who opened it as a document; here the page has
+   already said where it is and the sub-heading above it says what this is, so only the
+   table is shown. The rule lives on the class, not in the template, because the body is
+   generated markdown — the template gets one blob, and what it drops is a display
+   decision. */
+.catalogue > h1, .catalogue > p, .catalogue > ul { display: none; }
+/* Everything the table itself brings stays — the legend line that explains the glyphs in
+   its Description column is part of the table, and sits after it. */
+.catalogue > table ~ p { display: block; }
+.catalogue > table { margin-top: 0; }
 /* A century cell the filter did not match is DIMMED, never hidden: a cell's position in
    its grid is what tells you which problem it is, so taking the misses out would
    renumber the grid under the reader (site.js § the pane filter). It stays a link — the

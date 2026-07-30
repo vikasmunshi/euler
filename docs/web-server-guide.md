@@ -1216,11 +1216,16 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   without arriving pre-typed over the guides. The start page has prose below its rule and
   nothing to narrow, so it states that instead of offering a dead box.
 
-  `/shell` is that layout with the **docs index as its content, cut to four** —
-  `content.SHELL_DOCS`, the guides worth having at a prompt. It is what the header's
-  Terminal item and the Terminal tile swap into the pane while they show and focus the
-  shell: the page about the thing the click just took you to. Not to be confused with
-  `/terminal`, which *is* the shell (the right pane's own document).
+  `/shell` is that layout with the **docs index cut to four** (`content.SHELL_DOCS`, the
+  guides worth having at a prompt) and then the **command catalogue** itself — the
+  generated `docs/commands-catalogue.md`, rendered in place, which is what a reader
+  standing at a prompt is actually looking for. It closes the page instead of a link out
+  to the docs index: a page about the shell should end with what to type into it. The one
+  filter narrows the shelf and the catalogue's rows together, so `git` leaves the git
+  commands standing. `/shell` is what the header's Terminal item and the Terminal tile
+  swap into the pane while they show and focus the shell: the page about the thing the
+  click just took you to. Not to be confused with `/terminal`, which *is* the shell (the
+  right pane's own document).
 
   **The tile is one object across every page** — the strip, docs, topics, and the head of
   every century grid on solutions — and it is **two lines**, because that is what it has to

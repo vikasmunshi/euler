@@ -417,10 +417,10 @@
   // Two behaviours, because the two things below a divider are not the same kind of
   // thing:
   //
-  //   CARDS are hidden. A grid of tiles has no meaning in its gaps, so a miss simply
-  //   goes, and a folder heading (.subrule) whose whole grid went goes with it.
-  //   [hidden] is beaten by the display rules on .card/.cards, so site.css carries a
-  //   matching [hidden] override.
+  //   CARDS AND TABLE ROWS are hidden — a grid of tiles and a table of commands have no
+  //   meaning in their gaps, so a miss simply goes, and a sub-heading (.subrule) whose
+  //   whole region went goes with it. [hidden] is beaten by the display rules on
+  //   .card/.cards/tr, so site.css carries a matching [hidden] override.
   //
   //   CELLS are dimmed. A century cell's POSITION is what says which problem it is —
   //   hiding the misses would renumber the grid under the reader — so a miss fades and
@@ -461,19 +461,31 @@
     var q = input.value.trim().toLowerCase();
     var pane = document.getElementById('content') || document;
     var matched = 0;
-    // The card grids, minus the section strip.
-    pane.querySelectorAll('nav.cards:not(.sections)').forEach(function (nav) {
+    // One pass over the hideable regions: a card grid (minus the section strip) or the
+    // command catalogue's table body. Both hide their items, both fold away when nothing
+    // is left, and both may be titled by a .subrule whose count is the count of what is
+    // under it — not the number the server rendered before anyone typed.
+    var regions = pane.querySelectorAll('nav.cards:not(.sections), .catalogue tbody');
+    regions.forEach(function (region) {
+      var items = region.querySelectorAll('.card, tr');
       var visible = 0;
-      nav.querySelectorAll('.card').forEach(function (card) {
-        var match = !q || hay(card).indexOf(q) !== -1;
-        card.hidden = !match;
+      items.forEach(function (item) {
+        var match = !q || hay(item).indexOf(q) !== -1;
+        item.hidden = !match;
         if (match) { visible += 1; }
       });
       matched += visible;
-      nav.hidden = !visible;
-      // A folder heading goes with its grid, and while it stands its count is the count
-      // of what is under it — not the number the server rendered before anyone typed.
-      var heading = nav.previousElementSibling;
+      // The catalogue's own region is its <table>, not the <tbody> we walked: hiding the
+      // tbody alone would leave a headed table with no rows under it.
+      var box = region.closest('table') || region;
+      box.hidden = !visible;
+      var heading = box.previousElementSibling;
+      // The catalogue's heading is the .subrule before its SECTION, not before the table
+      // inside it — the rendered markdown puts the table one level down.
+      if (!heading || !heading.classList.contains('subrule')) {
+        var section = box.closest('.catalogue');
+        heading = section && section.previousElementSibling;
+      }
       if (heading && heading.classList.contains('subrule')) {
         heading.hidden = !visible;
         var groupCount = heading.querySelector('[data-group-count]');

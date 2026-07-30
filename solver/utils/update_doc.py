@@ -33,7 +33,8 @@ from solver.auth.subject import rank
 from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
-from solver.shell.docstring import GLYPH_PROBLEM, GLYPH_SILENT, help_model
+from solver.shell.docstring import (GLYPH_ASKS, GLYPH_PROBLEM, GLYPH_REQUIRES, GLYPH_SILENT,
+                                    help_model)
 from solver.utils.loader import load_commands, update_modules
 
 
@@ -97,6 +98,19 @@ def _home_summary(readme: str) -> str:
 _LEGEND: dict[str, str] = {
     GLYPH_PROBLEM: 'takes an optional problem number (defaults to the current problem)',
     GLYPH_SILENT: 'supports `--silent`',
+}
+
+#: The **flags** legend for the command index — every glyph a command's `?` panel can
+#: carry, in the order `help_model` appends them. Generated rather than written out,
+#: because the hand-kept version outlived three of its own glyphs: it still explained the
+#: workspace lock (`§`), the checkout (`⚑`) and the refusal (`⊘`) long after they were
+#: retired, and never grew rows for `❏` or `✎`. Keyed by the constants themselves, so a
+#: glyph that is renamed moves here with it and a glyph that is deleted stops compiling.
+_FLAGS_LEGEND: dict[str, str] = {
+    GLYPH_REQUIRES: 'the least profile that may run it — every rung above may too',
+    GLYPH_PROBLEM: 'takes an optional problem number (defaults to the current problem)',
+    GLYPH_ASKS: 'asks for anything you leave out',
+    GLYPH_SILENT: 'supports `--silent` to suppress its incidental output',
 }
 
 
@@ -195,6 +209,13 @@ def _markdown_help(cmd: Command) -> str:
     return '\n'.join(parts)
 
 
+def gen_flags_legend() -> str:
+    """The command index's flags legend: one row per glyph a `?` panel can carry."""
+    rows = ['| glyph | meaning |', '|-------|---------|']
+    rows += [f'| `{glyph}` | {meaning} |' for glyph, meaning in _FLAGS_LEGEND.items()]
+    return '\n'.join(rows)
+
+
 def gen_command_index() -> str:
     """The per-command reference: every command's `?` panel as markdown, rule-separated."""
     return '\n\n---\n\n'.join(_markdown_help(cmd) for cmd in registry.all())
@@ -285,6 +306,7 @@ GENERATORS: dict[str, Callable[[], str]] = {
     'command-table': gen_command_table,
     'command-summary': gen_command_summary,
     'command-index': gen_command_index,
+    'flags-legend': gen_flags_legend,
     'authorization-table': gen_authorization_table,
     'package-layout': gen_package_layout,
 }

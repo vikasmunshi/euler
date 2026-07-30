@@ -8,12 +8,15 @@
 
    It is the five-page layout (hero · section strip · divider · content) with the docs
    index as its content, narrowed to `content.SHELL_DOCS` — the four guides worth having
-   at a prompt. It used to inline the whole user guide instead; a document that long
-   below the strip made this a page you scrolled rather than a page you left, and the
-   guide is one click away either way.
+   at a prompt — and then the **command catalogue** below them. That is what closes the
+   page: a page about the shell should end with what to type into it, not with a link out
+   to the docs index. The guides above it are the way to the long form.
 
    Context: `entries` (content.shell_docs — the same DocEntry rows the docs index
-   carries, in reading order rather than the filename's). #}
+   carries, in reading order rather than the filename's), `catalogue_html` + `commands`
+   (content.command_catalogue — our own generated file, pre-rendered and trusted, exactly
+   as the docs pages mark their bodies), `filterable` (what the one filter can narrow:
+   the shelf and the catalogue's rows together). #}
 {% extends "base.html" %}
 {% block title %}terminal — euler{% endblock %}
 {% block content %}
@@ -28,8 +31,11 @@
 
 {% include "_sections.html" %}
 
-{{ divider('at the prompt', count=entries | length, filter='Filter guides by name…') }}
-{# The docs index's own tile — this page IS that index, cut to four. #}
+{# One filter for the whole page, so its count is everything below the rule: the four
+   guides AND the catalogue's rows. Typing `git` narrows the shelf and leaves the git
+   commands standing — which is the question a reader at a prompt actually has. #}
+{{ divider('at the prompt', count=filterable, filter='Filter guides and commands…') }}
+{# The docs index's own tile — this shelf IS that index, cut to four. #}
 <nav class="cards" aria-label="Guides for the shell">
   {% for e in entries %}
   <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
@@ -42,6 +48,20 @@
   </a>
   {% endfor %}
 </nav>
-<p class="readme-more"><a href="/docs/" hx-get="/docs/" hx-target="#content"
-   hx-swap="innerHTML" hx-push-url="true">All the guides &rarr;</a></p>
+
+{# The catalogue: `docs/commands-catalogue.md`, generated from the live registry by
+   `update-docs` — our own file, so it is marked safe deliberately, exactly as the docs
+   and topics pages mark their rendered bodies. Its own `#` heading and the prose above
+   the table are dropped (`.catalogue` in site.css): this page has already said where you
+   are, and the file's front matter is for a reader who arrived at /docs/commands-catalogue
+   instead. Each row's name links into the command index for the full `?` panel.
+
+   A sub-heading, not a second page rule: the divider above opens the whole region, and
+   this names a section inside it — the same two levels the topics index uses. Its count
+   tracks the filter. #}
+{% if catalogue_html %}
+<div class="subrule"><h3>every command</h3>
+  <span class="count" data-group-count>{{ commands }}</span></div>
+<section class="catalogue doc-body">{{ catalogue_html | safe }}</section>
+{% endif %}
 {% endblock %}

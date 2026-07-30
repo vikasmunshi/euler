@@ -13,11 +13,11 @@ not read them.
 from __future__ import annotations
 
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
-           'TEXT_SUFFIXES', 'ABOUT_PAGES', 'SHELL_DOCS',
+           'TEXT_SUFFIXES', 'ABOUT_PAGES', 'SHELL_DOCS', 'CATALOGUE_DOC',
            'solution_dir', 'load_problems', 'centuries', 'problem_files', 'section_state',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'git_status', 'topic_status',
-           'list_docs', 'read_doc', 'shell_docs', 'list_topics', 'list_topic_groups',
+           'list_docs', 'read_doc', 'shell_docs', 'command_catalogue', 'list_topics', 'list_topic_groups',
            'read_topic', 'drop_article',
            'problem_tag_view',
            'read_about', 'readme_html',
@@ -721,6 +721,25 @@ def shell_docs(repo_root: Path) -> list[DocEntry]:
         entries.append(DocEntry(name=name, heading=_filename_heading(name),
                                 title=_page_title(text, name)))
     return entries
+
+
+#: The one-page command catalogue (`docs/commands-catalogue.md`) — the compact
+#: `name · aliases · requires · description` table, generated into that file from the
+#: live registry by `update-docs`. The terminal page renders it beside the shell; the
+#: user guide shows the same generated block inside its own narrative.
+CATALOGUE_DOC = 'commands-catalogue'
+
+
+def command_catalogue(repo_root: Path) -> tuple[str, int]:
+    """The rendered command catalogue and how many commands it lists.
+
+    The count is read off the rendered table rather than the registry: this service does
+    not import the shell (the command modules pull in prompt-toolkit and resolve the
+    shell's identity), and the page's own table is the honest answer to "how many rows
+    are below this rule" whatever the clone's `update-docs` last wrote. `<thead>`
+    contributes the one row that is not a command."""
+    html = render_markdown(_read_page(repo_root / 'docs', CATALOGUE_DOC) or '')
+    return html, max(html.count('<tr>') - 1, 0)
 
 
 def _docs_count(repo_root: Path) -> int:

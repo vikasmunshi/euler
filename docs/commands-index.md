@@ -22,15 +22,18 @@ every command declares its floor. See the
 [web server guide](web-server-guide.md) for the authorization model.
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
-ones shown after a command's help by `?`):
+ones shown after a command's help by `?`). The table is generated from the glyph
+constants themselves by `update-docs` — do not edit it by hand:
 
-| glyph | meaning                                                         |
-|-------|-----------------------------------------------------------------|
-| `§`   | requires the workspace lock to be acquired or inherited         |
-| `↻`   | the variable `problem` is read from the workspace on completion |
-| `⊘`   | refuses while the workspace is checked out                      |
-| `⚑ `  | checkout on start, checkin on completion                        |
-| `»`   | supports `--silent` to suppress its incidental output           |
+<!-- GEN:flags-legend -->
+| glyph | meaning |
+|-------|---------|
+| `⚑` | the least profile that may run it — every rung above may too |
+| `❏` | takes an optional problem number (defaults to the current problem) |
+| `✎` | asks for anything you leave out |
+| `»` | supports `--silent` to suppress its incidental output |
+<!-- /GEN:flags-legend -->
+
 
 In a usage string: `<required>`, `[optional]`, `a|b|c` is a choice, `key=value`
 sets a named parameter, `--flag` / `--no-flag` toggle a boolean, and `...` marks

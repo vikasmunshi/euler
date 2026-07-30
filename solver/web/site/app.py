@@ -263,15 +263,23 @@ async def shell_page(request: web.Request) -> web.StreamResponse:
     with `/terminal`, the right pane's own document: that one *is* the shell.
 
     It reads as the docs index narrowed to :data:`content.SHELL_DOCS` — the four guides
-    worth having at a prompt. It used to inline the whole user guide instead; a document
-    the length of a guide below the strip made this a page you scrolled rather than a
-    page you left, and the guide is one click away either way.
+    worth having at a prompt — and then the **command catalogue** itself, the one document
+    a reader standing at a prompt is actually looking for. That is what closes the page
+    rather than a link out to the full docs index: a page about the shell should end with
+    what to type into it, not with a way to go and look elsewhere.
 
-    The guides are read from this clone, so a collaborator editing them on their branch
-    sees their own text; a tree missing one renders a shorter shelf rather than 404ing.
+    Both are read from this clone, so a collaborator editing them on their branch sees
+    their own text; a tree missing one renders a shorter shelf rather than 404ing.
     """
+    repo_root = request.app[CONFIG_KEY].repo_root
+    catalogue_html, commands = content.command_catalogue(repo_root)
+    entries = content.shell_docs(repo_root)
     return render(request, 'shell.html', {
-        'entries': content.shell_docs(request.app[CONFIG_KEY].repo_root),
+        'entries': entries,
+        'catalogue_html': catalogue_html,
+        'commands': commands,
+        # What the filter can narrow on this page: the shelf and the catalogue's rows.
+        'filterable': len(entries) + commands,
         'crumbs': [_HOME, ('terminal', None)],
         **_sections(request, 'terminal'),
     }, block='content')
