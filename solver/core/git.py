@@ -817,6 +817,9 @@ def _announce_pull_request(branch: str, url: str) -> None:
     to work, and one open pull request quietly picks up the new commits; a notice per push
     would turn the queue into a changelog of somebody's afternoon.
 
+    The branch is in the **subject**, not only the body: it is what lets the merge close
+    this notice without a thread id (:func:`_dismiss_pr_notice`).
+
     Best-effort and silent on failure, like every other :mod:`solver.web.msg.notify` caller:
     the branch is pushed and the request is open either way, and a spool that is down must
     not fail the push that reached GitHub.
@@ -830,6 +833,27 @@ def _announce_pull_request(branch: str, url: str) -> None:
         f'    gh-merge merge\n')
     if sent:
         console.print('[muted]the maintainers have been notified.[/muted]')
+
+
+def _dismiss_pr_notice(branch: str) -> None:
+    """Drop the notice that announced *branch*'s pull request — it has just landed.
+
+    The closing half of :func:`_announce_pull_request`, and the reason the announcement
+    named the branch in its subject: a notice that survives the act it asked for is a queue
+    nobody trusts, and this one cannot be dismissed by whoever works it. The chip's row
+    types a bare `gh-merge merge` (the queue that verb walks is GitHub's, not the spool's),
+    so the merge holds no thread id — the subject is the only handle either side shares.
+
+    Silent and best-effort, like the announcement: the pull request is merged either way,
+    and a wedged spool must not turn a landed review into a failure. On a real dismissal
+    the message chip is nudged, since the row it just removed is on screen.
+    """
+    if not branch:
+        return
+    from solver.web.msg.notify import dismiss_by_subject
+    if dismiss_by_subject(f'{PR_REVIEW_SUBJECT}{branch}'):
+        console.print('[muted]the review notice has been dismissed.[/muted]')
+        osc.messages_changed()
 
 
 def _ensure_pull_request(branch: str) -> int:
@@ -965,7 +989,7 @@ def _open_prs() -> list[dict[str, object]] | None:
     return data if isinstance(data, list) else None
 
 
-def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *,
+def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *, branch: str = '',
               one_tree: bool = True, label: str = 'content') -> int:
     """Rebase-merge pull request *number* onto master, refusing anything beyond *scope*.
 
@@ -983,6 +1007,10 @@ def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *,
     *one_tree* additionally requires the files to sit in a single entry of *scope* — the
     :data:`PR_SCOPE` rule that solutions and articles are separate reviews. The docs set
     (:data:`DOCS_PATHS`) is one body of work spread over six paths, so it merges whole.
+
+    *branch* is the request's head ref, carried only so a landed merge can close the
+    notice that asked for it (:func:`_dismiss_pr_notice`). Optional because the merge is
+    complete without it: the spool is a nudge on top, never part of the gate.
     """
     files: list[str] | None = _pr_files(number)
     if files is None:
@@ -1016,9 +1044,13 @@ def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *,
     # the owner running this review has the bypass, and without --admin `gh pr merge`
     # just refuses with "the base branch policy prohibits the merge".
     result: int = run_cmdline(f'gh pr merge {number} --rebase --admin')
-    if result == 0:
-        return git_sync()
-    return result
+    if result != 0:
+        return result
+    # Before the sync, and independent of it: the review is what the notice asked for, and
+    # it is done. A sync that then fails (a conflicted rebase, say) leaves work to do on
+    # this clone — not a pull request still waiting for a reviewer.
+    _dismiss_pr_notice(branch)
+    return git_sync()
 
 
 def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
@@ -1047,7 +1079,12 @@ def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
 
     def merge(pr: dict[str, object]) -> int | None:
         number = pr.get('number')
-        return _merge_pr(number, scope, one_tree=one_tree, label=label) if isinstance(number, int) else None
+        if not isinstance(number, int):
+            return None
+        # The head ref comes from the same read that drew the row, so the notice
+        # `git-push` filed under this branch is closed by the merge that answers it.
+        return _merge_pr(number, scope, branch=str(pr.get('headRefName', '')),
+                         one_tree=one_tree, label=label)
 
     return walk([pr for pr in prs if isinstance(pr.get('number'), int)],
                 {'m': Action('merge', merge), 's': Action('skip', SKIP)},
@@ -1063,7 +1100,8 @@ def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
     **skip**, or **quit** — the same shape as `users process-requests`. Merging one is
     how a collaborator's `user/<slug>` branch lands on master, each of its commits
     replayed onto the tip; their next `git-sync` then rebases those already-applied
-    commits away and prunes the merged branch.
+    commits away and prunes the merged branch. Merging also **dismisses the notice**
+    `git-push` filed for that branch — the message asked for this review, and it is done.
 
     A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
     anything else is refused, and a branch spanning both is asked to become two pull

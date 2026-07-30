@@ -684,7 +684,8 @@ the open pull requests interactively — per request **merge** (rebase onto mast
 **skip**, or **quit** — the same shape as `users process-requests`. Merging one is
 how a collaborator's `user/<slug>` branch lands on master, each of its commits
 replayed onto the tip; their next `git-sync` then rebases those already-applied
-commits away and prunes the merged branch.
+commits away and prunes the merged branch. Merging also **dismisses the notice**
+`git-push` filed for that branch — the message asked for this review, and it is done.
 
 A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
 anything else is refused, and a branch spanning both is asked to become two pull

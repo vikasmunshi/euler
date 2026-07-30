@@ -30,7 +30,7 @@ with no aiohttp — the shell tier has no web dependencies.
 """
 from __future__ import annotations
 
-__all__ = ['dismiss_thread', 'notify_staff', 'notify_user', 'read_thread']
+__all__ = ['dismiss_by_subject', 'dismiss_thread', 'notify_staff', 'notify_user', 'read_thread']
 
 import logging
 import os
@@ -122,3 +122,30 @@ def dismiss_thread(thread_id: str) -> bool:
     if not dismissed:
         log.warning('could not dismiss %s (%s)', thread_id, result and result[0])
     return dismissed
+
+
+def dismiss_by_subject(subject: str) -> int:
+    """Drop every visible thread whose subject is exactly *subject*; return how many went.
+
+    :func:`dismiss_thread` for the act that has **no thread id to work with**. A command
+    that files a notice can hand the id to whoever works it; `git-push` cannot — the act
+    that answers its notice is `gh-merge merge`, which walks the pull requests *GitHub*
+    knows and never reads the spool. So the notice carries the correlation in its subject
+    (:data:`~solver.web.msg.PR_REVIEW_SUBJECT` + the branch), and the merge dismisses by
+    that subject once the branch has landed.
+
+    An exact match, never a prefix: the prefix names a *kind* of message and would sweep
+    every waiting pull request the moment one of them merged.
+
+    Best-effort like the rest of this module — the act is already done, and a spool that
+    cannot be reached must not fail it. Zero is therefore both "nothing matched" and
+    "no spool answered"; callers report what they did, not what the spool was doing.
+    """
+    result = call('mailbox')
+    if result is None or result[0] != 200 or not isinstance(result[1], dict):
+        log.debug('mailbox unreadable; nothing dismissed for %r', subject)
+        return 0
+    threads: Any = result[1].get('threads') or []
+    ids = [str(thread.get('id', '')) for thread in threads
+           if isinstance(thread, dict) and str(thread.get('subject', '')) == subject]
+    return sum(1 for thread_id in ids if thread_id and dismiss_thread(thread_id))

@@ -38,7 +38,7 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
-from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT
+from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, PR_REVIEW_SUBJECT
 from solver.web.msg.app import MessageService, build_admin_app, build_app
 from solver.web.msg.config import MsgConfig
 from solver.web.msg.identity import box_of
@@ -789,6 +789,44 @@ class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
         from solver.web.msg.notify import notify_staff
         sent = await asyncio.to_thread(notify_staff, '', '')      # empty fields are refused
         self.assertFalse(sent)
+
+    # ── dismissing by subject: the act that has no thread id (gh-merge merge) ──
+    async def test_a_notice_is_dismissed_by_its_exact_subject(self) -> None:
+        """`gh-merge merge` walks GitHub's queue, not the spool's, so the subject
+        `git-push` filed the notice under is the only handle it has."""
+        from solver.web.msg.notify import dismiss_by_subject, notify_staff
+        subject = f'{PR_REVIEW_SUBJECT}user/alice'
+        self.assertTrue(await asyncio.to_thread(notify_staff, subject, 'a PR is waiting'))
+        self.assertEqual(await asyncio.to_thread(dismiss_by_subject, subject), 1)
+        self.assertEqual(self.spool.store.inbound(), [])
+
+    async def test_only_the_branch_that_landed_is_dismissed(self) -> None:
+        """An exact match, never the prefix: the prefix names a *kind* of message, and
+        sweeping it would clear every waiting review the moment one of them merged."""
+        from solver.web.msg.notify import dismiss_by_subject, notify_staff
+        for branch in ('user/alice', 'user/bob'):
+            self.assertTrue(await asyncio.to_thread(
+                notify_staff, f'{PR_REVIEW_SUBJECT}{branch}', f'{branch} is waiting'))
+        dismissed = await asyncio.to_thread(dismiss_by_subject, f'{PR_REVIEW_SUBJECT}user/alice')
+        self.assertEqual(dismissed, 1)
+        self.assertEqual([thread.subject for thread in self.spool.store.inbound()],
+                         [f'{PR_REVIEW_SUBJECT}user/bob'])
+
+    async def test_nothing_matching_is_a_quiet_zero(self) -> None:
+        """The merge happened; a spool with nothing to close must not read as a failure."""
+        from solver.web.msg.notify import dismiss_by_subject
+        self.assertEqual(await asyncio.to_thread(
+            dismiss_by_subject, f'{PR_REVIEW_SUBJECT}user/nobody'), 0)
+
+    async def test_an_absent_spool_dismisses_nothing_and_does_not_raise(self) -> None:
+        from solver.web.msg.notify import dismiss_by_subject
+        os.environ['EULER_MSG_SOCKET'] = str(self.scratch / 'nothing-here.sock')
+        os.environ['EULER_MSG_ENV'] = str(self.scratch / 'no-msg-env')
+        os.environ['EULER_MSG_ADMIN_SOCKET'] = str(self.scratch / 'no-admin.sock')
+        self.addCleanup(os.environ.pop, 'EULER_MSG_ENV', None)
+        self.addCleanup(os.environ.pop, 'EULER_MSG_ADMIN_SOCKET', None)
+        self.assertEqual(await asyncio.to_thread(
+            dismiss_by_subject, f'{PR_REVIEW_SUBJECT}user/alice'), 0)
 
 
 class DeliveryNudgeTests(unittest.IsolatedAsyncioTestCase):

@@ -1842,7 +1842,7 @@ reader do the routing. The rules (`solver/web/user/msg_api.py`):
 | --- | --- | --- |
 | a **key issued to you** | `msg save <id>` | the command reads the payload from the thread over the socket, so no key material reaches the browser |
 | a **key request**, read by staff | `user-authorize <id>` | same: the public key is read over the socket, and nobody retypes 64 hex characters off a screen |
-| a **pull request**, read by staff | `gh-merge merge` | no id — the verb walks the open pull requests as GitHub knows them; the row is what says one is waiting |
+| a **pull request**, read by staff | `gh-merge merge` | no id — the verb walks the open pull requests as GitHub knows them; the row is what says one is waiting, and the merge closes it by matching the branch in its subject |
 | anything else | `msg read <id>` | prose, for a person to read |
 
 The row decides *which* from the subject, against the same constants the filing commands use
@@ -1862,7 +1862,10 @@ In the terminal the same acts are the staff queue's keys — `msg queue` walks t
 threads offering **read / grant / merge / dismiss / skip** on each. There the verbs are
 offered on every row rather than picked per subject: the walk shows the thread in full, so
 which act it wants is plain from what it says, where a button has to name one verb before
-anybody has read anything.
+anybody has read anything. `dismiss` is for a message worked *elsewhere* or a branch
+abandoned: the two verbs that answer a command-filed message clean up after themselves —
+`msg save` drops the thread whose key it took, and `gh-merge merge` drops the notice for the
+branch it landed (§13.7).
 
 That mechanism is selected by the **`.term-menu`** marker every such menu carries, not by
 each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second
@@ -1939,6 +1942,16 @@ the right verb:
   someone with no reason to be looking. Only for a *newly opened* request: re-pushing a branch
   as it grows keeps the one open request, and a notice per push would turn the queue into a
   changelog of somebody's afternoon. The reviewer's verb is `gh-merge merge`.
+
+  **This one closes itself.** `gh-merge` dismisses the notice for each branch it lands
+  (`_dismiss_pr_notice` → `notify.dismiss_by_subject`), so a worked review does not leave its
+  own instruction in the queue — the same tidying `msg save` does for a taken key. The handle
+  is the **subject**, not a thread id: the chip's row types a bare `gh-merge merge` because
+  the queue that verb walks is GitHub's, so the merge never sees the message. Hence the branch
+  in `PR_REVIEW_SUBJECT` + branch, matched exactly (the prefix alone names the *kind* and would
+  sweep every waiting review). It runs after the merge and before the sync — a sync that fails
+  leaves work on the maintainer's clone, not a request still awaiting a reviewer — and is
+  best-effort like every other spool call, with a chip nudge only when a row actually went.
 - **`summary`**, when the progress page contradicts what is recorded as solved
   (`UNREGISTERED_SUBJECT`): `mark` records a problem solved the moment its own results
   confirm the answer, which can be long before the answer is given to projecteuler.net. The

@@ -285,6 +285,11 @@ def _queue() -> int:
         GitHub's. Reached only from a staff queue, whose floor (:data:`STAFF_FLOOR`) is the
         one `gh-merge` requires, so calling the command function directly grants nothing the
         caller does not already hold.
+
+        Nor does the row need dismissing after it: `gh-merge` closes each notice it lands,
+        by the branch in its subject. Merging the request this row announced therefore takes
+        the row with it — so `d` here is for a notice about something merged elsewhere, or
+        one whose branch was abandoned.
         """
         from solver.core.git import gh_merge
         return gh_merge('merge')

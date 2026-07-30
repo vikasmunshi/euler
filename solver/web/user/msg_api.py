@@ -112,7 +112,9 @@ def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]
     - a **pull request**, seen by staff, is `gh-merge merge` — the one act it is asking for.
       It carries no thread id, because the verb walks the open pull requests as GitHub knows
       them rather than reading anything out of the message; the row is what says one is
-      waiting;
+      waiting. The row therefore does not have to be dismissed by hand either: the merge
+      closes the notice itself, matching on the branch in its subject, and the chip's own
+      nudge takes the row away;
     - everything else is `msg read`.
 
     Every message stands on its own (there are no replies), so a request and the grant that

@@ -24,6 +24,8 @@ from solver.crypto.gitfilter import filter_settings
 from solver.shell import dialogue
 from solver.shell.command import registry
 from solver.utils.loader import load_commands
+from solver.web.msg import PR_REVIEW_SUBJECT
+from solver.web.msg import notify
 from tests import silence
 
 silence()  # the command tests drive console error/progress paths on purpose
@@ -305,6 +307,7 @@ class GhPrTest(_GitCommandCase):
         self.open_prs: list[dict[str, object]] | None = [
             {'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'}]
         self.answers: list[str] = []
+        self.dismiss_count: int = 1     # what the fake spool reports dismissing
         self._saved_pr_files = git._pr_files
         self._saved_open_prs = git._open_prs
         self._saved_input = git.console.input
@@ -316,12 +319,28 @@ class GhPrTest(_GitCommandCase):
         # under the runner (stdin is not a tty) — so a walk under test declares itself asked.
         self._saved_interactive = dialogue.interactive
         dialogue.interactive = lambda: True  # type: ignore[assignment]
+        # A landed merge closes the notice `git-push` filed for that branch. Recorded here,
+        # never dialled: unstubbed it would reach this host's real spool — or, since the
+        # operator's uid is deliberately outside `euler-web`, its **sudo** plane, which is
+        # not something a test run may prompt for.
+        self.dismissed: list[str] = []
+        self._saved_dismiss = notify.dismiss_by_subject
+        notify.dismiss_by_subject = self._fake_dismiss  # type: ignore[assignment]
+        # The base case swallows the OSC nudges; here they are the assertion that the chip
+        # is told only when a row actually went away.
+        self.emits: list[str] = []
+        git.osc.emit = lambda action, *fields: self.emits.append(action)  # type: ignore[assignment]
+
+    def _fake_dismiss(self, subject: str) -> int:
+        self.dismissed.append(subject)
+        return self.dismiss_count
 
     def tearDown(self) -> None:
         git._pr_files = self._saved_pr_files  # type: ignore[assignment]
         git._open_prs = self._saved_open_prs  # type: ignore[assignment]
         git.console.input = self._saved_input  # type: ignore[assignment]
         dialogue.interactive = self._saved_interactive  # type: ignore[assignment]
+        notify.dismiss_by_subject = self._saved_dismiss  # type: ignore[assignment]
         super().tearDown()
 
     def test_list_is_the_default_action(self) -> None:
@@ -420,6 +439,61 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git.gh_merge('merge'), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
+    # ── the review notice, closed by the merge that answers it ──
+    def test_a_merged_pr_dismisses_the_notice_that_asked_for_it(self) -> None:
+        """The chip's row types a bare `gh-merge merge`, so the branch in the subject is the
+        only handle the merge has on the message — and it is enough."""
+        self.as_profile('maintainer')
+        self.answers = ['m']
+        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
+        self.assertIn('msg', self.emits, 'the chip must be told the row is gone')
+
+    def test_the_notice_goes_before_the_sync_not_after_it(self) -> None:
+        """A sync that fails leaves work on this clone — not a request still awaiting review."""
+        self.as_profile('maintainer')
+        self.rcs = [0, 0, 1]                    # the merge lands, then sync.sh fails
+        self.assertNotEqual(git._merge_pr(12, branch='user/x'), 0)
+        self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
+
+    def test_a_refused_pr_leaves_the_notice_waiting(self) -> None:
+        self.as_profile('maintainer')
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
+        self.answers = ['m']
+        self.assertEqual(git.gh_merge('merge'), 0)      # the walk survives a refusal
+        self.assertEqual(self.cmdlines, [])
+        self.assertEqual(self.dismissed, [])
+
+    def test_a_failed_merge_leaves_the_notice_waiting(self) -> None:
+        """`gh pr merge` refusing is the pull request still open: the review has not happened."""
+        self.as_profile('maintainer')
+        self.rcs = [1]
+        self.assertNotEqual(git._merge_pr(12, branch='user/x'), 0)
+        self.assertEqual(self.dismissed, [])
+
+    def test_a_skipped_pr_leaves_the_notice_waiting(self) -> None:
+        self.as_profile('maintainer')
+        self.answers = ['s']
+        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(self.dismissed, [])
+
+    def test_a_merge_with_no_branch_in_hand_dismisses_nothing(self) -> None:
+        """The spool is a nudge on top, never part of the gate — no branch, no spool call."""
+        self.as_profile('maintainer')
+        self.assertEqual(git._merge_pr(12), 0)
+        self.assertEqual(self.dismissed, [])
+
+    def test_no_matching_notice_means_no_chip_nudge(self) -> None:
+        """A merge of a branch nobody was told about says nothing about the spool: a nudge
+        that fires when nothing moved trains the reader to ignore it."""
+        self.as_profile('maintainer')
+        self.dismiss_count = 0
+        self.answers = ['m']
+        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
+        self.assertNotIn('msg', self.emits)
+        self.assertIn('git', self.emits, 'the sync still moved master')
+
     # ── the docs gate (gh-merge-docs), disjoint from the content one ──
     def test_a_docs_pr_merges_through_the_docs_gate(self) -> None:
         """The docs set is one body of work: a regeneration touching all of it merges whole."""
@@ -431,6 +505,8 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
                                          './scripts/git/sync.sh'])
+        # A docs branch is announced by the same `git-push`, so it is closed the same way.
+        self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
 
     def test_the_two_gates_refuse_each_other(self) -> None:
         """Whichever verb you reach for names the review you are doing."""

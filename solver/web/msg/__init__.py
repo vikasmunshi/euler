@@ -47,7 +47,10 @@ KEY_ISSUE_SUBJECT: str = 'Master key for '
 #: A wire convention like the two above, and for the same reason: the chip must never offer
 #: a verb the command would refuse. Unlike a key message the body is not a payload — the
 #: reviewer's verb is `gh-merge merge`, which reads the open pull requests from GitHub — so
-#: this is a nudge with a thread to dismiss once the queue is worked.
+#: this is a pure nudge, and the **branch in the subject is the correlation**: the merge has
+#: no thread id in hand, and dismisses the notice by matching this subject once the branch
+#: has landed (`solver.core.git._dismiss_pr_notice`). Which is why the branch is part of the
+#: subject rather than only of the body.
 PR_REVIEW_SUBJECT: str = 'Pull request ready for review: '
 
 #: The subject `summary` files under when the progress page disagrees with what is recorded
