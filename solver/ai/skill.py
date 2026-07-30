@@ -8,7 +8,6 @@ __all__ = ['claude_solve', 'claude_blog']
 import json
 import shlex
 import subprocess
-import sys
 from typing import Any, Callable, Iterable, Literal
 
 from prompt_toolkit.completion import Completion
@@ -21,6 +20,8 @@ from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
+from solver.shell import dialogue
+from solver.shell.dialogue import text
 
 
 @register(requires='contributor', pass_ctx=True)
@@ -89,8 +90,7 @@ def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Complet
             for r in rows]
 
 
-@register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions},
-          )
+@register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions})
 def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force: bool = False) -> int:
     """Write (or flesh out) a topic article via the claude-euler-blogger skill.
 
@@ -120,10 +120,9 @@ def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force:
     # The Write / Rewrite web Actions type a bare `claude-blog <path>`, so a maintainer never gets
     # to pass an angle. Offer one interactively when none was given — Enter skips it. Only in an
     # interactive shell (a terminal, or the web PTY); a command block has no tty and stays as-is.
-    if not additional_prompt and sys.stdin.isatty():
-        console.print('[muted]Guidance for the writer — an angle, an emphasis, a constraint — '
-                      'or Enter to skip.[/muted]')
-        additional_prompt = console.input('[accent]prompt>[/accent] ').strip()
+    if not additional_prompt and dialogue.interactive():
+        additional_prompt = text('Guidance for the writer — an angle, an emphasis, a '
+                                 'constraint — or Enter to skip', default=' ').strip()
     invocation = f'/claude-euler-blogger {topic} {additional_prompt}'.strip()
     return _run_skill(ctx, invocation, '[accent]claude · blog[/accent]')
 

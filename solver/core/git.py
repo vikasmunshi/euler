@@ -40,6 +40,8 @@ from typing import Literal
 
 from cryptography.exceptions import InvalidTag
 
+from rich.text import Text
+
 from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
@@ -47,6 +49,7 @@ from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
 from solver.crypto.gitfilter import filter_settings
 from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
+from solver.shell.dialogue import SKIP, Action, walk
 from solver.utils.shell_utils import run_cmdline, run_command
 
 
@@ -93,8 +96,7 @@ def _commit_paths(problem: Problem) -> list[str]:
     return [problem.solution_dir.as_posix(), config.static_file_problems.as_posix()]
 
 
-@register(requires='contributor',
-          aliases=('commit',), quietable=True, )
+@register(requires='contributor', aliases=('commit',), quietable=True)
 def git_commit(problem: Problem, message: str = '', *, reset: bool = False) -> int:
     """Stage and commit the problem's solution directory.
 
@@ -169,8 +171,7 @@ def _can_amend(problem: Problem) -> bool:
     return bool(dirty)
 
 
-@register(requires='contributor', quietable=True,
-          aliases=('amend',), )
+@register(requires='contributor', quietable=True, aliases=('amend',))
 def git_commit_amend(problem: Problem) -> int:
     """Fold this problem's current changes into the last commit, message unchanged.
 
@@ -228,8 +229,7 @@ def _commits_ahead_of_master() -> int:
     return int(out) if proc.returncode == 0 and out.isdigit() else 0
 
 
-@register(requires='contributor', quietable=True, aliases=('reset',),
-          )
+@register(requires='contributor', quietable=True, aliases=('reset',))
 def git_reset() -> int:
     """Soft-reset your branch to origin/master — un-commit, keep every change.
 
@@ -326,8 +326,7 @@ def _docs_message(message: str) -> str:
     return message if message.startswith(DOCS_TAG) else f'{DOCS_TAG} {message}'
 
 
-@register(requires='contributor', quietable=True, aliases=('commit-docs',),
-          )
+@register(requires='contributor', quietable=True, aliases=('commit-docs',))
 def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
     """Stage and commit the documentation set — and nothing else.
 
@@ -371,11 +370,7 @@ def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
 
 # ── publish / status / sync / filter / identity ─────────────────────────────────────────
 
-@register(
-    requires='maintainer',
-    aliases=('publish',),
-    quietable=True,
-)
+@register(requires='maintainer', aliases=('publish',), quietable=True)
 def git_publish(*targets: Literal['scripts', 'solutions', 'solver'],
                 dry_run: bool = False) -> int:
     """Publish changed files for named targets to the remote repository.
@@ -404,8 +399,7 @@ def git_publish(*targets: Literal['scripts', 'solutions', 'solver'],
     return result
 
 
-@register(requires='reader',
-          aliases=('status',), )
+@register(requires='reader', aliases=('status',))
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
 
@@ -504,7 +498,7 @@ def private_local_edits() -> dict[str, bytes]:
         entry, index = tokens[index], index + 1
         if not entry:
             continue
-        if entry[0] in 'RC':        # a rename carries its source as the next NUL-separated token
+        if entry[0] in 'RC':  # a rename carries its source as the next NUL-separated token
             index += 1
         name = entry[3:]
         if (path := config.root_dir / name).is_file():
@@ -678,8 +672,7 @@ def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
         resmudge_private()
 
 
-@register(requires='reader', aliases=('filter',),
-          )
+@register(requires='reader', aliases=('filter',))
 def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     """Report or wire the transparent encryption filter for `solutions/private`.
 
@@ -709,8 +702,7 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     return result
 
 
-@register(requires='reader',
-          aliases=('sync',), )
+@register(requires='reader', aliases=('sync',))
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
 
@@ -762,12 +754,11 @@ def git_sync(dry_run: bool = False) -> int:
             return int(ExitCodes.EXIT_ERROR)
         result = run_cmdline(config.scripts.sync)
         if result == 0:
-            osc.git_changed()       # the fetch moved origin/master, the merge moved the branch
+            osc.git_changed()  # the fetch moved origin/master, the merge moved the branch
     return result
 
 
-@register(requires='contributor',
-          aliases=('identity',), )
+@register(requires='contributor', aliases=('identity',))
 def git_identity() -> int:
     """Configure your git identity and push credential from your GitHub login.
 
@@ -854,8 +845,7 @@ def _ensure_pull_request(branch: str) -> int:
     return int(ExitCodes.EXIT_OK)
 
 
-@register(requires='contributor', quietable=True,
-          aliases=('push',), )
+@register(requires='contributor', quietable=True, aliases=('push',))
 def git_push(force: bool = False, pr: bool = True) -> int:
     """Push the current branch to origin as yourself, then open its pull request.
 
@@ -1014,31 +1004,24 @@ def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
         console.print('[error]error:[/error] cannot read the open pull requests — is [accent]gh[/accent] '
                       'signed in ([accent]git-identity[/accent])?')
         return ExitCodes.EXIT_ERROR
-    if not prs:
-        console.print('[muted]no open pull requests[/muted]')
-        return int(ExitCodes.EXIT_OK)
-    console.print(f'[accent]{len(prs)}[/accent] open pull request(s) — per request: '
-                  '[accent]m[/accent]erge · [accent]s[/accent]kip · [accent]q[/accent]uit')
-    for pr in prs:
+
+    def render(pr: dict[str, object]) -> Text:
+        line = Text('  ')
+        line.append(f'#{pr.get("number")}', style='accent')
+        line.append(f'  {pr.get("title", "")}  ')
+        line.append(str(pr.get('headRefName', '')), style='muted')
+        return line
+
+    def merge(pr: dict[str, object]) -> int | None:
         number = pr.get('number')
-        if not isinstance(number, int):
-            continue
-        title = str(pr.get('title', ''))
-        branch = str(pr.get('headRefName', ''))
-        console.print()
-        console.print(f'  [accent]#{number}[/accent]  {title}  [muted]{branch}[/muted]')
-        choice = console.input('  [accent]m/s/q[/accent] > ').strip().lower()[:1]
-        if choice == 'q':
-            break
-        if choice != 'm':
-            console.print('  [muted]skipped[/muted]')
-            continue
-        _merge_pr(number, scope, one_tree=one_tree, label=label)
-    return int(ExitCodes.EXIT_OK)
+        return _merge_pr(number, scope, one_tree=one_tree, label=label) if isinstance(number, int) else None
+
+    return walk([pr for pr in prs if isinstance(pr.get('number'), int)],
+                {'m': Action('merge', merge), 's': Action('skip', SKIP)},
+                render=render, label='open pull request').rc
 
 
-@register(requires='maintainer', quietable=True,
-          aliases=('merge',), )
+@register(requires='maintainer', quietable=True, aliases=('merge',))
 def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
     """List the open pull requests, or walk them one at a time to rebase-merge.
 
@@ -1070,8 +1053,7 @@ def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
     return _merge_walk()
 
 
-@register(requires='maintainer', quietable=True, aliases=('merge-docs',),
-          )
+@register(requires='maintainer', quietable=True, aliases=('merge-docs',))
 def gh_merge_docs() -> int:
     """Walk the open pull requests, rebase-merging those that touch only the docs set.
 
@@ -1094,11 +1076,7 @@ def gh_merge_docs() -> int:
 
 # ── hooks / audit ───────────────────────────────────────────────────────────────────────
 
-@register(
-    requires='contributor',
-    aliases=('hooks',),
-    quietable=True,
-)
+@register(requires='contributor', aliases=('hooks',), quietable=True)
 def git_hooks() -> int:
     """Run the git pre-commit and (simulated) pre-push checks on demand.
 
@@ -1118,11 +1096,7 @@ def git_hooks() -> int:
     return result
 
 
-@register(
-    requires='contributor',
-    aliases=('audit',),
-    quietable=True,
-)
+@register(requires='contributor', aliases=('audit',), quietable=True)
 def git_audit(details: bool = False) -> int:
     """Audit what git actually stores, across the whole tracked tree.
 

@@ -3,13 +3,13 @@
 """ Utility for running shell commands and capturing their output. """
 from __future__ import annotations
 
-__all__ = ['confirm', 'pause', 'run_cmdline', 'run_command']
+__all__ = ['pause', 'run_cmdline', 'run_command']
 
 from pathlib import Path
 from subprocess import CalledProcessError, DEVNULL, run
 
-from solver.config import config
-from solver.shell import console, register
+from solver.config import ExitCodes, config
+from solver.shell import console, dialogue, register
 
 
 def run_cmdline(cmdline: str) -> int:
@@ -30,17 +30,16 @@ def run_cmdline(cmdline: str) -> int:
     return result
 
 
-def confirm(prompt: str) -> bool:
-    """Prompt the user for confirmation before proceeding."""
-    response = console.input(f'[muted]{prompt}[/muted]\nType "yes" to confirm: ')
-    return response.lower() == 'yes'
-
-
-@register(requires='reader', )
+@register(requires='reader')
 def pause() -> int:
-    """Pause the program execution until the user presses Enter."""
-    console.input('[muted]paused[/muted]\nPress enter to continue: ')
-    return 0
+    """Wait for the user to press Enter before the block carries on.
+
+    A beat in a command block — after a `show`, or between the steps of a walkthrough. With
+    nobody to wait for (a pipe, `< /dev/null`, `--silent`) it is a no-op rather than an error,
+    so a block that pauses is still scriptable.
+    """
+    dialogue.pause()
+    return ExitCodes.EXIT_OK
 
 
 def run_command(command: str, *, cwd: Path | None = None, silent: bool = False) -> str | None:

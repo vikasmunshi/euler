@@ -49,7 +49,8 @@ from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key
                                    read_enc_key_file, read_master_key, unlock, verify_master_key)
 from solver.crypto.config import config
 from solver.shell import console, register
-from solver.utils.shell_utils import confirm
+from solver.shell import dialogue
+from solver.shell.dialogue import Abort, sure, text
 from solver.web.auth.commands import registered_public_keys
 from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT
 
@@ -183,10 +184,10 @@ def key_rekey() -> int:
     for identity in unregistered:
         console.print(f'  [warning]{identity}[/warning] has no registered public key — they LOSE '
                       'access at this rotation (`users set-keys` first to keep them)')
-    if not confirm(f'Rotate the master key, re-encrypt all private files, and re-issue to '
-                   f'{len(named)} holder(s)?'):
-        console.print('[muted]Rekey cancelled.[/muted]')
-        return 1
+    if not sure(f'Rotate the master key, re-encrypt all private files, and re-issue to '
+                f'{len(named)} holder(s)? Anyone without a registered public key loses access.',
+                phrase='rekey'):
+        raise Abort('rekey cancelled')
 
     new_master: bytes = token_bytes(32)
     # Ourselves first: a rotation that fails half way must still leave THIS machine able to
@@ -283,8 +284,7 @@ def _resolve_key_request(thread_id: str) -> tuple[str, str] | None:
     return found[0], identity
 
 
-@register(requires='maintainer', aliases=('authorize',),
-          )
+@register(requires='maintainer', aliases=('authorize',))
 def user_authorize(target: str, identity: str = '') -> int:
     """Wrap the master key for someone else and send it to them.
 
@@ -346,9 +346,8 @@ def user_authorize(target: str, identity: str = '') -> int:
 
     console.print(f'[primary]issuing to:[/primary] {identity}\n'
                   f'[primary]public key:[/primary] {public_key}')
-    if not confirm('Send this key the master key?'):
-        console.print('[muted]Not sent.[/muted]')
-        return 1
+    if not sure('Send this key the master key?', phrase='send'):
+        raise Abort('not sent')
 
     # Its own message, always. There are no replies: a grant hidden inside the request it
     # answers is invisible to everything that reads the request, and `msg save` would have
@@ -447,7 +446,7 @@ def _register_public_key(identity: str, public_key: str) -> None:
 # ==================================================================================================================== #
 #                                               user identity
 # ==================================================================================================================== #
-@register(requires='reader', )
+@register(requires='reader')
 def user(regen: bool = False) -> int:
     """Show the solver user, the current identity, and whether it can decrypt.
 
@@ -465,7 +464,7 @@ def user(regen: bool = False) -> int:
     console.print(f'[primary]solver user:[/primary] {app_user.user} [muted]({app_user.profile})[/muted]')
     id_file: Path = config['private_key_file']
     private_key: X25519PrivateKey | None = None
-    minted: bool = False        # a key was created here — the only path that files a request
+    minted: bool = False  # a key was created here — the only path that files a request
     if id_file.exists():
         try:
             private_key = load_private_key()
@@ -477,11 +476,12 @@ def user(regen: bool = False) -> int:
                               'and ~/.euler/vault). To deliberately REPLACE the unreadable identity, '
                               'run [accent]user --regen[/accent].[/muted]')
                 return 1
-            if not confirm('REPLACE the unreadable identity with a fresh key pair? '
-                           '(the old file is kept as a rotated backup; any enc-key access it had is lost)'):
-                console.print('[muted]Keeping the existing (unreadable) identity file.[/muted]')
-                return 1
-    if regen and private_key is not None and not confirm('Replace the existing private key with a new one?'):
+            if not sure('REPLACE the unreadable identity with a fresh key pair? The old file is '
+                        'kept as a rotated backup, but any enc-key access it had is lost.',
+                        phrase='replace'):
+                raise Abort('keeping the existing (unreadable) identity file')
+    if regen and private_key is not None and not sure('Replace the existing private key with a '
+                                                      'new one?', phrase='replace'):
         console.print('[muted]Keeping the existing private key.[/muted]')
         regen = False
     if regen or private_key is None:
@@ -620,10 +620,11 @@ def unlock_session(interactive: bool = True) -> bytes | None:
         if after and after != before:
             _own_key_file(Path(after))
         return vault_key
-    if not (interactive and console.is_interactive):
+    if not (interactive and dialogue.interactive()):
         return None
-    password: str = console.input('[accent]Vault password:[/accent] ', password=True)
-    if not password:
+    try:
+        password: str = dialogue.secret('Vault password', hint=f'set ${config["vault_password_env"]}')
+    except Abort:
         return None
     try:
         vault_key = vault_mod.unlock_vault(password)
@@ -638,15 +639,12 @@ def unlock_session(interactive: bool = True) -> bytes | None:
 
 
 def _prompt_new_password(prompt: str) -> str | None:
-    """Prompt for a password twice (hidden); return it, or None on mismatch / empty input."""
-    first: str = console.input(f'[accent]{prompt}:[/accent] ', password=True)
-    if not first:
-        console.print('[error]error:[/error] password must not be empty')
+    """Prompt for a password twice (hidden); return it, or None when the two do not match."""
+    try:
+        return dialogue.secret(prompt, confirm_twice=True)
+    except Abort as abort:
+        console.print(f'[error]error:[/error] {abort.message}')
         return None
-    if console.input('[accent]Confirm password:[/accent] ', password=True) != first:
-        console.print('[error]error:[/error] passwords do not match')
-        return None
-    return first
 
 
 def _orphaned_vault_files() -> list[str]:
@@ -700,8 +698,7 @@ def _vault_status() -> int:
     return 0
 
 
-@register(requires='reader',
-          )
+@register(requires='reader')
 def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'status') -> int:
     """Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 
@@ -763,7 +760,7 @@ def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'stat
     if not vault_mod.vault_exists():
         console.print('[error]error:[/error] no vault to change; run `vault init` first.')
         return 1
-    current: str = console.input('[accent]Current vault password:[/accent] ', password=True)
+    current: str = dialogue.secret('Current vault password')
     try:
         vault_mod.unlock_vault(current)
     except InvalidTag:
@@ -827,6 +824,15 @@ def _split_secret(secret: bytes, num_shares: int, threshold: int) -> list[str]:
     return [f'{x:0{_HEX_WIDTH}x}{_eval_poly(poly, x):0{_HEX_WIDTH}x}' for x in xs]
 
 
+def _share_shape(share: str) -> str | None:
+    """Reject a mistyped share as it is entered, rather than after the last one."""
+    if not re.fullmatch(r'[0-9a-fA-F]+', share):
+        return 'a share is hexadecimal — check for a stray character'
+    if len(share) != 2 * _HEX_WIDTH:
+        return f'a share is {2 * _HEX_WIDTH} hex characters, this one is {len(share)}'
+    return None
+
+
 def _reconstruct_secret(shares: list[str]) -> bytes:
     """Reconstruct the 32-byte key from `threshold` distinct shares produced by `_split_secret`."""
     if not shares:
@@ -848,7 +854,7 @@ def _reconstruct_secret(shares: list[str]) -> bytes:
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
 
-@register(requires='admin', )
+@register(requires='admin')
 def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     """Print Shamir shares of the current master key.
 
@@ -878,7 +884,7 @@ def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     return 0
 
 
-@register(requires='reader', )
+@register(requires='reader')
 def key_reconstruct(threshold: int = 2) -> int:
     """Reconstruct the master key from Shamir shares and store it for this user.
 
@@ -895,9 +901,10 @@ def key_reconstruct(threshold: int = 2) -> int:
     except (FileNotFoundError, ValueError) as exc:
         console.print(f'[error]error:[/error] need a private key first ({exc}); run `user`')
         return 1
-    shares: list[str] = []
-    for i in range(1, threshold + 1):
-        shares.append(console.input(f'[accent]Enter master key share {i} of {threshold}:[/accent] ').strip())
+    shares: list[str] = [
+        text(f'Master key share {i} of {threshold}', validate=_share_shape)
+        for i in range(1, threshold + 1)
+    ]
     try:
         master_key: bytes = _reconstruct_secret(shares)
     except ValueError as exc:

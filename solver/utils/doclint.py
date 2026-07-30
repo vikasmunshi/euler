@@ -21,9 +21,10 @@ What it checks, one rule per name reported:
   names are the signature's names, in the signature's order, each with prose.
 * `indent`                         — entries sit at the section's indent and wrapped
   descriptions four columns past it, rather than aligned into a description column.
-* `marker`                         — the framework-supplied parameters carry the marker
-  that tells a reader where their value comes from: `[injected]` for the injected
-  `Context`, `[problem]` for the problem special. Ordinary arguments carry neither.
+* `marker`                         — a parameter whose value does not simply come from the
+  command line carries the marker saying where it *does* come from: `[injected]` for the
+  injected `Context`, `[problem]` for the problem special, `[asked]` for one the adapter
+  offers to fill in. Ordinary arguments carry none of them.
 * `summary-length` / `line-length` — the summary fits a catalogue cell (80 columns) and
   every rendered line (post-`inspect.getdoc`) fits the panel and the fenced doc block (100).
 * `rst-literal`                    — inline code is written with single backticks, the one
@@ -47,7 +48,8 @@ from solver.shell.command import Command, Context, registry
 # and the `?` renderer can never disagree about what a docstring says; likewise
 # `_is_problem_annotation` is the adapter's own answer to what makes a parameter the
 # problem special, imported rather than re-implemented so the rule cannot drift from it.
-from solver.shell.docstring import (CONTINUATION_INDENT, ENTRY_RE, MARKER_INJECTED,
+from solver.shell.dialogue import Ask
+from solver.shell.docstring import (CONTINUATION_INDENT, ENTRY_RE, MARKER_ASKED, MARKER_INJECTED,
                                     MARKER_PROBLEM, command_doc, entries, sections, split_marker)
 from solver.shell.register import _is_problem_annotation
 
@@ -108,11 +110,18 @@ def _stars(param: inspect.Parameter) -> str:
 
 
 def expected_marker(param: inspect.Parameter) -> str:
-    """The marker *param* must carry: `injected` for the `Context`, `problem` for the
-    problem special, and '' for an ordinary argument the user types."""
-    if param.annotation is Context:
+    """The marker *param* must carry, or '' for an ordinary argument the user types.
+
+    `asked` for a parameter carrying an `Ask` (the adapter offers to fill it in), `injected`
+    for the `Context` the decorator supplies, `problem` for the problem special.
+    """
+    metadata = getattr(param.annotation, '__metadata__', ())
+    if any(isinstance(item, Ask) for item in metadata):
+        return MARKER_ASKED
+    annotation = param.annotation.__origin__ if metadata else param.annotation
+    if annotation is Context:
         return MARKER_INJECTED
-    if param.name == 'problem' and _is_problem_annotation(param.annotation):
+    if param.name == 'problem' and _is_problem_annotation(annotation):
         return MARKER_PROBLEM
     return ''
 
@@ -229,8 +238,7 @@ def _name_completer(_: Context, incomplete: str) -> list[str]:
     return [name for name in registry.names() if name.startswith(incomplete)]
 
 
-@register(requires='admin', quietable=True,
-          completers={'name': _name_completer})
+@register(requires='admin', quietable=True, completers={'name': _name_completer})
 def check_commands(name: str = '') -> int:
     """Report every command docstring that breaks the documented standard.
 

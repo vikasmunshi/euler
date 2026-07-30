@@ -26,10 +26,10 @@ special. :func:`split_marker` separates it from the prose.
 """
 from __future__ import annotations
 
-__all__ = ['CONTINUATION_INDENT', 'ENTRY_RE', 'GLYPH_PROBLEM', 'GLYPH_REQUIRES', 'GLYPH_SILENT',
-           'HelpModel', 'MARKER_INJECTED', 'MARKER_PROBLEM', 'NOTE_PROBLEM', 'NOTE_SILENT',
-           'SILENT_HELP', 'command_doc', 'entries', 'help_model', 'requires_note', 'sections',
-           'split_marker']
+__all__ = ['CONTINUATION_INDENT', 'ENTRY_RE', 'GLYPH_ASKS', 'GLYPH_PROBLEM', 'GLYPH_REQUIRES',
+           'GLYPH_SILENT', 'HelpModel', 'MARKER_ASKED', 'MARKER_INJECTED', 'MARKER_PROBLEM',
+           'NOTE_ASKS', 'NOTE_PROBLEM', 'NOTE_SILENT', 'SILENT_HELP', 'command_doc', 'entries',
+           'help_model', 'requires_note', 'sections', 'split_marker']
 
 import inspect
 import re
@@ -42,6 +42,8 @@ from solver.auth import LADDER
 MARKER_INJECTED: str = 'injected'
 #: The problem special: a bare number or `problem=N`, or omitted to inherit the current one.
 MARKER_PROBLEM: str = 'problem'
+#: A parameter the adapter offers to fill in when it is left out (developer-guide §3.11).
+MARKER_ASKED: str = 'asked'
 
 #: A section heading: `Args:` / `Repeats:` alone on a line, at the docstring's left margin.
 _SECTION = re.compile(r'^([A-Z][\w /-]*):\s*$')
@@ -131,10 +133,12 @@ def split_marker(description: str) -> tuple[str, str]:
 GLYPH_REQUIRES: str = '⚑'
 GLYPH_PROBLEM: str = '❏'
 GLYPH_SILENT: str = '»'
+GLYPH_ASKS: str = '✎'
 
 #: The two fixed notes. The third (`GLYPH_REQUIRES`) is per-command: see `requires_note`.
 NOTE_PROBLEM: str = 'uses/sets current problem.'
 NOTE_SILENT: str = 'supports --silent to suppress output.'
+NOTE_ASKS: str = 'asks for anything you leave out.'
 
 #: The description of the synthetic `--silent` flag — identical on every quietable command,
 #: which is exactly why no docstring carries it (developer-guide §3.8).
@@ -197,6 +201,8 @@ def help_model(cmd: Any) -> HelpModel:
         notes.append((GLYPH_REQUIRES, note))
     if cmd.uses_problem:
         notes.append((GLYPH_PROBLEM, NOTE_PROBLEM))
+    if cmd.asks:
+        notes.append((GLYPH_ASKS, NOTE_ASKS))
     if cmd.quietable:
         notes.append((GLYPH_SILENT, NOTE_SILENT))
     arguments = [(name, rest) for name, description in entries(found.get('args', []))

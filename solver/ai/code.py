@@ -27,6 +27,7 @@ from solver.ai.models import Model, record_usage
 from solver.config import config
 from solver.core.problems import Problem, problems
 from solver.shell import console
+from solver.shell.dialogue import confirm
 from solver.templates.engine import Templates, filled_template, get_template
 from solver.utils.path_utils import canonical_path, iterdir_recursive, write_file
 
@@ -302,7 +303,8 @@ def _check_solution_against_test_cases(*,
             answer = literal_eval(_answer) if expected_type in (list, tuple, dict) else expected_type(_answer)
             if category == 'main' and expected is None:
                 console.print(f'[accent]{solution.name} {input_args} -> [bold]{_answer}[/bold][/accent]')
-                assert console.input('is this correct? (y/n) ')[0].lower() == 'y', f'answer {_answer} is incorrect.'
+                assert confirm(f'Is {_answer} the correct answer?',
+                               assume=False), f'answer {_answer} is rejected.'
             if expected is not None:
                 assert answer == expected, f'incorrect answer {_answer}, expected {expected}'
         except (AssertionError, IndexError, ValueError) as err:

@@ -84,7 +84,7 @@ a parameter that accepts repetition.
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
 | [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: your threads, questions to staff, staff notices. |
 | [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
-| [`pause`](#command-pause) | — | `reader` | Pause the program execution until the user presses Enter. |
+| [`pause`](#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
 | [`problems`](#command-problems) | — | `reader` | Print a list of problems and their count. |
 | [`progress`](#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
@@ -1392,19 +1392,24 @@ mark
 Read and send messages: your threads, questions to staff, staff notices.
 
 * ⚑ needs reader or above.
+* ✎ asks for anything you leave out.
 
 Every message has staff (`maintainer`+) at one end: you can ask them something,
 they can answer, and they can send notices. There is deliberately no user-to-user
 messaging. Delivery is asynchronous — the spool holds the thread until you read it.
 
+Typed bare, it walks you through the rest: pick a verb, then whatever that verb needs —
+a thread from your own list, or a subject and a message. Every answer can be given on the
+command line instead, and a non-interactive shell asks nothing.
+
 **usage**
 
 ```
 msg
-[action=list|read|save|send|queue|notice|dismiss] (default list)
-[thread=<str>] (default '')
-[subject=<str>] (default '')
-[body=<str>] (default '')
+[action=list|read|save|send|queue|notice|dismiss] (asked)
+[thread=<str>] (asked)
+[subject=<str>] (asked)
+[body=<str>] (asked)
 [to=<str>] (default '')
 [all_users=true|--all-users]
 ```
@@ -1413,8 +1418,8 @@ msg
 
 | argument | description |
 |----------|-------------|
-| `action` | What to do — `list` your threads, newest first; `read` one thread and mark it read; `save` the master key a maintainer issued you, writing it to your enc-key file; `send` staff a question; `queue` (STAFF) the inbound work list; `notice` (STAFF) to named recipients or everyone; `dismiss` (STAFF) a worked message. Defaults to `list`. |
-| `thread` | The message id, for `read` / `save` / `dismiss`. |
+| `action` | What to do — `list` your threads, newest first; `read` one thread and mark it read; `save` the master key a maintainer issued you, writing it to your enc-key file; `send` staff a question; `queue` (STAFF) work the inbound list; `notice` (STAFF) to named recipients or everyone; `dismiss` (STAFF) a worked message. Defaults to `list`. |
+| `thread` | The message to act on, for `read` / `save` / `dismiss`. Offered as a menu of your own threads, so the id never has to be typed out. |
 | `subject` | The subject line, for `send` / `notice`. |
 | `body` | The message text, for `send` / `notice`. |
 | `to` | Comma-separated recipient identities for a `notice`. |
@@ -1467,9 +1472,13 @@ new
 
 #### Command: `pause`
 
-Pause the program execution until the user presses Enter.
+Wait for the user to press Enter before the block carries on.
 
 * ⚑ needs reader or above.
+
+A beat in a command block — after a `show`, or between the steps of a walkthrough. With
+nobody to wait for (a pipe, `< /dev/null`, `--silent`) it is a no-op rather than an error,
+so a block that pauses is still scriptable.
 
 **usage**
 

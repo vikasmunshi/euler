@@ -49,11 +49,14 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from solver.auth.identity import system_slug
 from solver.config import config
+from rich.text import Text
+
 from solver.shell import console, register
+from solver.shell.dialogue import SKIP, Action, Choice, choose, walk
 
 #: Profiles assignable to a web account (`admin` is local-os-login-only).
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')
@@ -140,43 +143,36 @@ def _process_requests() -> int:
     except json.JSONDecodeError:
         console.print('[error]error:[/error] malformed request data from the admin plane')
         return 1
-    if not queue:
-        console.print('[muted]no pending invite requests[/muted]')
-        return 0
-    console.print(f'[accent]{len(queue)}[/accent] pending invite request(s) — per request: '
-                  '[accent]a[/accent]ccept · [accent]i[/accent]gnore · '
-                  '[accent]d[/accent]ismiss · [accent]q[/accent]uit')
-    for req in queue:
-        email = str(req.get('email', ''))
-        if '@' not in email:
-            continue
+
+    def render(req: dict[str, Any]) -> Text:
         submissions = int(req.get('submissions', 1))
-        seen = f'  (×{submissions})' if submissions > 1 else ''
-        console.print()
-        console.print(f'  [accent]{email}[/accent]  {req.get("name", "")}{seen}')
-        for line in str(req.get('remarks') or '').splitlines():
-            console.print(f'    [muted]{line}[/muted]')
-        choice = console.input('  [accent]a/i/d/q[/accent] > ').strip().lower()[:1]
-        if choice == 'q':
-            break
-        if choice == 'd':
-            _sudo_admin('dismiss', email)
-            console.print('  [muted]dismissed[/muted]')
-            continue
-        if choice != 'a':
-            console.print('  [muted]ignored (left queued)[/muted]')
-            continue
-        prompt = f'  [accent]profile[/accent] ({"/".join(_WEB_PROFILES)}) [reader] > '
-        prof = console.input(prompt).strip().lower() or 'reader'
-        if prof not in _WEB_PROFILES:
-            console.print(f'  [error]not a web profile: {prof} — left queued[/error]')
-            continue
-        if _add_account(email, prof) == 0:
-            _sudo_admin('dismiss', email)              # onboarded → drop it from the queue
-            console.print(f'  [success]invited {email} ({prof})[/success]')
-        else:
+        line = Text('  ')
+        line.append(str(req.get('email', '')), style='accent')
+        line.append(f'  {req.get("name", "")}')
+        if submissions > 1:
+            line.append(f'  (×{submissions})')
+        for remark in str(req.get('remarks') or '').splitlines():
+            line.append(f'\n    {remark}', style='muted')
+        return line
+
+    def accept(req: dict[str, Any]) -> int | None:
+        email = str(req.get('email', ''))
+        profile = choose('Which profile?', [Choice(p) for p in _WEB_PROFILES], default='reader')
+        if _add_account(email, profile) != 0:
             console.print('  [error]invite failed — left queued[/error]')
-    return 0
+            return 1
+        _sudo_admin('dismiss', email)                  # onboarded → drop it from the queue
+        console.print(f'  [success]invited {email} ({profile})[/success]')
+        return 0
+
+    def dismiss(req: dict[str, Any]) -> int | None:
+        _sudo_admin('dismiss', str(req.get('email', '')))
+        return None
+
+    return walk([req for req in queue if '@' in str(req.get('email', ''))],
+                {'a': Action('accept', accept), 'i': Action('ignore', SKIP),
+                 'd': Action('dismiss', dismiss)},
+                render=render, label='pending invite request').rc
 
 
 def _roster() -> list[dict[str, str]] | None:
@@ -237,8 +233,7 @@ def register_public_key(identity: str, public_key: str) -> bool:
     return _sudo_admin('set-key', identity, public_key) == 0
 
 
-@register(requires='admin',
-          )
+@register(requires='admin')
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
                           'remove', 'set-keys', 'redeploy'] = 'list',
           identity: str = '',

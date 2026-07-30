@@ -11,15 +11,13 @@ from __future__ import annotations
 from tomllib import load
 from typing import Literal
 
-from solver.config import ExitCodes, config
+from solver.config import config
 from solver.shell import console, register
-from solver.utils.shell_utils import confirm, run_cmdline
+from solver.shell.dialogue import Abort, confirm
+from solver.utils.shell_utils import run_cmdline
 
 
-@register(
-    requires='admin',
-    aliases=('upgrade',),
-)
+@register(requires='admin', aliases=('upgrade',))
 def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show']) -> int:
     """Upgrade packages in the current venv for the given dependency groups.
 
@@ -41,18 +39,13 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
         packages: list[str] = [p for pkgs in available.values() for p in pkgs]
     else:
         packages = [p for name in groups for p in available[name]]
-    if confirm(f'Upgrade {len(packages)} package(s): {" ".join(packages)}'):
-        result = run_cmdline(f'{config.scripts.upgrade} {" ".join(packages)}')
-        return result
-    else:
-        console.print('[muted]Package upgrade cancelled.[/muted]')
-        return ExitCodes.EXIT_ERROR
+    console.print(f'[muted]{" ".join(packages)}[/muted]')
+    if not confirm(f'Upgrade {len(packages)} package(s)?', default=True):
+        raise Abort('upgrade cancelled')
+    return run_cmdline(f'{config.scripts.upgrade} {" ".join(packages)}')
 
 
-@register(
-    requires='admin',
-    aliases=('install',),
-)
+@register(requires='admin', aliases=('install',))
 def sys_setup(target: Literal['chrome', 'dev-env', 'upgrade-service'],
               uninstall: bool = False,
               show_help: bool = False) -> int:
@@ -86,9 +79,6 @@ def sys_setup(target: Literal['chrome', 'dev-env', 'upgrade-service'],
         'dev-env': ' python primesieve c',
         'upgrade-service': '',
     }[target]
-    if confirm(f'{arg.capitalize()} {name}{extra_arg} (requires sudo)?'):
-        result = run_cmdline(f'{script} {arg}{extra_arg}')
-        return result
-    else:
-        console.print('[muted]Installation cancelled.[/muted]')
-        return ExitCodes.EXIT_ERROR
+    if not confirm(f'{arg.capitalize()} {name}{extra_arg}? This needs sudo.', default=True):
+        raise Abort(f'{arg} cancelled')
+    return run_cmdline(f'{script} {arg}{extra_arg}')

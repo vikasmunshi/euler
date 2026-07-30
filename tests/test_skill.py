@@ -17,6 +17,7 @@ from prompt_toolkit.completion import Completion
 
 from solver.ai import skill
 from solver.config import ExitCodes
+from solver.shell import dialogue
 
 _INDEX: list[dict[str, Any]] = [
     {'path': 'domain/alpha', 'title': 'Alpha', 'status': 'draft', 'tags': ['alpha'],
@@ -107,7 +108,8 @@ class BlogPromptTests(unittest.TestCase):
                                        lambda _c, inv, _t: self.launched.append(inv) or ExitCodes.EXIT_OK))
 
     def _blog(self, topic: str, prompt: str = '', *, tty: bool, typed: str = '') -> None:
-        with patch.object(skill.sys.stdin, 'isatty', lambda: tty), \
+        """`dialogue.interactive` is the one seam every prompt in the shell goes through."""
+        with patch.object(dialogue, 'interactive', lambda: tty), \
              patch.object(skill.console, 'input', lambda *a, **k: typed):
             skill.claude_blog(cast(Any, None), topic, prompt)
 
@@ -121,14 +123,14 @@ class BlogPromptTests(unittest.TestCase):
 
     def test_non_interactive_never_prompts(self) -> None:
         # console.input would raise if called; a command block must not block on a read.
-        with patch.object(skill.sys.stdin, 'isatty', lambda: False), \
+        with patch.object(dialogue, 'interactive', lambda: False), \
              patch.object(skill.console, 'input',
                           lambda *a, **k: self.fail('must not prompt without a tty')):
             skill.claude_blog(cast(Any, None), 'technique/gamma')
         self.assertEqual(self.launched, ['/claude-euler-blogger technique/gamma'])
 
     def test_a_given_prompt_is_not_overridden(self) -> None:
-        with patch.object(skill.sys.stdin, 'isatty', lambda: True), \
+        with patch.object(dialogue, 'interactive', lambda: True), \
              patch.object(skill.console, 'input',
                           lambda *a, **k: self.fail('must not prompt when one was given')):
             skill.claude_blog(cast(Any, None), 'technique/gamma', 'keep it short')

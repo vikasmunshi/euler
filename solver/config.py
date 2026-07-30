@@ -24,6 +24,7 @@ class ExitCodes(enum.IntEnum):
     EXIT_OK = 0  #: success
     EXIT_ERROR = 1  #: generic failure
     EXIT_USAGE = 2  #: parse / usage error
+    EXIT_ABORT = 3  #: the user declined or quit an interactive dialogue
     EXIT_NOTFOUND = 127  #: unknown command
 
 

@@ -39,6 +39,16 @@ flake8 "${dir_to_check}"
 flake8_rc=$?
 echo "flake8 ${dir_to_check} -> ${flake8_rc}"
 
+# the interaction guard: `dialogue.interactive` must be called through its module, never
+# bound by import. A by-value copy is a second seam that `--silent` and the tests cannot
+# reach, so a command would prompt when it must not (docs/developer-guide.md §3.10).
+seam_rc=0
+if grep -rn 'from solver.shell.dialogue import.*\binteractive\b' "${dir_to_check}" --include='*.py'; then
+    echo "^ import the module and call dialogue.interactive() instead" >&2
+    seam_rc=1
+fi
+echo "interaction guard ${dir_to_check} -> ${seam_rc}"
+
 # command docstrings: the standard in docs/developer-guide.md §3.8, enforced by the
 # `check-commands` shell command. Only meaningful for the solver package — the command
 # registry is what it walks, and only an admin subject sees all of it (the command is
@@ -51,4 +61,4 @@ if [[ "${dir_to_check}" == solver || "${dir_to_check}" == */solver ]]; then
     echo "command docstrings -> ${doclint_rc}"
 fi
 
-exit $(( "${ws_rc}" + "${mypy_rc}" + "${flake8_rc}" + "${doclint_rc}" ))
+exit $(( "${ws_rc}" + "${mypy_rc}" + "${flake8_rc}" + "${seam_rc}" + "${doclint_rc}" ))

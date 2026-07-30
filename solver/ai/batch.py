@@ -262,8 +262,7 @@ def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[
     return written, failures, conflicts
 
 
-@register(requires='maintainer',
-          )
+@register(requires='maintainer')
 def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                  target: Target = 'untagged',
                  limit: int = 250,

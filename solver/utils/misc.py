@@ -10,8 +10,7 @@ from solver.core.problems import Problem, problems as problem_set
 from solver.shell import register, console
 
 
-@register(requires='reader',
-          )
+@register(requires='reader')
 def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     """Print a list of problems and their count.
 
@@ -38,7 +37,7 @@ def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     return 0
 
 
-@register(requires='admin', )
+@register(requires='admin')
 def manage_config(
         param: Literal['all', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
         value: float | int | None = None, /,

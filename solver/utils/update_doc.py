@@ -354,8 +354,7 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
     return updated, stale
 
 
-@register(requires='admin',
-          pass_ctx=True, quietable=True)
+@register(requires='admin', pass_ctx=True, quietable=True)
 def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.
 

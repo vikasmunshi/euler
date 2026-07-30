@@ -100,12 +100,13 @@ The return value **is** the exit code, forwarded verbatim (`0` = success, nonzer
 what gates a chain (`eval 42 && benchmark`). Use the `ExitCodes` members from
 `solver.config` rather than bare integers:
 
-| member                     | value | meaning             |
-|----------------------------|-------|---------------------|
-| `ExitCodes.EXIT_OK`        | `0`   | success             |
-| `ExitCodes.EXIT_ERROR`     | `1`   | generic failure     |
-| `ExitCodes.EXIT_USAGE`     | `2`   | parse / usage error |
-| `ExitCodes.EXIT_NOTFOUND`  | `127` | unknown command     |
+| member                     | value | meaning                         |
+|----------------------------|-------|---------------------------------|
+| `ExitCodes.EXIT_OK`        | `0`   | success                         |
+| `ExitCodes.EXIT_ERROR`     | `1`   | generic failure                 |
+| `ExitCodes.EXIT_USAGE`     | `2`   | parse / usage error             |
+| `ExitCodes.EXIT_ABORT`     | `3`   | the user declined or quit (§3.10) |
+| `ExitCodes.EXIT_NOTFOUND`  | `127` | unknown command                 |
 
 You rarely return `EXIT_USAGE` yourself — the adapter returns it for you when
 argument parsing fails.
@@ -338,6 +339,93 @@ Like `update-docs`, it is **admin-floored on purpose**: registration is
 profile-filtered, so a lesser profile's registry is missing commands entirely and
 the check would pass by not looking at them.
 
+### 3.10 Asking the user: in-command dialogues
+
+Every question the shell puts to a user goes through `solver/shell/dialogue.py`. Nothing
+else calls `console.input`, and the module is the whole vocabulary:
+
+| primitive | for |
+|-----------|-----|
+| `confirm(question, default=…)` | a reversible yes/no; Enter takes the default |
+| `sure(question, phrase=…)` | a destructive act — the user types the phrase (`rekey`) |
+| `pause(message)` | wait for Enter; a no-op when nobody is waiting |
+| `choose(question, options)` | one of N — a numbered menu, a search above ~12 options |
+| `select(question, candidates)` | many of N — search, toggle by number, `done` |
+| `walk(items, actions, render=…)` | work a queue item by item |
+| `text(question, validate=…)` | free text, re-asked until it validates |
+| `secret(question)` | hidden entry, optionally twice |
+
+Three rules hold for all of them.
+
+**Line-based, never full-screen.** Each prompt reads one line through the shared console,
+so it behaves identically in a terminal, in the browser's PTY, and under `solver -s`, which
+tees typed input into the session log. A curses picker works in none of those. The polish
+is in what is rendered *around* the prompt — numbered tables, counters, panels.
+
+**Never crash, never hang.** `dialogue.interactive()` is the single guard: a tty on stdin, a
+terminal on stdout, and not muted by `--silent`. Call it through the module
+(`dialogue.interactive()`), never by value — a by-value import makes a second seam that
+tests and `--silent` cannot reach. EOF and `Ctrl-C` raise `Abort`, never a traceback.
+
+**Declining is not success.** `Abort` carries `EXIT_ABORT`; the adapter catches it, prints
+its message, and returns its code, so `gh-merge merge && git-push` stops when you quit the
+review. Raise `Abort(message, rc=EXIT_USAGE)` when the question could not be put at all and
+the fix is to pass an argument. This is also what replaces the `assert` / `if not confirm():
+print(); return 1` shape — a command body asks and acts, in a straight line.
+
+```python
+if not sure(f'Rotate the master key and re-issue to {len(named)} holder(s)?', phrase='rekey'):
+    raise Abort('rekey cancelled')
+```
+
+A **walk** is the shared shape of every queue — open pull requests, invite requests, the
+staff message spool:
+
+```python
+return walk(prs, {'m': Action('merge', merge), 's': Action('skip', SKIP)},
+            render=render, label='open pull request').rc
+```
+
+`q` is added for you and makes the result an abort. One exception is worth knowing: a verb
+that is *also* the read view of its queue (`msg queue`) should print the list when
+`interactive()` is False, rather than refusing — but a verb that exists to *change* things
+(`gh-merge merge`) must refuse, because quietly doing nothing hides that nothing happened.
+
+### 3.11 `Ask` — the adapter asks for what the user left out
+
+A question whose answer *is* an argument does not belong in the body. Declare it on the
+parameter and the adapter puts it:
+
+```python
+def msg(action: Annotated[Action, Ask('What would you like to do?', labels=_ACTIONS)] = 'list',
+        thread: Annotated[str, Ask('Which message?', choices=_threads, when=_needs_thread,
+                                   empty='no messages')] = '') -> int:
+```
+
+`Annotated[T, Ask(...)]` rather than a decorator flag, for three reasons: the function stays
+an ordinary Python callable with a real default (mypy included); a default is *not* the same
+as "no answer yet", so "ask for missing required arguments" would never fire where it is
+wanted; and a requirement is often conditional, which `when` states next to the parameter
+instead of in a validation ladder.
+
+**Where the options come from.** Nothing, if the type already says: a `Literal` or an enum
+becomes a menu on its own, and `Ask(labels={...})` adds the reading text a type cannot
+carry. For a live set, `choices` is a callable `(ctx, bound) -> Sequence[Choice]`, called
+once when the dialogue fires — `bound` is every argument answered so far, so `msg save`
+offers only the threads carrying a key. An empty result is an answer in itself: `Abort`
+with `empty=`, because "no messages to read" is more use than an empty menu.
+
+**One declaration, two surfaces.** `choices` also drives tab-completion for that parameter,
+positionally and as `name=`, with the label as display text — so `msg read <TAB>` offers
+thread ids without a completer being written.
+
+**Non-interactively nothing is asked** and every asked parameter keeps its default, so a
+scripted `solver "msg"` behaves exactly as it did before the command declared any `Ask`. If
+the command then cannot proceed, that is its own validation error to raise.
+
+Asked parameters are marked `[asked]` in the docstring (§3.8), rendered `(asked)` in the
+usage, and the command gains a `✎ asks for anything you leave out.` fact line in `?`.
+
 ---
 
 ## 4. Completion
@@ -449,6 +537,8 @@ control over their argument line (`?`, `clear`, the `!` bash passthrough) use
 - [ ] `aliases=(...)` if it deserves a short form.
 - [ ] `pass_ctx=True` only if you need shell state.
 - [ ] `quietable=True` if its output is incidental to scripting.
+- [ ] Questions asked through `dialogue` (§3.10) — never `console.input`; an argument the
+      user could have typed is an `Ask` (§3.11), not an `if not x:` block.
 - [ ] `requires=` set to the least profile that should have it (§3.7) — it shows in
       the help panel and in the catalogue's `Requires` column.
 - [ ] Module listed in `modules.csv` — run `python -m solver.utils.loader` (or

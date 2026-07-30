@@ -39,6 +39,7 @@ from solver.crypto import keys as keys_mod
 from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key_hex,
                                    read_enc_key_file, read_master_key, verify_master_key)
 from solver.crypto.config import config as crypto_config
+from solver.shell import dialogue
 from tests import silence
 
 silence()   # these drive the console's refusal paths on purpose
@@ -195,7 +196,7 @@ class RegenTests(EncKeyTestCase):
         keys_mod._request_authorization = (                              # type: ignore[assignment]
             lambda identity, public_key: self.requests.append((identity, public_key)))
         self.addCleanup(setattr, keys_mod, '_request_authorization', saved_request)
-        for name, stub in (('confirm', lambda _p: True),):
+        for name, stub in (('sure', lambda _q, *, phrase='': True),):
             saved = getattr(keys_mod, name)
             setattr(keys_mod, name, stub)
             self.addCleanup(setattr, keys_mod, name, saved)
@@ -267,8 +268,10 @@ class KeyReconstructTests(EncKeyTestCase):
         keys_mod.write_enc_key_file(good)
         shares = keys_mod._split_secret(token_bytes(32), 3, 2)           # a DIFFERENT secret
         answers = iter(shares[:2])
-        saved, keys_mod.console.input = keys_mod.console.input, lambda _p: next(answers)
+        saved, keys_mod.console.input = keys_mod.console.input, lambda *a, **k: next(answers)
         self.addCleanup(setattr, keys_mod.console, 'input', saved)
+        saved_interactive, dialogue.interactive = dialogue.interactive, lambda: True
+        self.addCleanup(setattr, dialogue, 'interactive', saved_interactive)
 
         self.assertEqual(keys_mod.key_reconstruct(2), 1)
         self.assertEqual(read_enc_key_file(), good, 'the working file must survive')

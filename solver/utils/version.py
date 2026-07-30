@@ -35,7 +35,7 @@ def _git_detail() -> str | None:
     return proc.stdout.strip() or None
 
 
-@register(requires='reader', )
+@register(requires='reader')
 def version() -> int:
     """Print the installed build version, plus live git detail of the clone.
 

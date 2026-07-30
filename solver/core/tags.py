@@ -35,7 +35,6 @@ __all__ = ['tags', 'topics', 'topic', 'update_tags', 'create_topic', 'format_voc
 import json
 import re
 import subprocess
-import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -43,6 +42,8 @@ from typing import Any
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem, problems, solution_dir
 from solver.shell import console, register
+from solver.shell import dialogue
+from solver.shell.dialogue import Abort, Choice, select
 
 FACETS = ('domain', 'technique', 'takeaway')
 _TAGS_RE = re.compile(r'<!--\s*tags:\s*\[(.*?)\]\s*-->', re.DOTALL)
@@ -246,8 +247,7 @@ def _problem_count(tag: dict[str, Any]) -> int:
     return len({r.split('_')[0] for r in tag.get('refs', [])})
 
 
-@register(requires='reader',
-          )
+@register(requires='reader')
 def tags(details: bool = False) -> int:
     """Report over the central tag vocabulary (`topics/tags.json`).
 
@@ -289,7 +289,7 @@ def tags(details: bool = False) -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(requires='reader', )
+@register(requires='reader')
 def topics(problem: Problem) -> int:
     """List a problem's tags and the topic articles that cover them.
 
@@ -322,7 +322,7 @@ def topics(problem: Problem) -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(requires='reader', )
+@register(requires='reader')
 def topic(name: str) -> int:
     """List a topic article's declared tags and what each one maps to.
 
@@ -664,8 +664,7 @@ def _load_index() -> dict[str, Any] | None:
         return None
 
 
-@register(requires='maintainer',
-          )
+@register(requires='maintainer')
 def update_tags(check: bool = False) -> int:
     """The glue for the double-entry tag graph.
 
@@ -717,7 +716,7 @@ def update_tags(check: bool = False) -> int:
     promoted, warnings = _promote_new_tags(central, ptags)
     _rebuild_refs(central, ptags)
     art_issues = _regen_articles(central, write=True)
-    index = _build_index(central)          # after the stamping above, so statuses are current
+    index = _build_index(central)  # after the stamping above, so statuses are current
 
     # Re-sort vocabulary (domain, technique, takeaway; by slug) and persist everything.
     order = {'domain': 0, 'technique': 1, 'takeaway': 2}
@@ -746,61 +745,19 @@ def update_tags(check: bool = False) -> int:
 _TOPIC_SEG_RE = re.compile(r'[a-z0-9][a-z0-9-]*')
 
 
-def _select_tags_interactively(vocab: list[dict[str, Any]]) -> list[str] | None:
-    """A line-based search-and-select over the tag vocabulary; the chosen slugs, or None to abort.
+def _select_tags_interactively(vocab: list[dict[str, Any]]) -> list[str]:
+    """The chosen tag slugs, picked by search-and-select over the vocabulary.
 
-    Line-based rather than a full-screen picker on purpose: it works identically in a terminal and
-    in the web PTY (both feed `console.input` over stdin), where a curses UI would not. Type a term
-    to search, a result's number to toggle it, `sel` to review, `done` to finish, `quit` to
-    abort.
+    A thin wrapper over `dialogue.select` — the shared multi-select, line-based on purpose so
+    it behaves identically in a terminal and in the web PTY. Raises `Abort` if the maintainer
+    quits, which leaves the topic uncreated.
     """
-    selected: list[str] = []
-    results: list[str] = []
-    console.print('[muted]search a term · number toggles it · [accent]sel[/accent] review · '
-                  '[accent]done[/accent] · [accent]quit[/accent][/muted]')
-    while True:
-        line = console.input('[accent]tag>[/accent] ').strip()
-        if not line:
-            continue
-        if line == 'quit':
-            return None
-        if line == 'done':
-            if not selected:
-                console.print('[warning]pick at least one tag, or [accent]quit[/accent][/warning]')
-                continue
-            return selected
-        if line == 'sel':
-            console.print('[accent]selected:[/accent] ' + (', '.join(selected) or '[muted]none[/muted]'))
-            continue
-        if line.isdigit():
-            i = int(line)
-            if not 0 <= i < len(results):
-                console.print('[warning]no result with that number — search first[/warning]')
-                continue
-            slug = results[i]
-            if slug in selected:
-                selected.remove(slug)
-                console.print(f'  [muted]removed[/muted] {slug}')
-            else:
-                selected.append(slug)
-                console.print(f'  [accent]added[/accent] {slug}')
-            continue
-        term = line.lower()
-        matches = [t for t in vocab if term in t['slug'] or term in t['name'].lower()]
-        results = [t['slug'] for t in matches[:20]]
-        if not matches:
-            console.print('[muted]no tags match[/muted]')
-            continue
-        for i, t in enumerate(matches[:20]):
-            mark = '[accent]✓[/accent]' if t['slug'] in selected else ' '
-            console.print(f'  [muted]{i:2}[/muted] {mark} {t["slug"]} '
-                          f'[muted]{t["facet"]} — {t["name"]}[/muted]')
-        if len(matches) > 20:
-            console.print(f'  [muted]… {len(matches) - 20} more — refine the search[/muted]')
+    return select('Which tags does it cover?',
+                  [Choice(tag['slug'], tag['slug'], f'{tag["facet"]} — {tag["name"]}')
+                   for tag in vocab])
 
 
-@register(requires='maintainer',
-          )
+@register(requires='maintainer')
 def create_topic(path: str, *tags: str) -> int:
     """Seed a curated cross-cutting topic page.
 
@@ -831,24 +788,18 @@ def create_topic(path: str, *tags: str) -> int:
     vocab = _load_central()['tags']
     known = {t['slug'] for t in vocab}
     if tags:
-        chosen = list(dict.fromkeys(tags))                 # de-dupe, keep order
+        chosen = list(dict.fromkeys(tags))  # de-dupe, keep order
         unknown = [t for t in chosen if t not in known]
         if unknown:
             console.print(f'[error]error:[/error] not in the vocabulary: {", ".join(unknown)}')
             return ExitCodes.EXIT_ERROR
     else:
-        if not sys.stdin.isatty():
-            console.print('[error]error:[/error] no tags given and not an interactive shell — '
-                          'pass the slugs as arguments (e.g. [accent]create-topic '
-                          f'{path} prime-number sieve-of-eratosthenes[/accent])')
-            return ExitCodes.EXIT_ERROR
-        console.print(f'[primary]New topic[/primary] [accent]{"/".join(segments)}[/accent] — '
-                      'choose the tags it covers.')
-        picked = _select_tags_interactively(vocab)
-        if picked is None:
-            console.print('[muted]aborted — nothing written[/muted]')
-            return ExitCodes.EXIT_OK
-        chosen = picked
+        if not dialogue.interactive():
+            raise Abort('no tags given and not an interactive shell — pass the slugs as '
+                        f'arguments, e.g. `create-topic {path} prime-number '
+                        'sieve-of-eratosthenes`', rc=ExitCodes.EXIT_USAGE)
+        console.print(f'[primary]New topic[/primary] [accent]{"/".join(segments)}[/accent]')
+        chosen = _select_tags_interactively(vocab)
 
     title = segments[-1].replace('-', ' ').title()
     from solver.templates.engine import Templates, get_template
@@ -859,6 +810,6 @@ def create_topic(path: str, *tags: str) -> int:
     target.write_text(body)
     console.print(f'[accent]created[/accent] {target.relative_to(config.topics_dir)} '
                   f'covering {len(chosen)} tag(s): {", ".join(chosen)}')
-    rc = update_tags()                                     # index it and fill its Problems section
+    rc = update_tags()  # index it and fill its Problems section
     console.print(f'[muted]write it with [accent]claude-blog {"/".join(segments)}[/accent][/muted]')
     return rc

@@ -42,7 +42,7 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
     }
 
 
-@register(requires='contributor', )
+@register(requires='contributor')
 def claude_api(problem: Problem,
                target: Literal['c', 'py', 'doc', 'notes', 'tags', 'test-cases'], *,
                force: bool = False,

@@ -23,8 +23,7 @@ from solver.utils.path_utils import canonical_path
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
 
-@register(requires='contributor',
-          aliases=('compile',), quietable=True)
+@register(requires='contributor', aliases=('compile',), quietable=True)
 def compile_c(problem: Problem, *, clean: bool = True) -> int:
     """Compile every C solution for the problem into a runnable binary.
 

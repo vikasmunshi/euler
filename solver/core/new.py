@@ -41,8 +41,7 @@ new_test_case: bytes = (
 )
 
 
-@register(requires='contributor',
-          quietable=True)
+@register(requires='contributor', quietable=True)
 def new(problem: Problem, py: bool = False, c: bool = False, tc: bool = False) -> int:
     """Generate new solution and/or test-case files for the problem.
 

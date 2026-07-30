@@ -109,7 +109,7 @@ def summary() -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(requires='reader', )
+@register(requires='reader')
 def progress() -> int:
     """Print overall progress through the Euler problems.
 
@@ -138,11 +138,7 @@ def progress() -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(
-    requires='contributor',
-    aliases=('mark-solved',),
-    quietable=True,
-)
+@register(requires='contributor', aliases=('mark-solved',), quietable=True)
 def mark(problem: Problem) -> int:
     """Mark the current problem as solved — once its results confirm it.
 

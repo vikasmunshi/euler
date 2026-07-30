@@ -36,6 +36,7 @@ from rich.text import Text
 from solver.config import ExitCodes
 from solver.core.problems import Problem, problems
 from solver.shell.command import Context, command
+from solver.shell.dialogue import Abort, Ask, Choice, choose, confirm, text
 from solver.shell.variables import variables
 
 
@@ -154,12 +155,15 @@ def _problem_completions(incomplete: str, *, prefix: str = '') -> list[Completio
     return candidates
 
 
-def _usage_from_signature(cmd_name: str, params: list[inspect.Parameter], quietable: bool) -> str:
+def _usage_from_signature(cmd_name: str, params: list[inspect.Parameter], quietable: bool,
+                          asks: Iterable[str] = ()) -> str:
     """Synthesize a usage string from the command name and its (ctx-dropped) params.
 
     Required parameters appear on the first line as `<name>`; optional ones (and the
     synthetic `--silent` for a quietable command) follow one per line as `[name=hint]`,
-    with bools rendered as their activating flag.
+    with bools rendered as their activating flag. A parameter the adapter may ask for is
+    marked `(asked)` rather than by its default, which is only what a non-interactive run
+    falls back to.
     """
 
     def _hint(ann: Any) -> str:
@@ -180,10 +184,14 @@ def _usage_from_signature(cmd_name: str, params: list[inspect.Parameter], quieta
             return str(value.value)
         return "''" if value == '' else str(value)
 
+    asked: frozenset[str] = frozenset(asks)
     required: list[str] = []
     optional: list[str] = []
     for p in params:
         nm = p.name
+        if nm in asked:
+            optional.append(f'[{nm}={_hint(p.annotation)}] (asked)')
+            continue
         if nm == 'problem' and _is_problem_annotation(p.annotation):
             # The `problem` special is always optional: it falls back to the
             # current problem when omitted (see `register`).
@@ -242,6 +250,30 @@ class _CommandSpec:
     problem_param: inspect.Parameter | None
     problem_positional: bool
     completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]]
+    #: Parameters the adapter may ask for, in signature order (developer-guide §3.11).
+    asks: dict[str, Ask]
+
+
+def _split_asks(params: list[inspect.Parameter]) -> tuple[list[inspect.Parameter], dict[str, Ask]]:
+    """Separate `Annotated[T, Ask(...)]` metadata from the parameters it decorates.
+
+    The `Ask` is lifted into its own table and the parameter is rewritten to its plain type,
+    so every other part of the adapter — coercion, flags, usage, completion, the problem
+    special — goes on seeing exactly what it saw before `Ask` existed. Only this function
+    knows about `Annotated`.
+    """
+    plain: list[inspect.Parameter] = []
+    asks: dict[str, Ask] = {}
+    for param in params:
+        metadata = getattr(param.annotation, '__metadata__', ())
+        ask = next((item for item in metadata if isinstance(item, Ask)), None)
+        if ask is not None:
+            asks[param.name] = ask
+        if metadata:
+            plain.append(param.replace(annotation=param.annotation.__origin__))
+        else:
+            plain.append(param)
+    return plain, asks
 
 
 def _build_bool_flags(params: list[inspect.Parameter], quietable: bool) -> dict[str, tuple[str, bool]]:
@@ -296,7 +328,7 @@ def _build_command_spec(
     """Introspect *func* and pre-compute everything the token-driven helpers need."""
     cmd_name: str = name or func.__name__.lstrip('_').replace('_', '-')
     signature: inspect.Signature = inspect.signature(func, eval_str=True)
-    params = list(signature.parameters.values())
+    params, asks = _split_asks(list(signature.parameters.values()))
     if pass_ctx:
         # The leading parameter receives the live Context, injected by the
         # adapter — it is not parsed from user tokens, so drop it from every
@@ -333,7 +365,7 @@ def _build_command_spec(
         func=func,
         name=name,
         cmd_name=cmd_name,
-        usage=_usage_from_signature(cmd_name, params, quietable),
+        usage=_usage_from_signature(cmd_name, params, quietable, asks),
         pass_ctx=pass_ctx,
         quietable=quietable,
         params=params,
@@ -344,6 +376,7 @@ def _build_command_spec(
         problem_param=problem_param,
         problem_positional=problem_positional,
         completers=completers or {},
+        asks=asks,
     )
 
 
@@ -456,6 +489,24 @@ def _print_arg_error(spec: _CommandSpec, ctx: Context, args: tuple[str, ...], ex
         ctx.console.print(usage_line)
 
 
+def _ask_completions(spec: _CommandSpec, ctx: Context, name: str, incomplete: str,
+                     *, prefix: str = '') -> list[Completion]:
+    """Tab-completions for an asked parameter, from the same `choices` its menu uses.
+
+    One declaration, both surfaces: `msg read <TAB>` offers the thread ids with their subjects
+    as display text because `Ask(choices=…)` said where the threads come from — nothing had to
+    be written twice, and the two can never disagree.
+    """
+    ask = spec.asks.get(name)
+    if ask is None or ask.choices is None:
+        return []
+    partial = incomplete[len(prefix):]
+    bound = _bind_known(spec, [tok for tok in ctx.argv if _is_positional_token(tok)], {})
+    return [Completion(prefix + choice.value, start_position=-len(incomplete),
+                       display=choice.text, display_meta=choice.description)
+            for choice in ask.choices(ctx, bound) if choice.value.startswith(partial)]
+
+
 def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str | Completion]:
     """Suggest completions for a `register()`-wrapped command.
 
@@ -476,6 +527,8 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
         # Special case: the `problem` special completes to problem numbers.
         if key == 'problem' and _is_problem_annotation(ann):
             return list(_problem_completions(incomplete, prefix=f'{key}='))
+        if asked := _ask_completions(spec, ctx, key, incomplete, prefix=f'{key}='):
+            return asked
         # A per-parameter dynamic completer (e.g. filenames) governs its value side too.
         if key in spec.completers:
             return [f'{key}={c}' for c in spec.completers[key](ctx, partial)
@@ -541,6 +594,8 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
             for v in typing.get_args(pos_param.annotation)
             if str(v).startswith(incomplete)
         )
+    if pos_param is not None:
+        candidates.extend(_ask_completions(spec, ctx, pos_param.name, incomplete))
     # A per-parameter dynamic completer for the positional slot (e.g. `edit`'s filename,
     # sourced from the current problem's solution directory — the `ls` file set).
     if pos_param is not None and pos_param.name in spec.completers:
@@ -580,6 +635,87 @@ def _strip_positional_problem(spec: _CommandSpec, args: tuple[str, ...]) -> tupl
     return args, None
 
 
+def _ask_choices(spec: _CommandSpec, ctx: Context, name: str, ask: Ask,
+                 bound: dict[str, Any]) -> list[Choice] | None:
+    """The options for an asked parameter, or None when it is free text.
+
+    A declared `choices` callable wins — it is the only thing that can enumerate a live set
+    (this user's message threads). Otherwise the options come from the annotation, so a
+    `Literal` or an enum needs no callable at all; `Ask.labels` adds the reading text a type
+    cannot carry.
+    """
+    if ask.choices is not None:
+        return list(ask.choices(ctx, bound))
+    annotation = spec.param_by_name[name].annotation
+    labels = ask.labels or {}
+    if typing.get_origin(annotation) is typing.Literal:
+        return [Choice(str(v), str(v), labels.get(str(v), '')) for v in typing.get_args(annotation)]
+    if isinstance(annotation, type) and issubclass(annotation, enum.Enum):
+        return [Choice(str(v.value), str(v.value), labels.get(str(v.value), '')) for v in annotation]
+    return None
+
+
+def _supplied_names(spec: _CommandSpec, pos_args: list[Any], kw_args: dict[str, Any]) -> set[str]:
+    """Which parameters the user actually answered on the command line."""
+    supplied: set[str] = set(kw_args)
+    for index in range(len(pos_args)):
+        if index < len(spec.positional_params):
+            supplied.add(spec.positional_params[index].name)
+    return supplied
+
+
+def _bind_known(spec: _CommandSpec, pos_args: list[Any], kw_args: dict[str, Any]) -> dict[str, Any]:
+    """Everything known so far — defaults, overlaid with what was typed.
+
+    Handed to `Ask.when` and `Ask.choices` so a question can depend on an earlier answer:
+    `msg` asks for a subject only for the outbound verbs, and offers only the key-carrying
+    threads when the verb is `save`.
+    """
+    bound: dict[str, Any] = {
+        p.name: (None if p.default is inspect.Parameter.empty else p.default)
+        for p in spec.params
+    }
+    for index, value in enumerate(pos_args):
+        if index < len(spec.positional_params):
+            bound[spec.positional_params[index].name] = value
+    bound.update(kw_args)
+    return bound
+
+
+def _ask_missing(spec: _CommandSpec, ctx: Context, pos_args: list[Any],
+                 kw_args: dict[str, Any]) -> None:
+    """Ask for the parameters the user left out, binding the answers into *kw_args*.
+
+    Only in an interactive shell: non-interactively every asked parameter keeps its default,
+    so a scripted `solver "msg"` behaves exactly as it did before it declared any `Ask`. The
+    questions are put in signature order, so a later `when` or `choices` sees the earlier
+    answers.
+    """
+    # The guard is called through the module, not bound at import: `dialogue.interactive` is
+    # the *one* seam every prompt in the shell goes through, and a by-value import here would
+    # quietly make a second one that tests and `--silent` could not reach.
+    from solver.shell import dialogue
+    if not spec.asks or not dialogue.interactive():
+        return
+    supplied = _supplied_names(spec, pos_args, kw_args)
+    bound = _bind_known(spec, pos_args, kw_args)
+    for name, ask in spec.asks.items():
+        if name in supplied or (ask.when is not None and not ask.when(bound)):
+            continue
+        param = spec.param_by_name[name]
+        question = ask.question or f'{name.replace("_", " ")}?'
+        options = _ask_choices(spec, ctx, name, ask, bound)
+        if param.annotation is bool:
+            answer: Any = confirm(question, default=param.default is True)
+        else:
+            default = '' if param.default in (inspect.Parameter.empty, None) else str(param.default)
+            raw = (choose(question, options, default=default, empty=ask.empty, strict=ask.strict)
+                   if options is not None
+                   else text(question, multiline=ask.multiline, secret_input=ask.secret))
+            answer = _coerce(raw, param.annotation)
+        kw_args[name] = bound[name] = answer
+
+
 def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int:
     """Parse *args*, invoke the wrapped function, and map outcomes to exit codes."""
     problem: Problem | None = None
@@ -590,6 +726,11 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
     except (ValueError, SyntaxError) as exc:
         _print_arg_error(spec, ctx, args, exc)
         return ExitCodes.EXIT_USAGE
+    try:
+        _ask_missing(spec, ctx, pos_args, kw_args)
+    except Abort as exc:
+        ctx.console.print(f'[muted]{exc.message}[/muted]')
+        return exc.rc
     if spec.problem_param is not None:
         # An explicit `problem=…` keyword (already coerced to a Problem) takes the
         # same path; reject supplying it both ways.
@@ -621,6 +762,11 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
             result = spec.func(*pos_args, **kw_args)
         finally:
             ctx.console.quiet = prev_quiet
+    except Abort as exc:
+        # A dialogue the user declined, quit, or could not be shown (`solver/shell/dialogue.py`).
+        # Its own exit code, and one line — an abort is an outcome, not a failure to report.
+        ctx.console.print(f'[muted]{exc.message}[/muted]')
+        return exc.rc
     except KeyboardInterrupt:
         ctx.console.print(f'[muted]{call_str}[/muted] [accent.dim]→[/accent.dim] interrupted')
         return ExitCodes.EXIT_ERROR
@@ -728,7 +874,7 @@ def register[**P](
 
         @command(name=name, usage=spec.usage, aliases=aliases, completer=_completer,
                  requires=requires, quietable=quietable,
-                 uses_problem=spec.problem_param is not None)
+                 uses_problem=spec.problem_param is not None, asks=bool(spec.asks))
         @wraps(func)
         def _adapter(ctx: Context, *args: str) -> int:
             return _run_command(spec, ctx, args)

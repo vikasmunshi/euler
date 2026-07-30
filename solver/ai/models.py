@@ -40,6 +40,8 @@ class Model(StrEnum):  # Available models (as of 29th July 2026; pricing from pl
             Model.CLAUDE_SONNET_5: Price(input=2.00, output=10.00),
             Model.CLAUDE_HAIKU_4_5: Price(input=1.00, output=5.00),
         }[self]
+
+
 # /GEN:models
 
 
@@ -101,7 +103,7 @@ def get_accumulated_charges() -> float:
                for model in consumed_tokens)
 
 
-@register(requires='contributor', )
+@register(requires='contributor')
 def costs(ecb_usd_rate: float = config.ecb_usd_rate) -> int:
     """Print what this session's AI tokens have cost, per model.
 

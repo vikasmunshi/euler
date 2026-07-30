@@ -33,6 +33,7 @@ solver.runners.runner,
 solver.shell.bash,True
 solver.shell.builtins,True
 solver.shell.command,
+solver.shell.dialogue,
 solver.shell.docstring,
 solver.shell.interpreter,
 solver.shell.lexer,

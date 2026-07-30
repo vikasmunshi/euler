@@ -208,8 +208,7 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
 # scripts/setup/egress.sh); the other half is the filesystem, and in a deployed instance the
 # package tree is root-owned, so a lesser rung would reach the network and then fail on the
 # write. The floor names who can actually complete the job.
-@register(requires='admin',
-          quietable=True)
+@register(requires='admin', quietable=True)
 def update_models(check: bool = False) -> int:
     """Refresh the model catalogue and the USD→EUR rate.
 

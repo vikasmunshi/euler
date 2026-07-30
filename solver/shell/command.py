@@ -85,6 +85,10 @@ class Command:
     #: help panel, the generated tables) needs the fact, and each wants to show it its own
     #: way, so styling it once at registration would only have to be undone.
     uses_problem: bool = False
+    #: Whether the command asks for arguments left out (developer-guide §3.11). Another fact
+    #: worth stating in the help: it tells a reader they can type the bare verb and be walked
+    #: through the rest.
+    asks: bool = False
 
     def invoke(self, ctx: Context) -> int:
         """Call the command's function with *ctx* and the parsed argv, returning its exit code."""
@@ -149,6 +153,7 @@ def command(
         requires: Literal['reader', 'contributor', 'maintainer', 'admin'],
         quietable: bool = False,
         uses_problem: bool = False,
+        asks: bool = False,
 ) -> Callable[[CommandFn], CommandFn]:
     """Decorator that registers *func* as a shell command (returned unchanged).
 
@@ -179,6 +184,7 @@ def command(
             requires=requires,
             quietable=quietable,
             uses_problem=uses_problem,
+            asks=asks,
         ))
         return func
 

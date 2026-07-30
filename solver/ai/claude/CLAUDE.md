@@ -157,6 +157,7 @@ solver/
     bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
     builtins.py       — Built-in framework commands for shell v2: echo, clear, help.
     command.py        — Command framework for shell v2: Context, Command, registry, and decorator.
+    dialogue.py       — Every question the shell asks: one interaction model, in one place.
     docstring.py      — Reading a command's docstring: the shape both `?` and `check-commands` rely on.
     interpreter.py    — Interpreter for shell v2: execute the parser's statements.
     lexer.py          — Lexer for shell v2: syntax-check a command block and normalise it.

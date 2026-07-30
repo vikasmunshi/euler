@@ -21,6 +21,7 @@ from solver.config import ExitCodes, config
 from solver.core import git
 from solver.crypto.config import config as crypto_config
 from solver.crypto.gitfilter import filter_settings
+from solver.shell import dialogue
 from solver.shell.command import registry
 from solver.utils.loader import load_commands
 from tests import silence
@@ -311,11 +312,16 @@ class GhPrTest(_GitCommandCase):
         git._open_prs = lambda: self.open_prs  # type: ignore[assignment]
         # Each prompt consumes the next queued keypress; an empty queue quits the walk.
         git.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
+        # `dialogue.interactive()` is the one seam every prompt goes through, and it is False
+        # under the runner (stdin is not a tty) — so a walk under test declares itself asked.
+        self._saved_interactive = dialogue.interactive
+        dialogue.interactive = lambda: True  # type: ignore[assignment]
 
     def tearDown(self) -> None:
         git._pr_files = self._saved_pr_files  # type: ignore[assignment]
         git._open_prs = self._saved_open_prs  # type: ignore[assignment]
         git.console.input = self._saved_input  # type: ignore[assignment]
+        dialogue.interactive = self._saved_interactive  # type: ignore[assignment]
         super().tearDown()
 
     def test_list_is_the_default_action(self) -> None:
@@ -393,11 +399,12 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, [])
 
     def test_quit_stops_the_walk_before_later_prs(self) -> None:
+        """And quitting a review is an abort, not a success: a chain gated on the walk stops."""
         self.as_profile('maintainer')
         self.open_prs = [{'number': 12, 'title': 'a', 'headRefName': 'user/x'},
                          {'number': 13, 'title': 'b', 'headRefName': 'user/y'}]
         self.answers = ['q']
-        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(git.gh_merge('merge'), ExitCodes.EXIT_ABORT)
         self.assertEqual(self.cmdlines, [])
 
     def test_no_open_prs_is_a_clean_noop(self) -> None:

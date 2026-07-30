@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 from solver.config import config
 from solver.core import tags
+from solver.shell import dialogue
 from tests import silence
 
 silence()
@@ -195,25 +196,28 @@ class SelectTagsInteractivelyTests(unittest.TestCase):
         {'slug': 'trial-division', 'facet': 'technique', 'name': 'Trial division'},
     ]
 
-    def _run(self, script: list[str]) -> list[str] | None:
+    def _run(self, script: list[str]) -> list[str]:
+        """Drive the select loop through the two seams every dialogue shares."""
         it = iter(script)
-        with patch.object(tags.console, 'input', lambda *a, **k: next(it)):
+        with (patch.object(tags.console, 'input', lambda *a, **k: next(it)),
+              patch.object(dialogue, 'interactive', lambda: True)):
             return tags._select_tags_interactively(self._VOCAB)
 
     def test_search_then_toggle_by_number_then_done(self) -> None:
-        # 'prime' matches prime-number at index 0; add it, finish
-        self.assertEqual(self._run(['prime', '0', 'done']), ['prime-number'])
+        # 'prime' matches prime-number, listed as 1 — the menus are 1-based throughout
+        self.assertEqual(self._run(['prime', '1', 'done']), ['prime-number'])
 
     def test_a_second_toggle_removes(self) -> None:
         # add then remove leaves nothing selected, so 'done' can't finish; add again and finish
-        self.assertEqual(self._run(['prime', '0', '0', 'prime', '0', 'done']), ['prime-number'])
+        self.assertEqual(self._run(['prime', '1', '1', 'prime', '1', 'done']), ['prime-number'])
 
     def test_quit_aborts(self) -> None:
-        self.assertIsNone(self._run(['prime', '0', 'quit']))
+        with self.assertRaises(dialogue.Abort):
+            self._run(['prime', '1', 'q'])
 
     def test_a_number_without_a_search_is_ignored(self) -> None:
-        # '0' before any search has no results to index; then a real pick finishes
-        self.assertEqual(self._run(['5', 'trial', '0', 'done']), ['trial-division'])
+        # '1' before any search has no results to index; then a real pick finishes
+        self.assertEqual(self._run(['1', 'trial', '1', 'done']), ['trial-division'])
 
 
 class CreateTopicTests(unittest.TestCase):
@@ -267,8 +271,9 @@ class CreateTopicTests(unittest.TestCase):
         self.assertIn('[prime-number]', self._page('number-theory/primes').read_text())
 
     def test_non_interactive_without_tags_is_an_error(self) -> None:
-        with patch.object(tags.sys.stdin, 'isatty', lambda: False):
-            self.assertNotEqual(tags.create_topic('number-theory/primes'), 0)
+        with patch.object(dialogue, 'interactive', lambda: False):
+            with self.assertRaises(dialogue.Abort):
+                tags.create_topic('number-theory/primes')
         self.assertFalse(self._page('number-theory/primes').exists())
 
 

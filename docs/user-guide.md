@@ -245,7 +245,7 @@ help:
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
 | [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: your threads, questions to staff, staff notices. |
 | [`new`](commands-index.md#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
-| [`pause`](commands-index.md#command-pause) | — | `reader` | Pause the program execution until the user presses Enter. |
+| [`pause`](commands-index.md#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
 | [`problems`](commands-index.md#command-problems) | — | `reader` | Print a list of problems and their count. |
 | [`progress`](commands-index.md#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
