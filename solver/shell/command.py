@@ -8,8 +8,10 @@ followed by its parsed argv tokens, and returning an `int` exit code.
 """
 from __future__ import annotations
 
-__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_permitted', 'registry']
+__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_permitted', 'registry',
+           'summary_of']
 
+import inspect
 from dataclasses import dataclass, field
 from typing import Any, Callable, Iterable, Literal
 
@@ -51,6 +53,16 @@ class Context:
 CommandFn = Callable[..., int]
 
 
+def summary_of(func: Callable[..., Any]) -> str:
+    """The one-line description of *func*: its docstring's summary line, or ''.
+
+    The single source of a command's description. `@register`'s adapter carries the wrapped
+    function's docstring (`functools.wraps`), so this reads the same text whichever decorator
+    registered the command — and the same text `update-docs` publishes.
+    """
+    return (inspect.getdoc(func) or '').splitlines()[0].strip() if func.__doc__ else ''
+
+
 @dataclass
 class Command:
     """A registered shell command, keyed by name (and optional aliases)."""
@@ -63,6 +75,16 @@ class Command:
     #: The minimum profile this command needs. Mandatory on the decorator, so a
     #: command can never be silently exposed by omitting its floor.
     requires: str = ''
+    #: Whether the adapter synthesized a `--silent` flag for this command. Recorded here
+    #: because it is a *typed* argument that no signature and no docstring can show: `?`
+    #: needs it to list `silent` among the arguments (see `builtins._arguments`).
+    quietable: bool = False
+    #: Whether the command takes the problem special — an argument the user may give as a
+    #: bare number or omit to inherit the current problem. A **fact about the command**, kept
+    #: as a flag rather than decorated into `help`: every view of it (the `?` catalogue, the
+    #: help panel, the generated tables) needs the fact, and each wants to show it its own
+    #: way, so styling it once at registration would only have to be undone.
+    uses_problem: bool = False
 
     def invoke(self, ctx: Context) -> int:
         """Call the command's function with *ctx* and the parsed argv, returning its exit code."""
@@ -121,16 +143,21 @@ registry = CommandRegistry()
 def command(
         name: str | None = None,
         *,
-        help_text: str = '',
         usage: str = '',
         aliases: tuple[str, ...] = (),
         completer: Callable[[Context, str], Iterable[str | Completion]] | None = None,
         requires: Literal['reader', 'contributor', 'maintainer', 'admin'],
+        quietable: bool = False,
+        uses_problem: bool = False,
 ) -> Callable[[CommandFn], CommandFn]:
     """Decorator that registers *func* as a shell command (returned unchanged).
 
-    ``requires`` is the **minimum profile** the command needs
-    (``'reader'``/``'contributor'``/``'maintainer'``/``'admin'``) and is **mandatory**:
+    The command's one-line description is the **docstring's summary line** — there is no
+    `help_text` to pass and so no second summary to fall out of step with it
+    (`docs/developer-guide.md` §3.8).
+
+    `requires` is the **minimum profile** the command needs
+    (`'reader'`/`'contributor'`/`'maintainer'`/`'admin'`) and is **mandatory**:
     omitting it is a type error, so a command can never be exposed by forgetting to
     declare its floor. The command registers only if the current subject's profile is at
     or above that floor — otherwise it is left unregistered (invisible to help/completion,
@@ -142,17 +169,16 @@ def command(
         cmd_name = name or func.__name__.lstrip('_').replace('_', '-')
         if not is_permitted(requires):
             return func
-        cmd_help = help_text
-        if not cmd_help and func.__doc__:
-            cmd_help = func.__doc__.strip().splitlines()[0]
         registry.register(Command(
             name=cmd_name,
             func=func,
-            help=cmd_help,
+            help=summary_of(func),
             usage=usage,
             aliases=tuple(aliases),
             completer=completer,
             requires=requires,
+            quietable=quietable,
+            uses_problem=uses_problem,
         ))
         return func
 

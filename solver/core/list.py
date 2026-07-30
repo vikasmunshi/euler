@@ -12,14 +12,17 @@ from solver.shell import console, register
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
-@register(requires='reader', help_text='List the solutions dir for given/current problem.', quietable=True)
+@register(requires='reader', quietable=True)
 def ls(problem: Problem) -> int:
-    """This function lists all files found recursively in the solution directory of a
-    given problem while displaying their canonical paths and file sizes. The files
-    are shown in sorted order for easy navigation.
+    """List the files in a problem's solution directory.
+
+    Walks the directory recursively and prints each file's canonical path, size, modified
+    time and MIME type, sorted by path; a solution file (`pNNNN_sK.*`) is flagged with a
+    trailing `*`. Files with no extension are skipped. Fails when the directory holds
+    nothing to list.
 
     Args:
-        problem (Problem): The problem instance containing the solution directory.
+        problem: [problem] The problem whose solution directory to list.
     """
     solution_prefix: str = f'p{problem.number:04d}_s'
     files: list[tuple[str, int, float, str, bool]] = [

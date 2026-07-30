@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Pending invite / reset store at ``<state>/pending.json``.
+"""Pending invite / reset store at `<state>/pending.json`.
 
 One record per in-flight registration or password reset, keyed by the **hash**
 of the emailed link token (the token itself is never stored or logged). The
@@ -12,7 +12,7 @@ record walks the registration state machine::
 
 The link token (32 bytes, 7-day TTL, single-use) proves possession of the
 invite; the OTP (6 digits, 10-minute TTL, 5 tries) proves *live* control of the
-mailbox at completion time. Expired records sweep on every access; ``consume``
+mailbox at completion time. Expired records sweep on every access; `consume`
 deletes the record so a link can complete a registration exactly once.
 """
 from __future__ import annotations
@@ -31,7 +31,7 @@ from solver.web.auth.users import normalize_email
 
 
 def generate_token() -> str:
-    """Return a fresh URL-safe link token (``LINK_TOKEN_BYTES`` of entropy)."""
+    """Return a fresh URL-safe link token (`LINK_TOKEN_BYTES` of entropy)."""
     return secrets.token_urlsafe(policy.LINK_TOKEN_BYTES)
 
 
@@ -41,7 +41,7 @@ def hash_token(token: str) -> str:
 
 
 def _generate_otp() -> str:
-    """Return a fresh zero-padded numeric OTP of ``OTP_DIGITS`` digits."""
+    """Return a fresh zero-padded numeric OTP of `OTP_DIGITS` digits."""
     return str(secrets.randbelow(10 ** policy.OTP_DIGITS)).zfill(policy.OTP_DIGITS)
 
 
@@ -120,8 +120,8 @@ class PendingStore:
     def issue_otp(self, token: str) -> str | None:
         """Mint and store (hashed) a fresh OTP for the record; None if not allowed.
 
-        Allowed from any pre-``verified`` state while under the send cap; resets the
-        attempt counter and moves the record to ``otp_sent``.
+        Allowed from any pre-`verified` state while under the send cap; resets the
+        attempt counter and moves the record to `otp_sent`.
         """
         records = self._load()
         raw = records.get(hash_token(token))
@@ -139,9 +139,9 @@ class PendingStore:
         return otp
 
     def verify_otp(self, token: str, otp: str) -> bool:
-        """Check the OTP; on success the record becomes ``verified``.
+        """Check the OTP; on success the record becomes `verified`.
 
-        A wrong try increments the attempt counter; ``OTP_MAX_ATTEMPTS`` failures
+        A wrong try increments the attempt counter; `OTP_MAX_ATTEMPTS` failures
         (or expiry) invalidate the OTP — a fresh one must be requested.
         """
         records = self._load()
@@ -163,7 +163,7 @@ class PendingStore:
         return ok
 
     def consume(self, token: str) -> PendingRecord | None:
-        """Pop and return the record iff it is ``verified`` (single-use completion)."""
+        """Pop and return the record iff it is `verified` (single-use completion)."""
         records = self._load()
         key = hash_token(token)
         raw = records.get(key)

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """Utility for loading command modules.
 
-``modules.csv`` is a pure **loader manifest**: two columns
-``(module, registers_commands)``. Every command-registering module is imported;
+`modules.csv` is a pure **loader manifest**: two columns
+`(module, registers_commands)`. Every command-registering module is imported;
 which of its commands actually **register** is decided per-command by the
-``@register``/``@command`` decorator against the current subject's channel and
+`@register`/`@command` decorator against the current subject's channel and
 permissions — channel/profile gating no longer lives here.
 """
 from __future__ import annotations
@@ -25,10 +25,10 @@ _commands_loaded = False
 
 
 def update_modules() -> bool:
-    """Regenerate ``modules.csv`` by scanning the package; True if the set changed.
+    """Regenerate `modules.csv` by scanning the package; True if the set changed.
 
-    Each non-underscore ``.py`` module under the registry directory gets a row
-    recording whether it registers commands (an ``@register``/``@command``
+    Each non-underscore `.py` module under the registry directory gets a row
+    recording whether it registers commands (an `@register`/`@command`
     decorator). Rows for deleted modules are dropped, new modules added.
     """
     registers_re = re.compile(r'^@(?:register|command)\(', re.MULTILINE)
@@ -57,7 +57,7 @@ def load_commands(refresh_modules: bool = False) -> None:
     """Import every command-registering module (once), populating the registry.
 
     All such modules are imported; per-command channel/permission gating happens
-    in the decorator against ``config.subject``.
+    in the decorator against `config.subject`.
     """
     global _commands_loaded
     if _commands_loaded and not refresh_modules:

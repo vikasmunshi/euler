@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 """The one-time shell ticket — the masquerade guard for the web shell.
 
-Every web shell runs as the shared ``euler-ws-<profile>`` uid and
-``/proc/<pid>/environ`` is same-uid-readable, so nothing carried in the
+Every web shell runs as the shared `euler-ws-<profile>` uid and
+`/proc/<pid>/environ` is same-uid-readable, so nothing carried in the
 environment can be a reusable credential. Identity therefore transfers by a
 **consumable** ticket: minted against a live session, redeemed once at fork.
 This pins the properties the masquerade story rests on — single-use (a replay
 from a sibling shell's environ is dead on arrival), time-boxed, and bound to
 the exact identity it was minted for. The kernel-side guards (a service uid with
 no ticket aborts; a ticket whose profile ≠ the instance pin aborts) live in
-``test_auth_kernel``; the app-side refusals in ``test_ws``."""
+`test_auth_kernel`; the app-side refusals in `test_ws`."""
 from __future__ import annotations
 
 import unittest

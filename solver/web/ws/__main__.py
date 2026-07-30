@@ -1,14 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Web-shell service entry point: ``python -m solver.web.ws``.
+"""Web-shell service entry point: `python -m solver.web.ws`.
 
-Run by ``euler-ws@<profile>.service`` as the per-profile ``euler-ws-<profile>``
-uid from the ``/opt/euler`` system venv, configured entirely by the environment.
-Binds the public unix socket (``/run/euler/ws-<profile>.sock``, group
-``euler-web`` — Caddy's upstream) and serves until SIGTERM.
+Run by `euler-ws@<profile>.service` as the per-profile `euler-ws-<profile>`
+uid from the `/opt/euler` system venv, configured entirely by the environment.
+Binds the public unix socket (`/run/euler/ws-<profile>.sock`, group
+`euler-web` — Caddy's upstream) and serves until SIGTERM.
 
 For local testing, bind a TCP port (the fake-auth harness in
-``tests/test_ws.py`` covers the full attach path without a deployed stack)::
+`tests/test_ws.py` covers the full attach path without a deployed stack)::
 
     EULER_WS_TCP=127.0.0.1:8082 EULER_PROFILE=contributor \\
     EULER_AUTH_SOCKET=/tmp/dev-auth.sock python -m solver.web.ws

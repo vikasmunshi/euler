@@ -3,9 +3,9 @@
 """Outbound mail via the loopback relay.
 
 The auth service holds **no** SMTP credentials: it submits over plain loopback
-SMTP to the ``euler-smtp`` relay (``EULER_SMTP_RELAY``), which is the sole
+SMTP to the `euler-smtp` relay (`EULER_SMTP_RELAY`), which is the sole
 holder of the Gmail app password and the sole uid the egress firewall permits
-on ``:587``. The relay forces the envelope sender, so this client only authors
+on `:587`. The relay forces the envelope sender, so this client only authors
 headers and body.
 
 Never log message bodies here — they carry invite links and OTPs.

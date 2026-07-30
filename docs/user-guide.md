@@ -196,72 +196,76 @@ trailing `… || break`) control iteration; loops do not nest.
 
 Type `?` in the shell for this list, or `? <cmd>` for one command's usage. Each
 command name below links to its full entry — usage and description — in the
-[Command Index](commands-index.md). The legend glyphs appear in a command's help:
+[Command Index](commands-index.md). **Requires** is the least profile that may run the
+command; every rung above it may too, and below it the command is not registered at all,
+so it does not appear in your own `?` listing. The legend glyphs appear in a command's
+help:
 
 - `❏` — takes an optional problem number (defaults to the current problem).
 - `»` — supports `--silent` to suppress its incidental output.
 
 <!-- GEN:command-table -->
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command. |
-| [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
-| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. ❏ |
-| [`claude-batch`](commands-index.md#command-claude-batch) | — | Generate tags.json for many problems in one Message Batches job. |
-| [`claude-blog`](commands-index.md#command-claude-blog) | — | Launch the Claude Euler Blogger skill to write a topic article for a tag/topic. |
-| [`claude-solve`](commands-index.md#command-claude-solve) | — | Launch the Claude Euler Solver skill. ❏ |
-| [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
-| [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
-| [`create-topic`](commands-index.md#command-create-topic) | — | Create a curated topic page, choosing its tags interactively. |
-| [`echo`](commands-index.md#command-echo) | — | Print text. |
-| [`edit`](commands-index.md#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
-| [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
-| [`gh-merge`](commands-index.md#command-gh-merge-merge) | `merge` | Content pull requests: list | merge (walk the queue). » |
-| [`gh-merge-docs`](commands-index.md#command-gh-merge-docs-merge-docs) | `merge-docs` | Walk the open pull requests and merge one confined to the docs set. » |
-| [`git-audit`](commands-index.md#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
-| [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
-| [`git-commit-amend`](commands-index.md#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
-| [`git-commit-docs`](commands-index.md#command-git-commit-docs-commit-docs) | `commit-docs` | Commit the docs set: everything update-docs, update-models and update-tags write. » |
-| [`git-filter`](commands-index.md#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
-| [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
-| [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
-| [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
-| [`git-push`](commands-index.md#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
-| [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | Un-commit local commits back to origin/master, keeping the changes staged. » |
-| [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
-| [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares. |
-| [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
-| [`key-split`](commands-index.md#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
-| [`lint`](commands-index.md#command-lint) | — | Lint current problem, auto-fix with --auto-fix. ❏ » |
-| [`ls`](commands-index.md#command-ls) | — | List the solutions dir for given/current problem. ❏ » |
-| [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. ❏ » |
-| [`msg`](commands-index.md#command-msg-messages) | `messages` | Read and send messages: your threads, questions to staff, staff notices. |
-| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file for a problem. ❏ » |
-| [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
-| [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
-| [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved). |
-| [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
-| [`results`](commands-index.md#command-results) | — | list the results for the problem. ❏ |
-| [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
-| [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem/file in a browser or the web viewer panel. ❏ » |
-| [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
-| [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
-| [`tags`](commands-index.md#command-tags) | — | Summary (tags per facet) or a problems-per-tag histogram of the vocabulary. |
-| [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. ❏ |
-| [`topic`](commands-index.md#command-topic) | — | Show a topic article's tags and the problems/solutions they map to. |
-| [`topics`](commands-index.md#command-topics) | — | Show the tags on a problem and the topics that cover them. ❏ |
-| [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
-| [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
-| [`update-tags`](commands-index.md#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
-| [`user`](commands-index.md#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
-| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Issue the master key to a public key, or work a key request by message id. |
-| [`users`](commands-index.md#command-users) | — | Administer accounts, invite requests and enc-key entries (via sudo admin CLI). |
-| [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
-| [`version`](commands-index.md#command-version) | — | Show the running solver build version. |
+| Command | Aliases | Requires | Description |
+|---------|---------|----------|-------------|
+| [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
+| [`?`](commands-index.md#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
+| [`benchmark`](commands-index.md#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. ❏ » |
+| [`check-commands`](commands-index.md#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. » |
+| [`claude-api`](commands-index.md#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. ❏ |
+| [`claude-batch`](commands-index.md#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
+| [`claude-blog`](commands-index.md#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
+| [`claude-solve`](commands-index.md#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. ❏ |
+| [`clear`](commands-index.md#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
+| [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. ❏ » |
+| [`costs`](commands-index.md#command-costs) | — | `contributor` | Print what this session's AI tokens have cost, per model. |
+| [`create-topic`](commands-index.md#command-create-topic) | — | `maintainer` | Seed a curated cross-cutting topic page. |
+| [`echo`](commands-index.md#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
+| [`edit`](commands-index.md#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. ❏ » |
+| [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. ❏ |
+| [`gh-merge`](commands-index.md#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or walk them one at a time to rebase-merge. » |
+| [`gh-merge-docs`](commands-index.md#command-gh-merge-docs-merge-docs) | `merge-docs` | `maintainer` | Walk the open pull requests, rebase-merging those that touch only the docs set. » |
+| [`git-audit`](commands-index.md#command-git-audit-audit) | `audit` | `contributor` | Audit what git actually stores, across the whole tracked tree. » |
+| [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the problem's solution directory. ❏ » |
+| [`git-commit-amend`](commands-index.md#command-git-commit-amend-amend) | `amend` | `contributor` | Fold this problem's current changes into the last commit, message unchanged. ❏ » |
+| [`git-commit-docs`](commands-index.md#command-git-commit-docs-commit-docs) | `commit-docs` | `contributor` | Stage and commit the documentation set — and nothing else. » |
+| [`git-filter`](commands-index.md#command-git-filter-filter) | `filter` | `reader` | Report or wire the transparent encryption filter for `solutions/private`. |
+| [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | `contributor` | Run the git pre-commit and (simulated) pre-push checks on demand. » |
+| [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | `contributor` | Configure your git identity and push credential from your GitHub login. |
+| [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | `maintainer` | Publish changed files for named targets to the remote repository. » |
+| [`git-push`](commands-index.md#command-git-push-push) | `push` | `contributor` | Push the current branch to origin as yourself, then open its pull request. » |
+| [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | `contributor` | Soft-reset your branch to origin/master — un-commit, keep every change. » |
+| [`git-status`](commands-index.md#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
+| [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
+| [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
+| [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
+| [`key-split`](commands-index.md#command-key-split) | — | `admin` | Print Shamir shares of the current master key. |
+| [`lint`](commands-index.md#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. ❏ » |
+| [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. ❏ » |
+| [`manage-config`](commands-index.md#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
+| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
+| [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: your threads, questions to staff, staff notices. |
+| [`new`](commands-index.md#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
+| [`pause`](commands-index.md#command-pause) | — | `reader` | Pause the program execution until the user presses Enter. |
+| [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
+| [`problems`](commands-index.md#command-problems) | — | `reader` | Print a list of problems and their count. |
+| [`progress`](commands-index.md#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
+| [`results`](commands-index.md#command-results) | — | `reader` | List the recorded results for a problem. ❏ |
+| [`search`](commands-index.md#command-search-find) | `find` | `reader` | Search the solution stack for a case-insensitive regular expression. |
+| [`show`](commands-index.md#command-show-open-view) | `open`, `view` | `reader` | Open a problem's documentation page, in a browser or the web viewer panel. ❏ » |
+| [`summary`](commands-index.md#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. » |
+| [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
+| [`tags`](commands-index.md#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
+| [`test-cases`](commands-index.md#command-test-cases) | — | `reader` | List a problem's test cases. ❏ |
+| [`topic`](commands-index.md#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
+| [`topics`](commands-index.md#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. ❏ |
+| [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. » |
+| [`update-models`](commands-index.md#command-update-models) | — | `admin` | Refresh the model catalogue and the USD→EUR rate. » |
+| [`update-tags`](commands-index.md#command-update-tags) | — | `maintainer` | The glue for the double-entry tag graph. |
+| [`user`](commands-index.md#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
+| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
+| [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
+| [`vault`](commands-index.md#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
+| [`version`](commands-index.md#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-table -->

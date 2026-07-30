@@ -1,18 +1,18 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The admin-plane CLI: run **under sudo** by the ``users`` shell command.
+"""The admin-plane CLI: run **under sudo** by the `users` shell command.
 
 The admin plane is gated by **wheel/sudo**, not a bespoke group. Running as root
-(via ``sudo``) this CLI does two things the operator's ordinary uid cannot:
+(via `sudo`) this CLI does two things the operator's ordinary uid cannot:
 
-- **writes the authorization system of record** — ``/etc/euler/authorizations.json``
-  (``root:root 0644``) — for profile assignment (``add`` / ``change`` / the map side
-  of ``remove``);
-- **reaches the euler-auth admin socket** (``0600``, token in root-readable
-  ``/etc/euler/auth.env``) for SRP operations — minting invites, enable / disable /
+- **writes the authorization system of record** — `/etc/euler/authorizations.json`
+  (`root:root 0644`) — for profile assignment (`add` / `change` / the map side
+  of `remove`);
+- **reaches the euler-auth admin socket** (`0600`, token in root-readable
+  `/etc/euler/auth.env`) for SRP operations — minting invites, enable / disable /
   remove, session revocation, and the full roster listing.
 
-Identity is a **web email** (``@``) or a **local OS login** (bare). A bare name gets
+Identity is a **web email** (`@`) or a **local OS login** (bare). A bare name gets
 a direct map entry (no invite, no SRP record — a local login authenticates by being
 that OS user); an email additionally mints an emailed invite / drives SRP state.
 
@@ -21,9 +21,9 @@ Invocation (see :mod:`solver.web.auth.commands` for the shell wrapper)::
     sudo <venv-python> -m solver.web.auth.admin \
         <list|add|change|enable|disable|remove|requests-json|dismiss> [identity] [profile]
 
-``list`` now folds in the invite-request queue (the login page's "Request an
-invite" form). ``requests-json`` dumps that queue as JSON for the interactive
-``users process-requests`` orchestrator, and ``dismiss <email>`` drops one — both
+`list` now folds in the invite-request queue (the login page's "Request an
+invite" form). `requests-json` dumps that queue as JSON for the interactive
+`users process-requests` orchestrator, and `dismiss <email>` drops one — both
 reach the same admin socket; the queue itself is a euler-auth-private store, never
 the SoR.
 """
@@ -103,10 +103,10 @@ def _api(method: str, path: str, *, body: dict[str, Any] | None = None,
 # ── dispatch ────────────────────────────────────────────────────────────────────────
 
 def _public_key_of(slug: str) -> str:
-    """The public key in *slug*'s own enc-key file, or ``''`` when there is not exactly one.
+    """The public key in *slug*'s own enc-key file, or `''` when there is not exactly one.
 
-    Their file holds two records — ``verify`` and the master key wrapped to their public key
-    — so the entry that is not ``verify`` *is* the key. No unwrapping, no private key, no
+    Their file holds two records — `verify` and the master key wrapped to their public key
+    — so the entry that is not `verify` *is* the key. No unwrapping, no private key, no
     master key: this reads a name, not a secret.
 
     It is the only place the key can be read from. `~/.euler/id` would be authoritative but is
@@ -294,8 +294,8 @@ def _print_listing(data: dict[str, Any]) -> None:
 def _print_requests(data: dict[str, Any]) -> None:
     """Render the invite-request queue — prospective collaborators from the public form.
 
-    Printed as its own section under ``users list``; work through it with
-    ``users process-requests``.
+    Printed as its own section under `users list`; work through it with
+    `users process-requests`.
     """
     requests = data.get('requests', [])
     print(f'\ninvite requests ({len(requests)}) — process with `users process-requests`:')

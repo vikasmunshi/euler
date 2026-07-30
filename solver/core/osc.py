@@ -4,22 +4,22 @@
 
 A **web** shell runs on a PTY whose bytes are a WebSocket away from the page that
 frames it (:mod:`solver.web.ws`), so a command can speak to the browser chrome by
-writing a control sequence into its own stdout: ``ESC ] 5379 ; <payload> BEL``.
-The counterpart is ``solver/web/content/assets/terminal.js``'s
-``registerOscHandler(5379, …)``, which parses the payload and asks its parent page
+writing a control sequence into its own stdout: `ESC ] 5379 ; <payload> BEL`.
+The counterpart is `solver/web/content/assets/terminal.js`'s
+`registerOscHandler(5379, …)`, which parses the payload and asks its parent page
 to act — the shell drives the chrome, never the other way round.
 
 The payloads, one per action — the first field is always the action, and every
 payload carries a *token* (:func:`token`):
 
-- ``open;<NNNN>;<token>`` — show problem *NNNN* in the left pane.
-- ``edit;<NNNN>;<token>;<relpath>`` — open *relpath* in the pane's editor. The
-  token sits *before* the path because a relpath may itself contain ``;``: it is
+- `open;<NNNN>;<token>` — show problem *NNNN* in the left pane.
+- `edit;<NNNN>;<token>;<relpath>` — open *relpath* in the pane's editor. The
+  token sits *before* the path because a relpath may itself contain `;`: it is
   the one field that must stay last and be rejoined by the reader.
-- ``git;<token>`` — this clone's git state changed; re-read the header's chip.
-- ``msg;<token>`` — this user's mailbox changed (they read, sent, replied or dismissed);
+- `git;<token>` — this clone's git state changed; re-read the header's chip.
+- `msg;<token>` — this user's mailbox changed (they read, sent, replied or dismissed);
   re-read the header's message chip.
-- ``account;<token>`` — this user's account state changed (a new identity, a GitHub
+- `account;<token>` — this user's account state changed (a new identity, a GitHub
   sign-in); re-read the account page — *if it is the visible pane*.
 
 The token is a server-side millisecond clock, strictly increasing per command. On
@@ -48,7 +48,7 @@ OSC_CODE: int = 5379
 def token() -> int:
     """A strictly increasing per-command stamp: the wall clock in milliseconds.
 
-    Exposed because the token's *position* is part of each payload's shape (``edit``
+    Exposed because the token's *position* is part of each payload's shape (`edit`
     keeps its relpath last), so the caller places it — but no caller invents its own
     clock.
     """
@@ -56,7 +56,7 @@ def token() -> int:
 
 
 def emit(action: str, *fields: str) -> None:
-    """Write ``ESC ] 5379 ; <action> ; <fields…> BEL`` to stdout — web channel only.
+    """Write `ESC ] 5379 ; <action> ; <fields…> BEL` to stdout — web channel only.
 
     A no-op off the web channel: a terminal shell's stdout is a real terminal, and an
     escape sequence no one is listening for would just be noise in it. Callers
@@ -76,10 +76,10 @@ def git_changed() -> None:
     that can change what the chip shows — a commit, a sync, a push, a wired filter.
     The header reads its state once per navigation and never polls, so without this
     the chip would be at its most wrong exactly after the user acted. It is only a
-    *nudge*: the browser answers by re-reading ``/git``, so a lost or replayed
+    *nudge*: the browser answers by re-reading `/git`, so a lost or replayed
     sequence costs at most a stale chip until the next navigation, never a wrong one.
 
-    Because this rides the shell's own stdout, it fires for a hand-typed ``git-sync``
+    Because this rides the shell's own stdout, it fires for a hand-typed `git-sync`
     exactly as it does for the header menu's item — the menu types the same command,
     so there is one path, not two.
     """
@@ -89,7 +89,7 @@ def git_changed() -> None:
 def messages_changed() -> None:
     """Tell the page this user's mailbox moved: the header re-reads its message chip.
 
-    Emitted by the ``msg`` command on every path that changes what the chip shows —
+    Emitted by the `msg` command on every path that changes what the chip shows —
     reading a thread (the unread count drops), sending, replying, dismissing.
 
     This is the **shell's** half of a two-sided nudge, and the distinction matters. When
@@ -98,7 +98,7 @@ def messages_changed() -> None:
     could not have known, because someone else acted. When the user *reads* one, the act
     happened in their own shell — no service saw it, and a round trip out to the spool and
     back to say so would be inventing a second mechanism for something stdout already
-    carries. Both land on the same ``euler:message`` body event, so the chip has one
+    carries. Both land on the same `euler:message` body event, so the chip has one
     listener and does not care which side moved.
 
     Without it the chip is at its most wrong exactly after the user acted: they read the
@@ -111,8 +111,8 @@ def account_changed() -> None:
     """Tell the page this user's account state moved: refresh the account panel.
 
     Emitted by the commands that change what the account page shows about *you* — a
-    new key pair (``user``), a GitHub sign-in (``git-identity``). The nudge reaches
-    the page the same way ``git;`` does; the difference is on the browser side, where
+    new key pair (`user`), a GitHub sign-in (`git-identity`). The nudge reaches
+    the page the same way `git;` does; the difference is on the browser side, where
     the listening element lives **inside** the account fragment, so it re-reads only
     when the account page is the visible pane and is a no-op otherwise (web-server-guide
     § The site). The chip's own git state is a separate concern: `git-sync` /

@@ -7,23 +7,23 @@ Both the X25519 private key (`~/.euler/id`) and the project env (`~/.euler/env`)
 **encrypted** rather than plain. The scheme is standard envelope encryption (see
 `docs/web-server-guide.md` § The vault):
 
-- a random 32-byte **vault key** ``VK`` encrypts the secrets (AES-256-GCM, random nonce per blob);
-- ``VK`` is stored **wrapped** under ``PK = PBKDF2(password, salt)`` in ``~/.euler/vault`` -- so at
-  rest the operator holds only ``{salt, wrap(PK, VK)}`` and the ``VK``-ciphertext, and can decrypt
-  none of it without the password. Changing the password re-wraps only the tiny ``VK`` blob; the
+- a random 32-byte **vault key** `VK` encrypts the secrets (AES-256-GCM, random nonce per blob);
+- `VK` is stored **wrapped** under `PK = PBKDF2(password, salt)` in `~/.euler/vault` -- so at
+  rest the operator holds only `{salt, wrap(PK, VK)}` and the `VK`-ciphertext, and can decrypt
+  none of it without the password. Changing the password re-wraps only the tiny `VK` blob; the
   secrets are never re-encrypted.
 
-``PK`` is derived with **PBKDF2-HMAC-SHA256** (not scrypt) on purpose: WebCrypto exposes PBKDF2
-natively, so the browser can derive the identical ``PK`` from the password it already holds and the
+`PK` is derived with **PBKDF2-HMAC-SHA256** (not scrypt) on purpose: WebCrypto exposes PBKDF2
+natively, so the browser can derive the identical `PK` from the password it already holds and the
 salt it gets in the SRP challenge, with no bundled KDF and no extra round-trip.
 
-**Key delivery.** The code that needs ``VK`` -- :func:`~solver.crypto.ciphers.load_private_key` and
-the git clean/smudge filter -- runs as *subprocesses*, so ``VK`` cannot live only in the interactive
-shell. It lives in a **uid-private tmpfs file** whose path is exported as ``EULER_VAULT_KEY_FILE``
+**Key delivery.** The code that needs `VK` -- :func:`~solver.crypto.ciphers.load_private_key` and
+the git clean/smudge filter -- runs as *subprocesses*, so `VK` cannot live only in the interactive
+shell. It lives in a **uid-private tmpfs file** whose path is exported as `EULER_VAULT_KEY_FILE`
 (:func:`session_vault_key` reads it); the key itself is never in any process's environment. The web
-path writes that file from the ``PK`` the browser supplies at shell-attach.
+path writes that file from the `PK` the browser supplies at shell-attach.
 
-**Where the terminal's password comes from**, in order: ``$EULER_VAULT_PASSWORD`` if set (a script,
+**Where the terminal's password comes from**, in order: `$EULER_VAULT_PASSWORD` if set (a script,
 CI, an automated run -- no prompt, no tty needed), otherwise the operator is **asked**, once, by the
 shell (:func:`solver.crypto.keys.unlock_session`), which then materialises the key file for the
 process tree. There is no password file: one stored next to the ciphertext it unlocks would hand the
@@ -36,8 +36,8 @@ protects a secret from the entity that controls the CPU. Do not over-claim "zero
 
 This module is imported on the git-filter path (via :mod:`solver.crypto.ciphers`), so its hard
 contract is the same: **importing it, and everything it imports, emits nothing on stdout**, and it
-depends only on the standard library, ``cryptography``, and :mod:`solver.crypto.config`. All
-interactive parts (password prompts, the ``vault`` command) live in :mod:`solver.crypto.keys`.
+depends only on the standard library, `cryptography`, and :mod:`solver.crypto.config`. All
+interactive parts (password prompts, the `vault` command) live in :mod:`solver.crypto.keys`.
 """
 from __future__ import annotations
 
@@ -98,22 +98,22 @@ class VaultData(TypedDict):
 #                                       password key + vault-key wrap/unwrap
 # ==================================================================================================================== #
 def derive_password_key(password: str, salt: bytes, iterations: int | None = None) -> bytes:
-    """Derive the 32-byte password key ``PK`` from the password and salt (PBKDF2-HMAC-SHA256).
+    """Derive the 32-byte password key `PK` from the password and salt (PBKDF2-HMAC-SHA256).
 
     WebCrypto-compatible: a browser derives the identical key from the same password, salt, and
-    iteration count, so the web path can supply ``PK`` without shipping the password to the server.
+    iteration count, so the web path can supply `PK` without shipping the password to the server.
     """
     rounds: int = config['vault_kdf_iterations'] if iterations is None else iterations
     return PBKDF2HMAC(SHA256(), _KEY_LEN, salt, rounds).derive(password.encode('utf-8'))
 
 
 def new_vault_key() -> bytes:
-    """Return a fresh random 32-byte vault key (``VK``)."""
+    """Return a fresh random 32-byte vault key (`VK`)."""
     return token_bytes(_KEY_LEN)
 
 
 def wrap_vault_key(password_key: bytes, vault_key: bytes) -> str:
-    """Wrap ``vault_key`` under ``password_key`` (AES-256-GCM, random nonce). Returns hex(nonce | ct)."""
+    """Wrap `vault_key` under `password_key` (AES-256-GCM, random nonce). Returns hex(nonce | ct)."""
     nonce: bytes = token_bytes(_NONCE_LEN)
     return (nonce + AESGCM(password_key).encrypt(nonce, vault_key, None)).hex()
 
@@ -132,15 +132,15 @@ def unwrap_vault_key(password_key: bytes, wrapped: str) -> bytes:
 #                                       secret blob encrypt/decrypt (id, env)
 # ==================================================================================================================== #
 def is_vault_encrypted(blob: bytes) -> bool:
-    """Return True if ``blob`` carries the vault MAGIC header (i.e. is vault ciphertext, not plaintext)."""
+    """Return True if `blob` carries the vault MAGIC header (i.e. is vault ciphertext, not plaintext)."""
     magic: bytes = config['vault_magic']
     return blob[:len(magic)] == magic
 
 
 def encrypt_secret(vault_key: bytes, plaintext: bytes) -> bytes:
-    """Encrypt a secret under ``VK`` (AES-256-GCM, random nonce). Idempotent on already-encrypted input.
+    """Encrypt a secret under `VK` (AES-256-GCM, random nonce). Idempotent on already-encrypted input.
 
-    Layout: ``MAGIC | nonce(12) | ciphertext``. Unlike the git filter's convergent scheme this uses a
+    Layout: `MAGIC | nonce(12) | ciphertext`. Unlike the git filter's convergent scheme this uses a
     random nonce -- these files are not tracked in git, so there is no reproducible-ciphertext need.
     """
     if is_vault_encrypted(plaintext):
@@ -172,7 +172,7 @@ def vault_exists() -> bool:
 
 
 def read_vault() -> VaultData | None:
-    """Read and parse ``~/.euler/vault``; return None if the user has no vault (plaintext at rest)."""
+    """Read and parse `~/.euler/vault`; return None if the user has no vault (plaintext at rest)."""
     vault_file: Path = config['vault_file']
     if not vault_file.exists():
         return None
@@ -180,7 +180,7 @@ def read_vault() -> VaultData | None:
 
 
 def write_vault(salt: bytes, wrapped_vk: str, iterations: int) -> None:
-    """Serialise ``~/.euler/vault`` (0600) with the wrapped vault key and its KDF parameters."""
+    """Serialise `~/.euler/vault` (0600) with the wrapped vault key and its KDF parameters."""
     vault_file: Path = config['vault_file']
     vault_file.parent.mkdir(parents=True, exist_ok=True)
     vault_file.parent.chmod(0o700)
@@ -191,11 +191,11 @@ def write_vault(salt: bytes, wrapped_vk: str, iterations: int) -> None:
 
 
 def init_vault(password: str, salt: bytes | None = None) -> bytes:
-    """Create a fresh vault: mint ``VK``, wrap it under ``PK = PBKDF2(password, salt)``, persist it.
+    """Create a fresh vault: mint `VK`, wrap it under `PK = PBKDF2(password, salt)`, persist it.
 
-    Returns the plaintext ``VK`` so the caller can immediately re-encrypt the existing secrets. When
-    ``salt`` is omitted a random one is generated; the web path passes the account's SRP salt so the
-    browser derives the same ``PK``.
+    Returns the plaintext `VK` so the caller can immediately re-encrypt the existing secrets. When
+    `salt` is omitted a random one is generated; the web path passes the account's SRP salt so the
+    browser derives the same `PK`.
     """
     salt = token_bytes(_SALT_LEN) if salt is None else salt
     iterations: int = config['vault_kdf_iterations']
@@ -206,7 +206,7 @@ def init_vault(password: str, salt: bytes | None = None) -> bytes:
 
 
 def unlock_vault(password: str) -> bytes:
-    """Derive ``PK`` from ``password`` and the stored salt, then unwrap and return ``VK``.
+    """Derive `PK` from `password` and the stored salt, then unwrap and return `VK`.
 
     Raises:
         FileNotFoundError:                  If no vault has been initialised.
@@ -220,10 +220,10 @@ def unlock_vault(password: str) -> bytes:
 
 
 def encrypt_secret_files(vault_key: bytes) -> list[str]:
-    """Encrypt any still-plaintext secret files (`id`, `env`) in place under ``vault_key``.
+    """Encrypt any still-plaintext secret files (`id`, `env`) in place under `vault_key`.
 
     Idempotent (already-encrypted files are left alone). Returns the names of the files rewritten.
-    Shared by the interactive ``vault init`` and the web first-login initialisation, so a vault is
+    Shared by the interactive `vault init` and the web first-login initialisation, so a vault is
     never created with its secrets left plain beside it.
     """
     encrypted: list[str] = []
@@ -240,12 +240,12 @@ def encrypt_secret_files(vault_key: bytes) -> list[str]:
 
 
 def rewrap_vault(old_password: str, new_password: str) -> None:
-    """Change the vault password: unwrap ``VK`` with the old password, re-wrap under the new one.
+    """Change the vault password: unwrap `VK` with the old password, re-wrap under the new one.
 
-    Only the small ``VK`` blob is rewritten; the ``VK``-encrypted secrets are untouched.
+    Only the small `VK` blob is rewritten; the `VK`-encrypted secrets are untouched.
 
     Raises:
-        cryptography.exceptions.InvalidTag: If ``old_password`` is wrong.
+        cryptography.exceptions.InvalidTag: If `old_password` is wrong.
     """
     vault_key: bytes = unlock_vault(old_password)
     salt: bytes = token_bytes(_SALT_LEN)
@@ -256,16 +256,16 @@ def rewrap_vault(old_password: str, new_password: str) -> None:
 # ==================================================================================================================== #
 #                                       web path: PK-based vault operations
 # ==================================================================================================================== #
-# The browser derives ``PK`` itself (WebCrypto PBKDF2 over the password it already holds and the SRP
-# salt) and sends only ``PK`` to the user's own service -- the password never reaches any server, and
-# the auth service never sees either. These are the ``PK``-taking twins of the password functions above.
+# The browser derives `PK` itself (WebCrypto PBKDF2 over the password it already holds and the SRP
+# salt) and sends only `PK` to the user's own service -- the password never reaches any server, and
+# the auth service never sees either. These are the `PK`-taking twins of the password functions above.
 
 def unlock_vault_with_pk(password_key: bytes) -> bytes:
-    """Unwrap and return ``VK`` using a browser-derived ``PK``.
+    """Unwrap and return `VK` using a browser-derived `PK`.
 
     Raises:
         FileNotFoundError:                  If no vault has been initialised.
-        cryptography.exceptions.InvalidTag: If ``PK`` does not match the vault's wrapping (a stale
+        cryptography.exceptions.InvalidTag: If `PK` does not match the vault's wrapping (a stale
                                             vault after a password reset, or a wrong password).
     """
     vault: VaultData | None = read_vault()
@@ -275,11 +275,11 @@ def unlock_vault_with_pk(password_key: bytes) -> bytes:
 
 
 def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
-    """Create a fresh vault wrapped under a browser-derived ``PK`` (web first-login).
+    """Create a fresh vault wrapped under a browser-derived `PK` (web first-login).
 
-    ``salt`` is the account's SRP salt, recorded so the terminal path (and any later browser session)
-    derives the identical ``PK``. Any plaintext ``id``/``env`` already on disk is encrypted in place --
-    a vault must never coexist with plain secrets. Returns the plaintext ``VK``.
+    `salt` is the account's SRP salt, recorded so the terminal path (and any later browser session)
+    derives the identical `PK`. Any plaintext `id`/`env` already on disk is encrypted in place --
+    a vault must never coexist with plain secrets. Returns the plaintext `VK`.
     """
     iterations: int = config['vault_kdf_iterations']
     vault_key: bytes = new_vault_key()
@@ -289,14 +289,14 @@ def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
 
 
 def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_salt: bytes) -> None:
-    """Re-wrap ``VK`` under a new browser-derived ``PK`` (a password change: the vault survives).
+    """Re-wrap `VK` under a new browser-derived `PK` (a password change: the vault survives).
 
-    Only the small ``VK`` blob is rewritten; the ``VK``-encrypted secrets are untouched. ``new_salt``
-    is the account's new SRP salt (the browser derived ``new_password_key`` from it).
+    Only the small `VK` blob is rewritten; the `VK`-encrypted secrets are untouched. `new_salt`
+    is the account's new SRP salt (the browser derived `new_password_key` from it).
 
     Raises:
         FileNotFoundError:                  If no vault has been initialised.
-        cryptography.exceptions.InvalidTag: If ``old_password_key`` is wrong.
+        cryptography.exceptions.InvalidTag: If `old_password_key` is wrong.
     """
     vault_key: bytes = unlock_vault_with_pk(old_password_key)
     write_vault(new_salt, wrap_vault_key(new_password_key, vault_key), config['vault_kdf_iterations'])
@@ -305,11 +305,11 @@ def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_s
 def reset_vault() -> list[str]:
     """Destroy the vault after a password reset: the secrets are unrecoverable *by design*.
 
-    An SRP reset re-mints the login verifier but shares nothing with the vault, so the old ``VK`` can
+    An SRP reset re-mints the login verifier but shares nothing with the vault, so the old `VK` can
     never be unwrapped again -- leaving the blobs around would only misrepresent the state. Removes the
     vault file and every **vault-encrypted** secret file (`id` + its rolling backups, `env`); plaintext
     files are never touched (they were never under this vault). Also drops the session key. Returns the
-    names of the files removed; the user re-provisions (``user --regen`` + re-upload) afterwards.
+    names of the files removed; the user re-provisions (`user --regen` + re-upload) afterwards.
     """
     removed: list[str] = []
     vault_file: Path = config['vault_file']
@@ -331,10 +331,10 @@ def reset_vault() -> list[str]:
 #                                               session vault key (VK delivery)
 # ==================================================================================================================== #
 def write_session_key(vault_key: bytes) -> Path:
-    """Write ``VK`` to a fresh uid-private tmpfs file (0600) and export its path as the session key.
+    """Write `VK` to a fresh uid-private tmpfs file (0600) and export its path as the session key.
 
-    Prefers ``$XDG_RUNTIME_DIR`` (a per-user tmpfs, cleared at logout); falls back to the system temp
-    dir. Sets ``EULER_VAULT_KEY_FILE`` in this process's environment so child processes -- notably the
+    Prefers `$XDG_RUNTIME_DIR` (a per-user tmpfs, cleared at logout); falls back to the system temp
+    dir. Sets `EULER_VAULT_KEY_FILE` in this process's environment so child processes -- notably the
     git clean/smudge filter -- inherit it. Returns the file path.
     """
     runtime: str = os.environ.get('XDG_RUNTIME_DIR', '').strip()
@@ -357,7 +357,7 @@ def write_session_key(vault_key: bytes) -> Path:
 
 @lru_cache(maxsize=1)
 def _resolve_session_key() -> bytes | None:
-    """Resolve the session ``VK`` once per process: tmpfs key file first, else ``$EULER_VAULT_PASSWORD``.
+    """Resolve the session `VK` once per process: tmpfs key file first, else `$EULER_VAULT_PASSWORD`.
 
     Both sources are non-interactive by construction. This function is on the git-filter path, in a
     subprocess with no terminal and a stdout that belongs to git — it must never prompt. When neither
@@ -393,7 +393,7 @@ def session_vault_key() -> bytes | None:
 
 
 def clear_session_key() -> None:
-    """Lock the session: delete the tmpfs key file, drop the env var, and clear the cached ``VK``.
+    """Lock the session: delete the tmpfs key file, drop the env var, and clear the cached `VK`.
 
     Called on logout and vault reset so a torn-down session leaves no reachable key material.
     Idempotent.
@@ -405,10 +405,10 @@ def clear_session_key() -> None:
 
 
 def ensure_session_key() -> bytes | None:
-    """Establish the session key file for this process tree; return the ``VK`` (or None if locked).
+    """Establish the session key file for this process tree; return the `VK` (or None if locked).
 
-    Idempotent: if ``EULER_VAULT_KEY_FILE`` already points at a valid key file, reuse it; otherwise
-    derive ``VK`` from ``$EULER_VAULT_PASSWORD`` and materialise the tmpfs file so subprocesses (the
+    Idempotent: if `EULER_VAULT_KEY_FILE` already points at a valid key file, reuse it; otherwise
+    derive `VK` from `$EULER_VAULT_PASSWORD` and materialise the tmpfs file so subprocesses (the
     git filter) skip the PBKDF2 cost. Non-interactive: a locked vault stays locked here and returns
     None -- asking the operator is :func:`solver.crypto.keys.unlock_session`, which is what a shell
     calls at startup.

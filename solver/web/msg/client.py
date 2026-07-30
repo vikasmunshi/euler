@@ -3,21 +3,21 @@
 """The shell tier's client for the message spool: one call, whichever plane answers.
 
 Extracted from :mod:`solver.web.msg.commands`, which was its only caller until
-``user-authorize <thread-id>`` needed to read and answer a thread from
+`user-authorize <thread-id>` needed to read and answer a thread from
 :mod:`solver.crypto.keys` (web-server-guide § Messaging). A command that wants the spool
 now asks here rather than re-deriving the two-plane dance — or, worse, reaching into the
-``msg`` command's privates.
+`msg` command's privates.
 
-**Two channels, one call.** A web shell's uid is in ``euler-web``, so it dials
-``msg.sock`` directly and the kernel proves who it is. The operator's terminal uid is
+**Two channels, one call.** A web shell's uid is in `euler-web`, so it dials
+`msg.sock` directly and the kernel proves who it is. The operator's terminal uid is
 deliberately *not* in that group, so it falls back to
-``sudo python -m solver.web.msg.admin``, which injects the invoking identity and proxies
+`sudo python -m solver.web.msg.admin`, which injects the invoking identity and proxies
 the same call. The channel is chosen by *what this process can reach*, never by a flag:
 a collaborator never sees a sudo prompt, and the operator never has to remember which
 plane they are on.
 
 **Silent.** Failures are logged, not printed: this is called from inside other commands,
-which own what the user reads. :func:`call` returns ``None`` for "neither plane
+which own what the user reads. :func:`call` returns `None` for "neither plane
 answered", and the caller says so in its own words.
 
 Stdlib-only (via :mod:`solver.web.unixhttp`), like the rest of the shell-facing half of
@@ -74,10 +74,10 @@ def sudo_plane_present() -> bool:
 
 
 def _direct(method: str, path: str, body: dict[str, Any] | None) -> tuple[int, Any] | None:
-    """Call the spool over ``msg.sock``; None when this uid cannot reach it.
+    """Call the spool over `msg.sock`; None when this uid cannot reach it.
 
-    An ``OSError`` here is the *expected* outcome for the operator's own uid (not in
-    ``euler-web``) and for a host with no spool deployed — it is the signal to try the
+    An `OSError` here is the *expected* outcome for the operator's own uid (not in
+    `euler-web`) and for a host with no spool deployed — it is the signal to try the
     sudo plane, not an error to report.
     """
     try:
@@ -89,7 +89,7 @@ def _direct(method: str, path: str, body: dict[str, Any] | None) -> tuple[int, A
 def _via_sudo(method: str, path: str, body: dict[str, Any] | None) -> tuple[int, Any] | None:
     """Call the spool through the sudo admin CLI; None when that fails outright.
 
-    The body goes in on **stdin**, never in ``argv`` — a message in the process table
+    The body goes in on **stdin**, never in `argv` — a message in the process table
     would be readable by every uid on the host.
     """
     argv = ['sudo', sys.executable, '-m', 'solver.web.msg.admin', 'api', method, path]

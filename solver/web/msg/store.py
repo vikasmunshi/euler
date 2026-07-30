@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The message spool at ``<state>/messages.json`` — messages and read-state.
+"""The message spool at `<state>/messages.json` — messages and read-state.
 
 One record per **message**, never per recipient. A broadcast is therefore a single
 record naming N recipients rather than N copies: "everyone" costs one write,
@@ -13,7 +13,7 @@ is always on one message. Threading bought conversation nobody was having, and c
 second place for content to hide: an answer buried in a reply is invisible to anything
 reading the message it answers.
 
-Every party to a thread appears in ``recipients``, keyed by **box**
+Every party to a thread appears in `recipients`, keyed by **box**
 (:func:`solver.web.msg.identity.box_of`), carrying that box's read timestamp:
 
 - the **author** is present and already read — they wrote it;
@@ -28,7 +28,7 @@ cap, field length caps, and a TTL swept on every access, so an unworked spool ca
 grow without limit. Bodies are stored as **plaintext** — sanitised on the way in and
 rendered through Jinja autoescape — so no markup ever survives to be interpreted.
 
-Single-writer by construction: one ``euler-msg`` process owns the file.
+Single-writer by construction: one `euler-msg` process owns the file.
 """
 from __future__ import annotations
 
@@ -125,7 +125,7 @@ class MessageStore:
     def _unread_for(raw: dict[str, Any], box: str) -> bool:
         """Whether *box* has yet to read this thread's latest activity.
 
-        A box absent from ``recipients`` has never read it — which is exactly the
+        A box absent from `recipients` has never read it — which is exactly the
         newly-promoted maintainer looking at an older queue thread.
         """
         recipients: dict[str, Any] = raw.get('recipients') or {}
@@ -164,7 +164,7 @@ class MessageStore:
     def inbound(self, box: str = '') -> list[Thread]:
         """Every inbound thread, oldest first — the staff queue, as a work list.
 
-        *box* is whoever is looking, so each thread's ``unread`` is that reader's own
+        *box* is whoever is looking, so each thread's `unread` is that reader's own
         state. Without it every row would read as unread (an empty box is in no
         thread's recipients), which is exactly the marker being useless.
         """

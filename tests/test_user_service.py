@@ -1,14 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the per-user web service: content + ``/ws`` folded onto one app.
+"""Tests for the per-user web service: content + `/ws` folded onto one app.
 
 Two surfaces on one application, sharing one per-user identity:
 
 - **content** — the reused site routes gate on the request's Subject exactly as the
   standalone content service does; the new behaviour is the **per-user identity**: a
-  request whose ``X-User`` maps to a slug other than this instance's ``EULER_USER_SLUG``
-  is refused (misrouting/bypass), and an ``admin`` profile is served **uncapped**.
-- **shell** — ``/ws`` attaches the browser terminal to this user's PTY shell against a
+  request whose `X-User` maps to a slug other than this instance's `EULER_USER_SLUG`
+  is refused (misrouting/bypass), and an `admin` profile is served **uncapped**.
+- **shell** — `/ws` attaches the browser terminal to this user's PTY shell against a
   **fake auth service** (real :class:`~solver.web.auth.tickets.TicketStore` semantics),
   with a stub echo shell so the suite stays fast; the child is pinned on the slug.
 """
@@ -182,7 +182,7 @@ class ContentIdentityTests(_UserServiceCase):
 
 
 class ShellAttachTests(_UserServiceCase):
-    """``/ws`` on the same app: the attach gate, the slug pin, the wire, teardown."""
+    """`/ws` on the same app: the attach gate, the slug pin, the wire, teardown."""
 
     @unittest_run_loop
     async def test_unauthenticated_ws_is_401(self) -> None:
@@ -208,7 +208,7 @@ class ShellAttachTests(_UserServiceCase):
 
     @unittest_run_loop
     async def test_internal_status_reports_the_shell_and_its_terminals(self) -> None:
-        """The operator's ``status-web`` probe: no shell → empty, attached → connected,
+        """The operator's `status-web` probe: no shell → empty, attached → connected,
         and the record survives the terminal closing (the shell keeps running detached)."""
         empty = await (await self.client.get('/internal/status')).json()
         self.assertEqual(empty, {'slug': _SLUG, 'shells': []})

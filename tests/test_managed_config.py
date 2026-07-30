@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """Tests for the managed-settings overlay (solver.config.Config.load_managed_config).
 
-``solver/config.json`` is **data, not code**: it may be hand-edited, may survive a
+`solver/config.json` is **data, not code**: it may be hand-edited, may survive a
 release that retires a setting, and must never be able to break startup or reach a
 setting that is not managed. These pin that contract — the retired-key case is the
-one that bit: dropping ``server_port`` from ``managed`` made every older config.json
-raise ``KeyError`` at import, before the shell could even print an error.
+one that bit: dropping `server_port` from `managed` made every older config.json
+raise `KeyError` at import, before the shell could even print an error.
 """
 from __future__ import annotations
 

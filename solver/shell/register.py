@@ -231,7 +231,6 @@ class _CommandSpec:
     func: Callable[..., int]
     name: str | None
     cmd_name: str
-    help_text: str
     usage: str
     pass_ctx: bool
     quietable: bool
@@ -290,7 +289,6 @@ def _build_bool_flags(params: list[inspect.Parameter], quietable: bool) -> dict[
 def _build_command_spec(
         func: Callable[..., int],
         name: str | None,
-        help_text: str,
         pass_ctx: bool,
         quietable: bool,
         completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
@@ -316,10 +314,6 @@ def _build_command_spec(
         (p for p in params if p.name == 'problem' and _is_problem_annotation(p.annotation)),
         None,
     )
-    if problem_param is not None:
-        help_text += ' [warning]❏[/warning]'
-    if quietable:
-        help_text += ' [warning]»[/warning]'
     problem_positional: bool = problem_param is not None and problem_param.kind in (
         inspect.Parameter.POSITIONAL_ONLY,
         inspect.Parameter.POSITIONAL_OR_KEYWORD,
@@ -339,7 +333,6 @@ def _build_command_spec(
         func=func,
         name=name,
         cmd_name=cmd_name,
-        help_text=help_text,
         usage=_usage_from_signature(cmd_name, params, quietable),
         pass_ctx=pass_ctx,
         quietable=quietable,
@@ -650,7 +643,6 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
 
 def register[**P](
         *,
-        help_text: str = '',
         aliases: tuple[str, ...] = (),
         pass_ctx: bool = False,
         quietable: bool = False,
@@ -658,6 +650,10 @@ def register[**P](
         requires: Literal['reader', 'contributor', 'maintainer', 'admin'],
 ) -> Callable[[Callable[P, int]], Callable[P, int]]:
     """Decorator that registers *func* as a shell command **without modifying it**.
+
+    The command's one-line description is its **docstring summary line**; its arguments are
+    described in the docstring's `Args:` section, which `?` renders and `update-docs`
+    publishes (the standard: `docs/developer-guide.md` §3.8).
 
     Unlike :func:`command` (which requires a '(ctx, *args)' signature), :func:`register`
     introspects the wrapped function's signature and builds an adapter that:
@@ -700,9 +696,9 @@ def register[**P](
     unknown flag or a conflicting combination raises a 'ValueError' that the
     adapter reports through the shared console.
 
-    ``completers`` maps a parameter name to a callable ``(ctx, incomplete) ->
-    Iterable[str | Completion]`` that supplies dynamic value completions for that
-    parameter (positionally and as ``name=``), for values the type system cannot
+    `completers` maps a parameter name to a callable
+    `(ctx, incomplete) -> Iterable[str | Completion]` that supplies dynamic value
+    completions for that parameter (positionally and as `name=`), for values the type system cannot
     enumerate — e.g. `edit`'s filename, sourced from the current problem's solution
     directory.  Plain-string candidates are prefix-filtered against the partial
     token; `Completion` objects are passed through verbatim.
@@ -712,20 +708,27 @@ def register[**P](
 
     Example
     -------
-    >>> @register(name='echo', help_text='Echo arguments.', usage='echo <message> [times=N]', aliases=('e',))
+    >>> @register(requires='reader', aliases=('e',))
     ... def echo(message: str, times: int = 1) -> str:
+    ...     '''Echo a message.
+    ...
+    ...     Args:
+    ...         message: What to echo.
+    ...         times: How many times to repeat it. Defaults to 1.
+    ...     '''
     ...     return ' '.join([message] * times)
     """
 
     def _register(func: Callable[P, int]) -> Callable[P, int]:
         name = func.__name__.replace('_', '-')
-        spec = _build_command_spec(func, name, help_text, pass_ctx, quietable, completers)
+        spec = _build_command_spec(func, name, pass_ctx, quietable, completers)
 
         def _completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
             return _complete(spec, ctx, incomplete)
 
-        @command(name=name, help_text=spec.help_text, usage=spec.usage, aliases=aliases,
-                 completer=_completer, requires=requires)
+        @command(name=name, usage=spec.usage, aliases=aliases, completer=_completer,
+                 requires=requires, quietable=quietable,
+                 uses_problem=spec.problem_param is not None)
         @wraps(func)
         def _adapter(ctx: Context, *args: str) -> int:
             return _run_command(spec, ctx, args)

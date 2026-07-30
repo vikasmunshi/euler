@@ -14,7 +14,7 @@ from solver.shell import console, register
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
-@register(requires='contributor', help_text='Lint current problem, auto-fix with --auto-fix.', quietable=True)
+@register(requires='contributor', quietable=True)
 def lint(problem: Problem, auto_fix: bool = False) -> int:
     """Lint the problem's solution files, optionally auto-fixing them.
 
@@ -23,11 +23,10 @@ def lint(problem: Problem, auto_fix: bool = False) -> int:
     in the exit code.
 
     Args:
-        problem:    The `problem` to lint; defaults to the current problem.
-        auto_fix:   When True, attempt to fix issues in place with autoflake
-                    (remove unused imports/variables), autopep8 (style), and
-                    isort (import order), then re-check. When False (default),
-                    only report.
+        problem: [problem] The problem whose solution files to lint.
+        auto_fix: Fix what can be fixed in place — autoflake (unused imports and
+            variables), autopep8 (style) and isort (import order) — then re-check.
+            Defaults to False, which only reports.
     """
     console.print(f'[accent]checking[/accent] {problem}')
     if _linter_check(problem):

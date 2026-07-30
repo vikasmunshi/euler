@@ -28,13 +28,13 @@ class ExitCodes(enum.IntEnum):
 
 
 def _enter_root(root: Path) -> Path:
-    """chdir into *root* and normalise ``PATH``, then return it.
+    """chdir into *root* and normalise `PATH`, then return it.
 
-    PATH gains the interpreter's own bin dir (the venv) and ``~/.local/bin`` — where
-    the per-user Claude Code install drops the ``claude`` binary: the web
+    PATH gains the interpreter's own bin dir (the venv) and `~/.local/bin` — where
+    the per-user Claude Code install drops the `claude` binary: the web
     shell's service unit starts from systemd's minimal PATH, which never includes
-    it, and without it ``claude-solve`` / the account page's status probe can't
-    find the CLI. The WSL ``/mnt`` entries are dropped, and duplicates collapsed.
+    it, and without it `claude-solve` / the account page's status probe can't
+    find the CLI. The WSL `/mnt` entries are dropped, and duplicates collapsed.
     """
     os.chdir(root)
     env_path: list[str] = ([Path(sys.executable).parent.as_posix(),
@@ -117,13 +117,13 @@ class Scripts(AttributeDict):
 
 
 def _package_version() -> str:
-    """The running build's version, read from the tracked ``solver/version.py``.
+    """The running build's version, read from the tracked `solver/version.py`.
 
     That module is the single source of truth (written only by
-    ``scripts/version/release.sh``); importing it needs no git and no install, so this
+    `scripts/version/release.sh`); importing it needs no git and no install, so this
     is correct everywhere — an editable dev checkout, the detached deployed venv
-    (``/opt/euler/venv``), and a bare source tree alike. It equals the wheel
-    metadata too: ``pyproject.toml`` stamps the wheel from the same ``__version__``.
+    (`/opt/euler/venv`), and a bare source tree alike. It equals the wheel
+    metadata too: `pyproject.toml` stamps the wheel from the same `__version__`.
     """
     from solver.version import __version__
     return __version__

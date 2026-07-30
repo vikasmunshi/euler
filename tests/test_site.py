@@ -287,8 +287,8 @@ class ContentServiceTests(AioHTTPTestCase):
         """The htmx path renders the content block alone — chips and all.
 
         Block rendering never runs the template root, so anything the block uses
-        (here the ``chip`` macro) has to be defined inside it; a top-level macro
-        blew up with ``'chip' is undefined`` on every htmx navigation.
+        (here the `chip` macro) has to be defined inside it; a top-level macro
+        blew up with `'chip' is undefined` on every htmx navigation.
         """
         resp = await self.client.get('/solutions/0007/', headers={**_READER, **_HTMX})
         self.assertEqual(resp.status, 200)
@@ -391,7 +391,7 @@ class ContentServiceTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_readme_images_are_same_origin(self) -> None:
-        """Every image the README shows must load under ``img-src 'self' data:``
+        """Every image the README shows must load under `img-src 'self' data:`
         (csp.py) — so the badges are vendored in-repo and served by the viewer,
         not fetched from img.shields.io, which the policy blocks outright."""
         page = await (await self.client.get('/docs/readme', headers=_READER)).text()
@@ -819,7 +819,7 @@ class TopicCardStatusTests(unittest.TestCase):
     exactly the thing that changes when someone writes an article, and a test that
     reads "primes is a draft" fails the day it stops being one.
 
-    Rendered with ``show_status``, i.e. the maintainer's `/topics/all`. That is the only
+    Rendered with `show_status`, i.e. the maintainer's `/topics/all`. That is the only
     view where status is shown: `/topics/` lists finished pages exclusively, so a "final"
     pill on every card there would carry no information.
     """

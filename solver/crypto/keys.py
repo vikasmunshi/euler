@@ -90,7 +90,7 @@ def _rotate_backups(key_file: Path) -> None:
 def _persist_private_key(private_key: X25519PrivateKey) -> None:
     """Write the private key to disk `0600` (rotating backups) -- vault-encrypted when one is unlocked.
 
-    With a vault present and this session holding its ``VK``, the PEM is encrypted at rest like every
+    With a vault present and this session holding its `VK`, the PEM is encrypted at rest like every
     vault secret -- so `user --regen` never downgrades an encrypted `id` back to plaintext. With
     no vault (the pre-vault operator setup) the key is written plain, protected by the `0600` secrets
     dir as before.
@@ -129,7 +129,7 @@ def _create_user_key() -> X25519PrivateKey:
 #                                       master (symmetrical) key: persist + rotate
 # ==================================================================================================================== #
 def write_enc_key_file(data: dict[str, str]) -> None:
-    """Write this machine's enc-key file (``0600``) and drop the cached master key.
+    """Write this machine's enc-key file (`0600`) and drop the cached master key.
 
     The file is two records and belongs to this machine alone, so writing it is a local act:
     no commit, no push, nobody else's copy to reconcile with. That is the whole point of
@@ -143,25 +143,25 @@ def write_enc_key_file(data: dict[str, str]) -> None:
     read_master_key.cache_clear()
 
 
-@register(requires='admin', help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
+@register(requires='admin', aliases=('rekey',))
 def key_rekey() -> int:
-    """Rotate to a new master key, re-issue it to every registered public key, renormalise blobs.
+    """Rotate the master key and re-issue it to every registered public key.
 
     **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
     access means rotating the key they hold and re-issuing the new one to everyone else.
 
     The list of who "everyone else" is comes from the **account roster** — each user's
-    ``public_key``, registered in ``users.json`` (``users set-keys``). It used to be implicit
+    `public_key`, registered in `users.json` (`users set-keys`). It used to be implicit
     in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
     found. With one file per machine there is nothing central to read, so the registry is
     explicit — and it holds only *public* keys, which is why losing it costs nothing but a
     round of re-registration.
 
     Each holder is sent their own payload through the message spool, exactly as
-    ``user-authorize`` does; they run ``msg save`` to take it. An account with no registered
+    `user-authorize` does; they run `msg save` to take it. An account with no registered
     public key cannot be re-issued to and is named, not skipped silently — that person loses
     access at this rotation, which is sometimes the intent and must never be a surprise.
-    ``users set-keys`` fills the registry from what every holder already has.
+    `users set-keys` fills the registry from what every holder already has.
 
     Because the git filter is deterministic, every committed blob depends on the master key, so
     a rotation re-encrypts the tracked private files via `git add --renormalize`.
@@ -216,7 +216,7 @@ def _land_reencrypted_blobs() -> int:
     therefore no merge — they cannot even sync their way out. Publishing first makes the window
     zero-width; a clone that saves the key always has somewhere to land.
 
-    Only ``solutions/private`` is committed, by pathspec. `git commit` otherwise commits the
+    Only `solutions/private` is committed, by pathspec. `git commit` otherwise commits the
     whole index, and a rotation that swept an operator's unrelated staged work into a commit
     labelled as re-encryption has happened here before.
 
@@ -251,15 +251,15 @@ def _land_reencrypted_blobs() -> int:
 
 
 def _resolve_key_request(thread_id: str) -> tuple[str, str] | None:
-    """Read a key-authorization thread and return ``(public_key, identity)``, or None.
+    """Read a key-authorization thread and return `(public_key, identity)`, or None.
 
     The identity comes from the thread's **author**, not from its text: the spool resolved
-    that box from ``SO_PEERCRED`` when the request was filed, so it is the one field in a
+    that box from `SO_PEERCRED` when the request was filed, so it is the one field in a
     message a sender cannot dress up as somebody else. Only the key itself is read out of
     the body, under rules that refuse rather than guess:
 
-    - the subject must be the one ``_request_authorization`` files under, so an arbitrary
-      ``msg send`` is never mined for hex;
+    - the subject must be the one `_request_authorization` files under, so an arbitrary
+      `msg send` is never mined for hex;
     - the body must contain **exactly one** 64-hex token. Zero or several means the message
       is not the request we know how to work, and the operator is told to pass the key
       itself. A grant is not a thing to infer from ambiguous text.
@@ -284,7 +284,7 @@ def _resolve_key_request(thread_id: str) -> tuple[str, str] | None:
 
 
 @register(requires='maintainer', aliases=('authorize',),
-          help_text='Issue the master key to a public key, or work a key request by message id.')
+          )
 def user_authorize(target: str, identity: str = '') -> int:
     """Wrap the master key for someone else and send it to them.
 
@@ -305,15 +305,14 @@ def user_authorize(target: str, identity: str = '') -> int:
     take it; until they do, nothing has changed for them.
 
     The public key is also registered on their account (as `users set-keys` does in bulk),
-    which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
-    so from a web shell it prints the command for the operator instead of failing the grant.
+    which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs
+    the admin plane, so from a web shell it prints the command for the operator instead of
+    failing the grant. Aliased as `authorize`.
 
     Args:
-        target:   the 16-hex id of a key-authorization message, or a 64-hex public key.
-        identity: who the key belongs to — taken from the thread for the message form,
-                  required for the bare-key form (there is nobody to send it to otherwise).
-
-    Aliased as `authorize`.
+        target: The 16-hex id of a key-authorization message, or a 64-hex public key.
+        identity: Who the key belongs to. Taken from the thread for the message form;
+            required for the bare-key form, where there is nobody to send it to otherwise.
     """
     from solver.web.msg.notify import dismiss_thread, notify_user
     token = target.strip().lower()
@@ -376,7 +375,7 @@ def save_issued_key(body: str) -> bool:
 
     An issued key is always its own message, so there is one body to read and one payload in
     it. Proving it is the whole gate: it must unwrap with **this machine's** private key and
-    its ``verify`` must decrypt to the known text. A payload wrapped to somebody else, or
+    its `verify` must decrypt to the known text. A payload wrapped to somebody else, or
     corrupted in transit, fails here — before the write, because the file it replaces may be
     the only thing between this machine and the whole private tree.
     """
@@ -448,15 +447,19 @@ def _register_public_key(identity: str, public_key: str) -> None:
 # ==================================================================================================================== #
 #                                               user identity
 # ==================================================================================================================== #
-@register(requires='reader', help_text="Show euler user, public key & enc-key access; --regen for new key-pair.")
+@register(requires='reader', )
 def user(regen: bool = False) -> int:
-    """Show the solver user, the current identity and whether it can decrypt; create a key pair on first run or --regen.
+    """Show the solver user, the current identity, and whether it can decrypt.
 
     A key pair is created only when the identity file is **truly absent** (first run) or on
-    an explicitly confirmed ``--regen``. An id file that *exists but cannot be read* — the
+    an explicitly confirmed `--regen`. An id file that *exists but cannot be read* — the
     vault is locked, the session key is stale, the vault file was lost — is a **vault
     failure to fix, never a reason to mint a new identity**: replacing the key would
-    silently orphan the real one (and with it any enc-key authorization it carries).
+    silently orphan the real one, and with it any enc-key authorization it carries.
+
+    Args:
+        regen: Replace the existing key pair with a fresh one, after confirmation, and
+            re-wrap the master key to it. Defaults to False.
     """
     app_user = app_config['subject']
     console.print(f'[primary]solver user:[/primary] {app_user.user} [muted]({app_user.profile})[/muted]')
@@ -536,8 +539,8 @@ def _request_authorization(identity: str, public_key: str) -> None:
     """File a key-authorization request with staff for a freshly minted key.
 
     Only on the paths that need it: a key was **just minted** and somebody holding the
-    master key has to run ``user-authorize`` on it before the grant is real anywhere but
-    this working tree. A bare ``user`` status view is not a request, and neither is a mint
+    master key has to run `user-authorize` on it before the grant is real anywhere but
+    this working tree. A bare `user` status view is not a request, and neither is a mint
     by someone who can authorise it themselves (:func:`_make_the_rotation_durable`).
 
     One condition reaches here: a key was minted and the master key could not be loaded —
@@ -595,7 +598,7 @@ def unlock_session(interactive: bool = True) -> bytes | None:
     """Establish this process tree's vault key, asking the operator only if nothing else can.
 
     The terminal's whole unlock path, and the one place a password is ever *prompted for*. The
-    order is: an existing session key file, then ``$EULER_VAULT_PASSWORD`` (both handled by
+    order is: an existing session key file, then `$EULER_VAULT_PASSWORD` (both handled by
     :func:`~solver.crypto.vault.ensure_session_key`, non-interactively), and only then the
     operator. A shell calls this once at startup; children -- notably the git filter, which has
     no terminal and cannot be asked anything -- inherit the key file it materialises.
@@ -603,7 +606,7 @@ def unlock_session(interactive: bool = True) -> bytes | None:
     Any key file this call *creates* is removed at process exit (:func:`_own_key_file`); one it
     merely found is left alone, because it belongs to whoever wrote it.
 
-    Returns the ``VK``, or None when there is no vault, when the vault stays locked, or when
+    Returns the `VK`, or None when there is no vault, when the vault stays locked, or when
     *interactive* is False and no env password answered. A locked session is not an error: it
     means the private solutions and `claude-api` are unavailable, and everything else works.
     """
@@ -649,7 +652,7 @@ def _prompt_new_password(prompt: str) -> str | None:
 def _orphaned_vault_files() -> list[str]:
     """Vault-encrypted secret files with NO vault file to unwrap their key — a broken state.
 
-    Their ``VK`` is unrecoverable without ``~/.euler/vault``, so they are unreadable by
+    Their `VK` is unrecoverable without `~/.euler/vault`, so they are unreadable by
     anyone; every caller must surface this loudly rather than treat it as "no vault yet".
     """
     if vault_mod.vault_exists():
@@ -698,7 +701,7 @@ def _vault_status() -> int:
 
 
 @register(requires='reader',
-          help_text='Manage the per-user secrets vault: status | init | unlock | change-password.')
+          )
 def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'status') -> int:
     """Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 
@@ -708,10 +711,14 @@ def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'stat
       unlock the current session. Prompts for a new password.
     - `unlock`: unlock a locked session (the shell asks at startup; this is the retry — after a
       typo, or once you have the password to hand).
-    - `change-password`: re-wrap the vault key under a new password (the secrets are not re-encrypted).
+    - `change-password`: re-wrap the vault key under a new password (the secrets are not
+      re-encrypted).
 
-    The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock (a script,
-    CI), otherwise you are asked once per shell.
+    The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock
+    (a script, CI), otherwise you are asked once per shell.
+
+    Args:
+        action: Which of the four operations above to run. Defaults to 'status'.
     """
     if action == 'status':
         return _vault_status()
@@ -841,9 +848,18 @@ def _reconstruct_secret(shares: list[str]) -> bytes:
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
 
-@register(requires='admin', help_text='Split master key into shares (n-of-m secret sharing).')
+@register(requires='admin', )
 def key_split(num_shares: int = 3, threshold: int = 2) -> int:
-    """Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct)."""
+    """Print Shamir shares of the current master key.
+
+    Any `threshold` of the printed shares reconstruct the key through `key-reconstruct`;
+    fewer reveal nothing. Store them apart from each other.
+
+    Args:
+        num_shares: How many shares to print. Defaults to 3.
+        threshold: How many of them are needed to reconstruct the key. Must be at least 2
+            and no more than `num_shares`. Defaults to 2.
+    """
     if num_shares < threshold or threshold < 2:
         console.print('[error]error:[/error] threshold must be >= 2 and < num_shares')
         return 1
@@ -862,9 +878,18 @@ def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     return 0
 
 
-@register(requires='reader', help_text='Recover master key from shares.')
+@register(requires='reader', )
 def key_reconstruct(threshold: int = 2) -> int:
-    """Prompt for `threshold` shares, reconstruct the master key, and store it wrapped to this user."""
+    """Reconstruct the master key from Shamir shares and store it for this user.
+
+    Prompts for the shares one at a time, reconstructs the key, and writes it wrapped to
+    this holder's public key — the recovery path when no `user-authorize` grant is coming.
+    Needs a private key already in place: run `user` first.
+
+    Args:
+        threshold: How many shares to ask for — the threshold the shares were split at.
+            Defaults to 2.
+    """
     try:
         private_key: X25519PrivateKey = load_private_key()
     except (FileNotFoundError, ValueError) as exc:

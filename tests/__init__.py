@@ -25,7 +25,7 @@ def _filter_request_key_warning() -> None:
 def _patch_aiohttp_test_case() -> None:
     """Re-apply the warning filter from inside every AioHTTPTestCase.setUp.
 
-    unittest's runner resets warnings to ``default`` for the whole run (main.py sets it
+    unittest's runner resets warnings to `default` for the whole run (main.py sets it
     before discovery, so an import-time filter is always shadowed). A filter re-added
     *during* the run wins, and every web tier's requests trip the warning — so wrap the
     one setUp they all inherit rather than touch each get_application. Installed once.

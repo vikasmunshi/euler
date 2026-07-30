@@ -1,13 +1,13 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The message admin plane CLI: run **under sudo** by the ``msg`` shell command.
+"""The message admin plane CLI: run **under sudo** by the `msg` shell command.
 
-The spool's public socket is ``0660 euler-msg:euler-web``, and the operator's own uid is
-deliberately **not** in ``euler-web`` — that group is for the service tier, and putting
+The spool's public socket is `0660 euler-msg:euler-web`, and the operator's own uid is
+deliberately **not** in `euler-web` — that group is for the service tier, and putting
 the host's most exposed uid in it would hand every browser and dev tool on the box a
 connection to the app plane. So the operator reaches the spool the same way they reach
-the auth service: as root, via ``sudo``, over the ``0600`` admin socket, with the token
-that lives only in root-readable ``/etc/euler/msg.env``.
+the auth service: as root, via `sudo`, over the `0600` admin socket, with the token
+that lives only in root-readable `/etc/euler/msg.env`.
 
 This is a **thin authenticated proxy**, not a second command surface: it takes a method
 and an admin path, injects the invoking identity, and prints the service's reply as one
@@ -16,12 +16,12 @@ so the terminal and the web shell cannot drift in what they show.
 
 Two details are deliberate:
 
-- **The body arrives on stdin**, never in ``argv``. A message body in the process table
-  would be readable by every uid on the host via ``/proc``, which is precisely the
+- **The body arrives on stdin**, never in `argv`. A message body in the process table
+  would be readable by every uid on the host via `/proc`, which is precisely the
   exposure the spool exists to avoid.
-- **The identity is the invoking user** (``SUDO_USER``), not an argument. Root could
+- **The identity is the invoking user** (`SUDO_USER`), not an argument. Root could
   assert anything here — the point is that a typo cannot file a message under a
-  stranger's name, and the profile check still runs against ``authorizations.json``.
+  stranger's name, and the profile check still runs against `authorizations.json`.
 
 Invocation (see :mod:`solver.web.msg.commands` for the shell wrapper)::
 
@@ -51,7 +51,7 @@ def _fail(message: str, code: int = 1) -> int:
 
 
 def _invoking_identity() -> str:
-    """The operator behind the sudo: ``SUDO_USER``, else this process's own login."""
+    """The operator behind the sudo: `SUDO_USER`, else this process's own login."""
     who = os.environ.get('SUDO_USER', '').strip()
     if who:
         return who

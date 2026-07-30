@@ -102,18 +102,18 @@ def load_test_cases(problem: Problem,
     return test_cases_list
 
 
-@register(requires='reader', help_text='list the test cases for the problem.')
+@register(requires='reader', )
 def test_cases(problem: Problem, *categories: Literal['all', 'dev', 'main', 'extra']) -> int:
-    """
-    List the test cases for a given problem based on specified categories.
+    """List a problem's test cases.
+
+    Reads the problem's `test_cases.json` and prints one line per case — category,
+    arguments and expected answer — for the categories asked for. URL arguments are
+    abbreviated to their final path segment.
 
     Args:
-        problem:            The `problem` to list test cases for. This is used to locate the test cases file.
-        *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                            (which expands to all three). Defaults to all three if omitted.
-
-    Returns:
-        int: Exit code indicating the completion status of the operation.
+        problem: [problem] The problem whose test cases to list.
+        *categories: Test-case categories to include: 'dev', 'main', 'extra', or 'all'
+            (which expands to all three). Defaults to all three.
     """
     if not categories or 'all' in categories:
         eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main', 'extra']

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Shared JSON persistence and untrusted-text hygiene for the service stores.
 
-Every store file lives in its service's private state dir (``/var/lib/euler-auth``,
-``/var/lib/euler-msg``), is owned by that service user alone, and is written
-atomically at mode ``0600`` — the service is the sole reader and writer; admin
+Every store file lives in its service's private state dir (`/var/lib/euler-auth`,
+`/var/lib/euler-msg`), is owned by that service user alone, and is written
+atomically at mode `0600` — the service is the sole reader and writer; admin
 operations go through the admin API, never through these files.
 
 :func:`sanitize` is here rather than beside any one store because both the stores
@@ -34,7 +34,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def save_json(path: Path, data: dict[str, Any]) -> None:
-    """Write *data* to *path* atomically (tmp file + rename) at mode ``0600``."""
+    """Write *data* to *path* atomically (tmp file + rename) at mode `0600`."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f'.{path.name}.')
     try:

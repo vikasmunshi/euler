@@ -4,21 +4,21 @@
 
 A content route renders either the **whole page** or a **named block** of the
 *same* template, so a full navigation and an htmx fragment-swap share one source
-of truth. The block path uses Jinja's own API — ``tmpl.blocks[name](ctx)`` — in
-a small helper rather than pulling in ``jinja2-fragments`` (a pinned dep that is
+of truth. The block path uses Jinja's own API — `tmpl.blocks[name](ctx)` — in
+a small helper rather than pulling in `jinja2-fragments` (a pinned dep that is
 mostly Flask/Quart glue for these few lines).
 
 :func:`render` is the one entry point handlers call: when the request is an htmx
-fetch (``HX-Request: true``) *and* a ``block`` is named, it returns just that
+fetch (`HX-Request: true`) *and* a `block` is named, it returns just that
 block; otherwise the full template. Either way the shared context (the request's
-CSP nonce and resolved subject) is injected, and the response is ``text/html``
+CSP nonce and resolved subject) is injected, and the response is `text/html`
 so the shared CSP middleware stamps its header.
 
 **Page chrome (web-server-guide § The site).** Breadcrumbs, the Actions menu and the
 git chip live in the fixed header, which htmx never re-renders — so every *block*
-response appends the ``_crumbs.html`` / ``_actions.html`` / ``_git.html`` partials
-with ``hx-swap-oob``, keeping the header in step with the pane. A full-page render
-places the same partials in the header directly (``oob`` unset).
+response appends the `_crumbs.html` / `_actions.html` / `_git.html` partials
+with `hx-swap-oob`, keeping the header in step with the pane. A full-page render
+places the same partials in the header directly (`oob` unset).
 """
 from __future__ import annotations
 
@@ -38,26 +38,26 @@ SUBJECT_KEY: str = 'subject'
 #: (:mod:`solver.web.site.gitstate`) — None where there is no readable clone.
 GIT_KEY: str = 'git'
 #: aiohttp request key set by the per-user tier's message routes: True where this
-#: service actually serves ``/messages`` (:mod:`solver.web.user.msg_api`). The header's
+#: service actually serves `/messages` (:mod:`solver.web.user.msg_api`). The header's
 #: chip needs to know whether there is a spool behind it *without* reading one — the
 #: auth tier renders the same header and has none — so this is a plain flag, and the
-#: count arrives later from the chip's own ``/messages`` fetch.
+#: count arrives later from the chip's own `/messages` fetch.
 MSG_SPOOL_KEY: str = 'msg_spool'
 #: htmx sets this on every fetch; its presence selects fragment rendering.
 _HX_HEADER = 'HX-Request'
 
 
 def is_htmx(request: web.Request) -> bool:
-    """True when *request* is an htmx-driven fetch (``HX-Request: true``)."""
+    """True when *request* is an htmx-driven fetch (`HX-Request: true`)."""
     return request.headers.get(_HX_HEADER, '').lower() == 'true'
 
 
 def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, Any]:
     """The template context: the shared nonce + subject, then the handler's vars.
 
-    ``crumbs`` / ``actions`` / ``git`` (the §6 page chrome) default empty so every
-    template — and the chrome partials — can rely on them existing. ``git`` defaults
-    to None and ``msg_spool`` to False, which are the two chips' inert states: the auth
+    `crumbs` / `actions` / `git` (the §6 page chrome) default empty so every
+    template — and the chrome partials — can rely on them existing. `git` defaults
+    to None and `msg_spool` to False, which are the two chips' inert states: the auth
     tier builds its own contexts and has neither a clone nor a spool behind it, and
     neither does a signed-out visitor.
     """
@@ -76,10 +76,10 @@ def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, An
 
 def render_block(env: jinja2.Environment, template_name: str, block_name: str,
                  context: dict[str, Any]) -> str:
-    """Render a single named ``{% block %}`` of *template_name* to a string.
+    """Render a single named `{% block %}` of *template_name* to a string.
 
     Only the block's own code runs — the template root does not. So anything a
-    block needs must live *inside* it: a ``{% macro %}`` (or ``{% set %}``) at
+    block needs must live *inside* it: a `{% macro %}` (or `{% set %}`) at
     template top level exists on the full-page path and is undefined here.
 
     Raises :class:`KeyError` if the template has no block called *block_name* —
@@ -98,7 +98,7 @@ def render(request: web.Request, template_name: str,
            fragment: bool = False) -> web.Response:
     """Render *template_name* — its *block* for an htmx fetch, else the full page.
 
-    *fragment* forces the block regardless of ``HX-Request``: the write routes
+    *fragment* forces the block regardless of `HX-Request`: the write routes
     always answer with a fragment (web-server-guide § The site), never the whole shell.
     """
     env = aiohttp_jinja2.get_env(request.app)

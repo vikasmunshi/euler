@@ -1,31 +1,31 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Print the authoring env (``~/.euler/env``) as plaintext — the setup scripts' reader.
+"""Print the authoring env (`~/.euler/env`) as plaintext — the setup scripts' reader.
 
-``~/.euler/env`` is the **authoring source** for deployment config: the FQDN, the DNS-01
-credentials, the SMTP relay's login. The installers (``scripts/setup/*.sh``) used to
-``.``-source it, which stops working the moment the vault encrypts it — so they source
-this instead (``scripts/setup/authoring_env.sh``), and it hands back the same dotenv lines
+`~/.euler/env` is the **authoring source** for deployment config: the FQDN, the DNS-01
+credentials, the SMTP relay's login. The installers (`scripts/setup/*.sh`) used to
+`.`-source it, which stops working the moment the vault encrypts it — so they source
+this instead (`scripts/setup/authoring_env.sh`), and it hands back the same dotenv lines
 whether the file rests as plaintext or as ciphertext.
 
 **This module is a CLI, not a library, and it prints secrets on stdout by design.** It
-therefore prints only under ``__main__`` — importing it emits nothing — and, critically,
+therefore prints only under `__main__` — importing it emits nothing — and, critically,
 **nothing on the git-filter path may ever import it**: :mod:`solver.crypto.vault` and
 :mod:`solver.crypto.ciphers` run there, where stdout belongs to git and a stray byte
-corrupts a blob. The dependency only ever points this way (here → ``vault``), never back.
+corrupts a blob. The dependency only ever points this way (here → `vault`), never back.
 
 **The password**, in the order the operator asked for:
 
-1. an already-unlocked session (``$EULER_VAULT_KEY_FILE``) — a shell that has unlocked
+1. an already-unlocked session (`$EULER_VAULT_KEY_FILE`) — a shell that has unlocked
    passes it to its children for free;
-2. ``$EULER_VAULT_PASSWORD`` — a script, CI, an unattended run;
+2. `$EULER_VAULT_PASSWORD` — a script, CI, an unattended run;
 3. the operator, prompted on **/dev/tty** (not stdin: stdin is usually the calling
    script's, and reading it would eat the installer's own input).
 
-Deliberately stdlib + ``cryptography`` only, through :mod:`solver.crypto.vault`'s
-non-interactive surface: it runs during installs, sometimes under ``sudo``, sometimes
-before much else exists. It reads the *repo-derived* secrets dir (``~euler`` →
-``~/.euler``, see :mod:`solver.crypto.config`), never ``$HOME``, so running it as root
+Deliberately stdlib + `cryptography` only, through :mod:`solver.crypto.vault`'s
+non-interactive surface: it runs during installs, sometimes under `sudo`, sometimes
+before much else exists. It reads the *repo-derived* secrets dir (`~euler` →
+`~/.euler`, see :mod:`solver.crypto.config`), never `$HOME`, so running it as root
 still reads the operator's vault rather than root's.
 """
 from __future__ import annotations
@@ -65,9 +65,9 @@ def _resolve_vault_key() -> bytes | None:
 def main(argv: list[str] | None = None) -> int:
     """Print an env file's plaintext on stdout. 0 on success, 1 on any failure.
 
-    Usage: ``python -m solver.crypto.readenv [PATH]`` — *PATH* defaults to the authoring
-    env (``~/.euler/env``). It is an argument rather than always the default because the
-    caller (``scripts/setup/authoring_env.sh``) names the file it wants: a reader that
+    Usage: `python -m solver.crypto.readenv [PATH]` — *PATH* defaults to the authoring
+    env (`~/.euler/env`). It is an argument rather than always the default because the
+    caller (`scripts/setup/authoring_env.sh`) names the file it wants: a reader that
     quietly substituted a different file than the one it was handed would be right only
     by coincidence.
     """

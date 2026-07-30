@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """Auth-service runtime configuration, read from the environment.
 
-The service runs as ``euler-auth`` from the ``/opt/euler`` system venv and reads
-its scoped ``/etc/euler/auth.env`` (via the unit's ``EnvironmentFile=``) — never
-the repo owner's ``~/.euler/env`` and **never** :mod:`solver.config` (which resolves the
+The service runs as `euler-auth` from the `/opt/euler` system venv and reads
+its scoped `/etc/euler/auth.env` (via the unit's `EnvironmentFile=`) — never
+the repo owner's `~/.euler/env` and **never** :mod:`solver.config` (which resolves the
 shell's identity and repo paths the service user cannot read). Every value has
 an env override so the whole service can run unprivileged in a scratch dir for
 local testing.
@@ -41,21 +41,21 @@ class AuthConfig(NamedTuple):
     #: Version tag of the Terms of use the registration flow records.
     terms_version: str
     #: Where invite-request notices go (the login page's "Request an invite" form).
-    #: Empty disables the notice — the ``requests.json`` queue is the system of record,
+    #: Empty disables the notice — the `requests.json` queue is the system of record,
     #: so a missing address costs a nudge, not a request.
     owner_email: str = ''
-    #: The directory holding the per-user instance sockets (``user-<slug>.sock``): the
+    #: The directory holding the per-user instance sockets (`user-<slug>.sock`): the
     #: teardown push targets the one socket for the affected user. Empty
     #: disables the push (a deploy with no web tier, or a test that does not exercise it)
-    #: — the default, so ``from_env`` is the only place the real directory is set.
+    #: — the default, so `from_env` is the only place the real directory is set.
     user_socket_dir: str = ''
 
     @classmethod
     def from_env(cls) -> AuthConfig:
         """Build the configuration from the process environment.
 
-        ``EULER_ADMIN_TOKEN`` and ``EULER_BASE_URL`` are required (the deployed
-        ``auth.env`` provides them); everything else has a production default.
+        `EULER_ADMIN_TOKEN` and `EULER_BASE_URL` are required (the deployed
+        `auth.env` provides them); everything else has a production default.
         """
         admin_token = os.environ.get('EULER_ADMIN_TOKEN', '').strip()
         base_url = os.environ.get('EULER_BASE_URL', '').strip().rstrip('/')

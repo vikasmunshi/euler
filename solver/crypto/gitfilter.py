@@ -114,7 +114,7 @@ def _write_response(dst: BinaryIO, content: bytes) -> None:
 
 
 def _write_abort(dst: BinaryIO) -> None:
-    """Answer one request with ``status=abort`` — "not this file, and not any after it".
+    """Answer one request with `status=abort` — "not this file, and not any after it".
 
     The protocol's own word for a filter that cannot work at all, and the difference between
     degrading and exploding. git's response depends on `filter.<name>.required`:
@@ -218,8 +218,8 @@ def _rule_present(attrs_path: Path) -> bool:
     """Whether `.gitattributes` already routes the private tree through this filter.
 
     Matched on the two things that carry meaning — the **path pattern** and
-    ``filter=<name>`` — not on the whole line. An exact-line comparison is what broke
-    here: `-diff` was added to the tracked rule without updating ``attr_line``, so the
+    `filter=<name>` — not on the whole line. An exact-line comparison is what broke
+    here: `-diff` was added to the tracked rule without updating `attr_line`, so the
     match failed and :func:`_install` appended a second, *weaker* copy of the same rule
     to a **tracked** file. Every collaborator clone then had a dirty `.gitattributes`
     after `git-sync`, and the duplicate silently un-did `-diff` for the paths it
@@ -243,17 +243,17 @@ def _rule_present(attrs_path: Path) -> bool:
 
 
 def filter_settings(name: str) -> dict[str, str]:
-    """The git config this filter is wired by — the four ``filter.<name>.*`` settings.
+    """The git config this filter is wired by — the four `filter.<name>.*` settings.
 
-    **``-P`` (PYTHONSAFEPATH) is load-bearing, not hygiene.** git runs a filter with the cwd
-    at the *top of the worktree*, and a solver checkout has a ``solver/`` package sitting
-    right there — so without it, ``python -m solver.crypto.gitfilter`` imports the **clone's**
+    **`-P` (PYTHONSAFEPATH) is load-bearing, not hygiene.** git runs a filter with the cwd
+    at the *top of the worktree*, and a solver checkout has a `solver/` package sitting
+    right there — so without it, `python -m solver.crypto.gitfilter` imports the **clone's**
     source instead of the venv's installed copy. A collaborator whose clone is behind then
     runs an old filter against a current key file.
 
     That is not theoretical: three readers could not decrypt because their clones predated
     the machine-local overlay, so the filter could not see the very entry carrying their
-    access — while their shell, a console script with a sane ``sys.path``, reported the key as
+    access — while their shell, a console script with a sane `sys.path`, reported the key as
     available. **A shell and a filter disagreeing about the same clone is the signature of
     this bug**, and the trap is worth remembering: the same one bit a venv probe in the web
     tier (docs/web-server-guide.md).

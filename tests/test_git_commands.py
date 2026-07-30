@@ -3,11 +3,11 @@
 """Per-user native git verbs: floors, guards, and dispatch.
 
 The per-user model makes git native — a collaborator works in their own clone on
-``user/<slug>`` as their own uid — so what the commands must get right is the
-**policy shape** (read verbs at ``reader``, write verbs at ``contributor``,
+`user/<slug>` as their own uid — so what the commands must get right is the
+**policy shape** (read verbs at `reader`, write verbs at `contributor`,
 master admin-gated) and the **guards** (never a non-admin push of master, never a
 force-push of master, a conflicted merge always aborted). Everything that would
-touch a real remote is exercised with ``run_cmdline`` recorded; the real
+touch a real remote is exercised with `run_cmdline` recorded; the real
 two-clone flow is covered by the step-6 runtime verification.
 """
 from __future__ import annotations
@@ -36,12 +36,12 @@ def _subject(profile: str) -> Subject:
 class PolicyShapeTest(unittest.TestCase):
     """The git floors: read for every rung, write for contributor+, master at admin.
 
-    ``git-publish`` sits at **maintainer**, not admin: a maintainer who has just run
-    ``user-authorize`` must be able to publish the enc-key grant they made. That does not
-    widen the gate on ``master`` — ``scripts/git/publish.sh`` pushes it directly only for
+    `git-publish` sits at **maintainer**, not admin: a maintainer who has just run
+    `user-authorize` must be able to publish the enc-key grant they made. That does not
+    widen the gate on `master` — `scripts/git/publish.sh` pushes it directly only for
     the repo owner's GitHub identity and routes everyone else to a branch plus a pull
-    request, and ``git-push`` keeps its own ``admin`` check on the master branch
-    (see ``test_non_admin_cannot_push_master`` below)."""
+    request, and `git-push` keeps its own `admin` check on the master branch
+    (see `test_non_admin_cannot_push_master` below)."""
 
     def test_floors_of_the_git_commands(self) -> None:
         load_commands()

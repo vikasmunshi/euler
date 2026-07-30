@@ -42,24 +42,29 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
     }
 
 
-@register(requires='contributor', help_text='Generate specified target using Claude API.')
+@register(requires='contributor', )
 def claude_api(problem: Problem,
                target: Literal['c', 'py', 'doc', 'notes', 'tags', 'test-cases'], *,
                force: bool = False,
                major: bool = False,
                model: Model | None = None,
                ) -> int:
-    """Generate AI-based content for the specified target.
+    """Generate one of a problem's solution artifacts through the Claude API.
+
+    Dispatches to the generator for *target*, prints the USD/EUR cost of the call, and fails
+    if the generator reports failure.
 
     Args:
-        problem: The `problem` to generate for; defaults to the current problem.
-        target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
-                docs, 'notes' for documentation, 'tags' for tags.json, 'test-cases' for test cases).
-        major:  Whether this is after a major change (e.g. template or instruction change).
-        force:  Whether to force generation even if the target already exists.
-        model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
-
-    Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
+        problem: [problem] The problem to generate for.
+        target: What to generate: 'c' or 'py' for code, 'doc' to refresh the in-source
+            documentation, 'notes' for `notes.html`, 'tags' for `tags.json`, 'test-cases'
+            for test cases.
+        force: Generate even when the target already exists, overwriting it. Defaults to
+            False.
+        major: Regenerate after a major change — a new template or changed instructions —
+            rather than an incremental one. Defaults to False.
+        model: The model to generate with. Defaults to None, which picks Opus for code, docs
+            and notes, and Sonnet for tags and test cases.
     """
     if (generators := _get_generate_funcs()) is None:
         return ExitCodes.EXIT_ERROR

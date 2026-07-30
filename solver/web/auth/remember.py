@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Persistent "remember me" tokens at ``<state>/remember.json``.
+"""Persistent "remember me" tokens at `<state>/remember.json`.
 
-A remember-me cookie is ``<selector>:<validator>``. Per selector the store
+A remember-me cookie is `<selector>:<validator>`. Per selector the store
 keeps the user's email, an HMAC of the validator (keyed by the persistent
-32-byte ``<state>/session-secret``, created on first start), and an expiry —
+32-byte `<state>/session-secret`, created on first start), and an expiry —
 so logins survive a service restart even though sessions are in-memory.
 
 On each use the validator **rotates** (one-time-use): a fresh cookie replaces
@@ -57,7 +57,7 @@ class RememberStore:
                 if isinstance(rec, dict) and float(rec.get('expiry', 0)) > now}
 
     def issue(self, email: str) -> str:
-        """Mint a fresh token for *email*; return the cookie value ``selector:validator``."""
+        """Mint a fresh token for *email*; return the cookie value `selector:validator`."""
         records = self._load()
         selector = secrets.token_urlsafe(9)
         validator = secrets.token_urlsafe(32)
@@ -67,7 +67,7 @@ class RememberStore:
         return f'{selector}:{validator}'
 
     def redeem(self, cookie: str) -> tuple[str, str] | None:
-        """Validate and rotate; return ``(email, new_cookie)`` or None.
+        """Validate and rotate; return `(email, new_cookie)` or None.
 
         A known selector with a wrong validator is deleted (stolen/forged token);
         the legitimate holder simply logs in again.

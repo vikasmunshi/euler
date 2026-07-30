@@ -7,8 +7,8 @@ Three surfaces, in the order the request travels:
 - **the store** — thread semantics with no service around them: who may see what, how
   read-state moves, and the caps and sanitising that bound a store
   holding text other people wrote.
-- **the spool service** — the real ``euler-msg`` apps over real unix sockets, so
-  ``SO_PEERCRED`` identity is exercised rather than stubbed: the tests connect as *this*
+- **the spool service** — the real `euler-msg` apps over real unix sockets, so
+  `SO_PEERCRED` identity is exercised rather than stubbed: the tests connect as *this*
   process's uid and the policy file maps that login. Also the profile floors, and that a
   policy edit lands within one request.
 - **the per-user tier** — the browser half: the pane, the header chip's badge, the write
@@ -16,7 +16,7 @@ Three surfaces, in the order the request travels:
 
 The policy file is written per test with **this process's own login** in it, because the
 spool's whole identity story is "the connecting uid, resolved through
-``authorizations.json``" — a fixture with someone else's name in it would test nothing.
+`authorizations.json`" — a fixture with someone else's name in it would test nothing.
 """
 from __future__ import annotations
 
@@ -58,7 +58,7 @@ _ADMIN_TOKEN = 'test-admin-token'
 
 
 def _write_policy(path: Path, users: dict[str, str]) -> None:
-    """Write an ``authorizations.json`` with *users*, bumping mtime so a reload is seen."""
+    """Write an `authorizations.json` with *users*, bumping mtime so a reload is seen."""
     path.write_text(json.dumps({'ladder': ['reader', 'contributor', 'maintainer', 'admin'],
                                 'users': users}), encoding='utf-8')
     stamp = time.time() + _write_policy.bump                # type: ignore[attr-defined]
@@ -819,7 +819,7 @@ class DeliveryNudgeTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(json.loads(received[0]), {'euler': 'message', 'unread': 2})
 
     async def test_the_push_targets_the_recipients_own_socket(self) -> None:
-        """euler-msg pushes to ``user-<box>.sock`` and never fans out beyond it."""
+        """euler-msg pushes to `user-<box>.sock` and never fans out beyond it."""
         scratch = Path(tempfile.mkdtemp(prefix='euler-msg-push-'))
         self.addCleanup(shutil.rmtree, scratch, True)
         policy = scratch / 'authorizations.json'

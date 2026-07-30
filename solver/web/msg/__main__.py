@@ -1,16 +1,16 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Message service entry point: ``python -m solver.web.msg``.
+"""Message service entry point: `python -m solver.web.msg`.
 
-Run by the root-owned ``euler-msg.service`` as the ``euler-msg`` user from the
-``/opt/euler`` system venv, configured entirely by the environment (the unit's
-``EnvironmentFile=/etc/euler/msg.env``). Binds the public and admin unix sockets,
+Run by the root-owned `euler-msg.service` as the `euler-msg` user from the
+`/opt/euler` system venv, configured entirely by the environment (the unit's
+`EnvironmentFile=/etc/euler/msg.env`). Binds the public and admin unix sockets,
 sets their group/mode, and serves until SIGTERM.
 
-The unit runs this ``RestrictAddressFamilies=AF_UNIX``: this process cannot open a
+The unit runs this `RestrictAddressFamilies=AF_UNIX`: this process cannot open a
 network socket at all, which is what dropping the mail path bought (web-server-guide
 § Messaging — *No mail*). Keep it that way — everything here speaks over
-``/run/euler`` and ``/run/euler-adm``.
+`/run/euler` and `/run/euler-adm`.
 
 For local testing every path is overridable::
 
@@ -38,9 +38,9 @@ log = logging.getLogger('euler-msg')
 async def _bind(app: web.Application, path: Path, group: str) -> web.AppRunner:
     """Serve *app* on the unix socket at *path*.
 
-    With a *group*, the socket is ``0660`` + chgrp'd (the public socket: every
-    collaborator uid connects via ``euler-web``). With an **empty** *group* it is
-    ``0600`` — private to the service user; only root reaches it via sudo (the admin
+    With a *group*, the socket is `0660` + chgrp'd (the public socket: every
+    collaborator uid connects via `euler-web`). With an **empty** *group* it is
+    `0600` — private to the service user; only root reaches it via sudo (the admin
     plane). Access logging is disabled: message subjects and thread ids have no
     business in the journal. No permission to chgrp (a dev run outside the deployed
     identities) is logged and tolerated.

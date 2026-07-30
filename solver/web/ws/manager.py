@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 """Persistent per-user PTY shells: one long-lived solver shell per web user.
 
-A browser terminal (``GET /ws``) attaches to the signed-in user's shell rather
+A browser terminal (`GET /ws`) attaches to the signed-in user's shell rather
 than forking a throwaway one. The PTY's lifetime is decoupled from any single
 WebSocket: the shell keeps running across disconnects and reconnects, and is
-torn down only by in-shell ``exit``, the auth service's logout/revocation push
-(``POST /internal/logout``), or service stop. At most one shell exists per user
+torn down only by in-shell `exit`, the auth service's logout/revocation push
+(`POST /internal/logout`), or service stop. At most one shell exists per user
 *per instance* — a second browser tab for the same user attaches to the *same*
-shell (a shared terminal, like ``tmux attach`` twice).
+shell (a shared terminal, like `tmux attach` twice).
 
 :class:`PtyManager` owns the shells, keyed by user email. Each
 :class:`PersistentPty` runs a single background *drainer* task that reads the
@@ -36,7 +36,7 @@ _REPLAY_CAP: int = 256 * 1024
 
 #: Text frame closing the replay on attach: everything before it is scrollback,
 #: everything after is live. The client must not act on control sequences carried
-#: by the replay (an already-run ``show`` would re-navigate the pane on every
+#: by the replay (an already-run `show` would re-navigate the pane on every
 #: load) — see :meth:`PersistentPty.attach`.
 REPLAY_END: str = json.dumps({'replay': 'end'})
 
@@ -129,7 +129,7 @@ class PersistentPty:
         The replay is followed by the :data:`REPLAY_END` marker — a text frame,
         so it cannot collide with the raw PTY byte stream. The client needs it:
         the buffer may contain the *control sequences* of commands already run
-        (``show``/``edit`` emit OSC 5379), and a terminal that acted on those
+        (`show`/`edit` emit OSC 5379), and a terminal that acted on those
         again would hijack the pane on every page load — a deep link to one
         problem would bounce to whatever the shell last showed. Everything before
         the marker is scrollback to redraw; only what comes after is live.
@@ -157,7 +157,7 @@ class PersistentPty:
         user (:mod:`solver.web.user.msg_api`). It deliberately does not touch the PTY:
         a service-originated nudge written into the shell's byte stream would land in
         the replay buffer and re-fire on every reattach, which is the whole reason
-        ``OSC 5379`` needs its monotonic token (:meth:`attach`). A text frame is not
+        `OSC 5379` needs its monotonic token (:meth:`attach`). A text frame is not
         replayed, so it needs no token and cannot be mistaken for shell output.
         """
         sent = 0
@@ -251,7 +251,7 @@ class PtyManager:
         A shell keeps running while detached so a long benchmark survives a closed
         laptop and a reconnect replays — but a shell nobody has reattached to in a
         day is almost certainly abandoned, so it is reaped to free the process. The
-        stale set is materialised before closing (``close`` mutates the dict).
+        stale set is materialised before closing (`close` mutates the dict).
         """
         if ttl_seconds <= 0:
             return []
@@ -262,11 +262,11 @@ class PtyManager:
         return stale
 
     def snapshot(self) -> list[dict[str, object]]:
-        """Describe every shell this manager holds — the operator's ``status-web`` view.
+        """Describe every shell this manager holds — the operator's `status-web` view.
 
         One record per shell: whose it is, whether the process is still alive, how many
         terminals are attached right now, and how long it has been running with none.
-        Read-only and allocation-cheap; the reporting path (``GET /internal/status``)
+        Read-only and allocation-cheap; the reporting path (`GET /internal/status`)
         must never disturb a live shell.
         """
         return [{'user': email,

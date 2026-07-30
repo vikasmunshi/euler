@@ -6,11 +6,11 @@ Covers the attach path end-to-end against a **fake auth service** on a unix
 socket (real :class:`~solver.web.auth.tickets.TicketStore` semantics — mint
 gated on the session cookie, redeem single-use): identity/pin refusals, the
 ticket-then-fork flow, the binary/resize wire protocol, replay + shared attach
-for a second tab, mint-refusal close, and the ``/internal/logout`` teardown
+for a second tab, mint-refusal close, and the `/internal/logout` teardown
 push. The PTY child is a stub echo shell so the suite stays fast; one
-integration test forks the **real** ``python -m solver`` and drives it over the
+integration test forks the **real** `python -m solver` and drives it over the
 ticket plane (the child redeems against the fake socket via
-``EULER_AUTH_SOCKET``).
+`EULER_AUTH_SOCKET`).
 """
 from __future__ import annotations
 
@@ -290,7 +290,7 @@ class ReaderAttachTests(_WsServiceCase):
 
 class PtySignalTest(unittest.TestCase):
     """The spawn bootstrap makes the slave the controlling terminal, so the
-    line discipline turns a ^C byte into SIGINT — the property ``pty.fork``
+    line discipline turns a ^C byte into SIGINT — the property `pty.fork`
     gave us and the Popen path must preserve."""
 
     @staticmethod
@@ -359,9 +359,9 @@ class ReaperTests(_WsServiceCase):
 
 
 class RealShellTest(_WsServiceCase):
-    """Integration: fork the real ``python -m solver``; the child redeems the
-    ticket against the fake auth socket (``EULER_AUTH_SOCKET``) and starts as
-    the web-channel subject; ``exit`` ends it and the service closes the socket."""
+    """Integration: fork the real `python -m solver`; the child redeems the
+    ticket against the fake auth socket (`EULER_AUTH_SOCKET`) and starts as
+    the web-channel subject; `exit` ends it and the service closes the socket."""
 
     shell_argv: tuple[str, ...] = (sys.executable, '-m', 'solver')
 

@@ -44,9 +44,14 @@ argument coercion from its signature.**
 from solver.shell import console, register
 
 
-@register(help_text='Greet someone.')
+@register(requires='reader')
 def greet(name: str, times: int = 1) -> int:
-    """Print a greeting `times` times."""
+    """Greet someone by name.
+
+    Args:
+        name: Who to greet.
+        times: How many times to greet them. Defaults to 1.
+    """
     for _ in range(times):
         console.print(f'Hello, {name}!')
     return 0
@@ -66,6 +71,8 @@ Three things were derived automatically from the signature:
 - **the command name** `greet` — the function name with underscores turned into
   dashes (`pip_upgrade` → `pip-upgrade`). Override it by renaming the function.
 - **the usage string** — `greet <name> [times=<int>] (default 1)`.
+- **the description** `?` lists, and `docs/commands-index.md` publishes — the
+  docstring's summary line (§3.8).
 - **argument coercion** — `times=3` arrives as the `int` `3`, not the string
   `'3'`, because the parameter is annotated `int`.
 
@@ -76,27 +83,29 @@ Three things were derived automatically from the signature:
 ```python
 def register(
     *,
-    help_text: str = '',
     aliases: tuple[str, ...] = (),
     pass_ctx: bool = False,
     quietable: bool = False,
-    changes_workspace: bool = False,
+    completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
+    requires: Literal['reader', 'contributor', 'maintainer', 'admin'],
 ) -> Callable[[Callable[P, int]], Callable[P, int]]
 ```
+
+`requires` is **mandatory** and keyword-only (§3.7); every other argument is optional.
 
 ### 3.1 Your function must return `int`
 
 The return value **is** the exit code, forwarded verbatim (`0` = success, nonzero
 = failure). The shell composes commands with `;`, `&&`, `||`, so this code is
-what gates a chain (`init 42 && eval && stack`). Use the named constants from
-`solver.shell.command` rather than bare integers:
+what gates a chain (`eval 42 && benchmark`). Use the `ExitCodes` members from
+`solver.config` rather than bare integers:
 
-| constant       | value | meaning                |
-|----------------|-------|------------------------|
-| `EXIT_OK`      | `0`   | success                |
-| `EXIT_ERROR`   | `1`   | generic failure        |
-| `EXIT_USAGE`   | `2`   | parse / usage error    |
-| `EXIT_NOTFOUND`| `127` | unknown command        |
+| member                     | value | meaning             |
+|----------------------------|-------|---------------------|
+| `ExitCodes.EXIT_OK`        | `0`   | success             |
+| `ExitCodes.EXIT_ERROR`     | `1`   | generic failure     |
+| `ExitCodes.EXIT_USAGE`     | `2`   | parse / usage error |
+| `ExitCodes.EXIT_NOTFOUND`  | `127` | unknown command     |
 
 You rarely return `EXIT_USAGE` yourself — the adapter returns it for you when
 argument parsing fails.
@@ -138,12 +147,16 @@ def cmd(required, /, optional='x', *rest, kw_only, flag=False, **extra): ...
 annotation — annotate it `*args: int` to get ints). `**kwargs` soaks up unknown
 `key=value` tokens (coerced against the `**kwargs` annotation).
 
-### 3.3 `help_text` and `aliases`
+### 3.3 The description, and `aliases`
 
-`help_text` is the one-line description shown by `?`. If omitted, the adapter
-falls back to the first line of the function's docstring. `aliases` is a tuple of
-alternative names (`aliases=('eval',)` makes `eval` resolve to `evaluate`);
-registering a name or alias that already exists raises at import time.
+There is **no `help_text`**. A command's one-line description is its docstring's
+summary line (§3.8) — read by `summary_of()` at registration, shown by `?`, and
+published in `docs/commands-index.md`. One summary, one place to edit it: the
+parameter existed for years alongside the docstring and the two drifted apart on most
+commands, each telling the reader something slightly different.
+
+`aliases` is a tuple of alternative names (`aliases=('eval',)` makes `eval` resolve to
+`evaluate`); registering a name or alias that already exists raises at import time.
 
 ### 3.4 Boolean flags
 
@@ -171,8 +184,13 @@ from solver.shell import register
 from solver.shell.command import Context
 
 
-@register(help_text='Show the current problem number.', pass_ctx=True)
+@register(requires='reader', pass_ctx=True)
 def cur(ctx: Context) -> int:
+    """Print the current problem number.
+
+    Args:
+        ctx: [injected] The live shell context; the decorator supplies it.
+    """
     ctx.console.print(ctx.variables['problem'])
     return 0
 ```
@@ -199,12 +217,126 @@ console quiet). Output your command would print is suppressed, while the final
 output is incidental to a scripted pipeline. Quietable commands are marked `»` in
 the help legend.
 
-### 3.7 `changes_workspace` — refreshing workspace state
+### 3.7 `requires` — the authorization floor
 
-`changes_workspace=True` wraps the function so that, after it runs, the shell
-re-derives the `problem` special from the workspace and prints a one-line status
-(`Workspace has #42 …` / `Workspace is empty`). Use it on commands that mutate
-which problem is loaded (`init`, `reset`). These are marked `↻`.
+`requires` is the **minimum profile** a subject needs to run the command, and it is
+**mandatory**: omitting it is a type error, so a command can never be exposed by
+forgetting to declare its floor. The rungs are `reader` → `contributor` →
+`maintainer` → `admin`, compared by rank (`solver/auth`).
+
+The check happens at **registration**, not at call time: below the floor the command
+is never registered at all — invisible to `?` and to completion, "unknown command" if
+typed — while the function is returned unchanged, so it stays an ordinary Python
+callable. Authorization is by profile only; the channel (terminal vs web) is not an
+axis.
+
+Two consequences worth knowing. `registry.all()` is only ever *this* subject's
+registry, which is why the commands that generate or audit documentation from it
+(`update-docs`, `check-commands`) are admin-floored. And a floor is about blast
+radius: read verbs sit at `reader`, verbs that write a collaborator's own branch at
+`contributor`, gates onto `master` at `maintainer`, host and key administration at
+`admin`.
+
+### 3.8 The docstring standard
+
+A command's docstring is not an internal note — it is the command's
+documentation, rendered in two user-facing places: the panel `? <command>`
+prints, and the per-command reference in `docs/commands-index.md` (generated
+verbatim by `update-docs`). Write it for someone at the prompt deciding what to
+type, not for someone reading the call site.
+
+The shape:
+
+```python
+"""<Imperative one-line summary, ending with a period.>
+
+<Prose: what the command does, when to reach for it, how it relates to
+neighbouring commands, and any non-obvious exit code. One or more paragraphs.
+Omit it when the summary genuinely says everything.>
+
+Args:
+    ctx: [injected] The live shell `Context`; the decorator supplies it — never
+        typed at the prompt.
+    problem: [problem] The problem to evaluate. Typed as a bare number
+        (`eval 42`) or `problem=42`; omit it to use the current problem, and
+        supplying it makes that problem current.
+    *categories: Test-case categories: 'dev', 'main', 'extra' or 'all'.
+        Defaults to 'dev' and 'main'.
+    runs: How many times to run each solution per test case. Defaults to 1.
+
+<Optional free sections — `Repeats:`, `Examples:`, `Notes:` — for anything that
+is not per-argument.>
+"""
+```
+
+The rules, all enforced by the `check-commands` command (§3.9):
+
+1. **The first line is the summary**, one line, ending in a period, and **under 80
+   columns**. It is the command's only description: the cell `?` and the generated
+   catalogue tables print, so it has to fit one. Write it as an imperative — "Evaluate
+   a problem's solutions against its test cases." — not as a noun phrase.
+2. **Every parameter is documented, in signature order, and nothing else is.**
+   Variadics keep their stars (`*categories:`, `**kwargs:`). A throwaway `*_` is
+   exempt. An entry with no description counts as undocumented.
+3. **Continuation lines indent four further** than the parameter name. Do *not*
+   align descriptions into a column: alignment reflows every entry the moment a
+   parameter is renamed, and the renderer ignores it anyway.
+4. **State defaults in words** ("Defaults to 1") — the synthesized usage line
+   already shows the machine form, so repeating it buys nothing.
+5. **No `Returns:` and no `Raises:` sections.** Every command returns an `int`
+   exit code and the adapter catches everything it raises, so both sections are
+   pure boilerplate. Where the exit code carries a *meaning* worth gating a
+   `&&` chain on, say so in one prose sentence instead.
+6. **Parameter sections are spelled `Args:`.** Free sections are titled and
+   `Capitalised:` on their own line.
+7. **Rendered lines stay under 100 columns** (`inspect.getdoc` output, i.e. after
+   dedenting), because they land inside a panel and a fenced doc block.
+8. **Inline code takes single backticks** — `` `results.json` ``, markdown-style. The
+   rST `` ``literal`` `` form renders as stray punctuation in the help panel, and the
+   docstrings were swept to one spelling so every reader sees the same thing.
+
+#### Markers — where an argument's value comes from
+
+Two parameters are supplied by the framework rather than typed like the rest, and
+a reader has no way to tell from the name alone. Each takes a marker at the
+**start** of its description:
+
+| Marker        | Applies to                             | Means                                                                                       |
+|---------------|----------------------------------------|---------------------------------------------------------------------------------------------|
+| `[injected]`  | `ctx: Context` (`pass_ctx=True`)       | The decorator injects it; it never consumes a token and never appears in usage.               |
+| `[problem]`   | `problem: Problem` (the problem special) | Typed as a bare number or `problem=N`, or omitted to inherit — and supplying it sets — the current problem. |
+
+Ordinary arguments take no marker; a marker on one is an error.
+
+`--silent` deliberately gets **no** entry. It is not a function parameter at all
+(the adapter synthesizes it for `quietable=True`) and it means the same thing on
+every command, so the renderer supplies the standard line — exactly as the `»`
+legend glyph already does.
+
+#### What the reader gets
+
+`? <command>` renders, in order: the summary; the **facts** about the command, one
+glyph line each — `⚑` the profile floor, `❏` the problem special, `»` `--silent`; the
+docstring's prose; the synthesized usage; a row per typeable argument; then each free
+section. `update-docs` renders that **same model** (`HelpModel`, built by
+`solver/shell/docstring.py`) as markdown into `docs/commands-index.md`, so the
+published reference for a command *is* its help rather than a second description of
+it. Write the docstring once and both are right.
+
+### 3.9 `check-commands` — enforcing the standard
+
+`check-commands` walks the live registry and reports every docstring that breaks
+§3.8, as `command | rule | detail` rows. It is part of
+`scripts/linters/check.sh solver`, so it runs with `mypy` and `flake8`.
+
+```bash
+check-commands              # the whole registry
+check-commands evaluate     # one command, while you rewrite it
+```
+
+Like `update-docs`, it is **admin-floored on purpose**: registration is
+profile-filtered, so a lesser profile's registry is missing commands entirely and
+the check would pass by not looking at them.
 
 ---
 
@@ -217,19 +349,25 @@ Tab-completion is derived from the signature for free:
 - `Optional[...]` offers `none`;
 - keyword parameters offer `name=` once they are not yet supplied on the line.
 
-Two parameter **names** are special-cased: a `problem` parameter (annotated
-`Problem`, optionally `| None`) completes to known problem numbers (with titles)
-plus `{next}`/`{random}`, and `solution` completes to executable files in the
-workspace. Reusing those names gives you that behaviour automatically.
+One parameter **name** is special-cased: a `problem` parameter (annotated `Problem`,
+optionally `| None`) completes to known problem numbers, each shown with its title,
+plus the `{next}` / `{random}` aliases. Reusing that name gives you the behaviour
+automatically.
 
-The `problem` parameter is the **problem special** (see §3.x / the `register`
-docstring): the user gives it as a bare problem number — positionally
-(`eval 42 …`) or as `problem=42` — which the adapter coerces to a `Problem`.
-Supplying it remembers the choice as the workspace problem (`variables.problem`);
-omitting it injects the current workspace problem, so a command can declare
-`problem: Problem` and never worry about resolving it. Only a leading positional
-naming a *known* problem is consumed as `problem`, so a trailing `*categories`
-(or other positionals) are unaffected.
+That parameter is the **problem special**: the user gives it as a bare problem number
+— positionally (`eval 42 …`) or as `problem=42` — which the adapter coerces to a
+`Problem`. Supplying it *remembers* the choice as the current problem
+(`variables.problem`); omitting it injects the current problem, so a command can
+declare `problem: Problem` and never worry about resolving it. Only a leading
+positional naming a *known* problem is consumed as `problem`, so a trailing
+`*categories` (or other positionals) are unaffected. Document it as `[problem]`
+(§3.8) — the marker is how a reader knows the argument is optional at the prompt
+despite having no default in the signature.
+
+For values the type system cannot enumerate — a filename, a topic slug — pass
+`completers={'param': fn}`, where `fn(ctx, incomplete)` returns candidate strings (or
+`Completion` objects, passed through verbatim). It governs the parameter both
+positionally and as `param=`.
 
 ---
 
@@ -268,8 +406,9 @@ nothing to hand-edit. The workflow for a new command module is:
    `modules.csv`.
 3. Verify with `? <command>` in the shell.
 
-To temporarily disable a module's commands, set its `load` cell to `False` —
-the row survives regeneration.
+To temporarily disable a module's commands, clear its `registers_commands` cell.
+Regeneration re-derives the cell by scanning the source, so the change lasts only
+until the next refresh — for anything permanent, remove the decorators.
 
 ---
 
@@ -305,13 +444,15 @@ control over their argument line (`?`, `clear`, the `!` bash passthrough) use
 ## 8. Checklist for a new command
 
 - [ ] Plain function, fully type-annotated, returns `int` (`EXIT_*`).
-- [ ] One-line `help_text` (or a docstring whose first line serves as one).
+- [ ] Docstring follows the standard in §3.8 — summary line, prose, `Args:` with
+      every parameter described and `ctx` / `problem` marked. `check-commands` clean.
 - [ ] `aliases=(...)` if it deserves a short form.
 - [ ] `pass_ctx=True` only if you need shell state.
 - [ ] `quietable=True` if its output is incidental to scripting.
-- [ ] `changes_workspace=True` if it changes which problem is loaded.
-- [ ] `@check_workspace_lock_command` beneath `@register` if it touches `workspace/`.
-- [ ] Module added to `modules.csv` with `load=True` (via the loader).
-- [ ] `mypy solver` and `flake8 solver` clean.
+- [ ] `requires=` set to the least profile that should have it (§3.7) — it shows in
+      the help panel and in the catalogue's `Requires` column.
+- [ ] Module listed in `modules.csv` — run `python -m solver.utils.loader` (or
+      `update-docs`) to add the row by scanning.
+- [ ] `scripts/linters/check.sh solver` clean (`mypy`, `flake8`, `check-commands`).
 - [ ] If you changed any command's name/help/usage, run the `update-docs`
       command to refresh the generated docs.

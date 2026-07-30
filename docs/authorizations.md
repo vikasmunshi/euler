@@ -84,6 +84,7 @@ a profile on each channel.
 | `solver.shell.builtins` | `?` | ✓ | ✓ | ✓ | ✓ |
 | `solver.shell.builtins` | `clear` | ✓ | ✓ | ✓ | ✓ |
 | `solver.shell.builtins` | `echo` | ✓ | ✓ | ✓ | ✓ |
+| `solver.utils.doclint` | `check-commands` |  |  |  | ✓ |
 | `solver.utils.linter` | `lint` |  | ✓ | ✓ | ✓ |
 | `solver.utils.misc` | `manage-config` |  |  |  | ✓ |
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |

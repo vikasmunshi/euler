@@ -3,19 +3,19 @@
 """ Git and GitHub (gh) commands and helpers — the repository workflow.
 
 Per-user native git (docs/web-server-guide.md § Git): a collaborator's shell runs in
-**their own clone** on branch ``user/<slug>`` as their own uid, so git needs no
-broker — the read verbs (`git-status`, `git-sync`) are ``reader``-floor and the
+**their own clone** on branch `user/<slug>` as their own uid, so git needs no
+broker — the read verbs (`git-status`, `git-sync`) are `reader`-floor and the
 write verbs (`git-commit`, `git-push`, `git-hooks`) plus the tree audit
-(`git-audit`) are ``contributor``-floor; the blast radius is their own branch.
-``master`` stays gated: `gh-merge` (``maintainer``) is the one gate through which
-a ``user/<slug>`` branch lands on master, and it opens only for a pull request that sits
-wholly inside one of the content trees a collaborator authors — ``solutions/`` **or**
-``topics/``, never both (:data:`PR_SCOPE`).
+(`git-audit`) are `contributor`-floor; the blast radius is their own branch.
+`master` stays gated: `gh-merge` (`maintainer`) is the one gate through which
+a `user/<slug>` branch lands on master, and it opens only for a pull request that sits
+wholly inside one of the content trees a collaborator authors — `solutions/` **or**
+`topics/`, never both (:data:`PR_SCOPE`).
 
 The **docs set** (:data:`DOCS_PATHS`) is the third body of work with its own pair of
 verbs, floored like the others by blast radius: `git-commit-docs` stages and commits
-exactly those paths on the collaborator's own branch (``contributor``), and
-`gh-merge-docs` is the ``maintainer`` merge gate that admits a pull request confined to
+exactly those paths on the collaborator's own branch (`contributor`), and
+`gh-merge-docs` is the `maintainer` merge gate that admits a pull request confined to
 them — the same read/write/master split the solution verbs above follow. Its
 definition is *what the doc-maintaining commands write* — `update-docs`, `update-models` and
 `update-tags` — wherever that happens to live, so a regeneration lands as one reviewable
@@ -94,26 +94,24 @@ def _commit_paths(problem: Problem) -> list[str]:
 
 
 @register(requires='contributor',
-          help_text="Commit a problem's solution directory and progress, optionally resetting to origin/master.",
           aliases=('commit',), quietable=True, )
 def git_commit(problem: Problem, message: str = '', *, reset: bool = False) -> int:
     """Stage and commit the problem's solution directory.
 
-    Adds everything under `problem.solution_dir`, plus `solutions/problems.json`
-        (the progress file `mark` rewrites), and commits just those
-        — the routine "save my progress" step.
+    Adds everything under `problem.solution_dir`, plus `solutions/problems.json` (the
+    progress file `mark` rewrites), and commits just those — the routine "save my
+    progress" step. Aliased as `commit`.
 
     Args:
-        problem:        The problem to commit.
-        message:        The commit message. When empty (the default) and `reset` is not
-                        set, folds into the last unpushed commit if there is one to amend
-                        (see `git-commit-amend`); otherwise commits fresh under the
-                        default message "solution for pNNNN".
-        reset:          When True, first soft-reset to `origin/master` so the new commit
-                        squashes all local commits into a single checkpoint (working
-                        tree untouched). Defaults to False. Suppresses the empty-message
-                        amend, since squashing to one checkpoint is the opposite intent.
-    Aliased as `commit`.
+        problem: [problem] The problem whose solution directory to commit.
+        message: The commit message. When empty (the default) and `reset` is not set,
+            folds into the last unpushed commit if there is one to amend (see
+            `git-commit-amend`); otherwise commits fresh under the default message
+            "solution for pNNNN".
+        reset: Soft-reset to `origin/master` first, so the new commit squashes all local
+            commits into a single checkpoint (the working tree is untouched). Defaults to
+            False. Suppresses the empty-message amend, since squashing to one checkpoint
+            is the opposite intent.
     """
     # Empty message with no reset prefers folding into HEAD — but only when the loud
     # `git-commit-amend` would actually amend; `_can_amend` decides that quietly so its
@@ -172,7 +170,6 @@ def _can_amend(problem: Problem) -> bool:
 
 
 @register(requires='contributor', quietable=True,
-          help_text="Amend the last unpushed commit with a problem's current changes.",
           aliases=('amend',), )
 def git_commit_amend(problem: Problem) -> int:
     """Fold this problem's current changes into the last commit, message unchanged.
@@ -187,10 +184,10 @@ def git_commit_amend(problem: Problem) -> int:
         `git-commit` is the honest step there. A no-op, not a failure, when nothing
         under those paths has changed.
 
-    Args:
-        problem:        The problem whose changes are folded into HEAD.
-
     Aliased as `amend`.
+
+    Args:
+        problem: [problem] The problem whose changes are folded into HEAD.
     """
     if run(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'],
            cwd=config.root_dir, capture_output=True).returncode != 0:
@@ -218,11 +215,11 @@ def git_commit_amend(problem: Problem) -> int:
 
 
 def _commits_ahead_of_master() -> int:
-    """How many local commits HEAD carries beyond ``origin/master`` (0 when unreadable).
+    """How many local commits HEAD carries beyond `origin/master` (0 when unreadable).
 
-    Read from HEAD, not ``origin/<branch>``: this counts the commits a reset is about to
+    Read from HEAD, not `origin/<branch>`: this counts the commits a reset is about to
     undo, which live in *this* clone whether or not they ever reached the remote. Zero on
-    any failure — a missing ``origin/master``, a detached HEAD — since the reset that
+    any failure — a missing `origin/master`, a detached HEAD — since the reset that
     follows either no-ops or errors on its own, and this only sizes the report.
     """
     proc = run(['git', 'rev-list', '--count', 'origin/master..HEAD'],
@@ -232,7 +229,7 @@ def _commits_ahead_of_master() -> int:
 
 
 @register(requires='contributor', quietable=True, aliases=('reset',),
-          help_text='Un-commit local commits back to origin/master, keeping the changes staged.')
+          )
 def git_reset() -> int:
     """Soft-reset your branch to origin/master — un-commit, keep every change.
 
@@ -265,21 +262,21 @@ def git_reset() -> int:
 # ── the docs set ────────────────────────────────────────────────────────────────────────
 
 #: The documentation set: **everything the doc-maintaining commands write**, plus the prose
-#: around it. Three entry forms — a trailing ``/`` is a directory prefix, an entry with ``*``
+#: around it. Three entry forms — a trailing `/` is a directory prefix, an entry with `*`
 #: is a glob, anything else is an exact path.
 #:
-#: - ``docs/`` — the guides, generated blocks and all (`update-docs`).
-#: - ``topics/`` — the articles, the tag vocabulary and the article index (`update-tags`).
-#: - ``README.md`` — prose plus its own generated package-layout block (`update-docs`).
-#: - ``solver/modules.csv`` — the module registry (`update-docs`, via the loader).
-#: - ``solver/config.json`` — the managed settings, of which `update-models` writes the FX rate.
-#: - ``solver/ai/models.py`` — the ``# GEN:models`` block: the model enum and its pricing
+#: - `docs/` — the guides, generated blocks and all (`update-docs`).
+#: - `topics/` — the articles, the tag vocabulary and the article index (`update-tags`).
+#: - `README.md` — prose plus its own generated package-layout block (`update-docs`).
+#: - `solver/modules.csv` — the module registry (`update-docs`, via the loader).
+#: - `solver/config.json` — the managed settings, of which `update-models` writes the FX rate.
+#: - `solver/ai/models.py` — the `# GEN:models` block: the model enum and its pricing
 #:   (`update-models`). Source code by file type, generated data by content.
-#: - ``solver/ai/claude/CLAUDE.md`` — the repo's Claude guidance, which the root ``CLAUDE.md``
+#: - `solver/ai/claude/CLAUDE.md` — the repo's Claude guidance, which the root `CLAUDE.md`
 #:   symlink points at (`update-docs` writes it through that link).
-#: - ``solver/web/content/home-summary.md`` — the web start page's README slice (`update-docs`).
-#: - ``solutions/**/tags.json`` — the per-problem leg of the tag graph (`update-tags`), the
-#:   only thing this scope reaches inside ``solutions/``: the problem's *own* files stay out.
+#: - `solver/web/content/home-summary.md` — the web start page's README slice (`update-docs`).
+#: - `solutions/**/tags.json` — the per-problem leg of the tag graph (`update-tags`), the
+#:   only thing this scope reaches inside `solutions/`: the problem's *own* files stay out.
 #:
 #: The set is defined by **who writes it**, not by where it lives: several entries sit inside
 #: the package or the solution tree yet are maintained by `update-docs`, `update-models` and
@@ -296,10 +293,10 @@ DOCS_TAG: str = 'docs(topic):'
 
 
 def _in_scope(path: str, scope: tuple[str, ...]) -> bool:
-    """Whether *path* is inside *scope*: ``dir/`` by prefix, ``a/**/b`` by glob, else exactly.
+    """Whether *path* is inside *scope*: `dir/` by prefix, `a/**/b` by glob, else exactly.
 
-    The exact and glob forms are what keep a scope narrow: ``solver/config.json`` admits that
-    one file and never the ``solver/`` tree around it, and ``solutions/**/tags.json`` admits a
+    The exact and glob forms are what keep a scope narrow: `solver/config.json` admits that
+    one file and never the `solver/` tree around it, and `solutions/**/tags.json` admits a
     problem's tag leg without admitting the solution beside it.
     """
     for entry in scope:
@@ -315,10 +312,10 @@ def _in_scope(path: str, scope: tuple[str, ...]) -> bool:
 
 
 def _pathspecs(scope: tuple[str, ...]) -> list[str]:
-    """*scope* as git pathspecs, in argv form (``shlex.quote`` them for a shell command line).
+    """*scope* as git pathspecs, in argv form (`shlex.quote` them for a shell command line).
 
-    A glob entry is given git's explicit ``:(glob)`` magic so its ``**`` means what it means
-    here — path-aware — rather than git's default wildmatch, where ``*`` also crosses ``/``.
+    A glob entry is given git's explicit `:(glob)` magic so its `**` means what it means
+    here — path-aware — rather than git's default wildmatch, where `*` also crosses `/`.
     """
     return [f':(glob){entry}' if '*' in entry else entry for entry in scope]
 
@@ -330,7 +327,7 @@ def _docs_message(message: str) -> str:
 
 
 @register(requires='contributor', quietable=True, aliases=('commit-docs',),
-          help_text='Commit the docs set: everything update-docs, update-models and update-tags write.')
+          )
 def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
     """Stage and commit the documentation set — and nothing else.
 
@@ -348,14 +345,14 @@ def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
     A clean docs set is a no-op, not a failure — so this composes in a `&&` chain after a
         regeneration that had nothing to do.
 
-    Args:
-        message:        The commit message, tagged `(docs)` if it is not already.
-                        Defaults to `(docs) update`.
-        reset:          When True, first soft-reset to `origin/master` so the new commit
-                        squashes all local commits into a single checkpoint (working tree
-                        untouched). Defaults to False.
-
     Aliased as `commit-docs`.
+
+    Args:
+        message: The commit message, tagged `(docs)` if it is not already. Defaults to
+            `(docs) update`.
+        reset: Soft-reset to `origin/master` first, so the new commit squashes all local
+            commits into a single checkpoint (the working tree is untouched). Defaults to
+            False.
     """
     pathspecs: list[str] = _pathspecs(DOCS_PATHS)
     dirty: str = run(['git', 'status', '--porcelain', '--', *pathspecs],
@@ -376,7 +373,6 @@ def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
 
 @register(
     requires='maintainer',
-    help_text='Push targets (keys|scripts|[accent]solutions[/accent]|solver) to remote.',
     aliases=('publish',),
     quietable=True,
 )
@@ -384,16 +380,16 @@ def git_publish(*targets: Literal['scripts', 'solutions', 'solver'],
                 dry_run: bool = False) -> int:
     """Publish changed files for named targets to the remote repository.
 
-    Args:
-        targets: Scopes of files to publish — one or more of 'scripts', 'solutions', or 'solver'.
-                 There is no `keys` scope: key material is not distributed by git any more.
-                 A holder's enc-key file is machine-local, and issuing one is
-                 `user-authorize` sending it through the message spool.
-                 Defaults to 'solutions'.
-        dry_run: Print the push and pull-request commands instead of running them.  Defaults to False.
+    Fails if any target is not one of the accepted scopes.
 
-    Raises:
-        ValueError: If any target is not one of the accepted values.
+    Args:
+        *targets: Scopes of files to publish — one or more of 'scripts', 'solutions' or
+            'solver'. There is no `keys` scope: key material is not distributed by git any
+            more. A holder's enc-key file is machine-local, and issuing one is
+            `user-authorize` sending it through the message spool. Defaults to
+            'solutions'.
+        dry_run: Print the push and pull-request commands instead of running them.
+            Defaults to False.
     """
     if not targets:
         targets = ('solutions',)
@@ -409,13 +405,17 @@ def git_publish(*targets: Literal['scripts', 'solutions', 'solver'],
 
 
 @register(requires='reader',
-          help_text='Display sync state between local and origin/master.', aliases=('status',), )
+          aliases=('status',), )
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
 
+    Reports how far ahead and behind your branch is, and what is uncommitted in the working
+    tree — the read before deciding between `git-push`, `git-sync` and `git-commit`. It is
+    as fresh as the last fetch; `git-sync` is what refreshes it. Aliased as `status`.
+
     Args:
-        details:    When True, lists every differing file and uncommitted change.
-                    When False (default), shows file counts only.
+        details: List every differing file and uncommitted change. Defaults to False, which
+            shows file counts only.
     """
     if details:
         result = run_cmdline(config.scripts.status)
@@ -425,7 +425,7 @@ def git_status(details: bool = False) -> int:
 
 
 def resmudge_private() -> int:
-    """Re-checkout ``solutions/private`` so stored ciphertext decrypts in place.
+    """Re-checkout `solutions/private` so stored ciphertext decrypts in place.
 
     Existing ciphertext in the worktree only decrypts on a *fresh* checkout, and git will not
     re-materialise a file it considers unchanged — hence the delete-then-checkout. That makes
@@ -518,11 +518,11 @@ def private_tree_opens(ref: str = 'HEAD') -> bool:
     A rotation puts the key and the commits out of step, and **which** side is unreadable says
     what to do about it, so both get asked:
 
-    - ``HEAD`` unreadable means the key is current and this clone's own history is not. That is
+    - `HEAD` unreadable means the key is current and this clone's own history is not. That is
       worse than it looks — the worktree is fine, but *any* operation that materialises HEAD
       fails, `git stash` included, so `git-sync` cannot even begin its merge and the clone
       cannot sync its way out of being unsynced. The repair is :func:`_rehome_on_origin`.
-    - ``origin/master`` unreadable means the opposite: this clone is coherent, holding an
+    - `origin/master` unreadable means the opposite: this clone is coherent, holding an
       *old* key, and the published tree was re-encrypted without it. Nothing local can fix
       that — the new key is sitting in the message spool. Merging anyway is what produced a
       filter traceback and a half-applied merge on a live clone.
@@ -634,7 +634,7 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
 def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
     """Wire the git filter once this machine can decrypt — the tail of `msg save`.
 
-    A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as ciphertext.
+    A provisioned clone starts filter-UNWIRED with `solutions/private/**` as ciphertext.
     The moment the master key becomes readable — a maintainer issued it and `msg save` wrote
     it, or a rotation was carried across by `user --regen` — wire the clean/smudge filter and
     re-checkout the private tree, so ciphertext becomes plaintext in place.
@@ -679,7 +679,7 @@ def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
 
 
 @register(requires='reader', aliases=('filter',),
-          help_text='Wire the git encryption filter: [accent.dim]status[/accent.dim] | install.')
+          )
 def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     """Report or wire the transparent encryption filter for `solutions/private`.
 
@@ -691,10 +691,11 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     automatically after a pull that delivers key access — use it when access
     arrived some other way, e.g. right after `key-reconstruct` from shares.
 
-    Args:
-        action: 'status' (default) or 'install'.
-
     Aliased as `filter`.
+
+    Args:
+        action: 'status' reports whether the filter is configured; 'install' configures it.
+            Defaults to 'status'.
     """
     if action == 'status':
         return run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter status')
@@ -709,7 +710,7 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
 
 
 @register(requires='reader',
-          help_text='Bring the local repository in sync with origin/master.', aliases=('sync',), )
+          aliases=('sync',), )
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
 
@@ -766,7 +767,6 @@ def git_sync(dry_run: bool = False) -> int:
 
 
 @register(requires='contributor',
-          help_text='Sign in to GitHub (gh) and set this clone\'s git identity from it.',
           aliases=('identity',), )
 def git_identity() -> int:
     """Configure your git identity and push credential from your GitHub login.
@@ -796,7 +796,7 @@ def _open_pr_url(branch: str) -> str:
 
 
 def _commits_ahead(branch: str) -> int | None:
-    """How many commits ``origin/<branch>`` carries that origin/master does not.
+    """How many commits `origin/<branch>` carries that origin/master does not.
 
     None when that cannot be determined here — no origin/master ref, or the branch
     never reached origin — in which case the caller must not infer "nothing to
@@ -855,7 +855,6 @@ def _ensure_pull_request(branch: str) -> int:
 
 
 @register(requires='contributor', quietable=True,
-          help_text='Push the current branch to origin and open a pull request onto master.',
           aliases=('push',), )
 def git_push(force: bool = False, pr: bool = True) -> int:
     """Push the current branch to origin as yourself, then open its pull request.
@@ -871,10 +870,10 @@ def git_push(force: bool = False, pr: bool = True) -> int:
     branch that already has one open keeps it.
 
     Args:
-        force: Push with `--force-with-lease` — needed after `git-sync` rebased your
-               branch onto a moved origin/master. Refused on master.
-        pr:    Open a pull request onto master after a successful push. Defaults to
-               True; `--no-pr` pushes and stops there.
+        force: Push with `--force-with-lease` — needed after `git-sync` rebased your branch
+            onto a moved origin/master. Refused on master. Defaults to False.
+        pr: Open a pull request onto master after a successful push. Defaults to True;
+            `--no-pr` pushes and stops there.
     """
     branch: str = _current_branch()
     if not branch or branch == 'HEAD':
@@ -926,7 +925,7 @@ def _pr_files(number: int) -> list[str] | None:
 
 
 def _open_prs() -> list[dict[str, object]] | None:
-    """The open pull requests as ``{number, title, branch}`` records, or None on failure.
+    """The open pull requests as `{number, title, branch}` records, or None on failure.
 
     None is NOT "no open PRs": an unauthenticated or offline `gh` fails here, and the
     caller must not read that as an empty queue. `gh pr list` defaults to open PRs; the
@@ -1039,7 +1038,6 @@ def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
 
 
 @register(requires='maintainer', quietable=True,
-          help_text='Content pull requests: [accent.dim]list[/accent.dim] | merge (walk the queue).',
           aliases=('merge',), )
 def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
     """List the open pull requests, or walk them one at a time to rebase-merge.
@@ -1061,10 +1059,11 @@ def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
     The docs set has its own gate and its own verb — `gh-merge-docs` — and the two are
     disjoint: a docs branch is refused here, a solutions branch is refused there.
 
-    Args:
-        action: 'list' (default) or 'merge' (walk the open queue interactively).
-
     Aliased as `merge`.
+
+    Args:
+        action: 'list' shows the open queue; 'merge' walks it interactively. Defaults to
+            'list'.
     """
     if action == 'list':
         return run_cmdline('gh pr list')
@@ -1072,7 +1071,7 @@ def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
 
 
 @register(requires='maintainer', quietable=True, aliases=('merge-docs',),
-          help_text='Walk the open pull requests and merge one confined to the docs set.')
+          )
 def gh_merge_docs() -> int:
     """Walk the open pull requests, rebase-merging those that touch only the docs set.
 
@@ -1097,7 +1096,6 @@ def gh_merge_docs() -> int:
 
 @register(
     requires='contributor',
-    help_text='Run pre-commit hook and simulated pre-push hook.',
     aliases=('hooks',),
     quietable=True,
 )
@@ -1122,7 +1120,6 @@ def git_hooks() -> int:
 
 @register(
     requires='contributor',
-    help_text='Audit the whole tracked tree: private encrypted, no compiled binaries.',
     aliases=('audit',),
     quietable=True,
 )
@@ -1140,11 +1137,11 @@ def git_audit(details: bool = False) -> int:
     stay fast. The cost of that scoping is that neither hook re-examines history
     already on origin; this is the command that does.
 
-    Args:
-        details: When True, lists every file audited. When False (default), reports
-                 counts only. Offenders are listed by path either way.
-
     Aliased as `audit`.
+
+    Args:
+        details: List every file audited. Defaults to False, which reports counts only;
+            offenders are listed by path either way.
     """
     # Name the interpreter rather than let the script resolve `python` off PATH: the
     # web shell inherits the euler-user unit's PATH, which has no venv on it (the unit

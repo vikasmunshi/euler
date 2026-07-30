@@ -6,7 +6,7 @@ An aiohttp + Jinja2 app (autoescape on) that serves the site: home/navigation, t
 read-only summary/problem/code/docs views, and the htmx edit paths. Its routes and
 readers are the library the **per-user** service (:mod:`solver.web.user`) imports and
 serves as one collaborator's own uid; Caddy authenticates every request via
-``forward_auth`` and forwards the trusted ``X-User`` / ``X-Profile``, which this app
+`forward_auth` and forwards the trusted `X-User` / `X-Profile`, which this app
 turns into a :class:`~solver.auth.subject.Subject` to gate its routes.
 
 Import discipline mirrors :mod:`solver.web.auth`: this package imports the

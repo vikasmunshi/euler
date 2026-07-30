@@ -4,21 +4,21 @@
 
 Two listeners, one process, one owner of the spool:
 
-- **Public** (``/run/euler/msg.sock``, group ``euler-web``) — reached by the per-user
-  services and their PTY children, never by Caddy. Identity is ``SO_PEERCRED``: the
+- **Public** (`/run/euler/msg.sock`, group `euler-web`) — reached by the per-user
+  services and their PTY children, never by Caddy. Identity is `SO_PEERCRED`: the
   connecting uid *is* the caller (:mod:`solver.web.msg.identity`), so nothing on this
   wire carries a sender field and there is no bearer token to leak.
-- **Admin** (``/run/euler-adm/msg-admin.sock``, ``0600`` euler-msg-private) — the
+- **Admin** (`/run/euler-adm/msg-admin.sock`, `0600` euler-msg-private) — the
   operator's terminal path, never routed by Caddy and **wheel-gated**: only root (via
-  sudo) can connect, and ``X-Admin-Token`` (kept solely in root-readable
-  ``/etc/euler/msg.env``) is a second check. It exists because the operator's own uid is
-  deliberately **not** in ``euler-web`` and so cannot dial the public socket at all.
+  sudo) can connect, and `X-Admin-Token` (kept solely in root-readable
+  `/etc/euler/msg.env`) is a second check. It exists because the operator's own uid is
+  deliberately **not** in `euler-web` and so cannot dial the public socket at all.
 
 Authorization on both planes is the plain ladder, resolved **per request** against
-``authorizations.json`` — a demote lands within one request rather than at next login.
+`authorizations.json` — a demote lands within one request rather than at next login.
 
 Delivery is a best-effort nudge to the recipient's own instance socket
-(``/internal/message``), the same socket-peer-only push the auth service uses for
+(`/internal/message`), the same socket-peer-only push the auth service uses for
 logout teardown. The spool is the system of record: a lost nudge costs a stale badge
 until the next navigation, never a message.
 """
@@ -44,7 +44,7 @@ log = logging.getLogger('euler-msg')
 
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
-#: Request key under which the peer middleware stores ``(box, identity, profile)``.
+#: Request key under which the peer middleware stores `(box, identity, profile)`.
 CALLER_KEY: str = 'caller'
 #: The floor every read/write of one's *own* mail sits at — the terminal is the front
 #: door for every rung, and a new invitee's first need is often to ask a question.
@@ -105,7 +105,7 @@ class MessageService:
 
     async def notice(self, box: str, subject: str, body: str,
                      targets: list[str]) -> tuple[str | None, list[str]]:
-        """Send a staff notice; return ``(thread id, resolved recipient boxes)``.
+        """Send a staff notice; return `(thread id, resolved recipient boxes)`.
 
         A target the policy does not map is dropped from the set and reported back, so
         a typo is visible to the sender rather than filed into a box nobody can read.
@@ -127,7 +127,7 @@ class MessageService:
         """Nudge each box's own instance so an attached terminal updates its badge.
 
         Only web identities have an instance to push to; a local os-login (the operator
-        at a terminal) has none and simply sees the count when they next run ``msg``.
+        at a terminal) has none and simply sees the count when they next run `msg`.
         Best-effort throughout — the spool is the system of record.
         """
         base = self.config.user_socket_dir
@@ -139,7 +139,7 @@ class MessageService:
             await self._push(box, self.store.unread_count(box, staff=False))
 
     async def _push(self, box: str, unread: int) -> None:
-        """POST ``/internal/message`` to *box*'s instance socket; never raises."""
+        """POST `/internal/message` to *box*'s instance socket; never raises."""
         sock = Path(self.config.user_socket_dir) / f'user-{box}.sock'
         try:
             connector = aiohttp.UnixConnector(path=str(sock))
@@ -159,11 +159,11 @@ def build_app(service: MessageService) -> web.Application:
 
     @web.middleware
     async def peer_identity(request: web.Request, handler: _Handler) -> web.StreamResponse:
-        """Resolve the connecting uid to ``(box, identity, profile)``, or refuse.
+        """Resolve the connecting uid to `(box, identity, profile)`, or refuse.
 
         The kernel is the identity here (web-server-guide § Messaging): a peer whose uid
         maps to no policy entry gets 401, so an un-mapped service account on the
-        ``euler-web`` group cannot read or write anyone's mail.
+        `euler-web` group cannot read or write anyone's mail.
         """
         if request.path == '/healthz':
             return await handler(request)
@@ -176,7 +176,7 @@ def build_app(service: MessageService) -> web.Application:
         return await handler(request)
 
     def caller(request: web.Request) -> tuple[str, str, str]:
-        """``(box, identity, profile)`` for this request (the middleware guarantees it)."""
+        """`(box, identity, profile)` for this request (the middleware guarantees it)."""
         resolved: tuple[str, str, str] = request[CALLER_KEY]
         return resolved
 
@@ -192,13 +192,13 @@ def build_app(service: MessageService) -> web.Application:
         return web.Response(text='ok')
 
     async def mailbox(request: web.Request) -> web.Response:
-        """``GET /messages`` — this caller's threads and unread count."""
+        """`GET /messages` — this caller's threads and unread count."""
         box, _identity, profile = caller(request)
         since = request.query.get('since', '').strip()
         return web.json_response(service.mailbox(box, profile, since=since))
 
     async def one_thread(request: web.Request) -> web.Response:
-        """``GET /messages/{id}`` — one thread, if it is the caller's to read."""
+        """`GET /messages/{id}` — one thread, if it is the caller's to read."""
         box, _identity, profile = caller(request)
         thread = service.store.thread(request.match_info['id'], box,
                                       staff=service.is_staff(profile))
@@ -207,7 +207,7 @@ def build_app(service: MessageService) -> web.Application:
         return web.json_response(service.render_thread(thread))
 
     async def submit(request: web.Request) -> web.Response:
-        """``POST /messages`` ``{subject, body}`` — ask staff something."""
+        """`POST /messages` `{subject, body}` — ask staff something."""
         box, identity, _profile = caller(request)
         body = await _json_body(request)
         thread_id = await service.submit(box, str(body.get('subject', '')), str(body.get('body', '')))
@@ -217,7 +217,7 @@ def build_app(service: MessageService) -> web.Application:
         return web.json_response({'id': thread_id}, status=201)
 
     async def mark_read(request: web.Request) -> web.Response:
-        """``POST /messages/{id}/read`` — mark a thread read by this caller."""
+        """`POST /messages/{id}/read` — mark a thread read by this caller."""
         box, _identity, profile = caller(request)
         thread_id = request.match_info['id']
         if not service.store.mark_read(thread_id, box, staff=service.is_staff(profile)):
@@ -225,7 +225,7 @@ def build_app(service: MessageService) -> web.Application:
         return web.json_response({'id': thread_id, 'read': True})
 
     async def queue(request: web.Request) -> web.Response:
-        """``GET /staff/queue`` — the inbound queue as a work list (staff only)."""
+        """`GET /staff/queue` — the inbound queue as a work list (staff only)."""
         refused = refuse_below(request, STAFF_FLOOR)
         if refused is not None:
             return refused
@@ -234,7 +234,7 @@ def build_app(service: MessageService) -> web.Application:
             {'queue': [service.render_thread(t) for t in service.store.inbound(box)]})
 
     async def notice(request: web.Request) -> web.Response:
-        """``POST /staff/notice`` ``{to, subject, body}`` — named recipients or ``*``."""
+        """`POST /staff/notice` `{to, subject, body}` — named recipients or `*`."""
         refused = refuse_below(request, STAFF_FLOOR)
         if refused is not None:
             return refused
@@ -250,7 +250,7 @@ def build_app(service: MessageService) -> web.Application:
         return web.json_response({'id': thread_id, 'recipients': len(boxes)}, status=201)
 
     async def dismiss(request: web.Request) -> web.Response:
-        """``DELETE /staff/queue/{id}`` — drop a worked message.
+        """`DELETE /staff/queue/{id}` — drop a worked message.
 
         Staff dismiss anything (the queue is theirs to clear). Anyone else may dismiss a
         message **they are a party to**, which is what lets an act clean up after itself:
@@ -301,7 +301,7 @@ def build_admin_app(service: MessageService) -> web.Application:
         return await handler(request)
 
     def resolve(request: web.Request, body: dict[str, Any] | None = None) -> tuple[str, str] | None:
-        """``(box, profile)`` for the asserted identity, or None when unmapped.
+        """`(box, profile)` for the asserted identity, or None when unmapped.
 
         The identity may be a web address or an os-login — :func:`box_of` collapses both
         to the box the store routes by.

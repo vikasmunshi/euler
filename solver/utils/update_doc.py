@@ -24,7 +24,6 @@ from within the solver shell, or non-interactively for a pre-commit / CI lane �
 from __future__ import annotations
 
 import ast
-import inspect
 import re
 from pathlib import Path
 from typing import Callable
@@ -34,13 +33,14 @@ from solver.auth.subject import rank
 from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
+from solver.shell.docstring import GLYPH_PROBLEM, GLYPH_SILENT, help_model
 from solver.utils.loader import load_commands, update_modules
 
 
 def _allowed_profiles(cmd: Command) -> list[str]:
     """The rungs at or above *cmd*'s floor, strongest first (audit view).
 
-    ``requires`` **is** the least profile now (plain ladder floors) — this just
+    `requires` **is** the least profile now (plain ladder floors) — this just
     expands it to the full satisfying set for the availability note.
     """
     floor = rank(cmd.requires)
@@ -92,23 +92,17 @@ def _home_summary(readme: str) -> str:
 
 
 #: Strips rich console markup (`[accent]`, `[/warning]`, …) from help strings.
-_MARKUP = re.compile(r'\[/?[\w.]+\]')
 
-#: Trailing legend glyphs the registry appends to a command's help text.
-#:   ❏ takes an optional problem number (default current) · » supports --silent
+#: The catalogue legend. The floor has its own column, so `⚑` is not repeated here.
 _LEGEND: dict[str, str] = {
-    '❏': 'takes an optional problem number (defaults to the current problem)',
-    '»': 'supports `--silent`',
+    GLYPH_PROBLEM: 'takes an optional problem number (defaults to the current problem)',
+    GLYPH_SILENT: 'supports `--silent`',
 }
 
 
-def _clean_help(help_text: str) -> tuple[str, list[str]]:
-    """Return *(description, glyphs)* — markup-stripped help and its legend glyphs."""
-    text = _MARKUP.sub('', help_text).strip()
-    glyphs = [g for g in _LEGEND if g in text]
-    for g in _LEGEND:
-        text = text.replace(g, '')
-    return ' '.join(text.split()), glyphs
+def _glyphs(cmd: Command) -> list[str]:
+    """The legend glyphs that apply to *cmd*, read from its registration flags."""
+    return [glyph for glyph, _ in help_model(cmd).notes if glyph in _LEGEND]
 
 
 def _aliases(cmd: Command) -> str:
@@ -146,35 +140,19 @@ def _usage_block(cmd: Command) -> str:
     return '```\n' + '\n'.join(lines) + '\n```'
 
 
-def _docstring(cmd: Command) -> str:
-    """The wrapped function's cleaned docstring (decorators unwrapped), or ''."""
-    func = cmd.func
-    while hasattr(func, '__wrapped__'):
-        func = func.__wrapped__
-    return inspect.getdoc(func) or ''
-
-
-def _availability(cmd: Command) -> str:
-    """A one-line `profiles: …` availability note for *cmd*.
-
-    The profiles at or above the command's declared ``requires`` floor. Authorization is
-    by profile only — the channel is not an axis.
-    """
-    return f'* profiles: {", ".join(_allowed_profiles(cmd))}'
-
-
 def _command_table(link_prefix: str) -> str:
-    """A compact `Command | Aliases | Description` table; names link to the index.
+    """A compact `Command | Aliases | Requires | Description` table; names link to the index.
 
     *link_prefix* is prepended to each command's anchor — `commands-index.md#`
     when the table lives in another file, `#` when it lives in the index itself.
     """
-    rows = ['| Command | Aliases | Description |', '|---------|---------|-------------|']
+    rows = ['| Command | Aliases | Requires | Description |',
+            '|---------|---------|----------|-------------|']
     for cmd in registry.all():
-        description, glyphs = _clean_help(cmd.help)
+        glyphs = _glyphs(cmd)
         suffix = (' ' + ' '.join(glyphs)) if glyphs else ''
         link = f'[`{cmd.name}`]({link_prefix}{_fragment(cmd)})'
-        rows.append(f'| {link} | {_aliases(cmd)} | {description}{suffix} |')
+        rows.append(f'| {link} | {_aliases(cmd)} | `{cmd.requires}` | {cmd.help}{suffix} |')
     legend = '\n*Legend: ' + ' · '.join(f'{g} {desc}' for g, desc in _LEGEND.items()) + '.*'
     return '\n'.join(rows) + '\n' + legend
 
@@ -189,32 +167,44 @@ def gen_command_summary() -> str:
     return _command_table('#')
 
 
+def _markdown_help(cmd: Command) -> str:
+    """One command's reference section: the `?` panel, rendered as markdown.
+
+    Same model, same order, same words as the panel `? <command>` prints
+    (`solver/shell/docstring.help_model`) — summary, the glyph facts, prose, usage,
+    arguments, then any free sections. Two renderings of one model is the point: a reader
+    of the guide and a reader at the prompt are told the same thing, and neither can go
+    stale against the other.
+    """
+    model = help_model(cmd)
+    parts: list[str] = [f'#### {_heading_text(cmd)}', '', model.summary, '']
+    parts.append('\n'.join(f'* {glyph} {note}' for glyph, note in model.notes))
+    if model.prose:
+        parts += ['', model.prose]
+    if model.usage:
+        parts += ['', '**usage**', '', '```', '\n'.join(model.usage), '```']
+    if model.arguments:
+        parts += ['', '**arguments**', '', '| argument | description |', '|----------|-------------|']
+        # A `|` in a description would end the cell early; nothing carries one today, but a
+        # future argument that lists alternatives (`py|c`) would silently break the table.
+        parts += [f'| `{name}` | {" ".join(description.split()).replace("|", "\\|")} |'
+                  for name, description in model.arguments]
+    for title, body in model.sections:
+        parts += ['', f'**{title}**', '', body]
+    parts += ['', f'*Defined in* `{model.fqn}`.']
+    return '\n'.join(parts)
+
+
 def gen_command_index() -> str:
-    """A per-command reference (heading, flags, availability, usage, docstring), rule-separated."""
-    sections: list[str] = []
-    for cmd in registry.all():
-        description, glyphs = _clean_help(cmd.help)
-        parts = [f'#### {_heading_text(cmd)}', '']
-        if description:
-            parts += [description]
-        availability = [_availability(cmd)]
-        if glyphs:
-            availability += [f'* {g} {_LEGEND[g]}' for g in glyphs]
-        parts += ['\n'.join(availability)]
-        parts += ['']
-        parts.append(_usage_block(cmd))
-        docstring = _docstring(cmd)
-        if docstring:
-            parts += ['', '```text', docstring, '```']
-        sections.append('\n'.join(parts))
-    return '\n\n---\n\n'.join(sections)
+    """The per-command reference: every command's `?` panel as markdown, rule-separated."""
+    return '\n\n---\n\n'.join(_markdown_help(cmd) for cmd in registry.all())
 
 
 def gen_authorization_table() -> str:
     """The authorization audit table: one row per command, one column per rung, with a
     tick on every rung that may run it.
 
-    A rung is ticked when it sits at or above the command's declared ``requires`` floor,
+    A rung is ticked when it sits at or above the command's declared `requires` floor,
     so each row reads as a run of ticks from its floor rightwards — the shape of the
     ladder is visible at a glance, and a gap would be a bug. Rows are grouped by module,
     then command. Authorization is by profile only — the channel is not an axis.
@@ -365,7 +355,7 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
 
 
 @register(requires='admin',
-          help_text='Regenerate the generated sections of the docs/ guides.', pass_ctx=True, quietable=True)
+          pass_ctx=True, quietable=True)
 def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.
 
@@ -388,10 +378,9 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     complete. The floor is what keeps the generated view whole.
 
     Args:
-        ctx:    The command context.
-        check:  When True, write nothing and fail (non-zero) if any doc is out
-                of date, listing the stale files. When False (default), rewrite
-                the docs in place and report which were updated.
+        ctx: [injected] The live shell context; the decorator supplies it.
+        check: Write nothing and fail if any doc is out of date, listing the stale files.
+            Defaults to False, which rewrites the docs in place and reports which changed.
     """
     if update_modules():
         load_commands(refresh_modules=True)

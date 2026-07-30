@@ -8,8 +8,8 @@ command, :func:`read_thread` lets the command that *works* it read it, and
 grant that hid inside one would be invisible to everything reading the request.
 
 The spool is not a mailbox for people to write in; it is the mechanism by which a
-command tells staff something they have to act on. The founding case is ``user``: it
-mints a keypair, and the public key is useless until an admin runs ``user-authorize``
+command tells staff something they have to act on. The founding case is `user`: it
+mints a keypair, and the public key is useless until an admin runs `user-authorize`
 on it. Until now the account page said *"copy your public key to the admin and wait"*
 with nothing behind "and wait" — the collaborator had to find the operator out of band.
 Now the command itself files the request.
@@ -17,7 +17,7 @@ Now the command itself files the request.
 Two properties every caller depends on:
 
 - **Best-effort, never raising.** A wedged or undeployed spool must not fail the act
-  that was trying to report itself. ``user`` still mints the keypair; the operator just
+  that was trying to report itself. `user` still mints the keypair; the operator just
   learns about it the next time they look rather than from a message. This is the same
   posture as the auth service's invite-request notification (§4): the *thing itself* is
   the system of record, the message is a nudge on top.
@@ -48,11 +48,11 @@ _TIMEOUT: float = 5.0
 
 
 def notify_staff(subject: str, body: str) -> bool:
-    """Queue a message to staff (``maintainer``+); return whether it was accepted.
+    """Queue a message to staff (`maintainer`+); return whether it was accepted.
 
     Callers may ignore the result — it is returned for the few that want to say
     "reported" versus "tell them yourself". Reaches the spool the same way the shell
-    command does, so the sender is this process's uid via ``SO_PEERCRED`` and there is
+    command does, so the sender is this process's uid via `SO_PEERCRED` and there is
     no identity to pass or forge.
     """
     socket_path = os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)
@@ -78,7 +78,7 @@ def notify_user(identity: str, subject: str, body: str) -> bool:
     answer — it is telling people something they never asked for — so it opens one.
 
     Goes through :mod:`solver.web.msg.client`, so it reaches the spool from the operator's
-    terminal (deliberately outside ``euler-web``) via the sudo plane. A rotation is already
+    terminal (deliberately outside `euler-web`) via the sudo plane. A rotation is already
     an interactive admin act, so a sudo prompt here surprises nobody.
     """
     result = call('notice', body={'to': [identity], 'subject': subject, 'body': body})
@@ -93,12 +93,12 @@ def read_thread(thread_id: str) -> dict[str, Any] | None:
 
     The other half of :func:`notify_staff`: a command that *files* a request has a
     counterpart command that *works* it, and the worker needs the thread back. Used by
-    ``user-authorize <thread-id>``, which takes the key-authorization request the
-    collaborator's ``user`` command filed and turns it into a grant.
+    `user-authorize <thread-id>`, which takes the key-authorization request the
+    collaborator's `user` command filed and turns it into a grant.
 
     Unlike :func:`notify_staff` this goes through :mod:`solver.web.msg.client`, so it
     reaches the spool from the operator's own terminal (which is deliberately outside
-    ``euler-web``) via the sudo plane. That is the right trade for this direction: the
+    `euler-web`) via the sudo plane. That is the right trade for this direction: the
     caller is a maintainer who asked for this, so a sudo prompt is expected, where a
     notification firing inside someone's key mint must never prompt for anything.
     """

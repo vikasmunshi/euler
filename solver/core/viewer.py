@@ -5,7 +5,7 @@
 Both drive the same channel-aware bridge to the browser — the app shell's left pane
 (web channel, over the terminal's OSC pipe) or a named browser tab (terminal
 channel) — differing only in the URL. The channel is the resolved subject's
-(``config.subject.channel``), never a CLI flag:
+(`config.subject.channel`), never a CLI flag:
 
 - `show` opens a problem's rendered documentation page (`<base_url>/solutions/NNNN/`).
 - `edit` opens a solution file in the code editor (`<base_url>/edit/solutions/NNNN/<file>`).
@@ -90,11 +90,10 @@ def _solution_file_completions(ctx: Context, incomplete: str) -> Iterable[str | 
 
 
 @register(requires='contributor',
-          help_text='Open a solution file in the web code editor.',
           aliases=('ed',), quietable=True,
           completers={'filename': _solution_file_completions})
 def edit(problem: Problem, filename: str) -> int:
-    """Open *filename* from *problem*'s solution directory in the web code editor.
+    """Open a solution file in the web code editor.
 
     The counterpart to `show` (which opens the rendered problem): *problem* defaults
     to the current problem, and *filename* completes to the files `ls` lists. The
@@ -109,9 +108,10 @@ def edit(problem: Problem, filename: str) -> int:
       (via `browser open-in-tab`); errors early if the `browser` command is
       unavailable.
 
-    Arguments:
-        problem:  The problem owning the file; defaults to the current problem.
-        filename: The solution-directory file to edit (as `ls` lists it).
+    Args:
+        problem: [problem] The problem owning the file.
+        filename: The solution-directory file to edit, as `ls` lists it. It must already
+            exist.
     """
     if '..' in Path(filename).parts or Path(filename).is_absolute() \
             or not (problem.solution_dir / filename).is_file():
@@ -140,7 +140,6 @@ def edit(problem: Problem, filename: str) -> int:
 # ---------------------------------------------------------------------------
 
 @register(requires='reader',
-          help_text='Open problem/file in a browser or the web viewer panel.',
           aliases=('open', 'view'), quietable=True,
           completers={'filename': _solution_file_completions})
 def show(problem: Problem, filename: str | None = None) -> int:
@@ -167,10 +166,10 @@ def show(problem: Problem, filename: str | None = None) -> int:
     instead of the rendered page — it delegates to `edit`, so the same file lookup,
     channel handling, and browser tab apply.
 
-    Arguments:
-        problem:  The `problem` to open; defaults to the current problem.
-        filename: A solution file to open in the code editor; when omitted, opens
-                  the rendered documentation page instead.
+    Args:
+        problem: [problem] The problem to open.
+        filename: A solution file to open in the code editor instead. Defaults to None,
+            which opens the rendered documentation page.
     """
     if filename is not None:
         return edit(problem, filename)

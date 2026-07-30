@@ -4,15 +4,15 @@
 
 Two listeners, one process, one owner of all auth state:
 
-- **Public** (``/run/euler/auth.sock``, group ``euler-web``) — reached through
+- **Public** (`/run/euler/auth.sock`, group `euler-web`) — reached through
   Caddy: SRP login (challenge/verify), session resume/logout, and the
-  ``forward_auth`` endpoint (``200 + X-User + X-Profile`` or ``401``). The
+  `forward_auth` endpoint (`200 + X-User + X-Profile` or `401`). The
   shell-ticket endpoints also live here but are **not routed by Caddy**
   — only socket peers (the ws service, the PTY shells) can reach them.
-- **Admin** (``/run/euler-adm/auth-admin.sock``, ``0600`` euler-auth-private)
+- **Admin** (`/run/euler-adm/auth-admin.sock`, `0600` euler-auth-private)
   — the local admin plane, never routed through Caddy and **wheel-gated**:
-  only root (the operator, via sudo) can connect, and ``X-Admin-Token`` (kept
-  solely in root-readable ``/etc/euler/auth.env``) is a second check. ``users``
+  only root (the operator, via sudo) can connect, and `X-Admin-Token` (kept
+  solely in root-readable `/etc/euler/auth.env`) is a second check. `users`
   add / list / enable / disable / remove.
 
 Access logging is disabled on both listeners: registration/reset URLs carry
@@ -98,7 +98,7 @@ class AuthService:
     # ── sessions & cookies ────────────────────────────────────────────────────────
 
     def session_identity(self, request: web.Request) -> tuple[str, str] | None:
-        """``(email, profile)`` for the request's session cookie, or None."""
+        """`(email, profile)` for the request's session cookie, or None."""
         return self.sessions.get(request.cookies.get(policy.SESSION_COOKIE))
 
     @staticmethod
@@ -118,7 +118,7 @@ class AuthService:
     # ── SRP handshake ─────────────────────────────────────────────────────────────
 
     def start_challenge(self, email: str) -> tuple[str, str]:
-        """Begin a handshake for *email*; return ``(salt_hex, B_hex)``.
+        """Begin a handshake for *email*; return `(salt_hex, B_hex)`.
 
         Unknown or disabled accounts get a stable **decoy** challenge (same shape,
         never stored), so the response does not reveal whether the account exists.
@@ -136,7 +136,7 @@ class AuthService:
 
     def finish_challenge(self, email: str, client_public_hex: str,
                          client_proof_hex: str) -> tuple[str, str] | None:
-        """Verify the client proof; return ``(M2_hex, profile)`` or None (generic failure)."""
+        """Verify the client proof; return `(M2_hex, profile)` or None (generic failure)."""
         key = normalize_email(email)
         entry = self._challenges.pop(key, None)
         if entry is None or entry[1] <= time.time():
@@ -152,11 +152,11 @@ class AuthService:
         return proof.hex(), self.profile_for(key)
 
     def profile_for(self, email: str) -> str:
-        """The web profile for *email* from ``authorizations.json``, defaulting to
-        ``reader`` when unmapped. **Not capped** — in the per-user model an ``admin``
+        """The web profile for *email* from `authorizations.json`, defaulting to
+        `reader` when unmapped. **Not capped** — in the per-user model an `admin`
         account is web-reachable, contained by its own uid + SRP, not the channel.
 
-        Loaded **fresh** so a ``users change`` takes effect on the next login (sessions
+        Loaded **fresh** so a `users change` takes effect on the next login (sessions
         bake the profile in at login, and a change revokes them — the staleness rule).
         """
         return Authorizations.load().profile_for(email) or 'reader'
@@ -173,8 +173,8 @@ class AuthService:
     def notify_invite_request(self, name: str, email: str, remarks: str) -> None:
         """Best-effort: email the operator that an invite request landed. Never raises.
 
-        The queue (``requests.json``) is the system of record; this is only a nudge.
-        Skipped when no owner address is configured (``EULER_OWNER_EMAIL``). Runs the
+        The queue (`requests.json`) is the system of record; this is only a nudge.
+        Skipped when no owner address is configured (`EULER_OWNER_EMAIL`). Runs the
         blocking submit under :func:`asyncio.to_thread` at the call site — never on the
         event loop.
         """
@@ -199,14 +199,14 @@ class AuthService:
         a *running* shell baked its permissions in at startup — so a demoted or
         logged-out account would keep its old authority until the PTY happened to
         die. This closes that gap at the source: on those events we POST
-        ``/internal/logout`` to **the user's own instance socket** (a single,
-        deterministic ``user-<slug>.sock`` in the per-user model — no fan-out), which
+        `/internal/logout` to **the user's own instance socket** (a single,
+        deterministic `user-<slug>.sock` in the per-user model — no fan-out), which
         reaps that user's shell and its attached tabs.
 
         Best-effort: an absent socket (instance not running) or a refusal is skipped —
         the shell simply isn't there. Never raises into the caller (a teardown failure
         must not fail the logout / revocation itself). The endpoint is socket-peer only
-        (Caddy never routes it), and ``euler-auth`` reaches it as a fellow ``euler-web``
+        (Caddy never routes it), and `euler-auth` reaches it as a fellow `euler-web`
         member.
         """
         await self._push_user_instance(email, '/internal/logout')
@@ -226,7 +226,7 @@ class AuthService:
         await self._push_user_instance(email, '/internal/vault-reset')
 
     async def _push_user_instance(self, email: str, path: str) -> None:
-        """POST to *email*'s own instance socket (``user-<slug>.sock``); never raises."""
+        """POST to *email*'s own instance socket (`user-<slug>.sock`); never raises."""
         base = self.config.user_socket_dir
         if not base:
             return
@@ -251,11 +251,11 @@ def build_public_app(service: AuthService) -> web.Application:
         return web.Response(text='ok')
 
     async def check(request: web.Request) -> web.Response:
-        """The Caddy ``forward_auth`` endpoint: 200 + identity headers, or 401.
+        """The Caddy `forward_auth` endpoint: 200 + identity headers, or 401.
 
-        ``X-User-Slug`` (the e-mail's :func:`system_slug`) is what Caddy routes on in
+        `X-User-Slug` (the e-mail's :func:`system_slug`) is what Caddy routes on in
         the per-user model — every request goes to that user's own instance socket
-        ``X-User``/``X-Profile`` still ride along for the app tier.
+        `X-User`/`X-Profile` still ride along for the app tier.
         """
         identity = service.session_identity(request)
         if identity is None:
@@ -314,12 +314,12 @@ def build_public_app(service: AuthService) -> web.Application:
         return response
 
     async def password_change(request: web.Request) -> web.Response:
-        """Change the signed-in user's password (``POST /auth/password``).
+        """Change the signed-in user's password (`POST /auth/password`).
 
         One atomic exchange, distinct from the unauthenticated forgot/reset
         flow: the browser proves the **current** password with an SRP handshake
-        (``/auth/challenge`` first, then ``A``/``M1`` here) and submits the new
-        ``{salt, verifier}`` derived locally — no password ever reaches the
+        (`/auth/challenge` first, then `A`/`M1` here) and submits the new
+        `{salt, verifier}` derived locally — no password ever reaches the
         server. The email comes from the live session, never the client. On
         success every *other* session and all remember-me tokens are revoked;
         the session that made the change stays signed in.
@@ -406,17 +406,17 @@ def build_public_app(service: AuthService) -> web.Application:
         """The app shell's own context, for every page this service renders.
 
         The auth pages are standalone public documents, but they are not a separate
-        place: they render the content service's ``base.html`` / ``_nav.html`` /
-        ``_home.html``, so this service must supply what those templates read.
+        place: they render the content service's `base.html` / `_nav.html` /
+        `_home.html`, so this service must supply what those templates read.
 
-        - ``subject`` — the header's switch. ``None`` on the signed-out pages, which
+        - `subject` — the header's switch. `None` on the signed-out pages, which
           is exactly what renders the header and the start page's cards inert. It is
           **presentational only**: this service's own routes gate on
-          ``session_identity`` directly, never on this. It is built here so that the
-          two pages a *signed-in* visitor can still land on (``/terms``,
-          ``/password``, both deep-link fallbacks) show them their own header rather
+          `session_identity` directly, never on this. It is built here so that the
+          two pages a *signed-in* visitor can still land on (`/terms`,
+          `/password`, both deep-link fallbacks) show them their own header rather
           than an invitation to sign in.
-        - ``readme_html`` — the start page's README, rendered from the packaged copy
+        - `readme_html` — the start page's README, rendered from the packaged copy
           (cached), since this uid has no clone to read one from.
         """
         identity = service.session_identity(request)
@@ -480,7 +480,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         return web.Response(text='ok')
 
     async def list_users(_request: web.Request) -> web.Response:
-        """The roster: every identity in ``authorizations.json`` — web emails
+        """The roster: every identity in `authorizations.json` — web emails
         **and** OS logins — with its profile, joined with SRP registration state for the
         web ones (and any registered web account not yet in the map)."""
         authz_users = Authorizations.load().all_users()          # identity → profile (web + local)
@@ -512,7 +512,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         })
 
     async def set_public_key(request: web.Request) -> web.Response:
-        """``POST /admin/users/{email}/public-key`` ``{public_key}`` — register the account's key.
+        """`POST /admin/users/{email}/public-key` `{public_key}` — register the account's key.
 
         Public material, and the only thing that stayed central when the wrapped master keys
         stopped being: `key-rekey` has to know whose public keys to re-issue a rotated key to,

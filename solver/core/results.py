@@ -187,16 +187,18 @@ def write_results(problem: Problem, results: list[Result], reset: bool = False) 
                'Updated results')
 
 
-@register(requires='reader', help_text='list the results for the problem.')
+@register(requires='reader', )
 def results(problem: Problem, *categories: Literal['all', 'dev', 'main', 'extra']) -> int:
-    """List the results for a given problem.
-    Args:
-        problem:            The `problem` to list `results` for. This is used to locate the `results` file.
-        *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                            (which expands to all three). Defaults to all three if omitted.
+    """List the recorded results for a problem.
 
-    Returns:
-        int: Exit code indicating the completion status of the operation.
+    Reads the `results.json` that `benchmark` (and `eval --record`) writes in the problem's
+    solution directory, and prints one line per recorded run — verdict, average time, run
+    count, solution and arguments. Fails when there is no results file to read.
+
+    Args:
+        problem: [problem] The problem whose results to list.
+        *categories: Test-case categories to include: 'dev', 'main', 'extra', or 'all'
+            (which expands to all three). Defaults to all three.
     """
     if not categories or 'all' in categories:
         eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main', 'extra']

@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 """The content service aiohttp app: identity from forward_auth, routes, gating.
 
-``build_app`` wires the shared CSP middleware (:mod:`solver.web.csp`) and an
-**identity middleware** that turns Caddy's trusted ``X-User`` / ``X-Profile``
-(set by ``forward_auth``; client-supplied copies are stripped at the edge, §4.1)
+`build_app` wires the shared CSP middleware (:mod:`solver.web.csp`) and an
+**identity middleware** that turns Caddy's trusted `X-User` / `X-Profile`
+(set by `forward_auth`; client-supplied copies are stripped at the edge, §4.1)
 into a :class:`~solver.auth.subject.Subject`. Routes gate on it with
-:func:`requires`, the web counterpart of the shell's ``@register(requires=…)``:
-the same profile floor, checked against ``X-Profile``.
+:func:`requires`, the web counterpart of the shell's `@register(requires=…)`:
+the same profile floor, checked against `X-Profile`.
 
-The route surface is the contract in ``docs/web-server-guide.md`` § The site: the app shell at
-``/`` (four fixed regions filling the viewport), read routes rendering into
-``#content`` (full page on a direct visit, fragment + out-of-band header chrome
+The route surface is the contract in `docs/web-server-guide.md` § The site: the app shell at
+`/` (four fixed regions filling the viewport), read routes rendering into
+`#content` (full page on a direct visit, fragment + out-of-band header chrome
 on htmx — :mod:`solver.web.site.render`), canonical trailing-slash 301s, and the
 edit routes — file editor, collection-level progress upload, delete, notes
 regenerate — each write passing the save gate (:mod:`solver.web.site.validate`)
@@ -53,7 +53,7 @@ VIEW = 'reader'
 #: Request key under which build_app stores its SiteConfig for handlers.
 CONFIG_KEY = web.AppKey('site_config', SiteConfig)
 
-#: Repo-relative roots the ``/docs/file/`` view may serve — the ``docs`` + ``about``
+#: Repo-relative roots the `/docs/file/` view may serve — the `docs` + `about`
 #: object trees (declared-readable). Computed once from the policy in build_app.
 READABLE_KEY = web.AppKey('readable_roots', list)
 
@@ -95,7 +95,7 @@ class Action(TypedDict, total=False):
 
 
 def _subject(request: web.Request) -> Subject:
-    """The resolved Subject — handlers behind ``requires()`` always have one."""
+    """The resolved Subject — handlers behind `requires()` always have one."""
     subject: Subject | None = request.get(SUBJECT_KEY)
     assert subject is not None
     return subject
@@ -120,8 +120,8 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     client-supplied copies). A missing/unknown profile yields None — the
     identity middleware then answers 401, since only Caddy should reach us.
 
-    *pin* is this instance's own profile (``EULER_PROFILE``): when set, a
-    request whose ``X-Profile`` differs is refused (None). Caddy routes each
+    *pin* is this instance's own profile (`EULER_PROFILE`): when set, a
+    request whose `X-Profile` differs is refused (None). Caddy routes each
     profile to its own per-profile uid's socket, so a mismatch means misrouting
     or a bypass — the code-side backstop to the OS per-profile boundary.
     """
@@ -168,7 +168,7 @@ async def redirect_slash(request: web.Request) -> web.StreamResponse:
 
 def _problem_number(request: web.Request) -> int:
     """The route's problem number; a GET 301s a non-zero-padded form to the
-    canonical ``NNNN`` (one URL per view — writes just accept the number),
+    canonical `NNNN` (one URL per view — writes just accept the number),
     and an out-of-range number is 404."""
     raw = request.match_info['n']
     number = int(raw)
@@ -189,13 +189,13 @@ async def healthz(request: web.Request) -> web.Response:
 
 @requires(VIEW)
 async def git_chip(request: web.Request) -> web.StreamResponse:
-    """``GET /git`` — the header's git chip on its own.
+    """`GET /git` — the header's git chip on its own.
 
     The refresh half of the chip's contract. Every navigation already re-sends the
     chip out-of-band with the pane (:mod:`solver.web.site.render`), but a git command
     runs in the *terminal*, which is not a navigation — so the shell nudges the page
-    over OSC 5379 (``git;<token>``), ``site.js`` turns that into an
-    ``euler:git-changed`` event, and the chip's own ``hx-get`` lands here. One read,
+    over OSC 5379 (`git;<token>`), `site.js` turns that into an
+    `euler:git-changed` event, and the chip's own `hx-get` lands here. One read,
     at the one moment the state actually changed. Nothing polls.
 
     The middleware has already done the read; this only renders it.
@@ -205,26 +205,26 @@ async def git_chip(request: web.Request) -> web.StreamResponse:
 
 @requires(VIEW)
 async def terminal(request: web.Request) -> web.StreamResponse:
-    """``GET /terminal`` — the right pane's own document (decision 14).
+    """`GET /terminal` — the right pane's own document (decision 14).
 
     A standalone page in its own browsing context, framed by the shell at
-    ``#ws``: xterm.js + the ``/ws`` client (``/assets/terminal.js``), whose
-    ``beforeunload`` guard owns the refresh/close confirmation, and which
-    forwards the shell's OSC 5379 ``show``/``edit`` sequences to the shell
+    `#ws`: xterm.js + the `/ws` client (`/assets/terminal.js`), whose
+    `beforeunload` guard owns the refresh/close confirmation, and which
+    forwards the shell's OSC 5379 `show`/`edit` sequences to the shell
     document so *it* swaps the left pane.
 
-    Note the socket is **not** this service's: Caddy routes ``/ws`` to the
-    per-profile ``euler-ws`` instance. Same origin, so the CSP's
-    ``connect-src 'self'`` covers the ``wss:`` upgrade.
+    Note the socket is **not** this service's: Caddy routes `/ws` to the
+    per-profile `euler-ws` instance. Same origin, so the CSP's
+    `connect-src 'self'` covers the `wss:` upgrade.
     """
     return render(request, 'terminal.html')
 
 
 @requires(VIEW)
 async def home(request: web.Request) -> web.StreamResponse:
-    """The landing — the default ``#content`` (full shell on a direct visit).
+    """The landing — the default `#content` (full shell on a direct visit).
 
-    The pane is ``_home.html``, the same partial the auth service renders behind
+    The pane is `_home.html`, the same partial the auth service renders behind
     its sign-in dialogue: one start page, signed in or out. Its README comes from
     the **packaged** copy rather than this clone's, so it reads the same on every
     collaborator's branch (content.readme_html).
@@ -240,15 +240,15 @@ async def home(request: web.Request) -> web.StreamResponse:
 
 @requires(VIEW)
 async def shell_page(request: web.Request) -> web.StreamResponse:
-    """``GET /shell`` — the Terminal item's page: the start tiles + the user guide.
+    """`GET /shell` — the Terminal item's page: the start tiles + the user guide.
 
     The header's Terminal item and the start page's Terminal tile show and focus the
-    right pane's shell (``data-term-show``, site.js); this is the left pane's half of
-    that click — the start page's shape, with ``docs/user-guide.md`` where the start
-    page carries the README summary. Not to be confused with ``/terminal``, the right
+    right pane's shell (`data-term-show`, site.js); this is the left pane's half of
+    that click — the start page's shape, with `docs/user-guide.md` where the start
+    page carries the README summary. Not to be confused with `/terminal`, the right
     pane's own document: this is a page *about* the shell, that one *is* the shell.
 
-    The guide is read from this clone (``content.read_doc``) rather than the packaged
+    The guide is read from this clone (`content.read_doc`) rather than the packaged
     copy, so a collaborator editing it on their branch sees their own text; a tree
     without it renders the tiles alone rather than 404ing.
     """
@@ -277,7 +277,7 @@ def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]
 
 @requires('reader')
 async def solutions_index(request: web.Request) -> web.StreamResponse:
-    """``GET /solutions/`` — problems.json as 10×10 century grids, two per row."""
+    """`GET /solutions/` — problems.json as 10×10 century grids, two per row."""
     return render(request, 'solutions.html', _solutions_context(request), block='content')
 
 
@@ -335,7 +335,7 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
 
 @requires('reader')
 async def problem_page(request: web.Request) -> web.StreamResponse:
-    """``GET /solutions/{n}/`` — the solution_dir rendered (§7 order)."""
+    """`GET /solutions/{n}/` — the solution_dir rendered (§7 order)."""
     number = _problem_number(request)
     return render(request, 'problem.html', _problem_context(request, number),
                   block='content')
@@ -344,18 +344,18 @@ async def problem_page(request: web.Request) -> web.StreamResponse:
 def _is_pane_view(request: web.Request) -> bool:
     """Whether this file request is an in-pane view rather than a sub-resource embed.
 
-    One URL serves two masters: a statement's ``<img src="resources/…">`` embed, and
+    One URL serves two masters: a statement's `<img src="resources/…">` embed, and
     the Files-panel link (or a pasted URL) that opens the same file *in the pane*. The
     two are told apart by how the browser asks:
 
-    - a **view** — the Files-panel htmx swap (``HX-Request``) or a direct page
-      navigation (``Sec-Fetch-Dest: document``, a pasted URL / opened-in-new-tab) —
+    - a **view** — the Files-panel htmx swap (`HX-Request`) or a direct page
+      navigation (`Sec-Fetch-Dest: document`, a pasted URL / opened-in-new-tab) —
       wants the file rendered in the viewer;
-    - an **embed** — an ``<img>`` sub-resource fetch (``Sec-Fetch-Dest: image`` and
+    - an **embed** — an `<img>` sub-resource fetch (`Sec-Fetch-Dest: image` and
       friends) — wants the raw bytes.
 
     Bytes are the safe default when neither signal is present (an old client, a direct
-    image fetch), so an ``<img>`` never accidentally renders the viewer into itself.
+    image fetch), so an `<img>` never accidentally renders the viewer into itself.
     """
     if is_htmx(request):
         return True
@@ -364,11 +364,11 @@ def _is_pane_view(request: web.Request) -> bool:
 
 @requires('reader')
 async def problem_file(request: web.Request) -> web.StreamResponse:
-    """``GET /solutions/{n}/{filename}`` — one problem file, three shapes for one URL.
+    """`GET /solutions/{n}/{filename}` — one problem file, three shapes for one URL.
 
     Source text renders in the viewer. A non-text file (a statement's images, its data
-    file) is served as **raw bytes** to an ``<img>`` embed, but rendered **in the
-    viewer** — an ``<img>`` for an image, a download link otherwise — when a person
+    file) is served as **raw bytes** to an `<img>` embed, but rendered **in the
+    viewer** — an `<img>` for an image, a download link otherwise — when a person
     opens it in the pane (a Files-panel click, or a direct page view); see
     :func:`_is_pane_view`. Without that split, clicking an image in the Files panel
     swapped raw PNG bytes into the content pane instead of showing the picture.
@@ -421,7 +421,7 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def docs_index(request: web.Request) -> web.StreamResponse:
-    """``GET /docs/`` — the guides index (card grid)."""
+    """`GET /docs/` — the guides index (card grid)."""
     return render(request, 'docs.html', {
         'entries': content.list_docs(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('docs', None)],
@@ -430,13 +430,13 @@ async def docs_index(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def doc_file(request: web.Request) -> web.StreamResponse:
-    """``GET /docs/file/{path}`` — view a doc-referenced repo file.
+    """`GET /docs/file/{path}` — view a doc-referenced repo file.
 
-    Serves a file under the declared-readable content trees (the ``docs`` +
-    ``about`` + ``solutions`` roots) — e.g. ``solver/templates/new.py`` linked
-    from a guide, or a ``../solutions/…`` file linked from a topic. Text renders in the viewer;
+    Serves a file under the declared-readable content trees (the `docs` +
+    `about` + `solutions` roots) — e.g. `solver/templates/new.py` linked
+    from a guide, or a `../solutions/…` file linked from a topic. Text renders in the viewer;
     other bytes are served raw. Anything outside those trees (or a traversal
-    attempt) is 404, so the route can never read the wider ``solver/`` source
+    attempt) is 404, so the route can never read the wider `solver/` source
     or the key material.
     """
     rel = request.match_info['path']
@@ -461,7 +461,7 @@ async def doc_file(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def doc_page(request: web.Request) -> web.StreamResponse:
-    """``GET /docs/{name}`` — one rendered guide (the file may live outside docs/)."""
+    """`GET /docs/{name}` — one rendered guide (the file may live outside docs/)."""
     name = request.match_info['name']
     text = content.read_doc(request.app[CONFIG_KEY].repo_root, name)
     if text is None:
@@ -478,11 +478,11 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def topics_index(request: web.Request) -> web.StreamResponse:
-    """``GET /topics/`` — the topics index (card grid, one section per folder).
+    """`GET /topics/` — the topics index (card grid, one section per folder).
 
-    Finished pages only. ``update-tags`` creates a skeleton for every tag, so the tree holds
+    Finished pages only. `update-tags` creates a skeleton for every tag, so the tree holds
     a page per topic whether or not anyone has written it; a reader given all of them cannot
-    find the few that say something. Nothing here is marked ``final`` because everything is.
+    find the few that say something. Nothing here is marked `final` because everything is.
 
     The maintainer's way into the drafts is an Action, not a link on the page — page verbs live
     in the header's Actions menu (web-server-guide § The site).
@@ -501,11 +501,11 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
 
 @requires('maintainer')
 async def topics_all(request: web.Request) -> web.StreamResponse:
-    """``GET /topics/all`` — every page, draft and final: the writing queue.
+    """`GET /topics/all` — every page, draft and final: the writing queue.
 
     The maintainer's view of the same grid, where the status *is* the information, so the
-    finished ones are marked. Registered ahead of the ``{name:.+}`` page route, which would
-    otherwise swallow it — the cost is that a topic may not be called ``all``.
+    finished ones are marked. Registered ahead of the `{name:.+}` page route, which would
+    otherwise swallow it — the cost is that a topic may not be called `all`.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     return render(request, 'topics.html', {
@@ -519,7 +519,7 @@ async def topics_all(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def topic_page(request: web.Request) -> web.StreamResponse:
-    """``GET /topics/{name}`` — one rendered topic page."""
+    """`GET /topics/{name}` — one rendered topic page."""
     name = request.match_info['name']
     repo_root = request.app[CONFIG_KEY].repo_root
     text = content.read_topic(repo_root, name)
@@ -553,10 +553,10 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def account(request: web.Request) -> web.StreamResponse:
-    """``GET /account`` — identity, the ladder, credentials, and the password form.
+    """`GET /account` — identity, the ladder, credentials, and the password form.
 
-    ``ladder`` is the kernel's own tuple, so the rendered rungs cannot drift from
-    the model the checks actually use. ``email`` feeds the shared password partial
+    `ladder` is the kernel's own tuple, so the rendered rungs cannot drift from
+    the model the checks actually use. `email` feeds the shared password partial
     (the same one /password renders).
     """
     return render(request, 'account.html', {
@@ -571,7 +571,7 @@ async def account(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def about_page(request: web.Request) -> web.StreamResponse:
-    """``GET /about/{name}`` — a footer page: readme · license · acknowledgements."""
+    """`GET /about/{name}` — a footer page: readme · license · acknowledgements."""
     name = request.match_info['name']
     page = content.read_about(request.app[CONFIG_KEY].repo_root, name)
     if page is None:
@@ -588,9 +588,9 @@ async def about_page(request: web.Request) -> web.StreamResponse:
 # ── handlers: edit — every write passes the save gate, every response is a fragment ──
 
 def _editor_target(request: web.Request) -> tuple[int, str, Path]:
-    """Resolve an ``/edit/solutions/{n}/{filename}`` route to its on-disk file.
+    """Resolve an `/edit/solutions/{n}/{filename}` route to its on-disk file.
 
-    The route pattern keeps *filename* bare (no ``/``); here it must also carry
+    The route pattern keeps *filename* bare (no `/`); here it must also carry
     an editable suffix and already exist — the editor edits, `new` creates.
     """
     number = _problem_number(request)
@@ -624,7 +624,7 @@ def _editor_context(request: web.Request, number: int, filename: str, text: str,
 
 @requires('contributor')
 async def file_editor(request: web.Request) -> web.StreamResponse:
-    """``GET /edit/solutions/{n}/{filename}`` — the code editor for the file."""
+    """`GET /edit/solutions/{n}/{filename}` — the code editor for the file."""
     number, filename, target = _editor_target(request)
     text = target.read_text(encoding='utf-8', errors='replace')
     return render(request, 'edit_file.html',
@@ -633,7 +633,7 @@ async def file_editor(request: web.Request) -> web.StreamResponse:
 
 @requires('contributor')
 async def file_save(request: web.Request) -> web.StreamResponse:
-    """``POST /edit/solutions/{n}/{filename}`` — gate, write, editor block.
+    """`POST /edit/solutions/{n}/{filename}` — gate, write, editor block.
 
     The submission runs :func:`~solver.web.site.validate.validate`; what lands
     on disk — and returns in the editor buffer — is the gate's *canonical*
@@ -671,7 +671,7 @@ async def file_save(request: web.Request) -> web.StreamResponse:
 
 
 def _article_target(request: web.Request) -> tuple[str, Path]:
-    """Resolve an ``/edit/topics/{name}`` route to its on-disk article, path-safely.
+    """Resolve an `/edit/topics/{name}` route to its on-disk article, path-safely.
 
     Reuses :func:`content.read_topic`'s segment rules (word-and-hyphen only, confined to the
     tree) by resolving through the same helper: a name it refuses to read is one we refuse to
@@ -697,7 +697,7 @@ def _article_context(name: str, text: str, status: str = '', ok: bool = True,
 
 @requires('maintainer')
 async def article_editor(request: web.Request) -> web.StreamResponse:
-    """``GET /edit/topics/{name}`` — the Markdown editor for a topic article."""
+    """`GET /edit/topics/{name}` — the Markdown editor for a topic article."""
     name, target = _article_target(request)
     text = target.read_text(encoding='utf-8', errors='replace')
     return render(request, 'edit_article.html', _article_context(name, text), block='content')
@@ -705,7 +705,7 @@ async def article_editor(request: web.Request) -> web.StreamResponse:
 
 @requires('maintainer')
 async def article_save(request: web.Request) -> web.StreamResponse:
-    """``POST /edit/topics/{name}`` — gate against the on-disk original, write, editor block.
+    """`POST /edit/topics/{name}` — gate against the on-disk original, write, editor block.
 
     The gate (:func:`~solver.web.site.validate.validate_article`) keeps the tags/status/refs
     comments that bind the page to the graph and refuses raw HTML in the prose; nothing is
@@ -734,11 +734,11 @@ async def article_save(request: web.Request) -> web.StreamResponse:
 
 @requires('maintainer')
 async def article_delete(request: web.Request) -> web.StreamResponse:
-    """``DELETE /edit/topics/{name}`` — delete a topic article → the topics index.
+    """`DELETE /edit/topics/{name}` — delete a topic article → the topics index.
 
-    Maintainer-only, mirroring :func:`file_delete`: the ``.md`` is unlinked, its row is
+    Maintainer-only, mirroring :func:`file_delete`: the `.md` is unlinked, its row is
     pruned from the article index (:func:`content.drop_article`), and the response swaps the
-    ``/topics/`` index back into ``#content`` (the deleted page has none to stay on). The
+    `/topics/` index back into `#content` (the deleted page has none to stay on). The
     :func:`_article_target` resolver 404s a name that does not resolve to an existing page.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
@@ -756,11 +756,11 @@ async def article_delete(request: web.Request) -> web.StreamResponse:
 
 @requires('maintainer')
 async def file_delete(request: web.Request) -> web.StreamResponse:
-    """``DELETE /edit/solutions/{n}/{filename}`` — delete → the problem fragment.
+    """`DELETE /edit/solutions/{n}/{filename}` — delete → the problem fragment.
 
-    Only a bare ``.py``/``.c`` *solution* file is deletable — never the
+    Only a bare `.py`/`.c` *solution* file is deletable — never the
     statement, notes, test cases, results, or resources. The response swaps the
-    problem page back into ``#content`` (the deleted file has no page to stay on).
+    problem page back into `#content` (the deleted file has no page to stay on).
     """
     number = _problem_number(request)
     filename = request.match_info['filename']
@@ -778,10 +778,10 @@ async def file_delete(request: web.Request) -> web.StreamResponse:
 
 @requires('contributor')
 async def progress_editor(request: web.Request) -> web.StreamResponse:
-    """``GET /edit/solutions/`` — the progress upload: an **empty** paste buffer.
+    """`GET /edit/solutions/` — the progress upload: an **empty** paste buffer.
 
     Upload-replace, not edit (web-server-guide § The site): the paste supersedes
-    ``solutions/.progress.html`` wholesale, so the current content is never
+    `solutions/.progress.html` wholesale, so the current content is never
     shipped into the page.
     """
     return render(request, 'edit_progress.html', {
@@ -793,10 +793,10 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
 
 @requires('contributor')
 async def progress_save(request: web.Request) -> web.StreamResponse:
-    """``POST /edit/solutions/`` — save progress → the grid block + status.
+    """`POST /edit/solutions/` — save progress → the grid block + status.
 
     Parse-or-reject: the paste must yield at least one problem before
-    ``solutions/.progress.html`` and the re-derived ``problems.json`` are
+    `solutions/.progress.html` and the re-derived `problems.json` are
     written; a broken paste never lands. Success renders the refreshed
     century grids, failure re-renders the upload with the reason.
     """
@@ -823,7 +823,7 @@ def add_content_routes(app: web.Application) -> None:
     """Register the content route surface (the web-server-guide § The site contract) on *app*.
 
     Shared by :func:`build_app` (the per-profile content service) and the per-user
-    service (:mod:`solver.web.user`), which folds these routes together with ``/ws`` —
+    service (:mod:`solver.web.user`), which folds these routes together with `/ws` —
     so the one route table has a single definition and the two tiers cannot drift.
     """
     app.add_routes([
@@ -870,19 +870,19 @@ def git_middleware(repo_root: Path) -> Any:
     content response carries it (out-of-band beside the crumbs), so every content
     handler would otherwise repeat the same lines. :func:`render` is sync and cannot
     await the read itself, so the state is stashed on the request here and picked up by
-    ``render._context``.
+    `render._context`.
 
     Skipped for anyone without a subject (nothing to show a chip to) and for the
-    routes that render no chrome — the health probe, the static trees, the ``/ws``
+    routes that render no chrome — the health probe, the static trees, the `/ws`
     attach.
 
     **When it fetches.** The divergence is measured against origin/master as the
     *remote* has it, which needs a network fetch (:func:`gitstate.read`'s *fetch*).
     That is worth blocking on only at the moments the user expects a fresh reading and
-    not on every pane swap: a **full page load** (login, reload — ``not is_htmx``) and
-    the **chip's own** ``/git`` endpoint (its git-changed refresh and the 10-minute
+    not on every pane swap: a **full page load** (login, reload — `not is_htmx`) and
+    the **chip's own** `/git` endpoint (its git-changed refresh and the 10-minute
     poller). A content navigation reads the local ref and never waits on the network;
-    ``git-sync`` keeps that ref current by fetching itself.
+    `git-sync` keeps that ref current by fetching itself.
     """
 
     @web.middleware

@@ -209,10 +209,9 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
 # package tree is root-owned, so a lesser rung would reach the network and then fail on the
 # write. The floor names who can actually complete the job.
 @register(requires='admin',
-          help_text='Update Model enum, pricing, and USD→EUR rate.',
           quietable=True)
 def update_models(check: bool = False) -> int:
-    """Refresh the `Model` class in `models.py` and the `usd_to_eur` rate in `config.json`.
+    """Refresh the model catalogue and the USD→EUR rate.
 
     Lists the available Claude models from the Anthropic Models API, scrapes each model's base
     input/output price (per million tokens) from the public pricing page, and rewrites the
@@ -222,9 +221,9 @@ def update_models(check: bool = False) -> int:
     writes it to `config.json` (the rate is used only by `costs`). Nothing else is touched.
 
     Args:
-        check:  When True, write nothing and fail (non-zero) if either the model block or the
-                FX rate is out of date. When False (default), rewrite both in place. The FX rate
-                drifts daily, so `--check` will usually report it as stale.
+        check: Write nothing and fail if either the model block or the FX rate is out of
+            date. Defaults to False, which rewrites both in place. The FX rate drifts daily,
+            so `--check` will usually report it as stale.
     """
     if (models := _collect()) is None:
         return ExitCodes.EXIT_ERROR

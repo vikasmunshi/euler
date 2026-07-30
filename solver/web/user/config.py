@@ -4,11 +4,11 @@
 
 Union of what the content tier needs (:class:`~solver.web.site.config.SiteConfig`)
 and the web shell needs (:class:`~solver.web.ws.config.WsConfig`), plus the one field
-that defines the instance: :attr:`slug` (``EULER_USER_SLUG=%i``) — *whose* uid this
+that defines the instance: :attr:`slug` (`EULER_USER_SLUG=%i`) — *whose* uid this
 process is. Like its predecessors it never imports :mod:`solver.config`; every value
 has an env override so the whole service runs unprivileged in a scratch dir for tests.
-The deployed ``euler-user@<slug>`` unit sets ``EULER_USER_SLUG`` and points
-``EULER_REPO_ROOT`` at that user's ``~/euler`` clone.
+The deployed `euler-user@<slug>` unit sets `EULER_USER_SLUG` and points
+`EULER_REPO_ROOT` at that user's `~/euler` clone.
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from solver.utils.repo_root import repo_root as find_repo_root
 from solver.web.auth import AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET
 from solver.web.site.config import SiteConfig
 
-#: Repo root as seen from this file (``solver/web/user/config.py`` → up 3): the default
+#: Repo root as seen from this file (`solver/web/user/config.py` → up 3): the default
 _GITHUB_URL = 'https://github.com/vikasmunshi/euler'
 _GITHUB_BRANCH = 'master'
 
@@ -35,22 +35,22 @@ def _truthy(value: str) -> bool:
 class UserConfig(NamedTuple):
     """Resolved runtime configuration for one per-user service process."""
 
-    #: The repo working tree this user's instance reads (their own ``~/euler`` clone).
+    #: The repo working tree this user's instance reads (their own `~/euler` clone).
     repo_root: Path
     #: The static content root (assets + vendored JS; Caddy serves them in prod).
     static_dir: Path
-    #: The public unix socket (Caddy upstream: ``/run/euler/user-<slug>.sock``). Ignored
+    #: The public unix socket (Caddy upstream: `/run/euler/user-<slug>.sock`). Ignored
     #: when a listener fd is passed by systemd socket activation, or when serving over TCP.
     socket_path: Path
     #: Group given connect() on the socket (Caddy + the app tier).
     socket_group: str
-    #: ``host:port`` for a dev TCP listener instead of the unix socket ('' = socket).
+    #: `host:port` for a dev TCP listener instead of the unix socket ('' = socket).
     tcp_bind: str
     #: Serve /assets and /vendor from the app (dev only; Caddy serves them in prod).
     serve_static: bool
-    #: **This instance's own user** — the ``system_slug`` of the collaborator whose uid
-    #: it runs as (``EULER_USER_SLUG``). The identity guard refuses any request whose
-    #: ``X-User`` maps to a different slug (misrouting/bypass), and it is the PTY child's
+    #: **This instance's own user** — the `system_slug` of the collaborator whose uid
+    #: it runs as (`EULER_USER_SLUG`). The identity guard refuses any request whose
+    #: `X-User` maps to a different slug (misrouting/bypass), and it is the PTY child's
     #: pin. Empty (dev) accepts any authenticated user.
     slug: str
     #: The auth service's public socket — shell-ticket minting + teardown.

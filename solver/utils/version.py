@@ -12,13 +12,13 @@ from solver.shell import console, register
 
 
 def _git_detail() -> str | None:
-    """Live ``git describe`` of ``config.root_dir``, or ``None`` when it has no git.
+    """Live `git describe` of `config.root_dir`, or `None` when it has no git.
 
-    Describes the clone the shell operates on (``config.root_dir``), which is the
+    Describes the clone the shell operates on (`config.root_dir`), which is the
     useful provenance in every context: the developer's checkout in a terminal, and
-    each collaborator's own ``~/euler`` clone in the deployed per-user web shell —
+    each collaborator's own `~/euler` clone in the deployed per-user web shell —
     there the line answers "what commit is *my* clone on" alongside the frozen build
-    number that ``config.version`` reports. Returns ``None`` only when ``root_dir``
+    number that `config.version` reports. Returns `None` only when `root_dir`
     is not a git repo (or git is unavailable). Run live on every call — the clone's
     commit moves under a long-lived web shell (a git-sync, a commit), so a cached
     value would go stale.
@@ -35,7 +35,7 @@ def _git_detail() -> str | None:
     return proc.stdout.strip() or None
 
 
-@register(requires='reader', help_text='Show the running solver build version.')
+@register(requires='reader', )
 def version() -> int:
     """Print the installed build version, plus live git detail of the clone.
 

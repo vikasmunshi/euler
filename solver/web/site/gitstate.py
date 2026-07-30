@@ -2,51 +2,51 @@
 # -*- coding: utf-8 -*-
 """The header chip's git state: three reads of this user's clone, by need.
 
-The chip in the header (``_git.html``) answers three questions — what branch am I
+The chip in the header (`_git.html`) answers three questions — what branch am I
 on, how far is it from where it should be, and what is in my worktree — and the reads
 are **staged by what each one needs**, so that a partial failure costs only the part
 that failed:
 
-1. ``git rev-parse --abbrev-ref HEAD`` — the branch. A pure ref read: no worktree
+1. `git rev-parse --abbrev-ref HEAD` — the branch. A pure ref read: no worktree
    scan, no filter, so it works with the vault locked. If even this fails the clone
-   is genuinely unreadable (``unknown``).
-2. ``git rev-list --left-right --count origin/master...HEAD`` — the divergence. Also
+   is genuinely unreadable (`unknown`).
+2. `git rev-list --left-right --count origin/master...HEAD` — the divergence. Also
    refs only, no filter. **origin/master, always** — not the branch's own tracking
-   branch (``origin/user/<slug>``, which answers "have I pushed?"), because the
+   branch (`origin/user/<slug>`, which answers "have I pushed?"), because the
    question this workspace turns on is "how far am I from **master**?", where work
-   lands and ``git-sync`` closes the gap. Same ref ``scripts/git/status.sh`` uses;
+   lands and `git-sync` closes the gap. Same ref `scripts/git/status.sh` uses;
    the two must not drift.
-3. ``git status --porcelain=v2`` — the worktree file counts. The **one** read that
+3. `git status --porcelain=v2` — the worktree file counts. The **one** read that
    scans files, so the one the clean filter can block: with the filter wired, git
-   hashes ``solutions/private/**`` through it, and the filter needs the master key,
+   hashes `solutions/private/**` through it, and the filter needs the master key,
    which needs the vault. Right after login the vault is still locked — the browser
-   posts ``/vault/unlock`` only *after* the first render — so this read fails there
-   and the chip is ``worktree_unknown``: branch and divergence stand, the worktree
-   line says "pending", and ``site.js`` refreshes it the moment the auto-unlock lands.
+   posts `/vault/unlock` only *after* the first render — so this read fails there
+   and the chip is `worktree_unknown`: branch and divergence stand, the worktree
+   line says "pending", and `site.js` refreshes it the moment the auto-unlock lands.
    (Before this staging the whole chip read "state not read" on every first load.)
 
 **Freshness against the remote.** The divergence answers "how far am I from
 origin/master?", and the honest answer is against the remote *as it is now*, not as
 this clone last happened to fetch it — a clone that never fetches would read "level"
 while the remote moved ahead (the reported bug). So :func:`read` takes *fetch*: when
-set, it runs a throttled ``git fetch origin master`` before the count, exactly as
-``scripts/git/status.sh`` does. The cost is a network round trip, so the caller spends
+set, it runs a throttled `git fetch origin master` before the count, exactly as
+`scripts/git/status.sh` does. The cost is a network round trip, so the caller spends
 it only where it is worth blocking on — a full page load, the periodic poll, the chip's
-own refresh — and not on content navigations, which read the local ref. ``git-sync``
+own refresh — and not on content navigations, which read the local ref. `git-sync`
 fetches on its own, so after one the ref is already current (and the throttle skips a
 redundant re-fetch). The branch and worktree reads never touch the network.
 
-**No optional locks.** ``git status`` normally takes ``.git/index.lock`` to write
+**No optional locks.** `git status` normally takes `.git/index.lock` to write
 back the refreshed stat cache. This module is a *reader* on a page render, and the
 user is typing real git commands into their terminal one pane away: a status read
-that grabs the index lock can make their ``git-commit`` fail. ``--no-optional-locks``
+that grabs the index lock can make their `git-commit` fail. `--no-optional-locks`
 is git's own answer for status displays — a little repeated hashing, no lock.
 
 **Who runs this.** The per-user service (:mod:`solver.web.user`) *is* the
 collaborator's uid and owns their clone, so the read succeeds there. The shared
-content service (:mod:`solver.web.site`) runs as a uid with no access to ``.git``
-(``SiteConfig.github_url`` documents the same boundary) — there :func:`read` returns
-``None`` and the header simply shows no chip, rather than an error or a guess.
+content service (:mod:`solver.web.site`) runs as a uid with no access to `.git`
+(`SiteConfig.github_url` documents the same boundary) — there :func:`read` returns
+`None` and the header simply shows no chip, rather than an error or a guess.
 
 **When the vault is locked.** With the filter wired, git hashes a changed file
 through the clean filter, which needs the master key. A locked vault therefore turns
@@ -94,20 +94,20 @@ _UPSTREAM: str = 'origin/master'
 class GitState:
     """One clone's state, as the header chip shows it.
 
-    ``unknown`` is the honest zero value: the clone is there but git would not answer
+    `unknown` is the honest zero value: the clone is there but git would not answer
     (a locked vault, a timeout, a detached HEAD with no upstream). Every field below
     it is then meaningless and the template shows none of them.
     """
 
-    #: Current branch, e.g. ``user/vikas``. Empty on a detached HEAD.
+    #: Current branch, e.g. `user/vikas`. Empty on a detached HEAD.
     branch: str = ''
-    #: The ref the divergence is measured against — ``origin/master``, always (§ module
+    #: The ref the divergence is measured against — `origin/master`, always (§ module
     #: docstring). Empty when this clone has no such ref, which is the one case the
     #: counts below mean nothing and the chip shows neither.
     upstream: str = ''
-    #: Commits on this branch that ``origin/master`` does not have (as of the last fetch).
+    #: Commits on this branch that `origin/master` does not have (as of the last fetch).
     ahead: int = 0
-    #: Commits on ``origin/master`` that this branch does not have (as of the last fetch).
+    #: Commits on `origin/master` that this branch does not have (as of the last fetch).
     behind: int = 0
     #: Tracked files changed in the worktree but not staged.
     modified: int = 0
@@ -122,7 +122,7 @@ class GitState:
     #: — the one part that touches files, so the one part the clean filter (and thus a
     #: locked vault) can block. The chip then shows branch + divergence and says the
     #: worktree state is pending, rather than blanking the whole chip or — worse —
-    #: reading three zero counts as "clean". Distinct from ``unknown``: this is a chip
+    #: reading three zero counts as "clean". Distinct from `unknown`: this is a chip
     #: that knows *most* of the answer.
     worktree_unknown: bool = False
     #: True when even the branch could not be read — the clone is there but git would
@@ -135,7 +135,7 @@ class GitState:
 
         False, not None, when :attr:`worktree_unknown`: the ring must not appear on a
         state we could not read, and the template gates the whole worktree block on
-        ``worktree_unknown`` before it ever consults this.
+        `worktree_unknown` before it ever consults this.
         """
         return bool(self.modified or self.staged or self.untracked)
 
@@ -152,17 +152,17 @@ class GitState:
 
 
 def _parse_counts(text: str) -> tuple[int, int, int]:
-    """``git status --porcelain=v2`` → (modified, staged, untracked).
+    """`git status --porcelain=v2` → (modified, staged, untracked).
 
     The format is line-oriented and stable (git's own machine contract):
 
-    - ``1 <XY> …`` ordinary change · ``2 <XY> …`` rename/copy — ``XY`` is the
+    - `1 <XY> …` ordinary change · `2 <XY> …` rename/copy — `XY` is the
       staged/worktree status pair, so a file can be counted in both columns (staged
       *and* modified) exactly as git reports it.
-    - ``? <path>`` untracked · ``u …`` unmerged (counted as modified: it is work in
-      the tree either way) · ``! <path>`` ignored (never counted).
+    - `? <path>` untracked · `u …` unmerged (counted as modified: it is work in
+      the tree either way) · `! <path>` ignored (never counted).
 
-    The branch is **not** read here: it comes from a separate ``rev-parse`` that does
+    The branch is **not** read here: it comes from a separate `rev-parse` that does
     not scan the worktree, so the chip keeps its branch even when this scan is blocked.
     """
     modified = staged = untracked = 0
@@ -181,9 +181,9 @@ def _parse_counts(text: str) -> tuple[int, int, int]:
 
 
 def _parse_divergence(text: str) -> tuple[int, int]:
-    """``git rev-list --left-right --count origin/master...HEAD`` → (ahead, behind).
+    """`git rev-list --left-right --count origin/master...HEAD` → (ahead, behind).
 
-    The output is ``<left>\\t<right>``: left counts commits reachable from
+    The output is `<left>\\t<right>`: left counts commits reachable from
     origin/master but not HEAD (**behind**), right the reverse (**ahead**).
     """
     fields = text.split()
@@ -195,13 +195,13 @@ def _parse_divergence(text: str) -> tuple[int, int]:
 
 
 def filter_wired(repo_root: Path) -> bool:
-    """Whether this clone has the clean/smudge filter registered in ``.git/config``.
+    """Whether this clone has the clean/smudge filter registered in `.git/config`.
 
     Public because the account page reports the same fact in its tools list
     (:mod:`solver.web.user.vault_api`) — one reader, so the header's chip and the
     account row cannot come to different conclusions about the same clone.
 
-    Read from the file rather than asked of ``git config``: it is the same answer for
+    Read from the file rather than asked of `git config`: it is the same answer for
     the price of one small read instead of a second subprocess per page. The driver's
     name comes from :mod:`solver.crypto.config`, which owns every git-filter wire
     constant — this must not carry a second copy of it.
@@ -217,9 +217,9 @@ def filter_wired(repo_root: Path) -> bool:
 
 
 def _fetch_due(repo_root: Path) -> bool:
-    """Whether origin/master is stale enough to re-fetch, by ``.git/FETCH_HEAD``'s mtime.
+    """Whether origin/master is stale enough to re-fetch, by `.git/FETCH_HEAD`'s mtime.
 
-    Any fetch writes FETCH_HEAD — the chip's own *and* the user's ``git-sync`` — so this
+    Any fetch writes FETCH_HEAD — the chip's own *and* the user's `git-sync` — so this
     one mtime throttles them together: a load right after a sync does not re-fetch what
     the sync just pulled. A never-fetched clone (no FETCH_HEAD) is always due.
     """
@@ -231,7 +231,7 @@ def _fetch_due(repo_root: Path) -> bool:
 
 
 async def _git(repo_root: Path, *args: str, timeout: float = _TIMEOUT) -> tuple[int, str]:
-    """Run ``git *args`` in *repo_root* → (returncode, stdout). Never raises.
+    """Run `git *args` in *repo_root* → (returncode, stdout). Never raises.
 
     A non-zero exit **logs git's own stderr**. That message is the whole diagnosis
     when a read fails on a clone this uid cannot open to look for itself — a dubious
@@ -268,23 +268,23 @@ async def _git(repo_root: Path, *args: str, timeout: float = _TIMEOUT) -> tuple[
 async def read(repo_root: Path, *, fetch: bool = False) -> GitState | None:
     """This clone's state, or None when *repo_root* is not a git clone we can read.
 
-    None is the "no chip" answer — no ``.git`` at all, or a uid without access to it
+    None is the "no chip" answer — no `.git` at all, or a uid without access to it
     (the shared content tier). The reads are staged by what each one *needs*, so a
-    vault that is still locked (the browser posts ``/vault/unlock`` only after the
+    vault that is still locked (the browser posts `/vault/unlock` only after the
     first render) costs the worktree counts, not the whole chip:
 
     1. **branch** — a pure ref read, no worktree scan, no filter. The spine: if even
-       this fails the clone is genuinely unreadable → ``unknown``.
+       this fails the clone is genuinely unreadable → `unknown`.
     2. **divergence** from origin/master — a pure ref walk, no filter. Absent only
        when there is no such ref (a fresh provision); the chip drops the counts, not
        the state.
     3. **worktree counts** — the one read that scans files, so the one the clean
-       filter (a locked vault) can block → ``worktree_unknown``, branch + divergence
+       filter (a locked vault) can block → `worktree_unknown`, branch + divergence
        kept.
 
     *fetch* asks for the divergence to be measured against the remote as it is *now*,
-    not as this clone last saw it — a throttled ``git fetch origin master`` first, like
-    ``scripts/git/status.sh``. The caller sets it for the moments worth a network round
+    not as this clone last saw it — a throttled `git fetch origin master` first, like
+    `scripts/git/status.sh`. The caller sets it for the moments worth a network round
     trip (a full page load, the periodic poll, the chip's own refresh) and leaves it off
     for content navigations, which read the local ref and never block on the network.
     """

@@ -4,20 +4,20 @@
 
 Three routes:
 
-- ``GET /healthz`` — the kit's socket probe.
-- ``GET /ws`` — attach the browser terminal to the caller's persistent shell.
-  Identity is the trusted ``X-User``/``X-Profile`` pair (Caddy strips
-  client-supplied copies and stamps the ``forward_auth`` response); the
-  instance refuses a profile that differs from its ``EULER_PROFILE`` pin and
+- `GET /healthz` — the kit's socket probe.
+- `GET /ws` — attach the browser terminal to the caller's persistent shell.
+  Identity is the trusted `X-User`/`X-Profile` pair (Caddy strips
+  client-supplied copies and stamps the `forward_auth` response); the
+  instance refuses a profile that differs from its `EULER_PROFILE` pin and
   gates attach on the **reader floor**. On fork it forwards the caller's
-  session cookie to the auth service's ``POST /shell-ticket`` and passes only
+  session cookie to the auth service's `POST /shell-ticket` and passes only
   the minted single-use ticket to the child.
-- ``POST /internal/logout`` — the auth service's teardown push:
-  ``{"email": …}`` closes that user's shell. Socket-peer only — Caddy routes
-  ``/ws`` and nothing else to this service, so no browser can reach it.
+- `POST /internal/logout` — the auth service's teardown push:
+  `{"email": …}` closes that user's shell. Socket-peer only — Caddy routes
+  `/ws` and nothing else to this service, so no browser can reach it.
 
-Wire protocol on ``/ws``: binary frames are raw PTY bytes both ways; a text
-frame ``{"resize": [cols, rows]}`` propagates the browser geometry.
+Wire protocol on `/ws`: binary frames are raw PTY bytes both ways; a text
+frame `{"resize": [cols, rows]}` propagates the browser geometry.
 """
 from __future__ import annotations
 
@@ -71,7 +71,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
 
 
 def _parse_resize(raw: str) -> tuple[int, int] | None:
-    """Parse a ``{"resize": [cols, rows]}`` control frame; None if it is not one."""
+    """Parse a `{"resize": [cols, rows]}` control frame; None if it is not one."""
     try:
         message = json.loads(raw)
     except json.JSONDecodeError:

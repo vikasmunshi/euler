@@ -24,7 +24,7 @@ _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c
 
 
 @register(requires='contributor',
-          help_text='Build all C source files for given/current problem.', aliases=('compile',), quietable=True)
+          aliases=('compile',), quietable=True)
 def compile_c(problem: Problem, *, clean: bool = True) -> int:
     """Compile every C solution for the problem into a runnable binary.
 
@@ -33,9 +33,9 @@ def compile_c(problem: Problem, *, clean: bool = True) -> int:
     error. `eval` and `benchmark` invoke this for you, so you rarely call it directly.
 
     Args:
-        problem:            The `problem` to compile.
-        clean:              When False, reuse up-to-date build output from previous compilations.
-                            Defaults to True.
+        problem: [problem] The problem whose C sources to compile.
+        clean: When False, reuse up-to-date build output from previous compilations.
+            Defaults to True.
     """
     source_files: list[Path] = sorted(s for s in problem.solution_dir.iterdir() if s.is_file() and s.suffix == '.c')
     result: int = ExitCodes.EXIT_OK
@@ -229,7 +229,7 @@ def _evaluate(problem: Problem,
     return rc
 
 
-@register(requires='contributor', help_text='Evaluate solutions to given/current problem.', aliases=('eval',))
+@register(requires='contributor', aliases=('eval',))
 def evaluate(problem: Problem,
              *categories: Literal['all', 'dev', 'main', 'extra'],
              clean: bool = True,
@@ -241,28 +241,36 @@ def evaluate(problem: Problem,
              solution_index: int | None = None,
              verbose: bool = False,
              ) -> int:
-    """
-    Evaluate solutions against test cases.
+    """Evaluate a problem's solutions against its test cases.
+
+    Compiles what needs compiling, then runs every solution the problem has — each
+    language, each solution index — against every test case in the chosen categories,
+    printing a verdict line per run: `correct`, `incorrect`, `error`, `overflow`, `timeout`
+    or `unknown` (a case with no recorded answer). Fails unless every run was correct, so it
+    gates a chain: `eval 42 && benchmark`.
+
+    This is the correctness check and it records nothing. `benchmark` is the measuring
+    counterpart — same runs, but written to `results.json` and repeated an adaptive number
+    of times.
 
     Args:
-    problem:            The `problem` to evaluate.
-    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                        (which expands to all three). Defaults to 'dev', 'main' if omitted.
-    clean:              When False, reuse up-to-date build output from previous compilations.
-                        Defaults to True.
-    timeout:            Timeout in seconds for solution execution. If None, uses default timeout.
-                        Defaults to None.
-    disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
-                        If True, only one run will be performed for each solution.
-    lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
-    runs:               Number of times to run each solution per test case (useful for timing).
-                        Defaults to 1.
-    show:               If True, appends '--show' to the arguments passed to each solution;
-                        defaults to False.
-    solution_index:     Specific solution index to evaluate.
-                        If provided, only this solution index will be evaluated.
-                        If None, all solutions will be evaluated. Defaults to None.
-    verbose:            If True, prints error information during evaluation. Defaults to False.
+        problem: [problem] The problem whose solutions to evaluate.
+        *categories: Test-case categories to include: 'dev', 'main', 'extra', or 'all'
+            (which expands to all three). Defaults to 'dev' and 'main'.
+        clean: When False, reuse up-to-date build output from previous compilations.
+            Defaults to True.
+        timeout: Timeout in seconds for a solution's execution. None uses the configured
+            default. Defaults to None.
+        disable_timeout: Run without a timeout, and only once per test case. Defaults to
+            False.
+        lang: Which language to evaluate: '*', 'py' or 'c'. Defaults to '*'.
+        runs: Number of times to run each solution per test case, useful for timing.
+            Defaults to 1.
+        show: Append '--show' to the arguments passed to each solution, so it prints its
+            own diagnostics. Defaults to False.
+        solution_index: Evaluate only this solution index. None evaluates every solution.
+            Defaults to None.
+        verbose: Print error detail as each solution runs. Defaults to False.
     """
     if not categories:
         eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main']
@@ -287,7 +295,7 @@ def evaluate(problem: Problem,
     return rc
 
 
-@register(requires='contributor', help_text='Benchmark solutions to given/current problem.', quietable=True)
+@register(requires='contributor', quietable=True)
 def benchmark(problem: Problem,
               *categories: Literal['all', 'dev', 'main', 'extra'],
               clean: bool = True,
@@ -325,24 +333,22 @@ def benchmark(problem: Problem,
         `disable_timeout` overrides this and forces a single run.
 
     Args:
-        problem:            The `problem` to benchmark.
-        *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                            (which expands to all three). Defaults to all three if omitted.
-        clean:              When False, reuse up-to-date build output from previous compilations.
-                            Defaults to True.
-        timeout:            Per-run timeout in seconds for solution execution. If None, uses the
-                            default timeout. Defaults to None.
-        disable_timeout:    If True, disables the timeout for solution execution and forces a single
-                            run (bypassing the adaptive repeat count above). Defaults to False.
-        lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
-        solution_index:     Specific solution index to evaluate.
-                            If provided, only this solution index will be evaluated.
-                            If None, all solutions will be evaluated. Defaults to None.
-        reset:              If True, replace any existing persisted results with this run on a
-                            clean completion. If the benchmark is interrupted, existing results
-                            are preserved untouched. Defaults to False (results are merged with
-                            existing records as a running average).
-        verbose:            If True, prints error information during evaluation. Defaults to False.
+        problem: [problem] The problem whose solutions to benchmark.
+        *categories: Test-case categories to include: 'dev', 'main', 'extra', or 'all'
+            (which expands to all three). Defaults to all three.
+        clean: When False, reuse up-to-date build output from previous compilations.
+            Defaults to True.
+        timeout: Per-run timeout in seconds for a solution's execution. None uses the
+            configured default. Defaults to None.
+        disable_timeout: Run without a timeout, and only once per test case — bypassing the
+            adaptive repeat count above. Defaults to False.
+        lang: Which language to benchmark: '*', 'py' or 'c'. Defaults to '*'.
+        solution_index: Benchmark only this solution index. None benchmarks every solution.
+            Defaults to None.
+        reset: Replace any existing persisted results with this run, on a clean completion;
+            an interrupted run leaves them untouched. Defaults to False, which merges this
+            run into the existing records as a running average.
+        verbose: Print error detail as each solution runs. Defaults to False.
     """
     if not categories or 'all' in categories:
         eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main', 'extra']

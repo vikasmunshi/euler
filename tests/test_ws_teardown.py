@@ -4,8 +4,8 @@
 logout and on every revocation path, so a *running* shell's baked-in permissions die
 at the event, not at the next login.
 
-A fake ws instance (a unix socket exposing ``POST /internal/logout``, recording the
-emails it is told to reap) stands in for the real ``euler-ws@<profile>`` sockets. The
+A fake ws instance (a unix socket exposing `POST /internal/logout`, recording the
+emails it is told to reap) stands in for the real `euler-ws@<profile>` sockets. The
 real auth handlers are driven over TCP TestServers; the assertion is that the fake
 socket received the teardown for the right email. The push is best-effort, so a second
 test points the service at a missing socket and confirms the handler still succeeds."""

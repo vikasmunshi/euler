@@ -1,18 +1,18 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Per-user service entry point: ``python -m solver.web.user``.
+"""Per-user service entry point: `python -m solver.web.user`.
 
-Run by ``euler-user@<slug>.service`` as that collaborator's own uid — named for the
-slug itself (``ue0f4a1``) — from the ``/opt/euler`` system venv, configured entirely by
-the environment (``EULER_USER_SLUG``, ``EULER_REPO_ROOT`` → their ``~/euler`` clone).
+Run by `euler-user@<slug>.service` as that collaborator's own uid — named for the
+slug itself (`ue0f4a1`) — from the `/opt/euler` system venv, configured entirely by
+the environment (`EULER_USER_SLUG`, `EULER_REPO_ROOT` → their `~/euler` clone).
 
 Three ways to get a listener, in order:
 
-1. **systemd socket activation** — the ``euler-user@<slug>.socket`` unit creates
-   ``/run/euler/user-<slug>.sock`` and passes it as ``fd 3`` (``LISTEN_FDS``); the
+1. **systemd socket activation** — the `euler-user@<slug>.socket` unit creates
+   `/run/euler/user-<slug>.sock` and passes it as `fd 3` (`LISTEN_FDS`); the
    service is spawned on the first Caddy connection and reuses that socket.
-2. **dev TCP** — ``EULER_USER_TCP=127.0.0.1:8084`` (the harness path).
-3. **plain unix bind** — ``EULER_USER_SOCKET`` (an always-on run without a .socket unit).
+2. **dev TCP** — `EULER_USER_TCP=127.0.0.1:8084` (the harness path).
+3. **plain unix bind** — `EULER_USER_SOCKET` (an always-on run without a .socket unit).
 
 Serves until SIGTERM; cleanup reaps every PTY child::
 

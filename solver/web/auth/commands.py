@@ -1,11 +1,11 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The ``users`` shell command: account administration for the operator.
+"""The `users` shell command: account administration for the operator.
 
-The whole command is **``admin``-floored** and every account verb re-executes the admin
-CLI (:mod:`solver.web.auth.admin`) under ``sudo`` — which writes the root-owned SoR and
+The whole command is **`admin`-floored** and every account verb re-executes the admin
+CLI (:mod:`solver.web.auth.admin`) under `sudo` — which writes the root-owned SoR and
 reaches the euler-auth admin socket. That is the real containment: a web shell (a
-per-user, non-privileged uid) cannot obtain ``sudo``, so nothing here runs over the
+per-user, non-privileged uid) cannot obtain `sudo`, so nothing here runs over the
 web regardless of the profile floor. The channel is not an authorization axis.
 
 The verbs:
@@ -30,12 +30,12 @@ The verbs:
   provisioning kit, never the admin CLI, and touches no account — so, like `list`, it
   takes no identity.
 
-`add` is two-path: an ``@``-address provisions the collaborator's **own OS instance**
-(uid, home, a filter-disabled clone on ``user/<slug>``, the socket — via
+`add` is two-path: an `@`-address provisions the collaborator's **own OS instance**
+(uid, home, a filter-disabled clone on `user/<slug>`, the socket — via
 :mod:`scripts/setup/user.sh`) and then mints a web invite (the account record
 appears when the invitee registers); a bare os-login is a direct map entry (no instance,
-no invite). ``remove`` reverses both: it drops the account, then deprovisions the
-instance. ``redeploy`` re-asserts the shared layer across **every** provisioned
+no invite). `remove` reverses both: it drops the account, then deprovisions the
+instance. `redeploy` re-asserts the shared layer across **every** provisioned
 collaborator — notably re-laying their git hooks from this checkout, the only plane that
 can (their clone cannot be synced from here: the smudge filter needs a master key that
 lives in the user's own vault). Password reset is self-service — there is deliberately no
@@ -55,7 +55,7 @@ from solver.auth.identity import system_slug
 from solver.config import config
 from solver.shell import console, register
 
-#: Profiles assignable to a web account (``admin`` is local-os-login-only).
+#: Profiles assignable to a web account (`admin` is local-os-login-only).
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')
 
 
@@ -87,14 +87,14 @@ def _sudo_admin_capture(action: str) -> tuple[int, str]:
 
 
 def _provision_kit(action: str, *args: str) -> int:
-    """Drive the per-user provisioning kit (``scripts/setup/user.sh``) under sudo.
+    """Drive the per-user provisioning kit (`scripts/setup/user.sh`) under sudo.
 
-    ``provision``/``deprovision`` create or tear down one collaborator's OS instance —
-    uid, home, the filter-disabled clone on ``user/<slug>``, and the socket — and take a
-    slug; ``redeploy`` sweeps every provisioned user and takes none. Best-effort:
+    `provision`/`deprovision` create or tear down one collaborator's OS instance —
+    uid, home, the filter-disabled clone on `user/<slug>`, and the socket — and take a
+    slug; `redeploy` sweeps every provisioned user and takes none. Best-effort:
     a host without the kit (a plain dev checkout without the web stack laid down) has
     nothing to provision, so a missing script is a note, not a failure — the account map
-    + invite still stand and the instance can be laid down later with ``make deploy-user``.
+    + invite still stand and the instance can be laid down later with `make deploy-user`.
     """
     script = Path(config.root_dir) / 'scripts' / 'setup' / 'user.sh'
     if not script.exists():
@@ -108,12 +108,12 @@ def _provision_kit(action: str, *args: str) -> int:
 
 
 def _add_account(identity: str, profile: str) -> int:
-    """Add an account: a web ``@``-address provisions its instance then mints an invite;
+    """Add an account: a web `@`-address provisions its instance then mints an invite;
     a bare os-login is a direct map entry only.
 
     Provisioning runs BEFORE the invite so a failed host never leaves a dangling invite
-    to a box with no shell (provisioning is idempotent). Shared by the ``add`` verb and
-    the ``process-requests`` accept path.
+    to a box with no shell (provisioning is idempotent). Shared by the `add` verb and
+    the `process-requests` accept path.
     """
     if '@' in identity:
         rc = _provision_kit('provision', system_slug(identity), identity, profile)
@@ -192,7 +192,7 @@ def _roster() -> list[dict[str, str]] | None:
 
 
 def registered_public_keys() -> dict[str, str] | None:
-    """``{identity: public_key}`` for every web account — ``''`` where none is registered.
+    """`{identity: public_key}` for every web account — `''` where none is registered.
 
     The registry :func:`~solver.crypto.keys.key_rekey` re-issues a rotated master key to.
     Lives on this side because reading it is a sudo call to the auth admin plane, and the
@@ -210,9 +210,9 @@ def registered_public_keys() -> dict[str, str] | None:
 
 
 def _can_elevate() -> bool:
-    """Whether ``sudo`` could possibly work in this process.
+    """Whether `sudo` could possibly work in this process.
 
-    A web shell's service unit sets ``NoNewPrivileges=true``, which makes elevation
+    A web shell's service unit sets `NoNewPrivileges=true`, which makes elevation
     impossible for it and every child — so sudo does not merely fail there, it fails
     *loudly*, printing two lines about container configuration that mean nothing to the
     person reading them. Asking the kernel first turns a confusing diagnostic into a path
@@ -238,37 +238,38 @@ def register_public_key(identity: str, public_key: str) -> bool:
 
 
 @register(requires='admin',
-          help_text='Administer accounts, invite requests and enc-key entries (via sudo admin CLI).')
+          )
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
                           'remove', 'set-keys', 'redeploy'] = 'list',
           identity: str = '',
           profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
 
-    The whole command is ``admin``-floored and the account verbs re-execute the admin CLI
-    under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
+    The whole command is `admin`-floored and the account verbs re-execute the admin CLI
+    under `sudo` (the SoR + admin socket are root-only). There is no reader/maintainer
     tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-    ``set-keys`` sweeps every collaborator and registers the X25519 **public** key each of
-    them already holds — the registry ``key-rekey`` re-issues a rotated master key to. It
+    `set-keys` sweeps every collaborator and registers the X25519 **public** key each of
+    them already holds — the registry `key-rekey` re-issues a rotated master key to. It
     takes no identity and reads no secret: a holder's enc-key file names their public key,
     and that is all it copies. `user-authorize` registers as it issues when it can reach the
     admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
-    run it whenever ``users list`` shows a blank column.
+    run it whenever `users list` shows a blank column.
 
     Args:
-        action:   list (roster + pending + the invite-request queue), process-requests
-                  (walk the queue interactively — accept / ignore / dismiss each),
-                  add (map entry — ``@email`` also provisions + mints an invite; a bare
-                  os-login is local-only), change (reassign a profile), enable / disable
-                  (web SRP state), remove (drop the account/entry), set-keys (register every
-                  collaborator's public key for rekey — takes no identity), redeploy
-                  (re-assert the per-user host layer and re-lay every collaborator's git
-                  hooks — takes no identity, and drops live shells).
-        identity: a web email (``@``) or a local OS login (required for the account verbs;
-                  not for list / process-requests / set-keys / redeploy).
-        profile:  the profile to assign (add / change). ``admin`` is valid only for a local
-                  os-login, never a web account.
+        action: What to do — `list` the roster, pending invites and the invite-request
+            queue; `process-requests` walks that queue interactively (accept / ignore /
+            dismiss each); `add` a map entry (`@email` also provisions the account and mints
+            an invite, a bare os-login is local-only); `change` reassigns a profile;
+            `enable` / `disable` the web SRP state; `remove` drops the account or entry;
+            `set-keys` registers every collaborator's public key for rekey; `redeploy`
+            re-asserts the per-user host layer and re-lays every collaborator's git hooks,
+            dropping live shells. Defaults to `list`.
+        identity: Whose account to act on: a web email (with `@`) or a local OS login.
+            Required for the account verbs, unused by `list` / `process-requests` /
+            `set-keys` / `redeploy`.
+        profile: The profile to assign, for `add` / `change`. `admin` is valid only for a
+            local os-login, never a web account.
     """
     if action == 'list':
         return _sudo_admin('list')                     # roster + pending + invite-request queue

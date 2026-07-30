@@ -8,7 +8,7 @@ talk over a unix socket without importing this package, since loading auth's
 modules into another service's process would recouple the two and defeat the
 isolation that gave the spool its own uid (web-server-guide § Messaging).
 
-This module stays as the auth tier's name for it, so its callers — the ``users``
+This module stays as the auth tier's name for it, so its callers — the `users`
 command and the identity resolver — need no edit.
 """
 from __future__ import annotations

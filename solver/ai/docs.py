@@ -133,9 +133,9 @@ def _parse_tags_json(raw: str) -> str | None:
 
 
 def has_solutions(problem: Problem) -> bool:
-    """Whether the problem has any solution file on disk (``pNNNN_sK.py`` / ``.c``).
+    """Whether the problem has any solution file on disk (`pNNNN_sK.py` / `.c`).
 
-    This - not the progress-file ``solved`` flag - is what decides which tag prompt applies:
+    This - not the progress-file `solved` flag - is what decides which tag prompt applies:
     the full prompt reads solutions to assign techniques and takeaways, so with no solution to
     read there is nothing for those two facets to describe.
     """

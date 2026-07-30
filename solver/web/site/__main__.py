@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Content service entry point: ``python -m solver.web.site``.
+"""Content service entry point: `python -m solver.web.site`.
 
-Run by ``euler-content@<profile>.service`` as the per-profile ``euler-content``
-uid from the ``/opt/euler`` system venv, configured entirely by the environment.
-Binds the public unix socket (``/run/euler/content.sock``, group ``euler-web`` —
+Run by `euler-content@<profile>.service` as the per-profile `euler-content`
+uid from the `/opt/euler` system venv, configured entirely by the environment.
+Binds the public unix socket (`/run/euler/content.sock`, group `euler-web` —
 Caddy's upstream) and serves until SIGTERM.
 
 For local testing, bind a TCP port and serve the static assets from the app::

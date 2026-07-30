@@ -218,7 +218,7 @@ USER_MARKER = '<!--user-->'
 def _split_prompt(prompt: str) -> tuple[str, str]:
     """Split a combined prompt into '(system, user)'.
 
-    At the explicit ``USER_MARKER`` line when the template has one; otherwise at the first
+    At the explicit `USER_MARKER` line when the template has one; otherwise at the first
     '## ' heading. The explicit form lets a template keep large static blocks (vocabularies,
     conventions) in the cached system half even when those blocks contain '## ' headings.
     """

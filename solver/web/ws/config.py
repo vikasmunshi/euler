@@ -6,7 +6,7 @@ Like :class:`~solver.web.site.config.SiteConfig`, every value has an env overrid
 so the service runs unprivileged (TCP, scratch sockets) for local testing, and it
 never imports :mod:`solver.config` — the *service* has no shell identity; only the
 PTY children it forks resolve one, from their ticket. The deployed template unit
-sets ``EULER_PROFILE=%i`` and ``EULER_WS_SOCKET=/run/euler/ws-%i.sock`` per
+sets `EULER_PROFILE=%i` and `EULER_WS_SOCKET=/run/euler/ws-%i.sock` per
 instance.
 """
 from __future__ import annotations
@@ -28,10 +28,10 @@ class WsConfig(NamedTuple):
     socket_path: Path
     #: Group given connect() on the socket (Caddy + the app tier).
     socket_group: str
-    #: ``host:port`` for a dev TCP listener instead of the unix socket ('' = socket).
+    #: `host:port` for a dev TCP listener instead of the unix socket ('' = socket).
     tcp_bind: str
-    #: The profile this instance is *born* as (``EULER_PROFILE=%i``).
-    #: When set, a request whose ``X-Profile`` differs is refused — the code-side
+    #: The profile this instance is *born* as (`EULER_PROFILE=%i`).
+    #: When set, a request whose `X-Profile` differs is refused — the code-side
     #: backstop to Caddy's per-profile routing — and it is exported to the PTY
     #: child, whose redeemed ticket profile must match it. Empty (dev)
     #: accepts any known profile.

@@ -1,24 +1,24 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Who is calling: ``SO_PEERCRED`` → login → identity → profile.
+"""Who is calling: `SO_PEERCRED` → login → identity → profile.
 
 The spool authenticates by the **kernel**, not by a header or a token. A connection
-on ``msg.sock`` carries the peer's uid, which the per-user unit already calls the
+on `msg.sock` carries the peer's uid, which the per-user unit already calls the
 authoritative identity (web-server-guide § The per-user tier), and this module turns
-it into the same ``(identity, profile)`` pair every other enforcement point uses:
+it into the same `(identity, profile)` pair every other enforcement point uses:
 
-1. ``SO_PEERCRED`` on the accepted socket → the caller's **uid**;
+1. `SO_PEERCRED` on the accepted socket → the caller's **uid**;
 2. :mod:`pwd` → its **login name**, which for a collaborator *is* their
    :func:`~solver.auth.identity.system_slug`;
-3. ``authorizations.json`` → the **identity** behind that name, and its **profile**.
+3. `authorizations.json` → the **identity** behind that name, and its **profile**.
 
 Step 3 needs no help from the auth service, and that is what keeps this service
 independent of it: :func:`~solver.auth.identity.system_slug` is a pure SHA-1 of the
 normalised e-mail, so recomputing it over every identity in the world-readable policy
-file yields the ``slug → e-mail`` map — the same trick ``status-web`` uses to label the
+file yields the `slug → e-mail` map — the same trick `status-web` uses to label the
 collaborator roster. A bare login name (the operator) is looked up directly.
 
-The policy is re-read whenever the file's mtime moves, so a ``users change`` reaches
+The policy is re-read whenever the file's mtime moves, so a `users change` reaches
 this service within one request rather than at some next restart — the immediate-revocation
 rule of § Authorization applies here too.
 
@@ -45,16 +45,16 @@ from solver.auth.subject import rank
 #: user→staff message, and the only rung that may broadcast.
 STAFF_FLOOR: str = 'maintainer'
 
-#: ``struct ucred`` — pid, uid, gid — as returned by ``SO_PEERCRED``.
+#: `struct ucred` — pid, uid, gid — as returned by `SO_PEERCRED`.
 _UCRED = struct.Struct('3i')
 
 
 def peer_uid(sock: socket.socket) -> int | None:
     """The uid on the far end of *sock*, or None if it cannot be read.
 
-    Unix-socket peer credentials are set by the kernel at ``connect()`` time and
+    Unix-socket peer credentials are set by the kernel at `connect()` time and
     cannot be forged by the peer — which is why nothing on this wire carries a
-    sender field. A non-``AF_UNIX`` transport (a dev TCP run) has none.
+    sender field. A non-`AF_UNIX` transport (a dev TCP run) has none.
     """
     try:
         raw = sock.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, _UCRED.size)
@@ -80,7 +80,7 @@ def _policy_path() -> Path:
 
 
 class PolicyView:
-    """A cached, box-indexed view of ``authorizations.json``.
+    """A cached, box-indexed view of `authorizations.json`.
 
     Rebuilt whenever the file's mtime changes (and on the first call), so a profile
     change lands within one request. A missing or unreadable file yields an empty view:
@@ -106,7 +106,7 @@ class PolicyView:
                         for identity, profile in Authorizations.load().all_users().items()}
 
     def resolve(self, name: str) -> tuple[str, str] | None:
-        """``(identity, profile)`` for *name*, or None if the policy maps no such principal.
+        """`(identity, profile)` for *name*, or None if the policy maps no such principal.
 
         *name* may be either form, because :func:`box_of` collapses them: an OS login
         (what :mod:`pwd` reports for a connecting uid — a collaborator's slug, or the
@@ -117,7 +117,7 @@ class PolicyView:
         return self._by_box.get(box_of(name))
 
     def resolve_uid(self, uid: int) -> tuple[str, str, str] | None:
-        """``(box, identity, profile)`` for *uid*, or None if it maps to nobody."""
+        """`(box, identity, profile)` for *uid*, or None if it maps to nobody."""
         try:
             login = pwd.getpwuid(uid).pw_name
         except KeyError:

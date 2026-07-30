@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """Config-free readers for the content trees the service renders.
 
-Every function takes the repo working tree (``SiteConfig.repo_root``) explicitly
+Every function takes the repo working tree (`SiteConfig.repo_root`) explicitly
 and imports nothing from :mod:`solver.config` (which resolves the shell's
 identity + per-user state — paths the service uid cannot use). The service reads
-exactly the declared content trees — ``solutions/`` · ``docs/`` · ``topics/`` ·
-``solver/web/content/`` — plus, best-effort, the AI reference sources under
-``solver/`` for the composed ``ai`` doc, which degrade to a note when the uid may
+exactly the declared content trees — `solutions/` · `docs/` · `topics/` ·
+`solver/web/content/` — plus, best-effort, the AI reference sources under
+`solver/` for the composed `ai` doc, which degrade to a note when the uid may
 not read them.
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ _NAME_RE = re.compile(r'[\w-]+')
 
 
 class ProblemInfo(NamedTuple):
-    """One row of ``problems.json``: the scraped progress-page metadata."""
+    """One row of `problems.json`: the scraped progress-page metadata."""
 
     number: int
     title: str
@@ -55,14 +55,14 @@ class ProblemInfo(NamedTuple):
 
     @property
     def heat(self) -> int:
-        """Difficulty bucket 1–5 (by ``pct``) shading a solved cell in the grid."""
+        """Difficulty bucket 1–5 (by `pct`) shading a solved cell in the grid."""
         if not self.pct:
             return 1
         return 1 + min((self.pct - 1) // 20, 4)
 
 
 class Century(NamedTuple):
-    """One 10×10 grid: problems ``start`` … ``start+99`` (missing numbers → None)."""
+    """One 10×10 grid: problems `start` … `start+99` (missing numbers → None)."""
 
     start: int
     cells: list[ProblemInfo | None]
@@ -72,20 +72,20 @@ class Century(NamedTuple):
     def total(self) -> int:
         """Problems this century actually has — 100, except the last, which stops at the
         highest number projecteuler.net has published. The tile heading the grid reads
-        ``n of total solved``, so it must count cells, not assume a hundred."""
+        `n of total solved`, so it must count cells, not assume a hundred."""
         return sum(1 for cell in self.cells if cell is not None)
 
 
 class DocEntry(NamedTuple):
     """A docs/topics index row (web-server-guide § The site): the URL *name*, the *heading*
     derived from the filename (title-cased, separators → spaces — the card's
-    first line), and the *title* from the page's leading ``#`` heading (second
+    first line), and the *title* from the page's leading `#` heading (second
     line). Index lists are sorted by *name* (the filename).
 
-    *status* is carried by topic articles only (``draft`` / ``final``, from the article
+    *status* is carried by topic articles only (`draft` / `final`, from the article
     index); the docs tree leaves it empty. *solved* / *problems* likewise come from the
     article index — how many of the problems behind a topic we have solved — and are
-    ``None`` for any entry read from a bare tree walk, where the counts are unknown
+    `None` for any entry read from a bare tree walk, where the counts are unknown
     rather than zero."""
 
     name: str
@@ -99,7 +99,7 @@ class DocEntry(NamedTuple):
 class TopicGroup(NamedTuple):
     """One folder of the topics tree: the folder segment, its display *heading*,
     and the pages inside it (each :class:`DocEntry` keeping its full URL *name*).
-    Pages sitting directly under ``topics/`` collect into the group named ``''``."""
+    Pages sitting directly under `topics/` collect into the group named `''`."""
 
     name: str
     heading: str
@@ -121,7 +121,7 @@ _problems_cache: dict[Path, tuple[float, dict[int, ProblemInfo]]] = {}
 
 
 def load_problems(repo_root: Path) -> dict[int, ProblemInfo]:
-    """The parsed ``solutions/problems.json``, cached until the file's mtime moves."""
+    """The parsed `solutions/problems.json`, cached until the file's mtime moves."""
     path = repo_root / 'solutions' / 'problems.json'
     try:
         mtime = path.stat().st_mtime
@@ -163,7 +163,7 @@ def centuries(problems: dict[int, ProblemInfo]) -> list[Century]:
 
 
 def problem_files(sdir: Path) -> list[str]:
-    """The problem's viewable files (mimetype-guessable, as ``ls`` lists them),
+    """The problem's viewable files (mimetype-guessable, as `ls` lists them),
     as POSIX paths relative to the solution directory. **Zero-size files are
     hidden** (web-server-guide § The site) — an empty stub says nothing worth a link."""
     if not sdir.is_dir():
@@ -180,16 +180,16 @@ def git_status(repo_root: Path, sdir: Path) -> dict[str, tuple[str, str]]:
 
     Read-only, and the *only* git the web tier runs (no commits, no
     checkouts, no key). It works from the deployed per-profile uids because
-    ``.git`` is world-readable and the query carries its own
-    ``safe.directory`` exception: git otherwise **refuses a repository owned by
+    `.git` is world-readable and the query carries its own
+    `safe.directory` exception: git otherwise **refuses a repository owned by
     another uid** ("detected dubious ownership") — that ownership check, not the
     file permissions, is what would silence the status colours on a deployed
-    instance. ``-c`` is *protected* configuration scope (like system/global), so
+    instance. `-c` is *protected* configuration scope (like system/global), so
     the exception is honoured; it is scoped to this one invocation rather than
     written into the host's git config, so no other process or uid gains
     anything.
 
-    Any failure still degrades to ``{}`` (files render plain) — a missing git
+    Any failure still degrades to `{}` (files render plain) — a missing git
     binary, a repo-less deployment, a timeout. A name absent from the porcelain
     output is clean/committed.
     """
@@ -238,9 +238,9 @@ def resolve_file(sdir: Path, filename: str) -> Path | None:
 def resolve_repo_file(repo_root: Path, roots: list[str], rel: str) -> Path | None:
     """Resolve a repo-relative path to a file under one of *roots*, or None.
 
-    *roots* are the **declared-readable** content paths (the ``docs`` / ``about``
+    *roots* are the **declared-readable** content paths (the `docs` / `about`
     trees — dirs or single files); the returned file must sit under one of them, so
-    the ``/docs/file/`` view can only ever serve what the service declares readable.
+    the `/docs/file/` view can only ever serve what the service declares readable.
     Rejects traversal + symlink escape.
     """
     relative = Path(rel)
@@ -278,11 +278,11 @@ def load_json(path: Path) -> Any | None:
 def parse_progress(text: str) -> dict[int, dict[str, str | int | bool]]:
     """Parse a saved projecteuler.net progress page into problem metadata.
 
-    The config-free port of ``solver.utils.summary._parse_progress_html``,
+    The config-free port of `solver.utils.summary._parse_progress_html`,
     operating on the submitted text (so a bad edit is rejected *before* anything
-    lands on disk). Returns ``{number: {title, level, pct, solved, date}}`` —
-    ``level``/``pct`` are ints or ``''`` when unknown, matching the shell's
-    writer so the two producers of ``problems.json`` stay interchangeable.
+    lands on disk). Returns `{number: {title, level, pct, solved, date}}` —
+    `level`/`pct` are ints or `''` when unknown, matching the shell's
+    writer so the two producers of `problems.json` stay interchangeable.
     """
     soup = BeautifulSoup(text, 'html.parser')
     problems: dict[int, dict[str, str | int | bool]] = {}
@@ -331,8 +331,8 @@ def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
 
     The submitted page source must parse to at least one problem (the 5c
     reject semantics — a broken paste never lands); on success it is stored as
-    ``solutions/.progress.html`` and re-derived into ``solutions/problems.json``
-    in the same shape the shell's ``summary`` command writes.
+    `solutions/.progress.html` and re-derived into `solutions/problems.json`
+    in the same shape the shell's `summary` command writes.
     """
     try:
         text = content.decode('utf-8')
@@ -351,9 +351,9 @@ def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
 
 # ── about (the footer pages, 5e) ────────────────────────────────────────────────────
 
-#: ``/about/{name}`` → (repo-relative source file, page title, render as markdown?).
+#: `/about/{name}` → (repo-relative source file, page title, render as markdown?).
 #: These are the files behind the footer pages — keep them in step with the service's
-#: declared-readable roots (``install_content``), which is what admits them.
+#: declared-readable roots (`install_content`), which is what admits them.
 ABOUT_PAGES: dict[str, tuple[str, str, bool]] = {
     'readme': ('README.md', 'README', True),
     'license': ('LICENSE', 'MIT license', False),
@@ -377,14 +377,14 @@ def rewrite_statement_links(html: str, number: int) -> str:
     """Root a cached statement's relative resource links at the problem's canonical path.
 
     projecteuler.net markup links its images and data files relatively
-    (``src="resources/0096_1.png"``). On a full page load those resolve under the
-    page's own ``/solutions/NNNN/`` URL and work — but the pane is normally reached by
+    (`src="resources/0096_1.png"`). On a full page load those resolve under the
+    page's own `/solutions/NNNN/` URL and work — but the pane is normally reached by
     an htmx swap, where the relative URL is resolved against the *previous* page's URL
-    (still ``/solutions/`` at swap time), so ``resources/…`` becomes
-    ``/solutions/resources/…`` and 404s — the images silently break. Rewriting them to
-    the absolute ``/solutions/NNNN/…`` path (the same route :func:`resolve_file` serves)
-    makes them resolve identically however the page was reached. Scheme (``http:``),
-    already-absolute (``/…``) and anchor (``#``) URLs are left untouched.
+    (still `/solutions/` at swap time), so `resources/…` becomes
+    `/solutions/resources/…` and 404s — the images silently break. Rewriting them to
+    the absolute `/solutions/NNNN/…` path (the same route :func:`resolve_file` serves)
+    makes them resolve identically however the page was reached. Scheme (`http:`),
+    already-absolute (`/…`) and anchor (`#`) URLs are left untouched.
     """
     base = f'/solutions/{number:04d}/'
     return re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
@@ -405,20 +405,20 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
     Each heading gets the same slug `update_doc.py` assumes, so in-page and
     cross-doc `#anchor` links land. Then the link rewrites:
 
-    - a relative ``foo.md`` (or ``docs/foo.md``) link → the *route_base* route;
-    - a repo-relative ``../<path>`` link (docs/topics sit one level under the
-      repo root, so ``../`` reaches it) → the ``/docs/file/<path>`` view route,
-      so a link like ``../solver/crypto/gitfilter.py`` — which resolves natively
+    - a relative `foo.md` (or `docs/foo.md`) link → the *route_base* route;
+    - a repo-relative `../<path>` link (docs/topics sit one level under the
+      repo root, so `../` reaches it) → the `/docs/file/<path>` view route,
+      so a link like `../solver/crypto/gitfilter.py` — which resolves natively
       on GitHub — also resolves in the app viewer;
     - with *repo_base* set (the README, which sits **at** the repo root and so
-      links its neighbours with no ``../`` to give them away): every remaining
-      relative link and image → the ``/docs/file/`` viewer when it names a
-      declared-readable tree, and *repo_base* (GitHub) otherwise. ``LICENSE``,
-      ``Makefile``, ``pyproject.toml`` are outside the content ACLs — the viewer
+      links its neighbours with no `../` to give them away): every remaining
+      relative link and image → the `/docs/file/` viewer when it names a
+      declared-readable tree, and *repo_base* (GitHub) otherwise. `LICENSE`,
+      `Makefile`, `pyproject.toml` are outside the content ACLs — the viewer
       would 404 on them, so they leave for the source of truth instead;
-    - every **internal, absolute** ``/…`` link gets ``hx-*`` attributes so it
+    - every **internal, absolute** `/…` link gets `hx-*` attributes so it
       swaps the content pane in place (the shell + terminal persist) instead of
-      a full reload. External (``http…``) and ``#anchor`` links are untouched,
+      a full reload. External (`http…`) and `#anchor` links are untouched,
       so they navigate/scroll normally.
     """
     tokens = _MD.parse(text)
@@ -453,18 +453,18 @@ _RENDERED_PROBLEMS_RE = re.compile(
 
 
 def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None) -> str:
-    """Fold a topic's generated Problems list into a collapsed ``<details>`` (click to expand).
+    """Fold a topic's generated Problems list into a collapsed `<details>` (click to expand).
 
     The block `update-tags` writes can run to dozens of entries and pushes the article's
     prose off-screen, so on the topic page it renders collapsed: a `<summary>` carrying the
-    `## Problems` heading — its ``id="problems"`` anchor preserved so `#problems` links still
+    `## Problems` heading — its `id="problems"` anchor preserved so `#problems` links still
     land — and the entry count, with the list revealed on click. Purely presentational: the
     source article keeps the plain heading-and-list that renders on GitHub. An article
     without the block is returned unchanged.
 
-    With *problems* given (the parsed ``problems.json``), the count reads ``solved / total``
-    — the numbers taken from *this clone's* progress against the ``/solutions/NNNN/`` links
-    the list carries, so it stays live rather than frozen at the last ``update-tags``.
+    With *problems* given (the parsed `problems.json`), the count reads `solved / total`
+    — the numbers taken from *this clone's* progress against the `/solutions/NNNN/` links
+    the list carries, so it stays live rather than frozen at the last `update-tags`.
     Without it (the default) the bare total is shown, as before.
     """
     def _wrap(match: re.Match[str]) -> str:
@@ -490,7 +490,7 @@ def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None)
 def _repo_link(path: str, repo_base: str) -> str:
     """One README link: the file viewer for a readable tree, else *repo_base* (GitHub).
 
-    The bare ``docs/`` link is the exception — the guides have an index route of
+    The bare `docs/` link is the exception — the guides have an index route of
     their own, and the file viewer serves files, not directories.
     """
     if path.rstrip('/') == 'docs':
@@ -509,7 +509,7 @@ def _page_title(text: str, fallback: str) -> str:
 
 def _filename_heading(stem: str) -> str:
     """A readable title from a filename stem: `_`/`-` → space, title-cased
-    (e.g. ``convention_c_translation`` → ``Convention C Translation``)."""
+    (e.g. `convention_c_translation` → `Convention C Translation`)."""
     return stem.replace('_', ' ').replace('-', ' ').title()
 
 
@@ -569,7 +569,7 @@ _HOME_SUMMARY = Path(__file__).resolve().parent.parent / 'content' / 'home-summa
 
 @cache
 def readme_html() -> str:
-    """The packaged start-page summary rendered to HTML, or ``''`` if missing.
+    """The packaged start-page summary rendered to HTML, or `''` if missing.
 
     Cached for the process's life: the file is package data, so it cannot change
     without a reinstall, and a reinstall restarts the services. The start page is
@@ -619,7 +619,7 @@ def _fence(content: str) -> str:
 def _ai_section(heading: str, path: Path, body: str) -> str:
     """One composed section, or a muted note when the source is unreadable.
 
-    The sources live under ``solver/`` — outside the declared content trees — so a
+    The sources live under `solver/` — outside the declared content trees — so a
     deployed service uid may lack read on them; the page degrades rather than 500s
     (in a dev run as the owner it renders in full).
     """
@@ -700,8 +700,8 @@ def read_doc(repo_root: Path, name: str) -> str | None:
 def list_topics(repo_root: Path) -> list[DocEntry]:
     """The topics index: every `topics/**/*.md` writeup, nested folders included.
 
-    A nested page's ``name`` is its folder-qualified path (``number-theory/primes``)
-    and its ``heading`` shows the folder trail (``Number Theory / Primes``); sorting by
+    A nested page's `name` is its folder-qualified path (`number-theory/primes`)
+    and its `heading` shows the folder trail (`Number Theory / Primes`); sorting by
     the full path keeps same-folder pages together in the card grid.
     """
     tree = repo_root / 'topics'
@@ -721,13 +721,13 @@ def list_topics(repo_root: Path) -> list[DocEntry]:
 
 
 def _indexed_topics(repo_root: Path) -> list[DocEntry]:
-    """The written pages of the article index (``topics/articles.json``, maintained by
-    ``update-tags``) — with their status and their solved/problem counts. Its ``missing``
+    """The written pages of the article index (`topics/articles.json`, maintained by
+    `update-tags`) — with their status and their solved/problem counts. Its `missing`
     rows are vocabulary rather than pages, so they are dropped: there is nothing to open.
     Empty when the index is absent or unreadable, which sends the caller back to walking
     the tree.
 
-    A row written before the counts existed simply has none: they stay ``None`` and the
+    A row written before the counts existed simply has none: they stay `None` and the
     card falls back to the page's title, rather than claiming "solved 0 of 0"."""
     data = load_json(repo_root / 'topics' / 'articles.json')
     rows = data.get('articles', []) if isinstance(data, dict) else []
@@ -749,15 +749,15 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
     The article index is the source when it is there (it alone knows each page's status);
     otherwise the tree is walked as :func:`list_topics` does, statusless.
 
-    ``drafts`` decides *which* pages: by default only the finished ones, because update-tags
+    `drafts` decides *which* pages: by default only the finished ones, because update-tags
     now creates a skeleton for every tag and a reader offered six hundred TODO stubs cannot
-    find the handful worth reading. The maintainer view passes ``drafts=True`` to see the
+    find the handful worth reading. The maintainer view passes `drafts=True` to see the
     writing queue. A statusless fallback (no index on disk) lists everything either way —
     there is nothing to filter on, and showing nothing would be worse.
 
     The folder is the section heading, so each card drops the trail and shows only
     its leaf heading. Groups come out in path order, the pages loose at the root of
-    ``topics/`` (if any) first under a generic heading. Every card keeps a *title* — the
+    `topics/` (if any) first under a generic heading. Every card keeps a *title* — the
     page's own heading, or its leaf slug when it has none — so all cards carry a second
     line and stand the same height in the grid.
     """
@@ -786,9 +786,9 @@ _ARTICLE_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)\s*-->', re.IGNORECASE)
 
 
 def topic_status(text: str) -> str:
-    """An article's status: ``final`` only when it says so, else ``draft``.
+    """An article's status: `final` only when it says so, else `draft`.
 
-    A page on disk is never ``missing`` however its comment reads - the file is the fact.
+    A page on disk is never `missing` however its comment reads - the file is the fact.
     """
     m = _ARTICLE_STATUS_RE.search(text)
     return 'final' if m and m.group(1).lower() == 'final' else 'draft'
@@ -800,11 +800,11 @@ def read_topic(repo_root: Path, name: str) -> str | None:
 
 
 def drop_article(repo_root: Path, name: str) -> None:
-    """Best-effort removal of *name*'s row from ``topics/articles.json``.
+    """Best-effort removal of *name*'s row from `topics/articles.json`.
 
     The article file is the page; the index is the catalogue. Deleting the file alone would
     leave a dangling index row — `_indexed_topics` would keep listing a page that now 404s —
-    so the matching ``path == name`` row is dropped here too. Best-effort by design: an
+    so the matching `path == name` row is dropped here too. Best-effort by design: an
     absent or malformed index is left untouched, and `update-tags` reconciles it fully on
     its next run.
     """
@@ -826,7 +826,7 @@ def drop_article(repo_root: Path, name: str) -> None:
 def _read_nested_page(tree: Path, name: str) -> str | None:
     """One page of a content tree, addressed by a `/`-separated path, or None.
 
-    Each path segment must match ``_NAME_RE`` (word characters and hyphens only), so `..`
+    Each path segment must match `_NAME_RE` (word characters and hyphens only), so `..`
     and absolute segments are rejected before any filesystem access; the resolved target is
     then confirmed to stay within *tree* as defence in depth against symlink escapes."""
     if name.endswith('.md'):                       # a rewritten cross-link that kept its suffix
@@ -850,7 +850,7 @@ _ARTICLE_TAGS_RE = re.compile(r'<!--\s*tags:\s*\[(.*?)\]\s*-->', re.DOTALL)
 
 
 def _declared_tags(text: str) -> set[str]:
-    """The tag slugs an article declares in its ``<!-- tags: [...] -->`` comment."""
+    """The tag slugs an article declares in its `<!-- tags: [...] -->` comment."""
     m = _ARTICLE_TAGS_RE.search(text)
     return {s.strip() for s in m.group(1).split(',') if s.strip()} if m else set()
 
@@ -858,9 +858,9 @@ def _declared_tags(text: str) -> set[str]:
 def problem_tag_view(repo_root: Path, number: int) -> dict[str, Any]:
     """The tag/topic view model for a problem page.
 
-    Reads the problem's ``tags.json`` and the central vocabulary, and returns the tags grouped
-    by facet (techniques keyed to each solution index) as chips — each with the ``/topics`` URL
-    of its per-tag page when one exists — plus ``flat`` for the header row and ``topics``, the
+    Reads the problem's `tags.json` and the central vocabulary, and returns the tags grouped
+    by facet (techniques keyed to each solution index) as chips — each with the `/topics` URL
+    of its per-tag page when one exists — plus `flat` for the header row and `topics`, the
     curated topic pages (outside the per-tag facet folders) that cover any of the problem's tags.
     """
     tags = load_json(solution_dir(repo_root, number) / 'tags.json')

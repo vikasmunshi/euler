@@ -42,7 +42,7 @@ new_test_case: bytes = (
 
 
 @register(requires='contributor',
-          help_text='Generate new solution/test-case file for a problem.', quietable=True)
+          quietable=True)
 def new(problem: Problem, py: bool = False, c: bool = False, tc: bool = False) -> int:
     """Generate new solution and/or test-case files for the problem.
 
@@ -51,16 +51,16 @@ def new(problem: Problem, py: bool = False, c: bool = False, tc: bool = False) -
     template with the problem information substituted; Python files are made
     executable (mode 0o755).
 
-    Args:
-        problem:    The `problem` to create files for; defaults to the current problem.
-        py: Create a Python solution file. Defaults to False.
-        c:  Create a C solution file (one per existing Python solution lacking a
-            matching ".c"). Defaults to False.
-        tc: Create an empty test-cases file instead of solution files, unless one
-            already exists. Defaults to False.
+    With neither `py` nor `c` given (and `tc` False), both a Python and a C file are
+    created.
 
-    With neither `py` nor `c` given (and `tc` False), both a Python and a C file
-    are created.
+    Args:
+        problem: [problem] The problem to create files for.
+        py: Create a Python solution file. Defaults to False.
+        c: Create a C solution file — one per existing Python solution that lacks a
+            matching ".c". Defaults to False.
+        tc: Create an empty test-cases file instead of solution files, unless one already
+            exists. Defaults to False.
     """
     if tc:
         if not (test_cases_file := problem.solution_dir / config.test_cases_filename).exists():

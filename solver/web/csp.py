@@ -4,14 +4,14 @@
 
 Every page an app service renders carries the locked baseline CSP
 (docs/web-server-guide.md § Content-Security-Policy): same-origin everything,
-no ``unsafe-inline``, no ``unsafe-eval``, no framing. The middleware mints a
-fresh nonce per response and exposes it as ``request['csp_nonce']`` so a
-template *can* mark an unavoidable inline ``<script>``/``<style>`` — the auth
-pages don't need it (all their JS/CSS is served from ``/assets``), but the
+no `unsafe-inline`, no `unsafe-eval`, no framing. The middleware mints a
+fresh nonce per response and exposes it as `request['csp_nonce']` so a
+template *can* mark an unavoidable inline `<script>`/`<style>` — the auth
+pages don't need it (all their JS/CSS is served from `/assets`), but the
 contract is established here once and every rendering service imports the same
 middleware.
 
-Caddy adds the transport-level headers (HSTS, ``X-Content-Type-Options``, …)
+Caddy adds the transport-level headers (HSTS, `X-Content-Type-Options`, …)
 and a fallback CSP for purely static responses; this header wins on rendered
 pages because the app sets it per response.
 """
@@ -27,12 +27,12 @@ from aiohttp import web
 #: Request key under which the per-response nonce is exposed to handlers/templates.
 NONCE_KEY: str = 'csp_nonce'
 
-#: ``style-src`` carries ``'unsafe-inline'`` for exactly one consumer: MathJax
+#: `style-src` carries `'unsafe-inline'` for exactly one consumer: MathJax
 #: (and htmx's indicator rules) inject their stylesheets at runtime with no
-#: nonce hook — verified blocked under bare ``'self'`` (headless-Chrome CSP
-#: violations, garbled math). Scripts stay strict: ``'self'`` + nonce only.
-#: ``frame-ancestors 'self'`` (not ``'none'``): the app shell frames its own
-#: ``/terminal`` document — cross-origin embedding stays blocked. See
+#: nonce hook — verified blocked under bare `'self'` (headless-Chrome CSP
+#: violations, garbled math). Scripts stay strict: `'self'` + nonce only.
+#: `frame-ancestors 'self'` (not `'none'`): the app shell frames its own
+#: `/terminal` document — cross-origin embedding stays blocked. See
 #: docs/web-server-guide.md § Content-Security-Policy for the recorded trade-offs.
 _POLICY = ("default-src 'self'; "
            "script-src 'self' 'nonce-{nonce}'; "
@@ -48,7 +48,7 @@ _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 @web.middleware
 async def csp_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
-    """Mint ``request['csp_nonce']`` and stamp the baseline CSP on the response."""
+    """Mint `request['csp_nonce']` and stamp the baseline CSP on the response."""
     nonce = secrets.token_urlsafe(16)
     request[NONCE_KEY] = nonce
     response = await handler(request)

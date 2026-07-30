@@ -6,19 +6,19 @@ One entry point — :func:`validate` — dispatches on the file's suffix and ret
 the **canonical bytes to store** (which may differ from the submission) or the
 failure diagnostics; the edit routes wire it in front of every write:
 
-- ``.py``   — auto-fix (autoflake → autopep8 → isort, best-effort: the ``dev``
+- `.py`   — auto-fix (autoflake → autopep8 → isort, best-effort: the `dev`
   extras may be absent in the deployed venv) then **flake8 over stdin**;
   reject on findings. The fixed source is the canonical content.
-- ``.c``    — compile with gcc against the runner header (``solver/runners``)
-  in a scratch dir, mirroring ``scripts/c/compile.sh``'s flags and extra-lib
-  detection; reject on any diagnostic (``-Werror``). The binary is discarded —
+- `.c`    — compile with gcc against the runner header (`solver/runners`)
+  in a scratch dir, mirroring `scripts/c/compile.sh`'s flags and extra-lib
+  detection; reject on any diagnostic (`-Werror`). The binary is discarded —
   the gate only proves compilability; the real build happens at evaluation.
-- ``.json`` — parse; reject when malformed. The two-space re-indent is the
+- `.json` — parse; reject when malformed. The two-space re-indent is the
   canonical content.
-- ``.html`` — **sanitize-and-store-clean via nh3**: the tailored
-  allowlist below, MathJax ``$…$`` surviving as text, ``rel`` rewritten on every
+- `.html` — **sanitize-and-store-clean via nh3**: the tailored
+  allowlist below, MathJax `$…$` surviving as text, `rel` rewritten on every
   link. nh3's output is *always* the canonical content (it normalises even clean
-  input — adds ``<tbody>``, rewrites ``rel`` — which is why this is store-clean,
+  input — adds `<tbody>`, rewrites `rel` — which is why this is store-clean,
   not reject-and-restore); the editor shows the submitted-vs-stored diff. nh3
   gates what is *stored*; the CSP (§4.7) blocks what would *execute*.
 
@@ -243,11 +243,11 @@ _RAW_HTML_RE = re.compile(r'</?[A-Za-z][A-Za-z0-9]*[\s/>]')
 def validate_article(submitted: str, original: str) -> Validated:
     """Gate an in-browser edit of a topic article against the on-disk *original*.
 
-    Two invariants. First, the machine-owned regions are preserved exactly: a page's ``tags``
-    (its graph identity), its ``status``, and the generated ``problems`` section all come from
+    Two invariants. First, the machine-owned regions are preserved exactly: a page's `tags`
+    (its graph identity), its `status`, and the generated `problems` section all come from
     the file update-tags maintains, not from a prose edit, so each must survive byte-for-byte.
     Second, the prose carries no raw HTML: topic pages render Markdown with raw-HTML passthrough
-    straight to every reader, so an injected ``<script>`` would be stored cross-user XSS. Markdown
+    straight to every reader, so an injected `<script>` would be stored cross-user XSS. Markdown
     needs no HTML tags, so the rule is a flat refusal rather than a sanitiser.
 
     On success the submitted Markdown is stored verbatim (bar a normalised trailing newline).

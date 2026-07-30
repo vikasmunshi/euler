@@ -1,33 +1,33 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""PTY bridge: run an interactive ``solver`` shell on a pseudo-terminal.
+"""PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
 
-``PtySession`` starts the shell on a PTY so the child sees a real terminal
-(``sys.stdin.isatty()`` is true) and runs the full prompt-toolkit interactive
-loop — completion, multi-line ``{ … }`` blocks, rich colours — rather than the
+`PtySession` starts the shell on a PTY so the child sees a real terminal
+(`sys.stdin.isatty()` is true) and runs the full prompt-toolkit interactive
+loop — completion, multi-line `{ … }` blocks, rich colours — rather than the
 non-interactive piped fallback.
 
-The child is spawned with ``pty.openpty()`` + ``subprocess.Popen`` — **not**
-``pty.fork()``: the service's event loop runs executor threads (the PTY
+The child is spawned with `pty.openpty()` + `subprocess.Popen` — **not**
+`pty.fork()`: the service's event loop runs executor threads (the PTY
 drainers), and forking a threaded process to run Python before exec is
-deadlock-prone (and a ``DeprecationWarning`` since 3.12). Popen's C-level
-fork+exec is async-signal-safe; a tiny ``-c`` bootstrap then runs *after* exec
-to make the slave the **controlling terminal** (``setsid`` + ``TIOCSCTTY``, what
-``pty.fork`` would have done) so the line discipline delivers Ctrl-C as SIGINT.
+deadlock-prone (and a `DeprecationWarning` since 3.12). Popen's C-level
+fork+exec is async-signal-safe; a tiny `-c` bootstrap then runs *after* exec
+to make the slave the **controlling terminal** (`setsid` + `TIOCSCTTY`, what
+`pty.fork` would have done) so the line discipline delivers Ctrl-C as SIGINT.
 
 The parent keeps the PTY master file descriptor: read it for the shell's
 output, write to it for keystrokes, ioctl it to propagate the browser
 terminal's size.
 
 Identity transfers by the **one-time shell ticket**, never the
-environment as a credential: the child gets ``SOLVER_TICKET`` and redeems it at
-startup (:mod:`solver.auth.identity`) over ``EULER_AUTH_SOCKET`` — the same
+environment as a credential: the child gets `SOLVER_TICKET` and redeems it at
+startup (:mod:`solver.auth.identity`) over `EULER_AUTH_SOCKET` — the same
 socket the service minted it from — which consumes the ticket and returns the
-authoritative ``(email, profile, …)``. The instance's **pin** carries in the
+authoritative `(email, profile, …)`. The instance's **pin** carries in the
 environment so the child can refuse a ticket routed to the wrong instance: the
-per-user service passes ``slug`` (``EULER_USER_SLUG`` — the redeemed e-mail must
-map to it); the legacy per-profile ws passes ``profile``
-(``EULER_PROFILE``). Any inherited ``SOLVER_USER`` is dropped — it is display-only
+per-user service passes `slug` (`EULER_USER_SLUG` — the redeemed e-mail must
+map to it); the legacy per-profile ws passes `profile`
+(`EULER_PROFILE`). Any inherited `SOLVER_USER` is dropped — it is display-only
 and the ticket is the truth.
 """
 from __future__ import annotations
@@ -48,7 +48,7 @@ from solver.web.auth import AUTH_SOCKET_ENV
 _READ_CHUNK: int = 65536
 
 #: Post-exec bootstrap: session leader + controlling terminal, then the shell.
-#: Runs as ``python -c <this> <argv...>`` (so ``sys.argv[1:]`` is the command) —
+#: Runs as `python -c <this> <argv...>` (so `sys.argv[1:]` is the command) —
 #: after Popen's exec, hence thread-safe where a preexec_fn would not be.
 _CTTY_BOOTSTRAP: str = (
     'import fcntl, os, sys, termios\n'
@@ -59,14 +59,14 @@ _CTTY_BOOTSTRAP: str = (
 
 
 class PtySession:
-    """An interactive ``solver`` shell running on a pseudo-terminal.
+    """An interactive `solver` shell running on a pseudo-terminal.
 
     On construction the child is spawned on a fresh PTY: it execs *argv* (the
-    solver shell; tests substitute a stub) with ``SOLVER_TICKET`` and the
-    instance pin (``EULER_USER_SLUG`` or ``EULER_PROFILE``) exported and a
-    colour-capable ``TERM``; the parent retains the PTY master ``fd``. The caller
-    drives I/O — ``read()``/``write()`` move bytes, ``resize()`` propagates the
-    browser terminal geometry, ``close()`` terminates the child.
+    solver shell; tests substitute a stub) with `SOLVER_TICKET` and the
+    instance pin (`EULER_USER_SLUG` or `EULER_PROFILE`) exported and a
+    colour-capable `TERM`; the parent retains the PTY master `fd`. The caller
+    drives I/O — `read()`/`write()` move bytes, `resize()` propagates the
+    browser terminal geometry, `close()` terminates the child.
     """
 
     def __init__(self, ticket: str, profile: str = '', argv: tuple[str, ...] = (),

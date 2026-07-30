@@ -104,7 +104,7 @@ User- and developer-facing docs live under `docs/`:
 
 The command catalogue (in `user-guide.md`) and `commands-index.md` are **generated** from the live
 registry by the `update-docs` command (`solver/utils/update_doc.py`). After changing any command's
-name, alias, `help_text`, or signature, run `update-docs` (`solver "update-docs --check"` verifies
+name, alias, docstring, or signature, run `update-docs` (`solver "update-docs --check"` verifies
 they are current).
 
 ## Architecture
@@ -128,7 +128,7 @@ solver/
     skill.py          — The `claude-solve` / `claude-blog` commands: run Claude Code in-shell via a skill.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   auth/               — The authorization kernel — identity, profiles, and the ladder.
-    authorizations.py — The authorization policy — ``authorizations.json``.
+    authorizations.py — The authorization policy — `authorizations.json`.
     identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject`.
     subject.py        — The authorization **subject** — the resolved security principal.
   core/
@@ -148,7 +148,7 @@ solver/
     config.py         — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
     gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
     keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
-    readenv.py        — Print the authoring env (``~/.euler/env``) as plaintext — the setup scripts' reader.
+    readenv.py        — Print the authoring env (`~/.euler/env`) as plaintext — the setup scripts' reader.
     vault.py          — The per-user vault: envelope encryption that makes a user's secrets opaque to the operator at rest.
   runners/
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
@@ -157,6 +157,7 @@ solver/
     bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
     builtins.py       — Built-in framework commands for shell v2: echo, clear, help.
     command.py        — Command framework for shell v2: Context, Command, registry, and decorator.
+    docstring.py      — Reading a command's docstring: the shape both `?` and `check-commands` rely on.
     interpreter.py    — Interpreter for shell v2: execute the parser's statements.
     lexer.py          — Lexer for shell v2: syntax-check a command block and normalise it.
     parser.py         — Parser for shell v2: canonical form (the lexer's output) → typed statements.
@@ -170,6 +171,7 @@ solver/
     new.c             — Solution to Euler $problem.
     new.py            — Solution to Euler $problem.
   utils/
+    doclint.py        — The `check-commands` command: hold every command docstring to the documented standard.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading command modules.
     misc.py           — The `problems` and `manage-config` commands.
@@ -184,40 +186,40 @@ solver/
   web/                — The web app services (see docs/web-server-guide.md).
     cache.py          — Cache-Control middleware: what a browser may reuse, and for how long (shared).
     csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
-    envfile.py        — Minimal ``KEY=VALUE`` reader for the scoped runtime env files under ``/etc/euler``.
+    envfile.py        — Minimal `KEY=VALUE` reader for the scoped runtime env files under `/etc/euler`.
     store.py          — Shared JSON persistence and untrusted-text hygiene for the service stores.
     unixhttp.py       — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
     auth/             — Web authentication: the auth service and its clients.
-      __main__.py     — Auth service entry point: ``python -m solver.web.auth``.
-      admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command.
+      __main__.py     — Auth service entry point: `python -m solver.web.auth`.
+      admin.py        — The admin-plane CLI: run **under sudo** by the `users` shell command.
       app.py          — The auth service: public + admin aiohttp apps over unix sockets.
       client.py       — HTTP-over-unix-socket client for the auth service — re-export of the shared one.
-      commands.py     — The ``users`` shell command: account administration for the operator.
+      commands.py     — The `users` shell command: account administration for the operator.
       config.py       — Auth-service runtime configuration, read from the environment.
       mail.py         — Outbound mail via the loopback relay.
       pages.py        — The auth service's HTML pages: login, registration, reset, forgot.
-      pending.py      — Pending invite / reset store at ``<state>/pending.json``.
+      pending.py      — Pending invite / reset store at `<state>/pending.json`.
       policy.py       — Auth policy constants (lifetimes, cookie names, password and OTP rules).
       ratelimit.py    — A small in-memory sliding-window rate limiter for the auth endpoints.
-      remember.py     — Persistent "remember me" tokens at ``<state>/remember.json``.
-      requests.py     — Prospective-collaborator invite requests at ``<state>/requests.json``.
+      remember.py     — Persistent "remember me" tokens at `<state>/remember.json`.
+      requests.py     — Prospective-collaborator invite requests at `<state>/requests.json`.
       sessions.py     — In-memory web session table.
       srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
       storage.py      — JSON persistence for the auth stores — re-export of the shared implementation.
       tickets.py      — One-time shell tickets: web identity for PTY children.
-      users.py        — User store: the SRP verifier database at ``<state>/users.json``.
+      users.py        — User store: the SRP verifier database at `<state>/users.json`.
     msg/              — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
-      __main__.py     — Message service entry point: ``python -m solver.web.msg``.
-      admin.py        — The message admin plane CLI: run **under sudo** by the ``msg`` shell command.
+      __main__.py     — Message service entry point: `python -m solver.web.msg`.
+      admin.py        — The message admin plane CLI: run **under sudo** by the `msg` shell command.
       app.py          — The message service: public + admin aiohttp apps over unix sockets.
       client.py       — The shell tier's client for the message spool: one call, whichever plane answers.
-      commands.py     — The ``msg`` shell command: read and write the message spool.
+      commands.py     — The `msg` shell command: read and write the message spool.
       config.py       — Message-service runtime configuration, read from the environment.
-      identity.py     — Who is calling: ``SO_PEERCRED`` → login → identity → profile.
+      identity.py     — Who is calling: `SO_PEERCRED` → login → identity → profile.
       notify.py       — Send a message **from a command** — the message layer's actual purpose.
-      store.py        — The message spool at ``<state>/messages.json`` — messages and read-state.
+      store.py        — The message spool at `<state>/messages.json` — messages and read-state.
     site/             — The content service — server-rendered pages + htmx fragments.
-      __main__.py     — Content service entry point: ``python -m solver.web.site``.
+      __main__.py     — Content service entry point: `python -m solver.web.site`.
       app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
       config.py       — Content-service runtime configuration, read from the environment.
       content.py      — Config-free readers for the content trees the service renders.
@@ -225,23 +227,23 @@ solver/
       render.py       — The full-page-vs-block render contract (§4.5).
       validate.py     — The save gate: the checks every write passes.
     user/             — The per-user web service: one collaborator's content **and** web shell.
-      __main__.py     — Per-user service entry point: ``python -m solver.web.user``.
+      __main__.py     — Per-user service entry point: `python -m solver.web.user`.
       app.py          — The per-user aiohttp app: one collaborator's content **and** web shell.
       config.py       — Per-user service runtime configuration, read from the environment.
       msg_api.py      — The header's message chip for the per-user service (web-server-guide § Messaging).
       vault_api.py    — Vault + account routes for the per-user service.
     ws/               — The web-shell service: the solver PTY terminal over WebSocket.
-      __main__.py     — Web-shell service entry point: ``python -m solver.web.ws``.
+      __main__.py     — Web-shell service entry point: `python -m solver.web.ws`.
       app.py          — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
       config.py       — Web-shell service runtime configuration, read from the environment.
       manager.py      — Persistent per-user PTY shells: one long-lived solver shell per web user.
-      pty.py          — PTY bridge: run an interactive ``solver`` shell on a pseudo-terminal.
+      pty.py          — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
 ```
 <!-- /GEN:package-layout -->
 
 ### Command registration
 
-Every shell command is a plain Python function decorated with `@register(help_text=..., aliases=..., pass_ctx=..., quietable=...)` from `solver.shell`. The command name is derived from the function name (underscores → dashes; `usage` is synthesised from the signature). The decorator handles argument tokenisation (`shlex.split`), type coercion (Literal, bool, int, Optional, Enum), and tab-completion. Commands are collected at import time; `solver/modules.csv` (read by `utils/loader.py`) lists which modules to import on startup.
+Every shell command is a plain Python function decorated with `@register(requires=..., aliases=..., pass_ctx=..., quietable=..., completers=...)` from `solver.shell`. The command name is derived from the function name (underscores → dashes; `usage` is synthesised from the signature), and its description from the docstring's summary line — the docstring standard is `docs/developer-guide.md` §3.8, enforced by the `check-commands` command. The decorator handles argument tokenisation (`shlex.split`), type coercion (Literal, bool, int, Optional, Enum), and tab-completion. Commands are collected at import time; `solver/modules.csv` (read by `utils/loader.py`) lists which modules to import on startup.
 
 Functions still work as normal Python — they are not transformed, just registered. See `docs/developer-guide.md` for the full register contract.
 

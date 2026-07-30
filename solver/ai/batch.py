@@ -19,9 +19,9 @@ single 1000-problem job would coin three slugs for the same concept and leave th
 merge them afterwards. Run a few hundred at a time and reconcile with `update-tags` between
 waves; the promoted tags then enter the vocabulary the *next* wave is prompted with.
 
-A submitted wave is recorded in ``<state>/tag_batches.json`` so collection survives a dropped
+A submitted wave is recorded in `<state>/tag_batches.json` so collection survives a dropped
 shell: the job keeps draining server-side regardless, and `claude-batch collect` picks it up.
-Results arrive in arbitrary order and are matched back to problems by ``custom_id``.
+Results arrive in arbitrary order and are matched back to problems by `custom_id`.
 """
 from __future__ import annotations
 
@@ -91,11 +91,11 @@ def _explicit(numbers: str) -> list[Problem]:
 
 
 def _select(target: Target, limit: int, start: int = 0) -> list[Problem]:
-    """The problems a wave covers, in problem-number order, from ``start``, capped at ``limit``.
+    """The problems a wave covers, in problem-number order, from `start`, capped at `limit`.
 
-    ``untagged`` is the resumable selector - it skips anything that already has a ``tags.json``,
+    `untagged` is the resumable selector - it skips anything that already has a `tags.json`,
     so re-running after a partial wave picks up only what is still missing. It cannot pace a
-    *re-tag*, though: every problem being regenerated already has a file. ``start`` is what walks
+    *re-tag*, though: every problem being regenerated already has a file. `start` is what walks
     a re-tag through the stack in waves - carry it forward by the previous wave's last number + 1.
     """
     chosen: list[Problem] = []
@@ -215,7 +215,7 @@ def _salvage(problem: Problem, model: Model) -> bool:
 def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[str], Counter[str]]:
     """Write every succeeded result to its problem's tags.json.
 
-    Returns ``(written, failures, conflicts)``. ``conflicts`` counts the facet corrections
+    Returns `(written, failures, conflicts)`. `conflicts` counts the facet corrections
     `enforce_facets` had to make, tallied by slug across the whole wave - one problem reaching
     for a slug in the wrong facet is a slip, the same slug recurring across a wave is the
     vocabulary telling you the concept is filed under the wrong facet.
@@ -263,7 +263,7 @@ def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[
 
 
 @register(requires='maintainer',
-          help_text='Generate tags.json for many problems in one Message Batches job.')
+          )
 def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                  target: Target = 'untagged',
                  limit: int = 250,
@@ -272,29 +272,29 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                  problems_list: str = '',
                  model: Model = Model.CLAUDE_SONNET_5,
                  ) -> int:
-    """Bulk-tag a wave of problems via the Message Batches API (half price, one shared cache).
+    """Bulk-tag a wave of problems in one Message Batches job, at half price.
 
     Solved problems get the full prompt (domain + per-index techniques + takeaways); unsolved
     ones get the domain-only prompt. Run `update-tags` after each wave to promote the proposed
     `new-tags` before submitting the next, so later waves are prompted with the settled vocabulary.
 
-    Args:
-        action:   `run` submits and waits and collects; `submit` returns as soon as the job is
-                  queued; `collect` writes the results of an already-submitted job; `list` shows
-                  waves that were submitted but not yet collected.
-        target:   Which problems to cover - `untagged` (no tags.json yet, the resumable default),
-                  `solved`, `unsolved`, or `all`.
-        limit:    Maximum problems in this wave. Keep it to a few hundred so that `new-tags`
-                  proposals get reconciled often enough to avoid duplicate slugs.
-        start:    Skip problems numbered below this. Paces a re-tag through the stack in waves,
-                  where `untagged` cannot help because every problem already has a file.
-        problems_list: Comma-separated problem numbers to run instead of a `target` sweep - the
-                  targeted re-run after a vocabulary change (`23,39,146`). Overrides `target`.
-        batch_id: The job to collect (required for `collect`).
-        model:    The model to run the wave on.
-
     Note: the `costs` command counts batched tokens at standard list price, so its total
     overstates a batch wave by roughly 2x; this command prints the true discounted cost.
+
+    Args:
+        action: `run` submits, waits and collects; `submit` returns as soon as the job is
+            queued; `collect` writes the results of an already-submitted job; `list` shows
+            waves that were submitted but not yet collected.
+        target: Which problems to cover — `untagged` (no `tags.json` yet, the resumable
+            default), `solved`, `unsolved`, or `all`.
+        limit: Maximum problems in this wave. Keep it to a few hundred so that `new-tags`
+            proposals get reconciled often enough to avoid duplicate slugs.
+        start: Skip problems numbered below this. Paces a re-tag through the stack in waves,
+            where `untagged` cannot help because every problem already has a file.
+        batch_id: The job to collect; required for `collect`.
+        problems_list: Comma-separated problem numbers to run instead of a `target` sweep —
+            the targeted re-run after a vocabulary change (`23,39,146`). Overrides `target`.
+        model: The model to run the wave on.
     """
     if action == 'list':
         store = _load_store()

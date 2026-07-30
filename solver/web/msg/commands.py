@@ -1,21 +1,21 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The ``msg`` shell command: read and write the message spool.
+"""The `msg` shell command: read and write the message spool.
 
 Registered at the **reader** floor — the terminal is the front door for every rung, and
-a new invitee's first need is often to ask a question. The staff verbs (``queue``,
-``notice``, ``dismiss``) check the caller's profile against
+a new invitee's first need is often to ask a question. The staff verbs (`queue`,
+`notice`, `dismiss`) check the caller's profile against
 :data:`~solver.web.msg.identity.STAFF_FLOOR` inside the command, the same shape
-``users list`` uses to self-scope for a non-admin: one command, one registration, and
+`users list` uses to self-scope for a non-admin: one command, one registration, and
 the ladder enforced where the verb is.
 
 **Two channels, one renderer.** Which plane answers — the web shell's direct
-``msg.sock``, or the operator's ``sudo`` fallback — is :mod:`solver.web.msg.client`'s
+`msg.sock`, or the operator's `sudo` fallback — is :mod:`solver.web.msg.client`'s
 problem, not this module's. Both come back as the same JSON, and everything below
-renders it identically; a ``None`` from the client means neither plane answered, which
+renders it identically; a `None` from the client means neither plane answered, which
 :func:`_unreachable` says once for every verb.
 
-That client is shared: ``user-authorize <thread-id>`` reads and answers a key-request
+That client is shared: `user-authorize <thread-id>` reads and answers a key-request
 thread through the same two planes (:mod:`solver.crypto.keys`), which is why the call
 lives beside the spool rather than inside this command.
 """
@@ -155,7 +155,7 @@ def _queue() -> int:
 
 
 def _notice(to: str, subject: str, body: str) -> int:
-    """Send a notice to named recipients, or to everyone with ``--all``."""
+    """Send a notice to named recipients, or to everyone with `--all`."""
     targets: str | list[str] = '*' if to == '*' else [part.strip() for part in to.split(',') if part.strip()]
     if not targets:
         console.print('[error]error:[/error] msg notice needs `to=<email[,email…]>` or `--all`')
@@ -235,28 +235,28 @@ def _dismiss(thread_id: str) -> int:
 
 
 @register(requires='reader', aliases=('messages',),
-          help_text='Read and send messages: your threads, questions to staff, staff notices.')
+          )
 def msg(action: Literal['list', 'read', 'save', 'send', 'queue', 'notice',
                         'dismiss'] = 'list',
         thread: str = '', subject: str = '', body: str = '',
         to: str = '', all_users: bool = False) -> int:
-    """Read and write the message spool (web-server-guide § Messaging).
+    """Read and send messages: your threads, questions to staff, staff notices.
 
-    Every message has staff (``maintainer``+) at one end: you can ask them something,
+    Every message has staff (`maintainer`+) at one end: you can ask them something,
     they can answer, and they can send notices. There is deliberately no user-to-user
     messaging. Delivery is asynchronous — the spool holds the thread until you read it.
 
     Args:
-        action:    list (your threads, newest first), read (one thread, and mark it
-                   read), save (take the master key a maintainer issued you, writing it
-                   to your enc-key file), send (ask staff a question), queue (STAFF: the
-                   inbound work list), notice (STAFF: send to named recipients or
-                   everyone), dismiss (STAFF: drop a worked message).
-        thread:    the message id (read / save / dismiss).
-        subject:   the subject line (send / notice).
-        body:      the message text (send / notice).
-        to:        comma-separated recipient identities for a notice.
-        all_users: send the notice to every mapped identity (``--all-users``).
+        action: What to do — `list` your threads, newest first; `read` one thread and mark
+            it read; `save` the master key a maintainer issued you, writing it to your
+            enc-key file; `send` staff a question; `queue` (STAFF) the inbound work list;
+            `notice` (STAFF) to named recipients or everyone; `dismiss` (STAFF) a worked
+            message. Defaults to `list`.
+        thread: The message id, for `read` / `save` / `dismiss`.
+        subject: The subject line, for `send` / `notice`.
+        body: The message text, for `send` / `notice`.
+        to: Comma-separated recipient identities for a `notice`.
+        all_users: Send the notice to every mapped identity. Defaults to False.
     """
     if action == 'list':
         return _list()

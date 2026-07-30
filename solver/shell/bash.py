@@ -157,7 +157,6 @@ def _run_streamed(ctx: Context, cmdline: str, cwd: Path) -> int:
 
 
 @command(requires='contributor', name='!',
-         help_text='Run a bash command.',
          usage='\t! <command> [args]...\n'
                '\t! sh → escape to a bash shell.\n'
                '\t! py → escape to a python interpreter.\n',
@@ -179,6 +178,12 @@ def _bash(ctx: Context, *args: str) -> int:
     changed the files.
 
     Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
+
+    Args:
+        ctx: [injected] The live shell context; the decorator supplies it.
+        *args: The command line to run, token by token — quoted before it reaches bash, so
+            `! git log --oneline` arrives intact. With none, prints its own usage and
+            fails.
     """
     if not (cmdline := ' '.join(shlex.quote(a) for a in args)):
         ctx.console.print('[muted]usage:[/muted] [accent]! <command ...>[/accent]')

@@ -18,7 +18,6 @@ from solver.utils.shell_utils import confirm, run_cmdline
 
 @register(
     requires='admin',
-    help_text="Upgrade dependency group ([accent.dim]all[/accent.dim]|ai|core|dev|solutions|show).",
     aliases=('upgrade',),
 )
 def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show']) -> int:
@@ -30,7 +29,7 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
                                             Defaults to 'all'.
 
     Args:
-        groups: One or more group names, or 'all'.
+        *groups: One or more dependency group names, or 'all'.
     """
     if not groups:
         groups = ('all',)
@@ -52,20 +51,21 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
 
 @register(
     requires='admin',
-    help_text='Installs or uninstalls system resources.',
     aliases=('install',),
 )
 def sys_setup(target: Literal['chrome', 'dev-env', 'upgrade-service'],
               uninstall: bool = False,
               show_help: bool = False) -> int:
-    """ Installs or uninstalls the system resource specified as the target.
+    """Install or uninstall a system resource.
 
-    Parameters:
-        target:     Specifies the target resource to install or uninstall.
-                    Accepted values are 'chrome', 'dev-env', and 'upgrade-service'
-        uninstall:  Indicates whether the operation is an uninstallation.
-                    Defaults to False, which performs installation.
-        show_help:  Displays help information for the specified target.
+    Runs the setup script for *target* under `sudo`, after confirming. Each script is
+    idempotent, so re-running an install is safe.
+
+    Args:
+        target: Which resource to act on: 'chrome', 'dev-env' or 'upgrade-service'.
+        uninstall: Uninstall the target instead of installing it. Defaults to False.
+        show_help: Print the target script's own help and stop, doing nothing else.
+            Defaults to False.
     """
     script: str = {
         'chrome': config.scripts.install_chrome,

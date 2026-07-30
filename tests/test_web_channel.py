@@ -3,20 +3,20 @@
 """The per-rung web-shell command set.
 
 The web terminal is the **full** solver shell; what a rung may run is decided **solely** by
-the decorator's ``requires`` floor against the subject's profile — not by a curated list,
+the decorator's `requires` floor against the subject's profile — not by a curated list,
 and not by any channel axis. This suite is the snapshot of that decision: it loads every
 command module (so the registry holds the whole catalogue, this process being the checkout
-owner → ``admin``/terminal) and then asks, for each rung, which commands *would* register.
+owner → `admin`/terminal) and then asks, for each rung, which commands *would* register.
 
 The invariants it pins:
 
-- ``reader`` gets a terminal, but a **read-only** one — no ``evaluate``/``benchmark``, no
-  ``edit``/``new``, so a fresh invitee triggers no host execution of user code.
-- ``reader`` never gets the shell escape (``!``). Above it, ``!`` simply **tracks the
-  policy**: the test reads the floor off the registry and asserts a rung sees ``!`` iff its
+- `reader` gets a terminal, but a **read-only** one — no `evaluate`/`benchmark`, no
+  `edit`/`new`, so a fresh invitee triggers no host execution of user code.
+- `reader` never gets the shell escape (`!`). Above it, `!` simply **tracks the
+  policy**: the test reads the floor off the registry and asserts a rung sees `!` iff its
   profile satisfies that floor, so it holds wherever the operator sets it rather than
   hardcoding a rung.
-- the admin-floored commands (``key-*``/``manage-config``/``update-*``/``git-publish`` and
+- the admin-floored commands (`key-*`/`manage-config`/`update-*`/`git-publish` and
   the roster mutations) reach **no** web rung — guarded by the ladder floor alone, the
   channel gate having been the redundant backstop that is now gone.
 """
@@ -30,7 +30,7 @@ from solver.utils.loader import load_commands
 
 _WEB_RUNGS = ('reader', 'contributor', 'maintainer')
 #: The tier where a shell escape is a hard no, whatever the policy: a fresh invitee
-#: (``reader``) runs no user code at all. ``contributor``+ gets bash by the operator's
+#: (`reader`) runs no user code at all. `contributor`+ gets bash by the operator's
 #: decision — in the per-user model the shell is the collaborator's OWN uid sandbox,
 #: so raw bash grants nothing that `evaluate` (arbitrary Python) did not already.
 _NO_ESCAPE_RUNGS = ('reader',)
@@ -122,17 +122,17 @@ class WebChannelCommandSetTest(unittest.TestCase):
         self.assertNotIn('edit', self.web['reader'])
 
     def test_formerly_terminal_only_commands_are_now_profile_gated(self) -> None:
-        """The commands that were ``channels=('terminal',)`` are gated purely by
-        ``requires`` now — each by what it actually does, not by where it is typed.
+        """The commands that were `channels=('terminal',)` are gated purely by
+        `requires` now — each by what it actually does, not by where it is typed.
 
-        ``users`` stays admin-floored and so reaches no web rung at all: it administers
+        `users` stays admin-floored and so reaches no web rung at all: it administers
         accounts + the invite-request queue only from the admin's local terminal (every
         verb re-execs the admin CLI under sudo, which a web uid cannot obtain). The
-        ``update-docs`` stays admin-floored for a reason of its own: registration is
+        `update-docs` stays admin-floored for a reason of its own: registration is
         profile-filtered, so a lesser profile's registry is truncated and regenerating from
         it would silently drop the admin-floored commands from the generated docs.
-        ``update-models`` is admin-floored too — it rewrites package *source*
-        (``solver/ai/models.py``, ``solver/config.json``), which is root-owned in a
+        `update-models` is admin-floored too — it rewrites package *source*
+        (`solver/ai/models.py`, `solver/config.json`), which is root-owned in a
         deployed instance, so a lesser rung would reach the ECB/pricing feeds through the
         egress allowlist and then fail on the write."""
         for admin_only in ('users', 'update-docs', 'update-models'):

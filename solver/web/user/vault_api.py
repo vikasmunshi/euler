@@ -3,26 +3,26 @@
 """Vault + account routes for the per-user service.
 
 These routes only exist on the per-user instance — the process runs as the collaborator's
-own uid, so ``~/.euler`` *is* their vault and acting on it needs no privilege dance.
+own uid, so `~/.euler` *is* their vault and acting on it needs no privilege dance.
 
-**The web unlock path.** The browser derives ``PK`` itself (WebCrypto PBKDF2 over
-the password it already holds and the SRP salt) and sends only ``PK`` here over TLS; the
-service unwraps ``VK`` and materialises the uid-private tmpfs key file
+**The web unlock path.** The browser derives `PK` itself (WebCrypto PBKDF2 over
+the password it already holds and the SRP salt) and sends only `PK` here over TLS; the
+service unwraps `VK` and materialises the uid-private tmpfs key file
 (:func:`solver.crypto.vault.write_session_key`), which every later-forked shell — and the
 git filter under it — inherits by path. The password never reaches any server, and the
-auth service (which could never derive ``PK``: it never sees the password) is not
+auth service (which could never derive `PK`: it never sees the password) is not
 involved at all. That is precisely what keeps the vault operator-opaque at rest.
 
 **The account fragment.** A credential dashboard: the public key (for the
-out-of-band ``user-authorize`` step), **write-only** secret upload/replace/delete into
-the vault-encrypted ``~/.euler/env`` (values are never rendered back), and the gh /
+out-of-band `user-authorize` step), **write-only** secret upload/replace/delete into
+the vault-encrypted `~/.euler/env` (values are never rendered back), and the gh /
 Claude Code sign-in state (the actual logins run in the web shell).
 
-**Reset.** ``POST /internal/vault-reset`` — socket-peer only, pushed by the auth
+**Reset.** `POST /internal/vault-reset` — socket-peer only, pushed by the auth
 service when a password *reset* completes — destroys the vault: an SRP reset shares
-nothing with the vault, so the old ``VK`` is unrecoverable *by design* and leaving the
+nothing with the vault, so the old `VK` is unrecoverable *by design* and leaving the
 blobs around would only misrepresent the state. A password *change* instead rides
-``POST /vault/rewrap`` and the vault survives.
+`POST /vault/rewrap` and the vault survives.
 """
 from __future__ import annotations
 
@@ -82,10 +82,10 @@ def _unlocked() -> bool:
 
 
 def _public_key_state() -> tuple[str, str]:
-    """The account page's pubkey line: a ``(state, value)`` pair.
+    """The account page's pubkey line: a `(state, value)` pair.
 
-    States: ``key`` (value = the hex to hand to the admin), ``locked`` (encrypted id,
-    no session VK), ``none`` (no keypair yet — run ``user`` in the shell).
+    States: `key` (value = the hex to hand to the admin), `locked` (encrypted id,
+    no session VK), `none` (no keypair yet — run `user` in the shell).
     """
     if not crypto_config['private_key_file'].exists():
         return 'none', ''
@@ -97,7 +97,7 @@ def _public_key_state() -> tuple[str, str]:
 
 
 def _env_lines(vault_key: bytes) -> list[str]:
-    """The decrypted lines of ``~/.euler/env`` (empty when the file is absent)."""
+    """The decrypted lines of `~/.euler/env` (empty when the file is absent)."""
     env_file: Path = crypto_config['env_file']
     if not env_file.exists():
         return []
@@ -106,7 +106,7 @@ def _env_lines(vault_key: bytes) -> list[str]:
 
 
 def _write_env_lines(vault_key: bytes, lines: list[str]) -> None:
-    """Encrypt the env lines under ``VK`` and write them back (0600)."""
+    """Encrypt the env lines under `VK` and write them back (0600)."""
     env_file: Path = crypto_config['env_file']
     body = ('\n'.join(lines) + '\n') if lines else ''
     env_file.parent.mkdir(parents=True, exist_ok=True)
@@ -127,12 +127,12 @@ def _home() -> Path:
 
 
 def _which(binary: str) -> str | None:
-    """*binary* on PATH, or in this user's ``~/.local/bin``.
+    """*binary* on PATH, or in this user's `~/.local/bin`.
 
-    ``shutil.which`` searches the PATH this **service** was started with, which is
-    systemd's (``/usr/bin:/bin``, per the unit) — not the login PATH the user's shell
-    builds. Per-user installs land in ``~/.local/bin`` (``claude`` does), so a tool the
-    user has, and can run in their web shell, reads as ``not installed`` here. The
+    `shutil.which` searches the PATH this **service** was started with, which is
+    systemd's (`/usr/bin:/bin`, per the unit) — not the login PATH the user's shell
+    builds. Per-user installs land in `~/.local/bin` (`claude` does), so a tool the
+    user has, and can run in their web shell, reads as `not installed` here. The
     shell's PATH is the truth this panel is reporting on, so look where it looks.
     """
     found = shutil.which(binary)
@@ -143,7 +143,7 @@ def _which(binary: str) -> str | None:
 
 
 def _tool_status(binary: str, args: list[str], timeout: float = 8.0) -> str:
-    """``signed in`` / ``not signed in`` / ``not installed`` for a CLI credential check."""
+    """`signed in` / `not signed in` / `not installed` for a CLI credential check."""
     path = _which(binary)
     if path is None:
         return 'not installed'
@@ -165,9 +165,9 @@ def _can_decrypt() -> bool:
     """Whether this user's key actually opens the private solutions.
 
     The pubkey line's real question. True only when the master key unwraps under this
-    user's private key **and** verifies — i.e. the admin has run ``user-authorize`` on
+    user's private key **and** verifies — i.e. the admin has run `user-authorize` on
     it. Every failure mode (no keypair, no vault to decrypt the key, no entry in
-    ``enc-key.json``, a key that no longer unwraps) is the same answer here: not yet.
+    `enc-key.json`, a key that no longer unwraps) is the same answer here: not yet.
     """
     try:
         return bool(read_master_key())
@@ -190,10 +190,10 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def vault_status(_request: web.Request) -> web.Response:
-        """``GET /vault/status`` — existence, lock state, and the KDF parameters.
+        """`GET /vault/status` — existence, lock state, and the KDF parameters.
 
         The salt + iterations are not secret (they are useless without the password) and
-        let the browser derive the *old* ``PK`` for the stale-vault recovery path.
+        let the browser derive the *old* `PK` for the stale-vault recovery path.
         """
         data = vault.read_vault()
         body: dict[str, Any] = {'vault': data is not None, 'unlocked': _unlocked()}
@@ -204,11 +204,11 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def vault_unlock(request: web.Request) -> web.Response:
-        """``POST /vault/unlock`` ``{pk, salt}`` — unlock, or initialise on first login.
+        """`POST /vault/unlock` `{pk, salt}` — unlock, or initialise on first login.
 
-        No vault yet → mint one wrapped under this ``PK`` (recording the SRP ``salt`` so
+        No vault yet → mint one wrapped under this `PK` (recording the SRP `salt` so
         every future session derives the same key) and encrypt any plaintext secrets.
-        A ``PK`` that does not match → 409 ``stale`` (a password reset orphaned the
+        A `PK` that does not match → 409 `stale` (a password reset orphaned the
         vault, or an old tab holds a dead key) — never destructive.
         """
         try:
@@ -238,11 +238,11 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def vault_rewrap(request: web.Request) -> web.Response:
-        """``POST /vault/rewrap`` ``{old_pk, new_pk, new_salt}`` — the vault survives a password change.
+        """`POST /vault/rewrap` `{old_pk, new_pk, new_salt}` — the vault survives a password change.
 
-        Re-wraps only the small ``VK`` blob under the new ``PK``; the secrets are never
+        Re-wraps only the small `VK` blob under the new `PK`; the secrets are never
         re-encrypted. Also serves the stale-vault recovery: the browser derives the old
-        ``PK`` from the *previous* password and the vault's stored salt (`/vault/status`).
+        `PK` from the *previous* password and the vault's stored salt (`/vault/status`).
         """
         try:
             body = await request.json()
@@ -294,12 +294,12 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def account_vault(request: web.Request) -> web.Response:
-        """``GET /account/vault`` — the account page's credential panel."""
+        """`GET /account/vault` — the account page's credential panel."""
         return await _account_fragment(request)
 
     @requires(_VAULT_REQUIRES)
     async def secret_upsert(request: web.Request) -> web.Response:
-        """``POST /account/secret`` — add/replace one env entry, write-only."""
+        """`POST /account/secret` — add/replace one env entry, write-only."""
         form = await request.post()
         name = str(form.get('name', '')).strip().upper()
         value = str(form.get('value', '')).strip()
@@ -317,7 +317,7 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def secret_delete(request: web.Request) -> web.Response:
-        """``POST /account/secret/delete`` — drop one env entry by name."""
+        """`POST /account/secret/delete` — drop one env entry by name."""
         form = await request.post()
         name = str(form.get('name', '')).strip()
         vault_key = vault.session_vault_key()
@@ -330,12 +330,12 @@ def add_vault_routes(app: web.Application) -> None:
         return await _account_fragment(request)
 
     async def internal_vault_reset(request: web.Request) -> web.Response:
-        """``POST /internal/vault-reset`` — the auth service's reset push.
+        """`POST /internal/vault-reset` — the auth service's reset push.
 
-        Socket-peer only (Caddy never routes ``/internal/*``): a completed password
-        *reset* means the old ``VK`` is unrecoverable by design, so remove the vault and
-        its ciphertext rather than leave a stale blob under the dead ``PK``. The next
-        login initialises a fresh vault and the user re-provisions (``user --regen`` +
+        Socket-peer only (Caddy never routes `/internal/*`): a completed password
+        *reset* means the old `VK` is unrecoverable by design, so remove the vault and
+        its ciphertext rather than leave a stale blob under the dead `PK`. The next
+        login initialises a fresh vault and the user re-provisions (`user --regen` +
         re-upload).
         """
         removed = reset_vault_and_lock()

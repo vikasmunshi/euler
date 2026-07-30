@@ -11,15 +11,18 @@ from solver.shell import register, console
 
 
 @register(requires='reader',
-          help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved).')
+          )
 def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     """Print a list of problems and their count.
 
+    The set comes from `problems.json`, the state `summary` imports from your Project Euler
+    progress page and `mark` updates as you solve — so "solved" means recorded there, not
+    merely present on disk.
+
     Args:
-        which:  Which set to list — 'all' (default) every known problem,
-                'solved' the problems with a recorded answer, or 'unsolved'
-                those without. Mirrors the `{problems}` / `{solved}` /
-                `{unsolved}` shell variables.
+        which: Which set to list — 'all' every known problem, 'solved' those with a
+            recorded answer, 'unsolved' those without. Mirrors the `{problems}` /
+            `{solved}` / `{unsolved}` shell variables. Defaults to 'all'.
     """
     if which == 'all':
         collection: list[Problem] = problem_set.problems_list
@@ -35,7 +38,7 @@ def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     return 0
 
 
-@register(requires='admin', help_text='Manage configuration settings.')
+@register(requires='admin', )
 def manage_config(
         param: Literal['all', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
         value: float | int | None = None, /,
@@ -48,10 +51,9 @@ def manage_config(
     `ecb_usd_rate` (the rate `costs` uses).
 
     Args:
-        param:  Which setting to act on; 'all' (default) prints every setting.
-        value:  When given, the new value to assign to `param` (coerced to the
-                setting's type and saved). When omitted, the current value of
-                `param` is printed instead.
+        param: Which setting to act on. Defaults to 'all', which prints every setting.
+        value: The new value to assign to `param`, coerced to the setting's type and saved.
+            Defaults to '', which prints the setting's current value instead.
     """
     config_params: list[str] = ['timeout_multiple', 'timeout_single', 'ecb_usd_rate']
     if param == 'all':

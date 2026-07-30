@@ -4,13 +4,13 @@
 
 The plain "does it render" half is the point: these pages all extend base.html,
 so a mistake in the shared template breaks the whole signed-out tier at once —
-as a footer reading ``request.path_qs`` did, aiohttp_jinja2 having no request in
+as a footer reading `request.path_qs` did, aiohttp_jinja2 having no request in
 the template context until the app registers its request processor. Rendering
 each page through the real app is what catches that; a bare Jinja render with a
 hand-made context does not.
 
 The other half is the back link the standalone /terms carries (Referrer-Policy is
-no-referrer, so the linking page names itself in ``?back=``): it must return a
+no-referrer, so the linking page names itself in `?back=`): it must return a
 reader to our own pages only, and never anywhere else."""
 from __future__ import annotations
 

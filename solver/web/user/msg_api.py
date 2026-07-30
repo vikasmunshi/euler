@@ -10,18 +10,18 @@ writing happen in the shell, where `requires()` is the boundary; the chip report
 its rows type `msg read <id>` into the terminal.
 
 The consequence worth stating: **the browser cannot write to the spool at all.** Every
-message arrives over ``msg.sock`` from a uid the kernel vouched for. This
+message arrives over `msg.sock` from a uid the kernel vouched for. This
 tier holds no write route to remove the temptation, which is a smaller surface than a
 guarded one.
 
 Two deliveries, both over paths that already exist:
 
-- ``POST /internal/message`` — socket-peer only (Caddy answers ``/internal/*`` itself),
-  pushed by ``euler-msg`` when something lands for this user. It sends a **text frame**
-  to any attached terminal, which ``terminal.js`` relays to the page so the chip re-reads.
+- `POST /internal/message` — socket-peer only (Caddy answers `/internal/*` itself),
+  pushed by `euler-msg` when something lands for this user. It sends a **text frame**
+  to any attached terminal, which `terminal.js` relays to the page so the chip re-reads.
   It never touches the PTY: a service-originated sequence in the shell's byte stream would
   land in the replay buffer and re-fire on every reattach.
-- ``GET /messages`` on document load, so a user who was away sees the count without a
+- `GET /messages` on document load, so a user who was away sees the count without a
   push having reached them.
 """
 from __future__ import annotations
@@ -157,12 +157,12 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
 
     @requires(_MSG_REQUIRES)
     async def chip(request: web.Request) -> web.StreamResponse:
-        """``GET /messages`` — the header chip's summary and panel.
+        """`GET /messages` — the header chip's summary and panel.
 
-        The same shape ``/git`` has, and for the same reason: the count moves when someone
+        The same shape `/git` has, and for the same reason: the count moves when someone
         *else* acts, which no navigation can predict, so the chip asks for itself on load
         and on the delivery nudge rather than riding every fragment out-of-band. Unlike
-        ``/git`` it answers with the chip's **contents**, because this one has a ``load``
+        `/git` it answers with the chip's **contents**, because this one has a `load`
         trigger: replacing the element would re-arm that trigger on the replacement and
         loop forever.
         """
@@ -184,11 +184,11 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
         })
 
     async def internal_message(request: web.Request) -> web.Response:
-        """``POST /internal/message`` — the spool's delivery nudge.
+        """`POST /internal/message` — the spool's delivery nudge.
 
         Socket-peer only, like the auth service's logout push: Caddy answers
-        ``/internal/*`` with 404 rather than routing it, so the only callers are root and
-        the ``euler-web`` tier over this user's own socket. It changes nothing — it tells
+        `/internal/*` with 404 rather than routing it, so the only callers are root and
+        the `euler-web` tier over this user's own socket. It changes nothing — it tells
         an attached terminal that the count moved, and the browser re-reads the chip.
         """
         try:

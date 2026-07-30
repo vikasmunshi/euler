@@ -40,7 +40,7 @@ def _highlight(re_query: re.Pattern[str], text: str) -> str:
     return ''.join(parts)
 
 
-@register(requires='reader', help_text='Find content in the stack.', aliases=('find',))
+@register(requires='reader', aliases=('find',))
 def search(query: str,
            *files: Literal['*', 'py', 'c', 'html', 'json'],
            scope: Literal['problems', 'solved'] = 'solved') -> int:
@@ -52,14 +52,12 @@ def search(query: str,
     A blank line separates the matches of one problem from the next.
 
     Args:
-        query:  Regular expression to search for, matched case-insensitively
-                against each line ('re.search', so it need not match the whole
-                line).
-        *files: File extensions to include, given without the leading dot.
-                Defaults to 'py html' when omitted; '*' expands to the full
-                set 'py c html json'.
-        scope:  Which problems to search: 'solved' (default) restricts to
-                solved problems; 'problems' covers every known problem.
+        query: Regular expression to search for, matched case-insensitively against each
+            line (`re.search`, so it need not match the whole line).
+        *files: File extensions to include, without the leading dot. Defaults to 'py' and
+            'html'; '*' expands to the full set 'py c html json'.
+        scope: Which problems to search: 'solved' restricts to solved problems, 'problems'
+            covers every known problem. Defaults to 'solved'.
     """
     # Resolve the extension filter, then prefix each with '.' for endswith().
     extensions: tuple[str, ...] = files or ('py', 'html')

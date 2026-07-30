@@ -5,7 +5,7 @@
 First Jinja-rendered pages of the redesign. Server-rendered throughout, with
 POST → redirect → GET after every state change so reloads are safe. The two
 JS-dependent moments — the SRP login handshake and the set-password verifier
-derivation — run from same-origin ``/assets`` scripts (CSP: no inline code).
+derivation — run from same-origin `/assets` scripts (CSP: no inline code).
 
 Flow endpoints (all on the public socket; Caddy exposes them in step 5):
 
@@ -71,11 +71,11 @@ _BACK_DEFAULT = ('/login', _BACK_LABELS['/login'])
 def _back_link(request: web.Request) -> tuple[str, str]:
     """The (href, label) the standalone Terms page returns a reader to.
 
-    ``Referrer-Policy: no-referrer`` (csp.py) means there is no ``Referer`` to
+    `Referrer-Policy: no-referrer` (csp.py) means there is no `Referer` to
     read, so the caller names itself: base.html's footer carries its own path in
-    ``?back=`` — with the query intact, so a half-finished registration comes
+    `?back=` — with the query intact, so a half-finished registration comes
     back to its own token rather than to a dead link. The value is only ever
-    honoured when it is a relative path (no scheme, no host — ``//evil.example``
+    honoured when it is a relative path (no scheme, no host — `//evil.example`
     is a netloc, not a path) naming one of our own pages.
     """
     raw = request.query.get('back', '')
@@ -89,10 +89,10 @@ def _back_link(request: web.Request) -> tuple[str, str]:
 
 
 def _is_htmx(request: web.Request) -> bool:
-    """True when the content shell fetched this page for its left pane (``HX-Request``).
+    """True when the content shell fetched this page for its left pane (`HX-Request`).
 
     The terms / change-password pages then answer with a bare fragment instead
-    of the full auth card, so the shell can swap it into ``#content`` without
+    of the full auth card, so the shell can swap it into `#content` without
     nesting a second page.
     """
     return request.headers.get('HX-Request', '').lower() == 'true'
@@ -240,13 +240,13 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
     # ── change password (signed-in self-service; distinct from forgot/reset) ──────
 
     async def password_page(request: web.Request) -> web.Response:
-        """The signed-in change-password page (``GET /password``).
+        """The signed-in change-password page (`GET /password`).
 
         Current password + new password twice; the browser proves the current
         password over SRP and derives the new verifier locally (no mailbox
         round-trip — that is the *forgot* flow's job). No session → login.
 
-        On ``HX-Request`` it returns a **bare fragment** (form + SRP scripts +
+        On `HX-Request` it returns a **bare fragment** (form + SRP scripts +
         OOB breadcrumb) so the content shell can swap it straight into the left
         pane; a direct visit gets the full auth page (the no-JS/deep-link form).
         """
@@ -269,7 +269,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
     async def request_invite_submit(request: web.Request) -> web.Response:
         """Queue a prospective collaborator's request; answer generically either way.
 
-        This creates **no** authorization state — only the sudo ``users add`` path
+        This creates **no** authorization state — only the sudo `users add` path
         does. The response is the same whether the request stored, deduped, or was
         dropped (a full queue / bad email), so it leaks neither membership nor
         capacity. The owner notice is best-effort and off the event loop.
@@ -295,7 +295,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         """Standalone view of the Terms of use (the same _terms.html partial the
         registration page embeds).
 
-        On ``HX-Request`` it returns a bare fragment (the terms + OOB breadcrumb)
+        On `HX-Request` it returns a bare fragment (the terms + OOB breadcrumb)
         for the content shell's left pane; a direct visit gets the full page —
         which carries a back link, being otherwise a dead end: it is the one
         auth-tier page a reader arrives at with nothing to sign in to."""

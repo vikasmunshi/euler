@@ -1,19 +1,19 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the ``.gitattributes`` rule the crypt filter is wired by.
+"""Tests for the `.gitattributes` rule the crypt filter is wired by.
 
 The rule is **tracked** — it ships in the repo, so a fresh clone already carries it and
-``gitfilter install`` should only ever *recognise* it. The regression these tests pin is
-what happens when it does not: ``-diff`` was added to the tracked rule without updating
-``crypto.config['attr_line']``, the installer's exact-line match failed, and it appended a
+`gitfilter install` should only ever *recognise* it. The regression these tests pin is
+what happens when it does not: `-diff` was added to the tracked rule without updating
+`crypto.config['attr_line']`, the installer's exact-line match failed, and it appended a
 second — weaker, `-diff`-less — copy of the same rule to a tracked file. Every
-collaborator clone then reported a modified ``.gitattributes`` after ``git-sync``.
+collaborator clone then reported a modified `.gitattributes` after `git-sync`.
 
 Two guards, for the two halves of that failure:
 
 - the constant must equal the tracked rule, so the fallback write produces the current
   rule and nothing drifts silently again;
-- the matcher must recognise the rule by its **meaning** (path + ``filter=<name>``), so a
+- the matcher must recognise the rule by its **meaning** (path + `filter=<name>`), so a
   future flag change is a non-event rather than a duplicated line.
 """
 from __future__ import annotations

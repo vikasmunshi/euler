@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """The machine-local enc-key file: two records, one holder, no shared state.
 
-``~/.euler/enc-key.json`` holds ``verify`` and the master key wrapped to *this machine's*
-public key, and nothing else. It replaced a tracked, multi-entry ``keys/enc-key.json`` that
+`~/.euler/enc-key.json` holds `verify` and the master key wrapped to *this machine's*
+public key, and nothing else. It replaced a tracked, multi-entry `keys/enc-key.json` that
 every collaborator committed and pulled — which is where a long run of failures came from:
 a rotation dirtied a tracked file, `sync.sh` stashed and popped it around the merge, the pop
 conflicted with the authorised copy arriving from the other side, and the conflict markers

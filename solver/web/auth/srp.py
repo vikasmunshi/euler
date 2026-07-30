@@ -29,15 +29,15 @@ the whole handshake locally — the path used when a password *is* available
 server-side (e.g. a local test harness) and must be checked
 against a stored verifier.
 
-This is **web-authentication** material only: it lives under ``solver.web`` and
-shares no code or key material with ``solver.crypto`` (the git-filter solution
+This is **web-authentication** material only: it lives under `solver.web` and
+shares no code or key material with `solver.crypto` (the git-filter solution
 encryption). Logging in gates web access; it does not unlock the encryption
 master key.
 
-The group is the RFC 5054 2048-bit safe prime with generator ``g = 2`` and
+The group is the RFC 5054 2048-bit safe prime with generator `g = 2` and
 SHA-256 throughout; :data:`VERSION` records this so the parameters can evolve
-later. Integer values fed to the hash (``A``, ``B``, ``S``) are left-padded to
-the byte length of ``N`` (``PAD``), which a browser-side client must match
+later. Integer values fed to the hash (`A`, `B`, `S`) are left-padded to
+the byte length of `N` (`PAD`), which a browser-side client must match
 byte-for-byte to interoperate.
 """
 from __future__ import annotations

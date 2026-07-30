@@ -5,9 +5,9 @@
 Used by the callers that must not depend on aiohttp — the shell commands and the
 identity resolver, which run inside the solver process:
 
-- the ``users`` shell command (:mod:`solver.web.auth.commands`) → the auth admin socket;
+- the `users` shell command (:mod:`solver.web.auth.commands`) → the auth admin socket;
 - shell-ticket redemption (:mod:`solver.auth.identity`) → the auth public socket;
-- the ``msg`` shell command (:mod:`solver.web.msg.commands`) → the message spool.
+- the `msg` shell command (:mod:`solver.web.msg.commands`) → the message spool.
 
 Deliberately tiny: JSON in/out, one request per connection, no retries — every
 socket is local and the service answers immediately or not at all.
@@ -54,7 +54,7 @@ def request(socket_path: str, method: str, path: str, *,
             body: dict[str, Any] | None = None,
             headers: dict[str, str] | None = None,
             timeout: float = 10.0) -> tuple[int, dict[str, Any] | str]:
-    """One HTTP request over the unix socket; return ``(status, parsed body)``.
+    """One HTTP request over the unix socket; return `(status, parsed body)`.
 
     The body comes back as a dict when the response is JSON, else as text.
     Raises OSError if the socket is absent/refusing (service not running or the

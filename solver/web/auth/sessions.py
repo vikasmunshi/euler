@@ -3,7 +3,7 @@
 """In-memory web session table.
 
 A logged-in browser holds an opaque random token in a cookie; this maps that
-token to ``(email, profile)`` and an expiry. State is per-process by design: a
+token to `(email, profile)` and an expiry. State is per-process by design: a
 service restart logs everyone out, and remember-me tokens
 (:mod:`solver.web.auth.remember`) restore sessions across restarts.
 """
@@ -31,7 +31,7 @@ class SessionStore:
         return token
 
     def get(self, token: str | None) -> tuple[str, str] | None:
-        """Return ``(email, profile)`` for a live token, or None (evicting expired)."""
+        """Return `(email, profile)` for a live token, or None (evicting expired)."""
         if not token:
             return None
         entry = self._sessions.get(token)

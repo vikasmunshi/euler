@@ -101,18 +101,18 @@ def get_accumulated_charges() -> float:
                for model in consumed_tokens)
 
 
-@register(requires='contributor', help_text='Display total cost of AI API tokens consumed in session.')
+@register(requires='contributor', )
 def costs(ecb_usd_rate: float = config.ecb_usd_rate) -> int:
-    """
-    Print the total cost of all AI tokens consumed in the session so far, broken down per model,
-    or a "No charges so far." notice if nothing has been consumed. Always returns EXIT_OK.
+    """Print what this session's AI tokens have cost, per model.
 
-    Totals the charges across all models in "consumed_tokens" using each model's published USD
-    price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),
-    then converts to EUR using "ecb_usd_rate".
+    Totals the charges across every model in `consumed_tokens` using its published USD price
+    per million tokens (cache writes at 1.25x and cache reads at 0.10x the input rate), then
+    converts to EUR. Prints "No charges so far." when nothing has been consumed; either way
+    it succeeds.
 
     Args:
-        ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
+        ecb_usd_rate: The conversion rate to price the total in EUR (1 € = N $). Defaults to
+            the configured `ecb_usd_rate`.
     """
     charges_usd: float = get_accumulated_charges()
     if charges_usd == 0.0:

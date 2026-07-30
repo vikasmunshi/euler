@@ -23,14 +23,14 @@ from solver.shell import console, register
 from solver.shell.command import Context
 
 
-@register(requires='contributor', help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
+@register(requires='contributor', pass_ctx=True)
 def claude_solve(
         ctx: Context,
         problem: Problem,
         action: Literal['solve', 'review'],
         additional_prompt: str = '',
 ) -> int:
-    """Run Claude Code over a problem's solution files via the claude-euler-solver skill.
+    """Run Claude Code over a problem's solution files, via a skill.
 
     Launches Claude Code headless against the given problem's solution directory,
     runs the requested action, and streams a
@@ -40,23 +40,23 @@ def claude_solve(
     `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
     Args:
-        problem:            The `problem` to work on; defaults to the current problem.
-        action:             What to do — 'solve' (write and verify a Python
-                            solution, translate it to C, then document and
-                            summarise), or 'review' (audit an existing solution
-                            for C↔Python parity, in-source docs, and notes.html).
-        additional_prompt:  Extra free-text instructions appended to the skill
-                            invocation. Defaults to empty.
+        ctx: [injected] The live shell context; the decorator supplies it.
+        problem: [problem] The problem to work on.
+        action: What to do — 'solve' writes and verifies a Python solution, translates it to
+            C, then documents and summarises it; 'review' audits an existing solution for
+            C↔Python parity, in-source documentation and `notes.html`.
+        additional_prompt: Extra free-text instructions appended to the skill invocation.
+            Defaults to empty.
     """
     invocation = f'/claude-euler-solver {problem.number} {action} {additional_prompt}'.strip()
     return _run_skill(ctx, invocation, f'[accent]claude · {action}[/accent]')
 
 
 def _topic_index() -> list[dict[str, Any]]:
-    """The article index — ``topics/articles.json``, maintained by ``update-tags``.
+    """The article index — `topics/articles.json`, maintained by `update-tags`.
 
     Empty when it has not been built yet; every reader here degrades to "no topics known"
-    rather than failing, so a clone that has not run ``update-tags`` still works."""
+    rather than failing, so a clone that has not run `update-tags` still works."""
     try:
         data = json.loads(config.topics_index_file.read_text())
     except (OSError, json.JSONDecodeError):
@@ -65,8 +65,8 @@ def _topic_index() -> list[dict[str, Any]]:
 
 
 def _find_topic(topic: str) -> dict[str, Any] | None:
-    """The index row a ``claude-blog`` target names: a full ``<folder>/<slug>`` path (the way
-    completion offers it) or a bare slug, with or without the ``.md``."""
+    """The index row a `claude-blog` target names: a full `<folder>/<slug>` path (the way
+    completion offers it) or a bare slug, with or without the `.md`."""
     topic = topic.removesuffix('.md').strip('/')
     rows = _topic_index()
     return (next((r for r in rows if r['path'] == topic), None)
@@ -74,7 +74,7 @@ def _find_topic(topic: str) -> dict[str, Any] | None:
 
 
 def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """`claude-blog` targets: every topic in the article index as its ``<folder>/<slug>`` path —
+    """`claude-blog` targets: every topic in the article index as its `<folder>/<slug>` path —
     the tag pages *and* the curated ones — **sorted alphabetically**.
 
     Ranking by how much needs writing sounds helpful and is not: what a maintainer types is the
@@ -90,25 +90,27 @@ def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Complet
 
 
 @register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions},
-          help_text='Launch the Claude Euler Blogger skill to write a topic article for a tag/topic.')
+          )
 def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force: bool = False) -> int:
     """Write (or flesh out) a topic article via the claude-euler-blogger skill.
 
-    *topic* names what to write about: a tag's ``<facet>/<slug>`` path (e.g.
-    ``technique/sieve-of-eratosthenes``), a bare tag slug, or a curated topic path
-    (``number-theory/primes``). Tab-completion offers every topic in the article index
-    (``topics/articles.json``), unwritten and most-referenced first.
+    *topic* names what to write about: a tag's `<facet>/<slug>` path (e.g.
+    `technique/sieve-of-eratosthenes`), a bare tag slug, or a curated topic path
+    (`number-theory/primes`). Tab-completion offers every topic in the article index
+    (`topics/articles.json`), unwritten and most-referenced first.
     Launches Claude Code headless to research the covering problems and write the article
-    under ``topics/``, then streams a live Markdown summary. Needs the `claude` CLI and an
+    under `topics/`, then streams a live Markdown summary. Needs the `claude` CLI and an
     `ANTHROPIC_API_KEY`.
 
-    A topic whose article the index reports as ``final`` is left alone — the skill marks a page
-    final when it is done writing it, and rewriting one is an explicit ``--force``.
+    A topic whose article the index reports as `final` is left alone — the skill marks a page
+    final when it is done writing it, and rewriting one is an explicit `--force`.
 
     Args:
-        topic:              The tag or topic to write about (completed most-referenced first).
-        additional_prompt:  Extra free-text guidance for the writer. Defaults to empty.
-        force:              Rewrite the article even when it is already final. Defaults to False.
+        ctx: [injected] The live shell context; the decorator supplies it.
+        topic: The tag or topic to write about; completion offers the most-referenced first.
+        additional_prompt: Extra free-text guidance for the writer. Defaults to empty, which
+            prompts for an angle in an interactive shell.
+        force: Rewrite the article even when it is already final. Defaults to False.
     """
     entry = _find_topic(topic)
     if entry is not None and entry['status'] == 'final' and not force:
@@ -127,7 +129,7 @@ def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force:
 
 
 def _run_skill(ctx: Context, invocation: str, title: str) -> int:
-    """Run ``claude -p <invocation>`` headless, stream its output into a transient live panel,
+    """Run `claude -p <invocation>` headless, stream its output into a transient live panel,
     then print the final Markdown result with a turns / duration / cost footer."""
     cmdline = ('claude -p --output-format stream-json --verbose '
                f'--include-partial-messages {shlex.quote(invocation)}').strip()

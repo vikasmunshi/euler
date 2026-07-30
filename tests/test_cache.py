@@ -4,7 +4,7 @@
 responses, and the hands-off cases.
 
 What is being protected is the *absence* of a header: a response with no
-``Cache-Control`` is heuristically cacheable, which is the stale-until-hard-refresh
+`Cache-Control` is heuristically cacheable, which is the stale-until-hard-refresh
 bug. So every assertion here is "something was said", not merely "nothing broke".
 """
 from __future__ import annotations

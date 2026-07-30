@@ -33,6 +33,7 @@ solver.runners.runner,
 solver.shell.bash,True
 solver.shell.builtins,True
 solver.shell.command,
+solver.shell.docstring,
 solver.shell.interpreter,
 solver.shell.lexer,
 solver.shell.parser,
@@ -43,6 +44,7 @@ solver.shell.tty,
 solver.shell.variables,
 solver.templates.engine,
 solver.templates.new,
+solver.utils.doclint,True
 solver.utils.linter,True
 solver.utils.loader,
 solver.utils.misc,True

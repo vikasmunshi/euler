@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 """One-time shell tickets: web identity for PTY children.
 
-Every web shell runs as the shared ``euler-ws`` uid and ``/proc/<pid>/environ``
+Every web shell runs as the shared `euler-ws` uid and `/proc/<pid>/environ`
 is same-uid-readable, so nothing carried in the environment can be a reusable
 credential. Identity therefore transfers by a **consumable ticket**:
 
 - the ws service (holding the user's authenticated session cookie) asks the
-  auth service to *mint* a ticket bound to ``(email, profile)``;
-- the forked PTY child *redeems* it over ``auth.sock`` at startup — redemption
+  auth service to *mint* a ticket bound to `(email, profile)`;
+- the forked PTY child *redeems* it over `auth.sock` at startup — redemption
   consumes the ticket and returns the authoritative identity.
 
 Tickets live only in this process's memory, stored **hashed**, expire after
-``TICKET_TTL_SECONDS`` (60 s — minting and forking are back-to-back), and are
+`TICKET_TTL_SECONDS` (60 s — minting and forking are back-to-back), and are
 single-use: replay from a sibling shell's environ is dead on arrival because
 the victim's own startup already consumed the ticket.
 """
@@ -40,7 +40,7 @@ class TicketStore:
         self._tickets = {key: value for key, value in self._tickets.items() if value[2] > now}
 
     def mint(self, email: str, profile: str) -> str:
-        """Mint a ticket bound to ``(email, profile)``; return the raw token."""
+        """Mint a ticket bound to `(email, profile)`; return the raw token."""
         self._sweep()
         ticket = secrets.token_urlsafe(32)
         key = sha256(ticket.encode()).hexdigest()
@@ -48,7 +48,7 @@ class TicketStore:
         return ticket
 
     def redeem(self, ticket: str) -> tuple[str, str] | None:
-        """Consume the ticket, returning ``(email, profile)`` — or None if unknown,
+        """Consume the ticket, returning `(email, profile)` — or None if unknown,
         expired, or already redeemed."""
         self._sweep()
         key = sha256(ticket.encode()).hexdigest()

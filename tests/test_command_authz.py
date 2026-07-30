@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """Unit tests for the decorator authorization layer (solver.shell.command):
-``is_permitted`` and decorator gating against the resolved
+`is_permitted` and decorator gating against the resolved
 :class:`~solver.auth.Subject`."""
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ class RequiresTests(unittest.TestCase):
 
     def test_permission_is_channel_agnostic(self) -> None:
         """The channel is not an authorization axis: the same profile is permitted the
-        same commands on terminal and web — only ``requires`` decides."""
+        same commands on terminal and web — only `requires` decides."""
         with as_subject('reader', channel='web'):
             self.assertTrue(is_permitted('reader'))
         with as_subject('reader', channel='terminal'):
@@ -83,7 +83,7 @@ class DecoratorEnforcementTests(unittest.TestCase):
         self.assertEqual(cmd.requires, 'reader')
 
     def test_registration_is_channel_agnostic(self) -> None:
-        """A command registers on any channel when the subject holds its ``requires`` — the channel
+        """A command registers on any channel when the subject holds its `requires` — the channel
         is no longer an axis. An admin over web registers an admin-floored command that
         the old channel gate would have hidden."""
         with as_subject('admin', channel='web'):

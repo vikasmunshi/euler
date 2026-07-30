@@ -159,8 +159,8 @@ def verify_master_key(data: dict[str, Any], master_key: bytes) -> bool:
 def read_master_key() -> bytes:
     """Unlock this machine's master key and prove it correct.
 
-    One file, two records: ``verify``, and this holder's own wrapped key. Read the entry that
-    matches the private key, unwrap it, and check it against ``verify`` before returning —
+    One file, two records: `verify`, and this holder's own wrapped key. Read the entry that
+    matches the private key, unwrap it, and check it against `verify` before returning —
     the same proof as ever, on a file that is now nobody's but this machine's.
 
     There is no second source and no fallback. The tracked, shared file this replaced needed
@@ -191,7 +191,7 @@ def read_master_key() -> bytes:
 
 
 def enc_key_payload(public_key: X25519PublicKey, master_key: bytes) -> dict[str, str]:
-    """The whole file, for one holder: ``{verify, <their-public-key>: <wrapped master key>}``.
+    """The whole file, for one holder: `{verify, <their-public-key>: <wrapped master key>}`.
 
     What `user-authorize` sends and `msg save` writes — the unit of key distribution now that
     there is no shared file to append to. Wrapped to *their* public key, so it is theirs alone

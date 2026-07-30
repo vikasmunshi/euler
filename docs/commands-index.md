@@ -44,66 +44,67 @@ a parameter that accepts repetition.
 <summary>command catalogue (click to expand) — each name jumps to its entry below</summary>
 
 <!-- GEN:command-summary -->
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command. |
-| [`?`](#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
-| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. ❏ |
-| [`claude-batch`](#command-claude-batch) | — | Generate tags.json for many problems in one Message Batches job. |
-| [`claude-blog`](#command-claude-blog) | — | Launch the Claude Euler Blogger skill to write a topic article for a tag/topic. |
-| [`claude-solve`](#command-claude-solve) | — | Launch the Claude Euler Solver skill. ❏ |
-| [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
-| [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
-| [`create-topic`](#command-create-topic) | — | Create a curated topic page, choosing its tags interactively. |
-| [`echo`](#command-echo) | — | Print text. |
-| [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
-| [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
-| [`gh-merge`](#command-gh-merge-merge) | `merge` | Content pull requests: list | merge (walk the queue). » |
-| [`gh-merge-docs`](#command-gh-merge-docs-merge-docs) | `merge-docs` | Walk the open pull requests and merge one confined to the docs set. » |
-| [`git-audit`](#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
-| [`git-commit`](#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
-| [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
-| [`git-commit-docs`](#command-git-commit-docs-commit-docs) | `commit-docs` | Commit the docs set: everything update-docs, update-models and update-tags write. » |
-| [`git-filter`](#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
-| [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
-| [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
-| [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
-| [`git-push`](#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
-| [`git-reset`](#command-git-reset-reset) | `reset` | Un-commit local commits back to origin/master, keeping the changes staged. » |
-| [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
-| [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares. |
-| [`key-rekey`](#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
-| [`key-split`](#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
-| [`lint`](#command-lint) | — | Lint current problem, auto-fix with --auto-fix. ❏ » |
-| [`ls`](#command-ls) | — | List the solutions dir for given/current problem. ❏ » |
-| [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. ❏ » |
-| [`msg`](#command-msg-messages) | `messages` | Read and send messages: your threads, questions to staff, staff notices. |
-| [`new`](#command-new) | — | Generate new solution/test-case file for a problem. ❏ » |
-| [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
-| [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
-| [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved). |
-| [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
-| [`results`](#command-results) | — | list the results for the problem. ❏ |
-| [`search`](#command-search-find) | `find` | Find content in the stack. |
-| [`show`](#command-show-open-view) | `open`, `view` | Open problem/file in a browser or the web viewer panel. ❏ » |
-| [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
-| [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
-| [`tags`](#command-tags) | — | Summary (tags per facet) or a problems-per-tag histogram of the vocabulary. |
-| [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
-| [`topic`](#command-topic) | — | Show a topic article's tags and the problems/solutions they map to. |
-| [`topics`](#command-topics) | — | Show the tags on a problem and the topics that cover them. ❏ |
-| [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
-| [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
-| [`update-tags`](#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
-| [`user`](#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
-| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Issue the master key to a public key, or work a key request by message id. |
-| [`users`](#command-users) | — | Administer accounts, invite requests and enc-key entries (via sudo admin CLI). |
-| [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
-| [`version`](#command-version) | — | Show the running solver build version. |
+| Command | Aliases | Requires | Description |
+|---------|---------|----------|-------------|
+| [`!`](#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
+| [`?`](#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
+| [`benchmark`](#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. ❏ » |
+| [`check-commands`](#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. » |
+| [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. ❏ |
+| [`claude-batch`](#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
+| [`claude-blog`](#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
+| [`claude-solve`](#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. ❏ |
+| [`clear`](#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
+| [`compile-c`](#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. ❏ » |
+| [`costs`](#command-costs) | — | `contributor` | Print what this session's AI tokens have cost, per model. |
+| [`create-topic`](#command-create-topic) | — | `maintainer` | Seed a curated cross-cutting topic page. |
+| [`echo`](#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
+| [`edit`](#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. ❏ » |
+| [`evaluate`](#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. ❏ |
+| [`gh-merge`](#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or walk them one at a time to rebase-merge. » |
+| [`gh-merge-docs`](#command-gh-merge-docs-merge-docs) | `merge-docs` | `maintainer` | Walk the open pull requests, rebase-merging those that touch only the docs set. » |
+| [`git-audit`](#command-git-audit-audit) | `audit` | `contributor` | Audit what git actually stores, across the whole tracked tree. » |
+| [`git-commit`](#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the problem's solution directory. ❏ » |
+| [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | `contributor` | Fold this problem's current changes into the last commit, message unchanged. ❏ » |
+| [`git-commit-docs`](#command-git-commit-docs-commit-docs) | `commit-docs` | `contributor` | Stage and commit the documentation set — and nothing else. » |
+| [`git-filter`](#command-git-filter-filter) | `filter` | `reader` | Report or wire the transparent encryption filter for `solutions/private`. |
+| [`git-hooks`](#command-git-hooks-hooks) | `hooks` | `contributor` | Run the git pre-commit and (simulated) pre-push checks on demand. » |
+| [`git-identity`](#command-git-identity-identity) | `identity` | `contributor` | Configure your git identity and push credential from your GitHub login. |
+| [`git-publish`](#command-git-publish-publish) | `publish` | `maintainer` | Publish changed files for named targets to the remote repository. » |
+| [`git-push`](#command-git-push-push) | `push` | `contributor` | Push the current branch to origin as yourself, then open its pull request. » |
+| [`git-reset`](#command-git-reset-reset) | `reset` | `contributor` | Soft-reset your branch to origin/master — un-commit, keep every change. » |
+| [`git-status`](#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
+| [`git-sync`](#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
+| [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
+| [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
+| [`key-split`](#command-key-split) | — | `admin` | Print Shamir shares of the current master key. |
+| [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. ❏ » |
+| [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. ❏ » |
+| [`manage-config`](#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
+| [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
+| [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: your threads, questions to staff, staff notices. |
+| [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
+| [`pause`](#command-pause) | — | `reader` | Pause the program execution until the user presses Enter. |
+| [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
+| [`problems`](#command-problems) | — | `reader` | Print a list of problems and their count. |
+| [`progress`](#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
+| [`results`](#command-results) | — | `reader` | List the recorded results for a problem. ❏ |
+| [`search`](#command-search-find) | `find` | `reader` | Search the solution stack for a case-insensitive regular expression. |
+| [`show`](#command-show-open-view) | `open`, `view` | `reader` | Open a problem's documentation page, in a browser or the web viewer panel. ❏ » |
+| [`summary`](#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. » |
+| [`sys-setup`](#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
+| [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
+| [`test-cases`](#command-test-cases) | — | `reader` | List a problem's test cases. ❏ |
+| [`topic`](#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
+| [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. ❏ |
+| [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. » |
+| [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and the USD→EUR rate. » |
+| [`update-tags`](#command-update-tags) | — | `maintainer` | The glue for the double-entry tag graph. |
+| [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
+| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
+| [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
+| [`vault`](#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
+| [`version`](#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -115,17 +116,9 @@ a parameter that accepts repetition.
 <!-- GEN:command-index -->
 #### Command: `!` (`sh`, `bash`)
 
-Run a bash command.
-* profiles: admin, maintainer, contributor
-
-```
-! <command> [args]...
-! sh → escape to a bash shell.
-! py → escape to a python interpreter.
-```
-
-```text
 Run a shell command from the shell, returning its exit code.
+
+* ⚑ needs contributor or above.
 
 Three forms escape into an *interactive* session that takes over the terminal:
 
@@ -140,43 +133,75 @@ After the command finishes, the problem specials are refreshed (↻) in case it
 changed the files.
 
 Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
+
+**usage**
+
 ```
+! <command> [args]...
+! sh → escape to a bash shell.
+! py → escape to a python interpreter.
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `*args` | The command line to run, token by token — quoted before it reaches bash, so `! git log --oneline` arrives intact. With none, prints its own usage and fails. |
+
+*Defined in* `solver.shell.bash._bash`.
 
 ---
 
 #### Command: `?` (`help`)
 
-List commands or show help for a specific command.
-* profiles: admin, maintainer, contributor, reader
+List every command, or show detailed help for one command.
+
+* ⚑ needs reader or above.
+
+With no argument, prints the catalogue: command, aliases, the profile it needs, and its
+description, with the `❏` / `»` glyphs of the panel subtitle's legend.
+
+With a command name or alias, prints that command's own panel — its description, the
+facts about it (the profile floor, and whether it takes a problem or supports
+`--silent`), the prose and free sections of its docstring, its usage, and a row per
+argument it accepts. It renders the same `HelpModel` that `update-docs` publishes as
+`docs/commands-index.md`, so the guide and the prompt cannot disagree;
+`docs/developer-guide.md` §3.8 is the docstring standard behind both. Returns non-zero
+if the named command is unknown.
+
+Aliased as `help`.
+
+**usage**
 
 ```
 ? [command]
 ```
 
-```text
-List every command, or show detailed help for one command.
+**arguments**
 
-With no argument, prints a three-column table (command, aliases,
-description) of all registered commands; the `»` glyph in a description marks
-a command that supports --silent, as noted in the panel subtitle.
+| argument | description |
+|----------|-------------|
+| `*args` | The command name or alias to describe. With none, lists every command. |
 
-With a command name or alias, prints a panel for just that command: its
-description (with a trailing `»` glyph expanded to a full sentence about
---silent), its aliases, and its usage, with the command's fully-qualified
-`module.function` name in the panel subtitle. Returns non-zero if the named
-command is unknown.
-
-Aliased as `help`.
-```
+*Defined in* `solver.shell.builtins._help`.
 
 ---
 
 #### Command: `benchmark`
 
-Benchmark solutions to given/current problem.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
+Measure and record the execution time of the problem's solutions.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
+
+Like `eval`, runs every solution against the chosen test-case categories, but
+always **records** the timings to `results.json` and repeats each case an
+adaptive number of times (see "Repeats") instead of running once. Run `eval`
+first to confirm correctness, then `benchmark` to measure; categories default
+to all three ('dev', 'main', 'extra').
+
+**usage**
 
 ```
 benchmark
@@ -192,61 +217,92 @@ benchmark
 [silent=true|--silent]
 ```
 
-```text
-Measure and record the execution time of the problem's solutions.
+**arguments**
 
-Like `eval`, runs every solution against the chosen test-case categories, but
-always **records** the timings to `results.json` and repeats each case an
-adaptive number of times (see "Repeats") instead of running once. Run `eval`
-first to confirm correctness, then `benchmark` to measure; categories default
-to all three ('dev', 'main', 'extra').
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose solutions to benchmark. |
+| `*categories` | Test-case categories to include: 'dev', 'main', 'extra', or 'all' (which expands to all three). Defaults to all three. |
+| `clean` | When False, reuse up-to-date build output from previous compilations. Defaults to True. |
+| `timeout` | Per-run timeout in seconds for a solution's execution. None uses the configured default. Defaults to None. |
+| `disable_timeout` | Run without a timeout, and only once per test case — bypassing the adaptive repeat count above. Defaults to False. |
+| `lang` | Which language to benchmark: '*', 'py' or 'c'. Defaults to '*'. |
+| `solution_index` | Benchmark only this solution index. None benchmarks every solution. Defaults to None. |
+| `reset` | Replace any existing persisted results with this run, on a clean completion; an interrupted run leaves them untouched. Defaults to False, which merges this run into the existing records as a running average. |
+| `verbose` | Print error detail as each solution runs. Defaults to False. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
 
-Repeats:
-    `benchmark` does not take a `runs` argument — it passes `runs=None` to the
-    evaluator, which makes `load_test_cases` (`core/test_cases.py`) choose the
-    repeat count **per test-case category** from the previously recorded
-    timings::
+**repeats**
 
-        runs = clamp(round(21 / slowest_prior_average), 1, 21)
+`benchmark` does not take a `runs` argument — it passes `runs=None` to the
+evaluator, which makes `load_test_cases` (`core/test_cases.py`) choose the
+repeat count **per test-case category** from the previously recorded
+timings::
 
-    where `slowest_prior_average` is the largest recorded average (seconds per
-    run) among prior *correct* results for that category and the solutions
-    being benchmarked. So each case is repeated ~21 times when it runs in well
-    under a second and scales down toward a single run as it gets slower —
-    keeping the per-category wall time bounded at roughly 21s — clamped to the
-    1..21 range. With no prior correct result recorded for a category the
-    count is 1: the first benchmark establishes a one-run baseline, and later
-    benchmarks use it to repeat the fast cases and average out noise. Passing
-    `disable_timeout` overrides this and forces a single run.
+    runs = clamp(round(21 / slowest_prior_average), 1, 21)
 
-Args:
-    problem:            The `problem` to benchmark.
-    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                        (which expands to all three). Defaults to all three if omitted.
-    clean:              When False, reuse up-to-date build output from previous compilations.
-                        Defaults to True.
-    timeout:            Per-run timeout in seconds for solution execution. If None, uses the
-                        default timeout. Defaults to None.
-    disable_timeout:    If True, disables the timeout for solution execution and forces a single
-                        run (bypassing the adaptive repeat count above). Defaults to False.
-    lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
-    solution_index:     Specific solution index to evaluate.
-                        If provided, only this solution index will be evaluated.
-                        If None, all solutions will be evaluated. Defaults to None.
-    reset:              If True, replace any existing persisted results with this run on a
-                        clean completion. If the benchmark is interrupted, existing results
-                        are preserved untouched. Defaults to False (results are merged with
-                        existing records as a running average).
-    verbose:            If True, prints error information during evaluation. Defaults to False.
+where `slowest_prior_average` is the largest recorded average (seconds per
+run) among prior *correct* results for that category and the solutions
+being benchmarked. So each case is repeated ~21 times when it runs in well
+under a second and scales down toward a single run as it gets slower —
+keeping the per-category wall time bounded at roughly 21s — clamped to the
+1..21 range. With no prior correct result recorded for a category the
+count is 1: the first benchmark establishes a one-run baseline, and later
+benchmarks use it to repeat the fast cases and average out noise. Passing
+`disable_timeout` overrides this and forces a single run.
+
+*Defined in* `solver.core.evaluate.benchmark`.
+
+---
+
+#### Command: `check-commands`
+
+Report every command docstring that breaks the documented standard.
+
+* ⚑ needs admin.
+* » supports --silent to suppress output.
+
+The standard is `docs/developer-guide.md` §3.8; the rules are listed in this module's
+docstring. Findings print as `command | rule | detail` rows, and the exit code is
+non-zero when there is at least one — so the command gates a chain and serves as the
+docstring lane of `scripts/linters/check.sh solver`.
+
+**Admin-floored on purpose, not out of caution.** Registration is itself
+profile-filtered (`solver/shell/command.py`): a command above your floor is never
+registered, so `registry.all()` returns only what *you* may run. Checking from a lesser
+profile would pass by never looking at the commands it cannot see — the same reasoning
+that floors `update-docs`.
+
+**usage**
+
 ```
+check-commands
+[name=<str>] (default '')
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `name` | Check only the command (or alias) named, instead of the whole registry. Defaults to '', which checks every registered command. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.utils.doclint.check_commands`.
 
 ---
 
 #### Command: `claude-api`
 
-Generate specified target using Claude API.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
+Generate one of a problem's solution artifacts through the Claude API.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+
+Dispatches to the generator for *target*, prints the USD/EUR cost of the call, and fails
+if the generator reports failure.
+
+**usage**
 
 ```
 claude-api <c|py|doc|notes|tags|test-cases>
@@ -256,26 +312,34 @@ claude-api <c|py|doc|notes|tags|test-cases>
 [model=claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5|none] (default None)
 ```
 
-```text
-Generate AI-based content for the specified target.
+**arguments**
 
-Args:
-    problem: The `problem` to generate for; defaults to the current problem.
-    target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
-            docs, 'notes' for documentation, 'tags' for tags.json, 'test-cases' for test cases).
-    major:  Whether this is after a major change (e.g. template or instruction change).
-    force:  Whether to force generation even if the target already exists.
-    model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
+| argument | description |
+|----------|-------------|
+| `problem` | The problem to generate for. |
+| `target` | What to generate: 'c' or 'py' for code, 'doc' to refresh the in-source documentation, 'notes' for `notes.html`, 'tags' for `tags.json`, 'test-cases' for test cases. |
+| `force` | Generate even when the target already exists, overwriting it. Defaults to False. |
+| `major` | Regenerate after a major change — a new template or changed instructions — rather than an incremental one. Defaults to False. |
+| `model` | The model to generate with. Defaults to None, which picks Opus for code, docs and notes, and Sonnet for tags and test cases. |
 
-Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
-```
+*Defined in* `solver.ai.api.claude_api`.
 
 ---
 
 #### Command: `claude-batch`
 
-Generate tags.json for many problems in one Message Batches job.
-* profiles: admin, maintainer
+Bulk-tag a wave of problems in one Message Batches job, at half price.
+
+* ⚑ needs maintainer or above.
+
+Solved problems get the full prompt (domain + per-index techniques + takeaways); unsolved
+ones get the domain-only prompt. Run `update-tags` after each wave to promote the proposed
+`new-tags` before submitting the next, so later waves are prompted with the settled vocabulary.
+
+Note: the `costs` command counts batched tokens at standard list price, so its total
+overstates a batch wave by roughly 2x; this command prints the true discounted cost.
+
+**usage**
 
 ```
 claude-batch
@@ -288,38 +352,40 @@ claude-batch
 [model=claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5] (default claude-sonnet-5)
 ```
 
-```text
-Bulk-tag a wave of problems via the Message Batches API (half price, one shared cache).
+**arguments**
 
-Solved problems get the full prompt (domain + per-index techniques + takeaways); unsolved
-ones get the domain-only prompt. Run `update-tags` after each wave to promote the proposed
-`new-tags` before submitting the next, so later waves are prompted with the settled vocabulary.
+| argument | description |
+|----------|-------------|
+| `action` | `run` submits, waits and collects; `submit` returns as soon as the job is queued; `collect` writes the results of an already-submitted job; `list` shows waves that were submitted but not yet collected. |
+| `target` | Which problems to cover — `untagged` (no `tags.json` yet, the resumable default), `solved`, `unsolved`, or `all`. |
+| `limit` | Maximum problems in this wave. Keep it to a few hundred so that `new-tags` proposals get reconciled often enough to avoid duplicate slugs. |
+| `start` | Skip problems numbered below this. Paces a re-tag through the stack in waves, where `untagged` cannot help because every problem already has a file. |
+| `batch_id` | The job to collect; required for `collect`. |
+| `problems_list` | Comma-separated problem numbers to run instead of a `target` sweep — the targeted re-run after a vocabulary change (`23,39,146`). Overrides `target`. |
+| `model` | The model to run the wave on. |
 
-Args:
-    action:   `run` submits and waits and collects; `submit` returns as soon as the job is
-              queued; `collect` writes the results of an already-submitted job; `list` shows
-              waves that were submitted but not yet collected.
-    target:   Which problems to cover - `untagged` (no tags.json yet, the resumable default),
-              `solved`, `unsolved`, or `all`.
-    limit:    Maximum problems in this wave. Keep it to a few hundred so that `new-tags`
-              proposals get reconciled often enough to avoid duplicate slugs.
-    start:    Skip problems numbered below this. Paces a re-tag through the stack in waves,
-              where `untagged` cannot help because every problem already has a file.
-    problems_list: Comma-separated problem numbers to run instead of a `target` sweep - the
-              targeted re-run after a vocabulary change (`23,39,146`). Overrides `target`.
-    batch_id: The job to collect (required for `collect`).
-    model:    The model to run the wave on.
-
-Note: the `costs` command counts batched tokens at standard list price, so its total
-overstates a batch wave by roughly 2x; this command prints the true discounted cost.
-```
+*Defined in* `solver.ai.batch.claude_batch`.
 
 ---
 
 #### Command: `claude-blog`
 
-Launch the Claude Euler Blogger skill to write a topic article for a tag/topic.
-* profiles: admin, maintainer
+Write (or flesh out) a topic article via the claude-euler-blogger skill.
+
+* ⚑ needs maintainer or above.
+
+*topic* names what to write about: a tag's `<facet>/<slug>` path (e.g.
+`technique/sieve-of-eratosthenes`), a bare tag slug, or a curated topic path
+(`number-theory/primes`). Tab-completion offers every topic in the article index
+(`topics/articles.json`), unwritten and most-referenced first.
+Launches Claude Code headless to research the covering problems and write the article
+under `topics/`, then streams a live Markdown summary. Needs the `claude` CLI and an
+`ANTHROPIC_API_KEY`.
+
+A topic whose article the index reports as `final` is left alone — the skill marks a page
+final when it is done writing it, and rewriting one is an explicit `--force`.
+
+**usage**
 
 ```
 claude-blog <topic>
@@ -327,42 +393,24 @@ claude-blog <topic>
 [force=true|--force]
 ```
 
-```text
-Write (or flesh out) a topic article via the claude-euler-blogger skill.
+**arguments**
 
-*topic* names what to write about: a tag's ``<facet>/<slug>`` path (e.g.
-``technique/sieve-of-eratosthenes``), a bare tag slug, or a curated topic path
-(``number-theory/primes``). Tab-completion offers every topic in the article index
-(``topics/articles.json``), unwritten and most-referenced first.
-Launches Claude Code headless to research the covering problems and write the article
-under ``topics/``, then streams a live Markdown summary. Needs the `claude` CLI and an
-`ANTHROPIC_API_KEY`.
+| argument | description |
+|----------|-------------|
+| `topic` | The tag or topic to write about; completion offers the most-referenced first. |
+| `additional_prompt` | Extra free-text guidance for the writer. Defaults to empty, which prompts for an angle in an interactive shell. |
+| `force` | Rewrite the article even when it is already final. Defaults to False. |
 
-A topic whose article the index reports as ``final`` is left alone — the skill marks a page
-final when it is done writing it, and rewriting one is an explicit ``--force``.
-
-Args:
-    topic:              The tag or topic to write about (completed most-referenced first).
-    additional_prompt:  Extra free-text guidance for the writer. Defaults to empty.
-    force:              Rewrite the article even when it is already final. Defaults to False.
-```
+*Defined in* `solver.ai.skill.claude_blog`.
 
 ---
 
 #### Command: `claude-solve`
 
-Launch the Claude Euler Solver skill.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
+Run Claude Code over a problem's solution files, via a skill.
 
-```
-claude-solve <solve|review>
-[problem=<n>] (default current)
-[additional_prompt=<str>] (default '')
-```
-
-```text
-Run Claude Code over a problem's solution files via the claude-euler-solver skill.
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
 
 Launches Claude Code headless against the given problem's solution directory,
 runs the requested action, and streams a
@@ -371,42 +419,58 @@ turns / duration / cost. Heavier and slower than `claude-api` — it actually
 runs `solver` commands, edits files, evaluates, and iterates. Needs the
 `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
-Args:
-    problem:            The `problem` to work on; defaults to the current problem.
-    action:             What to do — 'solve' (write and verify a Python
-                        solution, translate it to C, then document and
-                        summarise), or 'review' (audit an existing solution
-                        for C↔Python parity, in-source docs, and notes.html).
-    additional_prompt:  Extra free-text instructions appended to the skill
-                        invocation. Defaults to empty.
+**usage**
+
 ```
+claude-solve <solve|review>
+[problem=<n>] (default current)
+[additional_prompt=<str>] (default '')
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem to work on. |
+| `action` | What to do — 'solve' writes and verifies a Python solution, translates it to C, then documents and summarises it; 'review' audits an existing solution for C↔Python parity, in-source documentation and `notes.html`. |
+| `additional_prompt` | Extra free-text instructions appended to the skill invocation. Defaults to empty. |
+
+*Defined in* `solver.ai.skill.claude_solve`.
 
 ---
 
 #### Command: `clear` (`cls`)
 
-Clear the screen.
-* profiles: admin, maintainer, contributor, reader
+Clear the terminal screen and scrollback, then succeed.
+
+* ⚑ needs reader or above.
+
+A convenience wrapper over the console's clear; equivalent to the shell `clear`. Takes
+no arguments — any given are ignored. Aliased as `cls`.
+
+**usage**
 
 ```
 clear
 ```
 
-```text
-Clear the terminal screen and scrollback, then succeed.
-
-A convenience wrapper over the console's clear; equivalent to the shell
-`clear`. Takes no arguments. Aliased as `cls`.
-```
+*Defined in* `solver.shell.builtins._clear`.
 
 ---
 
 #### Command: `compile-c` (`compile`)
 
-Build all C source files for given/current problem.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
+Compile every C solution for the problem into a runnable binary.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
+
+Builds each `.c` file in `problem.solution_dir/` (linking the runner harness)
+so it can be evaluated and benchmarked; reports per-file success or the compiler
+error. `eval` and `benchmark` invoke this for you, so you rarely call it directly.
+
+**usage**
 
 ```
 compile-c
@@ -415,108 +479,113 @@ compile-c
 [silent=true|--silent]
 ```
 
-```text
-Compile every C solution for the problem into a runnable binary.
+**arguments**
 
-Builds each `.c` file in `problem.solution_dir/` (linking the runner harness)
-so it can be evaluated and benchmarked; reports per-file success or the compiler
-error. `eval` and `benchmark` invoke this for you, so you rarely call it directly.
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose C sources to compile. |
+| `clean` | When False, reuse up-to-date build output from previous compilations. Defaults to True. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
 
-Args:
-    problem:            The `problem` to compile.
-    clean:              When False, reuse up-to-date build output from previous compilations.
-                        Defaults to True.
-```
+*Defined in* `solver.core.evaluate.compile_c`.
 
 ---
 
 #### Command: `costs`
 
-Display total cost of AI API tokens consumed in session.
-* profiles: admin, maintainer, contributor
+Print what this session's AI tokens have cost, per model.
+
+* ⚑ needs contributor or above.
+
+Totals the charges across every model in `consumed_tokens` using its published USD price
+per million tokens (cache writes at 1.25x and cache reads at 0.10x the input rate), then
+converts to EUR. Prints "No charges so far." when nothing has been consumed; either way
+it succeeds.
+
+**usage**
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1389)
+[ecb_usd_rate=<float>] (default 1.138)
 ```
 
-```text
-Print the total cost of all AI tokens consumed in the session so far, broken down per model,
-or a "No charges so far." notice if nothing has been consumed. Always returns EXIT_OK.
+**arguments**
 
-Totals the charges across all models in "consumed_tokens" using each model's published USD
-price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),
-then converts to EUR using "ecb_usd_rate".
+| argument | description |
+|----------|-------------|
+| `ecb_usd_rate` | The conversion rate to price the total in EUR (1 € = N $). Defaults to the configured `ecb_usd_rate`. |
 
-Args:
-    ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
-```
+*Defined in* `solver.ai.models.costs`.
 
 ---
 
 #### Command: `create-topic`
 
-Create a curated topic page, choosing its tags interactively.
-* profiles: admin, maintainer
+Seed a curated cross-cutting topic page.
+
+* ⚑ needs maintainer or above.
+
+A curated topic (e.g. `number-theory/primes`) gathers several tags under one idea,
+unlike a tag's own auto-generated page.
+
+*path* is the `folder/leaf` the page lives at under `topics/`. Give the tag slugs as
+arguments to create non-interactively; give none and, in an interactive shell, pick them with
+a search-and-select prompt. Every slug must exist in the vocabulary. The page is seeded from
+the same template a tag page uses (its title is the leaf, title-cased — edit it when you
+write the page) and reconciled straight away, so it appears in the draft index and its
+Problems section is filled. Write it with `claude-blog <path>`.
+
+**usage**
 
 ```
 create-topic <path>
 [<tags>...]
 ```
 
-```text
-Seed a curated cross-cutting topic (e.g. ``number-theory/primes``) — a page that gathers
-several tags under one idea, unlike a tag's own auto-generated page.
+**arguments**
 
-*path* is the ``folder/leaf`` the page lives at under ``topics/``. Give the tag slugs as
-arguments to create non-interactively; give none and, in an interactive shell, pick them with
-a search-and-select prompt. Every slug must exist in the vocabulary. The page is seeded from
-the same template a tag page uses (its title is the leaf, title-cased — edit it when you
-write the page) and reconciled straight away, so it appears in the draft index and its
-Problems section is filled. Write it with ``claude-blog <path>``.
+| argument | description |
+|----------|-------------|
+| `path` | The `folder/leaf` location under `topics/` (lowercase words and hyphens). |
+| `*tags` | The tag slugs the page covers. Omit them to choose interactively. |
 
-Args:
-    path: The ``folder/leaf`` location under ``topics/`` (lowercase words and hyphens).
-    tags: The tag slugs the page covers; omit to choose interactively.
-```
+*Defined in* `solver.core.tags.create_topic`.
 
 ---
 
 #### Command: `echo`
 
-Print text.
-* profiles: admin, maintainer, contributor, reader
+Print the given text to the console, then succeed.
+
+* ⚑ needs reader or above.
+
+Handy in command blocks to annotate progress or to surface a variable, since
+`{...}` references are substituted before the command runs — e.g.
+`echo solved {len(solved)} problems`.
+
+**usage**
 
 ```
 echo <text>
 ```
 
-```text
-Print the given text to the console, then succeed.
+**arguments**
 
-The arguments are joined with single spaces and printed literally (no rich
-markup interpretation). Handy in command blocks to annotate progress or to
-surface a variable, since `{...}` references are substituted before the
-command runs — e.g. `echo solved {len(solved)} problems`.
-```
+| argument | description |
+|----------|-------------|
+| `*args` | The words to print. They are joined with single spaces and printed literally, with no rich markup interpretation. |
+
+*Defined in* `solver.shell.builtins._echo`.
 
 ---
 
 #### Command: `edit` (`ed`)
 
 Open a solution file in the web code editor.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
 
-```
-edit <filename>
-[problem=<n>] (default current)
-[silent=true|--silent]
-```
-
-```text
-Open *filename* from *problem*'s solution directory in the web code editor.
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
 
 The counterpart to `show` (which opens the rendered problem): *problem* defaults
 to the current problem, and *filename* completes to the files `ls` lists. The
@@ -531,18 +600,44 @@ like `show` (the channel is the resolved subject's):
   (via `browser open-in-tab`); errors early if the `browser` command is
   unavailable.
 
-Arguments:
-    problem:  The problem owning the file; defaults to the current problem.
-    filename: The solution-directory file to edit (as `ls` lists it).
+**usage**
+
 ```
+edit <filename>
+[problem=<n>] (default current)
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem owning the file. |
+| `filename` | The solution-directory file to edit, as `ls` lists it. It must already exist. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.viewer.edit`.
 
 ---
 
 #### Command: `evaluate` (`eval`)
 
-Evaluate solutions to given/current problem.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
+Evaluate a problem's solutions against its test cases.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+
+Compiles what needs compiling, then runs every solution the problem has — each
+language, each solution index — against every test case in the chosen categories,
+printing a verdict line per run: `correct`, `incorrect`, `error`, `overflow`, `timeout`
+or `unknown` (a case with no recorded answer). Fails unless every run was correct, so it
+gates a chain: `eval 42 && benchmark`.
+
+This is the correctness check and it records nothing. `benchmark` is the measuring
+counterpart — same runs, but written to `results.json` and repeated an adaptive number
+of times.
+
+**usage**
 
 ```
 evaluate
@@ -558,46 +653,31 @@ evaluate
 [verbose=true|--verbose]
 ```
 
-```text
-Evaluate solutions against test cases.
+**arguments**
 
-Args:
-problem:            The `problem` to evaluate.
-*categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                    (which expands to all three). Defaults to 'dev', 'main' if omitted.
-clean:              When False, reuse up-to-date build output from previous compilations.
-                    Defaults to True.
-timeout:            Timeout in seconds for solution execution. If None, uses default timeout.
-                    Defaults to None.
-disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
-                    If True, only one run will be performed for each solution.
-lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
-runs:               Number of times to run each solution per test case (useful for timing).
-                    Defaults to 1.
-show:               If True, appends '--show' to the arguments passed to each solution;
-                    defaults to False.
-solution_index:     Specific solution index to evaluate.
-                    If provided, only this solution index will be evaluated.
-                    If None, all solutions will be evaluated. Defaults to None.
-verbose:            If True, prints error information during evaluation. Defaults to False.
-```
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose solutions to evaluate. |
+| `*categories` | Test-case categories to include: 'dev', 'main', 'extra', or 'all' (which expands to all three). Defaults to 'dev' and 'main'. |
+| `clean` | When False, reuse up-to-date build output from previous compilations. Defaults to True. |
+| `timeout` | Timeout in seconds for a solution's execution. None uses the configured default. Defaults to None. |
+| `disable_timeout` | Run without a timeout, and only once per test case. Defaults to False. |
+| `lang` | Which language to evaluate: '*', 'py' or 'c'. Defaults to '*'. |
+| `runs` | Number of times to run each solution per test case, useful for timing. Defaults to 1. |
+| `show` | Append '--show' to the arguments passed to each solution, so it prints its own diagnostics. Defaults to False. |
+| `solution_index` | Evaluate only this solution index. None evaluates every solution. Defaults to None. |
+| `verbose` | Print error detail as each solution runs. Defaults to False. |
+
+*Defined in* `solver.core.evaluate.evaluate`.
 
 ---
 
 #### Command: `gh-merge` (`merge`)
 
-Content pull requests: list | merge (walk the queue).
-* profiles: admin, maintainer
-* » supports `--silent`
-
-```
-gh-merge
-[action=list|merge] (default list)
-[silent=true|--silent]
-```
-
-```text
 List the open pull requests, or walk them one at a time to rebase-merge.
+
+* ⚑ needs maintainer or above.
+* » supports --silent to suppress output.
 
 `list` (the default) shows what is waiting: number, title, branch. `merge` walks
 the open pull requests interactively — per request **merge** (rebase onto master),
@@ -616,27 +696,33 @@ something else entirely. Merge those on GitHub, as an admin who has read them.
 The docs set has its own gate and its own verb — `gh-merge-docs` — and the two are
 disjoint: a docs branch is refused here, a solutions branch is refused there.
 
-Args:
-    action: 'list' (default) or 'merge' (walk the open queue interactively).
-
 Aliased as `merge`.
+
+**usage**
+
 ```
+gh-merge
+[action=list|merge] (default list)
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `action` | 'list' shows the open queue; 'merge' walks it interactively. Defaults to 'list'. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.gh_merge`.
 
 ---
 
 #### Command: `gh-merge-docs` (`merge-docs`)
 
-Walk the open pull requests and merge one confined to the docs set.
-* profiles: admin, maintainer
-* » supports `--silent`
-
-```
-gh-merge-docs
-[silent=true|--silent]
-```
-
-```text
 Walk the open pull requests, rebase-merging those that touch only the docs set.
+
+* ⚑ needs maintainer or above.
+* » supports --silent to suppress output.
 
 `gh-merge`'s sibling for documentation: same interactive walk — per request
 **merge**, **skip**, or **quit** — but the gate admits :data:`DOCS_PATHS` instead of the
@@ -651,24 +737,30 @@ Unlike the content gate this one does not insist on a single path: the docs set 
 body of work, and a regeneration touches most of it at once.
 
 Aliased as `merge-docs`.
+
+**usage**
+
 ```
+gh-merge-docs
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.gh_merge_docs`.
 
 ---
 
 #### Command: `git-audit` (`audit`)
 
-Audit the whole tracked tree: private encrypted, no compiled binaries.
-* profiles: admin, maintainer, contributor
-* » supports `--silent`
-
-```
-git-audit
-[details=true|--details]
-[silent=true|--silent]
-```
-
-```text
 Audit what git actually stores, across the whole tracked tree.
+
+* ⚑ needs contributor or above.
+* » supports --silent to suppress output.
 
 Two checks, each reading every tracked blob straight from the object store (so
 no smudge filter runs): every file under `solutions/private` is stored as
@@ -681,21 +773,40 @@ you staged, pre-push audits what the push would add — so committing and pushin
 stay fast. The cost of that scoping is that neither hook re-examines history
 already on origin; this is the command that does.
 
-Args:
-    details: When True, lists every file audited. When False (default), reports
-             counts only. Offenders are listed by path either way.
-
 Aliased as `audit`.
+
+**usage**
+
 ```
+git-audit
+[details=true|--details]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `details` | List every file audited. Defaults to False, which reports counts only; offenders are listed by path either way. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.git_audit`.
 
 ---
 
 #### Command: `git-commit` (`commit`)
 
-Commit a problem's solution directory and progress, optionally resetting to origin/master.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
+Stage and commit the problem's solution directory.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
+
+Adds everything under `problem.solution_dir`, plus `solutions/problems.json` (the
+progress file `mark` rewrites), and commits just those — the routine "save my
+progress" step. Aliased as `commit`.
+
+**usage**
 
 ```
 git-commit
@@ -705,43 +816,26 @@ git-commit
 [silent=true|--silent]
 ```
 
-```text
-Stage and commit the problem's solution directory.
+**arguments**
 
-Adds everything under `problem.solution_dir`, plus `solutions/problems.json`
-    (the progress file `mark` rewrites), and commits just those
-    — the routine "save my progress" step.
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose solution directory to commit. |
+| `message` | The commit message. When empty (the default) and `reset` is not set, folds into the last unpushed commit if there is one to amend (see `git-commit-amend`); otherwise commits fresh under the default message "solution for pNNNN". |
+| `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. Suppresses the empty-message amend, since squashing to one checkpoint is the opposite intent. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
 
-Args:
-    problem:        The problem to commit.
-    message:        The commit message. When empty (the default) and `reset` is not
-                    set, folds into the last unpushed commit if there is one to amend
-                    (see `git-commit-amend`); otherwise commits fresh under the
-                    default message "solution for pNNNN".
-    reset:          When True, first soft-reset to `origin/master` so the new commit
-                    squashes all local commits into a single checkpoint (working
-                    tree untouched). Defaults to False. Suppresses the empty-message
-                    amend, since squashing to one checkpoint is the opposite intent.
-Aliased as `commit`.
-```
+*Defined in* `solver.core.git.git_commit`.
 
 ---
 
 #### Command: `git-commit-amend` (`amend`)
 
-Amend the last unpushed commit with a problem's current changes.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
-
-```
-git-commit-amend
-[problem=<n>] (default current)
-[silent=true|--silent]
-```
-
-```text
 Fold this problem's current changes into the last commit, message unchanged.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
 
 The "I forgot something" step after `git-commit`: stages everything under
     `problem.solution_dir` plus `solutions/problems.json` and amends HEAD with
@@ -753,29 +847,33 @@ Refused once HEAD is on origin — amending rewrites the commit, and a rewritten
     `git-commit` is the honest step there. A no-op, not a failure, when nothing
     under those paths has changed.
 
-Args:
-    problem:        The problem whose changes are folded into HEAD.
-
 Aliased as `amend`.
+
+**usage**
+
 ```
+git-commit-amend
+[problem=<n>] (default current)
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose changes are folded into HEAD. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.git_commit_amend`.
 
 ---
 
 #### Command: `git-commit-docs` (`commit-docs`)
 
-Commit the docs set: everything update-docs, update-models and update-tags write.
-* profiles: admin, maintainer, contributor
-* » supports `--silent`
-
-```
-git-commit-docs
-[message=<str>] (default '')
-[reset=true|--reset]
-[silent=true|--silent]
-```
-
-```text
 Stage and commit the documentation set — and nothing else.
+
+* ⚑ needs contributor or above.
+* » supports --silent to suppress output.
 
 The counterpart of `git-commit` for prose and generated docs: it stages exactly
     :data:`DOCS_PATHS` — the `docs/` guides, the `topics/` articles and tag graph, the
@@ -791,30 +889,34 @@ The message is tagged `(docs)` unless it already says so, and an empty one becom
 A clean docs set is a no-op, not a failure — so this composes in a `&&` chain after a
     regeneration that had nothing to do.
 
-Args:
-    message:        The commit message, tagged `(docs)` if it is not already.
-                    Defaults to `(docs) update`.
-    reset:          When True, first soft-reset to `origin/master` so the new commit
-                    squashes all local commits into a single checkpoint (working tree
-                    untouched). Defaults to False.
-
 Aliased as `commit-docs`.
+
+**usage**
+
 ```
+git-commit-docs
+[message=<str>] (default '')
+[reset=true|--reset]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `message` | The commit message, tagged `(docs)` if it is not already. Defaults to `(docs) update`. |
+| `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.git_commit_docs`.
 
 ---
 
 #### Command: `git-filter` (`filter`)
 
-Wire the git encryption filter: status | install.
-* profiles: admin, maintainer, contributor, reader
-
-```
-git-filter
-[action=status|install] (default status)
-```
-
-```text
 Report or wire the transparent encryption filter for `solutions/private`.
+
+* ⚑ needs reader or above.
 
 `status` shows the filter wiring and whether this session can unwrap the
 master key. `install` verifies master-key access first (refusing cleanly
@@ -824,27 +926,31 @@ ciphertext decrypts in place. The explicit form of what `git-sync` runs
 automatically after a pull that delivers key access — use it when access
 arrived some other way, e.g. right after `key-reconstruct` from shares.
 
-Args:
-    action: 'status' (default) or 'install'.
-
 Aliased as `filter`.
+
+**usage**
+
 ```
+git-filter
+[action=status|install] (default status)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `action` | 'status' reports whether the filter is configured; 'install' configures it. Defaults to 'status'. |
+
+*Defined in* `solver.core.git.git_filter`.
 
 ---
 
 #### Command: `git-hooks` (`hooks`)
 
-Run pre-commit hook and simulated pre-push hook.
-* profiles: admin, maintainer, contributor
-* » supports `--silent`
-
-```
-git-hooks
-[silent=true|--silent]
-```
-
-```text
 Run the git pre-commit and (simulated) pre-push checks on demand.
+
+* ⚑ needs contributor or above.
+* » supports --silent to suppress output.
 
 Runs the same checks the git hooks run — the pre-commit hook (whitespace
 fixes, flake8, mypy) and a simulation of the pre-push hook — so you can
@@ -852,21 +958,29 @@ verify your changes will pass before committing or pushing. Reports the
 combined pass/fail in the exit code.
 
 Aliased as `hooks`.
+
+**usage**
+
 ```
+git-hooks
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.git_hooks`.
 
 ---
 
 #### Command: `git-identity` (`identity`)
 
-Sign in to GitHub (gh) and set this clone's git identity from it.
-* profiles: admin, maintainer, contributor
-
-```
-git-identity
-```
-
-```text
 Configure your git identity and push credential from your GitHub login.
+
+* ⚑ needs contributor or above.
 
 The one-time setup before `git-push`: runs `gh auth login` when you are not yet
 signed in (interactive device flow — works in the web shell), makes gh the git
@@ -875,15 +989,27 @@ credential helper (`gh auth setup-git`), and sets this clone's `user.name` /
 as **you**, never as a service identity.
 
 Aliased as `identity`.
+
+**usage**
+
 ```
+git-identity
+```
+
+*Defined in* `solver.core.git.git_identity`.
 
 ---
 
 #### Command: `git-publish` (`publish`)
 
-Push targets (keys|scripts|solutions|solver) to remote.
-* profiles: admin, maintainer
-* » supports `--silent`
+Publish changed files for named targets to the remote repository.
+
+* ⚑ needs maintainer or above.
+* » supports --silent to suppress output.
+
+Fails if any target is not one of the accepted scopes.
+
+**usage**
 
 ```
 git-publish
@@ -892,38 +1018,24 @@ git-publish
 [silent=true|--silent]
 ```
 
-```text
-Publish changed files for named targets to the remote repository.
+**arguments**
 
-Args:
-    targets: Scopes of files to publish — one or more of 'scripts', 'solutions', or 'solver'.
-             There is no `keys` scope: key material is not distributed by git any more.
-             A holder's enc-key file is machine-local, and issuing one is
-             `user-authorize` sending it through the message spool.
-             Defaults to 'solutions'.
-    dry_run: Print the push and pull-request commands instead of running them.  Defaults to False.
+| argument | description |
+|----------|-------------|
+| `*targets` | Scopes of files to publish — one or more of 'scripts', 'solutions' or 'solver'. There is no `keys` scope: key material is not distributed by git any more. A holder's enc-key file is machine-local, and issuing one is `user-authorize` sending it through the message spool. Defaults to 'solutions'. |
+| `dry_run` | Print the push and pull-request commands instead of running them. Defaults to False. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
 
-Raises:
-    ValueError: If any target is not one of the accepted values.
-```
+*Defined in* `solver.core.git.git_publish`.
 
 ---
 
 #### Command: `git-push` (`push`)
 
-Push the current branch to origin and open a pull request onto master.
-* profiles: admin, maintainer, contributor
-* » supports `--silent`
-
-```
-git-push
-[force=true|--force]
-[pr=false|--no-pr]
-[silent=true|--silent]
-```
-
-```text
 Push the current branch to origin as yourself, then open its pull request.
+
+* ⚑ needs contributor or above.
+* » supports --silent to suppress output.
 
 In a per-user clone the current branch is `user/<slug>`, pushed with your own
 GitHub identity — `git-identity` is the one-time setup. Landing work on master
@@ -935,28 +1047,33 @@ work anyone has been asked for. It is skipped on master (nothing to merge into
 itself) and on a branch level with origin/master (nothing to review), and a
 branch that already has one open keeps it.
 
-Args:
-    force: Push with `--force-with-lease` — needed after `git-sync` rebased your
-           branch onto a moved origin/master. Refused on master.
-    pr:    Open a pull request onto master after a successful push. Defaults to
-           True; `--no-pr` pushes and stops there.
+**usage**
+
 ```
+git-push
+[force=true|--force]
+[pr=false|--no-pr]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `force` | Push with `--force-with-lease` — needed after `git-sync` rebased your branch onto a moved origin/master. Refused on master. Defaults to False. |
+| `pr` | Open a pull request onto master after a successful push. Defaults to True; `--no-pr` pushes and stops there. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.git_push`.
 
 ---
 
 #### Command: `git-reset` (`reset`)
 
-Un-commit local commits back to origin/master, keeping the changes staged.
-* profiles: admin, maintainer, contributor
-* » supports `--silent`
-
-```
-git-reset
-[silent=true|--silent]
-```
-
-```text
 Soft-reset your branch to origin/master — un-commit, keep every change.
+
+* ⚑ needs contributor or above.
+* » supports --silent to suppress output.
 
 The undo `git-commit --reset` never lets you stop at: this runs
     `git reset --soft origin/master`, moving your branch tip back to origin/master
@@ -970,42 +1087,56 @@ Makes no commit, so it runs no hooks and is a clean no-op — exit 0 — when yo
     reachable through the reflog until git eventually prunes them.
 
 Aliased as `reset`.
+
+**usage**
+
 ```
+git-reset
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.git.git_reset`.
 
 ---
 
 #### Command: `git-status` (`status`)
 
-Display sync state between local and origin/master.
-* profiles: admin, maintainer, contributor, reader
+Display the sync state between the local branch and origin/master.
+
+* ⚑ needs reader or above.
+
+Reports how far ahead and behind your branch is, and what is uncommitted in the working
+tree — the read before deciding between `git-push`, `git-sync` and `git-commit`. It is
+as fresh as the last fetch; `git-sync` is what refreshes it. Aliased as `status`.
+
+**usage**
 
 ```
 git-status
 [details=true|--details]
 ```
 
-```text
-Display the sync state between the local branch and origin/master.
+**arguments**
 
-Args:
-    details:    When True, lists every differing file and uncommitted change.
-                When False (default), shows file counts only.
-```
+| argument | description |
+|----------|-------------|
+| `details` | List every differing file and uncommitted change. Defaults to False, which shows file counts only. |
+
+*Defined in* `solver.core.git.git_status`.
 
 ---
 
 #### Command: `git-sync` (`sync`)
 
 Bring the local repository in sync with origin/master.
-* profiles: admin, maintainer, contributor, reader
 
-```
-git-sync
-[dry_run=true|--dry-run]
-```
-
-```text
-Bring the local repository in sync with origin/master.
+* ⚑ needs reader or above.
 
 On a per-user clone (branch `user/<slug>`) this is the pull flow: fetch
 origin/master and merge/rebase it into your branch — bringing in merged work
@@ -1015,66 +1146,95 @@ merged work. Key material does not travel this way -- it is issued by message
 Stale remote-tracking refs are pruned as part of the fetch, so a branch deleted
 when its pull request merged stops shadowing the branch you push next.
 
-Args:
-    dry_run: Print the sync commands instead of running them. Defaults to False.
+**usage**
+
 ```
+git-sync
+[dry_run=true|--dry-run]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `dry_run` | Print the sync commands instead of running them. Defaults to False. |
+
+*Defined in* `solver.core.git.git_sync`.
 
 ---
 
 #### Command: `key-reconstruct`
 
-Recover master key from shares.
-* profiles: admin, maintainer, contributor, reader
+Reconstruct the master key from Shamir shares and store it for this user.
+
+* ⚑ needs reader or above.
+
+Prompts for the shares one at a time, reconstructs the key, and writes it wrapped to
+this holder's public key — the recovery path when no `user-authorize` grant is coming.
+Needs a private key already in place: run `user` first.
+
+**usage**
 
 ```
 key-reconstruct
 [threshold=<int>] (default 2)
 ```
 
-```text
-Prompt for `threshold` shares, reconstruct the master key, and store it wrapped to this user.
-```
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `threshold` | How many shares to ask for — the threshold the shares were split at. Defaults to 2. |
+
+*Defined in* `solver.crypto.keys.key_reconstruct`.
 
 ---
 
 #### Command: `key-rekey` (`rekey`)
 
-Rotate the enc key and re-wrap to users.
-* profiles: admin
+Rotate the master key and re-issue it to every registered public key.
 
-```
-key-rekey
-```
-
-```text
-Rotate to a new master key, re-issue it to every registered public key, renormalise blobs.
+* ⚑ needs admin.
 
 **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
 access means rotating the key they hold and re-issuing the new one to everyone else.
 
 The list of who "everyone else" is comes from the **account roster** — each user's
-``public_key``, registered in ``users.json`` (``users set-keys``). It used to be implicit
+`public_key`, registered in `users.json` (`users set-keys`). It used to be implicit
 in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
 found. With one file per machine there is nothing central to read, so the registry is
 explicit — and it holds only *public* keys, which is why losing it costs nothing but a
 round of re-registration.
 
 Each holder is sent their own payload through the message spool, exactly as
-``user-authorize`` does; they run ``msg save`` to take it. An account with no registered
+`user-authorize` does; they run `msg save` to take it. An account with no registered
 public key cannot be re-issued to and is named, not skipped silently — that person loses
 access at this rotation, which is sometimes the intent and must never be a surprise.
-``users set-keys`` fills the registry from what every holder already has.
+`users set-keys` fills the registry from what every holder already has.
 
 Because the git filter is deterministic, every committed blob depends on the master key, so
 a rotation re-encrypts the tracked private files via `git add --renormalize`.
+
+**usage**
+
 ```
+key-rekey
+```
+
+*Defined in* `solver.crypto.keys.key_rekey`.
 
 ---
 
 #### Command: `key-split`
 
-Split master key into shares (n-of-m secret sharing).
-* profiles: admin
+Print Shamir shares of the current master key.
+
+* ⚑ needs admin.
+
+Any `threshold` of the printed shares reconstruct the key through `key-reconstruct`;
+fewer reveal nothing. Store them apart from each other.
+
+**usage**
 
 ```
 key-split
@@ -1082,18 +1242,30 @@ key-split
 [threshold=<int>] (default 2)
 ```
 
-```text
-Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct).
-```
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `num_shares` | How many shares to print. Defaults to 3. |
+| `threshold` | How many of them are needed to reconstruct the key. Must be at least 2 and no more than `num_shares`. Defaults to 2. |
+
+*Defined in* `solver.crypto.keys.key_split`.
 
 ---
 
 #### Command: `lint`
 
-Lint current problem, auto-fix with --auto-fix.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
+Lint the problem's solution files, optionally auto-fixing them.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
+
+Checks the current problem's solution files for style and quality issues
+(flake8, plus the configured checks). Reports any findings and reflects them
+in the exit code.
+
+**usage**
 
 ```
 lint
@@ -1102,29 +1274,32 @@ lint
 [silent=true|--silent]
 ```
 
-```text
-Lint the problem's solution files, optionally auto-fixing them.
+**arguments**
 
-Checks the current problem's solution files for style and quality issues
-(flake8, plus the configured checks). Reports any findings and reflects them
-in the exit code.
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose solution files to lint. |
+| `auto_fix` | Fix what can be fixed in place — autoflake (unused imports and variables), autopep8 (style) and isort (import order) — then re-check. Defaults to False, which only reports. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
 
-Args:
-    problem:    The `problem` to lint; defaults to the current problem.
-    auto_fix:   When True, attempt to fix issues in place with autoflake
-                (remove unused imports/variables), autopep8 (style), and
-                isort (import order), then re-check. When False (default),
-                only report.
-```
+*Defined in* `solver.utils.linter.lint`.
 
 ---
 
 #### Command: `ls`
 
-List the solutions dir for given/current problem.
-* profiles: admin, maintainer, contributor, reader
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
+List the files in a problem's solution directory.
+
+* ⚑ needs reader or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
+
+Walks the directory recursively and prints each file's canonical path, size, modified
+time and MIME type, sorted by path; a solution file (`pNNNN_sK.*`) is flagged with a
+trailing `*`. Files with no extension are skipped. Fails when the directory holds
+nothing to list.
+
+**usage**
 
 ```
 ls
@@ -1132,21 +1307,29 @@ ls
 [silent=true|--silent]
 ```
 
-```text
-This function lists all files found recursively in the solution directory of a
-given problem while displaying their canonical paths and file sizes. The files
-are shown in sorted order for easy navigation.
+**arguments**
 
-Args:
-    problem (Problem): The problem instance containing the solution directory.
-```
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose solution directory to list. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.list.ls`.
 
 ---
 
 #### Command: `manage-config`
 
-Manage configuration settings.
-* profiles: admin
+Show or update a managed configuration setting.
+
+* ⚑ needs admin.
+
+The managed settings persist to `solver/config.json` and override the
+defaults in `config.py`: `timeout_single` / `timeout_multiple` (solution
+timeouts in seconds for a single run and for repeated runs), and
+`ecb_usd_rate` (the rate `costs` uses).
+
+**usage**
 
 ```
 manage-config
@@ -1154,38 +1337,24 @@ manage-config
 [value=<float>|none] (default None)
 ```
 
-```text
-Show or update a managed configuration setting.
+**arguments**
 
-The managed settings persist to `solver/config.json` and override the
-defaults in `config.py`: `timeout_single` / `timeout_multiple` (solution
-timeouts in seconds for a single run and for repeated runs), and
-`ecb_usd_rate` (the rate `costs` uses).
+| argument | description |
+|----------|-------------|
+| `param` | Which setting to act on. Defaults to 'all', which prints every setting. |
+| `value` | The new value to assign to `param`, coerced to the setting's type and saved. Defaults to '', which prints the setting's current value instead. |
 
-Args:
-    param:  Which setting to act on; 'all' (default) prints every setting.
-    value:  When given, the new value to assign to `param` (coerced to the
-            setting's type and saved). When omitted, the current value of
-            `param` is printed instead.
-```
+*Defined in* `solver.utils.misc.manage_config`.
 
 ---
 
 #### Command: `mark` (`mark-solved`)
 
-Mark the current problem as solved, after checking.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
-
-```
-mark
-[problem=<n>] (default current)
-[silent=true|--silent]
-```
-
-```text
 Mark the current problem as solved — once its results confirm it.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
 
 Records the current problem as solved (with today's date) in
 `problems.json`, the same state `summary` maintains, so `{solved}`,
@@ -1199,16 +1368,36 @@ marked solved is left unchanged.
 
 Aliased as `mark-solved`.
 
-Args:
-    problem:    The `problem` to mark solved; defaults to the current problem.
+**usage**
+
 ```
+mark
+[problem=<n>] (default current)
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem to mark solved. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.utils.summary.mark`.
 
 ---
 
 #### Command: `msg` (`messages`)
 
 Read and send messages: your threads, questions to staff, staff notices.
-* profiles: admin, maintainer, contributor, reader
+
+* ⚑ needs reader or above.
+
+Every message has staff (`maintainer`+) at one end: you can ask them something,
+they can answer, and they can send notices. There is deliberately no user-to-user
+messaging. Delivery is asynchronous — the spool holds the thread until you read it.
+
+**usage**
 
 ```
 msg
@@ -1220,34 +1409,38 @@ msg
 [all_users=true|--all-users]
 ```
 
-```text
-Read and write the message spool (web-server-guide § Messaging).
+**arguments**
 
-Every message has staff (``maintainer``+) at one end: you can ask them something,
-they can answer, and they can send notices. There is deliberately no user-to-user
-messaging. Delivery is asynchronous — the spool holds the thread until you read it.
+| argument | description |
+|----------|-------------|
+| `action` | What to do — `list` your threads, newest first; `read` one thread and mark it read; `save` the master key a maintainer issued you, writing it to your enc-key file; `send` staff a question; `queue` (STAFF) the inbound work list; `notice` (STAFF) to named recipients or everyone; `dismiss` (STAFF) a worked message. Defaults to `list`. |
+| `thread` | The message id, for `read` / `save` / `dismiss`. |
+| `subject` | The subject line, for `send` / `notice`. |
+| `body` | The message text, for `send` / `notice`. |
+| `to` | Comma-separated recipient identities for a `notice`. |
+| `all_users` | Send the notice to every mapped identity. Defaults to False. |
 
-Args:
-    action:    list (your threads, newest first), read (one thread, and mark it
-               read), save (take the master key a maintainer issued you, writing it
-               to your enc-key file), send (ask staff a question), queue (STAFF: the
-               inbound work list), notice (STAFF: send to named recipients or
-               everyone), dismiss (STAFF: drop a worked message).
-    thread:    the message id (read / save / dismiss).
-    subject:   the subject line (send / notice).
-    body:      the message text (send / notice).
-    to:        comma-separated recipient identities for a notice.
-    all_users: send the notice to every mapped identity (``--all-users``).
-```
+*Defined in* `solver.web.msg.commands.msg`.
 
 ---
 
 #### Command: `new`
 
-Generate new solution/test-case file for a problem.
-* profiles: admin, maintainer, contributor
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
+Generate new solution and/or test-case files for the problem.
+
+* ⚑ needs contributor or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
+
+Solution files are named from the problem number and the next free solution
+index (e.g. "p0001_s0.py", "p0001_s1.py") and are created from the boilerplate
+template with the problem information substituted; Python files are made
+executable (mode 0o755).
+
+With neither `py` nor `c` given (and `tc` False), both a Python and a C file are
+created.
+
+**usage**
 
 ```
 new
@@ -1258,114 +1451,124 @@ new
 [silent=true|--silent]
 ```
 
-```text
-Generate new solution and/or test-case files for the problem.
+**arguments**
 
-Solution files are named from the problem number and the next free solution
-index (e.g. "p0001_s0.py", "p0001_s1.py") and are created from the boilerplate
-template with the problem information substituted; Python files are made
-executable (mode 0o755).
+| argument | description |
+|----------|-------------|
+| `problem` | The problem to create files for. |
+| `py` | Create a Python solution file. Defaults to False. |
+| `c` | Create a C solution file — one per existing Python solution that lacks a matching ".c". Defaults to False. |
+| `tc` | Create an empty test-cases file instead of solution files, unless one already exists. Defaults to False. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
 
-Args:
-    problem:    The `problem` to create files for; defaults to the current problem.
-    py: Create a Python solution file. Defaults to False.
-    c:  Create a C solution file (one per existing Python solution lacking a
-        matching ".c"). Defaults to False.
-    tc: Create an empty test-cases file instead of solution files, unless one
-        already exists. Defaults to False.
-
-With neither `py` nor `c` given (and `tc` False), both a Python and a C file
-are created.
-```
+*Defined in* `solver.core.new.new`.
 
 ---
 
 #### Command: `pause`
 
-Pause for user confirmation to continue.
-* profiles: admin, maintainer, contributor, reader
+Pause the program execution until the user presses Enter.
+
+* ⚑ needs reader or above.
+
+**usage**
 
 ```
 pause
 ```
 
-```text
-Pause the program execution until the user presses Enter.
-```
+*Defined in* `solver.utils.shell_utils.pause`.
 
 ---
 
 #### Command: `pip-upgrade` (`upgrade`)
 
-Upgrade dependency group (all|ai|core|dev|solutions|show).
-* profiles: admin
-
-```
-pip-upgrade
-[all|ai|core|dev|solutions|show ...]
-```
-
-```text
 Upgrade packages in the current venv for the given dependency groups.
+
+* ⚑ needs admin.
 
 Groups are defined in pyproject.toml:   'core' for project.dependencies,
                                         'ai', 'dev', 'solutions', 'show' for optional-dependencies,
                                         'all' to upgrade everything.
                                         Defaults to 'all'.
 
-Args:
-    groups: One or more group names, or 'all'.
+**usage**
+
 ```
+pip-upgrade
+[all|ai|core|dev|solutions|show ...]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `*groups` | One or more dependency group names, or 'all'. |
+
+*Defined in* `solver.utils.scripts.pip_upgrade`.
 
 ---
 
 #### Command: `problems`
 
-Show list of problems (all|solved|unsolved).
-* profiles: admin, maintainer, contributor, reader
+Print a list of problems and their count.
+
+* ⚑ needs reader or above.
+
+The set comes from `problems.json`, the state `summary` imports from your Project Euler
+progress page and `mark` updates as you solve — so "solved" means recorded there, not
+merely present on disk.
+
+**usage**
 
 ```
 problems
 [which=all|solved|unsolved] (default all)
 ```
 
-```text
-Print a list of problems and their count.
+**arguments**
 
-Args:
-    which:  Which set to list — 'all' (default) every known problem,
-            'solved' the problems with a recorded answer, or 'unsolved'
-            those without. Mirrors the `{problems}` / `{solved}` /
-            `{unsolved}` shell variables.
-```
+| argument | description |
+|----------|-------------|
+| `which` | Which set to list — 'all' every known problem, 'solved' those with a recorded answer, 'unsolved' those without. Mirrors the `{problems}` / `{solved}` / `{unsolved}` shell variables. Defaults to 'all'. |
+
+*Defined in* `solver.utils.misc.problems`.
 
 ---
 
 #### Command: `progress`
 
-Print progress statistics about Euler problems.
-* profiles: admin, maintainer, contributor, reader
-
-```
-progress
-```
-
-```text
 Print overall progress through the Euler problems.
+
+* ⚑ needs reader or above.
 
 Shows a bar of solved vs. unsolved problems, the solved count and
 percentage of the total known problems, and the next problem to solve (the
 lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 `summary` first if your progress looks out of date.
+
+**usage**
+
 ```
+progress
+```
+
+*Defined in* `solver.utils.summary.progress`.
 
 ---
 
 #### Command: `results`
 
-list the results for the problem.
-* profiles: admin, maintainer, contributor, reader
-* ❏ takes an optional problem number (defaults to the current problem)
+List the recorded results for a problem.
+
+* ⚑ needs reader or above.
+* ❏ uses/sets current problem.
+
+Reads the `results.json` that `benchmark` (and `eval --record`) writes in the problem's
+solution directory, and prints one line per recorded run — verdict, average time, run
+count, solution and arguments. Fails when there is no results file to read.
+
+**usage**
 
 ```
 results
@@ -1373,23 +1576,29 @@ results
 [all|dev|main|extra ...]
 ```
 
-```text
-List the results for a given problem.
-Args:
-    problem:            The `problem` to list `results` for. This is used to locate the `results` file.
-    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                        (which expands to all three). Defaults to all three if omitted.
+**arguments**
 
-Returns:
-    int: Exit code indicating the completion status of the operation.
-```
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose results to list. |
+| `*categories` | Test-case categories to include: 'dev', 'main', 'extra', or 'all' (which expands to all three). Defaults to all three. |
+
+*Defined in* `solver.core.results.results`.
 
 ---
 
 #### Command: `search` (`find`)
 
-Find content in the stack.
-* profiles: admin, maintainer, contributor, reader
+Search the solution stack for a case-insensitive regular expression.
+
+* ⚑ needs reader or above.
+
+For every problem in scope, each matching stack file is read (decrypted as
+needed) and scanned line by line; every matching line is printed as
+'<stack-dir>/<file>:<line> <text>' with the matched substring highlighted.
+A blank line separates the matches of one problem from the next.
+
+**usage**
 
 ```
 search <query>
@@ -1397,43 +1606,25 @@ search <query>
 [scope=problems|solved] (default solved)
 ```
 
-```text
-Search the solution stack for a case-insensitive regular expression.
+**arguments**
 
-For every problem in scope, each matching stack file is read (decrypted as
-needed) and scanned line by line; every matching line is printed as
-'<stack-dir>/<file>:<line> <text>' with the matched substring highlighted.
-A blank line separates the matches of one problem from the next.
+| argument | description |
+|----------|-------------|
+| `query` | Regular expression to search for, matched case-insensitively against each line (`re.search`, so it need not match the whole line). |
+| `*files` | File extensions to include, without the leading dot. Defaults to 'py' and 'html'; '*' expands to the full set 'py c html json'. |
+| `scope` | Which problems to search: 'solved' restricts to solved problems, 'problems' covers every known problem. Defaults to 'solved'. |
 
-Args:
-    query:  Regular expression to search for, matched case-insensitively
-            against each line ('re.search', so it need not match the whole
-            line).
-    *files: File extensions to include, given without the leading dot.
-            Defaults to 'py html' when omitted; '*' expands to the full
-            set 'py c html json'.
-    scope:  Which problems to search: 'solved' (default) restricts to
-            solved problems; 'problems' covers every known problem.
-```
+*Defined in* `solver.utils.search.search`.
 
 ---
 
 #### Command: `show` (`open`, `view`)
 
-Open problem/file in a browser or the web viewer panel.
-* profiles: admin, maintainer, contributor, reader
-* ❏ takes an optional problem number (defaults to the current problem)
-* » supports `--silent`
-
-```
-show
-[problem=<n>] (default current)
-[filename=<str>|none] (default None)
-[silent=true|--silent]
-```
-
-```text
 Open a problem's documentation page, in a browser or the web viewer panel.
+
+* ⚑ needs reader or above.
+* ❏ uses/sets current problem.
+* » supports --silent to suppress output.
 
 When *problem* is omitted, opens the current problem. The path depends on the
 shell's channel (from the resolved subject):
@@ -1456,27 +1647,33 @@ When *filename* is given, `show` opens that solution file in the code editor
 instead of the rendered page — it delegates to `edit`, so the same file lookup,
 channel handling, and browser tab apply.
 
-Arguments:
-    problem:  The `problem` to open; defaults to the current problem.
-    filename: A solution file to open in the code editor; when omitted, opens
-              the rendered documentation page instead.
+**usage**
+
 ```
+show
+[problem=<n>] (default current)
+[filename=<str>|none] (default None)
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem to open. |
+| `filename` | A solution file to open in the code editor instead. Defaults to None, which opens the rendered documentation page. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.core.viewer.show`.
 
 ---
 
 #### Command: `summary`
 
-Parse .progress.html into problems.json.
-* profiles: admin, maintainer
-* » supports `--silent`
-
-```
-summary
-[silent=true|--silent]
-```
-
-```text
 Refresh the solved/unsolved state from your Project Euler progress page.
+
+* ⚑ needs maintainer or above.
+* » supports --silent to suppress output.
 
 Parses `solutions/.progress.html` (the saved Page Source of your
 authenticated https://projecteuler.net/progress page) and updates
@@ -1486,14 +1683,34 @@ how the shell learns your real progress, driving `{solved}` / `{unsolved}`,
 
 Returns an error (with instructions) if `.progress.html` is missing: visit
 the progress page, copy its Page Source into that file, and retry.
+
+**usage**
+
 ```
+summary
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.utils.summary.summary`.
 
 ---
 
 #### Command: `sys-setup` (`install`)
 
-Installs or uninstalls system resources.
-* profiles: admin
+Install or uninstall a system resource.
+
+* ⚑ needs admin.
+
+Runs the setup script for *target* under `sudo`, after confirming. Each script is
+idempotent, so re-running an install is safe.
+
+**usage**
 
 ```
 sys-setup <chrome|dev-env|upgrade-service>
@@ -1501,43 +1718,58 @@ sys-setup <chrome|dev-env|upgrade-service>
 [show_help=true|--show-help]
 ```
 
-```text
-Installs or uninstalls the system resource specified as the target.
+**arguments**
 
-Parameters:
-    target:     Specifies the target resource to install or uninstall.
-                Accepted values are 'chrome', 'dev-env', and 'upgrade-service'
-    uninstall:  Indicates whether the operation is an uninstallation.
-                Defaults to False, which performs installation.
-    show_help:  Displays help information for the specified target.
-```
+| argument | description |
+|----------|-------------|
+| `target` | Which resource to act on: 'chrome', 'dev-env' or 'upgrade-service'. |
+| `uninstall` | Uninstall the target instead of installing it. Defaults to False. |
+| `show_help` | Print the target script's own help and stop, doing nothing else. Defaults to False. |
+
+*Defined in* `solver.utils.scripts.sys_setup`.
 
 ---
 
 #### Command: `tags`
 
-Summary (tags per facet) or a problems-per-tag histogram of the vocabulary.
-* profiles: admin, maintainer, contributor, reader
+Report over the central tag vocabulary (`topics/tags.json`).
+
+* ⚑ needs reader or above.
+
+The vocabulary's own shape, not any one problem's tags: how many tags each facet
+(domain, technique, takeaway) defines, and — with `--details` — how evenly the problems
+are spread across them, which is what shows a tag that has grown too broad or too
+narrow to be worth an article. Use `topic <name>` for one tag's problems.
+
+**usage**
 
 ```
 tags
 [details=true|--details]
 ```
 
-```text
-Report over the central tag vocabulary (`topics/tags.json`).
+**arguments**
 
-`summary` (default) prints the number of tags in each facet; `details` adds, per facet, a
-histogram of how many problems each tag maps to (min / median / max, then binned counts).
-```
+| argument | description |
+|----------|-------------|
+| `details` | Add, per facet, a histogram of how many problems each tag maps to — min / median / max, then binned counts. Defaults to False, which prints just the number of tags in each facet. |
+
+*Defined in* `solver.core.tags.tags`.
 
 ---
 
 #### Command: `test-cases`
 
-list the test cases for the problem.
-* profiles: admin, maintainer, contributor, reader
-* ❏ takes an optional problem number (defaults to the current problem)
+List a problem's test cases.
+
+* ⚑ needs reader or above.
+* ❏ uses/sets current problem.
+
+Reads the problem's `test_cases.json` and prints one line per case — category,
+arguments and expected answer — for the categories asked for. URL arguments are
+abbreviated to their final path segment.
+
+**usage**
 
 ```
 test-cases
@@ -1545,66 +1777,79 @@ test-cases
 [all|dev|main|extra ...]
 ```
 
-```text
-List the test cases for a given problem based on specified categories.
+**arguments**
 
-Args:
-    problem:            The `problem` to list test cases for. This is used to locate the test cases file.
-    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                        (which expands to all three). Defaults to all three if omitted.
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose test cases to list. |
+| `*categories` | Test-case categories to include: 'dev', 'main', 'extra', or 'all' (which expands to all three). Defaults to all three. |
 
-Returns:
-    int: Exit code indicating the completion status of the operation.
-```
+*Defined in* `solver.core.test_cases.test_cases`.
 
 ---
 
 #### Command: `topic`
 
-Show a topic article's tags and the problems/solutions they map to.
-* profiles: admin, maintainer, contributor, reader
+List a topic article's declared tags and what each one maps to.
+
+* ⚑ needs reader or above.
+
+Reads the article's `<!-- tags: [...] -->` declaration and, for each slug, prints its
+facet and the problem/solution refs recorded on the central vocabulary's leg — the
+other half of the double-entry graph `update-tags` keeps in step. Fails when no article
+matches.
+
+**usage**
 
 ```
 topic <name>
 ```
 
-```text
-List a topic article's declared tags and, per tag, the problems/solutions on its central leg.
-```
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `name` | The article to report on: a `folder/leaf` path under `topics/`, or a bare leaf name when it is unambiguous. |
+
+*Defined in* `solver.core.tags.topic`.
 
 ---
 
 #### Command: `topics`
 
-Show the tags on a problem and the topics that cover them.
-* profiles: admin, maintainer, contributor, reader
-* ❏ takes an optional problem number (defaults to the current problem)
+List a problem's tags and the topic articles that cover them.
+
+* ⚑ needs reader or above.
+* ❏ uses/sets current problem.
+
+Reads the problem's own `tags.json` — grouping the tags by facet (domain, technique per
+solution index, takeaway) — then names every article under `topics/` that declares any
+of them. Fails when the problem has no `tags.json`; `update-tags` reports which
+problems are missing one.
+
+**usage**
 
 ```
 topics
 [problem=<n>] (default current)
 ```
 
-```text
-List a problem's tags (grouped by facet) and the topic articles that cover any of them.
-```
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose tags to list. |
+
+*Defined in* `solver.core.tags.topics`.
 
 ---
 
 #### Command: `update-docs`
 
-Regenerate the generated sections of the docs/ guides.
-* profiles: admin
-* » supports `--silent`
-
-```
-update-docs
-[check=true|--check]
-[silent=true|--silent]
-```
-
-```text
 Rebuild the registry-generated blocks in the `docs/` guides and the README.
+
+* ⚑ needs admin.
+* » supports --silent to suppress output.
 
 Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
 the in-index summary, the per-command reference, the authorization audit table
@@ -1624,29 +1869,31 @@ lesser profile's registry would drop every admin-floored command from the audit 
 and the command index — silently, and in exactly the documents whose worth is being
 complete. The floor is what keeps the generated view whole.
 
-Args:
-    ctx:    The command context.
-    check:  When True, write nothing and fail (non-zero) if any doc is out
-            of date, listing the stale files. When False (default), rewrite
-            the docs in place and report which were updated.
+**usage**
+
 ```
+update-docs
+[check=true|--check]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `check` | Write nothing and fail if any doc is out of date, listing the stale files. Defaults to False, which rewrites the docs in place and reports which changed. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.utils.update_doc.update_docs`.
 
 ---
 
 #### Command: `update-models`
 
-Update Model enum, pricing, and USD→EUR rate.
-* profiles: admin
-* » supports `--silent`
+Refresh the model catalogue and the USD→EUR rate.
 
-```
-update-models
-[check=true|--check]
-[silent=true|--silent]
-```
-
-```text
-Refresh the `Model` class in `models.py` and the `usd_to_eur` rate in `config.json`.
+* ⚑ needs admin.
+* » supports --silent to suppress output.
 
 Lists the available Claude models from the Anthropic Models API, scrapes each model's base
 input/output price (per million tokens) from the public pricing page, and rewrites the
@@ -1655,76 +1902,90 @@ input/output price (per million tokens) from the public pricing page, and rewrit
 its display name. Separately, fetches the USD→EUR rate from the ECB daily reference feed and
 writes it to `config.json` (the rate is used only by `costs`). Nothing else is touched.
 
-Args:
-    check:  When True, write nothing and fail (non-zero) if either the model block or the
-            FX rate is out of date. When False (default), rewrite both in place. The FX rate
-            drifts daily, so `--check` will usually report it as stale.
+**usage**
+
 ```
+update-models
+[check=true|--check]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `check` | Write nothing and fail if either the model block or the FX rate is out of date. Defaults to False, which rewrites both in place. The FX rate drifts daily, so `--check` will usually report it as stale. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.ai.update_models.update_models`.
 
 ---
 
 #### Command: `update-tags`
 
-Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles.
-* profiles: admin, maintainer
+The glue for the double-entry tag graph.
+
+* ⚑ needs maintainer or above.
+
+Order (maintainer beats solver/contributor): apply maintainer edits to the central
+vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
+the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
+the topic articles' problem lists and rewrite the article index `topics/articles.json`
+(one row per writable topic: title, status, solved/problem counts, tags and refs). A
+problem with notes but no `tags.json` is reported, not created here — the
+`claude-api tags` target (or the skill) authors it.
+
+**usage**
 
 ```
 update-tags
 [check=true|--check]
 ```
 
-```text
-The glue for the double-entry tag graph.
+**arguments**
 
-Order (maintainer beats solver/contributor): apply maintainer edits to the central
-vocabulary (vs HEAD) into the per-problem files first; promote ``new-tags`` proposals into
-the vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
-topic articles' problem lists and rewrite the article index ``topics/articles.json`` (one
-row per writable topic: title, status, solved/problem counts, tags and refs). A problem with notes but no
-``tags.json`` is reported, not created here — the ``claude-api tags`` target (or the skill)
-authors it.
+| argument | description |
+|----------|-------------|
+| `check` | Write nothing: report unknown slugs, facet violations, unpromoted proposals, missing files and a stale article index, and fail if the graph is inconsistent. Defaults to False, which reconciles the graph in place. |
 
-With ``--check`` nothing is written: report unknown slugs, facet violations, unpromoted
-proposals, missing files and a stale article index, and exit non-zero if the graph is
-inconsistent.
-```
+*Defined in* `solver.core.tags.update_tags`.
 
 ---
 
 #### Command: `user`
 
-Show euler user, public key & enc-key access; --regen for new key-pair.
-* profiles: admin, maintainer, contributor, reader
+Show the solver user, the current identity, and whether it can decrypt.
+
+* ⚑ needs reader or above.
+
+A key pair is created only when the identity file is **truly absent** (first run) or on
+an explicitly confirmed `--regen`. An id file that *exists but cannot be read* — the
+vault is locked, the session key is stale, the vault file was lost — is a **vault
+failure to fix, never a reason to mint a new identity**: replacing the key would
+silently orphan the real one, and with it any enc-key authorization it carries.
+
+**usage**
 
 ```
 user
 [regen=true|--regen]
 ```
 
-```text
-Show the solver user, the current identity and whether it can decrypt; create a key pair on first run or --regen.
+**arguments**
 
-A key pair is created only when the identity file is **truly absent** (first run) or on
-an explicitly confirmed ``--regen``. An id file that *exists but cannot be read* — the
-vault is locked, the session key is stale, the vault file was lost — is a **vault
-failure to fix, never a reason to mint a new identity**: replacing the key would
-silently orphan the real one (and with it any enc-key authorization it carries).
-```
+| argument | description |
+|----------|-------------|
+| `regen` | Replace the existing key pair with a fresh one, after confirmation, and re-wrap the master key to it. Defaults to False. |
+
+*Defined in* `solver.crypto.keys.user`.
 
 ---
 
 #### Command: `user-authorize` (`authorize`)
 
-Issue the master key to a public key, or work a key request by message id.
-* profiles: admin, maintainer
-
-```
-user-authorize <target>
-[identity=<str>] (default '')
-```
-
-```text
 Wrap the master key for someone else and send it to them.
+
+* ⚑ needs maintainer or above.
 
 *target* is either form of the same act, told apart by shape:
 
@@ -1743,23 +2004,46 @@ could sit in a public repo: without their private key it is inert. They run `msg
 take it; until they do, nothing has changed for them.
 
 The public key is also registered on their account (as `users set-keys` does in bulk),
-which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs the admin plane,
-so from a web shell it prints the command for the operator instead of failing the grant.
+which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs
+the admin plane, so from a web shell it prints the command for the operator instead of
+failing the grant. Aliased as `authorize`.
 
-Args:
-    target:   the 16-hex id of a key-authorization message, or a 64-hex public key.
-    identity: who the key belongs to — taken from the thread for the message form,
-              required for the bare-key form (there is nobody to send it to otherwise).
+**usage**
 
-Aliased as `authorize`.
 ```
+user-authorize <target>
+[identity=<str>] (default '')
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `target` | The 16-hex id of a key-authorization message, or a 64-hex public key. |
+| `identity` | Who the key belongs to. Taken from the thread for the message form; required for the bare-key form, where there is nobody to send it to otherwise. |
+
+*Defined in* `solver.crypto.keys.user_authorize`.
 
 ---
 
 #### Command: `users`
 
-Administer accounts, invite requests and enc-key entries (via sudo admin CLI).
-* profiles: admin
+Administer accounts on the authorization map + the auth service.
+
+* ⚑ needs admin.
+
+The whole command is `admin`-floored and the account verbs re-execute the admin CLI
+under `sudo` (the SoR + admin socket are root-only). There is no reader/maintainer
+tier here — a web shell cannot get sudo, so nothing runs over the web.
+
+`set-keys` sweeps every collaborator and registers the X25519 **public** key each of
+them already holds — the registry `key-rekey` re-issues a rotated master key to. It
+takes no identity and reads no secret: a holder's enc-key file names their public key,
+and that is all it copies. `user-authorize` registers as it issues when it can reach the
+admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
+run it whenever `users list` shows a blank column.
+
+**usage**
 
 ```
 users
@@ -1768,49 +2052,23 @@ users
 [profile=reader|contributor|maintainer|admin] (default reader)
 ```
 
-```text
-Administer accounts on the authorization map + the auth service.
+**arguments**
 
-The whole command is ``admin``-floored and the account verbs re-execute the admin CLI
-under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
-tier here — a web shell cannot get sudo, so nothing runs over the web.
+| argument | description |
+|----------|-------------|
+| `action` | What to do — `list` the roster, pending invites and the invite-request queue; `process-requests` walks that queue interactively (accept / ignore / dismiss each); `add` a map entry (`@email` also provisions the account and mints an invite, a bare os-login is local-only); `change` reassigns a profile; `enable` / `disable` the web SRP state; `remove` drops the account or entry; `set-keys` registers every collaborator's public key for rekey; `redeploy` re-asserts the per-user host layer and re-lays every collaborator's git hooks, dropping live shells. Defaults to `list`. |
+| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Required for the account verbs, unused by `list` / `process-requests` / `set-keys` / `redeploy`. |
+| `profile` | The profile to assign, for `add` / `change`. `admin` is valid only for a local os-login, never a web account. |
 
-``set-keys`` sweeps every collaborator and registers the X25519 **public** key each of
-them already holds — the registry ``key-rekey`` re-issues a rotated master key to. It
-takes no identity and reads no secret: a holder's enc-key file names their public key,
-and that is all it copies. `user-authorize` registers as it issues when it can reach the
-admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
-run it whenever ``users list`` shows a blank column.
-
-Args:
-    action:   list (roster + pending + the invite-request queue), process-requests
-              (walk the queue interactively — accept / ignore / dismiss each),
-              add (map entry — ``@email`` also provisions + mints an invite; a bare
-              os-login is local-only), change (reassign a profile), enable / disable
-              (web SRP state), remove (drop the account/entry), set-keys (register every
-              collaborator's public key for rekey — takes no identity), redeploy
-              (re-assert the per-user host layer and re-lay every collaborator's git
-              hooks — takes no identity, and drops live shells).
-    identity: a web email (``@``) or a local OS login (required for the account verbs;
-              not for list / process-requests / set-keys / redeploy).
-    profile:  the profile to assign (add / change). ``admin`` is valid only for a local
-              os-login, never a web account.
-```
+*Defined in* `solver.web.auth.commands.users`.
 
 ---
 
 #### Command: `vault`
 
-Manage the per-user secrets vault: status | init | unlock | change-password.
-* profiles: admin, maintainer, contributor, reader
-
-```
-vault
-[action=status|init|unlock|change-password] (default status)
-```
-
-```text
 Encrypt this user's `id` + `env` at rest under a password-derived vault key.
+
+* ⚑ needs reader or above.
 
 - `status` (default): show whether the vault exists, which secret files are encrypted, and
   whether this session can decrypt them.
@@ -1818,25 +2076,34 @@ Encrypt this user's `id` + `env` at rest under a password-derived vault key.
   unlock the current session. Prompts for a new password.
 - `unlock`: unlock a locked session (the shell asks at startup; this is the retry — after a
   typo, or once you have the password to hand).
-- `change-password`: re-wrap the vault key under a new password (the secrets are not re-encrypted).
+- `change-password`: re-wrap the vault key under a new password (the secrets are not
+  re-encrypted).
 
-The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock (a script,
-CI), otherwise you are asked once per shell.
+The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock
+(a script, CI), otherwise you are asked once per shell.
+
+**usage**
+
 ```
+vault
+[action=status|init|unlock|change-password] (default status)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `action` | Which of the four operations above to run. Defaults to 'status'. |
+
+*Defined in* `solver.crypto.keys.vault`.
 
 ---
 
 #### Command: `version`
 
-Show the running solver build version.
-* profiles: admin, maintainer, contributor, reader
-
-```
-version
-```
-
-```text
 Print the installed build version, plus live git detail of the clone.
+
+* ⚑ needs reader or above.
 
 The first line is the running build: the number recorded in the tracked
 `solver/version.py` (`config.version`), written only by the release script and
@@ -1849,5 +2116,12 @@ installed vs. what commit this clone sits on) and can legitimately differ.
 
 Reader-floor and read-only: no writes, no network, no vault access — safe to
 run in every collaborator's long-lived web shell.
+
+**usage**
+
 ```
+version
+```
+
+*Defined in* `solver.utils.version.version`.
 <!-- /GEN:command-index -->

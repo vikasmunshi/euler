@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 """The per-user aiohttp app: one collaborator's content **and** web shell.
 
-``build_app`` folds two surfaces onto one application:
+`build_app` folds two surfaces onto one application:
 
 - **content** — the whole site route table, reused verbatim from
   :func:`solver.web.site.app.install_content` (home, solutions, docs, topics,
   account, the edit routes). Nothing about those handlers is per-profile; they read
   the request's :class:`~solver.auth.subject.Subject` and gate on it.
-- **shell** — ``GET /ws`` attaches the browser terminal to *this user's* persistent
-  PTY shell (:mod:`solver.web.ws` machinery); ``POST /internal/logout`` is the auth
-  service's teardown push and ``GET /internal/status`` the operator's shell report
-  (both socket-peer only — Caddy answers ``/internal/*`` with 404 rather than
+- **shell** — `GET /ws` attaches the browser terminal to *this user's* persistent
+  PTY shell (:mod:`solver.web.ws` machinery); `POST /internal/logout` is the auth
+  service's teardown push and `GET /internal/status` the operator's shell report
+  (both socket-peer only — Caddy answers `/internal/*` with 404 rather than
   routing it).
 
 The difference from the retired per-profile services is **identity**: this process
-*is* one user's uid (``EULER_USER_SLUG``), so the identity middleware refuses any
-request whose ``X-User`` maps to a different slug — misrouting or a bypass — and it
-resolves the profile from the trusted ``X-Profile`` uncapped (an ``admin`` account is
+*is* one user's uid (`EULER_USER_SLUG`), so the identity middleware refuses any
+request whose `X-User` maps to a different slug — misrouting or a bypass — and it
+resolves the profile from the trusted `X-Profile` uncapped (an `admin` account is
 web-reachable now). Caddy routes every request to the right user's socket by
-``X-User-Slug``, so in production the pin only ever agrees; the check is the
+`X-User-Slug`, so in production the pin only ever agrees; the check is the
 code-side backstop to that OS boundary.
 """
 from __future__ import annotations
@@ -64,12 +64,12 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
                           pin_slug: str) -> Subject | None:
     """Build the request's Subject from the forward_auth headers, or None.
 
-    Caddy guarantees ``X-User``/``X-Profile`` on every routed request and strips any
+    Caddy guarantees `X-User`/`X-Profile` on every routed request and strips any
     client copy. A missing/unknown profile yields None. *pin_slug* is this
-    instance's own user (``EULER_USER_SLUG``): a request whose ``X-User`` maps to a
+    instance's own user (`EULER_USER_SLUG`): a request whose `X-User` maps to a
     different :func:`system_slug` is refused (None) — Caddy routes each user to their
     own socket, so a mismatch means misrouting or a bypass. The profile is **not**
-    capped: an ``admin`` account is web-reachable.
+    capped: an `admin` account is web-reachable.
     """
     user = request.headers.get('X-User', '').strip()
     profile = request.headers.get('X-Profile', '').strip()
@@ -82,7 +82,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
 
 
 def _parse_resize(raw: str) -> tuple[int, int] | None:
-    """Parse a ``{"resize": [cols, rows]}`` control frame; None if it is not one."""
+    """Parse a `{"resize": [cols, rows]}` control frame; None if it is not one."""
     try:
         message = json.loads(raw)
     except json.JSONDecodeError:
@@ -97,7 +97,7 @@ def _parse_resize(raw: str) -> tuple[int, int] | None:
 
 
 def build_app(config: UserConfig) -> web.Application:
-    """Assemble the per-user app: content + ``/ws`` on one application."""
+    """Assemble the per-user app: content + `/ws` on one application."""
     authz = Authorizations.load()
     pin_slug = config.slug
     manager = PtyManager()
@@ -182,7 +182,7 @@ def build_app(config: UserConfig) -> web.Application:
     async def internal_logout(request: web.Request) -> web.Response:
         """Tear down this user's shell on the auth service's push.
 
-        Reachable only by socket peers (``euler-web`` members) — Caddy never routes
+        Reachable only by socket peers (`euler-web` members) — Caddy never routes
         here. Idempotent: closing an absent shell reports closed=False.
         """
         try:
@@ -198,10 +198,10 @@ def build_app(config: UserConfig) -> web.Application:
         return web.json_response({'closed': closed})
 
     async def internal_status(request: web.Request) -> web.Response:
-        """Report this instance's shell state for the operator's ``status-web`` sweep.
+        """Report this instance's shell state for the operator's `status-web` sweep.
 
-        Socket-peer only, like the logout push: Caddy answers ``/internal/*`` itself
-        (404) rather than routing it, so the only callers are root and the ``euler-web``
+        Socket-peer only, like the logout push: Caddy answers `/internal/*` itself
+        (404) rather than routing it, so the only callers are root and the `euler-web`
         tier over this user's own socket. Read-only — it never touches a live shell.
         """
         manager_ = request.app[PTY_MANAGER]

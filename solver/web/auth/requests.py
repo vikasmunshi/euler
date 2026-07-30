@@ -1,13 +1,13 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Prospective-collaborator invite requests at ``<state>/requests.json``.
+"""Prospective-collaborator invite requests at `<state>/requests.json`.
 
 The intake queue behind the login page's "Request an invite" form. A visitor
 with **no account** submits their name, email and remarks; the record lands here
-and the operator reviews it (folded into ``users list``) and works through it with
-``users process-requests`` — accept (invite + provision), ignore (leave), or
+and the operator reviews it (folded into `users list`) and works through it with
+`users process-requests` — accept (invite + provision), ignore (leave), or
 dismiss (drop). Submitting creates **zero** authorization state — it is a request,
-not a grant; only the sudo admin path (``users process-requests`` → ``users add``)
+not a grant; only the sudo admin path (`users process-requests` → `users add`)
 mints an invite and provisions an instance.
 
 This store is the **system of record** for requests: the owner-notification
@@ -19,7 +19,7 @@ Guard rails, since the form is unauthenticated:
 - every field is length-capped and control-char-stripped on the way in
   (:func:`sanitize`);
 - records are deduped by normalised email (a resubmit updates in place, refreshes
-  the TTL and bumps ``submissions``);
+  the TTL and bumps `submissions`);
 - a **global** cap of :data:`MAX_REQUESTS` distinct emails and a **hard per-IP**
   sub-cap of :data:`MAX_PER_IP` bound how much one source can queue — the client
   IP is stored only as a keyed hash (:data:`_secret`), never in the clear;
@@ -119,7 +119,7 @@ class RequestStore:
         """Queue (or refresh) a request; return False on a bad email or a hit cap.
 
         A resubmit from an already-queued email updates its name/remarks, refreshes
-        the TTL and bumps ``submissions`` in place — it never counts against either
+        the TTL and bumps `submissions` in place — it never counts against either
         cap. A brand-new email is dropped (False) once the global queue is full
         (:data:`MAX_REQUESTS`) or its source IP already holds :data:`MAX_PER_IP` live
         requests. Fields are sanitised here so every caller stores clean values.

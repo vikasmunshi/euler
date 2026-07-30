@@ -5,8 +5,8 @@
 Like :class:`~solver.web.auth.config.AuthConfig`, every value has an env override
 so the service runs unprivileged in a scratch dir for local testing, and it never
 touches :mod:`solver.config` (which resolves the shell's identity + repo paths the
-service uid cannot use). The deployed unit sets these via ``EnvironmentFile=`` and
-one ``EULER_PROFILE=<profile>`` per template-unit instance.
+service uid cannot use). The deployed unit sets these via `EnvironmentFile=` and
+one `EULER_PROFILE=<profile>` per template-unit instance.
 """
 from __future__ import annotations
 
@@ -18,13 +18,13 @@ from pathlib import Path
 from solver.utils.repo_root import repo_root as find_repo_root
 from typing import NamedTuple
 
-#: Repo root as seen from this file (``solver/web/site/config.py`` → up 3): the
+#: Repo root as seen from this file (`solver/web/site/config.py` → up 3): the
 
 #: This repo on GitHub — the default for :attr:`SiteConfig.github_url`, overridable
-#: with ``EULER_GITHUB_URL`` (a fork serves its own source links).
+#: with `EULER_GITHUB_URL` (a fork serves its own source links).
 _GITHUB_URL = 'https://github.com/vikasmunshi/euler'
 
-#: The branch the source links point at (``EULER_GITHUB_BRANCH``).
+#: The branch the source links point at (`EULER_GITHUB_BRANCH`).
 _GITHUB_BRANCH = 'master'
 
 
@@ -43,16 +43,16 @@ class SiteConfig(NamedTuple):
     socket_path: Path
     #: Group given connect() on the socket (Caddy + the app tier).
     socket_group: str
-    #: ``host:port`` for a dev TCP listener instead of the unix socket ('' = socket).
+    #: `host:port` for a dev TCP listener instead of the unix socket ('' = socket).
     tcp_bind: str
     #: Serve /assets and /vendor from the app (dev only; Caddy serves them in prod).
     serve_static: bool
-    #: The profile this instance is *born* as (``EULER_PROFILE=%i``). When set,
-    #: the app refuses a request whose ``X-Profile`` differs — the code-side backstop
+    #: The profile this instance is *born* as (`EULER_PROFILE=%i`). When set,
+    #: the app refuses a request whose `X-Profile` differs — the code-side backstop
     #: to Caddy's per-profile routing. Empty (dev) accepts any known profile.
     profile: str
     #: Base URL of the repo on GitHub, for the problem page's source link. It cannot
-    #: be derived from ``.git/config`` — the service uid has no read access to ``.git``
+    #: be derived from `.git/config` — the service uid has no read access to `.git`
     #: — so it is configuration. Empty drops the link rather than guessing.
     github_url: str = _GITHUB_URL
     #: The branch those source links point at.
