@@ -1009,10 +1009,11 @@ first, then `site/templates`). The split is the two panes:
 `subject` is the only switch. Signed out the header is *present and inert* (55% opacity):
 the visitor sees the shape of the place before being let into it. The brand and the user
 pill stay live — they are the two controls that still do something (home, and the way in),
-and the pill reads as *empty*, a dashed ring, never as disabled. The start page's cards
+and the pill reads as *empty*, a dashed ring, never as disabled. The section strip's tiles
 keep their boxes and their copy, as `<span>`s with a padlock where the arrow goes, because
-a visitor should see exactly what is behind the login. The solved count is **not** shown
-signed out: the auth service has no clone and no `problems.json`, so it cannot know it.
+a visitor should see exactly what is behind the login. No count is shown signed out —
+neither the solved count in the lede nor the strip's data lines: the auth service has no
+clone and no `problems.json`, so it cannot know them, and the tiles fall back to prose.
 
 The auth tier builds a `subject` from its session cookie (`shell_context` in `auth/app.py`)
 purely so the header renders correctly on the two pages a signed-in visitor can still land
@@ -1025,7 +1026,7 @@ of typesetter. `/about/license` and `/about/acknowledgements` sit behind `forwar
 so the footer dims them signed out rather than offering links that bounce to `/login`;
 `/terms` is an auth route and public, so it stays live.
 
-**A README summary** is rendered below the cards on the start page, in both tiers — an
+**A README summary** is rendered below the strip on the start page, in both tiers — an
 *extract*, not the whole README, closed by a "read the full README" link (in-app to
 `/docs/readme` signed in, out to GitHub signed out). It comes from the **packaged** copy
 `solver/web/content/home-summary.md`: a tracked, generated file that the `update-docs`
@@ -1173,22 +1174,57 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
 
 ### 11.6 Content pages
 
-- **Landing, docs index, topics index** — a short hero over a **card grid**. The landing
-  puts its four entry points (Solutions · Docs · Topics · Terminal) in one row, then the
-  **README** below them under a mono eyebrow — an eyebrow rather than a heading, because
-  the README is the same page continuing, not a new section competing with the hero. The
-  indexes list four per row, sorted by filename.
+- **The five index pages — home · solutions · docs · topics · terminal — are one layout.**
+  From a distance they are the same page: a hero, the **section strip**, the **divider**,
+  and then the page's own content. What changes below the divider is all that changes.
 
-  `/shell` is the landing's shape again — the same four tiles, from the same partial
-  (`_cards.html`, so a fifth section is added once and both pages grow it) — with
-  `docs/user-guide.md` where the landing carries the README. It is what the header's
+  ```
+  KICKER · H1 · lede
+
+  ┏━━━━━━━━━━━┓┌───────────┐┌───────────┐┌───────────┐   the section strip:
+  ┃π Solutions┃│§ Docs     ││λ Topics   ││❯ Terminal │   the current one lit,
+  ┃311 of 1007┃│16 guides  ││859 of 1007││● connected│   each carrying live state
+  ┗▔▔▔━━━━━━━━┛└───────────┘└▔▔▔▔▔━━━━━━┛└───────────┘
+
+  GUIDES ────────────────────────  filter…          16   the divider
+  ┌───────────┐┌───────────┐┌───────────┐┌───────────┐
+  │ the page's own tiles, grids or prose              │
+  ```
+
+  **The section strip** (`_sections.html`, one definition for all five pages) carries live
+  **counts**, not prose: it repeats the header's nav on every page, so it has to say
+  something the header cannot — how much is solved, how much is written, whether the shell
+  is up. The Terminal tile's line is the socket itself, painted by `site.js` from the
+  iframe's report (`[data-term-dot]`, `[data-term-state]`), never asserted by the server.
+  The counts come from `content.section_state` — `problems.json`, a `docs/` scan, and the
+  **union** (not the sum) of the problems the finished topic articles reach.
+
+  It is the same tile object as the grids below it, in a **quieter register**: flat on the
+  page ground, no lift on hover, because chrome does not move and content does. Two grids
+  of the identical object would read as one field of eight. The page you are on is the one
+  filled tile on the strip, wearing an inset accent edge and, in the corner slot, a
+  you-are-here mark instead of the `→` — there is no journey to offer to the page already
+  in the pane. The strip is exempt from the filter for the same reason.
+
+  **The divider** (`_divider.html`) is the `.subrule` device — a mono label trailed by a
+  hairline — doing three jobs: it names the region below, it **narrows** it, and the count
+  at the end of the rule is the count of what survived. Typing hides the cards that miss
+  and folds away a folder heading whose whole grid went; on the century grids it **dims**
+  instead, because a cell's position is what says which problem it is and hiding the misses
+  would renumber the grid under the reader. The query is remembered per section for the
+  browser session (`sessionStorage`), so returning to the topics resumes the narrowed view
+  without arriving pre-typed over the guides. The start page has prose below its rule and
+  nothing to narrow, so it states that instead of offering a dead box.
+
+  `/shell` is that layout with the **docs index as its content, cut to four** —
+  `content.SHELL_DOCS`, the guides worth having at a prompt. It is what the header's
   Terminal item and the Terminal tile swap into the pane while they show and focus the
   shell: the page about the thing the click just took you to. Not to be confused with
   `/terminal`, which *is* the shell (the right pane's own document).
 
-  **The tile is one object across four pages** — home, docs, topics, and the head of every
-  century grid on solutions — and it is **two lines**, because that is what it has to say:
-  what it is, and one fact about it.
+  **The tile is one object across every page** — the strip, docs, topics, and the head of
+  every century grid on solutions — and it is **two lines**, because that is what it has to
+  say: what it is, and one fact about it.
 
   | line | what it holds |
   |------|---------------|
@@ -1200,12 +1236,12 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   for its track takes a second line (then ellipsis), with the glyph and the corner mark
   staying on the first.
 
-  The supporting line is the rule that makes the four pages one system: **mono when it is
-  a number, body face when it is a sentence**. Topics and centuries carry a count
-  (`95 of 240 solved`, from `topics/articles.json` and `problems.json`); home and docs
-  carry prose (the start page's own copy, a guide's `#` title). Nothing carries both — a
-  tile says one thing about itself, and the count that would go on a home tile is already
-  in the hero above it.
+  The supporting line is the rule that makes the pages one system: **mono when it is a
+  number, body face when it is a sentence**. The strip, topics and centuries carry a count
+  (`95 of 240 solved`, from `topics/articles.json` and `problems.json`); a guide carries
+  prose (its `#` title). Nothing carries both — a tile says one thing about itself. Signed
+  out the strip has no clone to count, so its tiles fall back to prose rather than to a
+  number that would be invented.
 
   Where the count is a **fraction of work done**, the tile also carries a 2px **progress
   hairline** on its bottom edge, filled to that fraction. It appears on topic tiles and
@@ -1216,14 +1252,14 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
 
   The corner slot holds affordance or state, never decoration. The `→` fades in on
   hover/focus — sixteen resting grey arrows in a grid this dense is noise, and a bordered
-  box on a card grid already reads as clickable — while the padlock (signed out) and the
-  `final` pill are state and stay put.
+  box on a card grid already reads as clickable — while the padlock (signed out), the
+  `final` pill and the strip's you-are-here mark are state and stay put.
 
   Four per row is set for the pane the terminal leaves (half the viewport); below a 1200px
   viewport the grid drops to two and below 700px to one, because under ~150px a tile
   truncates its own title.
 
-  The **Terminal** card, and the header's Terminal item with it, points at two things at
+  The **Terminal** tile, and the header's Terminal item with it, points at two things at
   once: the shell already here in the right pane, and `/shell`, the page *about* it. So
   each is an ordinary `hx-get` link that also carries `[data-term-show]` — the pane swaps
   to `/shell`, and the terminal is *shown* when it has been hidden to the footer and

@@ -79,8 +79,10 @@ def render_block(env: jinja2.Environment, template_name: str, block_name: str,
     """Render a single named `{% block %}` of *template_name* to a string.
 
     Only the block's own code runs — the template root does not. So anything a
-    block needs must live *inside* it: a `{% macro %}` (or `{% set %}`) at
-    template top level exists on the full-page path and is undefined here.
+    block needs must live *inside* it: a `{% macro %}`, a `{% set %}`, or a
+    `{% from … import … %}` at template top level exists on the full-page path
+    and is undefined here — and since the htmx swap is the *common* path, a
+    template that imports at the root is broken for every navigation but the first.
 
     Raises :class:`KeyError` if the template has no block called *block_name* —
     a programming error (route/template mismatch), surfaced loudly.

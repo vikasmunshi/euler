@@ -1,0 +1,44 @@
+{# The page divider — the boundary between the section strip and the page's own content,
+   on all five index pages (web-server-guide § The site).
+
+   It is the `.subrule` device the topics folders and the problem page's tag facets
+   already wear — a small mono label trailed by a hairline — given the one more job this
+   layout needs: the hairline now runs to a FILTER, and the count at the end of the rule
+   is the count of what survives it. The divider names what is below, narrows it, and
+   says how much is left, in the slot that was already holding a number.
+
+     LABEL ─────────────────────────  filter…            7 / 16
+
+   Params:
+     `label`  the region below, in the mono voice ('guides', 'the grid', 'topics').
+     `count`  what is there before anyone types; site.js rewrites it to `n / total`
+              while a query is live. Pass none where there is nothing to count.
+     `filter` the input's placeholder. Empty renders the `note` instead — the home
+              page has no tiles below the rule, and a dead input box invites a click
+              that does nothing where a plain statement of the fact does not.
+     `note`   what stands in for the filter when there is nothing to filter. #}
+
+{% macro divider(label, count=none, filter='', note='no tiles to filter') %}
+<div class="pagerule">
+  <h2 class="pagerule-label">{{ label }}</h2>
+  <span class="pagerule-hair" aria-hidden="true"></span>
+  {% if filter %}
+  {# Rendered empty with the whole region showing; site.js paints the session's
+     remembered query back onto it once the markup lands, so a revisit resumes where
+     the reader left off (§ the pane filter). The query is remembered per SECTION —
+     `here`, the same name the strip marks its you-are-here tile with — so narrowing the
+     topics does not arrive pre-typed over the guides. It is carried on the input rather
+     than read from the address bar because a filter is painted during the htmx swap,
+     before the pushed URL has landed. #}
+  <input type="search" class="pane-filter" placeholder="{{ filter }}"
+         aria-label="{{ filter }}" autocomplete="off" spellcheck="false"
+         data-filter-scope="{{ here | default('') }}">
+  {% else %}
+  <span class="pagerule-note">{{ note }}</span>
+  {% endif %}
+  {% if count is not none %}
+  <span class="pagerule-count" data-filter-count data-filter-total="{{ count }}"
+        aria-live="polite">{{ count }}</span>
+  {% endif %}
+</div>
+{% endmacro %}

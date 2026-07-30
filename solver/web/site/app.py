@@ -94,6 +94,20 @@ class Action(TypedDict, total=False):
     confirm: str
 
 
+def _sections(request: web.Request, here: str) -> dict[str, Any]:
+    """The section strip's context (web-server-guide § The site): the four tiles' live
+    counts, and which of them is the page being rendered.
+
+    Every one of the five index pages opens with the same strip, so every one of them
+    merges this into its context. *here* is one of `home` · `solutions` · `docs` ·
+    `topics` · `terminal` — the tile that wears the you-are-here mark instead of the
+    arrow. The auth tier renders the start page too and builds its own context, where
+    this is simply absent: signed out there are no counts to show (no clone), and the
+    strip falls back to the locked tiles and their prose.
+    """
+    return {'sections': content.section_state(request.app[CONFIG_KEY].repo_root), 'here': here}
+
+
 def _subject(request: web.Request) -> Subject:
     """The resolved Subject — handlers behind `requires()` always have one."""
     subject: Subject | None = request.get(SUBJECT_KEY)
@@ -235,27 +249,31 @@ async def home(request: web.Request) -> web.StreamResponse:
         'solved': solved, 'total': len(problems),
         'readme_html': content.readme_html(),
         'crumbs': [('home', None)],
+        **_sections(request, 'home'),
     }, block='content')
 
 
 @requires(VIEW)
 async def shell_page(request: web.Request) -> web.StreamResponse:
-    """`GET /shell` — the Terminal item's page: the start tiles + the user guide.
+    """`GET /shell` — the Terminal item's page: the section strip + the shell's shelf.
 
     The header's Terminal item and the start page's Terminal tile show and focus the
     right pane's shell (`data-term-show`, site.js); this is the left pane's half of
-    that click — the start page's shape, with `docs/user-guide.md` where the start
-    page carries the README summary. Not to be confused with `/terminal`, the right
-    pane's own document: this is a page *about* the shell, that one *is* the shell.
+    that click — the page *about* the thing you were just taken to. Not to be confused
+    with `/terminal`, the right pane's own document: that one *is* the shell.
 
-    The guide is read from this clone (`content.read_doc`) rather than the packaged
-    copy, so a collaborator editing it on their branch sees their own text; a tree
-    without it renders the tiles alone rather than 404ing.
+    It reads as the docs index narrowed to :data:`content.SHELL_DOCS` — the four guides
+    worth having at a prompt. It used to inline the whole user guide instead; a document
+    the length of a guide below the strip made this a page you scrolled rather than a
+    page you left, and the guide is one click away either way.
+
+    The guides are read from this clone, so a collaborator editing them on their branch
+    sees their own text; a tree missing one renders a shorter shelf rather than 404ing.
     """
     return render(request, 'shell.html', {
-        'guide_html': content.render_markdown(
-            content.read_doc(request.app[CONFIG_KEY].repo_root, 'user-guide') or ''),
+        'entries': content.shell_docs(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('terminal', None)],
+        **_sections(request, 'terminal'),
     }, block='content')
 
 
@@ -272,6 +290,7 @@ def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]
         'status': status,
         'crumbs': [_HOME, ('solutions', None)],
         'actions': actions,
+        **_sections(request, 'solutions'),
     }
 
 
@@ -425,6 +444,7 @@ async def docs_index(request: web.Request) -> web.StreamResponse:
     return render(request, 'docs.html', {
         'entries': content.list_docs(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('docs', None)],
+        **_sections(request, 'docs'),
     }, block='content')
 
 
@@ -496,6 +516,7 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
         'total': len(content.load_problems(repo_root)),
         'crumbs': [_HOME, ('topics', None)],
         'actions': actions,
+        **_sections(request, 'topics'),
     }, block='content')
 
 
@@ -514,6 +535,7 @@ async def topics_all(request: web.Request) -> web.StreamResponse:
         'show_status': True,
         'crumbs': [_HOME, ('topics', '/topics/'), ('all', None)],
         'actions': [Action(label='Hide drafts', kind='get', path='/topics/')],
+        **_sections(request, 'topics'),
     }, block='content')
 
 

@@ -1,19 +1,26 @@
 {% extends "base.html" %}
 {% block title %}docs · euler{% endblock %}
 {% block content %}
+{% from "_divider.html" import divider with context %}
+{# The five-page layout (web-server-guide § The site): hero · section strip · divider ·
+   content. #}
 <header class="hero">
   <p class="kicker">documentation</p>
   <h1>The guides</h1>
   <p class="lede">{{ entries | length }} guides stand between you and the next
      unsolved problem. Read one, ignore the rest, feel briefly invincible.</p>
 </header>
-{# The tile (site.css § the tile), four to a row — the same object the start page,
-   topics and the century grids wear. A guide has no count to show, so its supporting
-   line is prose: the page's own leading heading, under the filename. #}
+{% include "_sections.html" %}
+{{ divider('guides', count=entries | length, filter='Filter guides by name…') }}
+{# The tile (site.css § the tile), four to a row — the same object the topics index and
+   the century grids wear, in the filled register that says "the page's own things"
+   against the flat strip above. A guide has no count to show, so its supporting line is
+   prose: the page's own leading heading, under the filename. #}
 <nav class="cards" aria-label="Guides">
   {% for e in entries %}
   <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
-     hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+     hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+     data-filter="{{ e.name }} {{ e.heading }} {{ e.title }}">
     <span class="card-head"><span class="card-ic">&sect;</span>
       <span class="card-title">{{ e.heading }}</span>
       <span class="card-go">&rarr;</span></span>

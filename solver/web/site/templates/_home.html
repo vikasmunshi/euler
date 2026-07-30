@@ -3,13 +3,17 @@
    the very same partial behind its sign-in dialogue, which is what makes the
    signed-out page the same page rather than a lookalike.
 
-   `subject` is the only switch. Signed in: live cards, and the count. Signed out:
-   the same boxes with the same copy, inert, and no count — the auth service has no
-   clone and no problems.json, so it cannot know it, and inventing a number that
-   drifts from the truth is worse than not saying it.
+   It is the five-page layout (§ The site): hero · section strip · divider · content. Its
+   content is the README summary — prose, not tiles — so it is the one page whose
+   divider carries no filter and no count.
 
-   Context: `subject` (or undefined), `solved` + `total` (signed in only),
+   `subject` is the switch for the strip (live tiles vs locked) and for the count in the
+   lede. Signed out the auth service has no clone and no problems.json, so it cannot know
+   the count, and inventing a number that drifts from the truth is worse than not saying it.
+
+   Context: `subject` (or undefined), `sections` + `solved` + `total` (signed in only),
    `readme_html` (content.readme_html(), pre-rendered and trusted — our own file). #}
+{% from "_divider.html" import divider with context %}
 <header class="hero">
   {# Derived from the opening of Blake's "Auguries of Innocence" ("To see a World
      in a Grain of Sand") — the same quatrain the crypto master-key verify text
@@ -26,9 +30,7 @@
   {% endif %}
 </header>
 
-{# The four tiles, shared with the terminal page (`_cards.html`) — one definition, so a
-   fifth section is added in one place and both pages grow it. #}
-{% include "_cards.html" %}
+{% include "_sections.html" %}
 
 {# The README *summary*, continuing the same page — the slice setup.py vendors
    between the README's HOME markers, not the whole file. `readme_html` is our own
@@ -38,8 +40,8 @@
    the docs viewer (this clone's README); signed out the auth service has no clone
    and /docs is behind the login, so it leaves for the canonical copy on GitHub. #}
 {% if readme_html %}
+{{ divider('readme') }}
 <section class="readme">
-  <p class="readme-eyebrow">readme</p>
   <div class="doc-body">{{ readme_html | safe }}</div>
   {% if subject %}
   <p class="readme-more"><a href="/docs/readme" hx-get="/docs/readme" hx-target="#content"

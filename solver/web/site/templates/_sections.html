@@ -1,0 +1,100 @@
+{# The section strip — Solutions · Docs · Topics · Terminal — as ONE definition, opening
+   every one of the five index pages: the start page (`_home.html`, rendered by both
+   tiers), solutions, docs, topics and the terminal page. One place to add a fifth
+   section, and five pages that grow it.
+
+   It is the same tile object the content grids below it wear (site.css § the tile), in a
+   quieter register: `.sections` renders it flat on the page ground rather than filled,
+   so a docs page showing the strip over a grid of guides never reads as eight tiles of
+   one kind. What it says is the other half of that distinction — the strip carries a
+   live COUNT per section, the grid below carries the section's own things.
+
+   Counts, not prose, because this row repeats the header's nav on every page and has to
+   say something the header cannot: how much is solved, how much is written, whether the
+   shell is up. Four sentences repeated five times say nothing.
+
+   Two switches, and they are independent:
+
+     `subject`  — signed out the tiles are the same boxes with the same copy, inert,
+                  wearing a padlock where the arrow goes. The visitor should see what is
+                  behind the login.
+     `sections` — the live counts (`content.section_state`). The auth tier renders this
+                  strip too and has no clone to count, so where it is absent every tile
+                  falls back to its prose line. Never invent a number that would drift.
+
+   Context: `subject` (or None), `sections` (a SectionState, or undefined), `here` — the
+   section being rendered, whose tile wears the you-are-here mark instead of the arrow. #}
+
+{% macro tile(key, href, glyph, title, desc) %}
+{% set is_here = (here | default('')) == key %}
+{% if subject %}
+<a class="card{% if is_here %} is-here{% endif %}" href="{{ href }}"
+   hx-get="{{ href }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+   {% if is_here %}aria-current="page"{% endif %}
+   {% if key == 'terminal' %}data-term-show{% endif %}
+   {% if key == 'topics' and sections %}title="{{ sections.topics }} topics written, covering {{ sections.covered }} of {{ sections.total }} problems"{% endif %}>
+  <span class="card-head"><span class="card-ic">{{ glyph }}</span>
+    <span class="card-title">{{ title }}</span>
+    {# The corner slot holds affordance or state, never decoration (site.css § the tile).
+       On the page you are already on there is no journey to offer, so the arrow gives way
+       to a mark that stays put — the one tile in the row that is not a way out. #}
+    {% if is_here %}<span class="card-here" aria-hidden="true">&bull;</span>
+    {% else %}<span class="card-go">&rarr;</span>{% endif %}</span>
+  {{ line(key, desc) }}
+</a>
+{% else %}
+{# A <span>, not a disabled <a>: there is no link here to follow, and the element-typed
+   hover rules in site.css never reach it. #}
+<span class="card is-locked">
+  <span class="card-head"><span class="card-ic">{{ glyph }}</span>
+    <span class="card-title">{{ title }}</span>
+    <svg class="card-lock" viewBox="0 0 24 24" role="img" aria-label="sign in to open">
+      <path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0
+        0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm-3 5a3 3 0 1
+        1 6 0v3H9V6Z"/></svg></span>
+  <span class="card-desc">{{ desc }}</span>
+</span>
+{% endif %}
+{% endmacro %}
+
+{# The tile's supporting line: the mono data line where there is a count to give, the
+   body face where there is only the section's own words (site.css § the tile — a tile
+   says ONE thing about itself, and which face it wears says which kind of thing it is).
+   The progress hairline follows the same rule as everywhere else: it appears only where
+   a fraction is a real fact, so Docs and Terminal have none rather than an empty one. #}
+{% macro line(key, desc) %}
+{% if not sections %}
+  <span class="card-desc">{{ desc }}</span>
+{% elif key == 'solutions' %}
+  <span class="card-meta"><b>{{ sections.solved }}</b> of {{ sections.total }} solved</span>
+  <span class="card-bar"><i style="width: {{ (100 * sections.solved / sections.total) | round(1) if sections.total else 0 }}%"></i></span>
+{% elif key == 'docs' %}
+  <span class="card-meta"><b>{{ sections.docs }}</b> guides</span>
+{% elif key == 'topics' %}
+  <span class="card-meta"><b>{{ sections.covered }}</b> of {{ sections.total }} covered</span>
+  <span class="card-bar"><i style="width: {{ (100 * sections.covered / sections.total) | round(1) if sections.total else 0 }}%"></i></span>
+{% elif key == 'terminal' %}
+  {# The one tile whose state is not on disk: the socket in the other pane. The dot and
+     the word are both painted by site.js from the iframe's own report ([data-term-dot],
+     [data-term-state]) — the markup ships disconnected, because a tile that claims a
+     live session before the terminal has said so is a lie we could not correct. #}
+  <span class="card-meta"><span class="dot off" data-term-dot></span>
+    <span data-term-state>disconnected</span></span>
+{% endif %}
+{% endmacro %}
+
+<nav class="cards sections" aria-label="Sections">
+  {{ tile('solutions', '/solutions/', 'π', 'Solutions',
+          'Every problem as a century grid — the orange ones are victories.') }}
+  {{ tile('docs', '/docs/', '§', 'Docs',
+          'The guides. Read one, ignore the rest, feel briefly invincible.') }}
+  {{ tile('topics', '/topics/', 'λ', 'Topics',
+          'The mathematics behind the problems, written down before it was forgotten.') }}
+  {# The one tile whose destination is in two places at once: /shell is the page about the
+     shell, and the shell itself is already here, in the right pane. So it does both — it
+     swaps the pane to /shell like any tile, and (data-term-show, site.js) brings the
+     terminal back when it has been hidden to the footer, focusing it either way. The
+     socket is untouched: Connect/Disconnect lives on the terminal's own titlebar. #}
+  {{ tile('terminal', '/shell', '❯', 'Terminal',
+          'A real solver shell, in the right pane. Yours once you sign in.') }}
+</nav>

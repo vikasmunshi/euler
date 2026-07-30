@@ -1,37 +1,47 @@
 {# `/shell` — the Terminal item's page (web-server-guide § The site).
 
-   The header's Terminal item and the start page's Terminal tile are the only two
+   The header's Terminal item and the section strip's Terminal tile are the only two
    controls that point at something already on screen: the shell in the right pane. They
    still show it and focus it (data-term-show, site.js) — but a nav item that swaps
    nothing left the left pane on whatever was there, so the click read as half an act.
    This is the other half: the page ABOUT the thing you were just taken to.
 
-   It is the start page's shape — hero, then the same four tiles (`_cards.html`) — with
-   the user guide where the start page carries the README summary. That is the document
-   a reader who just arrived at the shell wants: how to invoke it, how commands compose,
-   what the catalogue holds.
+   It is the five-page layout (hero · section strip · divider · content) with the docs
+   index as its content, narrowed to `content.SHELL_DOCS` — the four guides worth having
+   at a prompt. It used to inline the whole user guide instead; a document that long
+   below the strip made this a page you scrolled rather than a page you left, and the
+   guide is one click away either way.
 
-   Context: `guide_html` (the rendered docs/user-guide.md — our own file, pre-rendered
-   and trusted, exactly as the docs pages mark their bodies). #}
+   Context: `entries` (content.shell_docs — the same DocEntry rows the docs index
+   carries, in reading order rather than the filename's). #}
 {% extends "base.html" %}
 {% block title %}terminal — euler{% endblock %}
 {% block content %}
+{% from "_divider.html" import divider with context %}
 <header class="hero">
   <p class="kicker">a prompt is the shortest distance between a question and an answer</p>
   <h1>The solver shell</h1>
   <p class="lede">It is running on the right — yours, and only yours: forked the first
-     time you connect, and still there when you come back. Everything below is what to
-     type into it.</p>
+     time you connect, and still there when you come back. These are the guides worth
+     keeping beside it.</p>
 </header>
 
-{% include "_cards.html" %}
+{% include "_sections.html" %}
 
-{% if guide_html %}
-<section class="readme">
-  <p class="readme-eyebrow">user guide</p>
-  <div class="doc-body">{{ guide_html | safe }}</div>
-  <p class="readme-more"><a href="/docs/" hx-get="/docs/" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">All the guides &rarr;</a></p>
-</section>
-{% endif %}
+{{ divider('at the prompt', count=entries | length, filter='Filter guides by name…') }}
+{# The docs index's own tile — this page IS that index, cut to four. #}
+<nav class="cards" aria-label="Guides for the shell">
+  {% for e in entries %}
+  <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
+     hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+     data-filter="{{ e.name }} {{ e.heading }} {{ e.title }}">
+    <span class="card-head"><span class="card-ic">&sect;</span>
+      <span class="card-title">{{ e.heading }}</span>
+      <span class="card-go">&rarr;</span></span>
+    <span class="card-desc">{{ e.title }}</span>
+  </a>
+  {% endfor %}
+</nav>
+<p class="readme-more"><a href="/docs/" hx-get="/docs/" hx-target="#content"
+   hx-swap="innerHTML" hx-push-url="true">All the guides &rarr;</a></p>
 {% endblock %}

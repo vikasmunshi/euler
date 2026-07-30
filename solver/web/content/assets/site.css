@@ -679,18 +679,96 @@ body.terminal-doc {
 .card.is-locked .card-ic, .card.is-locked .card-title { color: var(--muted); }
 .card-lock { flex: none; width: 0.9rem; height: 0.9rem; margin-top: 0.2rem; color: var(--muted); display: block; }
 
-/* ── The README, below the cards on the start page ───────────────────────── */
-.readme { margin-top: 0.8rem; }
-/* An eyebrow, not a heading: the README is the same page continuing, not a new
-   section competing with the hero. */
-.readme-eyebrow, .workbench-eyebrow {
+/* ── The section strip (_sections.html) ──────────────────────────────────────
+   The same tile, in the QUIET register. Every one of the five index pages opens with
+   this row and then shows a grid of its own tiles below it; two grids of the identical
+   object would read as one long field of eight. So the strip is drawn flat on the page
+   ground — no fill, and no lift on hover — while the page's own tiles keep the surface
+   and the lift. Chrome does not move; content does.
+
+   The whole row is quiet except the one tile you are standing on, which is the only
+   filled box on the strip and carries an accent edge. Its corner slot holds the
+   you-are-here mark in place of the arrow: there is no journey to offer to the page
+   already in the pane. */
+.cards.sections { margin-bottom: 0.2rem; }
+.sections .card { background: transparent; }
+.sections .card:hover { background: var(--surface); transform: none; }
+.sections .card.is-here {
+  background: var(--surface-hi);
+  border-color: var(--border);
+  /* inset, not a border: a real left border would widen the box by 2px and knock this
+     tile out of step with the three beside it. The radius clips it either way. */
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.sections .card.is-here:hover { background: var(--surface-hi); border-color: var(--border); }
+.card-here {
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem; line-height: 1.65; color: var(--accent);
+}
+/* The terminal tile's data line is a live state, not a count: the dot site.js paints
+   from the iframe's report, then the word. */
+.sections .card-meta .dot { margin-right: 0.4rem; vertical-align: baseline; }
+
+/* ── The page divider (_divider.html) ────────────────────────────────────────
+   The boundary between the strip and the page's own content, on all five pages. It is
+   the `.subrule` device — a small mono label trailed by a hairline — with the one extra
+   job this layout needs: the rule runs to the FILTER, and the count at its end is the
+   count of what survived. Name what is below, narrow it, say how much is left.
+
+   The count sits in the slot `.subrule` was already using for a number, so a folder
+   heading inside the region and the region's own divider read as the same kind of break
+   at two levels. */
+.pagerule { display: flex; align-items: center; gap: 0.7rem; margin: 1.1rem 0 0.7rem; }
+.pagerule-label {
+  margin: 0; white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+}
+.pagerule-hair { flex: 1 1 1rem; min-width: 1rem; height: 1px; background: var(--border); }
+/* The count is data, so it is mono and quiet; site.js rewrites it to `n / total` while a
+   query is live. Fixed minimum width so the rule beside it does not twitch per keystroke. */
+.pagerule-count {
+  flex: none; min-width: 4ch; text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem; letter-spacing: 0.04em; color: var(--muted);
+}
+/* Where there is nothing below the rule to narrow (the start page), the filter's place
+   is taken by the fact, not by a dead input: a greyed box invites a click that does
+   nothing, and a statement does not. */
+.pagerule-note {
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted);
+}
+/* The filter, styled to the shell in the other pane: mono, dark ground, sized to sit on
+   the rule rather than to fill it. It shrinks before the hairline does on a narrow pane. */
+.pane-filter {
+  flex: 0 1 16rem; min-width: 5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.28rem 0.6rem;
+}
+.pane-filter::placeholder { color: var(--muted); }
+.pane-filter:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (max-width: 700px) { .pagerule { flex-wrap: wrap; } .pane-filter { flex: 1 1 8rem; } }
+
+/* ── The README, below the strip on the start page ───────────────────────── */
+/* The divider above it already opens the section, so the block starts flush. */
+.readme { margin-top: 0; }
+/* The problem page's workbench eyebrow — an eyebrow, not a heading: the workbench is
+   the same page continuing, not a new section competing with the hero. The five index
+   pages use the fuller `.pagerule` for the same job, since theirs carries a filter. */
+.workbench-eyebrow {
   display: flex; align-items: center; gap: 0.7rem;
   margin: 0 0 0.9rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--muted);
 }
-.readme-eyebrow::after, .workbench-eyebrow::after {
+.workbench-eyebrow::after {
   content: ""; flex: 1; height: 1px; background: var(--border);
 }
 /* The "full README →" link closing the summary — a quiet footer, not a button. */
@@ -1301,20 +1379,15 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 
 /* A section divider — a small mono label trailed by a hairline. Shared: the problem
    page's tag facets and the topics index's folders read as the same kind of break. */
-/* The topics filter box (F2) — styled to the shell, inset a touch from the pane edges
-   with comfortable internal padding on both sides. */
-.topic-filter {
-  width: calc(100% - 1rem);
-  margin: 0 0.5rem 0.9rem;
-  font: inherit; color: var(--text);
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 0.5rem 0.85rem;
-}
-.topic-filter:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-.topic-filter::placeholder { color: var(--muted); }
 /* The filter hides via the [hidden] attribute, which the display rules on these
    elements would otherwise override — so [hidden] wins here explicitly. */
-.card[hidden], nav.cards[hidden], .subrule[hidden] { display: none !important; }
+.card[hidden], nav.cards[hidden], .subrule[hidden], .century[hidden] { display: none !important; }
+/* A century cell the filter did not match is DIMMED, never hidden: a cell's position in
+   its grid is what tells you which problem it is, so taking the misses out would
+   renumber the grid under the reader (site.js § the pane filter). It stays a link — the
+   grid is still the map, the query is only a light on part of it. */
+.cell.is-dim { opacity: 0.22; }
+@media (prefers-reduced-motion: no-preference) { .cell { transition: opacity 0.12s ease; } }
 .subrule { display: flex; align-items: center; gap: 0.6rem; margin: 0.95rem 0 0.6rem; }
 .subrule h3 {
   font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.7rem; letter-spacing: 0.12em;

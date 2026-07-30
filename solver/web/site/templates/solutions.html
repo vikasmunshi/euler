@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block title %}solutions · euler{% endblock %}
 {% block content %}
+{% from "_divider.html" import divider with context %}
 {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
-{# The same hero header the docs and topics indexes wear, so the three read as one page.
-   Frost, "Stopping by Woods on a Snowy Evening" — the count is the fact; the lede is for
-   the miles still to go, not for restating what the grid shows. #}
+{# The five-page layout (web-server-guide § The site): hero · section strip · divider ·
+   content. Frost, "Stopping by Woods on a Snowy Evening" — the count is the fact; the
+   lede is for the miles still to go, not for restating what the grid shows. #}
 <header class="hero">
   <p class="kicker">solutions</p>
   <h1>Every problem</h1>
@@ -12,6 +13,11 @@
      the woods are lovely, dark and deep, but I have promises to keep,
      and miles to go before I sleep.</p>
 </header>
+{% include "_sections.html" %}
+{# The filter DIMS here rather than hiding (site.js § the pane filter): a cell's position
+   in its century is what tells you which problem it is, so a grid with the misses taken
+   out would renumber itself under the reader. A century with no match at all goes. #}
+{{ divider('the grid', count=total, filter='Filter by number or title…') }}
 <div class="grid-row">
   {% for grid in grids %}
   <div class="century">
@@ -32,9 +38,12 @@
       {% for cell in grid.cells %}
         {% set n = grid.start + loop.index0 %}
         {% if cell %}
+          {# data-filter is the cell's haystack: the number as typed (`42`), zero-padded
+             (`0042`) so either form finds it, and the title. #}
           <a class="cell {{ 'solved heat-%d' % cell.heat if cell.solved else 'unsolved' }}"
              href="/solutions/{{ '%04d' % n }}/"
              hx-get="/solutions/{{ '%04d' % n }}/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+             data-filter="{{ n }} {{ '%04d' % n }} {{ cell.title }}"
              title="{{ n }} · {{ cell.title }}{% if cell.pct %} · {{ cell.pct }}%{% endif %}">{{ n }}</a>
         {% else %}
           <span class="cell empty"></span>

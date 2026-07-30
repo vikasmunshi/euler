@@ -1,22 +1,31 @@
 {% extends "base.html" %}
 {% block title %}topics · euler{% endblock %}
 {% block content %}
+{% from "_divider.html" import divider with context %}
+{# The five-page layout (web-server-guide § The site): hero · section strip · divider ·
+   content. #}
 <header class="hero">
   <p class="kicker">topics</p>
   <h1>The mathematics</h1>
   <p class="lede">Writeups on the ideas the solutions keep reusing — learn once,
      apply forever.</p>
 </header>
+{% include "_sections.html" %}
+{# The divider's filter (site.js § the pane filter) narrows the grid in place: typing
+   hides the cards whose data-filter string does not match, and a folder heading whose
+   cards are all hidden goes with them. No server round-trip — the whole tree is already
+   on the page. Each card's data-filter carries the full path (facet/slug), the folder
+   heading and the display name, so the facet ('technique') and the slug ('np-where')
+   both match even though the card shows 'Np Where'.
+
+   The divider stands whether or not anything is written: it is the page's boundary, not
+   the grid's heading, and the five pages keep one shape. With nothing below it there is
+   nothing to narrow, so it says so instead of offering a box. #}
+{% set shown = groups | map(attribute='entries') | map('length') | sum %}
+{{ divider('topics', count=shown,
+           filter='Filter by name, slug or facet…' if groups else '',
+           note='nothing to filter yet') }}
 {% if groups %}
-{# Client-side filter (site.js): typing hides the cards whose data-filter string does not
-   match, and a folder heading whose cards are all hidden goes with them. No server
-   round-trip — the whole tree is already on the page. Each card's data-filter carries the
-   full path (facet/slug), the folder heading and the display name, so the facet
-   ('technique') and the slug ('np-where') both match even though the card shows 'Np Where'.
-   The box renders empty and the grid whole: site.js paints the session's remembered query
-   back onto it once the markup lands, so a revisit resumes where the reader left off. #}
-<input type="search" class="topic-filter" placeholder="Filter by name, slug or facet…"
-       aria-label="Filter topics by name, slug or facet" autocomplete="off">
 {# One section per folder of topics/: the folder is the heading, so the cards below
    carry only their leaf name and pack four to a row. A card's second line is the
    topic's REACH — "n of m", the problems its tags cover (from topics/articles.json,
@@ -25,7 +34,11 @@
    card's first line; the title stays as the card's tooltip and in the filter's
    haystack. A tree read without the index has no counts, and falls back to the title. #}
 {% for g in groups %}
-<div class="subrule"><h3>{{ g.heading }}</h3><span class="count">{{ g.entries | length }}</span></div>
+{# The folder's own count tracks the filter (site.js § the pane filter), like the
+   divider's above it: a heading that still claimed seven over two visible cards would be
+   the one number on the page that is not what you are looking at. #}
+<div class="subrule"><h3>{{ g.heading }}</h3>
+  <span class="count" data-group-count>{{ g.entries | length }}</span></div>
 <nav class="cards" aria-label="{{ g.heading }} topics">
   {% for e in g.entries %}
   {# The same tile the home, docs and solutions pages wear (site.css § the tile): glyph ·

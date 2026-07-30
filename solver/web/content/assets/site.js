@@ -52,9 +52,9 @@
     // Terminal tile): they arrive with the server's static markup and know nothing
     // of the live socket / hidden state, so paint them from the state we hold.
     paintWsHidden();
-    // A swapped-in topics index arrives with an empty filter box and the whole tree
-    // showing — restore the session's query onto it (§ the topics filter).
-    paintTopicFilter();
+    // A swapped-in index arrives with an empty filter box and the whole region
+    // showing — restore that section's query onto it (§ the pane filter).
+    paintPaneFilter();
   });
 
   // ── the pane's back arrow (web-server-guide § The site) ─────────────────────────────────
@@ -211,6 +211,12 @@
     });
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
+    });
+    // The section strip's Terminal tile says the state in words as well as in the dot:
+    // it is the tile's data line, where its three neighbours carry a count, and a lone
+    // dot in that slot would be the one tile in the row that says nothing.
+    document.querySelectorAll('[data-term-state]').forEach(function (word) {
+      word.textContent = termConnected ? 'connected' : 'disconnected';
     });
     // The header's chip: a readout, not a control — and the only place BOTH of the
     // terminal's states are shown at once. They are independent (hiding the window
@@ -398,68 +404,116 @@
     }, function () { button.textContent = 'Copy failed'; });
   });
 
-  // ── the topics filter ──────────────────────────────────────────────────────
-  // A .topic-filter box (topics.html) narrows the card grid in place: hide the cards
-  // whose data-filter string does not contain the query, and hide a folder heading
-  // (.subrule) plus its card grid when every card under it is gone. The data-filter
-  // carries the full path (facet/slug), the folder heading and the display name, so
-  // the facet and the slug match as well as the visible name (it falls back to the
-  // card's text if the attribute is ever absent). Client-side only — the whole tree is
-  // already in the pane — and delegated, so it survives the htmx swap that brings the
-  // page in. [hidden] is beaten by the display rules on .card/.cards in site.css, so
-  // those elements carry a matching [hidden] override there.
+  // ── the pane filter ────────────────────────────────────────────────────────
+  // The .pane-filter box on the page divider (_divider.html) narrows the region below it
+  // in place. Client-side only — everything it can show is already in the pane — and
+  // delegated, so it survives the htmx swap that brings the page in.
   //
-  // The query is remembered for the browser session: leaving /topics/ and coming back —
-  // by the nav, by the pane's back arrow, or by the drafts toggle, which is a second
-  // route (/topics/all) onto the same grid — restores the narrowed view rather than
-  // silently reopening the whole tree. sessionStorage, not localStorage: a filter is
-  // where you are in a sitting, not a standing preference like the hidden terminal,
-  // so it dies with the tab. Emptying the box forgets it.
-  var TOPIC_FILTER_KEY = 'euler:topic-filter';
-
-  function topicQuery() {
-    try { return sessionStorage.getItem(TOPIC_FILTER_KEY) || ''; } catch (e) { return ''; }
+  // The haystack is each thing's data-filter string, which carries more than its visible
+  // name: a topic's full path and facet, a guide's filename, a problem's number in both
+  // the typed and the zero-padded form. It falls back to the element's text if the
+  // attribute is ever absent.
+  //
+  // Two behaviours, because the two things below a divider are not the same kind of
+  // thing:
+  //
+  //   CARDS are hidden. A grid of tiles has no meaning in its gaps, so a miss simply
+  //   goes, and a folder heading (.subrule) whose whole grid went goes with it.
+  //   [hidden] is beaten by the display rules on .card/.cards, so site.css carries a
+  //   matching [hidden] override.
+  //
+  //   CELLS are dimmed. A century cell's POSITION is what says which problem it is —
+  //   hiding the misses would renumber the grid under the reader — so a miss fades and
+  //   stays put. A century with no match at all is hidden: it is a whole grid saying
+  //   nothing, and the ones that do match should not be scrolled apart by it.
+  //
+  // The section strip is exempt. It is the page's own chrome, not its content: typing
+  // `syn` on the terminal page narrows the guides, and must not blank out Solutions and
+  // Topics on the way.
+  //
+  // The count on the divider is the answer to what was typed: the total while the box is
+  // empty, `matched / total` while a query is live.
+  //
+  // The query is remembered for the browser session, per section: leaving /topics/ and
+  // coming back — by the nav, by the pane's back arrow, or by the drafts toggle, which is
+  // a second route (/topics/all) onto the same grid — restores the narrowed view rather
+  // than silently reopening the whole tree, while the guides are never met pre-narrowed
+  // by something typed at the topics. sessionStorage, not localStorage: a filter is where
+  // you are in a sitting, not a standing preference like the hidden terminal, so it dies
+  // with the tab. Emptying the box forgets it.
+  function filterKey(input) {
+    return 'euler:filter:' + (input.getAttribute('data-filter-scope') || '');
   }
-  function setTopicQuery(q) {
+  function filterQuery(input) {
+    try { return sessionStorage.getItem(filterKey(input)) || ''; } catch (e) { return ''; }
+  }
+  function setFilterQuery(input, q) {
     try {
-      if (q) { sessionStorage.setItem(TOPIC_FILTER_KEY, q); } else { sessionStorage.removeItem(TOPIC_FILTER_KEY); }
+      if (q) { sessionStorage.setItem(filterKey(input), q); } else { sessionStorage.removeItem(filterKey(input)); }
     } catch (e) { /* private mode */ }
   }
 
-  function applyTopicFilter(input) {
+  function hay(el) {
+    return (el.getAttribute('data-filter') || el.textContent || '').toLowerCase();
+  }
+
+  function applyPaneFilter(input) {
     var q = input.value.trim().toLowerCase();
     var pane = document.getElementById('content') || document;
-    pane.querySelectorAll('nav.cards').forEach(function (nav) {
-      var anyVisible = false;
+    var matched = 0;
+    // The card grids, minus the section strip.
+    pane.querySelectorAll('nav.cards:not(.sections)').forEach(function (nav) {
+      var visible = 0;
       nav.querySelectorAll('.card').forEach(function (card) {
-        var hay = (card.getAttribute('data-filter') || card.textContent).toLowerCase();
-        var match = !q || hay.indexOf(q) !== -1;
+        var match = !q || hay(card).indexOf(q) !== -1;
         card.hidden = !match;
-        if (match) { anyVisible = true; }
+        if (match) { visible += 1; }
       });
-      nav.hidden = !anyVisible;
+      matched += visible;
+      nav.hidden = !visible;
+      // A folder heading goes with its grid, and while it stands its count is the count
+      // of what is under it — not the number the server rendered before anyone typed.
       var heading = nav.previousElementSibling;
-      if (heading && heading.classList.contains('subrule')) { heading.hidden = !anyVisible; }
+      if (heading && heading.classList.contains('subrule')) {
+        heading.hidden = !visible;
+        var groupCount = heading.querySelector('[data-group-count]');
+        if (groupCount) { groupCount.textContent = visible; }
+      }
     });
+    // The century grids.
+    pane.querySelectorAll('.century').forEach(function (century) {
+      var anyVisible = false;
+      century.querySelectorAll('.cell[data-filter]').forEach(function (cell) {
+        var match = !q || hay(cell).indexOf(q) !== -1;
+        cell.classList.toggle('is-dim', !match);
+        if (match) { anyVisible = true; matched += 1; }
+      });
+      century.hidden = !anyVisible;
+    });
+    var count = pane.querySelector('[data-filter-count]');
+    if (count) {
+      var total = count.getAttribute('data-filter-total');
+      count.textContent = q ? matched + ' / ' + total : total;
+    }
   }
 
-  // Paint the remembered query onto a topics page as it arrives — the first load and
-  // every swap that brings one in. The server always renders the box empty and the grid
-  // whole, so this runs after the markup lands, never before. Any other route has no
-  // box: nothing to do, and the query keeps until the next visit.
-  function paintTopicFilter() {
-    var input = document.querySelector('.topic-filter');
+  // Paint the remembered query onto a filterable page as it arrives — the first load and
+  // every swap that brings one in. The server always renders the box empty and the region
+  // whole, so this runs after the markup lands, never before. A page without a box has
+  // nothing to do, and its section's query keeps until the next visit.
+  function paintPaneFilter() {
+    var input = document.querySelector('.pane-filter');
     if (!input) { return; }
-    input.value = topicQuery();
-    applyTopicFilter(input);
+    input.value = filterQuery(input);
+    applyPaneFilter(input);
   }
-  document.addEventListener('DOMContentLoaded', paintTopicFilter);
+  document.addEventListener('DOMContentLoaded', paintPaneFilter);
 
   document.addEventListener('input', function (ev) {
-    var input = ev.target.closest && ev.target.closest('.topic-filter');
+    var input = ev.target.closest && ev.target.closest('.pane-filter');
     if (!input) { return; }
-    setTopicQuery(input.value.trim());
-    applyTopicFilter(input);
+    setFilterQuery(input, input.value.trim());
+    applyPaneFilter(input);
   });
 
   // ── the vault: auto-unlock + account-panel recovery ────────────────

@@ -12,11 +12,13 @@ not read them.
 """
 from __future__ import annotations
 
-__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
-           'solution_dir', 'load_problems', 'centuries', 'problem_files',
+__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
+           'TEXT_SUFFIXES', 'ABOUT_PAGES', 'SHELL_DOCS',
+           'solution_dir', 'load_problems', 'centuries', 'problem_files', 'section_state',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'git_status', 'topic_status',
-           'list_docs', 'read_doc', 'list_topics', 'list_topic_groups', 'read_topic', 'drop_article',
+           'list_docs', 'read_doc', 'shell_docs', 'list_topics', 'list_topic_groups',
+           'read_topic', 'drop_article',
            'problem_tag_view',
            'read_about', 'readme_html',
            'parse_progress', 'save_progress']
@@ -695,6 +697,44 @@ def read_doc(repo_root: Path, name: str) -> str | None:
     return _read_page(repo_root / 'docs', name)
 
 
+#: The guides the **terminal** page offers (web-server-guide § The site): the four a
+#: reader standing at a prompt actually reaches for — how to invoke the shell, how to
+#: solve with it, what it can be told, and the grammar it is told in. The docs index
+#: holds a dozen more; this page is not that index, it is the shelf beside the prompt.
+#: Order is the reading order, not the filename's — the guide first, the reference last.
+SHELL_DOCS: tuple[str, ...] = ('user-guide', 'solver-guide', 'commands-index', 'syntax')
+
+
+def shell_docs(repo_root: Path) -> list[DocEntry]:
+    """The :data:`SHELL_DOCS` guides as index rows, in that order.
+
+    Reads only those four pages rather than indexing the whole tree: the terminal page
+    shows a fixed shelf, and `list_docs` would read every guide (one of them very large)
+    to title it. A guide missing from this clone is simply absent — a tree that has been
+    pruned renders a shorter shelf, never a 404."""
+    tree = repo_root / 'docs'
+    entries = []
+    for name in SHELL_DOCS:
+        text = _read_page(tree, name)
+        if text is None:
+            continue
+        entries.append(DocEntry(name=name, heading=_filename_heading(name),
+                                title=_page_title(text, name)))
+    return entries
+
+
+def _docs_count(repo_root: Path) -> int:
+    """How many rows :func:`list_docs` would return — counted by `stat`, not by reading.
+
+    The section strip carries this on every one of the five pages, and `list_docs` reads
+    each guide's body to title it (`web-server-guide.md` alone is a novel). The count
+    only needs to know which files *exist*. Keep the arithmetic in step with `list_docs`:
+    the README when it is readable, every `docs/*.md`, and the composed `ai` page."""
+    tree = repo_root / 'docs'
+    guides = sum(1 for _ in tree.glob('*.md')) if tree.is_dir() else 0
+    return guides + 1 + (1 if (repo_root / _README_MD).is_file() else 0)
+
+
 # ── topics ──────────────────────────────────────────────────────────────────────────
 
 def list_topics(repo_root: Path) -> list[DocEntry]:
@@ -776,6 +816,85 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
     return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
                        entries=entries)
             for folder, entries in sorted(groups.items())]
+
+
+# ── the section strip ───────────────────────────────────────────────────────────────
+#
+# The four tiles that head every one of the five index pages (web-server-guide § The
+# site). They carry live counts rather than prose: a row that repeats the header's nav
+# on five pages has to say something the header cannot, and four sentences repeated five
+# times say nothing. Everything here is a *count* — the tile's mono data line.
+
+#: A problem reference in an article's index row, as `update-tags` writes them (`p0244`).
+#: A row may also reference things that are not problems; those simply do not match.
+_REF_RE = re.compile(r'p?(\d+)$')
+
+#: mtime-keyed cache of the topic coverage read, per articles.json path. The index is
+#: ~650 rows and the strip wants it on every navigation, so it is parsed once per write.
+_coverage_cache: dict[Path, tuple[float, tuple[int, frozenset[int]]]] = {}
+
+
+def _topic_coverage(repo_root: Path) -> tuple[int, frozenset[int]]:
+    """`(written, reached)` — how many topic pages are finished, and which problems they
+    reach between them, from the article index (`topics/articles.json`).
+
+    The union, not the sum: two topics that both cover problem 42 have covered one
+    problem, and a strip tile that adds them up would claim coverage the site does not
+    have. Drafts are excluded for the same reason `/topics/` excludes them — a skeleton
+    page written by `update-tags` covers nothing a reader can read."""
+    path = repo_root / 'topics' / 'articles.json'
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return 0, frozenset()
+    cached = _coverage_cache.get(path)
+    if cached is not None and cached[0] == mtime:
+        return cached[1]
+    data = load_json(path)
+    rows = data.get('articles', []) if isinstance(data, dict) else []
+    written, reached = 0, set()
+    for row in rows:
+        if not isinstance(row, dict) or row.get('status') != 'final':
+            continue
+        written += 1
+        for ref in row.get('refs') or []:
+            match = _REF_RE.fullmatch(str(ref))
+            if match:
+                reached.add(int(match.group(1)))
+    state = (written, frozenset(reached))
+    _coverage_cache[path] = (mtime, state)
+    return state
+
+
+class SectionState(NamedTuple):
+    """The four section tiles' data lines: solutions, docs, topics, terminal.
+
+    The terminal tile's state is not here — it is the live socket, which only the
+    browser knows (`[data-term-dot]`, site.js paints it from the iframe's report)."""
+
+    solved: int
+    total: int
+    docs: int
+    topics: int
+    covered: int
+
+
+def section_state(repo_root: Path) -> SectionState:
+    """The section strip's counts for this clone (web-server-guide § The site).
+
+    Cheap enough for every navigation: problems.json and the article index are both
+    mtime-cached, and the docs count is a directory scan that reads nothing."""
+    problems = load_problems(repo_root)
+    written, reached = _topic_coverage(repo_root)
+    return SectionState(
+        solved=sum(1 for p in problems.values() if p.solved),
+        total=len(problems),
+        docs=_docs_count(repo_root),
+        topics=written,
+        # Only problems this clone actually publishes: an index that still references a
+        # problem dropped from problems.json must not push the count past the total.
+        covered=len(reached & problems.keys()),
+    )
 
 
 #: An article's own status comment. Mirrors `solver.core.tags.article_status`, deliberately
