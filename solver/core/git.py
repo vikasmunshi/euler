@@ -566,7 +566,7 @@ def key_waiting_hint() -> str:
     if config.subject.channel == 'web':
         return waiting + ('open the [accent]✉ messages[/accent] menu in the header and press '
                           '[accent]save[/accent] on the master-key message.')
-    return waiting + 'run [accent]msg list[/accent], then [accent]msg save <id>[/accent].'
+    return waiting + 'run [accent]msg list[/accent], then [accent]msg act <id>[/accent].'
 
 
 def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
@@ -627,10 +627,10 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
 
 
 def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
-    """Wire the git filter once this machine can decrypt — the tail of `msg save`.
+    """Wire the git filter once this machine can decrypt — the tail of taking a key.
 
     A provisioned clone starts filter-UNWIRED with `solutions/private/**` as ciphertext.
-    The moment the master key becomes readable — a maintainer issued it and `msg save` wrote
+    The moment the master key becomes readable — a maintainer issued it and `msg act` wrote
     it, or a rotation was carried across by `user --regen` — wire the clean/smudge filter and
     re-checkout the private tree, so ciphertext becomes plaintext in place.
 
@@ -710,7 +710,7 @@ def git_sync(dry_run: bool = False) -> int:
     On a per-user clone (branch `user/<slug>`) this is the pull flow: fetch
     origin/master and merge/rebase it into your branch — bringing in merged work
     merged work. Key material does not travel this way -- it is issued by message
-    (`user-authorize` / `msg save`), and that is what wires the filter.
+    (`user-authorize` / `msg act`), and that is what wires the filter.
 
     Stale remote-tracking refs are pruned as part of the fetch, so a branch deleted
     when its pull request merged stops shadowing the branch you push next.
@@ -736,7 +736,7 @@ def git_sync(dry_run: bool = False) -> int:
             # No edits are carried across here, and that is not an oversight: proving a private
             # file is *your* edit needs the key that opened HEAD, and by now it is gone. Diffing
             # against origin/master instead would read content you simply have not pulled yet as
-            # a local change and write it back over the incoming version. `msg save` collects
+            # a local change and write it back over the incoming version. `msg act` collects
             # the edits at the one moment they can be told apart, which is why this path exists
             # only for clones already wedged before it did.
             console.print('[warning]Note: uncommitted changes under solutions/private cannot be '

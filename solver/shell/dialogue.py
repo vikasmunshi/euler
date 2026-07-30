@@ -79,8 +79,8 @@ class Choice:
 
 
 #: Builds a menu's options when the dialogue fires. Receives the live `Context` and the
-#: arguments bound so far, so a choice set can narrow by an earlier answer — `msg save` offers
-#: only the threads carrying a key. Called once, never at import, never when the user typed
+#: arguments bound so far, so a choice set can narrow by an earlier answer — `msg act` labels
+#: each message with what acting on it would do. Called once, never at import, never when the user typed
 #: the answer.
 Choices = Callable[[Any, dict[str, Any]], Sequence[Choice]]
 

@@ -69,11 +69,11 @@ says the key is available (a console script, sane `sys.path`, current code) whil
 says UNAVAILABLE (a filter process, shadowed import, stale code).
 
 The flag is written into `.git/config` by `install`. A clone keeps whatever command was
-recorded the day it was set up, so **`msg save` compares the recorded command with what
+recorded the day it was set up, so **taking a key compares the recorded command with what
 `install` would write today** and re-wires when they differ — any change to that command
 repairs itself the next time a key is saved.
 
-It hangs off `msg save`, because taking a key is the one act that changes what a machine can
+It hangs off `msg act`, because taking a key is the one act that changes what a machine can
 decrypt. A drifted clone therefore waits for its owner's next save; `git-filter install` is
 the manual repair.
 
@@ -119,7 +119,7 @@ stale ones, a machine-local overlay to bridge rotations, and a repair path insid
 All of that was the price of keeping per-machine key material in shared state.
 
 **Distribution is the message spool.** A maintainer's `user-authorize` wraps the master key to
-your public key and sends you the payload — the whole of your file — and `msg save` writes it
+your public key and sends you the payload — the whole of your file — and `msg act` writes it
 after checking it unwraps with your private key and passes `verify`. It travels by message for
 the same reason the old file could sit in a public repo: without your private key it is inert.
 
@@ -233,7 +233,7 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 - **Add a user:** they run `solver user`, which creates their identity and files a key
   request over the message spool. A maintainer works it with `solver "authorize <message-id>"`
   — the key and the requester come from the thread — and the payload is sent back as a reply.
-  The user runs `msg save <id>` to write it, and their private solutions decrypt in place.
+  The user runs `msg act <id>` to write it, and their private solutions decrypt in place.
 - **Rotate your own key:** `solver "user --regen"`. It carries the master key to the new key
   itself; nobody else is involved, and nothing is published.
 - **Rotate the master key:** `solver rekey` (admin). It verifies the current key, generates a
@@ -302,7 +302,7 @@ filter wiring) were in place.
 | Symptom | Cause / fix |
 | --- | --- |
 | `git add` hangs | A stale `process` filter or `.git/index.lock` from an interrupted run. Kill leftover `gitfilter process` procs and remove `.git/index.lock`. |
-| `master key check FAILED` on `install` | No `~/.euler/enc-key.json` yet, no `~/.euler/id`, or the file holds a key that is not yours. Run `solver user` — it files a request — then `msg save <id>` when a maintainer issues it. |
+| `master key check FAILED` on `install` | No `~/.euler/enc-key.json` yet, no `~/.euler/id`, or the file holds a key that is not yours. Run `solver user` — it files a request — then `msg act <id>` when a maintainer issues it. |
 | Checkout/commit of private files aborts | `required = true` and the master key is unavailable. Obtain master-key access (see §6), or you genuinely cannot read these files. |
 | Other clones see ciphertext in the working tree | `.gitattributes` was not committed, or the filter was never `install`-ed on that clone. Commit `.gitattributes`; run `solver-gitfilter install`. |
 | Spurious "modified" on `status` with no edits | Determinism broke — the master key in use differs from the one a blob was encrypted with (e.g. after a partial rekey). Reconcile the master key, then `git add --renormalize`. |

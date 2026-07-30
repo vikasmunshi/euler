@@ -254,7 +254,7 @@ def build_app(service: MessageService) -> web.Application:
 
         Staff dismiss anything (the queue is theirs to clear). Anyone else may dismiss a
         message **they are a party to**, which is what lets an act clean up after itself:
-        `msg save` takes the key and the message it came in is spent. Without that, the one
+        `msg act` takes the key and the message it came in is spent. Without that, the one
         rung that most needs the tidying — a reader, who cannot reach the staff queue —
         would be the one left with a mailbox of worked messages.
         """

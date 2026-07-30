@@ -4,7 +4,7 @@
 
 The bug this pins was reported from a live web shell and is a genuine trap rather than a
 missing branch. A rotation re-encrypts every tracked private blob, so the moment a
-collaborator runs `msg save` their own HEAD stops decrypting — and *every* way out of that
+collaborator takes the new key their own HEAD stops decrypting — and *every* way out of that
 goes through HEAD. `git stash` materialises it, so `git-sync` cannot even reach its merge:
 the smudge filter raises `InvalidTag`, git calls the sync fatal, and the clone is stuck
 being stale with no self-service repair.
@@ -54,7 +54,7 @@ def _git_available() -> bool:
 
 @unittest.skipUnless(_git_available(), 'git is not installed')
 class RotationRehomeTests(unittest.TestCase):
-    """`msg save` on a stale clone: HEAD is unreadable, and the repair is origin/master."""
+    """Taking a key on a stale clone: HEAD is unreadable, and the repair is origin/master."""
 
     def setUp(self) -> None:
         self._tmp = TemporaryDirectory()
@@ -172,7 +172,7 @@ class RotationRehomeTests(unittest.TestCase):
         """
         held = (self.secrets / 'enc-key.json').read_text()
         self.rotate()
-        (self.secrets / 'enc-key.json').write_text(held)   # they never ran `msg save`
+        (self.secrets / 'enc-key.json').write_text(held)   # they never took the new key
         read_master_key.cache_clear()
         load_private_key.cache_clear()
         self._git('fetch', '-q', 'origin', 'master')
@@ -213,7 +213,7 @@ class RotationRehomeTests(unittest.TestCase):
     def test_local_edits_collected_before_the_key_changed_survive(self) -> None:
         """Plaintext is key-agnostic, which is the only reason carrying edits across works.
 
-        `msg save` reads them while the old key still answers, so they can be told apart from
+        The save reads them while the old key still answers, so they can be told apart from
         the rotation's own churn; the re-home writes them back over the published tree.
         """
         from solver.core import git
@@ -245,7 +245,7 @@ class RotationRehomeTests(unittest.TestCase):
         # Named where the reader is looking: the header's message chip over the web, whose key
         # row has its own save button, and the shell verbs in a terminal, which has no header.
         app_config = import_module('solver.config').config
-        for channel, expected in (('web', 'header'), ('terminal', 'msg save')):
+        for channel, expected in (('web', 'header'), ('terminal', 'msg act')):
             subject = app_config.subject._replace(channel=channel)
             with patch.dict(app_config._data, {'subject': subject}):
                 self.assertIn(expected, git.key_waiting_hint(), f'{channel}: names its own way')
@@ -311,7 +311,7 @@ class RotationRehomeTests(unittest.TestCase):
     def test_a_wedged_clone_reports_no_edits_at_all(self) -> None:
         """The 917 bug: a clone already behind a rotation must not invent local edits.
 
-        Reported live — `msg save` on a clone that had never re-homed from the *previous*
+        Reported live — taking a key on a clone that had never re-homed from the *previous*
         rotation announced "kept your 917 local edit(s)" on a worktree with none. With the
         held key not matching HEAD, git cleans every present private file to a different blob
         than HEAD's and reports it as changed; writing those back would have pinned stale

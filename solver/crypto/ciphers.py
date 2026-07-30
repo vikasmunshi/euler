@@ -13,7 +13,7 @@ import `solver.config`). On top of that, this module owns:
 - the master (symmetrical) key -- `read_master_key` unwraps this machine's entry from
   `~/.euler/enc-key.json` (two records: `verify`, and the master key wrapped to this holder's
   public key) and proves it correct by decrypting `verify` before returning it. `enc_key_payload`
-  builds that pair for somebody else -- the unit `user-authorize` sends and `msg save` writes.
+  builds that pair for somebody else -- the unit `user-authorize` sends and `msg act` writes.
 - deterministic blob encryption -- the convergent-encryption core used by the git filter: one fixed
   AES-256 key + a content-derived nonce (`HMAC(plaintext)`), so identical plaintext always yields
   byte-identical ciphertext (no spurious git diffs).
@@ -193,7 +193,7 @@ def read_master_key() -> bytes:
 def enc_key_payload(public_key: X25519PublicKey, master_key: bytes) -> dict[str, str]:
     """The whole file, for one holder: `{verify, <their-public-key>: <wrapped master key>}`.
 
-    What `user-authorize` sends and `msg save` writes — the unit of key distribution now that
+    What `user-authorize` sends and `msg act` writes — the unit of key distribution now that
     there is no shared file to append to. Wrapped to *their* public key, so it is theirs alone
     to open, and it travels through the message spool for the same reason the old file could
     sit in a public repo: without the matching private key it is inert.

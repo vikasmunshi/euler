@@ -11,7 +11,6 @@
 {% set unread = unread | default(0) %}
 {% set total = total | default(0) %}
 {% set threads = threads | default([]) %}
-{% set staff_floor = staff_floor | default('maintainer') %}
 <summary class="{{ 'is-unread' if unread else '' }}" title="messages — {{ unread }} unread">
   {# An envelope, closed: the chip is about mail waiting, not mail read. #}
   <svg class="msg-glyph" viewBox="0 0 24 24" aria-hidden="true">
@@ -33,18 +32,17 @@
   <li class="menu-sep" aria-hidden="true"></li>
   {% for item in threads %}
   {# One row per thread, newest first, unread before read. The button types
-     `msg read <id>` — the thread prints in the shell and is marked read there, so the
-     browser never needs a thread view and never reads the body. #}
+     `msg act <id>` — the shell does what the message asks and prints the result there, so
+     the browser never needs a thread view and never reads the body. #}
   <li class="verb msg-row{% if item.unread %} is-unread{% endif %}">
-    {# One button, carrying the verb THIS row is for — `msg read` for prose, `msg save` for a
-       key issued to you, `user-authorize` for somebody else's request seen by staff
-       (solver/web/user/msg_api.py decides, from the same subject constants the commands
-       match on). It used to be `msg read` on every row with an Authorize button bolted
-       beside the one kind that had an act: two controls where the row already knew which
-       one applied, and the reader left to do the routing.
+    {# One button, one command: `msg act <id>`, which does what THIS message asks — take the
+       key it carries, grant the key it requests, merge the pull request it announces, or,
+       for prose, read it. The rows used to type four different commands, so this template
+       and the command each decided what a row was for; now `verb_for` decides once
+       (solver/web/msg/__init__.py) and only the label is rendered here.
 
-       The verb chip appears only when the act is not a plain read — a row that says "save"
-       or "authorize" is telling you something; one that says "read" on every line is noise. #}
+       That label appears only when the act is not a plain read — a row that says "save" or
+       "merge" is telling you something; one that says "read" on every line is noise. #}
     <button type="button" data-term-cmd="{{ item.verb }}"
             title="run `{{ item.verb }}` in your terminal">
       <span class="msg-dot" aria-hidden="true"></span>
@@ -66,7 +64,10 @@
     <button type="button" data-term-toggle>Connect the terminal</button>
   </li>
   {# The verbs, gated but SHOWN: the ladder is part of what the header teaches, and a verb
-     that vanishes makes two collaborators' screens differ silently. #}
+     that vanishes makes two collaborators' screens differ silently. Both of these are at
+     the reader floor, so nothing here is locked today — the panel used to carry `msg queue`
+     (maintainer), which was a second name for the part of `msg list` staff already see. The
+     gate stays because the floor is what each verb declares, not what it happens to be. #}
   {% macro verb(label, command, floor) %}
   {% if subject.has(floor) %}
   <li class="verb"><button type="button" data-term-cmd="{{ command }}"
@@ -77,5 +78,5 @@
   {% endif %}
   {% endmacro %}
   {{ verb('All messages', 'msg list', 'reader') }}
-  {{ verb('Inbound queue', 'msg queue', staff_floor) }}
+  {{ verb('Write to staff', 'msg send', 'reader') }}
 </ul>

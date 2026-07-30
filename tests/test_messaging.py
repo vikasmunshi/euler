@@ -33,6 +33,7 @@ import time
 import unittest
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
@@ -456,6 +457,7 @@ class UserMessageChipTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('<summary', body)
         self.assertIn('msg list', body, 'the chip offers the shell verb, not a page')
+        self.assertIn('msg send', body)
 
     @unittest_run_loop
     async def test_the_fragment_is_the_contents_and_cannot_re_arm_its_own_load(self) -> None:
@@ -481,21 +483,23 @@ class UserMessageChipTests(AioHTTPTestCase):
         self.assertEqual((await self.client.get('/messages')).status, 401)
 
     @unittest_run_loop
-    async def test_rows_type_a_read_command_into_the_shell(self) -> None:
-        """A row is a terminal verb, not a link: there is nowhere in the browser to go."""
+    async def test_rows_type_the_act_command_into_the_shell(self) -> None:
+        """A row is a terminal verb, not a link: there is nowhere in the browser to go.
+
+        One command for every row — the message decides what it does, not the chip."""
         thread_id = self.spool.store.submit(_ALICE_BOX, 'a question', 'the body', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
         self.assertIn('a question', body)
         self.assertNotIn('the body', body, 'the body is read in the shell, never rendered here')
 
     @unittest_run_loop
-    async def test_a_key_request_row_offers_the_authorize_verb(self) -> None:
-        """The row carries the verb it is FOR — here, somebody else's request seen by staff.
+    async def test_a_key_request_row_is_labelled_authorize(self) -> None:
+        """The row says what acting on it does — here, granting somebody else's request.
 
-        Authored by somebody else — a request of *your own* is a `msg save` row instead, since
-        what you are waiting for on it is the reply.
+        Authored by somebody else: what you await on a request of *your own* is the reply, so
+        `verb_for` gives that one a plain read.
 
         The id is the whole point: the command reads the public key from the thread over the
         socket, so the key never reaches the browser and nobody retypes it.
@@ -504,30 +508,39 @@ class UserMessageChipTests(AioHTTPTestCase):
                                             f'public key: {"ab" * 32}', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn(f'data-term-cmd="user-authorize {thread_id}"', body)
-        self.assertNotIn(f'msg read {thread_id}', body, 'one verb per row, the relevant one')
-        self.assertIn('>authorize<', body, 'and the row says which')
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
+        self.assertIn('>authorize<', body, 'and the row says what it will do')
         self.assertNotIn('ab' * 32, body, 'the key is read in the shell, never rendered here')
 
     @unittest_run_loop
-    async def test_a_key_issued_to_you_offers_save(self) -> None:
+    async def test_a_key_issued_to_you_is_labelled_save(self) -> None:
         """A rotation's notice: the thing to do with a key is take it, not read about it."""
         thread_id = self.spool.store.notice(_ALICE_BOX, f'{KEY_ISSUE_SUBJECT}rotated master key',
                                             'payload here', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn(f'data-term-cmd="msg save {thread_id}"', body)
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
         self.assertIn('>save<', body)
 
     @unittest_run_loop
-    async def test_an_ordinary_thread_is_still_a_read(self) -> None:
-        """Prose keeps the plain verb, and carries no chip — a label on every row is noise."""
+    async def test_a_pull_request_row_is_labelled_merge_for_staff(self) -> None:
+        """Including one you filed yourself: the owner merges their own branch as a matter
+        of course, which is why `verb_for` has no is_own exclusion on this kind."""
+        thread_id = self.spool.store.submit(box_of(_ME), f'{PR_REVIEW_SUBJECT}user/x',
+                                            'a PR is waiting', [_ME])
+        assert thread_id is not None
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
+        self.assertIn('>merge<', body)
+
+    @unittest_run_loop
+    async def test_an_ordinary_thread_carries_no_label(self) -> None:
+        """Prose acts as a read, and says nothing — a label on every row is noise."""
         thread_id = self.spool.store.submit(_ALICE_BOX, 'a question', 'the body', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
-        self.assertNotIn('user-authorize', body)
-        self.assertNotIn('msg-verb', body, 'no chip on an ordinary row')
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
+        self.assertNotIn('msg-verb', body, 'no label on an ordinary row')
 
     @unittest_run_loop
     async def test_the_count_and_totals_come_from_the_spool(self) -> None:
@@ -550,7 +563,7 @@ class UserMessageChipTests(AioHTTPTestCase):
             if index < 6:                       # leave the last two unread
                 self.spool.store.mark_read(thread_id, _ME, staff=True)
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertEqual(body.count('data-term-cmd="msg read '), 5, 'the menu is capped')
+        self.assertEqual(body.count('data-term-cmd="msg act '), 5, 'the menu is capped')
         self.assertIn('subject-6', body)        # …and the unread ones are the ones kept
         self.assertIn('subject-7', body)
 
@@ -588,7 +601,7 @@ class UserMessageChipTests(AioHTTPTestCase):
 
         Dismiss used to be staff-only, so the rung that most needs the tidying — a reader,
         who cannot reach the staff queue — was the one left with a mailbox of worked
-        messages. `msg save` takes the key; the message it came in is then spent.
+        messages. `msg act` takes the key; the message it came in is then spent.
         """
         thread_id = self.spool.store.notice(box_of(_ME), 'yours', 'take it', [_ME])
         assert thread_id is not None
@@ -614,34 +627,45 @@ class UserMessageChipReaderTests(UserMessageChipTests):
     profile = 'reader'
 
     @unittest_run_loop
-    async def test_the_queue_verb_is_shown_but_locked(self) -> None:
-        """Shown, not hidden: the ladder is part of what the header teaches."""
+    async def test_the_panel_verbs_are_the_two_every_rung_has(self) -> None:
+        """Nothing in this panel is staff's alone any more: `msg queue` was a second name for
+        the part of `msg list` staff already see, and it took the locked row with it."""
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn('Inbound queue', body)
-        self.assertIn('needs the maintainer profile', body)
-        self.assertNotIn('data-term-cmd="msg queue"', body)
+        self.assertIn('data-term-cmd="msg list"', body)
+        self.assertIn('data-term-cmd="msg send"', body)
+        self.assertNotIn('Inbound queue', body)
 
     @unittest_run_loop
-    async def test_a_key_request_row_offers_the_authorize_verb(self) -> None:
-        """Overridden: a reader gets the row and **no** verb.
+    async def test_a_key_request_row_is_labelled_authorize(self) -> None:
+        """Overridden: a reader gets the row and **no** label.
 
-        A reader cannot issue a key, so somebody else's request keeps the plain read —
+        A reader cannot issue a key, so acting on somebody else's request is a plain read —
         offering them a grant they can never make would be worse than saying nothing.
         """
         thread_id = self.spool.store.submit(box_of(_ME), f'{KEY_REQUEST_SUBJECT}{_ME}',
                                             f'public key: {"ab" * 32}', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)   # the row is there…
-        self.assertNotIn('user-authorize', body)                       # …without the verb
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)   # the row is there…
+        self.assertNotIn('msg-verb', body)                            # …without the label
 
     @unittest_run_loop
-    async def test_rows_type_a_read_command_into_the_shell(self) -> None:
+    async def test_a_pull_request_row_is_labelled_merge_for_staff(self) -> None:
+        """Overridden: a reader cannot merge, so the notice is prose to them."""
+        thread_id = self.spool.store.notice(_ALICE_BOX, f'{PR_REVIEW_SUBJECT}user/x',
+                                            'a PR is waiting', [_ME])
+        assert thread_id is not None
+        body = await (await self.client.get('/messages', headers=self.headers)).text()
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
+        self.assertNotIn('msg-verb', body)
+
+    @unittest_run_loop
+    async def test_rows_type_the_act_command_into_the_shell(self) -> None:
         """As a reader this login is not staff, so the thread must be addressed to them."""
         thread_id = self.spool.store.notice(_ALICE_BOX, 'a notice', 'the body', [_ME])
         assert thread_id is not None
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertIn(f'data-term-cmd="msg read {thread_id}"', body)
+        self.assertIn(f'data-term-cmd="msg act {thread_id}"', body)
         self.assertNotIn('the body', body)
 
     @unittest_run_loop
@@ -659,19 +683,13 @@ class UserMessageChipReaderTests(UserMessageChipTests):
             if index < 6:
                 self.spool.store.mark_read(thread_id, _ME)
         body = await (await self.client.get('/messages', headers=self.headers)).text()
-        self.assertEqual(body.count('data-term-cmd="msg read '), 5)
+        self.assertEqual(body.count('data-term-cmd="msg act '), 5)
         self.assertIn('subject-6', body)
         self.assertIn('subject-7', body)
 
 
-class MsgCommandNudgeTests(_SpoolCase):
-    """The shell half of the chip's refresh: OSC 5379 `msg` after a mutating verb.
-
-    The spool pushes when a message *arrives*, but marking one read happens in the user's
-    own shell and no service sees it — so without this the badge still said 1 after they
-    read the only unread thread, until the next full page load. Same move `git-sync` makes
-    for the git chip, landing on the same `euler:message` event as the delivery push.
-    """
+class _MsgCommandCase(_SpoolCase):
+    """The `msg` command driven against a real spool, as this process's own login."""
 
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
@@ -686,12 +704,22 @@ class MsgCommandNudgeTests(_SpoolCase):
                                      auth_method='test', profile=self.my_profile)
 
     def _run(self, *args: Any, **kwargs: Any) -> str:
-        """Run the `msg` command with stdout captured; return what it wrote."""
+        """Run the `msg` command with stdout captured; return what it wrote.
+
+        Only the OSC nudges land here — the console renders through rich's own stream, which
+        `silence()` swallows — so this is a test of the *wire*, not of the prose.
+        """
         from solver.web.msg.commands import msg
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             msg(*args, **kwargs)
         return buffer.getvalue()
+
+    def _rc(self, *args: Any, **kwargs: Any) -> int:
+        """The command's exit code — what a refusal is actually observable as."""
+        from solver.web.msg.commands import msg
+        with contextlib.redirect_stdout(io.StringIO()):
+            return msg(*args, **kwargs)
 
     @staticmethod
     def _nudges(output: str) -> int:
@@ -703,6 +731,16 @@ class MsgCommandNudgeTests(_SpoolCase):
                                               {'subject': 'ping', 'body': 'hello'})
         self.assertEqual(status, 201)
         return str(data['id'])
+
+
+class MsgCommandNudgeTests(_MsgCommandCase):
+    """The shell half of the chip's refresh: OSC 5379 `msg` after a mutating verb.
+
+    The spool pushes when a message *arrives*, but marking one read happens in the user's
+    own shell and no service sees it — so without this the badge still said 1 after they
+    read the only unread thread, until the next full page load. Same move `git-sync` makes
+    for the git chip, landing on the same `euler:message` event as the delivery push.
+    """
 
     @unittest_run_loop
     async def test_reading_nudges_the_chip(self) -> None:
@@ -719,7 +757,7 @@ class MsgCommandNudgeTests(_SpoolCase):
         thread_id = await self._thread_from_alice()
         for label, call in (
                 ('send', lambda: self._run('send', subject='s', body='b')),
-                ('notice', lambda: self._run('notice', to=_ALICE, subject='s', body='b')),
+                ('send to a user', lambda: self._run('send', to=_ALICE, subject='s', body='b')),
                 ('dismiss', lambda: self._run('dismiss', thread_id)),
         ):
             output = await asyncio.to_thread(call)
@@ -729,10 +767,8 @@ class MsgCommandNudgeTests(_SpoolCase):
     async def test_read_only_verbs_do_not_nudge(self) -> None:
         """A nudge that fires when nothing moved trains the reader to ignore it."""
         await self._thread_from_alice()
-        for label, call in (('list', lambda: self._run('list')),
-                            ('queue', lambda: self._run('queue'))):
-            output = await asyncio.to_thread(call)
-            self.assertEqual(self._nudges(output), 0, f'{label} changes nothing')
+        output = await asyncio.to_thread(self._run, 'list')
+        self.assertEqual(self._nudges(output), 0, 'listing changes nothing')
 
     @unittest_run_loop
     async def test_a_terminal_shell_emits_nothing(self) -> None:
@@ -742,6 +778,185 @@ class MsgCommandNudgeTests(_SpoolCase):
         thread_id = await self._thread_from_alice()
         output = await asyncio.to_thread(self._run, 'read', thread_id)
         self.assertEqual(self._nudges(output), 0)
+
+
+class MsgActTests(_MsgCommandCase):
+    """`msg act <id>` — the message decides, against a real spool.
+
+    Five verbs replaced seven, and this is the one that absorbed the difference: `save` was a
+    verb for one message kind, so the reader had to know which of them theirs wanted. The
+    dispatch is `verb_for` on the subject — the same function that labels the header chip's
+    rows, which is what stops the button and the command from ever disagreeing.
+    """
+
+    def _dispatched(self) -> list[str]:
+        """Record which act ran, without running either heavy one for real."""
+        from solver.crypto import keys as keys_mod
+        from solver.core import git as git_mod
+        from solver.web.msg import commands as msg_commands
+        done: list[str] = []
+        self.enterContext(patch.object(keys_mod, 'user_authorize',
+                                       lambda thread_id: (done.append(f'authorize {thread_id}'), 0)[1]))
+        self.enterContext(patch.object(git_mod, 'gh_merge',
+                                       lambda action='list': (done.append(f'merge {action}'), 0)[1]))
+        self.enterContext(patch.object(msg_commands, '_save',
+                                       lambda thread_id, data: (done.append(f'save {thread_id}'), 0)[1]))
+        return done
+
+    async def _from_alice(self, subject: str, body: str = 'the body') -> str:
+        status, data = await self.as_identity('POST', '/admin/messages', _ALICE,
+                                              {'subject': subject, 'body': body})
+        self.assertEqual(status, 201)
+        return str(data['id'])
+
+    @unittest_run_loop
+    async def test_prose_is_read_and_marked_read(self) -> None:
+        """The default act, and the reason `act` needs no floor: on anything a command did
+        not file, it is exactly `read`."""
+        done = self._dispatched()
+        thread_id = await self._thread_from_alice()
+        output = await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [], 'no command ran — it was read')
+        self.assertEqual(self._nudges(output), 1, 'the unread count moved, so the chip is told')
+        _status, after = await self.call('GET', '/messages')
+        self.assertEqual(after['unread'], 0)
+
+    @unittest_run_loop
+    async def test_a_key_message_is_taken(self) -> None:
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{KEY_ISSUE_SUBJECT}{_ME}', '{"verify": "x"}')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [f'save {thread_id}'])
+
+    @unittest_run_loop
+    async def test_a_key_request_is_granted_by_staff(self) -> None:
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{KEY_REQUEST_SUBJECT}{_ALICE}')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [f'authorize {thread_id}'])
+
+    @unittest_run_loop
+    async def test_a_pull_request_notice_is_merged_by_staff(self) -> None:
+        """No thread is passed on: the queue `gh-merge` walks is GitHub's, and it dismisses
+        this message itself by the branch in the subject."""
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{PR_REVIEW_SUBJECT}user/x')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, ['merge merge'])
+
+    @unittest_run_loop
+    async def test_a_request_of_your_own_is_a_read(self) -> None:
+        """What you await on your own key request is the reply, not a self-grant."""
+        done = self._dispatched()
+        status, data = await self.call('POST', '/messages',
+                                       {'subject': f'{KEY_REQUEST_SUBJECT}{_ME}', 'body': 'k'})
+        self.assertEqual(status, 201)
+        await asyncio.to_thread(self._run, 'act', str(data['id']))
+        self.assertEqual(done, [], 'your own request is prose to you')
+
+
+class MsgActBelowStaffTests(MsgActTests):
+    """The ladder is applied once, in `verb_for`: below staff the two staff acts are reads.
+
+    A reader offered a grant they can never make is worse off than one shown prose — and the
+    command can hold no floor of its own on `act`, since the same verb is every rung's read.
+    """
+
+    my_profile = 'contributor'
+
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        # Somebody must be staff or the spool refuses inbound messages outright — and it
+        # must not be this login, which is the rung under test.
+        _write_policy(self.policy, {_ME: 'contributor', _ALICE: 'reader', _BOB: 'maintainer'})
+
+    async def _thread_from_alice(self) -> str:
+        return await self._from_alice('ping', 'hello')
+
+    async def _from_alice(self, subject: str, body: str = 'the body') -> str:
+        """Addressed to *me*, not to the staff queue.
+
+        Below the staff floor there is no queue to read: `_visible_to` lets staff see every
+        inbound thread and nobody else see any, so a message this rung can act on at all is
+        one it is a party to.
+        """
+        thread_id = self.service.store.notice(_ALICE_BOX, subject, body, [_ME])
+        assert thread_id is not None
+        return thread_id
+
+    @unittest_run_loop
+    async def test_a_key_request_is_granted_by_staff(self) -> None:
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{KEY_REQUEST_SUBJECT}{_ALICE}')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [], 'a contributor cannot grant a key')
+
+    @unittest_run_loop
+    async def test_a_pull_request_notice_is_merged_by_staff(self) -> None:
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{PR_REVIEW_SUBJECT}user/x')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [], 'a contributor cannot merge')
+
+    @unittest_run_loop
+    async def test_a_key_message_is_taken(self) -> None:
+        """Taking a key issued to you is nobody's privilege — it is your own file."""
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{KEY_ISSUE_SUBJECT}{_ME}', '{"verify": "x"}')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [f'save {thread_id}'])
+
+
+class MsgSendTests(_MsgCommandCase):
+    """One `send`, with the ladder in what it asks rather than in which verb you picked."""
+
+    my_profile = 'contributor'
+
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        # Somebody has to be staff for an inbound message to have a reader — and it must not
+        # be this login, which is the rung under test.
+        _write_policy(self.policy, {_ME: 'contributor', _ALICE: 'reader', _BOB: 'maintainer'})
+
+    @unittest_run_loop
+    async def test_the_default_audience_is_staff(self) -> None:
+        await asyncio.to_thread(self._run, 'send', subject='a question', body='b')
+        queue = self.service.store.inbound()
+        self.assertEqual([thread.subject for thread in queue], ['a question'])
+
+    @unittest_run_loop
+    async def test_below_staff_a_named_recipient_is_refused_by_the_command(self) -> None:
+        """Never asked for, so only a typed `to=` reaches this — and the command refuses in
+        its own words rather than letting the service answer a bare 403."""
+        rc = await asyncio.to_thread(self._rc, 'send', to=_ALICE, subject='s', body='b')
+        self.assertEqual(rc, 77, 'a floor refusal, not a spool error')
+        self.assertEqual(self.service.store.threads_for(_ALICE_BOX), [])
+
+
+class MsgSendStaffTests(_MsgCommandCase):
+    """What widens above the staff floor: who a `send` may reach."""
+
+    @unittest_run_loop
+    async def test_a_named_recipient_makes_it_a_notice(self) -> None:
+        await asyncio.to_thread(self._run, 'send', to=_ALICE, subject='heads up', body='b')
+        threads = self.service.store.threads_for(_ALICE_BOX)
+        self.assertEqual([thread.subject for thread in threads], ['heads up'])
+        self.assertEqual(self.service.store.inbound(), [], 'a notice is not an inbound question')
+
+    @unittest_run_loop
+    async def test_everyone_is_the_word_not_the_wire_form(self) -> None:
+        """`*` is the wire; nobody should have to know that to write a broadcast."""
+        await asyncio.to_thread(self._run, 'send', to='everyone', subject='all hands', body='b')
+        self.assertEqual([thread.subject for thread in self.service.store.threads_for(_ALICE_BOX)],
+                         ['all hands'])
+
+    @unittest_run_loop
+    async def test_staff_cannot_be_mixed_with_named_recipients(self) -> None:
+        """`staff` is the whole audience — silently dropping the rest would be worse."""
+        from solver.shell.dialogue import Abort
+        with self.assertRaises(Abort):
+            await asyncio.to_thread(self._run, 'send', to=f'staff,{_ALICE}',
+                                    subject='s', body='b')
 
 
 class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):

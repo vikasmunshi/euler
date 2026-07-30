@@ -286,7 +286,7 @@ the shell commands), and `gitfilter.py` (the git clean/smudge filter, depending 
   `0600`, never in the checkout and never committed: it used to be a tracked multi-entry file,
   which put per-machine key material into shared state and cost a long run of git conflicts,
   an attribution map, a purge verb and an overlay to manage. Authority is proof-of-possession.
-  Distribution is the message spool — `user-authorize` sends a holder their payload, `msg save`
+  Distribution is the message spool — `user-authorize` sends a holder their payload, `msg act`
   writes it after verifying — and `user --regen` re-wraps in place, needing nobody.
 - Decryption path: load private key → unwrap this machine's entry → verify → decrypt files.
 

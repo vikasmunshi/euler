@@ -15,7 +15,7 @@ What is left to test is small, which is the point:
 
 - the read path — one entry, held to `verify`;
 - issuance — a payload is the whole of somebody's file, wrapped to their key alone;
-- `msg save` — it must **prove** a payload before overwriting the file that may be the only
+- taking an issued key (`msg act`) — it must **prove** a payload before overwriting the file that may be the only
   thing between this machine and the private tree;
 - `user --regen` — carry the master key when it can be loaded, ask for it when it cannot,
   and never ask merely because the vault is locked.
@@ -118,7 +118,7 @@ class ReadPathTests(EncKeyTestCase):
 
 
 class SaveIssuedKeyTests(EncKeyTestCase):
-    """`msg save`: prove the payload, then write — never the other way round."""
+    """`msg act` on a key message: prove the payload, then write — never the other way round."""
 
     def setUp(self) -> None:
         super().setUp()

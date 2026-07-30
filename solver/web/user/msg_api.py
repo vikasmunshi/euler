@@ -7,7 +7,7 @@ read-only fragment** and the delivery push. There is no messages page, no compos
 and no thread view, because the spool is not a mailbox — it is how a *command* tells
 staff something they must act on (`user` filing a key-authorization request). Reading and
 writing happen in the shell, where `requires()` is the boundary; the chip reports, and
-its rows type `msg read <id>` into the terminal.
+its rows type `msg act <id>` into the terminal.
 
 The consequence worth stating: **the browser cannot write to the spool at all.** Every
 message arrives over `msg.sock` from a uid the kernel vouched for. This
@@ -37,8 +37,7 @@ from typing import Any
 import aiohttp
 from aiohttp import web
 
-from solver.web.msg import (DEFAULT_MSG_SOCKET, KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT,
-                            MSG_SOCKET_ENV, PR_REVIEW_SUBJECT)
+from solver.web.msg import DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV, verb_for
 from solver.web.msg.identity import STAFF_FLOOR
 from solver.web.site.app import requires
 from solver.web.site.render import MSG_SPOOL_KEY, SUBJECT_KEY, render
@@ -101,24 +100,18 @@ def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]
     own newest-first order is kept. Only the fields the row shows survive the trip — the
     body never reaches the browser, since it is read in the shell.
 
-    Each row carries **the verb that row is for**, not a generic read. Most threads are
-    prose and the useful act is `msg read`; a key thread is not, and offering "read" on the
-    grant you have been waiting for — with the real verb somewhere else — makes the reader
-    do the routing. The rules, decided from the subject against the shared constants the
-    commands themselves match on, so the chip can never offer a verb the command refuses:
+    **Every row types `msg act <id>`, and says what that will do.** One entry point, because
+    a message knows what it is for: :func:`~solver.web.msg.verb_for` reads the subject and
+    the command does the thing — take the key, grant the key, merge the pull request, or,
+    for prose, read it. The rows used to type four different commands, which meant this
+    module decided what a row was for and the command decided again; now the label is the
+    only thing decided here, from that same function, and what the button says is what the
+    command will do. The chip therefore cannot offer an act the command would refuse.
 
-    - a **key issued to you** is `msg save`: the thing to do with a key is take it;
-    - a **key request**, seen by staff, is `user-authorize`;
-    - a **pull request**, seen by staff, is `gh-merge merge` — the one act it is asking for.
-      It carries no thread id, because the verb walks the open pull requests as GitHub knows
-      them rather than reading anything out of the message; the row is what says one is
-      waiting. The row therefore does not have to be dismissed by hand either: the merge
-      closes the notice itself, matching on the branch in its subject, and the chip's own
-      nudge takes the row away;
-    - everything else is `msg read`.
-
-    Every message stands on its own (there are no replies), so a request and the grant that
-    answers it are two rows with two verbs — which is why the row can name one at all.
+    The label appears only when the act is not a plain read: a row that says "save" or
+    "merge" is telling you something, where "read" on every line is noise. A rung below
+    staff gets no label on a key request or a pull request, because for them acting on it
+    *is* a read — the ladder is applied once, in `verb_for`, not spelt out twice.
 
     No key material reaches the browser either way: the row carries the thread id, and the
     command reads the payload over the socket where the identity is vouched for.
@@ -129,18 +122,10 @@ def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]
     for thread in ordered[:_ROWS]:
         thread_id, subject = str(thread.get('id', '')), str(thread.get('subject', ''))
         author = str(thread.get('author_name', ''))
-        if subject.startswith(KEY_ISSUE_SUBJECT):
-            verb, label = f'msg save {thread_id}', 'save'
-        elif subject.startswith(KEY_REQUEST_SUBJECT) and is_staff and author != me:
-            verb, label = f'user-authorize {thread_id}', 'authorize'
-        elif subject.startswith(PR_REVIEW_SUBJECT) and is_staff:
-            # No `author != me` here, unlike a key request: the owner pushes and merges
-            # their own branch as a matter of course, so their own row is still actionable.
-            verb, label = 'gh-merge merge', 'merge'
-        else:
-            verb, label = f'msg read {thread_id}', ''
+        verb = verb_for(subject, is_staff=is_staff, is_own=author == me)
         rows.append({'id': thread_id, 'author_name': author, 'subject': subject,
-                     'unread': bool(thread.get('unread')), 'verb': verb, 'verb_label': label,
+                     'unread': bool(thread.get('unread')), 'verb': f'msg act {thread_id}',
+                     'verb_label': '' if verb == 'read' else verb,
                      'when': _when(str(thread.get('updated', '')))})
     return rows
 
@@ -188,9 +173,6 @@ def add_message_routes(app: web.Application, manager: PtyManager) -> None:
             'unread': mailbox.get('unread') or 0,
             'total': len(threads),
             'threads': _rows(threads, me, is_staff=is_staff),
-            # The rung the queue verb needs, so the template does not carry a second
-            # copy of it — the floor lives with the service that enforces it.
-            'staff_floor': STAFF_FLOOR,
         })
 
     async def internal_message(request: web.Request) -> web.Response:

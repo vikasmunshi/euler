@@ -489,14 +489,14 @@ re-encrypts the tracked private tree under the new key, commits *only* `solution
 (by pathspec — `git commit` otherwise sweeps in whatever else is staged) and pushes it to
 `origin/master`, and only then sends anybody their payload. Publishing second would strand
 the first person to act on their message: a rotation makes every earlier blob unreadable, so
-the instant they run `msg save` their own `HEAD` stops decrypting, and *every* way out goes
+the instant they take the new key their own `HEAD` stops decrypting, and *every* way out goes
 through `HEAD` — `git stash` materialises it, so `git-sync` cannot even reach its merge.
 They would be stuck being stale with no self-service repair. A push that fails is therefore
 fatal to the rotation: nothing is issued, and re-running mints a further key, which costs
 nothing because nobody ever received the last one.
 
 **The receiving half re-homes the clone.** Even publishing first, a collaborator's own `HEAD`
-predates the rotation, so `msg save` checks whether it still decrypts and moves the clone onto
+predates the rotation, so `msg act` checks whether it still decrypts and moves the clone onto
 the published tree when it does not — `git reset --hard origin/master`, the one worktree-wide
 command that never has to materialise the unreadable `HEAD` on the way. Uncommitted private
 edits are carried across as plaintext, collected *before* the new key is written, which is the
@@ -518,8 +518,8 @@ traceback *and* a half-applied merge that left a private file deleted in their w
 login banner asks the same pair, so a stale clone is told how to take the key rather than the
 generic "run `git-sync` to see why" — which, after a rotation, points at the one command that
 cannot work. The instruction follows the channel: over the web it names the header's message
-chip, whose key row carries its own **save** button, so nobody has to find and type a message
-id; a terminal, having no header, gets `msg list` / `msg save <id>`.
+chip, whose key row is a **save**-labelled button, so nobody has to find and type a message
+id; a terminal, having no header, gets `msg list` / `msg act <id>`.
 
 **`add` has two paths.** An `@`-address is the **web** path: provision the collaborator
 (§7), write the map entry, and mint an emailed invite — provisioning happens *before* the
@@ -545,7 +545,7 @@ Every command's declared floor is generated from the live registry into
 |---|---|
 | `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `msg` (own threads + send to staff), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg queue`/`msg notice`, `user-authorize` (grants enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, web file-delete |
+| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg send` to anyone but staff, `user-authorize` (grants enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, web file-delete |
 | `admin` | `users` mutations, `key-rekey`, `key-split`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:
@@ -805,7 +805,7 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   key request is the floor that can act on it. The flow: the user runs `user`, which files a
   request through the message spool (§13) carrying their public key; a maintainer runs
   **`user-authorize <message-id>`**, which wraps the master key to that public key and sends
-  the payload back as **its own message**; the user runs **`msg save <id>`**, which writes their enc-key
+  the payload back as **its own message**; the user runs **`msg act <id>`**, which writes their enc-key
   file and wires the filter. **The distribution channel is the spool**, and the payload
   travels through it for the same reason the old file could sit in a public repo: without
   their private key it is inert.
@@ -815,10 +815,10 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   the key comes out of the request and the **requester comes from the thread's author**, which
   the spool resolved from `SO_PEERCRED` when it was filed and which no sender can dress up as
   somebody else. It refuses rather than guesses (the subject must be the key-request one, the
-  body must hold exactly one hex token) and asks before granting. The worked request is left
-  for the maintainer to `msg dismiss`.
+  body must hold exactly one hex token) and asks before granting. The worked request is
+  dismissed once the grant is delivered.
 
-- **`msg save` proves before it writes.** The subject must be the key-issue one, the payload
+- **Taking a key proves before it writes.** The subject must be the key-issue one, the payload
   must unwrap with *this* machine's private key, and its `verify` must decrypt to the known
   text. Only then does it replace the file — which may be the only thing between this machine
   and the whole private tree, so a mistargeted or corrupted payload has to fail *before* the
@@ -1611,7 +1611,7 @@ act is always on one message. A request and the grant that answers it are two me
 two verbs, which is precisely what lets the header chip name the verb a row is for. Threading
 bought conversation nobody was having, and cost a second place for content to hide — an
 answer buried in a reply is invisible to anything reading the message it answers, which is
-exactly how `msg save` came to look in the wrong place for a key.
+exactly how taking a key came to look in the wrong place for one.
 
 **This is a mechanism for commands, not a chat feature.** Its purpose is to let a command
 tell staff something they have to act on. The founding case is `user`: it mints a keypair,
@@ -1826,46 +1826,39 @@ Three tiers, all reusing paths that already exist:
 the user pill — one menu idiom in the header, not four. It carries the state in two counts
 (`N unread, M threads`, shown even at zero), then up to five threads newest-first with
 unread ahead of read, then the verbs. Every row and every verb is a `data-term-cmd` button:
-a row types `msg read <id>`, and the thread prints in the shell and is marked read there.
-So the body never reaches the browser at all, and the boundary is the command's own floor
-rather than anything this menu decides to show. When the terminal is disconnected the
+a row types `msg act <id>`, and the shell does what that message asks and prints the result
+there. So the body never reaches the browser at all, and the boundary is the command's own
+floor rather than anything this menu decides to show. When the terminal is disconnected the
 panel says so and offers to connect it, painted from the same `termConnected` every other
 `[data-term-*]` control reads — a verb that silently does nothing is the one outcome a
 control must never have.
 
-**Each row carries the verb that row is for**, not a generic read. Most threads are prose and
-the useful act is `msg read <id>`; the message kinds a *command* files are not, and offering
-"read" on the grant you have been waiting for — with the real verb somewhere else — makes the
-reader do the routing. The rules (`solver/web/user/msg_api.py`):
+**Every row types the same command and says what it will do.** One entry point, `msg act
+<id>`, because a message knows what it is for — the rows used to type four different commands,
+which meant `msg_api.py` decided what a row was for and the command decided again. Now
+`verb_for` (§13.7) decides once, and the row renders only its **label**:
 
-| the row is | the verb it types | why the id is / is not in it |
+| the row is | the label it carries | what `msg act <id>` does |
 | --- | --- | --- |
-| a **key issued to you** | `msg save <id>` | the command reads the payload from the thread over the socket, so no key material reaches the browser |
-| a **key request**, read by staff | `user-authorize <id>` | same: the public key is read over the socket, and nobody retypes 64 hex characters off a screen |
-| a **pull request**, read by staff | `gh-merge merge` | no id — the verb walks the open pull requests as GitHub knows them; the row is what says one is waiting, and the merge closes it by matching the branch in its subject |
-| anything else | `msg read <id>` | prose, for a person to read |
+| a **key issued to you** | save | writes your enc-key file, reading the payload from the thread over the socket, so no key material reaches the browser |
+| somebody else's **key request**, read by staff | authorize | `user-authorize <id>` — the public key is read over the socket, and nobody retypes 64 hex characters off a screen |
+| a **pull request**, read by staff | merge | `gh-merge merge` — no id is needed, the verb walks the pull requests as GitHub knows them, and the merge closes this notice by the branch in its subject |
+| anything else | *(none)* | prints it and marks it read |
 
-The row decides *which* from the subject, against the same constants the filing commands use
-(`solver/web/msg/__init__.py`), so the chip can never offer a verb the command would refuse.
-The verb chip beside the subject appears only when the act is not a plain read: a row that
-says "save", "authorize" or "merge" is telling you something, where "read" on every line is
-noise. This is also why a request and its answer being two messages matters — one message,
-one act, so a row can name a verb at all.
+The label appears only when the act is not a plain read: a row that says "save" or "merge" is
+telling you something, where "read" on every line is noise. A rung below staff gets no label
+on a key request or a pull request, because for them acting on it *is* a read — `verb_for`
+applies the ladder once rather than the chip spelling it out again. This is also why a
+request and its answer being two messages matters: one message, one act.
 
-A command verb appears **only when applicable** — the subject matches *and* the reader is at
-the command's floor — which is a deliberate exception to this panel's shown-but-locked rule. A
-locked verb in the verb list teaches the ladder on a menu everyone sees; a locked one on a
-*row* would ride on every message of a kind most readers never receive, and on a reader's own
-key request it would offer them a grant they can never make.
+That the ladder shows on a *row* by omission, not by a locked button, is a deliberate
+exception to this panel's shown-but-locked rule. A locked verb in the verb list teaches the
+ladder on a menu everyone sees; a locked one on a row would ride on every message of a kind
+most readers never receive, and on a reader's own key request it would offer them a grant
+they can never make.
 
-In the terminal the same acts are the staff queue's keys — `msg queue` walks the inbound
-threads offering **read / grant / merge / dismiss / skip** on each. There the verbs are
-offered on every row rather than picked per subject: the walk shows the thread in full, so
-which act it wants is plain from what it says, where a button has to name one verb before
-anybody has read anything. `dismiss` is for a message worked *elsewhere* or a branch
-abandoned: the two verbs that answer a command-filed message clean up after themselves —
-`msg save` drops the thread whose key it took, and `gh-merge merge` drops the notice for the
-branch it landed (§13.7).
+The panel's two verbs are `msg list` and `msg send`, both `reader`. It used to carry `msg
+queue` (`maintainer`) as well — a second name for the part of `msg list` staff already see.
 
 That mechanism is selected by the **`.term-menu`** marker every such menu carries, not by
 each menu's own class. It used to be `.git-menu`/`.git-offline`, which meant the second
@@ -1894,24 +1887,48 @@ a convenience.
 
 ### 13.7 The `msg` command
 
-Verb-split like `users` (§6.3), registered from `solver/web/msg/commands.py`. Reader verbs
-dial `msg.sock` directly — a web shell's uid is in `euler-web`, so the PTY child reaches it
-with no credential. Staff verbs re-exec under `sudo` against the admin socket.
+Verb-split like `users` (§6.3), registered from `solver/web/msg/commands.py`. Whichever
+plane answers is `client.py`'s problem: a web shell's uid is in `euler-web`, so the PTY
+child dials `msg.sock` directly; the operator's terminal uid deliberately is not, and falls
+back to `sudo` against the admin socket.
 
 ```bash
-msg list                                       # own threads, newest activity first
-msg read <id>                                  # one thread, and mark it read
-msg send subject="…" body="…"                  # → the staff queue
-msg reply <id> body="…"                        # own thread (staff: any thread)
-msg queue                                      # STAFF: the inbound queue
-msg notice to=alice@example.com,bob@… subject="…" body="…"   # STAFF: named recipients
-msg notice --all-users subject="…" body="…"    # STAFF: broadcast
-msg dismiss <id>                               # STAFF: drop a worked thread
+msg list                                       # everything waiting for you, newest first
+msg read <id>                                  # one message, and mark it read
+msg act <id>                                   # do what it asks (see below)
+msg send subject="…" body="…"                  # → staff, the default audience
+msg send to=alice@example.com,bob@… subject="…" body="…"   # STAFF-only recipients
+msg send to=everyone subject="…" body="…"      # STAFF: broadcast
+msg dismiss <id>                               # drop a message you are done with
 ```
 
 The subject and body are `name=value` tokens rather than bare positionals because the
-thread id is the one argument that reads naturally in the leading position — `msg read
-<id>` and `msg reply <id> body="…"` are the two forms typed most often.
+message id is the one argument that reads naturally in the leading position — `msg read
+<id>` and `msg act <id>` are the two forms typed most often.
+
+**Five verbs, one per thing a person does with a message.** There were seven. `queue` was
+`list` with a staff-only filter over a mailbox that already shows staff every inbound
+thread, and `notice` was `send` with a different `to` — both marked STAFF in the menu, and
+both refusing *after* walking a `contributor` through subject, body and recipients. A menu
+that offers what it will then refuse teaches the ladder in the worst possible place. The
+ladder now lives in what a verb **asks**: `to` is only asked of staff, because below that
+floor there is one possible answer (`staff`), and it is the default.
+
+**`act` is the message's own verb.** `save` used to be a verb for one message kind, so the
+reader had to know which of seven verbs their message wanted. A message knows what it is
+for: `verb_for(subject, is_staff=…, is_own=…)` in `solver/web/msg/__init__.py` maps it to
+**save** (take the key it carries), **authorize** (grant the key it asks for — staff, and
+not your own request), **merge** (land the pull request it announces — staff), or **read**.
+That one function is also what labels the header chip's rows, so the button and the command
+cannot drift, and the two staff acts are unreachable below `maintainer` because the function
+never hands them out there. Each act cleans up after itself, so nothing is left to dismiss:
+taking a key drops the message that carried it, granting one drops the request, and a merge
+drops the notice (§13.7 above).
+
+**`dismiss` is not floored in the command.** The service already answers that question
+better — staff may drop anything, anyone else a message they are a party to — and the old
+`maintainer` check meant the rung that most needs the tidying, a reader clearing a worked
+notice, was the one refused.
 
 **Commands send through `notify_staff`** (`solver/web/msg/notify.py`), not through the
 command layer:
@@ -1945,7 +1962,7 @@ the right verb:
 
   **This one closes itself.** `gh-merge` dismisses the notice for each branch it lands
   (`_dismiss_pr_notice` → `notify.dismiss_by_subject`), so a worked review does not leave its
-  own instruction in the queue — the same tidying `msg save` does for a taken key. The handle
+  own instruction in the queue — the same tidying `msg act` does for a taken key. The handle
   is the **subject**, not a thread id: the chip's row types a bare `gh-merge merge` because
   the queue that verb walks is GitHub's, so the merge never sees the message. Hence the branch
   in `PR_REVIEW_SUBJECT` + branch, matched exactly (the prefix alone names the *kind* and would

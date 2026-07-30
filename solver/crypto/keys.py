@@ -14,7 +14,7 @@ entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two
   `~/.euler/enc-key.json` -- two records, `verify` and the key wrapped to their public key.
   Authority is **proof-of-possession**: anyone who can unwrap and verify it may rotate it, issue
   it to another public key, or split it into shares. Issuing goes through the message spool
-  (`user-authorize` sends, `msg save` writes); a rotation of one's own key pair needs nobody.
+  (`user-authorize` sends, `msg act` writes); a rotation of one's own key pair needs nobody.
 
 The non-interactive primitives (load, lock/unlock, encrypt/decrypt) come from `solver.crypto.ciphers`
 and the configuration from `solver.crypto.config`; this module never re-implements them. The git
@@ -159,7 +159,7 @@ def key_rekey() -> int:
     round of re-registration.
 
     Each holder is sent their own payload through the message spool, exactly as
-    `user-authorize` does; they run `msg save` to take it. An account with no registered
+    `user-authorize` does; they run `msg act` on it to take it. An account with no registered
     public key cannot be re-issued to and is named, not skipped silently — that person loses
     access at this rotation, which is sometimes the intent and must never be a surprise.
     `users set-keys` fills the registry from what every holder already has.
@@ -291,8 +291,8 @@ def user_authorize(target: str, identity: str = '') -> int:
     *target* is either form of the same act, told apart by shape:
 
     - a **16-hex message id** — the key-authorization request their `user` command filed
-      (`msg queue` lists them). The key and the requester come from that message, the grant
-      is confirmed, the payload is sent as **its own message** for them to `msg save`, and
+      (`msg list` shows them). The key and the requester come from that message, the grant
+      is confirmed, the payload is sent as **its own message** for them to `msg act` on, and
       the request is dismissed — it is worked, and a queue that keeps worked requests is a
       queue nobody trusts;
     - a **64-hex public key** — the same act by hand, for a key that reached you some other
@@ -301,8 +301,8 @@ def user_authorize(target: str, identity: str = '') -> int:
     **Nothing is written to a shared file, because there is no shared file.** The payload is
     the whole of the recipient's enc-key file — `verify` plus the master key wrapped to their
     public key — and it travels through the spool for the same reason the old tracked file
-    could sit in a public repo: without their private key it is inert. They run `msg save` to
-    take it; until they do, nothing has changed for them.
+    could sit in a public repo: without their private key it is inert. They run `msg act` on it
+    to take it; until they do, nothing has changed for them.
 
     The public key is also registered on their account (as `users set-keys` does in bulk),
     which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs
@@ -350,7 +350,7 @@ def user_authorize(target: str, identity: str = '') -> int:
         raise Abort('not sent')
 
     # Its own message, always. There are no replies: a grant hidden inside the request it
-    # answers is invisible to everything that reads the request, and `msg save` would have
+    # answers is invisible to everything that reads the request, and `msg act` would have
     # to go looking for it.
     delivered = notify_user(identity, f'{KEY_ISSUE_SUBJECT}{identity}',
                             _issue_body(enc_key_payload(pub, master_key)))
@@ -359,7 +359,7 @@ def user_authorize(target: str, identity: str = '') -> int:
                       'Check the message spool and retry.')
         return 1
     console.print(f'[success]Sent to [accent]{identity}[/accent].[/success] '
-                  '[muted]They run `msg save <id>` to take it.[/muted]')
+                  '[muted]They run `msg act <id>` to take it.[/muted]')
     if thread_id and not dismiss_thread(thread_id):
         # The grant is delivered either way; an undismissed request is only clutter, and
         # saying so beats a silent one that reappears in the queue tomorrow looking unworked.
@@ -419,11 +419,11 @@ def save_issued_key(body: str) -> bool:
 def _issue_body(payload: dict[str, str]) -> str:
     """The message body carrying an enc-key payload — a line of prose, then the JSON.
 
-    `msg save` reads the JSON object out of it, so the prose above is free to change and the
+    `msg act` reads the JSON object out of it, so the prose above is free to change and the
     braces are the contract. Kept human-readable on purpose: the recipient sees what arrived
     and what to do with it, not an opaque blob.
     """
-    return ('Your master-key access. Run `msg save <id of this message>` to write it to '
+    return ('Your master-key access. Run `msg act <id of this message>` to write it to '
             'your enc-key file; the private solutions decrypt in place once you do.\n\n'
             + dumps(payload, indent=2) + '\n')
 

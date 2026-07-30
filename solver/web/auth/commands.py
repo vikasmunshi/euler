@@ -201,7 +201,7 @@ def account_identities() -> list[str]:
     """The web account identities, for a menu — empty when the roster cannot be read cheaply.
 
     Deliberately weaker than :func:`registered_public_keys`: the roster is a sudo read, and a
-    caller building a menu (`msg notice`'s recipients) must not stop to ask for a password. So
+    caller building a menu (`msg send`'s recipients) must not stop to ask for a password. So
     it asks with `sudo -n` and takes silence for an answer, leaving the menu shorter rather
     than the dialogue interrupted. A rotation, which cannot afford that ambiguity, uses the
     strict reader below.

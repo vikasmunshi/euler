@@ -386,10 +386,10 @@ return walk(prs, {'m': Action('merge', merge), 's': Action('skip', SKIP)},
             render=render, label='open pull request').rc
 ```
 
-`q` is added for you and makes the result an abort. One exception is worth knowing: a verb
-that is *also* the read view of its queue (`msg queue`) should print the list when
-`interactive()` is False, rather than refusing — but a verb that exists to *change* things
-(`gh-merge merge`) must refuse, because quietly doing nothing hides that nothing happened.
+`q` is added for you and makes the result an abort. One rule is worth knowing: a verb that
+exists to *change* things (`gh-merge merge`) must refuse when `interactive()` is False,
+because quietly doing nothing hides that nothing happened — where a verb that is also the
+read view of its queue should print the list instead of refusing.
 
 ### 3.11 `Ask` — the adapter asks for what the user left out
 
@@ -411,8 +411,8 @@ instead of in a validation ladder.
 **Where the options come from.** Nothing, if the type already says: a `Literal` or an enum
 becomes a menu on its own, and `Ask(labels={...})` adds the reading text a type cannot
 carry. For a live set, `choices` is a callable `(ctx, bound) -> Sequence[Choice]`, called
-once when the dialogue fires — `bound` is every argument answered so far, so `msg save`
-offers only the threads carrying a key. An empty result is an answer in itself: `Abort`
+once when the dialogue fires — `bound` is every argument answered so far, so `msg act`
+labels each message with what acting on it would do. An empty result is an answer in itself: `Abort`
 with `empty=`, because "no messages to read" is more use than an empty menu.
 
 **One declaration, two surfaces.** `choices` also drives tab-completion for that parameter,

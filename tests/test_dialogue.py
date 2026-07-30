@@ -351,6 +351,12 @@ class MsgNoDeadEndTests(_DialogueCase):
     The defect this pins: `msg notice` walked the user through subject and message, then failed
     with `needs to=… or --all` — an argument no question had offered, naming a flag that did not
     exist. A verb that asks must ask for everything the path it took needs.
+
+    It came back in a second form, which is why `notice` is gone: the verb *menu* offered a
+    `contributor` two STAFF-marked verbs, took their subject, body and recipients, and then
+    refused on the floor. Now there is one `send`, its `to` defaults to `staff` — an answer
+    valid for every rung — and the question is put only to those who have more than one
+    answer available. The dead end is closed by the shape, not by another question.
     """
 
     def setUp(self) -> None:
@@ -382,17 +388,34 @@ class MsgNoDeadEndTests(_DialogueCase):
         assert command is not None
         return command.invoke(Context(argv=[verb]))
 
-    def test_notice_asks_for_its_recipients(self) -> None:
-        rc = self._verb('notice', 'a subject', 'the body', '', '1')
-        self.assertNotEqual(ExitCodes.EXIT_USAGE, rc, 'a notice must never ask then refuse')
+    def test_staff_are_asked_who_a_send_goes_to(self) -> None:
+        """Option 1 is `staff`, the default audience — an inbound message, not a notice."""
+        rc = self._verb('send', 'a subject', 'the body', '', '1')
+        self.assertNotEqual(ExitCodes.EXIT_USAGE, rc, 'a send must never ask then refuse')
+        self.assertIn('send', [verb for verb, _ in self.calls])
+
+    def test_a_named_recipient_makes_it_a_notice(self) -> None:
+        """Option 3 is the roster's first identity (staff / everyone lead the menu)."""
+        rc = self._verb('send', 'a subject', 'the body', '', '3')
+        self.assertNotEqual(ExitCodes.EXIT_USAGE, rc)
         self.assertIn('notice', [verb for verb, _ in self.calls])
 
-    def test_the_recipient_question_is_what_prevents_the_dead_end(self) -> None:
-        """Take the question away and the defect returns — which is what this class pins.
+    def test_below_staff_the_recipient_is_never_asked(self) -> None:
+        """One possible answer is not a question — and asking it would offer two options the
+        service then refuses, which is the dead end this class exists for."""
+        self.enterContext(patch.object(self.commands, '_is_staff', lambda: False))
+        rc = self._verb('send', 'a subject', 'the body', '')
+        self.assertNotEqual(ExitCodes.EXIT_USAGE, rc)
+        self.assertIn('send', [verb for verb, _ in self.calls])
+
+    def test_the_default_audience_is_what_closes_the_dead_end(self) -> None:
+        """Take the question away entirely and nothing strands: `to` defaults to `staff`.
 
         The adapter closes over the command's `_CommandSpec`, so dropping `to` from its `asks`
-        reproduces exactly what shipped: subject and message asked for, then a usage error
-        about an argument no question offered.
+        reproduces the old shape — subject and message asked for, nothing else. It used to end
+        in a usage error about an argument no question offered; now it sends (the stubbed
+        spool answers 200 where a real one answers 201, so the rc is not the assertion —
+        reaching the send at all is).
         """
         command = registry.resolve('msg')
         assert command is not None
@@ -401,10 +424,7 @@ class MsgNoDeadEndTests(_DialogueCase):
         without_to = {name: ask for name, ask in spec.asks.items() if name != 'to'}
         with patch.object(spec, 'asks', without_to):
             self.script('a subject', 'the body', '')          # '' ends the multiline message
-            self.assertEqual(ExitCodes.EXIT_USAGE, command.invoke(Context(argv=['notice'])))
-
-    def test_send_asks_for_subject_and_body(self) -> None:
-        rc = self._verb('send', 'a subject', 'the body', '')
+            rc = command.invoke(Context(argv=['send']))
         self.assertNotEqual(ExitCodes.EXIT_USAGE, rc)
         self.assertIn('send', [verb for verb, _ in self.calls])
 
@@ -438,7 +458,7 @@ class MsgNoDeadEndTests(_DialogueCase):
         self.assertEqual(ExitCodes.EXIT_ERROR, command.invoke(Context(argv=['read'])))
 
     def test_the_thread_verbs_ask_for_a_thread(self) -> None:
-        for verb in ('read', 'save', 'dismiss'):
+        for verb in ('read', 'dismiss', 'act'):
             with self.subTest(verb=verb):
                 try:
                     rc = self._verb(verb, '1')

@@ -82,7 +82,7 @@ config: CryptoConfig = {
     # a machine-local overlay to bridge rotations, and a repair path in `git-sync`.
     #
     # One file per machine needs none of that. Distribution is the message spool (a
-    # maintainer's `user-authorize` replies with the payload, `msg save` writes it), and a
+    # maintainer's `user-authorize` replies with the payload, `msg act` writes it), and a
     # rotation just re-wraps in place.
     'enc_key_file': _SECRETS_DIR / 'enc-key.json',
     'enc_key_verify': 'verify',

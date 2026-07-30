@@ -32,12 +32,13 @@ _VERB_RE = re.compile(r"verb\(\s*'[^']*'\s*,\s*'([^']+)'")
 #: An `Action(kind='term', command=f'claude-blog {name}')` — take the static prefix, which is
 #: the command and any literal flags before the first `{…}` interpolation.
 _ACTION_CMD_RE = re.compile(r"kind='term',\s*command=f?['\"]([^'\"{}]+)")
-#: A row verb chosen in Python: `verb, label = f'msg save {thread_id}'`. The message chip
-#: decides which command each row is for (solver/web/user/msg_api.py), so the command name
-#: left the template and the two regexes above stopped seeing it — silently dropping the row
-#: verbs out of this check. Anchored on the assignment rather than on f-strings generally: a
-#: loose rule would collect prose like f'requires {capability}' and turn the guard into noise.
-_VERB_ASSIGN_RE = re.compile(r"verb(?:,\s*\w+)?\s*=\s*f'([^'{}]+)")
+#: A row verb built in Python: `'verb': f'msg act {thread_id}'` (solver/web/user/msg_api.py).
+#: The chip builds its rows' command in code, not in the template, so the two regexes above
+#: stopped seeing it — silently dropping the row verbs out of this check. Anchored on a `verb`
+#: binding (`verb =`, `verb, label =`, or the `'verb':` dict key) rather than on f-strings
+#: generally: a loose rule would collect prose like f'requires {capability}' and turn the
+#: guard into noise.
+_VERB_ASSIGN_RE = re.compile(r"'?verb'?(?:,\s*\w+)?\s*[:=]\s*f'([^'{}]+)")
 
 
 def _emitted_commands() -> set[str]:
@@ -68,7 +69,10 @@ class WebTerminalVerbTests(unittest.TestCase):
         """A guard on the guard: if a refactor stops the regexes matching, the test above would
         pass vacuously. Pin a few commands we know the UI emits."""
         emitted = {c.split()[0] for c in _emitted_commands()}
-        for expected in ('git-sync', 'gh-merge', 'claude-blog', 'msg', 'user-authorize'):
+        # `user-authorize` used to be pinned here, back when a key-request row typed it. Every
+        # message row now types `msg act <id>` and the command dispatches (verb_for), so the
+        # UI no longer emits it — `msg` covers that path.
+        for expected in ('git-sync', 'gh-merge', 'claude-blog', 'msg', 'user'):
             self.assertIn(expected, emitted)
 
 

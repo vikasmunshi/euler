@@ -243,7 +243,7 @@ help:
 | [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. ❏ » |
 | [`manage-config`](commands-index.md#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
-| [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: your threads, questions to staff, staff notices. |
+| [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`new`](commands-index.md#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
 | [`pause`](commands-index.md#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
@@ -395,7 +395,7 @@ When one of them issues the key, it arrives as a message:
 
 ```bash
 msg list                 # the reply is there
-msg save <message-id>    # writes ~/.euler/enc-key.json, verified before anything is written
+msg act <message-id>     # writes ~/.euler/enc-key.json, verified before anything is written
 ```
 
 `solver "user"` then reports `✓ can encrypt/decrypt`, and the private solutions decrypt in

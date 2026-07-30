@@ -82,7 +82,7 @@ a parameter that accepts repetition.
 | [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. ❏ » |
 | [`manage-config`](#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. ❏ » |
-| [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: your threads, questions to staff, staff notices. |
+| [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. ❏ » |
 | [`pause`](#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
@@ -1144,7 +1144,7 @@ Bring the local repository in sync with origin/master.
 On a per-user clone (branch `user/<slug>`) this is the pull flow: fetch
 origin/master and merge/rebase it into your branch — bringing in merged work
 merged work. Key material does not travel this way -- it is issued by message
-(`user-authorize` / `msg save`), and that is what wires the filter.
+(`user-authorize` / `msg act`), and that is what wires the filter.
 
 Stale remote-tracking refs are pruned as part of the fetch, so a branch deleted
 when its pull request merged stops shadowing the branch you push next.
@@ -1210,7 +1210,7 @@ explicit — and it holds only *public* keys, which is why losing it costs nothi
 round of re-registration.
 
 Each holder is sent their own payload through the message spool, exactly as
-`user-authorize` does; they run `msg save` to take it. An account with no registered
+`user-authorize` does; they run `msg act` on it to take it. An account with no registered
 public key cannot be re-issued to and is named, not skipped silently — that person loses
 access at this rotation, which is sometimes the intent and must never be a surprise.
 `users set-keys` fills the registry from what every holder already has.
@@ -1392,41 +1392,44 @@ mark
 
 #### Command: `msg` (`messages`)
 
-Read and send messages: your threads, questions to staff, staff notices.
+Read and send messages: what is waiting for you, and what it asks you to do.
 
 * ⚑ needs reader or above.
 * ✎ asks for anything you leave out.
 
 Every message has staff (`maintainer`+) at one end: you can ask them something,
 they can answer, and they can send notices. There is deliberately no user-to-user
-messaging. Delivery is asynchronous — the spool holds the thread until you read it.
+messaging. Delivery is asynchronous — the spool holds the message until you read it.
+
+Five verbs, and each is one thing a person does with a message. `act` is the one worth
+knowing: a message *knows* what it is for, so acting on one takes the key it carries,
+grants the key it asks for, or merges the pull request it announces — and on anything
+else it simply reads it. The header's message chip labels its rows from the same rule.
 
 Typed bare, it walks you through the rest: pick a verb, then whatever that verb needs —
-a thread from your own list, or a subject and a message. Every answer can be given on the
+a message from your own list, or a subject and a body. Every answer can be given on the
 command line instead, and a non-interactive shell asks nothing.
 
 **usage**
 
 ```
 msg
-[action=list|read|save|send|queue|notice|dismiss] (asked)
+[action=list|read|send|dismiss|act] (asked)
 [thread=<str>] (asked)
 [subject=<str>] (asked)
 [body=<str>] (asked)
 [to=<str>] (asked)
-[all_users=true|--all-users]
 ```
 
 **arguments**
 
 | argument | description |
 |----------|-------------|
-| `action` | What to do — `list` your threads, newest first; `read` one thread and mark it read; `save` the master key a maintainer issued you, writing it to your enc-key file; `send` staff a question; `queue` (STAFF) work the inbound list; `notice` (STAFF) to named recipients or everyone; `dismiss` (STAFF) a worked message. Defaults to `list`. |
-| `thread` | The message to act on, for `read` / `save` / `dismiss`. Offered as a menu of your own threads, so the id never has to be typed out. |
-| `subject` | The subject line, for `send` / `notice`. |
-| `body` | The message text, for `send` / `notice`. |
-| `to` | Who a `notice` goes to: `*` for everyone, or one or more identities, comma-separated. Offered as a menu of the known accounts where the roster can be read. |
-| `all_users` | Send the notice to every mapped identity. Defaults to False. |
+| `action` | What to do — `list` everything waiting for you, newest first; `read` one message and mark it read; `send` a message; `dismiss` one you are done with; `act` on one, doing what it asks. Defaults to `list`. |
+| `thread` | The message to act on, for `read` / `dismiss` / `act`. Offered as a menu of your own messages, so the id never has to be typed out. |
+| `subject` | The subject line, for `send`. |
+| `body` | The message text, for `send`. |
+| `to` | Who a `send` goes to: `staff` (the default, and the only audience below the `maintainer` floor), `everyone`, or one or more identities, comma-separated. Staff are offered the known accounts as a menu where the roster can be read. |
 
 *Defined in* `solver.web.msg.commands.msg`.
 
@@ -2008,8 +2011,8 @@ Wrap the master key for someone else and send it to them.
 *target* is either form of the same act, told apart by shape:
 
 - a **16-hex message id** — the key-authorization request their `user` command filed
-  (`msg queue` lists them). The key and the requester come from that message, the grant
-  is confirmed, the payload is sent as **its own message** for them to `msg save`, and
+  (`msg list` shows them). The key and the requester come from that message, the grant
+  is confirmed, the payload is sent as **its own message** for them to `msg act` on, and
   the request is dismissed — it is worked, and a queue that keeps worked requests is a
   queue nobody trusts;
 - a **64-hex public key** — the same act by hand, for a key that reached you some other
@@ -2018,8 +2021,8 @@ Wrap the master key for someone else and send it to them.
 **Nothing is written to a shared file, because there is no shared file.** The payload is
 the whole of the recipient's enc-key file — `verify` plus the master key wrapped to their
 public key — and it travels through the spool for the same reason the old tracked file
-could sit in a public repo: without their private key it is inert. They run `msg save` to
-take it; until they do, nothing has changed for them.
+could sit in a public repo: without their private key it is inert. They run `msg act` on it
+to take it; until they do, nothing has changed for them.
 
 The public key is also registered on their account (as `users set-keys` does in bulk),
 which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs

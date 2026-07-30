@@ -45,7 +45,10 @@ log = logging.getLogger('solver.msg')
 _MSG_ENV = '/etc/euler/msg.env'
 
 #: Logical operation → (method, public path, admin path). The two planes expose the same
-#: verbs under different prefixes; this table is the only place that knows both.
+#: verbs under different prefixes; this table is the only place that knows both. It maps the
+#: *service*, not the shell command, which is why `queue` is still here with no caller: the
+#: `msg queue` verb went when `list` absorbed it (the mailbox already shows staff every
+#: inbound thread), and the service kept the endpoint.
 OPS: dict[str, tuple[str, str, str]] = {
     'mailbox': ('GET', '/messages', '/admin/messages'),
     'thread': ('GET', '/messages/{id}', '/admin/threads/{id}'),
