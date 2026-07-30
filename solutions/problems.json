@@ -30,7 +30,7 @@
   "5": {
     "title": "Smallest Multiple",
     "level": 0,
-    "pct": 1,
+    "pct": 2,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 12:00"
   },
@@ -92,7 +92,7 @@
   },
   "14": {
     "title": "Longest Collatz Sequence",
-    "level": 1,
+    "level": 0,
     "pct": 3,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 20:38"
@@ -219,7 +219,7 @@
   "32": {
     "title": "Pandigital Products",
     "level": 1,
-    "pct": 5,
+    "pct": 4,
     "solved": true,
     "date": "Mon, 11 Nov 2019, 22:27"
   },
@@ -247,7 +247,7 @@
   "36": {
     "title": "Double-base Palindromes",
     "level": 0,
-    "pct": 2,
+    "pct": 1,
     "solved": true,
     "date": "Wed, 13 Nov 2019, 10:27"
   },
@@ -303,7 +303,7 @@
   "44": {
     "title": "Pentagon Numbers",
     "level": 2,
-    "pct": 7,
+    "pct": 6,
     "solved": true,
     "date": "Tue, 3 Dec 2019, 22:39"
   },
@@ -324,7 +324,7 @@
   "47": {
     "title": "Distinct Primes Factors",
     "level": 1,
-    "pct": 4,
+    "pct": 5,
     "solved": true,
     "date": "Thu, 28 Nov 2019, 08:32"
   },
@@ -337,7 +337,7 @@
   },
   "49": {
     "title": "Prime Permutations",
-    "level": 0,
+    "level": 1,
     "pct": 3,
     "solved": true,
     "date": "Thu, 28 Nov 2019, 11:36"
@@ -401,7 +401,7 @@
   "58": {
     "title": "Spiral Primes",
     "level": 2,
-    "pct": 6,
+    "pct": 7,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 13:13"
   },
@@ -499,7 +499,7 @@
   "72": {
     "title": "Counting Fractions",
     "level": 3,
-    "pct": 9,
+    "pct": 10,
     "solved": true,
     "date": "Wed, 16 Jul 2025, 21:07"
   },
@@ -513,7 +513,7 @@
   "74": {
     "title": "Digit Factorial Chains",
     "level": 1,
-    "pct": 5,
+    "pct": 4,
     "solved": true,
     "date": "Wed, 16 Jul 2025, 23:31"
   },
@@ -569,7 +569,7 @@
   "82": {
     "title": "Path Sum: Three Ways",
     "level": 3,
-    "pct": 10,
+    "pct": 9,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 14:23"
   },
@@ -603,7 +603,7 @@
   },
   "87": {
     "title": "Prime Power Triples",
-    "level": 2,
+    "level": 3,
     "pct": 8,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 19:49"
@@ -674,7 +674,7 @@
   "97": {
     "title": "Large Non-Mersenne Prime",
     "level": 1,
-    "pct": 4,
+    "pct": 5,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 03:14"
   },
@@ -722,7 +722,7 @@
   },
   "104": {
     "title": "Pandigital Fibonacci Ends",
-    "level": 3,
+    "level": 2,
     "pct": 8,
     "solved": true,
     "date": "Thu, 7 Aug 2025, 21:25"
@@ -975,7 +975,7 @@
   "140": {
     "title": "Modified Fibonacci Golden Nuggets",
     "level": 13,
-    "pct": 35,
+    "pct": 36,
     "solved": true,
     "date": "Mon, 25 May 2026, 13:52"
   },
@@ -1052,7 +1052,7 @@
   "151": {
     "title": "A Preference for A5",
     "level": 17,
-    "pct": 43,
+    "pct": 44,
     "solved": true,
     "date": "Sun, 31 May 2026, 10:57"
   },
@@ -1087,7 +1087,7 @@
   "156": {
     "title": "Counting Digits",
     "level": 22,
-    "pct": 58,
+    "pct": 57,
     "solved": true,
     "date": "Sun, 14 Jun 2026, 15:32"
   },
@@ -1122,7 +1122,7 @@
   "161": {
     "title": "Triominoes",
     "level": 16,
-    "pct": 41,
+    "pct": 42,
     "solved": true,
     "date": "Sun, 31 May 2026, 17:26"
   },
@@ -1150,14 +1150,14 @@
   "165": {
     "title": "Intersections",
     "level": 22,
-    "pct": 56,
+    "pct": 57,
     "solved": true,
     "date": "Sun, 14 Jun 2026, 16:15"
   },
   "166": {
     "title": "Criss Cross",
     "level": 15,
-    "pct": 41,
+    "pct": 40,
     "solved": true,
     "date": "Sun, 14 Jun 2026, 22:38"
   },
@@ -1241,7 +1241,7 @@
   "178": {
     "title": "Step Numbers",
     "level": 12,
-    "pct": 31,
+    "pct": 32,
     "solved": true,
     "date": "Wed, 17 Jun 2026, 19:42"
   },
@@ -1283,7 +1283,7 @@
   "184": {
     "title": "Triangles Containing the Origin",
     "level": 16,
-    "pct": 42,
+    "pct": 41,
     "solved": true,
     "date": "Thu, 18 Jun 2026, 15:09"
   },
@@ -1296,8 +1296,8 @@
   },
   "186": {
     "title": "Connectedness of a Network",
-    "level": 7,
-    "pct": 20,
+    "level": 8,
+    "pct": 21,
     "solved": true,
     "date": "Thu, 18 Jun 2026, 19:31"
   },
@@ -1360,7 +1360,7 @@
   "195": {
     "title": "$60$-degree Triangle Inscribed Circles",
     "level": 15,
-    "pct": 40,
+    "pct": 41,
     "solved": true,
     "date": "Fri, 19 Jun 2026, 14:14"
   },
@@ -1465,7 +1465,7 @@
   "210": {
     "title": "Obtuse Angled Triangles",
     "level": 29,
-    "pct": 74,
+    "pct": 75,
     "solved": true,
     "date": "Sun, 12 Jul 2026, 09:41"
   },
@@ -1514,21 +1514,21 @@
   "217": {
     "title": "Balanced Numbers",
     "level": 17,
-    "pct": 45,
+    "pct": 44,
     "solved": true,
     "date": "Fri, 17 Jul 2026, 12:24"
   },
   "218": {
     "title": "Perfect Right-angled Triangles",
     "level": 15,
-    "pct": 39,
+    "pct": 40,
     "solved": true,
     "date": "Fri, 17 Jul 2026, 18:23"
   },
   "219": {
     "title": "Skew-cost Coding",
     "level": 19,
-    "pct": 50,
+    "pct": 49,
     "solved": true,
     "date": "Sat, 18 Jul 2026, 11:10"
   },
@@ -1542,7 +1542,7 @@
   "221": {
     "title": "Alexandrian Integers",
     "level": 19,
-    "pct": 48,
+    "pct": 49,
     "solved": true,
     "date": "Sat, 18 Jul 2026, 19:43"
   },
@@ -1605,7 +1605,7 @@
   "230": {
     "title": "Fibonacci Words",
     "level": 12,
-    "pct": 33,
+    "pct": 32,
     "solved": true,
     "date": "Sat, 25 Jul 2026, 18:33"
   },
@@ -1646,8 +1646,8 @@
   },
   "236": {
     "title": "Luxury Hampers",
-    "level": 31,
-    "pct": 79,
+    "level": 30,
+    "pct": 78,
     "solved": true,
     "date": "Wed, 29 Jul 2026, 19:23"
   },
@@ -1656,7 +1656,7 @@
     "level": 17,
     "pct": 44,
     "solved": true,
-    "date": "2026-07-30T13:43:01.646983"
+    "date": "Thu, 30 Jul 2026, 12:57"
   },
   "238": {
     "title": "Infinite String Tour",
@@ -1828,8 +1828,8 @@
   },
   "262": {
     "title": "Mountain Range",
-    "level": 28,
-    "pct": 72,
+    "level": 30,
+    "pct": 77,
     "solved": false,
     "date": ""
   },
@@ -1864,7 +1864,7 @@
   "267": {
     "title": "Billionaire",
     "level": 11,
-    "pct": 28,
+    "pct": 29,
     "solved": false,
     "date": ""
   },
@@ -1877,7 +1877,7 @@
   },
   "269": {
     "title": "Polynomials with at Least One Integer Root",
-    "level": 33,
+    "level": 34,
     "pct": 86,
     "solved": true,
     "date": "Wed, 27 May 2026, 09:40"
@@ -1926,15 +1926,15 @@
   },
   "276": {
     "title": "Primitive Triangles",
-    "level": 34,
-    "pct": 86,
+    "level": 33,
+    "pct": 85,
     "solved": false,
     "date": ""
   },
   "277": {
     "title": "A Modified Collatz Sequence",
     "level": 12,
-    "pct": 32,
+    "pct": 31,
     "solved": true,
     "date": "Mon, 1 Jun 2026, 12:39"
   },
@@ -1997,7 +1997,7 @@
   "286": {
     "title": "Scoring Probabilities",
     "level": 11,
-    "pct": 31,
+    "pct": 30,
     "solved": false,
     "date": ""
   },
@@ -2039,14 +2039,14 @@
   "292": {
     "title": "Pythagorean Polygons",
     "level": 20,
-    "pct": 52,
+    "pct": 51,
     "solved": false,
     "date": ""
   },
   "293": {
     "title": "Pseudo-Fortunate Numbers",
     "level": 6,
-    "pct": 17,
+    "pct": 16,
     "solved": true,
     "date": "Fri, 19 Jun 2026, 20:33"
   },
@@ -2284,7 +2284,7 @@
   "327": {
     "title": "Rooms of Doom",
     "level": 8,
-    "pct": 23,
+    "pct": 22,
     "solved": false,
     "date": ""
   },
@@ -2346,8 +2346,8 @@
   },
   "336": {
     "title": "Maximix Arrangements",
-    "level": 6,
-    "pct": 16,
+    "level": 5,
+    "pct": 15,
     "solved": false,
     "date": ""
   },
@@ -2382,21 +2382,21 @@
   "341": {
     "title": "Golomb's Self-describing Sequence",
     "level": 20,
-    "pct": 52,
+    "pct": 53,
     "solved": false,
     "date": ""
   },
   "342": {
     "title": "The Totient of a Square Is a Cube",
     "level": 15,
-    "pct": 40,
+    "pct": 39,
     "solved": false,
     "date": ""
   },
   "343": {
     "title": "Fractional Sequences",
     "level": 17,
-    "pct": 44,
+    "pct": 43,
     "solved": false,
     "date": ""
   },
@@ -2459,7 +2459,7 @@
   "352": {
     "title": "Blood Tests",
     "level": 20,
-    "pct": 51,
+    "pct": 52,
     "solved": false,
     "date": ""
   },
@@ -2543,14 +2543,14 @@
   "364": {
     "title": "Comfortable Distance",
     "level": 21,
-    "pct": 54,
+    "pct": 55,
     "solved": false,
     "date": ""
   },
   "365": {
     "title": "A Huge Binomial Coefficient",
     "level": 17,
-    "pct": 44,
+    "pct": 45,
     "solved": false,
     "date": ""
   },
@@ -2599,7 +2599,7 @@
   "372": {
     "title": "Pencils of Rays",
     "level": 31,
-    "pct": 79,
+    "pct": 80,
     "solved": false,
     "date": ""
   },
@@ -2647,7 +2647,7 @@
   },
   "379": {
     "title": "Least Common Multiple Count",
-    "level": 33,
+    "level": 34,
     "pct": 86,
     "solved": false,
     "date": ""
@@ -2689,7 +2689,7 @@
   },
   "385": {
     "title": "Ellipses Inside Triangles",
-    "level": 32,
+    "level": 33,
     "pct": 83,
     "solved": false,
     "date": ""
@@ -2753,7 +2753,7 @@
   "394": {
     "title": "Eating Pie",
     "level": 21,
-    "pct": 53,
+    "pct": 54,
     "solved": false,
     "date": ""
   },
@@ -2809,7 +2809,7 @@
   "402": {
     "title": "Integer-valued Polynomials",
     "level": 29,
-    "pct": 75,
+    "pct": 74,
     "solved": false,
     "date": ""
   },
@@ -2851,7 +2851,7 @@
   "408": {
     "title": "Admissible Paths Through a Grid",
     "level": 22,
-    "pct": 57,
+    "pct": 56,
     "solved": false,
     "date": ""
   },
@@ -2872,7 +2872,7 @@
   "411": {
     "title": "Uphill Paths",
     "level": 19,
-    "pct": 49,
+    "pct": 48,
     "solved": false,
     "date": ""
   },
@@ -2920,7 +2920,7 @@
   },
   "418": {
     "title": "Factorisation Triples",
-    "level": 29,
+    "level": 28,
     "pct": 73,
     "solved": false,
     "date": ""
@@ -2928,7 +2928,7 @@
   "419": {
     "title": "Look and Say Sequence",
     "level": 21,
-    "pct": 55,
+    "pct": 54,
     "solved": false,
     "date": ""
   },
@@ -2970,7 +2970,7 @@
   "425": {
     "title": "Prime Connection",
     "level": 7,
-    "pct": 21,
+    "pct": 20,
     "solved": false,
     "date": ""
   },
@@ -3012,7 +3012,7 @@
   "431": {
     "title": "Square Space Silo",
     "level": 10,
-    "pct": 28,
+    "pct": 27,
     "solved": false,
     "date": ""
   },
@@ -3047,7 +3047,7 @@
   "436": {
     "title": "Unfair Wager",
     "level": 33,
-    "pct": 85,
+    "pct": 86,
     "solved": false,
     "date": ""
   },
@@ -3102,8 +3102,8 @@
   },
   "444": {
     "title": "The Roundtable Lottery",
-    "level": 30,
-    "pct": 78,
+    "level": 32,
+    "pct": 81,
     "solved": false,
     "date": ""
   },
@@ -3138,7 +3138,7 @@
   "449": {
     "title": "Chocolate Covered Candy",
     "level": 12,
-    "pct": 32,
+    "pct": 31,
     "solved": false,
     "date": ""
   },
@@ -3166,7 +3166,7 @@
   "453": {
     "title": "Lattice Quadrilaterals",
     "level": 38,
-    "pct": 97,
+    "pct": 96,
     "solved": false,
     "date": ""
   },
@@ -3179,8 +3179,8 @@
   },
   "455": {
     "title": "Powers with Trailing Digits",
-    "level": 12,
-    "pct": 31,
+    "level": 11,
+    "pct": 30,
     "solved": false,
     "date": ""
   },
@@ -3236,7 +3236,7 @@
   "463": {
     "title": "A Weird Recurrence Relation",
     "level": 10,
-    "pct": 27,
+    "pct": 28,
     "solved": false,
     "date": ""
   },
@@ -3271,7 +3271,7 @@
   "468": {
     "title": "Smooth Divisors of Binomial Coefficients",
     "level": 30,
-    "pct": 77,
+    "pct": 76,
     "solved": false,
     "date": ""
   },
@@ -3320,7 +3320,7 @@
   "475": {
     "title": "Music Festival",
     "level": 12,
-    "pct": 32,
+    "pct": 31,
     "solved": false,
     "date": ""
   },
@@ -3383,7 +3383,7 @@
   "484": {
     "title": "Arithmetic Derivative",
     "level": 30,
-    "pct": 77,
+    "pct": 78,
     "solved": true,
     "date": "Tue, 9 Jun 2026, 22:37"
   },
@@ -3410,8 +3410,8 @@
   },
   "488": {
     "title": "Unbalanced Nim",
-    "level": 34,
-    "pct": 86,
+    "level": 33,
+    "pct": 85,
     "solved": false,
     "date": ""
   },
@@ -3516,7 +3516,7 @@
   "503": {
     "title": "Compromise or Persist",
     "level": 28,
-    "pct": 72,
+    "pct": 73,
     "solved": false,
     "date": ""
   },
@@ -3578,7 +3578,7 @@
   },
   "512": {
     "title": "Sums of Totients of Powers",
-    "level": 8,
+    "level": 7,
     "pct": 21,
     "solved": false,
     "date": ""
@@ -3768,7 +3768,7 @@
   "539": {
     "title": "Odd Elimination",
     "level": 11,
-    "pct": 29,
+    "pct": 28,
     "solved": false,
     "date": ""
   },
@@ -3796,7 +3796,7 @@
   "543": {
     "title": "Prime-Sum Numbers",
     "level": 12,
-    "pct": 31,
+    "pct": 32,
     "solved": false,
     "date": ""
   },
@@ -3817,21 +3817,21 @@
   "546": {
     "title": "The Floor's Revenge",
     "level": 30,
-    "pct": 78,
+    "pct": 77,
     "solved": false,
     "date": ""
   },
   "547": {
     "title": "Distance of Random Points Within Hollow Square Laminae",
     "level": 38,
-    "pct": 96,
+    "pct": 97,
     "solved": false,
     "date": ""
   },
   "548": {
     "title": "Gozinta Chains",
     "level": 22,
-    "pct": 57,
+    "pct": 58,
     "solved": false,
     "date": ""
   },
@@ -3880,7 +3880,7 @@
   "555": {
     "title": "McCarthy 91 Function",
     "level": 10,
-    "pct": 27,
+    "pct": 28,
     "solved": false,
     "date": ""
   },
@@ -4090,7 +4090,7 @@
   "585": {
     "title": "Nested Square Roots",
     "level": 38,
-    "pct": 98,
+    "pct": 97,
     "solved": false,
     "date": ""
   },
@@ -4103,8 +4103,8 @@
   },
   "587": {
     "title": "Concave Triangle",
-    "level": 5,
-    "pct": 15,
+    "level": 6,
+    "pct": 16,
     "solved": true,
     "date": "Sat, 13 Jun 2026, 10:41"
   },
@@ -4166,7 +4166,7 @@
   },
   "596": {
     "title": "Number of Lattice Points in a Hyperball",
-    "level": 20,
+    "level": 21,
     "pct": 53,
     "solved": false,
     "date": ""
@@ -4208,7 +4208,7 @@
   },
   "602": {
     "title": "Product of Head Counts",
-    "level": 19,
+    "level": 18,
     "pct": 48,
     "solved": false,
     "date": ""
@@ -4398,7 +4398,7 @@
   "629": {
     "title": "Scatterstone Nim",
     "level": 31,
-    "pct": 81,
+    "pct": 79,
     "solved": false,
     "date": ""
   },
@@ -4446,7 +4446,7 @@
   },
   "636": {
     "title": "Restricted Factorisations",
-    "level": 33,
+    "level": 32,
     "pct": 83,
     "solved": false,
     "date": ""
@@ -4489,7 +4489,7 @@
   "642": {
     "title": "Sum of Largest Prime Factors",
     "level": 28,
-    "pct": 73,
+    "pct": 72,
     "solved": true,
     "date": "Fri, 8 Feb 2019, 01:39"
   },
@@ -4545,7 +4545,7 @@
   "650": {
     "title": "Divisors of Binomial Product",
     "level": 10,
-    "pct": 26,
+    "pct": 27,
     "solved": true,
     "date": "Sat, 13 Jun 2026, 10:56"
   },
@@ -4608,14 +4608,14 @@
   "659": {
     "title": "Largest Prime",
     "level": 19,
-    "pct": 49,
+    "pct": 50,
     "solved": false,
     "date": ""
   },
   "660": {
     "title": "Pandigital Triangles",
     "level": 21,
-    "pct": 54,
+    "pct": 55,
     "solved": false,
     "date": ""
   },
@@ -4628,7 +4628,7 @@
   },
   "662": {
     "title": "Fibonacci Paths",
-    "level": 10,
+    "level": 11,
     "pct": 28,
     "solved": false,
     "date": ""
@@ -4650,7 +4650,7 @@
   "665": {
     "title": "Proportionate Nim",
     "level": 31,
-    "pct": 80,
+    "pct": 79,
     "solved": false,
     "date": ""
   },
@@ -4769,7 +4769,7 @@
   "682": {
     "title": "$5$-Smooth Pairs",
     "level": 24,
-    "pct": 63,
+    "pct": 62,
     "solved": false,
     "date": ""
   },
@@ -4832,7 +4832,7 @@
   "691": {
     "title": "Long Substring with Many Repetitions",
     "level": 24,
-    "pct": 62,
+    "pct": 63,
     "solved": false,
     "date": ""
   },
@@ -4852,8 +4852,8 @@
   },
   "694": {
     "title": "Cube-full Divisors",
-    "level": 9,
-    "pct": 24,
+    "level": 8,
+    "pct": 23,
     "solved": true,
     "date": "Sat, 13 Jun 2026, 13:32"
   },
@@ -4881,7 +4881,7 @@
   "698": {
     "title": "123 Numbers",
     "level": 13,
-    "pct": 36,
+    "pct": 35,
     "solved": false,
     "date": ""
   },
@@ -4894,8 +4894,8 @@
   },
   "700": {
     "title": "Eulercoin",
-    "level": 11,
-    "pct": 28,
+    "level": 10,
+    "pct": 27,
     "solved": false,
     "date": ""
   },
@@ -4923,7 +4923,7 @@
   "704": {
     "title": "Factors of Two in Binomial Coefficients",
     "level": 6,
-    "pct": 16,
+    "pct": 17,
     "solved": true,
     "date": "Wed, 27 May 2026, 13:43"
   },
@@ -5090,7 +5090,7 @@
   },
   "728": {
     "title": "Circle of Coins",
-    "level": 20,
+    "level": 21,
     "pct": 53,
     "solved": false,
     "date": ""
@@ -5153,8 +5153,8 @@
   },
   "737": {
     "title": "Coin Loops",
-    "level": 11,
-    "pct": 30,
+    "level": 13,
+    "pct": 34,
     "solved": false,
     "date": ""
   },
@@ -5342,7 +5342,7 @@
   },
   "764": {
     "title": "Asymmetric Diophantine Equation",
-    "level": 13,
+    "level": 12,
     "pct": 33,
     "solved": false,
     "date": ""
@@ -5427,7 +5427,7 @@
   "776": {
     "title": "Digit Sum Division",
     "level": 13,
-    "pct": 34,
+    "pct": 33,
     "solved": false,
     "date": ""
   },
@@ -5552,8 +5552,8 @@
   },
   "794": {
     "title": "Seventeen Points",
-    "level": 21,
-    "pct": 55,
+    "level": 20,
+    "pct": 52,
     "solved": false,
     "date": ""
   },
@@ -5727,7 +5727,7 @@
   },
   "819": {
     "title": "Iterative Sampling",
-    "level": 21,
+    "level": 20,
     "pct": 53,
     "solved": false,
     "date": ""
@@ -5882,7 +5882,7 @@
   "841": {
     "title": "Regular Star Polygons",
     "level": 28,
-    "pct": 73,
+    "pct": 72,
     "solved": false,
     "date": ""
   },
@@ -5923,7 +5923,7 @@
   },
   "847": {
     "title": "Jack's Bean",
-    "level": 37,
+    "level": 36,
     "pct": 93,
     "solved": false,
     "date": ""
@@ -5931,7 +5931,7 @@
   "848": {
     "title": "Guessing with Sets",
     "level": 33,
-    "pct": 85,
+    "pct": 86,
     "solved": false,
     "date": ""
   },
@@ -6022,7 +6022,7 @@
   "861": {
     "title": "Products of Bi-Unitary Divisors",
     "level": 29,
-    "pct": 74,
+    "pct": 73,
     "solved": false,
     "date": ""
   },
@@ -6070,7 +6070,7 @@
   },
   "868": {
     "title": "Belfry Maths",
-    "level": 8,
+    "level": 9,
     "pct": 23,
     "solved": true,
     "date": "Sat, 13 Jun 2026, 14:39"
@@ -6169,7 +6169,7 @@
   "882": {
     "title": "Removing Bits",
     "level": 31,
-    "pct": 80,
+    "pct": 81,
     "solved": false,
     "date": ""
   },
@@ -6288,7 +6288,7 @@
   "899": {
     "title": "DistribuNim I",
     "level": 10,
-    "pct": 27,
+    "pct": 26,
     "solved": true,
     "date": "Sat, 13 Jun 2026, 14:27"
   },
@@ -6301,8 +6301,8 @@
   },
   "901": {
     "title": "Well Drilling",
-    "level": 32,
-    "pct": 81,
+    "level": 31,
+    "pct": 80,
     "solved": false,
     "date": ""
   },
@@ -6546,7 +6546,7 @@
   },
   "936": {
     "title": "Peerless Trees",
-    "level": 36,
+    "level": 37,
     "pct": 93,
     "solved": false,
     "date": ""
@@ -6589,7 +6589,7 @@
   "942": {
     "title": "Mersenne's Square Root",
     "level": 38,
-    "pct": 97,
+    "pct": 98,
     "solved": false,
     "date": ""
   },
@@ -6603,7 +6603,7 @@
   "944": {
     "title": "Sum of Elevisors",
     "level": 8,
-    "pct": 22,
+    "pct": 23,
     "solved": true,
     "date": "Thu, 4 Jun 2026, 17:18"
   },
@@ -6652,7 +6652,7 @@
   "951": {
     "title": "A Game of Chance",
     "level": 11,
-    "pct": 30,
+    "pct": 31,
     "solved": false,
     "date": ""
   },
@@ -6798,7 +6798,7 @@
   },
   "972": {
     "title": "Hyperbolic Plane",
-    "level": 18,
+    "level": 19,
     "pct": 48,
     "solved": false,
     "date": ""
@@ -6820,7 +6820,7 @@
   "975": {
     "title": "A Winding Path",
     "level": 29,
-    "pct": 75,
+    "pct": 74,
     "solved": false,
     "date": ""
   },
@@ -6855,7 +6855,7 @@
   "980": {
     "title": "The Quaternion Group I",
     "level": 9,
-    "pct": 23,
+    "pct": 24,
     "solved": true,
     "date": "Thu, 11 Jun 2026, 19:51"
   },
@@ -6931,8 +6931,8 @@
   },
   "991": {
     "title": "Fruit Salad",
-    "level": 30,
-    "pct": 76,
+    "level": 29,
+    "pct": 75,
     "solved": false,
     "date": ""
   },
