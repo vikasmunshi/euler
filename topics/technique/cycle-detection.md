@@ -15,6 +15,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cycle_detectio
 - ● [0197](/solutions/0197/) — A Recursively Defined Sequence
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0225](/solutions/0225/) — Tribonacci Non-divisors
+- ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 
 <!-- /problems -->

@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Periodic_seque
 - ● [0019](/solutions/0019/) — Counting Sundays
 - ● [0167](/solutions/0167/) — Investigating Ulam Sequences
 - ● [0225](/solutions/0225/) — Tribonacci Non-divisors
+- ● [0238](/solutions/0238/) — Infinite String Tour
 - ○ [0306](/solutions/0306/) — Paper-strip Game
 - ○ [0349](/solutions/0349/) — Langton's Ant
 - ○ [0426](/solutions/0426/) — Box-Ball System

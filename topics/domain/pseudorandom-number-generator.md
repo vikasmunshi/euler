@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pseudorandom_n
 
 - ● [0149](/solutions/0149/) — Maximum-sum Subsequence
 - ● [0185](/solutions/0185/) — Number Mind
-- ○ [0238](/solutions/0238/) — Infinite String Tour
+- ● [0238](/solutions/0238/) — Infinite String Tour
 - ○ [0252](/solutions/0252/) — Convex Holes
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ○ [0334](/solutions/0334/) — Spilling the Beans

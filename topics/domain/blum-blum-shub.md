@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Blum_Blum_Shub
 ## Problems
 
 - ● [0165](/solutions/0165/) — Intersections
-- ○ [0238](/solutions/0238/) — Infinite String Tour
+- ● [0238](/solutions/0238/) — Infinite String Tour
 
 <!-- /problems -->
