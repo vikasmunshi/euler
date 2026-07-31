@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Rounding>._
 ## Problems
 
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
+- ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 

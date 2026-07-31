@@ -14,6 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Inclusion%E2%8
 - ● [0193](/solutions/0193/) — Squarefree Numbers
 - ● [0202](/solutions/0202/) — Laserbeam
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0710](/solutions/0710/) — One Million Members

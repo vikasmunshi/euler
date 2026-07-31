@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Enumerative_co
 
 - ● [0114](/solutions/0114/) — Counting Block Combinations I
 - ● [0126](/solutions/0126/) — Cuboid Layers
+- ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ○ [0480](/solutions/0480/) — The Last Question
 - ○ [0502](/solutions/0502/) — Counting Castles
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices

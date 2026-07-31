@@ -196,6 +196,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0236](/solutions/0236/) — Luxury Hampers
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0238](/solutions/0238/) — Infinite String Tour
+- ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
