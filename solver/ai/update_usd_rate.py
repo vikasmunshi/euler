@@ -27,6 +27,7 @@ import re
 
 from solver.config import ExitCodes, config
 from solver.core.download import download_file
+from solver.core.git import commit_regenerated
 from solver.shell import console, register
 
 #: The ECB euro foreign-exchange reference rates (daily, free, no API key) — the authoritative
@@ -38,6 +39,15 @@ _USD_RATE_RE = re.compile(r"""currency=['"]USD['"]\s+rate=['"]([\d.]+)['"]""")
 
 #: Below this the two rates round to the same displayed figure — not worth a write.
 _EPSILON = 5e-5
+
+#: Commit subjects for the rate's own commit (`commit_regenerated`); one is picked at random.
+_QUIPS: tuple[str, ...] = (
+    'the euro moved, so the ledger moved',
+    're-pegged to Frankfurt\'s opinion of the dollar',
+    'one float, imported fresh from the ECB',
+    'money is a moving target; this is where it moved to',
+    'today\'s exchange rate, before it stops being today\'s',
+)
 
 
 def _fetch_ecb_usd_rate() -> float | None:
@@ -68,6 +78,8 @@ def update_usd_rate(check: bool = False) -> int:
     to `ecb_usd_rate` in `config.json`, the managed setting `costs` converts API spend with.
     A rate within a rounding step of the stored one is left alone. Nothing else is touched.
 
+    A rate that moved is committed, staging that one file and nothing beside it.
+
     Args:
         check: Write nothing and fail if the stored rate is out of date. Defaults to False,
             which refreshes it in place. The rate drifts daily, so `--check` will usually
@@ -78,9 +90,11 @@ def update_usd_rate(check: bool = False) -> int:
     if abs(rate - config.ecb_usd_rate) <= _EPSILON:
         if check:
             console.print('[success]USD→EUR rate is up to date[/success]')
-        else:
-            console.print('[muted]USD→EUR rate already up to date[/muted]')
-        return ExitCodes.EXIT_OK
+            return ExitCodes.EXIT_OK
+        console.print('[muted]USD→EUR rate already up to date[/muted]')
+        # Still offered to the committer: an earlier run may have written the rate and failed
+        # to commit it, and "up to date" must not mean "left dirty forever". Clean is a no-op.
+        return commit_regenerated('update-usd-rate', _QUIPS)
     if check:
         console.print(f'[error]USD→EUR rate out of date[/error] (run [accent]update-usd-rate[/accent]): '
                       f'[accent]{config.ecb_usd_rate} → {rate}[/accent]')
@@ -91,4 +105,4 @@ def update_usd_rate(check: bool = False) -> int:
     console.print(f'[success]updated[/success] ecb_usd_rate in '
                   f'{config.managed_config_file.relative_to(config.root_dir)} '
                   f'([accent]{previous} → {rate}[/accent])')
-    return ExitCodes.EXIT_OK
+    return commit_regenerated('update-usd-rate', _QUIPS, [f'ecb_usd_rate: {previous} → {rate}'])

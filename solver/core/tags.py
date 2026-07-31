@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import Any
 
 from solver.config import ExitCodes, config
+from solver.core.git import commit_regenerated
 from solver.core.problems import Problem, problems, solution_dir
 from solver.shell import console, register
 from solver.shell import dialogue
@@ -62,6 +63,15 @@ _GEN_RE = re.compile(r'<!--\s*' + re.escape(_GEN_OPEN) + r'\s*-->.*?<!--\s*'
 #: every tag, so a topic always has a file and the only question is whether it has been written.
 STATUSES = ('draft', 'final')
 _STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)\s*-->', re.IGNORECASE)
+
+#: Commit subjects for the graph's own commit (`commit_regenerated`); one is picked at random.
+_QUIPS: tuple[str, ...] = (
+    'both legs of the double entry agree again',
+    'the tag graph balances',
+    'vocabulary and problems, reconciled',
+    'every tag knows its problems; every problem knows its tags',
+    'the index caught up with the articles',
+)
 
 
 # ── compact JSON (scalar lists inline, object lists multi-line) ─────────────────────────
@@ -683,6 +693,8 @@ def update_tags(check: bool = False) -> int:
     problem with notes but no `tags.json` is reported, not created here — the
     `claude-api tags` target (or the skill) authors it.
 
+    The reconciled graph is committed — both legs together, and nothing beside them.
+
     Args:
         check: Write nothing: report unknown slugs, facet violations, unpromoted proposals,
             missing files and a stale article index, and fail if the graph is inconsistent.
@@ -742,7 +754,11 @@ def update_tags(check: bool = False) -> int:
     console.print(f'[accent]update-tags:[/accent] {len(ptags)} problem file(s), '
                   f'{promoted} tag(s) promoted, {diff_changes} maintainer edit(s) applied')
     console.print('[accent]articles:[/accent] ' + ' · '.join(f'{written[s]} {s}' for s in STATUSES))
-    return ExitCodes.EXIT_OK
+    return commit_regenerated('update-tags', _QUIPS, [
+        f'{len(ptags)} problem file(s), {promoted} tag(s) promoted, '
+        f'{diff_changes} maintainer edit(s) applied',
+        'articles: ' + ' · '.join(f'{written[s]} {s}' for s in STATUSES),
+    ])
 
 
 # ── curated topics ──────────────────────────────────────────────────────────────────────

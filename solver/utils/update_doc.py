@@ -31,6 +31,7 @@ from typing import Callable
 from solver.auth import LADDER
 from solver.auth.subject import rank
 from solver.config import ExitCodes, config
+from solver.core.git import commit_regenerated
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
 from solver.shell.docstring import (GLYPH_ASKS, GLYPH_PROBLEM, GLYPH_REQUIRES, GLYPH_SILENT,
@@ -329,6 +330,16 @@ def _render(text: str) -> tuple[str, list[str]]:
     return text, changed
 
 
+#: Commit subjects for the docs' own commit (`commit_regenerated`); one is picked at random.
+_QUIPS: tuple[str, ...] = (
+    'the map, redrawn to match the territory',
+    'the docs now describe the software that exists',
+    'the catalogue remembers what the registry knows',
+    'prose left alone; the generated blocks tidied themselves',
+    'documentation caught up with the code it documents',
+)
+
+
 def _apply(check: bool) -> tuple[list[str], list[str]]:
     """Render every doc; return *(updated, stale)* as `<file>: <blocks>` strings.
 
@@ -381,6 +392,9 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     `requires`/`channels`, a module's first docstring line, or the README's HOME
     region.
 
+    What it rewrote is committed — the guides, the README, the module registry, the
+    start-page summary and the Claude guidance, and nothing beside them.
+
     **Admin-floored on purpose, not out of caution.** Registration is itself
     profile-filtered (`solver/shell/command.py`): a command above your floor is never
     registered, so `registry.all()` returns only what *you* may run. Regenerating from a
@@ -413,4 +427,6 @@ def update_docs(ctx: Context, check: bool = False) -> int:
             console.print(f'[success]updated[/success] {entry}')
     else:
         console.print('[muted]docs already up to date[/muted]')
-    return ExitCodes.EXIT_OK
+    # Committed even when `updated` is empty: `update_modules()` above may have rewritten
+    # `solver/modules.csv`, which is this verb's output too and is not in that list.
+    return commit_regenerated('update-docs', _QUIPS, updated)

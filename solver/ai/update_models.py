@@ -35,6 +35,7 @@ from pathlib import Path
 
 from solver.config import ExitCodes, config
 from solver.core.download import download_file
+from solver.core.git import commit_regenerated
 from solver.shell import console, register
 
 #: The module whose `Model` class this command maintains.
@@ -54,6 +55,15 @@ _PRICE_RE = re.compile(r'\$\s*([\d.]+)')
 
 #: A trailing dated-snapshot suffix (`-20251001`) normalised back to the alias form.
 _SNAPSHOT_RE = re.compile(r'-\d{8}$')
+
+#: Commit subjects for the catalogue's own commit (`commit_regenerated`); one is picked at random.
+_QUIPS: tuple[str, ...] = (
+    'the frontier moved again; the enum followed',
+    'new models, new prices, same generated block',
+    're-priced: what a million tokens costs this week',
+    'the catalogue, as the API currently tells it',
+    'models come, models go, the markers stay put',
+)
 
 
 def _ordinal(day: int) -> str:
@@ -206,6 +216,8 @@ def update_models(check: bool = False) -> int:
     with its display name. Nothing outside the markers is touched, and the USD→EUR rate is
     `update-usd-rate`'s to refresh.
 
+    A regenerated block is committed, staging `models.py` and nothing beside it.
+
     Args:
         check: Write nothing and fail if the generated block is out of date. Defaults to
             False, which rewrites it in place.
@@ -222,9 +234,11 @@ def update_models(check: bool = False) -> int:
     if rendered == original:
         if check:
             console.print('[success]models are up to date[/success]')
-        else:
-            console.print('[muted]models already up to date[/muted]')
-        return ExitCodes.EXIT_OK
+            return ExitCodes.EXIT_OK
+        console.print('[muted]models already up to date[/muted]')
+        # Still offered to the committer: an earlier run may have written the block and failed
+        # to commit it, and "up to date" must not mean "left dirty forever". Clean is a no-op.
+        return commit_regenerated('update-models', _QUIPS)
     if check:
         console.print('[error]models out of date[/error] (run [accent]update-models[/accent]): '
                       '[warning]model pricing[/warning]')
@@ -233,4 +247,6 @@ def update_models(check: bool = False) -> int:
     MODELS_FILE.write_text(rendered)
     console.print(f'[success]updated[/success] {MODELS_FILE.relative_to(config.root_dir)} '
                   f'([accent]{len(models)}[/accent] models)')
-    return ExitCodes.EXIT_OK
+    return commit_regenerated('update-models', _QUIPS,
+                              [f'{model_id}: ${inp:.2f} in / ${out:.2f} out per MTok'
+                               for model_id, _display, inp, out in models])
