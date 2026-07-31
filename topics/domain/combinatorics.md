@@ -188,7 +188,7 @@ of crossing it.
 - ● [0208](/solutions/0208/) — Robot Walks
 - ● [0215](/solutions/0215/) — Crack-free Walls
 - ● [0228](/solutions/0228/) — Minkowski Sums
-- ○ [0240](/solutions/0240/) — Top Dice
+- ● [0240](/solutions/0240/) — Top Dice
 - ○ [0242](/solutions/0242/) — Odd Triplets
 - ○ [0244](/solutions/0244/) — Sliders
 - ○ [0247](/solutions/0247/) — Squares Under a Hyperbola

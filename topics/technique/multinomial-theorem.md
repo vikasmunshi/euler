@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Multinomial_th
 ## Problems
 
 - ● [0154](/solutions/0154/) — Exploring Pascal's Pyramid
+- ● [0240](/solutions/0240/) — Top Dice
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0885](/solutions/0885/) — Sorted Digits
 

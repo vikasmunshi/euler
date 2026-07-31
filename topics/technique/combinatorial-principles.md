@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Combinatorial_
 ## Problems
 
 - ● [0032](/solutions/0032/) — Pandigital Products
+- ● [0240](/solutions/0240/) — Top Dice
 - ● [0788](/solutions/0788/) — Dominating Numbers
 
 <!-- /problems -->

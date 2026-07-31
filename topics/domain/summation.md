@@ -17,7 +17,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Summation>._
 - ● [0125](/solutions/0125/) — Palindromic Sums
 - ● [0150](/solutions/0150/) — Sub-triangle Sums
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
-- ○ [0240](/solutions/0240/) — Top Dice
 - ○ [0261](/solutions/0261/) — Pivotal Square Sums
 - ○ [0297](/solutions/0297/) — Zeckendorf Representation
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
