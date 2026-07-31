@@ -2343,7 +2343,7 @@
     {
       "path": "domain/pseudorandom-number-generator",
       "title": "Pseudorandom number generator",
-      "status": "draft",
+      "status": "final",
       "solved": 6,
       "problems": 19,
       "tags": ["pseudorandom-number-generator"],
