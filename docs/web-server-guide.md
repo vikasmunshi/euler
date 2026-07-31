@@ -1104,13 +1104,33 @@ stack, vendored htmx and MathJax from `/vendor`. Statements and notes carry math
 text (`$…$`); MathJax typesets on load and after every swap.
 
 That vendoring has to include what MathJax fetches **at runtime**: its woff fonts, and the
-TeX extension for every macro outside the bundle's default packages — `autoload` requests
-`<bundle root>/input/tex/extensions/<pkg>.js` the first time it sees `\color`, `\pu`,
-`\style`, `\boldsymbol`, `\enclose` or `\unicode`. Same-origin, so `script-src 'self'`
-admits it; missing, it 404s and the `noundefined` package renders the macro as its own
-name in red — the "`\color` in red" a cached statement showed before the extensions were
-vendored. The set that ships is the set the cached statements actually use
+TeX extension for every macro outside the bundle's default packages —
+`<bundle root>/input/tex/extensions/<pkg>.js` for `\color`, `\pu`, `\style`,
+`\boldsymbol`, `\enclose` and `\unicode`. Same-origin, so `script-src 'self'` admits it;
+missing, it 404s and the `noundefined` package renders the macro as its own name in red —
+the "`\color` in red" a cached statement showed before the extensions were vendored. The
+set that ships is the set the cached statements actually use
 (`solver/web/content/vendor/README.md` lists it, and how to re-scan).
+
+**Those six are preloaded, and the swap re-typeset is chained.** Both halves are about the
+same failure, and it took two goes to see it whole. MathJax's `autoload` fetches a package
+*on first use* — in the middle of a typeset — and `site.js` used to fire
+`MathJax.typesetPromise()` behind a bare `if (window.MathJax && MathJax.typesetPromise)`
+guard. That guard loses on either side of its race with the deferred bundle: too early
+MathJax is still the plain config object and the swap is never typeset at all; a moment
+later `typesetPromise` exists but startup has not added the packages, so the typeset runs
+against a half-configured TeX input and every non-default macro renders as its own source.
+Reaching a problem by the terminal's `show` did exactly that, printing
+`\color[RGB]124, 192, 255` mid-sentence, while a refresh of the same URL looked perfect —
+which is what made it read like a content bug rather than a wiring one.
+
+So `loader.load` fetches the six at startup, and the swap re-typeset waits on `mathReady`,
+resolved inside MathJax's own `pageReady` (after the loader *and* the initial typeset).
+Later swaps queue behind their predecessor, which MathJax requires — concurrent typesets on
+one document are unsupported, and it is the *rapid* sequence (`show 238`, `show 91`,
+`show 238`) that made this reproducible at all: a single swap always recovered. Reproduced
+in headless Chrome against the real vendored bundle, failing before the change and clean
+after, and pinned by `tests/test_web_verbs.py::MathJaxWiringTests`.
 
 **The terminal pins its own dark**, in literal hex rather than the tokens. It renders the
 *shell's own* output, and the shell paints with absolute xterm-256 indices chosen for a

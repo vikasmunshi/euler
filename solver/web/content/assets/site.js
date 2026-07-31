@@ -13,13 +13,48 @@
   // $…$ / $$…$$ text (convention_documentation.md); \$ escapes a literal dollar.
   // MathJax's defaults already skip pre/code/textarea, so source views and the
   // editors are never typeset.
+  // The TeX extensions a cached statement needs, LOADED UP FRONT rather than left to
+  // MathJax's `autoload`. They are vendored either way (vendor/README.md); the difference
+  // is *when* they arrive. Autoload fetches on first use — in the middle of a typeset —
+  // and that is a race the swap path loses: reaching a problem by htmx swap rendered
+  // `\color` as its own literal text, while a plain refresh had the extension cached from
+  // the previous visit and looked perfect. One macro away from any of these six and the
+  // page silently shows TeX source instead of maths.
+  //
+  // Preloading costs one fetch per document, of files already vendored, and buys a
+  // typesetter whose vocabulary does not depend on what the reader happened to open
+  // first. `loader.load` fetches them at startup; `packages: {'[+]': …}` adds them to the
+  // TeX input's package list (the combined bundle ships only the defaults).
+  //
+  // The set is what the cached statements actually use — \color · \pu · \unicode ·
+  // \enclose · \boldsymbol · \style — the same scan vendor/README.md records. A statement
+  // reaching for a seventh needs its package vendored and added in both lists here.
+  var MJ_TEX = ['color', 'mhchem', 'html', 'unicode', 'enclose', 'boldsymbol'];
+
+  // Resolved by MathJax's own `pageReady`, which runs only after the loader has every
+  // package above and the initial typeset is done. It is what the swap re-typeset waits
+  // on, and it must be created HERE, before the bundle: a swap can fire while
+  // `window.MathJax` is still this plain config object, with no `startup`, no
+  // `typesetPromise` and nothing to hang a promise off (see `typesetPane` below).
+  var mathStarted;
+  var mathReady = new Promise(function (resolve) { mathStarted = resolve; });
+
   window.MathJax = {
-    tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true },
+    loader: { load: MJ_TEX.map(function (p) { return '[tex]/' + p; }) },
+    tex: {
+      packages: { '[+]': MJ_TEX },
+      inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true
+    },
     // matchFontHeight measures the surrounding font's x-height and inflates the
     // math (~20% over system-ui), and the measurement varies with load timing —
     // the "large math until a refresh" symptom. Off = deterministic: math
     // renders at exactly the surrounding font size, every client, every load.
-    chtml: { scale: 1, matchFontHeight: false }
+    chtml: { scale: 1, matchFontHeight: false },
+    startup: {
+      pageReady: function () {
+        return MathJax.startup.defaultPageReady().then(mathStarted);
+      }
+    }
   };
 
   // Every off-site link opens in a new tab: following one in-place would tear
@@ -39,13 +74,40 @@
   }
   document.addEventListener('DOMContentLoaded', function () { externalize(document); });
 
-  // htmx swaps replace pane content after MathJax's initial pass — re-typeset
-  // the left pane (its math state first cleared so removed nodes are forgotten).
-  document.addEventListener('htmx:afterSwap', function () {
-    if (window.MathJax && MathJax.typesetPromise) {
+  // Re-typeset the left pane after a swap — ON A CHAIN rooted at `mathReady`, never as a
+  // bare call guarded by "is MathJax there yet".
+  //
+  // The old guard was `if (window.MathJax && MathJax.typesetPromise)`, and it had two
+  // losing outcomes either side of a race with the deferred bundle. Too early, MathJax is
+  // still the plain config object: the guard is false, the swap is never typeset at all,
+  // and the pane shows raw `$…$`. A moment later `typesetPromise` exists but startup has
+  // not finished adding the packages, so the typeset runs against a half-configured TeX
+  // input and every macro outside the defaults renders as its own literal source — which
+  // is exactly the `\color[RGB]124, 192, 255` a swapped-in statement showed, while a
+  // refresh of the same URL looked perfect because startup was long done by then. The
+  // swap is the *normal* way into a problem here (the terminal's `show`), so the losing
+  // case was the common one.
+  //
+  // Waiting on `mathReady` closes both: it resolves inside MathJax's own `pageReady`,
+  // after the loader has the packages and the first typeset is done. Later swaps then
+  // queue behind their predecessor, which is MathJax's documented requirement —
+  // concurrent typesets on one document are not supported. A rejection is swallowed so a
+  // single statement with bad TeX cannot wedge typesetting for the rest of the session.
+  //
+  // On a page with no MathJax at all (the signed-out shell drops the bundle) `mathReady`
+  // simply never resolves, and the queued work is a no-op on a pane that has no maths.
+  var typesetting = mathReady;
+
+  function typesetPane() {
+    typesetting = typesetting.then(function () {
+      if (!window.MathJax || !MathJax.typesetPromise) { return undefined; }
       if (MathJax.typesetClear) { MathJax.typesetClear(); }
-      MathJax.typesetPromise([document.getElementById('content')]);
-    }
+      return MathJax.typesetPromise([document.getElementById('content')]);
+    }).catch(function () { /* keep the chain alive for the next swap */ });
+  }
+
+  document.addEventListener('htmx:afterSwap', function () {
+    typesetPane();
     enhanceEditors();
     externalize(document);
     // A swapped-in pane may carry terminal controls of its own (the start page's

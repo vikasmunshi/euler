@@ -166,5 +166,62 @@ class HeaderChipShapeTests(unittest.TestCase):
         self.assertIn('body.ws-hidden .term-only-visible', css)
 
 
+class MathJaxWiringTests(unittest.TestCase):
+    r"""How the typesetter is configured and driven — the contract behind a rendered statement.
+
+    A statement reached by htmx swap once rendered `\color[RGB]124, 192, 255` as literal
+    text while a refresh of the same URL looked perfect. Two causes, both pinned here: the
+    TeX packages arrived by `autoload` *during* a typeset, and `site.js` fired
+    `typesetPromise()` un-chained, so rapid swaps (the terminal's `show`, twice in a row)
+    typeset concurrently against a half-configured input. Reproduced in headless Chrome
+    before the fix and clean after it.
+    """
+
+    site_js: str = (_SITE / 'content' / 'assets' / 'site.js').read_text(encoding='utf-8')
+    extensions: Path = _SITE / 'content' / 'vendor' / 'mathjax' / 'input' / 'tex' / 'extensions'
+
+    def _preloaded(self) -> list[str]:
+        match = re.search(r'var MJ_TEX = \[([^\]]*)\]', self.site_js)
+        assert match is not None, 'the preloaded package list is gone'
+        return re.findall(r"'([^']+)'", match.group(1))
+
+    def test_the_tex_packages_are_preloaded_not_autoloaded(self) -> None:
+        """`autoload` fetches on first use — in the middle of a typeset, which is the race."""
+        self.assertIn('loader:', self.site_js)
+        self.assertIn("packages: { '[+]': MJ_TEX }", self.site_js)
+        self.assertTrue(self._preloaded(), 'no packages preloaded')
+
+    def test_every_preloaded_package_is_actually_vendored(self) -> None:
+        """A preload naming a file that is not there fails MathJax *startup* — worse than
+        the autoload it replaced, and on every page rather than one statement."""
+        for package in self._preloaded():
+            self.assertTrue((self.extensions / f'{package}.js').is_file(),
+                            f'{package} is preloaded but not vendored')
+
+    def test_the_preloaded_set_covers_the_macros_the_statements_use(self) -> None:
+        """The set is derived from the cached statements, so a macro can never be left to
+        the autoload path this exists to avoid."""
+        macros = {'color': 'color', 'pu': 'mhchem', 'unicode': 'unicode',
+                  'enclose': 'enclose', 'boldsymbol': 'boldsymbol', 'style': 'html'}
+        statements = [p.read_text(errors='replace')
+                      for p in (_ROOT / 'solutions').rglob('statement.html')]
+        used = {pkg for macro, pkg in macros.items()
+                if any(re.search(r'\\' + macro + r'\b', text) for text in statements)}
+        self.assertTrue(used, 'found no TeX macros at all — the scan is broken')
+        self.assertLessEqual(used, set(self._preloaded()))
+
+    def test_the_swap_typeset_is_chained_never_bare(self) -> None:
+        """Concurrent typesets on one document are not supported by MathJax, and the guard
+        this replaced (`if (window.MathJax && MathJax.typesetPromise)`) lost either way: too
+        early it skipped the typeset entirely, a moment later it ran against a TeX input
+        that did not have its packages yet."""
+        self.assertIn('mathReady', self.site_js)
+        self.assertIn('defaultPageReady', self.site_js)
+        self.assertIn('typesetting = typesetting.then(', self.site_js)
+        # every typesetPromise call sits inside the chained helper
+        self.assertEqual(self.site_js.count('MathJax.typesetPromise('), 1)
+        self.assertNotIn('if (window.MathJax && MathJax.typesetPromise) {', self.site_js)
+
+
 if __name__ == '__main__':
     unittest.main()

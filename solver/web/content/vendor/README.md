@@ -25,13 +25,26 @@ own URL, so the whole tree ships together. Its full license text is at
 `style-src` carries `'unsafe-inline'` (docs/web-server-guide.md § Content-Security-Policy).
 
 **The TeX extensions under `mathjax/input/tex/extensions/`** ship for the same
-reason as the fonts: the combined bundle carries only the default packages, and its
-`autoload` package fetches the rest **on first use** — relative to the bundle's own
-URL, so `/vendor/mathjax/input/tex/extensions/<name>.js`. Vendored, that request is
+reason as the fonts: the combined bundle carries only the default packages, and the rest
+are fetched relative to the bundle's own URL, so
+`/vendor/mathjax/input/tex/extensions/<name>.js`. Vendored, that request is
 same-origin and `script-src 'self'` admits it; *not* vendored it 404s, and the
 `noundefined` package then renders the macro as its own name in red — which is what a
-statement using `\color` used to show (problem 230). One file per package actually
-used by a cached statement, found by scanning them for each autoload trigger:
+statement using `\color` used to show (problem 230).
+
+**They are preloaded, not autoloaded** (`loader.load` + `tex.packages` in
+`/assets/site.js`). MathJax's `autoload` fetches a package **on first use**, i.e. in the
+middle of a typeset, and the swap path lost that race: a statement reached by the
+terminal's `show` rendered `\color[RGB]124, 192, 255` as literal text while a plain
+refresh of the same URL was perfect. Preloading costs one fetch per document, of files
+already vendored, and makes the typesetter's vocabulary independent of which page the
+reader happened to open first. **A package added here must be added to `MJ_TEX` in
+site.js as well** — preloading a name whose file is missing fails MathJax *startup*, on
+every page, which is worse than the autoload it replaced. A test pins both directions
+(`tests/test_web_verbs.py::MathJaxWiringTests`).
+
+One file per package actually used by a cached statement, found by scanning them for
+each trigger macro:
 
 | Package | Macros | Statements |
 |---------|--------|------------|
