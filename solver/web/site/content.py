@@ -412,7 +412,38 @@ STATEMENT_COLOURS: dict[str, str] = {
 #: reported case lived: the colour is not HTML at all, so no stylesheet can reach it —
 #: MathJax has already turned it into a fill by the time CSS applies. Rewriting the source
 #: before it reaches the browser is the only hook, and it is the same hook for both forms.
-_TEX_COLOUR_RE = re.compile(r'(\\color\s*\{\s*)([A-Za-z]+|#[0-9A-Fa-f]{3,6})(\s*\})')
+#:
+#: A form that already names a model (`\color[rgb]{…}`) does not match, and is left alone:
+#: whoever wrote that said exactly what they meant.
+_TEX_COLOUR_RE = re.compile(r'\\color\s*\{\s*([A-Za-z]+|#[0-9A-Fa-f]{3,6})\s*\}')
+
+
+def _tex_colour(hex_colour: str) -> str:
+    r"""A `\color` directive for *hex_colour* — as `[RGB]{r,g,b}`, never as a `#` literal.
+
+    **`#` must never reach the TeX.** It is the macro-parameter character, and whether it
+    is fatal depends on a race: `\color` arrives from an autoloaded extension, so on the
+    first statement to use it MathJax parses the argument as ordinary math while the
+    extension is still in flight — and there `#` is "You can't use 'macro parameter
+    character #' in math mode", which is a rendered error, not a retry.
+
+    That is exactly what a `#7cc0ff` rewrite did to p0238, and it hid well: reaching the
+    page by htmx swap hit the window and failed, while a plain refresh had the extension
+    cached and rendered perfectly. `\color{blue}` never showed it because `{blue}` is
+    valid math — four italic letters — so the same race was invisible for every colour
+    projecteuler.net actually writes.
+
+    `[RGB]{r,g,b}` is the LaTeX-standard model form (the vendored `color.js` implements
+    `rgb`, `RGB`, `gray` and `named` — there is no `HTML` model), and it carries no
+    character that math mode objects to. Tested both ways: with the extension loaded it
+    colours, and with it missing entirely it still raises no error.
+    """
+    digits = hex_colour.lstrip('#')
+    if len(digits) == 3:
+        digits = ''.join(c * 2 for c in digits)
+    red, green, blue = (int(digits[i:i + 2], 16) for i in (0, 2, 4))
+    return f'\\color[RGB]{{{red},{green},{blue}}}'
+
 
 #: An inline `style="color:#FF0000"`. CSS could only beat this with `!important`, and a
 #: sheet that has to shout at its own content is a sheet that will lose the next round.
@@ -430,8 +461,10 @@ def recolour_statement(html: str) -> str:
     whatever this guessed.
     """
     def tex(match: re.Match[str]) -> str:
-        mapped = STATEMENT_COLOURS.get(match.group(2).lower())
-        return f'{match.group(1)}{mapped or match.group(2)}{match.group(3)}'
+        mapped = STATEMENT_COLOURS.get(match.group(1).lower())
+        # The whole directive is replaced, not just the value: the replacement names a
+        # colour *model* (`[RGB]`), which is what keeps `#` out of the math (:func:`_tex_colour`).
+        return _tex_colour(mapped) if mapped else match.group(0)
 
     def css(match: re.Match[str]) -> str:
         mapped = STATEMENT_COLOURS.get(match.group(2).lower())

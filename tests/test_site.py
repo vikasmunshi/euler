@@ -992,9 +992,36 @@ class StatementForDarkGroundTests(unittest.TestCase):
         """The reported case (p0238): the colour is LaTeX inside MathJax, so no stylesheet
         can reach it — by the time CSS applies it is already a fill."""
         out = content.recolour_statement(r'$\color{blue}{14025}$ and $\color{red}{7}$')
-        self.assertIn(r'\color{' + content.STATEMENT_COLOURS['blue'] + '}', out)
-        self.assertIn(r'\color{' + content.STATEMENT_COLOURS['red'] + '}', out)
+        self.assertIn(r'\color[RGB]{124,192,255}', out)
+        self.assertIn(r'\color[RGB]{255,135,129}', out)
         self.assertNotIn(r'\color{blue}', out)
+
+    def test_no_hash_ever_reaches_the_tex(self) -> None:
+        """The regression this replaced, and the one rule that matters here.
+
+        `#` is TeX's macro-parameter character. `\\color` comes from an autoloaded
+        extension, so on the first statement to use it MathJax parses the argument as
+        ordinary math while the extension is still in flight — and there a `#` is a
+        rendered error, not a retry. It hid beautifully: reaching p0238 by htmx swap hit
+        that window and showed "You can't use 'macro parameter character #' in math mode",
+        while a plain refresh had the extension cached and rendered perfectly.
+        `\\color{blue}` never showed it, because `{blue}` is valid math.
+
+        So the emitted form names a model instead — `[RGB]{r,g,b}`, which carries nothing
+        math mode objects to, verified in a headless render both with the extension loaded
+        and with it removed entirely.
+        """
+        for source in (r'$\color{blue}1, 14, \dots$', r'$\color{red}{7}$',
+                       r'$x = {\color{blue}14025\cdots}$'):
+            out = content.recolour_statement(source)
+            tex = ''.join(re.findall(r'\\color[^$]*', out))
+            self.assertNotIn('#', tex, f'a # reached the TeX from {source!r}')
+            self.assertIn('[RGB]{', tex)
+
+    def test_a_directive_that_already_names_a_model_is_untouched(self) -> None:
+        """Whoever wrote `\\color[rgb]{…}` said exactly what they meant."""
+        source = r'$\color[rgb]{0.2,0.2,1.0}x$'
+        self.assertEqual(content.recolour_statement(source), source)
 
     def test_inline_style_colour_is_remapped(self) -> None:
         """CSS could only beat an inline style with `!important`."""

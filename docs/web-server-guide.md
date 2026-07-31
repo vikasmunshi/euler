@@ -1340,6 +1340,21 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   lifted for a dark ground: `#3333ff` on `#0f1115` was the reported case. A colour outside
   the table is left exactly as written — the author's own value beats a guess.
 
+  **The TeX form emits `\color[RGB]{r,g,b}`, never a `#` literal**, and that is not a
+  style preference. `#` is TeX's macro-parameter character, and `\color` arrives from an
+  *autoloaded* extension (§ the vendored TeX extensions above): on the first statement to
+  use it, MathJax parses the argument as ordinary math while the extension is still in
+  flight, and a `#` there is `You can't use 'macro parameter character #' in math mode` —
+  a rendered error, not a retry. A first cut that emitted `\color{#7cc0ff}` shipped this
+  and it hid well, because the race only loses one way round: reaching a problem by
+  **htmx swap** hit the window and broke, while a **full refresh** had the extension
+  cached and rendered perfectly. `\color{blue}` never showed it — `{blue}` is valid math,
+  four italic letters — so every colour projecteuler.net actually writes was immune.
+  `[RGB]{r,g,b}` is the LaTeX-standard model form (the vendored `color.js` implements
+  `rgb`, `RGB`, `gray`, `named` — there is no `HTML` model) and contains nothing math mode
+  objects to; it is verified in a headless render both with the extension loaded and with
+  it deleted outright.
+
   *Transparent diagrams.* A see-through image takes the page's ground. Of the cached
   statement images 43 are dark line art on transparency — a black diagram on a near-black
   field, on problems as ordinary as 15, 86 and 91 — while 29 are light ink that our ground
