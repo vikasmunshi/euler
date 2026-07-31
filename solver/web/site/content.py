@@ -782,18 +782,22 @@ def readme_html() -> str:
 
 #: The AI reference sources composed into the `ai` doc. They live under `solver/`
 #: — outside the content ACLs — so each is read best-effort (see `_ai_section`).
-_AI_SKILL_MD = 'solver/ai/claude/skills/claude-euler-solver/SKILL.md'
+#: Every skill under `skills/` is composed in, so a new one appears here by existing
+#: rather than by being added to a list that the last one was forgotten from.
+_AI_SKILLS_DIR = 'solver/ai/claude/skills'
 _AI_PROMPTS_DIR = 'solver/templates'
 
 _AI_INTRO = """\
 # AI reference
 
-The framework's two AI paths, collated into one reference. The shell's
-`claude-solve` command runs Claude Code **headless** against a single problem's
-solution files (the **claude-euler-solver** skill, below); `claude-api` generates
-solution artifacts — Python and C code, `notes.html`, `test_cases.json` — through
-the Claude API from the **prompt templates** below. Both are held to the shared
-`convention_*` guides listed in the [docs index](/docs/).
+The framework's AI paths, collated into one reference. The shell's `claude-solve`
+command runs Claude Code **headless** against a single problem's solution files
+(the **claude-euler-solver** skill), and `claude-blog` runs it against one topic
+article under `topics/` (the **claude-euler-blogger** skill); both skills are
+below. `claude-api` generates solution artifacts — Python and C code,
+`notes.html`, `test_cases.json` — through the Claude API from the **prompt
+templates** further down. All of them are held to the shared `convention_*`
+guides listed in the [docs index](/docs/).
 """
 
 
@@ -824,13 +828,20 @@ def _ai_section(heading: str, path: Path, body: str) -> str:
 def _compose_ai_doc(repo_root: Path) -> str:
     """The `ai` doc's Markdown: intro + the skill definition + the prompt templates."""
     sections = [_AI_INTRO]
-    skill = repo_root / _AI_SKILL_MD
+    skills_dir = repo_root / _AI_SKILLS_DIR
     try:
-        skill_body = _strip_frontmatter(skill.read_text(encoding='utf-8'))
+        skills = sorted(skills_dir.glob('*/SKILL.md'))
     except OSError:
-        skill_body = ''
-    sections.append(_ai_section('## The claude-euler-solver skill',
-                                skill.relative_to(repo_root), skill_body))
+        skills = []
+    if not skills:  # unreadable dir, or none installed — say so rather than silently drop them
+        sections.append(_ai_section('## The Claude Code skills', Path(_AI_SKILLS_DIR), ''))
+    for skill in skills:
+        try:
+            skill_body = _strip_frontmatter(skill.read_text(encoding='utf-8'))
+        except OSError:
+            skill_body = ''
+        sections.append(_ai_section(f'## The {skill.parent.name} skill',
+                                    skill.relative_to(repo_root), skill_body))
     prompts_dir = repo_root / _AI_PROMPTS_DIR
     try:
         prompts = sorted(prompts_dir.glob('prompt_*.txt'))

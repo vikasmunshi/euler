@@ -39,6 +39,9 @@ _ADMIN = {'X-User': 'a@example.com', 'X-Profile': 'admin'}
 _HTMX = {'HX-Request': 'true'}
 
 
+#: Every Claude Code skill in this checkout — the composed `ai` doc must carry them all.
+_REPO_SKILLS = sorted((Path(__file__).resolve().parents[1] / 'solver/ai/claude/skills').glob('*/SKILL.md'))
+
 #: A deterministic policy for tests: the ladder plus an empty users map. Tests must
 #: point EULER_AUTHZ_FILE at this — a host with the real /etc/euler SoR deployed would
 #: otherwise leak its own user map into the run.
@@ -459,9 +462,13 @@ class ContentServiceTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_composed_ai_doc(self) -> None:
+        """Every skill under `skills/` composes in — the doc globs the directory rather than
+        naming each one, because the blogger spent its life missing from a hand-kept list."""
         resp = await self.client.get('/docs/ai', headers=_READER)
         self.assertEqual(resp.status, 200)
-        self.assertIn('claude-euler-solver', await resp.text())
+        body = await resp.text()
+        for skill in (p.parent.name for p in _REPO_SKILLS):
+            self.assertIn(skill, body, f'{skill} is missing from the composed ai doc')
 
     @unittest_run_loop
     async def test_missing_doc_404s(self) -> None:
