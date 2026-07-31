@@ -16,7 +16,8 @@ __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
            'TEXT_SUFFIXES', 'ABOUT_PAGES', 'SHELL_DOCS', 'CATALOGUE_DOC',
            'solution_dir', 'load_problems', 'centuries', 'problem_files', 'section_state',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'collapse_problems',
-           'rewrite_statement_links', 'git_status', 'topic_status',
+           'rewrite_statement_links', 'recolour_statement', 'plate_statement_images',
+           'prepare_statement', 'STATEMENT_COLOURS', 'git_status', 'topic_status',
            'list_docs', 'read_doc', 'shell_docs', 'command_catalogue', 'list_topics', 'list_topic_groups',
            'read_topic', 'drop_article',
            'problem_tag_view',
@@ -391,6 +392,163 @@ def rewrite_statement_links(html: str, number: int) -> str:
     base = f'/solutions/{number:04d}/'
     return re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
                   lambda m: f'{m.group(1)}{base}{m.group(2)}"', html)
+
+
+#: projecteuler.net's emphasis colours, remapped for a dark ground. Their markup is
+#: written for a light page, where a saturated primary reads as emphasis; on ours the
+#: same value is a dark mark on a dark field — `#3333ff` on `#0f1115` is the case that
+#: started this. Each entry is the same hue, lifted in luminance and desaturated enough
+#: to sit on `--bg` without glowing: the author's *intent* (this bit is marked) survives,
+#: which is the thing worth keeping. Their exact byte was never the point.
+#:
+#: Keyed by the token as it appears in the source, and matched case-insensitively, so one
+#: table serves all three ways a statement asks for a colour (below).
+STATEMENT_COLOURS: dict[str, str] = {
+    'red': '#ff8781', 'blue': '#7cc0ff', 'green': '#7ee787', 'orange': '#ffb26b',
+    '#ff0000': '#ff8781', '#3333ff': '#7cc0ff', '#00ff00': '#7ee787',
+}
+
+#: `\color{red}` / `\color{#FF0000}` inside the LaTeX MathJax renders. This is where the
+#: reported case lived: the colour is not HTML at all, so no stylesheet can reach it —
+#: MathJax has already turned it into a fill by the time CSS applies. Rewriting the source
+#: before it reaches the browser is the only hook, and it is the same hook for both forms.
+_TEX_COLOUR_RE = re.compile(r'(\\color\s*\{\s*)([A-Za-z]+|#[0-9A-Fa-f]{3,6})(\s*\})')
+
+#: An inline `style="color:#FF0000"`. CSS could only beat this with `!important`, and a
+#: sheet that has to shout at its own content is a sheet that will lose the next round.
+_CSS_COLOUR_RE = re.compile(r'(color\s*:\s*)(#[0-9A-Fa-f]{3,6}|[A-Za-z]+)')
+
+
+def recolour_statement(html: str) -> str:
+    """Remap a cached statement's emphasis colours for the dark ground.
+
+    Three ways projecteuler.net colours a statement, and this reaches all three: the LaTeX
+    `\\color{…}` MathJax renders, an inline `style="color:…"`, and — via
+    :data:`STATEMENT_COLOURS` and the stylesheet's `.statement .red` rules — their
+    `class="red"` spans. Only the tokens in the table are touched; anything else is left
+    exactly as written, so an unrecognised colour renders as it always did rather than as
+    whatever this guessed.
+    """
+    def tex(match: re.Match[str]) -> str:
+        mapped = STATEMENT_COLOURS.get(match.group(2).lower())
+        return f'{match.group(1)}{mapped or match.group(2)}{match.group(3)}'
+
+    def css(match: re.Match[str]) -> str:
+        mapped = STATEMENT_COLOURS.get(match.group(2).lower())
+        return f'{match.group(1)}{mapped}' if mapped else match.group(0)
+
+    return _CSS_COLOUR_RE.sub(css, _TEX_COLOUR_RE.sub(tex, html))
+
+
+#: Above this share of see-through pixels an image has no background of its own, so it
+#: takes the page's — which is the whole problem. Below it the image brings its own ground
+#: and is readable on any page, so it is left alone.
+_TRANSPARENT_AT: float = 0.15
+#: Mean luminance (0–255) of the visible pixels, above which the ink is light. Light ink is
+#: what a dark page wants, so those are the images that must NOT be plated.
+_LIGHT_INK_AT: float = 140.0
+#: Sampling stride. These are diagrams a few hundred pixels square, so every fourth pixel
+#: fixes the mean at a quarter of the work. Measured against a full scan of all 254 cached
+#: images it changes exactly one verdict — an image whose ink means 139.8 against a
+#: threshold of 140. That one is not the stride being lossy, it is a genuinely mid-grey
+#: diagram that reads on either ground; nothing near the thresholds moves for any other.
+_INK_STRIDE: int = 4
+
+
+@cache
+def _image_ink(path: Path, stamp: tuple[int, int]) -> str:
+    """Classify *path*'s ink: `'dark'`, `'light'`, or `''` when it needs no plate.
+
+    projecteuler.net's diagrams are transparent PNGs and GIFs, so the page shows through
+    them and the ink has to contrast with *our* ground. It does not always: 44 of the
+    cached images are dark line art on nothing, which on `--bg` is a black diagram on a
+    near-black field — invisible, on problems as ordinary as 15 and 86. Another 28 are the
+    opposite, light ink that a dark page suits exactly. `class="dark_img"`, which
+    projecteuler puts on the ones it serves to dark themes, does not tell them apart in our
+    cache (37 of the dark-ink images carry it), so the pixels are the only honest source.
+
+    `''` for an opaque image (it carries its own background, so the page's ground never
+    reaches it), for a format Pillow cannot open, and for every image if Pillow is absent —
+    each of which means "no plate", which is exactly today's rendering. A statement must
+    render whatever this can or cannot decide about a picture in it.
+
+    *stamp* is the file's `(mtime_ns, size)`. It is not read — it is in the key so a
+    replaced image is re-measured rather than answered from the cache.
+    """
+    del stamp
+    try:
+        from PIL import Image
+    except ImportError:                                     # pragma: no cover - env-dependent
+        return ''
+    try:
+        with Image.open(path) as handle:
+            # `tobytes()` on the converted image, not `getdata()`: the latter is deprecated
+            # and goes away in Pillow 14. Four bytes per pixel, RGBA in order, which is a
+            # flat buffer to stride through rather than a list of tuples to allocate.
+            raw = handle.convert('RGBA').tobytes()
+    except (OSError, ValueError):
+        return ''
+    step = 4 * _INK_STRIDE
+    total = visible = 0
+    luminance = 0.0
+    for i in range(0, len(raw) - 3, step):
+        total += 1
+        if raw[i + 3] > 128:
+            visible += 1
+            luminance += 0.2126 * raw[i] + 0.7152 * raw[i + 1] + 0.0722 * raw[i + 2]
+    if not total or not visible or (total - visible) / total < _TRANSPARENT_AT:
+        return ''
+    return 'light' if luminance / visible > _LIGHT_INK_AT else 'dark'
+
+
+def plate_statement_images(html: str, number: int, sdir: Path) -> str:
+    """Mark each statement image with the ground it needs: `ink-dark` gets a plate.
+
+    Adds a class the stylesheet acts on, rather than a style: what a plated image should
+    look like — how much padding, how round, how white — is the sheet's business, and this
+    only answers the question the sheet cannot, which is what is *in* the picture.
+
+    Runs after :func:`rewrite_statement_links`, so `src` is the rooted `/solutions/NNNN/…`
+    path — hence *number*, which rebuilds the same prefix that pass added and strips it to
+    get back to the path on disk. (Taking the directory's own name instead does not work:
+    *sdir* is `…/p0015` while the route is `/solutions/0015/`.) An image that does not
+    resolve under *sdir* — an off-site `src`, a resource that never downloaded — is left
+    alone, the same "no plate" as an undecidable one.
+    """
+    base = f'/solutions/{number:04d}/'
+
+    def mark(match: re.Match[str]) -> str:
+        tag, src = match.group(0), match.group(1)
+        if not src.startswith(base):
+            return tag
+        rel = src[len(base):]
+        target = sdir / rel
+        if '..' in rel or not target.is_file():
+            return tag
+        try:
+            stat = target.stat()
+        except OSError:
+            return tag
+        ink = _image_ink(target, (stat.st_mtime_ns, stat.st_size))
+        if not ink:
+            return tag
+        klass = f'ink-{ink}'
+        if 'class="' in tag:
+            return tag.replace('class="', f'class="{klass} ', 1)
+        return tag.replace('<img', f'<img class="{klass}"', 1)
+
+    return re.sub(r'<img\b[^>]*?\bsrc="([^"]+)"[^>]*>', mark, html)
+
+
+def prepare_statement(html: str, number: int, sdir: Path) -> str:
+    """A cached statement, ready for a dark page: links rooted, colours and ink remapped.
+
+    The three passes in the order they depend on each other — links first, because the
+    plate step reads the rooted `src` to find the file on disk. Composed here so the one
+    caller states what it wants ("prepare this statement") rather than the recipe.
+    """
+    return plate_statement_images(recolour_statement(rewrite_statement_links(html, number)),
+                                  number, sdir)
 
 
 # ── markdown (docs + topics) ────────────────────────────────────────────────────────

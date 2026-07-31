@@ -855,6 +855,37 @@ a.cell:hover { border-color: var(--accent); color: var(--text); }
 .statement, .notes, .doc-body { overflow-wrap: break-word; }
 .statement img, .notes img, .doc-body img { max-width: 100%; }
 
+/* The statement is foreign content: projecteuler.net's own markup, written for their
+   light page. Two things in it assume that ground, and both are met here rather than by
+   giving the statement a light panel of its own — the dark ground is the design, and a
+   bright block in the middle of the page would be the more visible bug.
+
+   1 · EMPHASIS COLOURS. Their `class="red"` spans get the same values
+   `content.STATEMENT_COLOURS` maps the LaTeX `\color{…}` and inline `style="color:…"`
+   forms onto, so a statement reads the same however it asked. Scoped to `.statement`:
+   these are generic words, and a `.red` loose in the sheet would eventually collide. */
+.statement .red { color: #ff8781; }
+.statement .blue { color: #7cc0ff; }
+.statement .green { color: #7ee787; }
+.statement .orange { color: #ffb26b; }
+
+/* 2 · TRANSPARENT DIAGRAMS. A see-through image takes the page's ground, and theirs is
+   drawn for a white one: dark line art on `--bg` is a black diagram on a near-black
+   field. `content.plate_statement_images` reads the pixels and marks the ones that need
+   a ground of their own; this gives them one. Not a bare white box — a plate with the
+   page's own radius, inset so the art is not flush to the edge, so it reads as a figure
+   rather than as a rendering accident.
+
+   Only `ink-dark` is plated. Light ink is what a dark page wants (28 of the cached
+   diagrams are drawn that way), and opaque images bring their own background — both are
+   left exactly as they were. */
+.statement img.ink-dark {
+  background: #fbfbfb;
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
 /* The reading document: statement, then notes, as one flow. The rule marks where
    the problem ends and the analysis begins — the notes carry their own headings,
    so no "Notes" label is needed. */

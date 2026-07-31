@@ -298,6 +298,21 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('href="/topics/technique/', body)
 
     @unittest_run_loop
+    async def test_a_statement_diagram_that_needs_a_ground_gets_one(self) -> None:
+        """p0015's lattice-path diagram is black line art on transparency — on `--bg` that
+        is a black diagram on a near-black field. The plate is what makes it a picture."""
+        body = await (await self.client.get('/solutions/0015/', headers=_READER)).text()
+        self.assertRegex(body, r'<img[^>]*class="[^"]*\bink-dark\b[^"]*"[^>]*0015\.png')
+
+    @unittest_run_loop
+    async def test_a_statement_diagram_drawn_for_dark_is_left_alone(self) -> None:
+        """The other half of the same problem: p0068's diagrams are light ink, which our
+        ground already suits. Plating those would break what currently works."""
+        body = await (await self.client.get('/solutions/0068/', headers=_READER)).text()
+        self.assertIn('ink-light', body)
+        self.assertNotIn('ink-dark', body)
+
+    @unittest_run_loop
     async def test_problem_page_off_site_links(self) -> None:
         """The meta line links out to the problem and to its directory on GitHub.
 
@@ -957,6 +972,93 @@ class PinnedInstanceTests(AioHTTPTestCase):
         headers = {'X-User': 'm@example.com', 'X-Profile': 'maintainer'}
         resp = await self.client.get('/', headers=headers)
         self.assertEqual(resp.status, 401)
+
+
+class StatementForDarkGroundTests(unittest.TestCase):
+    """A cached statement is projecteuler.net's own markup, written for their light page.
+
+    Two things in it assume that ground — emphasis colours and transparent diagrams — and
+    both are met without giving the statement a light panel of its own, because the dark
+    ground is the design. These pin the two transforms and, more importantly, what each
+    deliberately leaves alone.
+
+    Read from the real cache: the point of the plate is what is *in* the pictures, and a
+    fixture image would only ever assert that the arithmetic runs.
+    """
+
+    root: Path = Path(__file__).resolve().parents[1]
+
+    def test_latex_colour_is_remapped(self) -> None:
+        """The reported case (p0238): the colour is LaTeX inside MathJax, so no stylesheet
+        can reach it — by the time CSS applies it is already a fill."""
+        out = content.recolour_statement(r'$\color{blue}{14025}$ and $\color{red}{7}$')
+        self.assertIn(r'\color{' + content.STATEMENT_COLOURS['blue'] + '}', out)
+        self.assertIn(r'\color{' + content.STATEMENT_COLOURS['red'] + '}', out)
+        self.assertNotIn(r'\color{blue}', out)
+
+    def test_inline_style_colour_is_remapped(self) -> None:
+        """CSS could only beat an inline style with `!important`."""
+        out = content.recolour_statement('<span style="color:#3333ff">n</span>')
+        self.assertIn(f'color:{content.STATEMENT_COLOURS["#3333ff"]}', out)
+
+    def test_a_colour_we_do_not_know_is_left_exactly_as_written(self) -> None:
+        """Better the author's own value than whatever a guess produced."""
+        for source in (r'$\color{teal}{x}$', '<span style="color:rebeccapurple">x</span>'):
+            self.assertEqual(content.recolour_statement(source), source)
+
+    def test_hex_case_does_not_matter(self) -> None:
+        """The cache holds both `#FF0000` and `#3333ff` — the table is matched folded."""
+        self.assertIn(content.STATEMENT_COLOURS['#ff0000'],
+                      content.recolour_statement('<i style="color: #FF0000">x</i>'))
+
+    def test_a_transparent_dark_ink_diagram_is_plated(self) -> None:
+        sdir = self.root / 'solutions' / 'public' / 'p0015'
+        html = content.rewrite_statement_links((sdir / 'statement.html').read_text(), 15)
+        self.assertIn('ink-dark', content.plate_statement_images(html, 15, sdir))
+
+    def test_a_transparent_light_ink_diagram_is_not_plated(self) -> None:
+        """Light ink is what a dark page wants; plating it would break what works."""
+        sdir = self.root / 'solutions' / 'public' / 'p0068'
+        html = content.rewrite_statement_links((sdir / 'statement.html').read_text(), 68)
+        out = content.plate_statement_images(html, 68, sdir)
+        self.assertIn('ink-light', out)
+        self.assertNotIn('ink-dark', out)
+
+    def test_an_opaque_diagram_is_left_alone(self) -> None:
+        """It brings its own background, so the page's ground never reaches it."""
+        sdir = self.root / 'solutions' / 'public' / 'p0096'
+        html = content.rewrite_statement_links((sdir / 'statement.html').read_text(), 96)
+        out = content.plate_statement_images(html, 96, sdir)
+        self.assertNotIn('ink-', out)
+
+    def test_one_statement_can_need_both_answers(self) -> None:
+        """p0091 carries a dark-ink diagram and a light-ink one, which is the whole reason
+        no single background could have worked and the pixels had to be read."""
+        sdir = self.root / 'solutions' / 'public' / 'p0091'
+        out = content.prepare_statement((sdir / 'statement.html').read_text(), 91, sdir)
+        self.assertIn('ink-dark', out)
+        self.assertIn('ink-light', out)
+
+    def test_the_existing_class_survives_the_plate(self) -> None:
+        """projecteuler's own `dark_img` stays on the tag — it is theirs, not ours to eat."""
+        sdir = self.root / 'solutions' / 'public' / 'p0015'
+        out = content.prepare_statement((sdir / 'statement.html').read_text(), 15, sdir)
+        self.assertRegex(out, r'class="ink-dark [^"]*dark_img')
+
+    def test_an_unresolvable_image_is_left_alone(self) -> None:
+        """An off-site src, or a resource that never downloaded: no plate, as before."""
+        sdir = self.root / 'solutions' / 'public' / 'p0015'
+        for tag in ('<img src="https://example.com/x.png"/>',
+                    '<img src="/solutions/0015/resources/nope.png"/>',
+                    '<img src="/solutions/0015/../../etc/passwd"/>'):
+            self.assertEqual(content.plate_statement_images(tag, 15, sdir), tag)
+
+    def test_plating_needs_the_number_not_the_directory_name(self) -> None:
+        """The route is `/solutions/0015/` while the directory is `p0015`; deriving the file
+        path from the directory's own name silently matched nothing at all."""
+        sdir = self.root / 'solutions' / 'public' / 'p0015'
+        self.assertNotIn('/p0015/', content.rewrite_statement_links(
+            (sdir / 'statement.html').read_text(), 15))
 
 
 if __name__ == '__main__':

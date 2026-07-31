@@ -51,6 +51,13 @@ web = [
     # cp38-abi3 stable-ABI wheel installs on 3.14 with no Rust toolchain;
     # content.sh's deploy/status checks verify the import in the system venv.
     "nh3",
+    # Reading the ink of a cached problem diagram (content._image_ink): a
+    # projecteuler.net statement's images are transparent, so they take our dark
+    # ground, and their line art is drawn for a white one. Only the pixels say which
+    # images need a plate — `class="dark_img"` does not. The import is local to that
+    # one function and its absence degrades to "no plate" (today's rendering), so a
+    # venv without it serves statements, just without the fix.
+    "pillow",
 ]
 solutions = [
     # NOTE: `pip install primesieve` builds only the base extension; its optional

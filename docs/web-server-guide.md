@@ -1325,6 +1325,33 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   files hidden, each name coloured by its git status with the status spelled out in the
   hover title.
 
+  **The statement is foreign content, and it assumes a light page.** It is
+  projecteuler.net's own markup, cached verbatim, and two things in it are written for
+  their white ground. `content.prepare_statement` meets both on the way out — the dark
+  ground stays the design, because a bright panel in the middle of the page would be the
+  more visible bug.
+
+  *Emphasis colours.* A statement asks for colour three ways, and all three land on
+  `content.STATEMENT_COLOURS`: the LaTeX `\color{…}` MathJax renders (the case that
+  started this — no stylesheet can reach it, since by the time CSS applies MathJax has
+  turned it into a fill), an inline `style="color:…"` (which CSS could only beat by
+  shouting `!important`), and their `class="red"` spans (the stylesheet's `.statement
+  .red` rules, scoped so a generic `.red` cannot collide). Each maps to the same hue
+  lifted for a dark ground: `#3333ff` on `#0f1115` was the reported case. A colour outside
+  the table is left exactly as written — the author's own value beats a guess.
+
+  *Transparent diagrams.* A see-through image takes the page's ground. Of the cached
+  statement images 43 are dark line art on transparency — a black diagram on a near-black
+  field, on problems as ordinary as 15, 86 and 91 — while 29 are light ink that our ground
+  suits exactly, and 183 are opaque and carry their own background.
+  `content.plate_statement_images` reads the pixels (`_image_ink`, Pillow, cached per file
+  by mtime and size) and marks only the dark-ink ones `ink-dark`; the stylesheet gives
+  those a light plate. **The pixels are the only honest source** — projecteuler's
+  `class="dark_img"` sits on 37 of the dark-ink images and 20 of the light-ink ones, so it
+  does not tell them apart in our cache. p0091 carries one of each in a single statement,
+  which is the whole reason no single background could have worked. Pillow's absence
+  degrades to "no plate", which is exactly the old rendering.
+
 **Every off-site link opens in a new tab.** `site.js` stamps `target="_blank"
 rel="noopener noreferrer"` on any link whose host is not ours, on load and after every
 swap. It is a document-wide rule rather than per-link markup precisely because the

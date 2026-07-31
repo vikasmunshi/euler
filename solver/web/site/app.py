@@ -347,9 +347,11 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'info': info,
         'euler_url': f'https://projecteuler.net/problem={number}',
         'github_url': github,
-        # Relative resource links (images, the data file) rooted at this problem's
-        # canonical path, so they resolve after an htmx swap, not just a full load.
-        'statement': content.rewrite_statement_links(read_html('statement.html'), number),
+        # The cached projecteuler.net markup, made to work on a dark page: resource links
+        # rooted at this problem's canonical path (so they resolve after an htmx swap, not
+        # just a full load), emphasis colours remapped, and transparent dark-ink diagrams
+        # marked for a plate. See content.prepare_statement.
+        'statement': content.prepare_statement(read_html('statement.html'), number, sdir),
         'notes': read_html('notes.html'),
         'tags': content.problem_tag_view(repo_root, number),
         'files': _file_entries(repo_root, sdir),
