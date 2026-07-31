@@ -507,7 +507,7 @@ it succeeds.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.138)
+[ecb_usd_rate=<float>] (default 1.1485)
 ```
 
 **arguments**
@@ -1781,6 +1781,9 @@ after changing any command's name, alias, help text, signature,
 `requires`/`channels`, a module's first docstring line, or the README's HOME
 region.
 
+What it rewrote is committed — the guides, the README, the module registry, the
+start-page summary and the Claude guidance, and nothing beside them.
+
 **Admin-floored on purpose, not out of caution.** Registration is itself
 profile-filtered (`solver/shell/command.py`): a command above your floor is never
 registered, so `registry.all()` returns only what *you* may run. Regenerating from a
@@ -1821,6 +1824,8 @@ input/output price (per million tokens) from the public pricing page, and rewrit
 with its display name. Nothing outside the markers is touched, and the USD→EUR rate is
 `update-usd-rate`'s to refresh.
 
+A regenerated block is committed, staging `models.py` and nothing beside it.
+
 **usage**
 
 ```
@@ -1854,6 +1859,8 @@ the topic articles' problem lists and rewrite the article index `topics/articles
 problem with notes but no `tags.json` is reported, not created here — the
 `claude-api tags` target (or the skill) authors it.
 
+The reconciled graph is committed — both legs together, and nothing beside them.
+
 **usage**
 
 ```
@@ -1881,6 +1888,8 @@ Refresh the USD→EUR rate used to report API costs.
 Fetches the euro reference rate from the European Central Bank's daily feed and writes it
 to `ecb_usd_rate` in `config.json`, the managed setting `costs` converts API spend with.
 A rate within a rounding step of the stored one is left alone. Nothing else is touched.
+
+A rate that moved is committed, staging that one file and nothing beside it.
 
 **usage**
 
