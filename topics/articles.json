@@ -4422,7 +4422,7 @@
     {
       "path": "technique/gmp",
       "title": "GMP",
-      "status": "draft",
+      "status": "final",
       "solved": 11,
       "problems": 11,
       "tags": ["gmp"],
