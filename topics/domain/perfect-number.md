@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Perfect_number
 ## Problems
 
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
-- ○ [0241](/solutions/0241/) — Perfection Quotients
+- ● [0241](/solutions/0241/) — Perfection Quotients
 
 <!-- /problems -->

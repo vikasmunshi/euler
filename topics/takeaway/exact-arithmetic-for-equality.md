@@ -111,6 +111,7 @@ decision.
 - ● [0205](/solutions/0205/) — Dice Game
 - ● [0211](/solutions/0211/) — Divisor Square Sum
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
+- ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0493](/solutions/0493/) — Under the Rainbow

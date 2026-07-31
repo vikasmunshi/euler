@@ -11,6 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Miller%E2%80%9
 - ● [0131](/solutions/0131/) — Prime Cube Partnership
 - ● [0146](/solutions/0146/) — Investigating a Prime Pattern
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
+- ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0487](/solutions/0487/) — Sums of Power Sums

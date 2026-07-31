@@ -14,6 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Multiplicative
 - ● [0124](/solutions/0124/) — Ordered Radicals
 - ● [0127](/solutions/0127/) — abc-hits
 - ● [0211](/solutions/0211/) — Divisor Square Sum
+- ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0243](/solutions/0243/) — Resilience
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube

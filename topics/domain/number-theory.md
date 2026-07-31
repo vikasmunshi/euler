@@ -19,7 +19,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Number_theory>
 - ● [0179](/solutions/0179/) — Consecutive Positive Divisors
 - ● [0193](/solutions/0193/) — Squarefree Numbers
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
-- ○ [0241](/solutions/0241/) — Perfection Quotients
+- ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0243](/solutions/0243/) — Resilience
 - ○ [0245](/solutions/0245/) — Coresilience
 - ○ [0248](/solutions/0248/) — Euler's Totient Function Equals 13!

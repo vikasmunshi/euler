@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Irreducible_fr
 ## Problems
 
 - ● [0180](/solutions/0180/) — Golden Triplets
+- ● [0241](/solutions/0241/) — Perfection Quotients
 
 <!-- /problems -->
