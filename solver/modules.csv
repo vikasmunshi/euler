@@ -51,6 +51,7 @@ solver.utils.linter,True
 solver.utils.loader,
 solver.utils.misc,True
 solver.utils.path_utils,
+solver.utils.quips,
 solver.utils.repo_root,
 solver.utils.scripts,True
 solver.utils.search,True

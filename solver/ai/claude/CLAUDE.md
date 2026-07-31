@@ -178,6 +178,7 @@ solver/
     loader.py          — Utility for loading command modules.
     misc.py            — The `problems` and `manage-config` commands.
     path_utils.py      — Utility functions for file and directory operations.
+    quips.py           — The `update-*` verbs' commit subjects — one pool per verb, in one place.
     repo_root.py       — Where the working tree is — the one answer, for every part of the solver that needs it.
     scripts.py         — Dependency and system-resource setup commands.
     search.py          — 'find' command: grep the solution stack for a regular expression.
