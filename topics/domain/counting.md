@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Counting>._
 - ● [0173](/solutions/0173/) — Hollow Square Laminae I
 - ● [0191](/solutions/0191/) — Prize Strings
 - ● [0201](/solutions/0201/) — Subsets with a Unique Sum
-- ○ [0240](/solutions/0240/) — Top Dice
+- ● [0240](/solutions/0240/) — Top Dice
 - ○ [0242](/solutions/0242/) — Odd Triplets
 - ○ [0275](/solutions/0275/) — Balanced Sculptures
 - ○ [0281](/solutions/0281/) — Pizza Toppings

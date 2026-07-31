@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Convolution>._
 
 - ● [0092](/solutions/0092/) — Square Digit Chains
 - ● [0205](/solutions/0205/) — Dice Game
+- ● [0240](/solutions/0240/) — Top Dice
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 
