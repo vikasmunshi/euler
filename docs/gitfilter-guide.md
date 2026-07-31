@@ -113,7 +113,8 @@ It used to be tracked: `keys/enc-key.json`, every authorised key, committed and 
 cost was structural. A rotation had to edit that tracked file, `sync.sh` stashes a dirty tree
 around the merge and pops it after, and the authorised copy arriving from the other side made
 the pop conflict — leaving markers in JSON that every reader takes for "not authorised",
-decryption included. A reader could not even repair it: `git-reset` is contributor-floored. It
+decryption included. A reader could not even repair it: `git-reset` was contributor-floored then (it sits at
+`reader` now). It
 also needed an attribution map to say whose entries were whose, a purge verb to remove the
 stale ones, a machine-local overlay to bridge rotations, and a repair path inside `git-sync`.
 All of that was the price of keeping per-machine key material in shared state.

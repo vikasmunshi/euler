@@ -44,12 +44,19 @@ class PolicyShapeTest(unittest.TestCase):
     widen the gate on `master` — `scripts/git/publish.sh` pushes it directly only for
     the repo owner's GitHub identity and routes everyone else to a branch plus a pull
     request, and `git-push` keeps its own `admin` check on the master branch
-    (see `test_non_admin_cannot_push_master` below)."""
+    (see `test_non_admin_cannot_push_master` below).
+
+    `git-reset` sits at **reader**, the one ref-moving verb that does: `--soft` keeps the
+    working tree and makes no commit, so it can neither destroy work nor put anything on
+    master — the blast radius that floors the others is empty. Floored at contributor it
+    stranded the rung least able to help itself, since a reader cannot commit their way out
+    of a clone that has drifted ahead of origin/master."""
 
     def test_floors_of_the_git_commands(self) -> None:
         load_commands()
         expected = {'git-status': 'reader', 'git-sync': 'reader', 'git-filter': 'reader',
-                    'git-commit': 'contributor', 'git-reset': 'contributor',
+                    'git-reset': 'reader',
+                    'git-commit': 'contributor',
                     'git-push': 'contributor', 'git-hooks': 'contributor',
                     'git-identity': 'contributor', 'gh-merge': 'maintainer',
                     'git-publish': 'maintainer'}

@@ -329,7 +329,15 @@ def _commits_ahead_of_master() -> int:
     return int(out) if proc.returncode == 0 and out.isdigit() else 0
 
 
-@register(requires='contributor', quietable=True, aliases=('reset',))
+# Reader, alone among the verbs that move a ref: this one cannot lose work. `--soft` leaves
+# the working tree untouched and makes no commit, so there is nothing it can destroy and
+# nothing it can put on master — the blast radius that floors every other write verb is
+# empty here. What the contributor floor did instead was strand the rung least able to help
+# itself: a reader whose clone had drifted ahead of origin/master had no verb for it at all,
+# which is a state they cannot reach by committing (they cannot) and so cannot be blamed for.
+# `scripts/ops/reset-user.sh` stays the operator's answer for the harder wedge — a conflicted
+# merge or a half-checked-out worktree needs `--hard`, which this deliberately is not.
+@register(requires='reader', quietable=True, aliases=('reset',))
 def git_reset() -> int:
     """Soft-reset your branch to origin/master — un-commit, keep every change.
 

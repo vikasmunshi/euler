@@ -43,7 +43,7 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | `contributor` | Configure your git identity and push credential from your GitHub login. |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | `maintainer` | Publish changed files for named targets to the remote repository. |
 | [`git-push`](commands-index.md#command-git-push-push) | `push` | `contributor` | Push the current branch to origin as yourself, then open its pull request. |
-| [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | `contributor` | Soft-reset your branch to origin/master — un-commit, keep every change. |
+| [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | `reader` | Soft-reset your branch to origin/master — un-commit, keep every change. |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |

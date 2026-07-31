@@ -101,12 +101,29 @@ class HeaderChipShapeTests(unittest.TestCase):
         for earlier in ("'git-status --details'", "'git-sync'",
                         "'git-commit solution docs topics'", "'git-push'", "'gh-merge merge'"):
             self.assertLess(menu.index(earlier), reset, earlier)
-        # The separator sits between the last forward verb and the undo, with nothing
-        # between it and the reset row.
         # Exactly one verb call between the last separator and the reset row: its own.
         last_sep = menu[:reset].rindex('menu-sep')
         self.assertEqual(menu[last_sep:reset].count('{{ verb('), 1,
                          'the separator is the pause immediately before the undo')
+
+    def test_the_git_rows_name_the_work_not_the_command(self) -> None:
+        """`git-commit solution docs topics` is a fine thing to run and a poor thing to call
+        a button. The command is on every row already (the macro renders it into `.cmd`), so
+        the label is free to say which of the day's jobs this is — and has to, or the menu
+        reads as a transcript of the shell rather than a way into it."""
+        menu = self._template('_git.html')
+        labels = [m.group(1) for m in re.finditer(r"\{\{ verb\('([^']+)'", menu)]
+        self.assertGreaterEqual(len(labels), 6, 'the git menu lost its rows')
+        for label in labels:
+            self.assertNotRegex(label, r'^(git|gh)-', f'{label!r} is the command, not the work')
+
+    def test_the_undo_row_is_offered_to_every_rung(self) -> None:
+        """`git-reset` is `--soft`: it keeps the working tree and makes no commit, so it can
+        neither lose work nor reach master. Floored higher it stranded the rung least able to
+        help itself — a reader cannot commit their way out of a drifted clone."""
+        menu = self._template('_git.html')
+        row = menu[menu.rindex('{{ verb(', 0, menu.index("'git-reset'")):]
+        self.assertRegex(row[:120], r"'git-reset',\s*'reader'")
 
     def test_the_message_chip_refreshes_when_it_is_opened(self) -> None:
         """`load` and the pushed nudge can both be missed — the nudge rides the terminal's

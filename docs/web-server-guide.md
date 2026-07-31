@@ -621,8 +621,10 @@ their own home — the git filter enforces the enc-key layer with no extra machi
 
 **Repair** — `sudo bash scripts/ops/reset-user.sh <slug>` fetches and hard-resets one
 collaborator's clone to origin/master, as that user. It exists because a clone can reach a
-state its owner cannot leave with the verbs their profile has: a reader has no `git-reset`
-and no `!`, so a conflicted or half-checked-out worktree is terminal for them. It discards
+state its owner cannot leave with the verbs their profile has. `git-reset` is at `reader`
+now, so a branch merely *ahead* of origin/master is self-service — but it is `--soft` by
+design, which is exactly why it is not the answer here: a conflicted merge or a
+half-checked-out worktree needs `--hard`, and no rung is given that. It discards
 their local commits and uncommitted changes — that is the point, and it prints what it is
 about to destroy and asks first. It runs git **as them**, never as root, because
 root-owned objects in their home turn one wedged clone into a permanently wedged one. It
@@ -796,7 +798,8 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
   rotation dirtied a tracked file, `sync.sh` stashed and popped it around the merge, the pop
   conflicted with the authorised copy coming the other way, and the markers left the JSON
   unparseable, which every reader takes for "not authorised". A reader could not even repair
-  it (`git-reset` is contributor-floored). It also needed an attribution map, a purge verb, a
+  it (`git-reset` was contributor-floored then; it sits at `reader` now). It also needed an
+  attribution map, a purge verb, a
   machine-local overlay and a repair path in `git-sync` — all to manage a sharing nobody
   wanted.
 
@@ -858,9 +861,15 @@ failure mode collapses to one answer here (no keypair, a locked vault, no entry 
 ## 10 · Git
 
 Git is **native** in the user's own clone — there is no broker, and nothing proxies it.
-`git-status`/`git-sync` sit at `reader`; `git-commit`/`git-reset`/`git-push`/
+`git-status`/`git-sync`/`git-reset` sit at `reader`; `git-commit`/`git-push`/
 `git-hooks`/`git-identity` at `contributor`; `gh-pr` at `maintainer`; `git-publish` at
 `admin`.
+
+`git-reset` is the one ref-moving verb at `reader`, and it earns it by what `--soft` does
+*not* do: it keeps the working tree and makes no commit, so it can neither destroy work nor
+put anything on master. The blast radius that floors every other write verb is empty here,
+while the contributor floor stranded the rung least able to help itself — a reader cannot
+commit their way out of a clone that has drifted ahead of origin/master.
 
 `git-commit` is the **one** commit verb: what it stages is named by its targets
 (`solution`, `solutions`, `docs`, `topics`, `update`) rather than by a command per body of
@@ -1533,6 +1542,15 @@ the command lands in a shell that already resolved this subject, and `requires()
 the boundary whatever the menu shows. `git-commit` needs no problem argument, because the
 shell supplies the one it is on, and no message either — the command asks for one at the
 prompt, so the row *starts* the commit rather than completing it.
+
+**The rows name the work, not the commands.** "Save my work", not "Commit"; "Land a pull
+request", not "Pull requests"; "Un-commit, keep my changes", not "Reset to master". The
+command is on every row regardless — the macro renders it into `.cmd` beside the label — so
+the menu still teaches exactly what it types, which frees the label to say which of the
+day's jobs this is. A panel whose labels are the command names is a transcript of the shell
+rather than a way into it, and `git-commit solution docs topics` is a fine thing to run and
+a poor thing to call a button. They are ordered as the job runs: see what changed, take what
+others landed, save it, hand it over, land someone else's.
 
 **One commit row, three targets.** `git-commit solution docs topics` is a single button for
 "save what I did", whichever of those the afternoon went into. Naming three targets costs
