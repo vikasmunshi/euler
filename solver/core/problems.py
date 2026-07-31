@@ -3,7 +3,7 @@
 """The Problem model plus the projecteuler.net problem scraper and on-disk cache."""
 from __future__ import annotations
 
-__all__ = ['Problem', 'problems', 'solution_dir']
+__all__ = ['Problem', 'SOLVED_DATE_FORMAT', 'format_solved_date', 'parse_solved_date', 'problems', 'solution_dir']
 
 from datetime import datetime
 from functools import lru_cache
@@ -19,6 +19,40 @@ from bs4.element import AttributeValueList
 
 from solver.config import config
 from solver.core.download import download_file
+
+
+SOLVED_DATE_FORMAT: str = '%a, %d %b %Y, %H:%M'
+"""How a solved date is written in `problems.json` — the progress page's own wording.
+
+The field has two writers: the projecteuler.net progress page (scraped verbatim by
+`solver.utils.summary`) and the `mark` command. Both must speak this one format, or the
+record the second one writes is unreadable to everything that reads the first.
+"""
+
+
+def format_solved_date(when: datetime) -> str:
+    """Render *when* the way `problems.json` records a solved date."""
+    return when.strftime(SOLVED_DATE_FORMAT)
+
+
+def parse_solved_date(text: str) -> datetime | None:
+    """Read a `problems.json` solved date, or `None` when there is nothing readable there.
+
+    ISO-8601 is accepted as well as :data:`SOLVED_DATE_FORMAT`: `mark` wrote its dates that
+    way until this was fixed, so a clone or a backup can still carry them. An unparseable
+    date is a missing date, not an error — one malformed record must not take down every
+    caller that only wanted the latest one.
+    """
+    if not text:
+        return None
+    try:
+        return datetime.strptime(text, SOLVED_DATE_FORMAT)
+    except ValueError:
+        pass
+    try:
+        return datetime.fromisoformat(text)
+    except ValueError:
+        return None
 
 
 @lru_cache(maxsize=None)
@@ -162,9 +196,9 @@ class Problems:
         for num, info in get_problems().items():
             if not info['solved']:
                 continue
-            if not info['date']:
+            solved = parse_solved_date(info['date'])
+            if solved is None:
                 continue
-            solved = datetime.strptime(info['date'], "%a, %d %b %Y, %H:%M")
             if not latest_solved or solved > latest_solved:
                 result = Problem.from_number(num)
                 latest_solved = solved

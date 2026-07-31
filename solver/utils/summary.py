@@ -12,7 +12,7 @@ from typing import Any
 from bs4 import BeautifulSoup, Tag
 
 from solver.config import ExitCodes, config
-from solver.core.problems import Problem, problems
+from solver.core.problems import Problem, format_solved_date, problems
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
 from solver.web.msg import UNREGISTERED_SUBJECT
@@ -292,7 +292,7 @@ def mark(problem: Problem) -> int:
         console.print(f'[error]error:[/error] [muted]{problem} is not solved.[/muted]')
         return ExitCodes.EXIT_ERROR
     _problems[problem.number]['solved'] = True
-    _problems[problem.number]['date'] = datetime.now().isoformat()
+    _problems[problem.number]['date'] = format_solved_date(datetime.now())
     _update_problems_state(_problems)
     return ExitCodes.EXIT_OK
 
