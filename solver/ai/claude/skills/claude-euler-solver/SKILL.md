@@ -168,11 +168,11 @@ Write and verify a Python solution, translate it to C, then document and summari
 6. **Document.** Replace the template's placeholder module and function docstrings
    with the real approach. Bring the in-source docs to
    [convention_source_documentation.md](docs/convention_source_documentation.md).
-7. **Summarise.** Run `solver "benchmark <n>"` to record fresh timings, then
-   write/refresh the solution directory's `notes.html` per
-   [convention_documentation.md](docs/convention_documentation.md), using the recorded
-   `results.json` values for every timing claim. `notes.html` is *Problem Analysis* and
-   *Solution Approach* only — no techniques or takeaways sections.
+7. **Summarise.** Run `solver "benchmark <n> && benchmark <n>"` to record fresh
+   timings (benchmark twice), then write/refresh the solution directory's
+   `notes.html` per [convention_documentation.md](docs/convention_documentation.md),
+   using the recorded `results.json` values for every timing claim. `notes.html` is
+   *Problem Analysis* and *Solution Approach* only — no techniques or takeaways sections.
 8. **Tag.** Write/refresh the solution directory's `tags.json` per
    [convention_tags.md](docs/convention_tags.md): the problem's `domain`, each solution index's
    `techniques`, and any `takeaways` — choosing slugs from the vocabulary in `topics/tags.json`
