@@ -22,12 +22,12 @@ class LoadManagedConfigTests(unittest.TestCase):
     def setUp(self) -> None:
         self._saved = {param: config._data[param] for param in config.managed}
         self._tmp = Path(tempfile.mkdtemp(prefix='euler-cfg-test-')) / 'config.json'
-        self._saved_file = config.managed_config_file
-        type(config).managed_config_file = self._tmp
+        self._saved_file = config._data['managed_config_file']
+        config._data['managed_config_file'] = self._tmp
         self.addCleanup(self._restore)
 
     def _restore(self) -> None:
-        type(config).managed_config_file = self._saved_file
+        config._data['managed_config_file'] = self._saved_file
         config._data.update(self._saved)
 
     def _write(self, data: dict[str, object]) -> None:

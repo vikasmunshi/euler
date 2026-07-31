@@ -122,6 +122,11 @@ include = ["solver*"]
 # utils/loader.py); it must ship in the wheel so the deployed venv can import
 # the command modules.
 solver = ["*.html", "modules.csv"]
+# `config.templates_dir` is package-relative, so the whole template set must ship:
+# the AI prompts (prompt_*.txt), the C solution template (new.c — new.py is a module
+# and ships anyway) and the blogger's article.md. Without these a deployed shell's
+# `new … c`, `claude-api` and `claude-blog` read a file that isn't there.
+"solver.templates" = ["*.txt", "*.c", "*.md"]
 "solver.web" = [
     "templates/*.html",      # Jinja pages ship inside the deployed venv
     # The start page's summary — a tracked, generated file (the `update-docs`

@@ -131,7 +131,6 @@ def _package_version() -> str:
 
 
 class Config(AttributeDict):
-    managed_config_file: ClassVar[Path] = Path(__file__).parent / 'config.json'
     version: ClassVar[str] = _package_version()
     #: The subset of settings that `load`/`dump`/`repr` round-trip through `managed_config_file`.
     managed: ClassVar[tuple[str, ...]] = ('timeout_multiple', 'timeout_single', 'ecb_usd_rate')
@@ -139,6 +138,9 @@ class Config(AttributeDict):
     # Annotation-only declarations of the settings served from `_data` via `__getattr__` (they assign no
     # value, so the lookup falls through to `__getattr__` at runtime). They give static checkers the
     # precise per-field type of each `config.<name>` read.
+    root_dir: Path
+    package_dir: Path
+    managed_config_file: Path
     scripts: Scripts
     api_timeout: float
     max_line_length: int
@@ -160,7 +162,6 @@ class Config(AttributeDict):
     user: str
     user_slug: str
     user_profile: str
-    root_dir: Path
     backup_dir: Path
     cache_dir: Path
     docs_dir: Path
@@ -172,7 +173,6 @@ class Config(AttributeDict):
     modules_file: Path
     session_file: Path
     solutions_dir: Path
-    static_file_dir: Path
     static_file_problems: Path
     static_file_progress: Path
     templates_dir: Path
@@ -209,6 +209,10 @@ class Config(AttributeDict):
         user_state_dir: Path = root_dir / '.state' / subject.slug
         user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
+            'root_dir': root_dir,
+            'package_dir': package_dir,
+            'managed_config_file': root_dir / 'solver/config.json',
+
             'scripts': Scripts(),
 
             'api_timeout': 600.0,  # seconds
@@ -232,7 +236,6 @@ class Config(AttributeDict):
             'user': subject.user,
             'user_slug': subject.slug,
             'user_profile': subject.profile,
-            'root_dir': root_dir,
             'backup_dir': root_dir / '.backup',
             'cache_dir': root_dir / '.cache',
             'docs_dir': root_dir / 'docs',
@@ -245,10 +248,9 @@ class Config(AttributeDict):
             'modules_file': package_dir / 'modules.csv',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
-            'static_file_dir': root_dir / 'solver/web/content',
             'static_file_problems': root_dir / 'solutions/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
-            'templates_dir': root_dir / 'solver/templates',
+            'templates_dir': package_dir / 'templates',
             'topics_dir': root_dir / 'topics',
             'central_tags_file': root_dir / 'topics' / 'tags.json',
             'topics_index_file': root_dir / 'topics' / 'articles.json',
