@@ -29,6 +29,7 @@ from solver.config import ExitCodes, config
 from solver.core.download import download_file
 from solver.core.git import commit_regenerated
 from solver.shell import console, register
+from solver.utils.quips import quips
 
 #: The ECB euro foreign-exchange reference rates (daily, free, no API key) — the authoritative
 #: source for EUR conversions. It quotes `1 EUR = N USD`, so `ecb_usd_rate` is `N`.
@@ -39,15 +40,6 @@ _USD_RATE_RE = re.compile(r"""currency=['"]USD['"]\s+rate=['"]([\d.]+)['"]""")
 
 #: Below this the two rates round to the same displayed figure — not worth a write.
 _EPSILON = 5e-5
-
-#: Commit subjects for the rate's own commit (`commit_regenerated`); one is picked at random.
-_QUIPS: tuple[str, ...] = (
-    'the euro moved, so the ledger moved',
-    're-pegged to Frankfurt\'s opinion of the dollar',
-    'one float, imported fresh from the ECB',
-    'money is a moving target; this is where it moved to',
-    'today\'s exchange rate, before it stops being today\'s',
-)
 
 
 def _fetch_ecb_usd_rate() -> float | None:
@@ -94,7 +86,7 @@ def update_usd_rate(check: bool = False) -> int:
         console.print('[muted]USD→EUR rate already up to date[/muted]')
         # Still offered to the committer: an earlier run may have written the rate and failed
         # to commit it, and "up to date" must not mean "left dirty forever". Clean is a no-op.
-        return commit_regenerated('update-usd-rate', _QUIPS)
+        return commit_regenerated('update-usd-rate', quips['update-usd-rate'])
     if check:
         console.print(f'[error]USD→EUR rate out of date[/error] (run [accent]update-usd-rate[/accent]): '
                       f'[accent]{config.ecb_usd_rate} → {rate}[/accent]')
@@ -105,4 +97,4 @@ def update_usd_rate(check: bool = False) -> int:
     console.print(f'[success]updated[/success] ecb_usd_rate in '
                   f'{config.managed_config_file.relative_to(config.root_dir)} '
                   f'([accent]{previous} → {rate}[/accent])')
-    return commit_regenerated('update-usd-rate', _QUIPS, [f'ecb_usd_rate: {previous} → {rate}'])
+    return commit_regenerated('update-usd-rate', quips['update-usd-rate'], [f'ecb_usd_rate: {previous} → {rate}'])

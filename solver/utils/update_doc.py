@@ -37,6 +37,7 @@ from solver.shell.command import Command, Context, registry
 from solver.shell.docstring import (GLYPH_ASKS, GLYPH_PROBLEM, GLYPH_REQUIRES, GLYPH_SILENT,
                                     help_model)
 from solver.utils.loader import load_commands, update_modules
+from solver.utils.quips import quips
 
 
 def _allowed_profiles(cmd: Command) -> list[str]:
@@ -330,16 +331,6 @@ def _render(text: str) -> tuple[str, list[str]]:
     return text, changed
 
 
-#: Commit subjects for the docs' own commit (`commit_regenerated`); one is picked at random.
-_QUIPS: tuple[str, ...] = (
-    'the map, redrawn to match the territory',
-    'the docs now describe the software that exists',
-    'the catalogue remembers what the registry knows',
-    'prose left alone; the generated blocks tidied themselves',
-    'documentation caught up with the code it documents',
-)
-
-
 def _apply(check: bool) -> tuple[list[str], list[str]]:
     """Render every doc; return *(updated, stale)* as `<file>: <blocks>` strings.
 
@@ -429,4 +420,4 @@ def update_docs(ctx: Context, check: bool = False) -> int:
         console.print('[muted]docs already up to date[/muted]')
     # Committed even when `updated` is empty: `update_modules()` above may have rewritten
     # `solver/modules.csv`, which is this verb's output too and is not in that list.
-    return commit_regenerated('update-docs', _QUIPS, updated)
+    return commit_regenerated('update-docs', quips['update-docs'], updated)
