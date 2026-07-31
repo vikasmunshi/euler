@@ -50,7 +50,7 @@ from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.dialogue import Abort, Ask, Choice
 from solver.web.msg.client import call as _call
-from solver.web.msg import KEY_ISSUE_SUBJECT, verb_for
+from solver.web.msg import KEY_ISSUE_SUBJECT, PR_REVIEW_SUBJECT, verb_for
 from solver.web.msg.identity import STAFF_FLOOR
 
 
@@ -284,11 +284,13 @@ def _act(thread_id: str) -> int:
             from solver.crypto.keys import user_authorize
             return user_authorize(thread_id)
         case 'merge':
-            # No thread is passed: the notice says a pull request is waiting, and the queue
-            # the verb walks is GitHub's. It dismisses this message itself, by the branch in
-            # the subject (`solver.core.git._dismiss_pr_notice`).
-            from solver.core.git import gh_merge
-            return gh_merge('merge')
+            # The branch out of the subject, not the thread id: the queue this act works is
+            # GitHub's, and `merge_pr_for_branch` turns the branch into the number the gate
+            # needs — so acting on *this* notice lands *this* request, rather than offering
+            # the whole queue as a menu. It dismisses this message itself, by the same
+            # branch (`solver.core.git._dismiss_pr_notice`).
+            from solver.core.git import merge_pr_for_branch
+            return merge_pr_for_branch(str(data.get('subject', '')).removeprefix(PR_REVIEW_SUBJECT))
         case _:
             return _show(data)
 

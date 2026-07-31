@@ -209,6 +209,12 @@
       button.title = act;
       button.setAttribute('aria-label', act);
     });
+    // A toggle that also SHOWS its act in words (the header chip's panel row). The bare
+    // controls above are a dot with a tooltip; a menu row has to read as the thing it
+    // does, and both are written from the one `act` so they cannot say different things.
+    document.querySelectorAll('[data-term-toggle-label]').forEach(function (label) {
+      label.textContent = act;
+    });
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
     });
@@ -229,6 +235,17 @@
         + ', ' + (hidden ? 'hidden' : 'visible');
       chip.classList.toggle('is-on', termConnected);
       chip.classList.toggle('is-hidden', hidden);
+    });
+    // The layout half, in words and a dot, for the chip's panel — the session half is the
+    // [data-term-state] / [data-term-dot] pair above. Two readouts because the two states
+    // are independent: a terminal can be connected and hidden, and a panel that showed only
+    // one of them would leave the other unexplained. Which of the hide/show rows is on offer
+    // is CSS's (body.ws-hidden), so the pair below stays two single-purpose controls.
+    document.querySelectorAll('[data-term-layout]').forEach(function (word) {
+      word.textContent = hidden ? 'hidden' : 'visible';
+    });
+    document.querySelectorAll('[data-term-layout-dot]').forEach(function (dot) {
+      dot.className = 'dot ' + (hidden ? 'off' : 'on');
     });
     // A menu whose verbs type into the shell needs one to be there. This is the same
     // single state, not a second reading of the socket: the panels join the set above

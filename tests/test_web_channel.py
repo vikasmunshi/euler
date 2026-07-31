@@ -130,14 +130,23 @@ class WebChannelCommandSetTest(unittest.TestCase):
         verb re-execs the admin CLI under sudo, which a web uid cannot obtain). The
         `update-docs` stays admin-floored for a reason of its own: registration is
         profile-filtered, so a lesser profile's registry is truncated and regenerating from
-        it would silently drop the admin-floored commands from the generated docs.
-        `update-models` is admin-floored too — it rewrites package *source*
-        (`solver/ai/models.py`, `solver/config.json`), which is root-owned in a
-        deployed instance, so a lesser rung would reach the ECB/pricing feeds through the
-        egress allowlist and then fail on the write."""
-        for admin_only in ('users', 'update-docs', 'update-models'):
+        it would silently drop the admin-floored commands from the generated docs."""
+        for admin_only in ('users', 'update-docs'):
             for rung in _WEB_RUNGS:
                 self.assertNotIn(admin_only, self.web[rung], f'{admin_only} must not reach {rung}')
+
+    def test_the_update_verbs_are_floored_by_what_they_write(self) -> None:
+        """Each `update-*` sits at the rung that authors what it rewrites.
+
+        `update-tags` reconciles the tag graph a *contributor* writes as they solve, so it
+        reaches contributor and above — the solver skill runs it in the same pass that
+        authors a problem's `tags.json`. `update-models` curates the model catalogue and its
+        pricing, which is maintainer's work, the same rung that reads `costs`. `update-docs`
+        keeps its admin floor above (its own reason, not a blast-radius one)."""
+        self.assertIn('update-tags', self.web['contributor'])
+        self.assertNotIn('update-tags', self.web['reader'])
+        self.assertIn('update-models', self.web['maintainer'])
+        self.assertNotIn('update-models', self.web['contributor'])
 
 
 if __name__ == '__main__':

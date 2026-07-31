@@ -35,12 +35,9 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`echo`](commands-index.md#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
 | [`edit`](commands-index.md#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. |
-| [`gh-merge`](commands-index.md#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or walk them one at a time to rebase-merge. |
-| [`gh-merge-docs`](commands-index.md#command-gh-merge-docs-merge-docs) | `merge-docs` | `maintainer` | Walk the open pull requests, rebase-merging those that touch only the docs set. |
+| [`gh-merge`](commands-index.md#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or rebase-merge one onto master. |
 | [`git-audit`](commands-index.md#command-git-audit-audit) | `audit` | `contributor` | Audit what git actually stores, across the whole tracked tree. |
-| [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the problem's solution directory. |
-| [`git-commit-amend`](commands-index.md#command-git-commit-amend-amend) | `amend` | `contributor` | Fold this problem's current changes into the last commit, message unchanged. |
-| [`git-commit-docs`](commands-index.md#command-git-commit-docs-commit-docs) | `commit-docs` | `contributor` | Stage and commit the documentation set — and nothing else. |
+| [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the named targets — the one commit verb. |
 | [`git-filter`](commands-index.md#command-git-filter-filter) | `filter` | `reader` | Report or wire the transparent encryption filter for `solutions/private`. |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | `contributor` | Run the git pre-commit and (simulated) pre-push checks on demand. |
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | `contributor` | Configure your git identity and push credential from your GitHub login. |
@@ -72,8 +69,8 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`topic`](commands-index.md#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
 | [`topics`](commands-index.md#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
-| [`update-models`](commands-index.md#command-update-models) | — | `admin` | Refresh the model catalogue and the USD→EUR rate. |
-| [`update-tags`](commands-index.md#command-update-tags) | — | `maintainer` | The glue for the double-entry tag graph. |
+| [`update-models`](commands-index.md#command-update-models) | — | `maintainer` | Refresh the model catalogue and the USD→EUR rate. |
+| [`update-tags`](commands-index.md#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`user`](commands-index.md#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
 | [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |

@@ -64,12 +64,9 @@ a parameter that accepts repetition.
 | [`echo`](#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
 | [`edit`](#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. |
 | [`evaluate`](#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. |
-| [`gh-merge`](#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or walk them one at a time to rebase-merge. |
-| [`gh-merge-docs`](#command-gh-merge-docs-merge-docs) | `merge-docs` | `maintainer` | Walk the open pull requests, rebase-merging those that touch only the docs set. |
+| [`gh-merge`](#command-gh-merge-merge) | `merge` | `maintainer` | List the open pull requests, or rebase-merge one onto master. |
 | [`git-audit`](#command-git-audit-audit) | `audit` | `contributor` | Audit what git actually stores, across the whole tracked tree. |
-| [`git-commit`](#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the problem's solution directory. |
-| [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | `contributor` | Fold this problem's current changes into the last commit, message unchanged. |
-| [`git-commit-docs`](#command-git-commit-docs-commit-docs) | `commit-docs` | `contributor` | Stage and commit the documentation set — and nothing else. |
+| [`git-commit`](#command-git-commit-commit) | `commit` | `contributor` | Stage and commit the named targets — the one commit verb. |
 | [`git-filter`](#command-git-filter-filter) | `filter` | `reader` | Report or wire the transparent encryption filter for `solutions/private`. |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | `contributor` | Run the git pre-commit and (simulated) pre-push checks on demand. |
 | [`git-identity`](#command-git-identity-identity) | `identity` | `contributor` | Configure your git identity and push credential from your GitHub login. |
@@ -101,8 +98,8 @@ a parameter that accepts repetition.
 | [`topic`](#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
 | [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
-| [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and the USD→EUR rate. |
-| [`update-tags`](#command-update-tags) | — | `maintainer` | The glue for the double-entry tag graph. |
+| [`update-models`](#command-update-models) | — | `maintainer` | Refresh the model catalogue and the USD→EUR rate. |
+| [`update-tags`](#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
 | [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
@@ -677,28 +674,27 @@ evaluate
 
 #### Command: `gh-merge` (`merge`)
 
-List the open pull requests, or walk them one at a time to rebase-merge.
+List the open pull requests, or rebase-merge one onto master.
 
 * ⚑ needs maintainer or above.
+* ✎ asks for anything you leave out.
 * » supports --silent to suppress output.
 
-`list` (the default) shows what is waiting: number, title, branch. `merge` walks
-the open pull requests interactively — per request **merge** (rebase onto master),
-**skip**, or **quit** — the same shape as `users process-requests`. Merging one is
-how a collaborator's `user/<slug>` branch lands on master, each of its commits
-replayed onto the tip; their next `git-sync` then rebases those already-applied
-commits away and prunes the merged branch. Merging also **dismisses the notice**
-`git-push` filed for that branch — the message asked for this review, and it is done.
+`list` (the default) shows what is waiting: number, title, branch. `merge` lands one
+of them, named by number and offered as a menu when you leave it out. Merging is how a
+collaborator's `user/<slug>` branch reaches master, each of its commits replayed onto
+the tip; their next `git-sync` then rebases those already-applied commits away and
+prunes the merged branch. It also **dismisses the notice** `git-push` filed for that
+branch — the message asked for this review, and it is done.
 
-A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
-anything else is refused, and a branch spanning both is asked to become two pull
-requests. That gate is what makes this a maintainer's command rather than an admin's:
-merging a branch that carries solutions or topic articles is reviewing content,
-but a branch that also edits the framework, the scripts, or the keys is asking for
-something else entirely. Merge those on GitHub, as an admin who has read them.
-
-The docs set has its own gate and its own verb — `gh-merge-docs` — and the two are
-disjoint: a docs branch is refused here, a solutions branch is refused there.
+Every file in the pull request must sit inside the allowlist: `solutions/`, `docs/`,
+`topics/`, and the specific files the `update` target names — which is exactly what
+`git-commit` can stage. One file outside it refuses the whole request. That is the
+gate, and the only one: a request may carry as many commits, across as many targets,
+as the work needed. What makes this a maintainer's command rather than an admin's is
+that everything in it came from a commit verb they know the shape of; a branch that
+also edits the framework, the scripts, or the keys is asking for something else
+entirely, and belongs on GitHub in front of an admin who has read it.
 
 Aliased as `merge`.
 
@@ -707,6 +703,7 @@ Aliased as `merge`.
 ```
 gh-merge
 [action=list|merge] (default list)
+[pr_number=<int>] (asked)
 [silent=true|--silent]
 ```
 
@@ -714,48 +711,11 @@ gh-merge
 
 | argument | description |
 |----------|-------------|
-| `action` | 'list' shows the open queue; 'merge' walks it interactively. Defaults to 'list'. |
+| `action` | 'list' shows the open queue; 'merge' lands one request. Defaults to 'list'. |
+| `pr_number` | Which pull request to merge, by number. Offered as a menu of the open requests when omitted, so the number never has to be typed out; only ever required for `merge`. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.git.gh_merge`.
-
----
-
-#### Command: `gh-merge-docs` (`merge-docs`)
-
-Walk the open pull requests, rebase-merging those that touch only the docs set.
-
-* ⚑ needs maintainer or above.
-* » supports --silent to suppress output.
-
-`gh-merge`'s sibling for documentation: same interactive walk — per request
-**merge**, **skip**, or **quit** — but the gate admits :data:`DOCS_PATHS` instead of the
-content trees. `gh-merge list` shows the queue either command is walking.
-
-Which verb you reach for names the review you are doing. A branch of *solutions* is
-refused here, and a branch of docs is refused by `gh-merge` — with one deliberate
-overlap, a problem's `tags.json`: it is a solution's file that `update-tags` maintains,
-so it can land either as part of the problem or as part of a graph reconciliation.
-
-Unlike the content gate this one does not insist on a single path: the docs set is one
-body of work, and a regeneration touches most of it at once.
-
-Aliased as `merge-docs`.
-
-**usage**
-
-```
-gh-merge-docs
-[silent=true|--silent]
-```
-
-**arguments**
-
-| argument | description |
-|----------|-------------|
-| `silent` | Suppress this command's output; errors and the result line still show. |
-
-*Defined in* `solver.core.git.gh_merge_docs`.
 
 ---
 
@@ -800,22 +760,37 @@ git-audit
 
 #### Command: `git-commit` (`commit`)
 
-Stage and commit the problem's solution directory.
+Stage and commit the named targets — the one commit verb.
 
 * ⚑ needs contributor or above.
 * ❏ uses/sets current problem.
+* ✎ asks for anything you leave out.
 * » supports --silent to suppress output.
 
-Adds everything under `problem.solution_dir`, plus `solutions/problems.json` (the
-progress file `mark` rewrites), and commits just those — the routine "save my
-progress" step. Aliased as `commit`.
+The routine "save my progress" step. With no target it commits `solution`: everything
+under this problem's directory, plus `solutions/problems.json` (the progress file `mark`
+rewrites), and nothing else. Naming targets widens that to whichever bodies of work you
+mean, and they compose — `git-commit docs update` lands a whole `update-docs` run as one
+commit, `git-commit topics` lands both legs of the tag graph together. A target with
+nothing to stage contributes nothing rather than failing, so composing is cheap.
+
+`--amend` folds the same paths into HEAD with its message untouched — the "I forgot
+something" step, so a checkpoint absorbs the fix instead of growing a "fix typo" commit
+behind it. It is refused once HEAD is on origin (rewriting a pushed commit needs a
+force-push, so committing again is the honest step there), and is a no-op, not a failure,
+when those paths are clean. A message and `--amend` are mutually exclusive: exactly one
+of them says what the commit is called.
+
+Aliased as `commit`.
 
 **usage**
 
 ```
 git-commit
 [problem=<n>] (default current)
-[message=<str>] (default '')
+[solution|solutions|docs|topics|update ...]
+[message=<str>] (asked)
+[amend=true|--amend]
 [reset=true|--reset]
 [silent=true|--silent]
 ```
@@ -824,95 +799,14 @@ git-commit
 
 | argument | description |
 |----------|-------------|
-| `problem` | The problem whose solution directory to commit. |
-| `message` | The commit message. When empty (the default) and `reset` is not set, folds into the last unpushed commit if there is one to amend (see `git-commit-amend`); otherwise commits fresh under the default message "solution for pNNNN". |
-| `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. Suppresses the empty-message amend, since squashing to one checkpoint is the opposite intent. |
+| `problem` | The problem whose solution directory the `solution` target stages. Ignored by every other target. |
+| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the articles and every problem's tag leg) or 'update' (what `update-docs` and `update-models` write outside `docs/` — the README, the module registry, the managed settings, the model block, the Claude guidance). Defaults to 'solution'. |
+| `message` | The commit message. Required unless `amend` is set, and asked for at the prompt when it is left out. |
+| `amend` | Fold the staged changes into HEAD instead of committing, keeping its message. Defaults to False. Refused with a message, with `reset`, or once HEAD is pushed. |
+| `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. `git-reset` is the same move without the re-commit. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.git.git_commit`.
-
----
-
-#### Command: `git-commit-amend` (`amend`)
-
-Fold this problem's current changes into the last commit, message unchanged.
-
-* ⚑ needs contributor or above.
-* ❏ uses/sets current problem.
-* » supports --silent to suppress output.
-
-The "I forgot something" step after `git-commit`: stages everything under
-    `problem.solution_dir` plus `solutions/problems.json` and amends HEAD with
-    `--no-edit`, so the checkpoint absorbs the fix instead of growing a
-    "fix typo" commit behind it.
-
-Refused once HEAD is on origin — amending rewrites the commit, and a rewritten
-    commit that is already pushed only lands again through a force-push, so
-    `git-commit` is the honest step there. A no-op, not a failure, when nothing
-    under those paths has changed.
-
-Aliased as `amend`.
-
-**usage**
-
-```
-git-commit-amend
-[problem=<n>] (default current)
-[silent=true|--silent]
-```
-
-**arguments**
-
-| argument | description |
-|----------|-------------|
-| `problem` | The problem whose changes are folded into HEAD. |
-| `silent` | Suppress this command's output; errors and the result line still show. |
-
-*Defined in* `solver.core.git.git_commit_amend`.
-
----
-
-#### Command: `git-commit-docs` (`commit-docs`)
-
-Stage and commit the documentation set — and nothing else.
-
-* ⚑ needs contributor or above.
-* » supports --silent to suppress output.
-
-The counterpart of `git-commit` for prose and generated docs: it stages exactly
-    :data:`DOCS_PATHS` — the `docs/` guides, the `topics/` articles and tag graph, the
-    README and the start page's slice of it, `solver/modules.csv`, `solver/config.json`,
-    the model enum, the Claude guidance, and each problem's `tags.json` — so a run of
-    `update-docs`, `update-tags` and `update-models` lands as one commit, whole.
-
-The message is tagged `(docs)` unless it already says so, and an empty one becomes
-    `(docs) update`. Unlike `git-commit` an empty message never folds into HEAD: docs
-    are regenerated wholesale and often, and a silent amend would rewrite a commit
-    somebody may already be reading.
-
-A clean docs set is a no-op, not a failure — so this composes in a `&&` chain after a
-    regeneration that had nothing to do.
-
-Aliased as `commit-docs`.
-
-**usage**
-
-```
-git-commit-docs
-[message=<str>] (default '')
-[reset=true|--reset]
-[silent=true|--silent]
-```
-
-**arguments**
-
-| argument | description |
-|----------|-------------|
-| `message` | The commit message, tagged `(docs)` if it is not already. Defaults to `(docs) update`. |
-| `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. |
-| `silent` | Suppress this command's output; errors and the result line still show. |
-
-*Defined in* `solver.core.git.git_commit_docs`.
 
 ---
 
@@ -1916,7 +1810,7 @@ update-docs
 
 Refresh the model catalogue and the USD→EUR rate.
 
-* ⚑ needs admin.
+* ⚑ needs maintainer or above.
 * » supports --silent to suppress output.
 
 Lists the available Claude models from the Anthropic Models API, scrapes each model's base
@@ -1949,7 +1843,7 @@ update-models
 
 The glue for the double-entry tag graph.
 
-* ⚑ needs maintainer or above.
+* ⚑ needs contributor or above.
 
 Order (maintainer beats solver/contributor): apply maintainer edits to the central
 vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into

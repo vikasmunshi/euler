@@ -858,9 +858,17 @@ failure mode collapses to one answer here (no keypair, a locked vault, no entry 
 ## 10 · Git
 
 Git is **native** in the user's own clone — there is no broker, and nothing proxies it.
-`git-status`/`git-sync` sit at `reader`; `git-commit`/`git-commit-amend`/`git-push`/
+`git-status`/`git-sync` sit at `reader`; `git-commit`/`git-reset`/`git-push`/
 `git-hooks`/`git-identity` at `contributor`; `gh-pr` at `maintainer`; `git-publish` at
 `admin`.
+
+`git-commit` is the **one** commit verb: what it stages is named by its targets
+(`solution`, `solutions`, `docs`, `topics`, `update`) rather than by a command per body of
+work, and `--amend` folds into HEAD instead of a second verb. `gh-merge` is the **one**
+merge verb, and it reads from the same table: its allowlist is the union of those targets,
+so a pull request may carry whatever `git-commit` could have staged — several commits,
+spanning several targets — and one file outside it refuses the whole request. There is no
+one-tree rule and no per-body-of-work gate.
 
 - **`git-identity`** (`scripts/git/configure-identity.sh`) is the user's one-time
   self-service setup: `gh auth login` (device flow, which works in a web shell), `gh auth
@@ -959,13 +967,33 @@ pane scrolls its own overflow.
   name and which `site.js` flips with the state. The user menu carries no terminal item at
   all; it is for getting places.
 
-  The header's **terminal chip** only *reports*, and it reports **both** of the terminal's
-  states, because they are independent and either one explains a shell that is not
-  answering: the **session** (connected/disconnected) as the dot's colour, and **layout**
-  (visible/hidden) as a slash struck through the glyph. The tooltip says both in words
-  (`terminal — connected, hidden`). It exists because the titlebar can be hidden away
-  (§ Footer), and the one thing that must never become unreadable is where the session
-  stands.
+  The header's **terminal chip** reports **both** of the terminal's states, because they are
+  independent and either one explains a shell that is not answering: the **session**
+  (connected/disconnected) as the dot's colour, and **layout** (visible/hidden) as a slash
+  struck through the glyph. The tooltip says both in words (`terminal — connected, hidden`).
+  It exists because the titlebar can be hidden away (§ Footer), and the one thing that must
+  never become unreadable is where the session stands.
+
+  **And it offers the act for each.** The chip used to report only, with every control on
+  the terminal window's own titlebar — which is exactly where they are unreachable in the
+  state a person most needs them: hide the window and the titlebar goes with it, leaving the
+  header saying "hidden" beside no way to bring it back but the nav's Terminal item. It is
+  now a `<details class="menu">` on the same chassis as messages, git and the user pill, with
+  a row per state: **connect/disconnect** and **hide/show**. The titlebar's controls are
+  unchanged and stay the closest ones to hand while the window is there.
+
+  Both rows carry the attributes `site.js` already dispatches on, so the panel added no
+  wiring: `[data-term-toggle]` for the session, `[data-term-hide]`/`[data-term-show]` for the
+  layout. The session row is **one** control that flips (the act on offer is always the
+  opposite of the state, and `site.js` writes its label, title and accessible name from the
+  same string), while hide and show stay **two** single-purpose controls — `site.js`'s
+  invariant, so neither can lie about a state it did not read. They read as one flipping row
+  because CSS shows whichever applies (`body.ws-hidden`), which keeps both the invariant and
+  the single row a person expects.
+
+  The chip is deliberately **not** `.term-menu`. That class marks a menu whose verbs type
+  into the shell, which `site.js` dims when the socket is down — and Connect is precisely
+  what someone looking at a disconnected chip came for.
 
   A terminal **control** is any `[data-term-toggle]` carrying a `[data-term-dot]` (its
   title and accessible name are painted, so a control needs no text of its own); a
@@ -1440,14 +1468,30 @@ repeated hashing, no lock.
 door, so there is one execution path and one audit trail. Hence every verb *names the
 command it types* — the menu is a way into the shell, not around it. The floors come free:
 the command lands in a shell that already resolved this subject, and `requires()` there is
-the boundary whatever the menu shows. `git-commit` needs no argument, because the shell
-supplies the problem it is on.
+the boundary whatever the menu shows. `git-commit` needs no problem argument, because the
+shell supplies the one it is on, and no message either — the command asks for one at the
+prompt, so the row *starts* the commit rather than completing it.
 
-**Both merge gates, because the queue has two halves.** The panel carries `gh-merge merge`
-*and* `gh-merge-docs` (both `maintainer`), for the same reason it carries both commit
-verbs: the two gates are disjoint — a branch of docs is refused by `gh-merge`, a branch of
-solutions by `gh-merge-docs` — so a maintainer walking the open pull requests with only
-one verb here has no button for half of what is waiting.
+**One commit row, three targets.** `git-commit solution docs topics` is a single button for
+"save what I did", whichever of those the afternoon went into. Naming three targets costs
+nothing when only one has changed: a clean target contributes no path and the commit says
+so, which is exactly what makes one row viable where two previously asked the reader to
+decide which half of their own work they were saving. `solutions` and `update` are
+deliberately not on it — staging the whole tree, or regenerated package source, is not a
+one-click act.
+
+**One merge row, because there is one queue.** The panel carries a single `gh-merge merge`
+(`maintainer`), which offers the open requests as a menu — so the row needs no number and a
+maintainer sees everything that is waiting. It used to carry a second `gh-merge-docs`
+button, because the two gates were disjoint and half the queue had no button otherwise;
+with one allowlist there is one queue and one row.
+
+**The message chip's merge row names its own request.** A `PR_REVIEW_SUBJECT` notice is
+about *one* branch, so `msg act` on it resolves that branch to its request number
+(`solver.core.git.merge_pr_for_branch`) and lands it. Offering the whole queue as a menu
+there would ask the reader to pick out a request they had just been told the answer to —
+and let them pick a different one. The branch in the subject is therefore load-bearing in
+both directions: it names the request to merge, and it dismisses the notice afterwards.
 
 **A disconnected terminal is a designed state.** `terminal.js`'s `send()` drops the frame
 on a closed socket, so a click would silently do nothing — the one outcome a control must
@@ -1834,7 +1878,7 @@ grow without limit.
 
 ### 13.5 Delivery
 
-Three tiers, all reusing paths that already exist:
+Five ways the count reaches you, all reusing machinery that already exists:
 
 1. **Live nudge.** `euler-msg` POSTs `/internal/message` to the recipient's own
    `user-<slug>.sock` — the same socket-peer-only push the auth service uses for logout and
@@ -1849,6 +1893,16 @@ Three tiers, all reusing paths that already exist:
    someone *else* acts, which no navigation can predict, so a spool read per navigation would
    buy nothing. The push is only a nudge — a lost one costs a stale count until the next
    document load, never a lost message.
+3. **On opening the panel** — `hx-trigger="toggle[this.open] throttle:1s"`. (1) and (2) are
+   both pushes, and a push can be missed: the live nudge rides the terminal's WebSocket, so a
+   disconnected or hidden terminal silently drops it, and `load` has not fired since the last
+   full document load. Opening the menu is the one moment a person is *asking* what is
+   waiting, and it is exactly when the answer must not be twenty minutes old. The filter is
+   what keeps it to opening — a bare `toggle` fires on close too, spending a fetch on a panel
+   nobody is looking at any more; htmx calls a trigger filter with the element as `this`
+   (`eventFilter.call(elt, evt)`), so `this.open` reads the state the event just produced. The
+   throttle is because the trigger is a pointer away from being held down: it fires the first
+   open and drops the rest of the second, which no reader can perceive as staleness.
 3. **The shell's own nudge.** The three above cover a message *arriving*. Reading one is
    the user's own act in their own shell, which no service sees — so the `msg` command
    emits **`OSC 5379` `msg;<token>`** on every path that changes what the chip shows

@@ -203,12 +203,16 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
     ])
 
 
-# Admin, not maintainer: this command *writes package source* — `solver/ai/models.py` and
-# `solver/config.json`. Egress is only half the requirement (the ECB feed is allowlisted in
-# scripts/setup/egress.sh); the other half is the filesystem, and in a deployed instance the
-# package tree is root-owned, so a lesser rung would reach the network and then fail on the
-# write. The floor names who can actually complete the job.
-@register(requires='admin', quietable=True)
+# Maintainer: curating the model catalogue and what it costs is maintainer's work — the same
+# rung that reads `costs` and picks the model a generation runs on. It writes package source
+# (`solver/ai/models.py`, `solver/config.json`), which is why it sits above `contributor`.
+#
+# The floor is not a promise the write will land. In a deployed instance the package tree is
+# root-owned, so this completes in a developer checkout and fails on the filesystem anywhere
+# else — a property of where it is run, not of who runs it, and one no floor can express.
+# Egress is the other half: the Models API and the ECB feed are allowlisted in
+# scripts/setup/egress.sh.
+@register(requires='maintainer', quietable=True)
 def update_models(check: bool = False) -> int:
     """Refresh the model catalogue and the USD→EUR rate.
 

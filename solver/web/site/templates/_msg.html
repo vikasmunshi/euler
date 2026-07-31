@@ -26,15 +26,27 @@
    trigger — it rides the out-of-band swap on each navigation instead. Keeping the element
    also keeps the `.term-offline` class site.js paints on it.
 
-   Two triggers, no polling:
+   Three triggers, no polling:
    · `load` — once per document, so a full page load is always current;
    · `euler:message from:body` — the delivery nudge, pushed by euler-msg to this user's
      instance and relayed over the terminal's WebSocket as a TEXT frame (terminal.js →
-     site.js). That is what makes a message arriving *now* show up now. #}
+     site.js). That is what makes a message arriving *now* show up now;
+   · `toggle[this.open]` — opening the panel. The two above are pushes, and a push can be
+     missed: the nudge rides the terminal's WebSocket, so a disconnected or hidden terminal
+     silently drops it, and `load` has not fired since the last full document load. Opening
+     the menu is the one moment a person is *asking* what is waiting, and it is exactly when
+     the answer must not be a count from twenty minutes ago. The filter is what keeps it to
+     opening — a bare `toggle` fires on close too, spending a fetch on a panel nobody is
+     looking at any more. htmx calls the filter with the element as `this` (`r.call(elt,
+     evt)`), so `this.open` reads the state the event just produced.
+
+     `throttle:1s` because the trigger is a pointer away from being held down: it fires the
+     first open and drops the rest of the second. Nobody reopens a menu inside a second
+     expecting a different number, so it cannot show anything stale a person would notice. #}
 {% if subject and msg_spool %}
 <details id="msg-chip" class="menu msg-menu term-menu"
          hx-get="/messages" hx-swap="innerHTML"
-         hx-trigger="load, euler:message from:body">
+         hx-trigger="load, euler:message from:body, toggle[this.open] throttle:1s">
   {% include "_msg_menu.html" %}
 </details>
 {% else %}

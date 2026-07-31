@@ -32,7 +32,7 @@ register the filter in the local git config and `.gitattributes`; `status` repor
 """
 from __future__ import annotations
 
-__all__ = ['main']
+__all__ = ['main', 'filter_settings']
 
 import sys
 from pathlib import Path
@@ -178,7 +178,7 @@ def _process() -> int:
             command: str = next((m.removeprefix('command=') for m in meta if m.startswith('command=')), '')
             content: bytes = _read_content(src)
             if cipher is None or mac_key is None:
-                _write_abort(dst)          # no key: git decides what that means (§ _write_abort)
+                _write_abort(dst)  # no key: git decides what that means (§ _write_abort)
                 continue
             out: bytes = (encrypt_blob_with(content, cipher, mac_key) if command == 'clean'
                           else decrypt_blob_with(content, cipher))

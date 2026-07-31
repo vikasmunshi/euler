@@ -8,26 +8,29 @@ broker — the read verbs (`git-status`, `git-sync`) are `reader`-floor and the
 write verbs (`git-commit`, `git-push`, `git-hooks`) plus the tree audit
 (`git-audit`) are `contributor`-floor; the blast radius is their own branch.
 `master` stays gated: `gh-merge` (`maintainer`) is the one gate through which
-a `user/<slug>` branch lands on master, and it opens only for a pull request that sits
-wholly inside one of the content trees a collaborator authors — `solutions/` **or**
-`topics/`, never both (:data:`PR_SCOPE`).
+a `user/<slug>` branch lands on master, and it opens only for a pull request whose every
+file sits inside the allowlist (:data:`PR_SCOPE`).
 
-The **docs set** (:data:`DOCS_PATHS`) is the third body of work with its own pair of
-verbs, floored like the others by blast radius: `git-commit-docs` stages and commits
-exactly those paths on the collaborator's own branch (`contributor`), and
-`gh-merge-docs` is the `maintainer` merge gate that admits a pull request confined to
-them — the same read/write/master split the solution verbs above follow. Its
-definition is *what the doc-maintaining commands write* — `update-docs`, `update-models` and
-`update-tags` — wherever that happens to live, so a regeneration lands as one reviewable
-commit that carries nothing else.
+`git-commit` is the **one** commit verb, and what it stages is named by its targets
+(:data:`TARGET_PATHS`) rather than by a command per body of work: `solution` for the
+problem the shell is on, `solutions` for the whole tree, and `docs` / `topics` / `update`
+for the three path sets the doc-maintaining commands write — `update-docs` writes `docs/`
+and the `update` set, `update-tags` writes both legs of the tag graph under `topics`, and
+`update-models` writes the `update` set. Targets compose, so a regeneration lands as one
+reviewable commit that carries nothing else (`git-commit docs update`), and `--amend`
+folds a fix into it rather than growing a commit behind it.
+
+The gate reads from the same table: :data:`PR_SCOPE` is the union of :data:`TARGET_PATHS`,
+so a pull request may carry whatever `git-commit` could have staged — several commits,
+spanning several targets — and nothing else. There is one commit verb and one merge verb,
+and the second admits exactly what the first can produce.
 """
 from __future__ import annotations
 
 __all__ = ['enc_key_arrived', 'get_gh_user_email', 'get_repo_owner_email', 'git_commit',
-           'git_commit_amend', 'key_waiting_hint', 'private_local_edits', 'private_tree_opens',
-           'resmudge_private',
-           'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
-           'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
+           'key_waiting_hint', 'merge_pr_for_branch', 'private_local_edits', 'private_tree_opens',
+           'resmudge_private', 'git_reset', 'git_publish', 'git_status', 'git_filter', 'git_sync',
+           'git_identity', 'git_push', 'gh_merge', 'git_hooks', 'git_audit']
 
 import json
 import shlex
@@ -36,20 +39,18 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import PurePosixPath
 from subprocess import run
-from typing import Literal
+from typing import Annotated, Any, Literal
 
 from cryptography.exceptions import InvalidTag
-
-from rich.text import Text
 
 from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
 from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
-from solver.crypto.gitfilter import filter_settings
 from solver.crypto.config import config as crypto_config
+from solver.crypto.gitfilter import filter_settings
 from solver.shell import console, register
-from solver.shell.dialogue import SKIP, Action, walk
+from solver.shell.dialogue import Ask, Choice
 from solver.utils.shell_utils import run_cmdline, run_command
 from solver.web.msg import PR_REVIEW_SUBJECT
 
@@ -83,7 +84,67 @@ def get_repo_owner_email() -> str:
     return owner_email
 
 
-# ── commit / amend ──────────────────────────────────────────────────────────────────────
+# ── what a commit stages ────────────────────────────────────────────────────────────────
+
+#: What each `git-commit` target stages, as repo-relative git pathspecs. Three entry
+#: forms — a trailing `/` is a directory prefix, an entry with `*` is a glob, anything
+#: else is an exact path — read both by :func:`_pathspecs` (for git) and by
+#: :func:`_in_scope` (for the merge gates), so one table answers "what does this commit
+#: touch?" and "what may this pull request touch?".
+#:
+#: The `solution` target is absent because it is not a fixed set: it is *this* problem's
+#: directory plus the progress file, which :func:`_solution_paths` derives per call.
+#:
+#: - `solutions` — the whole solution tree, tag legs and progress file included.
+#: - `docs` — the guides, generated blocks and all (`update-docs`).
+#: - `topics` — **both** legs of the tag graph: the articles and tag vocabulary under
+#:   `topics/`, and each problem's `tags.json` (`update-tags`). They are one double-entry
+#:   record, so splitting them across two commits is what this target exists to prevent —
+#:   and it is the only thing this target reaches inside `solutions/`.
+#: - `update` — everything else `update-docs` and `update-models` write, wherever it
+#:   happens to live: the README plus its generated package-layout block and the web start
+#:   page's slice of it, the module registry, the managed settings (of which `update-models`
+#:   writes the FX rate), the `# GEN:models` block, and the Claude guidance the root
+#:   `CLAUDE.md` symlink points at. Source code by file type, generated data by content —
+#:   which is why it is a target of its own and not part of `docs`.
+TARGET_PATHS: dict[str, tuple[str, ...]] = {
+    'solutions': ('solutions/',),
+    'docs': ('docs/',),
+    'topics': ('topics/', 'solutions/**/tags.json'),
+    'update': ('README.md', 'solver/modules.csv', 'solver/config.json', 'solver/ai/models.py',
+               'solver/ai/claude/CLAUDE.md', 'solver/web/content/home-summary.md'),
+}
+
+
+def _in_scope(path: str, scope: tuple[str, ...]) -> bool:
+    """Whether *path* is inside *scope*: `dir/` by prefix, `a/**/b` by glob, else exactly.
+
+    The exact and glob forms are what keep a scope narrow: `solver/config.json` admits that
+    one file and never the `solver/` tree around it, and `solutions/**/tags.json` admits a
+    problem's tag leg without admitting the solution beside it.
+    """
+    for entry in scope:
+        if entry.endswith('/'):
+            if path.startswith(entry):
+                return True
+        elif '*' in entry:
+            if PurePosixPath(path).full_match(entry):
+                return True
+        elif path == entry:
+            return True
+    return False
+
+
+def _pathspecs(scope: tuple[str, ...]) -> list[str]:
+    """*scope* as git pathspecs, in argv form (`shlex.quote` them for a shell command line).
+
+    A glob entry is given git's explicit `:(glob)` magic so its `**` means what it means
+    here — path-aware — rather than git's default wildmatch, where `*` also crosses `/`.
+    """
+    return [f':(glob){entry}' if '*' in entry else entry for entry in scope]
+
+
+# ── commit ──────────────────────────────────────────────────────────────────────────────
 
 def _current_branch() -> str:
     """The checked-out branch name ('' when detached or not a repo)."""
@@ -92,42 +153,143 @@ def _current_branch() -> str:
     return proc.stdout.strip() if proc.returncode == 0 else ''
 
 
-def _commit_paths(problem: Problem) -> list[str]:
-    """The paths a commit stages for *problem* — its directory and the progress file."""
-    return [problem.solution_dir.as_posix(), config.static_file_problems.as_posix()]
+def _solution_paths(problem: Problem) -> tuple[str, ...]:
+    """The `solution` target: *problem*'s own directory, and the progress file `mark` rewrites.
+
+    Repo-relative, like every entry in :data:`TARGET_PATHS`: the pathspecs are handed to git
+    with `cwd` at the repository root, and a `:(glob)` entry beside an absolute path would
+    not mean what it says.
+    """
+    return (problem.solution_dir.relative_to(config.root_dir).as_posix(),
+            config.static_file_problems.relative_to(config.root_dir).as_posix())
+
+
+def _commit_paths(problem: Problem, targets: tuple[str, ...]) -> list[str]:
+    """The git pathspecs *targets* stage for *problem*, de-duplicated in the order named.
+
+    Targets overlap by design — `solutions` contains every `solution`, and `topics` reaches
+    the tag leg inside the solution tree — so naming two that share a path must stage that
+    path once, not twice.
+    """
+    specs: list[str] = []
+    for target in targets:
+        entries = TARGET_PATHS.get(target) or _solution_paths(problem)
+        for spec in _pathspecs(entries):
+            if spec not in specs:
+                specs.append(spec)
+    return specs
+
+
+def _is_not_amend(bound: dict[str, Any]) -> bool:
+    """Whether the commit is writing a new message — an amend keeps the one it has."""
+    return not bound.get('amend', False)
 
 
 @register(requires='contributor', aliases=('commit',), quietable=True)
-def git_commit(problem: Problem, message: str = '', *, reset: bool = False) -> int:
-    """Stage and commit the problem's solution directory.
+def git_commit(problem: Problem,
+               *targets: Literal['solution', 'solutions', 'docs', 'topics', 'update'],
+               message: Annotated[str, Ask('Message', when=_is_not_amend, multiline=True)] = '',
+               amend: bool = False,
+               reset: bool = False,
+               ) -> int:
+    """Stage and commit the named targets — the one commit verb.
 
-    Adds everything under `problem.solution_dir`, plus `solutions/problems.json` (the
-    progress file `mark` rewrites), and commits just those — the routine "save my
-    progress" step. Aliased as `commit`.
+    The routine "save my progress" step. With no target it commits `solution`: everything
+    under this problem's directory, plus `solutions/problems.json` (the progress file `mark`
+    rewrites), and nothing else. Naming targets widens that to whichever bodies of work you
+    mean, and they compose — `git-commit docs update` lands a whole `update-docs` run as one
+    commit, `git-commit topics` lands both legs of the tag graph together. A target with
+    nothing to stage contributes nothing rather than failing, so composing is cheap.
+
+    `--amend` folds the same paths into HEAD with its message untouched — the "I forgot
+    something" step, so a checkpoint absorbs the fix instead of growing a "fix typo" commit
+    behind it. It is refused once HEAD is on origin (rewriting a pushed commit needs a
+    force-push, so committing again is the honest step there), and is a no-op, not a failure,
+    when those paths are clean. A message and `--amend` are mutually exclusive: exactly one
+    of them says what the commit is called.
+
+    Aliased as `commit`.
 
     Args:
-        problem: [problem] The problem whose solution directory to commit.
-        message: The commit message. When empty (the default) and `reset` is not set,
-            folds into the last unpushed commit if there is one to amend (see
-            `git-commit-amend`); otherwise commits fresh under the default message
-            "solution for pNNNN".
+        problem: [problem] The problem whose solution directory the `solution` target
+            stages. Ignored by every other target.
+        *targets: What to stage — 'solution' (this problem plus the progress file),
+            'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the
+            articles and every problem's tag leg) or 'update' (what `update-docs` and
+            `update-models` write outside `docs/` — the README, the module registry, the
+            managed settings, the model block, the Claude guidance). Defaults to
+            'solution'.
+        message: [asked] The commit message. Required unless `amend` is set, and asked for
+            at the prompt when it is left out.
+        amend: Fold the staged changes into HEAD instead of committing, keeping its
+            message. Defaults to False. Refused with a message, with `reset`, or once
+            HEAD is pushed.
         reset: Soft-reset to `origin/master` first, so the new commit squashes all local
             commits into a single checkpoint (the working tree is untouched). Defaults to
-            False. Suppresses the empty-message amend, since squashing to one checkpoint
-            is the opposite intent.
+            False. `git-reset` is the same move without the re-commit.
     """
-    # Empty message with no reset prefers folding into HEAD — but only when the loud
-    # `git-commit-amend` would actually amend; `_can_amend` decides that quietly so its
-    # refusal diagnostics never surface on a path that then commits fresh. `reset` opts
-    # out entirely: it squashes local commits into one checkpoint, not into HEAD.
-    if not message and not reset and _can_amend(problem):
-        return git_commit_amend(problem)
-    if not message:
-        message = f'solution for p{problem.number:04d}'
+    if amend and message:
+        console.print('[error]error:[/error] [accent]--amend[/accent] keeps HEAD\'s message — '
+                      'drop the message, or commit without [accent]--amend[/accent].')
+        return ExitCodes.EXIT_USAGE
+    if amend and reset:
+        console.print('[error]error:[/error] [accent]--reset[/accent] squashes the local commits into a '
+                      'fresh one and [accent]--amend[/accent] folds into the last — pick one.')
+        return ExitCodes.EXIT_USAGE
+    if not amend and not message:
+        # Only reachable non-interactively: at the prompt the `Ask` above collects it first.
+        console.print('[error]error:[/error] a commit needs a message — pass '
+                      '[accent]message=…[/accent], or [accent]--amend[/accent] to keep HEAD\'s.')
+        return ExitCodes.EXIT_USAGE
+    targets = targets or ('solution',)
+    paths: list[str] = _commit_paths(problem, targets)
+    dirty: str = run(['git', 'status', '--porcelain', '--', *paths],
+                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
+    if amend:
+        return _amend(paths, dirty, targets)
+    # A clean target is nothing to do, not a failure — so this composes in a `&&` chain
+    # after a regeneration (`update-docs && git-commit docs update`) that had nothing to
+    # regenerate. `--reset` still runs: it is about squashing the local commits into one
+    # checkpoint, which has nothing to do with the working tree.
+    if not dirty and not reset:
+        console.print(f'nothing to commit: [accent]{" ".join(targets)}[/accent] is unchanged.')
+        return ExitCodes.EXIT_OK
     cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
-    cmdline += ['git', 'add', '-A', *_commit_paths(problem), '&&']
-    cmdline += ['git', 'commit', '--message', f'"{message}"']
-    result = run_cmdline(' '.join(cmdline))
+    cmdline += ['git', 'add', '-A', *(shlex.quote(spec) for spec in paths), '&&']
+    cmdline += ['git', 'commit', '--message', shlex.quote(message)]
+    result: int = run_cmdline(' '.join(cmdline))
+    if result == 0:
+        osc.git_changed()
+    return result
+
+
+def _amend(paths: list[str], dirty: str, targets: tuple[str, ...]) -> int:
+    """Fold *paths* into HEAD with its message untouched — `git-commit --amend`.
+
+    Three preconditions, each with its own diagnostic: there is a HEAD to amend, it is
+    unpushed, and the paths are actually dirty (*dirty* being the caller's `git status`
+    probe, which the plain commit needs anyway). The middle one is the reason this is a
+    check and not just a git flag — amending rewrites the commit, and a rewritten commit
+    already on origin only lands again through a force-push.
+    """
+    if run(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'],
+           cwd=config.root_dir, capture_output=True).returncode != 0:
+        console.print('[error]error:[/error] no commit to amend.')
+        return ExitCodes.EXIT_ERROR
+    pushed: list[str] | None = _remotes_containing_head()
+    if pushed is None:
+        console.print('[error]error:[/error] cannot tell whether HEAD is pushed — not amending.')
+        return ExitCodes.EXIT_ERROR
+    if pushed:
+        console.print(f'[error]error:[/error] HEAD is already pushed to [accent]{", ".join(pushed)}[/accent]; '
+                      'amending it would need a force-push — commit without '
+                      '[accent]--amend[/accent] instead.')
+        return ExitCodes.EXIT_ERROR
+    if not dirty:
+        console.print(f'nothing to amend: [accent]{" ".join(targets)}[/accent] is unchanged.')
+        return ExitCodes.EXIT_OK
+    result: int = run_cmdline('git add -A ' + ' '.join(shlex.quote(spec) for spec in paths)
+                              + ' && git commit --amend --no-edit')
     if result == 0:
         osc.git_changed()
     return result
@@ -151,69 +313,6 @@ def _remotes_containing_head() -> list[str] | None:
     # A bare '<remote>' among the refs is that remote's HEAD symref, not a branch it
     # carries — naming it alongside the branch it points at only pads the refusal.
     return [ref for line in proc.stdout.splitlines() if '/' in (ref := line.strip())]
-
-
-def _can_amend(problem: Problem) -> bool:
-    """Whether `git-commit-amend` would actually amend *problem* — decided quietly.
-
-    True only when all three of amend's preconditions hold: there is a HEAD to amend,
-    it is unpushed (so no force-push would be needed), and this problem's paths are
-    dirty. `git_commit_amend` reports *why* each of these fails; this answers only
-    whether an empty-message `git-commit` should fold into HEAD, without printing, so
-    the loud command is called only on the path where it succeeds.
-    """
-    if run(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'],
-           cwd=config.root_dir, capture_output=True).returncode != 0:
-        return False
-    if _remotes_containing_head() != []:  # None (undecidable) or non-empty (pushed) → do not amend
-        return False
-    dirty: str = run(['git', 'status', '--porcelain', '--', *_commit_paths(problem)],
-                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
-    return bool(dirty)
-
-
-@register(requires='contributor', quietable=True, aliases=('amend',))
-def git_commit_amend(problem: Problem) -> int:
-    """Fold this problem's current changes into the last commit, message unchanged.
-
-    The "I forgot something" step after `git-commit`: stages everything under
-        `problem.solution_dir` plus `solutions/problems.json` and amends HEAD with
-        `--no-edit`, so the checkpoint absorbs the fix instead of growing a
-        "fix typo" commit behind it.
-
-    Refused once HEAD is on origin — amending rewrites the commit, and a rewritten
-        commit that is already pushed only lands again through a force-push, so
-        `git-commit` is the honest step there. A no-op, not a failure, when nothing
-        under those paths has changed.
-
-    Aliased as `amend`.
-
-    Args:
-        problem: [problem] The problem whose changes are folded into HEAD.
-    """
-    if run(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'],
-           cwd=config.root_dir, capture_output=True).returncode != 0:
-        console.print('[error]error:[/error] no commit to amend.')
-        return ExitCodes.EXIT_ERROR
-    pushed: list[str] | None = _remotes_containing_head()
-    if pushed is None:
-        console.print('[error]error:[/error] cannot tell whether HEAD is pushed — not amending.')
-        return ExitCodes.EXIT_ERROR
-    if pushed:
-        console.print(f'[error]error:[/error] HEAD is already pushed to [accent]{", ".join(pushed)}[/accent]; '
-                      'amending it would need a force-push — use [accent]git-commit[/accent] instead.')
-        return ExitCodes.EXIT_ERROR
-    paths: list[str] = _commit_paths(problem)
-    dirty: str = run(['git', 'status', '--porcelain', '--', *paths],
-                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
-    if not dirty:
-        console.print(f'nothing to amend: [accent]p{problem.number:04d}[/accent] and the progress file '
-                      'are unchanged.')
-        return int(ExitCodes.EXIT_OK)
-    result = run_cmdline(f'git add -A {" ".join(paths)} && git commit --amend --no-edit')
-    if result == 0:
-        osc.git_changed()
-    return result
 
 
 def _commits_ahead_of_master() -> int:
@@ -258,115 +357,6 @@ def git_reset() -> int:
         console.print('already level with [accent]origin/master[/accent] — nothing to undo.')
     osc.git_changed()
     return int(ExitCodes.EXIT_OK)
-
-
-# ── the docs set ────────────────────────────────────────────────────────────────────────
-
-#: The documentation set: **everything the doc-maintaining commands write**, plus the prose
-#: around it. Three entry forms — a trailing `/` is a directory prefix, an entry with `*`
-#: is a glob, anything else is an exact path.
-#:
-#: - `docs/` — the guides, generated blocks and all (`update-docs`).
-#: - `topics/` — the articles, the tag vocabulary and the article index (`update-tags`).
-#: - `README.md` — prose plus its own generated package-layout block (`update-docs`).
-#: - `solver/modules.csv` — the module registry (`update-docs`, via the loader).
-#: - `solver/config.json` — the managed settings, of which `update-models` writes the FX rate.
-#: - `solver/ai/models.py` — the `# GEN:models` block: the model enum and its pricing
-#:   (`update-models`). Source code by file type, generated data by content.
-#: - `solver/ai/claude/CLAUDE.md` — the repo's Claude guidance, which the root `CLAUDE.md`
-#:   symlink points at (`update-docs` writes it through that link).
-#: - `solver/web/content/home-summary.md` — the web start page's README slice (`update-docs`).
-#: - `solutions/**/tags.json` — the per-problem leg of the tag graph (`update-tags`), the
-#:   only thing this scope reaches inside `solutions/`: the problem's *own* files stay out.
-#:
-#: The set is defined by **who writes it**, not by where it lives: several entries sit inside
-#: the package or the solution tree yet are maintained by `update-docs`, `update-models` and
-#: `update-tags` rather than authored. Keeping them together is what lets one regeneration land
-#: as one reviewable commit — and keeps a code review from quietly carrying a regenerated file.
-DOCS_PATHS: tuple[str, ...] = ('docs/', 'topics/', 'README.md',
-                               'solver/modules.csv', 'solver/config.json', 'solver/ai/models.py',
-                               'solver/ai/claude/CLAUDE.md', 'solver/web/content/home-summary.md',
-                               'solutions/**/tags.json')
-
-#: Prefixed onto a docs commit's message when it does not already say so, so the log reads
-#: at a glance and `git log --grep` finds the set.
-DOCS_TAG: str = 'docs(topic):'
-
-
-def _in_scope(path: str, scope: tuple[str, ...]) -> bool:
-    """Whether *path* is inside *scope*: `dir/` by prefix, `a/**/b` by glob, else exactly.
-
-    The exact and glob forms are what keep a scope narrow: `solver/config.json` admits that
-    one file and never the `solver/` tree around it, and `solutions/**/tags.json` admits a
-    problem's tag leg without admitting the solution beside it.
-    """
-    for entry in scope:
-        if entry.endswith('/'):
-            if path.startswith(entry):
-                return True
-        elif '*' in entry:
-            if PurePosixPath(path).full_match(entry):
-                return True
-        elif path == entry:
-            return True
-    return False
-
-
-def _pathspecs(scope: tuple[str, ...]) -> list[str]:
-    """*scope* as git pathspecs, in argv form (`shlex.quote` them for a shell command line).
-
-    A glob entry is given git's explicit `:(glob)` magic so its `**` means what it means
-    here — path-aware — rather than git's default wildmatch, where `*` also crosses `/`.
-    """
-    return [f':(glob){entry}' if '*' in entry else entry for entry in scope]
-
-
-def _docs_message(message: str) -> str:
-    """A docs commit message: the caller's text, tagged :data:`DOCS_TAG` unless it says so."""
-    message = message.strip() or 'update'
-    return message if message.startswith(DOCS_TAG) else f'{DOCS_TAG} {message}'
-
-
-@register(requires='contributor', quietable=True, aliases=('commit-docs',))
-def git_commit_docs(message: str = '', *, reset: bool = False) -> int:
-    """Stage and commit the documentation set — and nothing else.
-
-    The counterpart of `git-commit` for prose and generated docs: it stages exactly
-        :data:`DOCS_PATHS` — the `docs/` guides, the `topics/` articles and tag graph, the
-        README and the start page's slice of it, `solver/modules.csv`, `solver/config.json`,
-        the model enum, the Claude guidance, and each problem's `tags.json` — so a run of
-        `update-docs`, `update-tags` and `update-models` lands as one commit, whole.
-
-    The message is tagged `(docs)` unless it already says so, and an empty one becomes
-        `(docs) update`. Unlike `git-commit` an empty message never folds into HEAD: docs
-        are regenerated wholesale and often, and a silent amend would rewrite a commit
-        somebody may already be reading.
-
-    A clean docs set is a no-op, not a failure — so this composes in a `&&` chain after a
-        regeneration that had nothing to do.
-
-    Aliased as `commit-docs`.
-
-    Args:
-        message: The commit message, tagged `(docs)` if it is not already. Defaults to
-            `(docs) update`.
-        reset: Soft-reset to `origin/master` first, so the new commit squashes all local
-            commits into a single checkpoint (the working tree is untouched). Defaults to
-            False.
-    """
-    pathspecs: list[str] = _pathspecs(DOCS_PATHS)
-    dirty: str = run(['git', 'status', '--porcelain', '--', *pathspecs],
-                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
-    if not dirty and not reset:
-        console.print('nothing to commit: the docs set is unchanged.')
-        return int(ExitCodes.EXIT_OK)
-    cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
-    cmdline += ['git', 'add', '-A', *(shlex.quote(spec) for spec in pathspecs), '&&']
-    cmdline += ['git', 'commit', '--message', f'"{_docs_message(message)}"']
-    result = run_cmdline(' '.join(cmdline))
-    if result == 0:
-        osc.git_changed()
-    return result
 
 
 # ── publish / status / sync / filter / identity ─────────────────────────────────────────
@@ -818,19 +808,24 @@ def _announce_pull_request(branch: str, url: str) -> None:
     would turn the queue into a changelog of somebody's afternoon.
 
     The branch is in the **subject**, not only the body: it is what lets the merge close
-    this notice without a thread id (:func:`_dismiss_pr_notice`).
+    this notice without a thread id (:func:`_dismiss_pr_notice`), and what
+    :func:`merge_pr_for_branch` turns back into a number when the chip's row is pressed.
 
     Best-effort and silent on failure, like every other :mod:`solver.web.msg.notify` caller:
     the branch is pushed and the request is open either way, and a spool that is down must
     not fail the push that reached GitHub.
     """
     from solver.web.msg.notify import notify_staff
+    # The number is the URL's last segment. The body names a command that lands *this*
+    # request rather than a bare `gh-merge merge`, which would open a menu of the whole
+    # queue — a notice about one branch should not make its reader pick it out again.
+    number: str = url.rstrip('/').rsplit('/', 1)[-1]
     sent = notify_staff(
         f'{PR_REVIEW_SUBJECT}{branch}',
         f'{branch} has a pull request open onto master:\n\n'
         f'    {url}\n\n'
-        f'To review the open pull requests and land this one, run:\n'
-        f'    gh-merge merge\n')
+        f'To review it and land it, run:\n'
+        f'    gh-merge merge {number}\n')
     if sent:
         console.print('[muted]the maintainers have been notified.[/muted]')
 
@@ -841,7 +836,7 @@ def _dismiss_pr_notice(branch: str) -> None:
     The closing half of :func:`_announce_pull_request`, and the reason the announcement
     named the branch in its subject: a notice that survives the act it asked for is a queue
     nobody trusts, and this one cannot be dismissed by whoever works it. The chip's row
-    types a bare `gh-merge merge` (the queue that verb walks is GitHub's, not the spool's),
+    types a bare `gh-merge merge` (the queue that verb offers is GitHub's, not the spool's),
     so the merge holds no thread id — the subject is the only handle either side shares.
 
     Silent and best-effort, like the announcement: the pull request is merged either way,
@@ -943,17 +938,24 @@ def git_push(force: bool = False, pr: bool = True) -> int:
     return _ensure_pull_request(branch)
 
 
-#: The content trees a collaborator's pull request may touch: solutions (plus the
-#: progress file) and topic articles. Framework code, scripts, keys and docs reach master
-#: another way, and `gh-merge` is not the review for those. Prefixes, so a lookalike
-#: sibling (`solutions-of-mine/`) does not pass.
+#: What a collaborator's pull request may touch — the merge gate's allowlist, and the one
+#: rule `gh-merge` applies: solutions (progress file and tag legs included), the guides,
+#: the topic articles, and the specific files the `update` target names. Read by
+#: :func:`_in_scope`, so a `dir/` entry is a prefix and a lookalike sibling
+#: (`solutions-of-mine/`) does not pass.
 #:
-#: **One tree per pull request.** A review is of one kind of work — solving a problem or
-#: writing an article — and the two carry different risks: solutions bring encrypted
-#: files and the progress file, articles bring prose and the reconciled tag graph. A
-#: branch that mixes them is two reviews wearing one hat, so the gate refuses it and asks
-#: for two pull requests.
-PR_SCOPE: tuple[str, ...] = ('solutions/', 'topics/')
+#: It is exactly the union of :data:`TARGET_PATHS` — **a pull request may carry whatever
+#: `git-commit` could have staged, and nothing else.** That equivalence is the gate: a
+#: branch of solutions, articles and a regeneration is one review a maintainer can do,
+#: because every file in it came from a commit verb they know the shape of. A branch that
+#: also edits the framework, the scripts or the keys is asking for something else
+#: entirely — merge that on GitHub, as an admin who has read it.
+#:
+#: There is deliberately **no one-tree rule** and no per-body-of-work gate. A pull request
+#: may carry several commits spanning several targets, so splitting the queue by tree only
+#: refused branches that were honest work; what the review needs to know is that nothing
+#: outside the allowlist rode along, which is what this checks.
+PR_SCOPE: tuple[str, ...] = ('solutions/', 'docs/', 'topics/') + TARGET_PATHS['update']
 
 
 def _pr_files(number: int) -> list[str] | None:
@@ -989,24 +991,66 @@ def _open_prs() -> list[dict[str, object]] | None:
     return data if isinstance(data, list) else None
 
 
-def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *, branch: str = '',
-              one_tree: bool = True, label: str = 'content') -> int:
-    """Rebase-merge pull request *number* onto master, refusing anything beyond *scope*.
+def _open_queue() -> list[dict[str, object]] | None:
+    """The open pull requests, reporting the one failure that stops every merge path.
+
+    Both ways in — a number typed at `gh-merge merge`, and a branch named by a review
+    notice — need the same read and fail it the same way, so the diagnostic lives here
+    rather than being written twice and drifting.
+    """
+    prs: list[dict[str, object]] | None = _open_prs()
+    if prs is None:
+        console.print('[error]error:[/error] cannot read the open pull requests — is [accent]gh[/accent] '
+                      'signed in ([accent]git-identity[/accent])?')
+    return prs
+
+
+def merge_pr_for_branch(branch: str) -> int:
+    """Merge the open pull request for *branch* — the act behind a review notice.
+
+    `msg act` on a :data:`~solver.web.msg.PR_REVIEW_SUBJECT` message must land **that**
+    request, and the subject names a branch where the gate needs a number. The open queue
+    is what turns one into the other, and it is the read the merge wants anyway.
+
+    It used to call `gh-merge merge` with nothing at all, which was right only while that
+    verb walked the whole queue: with the queue offered as a menu, pressing **merge** on one
+    notice would ask the reader to pick a request out of a list they had just been told the
+    answer to — and let them pick a different one. A notice about one branch lands that
+    branch.
+
+    No open request for this branch is worth saying rather than falling back to a menu: the
+    notice has outlived what it asked for (already merged, or closed), and that is the fact
+    the reader needs.
+    """
+    if not branch:
+        console.print('[error]error:[/error] this notice names no branch — run '
+                      '[accent]gh-merge list[/accent] and merge by number.')
+        return ExitCodes.EXIT_ERROR
+    prs = _open_queue()
+    if prs is None:
+        return ExitCodes.EXIT_ERROR
+    number = next((pr.get('number') for pr in prs
+                   if str(pr.get('headRefName', '')) == branch), None)
+    if not isinstance(number, int):
+        console.print(f'[error]error:[/error] no open pull request for [accent]{branch}[/accent] — '
+                      'it may already have been merged or closed. Run [accent]gh-merge list[/accent] '
+                      'to see what is waiting.')
+        return ExitCodes.EXIT_ERROR
+    return _merge_pr(number, branch=branch)
+
+
+def _merge_pr(number: int, *, branch: str = '') -> int:
+    """Rebase-merge pull request *number* onto master, refusing anything beyond :data:`PR_SCOPE`.
 
     Rebase, not squash: each of the branch's commits is replayed onto master (with fresh
     SHAs), so a review of several commits lands as several commits rather than one folded
     checkpoint — master's history stays linear, and the individual commits survive.
 
-    The gate that makes this a maintainer's command rather than an admin's: merging a
-    branch that carries solutions, topic articles or docs is reviewing what a maintainer
-    reads anyway, but a branch that also edits the framework, the scripts, or the keys is
-    asking for something else entirely — merge those on GitHub, as an admin who has read
-    them. On a clean merge the header chip is nudged (:func:`osc.git_changed`), since
-    master moved.
-
-    *one_tree* additionally requires the files to sit in a single entry of *scope* — the
-    :data:`PR_SCOPE` rule that solutions and articles are separate reviews. The docs set
-    (:data:`DOCS_PATHS`) is one body of work spread over six paths, so it merges whole.
+    One gate, one question: **is every file in the allowlist?** A pull request may carry
+    as many commits, and span as many of `git-commit`'s targets, as the work needed — what
+    makes this a maintainer's command rather than an admin's is that nothing outside
+    :data:`PR_SCOPE` rode along. On a clean merge the header chip is nudged
+    (:func:`osc.git_changed`), since master moved.
 
     *branch* is the request's head ref, carried only so a landed merge can close the
     notice that asked for it (:func:`_dismiss_pr_notice`). Optional because the merge is
@@ -1021,22 +1065,17 @@ def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *, branch: str = '
     if not files:
         console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] touches no files.')
         return ExitCodes.EXIT_ERROR
-    outside: list[str] = [path for path in files if not _in_scope(path, scope)]
+    outside: list[str] = [path for path in files if not _in_scope(path, PR_SCOPE)]
     if outside:
         console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] touches '
-                      f'{len(outside)} file(s) outside [accent]{" / ".join(scope)}[/accent]:')
+                      f'{len(outside)} file(s) outside [accent]{" / ".join(PR_SCOPE)}[/accent]:')
         for path in outside[:10]:
             console.print(f'  !! {path}')
         if len(outside) > 10:
             console.print(f'  … and {len(outside) - 10} more')
-        console.print(f'this is not a {label} review — merge it on GitHub if it is genuinely wanted.')
+        console.print('this is not a content review — merge it on GitHub if it is genuinely wanted.')
         return ExitCodes.EXIT_ERROR
-    trees: list[str] = sorted({entry for path in files for entry in scope if _in_scope(path, (entry,))})
-    if one_tree and len(trees) > 1:
-        console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] spans '
-                      f'[accent]{" and ".join(trees)}[/accent] — one tree per review.')
-        console.print('split it into a pull request per tree, then merge them separately.')
-        return ExitCodes.EXIT_ERROR
+    trees: list[str] = sorted({entry for path in files for entry in PR_SCOPE if _in_scope(path, (entry,))})
     console.print(f'pull request [accent]#{number}[/accent]: {len(files)} file(s), all under '
                   f'[accent]{" / ".join(trees)}[/accent] — merging.')
     # --admin: land it immediately with administrator privileges. master's base-branch
@@ -1053,96 +1092,82 @@ def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *, branch: str = '
     return git_sync()
 
 
-def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
-                one_tree: bool = True, label: str = 'content') -> int:
-    """Walk the open pull requests interactively — merge / skip / quit each.
+def _is_merge(bound: dict[str, Any]) -> bool:
+    """Whether the verb is the one that needs a pull request named — only `merge` does."""
+    return bound.get('action') == 'merge'
 
-    The interactive counterpart of `users process-requests`: read the open PRs once,
-    then per request show its number, title and branch and offer **merge** (the
-    scope-gated rebase), **skip** (leave it open), or **quit**. Merging is
-    :func:`_merge_pr`, so the same file gate and the same git-changed nudge apply as a
-    numbered merge once did. *scope* selects which queue this walk can land: the content
-    trees (`gh-merge`) or the docs set (`gh-merge-docs`).
+
+def _open_pr_choices(_ctx: Any, _bound: dict[str, Any]) -> list[Choice]:
+    """The open pull requests as menu options, so the number never has to be typed out.
+
+    The same read `gh-merge list` prints, offered as a chooser: each row is the number
+    (the value bound to `pr_number`), the title, and the branch it would land. An
+    unreadable queue comes back empty rather than raising — the dialogue says there is
+    nothing to choose, and the caller's own `_open_prs` read reports *why* on the path
+    that matters.
     """
-    prs: list[dict[str, object]] | None = _open_prs()
-    if prs is None:
-        console.print('[error]error:[/error] cannot read the open pull requests — is [accent]gh[/accent] '
-                      'signed in ([accent]git-identity[/accent])?')
-        return ExitCodes.EXIT_ERROR
-
-    def render(pr: dict[str, object]) -> Text:
-        line = Text('  ')
-        line.append(f'#{pr.get("number")}', style='accent')
-        line.append(f'  {pr.get("title", "")}  ')
-        line.append(str(pr.get('headRefName', '')), style='muted')
-        return line
-
-    def merge(pr: dict[str, object]) -> int | None:
-        number = pr.get('number')
-        if not isinstance(number, int):
-            return None
-        # The head ref comes from the same read that drew the row, so the notice
-        # `git-push` filed under this branch is closed by the merge that answers it.
-        return _merge_pr(number, scope, branch=str(pr.get('headRefName', '')),
-                         one_tree=one_tree, label=label)
-
-    return walk([pr for pr in prs if isinstance(pr.get('number'), int)],
-                {'m': Action('merge', merge), 's': Action('skip', SKIP)},
-                render=render, label='open pull request').rc
+    return [Choice(str(number), f'#{number}  {pr.get("title", "")}',
+                   str(pr.get('headRefName', '')))
+            for pr in _open_prs() or []
+            if isinstance(number := pr.get('number'), int)]
 
 
 @register(requires='maintainer', quietable=True, aliases=('merge',))
-def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
-    """List the open pull requests, or walk them one at a time to rebase-merge.
+def gh_merge(action: Literal['list', 'merge'] = 'list',
+             pr_number: Annotated[int, Ask('Which pull request?', choices=_open_pr_choices,
+                                           when=_is_merge, empty='no open pull requests')] = 0,
+             ) -> int:
+    """List the open pull requests, or rebase-merge one onto master.
 
-    `list` (the default) shows what is waiting: number, title, branch. `merge` walks
-    the open pull requests interactively — per request **merge** (rebase onto master),
-    **skip**, or **quit** — the same shape as `users process-requests`. Merging one is
-    how a collaborator's `user/<slug>` branch lands on master, each of its commits
-    replayed onto the tip; their next `git-sync` then rebases those already-applied
-    commits away and prunes the merged branch. Merging also **dismisses the notice**
-    `git-push` filed for that branch — the message asked for this review, and it is done.
+    `list` (the default) shows what is waiting: number, title, branch. `merge` lands one
+    of them, named by number and offered as a menu when you leave it out. Merging is how a
+    collaborator's `user/<slug>` branch reaches master, each of its commits replayed onto
+    the tip; their next `git-sync` then rebases those already-applied commits away and
+    prunes the merged branch. It also **dismisses the notice** `git-push` filed for that
+    branch — the message asked for this review, and it is done.
 
-    A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
-    anything else is refused, and a branch spanning both is asked to become two pull
-    requests. That gate is what makes this a maintainer's command rather than an admin's:
-    merging a branch that carries solutions or topic articles is reviewing content,
-    but a branch that also edits the framework, the scripts, or the keys is asking for
-    something else entirely. Merge those on GitHub, as an admin who has read them.
-
-    The docs set has its own gate and its own verb — `gh-merge-docs` — and the two are
-    disjoint: a docs branch is refused here, a solutions branch is refused there.
+    Every file in the pull request must sit inside the allowlist: `solutions/`, `docs/`,
+    `topics/`, and the specific files the `update` target names — which is exactly what
+    `git-commit` can stage. One file outside it refuses the whole request. That is the
+    gate, and the only one: a request may carry as many commits, across as many targets,
+    as the work needed. What makes this a maintainer's command rather than an admin's is
+    that everything in it came from a commit verb they know the shape of; a branch that
+    also edits the framework, the scripts, or the keys is asking for something else
+    entirely, and belongs on GitHub in front of an admin who has read it.
 
     Aliased as `merge`.
 
     Args:
-        action: 'list' shows the open queue; 'merge' walks it interactively. Defaults to
-            'list'.
+        action: 'list' shows the open queue; 'merge' lands one request. Defaults to 'list'.
+        pr_number: [asked] Which pull request to merge, by number. Offered as a menu of the
+            open requests when omitted, so the number never has to be typed out; only ever
+            required for `merge`.
     """
     if action == 'list':
         return run_cmdline('gh pr list')
-    return _merge_walk()
-
-
-@register(requires='maintainer', quietable=True, aliases=('merge-docs',))
-def gh_merge_docs() -> int:
-    """Walk the open pull requests, rebase-merging those that touch only the docs set.
-
-    `gh-merge`'s sibling for documentation: same interactive walk — per request
-    **merge**, **skip**, or **quit** — but the gate admits :data:`DOCS_PATHS` instead of the
-    content trees. `gh-merge list` shows the queue either command is walking.
-
-    Which verb you reach for names the review you are doing. A branch of *solutions* is
-    refused here, and a branch of docs is refused by `gh-merge` — with one deliberate
-    overlap, a problem's `tags.json`: it is a solution's file that `update-tags` maintains,
-    so it can land either as part of the problem or as part of a graph reconciliation.
-
-    Unlike the content gate this one does not insist on a single path: the docs set is one
-    body of work, and a regeneration touches most of it at once.
-
-    Aliased as `merge-docs`.
-    """
-    return _merge_walk(DOCS_PATHS, one_tree=False, label='docs')
+    # Read the queue even when the number came in on the command line: it says whether the
+    # request is open (a merged or invented number would otherwise reach `gh` as a refusal
+    # nobody can act on), and it carries the head ref that closes the review notice.
+    prs = _open_queue()
+    if prs is None:
+        return ExitCodes.EXIT_ERROR
+    if not pr_number:
+        # Only reachable non-interactively: at the prompt the menu above collects it first.
+        if not prs:
+            console.print('no open pull requests — nothing to merge.')
+            return ExitCodes.EXIT_OK
+        console.print('[error]error:[/error] which pull request? pass '
+                      '[accent]gh-merge merge <number>[/accent] — [accent]gh-merge list[/accent] '
+                      'shows the queue.')
+        return ExitCodes.EXIT_USAGE
+    record = next((pr for pr in prs if pr.get('number') == pr_number), None)
+    if record is None:
+        console.print(f'[error]error:[/error] no open pull request [accent]#{pr_number}[/accent] — '
+                      'run [accent]gh-merge list[/accent] to see the queue.')
+        return ExitCodes.EXIT_ERROR
+    # The head ref comes from the same read that offered the row, so the notice `git-push`
+    # filed under this branch is closed by the merge that answers it.
+    return _merge_pr(pr_number, branch=str(record.get('headRefName', '')))
 
 
 # ── hooks / audit ───────────────────────────────────────────────────────────────────────

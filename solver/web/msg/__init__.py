@@ -47,11 +47,12 @@ KEY_ISSUE_SUBJECT: str = 'Master key for '
 #: one, and :func:`verb_for` reads it to make `msg act` on such a message the merge itself.
 #: A wire convention like the two above, and for the same reason: the chip must never name
 #: an act the command would not take. Unlike a key message the body is not a payload — the
-#: reviewer's verb is `gh-merge merge`, which reads the open pull requests from GitHub — so
-#: this is a pure nudge, and the **branch in the subject is the correlation**: the merge has
-#: no thread id in hand, and dismisses the notice by matching this subject once the branch
-#: has landed (`solver.core.git._dismiss_pr_notice`). Which is why the branch is part of the
-#: subject rather than only of the body.
+#: review happens against GitHub's queue, not the spool — so this is a pure nudge, and the
+#: **branch in the subject is the correlation**, in both directions: acting on the message
+#: resolves it into the request to merge (`solver.core.git.merge_pr_for_branch`), and the
+#: merge dismisses the notice by matching this subject once the branch has landed
+#: (`solver.core.git._dismiss_pr_notice`). Which is why the branch is part of the subject
+#: rather than only of the body.
 PR_REVIEW_SUBJECT: str = 'Pull request ready for review: '
 
 #: The subject `summary` files under when the progress page disagrees with what is recorded

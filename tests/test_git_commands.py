@@ -49,17 +49,22 @@ class PolicyShapeTest(unittest.TestCase):
     def test_floors_of_the_git_commands(self) -> None:
         load_commands()
         expected = {'git-status': 'reader', 'git-sync': 'reader', 'git-filter': 'reader',
-                    'git-commit': 'contributor', 'git-commit-amend': 'contributor',
-                    'git-reset': 'contributor',
+                    'git-commit': 'contributor', 'git-reset': 'contributor',
                     'git-push': 'contributor', 'git-hooks': 'contributor',
                     'git-identity': 'contributor', 'gh-merge': 'maintainer',
-                    'git-commit-docs': 'contributor', 'gh-merge-docs': 'maintainer',
                     'git-publish': 'maintainer'}
         for name, floor in expected.items():
             cmd = registry.resolve(name)
             self.assertIsNotNone(cmd, f'{name} not registered')
             assert cmd is not None
             self.assertEqual(cmd.requires, floor, name)
+
+    def test_the_retired_verbs_are_gone(self) -> None:
+        """One commit verb and one merge verb: the per-body-of-work siblings are gone."""
+        load_commands()
+        for name in ('git-commit-amend', 'amend', 'git-commit-docs', 'commit-docs',
+                     'gh-merge-docs', 'merge-docs'):
+            self.assertIsNone(registry.resolve(name), f'{name} still registered')
 
     def test_reader_may_sync_but_not_push(self) -> None:
         reader = _subject('reader')
@@ -295,10 +300,10 @@ class GhPrTest(_GitCommandCase):
     # the *published* private tree before deciding whether it can merge at all — see
     # tests/test_rekey_rehome.py. It is asserted here so a change to that ordering is visible.
 
-    """The gate to master: a maintainer merges a pull request, and only a
-    solutions-only one. The file list is what is judged, so it is what is faked.
-    `merge` itself walks the open PRs interactively (like `users process-requests`):
-    the queue and the keypresses are faked so no test touches a real remote or stdin."""
+    """The gate to master: a maintainer merges a pull request, and only one whose every
+    file is in the allowlist. The file list is what is judged, so it is what is faked.
+    `merge` names its request by number — offered as a menu when omitted — so the queue
+    is faked too, and no test touches a real remote or stdin."""
 
     def setUp(self) -> None:
         super().setUp()
@@ -371,12 +376,14 @@ class GhPrTest(_GitCommandCase):
                                          'git fetch --prune origin master',
                                          './scripts/git/sync.sh'])
 
-    def test_a_pr_spanning_both_trees_is_refused(self) -> None:
-        """Either tree, never both: solving a problem and writing an article are two reviews."""
+    def test_a_pr_spanning_both_trees_is_admitted(self) -> None:
+        """No one-tree rule: a branch may carry a solution and the article about it."""
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'topics/technique/memoization.md']
-        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
-        self.assertEqual(self.cmdlines, [])  # refused before gh ran
+        self.assertEqual(git._merge_pr(12), 0)
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
 
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
         # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/;
@@ -402,28 +409,24 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
-    # ── the interactive walk (gh-merge merge → _merge_walk) ──
-    def test_merge_walks_and_merges_on_m(self) -> None:
+    # ── choosing which request to merge (gh-merge merge) ──
+    def test_merge_lands_the_numbered_request(self) -> None:
         self.as_profile('maintainer')
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
                                          './scripts/git/sync.sh'])
 
-    def test_skip_leaves_the_pr_untouched(self) -> None:
+    def test_a_number_that_is_not_open_is_refused(self) -> None:
+        """A merged or invented number must not reach `gh` as a refusal nobody can act on."""
         self.as_profile('maintainer')
-        self.answers = ['s']
-        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(git.gh_merge('merge', 99), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
-    def test_quit_stops_the_walk_before_later_prs(self) -> None:
-        """And quitting a review is an abort, not a success: a chain gated on the walk stops."""
+    def test_merge_with_no_number_is_a_usage_error(self) -> None:
+        """Only reachable non-interactively — at the prompt the menu collects it first."""
         self.as_profile('maintainer')
-        self.open_prs = [{'number': 12, 'title': 'a', 'headRefName': 'user/x'},
-                         {'number': 13, 'title': 'b', 'headRefName': 'user/y'}]
-        self.answers = ['q']
-        self.assertEqual(git.gh_merge('merge'), ExitCodes.EXIT_ABORT)
+        self.assertEqual(git.gh_merge('merge'), ExitCodes.EXIT_USAGE)
         self.assertEqual(self.cmdlines, [])
 
     def test_no_open_prs_is_a_clean_noop(self) -> None:
@@ -436,16 +439,60 @@ class GhPrTest(_GitCommandCase):
         # None is 'gh could not tell us', not 'the queue is empty' — never a silent 0.
         self.as_profile('maintainer')
         self.open_prs = None
-        self.assertEqual(git.gh_merge('merge'), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git.gh_merge('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_the_menu_offers_the_open_requests(self) -> None:
+        """The chooser's value is the number the argument binds; the branch reads as detail."""
+        self.open_prs = [{'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'},
+                         {'number': 13, 'title': 'Articles', 'headRefName': 'user/y'}]
+        choices = git._open_pr_choices(None, {})
+        self.assertEqual([c.value for c in choices], ['12', '13'])
+        self.assertEqual(choices[0].label, '#12  Publish user/x')
+        self.assertEqual(choices[0].description, 'user/x')
+
+    def test_an_unreadable_queue_offers_no_menu_rather_than_raising(self) -> None:
+        self.open_prs = None
+        self.assertEqual(git._open_pr_choices(None, {}), [])
+
+    # ── a review notice's branch, resolved back to its request (msg act) ──
+    def test_a_notice_branch_lands_that_request(self) -> None:
+        """`msg act` on a notice must merge the branch it names, not offer the whole queue."""
+        self.as_profile('maintainer')
+        self.open_prs = [{'number': 7, 'title': 'other', 'headRefName': 'user/other'},
+                         {'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'}]
+        self.assertEqual(git.merge_pr_for_branch('user/x'), 0)
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
+        self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
+
+    def test_a_notice_whose_request_is_gone_says_so(self) -> None:
+        """The notice outlived what it asked for — a menu of other people's work is not the
+        answer, and neither is merging whatever happens to be first."""
+        self.as_profile('maintainer')
+        self.open_prs = [{'number': 7, 'title': 'other', 'headRefName': 'user/other'}]
+        self.assertEqual(git.merge_pr_for_branch('user/x'), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+        self.assertEqual(self.dismissed, [])
+
+    def test_a_notice_with_no_branch_is_refused(self) -> None:
+        self.as_profile('maintainer')
+        self.assertEqual(git.merge_pr_for_branch(''), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_an_unreadable_queue_refuses_the_notice_merge(self) -> None:
+        self.as_profile('maintainer')
+        self.open_prs = None
+        self.assertEqual(git.merge_pr_for_branch('user/x'), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     # ── the review notice, closed by the merge that answers it ──
     def test_a_merged_pr_dismisses_the_notice_that_asked_for_it(self) -> None:
-        """The chip's row types a bare `gh-merge merge`, so the branch in the subject is the
-        only handle the merge has on the message — and it is enough."""
+        """The head ref comes from the same read that offered the row, so the branch in the
+        notice's subject is the only handle the merge needs — and it is enough."""
         self.as_profile('maintainer')
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
         self.assertIn('msg', self.emits, 'the chip must be told the row is gone')
 
@@ -459,8 +506,7 @@ class GhPrTest(_GitCommandCase):
     def test_a_refused_pr_leaves_the_notice_waiting(self) -> None:
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge('merge'), 0)      # the walk survives a refusal
+        self.assertEqual(git.gh_merge('merge', 12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
         self.assertEqual(self.dismissed, [])
 
@@ -469,12 +515,6 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.rcs = [1]
         self.assertNotEqual(git._merge_pr(12, branch='user/x'), 0)
-        self.assertEqual(self.dismissed, [])
-
-    def test_a_skipped_pr_leaves_the_notice_waiting(self) -> None:
-        self.as_profile('maintainer')
-        self.answers = ['s']
-        self.assertEqual(git.gh_merge('merge'), 0)
         self.assertEqual(self.dismissed, [])
 
     def test_a_merge_with_no_branch_in_hand_dismisses_nothing(self) -> None:
@@ -488,66 +528,54 @@ class GhPrTest(_GitCommandCase):
         that fires when nothing moved trains the reader to ignore it."""
         self.as_profile('maintainer')
         self.dismiss_count = 0
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge('merge'), 0)
+        self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
         self.assertNotIn('msg', self.emits)
         self.assertIn('git', self.emits, 'the sync still moved master')
 
-    # ── the docs gate (gh-merge-docs), disjoint from the content one ──
-    def test_a_docs_pr_merges_through_the_docs_gate(self) -> None:
-        """The docs set is one body of work: a regeneration touching all of it merges whole."""
+    # ── the allowlist: one gate, admitting exactly what `git-commit` can stage ──
+    def test_the_allowlist_is_the_union_of_the_commit_targets(self) -> None:
+        """The invariant behind the gate: a PR may carry whatever a commit verb produced."""
+        for target, entries in git.TARGET_PATHS.items():
+            for entry in entries:
+                self.assertTrue(any(git._in_scope(probe, git.PR_SCOPE)
+                                    for probe in (entry.rstrip('/') + '/x',
+                                                  entry.replace('**/', 'public/p0042/'), entry)),
+                                f'{target} stages {entry}, which no PR may carry')
+
+    def test_a_pr_spanning_several_targets_merges_whole(self) -> None:
+        """Multiple commits across solutions, docs and topics are one review, not three."""
+        self.as_profile('maintainer')
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'solutions/problems.json',
+                      'docs/user-guide.md', 'topics/articles.json',
+                      'solutions/public/p0042/tags.json', 'README.md', 'solver/config.json']
+        self.assertEqual(git.gh_merge('merge', 12), 0)
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
+                                         'git fetch --prune origin master',
+                                         './scripts/git/sync.sh'])
+
+    def test_a_docs_only_pr_merges_through_the_same_gate(self) -> None:
+        """A regeneration is no longer a separate verb: one queue, one gate."""
         self.as_profile('maintainer')
         self.files = ['docs/user-guide.md', 'topics/articles.json', 'README.md',
                       'solver/modules.csv', 'solver/config.json', 'solver/ai/claude/CLAUDE.md']
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge_docs(), 0)
+        self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
                                          './scripts/git/sync.sh'])
-        # A docs branch is announced by the same `git-push`, so it is closed the same way.
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
 
-    def test_the_two_gates_refuse_each_other(self) -> None:
-        """Whichever verb you reach for names the review you are doing."""
-        self.as_profile('maintainer')
-        self.files = ['docs/user-guide.md']
-        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)  # docs via gh-merge
-        self.files = ['solutions/public/p0042/p0042_s0.py']
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge_docs(), 0)  # the walk survives…
-        self.assertEqual(self.cmdlines, [])  # …but nothing merged
-
-    def test_the_docs_gate_admits_only_the_named_files_under_solver(self) -> None:
+    def test_only_the_named_files_under_solver_are_admitted(self) -> None:
         """`solver/config.json` is in scope; the `solver/` tree around it is not."""
         self.as_profile('maintainer')
-        self.answers = ['m']
         self.files = ['solver/config.py']
-        self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, [])  # refused
+        self.assertEqual(git.gh_merge('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
         self.files = ['solver/config.json']
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge_docs(), 0)
+        self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
                                          './scripts/git/sync.sh'])
-
-    def test_the_docs_gate_reaches_the_tag_leg_but_not_the_solution_beside_it(self) -> None:
-        """`update-tags` writes each problem's tags.json, so a reconciliation must merge —
-        while the solution file next to it stays a solutions review."""
-        self.as_profile('maintainer')
-        self.files = ['solutions/public/p0042/tags.json',
-                      'solutions/private/p0100_0199/p0101/tags.json', 'topics/tags.json']
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
-                                         'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
-        self.cmdlines.clear()
-        self.files = ['solutions/public/p0042/tags.json', 'solutions/public/p0042/p0042_s0.py']
-        self.answers = ['m']
-        self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, [])  # refused
 
 
 class GitFilterCommandTest(_GitCommandCase):
@@ -699,127 +727,61 @@ class EncKeyPullFlowTest(_GitCommandCase):
         self.assertEqual(len(self.cmdlines), 1)
 
 
-class CanAmendTest(unittest.TestCase):
-    """`_can_amend`: True only for an unpushed HEAD with dirty paths — decided quietly.
+class CommitTargetsTest(unittest.TestCase):
+    """`_commit_paths`: what each target stages, and how targets compose.
 
-    The three preconditions are read at the `run`/`_remotes_containing_head` boundary,
-    each stubbed so no real git runs. What matters is that every reason amend must be
-    refused (no HEAD, a pushed HEAD, an undecidable push state, a clean tree) comes back
-    False — that is what keeps the loud `git-commit-amend` off an empty-message commit's
-    recovery path.
+    The table is the whole contract between `git-commit` and the merge gates — the same
+    entries answer "what does this commit touch?" and "what may this pull request touch?"
+    — so it is pinned here rather than only through a command line.
     """
 
-    def setUp(self) -> None:
-        self.head_rc: int = 0  # rev-parse HEAD: 0 = a commit exists
-        self.pushed: list[str] | None = []  # _remotes_containing_head: [] = unpushed
-        self.status: str = ' M solutions/public/p0218/p0218_s0.py'
+    problem: Any = MagicMock(number=218,
+                             solution_dir=config.root_dir / 'solutions/public/p0218')
 
-        def fake_run(argv: list[str], **_k: Any) -> Any:
-            if 'rev-parse' in argv:
-                return MagicMock(returncode=self.head_rc)
-            if 'status' in argv:
-                return MagicMock(returncode=0, stdout=self.status)
-            raise AssertionError(f'unexpected run: {argv}')
+    def test_the_default_target_is_this_problem_and_the_progress_file(self) -> None:
+        self.assertEqual(git._commit_paths(self.problem, ('solution',)),
+                         ['solutions/public/p0218', 'solutions/problems.json'])
 
-        self._saved_run = git.run
-        self._saved_remotes = git._remotes_containing_head
-        self._saved_paths = git._commit_paths
-        git.run = fake_run  # type: ignore[assignment]
-        git._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
-        git._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
-        self.problem: Any = MagicMock(number=218)
+    def test_paths_are_repo_relative(self) -> None:
+        """Absolute paths would work for `git add` but break `:(glob)` beside them."""
+        for spec in git._commit_paths(self.problem, ('solution', 'docs', 'topics', 'update')):
+            self.assertFalse(spec.removeprefix(':(glob)').startswith('/'), spec)
 
-    def tearDown(self) -> None:
-        git.run = self._saved_run  # type: ignore[assignment]
-        git._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
-        git._commit_paths = self._saved_paths  # type: ignore[assignment]
+    def test_topics_carries_both_legs_of_the_tag_graph(self) -> None:
+        """`update-tags` writes both, and a double-entry record must land as one commit."""
+        self.assertEqual(git._commit_paths(self.problem, ('topics',)),
+                         ['topics/', ':(glob)solutions/**/tags.json'])
 
-    def test_unpushed_head_with_dirty_paths_can_amend(self) -> None:
-        self.assertTrue(git._can_amend(self.problem))
+    def test_update_is_what_the_generators_write_outside_docs(self) -> None:
+        self.assertEqual(git._commit_paths(self.problem, ('update',)),
+                         ['README.md', 'solver/modules.csv', 'solver/config.json',
+                          'solver/ai/models.py', 'solver/ai/claude/CLAUDE.md',
+                          'solver/web/content/home-summary.md'])
 
-    def test_no_head_cannot_amend(self) -> None:
-        self.head_rc = 1  # no commit to amend yet
-        self.assertFalse(git._can_amend(self.problem))
+    def test_targets_compose_in_the_order_named(self) -> None:
+        self.assertEqual(git._commit_paths(self.problem, ('docs', 'solutions')),
+                         ['docs/', 'solutions/'])
 
-    def test_a_pushed_head_cannot_amend(self) -> None:
-        self.pushed = ['origin/user/t-000000']  # on origin — amending would force-push
-        self.assertFalse(git._can_amend(self.problem))
+    def test_overlapping_targets_stage_a_path_once(self) -> None:
+        """`solutions` contains every `solution`; naming both must not stage it twice."""
+        self.assertEqual(git._commit_paths(self.problem, ('solution', 'solution')),
+                         ['solutions/public/p0218', 'solutions/problems.json'])
 
-    def test_an_undecidable_push_state_cannot_amend(self) -> None:
-        self.pushed = None  # cannot tell — never assume unpushed
-        self.assertFalse(git._can_amend(self.problem))
-
-    def test_clean_paths_cannot_amend(self) -> None:
-        self.status = ''  # nothing under this problem changed
-        self.assertFalse(git._can_amend(self.problem))
+    def test_every_target_is_inside_the_merge_allowlist(self) -> None:
+        """The invariant tying the two verbs together: a PR may carry whatever a commit staged."""
+        staged = git._commit_paths(self.problem, tuple(git.TARGET_PATHS) + ('solution',))
+        for spec in staged:
+            probe = spec.removeprefix(':(glob)').replace('**/', 'public/p0042/')
+            self.assertTrue(git._in_scope(probe, git.PR_SCOPE)
+                            or git._in_scope(probe.rstrip('/') + '/x', git.PR_SCOPE), spec)
 
 
-class GitCommitDispatchTest(_GitCommandCase):
-    """git-commit's empty-message dispatch: amend when it can, `--reset` suppresses it,
-    an explicit message never amends. `_can_amend` and `git-commit-amend` are stubbed —
-    the predicate has its own test; this pins which branch git-commit takes."""
+class GitCommitTest(_GitCommandCase):
+    """git-commit: the usage guards, the command line it builds, and the clean no-op.
 
-    _FRESH = 'git add -A solutions/public/p0218 && git commit --message "solution for p0218"'
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.amendable: bool = True
-        self.amend_rc: int = 0
-        self.amend_calls: int = 0
-
-        def fake_amend(problem: Any) -> int:
-            self.amend_calls += 1
-            return self.amend_rc
-
-        self._saved_can_amend = git._can_amend
-        self._saved_amend = git.git_commit_amend
-        self._saved_paths = git._commit_paths
-        git._can_amend = lambda problem: self.amendable  # type: ignore[assignment]
-        git.git_commit_amend = fake_amend  # type: ignore[assignment]
-        git._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
-        self.as_profile('contributor')
-        self.problem: Any = MagicMock(number=218)
-
-    def tearDown(self) -> None:
-        git._can_amend = self._saved_can_amend  # type: ignore[assignment]
-        git.git_commit_amend = self._saved_amend  # type: ignore[assignment]
-        git._commit_paths = self._saved_paths  # type: ignore[assignment]
-        super().tearDown()
-
-    def test_empty_message_amends_when_it_can(self) -> None:
-        self.assertEqual(git.git_commit(self.problem), 0)
-        self.assertEqual(self.amend_calls, 1)
-        self.assertEqual(self.cmdlines, [])  # folded into HEAD; no fresh commit ran
-
-    def test_a_failing_amend_is_returned_not_retried_as_fresh(self) -> None:
-        self.amend_rc = ExitCodes.EXIT_ERROR  # _can_amend said yes, so trust the amend
-        self.assertEqual(git.git_commit(self.problem), ExitCodes.EXIT_ERROR)
-        self.assertEqual(self.cmdlines, [])  # never a second, fresh commit
-
-    def test_empty_message_commits_fresh_when_it_cannot_amend(self) -> None:
-        self.amendable = False
-        self.assertEqual(git.git_commit(self.problem), 0)
-        self.assertEqual(self.amend_calls, 0)
-        self.assertEqual(self.cmdlines, [self._FRESH])
-
-    def test_reset_suppresses_the_amend_even_when_it_could(self) -> None:
-        self.amendable = True  # amendable — but --reset must win
-        self.assertEqual(git.git_commit(self.problem, reset=True), 0)
-        self.assertEqual(self.amend_calls, 0)
-        self.assertEqual(self.cmdlines, ['git reset --soft origin/master && ' + self._FRESH])
-
-    def test_an_explicit_message_never_amends(self) -> None:
-        self.assertEqual(git.git_commit(self.problem, 'hand-written'), 0)
-        self.assertEqual(self.amend_calls, 0)
-        self.assertEqual(self.cmdlines,
-                         ['git add -A solutions/public/p0218 && git commit --message "hand-written"'])
-
-
-class GitCommitDocsTest(_GitCommandCase):
-    """git-commit-docs: the docs set, the `(docs)` tag, and the clean no-op.
-
-    The `git status` probe is stubbed, so what is pinned is the command line the verb
-    builds — which paths it stages, and with what message."""
+    The `git status` probe is stubbed, so what is pinned is which paths the verb stages
+    and with what message — no real git runs.
+    """
 
     def setUp(self) -> None:
         super().setUp()
@@ -830,39 +792,132 @@ class GitCommitDocsTest(_GitCommandCase):
             return MagicMock(returncode=0, stdout=self.dirty)
 
         git.run = fake_run  # type: ignore[assignment]
-        self.as_profile('maintainer')
+        self.as_profile('contributor')
+        self.problem: Any = MagicMock(number=218,
+                                      solution_dir=config.root_dir / 'solutions/public/p0218')
 
-    def test_it_stages_exactly_the_docs_set(self) -> None:
-        """The glob leg carries git's explicit :(glob) magic, and is quoted for the shell."""
-        self.assertEqual(git.git_commit_docs('regenerate'), 0)
-        self.assertEqual(self.cmdlines, [
-            'git add -A docs/ topics/ README.md solver/modules.csv solver/config.json '
-            'solver/ai/models.py solver/ai/claude/CLAUDE.md solver/web/content/home-summary.md '
-            "':(glob)solutions/**/tags.json' && git commit --message \"docs(topic): regenerate\""])
+    # ── the usage guards: exactly one of message / --amend names the commit ──
 
-    def test_the_message_is_tagged_once(self) -> None:
-        git.git_commit_docs('docs(topic): already tagged')
-        self.assertIn('--message "docs(topic): already tagged"', self.cmdlines[0])
-
-    def test_an_empty_message_becomes_the_default(self) -> None:
-        git.git_commit_docs()
-        self.assertIn('--message "docs(topic): update"', self.cmdlines[0])
-
-    def test_a_clean_docs_set_is_a_noop_not_a_failure(self) -> None:
-        """It composes in a `&&` chain after a regeneration that had nothing to do."""
-        self.dirty = ''
-        self.assertEqual(git.git_commit_docs('nothing to say'), 0)
+    def test_a_message_is_required(self) -> None:
+        """Only reachable non-interactively — at the prompt the `Ask` collects it first."""
+        self.assertEqual(git.git_commit(self.problem), ExitCodes.EXIT_USAGE)
         self.assertEqual(self.cmdlines, [])
 
+    def test_a_message_with_amend_is_refused(self) -> None:
+        """--amend keeps HEAD's message, so a message alongside it means two things."""
+        self.assertEqual(git.git_commit(self.problem, message='x', amend=True),
+                         ExitCodes.EXIT_USAGE)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_amend_with_reset_is_refused(self) -> None:
+        """Opposite intents: fold into the last commit vs squash them all into a fresh one."""
+        self.assertEqual(git.git_commit(self.problem, amend=True, reset=True),
+                         ExitCodes.EXIT_USAGE)
+        self.assertEqual(self.cmdlines, [])
+
+    # ── what it stages ──
+
+    def test_it_commits_this_problem_by_default(self) -> None:
+        self.assertEqual(git.git_commit(self.problem, message='solved it'), 0)
+        self.assertEqual(self.cmdlines, [
+            'git add -A solutions/public/p0218 solutions/problems.json '
+            "&& git commit --message 'solved it'"])
+
+    def test_the_doc_targets_stage_the_whole_docs_set(self) -> None:
+        """The glob leg carries git's explicit :(glob) magic, and is quoted for the shell."""
+        self.assertEqual(git.git_commit(self.problem, 'docs', 'topics', 'update',
+                                        message='regenerate'), 0)
+        self.assertEqual(self.cmdlines, [
+            "git add -A docs/ topics/ ':(glob)solutions/**/tags.json' README.md "
+            'solver/modules.csv solver/config.json solver/ai/models.py '
+            'solver/ai/claude/CLAUDE.md solver/web/content/home-summary.md '
+            "&& git commit --message regenerate"])
+
+    def test_the_message_is_shell_quoted(self) -> None:
+        """It reaches a `shell=True` command line, and `Ask(multiline=True)` collects prose."""
+        git.git_commit(self.problem, message='fix "quoted" $HOME `now`')
+        self.assertIn("""--message 'fix "quoted" $HOME `now`'""", self.cmdlines[0])
+
     def test_reset_squashes_to_origin_first(self) -> None:
-        self.assertEqual(git.git_commit_docs('checkpoint', reset=True), 0)
+        self.assertEqual(git.git_commit(self.problem, message='checkpoint', reset=True), 0)
         self.assertTrue(self.cmdlines[0].startswith('git reset --soft origin/master && git add -A'))
 
-    def test_reset_runs_even_on_a_clean_set(self) -> None:
+    # ── the clean no-op ──
+
+    def test_a_clean_target_is_a_noop_not_a_failure(self) -> None:
+        """It composes in a `&&` chain after a regeneration that had nothing to do."""
+        self.dirty = ''
+        self.assertEqual(git.git_commit(self.problem, 'docs', message='nothing to say'), 0)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_reset_runs_even_on_a_clean_target(self) -> None:
         """--reset is about squashing the local commits, not about the working tree."""
         self.dirty = ''
-        self.assertEqual(git.git_commit_docs('squash', reset=True), 0)
+        self.assertEqual(git.git_commit(self.problem, message='squash', reset=True), 0)
         self.assertEqual(len(self.cmdlines), 1)
+
+
+class GitCommitAmendTest(_GitCommandCase):
+    """`git-commit --amend`: the three preconditions, each refused for its own reason.
+
+    A rewritten commit that is already on origin only lands again through a force-push,
+    which is why the pushed-HEAD check is a refusal and not a warning.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.head_rc: int = 0  # rev-parse HEAD: 0 = a commit exists
+        self.pushed: list[str] | None = []  # _remotes_containing_head: [] = unpushed
+        self.dirty: str = ' M solutions/public/p0218/p0218_s0.py'
+
+        def fake_run(argv: list[str], **_k: Any) -> Any:
+            if 'rev-parse' in argv:
+                return MagicMock(returncode=self.head_rc)
+            if 'status' in argv:
+                return MagicMock(returncode=0, stdout=self.dirty)
+            raise AssertionError(f'unexpected run: {argv}')
+
+        git.run = fake_run  # type: ignore[assignment]
+        self._saved_remotes = git._remotes_containing_head
+        git._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
+        self.as_profile('contributor')
+        self.problem: Any = MagicMock(number=218,
+                                      solution_dir=config.root_dir / 'solutions/public/p0218')
+
+    def tearDown(self) -> None:
+        git._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
+        super().tearDown()
+
+    def test_it_folds_the_staged_paths_into_head(self) -> None:
+        self.assertEqual(git.git_commit(self.problem, amend=True), 0)
+        self.assertEqual(self.cmdlines, [
+            'git add -A solutions/public/p0218 solutions/problems.json '
+            '&& git commit --amend --no-edit'])
+
+    def test_it_amends_whatever_targets_name(self) -> None:
+        """The amend is not the solution target's alone — it folds in what you staged."""
+        self.assertEqual(git.git_commit(self.problem, 'docs', amend=True), 0)
+        self.assertEqual(self.cmdlines, ['git add -A docs/ && git commit --amend --no-edit'])
+
+    def test_no_head_is_refused(self) -> None:
+        self.head_rc = 1  # no commit to amend yet
+        self.assertEqual(git.git_commit(self.problem, amend=True), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_a_pushed_head_is_refused(self) -> None:
+        self.pushed = ['origin/user/t-000000']  # on origin — amending would force-push
+        self.assertEqual(git.git_commit(self.problem, amend=True), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_an_undecidable_push_state_is_refused(self) -> None:
+        self.pushed = None  # cannot tell — never assume unpushed
+        self.assertEqual(git.git_commit(self.problem, amend=True), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_clean_paths_are_a_noop_not_a_failure(self) -> None:
+        self.dirty = ''  # nothing under this problem changed
+        self.assertEqual(git.git_commit(self.problem, amend=True), 0)
+        self.assertEqual(self.cmdlines, [])
 
 
 if __name__ == '__main__':

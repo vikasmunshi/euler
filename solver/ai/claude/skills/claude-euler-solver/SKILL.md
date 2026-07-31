@@ -234,19 +234,34 @@ it — and any of them failing is a stop-and-report:
    unchanged (still exit 0). If it refuses, run `solver "benchmark <n>"` to record
    fresh results and try again; if it still refuses, **stop and report** — an
    unconfirmed solution is not finished work.
-3. **Commit:** `solver "git-commit '<message>'"`. Keep `<message>` short — a single
-   line that does **not** reveal the solution approach. Use a word or two from the
-   problem title and make it unique with a bit of personality, e.g.
-   `solver "git-commit 'p0042 de-coded triangles with a smile'"`,
-   `solver "git-commit 'p0042 coded triangles bites the dust'"`, etc.
-   Never mention the algorithm, formula, or any hint of how it was solved.
+3. **Commit:** `solver "git-commit solution topics message='<message>'"`.
+
+   Two targets, because the work has two halves: `solution` stages this problem's
+   directory plus `solutions/problems.json` (what step 2 just wrote), and `topics`
+   stages the central vocabulary and article index that `update-tags` reconciled in
+   Phase 2 — leave it off and the graph's other leg sits uncommitted. A target with
+   nothing to stage contributes nothing, so naming both is always safe.
+
+   The message is a **named** argument (`message=…`), not a positional one; pass it
+   explicitly. Headless there is nobody to ask, so `git-commit` with no `message=`
+   exits `2` without committing. Quote it as shown when it contains spaces.
+
+   Keep `<message>` short — a single line that does **not** reveal the solution
+   approach. Use a word or two from the problem title and make it unique with a bit of
+   personality, e.g.
+   `solver "git-commit solution topics message='p0042 de-coded triangles with a smile'"`,
+   `solver "git-commit solution topics message='p0042 coded triangles bites the dust'"`,
+   etc. Never mention the algorithm, formula, or any hint of how it was solved.
 4. **Push and open the pull request:** `solver "git-push"`. It pushes your branch to
    origin as yourself and opens (or reports) its pull request onto master, which is
    how the work is handed over for review — a commit that stays local has been
    delivered to nobody. A branch that already has an open pull request keeps it, and
-   the new commits simply join it. If the push or the pull request fails, **report
-   what it said**: the commit is safe either way, so do not retry with `--force` and
-   do not merge anything yourself.
+   the new commits simply join it, and opening one also notifies the maintainers. If
+   the push or the pull request fails, **report what it said**: the commit is safe
+   either way, so do not retry with `--force` and do not merge anything yourself.
+
+   Merging is `gh-merge`, a maintainer's command and never part of this phase. Landing
+   your own review is exactly the "do not merge anything yourself" this step rules out.
 
 Then **summarise the session** in one or two sentences (the action, and what was
 found or done) and end the turn.

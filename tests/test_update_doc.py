@@ -72,7 +72,7 @@ class AuthorizationTableTests(unittest.TestCase):
         self.assertEqual(_least_profile(update_docs), 'admin')
         update_tags = registry.resolve('update-tags')
         assert update_tags is not None
-        self.assertEqual(_least_profile(update_tags), 'maintainer')
+        self.assertEqual(_least_profile(update_tags), 'contributor')
 
 
 class RegistryCompletenessTests(unittest.TestCase):

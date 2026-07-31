@@ -93,24 +93,33 @@
     {% endmacro %}
     {{ verb('Review changes', 'git-status --details', 'reader') }}
     {{ verb('Sync with master', 'git-sync', 'reader') }}
-    {# No problem argument: the shell supplies the one it is on. `git-commit`'s message
-       is optional now — it defaults to "solution for pNNNN" — so a one-click commit works. #}
-    {{ verb('Commit', 'git-commit', 'contributor') }}
-    {# The docs set is the other half of a commit: `git-commit` stages the problem the
-       shell is on, so a regeneration (update-docs / update-tags / update-models) has no
-       verb here at all without this one, and its files would sit uncommitted while the
-       chip counts them. Empty message: it becomes `(docs) update`. #}
-    {{ verb('Commit docs', 'git-commit-docs', 'contributor') }}
-    {# Un-commit back to origin/master, keeping the changes staged — the undo
-       `git-commit --reset` folds into a re-commit and never stops at. #}
-    {{ verb('Reset to master', 'git-reset', 'contributor') }}
+    {# One commit row, naming the three targets a collaborator authors: the problem the
+       shell is on, the guides, and the articles with their tag legs. No problem argument
+       (the shell supplies the one it is on) and no message (the command asks for one at
+       the prompt), so the row *starts* the commit rather than completing it.
+
+       Naming three targets costs nothing when only one has changed: a clean target
+       contributes no path, and a commit with nothing staged is a no-op that says so. That
+       is what lets a single button stand in for "save what I did", whether the afternoon
+       went into a solution, an article, or both — where two rows previously made the
+       reader decide which half of their own work they were saving. `solutions` and
+       `update` are deliberately absent: staging the whole tree, or regenerated package
+       source, is not a one-click act. #}
+    {{ verb('Commit', 'git-commit solution docs topics', 'contributor') }}
     {{ verb('Push & open pull request', 'git-push', 'contributor') }}
+    {# One row, because there is one gate and one queue: `gh-merge merge` offers the open
+       requests as a menu, so the row needs no number and a maintainer sees everything that
+       is waiting — where the docs half of the queue used to need a second button. #}
     {{ verb('Pull requests', 'gh-merge merge', 'maintainer') }}
-    {# The docs set's own merge gate, beside the content one — the same split the two
-       commit verbs above already make. A branch of docs is refused by `gh-merge` and a
-       branch of solutions by this one, so a maintainer walking the queue needs both
-       verbs here or half the queue has no button. #}
-    {{ verb('Docs pull requests', 'gh-merge-docs', 'maintainer') }}
+    <li class="menu-sep" aria-hidden="true"></li>
+    {# Last, and behind a separator, because it runs the other way. Every verb above moves
+       work forward — review it, sync it, commit it, push it, land it — and this one takes
+       a commit back. Sitting mid-list it was one slip away from the Commit above it; down
+       here it reads as what it is, an undo, and the separator is the pause before it.
+
+       Un-commit back to origin/master, keeping the changes staged — the stop
+       `git-commit --reset` folds into a re-commit and never offers. #}
+    {{ verb('Reset to master', 'git-reset', 'contributor') }}
     <li class="menu-sep" aria-hidden="true"></li>
     {# The one piece of clone health that silently decides whether solutions/private
        is readable at all. This reports; the account page owns the full story — the

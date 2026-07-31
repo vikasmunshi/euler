@@ -157,17 +157,20 @@ fill.
    exit `0`; fix any issue it names (an unknown tag in your `<!-- tags: -->` comment, most likely)
    and re-run.
 3. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
-4. **Commit with `git-commit-docs`:**
+4. **Commit the `topics` target:**
 
-       solver "git-commit-docs 'docs(topic): <name>'"
+       solver "git-commit topics message='docs(topic): <name>'"
 
-   That command stages the whole documentation set — `topics/` included — so your page goes in
-   together with everything `update-tags` touched (`topics/tags.json`, `topics/articles.json`) in
-   one commit, and nothing outside that set can ride along. The message is tagged `(docs)`
-   automatically. Topic pages carry no solutions, so it needs no secrecy — just say what was
-   written.
+   `git-commit` stages what its targets name, and `topics` is both legs of the tag graph — your
+   page and `topics/tags.json` / `topics/articles.json`, plus each problem's `tags.json` — so
+   everything `update-tags` touched goes in as one commit, and nothing outside those paths can
+   ride along. Topic pages carry no solutions, so the message needs no secrecy: just say what was
+   written, tagged `docs(topic):` so the log reads at a glance.
 
-   Do **not** use `solver "commit"`: that command is problem-scoped — it stages a
+   Pass the message explicitly, as above. With no `message=` the command asks for one at the
+   prompt, and headless there is nobody to ask — it exits `2` without committing.
+
+   Do **not** run `solver "commit"` bare: with no target it is problem-scoped — it stages a
    `solutions/pNNNN` directory plus `problems.json`, *not* a topic page, so it would not commit
    your work at all.
 

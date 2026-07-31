@@ -129,10 +129,12 @@ def dismiss_by_subject(subject: str) -> int:
 
     :func:`dismiss_thread` for the act that has **no thread id to work with**. A command
     that files a notice can hand the id to whoever works it; `git-push` cannot — the act
-    that answers its notice is `gh-merge merge`, which walks the pull requests *GitHub*
-    knows and never reads the spool. So the notice carries the correlation in its subject
+    that answers its notice is a merge, which works the pull requests *GitHub* knows and
+    never reads the spool. So the notice carries the correlation in its subject
     (:data:`~solver.web.msg.PR_REVIEW_SUBJECT` + the branch), and the merge dismisses by
-    that subject once the branch has landed.
+    that subject once the branch has landed. The branch is load-bearing twice over: it is
+    also what :func:`~solver.core.git.merge_pr_for_branch` resolves into the request number
+    when the act is taken from the chip.
 
     An exact match, never a prefix: the prefix names a *kind* of message and would sweep
     every waiting pull request the moment one of them merged.

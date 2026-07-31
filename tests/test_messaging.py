@@ -797,8 +797,8 @@ class MsgActTests(_MsgCommandCase):
         done: list[str] = []
         self.enterContext(patch.object(keys_mod, 'user_authorize',
                                        lambda thread_id: (done.append(f'authorize {thread_id}'), 0)[1]))
-        self.enterContext(patch.object(git_mod, 'gh_merge',
-                                       lambda action='list': (done.append(f'merge {action}'), 0)[1]))
+        self.enterContext(patch.object(git_mod, 'merge_pr_for_branch',
+                                       lambda branch: (done.append(f'merge {branch}'), 0)[1]))
         self.enterContext(patch.object(msg_commands, '_save',
                                        lambda thread_id, data: (done.append(f'save {thread_id}'), 0)[1]))
         return done
@@ -837,12 +837,12 @@ class MsgActTests(_MsgCommandCase):
 
     @unittest_run_loop
     async def test_a_pull_request_notice_is_merged_by_staff(self) -> None:
-        """No thread is passed on: the queue `gh-merge` walks is GitHub's, and it dismisses
-        this message itself by the branch in the subject."""
+        """The branch out of the subject, not the thread id: the queue is GitHub's, and the
+        branch is what names *this* request in it — and what dismisses this message after."""
         done = self._dispatched()
         thread_id = await self._from_alice(f'{PR_REVIEW_SUBJECT}user/x')
         await asyncio.to_thread(self._run, 'act', thread_id)
-        self.assertEqual(done, ['merge merge'])
+        self.assertEqual(done, ['merge user/x'])
 
     @unittest_run_loop
     async def test_a_request_of_your_own_is_a_read(self) -> None:

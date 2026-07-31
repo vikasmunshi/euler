@@ -45,16 +45,13 @@ a profile on each channel.
 | `solver.ai.models` | `costs` |  | ✓ | ✓ | ✓ |
 | `solver.ai.skill` | `claude-blog` |  |  | ✓ | ✓ |
 | `solver.ai.skill` | `claude-solve` |  | ✓ | ✓ | ✓ |
-| `solver.ai.update_models` | `update-models` |  |  |  | ✓ |
+| `solver.ai.update_models` | `update-models` |  |  | ✓ | ✓ |
 | `solver.core.evaluate` | `benchmark` |  | ✓ | ✓ | ✓ |
 | `solver.core.evaluate` | `compile-c` |  | ✓ | ✓ | ✓ |
 | `solver.core.evaluate` | `evaluate` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `gh-merge` |  |  | ✓ | ✓ |
-| `solver.core.git` | `gh-merge-docs` |  |  | ✓ | ✓ |
 | `solver.core.git` | `git-audit` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-commit` |  | ✓ | ✓ | ✓ |
-| `solver.core.git` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
-| `solver.core.git` | `git-commit-docs` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-hooks` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-identity` |  | ✓ | ✓ | ✓ |
@@ -70,7 +67,7 @@ a profile on each channel.
 | `solver.core.tags` | `tags` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `topic` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `topics` | ✓ | ✓ | ✓ | ✓ |
-| `solver.core.tags` | `update-tags` |  |  | ✓ | ✓ |
+| `solver.core.tags` | `update-tags` |  | ✓ | ✓ | ✓ |
 | `solver.core.test_cases` | `test-cases` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `edit` |  | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `show` | ✓ | ✓ | ✓ | ✓ |

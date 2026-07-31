@@ -203,6 +203,16 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 .term-slash { display: none; }
 .term-chip.is-hidden .term-slash { display: inline; }
 
+/* The chip's panel: one row per state, each offering the act that changes it.
+   Hide and show are two single-purpose controls in site.js — deliberately, so neither can
+   lie about a state it did not read — and this is what makes the pair READ as one row:
+   whichever does not apply is not there. The default is visible, so the show row hides
+   until body.ws-hidden says otherwise. */
+.term-panel { min-width: 14rem; }
+.term-only-hidden { display: none; }
+body.ws-hidden .term-only-hidden { display: block; }
+body.ws-hidden .term-only-visible { display: none; }
+
 /* ── the message chip (_msg.html) ────────────────────────────────────────────
    Between the terminal and git chips in `.app-who`: all three report state about YOU,
    and this is the only one another person can change.

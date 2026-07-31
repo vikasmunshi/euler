@@ -72,27 +72,65 @@
   <span class="hsep" aria-hidden="true"></span>
   {% include "_crumbs.html" %}
   <div class="app-who">
-    {# The terminal's state, first in the identity group. The controls that CHANGE it
-       live on the terminal window itself (base.html's titlebar); this only reports —
-       so the state stays readable when the window is hidden to the footer and its
-       titlebar is gone. Same [data-term-dot] every other terminal control carries, so
-       site.js paints it from the one state the iframe reports.
+    {# The terminal's state AND the two acts that change it, first in the identity group.
+       Same <details class="menu"> chassis as messages, git and the user pill — one menu
+       idiom in the header, not four.
 
-       It carries BOTH of the terminal's states, because they are independent and either
-       one explains a shell that is not answering: the SESSION (connected/disconnected)
-       in the dot, and LAYOUT (visible/hidden) as a slash struck through the glyph —
-       hidden reads as crossed-out everywhere else, and it costs the chip no width. The
-       tooltip says both in words. #}
+       The summary carries BOTH of the terminal's states, because they are independent and
+       either one explains a shell that is not answering: the SESSION
+       (connected/disconnected) in the dot, and LAYOUT (visible/hidden) as a slash struck
+       through the glyph — hidden reads as crossed-out everywhere else, and it costs the
+       chip no width. The panel says both in words and offers the act for each.
+
+       It used to report only. The controls lived on the terminal window's own titlebar,
+       which is exactly where they are *not* reachable in the state a person most needs
+       them: hide the window and the titlebar goes with it, leaving the header saying
+       "hidden" beside no way to bring it back but the nav's Terminal item. Two states, two
+       rows, in the one place that is always on screen.
+
+       Both rows carry the attributes site.js already dispatches on ([data-term-toggle],
+       [data-term-hide]/[data-term-show]) — no new wiring, and the titlebar's controls keep
+       working unchanged from the same single `termConnected`. #}
     {% if subject %}
-    <span class="term-chip" data-term-status title="terminal — disconnected, visible">
-      <svg class="term-glyph" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round" d="M5 7l4 4-4 4M12 16h7"/>
-        <path class="term-slash" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" d="M3 21L21 3"/>
-      </svg>
-      <span class="dot off" data-term-dot></span>
-    </span>
+    {# Deliberately NOT `.term-menu`: that marks a menu whose verbs type into the shell, and
+       site.js dims those when the socket is down. These two act on the terminal itself, and
+       Connect is exactly what someone looking at a disconnected chip came here for. #}
+    <details id="term-chip" class="menu">
+      <summary class="term-chip" data-term-status title="terminal — disconnected, visible">
+        <svg class="term-glyph" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" d="M5 7l4 4-4 4M12 16h7"/>
+          <path class="term-slash" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" d="M3 21L21 3"/>
+        </svg>
+        <span class="dot off" data-term-dot></span>
+      </summary>
+      <ul class="menu-list menu-right term-panel">
+        {# The two states in words, each with its dot, shown always: a readout that names
+           its axes is read at a glance, where a line that disappears makes the reader
+           wonder what it dropped. The words are site.js's to write. #}
+        <li class="menu-info">Session
+          <span class="menu-state"><span data-term-state>disconnected</span>
+            <span class="dot off" data-term-dot></span></span></li>
+        {# Connect/disconnect: one control that flips, because the act on offer is always
+           the opposite of the state. site.js writes the label, the title and the accessible
+           name from `termConnected`, so this row can never name an act it would not take. #}
+        <li class="verb"><button type="button" data-term-toggle>
+          <span data-term-toggle-label>Connect the terminal</span></button></li>
+        <li class="menu-sep" aria-hidden="true"></li>
+        <li class="menu-info">Window
+          <span class="menu-state"><span data-term-layout>visible</span>
+            <span class="dot on" data-term-layout-dot></span></span></li>
+        {# Hide and show stay SEPARATE controls — site.js's invariant, so each does one
+           predictable thing and a stale flag can never make a control lie. The pair reads
+           as one flipping row because CSS shows whichever applies (body.ws-hidden), which
+           keeps the invariant *and* the single row a person expects. #}
+        <li class="verb term-only-visible"><button type="button" data-term-hide>
+          Hide the terminal</button></li>
+        <li class="verb term-only-hidden"><button type="button" data-term-show>
+          Show the terminal</button></li>
+      </ul>
+    </details>
     {% else %}
     {# Signed out there is no session to report — the right pane holds the sign-in
        dialogue, not a terminal. Inert, never absent: the header keeps its shape. #}

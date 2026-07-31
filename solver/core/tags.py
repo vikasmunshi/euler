@@ -664,7 +664,14 @@ def _load_index() -> dict[str, Any] | None:
         return None
 
 
-@register(requires='maintainer')
+# Contributor: the tag graph is authored *alongside* a solution, not curated after it — the
+# solver skill writes a problem's `tags.json` and reconciles in the same pass, and a
+# contributor who cannot run this leaves the graph half-written every time they solve
+# something. The blast radius is their own branch, like every other `contributor` write verb:
+# what it reconciles is `topics/` and each problem's tag leg, which is exactly `git-commit`'s
+# `topics` target. Promoting a proposal into the central vocabulary still reaches master only
+# through `gh-merge`, where a maintainer reads it.
+@register(requires='contributor')
 def update_tags(check: bool = False) -> int:
     """The glue for the double-entry tag graph.
 
