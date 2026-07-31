@@ -126,7 +126,6 @@ logarithmic.
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
 - ● [0236](/solutions/0236/) — Luxury Hampers
-- ○ [0241](/solutions/0241/) — Perfection Quotients
 - ○ [0251](/solutions/0251/) — Cardano Triplets
 - ○ [0257](/solutions/0257/) — Angular Bisectors
 - ○ [0261](/solutions/0261/) — Pivotal Square Sums
