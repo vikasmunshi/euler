@@ -366,7 +366,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
-- ○ [0239](/solutions/0239/) — Twenty-two Foolish Primes
+- ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0243](/solutions/0243/) — Resilience
 - ○ [0245](/solutions/0245/) — Coresilience
 - ○ [0248](/solutions/0248/) — Euler's Totient Function Equals 13!

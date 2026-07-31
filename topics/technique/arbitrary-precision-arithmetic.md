@@ -163,6 +163,7 @@ conversion altogether, and is usually faster besides.
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0238](/solutions/0238/) — Infinite String Tour
+- ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0321](/solutions/0321/) — Swapping Counters
