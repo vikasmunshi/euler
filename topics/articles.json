@@ -3801,7 +3801,7 @@
     {
       "path": "technique/convolution",
       "title": "Convolution",
-      "status": "draft",
+      "status": "final",
       "solved": 5,
       "problems": 5,
       "tags": ["convolution"],
