@@ -854,7 +854,7 @@ def _reconstruct_secret(shares: list[str]) -> bytes:
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
 
-@register(requires='admin')
+@register(requires='maintainer')
 def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     """Print Shamir shares of the current master key.
 
