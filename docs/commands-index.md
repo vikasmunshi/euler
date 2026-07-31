@@ -98,8 +98,9 @@ a parameter that accepts repetition.
 | [`topic`](#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
 | [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
-| [`update-models`](#command-update-models) | — | `maintainer` | Refresh the model catalogue and the USD→EUR rate. |
+| [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
 | [`update-tags`](#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
+| [`update-usd-rate`](#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
 | [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
@@ -800,7 +801,7 @@ git-commit
 | argument | description |
 |----------|-------------|
 | `problem` | The problem whose solution directory the `solution` target stages. Ignored by every other target. |
-| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the articles and every problem's tag leg) or 'update' (what `update-docs` and `update-models` write outside `docs/` — the README, the module registry, the managed settings, the model block, the Claude guidance). Defaults to 'solution'. |
+| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the articles and every problem's tag leg) or 'update' (what the `update-*` verbs write outside `docs/` — the README, the module registry, the managed settings, the model block, the Claude guidance). Defaults to 'solution'. |
 | `message` | The commit message. Required unless `amend` is set, and asked for at the prompt when it is left out. |
 | `amend` | Fold the staged changes into HEAD instead of committing, keeping its message. Defaults to False. Refused with a message, with `reset`, or once HEAD is pushed. |
 | `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. `git-reset` is the same move without the re-commit. |
@@ -1808,17 +1809,17 @@ update-docs
 
 #### Command: `update-models`
 
-Refresh the model catalogue and the USD→EUR rate.
+Refresh the model catalogue and its pricing.
 
-* ⚑ needs maintainer or above.
+* ⚑ needs admin.
 * » supports --silent to suppress output.
 
 Lists the available Claude models from the Anthropic Models API, scrapes each model's base
 input/output price (per million tokens) from the public pricing page, and rewrites the
 `# GEN:models` block in `models.py` — the enum members, their inline comments, and the
-`price` map. Curated per-model comments are kept; a newly discovered model is commented with
-its display name. Separately, fetches the USD→EUR rate from the ECB daily reference feed and
-writes it to `config.json` (the rate is used only by `costs`). Nothing else is touched.
+`price` map. Curated per-model comments are kept; a newly discovered model is commented
+with its display name. Nothing outside the markers is touched, and the USD→EUR rate is
+`update-usd-rate`'s to refresh.
 
 **usage**
 
@@ -1832,7 +1833,7 @@ update-models
 
 | argument | description |
 |----------|-------------|
-| `check` | Write nothing and fail if either the model block or the FX rate is out of date. Defaults to False, which rewrites both in place. The FX rate drifts daily, so `--check` will usually report it as stale. |
+| `check` | Write nothing and fail if the generated block is out of date. Defaults to False, which rewrites it in place. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.ai.update_models.update_models`.
@@ -1867,6 +1868,36 @@ update-tags
 | `check` | Write nothing: report unknown slugs, facet violations, unpromoted proposals, missing files and a stale article index, and fail if the graph is inconsistent. Defaults to False, which reconciles the graph in place. |
 
 *Defined in* `solver.core.tags.update_tags`.
+
+---
+
+#### Command: `update-usd-rate`
+
+Refresh the USD→EUR rate used to report API costs.
+
+* ⚑ needs maintainer or above.
+* » supports --silent to suppress output.
+
+Fetches the euro reference rate from the European Central Bank's daily feed and writes it
+to `ecb_usd_rate` in `config.json`, the managed setting `costs` converts API spend with.
+A rate within a rounding step of the stored one is left alone. Nothing else is touched.
+
+**usage**
+
+```
+update-usd-rate
+[check=true|--check]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `check` | Write nothing and fail if the stored rate is out of date. Defaults to False, which refreshes it in place. The rate drifts daily, so `--check` will usually report it as stale. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.ai.update_usd_rate.update_usd_rate`.
 
 ---
 

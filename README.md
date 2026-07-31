@@ -218,131 +218,132 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 <!-- GEN:package-layout -->
 ```
 solver/
-  __main__.py         — Module entry point.
-  config.py           — Singleton Config: all paths, constants, command modules, and managed settings.
-  main.py             — Entry point for the "solver shell" CLI.
-  version.py          — The solver build version — the single source of truth.
+  __main__.py          — Module entry point.
+  config.py            — Singleton Config: all paths, constants, command modules, and managed settings.
+  main.py              — Entry point for the "solver shell" CLI.
+  version.py           — The solver build version — the single source of truth.
   ai/
-    api.py            — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
-    batch.py          — The `claude-batch` command: bulk tag generation over the Message Batches API.
-    code.py           — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
-    docs.py           — Module to generate notes for solver solutions, leveraging AI.
-    facts.py          — Utility function for gathering problem inputs for AI
-    models.py         — Available models and their pricing, plus a utility function to calculate costs.
-    skill.py          — The `claude-solve` / `claude-blog` commands: run Claude Code in-shell via a skill.
-    update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
-  auth/               — The authorization kernel — identity, profiles, and the ladder.
-    authorizations.py — The authorization policy — `authorizations.json`.
-    identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject`.
-    subject.py        — The authorization **subject** — the resolved security principal.
+    api.py             — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
+    batch.py           — The `claude-batch` command: bulk tag generation over the Message Batches API.
+    code.py            — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
+    docs.py            — Module to generate notes for solver solutions, leveraging AI.
+    facts.py           — Utility function for gathering problem inputs for AI
+    models.py          — Available models and their pricing, plus a utility function to calculate costs.
+    skill.py           — The `claude-solve` / `claude-blog` commands: run Claude Code in-shell via a skill.
+    update_models.py   — The `update-models` command: refresh the `Model` enum and its pricing.
+    update_usd_rate.py — The `update-usd-rate` command: refresh the USD→EUR reference rate.
+  auth/                — The authorization kernel — identity, profiles, and the ladder.
+    authorizations.py  — The authorization policy — `authorizations.json`.
+    identity.py        — Identity resolution → a :class:`~solver.auth.subject.Subject`.
+    subject.py         — The authorization **subject** — the resolved security principal.
   core/
-    download.py       — Utility for downloading and caching files via HTTP.
-    evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
-    git.py            — Git and GitHub (gh) commands and helpers — the repository workflow.
-    list.py           — List solution directory contents.
-    new.py            — The `new` command and solution-file formatting (black / isort / autoflake).
-    osc.py            — The shell → browser control channel: `OSC 5379`.
-    problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
-    results.py        — Results: save and retrieve problem results.
-    tags.py           — Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
-    test_cases.py     — Load test cases for evaluation
-    viewer.py         — Open a problem or its files in the web front end: the `show` and `edit` commands.
+    download.py        — Utility for downloading and caching files via HTTP.
+    evaluate.py        — Solution evaluation: runs standalone scripts against test cases and reports results.
+    git.py             — Git and GitHub (gh) commands and helpers — the repository workflow.
+    list.py            — List solution directory contents.
+    new.py             — The `new` command and solution-file formatting (black / isort / autoflake).
+    osc.py             — The shell → browser control channel: `OSC 5379`.
+    problems.py        — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
+    results.py         — Results: save and retrieve problem results.
+    tags.py            — Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
+    test_cases.py      — Load test cases for evaluation
+    viewer.py          — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/
-    ciphers.py        — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
-    config.py         — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
-    gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
-    keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
-    readenv.py        — Print the authoring env (`~/.euler/env`) as plaintext — the setup scripts' reader.
-    vault.py          — The per-user vault: envelope encryption that makes a user's secrets opaque to the operator at rest.
+    ciphers.py         — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
+    config.py          — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
+    gitfilter.py       — Transparent git clean/smudge encryption for tracked solution files.
+    keys.py            — Cipher key management: create, persist, rotate and share the crypto key material.
+    readenv.py         — Print the authoring env (`~/.euler/env`) as plaintext — the setup scripts' reader.
+    vault.py           — The per-user vault: envelope encryption that makes a user's secrets opaque to the operator at rest.
   runners/
-    runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
-    runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
-  shell/              — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
-    bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
-    builtins.py       — Built-in framework commands for shell v2: echo, clear, help.
-    command.py        — Command framework for shell v2: Context, Command, registry, and decorator.
-    dialogue.py       — Every question the shell asks: one interaction model, in one place.
-    docstring.py      — Reading a command's docstring: the shape both `?` and `check-commands` rely on.
-    interpreter.py    — Interpreter for shell v2: execute the parser's statements.
-    lexer.py          — Lexer for shell v2: syntax-check a command block and normalise it.
-    parser.py         — Parser for shell v2: canonical form (the lexer's output) → typed statements.
-    register.py       — The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
-    session.py        — Session capture: tee shell output and typed input to a plain-text log file.
-    shell.py          — Interactive shell for v2: readline → lexer → parser → interpreter.
-    tty.py            — Terminal I/O: the shared rich console, the prompt-toolkit session, and the command-block reader.
-    variables.py      — Variable store for shell v2.
+    runner.h           — Runner framework for Project Euler solutions with benchmarking and validation.
+    runner.py          — Runner framework for Project Euler solutions with benchmarking and validation.
+  shell/               — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
+    bash.py            — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
+    builtins.py        — Built-in framework commands for shell v2: echo, clear, help.
+    command.py         — Command framework for shell v2: Context, Command, registry, and decorator.
+    dialogue.py        — Every question the shell asks: one interaction model, in one place.
+    docstring.py       — Reading a command's docstring: the shape both `?` and `check-commands` rely on.
+    interpreter.py     — Interpreter for shell v2: execute the parser's statements.
+    lexer.py           — Lexer for shell v2: syntax-check a command block and normalise it.
+    parser.py          — Parser for shell v2: canonical form (the lexer's output) → typed statements.
+    register.py        — The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
+    session.py         — Session capture: tee shell output and typed input to a plain-text log file.
+    shell.py           — Interactive shell for v2: readline → lexer → parser → interpreter.
+    tty.py             — Terminal I/O: the shared rich console, the prompt-toolkit session, and the command-block reader.
+    variables.py       — Variable store for shell v2.
   templates/
-    engine.py         — Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars.
-    new.c             — Solution to Euler $problem.
-    new.py            — Solution to Euler $problem.
+    engine.py          — Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars.
+    new.c              — Solution to Euler $problem.
+    new.py             — Solution to Euler $problem.
   utils/
-    doclint.py        — The `check-commands` command: hold every command docstring to the documented standard.
-    linter.py         — Utilities for linting code.
-    loader.py         — Utility for loading command modules.
-    misc.py           — The `problems` and `manage-config` commands.
-    path_utils.py     — Utility functions for file and directory operations.
-    repo_root.py      — Where the working tree is — the one answer, for every part of the solver that needs it.
-    scripts.py        — Dependency and system-resource setup commands.
-    search.py         — 'find' command: grep the solution stack for a regular expression.
-    shell_utils.py    — Utility for running shell commands and capturing their output.
-    summary.py        — Progress: parse .progress.html into problems.json and refresh in-memory state.
-    update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
-    version.py        — The `version` command: report the running solver build's version.
-  web/                — The web app services (see docs/web-server-guide.md).
-    cache.py          — Cache-Control middleware: what a browser may reuse, and for how long (shared).
-    csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
-    envfile.py        — Minimal `KEY=VALUE` reader for the scoped runtime env files under `/etc/euler`.
-    store.py          — Shared JSON persistence and untrusted-text hygiene for the service stores.
-    unixhttp.py       — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
-    auth/             — Web authentication: the auth service and its clients.
-      __main__.py     — Auth service entry point: `python -m solver.web.auth`.
-      admin.py        — The admin-plane CLI: run **under sudo** by the `users` shell command.
-      app.py          — The auth service: public + admin aiohttp apps over unix sockets.
-      client.py       — HTTP-over-unix-socket client for the auth service — re-export of the shared one.
-      commands.py     — The `users` shell command: account administration for the operator.
-      config.py       — Auth-service runtime configuration, read from the environment.
-      mail.py         — Outbound mail via the loopback relay.
-      pages.py        — The auth service's HTML pages: login, registration, reset, forgot.
-      pending.py      — Pending invite / reset store at `<state>/pending.json`.
-      policy.py       — Auth policy constants (lifetimes, cookie names, password and OTP rules).
-      ratelimit.py    — A small in-memory sliding-window rate limiter for the auth endpoints.
-      remember.py     — Persistent "remember me" tokens at `<state>/remember.json`.
-      requests.py     — Prospective-collaborator invite requests at `<state>/requests.json`.
-      sessions.py     — In-memory web session table.
-      srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
-      storage.py      — JSON persistence for the auth stores — re-export of the shared implementation.
-      tickets.py      — One-time shell tickets: web identity for PTY children.
-      users.py        — User store: the SRP verifier database at `<state>/users.json`.
-    msg/              — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
-      __main__.py     — Message service entry point: `python -m solver.web.msg`.
-      admin.py        — The message admin plane CLI: run **under sudo** by the `msg` shell command.
-      app.py          — The message service: public + admin aiohttp apps over unix sockets.
-      client.py       — The shell tier's client for the message spool: one call, whichever plane answers.
-      commands.py     — The `msg` shell command: read and write the message spool.
-      config.py       — Message-service runtime configuration, read from the environment.
-      identity.py     — Who is calling: `SO_PEERCRED` → login → identity → profile.
-      notify.py       — Send a message **from a command** — the message layer's actual purpose.
-      store.py        — The message spool at `<state>/messages.json` — messages and read-state.
-    site/             — The content service — server-rendered pages + htmx fragments.
-      __main__.py     — Content service entry point: `python -m solver.web.site`.
-      app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
-      config.py       — Content-service runtime configuration, read from the environment.
-      content.py      — Config-free readers for the content trees the service renders.
-      gitstate.py     — The header chip's git state: three reads of this user's clone, by need.
-      render.py       — The full-page-vs-block render contract (§4.5).
-      validate.py     — The save gate: the checks every write passes.
-    user/             — The per-user web service: one collaborator's content **and** web shell.
-      __main__.py     — Per-user service entry point: `python -m solver.web.user`.
-      app.py          — The per-user aiohttp app: one collaborator's content **and** web shell.
-      config.py       — Per-user service runtime configuration, read from the environment.
-      msg_api.py      — The header's message chip for the per-user service (web-server-guide § Messaging).
-      vault_api.py    — Vault + account routes for the per-user service.
-    ws/               — The web-shell service: the solver PTY terminal over WebSocket.
-      __main__.py     — Web-shell service entry point: `python -m solver.web.ws`.
-      app.py          — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
-      config.py       — Web-shell service runtime configuration, read from the environment.
-      manager.py      — Persistent per-user PTY shells: one long-lived solver shell per web user.
-      pty.py          — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
+    doclint.py         — The `check-commands` command: hold every command docstring to the documented standard.
+    linter.py          — Utilities for linting code.
+    loader.py          — Utility for loading command modules.
+    misc.py            — The `problems` and `manage-config` commands.
+    path_utils.py      — Utility functions for file and directory operations.
+    repo_root.py       — Where the working tree is — the one answer, for every part of the solver that needs it.
+    scripts.py         — Dependency and system-resource setup commands.
+    search.py          — 'find' command: grep the solution stack for a regular expression.
+    shell_utils.py     — Utility for running shell commands and capturing their output.
+    summary.py         — Progress: parse .progress.html into problems.json and refresh in-memory state.
+    update_doc.py      — Regenerate the machine-maintained sections of the guides under `docs/`.
+    version.py         — The `version` command: report the running solver build's version.
+  web/                 — The web app services (see docs/web-server-guide.md).
+    cache.py           — Cache-Control middleware: what a browser may reuse, and for how long (shared).
+    csp.py             — Content-Security-Policy middleware with a per-response nonce (shared).
+    envfile.py         — Minimal `KEY=VALUE` reader for the scoped runtime env files under `/etc/euler`.
+    store.py           — Shared JSON persistence and untrusted-text hygiene for the service stores.
+    unixhttp.py        — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
+    auth/              — Web authentication: the auth service and its clients.
+      __main__.py      — Auth service entry point: `python -m solver.web.auth`.
+      admin.py         — The admin-plane CLI: run **under sudo** by the `users` shell command.
+      app.py           — The auth service: public + admin aiohttp apps over unix sockets.
+      client.py        — HTTP-over-unix-socket client for the auth service — re-export of the shared one.
+      commands.py      — The `users` shell command: account administration for the operator.
+      config.py        — Auth-service runtime configuration, read from the environment.
+      mail.py          — Outbound mail via the loopback relay.
+      pages.py         — The auth service's HTML pages: login, registration, reset, forgot.
+      pending.py       — Pending invite / reset store at `<state>/pending.json`.
+      policy.py        — Auth policy constants (lifetimes, cookie names, password and OTP rules).
+      ratelimit.py     — A small in-memory sliding-window rate limiter for the auth endpoints.
+      remember.py      — Persistent "remember me" tokens at `<state>/remember.json`.
+      requests.py      — Prospective-collaborator invite requests at `<state>/requests.json`.
+      sessions.py      — In-memory web session table.
+      srp.py           — Secure Remote Password (SRP-6a) primitives for web authentication.
+      storage.py       — JSON persistence for the auth stores — re-export of the shared implementation.
+      tickets.py       — One-time shell tickets: web identity for PTY children.
+      users.py         — User store: the SRP verifier database at `<state>/users.json`.
+    msg/               — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
+      __main__.py      — Message service entry point: `python -m solver.web.msg`.
+      admin.py         — The message admin plane CLI: run **under sudo** by the `msg` shell command.
+      app.py           — The message service: public + admin aiohttp apps over unix sockets.
+      client.py        — The shell tier's client for the message spool: one call, whichever plane answers.
+      commands.py      — The `msg` shell command: read and write the message spool.
+      config.py        — Message-service runtime configuration, read from the environment.
+      identity.py      — Who is calling: `SO_PEERCRED` → login → identity → profile.
+      notify.py        — Send a message **from a command** — the message layer's actual purpose.
+      store.py         — The message spool at `<state>/messages.json` — messages and read-state.
+    site/              — The content service — server-rendered pages + htmx fragments.
+      __main__.py      — Content service entry point: `python -m solver.web.site`.
+      app.py           — The content service aiohttp app: identity from forward_auth, routes, gating.
+      config.py        — Content-service runtime configuration, read from the environment.
+      content.py       — Config-free readers for the content trees the service renders.
+      gitstate.py      — The header chip's git state: three reads of this user's clone, by need.
+      render.py        — The full-page-vs-block render contract (§4.5).
+      validate.py      — The save gate: the checks every write passes.
+    user/              — The per-user web service: one collaborator's content **and** web shell.
+      __main__.py      — Per-user service entry point: `python -m solver.web.user`.
+      app.py           — The per-user aiohttp app: one collaborator's content **and** web shell.
+      config.py        — Per-user service runtime configuration, read from the environment.
+      msg_api.py       — The header's message chip for the per-user service (web-server-guide § Messaging).
+      vault_api.py     — Vault + account routes for the per-user service.
+    ws/                — The web-shell service: the solver PTY terminal over WebSocket.
+      __main__.py      — Web-shell service entry point: `python -m solver.web.ws`.
+      app.py           — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
+      config.py        — Web-shell service runtime configuration, read from the environment.
+      manager.py       — Persistent per-user PTY shells: one long-lived solver shell per web user.
+      pty.py           — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
 ```
 <!-- /GEN:package-layout -->
 

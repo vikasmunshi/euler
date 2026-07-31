@@ -128,10 +128,12 @@ class WebChannelCommandSetTest(unittest.TestCase):
         `users` stays admin-floored and so reaches no web rung at all: it administers
         accounts + the invite-request queue only from the admin's local terminal (every
         verb re-execs the admin CLI under sudo, which a web uid cannot obtain). The
-        `update-docs` stays admin-floored for a reason of its own: registration is
-        profile-filtered, so a lesser profile's registry is truncated and regenerating from
-        it would silently drop the admin-floored commands from the generated docs."""
-        for admin_only in ('users', 'update-docs'):
+        `update-docs` and `update-models` stay admin-floored because they generate tracked
+        source: `update-docs` from a registry that is itself profile-filtered (a lesser
+        profile's registry is truncated, so regenerating from it would silently drop the
+        admin-floored commands), `update-models` into `solver/ai/models.py`, a module every
+        AI command imports."""
+        for admin_only in ('users', 'update-docs', 'update-models'):
             for rung in _WEB_RUNGS:
                 self.assertNotIn(admin_only, self.web[rung], f'{admin_only} must not reach {rung}')
 
@@ -140,13 +142,14 @@ class WebChannelCommandSetTest(unittest.TestCase):
 
         `update-tags` reconciles the tag graph a *contributor* writes as they solve, so it
         reaches contributor and above — the solver skill runs it in the same pass that
-        authors a problem's `tags.json`. `update-models` curates the model catalogue and its
-        pricing, which is maintainer's work, the same rung that reads `costs`. `update-docs`
-        keeps its admin floor above (its own reason, not a blast-radius one)."""
+        authors a problem's `tags.json`. `update-usd-rate` refreshes one managed setting in
+        `config.json` — data, and only what `costs` converts with — which is maintainer's.
+        `update-models` and `update-docs` generate source and keep their admin floor above
+        (tested with the other admin-only verbs)."""
         self.assertIn('update-tags', self.web['contributor'])
         self.assertNotIn('update-tags', self.web['reader'])
-        self.assertIn('update-models', self.web['maintainer'])
-        self.assertNotIn('update-models', self.web['contributor'])
+        self.assertIn('update-usd-rate', self.web['maintainer'])
+        self.assertNotIn('update-usd-rate', self.web['contributor'])
 
 
 if __name__ == '__main__':

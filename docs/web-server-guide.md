@@ -545,7 +545,7 @@ Every command's declared floor is generated from the live registry into
 |---|---|
 | `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `msg` (own threads + send to staff), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg send` to anyone but staff, `user-authorize` (grants enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, web file-delete |
+| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg send` to anyone but staff, `user-authorize` (grants enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, `update-usd-rate`, web file-delete |
 | `admin` | `users` mutations, `key-rekey`, `key-split`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:

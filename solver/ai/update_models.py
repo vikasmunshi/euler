@@ -1,27 +1,29 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
+"""The `update-models` command: refresh the `Model` enum and its pricing.
 
-The set of available Claude models, their per-token prices, and the USD→EUR rate the `costs`
-command uses are all moving targets. Rather than hand-edit them on every model launch, price
-change, or currency drift, this command refreshes them from live sources:
+The set of available Claude models and their per-token prices are moving targets. Rather
+than hand-edit them on every model launch or price change, this command regenerates them
+from live sources:
 
 * the Anthropic Models API (`client.models.list()`) — the authoritative list of callable
-  model IDs and their display names;
+  model IDs and their display names; and
 * the public pricing page (`platform.claude.com/.../pricing.md`) — scraped for each model's
-  base input and output price per million tokens (the Models API does not expose pricing); and
-* the European Central Bank euro reference rates (`eurofxref-daily.xml`) — the authoritative,
-  free, no-key source for the `ecb_usd_rate` rate in `config.json` (used only by `costs`).
+  base input and output price per million tokens (the Models API does not expose pricing).
 
 In `models.py`, only the block between the `# GEN:models` / `# /GEN:models` markers is
 rewritten — the enum members, their inline comments, and the `price` map. Curated per-model
 comments are preserved across regenerations; a newly discovered model is commented with its
-display name. Everything outside the markers is left untouched. The `ecb_usd_rate` rate is
-written back through `config.dump_managed_config()`.
+display name. Everything outside the markers is left untouched.
+
+The USD→EUR rate `costs` converts with is *not* here: it is one managed setting refreshed by
+:mod:`solver.ai.update_usd_rate`, a maintainer command. It was split out because it is a
+different job at a different rung, and because a rate that drifts daily made `--check` below
+report stale on almost every run.
 
 Exposed as the `update-models` shell command: `solver "update-models"` to rewrite,
-`solver "update-models --check"` to verify (exit 1 if anything is out of date, writing
-nothing). Note that the FX rate drifts daily, so `--check` will usually flag it as stale.
+`solver "update-models --check"` to verify (exit 1 if the block is out of date, writing
+nothing).
 """
 from __future__ import annotations
 
@@ -52,13 +54,6 @@ _PRICE_RE = re.compile(r'\$\s*([\d.]+)')
 
 #: A trailing dated-snapshot suffix (`-20251001`) normalised back to the alias form.
 _SNAPSHOT_RE = re.compile(r'-\d{8}$')
-
-#: The ECB euro foreign-exchange reference rates (daily, free, no API key) — the authoritative
-#: source for EUR conversions. It quotes `1 EUR = N USD`, so `ecb_usd_rate` is `N`.
-ECB_FX_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml'
-
-#: Matches the USD reference rate in the ECB feed: `<Cube currency='USD' rate='1.1591'/>`.
-_USD_RATE_RE = re.compile(r"""currency=['"]USD['"]\s+rate=['"]([\d.]+)['"]""")
 
 
 def _ordinal(day: int) -> str:
@@ -140,19 +135,6 @@ def _fetch_models() -> list[tuple[str, str]] | None:
         return None
 
 
-def _fetch_ecb_usd_rate() -> float | None:
-    """Fetch the current USD→EUR rate (euros per dollar) from the ECB daily reference feed.
-
-    The ECB quotes `1 EUR = N USD`
-    Returns None if the feed is unreachable or carries no USD rate.
-    """
-    raw: bytes = download_file(ECB_FX_URL, refresh=True)
-    if not (match := _USD_RATE_RE.search(raw.decode('utf-8'))):
-        console.print(f'[error]error:[/error] no USD rate found in the ECB feed at {ECB_FX_URL}')
-        return None
-    return float(match.group(1))
-
-
 def _existing_comments() -> dict[str, str]:
     """Map each model ID currently in `models.py` to its inline comment (for preservation)."""
     text = MODELS_FILE.read_text()
@@ -203,30 +185,30 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
     ])
 
 
-# Maintainer: curating the model catalogue and what it costs is maintainer's work — the same
-# rung that reads `costs` and picks the model a generation runs on. It writes package source
-# (`solver/ai/models.py`, `solver/config.json`), which is why it sits above `contributor`.
+# Admin: this command **generates package source**. It rewrites `solver/ai/models.py`, a
+# tracked module every AI command then imports — the same kind of write that floors
+# `update-docs` at admin, and a different act from curating data. `update-usd-rate`, which
+# writes one managed setting and no code, is the maintainer half of what this used to be.
 #
 # The floor is not a promise the write will land. In a deployed instance the package tree is
 # root-owned, so this completes in a developer checkout and fails on the filesystem anywhere
 # else — a property of where it is run, not of who runs it, and one no floor can express.
-# Egress is the other half: the Models API and the ECB feed are allowlisted in
+# Egress is the other half: the Models API and the pricing page are allowlisted in
 # scripts/setup/egress.sh.
-@register(requires='maintainer', quietable=True)
+@register(requires='admin', quietable=True)
 def update_models(check: bool = False) -> int:
-    """Refresh the model catalogue and the USD→EUR rate.
+    """Refresh the model catalogue and its pricing.
 
     Lists the available Claude models from the Anthropic Models API, scrapes each model's base
     input/output price (per million tokens) from the public pricing page, and rewrites the
     `# GEN:models` block in `models.py` — the enum members, their inline comments, and the
-    `price` map. Curated per-model comments are kept; a newly discovered model is commented with
-    its display name. Separately, fetches the USD→EUR rate from the ECB daily reference feed and
-    writes it to `config.json` (the rate is used only by `costs`). Nothing else is touched.
+    `price` map. Curated per-model comments are kept; a newly discovered model is commented
+    with its display name. Nothing outside the markers is touched, and the USD→EUR rate is
+    `update-usd-rate`'s to refresh.
 
     Args:
-        check: Write nothing and fail if either the model block or the FX rate is out of
-            date. Defaults to False, which rewrites both in place. The FX rate drifts daily,
-            so `--check` will usually report it as stale.
+        check: Write nothing and fail if the generated block is out of date. Defaults to
+            False, which rewrites it in place.
     """
     if (models := _collect()) is None:
         return ExitCodes.EXIT_ERROR
@@ -237,34 +219,18 @@ def update_models(check: bool = False) -> int:
         return ExitCodes.EXIT_ERROR
     body = _render(models, _existing_comments())
     rendered = _BLOCK_RE.sub(lambda m: f'{m.group(1)}{body}\n{m.group(2)}', original)
-    models_stale = rendered != original
-
-    rate = _fetch_ecb_usd_rate()  # None on fetch failure — leaves the existing rate untouched
-    rate_stale = rate is not None and abs(rate - config.ecb_usd_rate) > 5e-5
-
-    if not models_stale and not rate_stale:
+    if rendered == original:
         if check:
-            console.print('[success]models and USD→EUR rate are up to date[/success]')
+            console.print('[success]models are up to date[/success]')
         else:
-            console.print('[muted]models and USD→EUR rate already up to date[/muted]')
+            console.print('[muted]models already up to date[/muted]')
         return ExitCodes.EXIT_OK
     if check:
-        console.print('[error]models out of date[/error] (run [accent]update-models[/accent]):')
-        if models_stale:
-            console.print('  [warning]•[/warning] model pricing')
-        if rate_stale:
-            console.print(f'  [warning]•[/warning] USD→EUR rate '
-                          f'([accent]{config.ecb_usd_rate} → {rate}[/accent])')
+        console.print('[error]models out of date[/error] (run [accent]update-models[/accent]): '
+                      '[warning]model pricing[/warning]')
         return ExitCodes.EXIT_ERROR
 
-    if models_stale:
-        MODELS_FILE.write_text(rendered)
-        console.print(f'[success]updated[/success] {MODELS_FILE.relative_to(config.root_dir)} '
-                      f'([accent]{len(models)}[/accent] models)')
-    if rate_stale and rate is not None:
-        previous, config.ecb_usd_rate = config.ecb_usd_rate, rate
-        config.dump_managed_config()
-        console.print(f'[success]updated[/success] ecb_usd_rate in '
-                      f'{config.managed_config_file.relative_to(config.root_dir)} '
-                      f'([accent]{previous} → {rate}[/accent])')
+    MODELS_FILE.write_text(rendered)
+    console.print(f'[success]updated[/success] {MODELS_FILE.relative_to(config.root_dir)} '
+                  f'([accent]{len(models)}[/accent] models)')
     return ExitCodes.EXIT_OK

@@ -16,7 +16,7 @@ file sits inside the allowlist (:data:`PR_SCOPE`).
 problem the shell is on, `solutions` for the whole tree, and `docs` / `topics` / `update`
 for the three path sets the doc-maintaining commands write — `update-docs` writes `docs/`
 and the `update` set, `update-tags` writes both legs of the tag graph under `topics`, and
-`update-models` writes the `update` set. Targets compose, so a regeneration lands as one
+`update-models` / `update-usd-rate` write the `update` set. Targets compose, so a regeneration lands as one
 reviewable commit that carries nothing else (`git-commit docs update`), and `--amend`
 folds a fix into it rather than growing a commit behind it.
 
@@ -101,10 +101,10 @@ def get_repo_owner_email() -> str:
 #:   `topics/`, and each problem's `tags.json` (`update-tags`). They are one double-entry
 #:   record, so splitting them across two commits is what this target exists to prevent —
 #:   and it is the only thing this target reaches inside `solutions/`.
-#: - `update` — everything else `update-docs` and `update-models` write, wherever it
+#: - `update` — everything else the `update-*` verbs write, wherever it
 #:   happens to live: the README plus its generated package-layout block and the web start
-#:   page's slice of it, the module registry, the managed settings (of which `update-models`
-#:   writes the FX rate), the `# GEN:models` block, and the Claude guidance the root
+#:   page's slice of it, the module registry, the managed settings (of which
+#:   `update-usd-rate` writes the FX rate), the `# GEN:models` block, and the Claude guidance the root
 #:   `CLAUDE.md` symlink points at. Source code by file type, generated data by content —
 #:   which is why it is a target of its own and not part of `docs`.
 TARGET_PATHS: dict[str, tuple[str, ...]] = {
@@ -215,10 +215,9 @@ def git_commit(problem: Problem,
             stages. Ignored by every other target.
         *targets: What to stage — 'solution' (this problem plus the progress file),
             'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the
-            articles and every problem's tag leg) or 'update' (what `update-docs` and
-            `update-models` write outside `docs/` — the README, the module registry, the
-            managed settings, the model block, the Claude guidance). Defaults to
-            'solution'.
+            articles and every problem's tag leg) or 'update' (what the `update-*` verbs
+            write outside `docs/` — the README, the module registry, the managed settings,
+            the model block, the Claude guidance). Defaults to 'solution'.
         message: [asked] The commit message. Required unless `amend` is set, and asked for
             at the prompt when it is left out.
         amend: Fold the staged changes into HEAD instead of committing, keeping its

@@ -69,8 +69,9 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`topic`](commands-index.md#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
 | [`topics`](commands-index.md#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
-| [`update-models`](commands-index.md#command-update-models) | — | `maintainer` | Refresh the model catalogue and the USD→EUR rate. |
+| [`update-models`](commands-index.md#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
 | [`update-tags`](commands-index.md#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
+| [`update-usd-rate`](commands-index.md#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](commands-index.md#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
 | [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
