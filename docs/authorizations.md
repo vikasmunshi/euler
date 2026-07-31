@@ -74,7 +74,7 @@ a profile on each channel.
 | `solver.core.viewer` | `show` | ✓ | ✓ | ✓ | ✓ |
 | `solver.crypto.keys` | `key-reconstruct` | ✓ | ✓ | ✓ | ✓ |
 | `solver.crypto.keys` | `key-rekey` |  |  |  | ✓ |
-| `solver.crypto.keys` | `key-split` |  |  |  | ✓ |
+| `solver.crypto.keys` | `key-split` |  |  | ✓ | ✓ |
 | `solver.crypto.keys` | `user` | ✓ | ✓ | ✓ | ✓ |
 | `solver.crypto.keys` | `user-authorize` |  |  | ✓ | ✓ |
 | `solver.crypto.keys` | `vault` | ✓ | ✓ | ✓ | ✓ |

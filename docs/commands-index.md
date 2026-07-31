@@ -77,7 +77,7 @@ a parameter that accepts repetition.
 | [`git-sync`](#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
-| [`key-split`](#command-key-split) | — | `admin` | Print Shamir shares of the current master key. |
+| [`key-split`](#command-key-split) | — | `maintainer` | Print Shamir shares of the current master key. |
 | [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`manage-config`](#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
@@ -1130,7 +1130,7 @@ key-rekey
 
 Print Shamir shares of the current master key.
 
-* ⚑ needs admin.
+* ⚑ needs maintainer or above.
 
 Any `threshold` of the printed shares reconstruct the key through `key-reconstruct`;
 fewer reveal nothing. Store them apart from each other.

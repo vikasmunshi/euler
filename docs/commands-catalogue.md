@@ -48,7 +48,7 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
 | [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
-| [`key-split`](commands-index.md#command-key-split) | — | `admin` | Print Shamir shares of the current master key. |
+| [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Print Shamir shares of the current master key. |
 | [`lint`](commands-index.md#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`manage-config`](commands-index.md#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
