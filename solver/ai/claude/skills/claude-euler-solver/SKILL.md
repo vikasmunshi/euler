@@ -203,8 +203,9 @@ report that this is a `solve` job, not a `review`. Then, in order:
    missing approach-and-complexity note.
 3. **`notes.html`.** Ensure `results.json` is present and newer than every solution
    source (`solver "ls <n>"` shows the mtimes); if it is missing or stale, run
-   `solver "benchmark <n>"` twice to refresh it. Then bring the solution directory's
-   `notes.html` to [convention_documentation.md](docs/convention_documentation.md),
+   `solver "benchmark <n> && benchmark <n>"` to refresh it (benchmark twice).
+   Then bring the solution directory's `notes.html` to
+   [convention_documentation.md](docs/convention_documentation.md),
    using the recorded `results.json` values for every timing or comparison claim —
    never invent numbers. It must be *Problem Analysis* and *Solution Approach* only; if the
    notes still carry `Programming Techniques` or `Key Takeaways` sections, remove them (that
