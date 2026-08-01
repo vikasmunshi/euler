@@ -3711,7 +3711,7 @@
     {
       "path": "technique/chinese-remainder-theorem",
       "title": "Chinese remainder theorem",
-      "status": "draft",
+      "status": "final",
       "solved": 4,
       "problems": 4,
       "tags": ["chinese-remainder-theorem"],
