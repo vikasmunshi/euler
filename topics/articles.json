@@ -5861,8 +5861,8 @@
     },
     {
       "path": "technique/vectorized",
-      "title": "vectorized",
-      "status": "draft",
+      "title": "Vectorized computation",
+      "status": "final",
       "solved": 30,
       "problems": 30,
       "tags": ["vectorized"],
