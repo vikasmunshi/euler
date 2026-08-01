@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Shortest_path_
 - ● [0081](/solutions/0081/) — Path Sum: Two Ways
 - ● [0082](/solutions/0082/) — Path Sum: Three Ways
 - ● [0083](/solutions/0083/) — Path Sum: Four Ways
-- ○ [0244](/solutions/0244/) — Sliders
+- ● [0244](/solutions/0244/) — Sliders
 - ○ [0262](/solutions/0262/) — Mountain Range
 - ○ [0353](/solutions/0353/) — Risky Moon
 - ○ [0736](/solutions/0736/) — Paths to Equality

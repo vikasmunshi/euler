@@ -15,7 +15,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Graph_theory>.
 - ● [0143](/solutions/0143/) — Torricelli Triangles
 - ● [0186](/solutions/0186/) — Connectedness of a Network
 - ● [0215](/solutions/0215/) — Crack-free Walls
-- ○ [0244](/solutions/0244/) — Sliders
+- ● [0244](/solutions/0244/) — Sliders
 - ○ [0270](/solutions/0270/) — Cutting Squares
 - ○ [0289](/solutions/0289/) — Eulerian Cycles
 - ○ [0303](/solutions/0303/) — Multiples with Small Digits

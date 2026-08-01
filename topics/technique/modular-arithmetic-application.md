@@ -26,7 +26,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Modular_arithm
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0225](/solutions/0225/) — Tribonacci Non-divisors
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
-- ○ [0244](/solutions/0244/) — Sliders
+- ● [0244](/solutions/0244/) — Sliders
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
