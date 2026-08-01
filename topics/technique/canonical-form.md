@@ -16,7 +16,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Canonical_form
 - ● [0089](/solutions/0089/) — Roman Numerals
 - ● [0165](/solutions/0165/) — Intersections
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
-- ○ [0244](/solutions/0244/) — Sliders
+- ● [0244](/solutions/0244/) — Sliders
 - ● [0259](/solutions/0259/) — Reachable Numbers
 
 <!-- /problems -->
