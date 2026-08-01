@@ -3909,7 +3909,7 @@
     {
       "path": "technique/depth-first-search",
       "title": "Depth-first search",
-      "status": "draft",
+      "status": "final",
       "solved": 18,
       "problems": 18,
       "tags": ["depth-first-search"],
