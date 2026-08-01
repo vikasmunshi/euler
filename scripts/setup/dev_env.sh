@@ -37,15 +37,15 @@
 # ============================================================================
 # Package Array Definitions
 # ============================================================================
-# Base packages (git, build-essential, software-properties-common) - never removed
-declare -a base_packages=("git" "gh" "build-essential" "openssl" "software-properties-common")
+# Base packages - never removed (the uninstall path always filters the base target out)
+declare -a base_packages=("bash" "git" "gh" "build-essential" "openssl" "software-properties-common" "tmux")
 # shellcheck disable=SC2034 # used dynamically
-declare -a base_commands=("git" "gh" "make" "openssl")
+declare -a base_commands=("bash" "git" "gh" "make" "openssl" "tmux")
 
 # PPAs (deadsnakes/ppa for Python) - never removed
 # PPAs (deadsnakes/ppa for Python) - never removed
 # Notes:
-#   base_packages: git, build-essential, software-properties-common
+#   base_packages: see the array above — never uninstalled
 #   package_ppas: ppa:deadsnakes/ppa
 declare -a package_ppas=("ppa:deadsnakes/ppa")
 
@@ -341,7 +341,10 @@ status() {
     for clicmd in "${commands[@]}"; do
         if command -v "$clicmd" &>/dev/null; then
             printf "  ✓ %-12s : " "$clicmd"
-            ("$clicmd" --version 2>/dev/null || "$clicmd" -v 2>/dev/null) | head -n 1
+            # -V before -v: for tmux, -v is not "version" but "verbose logging" — it starts
+            # a server and writes tmux-{client,server}-*.log into the current directory.
+            # Everything here answers --version or -V; -v stays last for the likes of lua.
+            ("$clicmd" --version 2>/dev/null || "$clicmd" -V 2>/dev/null || "$clicmd" -v 2>/dev/null) | head -n 1
         else
             printf "  ✗ %-12s : not available\n" "$clicmd"
         fi
