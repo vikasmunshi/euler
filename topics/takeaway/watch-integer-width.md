@@ -160,6 +160,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0240](/solutions/0240/) — Top Dice
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0242](/solutions/0242/) — Odd Triplets
+- ● [0245](/solutions/0245/) — Coresilience
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
