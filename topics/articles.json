@@ -2631,7 +2631,7 @@
     {
       "path": "domain/shortest-path-problem",
       "title": "Shortest path problem",
-      "status": "draft",
+      "status": "final",
       "solved": 4,
       "problems": 8,
       "tags": ["shortest-path-problem"],
