@@ -22,6 +22,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Depth-first_se
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ● [0241](/solutions/0241/) — Perfection Quotients
+- ○ [0244](/solutions/0244/) — Sliders
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 
