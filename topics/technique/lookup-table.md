@@ -16,7 +16,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lookup_table>.
 - ● [0159](/solutions/0159/) — Digital Root Sums of Factorisations
 - ● [0160](/solutions/0160/) — Factorial Trailing Digits
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
-- ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0862](/solutions/0862/) — Larger Digit Permutation

@@ -33,7 +33,7 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/>._
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0357](/solutions/0357/) — Prime Generating Integers
-- ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors

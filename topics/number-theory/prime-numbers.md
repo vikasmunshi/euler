@@ -398,7 +398,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ○ [0362](/solutions/0362/) — Squarefree Factors
-- ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ○ [0386](/solutions/0386/) — Maximum Length of an Antichain
 - ● [0387](/solutions/0387/) — Harshad Numbers
