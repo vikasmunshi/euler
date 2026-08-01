@@ -3406,7 +3406,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit_manipulation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0269_s0", "p0345_s0", "p0704_s0", "p0755_s0", "p0872_s0", "p0918_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0244_s0", "p0269_s0", "p0345_s0", "p0704_s0", "p0755_s0", "p0872_s0", "p0918_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "bitwise-operation",
@@ -3451,7 +3451,7 @@
       "reference": "https://en.wikipedia.org/wiki/Breadth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0387_s0", "p0679_s0"]
+      "refs": ["p0244_s0", "p0387_s0", "p0679_s0"]
     },
     {
       "slug": "broadcasting",
@@ -3514,7 +3514,7 @@
       "reference": "https://en.wikipedia.org/wiki/Canonical_form",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0029_s0", "p0029_s1", "p0052_s0", "p0054_s0", "p0061_s0", "p0062_s0", "p0068_s0", "p0089_s0", "p0165_s0", "p0177_s0", "p0259_s0"]
+      "refs": ["p0029_s0", "p0029_s1", "p0052_s0", "p0054_s0", "p0061_s0", "p0062_s0", "p0068_s0", "p0089_s0", "p0165_s0", "p0177_s0", "p0244_s0", "p0259_s0"]
     },
     {
       "slug": "carmichael-function",
@@ -3757,7 +3757,7 @@
       "reference": "https://en.wikipedia.org/wiki/Depth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0484_s0", "p0642_s0"]
+      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0484_s0", "p0642_s0"]
     },
     {
       "slug": "descartes-circle-theorem",
@@ -4351,7 +4351,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hash_function",
       "additional-references": ["http://www.cse.yorku.ca/~oz/hash.html", "https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function", "https://en.wikipedia.org/wiki/MurmurHash"],
       "summary": "",
-      "refs": ["p0037_s0", "p0098_s0", "p0155_s0", "p0208_s0"]
+      "refs": ["p0037_s0", "p0098_s0", "p0155_s0", "p0208_s0", "p0244_s0"]
     },
     {
       "slug": "hash-table",
@@ -4729,7 +4729,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lookup_table",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0017_s0", "p0019_s0", "p0034_s0", "p0043_s0", "p0089_s0", "p0103_s0", "p0103_s1", "p0159_s0", "p0160_s0", "p0177_s0", "p0365_s0", "p0381_s0", "p0504_s0", "p0862_s0"]
+      "refs": ["p0017_s0", "p0019_s0", "p0034_s0", "p0043_s0", "p0089_s0", "p0103_s0", "p0103_s1", "p0159_s0", "p0160_s0", "p0177_s0", "p0244_s0", "p0365_s0", "p0381_s0", "p0504_s0", "p0862_s0"]
     },
     {
       "slug": "loop-invariant-code-motion",
@@ -4963,7 +4963,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0277_s0", "p0288_s0", "p0429_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0772_s0", "p0788_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0277_s0", "p0288_s0", "p0429_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0772_s0", "p0788_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -5794,13 +5794,22 @@
       "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0239", "p0241", "p0243", "p0259", "p0493", "p0751", "p0800"]
     },
     {
+      "slug": "exact-sums-resist-modular-shortcuts",
+      "facet": "takeaway",
+      "name": "Exact sums resist modular shortcuts",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When each term is already reduced modulo m, aggregating them inside the same modulus recovers only the total modulo m, so an exact sum forces the terms to be produced individually.",
+      "refs": ["p0244"]
+    },
+    {
       "slug": "exploit-symmetry",
       "facet": "takeaway",
       "name": "Exploit symmetry and complementary counting",
       "reference": null,
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
-      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0346", "p0420", "p0478", "p0565", "p0788", "p0862", "p0926", "p0961", "p1000"]
+      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0346", "p0420", "p0478", "p0565", "p0788", "p0862", "p0926", "p0961", "p1000"]
     },
     {
       "slug": "parity-across-languages",

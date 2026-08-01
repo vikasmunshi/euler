@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hash_function>
 - ● [0098](/solutions/0098/) — Anagramic Squares
 - ● [0155](/solutions/0155/) — Counting Capacitor Circuits
 - ● [0208](/solutions/0208/) — Robot Walks
+- ○ [0244](/solutions/0244/) — Sliders
 
 <!-- /problems -->
