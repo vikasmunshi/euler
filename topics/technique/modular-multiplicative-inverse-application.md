@@ -12,7 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Modular_multip
 - ● [0160](/solutions/0160/) — Factorial Trailing Digits
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ● [0202](/solutions/0202/) — Laserbeam
-- ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

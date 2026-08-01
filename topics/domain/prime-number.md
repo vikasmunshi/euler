@@ -54,7 +54,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prime_number>.
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
 - ● [0357](/solutions/0357/) — Prime Generating Integers
-- ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ○ [0425](/solutions/0425/) — Prime Connection

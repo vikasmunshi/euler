@@ -24,7 +24,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binomial_coeff
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ○ [0267](/solutions/0267/) — Billionaire
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
-- ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ○ [0408](/solutions/0408/) — Admissible Paths Through a Grid
 - ○ [0445](/solutions/0445/) — Retractions A
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
