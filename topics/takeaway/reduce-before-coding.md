@@ -199,6 +199,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0240](/solutions/0240/) — Top Dice
 - ● [0241](/solutions/0241/) — Perfection Quotients
+- ○ [0242](/solutions/0242/) — Odd Triplets
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
