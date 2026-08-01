@@ -1776,7 +1776,7 @@
     {
       "path": "domain/lucass-theorem",
       "title": "Lucas's theorem",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["lucass-theorem"],
