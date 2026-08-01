@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binomial_theor
 - ● [0120](/solutions/0120/) — Square Remainders
 - ● [0123](/solutions/0123/) — Prime Square Remainders
 - ● [0172](/solutions/0172/) — Few Repeated Digits
-- ○ [0242](/solutions/0242/) — Odd Triplets
+- ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0788](/solutions/0788/) — Dominating Numbers
 
 <!-- /problems -->

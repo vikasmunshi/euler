@@ -21,7 +21,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binomial_coeff
 - ● [0194](/solutions/0194/) — Coloured Configurations
 - ● [0203](/solutions/0203/) — Squarefree Binomial Coefficients
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
-- ○ [0242](/solutions/0242/) — Odd Triplets
+- ● [0242](/solutions/0242/) — Odd Triplets
 - ○ [0267](/solutions/0267/) — Billionaire
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
 - ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient

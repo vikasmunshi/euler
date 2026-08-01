@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Digit_DP>._
 - ● [0171](/solutions/0171/) — Square Sum of the Digital Squares
 - ● [0178](/solutions/0178/) — Step Numbers
 - ● [0217](/solutions/0217/) — Balanced Numbers
-- ○ [0242](/solutions/0242/) — Odd Triplets
+- ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0301](/solutions/0301/) — Nim
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
