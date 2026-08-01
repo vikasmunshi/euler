@@ -124,6 +124,7 @@ the sieve exists to avoid when the question is about a whole range.
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0241](/solutions/0241/) — Perfection Quotients
+- ● [0245](/solutions/0245/) — Coresilience
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences

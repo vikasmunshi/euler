@@ -149,7 +149,7 @@ the loop.
 - ● [0214](/solutions/0214/) — Totient Chains
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0243](/solutions/0243/) — Resilience
-- ○ [0245](/solutions/0245/) — Coresilience
+- ● [0245](/solutions/0245/) — Coresilience
 - ○ [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ○ [0289](/solutions/0289/) — Eulerian Cycles
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers

@@ -142,6 +142,7 @@ residue class is then a division, and a sum over `10¹⁷` values becomes a loop
 ## Problems
 
 - ● [0160](/solutions/0160/) — Factorial Trailing Digits
+- ● [0245](/solutions/0245/) — Coresilience
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes

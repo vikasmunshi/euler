@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Composite_numb
 - ● [0046](/solutions/0046/) — Goldbach's Other Conjecture
 - ● [0130](/solutions/0130/) — Composites with Prime Repunit Property
 - ● [0159](/solutions/0159/) — Digital Root Sums of Factorisations
-- ○ [0245](/solutions/0245/) — Coresilience
+- ● [0245](/solutions/0245/) — Coresilience
 - ○ [0467](/solutions/0467/) — Superinteger
 
 <!-- /problems -->

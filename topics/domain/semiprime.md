@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Semiprime>._
 
 - ● [0070](/solutions/0070/) — Totient Permutation
 - ● [0187](/solutions/0187/) — Semiprimes
+- ● [0245](/solutions/0245/) — Coresilience
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 
 <!-- /problems -->

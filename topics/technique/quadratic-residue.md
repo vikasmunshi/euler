@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_resi
 
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0221](/solutions/0221/) — Alexandrian Integers
+- ● [0245](/solutions/0245/) — Coresilience
 
 <!-- /problems -->

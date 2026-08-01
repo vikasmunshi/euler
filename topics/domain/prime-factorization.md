@@ -18,7 +18,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_factor
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
-- ○ [0245](/solutions/0245/) — Coresilience
 - ○ [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ○ [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0288](/solutions/0288/) — An Enormous Factorial
