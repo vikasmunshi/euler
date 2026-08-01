@@ -25,7 +25,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bit_manipulati
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0215](/solutions/0215/) — Crack-free Walls
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
-- ○ [0242](/solutions/0242/) — Odd Triplets
+- ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
