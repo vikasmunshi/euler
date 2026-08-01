@@ -138,6 +138,7 @@ Three cautions earn their keep:
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
+- ○ [0242](/solutions/0242/) — Odd Triplets
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences

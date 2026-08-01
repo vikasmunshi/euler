@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lucas%27s_theo
 ## Problems
 
 - ● [0148](/solutions/0148/) — Exploring Pascal's Triangle
+- ○ [0242](/solutions/0242/) — Odd Triplets
 - ○ [0365](/solutions/0365/) — A Huge Binomial Coefficient
 
 <!-- /problems -->

@@ -11,6 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hamming_weight
 - ● [0105](/solutions/0105/) — Special Subset Sums: Testing
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0238](/solutions/0238/) — Infinite String Tour
+- ○ [0242](/solutions/0242/) — Odd Triplets
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0872](/solutions/0872/) — Recursive Tree
