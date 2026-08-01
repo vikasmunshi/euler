@@ -9,7 +9,7 @@ description: Use when Claude is launched by the `claude-skill` command via
   document and summarise) and `review` (audit an existing solution for C↔Python
   algorithmic parity, in-source documentation, and `notes.html` standards). Do NOT
   activate for a generic "solve this" or for codebase questions.
-version: 0.4.0
+version: 0.5.0
 model: opus
 ---
 
@@ -45,9 +45,8 @@ For exact `solver` command usage (aliases, flags, arguments), see
 **[docs/commands-index.md](docs/commands-index.md)** — e.g. [`ls`](docs/commands-index.md#command-ls),
 [`new`](docs/commands-index.md#command-new), [`evaluate`/`eval`](docs/commands-index.md#command-evaluate-eval),
 [`benchmark`](docs/commands-index.md#command-benchmark), [`lint`](docs/commands-index.md#command-lint),
-[`mark`](docs/commands-index.md#command-mark-mark-solved),
-[`git-commit`](docs/commands-index.md#command-git-commit-commit) and
-[`git-push`](docs/commands-index.md#command-git-push-push). The solution interface
+[`mark`](docs/commands-index.md#command-mark-mark-solved) and
+[`git-commit`](docs/commands-index.md#command-git-commit-commit). The solution interface
 (`@runner.main` / `runner.h`) is documented in
 **[docs/solver-guide.md](docs/solver-guide.md)**.
 
@@ -176,8 +175,9 @@ Write and verify a Python solution, translate it to C, then document and summari
 8. **Tag.** Write/refresh the solution directory's `tags.json` per
    [convention_tags.md](docs/convention_tags.md): the problem's `domain`, each solution index's
    `techniques`, and any `takeaways` — choosing slugs from the vocabulary in `topics/tags.json`
-   and proposing anything genuinely new under `new-tags`. Then run `solver "update-tags"` to
-   reconcile the central vocabulary and topic articles.
+   and proposing anything genuinely new under `new-tags`. Write the file only; reconciling it
+   into the central vocabulary is [Finalize](#phase-3--finalize-always-last)'s job, after
+   `mark`, so the articles it regenerates carry this problem's solved marker.
 
 ### `review`
 
@@ -214,16 +214,17 @@ report that this is a `solve` job, not a `review`. Then, in order:
    [convention_tags.md](docs/convention_tags.md): confirm the `domain` fits the problem, each
    solution index's `techniques` reflect *that index's* code, and `takeaways` are genuinely
    transferable — choosing slugs from `topics/tags.json` and proposing new ones only under
-   `new-tags`. Then run `solver "update-tags"` to reconcile.
+   `new-tags`. Write the file only; [Finalize](#phase-3--finalize-always-last) reconciles it.
 
 ---
 
 ## Phase 3 — Finalize (always last)
 
-Files are edited in place in the solution directory, so finishing means handing the
-work over: make it clean, record it as solved, commit it, and put it up for review.
-The four steps run **in order** — each one is worth nothing without the one before
-it — and any of them failing is a stop-and-report:
+Files are edited in place in the solution directory, so finishing means leaving the
+work in a state a collaborator can review: make it clean, record it as solved,
+reconcile the tag graph, and commit. The four steps run **in order** — each one is
+worth nothing without the one before it — and any of them failing is a
+stop-and-report:
 
 1. **Lint and fix:** `solver "lint <n> --auto-fix"`. It clears the mechanical
    `flake8` issues automatically; fix any remaining `mypy`/`flake8` errors by hand
@@ -235,13 +236,24 @@ it — and any of them failing is a stop-and-report:
    unchanged (still exit 0). If it refuses, run `solver "benchmark <n>"` to record
    fresh results and try again; if it still refuses, **stop and report** — an
    unconfirmed solution is not finished work.
-3. **Commit:** `solver "git-commit solution topics message='<message>'"`.
+3. **Reconcile the tag graph:** `solver "update-tags"`. It promotes any `new-tags`
+   you proposed into the central vocabulary, rebuilds every `refs` leg from the
+   per-problem files, and regenerates the topic articles and `topics/articles.json`.
 
-   Two targets, because the work has two halves: `solution` stages this problem's
-   directory plus `solutions/problems.json` (what step 2 just wrote), and `topics`
-   stages the central vocabulary and article index that `update-tags` reconciled in
-   Phase 2 — leave it off and the graph's other leg sits uncommitted. A target with
-   nothing to stage contributes nothing, so naming both is always safe.
+   **After `mark`, and before the commit.** After, because the articles it
+   regenerates carry each problem's solved marker — run it first and this problem
+   still reads unsolved. Before, because `update-tags` commits its own output
+   (`topics/` and every problem's `tags.json`, both legs together and nothing else),
+   so letting it go first means step 4 has only your solution left to stage.
+
+   Then `solver "update-tags --check"` must exit `0`; fix whatever it names — an
+   unknown slug or an unpromoted proposal in this problem's `tags.json` is the
+   likely cause — and re-run.
+4. **Commit:** `solver "git-commit solution message='<message>'"`.
+
+   One target: `solution` stages this problem's directory plus
+   `solutions/problems.json` (what step 2 wrote). The tag graph needs no target here
+   — step 3 already committed both of its legs, this problem's `tags.json` included.
 
    The message is a **named** argument (`message=…`), not a positional one; pass it
    explicitly. Headless there is nobody to ask, so `git-commit` with no `message=`
@@ -250,19 +262,14 @@ it — and any of them failing is a stop-and-report:
    Keep `<message>` short — a single line that does **not** reveal the solution
    approach. Use a word or two from the problem title and make it unique with a bit of
    personality, e.g.
-   `solver "git-commit solution topics message='p0042 de-coded triangles with a smile'"`,
-   `solver "git-commit solution topics message='p0042 coded triangles bites the dust'"`,
+   `solver "git-commit solution message='p0042 de-coded triangles with a smile'"`,
+   `solver "git-commit solution message='p0042 coded triangles bites the dust'"`,
    etc. Never mention the algorithm, formula, or any hint of how it was solved.
-4. **Push and open the pull request:** `solver "git-push"`. It pushes your branch to
-   origin as yourself and opens (or reports) its pull request onto master, which is
-   how the work is handed over for review — a commit that stays local has been
-   delivered to nobody. A branch that already has an open pull request keeps it, and
-   the new commits simply join it, and opening one also notifies the maintainers. If
-   the push or the pull request fails, **report what it said**: the commit is safe
-   either way, so do not retry with `--force` and do not merge anything yourself.
 
-   Merging is `gh-merge`, a maintainer's command and never part of this phase. Landing
-   your own review is exactly the "do not merge anything yourself" this step rules out.
+The phase ends at the commit. Pushing the branch and opening its pull request is the
+collaborator's step (`solver "git-push"`), taken once they have reviewed the work and
+amended anything they want changed — so do **not** push, and never merge anything
+yourself.
 
 Then **summarise the session** in one or two sentences (the action, and what was
 found or done) and end the turn.
@@ -286,7 +293,8 @@ found or done) and end the turn.
   "nothing to do".
 - In [Finalize](#phase-3--finalize-always-last): a non-zero `lint` exit, or an
   unfixable lint error, is a stop-and-report, never a reason to push on. The same
-  goes for the three steps after it — a refused `mark`, a failed commit, or a push
-  that could not open its pull request each stop the phase and get reported as they
-  came back. Never work around one: no `--force`, no hand-edited `problems.json`, no
-  merging your own pull request.
+  goes for the three steps after it — a refused `mark`, a non-zero
+  `update-tags --check`, or a failed commit stop the phase and get reported as they
+  came back. Never work around one: no `--force`, no hand-edited `problems.json`,
+  no hand-edited `topics/tags.json`, no pushing or merging on the collaborator's
+  behalf.

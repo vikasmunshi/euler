@@ -7,7 +7,7 @@ description: Use when Claude is launched by the `claude-blog` command via
   is a tag's `<facet>/<slug>` path (e.g. `technique/sieve-of-eratosthenes`), a bare tag slug, or a
   curated topic path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
   post" or for solving problems.
-version: 0.3.0
+version: 0.4.0
 model: opus
 ---
 
@@ -23,7 +23,8 @@ claude -p /claude-euler-blogger <tag-or-topic> [additional_prompt]
 A **topic** collects the problems that share a tag and explains the idea behind them. Each tag has
 a page at `topics/<facet>/<slug>.md`; curated cross-cutting topics live elsewhere under `topics/`
 (e.g. `topics/number-theory/primes.md`). Claude researches the covered problems, writes the page,
-commits it, refreshes its Problems section, opens a pull request, and **ends the turn**.
+commits it, refreshes its Problems section, and **ends the turn**. The commit stays local: the
+collaborator reviews and amends the work, then pushes it themselves.
 
 ## Read first — the conventions
 
@@ -69,7 +70,7 @@ without confirmation; the skill also relies on `Edit`/`Write` under `topics/**` 
 project tree — keep `.claude/settings.local.json` in sync:
 
     - bash solver *
-    - bash git add:* / git commit:* / git push:*
+    - bash git add:* / git commit:*
     - edit/write topics/**      # the article
     - read ./**
 
@@ -144,9 +145,8 @@ fill.
 
 ## Phase 4 — Finalize (always last)
 
-Writing the page is not delivering it. The five steps run **in order** — each is worth nothing
+Writing the page is not delivering it. The four steps run **in order** — each is worth nothing
 without the one before it — and any of them failing is a stop-and-report:
-
 
 1. **Mark the page final.** The article is written, so change its status comment to
 
@@ -181,14 +181,10 @@ without the one before it — and any of them failing is a stop-and-report:
    `solver "update-tags --check"` must exit `0`; fix any issue it names (an unknown tag in your
    `<!-- tags: -->` comment, most likely) and re-run.
 4. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
-5. **Push and open the pull request:** `solver "git-push"`. It pushes your branch to origin as
-   yourself and opens (or reports) its pull request onto master, which is how the work is handed
-   over for review — a commit that stays local has been delivered to nobody. A branch that already
-   has an open pull request keeps it and the new commits simply join it, and opening one also
-   notifies the maintainers. If the push or the pull request fails, **report what it said**: the
-   commits are safe either way, so do not retry with `--force` and do not merge anything yourself.
 
-   Merging is `gh-merge`, a maintainer's command and never part of this phase.
+The phase ends at the commit. Pushing the branch and opening its pull request is the
+collaborator's step (`solver "git-push"`), taken once they have read the page and amended
+anything they want changed — so do **not** push, and never merge anything yourself.
 
 Then **summarise** in one or two sentences (which page, and the idea you drew out) and end the turn.
 
@@ -203,6 +199,5 @@ Then **summarise** in one or two sentences (which page, and the idea you drew ou
 - Do not hand-edit the `<!-- problems … -->` section or the `<!-- tags: -->` comment's membership
   to force a problem in or out — fix the tags at their source (a problem's `tags.json`) if the
   mapping is wrong, then `update-tags`. The save gate refuses edits to those regions anyway.
-- A non-zero `update-tags --check`, or a commit / push / pull-request failure, is a
-  stop-and-report, not a reason to push on. Never retry a push with `--force`, and never merge
-  your own pull request — merging is `gh-merge`, a maintainer's command.
+- A non-zero `update-tags --check`, or a commit failure, is a stop-and-report, not a reason to
+  push on.
