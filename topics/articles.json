@@ -5070,7 +5070,7 @@
     {
       "path": "technique/miller-rabin-primality-test",
       "title": "Miller\u2013Rabin primality test",
-      "status": "draft",
+      "status": "final",
       "solved": 10,
       "problems": 10,
       "tags": ["miller-rabin-primality-test"],
