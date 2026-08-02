@@ -1719,7 +1719,7 @@ nothing — the fresh fetch comes with a new shell, i.e. after a teardown or the
 detached reaper. The chip's own remote-fetch freshness (§11.9) is what keeps a
 long-running shell's *view* current in between.
 
-### 12.2 Three client-side subtleties
+### 12.2 Four client-side subtleties
 
 **The shell is the front door for interactive logins.** The account page's tool rows
 (GitHub CLI, Claude Code) make the *status* the button: clicking posts
@@ -1767,6 +1767,29 @@ showed. So the server closes the replay with an explicit `{"replay":"end"}` text
 after it — sequenced *through* xterm's write queue, since `write()` is asynchronous and
 the bytes are still being parsed when the marker arrives. A monotonic token remains the
 within-session guard.
+
+**Enter carries its modifiers — when the application asked for them.** xterm.js sends Enter
+as a bare CR whatever else is held down (its keyboard knows only Alt, as ESC CR), so
+Shift-Enter used to reach the PTY indistinguishable from Enter, and the tools that read that
+chord as "newline, don't submit" — Claude Code — never saw it. Two encodings carry the
+modifier, kitty's `CSI 13 ; <mod> u` and xterm's modifyOtherKeys `CSI 27 ; <mod> ; 13 ~`, and
+**neither may be sent unasked**: a reader that knows only the legacy encoding takes the second
+for text and lands `;2;13~` in its line buffer, which is precisely what bash does. So
+`terminal.js` watches the enabling sequences go past on the way out (`CSI > <flags> u` /
+`CSI < u`, `CSI > 4 ; <n> m` / `CSI > 4 m`) and encodes to match whatever the foreground app
+turned on. With nothing on — the common case, since Claude Code *requests* those protocols
+only for terminals on its own allowlist, which this one is not — it falls back to what a
+terminal user would have bound by hand: ESC CR for Shift and Alt, which is Meta-Enter to any
+readline-ish reader and the newline Claude Code's `/terminal-setup` installs for this key in
+editors' terminals, and LF for Ctrl. The fallback costs the solver's own prompt nothing:
+prompt-toolkit accepts the line on all three, exactly as it did on a bare CR.
+
+Modes, unlike the OSC actions above, *are* rebuilt from the replay. An action must not
+re-fire; a mode is the state of the shell being reattached to, still running whatever app set
+it — and since the buffer drops its oldest bytes, an enable can only be lost before, or along
+with, its disable, never after. The kitty **query** (`CSI ? u`) is deliberately left
+unanswered: this client encodes Enter and nothing else, so advertising a flag set would
+promise an app the disambiguated Esc and Tab it would then sit waiting for.
 
 ## 13 · Messaging
 

@@ -230,12 +230,104 @@
     return true;                              // handled — not printable text
   });
 
-  // ── clipboard ────────────────────────────────────────────────────────────
-  // In a browser, Ctrl-C with a selection means "copy", not "interrupt"; Ctrl-V
-  // must go through the clipboard API. Everything else falls through to the PTY
-  // (so a bare Ctrl-C still interrupts the running command).
+  // ── modified Enter (web-server-guide § 12.2) ──────────────────────────────
+  // xterm.js sends Enter as a bare CR whatever else is held down — its keyboard
+  // knows only Alt, as ESC CR — so Shift-Enter arrives at the PTY indistinguishable
+  // from Enter, and the tools that read it as "newline, don't submit" (Claude Code)
+  // never see it. Two encodings carry the modifier, and which one is right is the
+  // *application's* to say, not ours:
+  //
+  //   kitty keyboard    CSI 13 ; <mod> u       on: CSI > <flags> u   off: CSI < u
+  //   modifyOtherKeys   CSI 27 ; <mod> ; 13 ~  on: CSI > 4 ; <n> m   off: CSI > 4 m
+  //
+  // Neither may be sent unasked: a reader that knows only the legacy encoding takes
+  // CSI 27;2;13~ for text and lands `;2;13~` in its line buffer — bash does exactly
+  // that. So we follow what the foreground app turned on, and with nothing on fall
+  // back to what a terminal user would have bound by hand (below).
+  //
+  // The mode state is rebuilt from the attach replay as well, deliberately, and
+  // unlike the OSC actions below: an action must not re-fire, but a *mode* is the
+  // state of the shell we are reattaching to, still running whatever app set it.
+  // A truncated replay cannot leave us wrongly enabled — the buffer drops its
+  // oldest bytes, so an enable is lost before, or along with, its disable.
+  var kittyFlags = [0];                 // the kitty flag stack; [0] is the base entry
+  var otherKeys = 0;                    // xterm's modifyOtherKeys level (0 = off)
+
+  //: One CSI parameter as a plain integer. xterm hands sub-parameters (`38:2:…`)
+  //: through as arrays and omitted ones as 0; no sequence read here uses either.
+  function param(params, index, fallback) {
+    var value = params[index];
+    if (Array.isArray(value)) { value = value[0]; }
+    return typeof value === 'number' ? value : fallback;
+  }
+
+  term.parser.registerCsiHandler({ prefix: '>', final: 'u' }, function (params) {
+    kittyFlags.push(param(params, 0, 0));
+    return true;
+  });
+  term.parser.registerCsiHandler({ prefix: '<', final: 'u' }, function (params) {
+    var count = param(params, 0, 1) || 1;
+    while (count-- > 0 && kittyFlags.length > 1) { kittyFlags.pop(); }
+    return true;
+  });
+  term.parser.registerCsiHandler({ prefix: '=', final: 'u' }, function (params) {
+    var flags = param(params, 0, 0);
+    var mode = param(params, 1, 1) || 1;      // 1 = assign, 2 = set bits, 3 = clear bits
+    var top = kittyFlags.length - 1;
+    kittyFlags[top] = mode === 2 ? kittyFlags[top] | flags
+      : mode === 3 ? kittyFlags[top] & ~flags
+        : flags;
+    return true;
+  });
+  // XTMODKEYS. Resource 4 is modifyOtherKeys; `CSI > m` carries no resource and
+  // resets every one of them, which for us is the same answer: off.
+  term.parser.registerCsiHandler({ prefix: '>', final: 'm' }, function (params) {
+    var resource = param(params, 0, 0);
+    if (resource === 0) { otherKeys = 0; }
+    else if (resource === 4) { otherKeys = param(params, 1, 0); }
+    return true;
+  });
+  // Not registered: the kitty query `CSI ? u`. Silence is the honest answer — we
+  // encode Enter and nothing else, so advertising the flag set would promise an app
+  // a disambiguated Esc and Tab it would then wait for. An app that enables the
+  // protocol regardless (Claude Code does, for the terminals on its own allowlist)
+  // is still obeyed above: what it turned on, it can read.
+
+  //: The bytes for an Enter with modifiers held, or null when there is nothing to
+  //: encode. The modifier number is the one both encodings share: 1, plus 1 shift,
+  //: 2 alt, 4 ctrl.
+  function enterSequence(ev) {
+    var mod = 1 + (ev.shiftKey ? 1 : 0) + (ev.altKey ? 2 : 0) + (ev.ctrlKey ? 4 : 0);
+    if (mod === 1) { return null; }                                   // bare Enter: xterm's CR
+    if (kittyFlags[kittyFlags.length - 1] & 1) { return '\x1b[13;' + mod + 'u'; }
+    if (otherKeys >= 1) { return '\x1b[27;' + mod + ';13~'; }
+    // Nothing negotiated, so no encoding keeps the three apart and the question is
+    // which byte each is most useful as. Ctrl-Enter takes LF — Ctrl-J's byte, and
+    // "newline" to every reader that distinguishes one; Shift-Enter and Alt-Enter
+    // take ESC CR, which is Meta-Enter to a readline-ish reader and is the binding
+    // Claude Code's own /terminal-setup installs for this key in editors' terminals.
+    return ev.ctrlKey && !ev.shiftKey && !ev.altKey ? '\n' : '\x1b\r';
+  }
+
+  // ── the keyboard ─────────────────────────────────────────────────────────
+  // Enter with a modifier, per the section above; then the clipboard, because in a
+  // browser Ctrl-C with a selection means "copy", not "interrupt", and Ctrl-V must
+  // go through the clipboard API. Everything else falls through to the PTY (so a
+  // bare Ctrl-C still interrupts the running command). Meta (Cmd / Win) is left
+  // alone throughout — those chords are the browser's and the OS's.
   term.attachCustomKeyEventHandler(function (ev) {
-    if (ev.type !== 'keydown' || !ev.ctrlKey || ev.altKey || ev.metaKey) { return true; }
+    if (ev.type !== 'keydown' || ev.metaKey) { return true; }
+    if (ev.key === 'Enter') {
+      var sequence = enterSequence(ev);
+      if (!sequence) { return true; }
+      // preventDefault for the reason the paste below spells out: returning false
+      // only skips xterm's own handling, and the key would still reach the hidden
+      // textarea underneath — a second Enter, from the browser.
+      ev.preventDefault();
+      send(new TextEncoder().encode(sequence));
+      return false;
+    }
+    if (!ev.ctrlKey || ev.altKey) { return true; }
     var key = ev.key.toLowerCase();
     if (key === 'c' && term.hasSelection()) {
       navigator.clipboard && navigator.clipboard.writeText(term.getSelection());
