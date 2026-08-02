@@ -13,6 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Stack_(abstrac
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
+- ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 
 <!-- /problems -->

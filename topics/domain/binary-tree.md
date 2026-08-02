@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binary_tree>._
 ## Problems
 
 - ● [0219](/solutions/0219/) — Skew-cost Coding
+- ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ○ [0400](/solutions/0400/) — Fibonacci Tree Game
 - ○ [0406](/solutions/0406/) — Guessing Game
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence

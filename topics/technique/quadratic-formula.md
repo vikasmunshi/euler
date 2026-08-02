@@ -13,6 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_form
 - ● [0141](/solutions/0141/) — Square Progressive Numbers
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
+- ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0932](/solutions/0932/) — $2025$
 

@@ -14,6 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tessellation>.
 - ● [0139](/solutions/0139/) — Pythagorean Tiles
 - ● [0161](/solutions/0161/) — Triominoes
 - ● [0215](/solutions/0215/) — Crack-free Walls
+- ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ○ [0256](/solutions/0256/) — Tatami-Free Rooms
 - ○ [0324](/solutions/0324/) — Building a Tower
 - ○ [0338](/solutions/0338/) — Cutting Rectangular Grid Paper

@@ -28,7 +28,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Recurrence_rel
 - ● [0230](/solutions/0230/) — Fibonacci Words
 - ● [0232](/solutions/0232/) — The Race
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
-- ○ [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ○ [0258](/solutions/0258/) — A Lagged Fibonacci Sequence
 - ○ [0282](/solutions/0282/) — The Ackermann Function
 - ○ [0287](/solutions/0287/) — Quadtree Encoding (a Simple Compression Algorithm)

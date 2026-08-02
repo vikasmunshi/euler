@@ -165,7 +165,7 @@ if the process is periodic, find the period instead of running it out.
 - ● [0222](/solutions/0222/) — Sphere Packing
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
-- ○ [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ○ [0264](/solutions/0264/) — Triangle Centres
 - ○ [0279](/solutions/0279/) — Triangles with Integral Sides and an Integral Angle
 - ○ [0285](/solutions/0285/) — Pythagorean Odds
