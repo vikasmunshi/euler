@@ -21,6 +21,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Modular_expone
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient

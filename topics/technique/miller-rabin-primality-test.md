@@ -134,6 +134,7 @@ not a faster test.
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0487](/solutions/0487/) — Sums of Power Sums

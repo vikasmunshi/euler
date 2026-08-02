@@ -176,6 +176,7 @@ handful of operations on small numbers.
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0244](/solutions/0244/) — Sliders
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ○ [0250](/solutions/0250/) — $250250$
 - ○ [0258](/solutions/0258/) — A Lagged Fibonacci Sequence
 - ○ [0266](/solutions/0266/) — Pseudo Square Root

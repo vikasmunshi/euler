@@ -188,6 +188,7 @@ kept warm between them flatters the measurement.
 - ● [0244](/solutions/0244/) — Sliders
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 
