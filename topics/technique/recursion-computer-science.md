@@ -34,6 +34,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Recursion_(com
 - ● [0204](/solutions/0204/) — Generalised Hamming Numbers
 - ● [0215](/solutions/0215/) — Crack-free Walls
 - ● [0220](/solutions/0220/) — Heighway Dragon
+- ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0301](/solutions/0301/) — Nim

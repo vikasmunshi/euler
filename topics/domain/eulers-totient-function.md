@@ -17,7 +17,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Euler%27s_toti
 - ● [0228](/solutions/0228/) — Minkowski Sums
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0245](/solutions/0245/) — Coresilience
-- ○ [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
+- ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
