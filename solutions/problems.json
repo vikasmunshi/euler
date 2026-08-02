@@ -1732,8 +1732,8 @@
     "title": "Euler's Totient Function Equals 13!",
     "level": 23,
     "pct": 58,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 02 Aug 2026, 21:36"
   },
   "249": {
     "title": "Prime Subset Sums",
