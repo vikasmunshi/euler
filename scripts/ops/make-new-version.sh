@@ -11,7 +11,12 @@
 #      the software that actually exists — `update-models`, `update-usd-rate`,
 #      `update-tags`, `update-docs`, in that order (see "Why that order" below);
 #   2. `make release`  — derive the SemVer bump from the Conventional Commits since the
-#      last tag, rewrite solver/version.py, commit, tag vX.Y.Z, push commit + tag;
+#      last tag, rewrite solver/version.py, commit, tag vX.Y.Z, push commit + tag.
+#      **Skipped, not fatal, when there is nothing to release**: an unchanged tree since
+#      the last tag has no bump to make, and `release.sh` exits 1 on it. That is not a
+#      reason to abandon the run — re-shipping the build that is already tagged is a
+#      perfectly ordinary thing to want — so the bump is skipped and steps 3 and 4 go
+#      ahead with the current version;
 #   3. `make redeploy-web` — rebuild the /opt/euler venv from the pushed release and
 #      bounce the services onto it (gated on `make check-version`, which is exactly the
 #      tag step 2 just published);
@@ -136,6 +141,9 @@ Usage: bash $0 [--dry-run] [--yes] [--skip-updates] [--no-deploy] [--no-follow] 
 
 Runs, in order: solver ${UPDATE_VERBS[*]} -> make release -> make redeploy-web
 -> make status-web. Needs a clean working tree, an unlocked vault, and sudo.
+
+With nothing to release (no commits since the last tag) the bump is skipped rather than
+fatal, and the run goes straight on to re-deploy the build that is already tagged.
 
 The run happens inside the tmux session '${TMUX_SESSION}' (Ctrl-b d to detach, 'tmux
 attach -t ${TMUX_SESSION}' to return), so a dropped connection costs neither the deploy
@@ -368,7 +376,11 @@ if [[ ${SKIP_UPDATES} -eq 1 ]]; then
 else
     say "     1. solver ${UPDATE_VERBS[*]}      <- each commits its own output"
 fi
-say "     2. make release                             <- bump + commit + tag + PUSH to origin"
+if [[ "${LAST_TAG}" != 'none' && -z "$(git rev-list "${LAST_TAG}..HEAD" 2> /dev/null)" ]]; then
+    say "     2. make release                             <- nothing new since ${LAST_TAG}: skipped unless step 1 commits"
+else
+    say "     2. make release                             <- bump + commit + tag + PUSH to origin"
+fi
 if [[ ${NO_DEPLOY} -eq 1 ]]; then
     say "     3. (skipped) make redeploy-web"
     say "     4. (skipped) make status-web"
@@ -420,17 +432,25 @@ fi
 
 head2 "2. make release"
 
-# Nothing new since the tag is not a failure — it is a release that would have no content.
-# Say so and stop, rather than letting release.sh exit 1 on it after the updates ran.
-if [[ ${DRY_RUN} -eq 0 && "${LAST_TAG}" != 'none' ]]; then
-    if [[ -z "$(git rev-list "${LAST_TAG}..HEAD" 2> /dev/null)" ]]; then
-        say "   no commits since ${LAST_TAG} — the tree is already the released version."
-        say "   Nothing to release. To re-ship the current build: make redeploy-web"
-        exit 0
+# Nothing new since the tag is not a failure — it is a release that would have no content,
+# and release.sh exits 1 on exactly that. Skip the bump instead of aborting the run: the
+# tree already *is* a released version, so steps 3 and 4 can ship it as it stands. (Checked
+# here, after step 1: an update verb committing is precisely what turns "nothing to
+# release" into something to release.)
+NOTHING_NEW=0
+if [[ "${LAST_TAG}" != 'none' && -z "$(git rev-list "${LAST_TAG}..HEAD" 2> /dev/null)" ]]; then
+    NOTHING_NEW=1
+    say "   no commits since ${LAST_TAG} — the tree is already the released version."
+    if [[ ${NO_DEPLOY} -eq 1 ]]; then
+        say "   Nothing to release, and --no-deploy stops before the redeploy: nothing to do."
+    else
+        say "   Skipping the bump; steps 3 and 4 re-ship the current build (v${CURRENT})."
     fi
 fi
 
-if [[ ${DRY_RUN} -eq 1 ]]; then
+if [[ ${NOTHING_NEW} -eq 1 ]]; then
+    : # no bump to make — RELEASED below is the version already on disk and on origin
+elif [[ ${DRY_RUN} -eq 1 ]]; then
     say "   previewing the bump (writes nothing):"
     preview="$(make release ARGS=--dry-run)" || fail "'make release --dry-run' failed."
     say "   ${preview}"
@@ -455,11 +475,20 @@ if [[ ${NO_DEPLOY} -eq 1 ]]; then
     head2 "3. make redeploy-web — skipped (--no-deploy)"
     say ""
     if [[ ${DRY_RUN} -eq 1 ]]; then
-        say "✓ dry run complete — nothing was changed. A real run would stop with v${RELEASED}"
-        say "  released and pushed, and the host still on the previous build."
+        if [[ ${NOTHING_NEW} -eq 1 ]]; then
+            say "✓ dry run complete — nothing was changed. A real run would do nothing at all:"
+            say "  no commits to release, and --no-deploy stops before the redeploy."
+        else
+            say "✓ dry run complete — nothing was changed. A real run would stop with v${RELEASED}"
+            say "  released and pushed, and the host still on the previous build."
+        fi
         exit 0
     fi
-    say "✓ v${RELEASED} is released and pushed; the deployed venv still runs the previous build."
+    if [[ ${NOTHING_NEW} -eq 1 ]]; then
+        say "✓ nothing to release — v${RELEASED} is already tagged and pushed, and nothing was deployed."
+    else
+        say "✓ v${RELEASED} is released and pushed; the deployed venv still runs the previous build."
+    fi
     say "  Ship it with: make redeploy-web"
     say "  log: ${LOG}"
     exit 0
@@ -518,11 +547,18 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Whether step 2 actually cut a release changes only what these lines are allowed to claim.
+if [[ "${EULER_NOTHING_NEW:-0}" == '1' ]]; then
+    release_note="v${EULER_RELEASED} was already released and pushed (there was nothing to bump)"
+else
+    release_note="v${EULER_RELEASED} IS released and pushed"
+fi
+
 printf '\n── 3. make redeploy-web   (detached, pid %s)\n' "$$"
 printf '   (check-version first: v%s must be on origin. Live web shells are dropped.)\n' "${EULER_RELEASED}"
 printf '   $ make redeploy-web\n'
 if ! make redeploy-web; then
-    printf '\nError: %s\n' "'make redeploy-web' failed — v${EULER_RELEASED} IS released and pushed,
+    printf '\nError: %s\n' "'make redeploy-web' failed — ${release_note},
        but the host still runs the previous build. Re-run 'make redeploy-web' once the
        cause is fixed; 'make status-web' shows what is up in the meantime."
     exit 1
@@ -532,12 +568,16 @@ printf '\n── 4. make status-web\n'
 printf '   $ make status-web\n'
 make status-web || printf '   (status sweep reported a problem — read the sections above)\n'
 
-printf '\n✓ v%s released, pushed, and deployed.\n' "${EULER_RELEASED}"
+if [[ "${EULER_NOTHING_NEW:-0}" == '1' ]]; then
+    printf '\n✓ v%s (nothing new to release) re-deployed.\n' "${EULER_RELEASED}"
+else
+    printf '\n✓ v%s released, pushed, and deployed.\n' "${EULER_RELEASED}"
+fi
 printf '  Collaborators pick it up with '"'"'git-sync'"'"'; a new shell command also needs them to\n'
 printf '  reconnect their web terminal (the PTY builds its registry at spawn).\n'
 STEPS_EOF
 
-EULER_ROOT="${ROOT}" EULER_RELEASED="${RELEASED}" \
+EULER_ROOT="${ROOT}" EULER_RELEASED="${RELEASED}" EULER_NOTHING_NEW="${NOTHING_NEW}" \
     nohup bash "${STEPS}" < /dev/null >> "${LOG}" 2>&1 &
 DEPLOY_PID=$!
 
@@ -547,7 +587,11 @@ say "   follow: tail -f ${LOG}      stop: kill ${DEPLOY_PID}"
 
 if [[ ${NO_FOLLOW} -eq 1 ]]; then
     say ""
-    say "✓ v${RELEASED} released and pushed; the deploy is running as pid ${DEPLOY_PID}."
+    if [[ ${NOTHING_NEW} -eq 1 ]]; then
+        say "✓ nothing to release; v${RELEASED} is being re-deployed as pid ${DEPLOY_PID}."
+    else
+        say "✓ v${RELEASED} released and pushed; the deploy is running as pid ${DEPLOY_PID}."
+    fi
     say "  log: ${LOG}"
     exit 0
 fi
@@ -564,6 +608,11 @@ deploy_rc=$?
 say ""
 say "   log: ${LOG}"
 if [[ ${deploy_rc} -ne 0 ]]; then
+    if [[ ${NOTHING_NEW} -eq 1 ]]; then
+        fail "the detached deploy exited ${deploy_rc} — nothing was released (v${RELEASED} was
+       already current), and the stack is not confirmed. Read the log, then re-run
+       'make redeploy-web'."
+    fi
     fail "the detached deploy exited ${deploy_rc} — v${RELEASED} is released and pushed,
        but the stack is not confirmed. Read the log, then re-run 'make redeploy-web'."
 fi
