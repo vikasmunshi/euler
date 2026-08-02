@@ -202,6 +202,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial

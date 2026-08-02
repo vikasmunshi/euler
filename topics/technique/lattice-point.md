@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lattice_point>
 
 - ● [0091](/solutions/0091/) — Right Triangles with Integer Coordinates
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
+- ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0313](/solutions/0313/) — Sliding Game
 
 <!-- /problems -->

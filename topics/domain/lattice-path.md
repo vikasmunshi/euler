@@ -10,7 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lattice_path>.
 - ● [0015](/solutions/0015/) — Lattice Paths
 - ● [0081](/solutions/0081/) — Path Sum: Two Ways
 - ● [0082](/solutions/0082/) — Path Sum: Three Ways
-- ○ [0246](/solutions/0246/) — Tangents to an Ellipse
 - ○ [0295](/solutions/0295/) — Lenticular Holes
 - ○ [0300](/solutions/0300/) — Protein Folding
 - ○ [0354](/solutions/0354/) — Distances in a Bee's Honeycomb

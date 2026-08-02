@@ -113,6 +113,7 @@ decision.
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0243](/solutions/0243/) — Resilience
+- ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
