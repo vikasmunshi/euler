@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cross-multipli
 
 - ● [0033](/solutions/0033/) — Digit Cancelling Fractions
 - ● [0112](/solutions/0112/) — Bouncy Numbers
+- ● [0246](/solutions/0246/) — Tangents to an Ellipse
 
 <!-- /problems -->

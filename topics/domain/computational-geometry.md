@@ -13,7 +13,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Computational_
 - ● [0199](/solutions/0199/) — Iterative Circle Packing
 - ● [0212](/solutions/0212/) — Combined Volume of Cuboids
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
-- ○ [0246](/solutions/0246/) — Tangents to an Ellipse
 - ○ [0252](/solutions/0252/) — Convex Holes
 - ○ [0262](/solutions/0262/) — Mountain Range
 - ○ [0270](/solutions/0270/) — Cutting Squares

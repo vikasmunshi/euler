@@ -14,7 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Geometry>._
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
 - ● [0222](/solutions/0222/) — Sphere Packing
 - ● [0228](/solutions/0228/) — Minkowski Sums
-- ○ [0246](/solutions/0246/) — Tangents to an Ellipse
+- ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ○ [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ○ [0264](/solutions/0264/) — Triangle Centres
 - ○ [0279](/solutions/0279/) — Triangles with Integral Sides and an Integral Angle

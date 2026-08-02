@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Symmetry>._
 - ● [0126](/solutions/0126/) — Cuboid Layers
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
+- ● [0246](/solutions/0246/) — Tangents to an Ellipse
 
 <!-- /problems -->
