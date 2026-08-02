@@ -5448,7 +5448,7 @@
     {
       "path": "technique/quadratic-residue",
       "title": "Quadratic residue",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["quadratic-residue"],
