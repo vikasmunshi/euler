@@ -1263,7 +1263,7 @@
     {
       "path": "domain/geometry",
       "title": "Geometry",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 71,
       "tags": ["geometry"],
