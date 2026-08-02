@@ -191,7 +191,6 @@ of crossing it.
 - ● [0240](/solutions/0240/) — Top Dice
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0244](/solutions/0244/) — Sliders
-- ○ [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ○ [0249](/solutions/0249/) — Prime Subset Sums
 - ○ [0253](/solutions/0253/) — Tidying Up A
 - ○ [0256](/solutions/0256/) — Tatami-Free Rooms
