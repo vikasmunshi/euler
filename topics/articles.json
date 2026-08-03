@@ -4629,7 +4629,7 @@
     {
       "path": "technique/integer-factorization",
       "title": "Integer factorization",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["integer-factorization"],
