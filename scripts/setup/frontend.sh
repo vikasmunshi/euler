@@ -131,7 +131,8 @@ Usage: $0 [deploy|remove|upgrade|redeploy|status|renew|reload|help]
              package upgrade, cert, or unit changes.
   status     Show deploy state, cert expiry, unit state, and a /healthz ping.
   renew      Force-renew the certificate now (as root; creds cached by acme.sh).
-  reload     Reload the running edge (sudo systemctl reload).
+  reload     Reload the running edge (sudo systemctl reload; restarts it instead if
+             the running unit's namespace can no longer be re-entered).
 
   The deployment FQDN is read from ~/.euler/env (EULER_TLS_DOMAIN); commands fail if unset.
   DNS provider (\$EULER_TLS_DNS_PROVIDER, default ${DNS_PROVIDER}): one of
@@ -812,10 +813,23 @@ do_renew() {
     echo "Renewal complete for ${DOMAIN}"
 }
 
+# Reload the running edge, falling back to a restart.
+#
+# `systemctl reload` runs ExecReload *inside the running main process's namespace*, so
+# it fails with 226/NAMESPACE when the private /tmp that namespace was set up with has
+# since been cleaned away from the host — nothing is wrong with the Caddyfile (it has
+# already validated by the time we get here), the long-lived unit's namespace is simply
+# no longer re-enterable. A restart lays a fresh namespace, so take one rather than
+# leave a freshly generated Caddyfile unserved.
 do_reload() {
     check_can_sudo || return 1
-    sudo systemctl reload "${SERVICE_NAME}"
-    echo "Reloaded ${SERVICE_NAME}"
+    if sudo systemctl reload "${SERVICE_NAME}" 2> /dev/null; then
+        echo "Reloaded ${SERVICE_NAME}"
+        return 0
+    fi
+    echo "Reload of ${SERVICE_NAME} failed (stale unit namespace); restarting instead..."
+    sudo systemctl restart "${SERVICE_NAME}"
+    echo "Restarted ${SERVICE_NAME}"
 }
 
 # Fast redeploy: push the repo's static web-content + regenerated Caddyfile to the

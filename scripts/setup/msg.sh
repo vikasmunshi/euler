@@ -237,6 +237,20 @@ EOF
 
 # ── deploy / remove / redeploy ─────────────────────────────────────────────────────
 
+# `systemctl restart` returns as soon as the unit is active; the service binds its two
+# sockets a beat later. do_status runs straight after, so without this wait it reports a
+# perfectly healthy spool as "✗ missing / not answering" — the same false alarm the
+# sudo-less `test -S` used to raise, from the other direction. Bounded, then give up and
+# let do_status say what it finds.
+wait_for_sockets() {
+    local i
+    for ((i = 0; i < 50; i++)); do
+        if sudo test -S "${MSG_SOCKET}" && sudo test -S "${ADMIN_SOCKET}"; then return 0; fi
+        sleep 0.1
+    done
+    return 0
+}
+
 do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
@@ -261,6 +275,7 @@ do_deploy() {
         echo "Reloading the egress firewall to include ${MSG_USER}..."
         "${SCRIPT_DIR}/firewall.sh" reload
     fi
+    wait_for_sockets
     do_status
 }
 
@@ -269,6 +284,7 @@ do_redeploy() {
     require_venv || return 1
     echo "Restarting ${SERVICE_NAME} against ${VENV_DIR}..."
     sudo systemctl restart "${SERVICE_NAME}"
+    wait_for_sockets
     do_status
 }
 
