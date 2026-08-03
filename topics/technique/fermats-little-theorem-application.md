@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fermat%27s_lit
 ## Problems
 
 - ● [0133](/solutions/0133/) — Repunit Nonfactors
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0926](/solutions/0926/) — Total Roundness

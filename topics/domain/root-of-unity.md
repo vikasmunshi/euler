@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Root_of_unity>
 ## Problems
 
 - ● [0208](/solutions/0208/) — Robot Walks
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0768](/solutions/0768/) — Chandelier
 
 <!-- /problems -->

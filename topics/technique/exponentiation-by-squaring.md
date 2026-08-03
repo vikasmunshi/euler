@@ -16,6 +16,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Exponentiation
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0387](/solutions/0387/) — Harshad Numbers
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals

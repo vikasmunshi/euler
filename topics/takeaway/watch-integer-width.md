@@ -173,6 +173,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0487](/solutions/0487/) — Sums of Power Sums

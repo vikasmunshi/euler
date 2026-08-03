@@ -16,6 +16,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_overfl
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0259](/solutions/0259/) — Reachable Numbers
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 

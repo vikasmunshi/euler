@@ -221,6 +221,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
