@@ -5151,7 +5151,7 @@
     {
       "path": "technique/modular-multiplicative-inverse-application",
       "title": "Modular multiplicative inverse (application)",
-      "status": "draft",
+      "status": "final",
       "solved": 14,
       "problems": 14,
       "tags": ["modular-multiplicative-inverse-application"],
