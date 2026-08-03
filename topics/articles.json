@@ -993,7 +993,7 @@
     {
       "path": "domain/exponentiation",
       "title": "Exponentiation",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 18,
       "tags": ["exponentiation"],
