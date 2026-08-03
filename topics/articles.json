@@ -2289,7 +2289,7 @@
     {
       "path": "domain/prime-factorization",
       "title": "Prime factorization",
-      "status": "draft",
+      "status": "final",
       "solved": 20,
       "problems": 72,
       "tags": ["prime-factorization"],
