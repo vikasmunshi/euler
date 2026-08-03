@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Carmichael_fun
 ## Problems
 
 - ● [0130](/solutions/0130/) — Composites with Prime Repunit Property
+- ● [0250](/solutions/0250/) — $250250$
 
 <!-- /problems -->

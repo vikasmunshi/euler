@@ -15,7 +15,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Exponentiation
 - ● [0099](/solutions/0099/) — Largest Exponential
 - ● [0119](/solutions/0119/) — Digit Power Sum
 - ● [0122](/solutions/0122/) — Efficient Exponentiation
-- ○ [0250](/solutions/0250/) — $250250$
+- ● [0250](/solutions/0250/) — $250250$
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers
 - ○ [0411](/solutions/0411/) — Uphill Paths
 - ○ [0616](/solutions/0616/) — Creative Numbers

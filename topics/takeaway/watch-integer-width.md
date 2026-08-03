@@ -163,6 +163,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0249](/solutions/0249/) — Prime Subset Sums
+- ● [0250](/solutions/0250/) — $250250$
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
