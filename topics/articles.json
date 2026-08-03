@@ -5826,7 +5826,7 @@
     {
       "path": "technique/trial-division",
       "title": "Trial division",
-      "status": "draft",
+      "status": "final",
       "solved": 38,
       "problems": 38,
       "tags": ["trial-division"],
