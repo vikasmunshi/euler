@@ -179,6 +179,7 @@ handful of operations on small numbers.
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0250](/solutions/0250/) — $250250$
+- ● [0251](/solutions/0251/) — Cardano Triplets
 - ○ [0258](/solutions/0258/) — A Lagged Fibonacci Sequence
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1

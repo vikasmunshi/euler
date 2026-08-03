@@ -14,6 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_overfl
 - ● [0110](/solutions/0110/) — Diophantine Reciprocals II
 - ● [0119](/solutions/0119/) — Digit Power Sum
 - ● [0221](/solutions/0221/) — Alexandrian Integers
+- ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative

@@ -148,6 +148,7 @@ clock.
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0230](/solutions/0230/) — Fibonacci Words
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
+- ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences

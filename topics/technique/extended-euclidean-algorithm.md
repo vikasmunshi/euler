@@ -128,6 +128,7 @@ congruent to `r (mod m)`", where `r` is an inverse from the Farey-neighbour rela
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ● [0236](/solutions/0236/) — Luxury Hampers
 - ● [0250](/solutions/0250/) — $250250$
+- ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 

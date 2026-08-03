@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_factor
 ## Problems
 
 - ● [0088](/solutions/0088/) — Product-sum Numbers
+- ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 
 <!-- /problems -->
