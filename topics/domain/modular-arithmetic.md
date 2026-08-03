@@ -124,7 +124,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
 - ● [0225](/solutions/0225/) — Tribonacci Non-divisors
-- ○ [0250](/solutions/0250/) — $250250$
+- ● [0250](/solutions/0250/) — $250250$
 - ○ [0258](/solutions/0258/) — A Lagged Fibonacci Sequence
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1

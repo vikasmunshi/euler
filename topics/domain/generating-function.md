@@ -12,7 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Generating_fun
 - ● [0140](/solutions/0140/) — Modified Fibonacci Golden Nuggets
 - ● [0172](/solutions/0172/) — Few Repeated Digits
 - ● [0249](/solutions/0249/) — Prime Subset Sums
-- ○ [0250](/solutions/0250/) — $250250$
+- ● [0250](/solutions/0250/) — $250250$
 - ○ [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
 - ○ [0519](/solutions/0519/) — Tricoloured Coin Fountains

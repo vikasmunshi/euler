@@ -127,6 +127,7 @@ congruent to `r (mod m)`", where `r` is an inverse from the Farey-neighbour rela
 - ● [0160](/solutions/0160/) — Factorial Trailing Digits
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ● [0236](/solutions/0236/) — Luxury Hampers
+- ● [0250](/solutions/0250/) — $250250$
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 
