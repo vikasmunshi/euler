@@ -17,7 +17,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Coprime_intege
 - ● [0141](/solutions/0141/) — Square Progressive Numbers
 - ● [0157](/solutions/0157/) — Base-10 Diophantine Reciprocal
 - ● [0202](/solutions/0202/) — Laserbeam
-- ○ [0251](/solutions/0251/) — Cardano Triplets
+- ● [0251](/solutions/0251/) — Cardano Triplets
 - ○ [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ○ [0351](/solutions/0351/) — Hexagonal Orchards
