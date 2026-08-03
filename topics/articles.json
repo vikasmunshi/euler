@@ -5637,7 +5637,7 @@
     {
       "path": "technique/sorting-algorithm",
       "title": "Sorting algorithm",
-      "status": "draft",
+      "status": "final",
       "solved": 19,
       "problems": 19,
       "tags": ["sorting-algorithm"],
