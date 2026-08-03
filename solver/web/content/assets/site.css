@@ -420,7 +420,13 @@ body.ws-hidden .term-only-visible { display: none; }
   min-height: 0;                             /* let the panes, not the page, scroll */
 }
 .pane { min-width: 0; min-height: 0; }
-.pane-content { overflow: auto; }            /* both axes when content overflows */
+/* Both axes when content overflows — and the vertical gutter is reserved whether or not
+   a scrollbar is in it. Without that, every page that grows past the pane (or shrinks
+   back under it, as the filter narrows a grid) takes the scrollbar's width away from the
+   content and re-flows it: the tiles shift sideways, and a grid that packs by available
+   width can drop a column, under a reader who only typed a letter. The gutter costs the
+   same handful of pixels on every page; the jump costs them their place. */
+.pane-content { overflow: auto; scrollbar-gutter: stable; }
 /* The terminal pane is a little window: a titlebar over an iframe that scrolls itself.
    The pane owns the frame (border, radius, fill) and clips the iframe's corners. */
 .pane-ws {
