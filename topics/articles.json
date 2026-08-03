@@ -3540,7 +3540,7 @@
     {
       "path": "technique/binomial-theorem",
       "title": "Binomial theorem",
-      "status": "draft",
+      "status": "final",
       "solved": 7,
       "problems": 7,
       "tags": ["binomial-theorem"],
