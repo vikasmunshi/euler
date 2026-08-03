@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Array_programm
 - ● [0135](/solutions/0135/) — Same Differences
 - ● [0196](/solutions/0196/) — Prime Triplets
 - ● [0213](/solutions/0213/) — Flea Circus
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 
 <!-- /problems -->

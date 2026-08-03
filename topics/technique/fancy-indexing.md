@@ -10,5 +10,6 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/user/basics.ind
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 
 <!-- /problems -->

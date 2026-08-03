@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cyclic_group>.
 - ● [0182](/solutions/0182/) — RSA Encryption
 - ○ [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ○ [0281](/solutions/0281/) — Pizza Toppings
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0483](/solutions/0483/) — Repeated Permutation
 - ○ [0622](/solutions/0622/) — Riffle Shuffles
 - ○ [0651](/solutions/0651/) — Patterned Cylinders

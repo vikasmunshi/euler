@@ -21,7 +21,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisor>._
 - ○ [0386](/solutions/0386/) — Maximum Length of an Antichain
 - ○ [0417](/solutions/0417/) — Reciprocal Cycles II
 - ○ [0418](/solutions/0418/) — Factorisation Triples
-- ○ [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0454](/solutions/0454/) — Diophantine Reciprocals III
 - ○ [0462](/solutions/0462/) — Permutation of 3-smooth Numbers
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients

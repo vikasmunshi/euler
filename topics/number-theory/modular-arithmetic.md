@@ -217,7 +217,7 @@ handful of operations on small numbers.
 - ○ [0412](/solutions/0412/) — Gnomon Numbering
 - ○ [0413](/solutions/0413/) — One-child Numbers
 - ○ [0416](/solutions/0416/) — A Frog's Trip
-- ○ [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0422](/solutions/0422/) — Sequence of Points on a Hyperbola
 - ○ [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0427](/solutions/0427/) — $n$-sequences

@@ -47,7 +47,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Number_theory>
 - ○ [0407](/solutions/0407/) — Idempotents
 - ○ [0410](/solutions/0410/) — Circle and Tangent Line
 - ○ [0417](/solutions/0417/) — Reciprocal Cycles II
-- ○ [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0432](/solutions/0432/) — Totient Sum
 - ○ [0433](/solutions/0433/) — Steps in Euclid's Algorithm
 - ○ [0439](/solutions/0439/) — Sum of Sum of Divisors

@@ -406,7 +406,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0399](/solutions/0399/) — Squarefree Fibonacci Numbers
 - ○ [0418](/solutions/0418/) — Factorisation Triples
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
-- ○ [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
