@@ -183,6 +183,27 @@ load_fqdn() {
     fi
 }
 
+# What to write for PrivateTmp= in the unit.
+#
+# `PrivateTmp=true` binds a per-invocation /tmp/systemd-private-* directory into the
+# service's namespace. The edge is long-lived, and `systemctl reload` re-enters that
+# namespace to run ExecReload — so once the host has cleaned the directory away, every
+# reload fails at 226/NAMESPACE on a service that is otherwise perfectly healthy, and a
+# redeploy carrying a valid new Caddyfile dies with it. `disconnected` (systemd 257+)
+# mounts an unshared tmpfs inside the namespace instead, with nothing outside to clean.
+# Older systemd cannot parse the value, so fall back to the bind there; do_reload's
+# restart fallback covers that case.
+private_tmp_mode() {
+    local ver
+    ver="$(systemctl --version 2>/dev/null | awk 'NR==1 {print $2}')"
+    ver="${ver%%[!0-9]*}"
+    if [ -n "${ver}" ] && [ "${ver}" -ge 257 ]; then
+        echo "disconnected"
+    else
+        echo "true"
+    fi
+}
+
 caddy_is_installed() { command -v caddy &> /dev/null; }
 caddy_version() { caddy version 2>/dev/null | head -n1 || echo "unknown"; }
 caddy_bin() { command -v caddy; }
@@ -676,7 +697,7 @@ Environment=XDG_CONFIG_HOME=/var/lib/euler-caddy
 NoNewPrivileges=true
 ProtectHome=true
 ProtectSystem=full
-PrivateTmp=true
+PrivateTmp=$(private_tmp_mode)
 
 [Install]
 WantedBy=multi-user.target
