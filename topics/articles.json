@@ -5286,7 +5286,7 @@
     {
       "path": "technique/numpy",
       "title": "NumPy",
-      "status": "draft",
+      "status": "final",
       "solved": 45,
       "problems": 45,
       "tags": ["numpy"],
