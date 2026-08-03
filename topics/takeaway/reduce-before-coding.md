@@ -205,6 +205,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
+- ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
