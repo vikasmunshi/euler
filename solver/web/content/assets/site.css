@@ -729,7 +729,15 @@ body.terminal-doc {
    The count sits in the slot `.subrule` was already using for a number, so a folder
    heading inside the region and the region's own divider read as the same kind of break
    at two levels. */
-.pagerule { display: flex; align-items: center; gap: 0.7rem; margin: 1.1rem 0 0.7rem; }
+/* The right-hand end keeps clear of the pane's scrollbar. #content is itself the scroll
+   container and carries no padding, so the rule runs flush to the pane edge — where an
+   overlay scrollbar lies straight over the count, the one thing on the rule that has to
+   stay readable while the reader types. The hairline flexes, so this padding costs the
+   rule nothing: it simply moves the filter and the count in off the edge. */
+.pagerule {
+  display: flex; align-items: center; gap: 0.7rem;
+  margin: 1.1rem 0 0.7rem; padding-right: 1.1rem;
+}
 .pagerule-label {
   margin: 0; white-space: nowrap;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -758,9 +766,15 @@ body.terminal-doc {
   flex: 0 1 16rem; min-width: 5rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.75rem; color: var(--text);
-  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg);
+  /* A hairline warmed towards the accent rather than the plain --border the rule beside
+     it wears: the box is the one thing on this rule you can type into, and at rest it
+     should look it. Well short of the focus state, which takes the accent outright. */
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 6px;
   padding: 0.28rem 0.6rem;
 }
+.pane-filter:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .pane-filter::placeholder { color: var(--muted); }
 .pane-filter:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 1px; }
 @media (max-width: 700px) { .pagerule { flex-wrap: wrap; } .pane-filter { flex: 1 1 8rem; } }
