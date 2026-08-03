@@ -30,6 +30,7 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/>._
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
+- ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0357](/solutions/0357/) — Prime Generating Integers

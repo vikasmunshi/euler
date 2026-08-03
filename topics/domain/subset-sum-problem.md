@@ -12,7 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Subset_sum_pro
 - ● [0106](/solutions/0106/) — Special Subset Sums: Meta-testing
 - ● [0152](/solutions/0152/) — Sums of Square Reciprocals
 - ● [0201](/solutions/0201/) — Subsets with a Unique Sum
-- ○ [0249](/solutions/0249/) — Prime Subset Sums
+- ● [0249](/solutions/0249/) — Prime Subset Sums
 - ○ [0250](/solutions/0250/) — $250250$
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0382](/solutions/0382/) — Generating Polygons

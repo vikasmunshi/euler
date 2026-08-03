@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Knapsack_probl
 
 - ● [0181](/solutions/0181/) — Grouping Two Different Coloured Objects
 - ● [0201](/solutions/0201/) — Subsets with a Unique Sum
+- ● [0249](/solutions/0249/) — Prime Subset Sums
 
 <!-- /problems -->

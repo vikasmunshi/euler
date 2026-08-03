@@ -371,7 +371,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
-- ○ [0249](/solutions/0249/) — Prime Subset Sums
+- ● [0249](/solutions/0249/) — Prime Subset Sums
 - ○ [0251](/solutions/0251/) — Cardano Triplets
 - ○ [0263](/solutions/0263/) — An Engineers' Dream Come True
 - ○ [0266](/solutions/0266/) — Pseudo Square Root

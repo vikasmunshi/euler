@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/In-place_algor
 ## Problems
 
 - ● [0081](/solutions/0081/) — Path Sum: Two Ways
+- ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 
 <!-- /problems -->
