@@ -1209,7 +1209,7 @@
     {
       "path": "domain/generating-function",
       "title": "Generating function",
-      "status": "draft",
+      "status": "final",
       "solved": 7,
       "problems": 27,
       "tags": ["generating-function"],
