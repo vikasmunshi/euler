@@ -3693,7 +3693,7 @@
     {
       "path": "technique/carmichael-function",
       "title": "Carmichael function",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["carmichael-function"],
