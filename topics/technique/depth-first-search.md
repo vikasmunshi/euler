@@ -137,7 +137,7 @@ every state with its distance, a **DFS restricted to strictly descending labels*
 *all* shortest paths — every step drops the label by one, so every root-to-target walk is
 optimal by construction. BFS establishes the metric; DFS enumerates within it. That pairing
 is worth remembering whenever a problem asks not for the shortest path but for something
-summed over all of them. See also [shortest path problem](/topics/domain/shortest-path-problem/).
+summed over all of them. See also [shortest path problem](/topics/domain/shortest-path-problem).
 
 The other repair is [iterative deepening](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search)
 (IDDFS): run a depth-limited DFS at limit $1$, then $2$, then $3$, until an answer appears.

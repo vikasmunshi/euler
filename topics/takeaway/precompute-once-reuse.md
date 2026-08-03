@@ -43,7 +43,7 @@ length so a start whose tail was already seen stops the moment it lands on a
 cached value; [Digit Factorial Chains](/solutions/0074/) walks each chain forward
 and *back-propagates* the length into every node it touched, so across all starts
 each node is resolved once and the whole scan is $O(N)$ amortised. This is
-[dynamic programming](/topics/technique/dynamic-programming/) read as caching:
+[dynamic programming](/topics/technique/dynamic-programming) read as caching:
 the [overlapping subproblems](https://en.wikipedia.org/wiki/Overlapping_subproblems)
 are the shared graph tails.
 
@@ -76,7 +76,7 @@ A few cautions earn their keep:
 - **Size the table to the input, not to a fixed bound.** Build the sieve, cache,
   or DP array *inside* `solve()`, dimensioned from the arguments — a bound sized
   to the input is the companion habit of
-  [sizing work to the input](/topics/takeaway/size-work-to-the-input/). A table
+  [sizing work to the input](/topics/takeaway/size-work-to-the-input). A table
   hard-coded to some maximum wastes memory on small inputs and silently breaks on
   large ones.
 - **Rebuild the table each call — do not hoist it out of the timed loop.** The
@@ -91,7 +91,7 @@ A few cautions earn their keep:
   is too large to tabulate, fall back to recomputation, a smaller rolling window
   (keep only the DP frontier, not the whole grid), or — when the structure is
   regular enough — skip the table entirely for a
-  [closed form](/topics/takeaway/closed-form-over-iteration/), the opposite
+  [closed form](/topics/takeaway/closed-form-over-iteration), the opposite
   extreme where no storage is needed at all.
 
 The through-line is that repeated work is a table waiting to be built. Find the

@@ -43,7 +43,7 @@ $N \times N$ grid.
 
 The payoff is not a constant factor. Dropping from $O(n)$ (or an $O(n^2)$
 enumeration) to $O(1)$ changes the shape of the running time — it is the same
-lever the [algorithm-beats-language](/topics/takeaway/algorithm-beats-language/)
+lever the [algorithm-beats-language](/topics/takeaway/algorithm-beats-language)
 takeaway pulls, taken to its limit, where the work stops growing with the input
 at all. Larger problems reach for heavier closed forms — a matrix recurrence
 solved by [fast exponentiation](https://en.wikipedia.org/wiki/Exponentiation_by_squaring),

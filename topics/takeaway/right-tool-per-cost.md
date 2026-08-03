@@ -38,7 +38,7 @@ total = sum(range(0, N, d))              # range consumed in C — much cheaper
 The generator is not *wrong*; it is the wrong tool for a tight numeric loop, where its one
 virtue — streaming without materialising — buys nothing, because the sequence is finite
 and cheap to hold. (The real winner here is the `O(1)` closed form, which deletes the loop
-altogether — see [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration/).)
+altogether — see [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration).)
 
 **Representation weight.** [Problem 74](/solutions/0074/) and
 [Problem 77](/solutions/0077/) both offer a lean and a rich
@@ -53,7 +53,7 @@ slower. In both, the heavier structure exists for debugging or visualisation —
 **Machine word versus big number.** [Problem 104](/solutions/0104/) hunts for a Fibonacci
 index whose value has more than sixty thousand digits. You must never form that number in
 the search loop. The tail nine digits come from the recurrence reduced
-[modulo](https://en.wikipedia.org/wiki/Modular_arithmetic) `$10^9$` — small enough to live
+[modulo](https://en.wikipedia.org/wiki/Modular_arithmetic) `109` — small enough to live
 in a 64-bit word — and the leading digits from the fractional part of a logarithm; both
 checks are `O(1)`. Contrast [Problem 20](/solutions/0020/), where the giant factorial is
 touched *once*: there Python's built-in
@@ -63,8 +63,8 @@ price C pays for lacking one. Same object, opposite verdict — because one sits
 path and the other does not.
 
 **Vectorise the batch; match the container to the language.**
-[Problem 501](/solutions/0501/) counts integers with eight divisors up to `$10^{12}$` with
-a Lucy_Hedgehog prime-counting sieve whose inner update runs on the order of `$10^6$`
+[Problem 501](/solutions/0501/) counts integers with eight divisors up to `1012` with
+a Lucy_Hedgehog prime-counting sieve whose inner update runs on the order of `106`
 times. In pure Python that loop is hopeless, so the hot update becomes a single
 [NumPy](https://numpy.org/doc/stable/) batch operation while the short secondary loop stays
 plain Python; the C version just writes nested loops, which the compiler makes fast enough
