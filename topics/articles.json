@@ -957,7 +957,7 @@
     {
       "path": "domain/eulers-totient-function",
       "title": "Euler's totient function",
-      "status": "draft",
+      "status": "final",
       "solved": 12,
       "problems": 28,
       "tags": ["eulers-totient-function"],
