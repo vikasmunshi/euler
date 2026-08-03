@@ -651,7 +651,7 @@
     {
       "path": "domain/coprime-integers",
       "title": "Coprime integers",
-      "status": "draft",
+      "status": "final",
       "solved": 15,
       "problems": 48,
       "tags": ["coprime-integers"],
