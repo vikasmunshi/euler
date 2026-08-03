@@ -2,7 +2,7 @@
 <!-- status: final -->
 # Size the work to the input
 
-These solutions all take a size as their one argument — an $n$, a ceiling $N$, a
+These solutions all take a size as their one argument — an n, a ceiling N, a
 target — and every one of them has to decide how much scaffolding to build: how
 far to sieve, how big a table to allocate, how high to let a search run. The trap
 that lurks in all of them is the *magic constant*: a bound hard-coded to whatever
@@ -34,7 +34,7 @@ integers, so it leans on the
 estimate $p_n < n \ln n$ (for $n$ past a small threshold) and sizes the sieve to
 $n \ln n$. The ceiling is still computed from the input — just through a
 closed-form bound rather than the raw value. Deriving the right ceiling is a small
-[closed-form](/topics/takeaway/closed-form-over-iteration/) step in its own right.
+[closed-form](/topics/takeaway/closed-form-over-iteration) step in its own right.
 
 **A bound that shrinks as the work proceeds.** Sometimes the right size is not
 known up front but tightens as you go. [Largest Prime Factor](/solutions/0003/)
@@ -60,7 +60,7 @@ Two forces push the same way.
   once at import is paid for once and then free, flattering the number you report.
   A fresh, input-sized build on every call is what makes the measured time the
   real time. This is the companion of [precomputing once and
-  reusing](/topics/takeaway/precompute-once-reuse/): both keep the expensive
+  reusing](/topics/takeaway/precompute-once-reuse): both keep the expensive
   structure local to `solve()`; this takeaway adds that its *size* must come from
   the input.
 

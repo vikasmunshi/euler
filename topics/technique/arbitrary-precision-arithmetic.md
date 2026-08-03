@@ -5,7 +5,7 @@
 [Arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) is
 integer (or fractional) arithmetic whose operands are limited by memory rather than by a register
 width. It recurs across these problems for two quite different reasons. Sometimes the *answer* is a
-big number — the digits of $2^{1000}$, of $100!$, of the 1000-digit Fibonacci term. Far more often
+big number — the digits of 21000, of 100!, of the 1000-digit Fibonacci term. Far more often
 the big number is an *intermediate*: an exact rational, a convergent's numerator, a scaled square
 root, a binomial coefficient that must be compared for equality rather than approximated. In Python
 this is invisible — [`int`](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
@@ -15,7 +15,7 @@ implement, and that asymmetry is what makes this tag worth a page.
 ## The idea
 
 A machine integer is a fixed number of bits: 64 in a `long long`, 128 if you reach for
-[`__int128`](/topics/technique/int128/). Arbitrary precision drops the ceiling by representing a
+[`__int128`](/topics/technique/int128). Arbitrary precision drops the ceiling by representing a
 number as a *sequence of limbs* — an array of small integers, each holding one digit in some base
 $B$, least-significant first — and implementing the schoolbook algorithms over that array. Addition
 walks the limbs propagating a carry; multiplication is the $O(n \cdot m)$ double loop; division is
@@ -58,7 +58,7 @@ Three shapes of use recur, and it is worth naming them separately:
   $e$ (Problem 65), the fundamental solution of a [Pell equation](https://en.wikipedia.org/wiki/Pell%27s_equation)
   (Problem 66), squarefree tests on binomial coefficients (Problem 203) — in each case a `double`
   would silently agree with itself to fifteen digits and give the wrong count. This is the same
-  instinct as [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality/).
+  instinct as [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
 - **Fixed point in disguise.** To get $d$ digits of an irrational, scale by $10^{2d}$ and take an
   *integer* square root. Problem 80 does exactly this — `number *= 10 ** (2 * digits)`, then
   [Heron's method](https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method)
@@ -71,7 +71,7 @@ Three shapes of use recur, and it is worth naming them separately:
 
 **Ask first whether you need the digits at all.** Arbitrary precision is the fallback, not the
 opening move. If the problem asks for a value modulo something, use
-[modular arithmetic](/topics/domain/modular-arithmetic/) and never let the number grow — Problem 97
+[modular arithmetic](/topics/domain/modular-arithmetic) and never let the number grow — Problem 97
 computes a digit-slice of a 7-million-digit prime with nothing wider than a 128-bit product. If it
 asks whether two quantities are equal, a well-chosen invariant often decides it without evaluating
 either. A big integer that exists only because you did not think about reduction first is a cost you
@@ -87,7 +87,7 @@ takes $0.24$ ms — Python is **122× faster**. Nothing about C is at fault; the
 the base $n$ times over single-decimal-digit limbs, an $O(n^2)$ walk, while `2 ** 10000` uses
 [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) over 30-bit
 limbs. A naive bignum in a fast language loses to a good bignum in a slow one, every time. This is
-[algorithm beats language](/topics/takeaway/algorithm-beats-language/) in its purest form.
+[algorithm beats language](/topics/takeaway/algorithm-beats-language) in its purest form.
 
 **Know the ladder, and stop at the lowest rung that holds.** 64-bit native → `__int128` (~38 digits,
 still machine speed) → a hand-rolled base-$10^9$ `BigInt` (fine for add/multiply/compare) → GMP

@@ -5,12 +5,12 @@
 [Prime factorization](https://en.wikipedia.org/wiki/Integer_factorization) is what an integer
 *is*, as opposed to what it looks like written down. The
 [fundamental theorem of arithmetic](https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic)
-says every $n > 1$ has exactly one decomposition $n = p_1^{e_1} p_2^{e_2} \cdots p_k^{e_k}$, and
+says every n>1 has exactly one decomposition n=p1e1p2e2⋯pkek, and
 the seventy-odd problems below are, almost without exception, problems about that decomposition
 rather than about the number. This page is about the *object* — what the exponent vector tells you
 and how to reason in it. The mechanics of obtaining one are
-[trial division](/topics/technique/trial-division/) and
-[integer factorization](/topics/technique/integer-factorization/), which have their own pages.
+[trial division](/topics/technique/trial-division) and
+[integer factorization](/topics/technique/integer-factorization), which have their own pages.
 
 ## The exponent vector is the real object
 
@@ -43,10 +43,10 @@ vector is the cheap answer.
 
 The vocabulary the problem titles use is all predicates on this vector, and it is worth being
 fluent in it: $\omega(n)$ is its length (the count of *distinct* primes), $\Omega(n)$ the sum of
-its exponents, a [square-free](/topics/domain/square-free-integer/) number has every exponent $1$,
-a [$B$-smooth](/topics/domain/smooth-number/) number has every prime $\le B$, the
-[radical](/topics/domain/radical-of-an-integer/) is the vector with every exponent flattened to
-$1$, and a [highly composite](/topics/domain/highly-composite-number/) number is one whose
+its exponents, a [square-free](/topics/domain/square-free-integer) number has every exponent $1$,
+a [$B$-smooth](/topics/domain/smooth-number) number has every prime $\le B$, the
+[radical](/topics/domain/radical-of-an-integer) is the vector with every exponent flattened to
+$1$, and a [highly composite](/topics/domain/highly-composite-number) number is one whose
 exponents are non-increasing over an initial run of primes. Problem 47 wants $\omega = 4$ four
 times running; 615 wants $\Omega \ge 10^6$; 362, 632 and 668 constrain exponents and smoothness
 directly.
@@ -54,16 +54,16 @@ directly.
 ## Multiplicative functions read straight off the vector
 
 The reason to factor at all is almost never the factors. It is that a
-[multiplicative function](/topics/domain/multiplicative-function/) — one where
+[multiplicative function](/topics/domain/multiplicative-function) — one where
 $f(ab) = f(a)f(b)$ for coprime $a, b$ — is determined entirely by its values on prime powers, so
 once you have the vector the function is a product over $k$ terms rather than a search over $n$:
 
 | Function | From $n = \prod p_i^{e_i}$ | Where it does the work |
 | --- | --- | --- |
-| [divisor count](/topics/domain/divisor-function/) $\tau(n)$ | $\prod (e_i + 1)$ | 12, 108, 920 |
+| [divisor count](/topics/domain/divisor-function) $\tau(n)$ | $\prod (e_i + 1)$ | 12, 108, 920 |
 | divisor sum $\sigma(n)$ | $\prod \frac{p_i^{e_i+1} - 1}{p_i - 1}$ | 650 |
-| [totient](/topics/domain/eulers-totient-function/) $\varphi(n)$ | $n \prod \left(1 - \frac{1}{p_i}\right)$ | 69, 248, 342 |
-| [radical](/topics/domain/radical-of-an-integer/) $\mathrm{rad}(n)$ | $\prod p_i$ | 124 |
+| [totient](/topics/domain/eulers-totient-function) $\varphi(n)$ | $n \prod \left(1 - \frac{1}{p_i}\right)$ | 69, 248, 342 |
+| [radical](/topics/domain/radical-of-an-integer) $\mathrm{rad}(n)$ | $\prod p_i$ | 124 |
 
 Two habits follow from that table. The first is that "count the divisors of $n$" is never a
 divisor-counting loop; it is a factorization and a product. Problem 108 goes one step further and
@@ -73,7 +73,7 @@ exponent, so $\tau(n^2) = \prod (2e_i + 1)$ falls out of $n$'s own vector.
 The second is that multiplicative is *not* completely multiplicative: the identity needs the
 arguments coprime, and getting that coprimality is often the design move. Problem 12 wants
 $\tau$ of the triangular number $n(n+1)/2$; rather than factor a number of size $n^2$, it observes
-that consecutive integers are [coprime](/topics/domain/coprime-integers/), folds the halving into
+that consecutive integers are [coprime](/topics/domain/coprime-integers), folds the halving into
 whichever of $n, n+1$ is even, and multiplies two $\tau$ values computed on numbers half the size.
 Problem 69 leans on the same structure from the other end: $n/\varphi(n) = \prod p_i/(p_i - 1)$
 depends only on the *set* of primes, never the exponents, so raising any prime above the first
@@ -94,7 +94,7 @@ One coordinate of the vector is the
 [$p$-adic valuation](https://en.wikipedia.org/wiki/P-adic_valuation) $v_p(n)$ — the exponent of
 $p$ in $n$. Treating it as a quantity in its own right is the single most productive idea on this
 page, because valuations are computable for numbers that can never be formed.
-[Legendre's formula](/topics/domain/legendres-formula/) is the lever:
+[Legendre's formula](/topics/domain/legendres-formula) is the lever:
 
 $$v_p(N!) = \sum_{i \ge 1} \left\lfloor \frac{N}{p^i} \right\rfloor
           = \frac{N - s_p(N)}{p - 1},$$
@@ -114,7 +114,7 @@ constraint $v_p(m!) \ge e_p$ is independent for each prime power, the answer is 
 prime powers — reducing $10^8$ separate questions to a table indexed by $p^e$.
 
 If a problem's numbers are factorials, binomials, or products of them, do not reach for
-[bignums](/topics/technique/arbitrary-precision-arithmetic/). Reach for valuations.
+[bignums](/topics/technique/arbitrary-precision-arithmetic). Reach for valuations.
 
 ## Constraints on the vector, not on the number
 
@@ -159,7 +159,7 @@ When a problem smells multiplicative, work down this list.
    almost always cheaper than generating integers and decomposing them.
 5. **Only then decide how to factor.** One number or a scattered few: trial division against a
    prime list. Every number below $N$: a smallest-prime-factor or
-   [divisor-sum sieve](/topics/technique/divisor-sum-sieve/), which computes the whole range for
+   [divisor-sum sieve](/topics/technique/divisor-sum-sieve), which computes the whole range for
    about the cost of one pass — problem 124 sieves a hundred thousand radicals this way without
    factoring anything.
 

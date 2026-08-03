@@ -85,7 +85,7 @@ ascending Python loop would get wrong.
 
 ## How to reason about it
 
-**Fixed-width dtypes are the price of the speed** — [watch the integer width](/topics/takeaway/watch-integer-width/). Python's `int` is arbitrary
+**Fixed-width dtypes are the price of the speed** — [watch the integer width](/topics/takeaway/watch-integer-width). Python's `int` is arbitrary
 precision; `np.int64` wraps silently at $2^{63}$ and tells you nothing. Every
 vectorised modular computation therefore needs an overflow argument before it needs a
 correctness argument. [944](/solutions/0944/) does square-and-multiply on arrays with
@@ -111,7 +111,7 @@ sieve, the prefix sums and the sort, then a hand-written Fenwick tree over Pytho
 lists, because a pointer-chasing $O(\log n)$ update has nothing to vectorise.
 
 **It is a constant factor, not a complexity class.** A $50\times$ speedup never
-rescues the wrong exponent; see [algorithm beats language](/topics/takeaway/algorithm-beats-language/).
+rescues the wrong exponent; see [algorithm beats language](/topics/takeaway/algorithm-beats-language).
 Fix the asymptotics first, then vectorise the inner loop that survives. Conversely,
 once the algorithm is right, NumPy is often the cheapest remaining win — it keeps the
 solution in Python, readable and a dozen lines long, at a speed that would otherwise

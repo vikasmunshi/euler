@@ -7,7 +7,7 @@ mathematics will hand you the answer with less work, or none. Reducing
 algebraically before coding is the habit of spending five minutes with pen and
 paper on a problem's structure so the program that follows is smaller, tighter,
 or gone entirely. The payoff runs from the modest (one nested loop removed) to
-the total (an $O(n)$ scan collapsed to a formula), but it is the same move every
+the total (an O(n) scan collapsed to a formula), but it is the same move every
 time: simplify the math first, because the cheapest loop is the one you never
 have to run.
 
@@ -28,8 +28,8 @@ an entire loop.
 *bounds* what is left: $a$ cannot exceed $S/4$ and $b$ cannot exceed $S/2$, or no
 valid larger values fit. Deriving the tightest bounds before the loop is written
 keeps the search inside the region that can actually contain an answer. The
-[cheap-checks-first](/topics/takeaway/cheap-checks-first/) and
-[exploit-symmetry](/topics/takeaway/exploit-symmetry/) takeaways are this same
+[cheap-checks-first](/topics/takeaway/cheap-checks-first) and
+[exploit-symmetry](/topics/takeaway/exploit-symmetry) takeaways are this same
 instinct pointed at the loop body and the coordinate system.
 
 **Exploit structure to skip work.** Sometimes the sequence itself has a pattern
@@ -50,7 +50,7 @@ $T(H)\cdot T(W)$ with $T(n) = \tfrac{n(n+1)}{2}$ — two independent
 a two-dimensional enumeration. [Number Spiral Diagonals](/solutions/0028/) sums
 each ring's four corners in closed form to
 $\tfrac{N(N(4N+3)+8)-9}{6}$, an $O(N^2)$ grid replaced by one arithmetic line.
-This is the endpoint the [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration/)
+This is the endpoint the [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration)
 takeaway is about; reducing before coding is the wider discipline that *reaches*
 it — and that is content to stop one step short when the algebra will not close
 all the way.
@@ -90,7 +90,7 @@ Three cautions keep the habit honest:
   and can form intermediates far larger than the answer — an overflow risk in C,
   and a reason to keep the algebra in exact integers (compute $c = S - a - b$, not
   $\sqrt{a^2+b^2}$) so equality checks stay reliable. See
-  [exact-arithmetic-for-equality](/topics/takeaway/exact-arithmetic-for-equality/).
+  [exact-arithmetic-for-equality](/topics/takeaway/exact-arithmetic-for-equality).
 
 The discipline underneath all of it is order of operations, in the human sense:
 do the mathematics *first*. A loop written before the algebra is a loop you will

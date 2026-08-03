@@ -94,14 +94,14 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   that runs millions of times; a surrounding loop of a few thousand iterations can stay plain
   Python and cost nothing measurable. Chasing the outer loop into array form usually buys
   little and costs a lot of readability. This is
-  [match the abstraction to the hot path](/topics/takeaway/right-tool-per-cost/) applied to
+  [match the abstraction to the hot path](/topics/takeaway/right-tool-per-cost) applied to
   arithmetic.
 - **Watch the dtype.** NumPy integers are fixed-width machine words, not Python's
   [arbitrary-precision integers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic),
   and `int64` overflow wraps **silently** — no exception, just a wrong answer. Before writing a
   product into an array, bound it: keep every intermediate under `2**63`, reduce modulo `m`
   before multiplying when `m*m` fits, and say so in a comment. See
-  [watch integer width](/topics/takeaway/watch-integer-width/). Choosing the *smallest*
+  [watch integer width](/topics/takeaway/watch-integer-width). Choosing the *smallest*
   sufficient dtype is also a speed decision: an `int8` Möbius table
   ([problem 193](/solutions/0193/)) is eight times more cache-friendly than `int64`, and
   bandwidth is what these loops are limited by.
@@ -132,7 +132,7 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   [`expm1`](https://numpy.org/doc/stable/reference/generated/numpy.expm1.html) to avoid
   catastrophic cancellation and widens its search with an epsilon before deciding. When the
   answer depends on exact equality, keep integers — see
-  [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality/).
+  [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
 - **In C, this problem does not exist.** Every one of these solutions has a C counterpart that
   simply writes the nested loops, because a compiled loop already has no interpreter tax and
   the compiler auto-vectorizes what it can. That is the honest framing: vectorization is how
