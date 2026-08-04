@@ -38,9 +38,13 @@
 # Package Array Definitions
 # ============================================================================
 # Base packages - never removed (the uninstall path always filters the base target out)
-declare -a base_packages=("bash" "git" "gh" "build-essential" "openssl" "software-properties-common" "tmux")
+declare -a base_packages=(
+    "bash" "git" "gh" "build-essential" "neovim" "openssl" "shellcheck"
+    "software-properties-common" "tmux"
+)
 # shellcheck disable=SC2034 # used dynamically
-declare -a base_commands=("bash" "git" "gh" "make" "openssl" "tmux")
+# The neovim package's executable is nvim, not neovim — check for the command that exists.
+declare -a base_commands=("bash" "git" "gh" "make" "nvim" "openssl" "shellcheck" "tmux")
 
 # PPAs (deadsnakes/ppa for Python) - never removed
 # PPAs (deadsnakes/ppa for Python) - never removed
@@ -344,7 +348,10 @@ status() {
             # -V before -v: for tmux, -v is not "version" but "verbose logging" — it starts
             # a server and writes tmux-{client,server}-*.log into the current directory.
             # Everything here answers --version or -V; -v stays last for the likes of lua.
-            ("$clicmd" --version 2>/dev/null || "$clicmd" -V 2>/dev/null || "$clicmd" -v 2>/dev/null) | head -n 1
+            # First *non-blank* line, not simply the first: shellcheck --version leads with
+            # an empty one, which would print the name and then nothing at all.
+            ("$clicmd" --version 2>/dev/null || "$clicmd" -V 2>/dev/null || "$clicmd" -v 2>/dev/null) \
+                | grep -m 1 -v '^[[:space:]]*$'
         else
             printf "  ✗ %-12s : not available\n" "$clicmd"
         fi
