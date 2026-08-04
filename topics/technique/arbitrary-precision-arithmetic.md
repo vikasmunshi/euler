@@ -172,6 +172,7 @@ conversion altogether, and is usually faster besides.
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
+- ● [0768](/solutions/0768/) — Chandelier
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ● [0862](/solutions/0862/) — Larger Digit Permutation

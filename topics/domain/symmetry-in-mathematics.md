@@ -15,7 +15,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Symmetry_in_ma
 - ○ [0599](/solutions/0599/) — Distinct Colourings of a Rubik's Cube
 - ○ [0741](/solutions/0741/) — Binary Grid Colouring
 - ○ [0742](/solutions/0742/) — Minimum Area of a Convex Grid Polygon
-- ○ [0768](/solutions/0768/) — Chandelier
 - ○ [0951](/solutions/0951/) — A Game of Chance
 - ○ [0997](/solutions/0997/) — Dice Box
 

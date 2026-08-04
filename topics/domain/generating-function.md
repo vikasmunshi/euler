@@ -166,7 +166,7 @@ ask which coefficient you actually need.
 - ○ [0709](/solutions/0709/) — Even Stevens
 - ○ [0722](/solutions/0722/) — Slowly Converging Series
 - ● [0743](/solutions/0743/) — Window into a Matrix
-- ○ [0768](/solutions/0768/) — Chandelier
+- ● [0768](/solutions/0768/) — Chandelier
 - ○ [0851](/solutions/0851/) — SOP and POS
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
 - ○ [0881](/solutions/0881/) — Divisor Graph Width

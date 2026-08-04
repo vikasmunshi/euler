@@ -31,6 +31,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hash_table>._
 - ● [0212](/solutions/0212/) — Combined Volume of Cuboids
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
+- ● [0768](/solutions/0768/) — Chandelier
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
 
 <!-- /problems -->
