@@ -1,0 +1,167 @@
+{# The git chip's CONTENTS — summary + panel (web-server-guide § 11.9).
+
+   Split from `_git.html` because this is what `GET /git` swaps into the chip. The
+   <details> element itself must survive the swap: it holds the open state, the htmx
+   triggers, and the `.term-offline` class site.js paints on it (see `_git.html`).
+   That is also why every state class the chip wears rides on the <summary> here
+   rather than on the <details> — an inner swap cannot reach the outer element's
+   attributes, so a class left up there would freeze at whatever the page load saw.
+
+   Three states, one file, because the chip is one control:
+   · a clone that answered — branch, divergence, worktree;
+   · `unknown` — the clone is there but git would not answer at all (a locked vault,
+     a wedged index, dubious ownership). Branch and counts are withheld, and the
+     verbs stay: `git-status --details` in the terminal is exactly the diagnosis this
+     chip cannot make for itself;
+   · no clone at all (`git` is None — a tier that cannot read one). `_git.html`
+     renders its own inert span for that and never includes this file, but the
+     route can still be reached, so the guard below is total rather than assuming. #}
+{% set known = git and not git.unknown %}
+<summary class="{% if not known %}is-unknown{% elif git.dirty %}is-dirty{% else %}is-clean{% endif %}"
+         title="{% if not known %}branch state could not be read{% else %}{{ git.branch or 'detached HEAD' }} — {% if git.worktree_unknown %}uncommitted pending vault unlock{% else %}{{ git.uncommitted }} uncommitted{% endif %}, {{ git.ahead }} ahead, {{ git.behind }} behind{% endif %}">
+  {# A branch: one commit line, one fork, three nodes. Not a cloud or an arrow —
+     the chip is about *this clone's* shape, and none of the state below it is
+     about the network. #}
+  <svg class="git-glyph" viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 8v8"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M17 9v1a4 4 0 0 1-4 4H7"/>
+    <circle cx="7" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="7" cy="18.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="17" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+  </svg>
+  <span class="git-branch">{% if known %}{{ git.branch or 'detached' }}{% else %}&#8212;&#8202;&#8212;&#8202;&#8212;{% endif %}</span>
+  {% if known %}
+  {# Both counts always show, zero included: a fixed pair of glyphs is read at a
+     glance, where a digit that vanishes at zero makes the reader wonder whether the
+     branch is in sync or the glyph simply went away. #}
+  <span class="git-counts" aria-label="{{ git.ahead }} ahead, {{ git.behind }} behind">
+    <span class="git-count ahead"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4l6 8h-4v8h-4v-8H6z"/></svg>{{ git.ahead }}</span>
+    <span class="git-count behind"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 20l-6-8h4V4h4v8h4z"/></svg>{{ git.behind }}</span>
+  </span>
+  {# The ring means "uncommitted changes" — so it must not appear on a worktree we
+     could not scan (a locked vault); that would read as a definite dirty state we
+     do not actually know. A hollow dot marks "pending" instead. #}
+  {% if git.worktree_unknown %}<span class="git-pending" aria-label="worktree state pending"></span>
+  {% elif git.dirty %}<span class="git-dirty" aria-label="uncommitted changes"></span>{% endif %}
+  {% endif %}
+</summary>
+<ul class="menu-list menu-right git-panel">
+  {% if not known %}
+  {# Not even the branch read answered, so there is nothing true to say about this
+     clone. Say that, and name where the common cause is fixed — the verbs below
+     still work, and `git-status --details` in the terminal reports git's own error. #}
+  <li class="menu-info">Branch state could not be read</li>
+  <li class="git-locked-hint">
+    The clone did not answer — often a locked vault.
+    <a href="/account" hx-get="/account" hx-target="#content" hx-swap="innerHTML"
+       hx-push-url="true">Check your account&nbsp;&rsaquo;</a>
+  </li>
+  {% else %}
+  <li class="menu-info">
+    <span class="git-track"><b>{{ git.branch or 'detached HEAD' }}</b>{% if git.upstream %} → {{ git.upstream }}{% endif %}</span>
+  </li>
+  {% if git.worktree_unknown %}
+  {# The branch and divergence above are real (ref reads, no filter); only the
+     worktree scan hit the locked vault, so the uncommitted count is unknown. Say
+     exactly that, and name the fix — the auto-unlock (site.js) usually resolves it a
+     beat after this first paint. #}
+  <li class="menu-info">Worktree state pending — unlock the vault to read local changes</li>
+  {% else %}
+  {# The whole state in three counts — the same wording as the summary's tooltip, so
+     the chip and its open panel never disagree. Shown even at all-zero: a status
+     readout that always names its three axes is read at a glance, where a
+     disappearing line makes the reader wonder what it dropped. #}
+  <li class="menu-info git-summary">{{ git.uncommitted }} uncommitted, {{ git.ahead }} ahead, {{ git.behind }} behind</li>
+  {% endif %}
+  {% endif %}
+  <li class="menu-sep" aria-hidden="true"></li>
+  {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the
+     frame on a closed socket), so site.js paints .term-offline on this panel from
+     the same `termConnected` every other [data-term-*] control reads. Without it a
+     click would silently do nothing. The `.term-menu` marker on the <details> in
+     `_git.html` is what selects this panel — every menu whose verbs type commands
+     carries it, and it survives this swap because the element does. #}
+  <li class="term-need">
+    These run in the terminal, and it is disconnected.<br>
+    <button type="button" data-term-toggle>Connect the terminal</button>
+  </li>
+  {# Every verb types a real command into the shell and lets it answer there — the
+     same move the account page's tool rows make, for the same reason: the web shell
+     is the front door, so there is one execution path and one audit trail. So every
+     verb names the command it types. The floors are the shell's: the command lands
+     in a shell that already resolved this subject, and `requires()` there is the
+     boundary whatever this menu shows. #}
+  {% macro verb(label, command, floor) %}
+  {% if subject and subject.has(floor) %}
+  <li class="verb"><button type="button" data-term-cmd="{{ command }}"
+      title="run `{{ command }}` in your terminal">{{ label }}<span class="cmd">{{ command }}</span></button></li>
+  {% else %}
+  {# Shown, not hidden: the ladder is part of what the page teaches, and a verb that
+     vanishes makes two collaborators' screens differ silently. #}
+  <li class="verb is-locked"><button type="button" aria-disabled="true"
+      title="{{ label }} needs the {{ floor }} profile">{{ label }}<span class="cmd">{{ floor }}</span></button></li>
+  {% endif %}
+  {% endmacro %}
+  {# The rows read as the WORK, not as the commands — `git-commit solution docs topics` is
+     a fine thing to run and a poor thing to call a button. The command is still on every
+     row (the macro puts it in `.cmd`), so the menu still teaches what it types; the label
+     just says which of the day's jobs this is. Ordered as the job actually runs: see what
+     changed, take what others landed, save it, hand it over, land someone else's. #}
+  {{ verb('See what changed', 'git-status --details', 'reader') }}
+  {{ verb('Take in merged work', 'git-sync', 'reader') }}
+  {# One commit row, naming the three targets a collaborator authors: the problem the
+     shell is on, the guides, and the articles with their tag legs. No problem argument
+     (the shell supplies the one it is on) and no message (the command asks for one at
+     the prompt), so the row *starts* the commit rather than completing it.
+
+     Naming three targets costs nothing when only one has changed: a clean target
+     contributes no path, and a commit with nothing staged is a no-op that says so. That
+     is what lets a single button stand in for "save what I did", whether the afternoon
+     went into a solution, an article, or both — where two rows previously made the
+     reader decide which half of their own work they were saving. `solutions` and
+     `update` are deliberately absent: staging the whole tree, or regenerated package
+     source, is not a one-click act. #}
+  {{ verb('Save my work', 'git-commit solution docs topics', 'contributor') }}
+  {{ verb('Hand it over for review', 'git-push', 'contributor') }}
+  {# One row, because there is one gate and one queue: `gh-merge merge` offers the open
+     requests as a menu, so the row needs no number and a maintainer sees everything that
+     is waiting — where the docs half of the queue used to need a second button. The label
+     says whose work it is: every row above acts on your own, and this one lands somebody
+     else's, which is the distinction the ladder is drawing when it floors this row alone. #}
+  {{ verb('Land a pull request', 'gh-merge merge', 'maintainer') }}
+  <li class="menu-sep" aria-hidden="true"></li>
+  {# Last, and behind a separator, because it runs the other way. Every verb above moves
+     work forward — see it, take it, save it, hand it over, land it — and this one takes a
+     commit back. Sitting mid-list it was one slip away from the save above it; down here
+     it reads as what it is, an undo, and the separator is the pause before it.
+
+     `reader`, alone among the rows that move a ref: `--soft` keeps the working tree, so
+     the label can promise the changes survive and mean it. That floor is why the row is
+     live for everyone — the rung least able to help itself is the one most likely to need
+     it (solver/core/git.py, above `git_reset`). #}
+  {{ verb('Un-commit, keep my changes', 'git-reset', 'reader') }}
+  {% if known %}
+  <li class="menu-sep" aria-hidden="true"></li>
+  {# The one piece of clone health that silently decides whether solutions/private
+     is readable at all. This reports; the account page owns the full story — the
+     key, whether it is authorised, the terminal actions that advance it — so the
+     chip does not offer a self-service "unlock". `git-filter install` would just
+     error for the common locked case (a reader not yet granted enc-key access, who
+     needs an admin to authorise their key first, not a local command), and the chip
+     cannot cheaply tell that apart from a key that merely has not been wired. So it
+     points at Account, where the state is known and the right action is offered.
+
+     Gated on a clone that answered: an `unknown` state never reached the read that
+     sets `filter_wired`, so reporting "locked" there would be a guess dressed as a
+     fact — and the hint above already points at the same page. #}
+  <li class="menu-info">Private solutions
+    <span class="menu-state">{{ 'decrypted' if git.filter_wired else 'locked' }}<span class="dot {{ 'on' if git.filter_wired else 'off' }}"></span></span></li>
+  {% if not git.filter_wired %}
+  <li class="git-locked-hint">
+    Awaiting key access.
+    <a href="/account" hx-get="/account" hx-target="#content" hx-swap="innerHTML"
+       hx-push-url="true">Set it up on your account&nbsp;&rsaquo;</a>
+  </li>
+  {% endif %}
+  {% endif %}
+</ul>

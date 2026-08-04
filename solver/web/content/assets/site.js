@@ -430,10 +430,10 @@
   // re-reads itself: one `git status`, at the one moment the state changed.
   //
   // The event is dispatched on <body> because the chip listens for it `from:body`
-  // and swaps ITSELF (hx-swap="outerHTML") — a fresh #git replaces the stale one
-  // without touching the pane or the terminal. Firing an event rather than calling
-  // htmx.ajax keeps the fetch declarative, in the markup, next to the element it
-  // replaces.
+  // and swaps its own CONTENTS — fresh state inside the same #git, without touching
+  // the pane or the terminal, and without resetting the menu's open state. Firing an
+  // event rather than calling htmx.ajax keeps the fetch declarative, in the markup,
+  // next to the element it refreshes.
   //
   // It fires for a hand-typed `git-sync` exactly as for the menu's item: the menu
   // types the same command, so there is one path here, not two.

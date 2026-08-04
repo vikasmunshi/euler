@@ -96,7 +96,7 @@ class HeaderChipShapeTests(unittest.TestCase):
         """Every other verb moves work forward — review, sync, commit, push, land — and this
         one takes a commit back. Mid-list it sat one slip below Commit; last, behind a
         separator, it reads as the undo it is."""
-        menu = self._template('_git.html')
+        menu = self._template('_git_menu.html')
         reset = menu.index("'git-reset'")
         for earlier in ("'git-status --details'", "'git-sync'",
                         "'git-commit solution docs topics'", "'git-push'", "'gh-merge merge'"):
@@ -111,7 +111,7 @@ class HeaderChipShapeTests(unittest.TestCase):
         a button. The command is on every row already (the macro renders it into `.cmd`), so
         the label is free to say which of the day's jobs this is — and has to, or the menu
         reads as a transcript of the shell rather than a way into it."""
-        menu = self._template('_git.html')
+        menu = self._template('_git_menu.html')
         labels = [m.group(1) for m in re.finditer(r"\{\{ verb\('([^']+)'", menu)]
         self.assertGreaterEqual(len(labels), 6, 'the git menu lost its rows')
         for label in labels:
@@ -121,9 +121,40 @@ class HeaderChipShapeTests(unittest.TestCase):
         """`git-reset` is `--soft`: it keeps the working tree and makes no commit, so it can
         neither lose work nor reach master. Floored higher it stranded the rung least able to
         help itself — a reader cannot commit their way out of a drifted clone."""
-        menu = self._template('_git.html')
+        menu = self._template('_git_menu.html')
         row = menu[menu.rindex('{{ verb(', 0, menu.index("'git-reset'")):]
         self.assertRegex(row[:120], r"'git-reset',\s*'reader'")
+
+    def test_the_git_chip_refreshes_when_it_is_opened(self) -> None:
+        """Same reasoning as the message chip below, and one reason more: the git-changed
+        nudge rides the terminal's WebSocket, and an external push moves `origin/master`
+        with nothing local to notice at all. Opening the panel is when a person is asking
+        where their clone stands, so that is when it must be re-read."""
+        # From the element, not the file: the docstring above it quotes the trigger list.
+        chip = self._template('_git.html').split('<details id="git"')[1]
+        trigger = re.search(r'hx-trigger="([^"]+)"', chip)
+        assert trigger is not None
+        self.assertIn('toggle[this.open]', trigger.group(1),
+                      'a bare `toggle` fires on close too — htmx calls the filter with the '
+                      'element as `this`, so `this.open` is the open half')
+        self.assertIn('throttle:1s', trigger.group(1))
+        self.assertIn('euler:git-changed from:body', trigger.group(1))   # the shell's nudge
+        self.assertIn('every 600s', trigger.group(1))                    # the slow poll
+
+    def test_the_git_chip_swaps_its_contents_not_itself(self) -> None:
+        """The <details> holds the open state, so a chip that refreshes *on being opened*
+        must survive its own refresh — the lesson the message chip learned first. Both the
+        chip's own fetch and the per-navigation out-of-band swap therefore land inside it,
+        which is also why every state class it wears rides on the <summary>."""
+        shell = self._template('_git.html').split('<details id="git"')[1]
+        shell = shell[:shell.index('>')]
+        self.assertIn('hx-swap="innerHTML"', shell)
+        self.assertIn('hx-swap-oob="innerHTML"', shell)
+        self.assertNotRegex(shell, r'class="[^"]*is-(dirty|clean|unknown)',
+                            'a state class on the <details> freezes: the inner swap '
+                            'cannot reach the outer element')
+        for state in ('is-dirty', 'is-clean', 'is-unknown'):
+            self.assertIn(state, self._template('_git_menu.html'))
 
     def test_the_message_chip_refreshes_when_it_is_opened(self) -> None:
         """`load` and the pushed nudge can both be missed — the nudge rides the terminal's

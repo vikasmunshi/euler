@@ -22,9 +22,10 @@
    lives in `_msg_menu.html`). With `outerHTML` the chip replaced the <details> on every
    fetch, and two things broke: the fresh element's own `hx-trigger="load"` fired again, so
    it re-fetched in a tight loop forever; and each swap reset `open`, so the menu shut a few
-   milliseconds after any click. The git chip never hit this because it has no `load`
-   trigger — it rides the out-of-band swap on each navigation instead. Keeping the element
-   also keeps the `.term-offline` class site.js paints on it.
+   milliseconds after any click. Keeping the element also keeps the `.term-offline` class
+   site.js paints on it. The git chip has since settled on the same shape, for the second
+   of those reasons: it too refreshes on being opened, and a chip that replaced itself
+   would close the menu it had just been asked to answer.
 
    Three triggers, no polling:
    · `load` — once per document, so a full page load is always current;

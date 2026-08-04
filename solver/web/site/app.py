@@ -203,18 +203,23 @@ async def healthz(request: web.Request) -> web.Response:
 
 @requires(VIEW)
 async def git_chip(request: web.Request) -> web.StreamResponse:
-    """`GET /git` — the header's git chip on its own.
+    """`GET /git` — the header git chip's contents on their own.
 
     The refresh half of the chip's contract. Every navigation already re-sends the
-    chip out-of-band with the pane (:mod:`solver.web.site.render`), but a git command
-    runs in the *terminal*, which is not a navigation — so the shell nudges the page
-    over OSC 5379 (`git;<token>`), `site.js` turns that into an
-    `euler:git-changed` event, and the chip's own `hx-get` lands here. One read,
-    at the one moment the state actually changed. Nothing polls.
+    chip out-of-band with the pane (:mod:`solver.web.site.render`), but the three
+    moments that do not ride a navigation land here instead: a git command run in the
+    *terminal* (the shell nudges the page over OSC 5379 `git;<token>`, `site.js` turns
+    that into an `euler:git-changed` event), the user **opening the menu** — the one
+    moment they are asking where their clone stands — and the slow poll that catches
+    an external push.
+
+    The response is the chip's **contents** (`_git_menu.html`), never the whole
+    element: the <details> holds the open state and the triggers, so it has to survive
+    its own refresh (`_git.html` documents the swap contract).
 
     The middleware has already done the read; this only renders it.
     """
-    return render(request, '_git.html')
+    return render(request, '_git_menu.html')
 
 
 @requires(VIEW)

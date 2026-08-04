@@ -150,16 +150,12 @@
        `margin-left: auto` pushes this group right, and the chip belongs on the identity
        side of that gap — it is state about *your clone*, not about the page in the pane. #}
     {% include "_git.html" %}
-    {% if subject %}
-    {# The chip's 10-minute remote refresh, so an external push shows without the user
-       having to reload or run a git command. It is a SEPARATE element, not a trigger on
-       #git: the chip is oob-swapped on every navigation (which would reset an `every`
-       timer on it), but this poller lives in the header htmx never re-renders, so its
-       interval runs uninterrupted. It refreshes #git via /git, where the read fetches
-       origin/master. Signed-in only — /git needs the reader floor. #}
-    <span class="git-poll" hidden aria-hidden="true"
-          hx-get="/git" hx-trigger="every 600s" hx-target="#git" hx-swap="outerHTML"></span>
-    {% endif %}
+    {# No poller element here: the chip's 10-minute remote refresh is a trigger on the
+       chip itself (`_git.html`). It needed to be a separate span only while the chip
+       oob-swapped `outerHTML` on every navigation, which restarted any `every` timer
+       placed on it; the chip now swaps its contents and the element survives, so the
+       timer runs uninterrupted where it belongs — and it no longer fires on a tier that
+       has no clone and no `/git` route to answer it. #}
     {# The user pill is live in both tiers — signed out it is the way in, so it
        reads as *empty* (dashed ring, muted ink), never as disabled. #}
     <details class="menu user-menu">

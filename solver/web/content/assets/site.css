@@ -286,8 +286,11 @@ body.ws-hidden .term-only-visible { display: none; }
   font-size: 0.82rem;
   max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.git-menu.is-clean > summary { color: var(--muted); }
-.git-menu.is-dirty > summary { color: var(--text); }
+/* The state classes sit on the SUMMARY, not on the <details>: the chip refreshes by
+   swapping its own contents (_git.html), which cannot reach the outer element's
+   attributes — a class left up there would freeze at whatever the page load read. */
+.git-menu > summary.is-clean { color: var(--muted); }
+.git-menu > summary.is-dirty { color: var(--text); }
 /* Ahead/behind are the SHAPE of the divergence, so they stay two glyphs with
    tabular digits, never one blended number. Ahead is --git-staged: work that is
    yours and ready to go. Behind is the accent ink: the pull you owe — attention,
@@ -310,12 +313,14 @@ body.ws-hidden .term-only-visible { display: none; }
    it away a beat later. */
 .git-pending { width: 0.5rem; height: 0.5rem; border-radius: 50%;
   border: 1.5px solid var(--muted); flex: none; }
-/* Signed out (no clone), or a read that failed: inert, never absent — the header
-   shows the shape of the place either way, and a chip that says nothing is honest
-   where one that says "clean" would not be. */
+/* Signed out, or a tier with no clone to read: inert, never absent — the header shows
+   the shape of the place either way, and a chip that says nothing is honest where one
+   that says "clean" would not be. */
 .git-inert { display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.3rem 0.5rem; color: var(--muted); }
-.git-menu.is-unknown .git-branch { color: var(--border); }
+/* A clone that IS there but would not answer: a live menu (it still carries the verbs
+   that diagnose it) wearing a branch name that reads as absent rather than as a name. */
+.git-menu > summary.is-unknown .git-branch { color: var(--border); }
 .git-panel { min-width: 20rem; }
 /* The file counts in their own inks. A zero is dropped by the template, not greyed
    here: the line lists what IS, so it stays short. */

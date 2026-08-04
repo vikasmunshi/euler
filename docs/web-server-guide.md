@@ -1198,7 +1198,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/topics/` · `/topics/{name}` | topics index · a topic page (`{name}` may be a nested `folder/page` path) | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
-| GET | `/git` | the header's git chip alone — the refresh the shell asks for (§11.9) | reader |
+| GET | `/git` | the header git chip's contents — the refresh the shell, the menu-open and the poll ask for (§11.9) | reader |
 | GET | `/messages` | the header's message chip alone — count, rows, verbs (§13) | reader |
 | GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save | contributor |
 | GET/POST | `/edit/solutions/{n}/{filename}` | file editor → save | contributor |
@@ -1522,11 +1522,45 @@ throttled on `.git/FETCH_HEAD`'s mtime (which any fetch resets, `git-sync` inclu
 rapid reloads — and a load right after a sync — do not re-hit the remote; a slow or offline
 remote falls back to the local ref within a short timeout rather than hanging the load.
 
-**The 10-minute poll** is a lone `<span class="git-poll" hx-trigger="every 600s">` in the
-header that refreshes `#git` via `/git`, so an external push shows without the user
-reloading or running a git command. It is **separate from the chip** deliberately: `#git` is
-oob-swapped on every navigation, which would reset an `every` timer placed on it, but the
-header htmx never re-renders — so the poller's interval runs uninterrupted.
+**The chip refreshes itself, and swaps its CONTENTS to do it.** `_git.html` is the
+element — the `<details>`, its triggers, and the `.term-offline` class `site.js` paints on
+it; `_git_menu.html` is what `/git` returns and what lands inside it (`hx-swap="innerHTML"`,
+and `hx-swap-oob="innerHTML"` for the per-navigation swap). The element has to survive its
+own refresh, because it holds the open state — this is the shape the message chip settled on
+first (§13), and the git chip joined it when the second trigger below arrived. Consequence
+worth knowing when editing: **every state class the chip wears rides on the `<summary>`**,
+not on the `<details>`, since an inner swap cannot reach the outer element's attributes.
+
+Three triggers, no overlap:
+
+- **`euler:git-changed from:body`** — the shell moved the clone. Git commands run in the
+  *terminal*, which is not a navigation, so `solver/core/osc.py` says so over OSC 5379 and
+  `site.js` turns it into the event (the vault's auto-unlock fires it too, to fill in a
+  worktree the first paint could not scan).
+- **`toggle[this.open] throttle:1s`** — the user opened the menu. The push above can be
+  missed: it rides the terminal's WebSocket, so a disconnected or hidden terminal drops it
+  silently, and an external push moves `origin/master` with nothing local to notice. Opening
+  the menu is the one moment a person is *asking* where their clone stands, and it is
+  exactly when the answer must not be whatever the last navigation happened to read. The
+  filter keeps it to *opening* — a bare `toggle` fires on close too, spending a read on a
+  panel nobody is looking at any more.
+- **`every 600s`** — the slow poll, so an external push shows without the user reloading or
+  running a git command. `/git` reads with `fetch=True`, so this is the one that goes to the
+  remote on its own. It used to be a separate `<span class="git-poll">` in the header,
+  because an oob `outerHTML` swap on every navigation restarted an `every` timer placed on
+  the chip; with the contents swapping instead, the element survives and the timer lives
+  where it belongs — and no longer fires on a tier that has no clone and no `/git` to answer
+  it.
+
+**Two inert states, and they are not the same.** No clone at all (`git is None` — the auth
+tier, or a uid without access to `.git`) renders a plain span: no id, no triggers, nothing
+targets it, and nothing ever will within that document. A clone that is *there* but would
+not answer (`unknown`) renders the **real** chip, wearing an absent branch name and saying
+"branch state could not be read" — it keeps the verbs, because `git-status --details` in the
+terminal is exactly the diagnosis the chip cannot make for itself, and it keeps the triggers,
+because an unlocked vault a moment later resolves it. The "private solutions" row is dropped
+there: that state never reached the read that sets `filter_wired`, and reporting "locked"
+would be a guess dressed as a fact.
 
 **`--no-optional-locks`.** `git status` normally takes `.git/index.lock` to write back its
 refreshed stat cache. The chip is a *reader on a page render*, and the user is typing real
