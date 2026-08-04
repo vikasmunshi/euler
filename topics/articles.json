@@ -2541,7 +2541,7 @@
     {
       "path": "domain/root-of-unity",
       "title": "Root of unity",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["root-of-unity"],
