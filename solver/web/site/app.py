@@ -542,10 +542,13 @@ async def topics_all(request: web.Request) -> web.StreamResponse:
     The maintainer's view of the same grid, where the status *is* the information, so the
     finished ones are marked. Registered ahead of the `{name:.+}` page route, which would
     otherwise swallow it — the cost is that a topic may not be called `all`.
+
+    A queue is ordered by what to take next, so the cards come out by coverage — the reach
+    each topic's tags have over the problem set, widest first — rather than by name.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     return render(request, 'topics.html', {
-        'groups': content.list_topic_groups(repo_root, drafts=True),
+        'groups': content.list_topic_groups(repo_root, drafts=True, by_coverage=True),
         'total': len(content.load_problems(repo_root)),
         'show_status': True,
         'crumbs': [_HOME, ('topics', '/topics/'), ('all', None)],

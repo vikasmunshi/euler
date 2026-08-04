@@ -1004,7 +1004,8 @@ def _count(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
-def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGroup]:
+def list_topic_groups(repo_root: Path, *, drafts: bool = False,
+                      by_coverage: bool = False) -> list[TopicGroup]:
     """The topics index, folded by folder.
 
     The article index is the source when it is there (it alone knows each page's status);
@@ -1015,6 +1016,13 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
     find the handful worth reading. The maintainer view passes `drafts=True` to see the
     writing queue. A statusless fallback (no index on disk) lists everything either way —
     there is nothing to filter on, and showing nothing would be worse.
+
+    `by_coverage` orders the cards within each folder by *reach* — the problems the topic's
+    tags cover, the count the card already shows — widest first, ties broken by path so the
+    order is stable. It is the writing queue's order: alphabetical says nothing about what
+    is worth writing next, and the number the maintainer is choosing on is the one on the
+    card. Entries with no count (a tree read without the index) sort last, keeping their
+    path order. The reader's index stays alphabetical, where a page is looked up by name.
 
     The folder is the section heading, so each card drops the trail and shows only
     its leaf heading. Groups come out in path order, the pages loose at the root of
@@ -1034,8 +1042,10 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
         heading = _filename_heading(leaf)
         title = entry.title or leaf
         groups.setdefault(folder, []).append(entry._replace(heading=heading, title=title))
+    order = (lambda e: (-(e.problems if e.problems is not None else -1), e.name)) if by_coverage \
+        else (lambda e: (0, e.name))
     return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
-                       entries=entries)
+                       entries=sorted(entries, key=order))
             for folder, entries in sorted(groups.items())]
 
 

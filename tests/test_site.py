@@ -506,6 +506,24 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('is-draft', body)                                     # …and marked as one
 
     @unittest_run_loop
+    async def test_topics_all_orders_cards_by_coverage(self) -> None:
+        """The writing queue is ordered by reach — widest coverage first, within each folder —
+        while the reader's index stays alphabetical. Both are read off the rendered grid: the
+        card link order *is* the page's order."""
+        def links(body: str) -> list[str]:
+            return re.findall(r'<a class="card[^"]*"\s+href="/topics/([^"]+)"', body)
+
+        counts = {r['path']: r['problems'] for r in json.loads(
+            (Path(__file__).resolve().parents[1] / 'topics/articles.json').read_text())['articles']}
+        queue = links(await (await self.client.get('/topics/all', headers=_MAINTAINER)).text())
+        index = links(await (await self.client.get('/topics/', headers=_READER)).text())
+        self.assertTrue(queue and index)
+        for folder in {name.rpartition('/')[0] for name in queue}:          # per section, as rendered
+            reach = [counts[name] for name in queue if name.rpartition('/')[0] == folder]
+            self.assertEqual(reach, sorted(reach, reverse=True), folder)
+        self.assertEqual(index, sorted(index))                              # the reader: by name
+
+    @unittest_run_loop
     async def test_topics_all_is_not_swallowed_by_the_page_route(self) -> None:
         """`/topics/{name:.+}` would match 'all'; the specific route is registered first."""
         resp = await self.client.get('/topics/all', headers=_MAINTAINER)
