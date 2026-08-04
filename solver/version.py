@@ -16,5 +16,5 @@ from __future__ import annotations
 
 __all__ = ['__version__', 'version']
 
-__version__ = '3.9.18'
+__version__ = '3.9.19'
 version = __version__
