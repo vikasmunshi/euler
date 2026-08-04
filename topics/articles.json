@@ -5277,7 +5277,7 @@
     {
       "path": "technique/np-where",
       "title": "np.where",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["np-where"],
