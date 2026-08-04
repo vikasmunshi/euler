@@ -4242,7 +4242,7 @@
     {
       "path": "technique/fermats-little-theorem-application",
       "title": "Fermat's little theorem (application)",
-      "status": "draft",
+      "status": "final",
       "solved": 5,
       "problems": 5,
       "tags": ["fermats-little-theorem-application"],
