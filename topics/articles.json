@@ -3639,7 +3639,7 @@
     {
       "path": "technique/brute-force-search",
       "title": "Brute-force search",
-      "status": "draft",
+      "status": "final",
       "solved": 41,
       "problems": 41,
       "tags": ["brute-force-search"],
