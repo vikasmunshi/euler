@@ -10,5 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Meet-in-the-mi
 - ● [0152](/solutions/0152/) — Sums of Square Reciprocals
 - ● [0166](/solutions/0166/) — Criss Cross
 - ● [0461](/solutions/0461/) — Almost Pi
+- ● [0768](/solutions/0768/) — Chandelier
 
 <!-- /problems -->

@@ -19,6 +19,7 @@ _TODO: write this page. Start from <https://en.cppreference.com/w/c/algorithm/qs
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0757](/solutions/0757/) — Stealthy Numbers
+- ● [0768](/solutions/0768/) — Chandelier
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [1000](/solutions/1000/) — Problem $1000$
 

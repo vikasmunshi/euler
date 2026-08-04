@@ -31,6 +31,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bit_manipulati
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0755](/solutions/0755/) — Not Zeckendorf
+- ● [0768](/solutions/0768/) — Chandelier
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0961](/solutions/0961/) — Removing Digits

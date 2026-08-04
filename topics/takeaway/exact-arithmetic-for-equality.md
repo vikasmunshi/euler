@@ -117,6 +117,7 @@ decision.
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
+- ● [0768](/solutions/0768/) — Chandelier
 - ● [0800](/solutions/0800/) — Hybrid Integers
 
 <!-- /problems -->

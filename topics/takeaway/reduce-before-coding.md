@@ -236,6 +236,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0757](/solutions/0757/) — Stealthy Numbers
+- ● [0768](/solutions/0768/) — Chandelier
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0834](/solutions/0834/) — Add and Divide

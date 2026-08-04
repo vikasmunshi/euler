@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cyclotomic_pol
 
 - ● [0208](/solutions/0208/) — Robot Walks
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
+- ● [0768](/solutions/0768/) — Chandelier
 - ○ [0797](/solutions/0797/) — Cyclogenic Polynomials
 - ○ [0880](/solutions/0880/) — Nested Radicals
 - ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
