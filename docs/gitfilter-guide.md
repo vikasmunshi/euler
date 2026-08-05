@@ -240,7 +240,7 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 - **Add a user:** they run `solver user`, which creates their identity and files a key
   request over the message spool. A maintainer works it with `solver "authorize <message-id>"`
   — the key and the requester come from the thread. That records their public key in the
-  tracked roster (`users/users.json`) and delivers **half** the master key, sealed to that
+  roster (`/etc/euler/roster/users.json`) and delivers **half** the master key, sealed to that
   key; the other half is `/etc/euler/share.json`, which their instance on this host already
   reads. They run `msg act <id>`, and their private solutions decrypt in place.
 - **Lay the host's half:** `solver "key-split"` (maintainer), once per host. With no half yet

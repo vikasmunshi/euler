@@ -299,7 +299,7 @@ repo owner. The admin commands never touch these files; they call the service (�
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, name, terms_version, terms_accepted_at, created, disabled}` per email. `name` is the display name, used for git authorship. **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with the tracked `users/users.json` (§6.3): this one holds the login secrets and never leaves the host; that one holds public keys and no address at all. |
+| `users.json` | SRP verifier DB: `{salt, verifier, name, terms_version, terms_accepted_at, created, disabled}` per email. `name` is the display name, used for git authorship. **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with `/etc/euler/roster/users.json` (§6.3): this one holds the login secrets and is euler-auth's alone; that one holds public keys, is world-readable, and carries no address at all. |
 | `pending.json` | in-flight invites and resets, keyed by `hash(link-token)`. |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |
@@ -409,24 +409,41 @@ repo write cannot change policy. There is **no policy file in the repo**: absent
 deployed one the built-in default maps nobody, so the checkout owner floors to `admin`
 by uid and everyone else is `contributor`. The installer seeds the real file.
 
-### 6.2 The tracked roster is not the policy
+### 6.2 The roster is not the policy
 
-`users/users.json` (§6.3) carries a `profile` field, and it is a **mirror**. Every rank
-comparison — in the shell, in every service, on every route — reads the file above and only
-that file. The reason is not tidiness: `!` is contributor-floored and a collaborator's
-per-user service serves that collaborator's own clone, so a tracked profile would be a
-one-line self-promotion for the person whose tree it is read from. The rule the roster is
-built to is therefore *facts that verify themselves, or nothing* — a public key seals or it
-does not, a share verifies or it does not — and **no decisions**. `users list` reports where
-the two disagree; the host is what applies.
+`/etc/euler/roster/users.json` (§6.3) carries a `profile` field, and it is a **mirror**.
+Every rank comparison — in the shell, in every service, on every route — reads the file above
+and only that file. The rule the roster is built to is *facts that verify themselves, or
+nothing* — a public key seals or it does not — and **no decisions**. `users list` reports
+where the two disagree; the host is what applies.
 
-### 6.3 The tracked roster (`users/users.json`)
+The `euler-maint` group that may write the roster is a **write-ACL, not a copy of the
+ladder**: it grants "may record a public key and a date", never a profile capability. A
+member who has since been demoted can therefore mislead a menu, and nothing else.
 
-What the **repository** knows about collaborators, and the only account state that is
-tracked. It exists because the registry it replaces was an admin-plane read behind `sudo`,
-which the shell that most needs it — a maintainer's, over the web — can never obtain:
-`key-rekey` refused to rotate without it, `key-split` had to be handed a public key by hand,
-and `msg send`'s recipient menu shrank to two words.
+### 6.3 The roster (`/etc/euler/roster/users.json`)
+
+Who exists and what public key they hold. It is **read by everyone and written by
+maintainers**, which is exactly the shape its readers need: the registry it replaces was an
+admin-plane read behind `sudo`, which the shell that most needs it — a maintainer's, over the
+web — can never obtain, so `key-rekey` refused to rotate without it, `key-split` had to be
+handed a public key by hand, and `msg send`'s recipient menu shrank to two words.
+
+It spent one revision as a *tracked* file, which fixed the reading and broke the writing:
+`users` is admin-gated and sudo'd, but `user-authorize` and `key-split` are **maintainer**
+commands, so a maintainer's grant wrote the file in their own clone on their own branch, where
+it reached nobody and collided at the next sync. `/etc/euler/roster/` is `root:euler-maint
+2775` — setgid, so a file created there inherits the group — with the file at `0664`. The
+*directory* carries the group because an atomic replace renames a temp file over the target
+and so needs write permission on the directory; a group-writable file in a root-owned
+directory would force truncate-and-rewrite, and a crash mid-write leaves an empty roster,
+which reads as "nobody holds a key".
+
+The floor is `euler-maint` and never `euler-user` or `euler-web` (which hold every
+collaborator) for one specific reason: `public_key` is the only field here that is *used*
+rather than displayed — a grant seals half the master key to it — so whoever can write it can
+redirect a future grant to a key they hold. With host read access to the share that is the
+whole master key, which is why the group must be people who already have it.
 
 ```json
 {
@@ -442,21 +459,21 @@ and `msg send`'s recipient menu shrank to two words.
 
 Four properties, each load-bearing:
 
-- **Keyed by slug, and no e-mail address anywhere in it.** The repository is public, and
-  `system_slug` already keeps addresses out of `/home`, the process table and branch names.
+- **Keyed by slug, and no e-mail address anywhere in it.** `system_slug` already keeps
+  addresses out of `/home`, the process table and branch names.
   The spool routes by box key and a box key *is* the slug, so a recipient can be named
   without publishing who they are.
-- **Immutable dated facts, not mutable states.** `invited` / `provisioned` / `key_issued` /
-  `removed` are what the operator did, and `created` is when the host's record was written —
-  none of them can change once true, which is what makes a copy safe. Registration state and
-  `disabled` stay on the host and are joined in at display time: a mirror of `disabled`
-  reading `active` for a locked-out account is exactly the stale copy that gets trusted.
-- **One writer, and no sweep.** The operator's `users` / `user-authorize` / `key-split` /
-  `key-rekey` paths write it; no service and no per-user shell ever does. Each verb writes
-  both places it needs to — the host's SoR through the sudo'd admin CLI, and this file for
-  what every clone must read without `sudo` — so there is no registration step to remember
-  and no repair sweep to run. `users list` reports drift if they get out of step anyway.
-  Writing never commits on its own; the commands say what to commit.
+- **Acts, not states.** `invited` / `provisioned` / `key_issued` / `removed` are what the
+  operator did, dated when they did it, so nothing else can make them stale. Registration
+  state and `disabled` stay on the host and are joined in at display time: a mirror of
+  `disabled` reading `active` for a locked-out account is exactly the stale copy that gets
+  trusted.
+- **Two floors, one file, no sweep.** `users add` / `change` / `remove` write it as the
+  operator; `user-authorize` / `key-split` write it as any maintainer, recording the key they
+  just sealed to. Each verb writes both places it needs to — the host's SoR through the
+  sudo'd admin CLI, and this file for what every rung must read without `sudo` — so there is
+  no registration step to remember and no repair sweep to run. `users list` reports drift if
+  they get out of step anyway.
 - **Total reader.** Absent, mangled (conflict markers included) or from a future schema all
   read as *empty*, because every caller's fallback is to ask the host, and a roster that
   raised would break commands that used to work without it.
@@ -531,7 +548,7 @@ users remove  alice@example.com               # delete the account/entry, pendin
 
 **Every verb writes both places it needs to.** The host's system of record — profile in
 `authorizations.json`, SRP state in the service's own store — through the sudo'd admin CLI,
-and the tracked roster (§6.3) for what every clone must read without `sudo`. There is
+and the roster (§6.3) for what every rung must read without `sudo`. There is
 deliberately **no key-registration verb**: the public key `key-rekey` re-issues against is
 recorded by the grant that issues one (`user-authorize`), so the two files stay in step by
 construction rather than by a sweep somebody has to remember. `users list` reports it when
@@ -545,6 +562,10 @@ before you confirm.
 > from the registration record and the enc-key file's mtime, and the duplicate `public_key`
 > column stripped from the auth service's own store. One store, one copy. The migration
 > script was deleted with the commit that ran it — it was a migration, not a tool.
+>
+> The roster itself moved out of the repository shortly after, for the write-path reason
+> above; `scripts/setup/auth.sh` (`deploy_roster`) lays down the group, the directory and an
+> empty file, and seeds the group from everyone the policy already ranks maintainer or admin.
 
 **A rotation publishes before it issues, and that order is load-bearing.** `key-rekey`
 re-encrypts the tracked private tree under the new key, commits *only* `solutions/private`
@@ -2197,9 +2218,8 @@ msg send to=everyone subject="…" body="…"      # STAFF: broadcast
 msg dismiss <id>                               # drop a message you are done with
 ```
 
-Recipients are named by **slug**, and the menu offers them from the tracked roster (§6.3) —
-a plain read of the checkout, so a maintainer over the web gets the same list the operator's
-terminal does. An e-mail address still resolves (`box_of` collapses either form to the same
+Recipients are named by **slug**, and the menu offers them from the roster (§6.3) — a plain
+file read, so a maintainer over the web gets the same list the operator's terminal does. An e-mail address still resolves (`box_of` collapses either form to the same
 box key), but nothing has to publish one to address a message.
 
 The subject and body are `name=value` tokens rather than bare positionals because the

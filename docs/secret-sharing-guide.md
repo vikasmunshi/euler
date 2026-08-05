@@ -9,7 +9,7 @@ reach.
 
 Related: [Git Filter Guide](gitfilter-guide.md) — what the master key opens;
 [Vault Guide](vault-guide.md) — where the private key that opens a sent half lives;
-[web-server-guide §6.3](web-server-guide.md) — the tracked roster of public keys.
+[web-server-guide §6.3](web-server-guide.md) — the roster of public keys.
 
 ---
 
@@ -37,7 +37,7 @@ An attacker needs the message, the private key that opens it, **and** the abilit
 host. The collaborator needs exactly the same three, which is why this is not theatre: it is
 the same act, arranged so no one piece is ever enough.
 
-> **The half was tracked once, and that was a mistake.** It sat in `users/users.json`, on the
+> **The half was tracked once, and that was a mistake.** It sat in the repository, on the
 > argument that a single share reveals nothing — which is true (§2) and beside the point. This
 > repository is **public**, so a half anybody can clone is not a factor at all: the sealed
 > message plus the private key was the whole of the secret, exactly as with an issued key. It
@@ -241,9 +241,10 @@ Two properties make this work without privilege:
   changes by keeping it on the host is *who* holds it: not everyone with a clone of a public
   repository, but everyone with an account on the machine.
 
-The public keys a half is sealed to live somewhere else — the tracked roster,
-[`users/users.json`](../users/users.json), which carries **no key material at all**. See
-[web-server-guide §6.3](web-server-guide.md).
+The public keys a half is sealed to live next door, in `/etc/euler/roster/users.json` — the
+roster, world-readable and writable by `euler-maint`, carrying **no key material at all**. It
+is the same floor for the same reason: whoever can write a public key there can redirect the
+next grant to a key they hold. See [web-server-guide §6.3](web-server-guide.md).
 
 ---
 
@@ -436,7 +437,7 @@ nothing, because an off-host machine has no account to record it against.
 | [`solver/crypto/keys.py`](../solver/crypto/keys.py) | the field arithmetic, the sealing, `key-split`, `key-reconstruct`, `user-authorize`, `host-authorize`, `host-unlock` |
 | [`solver/crypto/config.py`](../solver/crypto/config.py) | `share_file` — where the local half lives, and the order it is looked for in |
 | [`solver/crypto/ciphers.py`](../solver/crypto/ciphers.py) | `lock` / `unlock` — the X25519 envelope a sent half and a mailed key both ride in |
-| [`solver/auth/roster.py`](../solver/auth/roster.py) | the tracked roster: public keys and the operator's dated acts, and no key material |
+| [`solver/auth/roster.py`](../solver/auth/roster.py) | the roster: public keys and the operator's dated acts, and no key material |
 | [`solver/web/auth/mail.py`](../solver/web/auth/mail.py) | `send_master_key` — the off-host delivery |
 | [`solver/web/msg/__init__.py`](../solver/web/msg/__init__.py) | `KEY_SHARE_SUBJECT` and `verb_for`, which make `msg act` on such a message *be* the reconstruction |
 | [`solver/web/msg/commands.py`](../solver/web/msg/commands.py) | `_reconstruct` — the receiving half of `msg act` |

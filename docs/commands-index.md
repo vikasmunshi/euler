@@ -1181,8 +1181,8 @@ Rotate the master key and re-issue it to every registered public key.
 **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
 access means rotating the key they hold and re-issuing the new one to everyone else.
 
-The list of who "everyone else" is comes from the **tracked roster** — each holder's
-`public_key` in `users/users.json`, written by the grant that issued to them. It used to be
+The list of who "everyone else" is comes from the **roster** — each holder's `public_key`
+in `/etc/euler/roster/users.json`, written by the grant that issued to them. It used to be
 implicit in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped
 what it found. With one file per machine there is nothing central to read, so the registry
 is explicit — and it holds only *public* keys, which is why losing it costs nothing but a
@@ -1216,7 +1216,7 @@ Send someone half the master key, sealed to their public key.
 Two halves of a 2-of-2 split, and **neither is worth anything alone**. One sits on this
 host (`/etc/euler/share.json`, readable by every uid there and written only by the
 operator); the other is minted per recipient, **sealed to that recipient's X25519 public
-key** — read from the tracked roster — and sent through the message spool, which they take
+key** — read from the roster — and sent through the message spool, which they take
 with `msg act`: that runs `key-reconstruct`, unwraps their half, puts the two together,
 and writes their enc-key file.
 
@@ -1243,7 +1243,7 @@ key-split
 | argument | description |
 |----------|-------------|
 | `identity` | Who to send the other half to. Not asked — and not used — on the run that writes the repository's share. |
-| `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before anyone has been authorised. Defaults to '', which reads it from `users/users.json`. |
+| `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before anyone has been authorised. Defaults to '', which reads it from the roster. |
 
 *Defined in* `solver.crypto.keys.key_split`.
 
@@ -2051,8 +2051,8 @@ Record someone's public key and send them half the master key.
   way. *identity* names who to send it to.
 
 Two things happen, and the first is the durable one. The public key is written to the
-**tracked roster** (`users/users.json`), which is what a later rotation re-issues against
-and what every shell — terminal or web — can read without `sudo`. Then delivery goes
+**roster** (`/etc/euler/roster/users.json`), which is what a later rotation re-issues
+against and what every shell — terminal or web — can read without `sudo`. Then delivery goes
 through `key-split`: half the master key, sealed to that public key, against the half the
 repository already carries. So a grant is never one artefact — the message, the private
 key that opens it and a current clone are all needed, and the recipient's own
@@ -2091,10 +2091,11 @@ under `sudo` (the SoR + admin socket are root-only). There is no reader/maintain
 tier here — a web shell cannot get sudo, so nothing runs over the web.
 
 Every account verb writes **both** places it needs to: the host's system of record
-(profile, SRP state) through the sudo'd admin CLI, and the tracked roster
-(`users/users.json`) for the parts every clone must be able to read without `sudo`. There
-is no separate registration step and no sweep to remember: a public key is recorded by the
-grant that issues one (`user-authorize`), and `list` says so when the two have drifted.
+(profile, SRP state) through the sudo'd admin CLI, and the roster
+(`/etc/euler/roster/users.json`) for the parts every rung must be able to read without
+`sudo`. There is no separate registration step and no sweep to remember: a public key is
+recorded by the grant that issues one (`user-authorize`), and `list` says so when the two
+have drifted.
 
 **usage**
 
