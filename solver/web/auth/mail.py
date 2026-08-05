@@ -79,6 +79,28 @@ class Mailer:
                    f'Remarks: {remarks or "(none)"}\n\n'
                    'The request is queued for review in the solver shell.\n')
 
+    def send_master_key(self, rcpt: str, block: str) -> None:
+        """Email a master key sealed to one public key — the off-host grant (`host-authorize`).
+
+        The one mail body that carries key material, and it may: the payload is wrapped to a
+        public key, so it is inert to the mail provider, the operator's own mailbox, and
+        anyone who later reads either. What makes it usable at the far end is that the block
+        is **delimited and quoted verbatim** — the recipient copies between the markers into
+        `host-unlock`, and no mail client's line wrapping can be mistaken for content.
+
+        Unlike every other mail here this one is submitted from the *operator's terminal*, not
+        the auth service: the egress firewall bars the per-user uids from the relay, and this
+        is an admin act by construction.
+        """
+        self._send(rcpt, 'euler master key (sealed)',
+                   'Below is the euler master key, sealed to the public key you supplied. It is '
+                   'useless to anyone without the matching private key.\n\n'
+                   'On the machine that holds that private key, run:\n\n'
+                   '    solver "host-unlock"\n\n'
+                   'and paste everything between the markers when it asks.\n\n'
+                   f'{block}\n'
+                   'If you did not ask for this, tell the sender — and ignore it.\n')
+
     def send_otp(self, rcpt: str, otp: str) -> None:
         """Email the one-time code proving live mailbox control."""
         self._send(rcpt, 'Your euler verification code',

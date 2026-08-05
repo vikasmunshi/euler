@@ -26,8 +26,8 @@ side and run from the deployed `/opt/euler` venv.
 from __future__ import annotations
 
 __all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KEY_ISSUE_SUBJECT',
-           'KEY_REQUEST_SUBJECT', 'MSG_SOCKET_ENV', 'PR_REVIEW_SUBJECT', 'UNREGISTERED_SUBJECT',
-           'verb_for']
+           'KEY_REQUEST_SUBJECT', 'KEY_SHARE_SUBJECT', 'MSG_SOCKET_ENV', 'PR_REVIEW_SUBJECT',
+           'UNREGISTERED_SUBJECT', 'verb_for']
 
 #: The subject a key-authorization request is filed under — the one message *kind* the
 #: spool carries that another command can work. It lives here, with the socket paths,
@@ -42,6 +42,15 @@ KEY_REQUEST_SUBJECT: str = 'Key authorization request from '
 #: enc-key file: the payload is the whole of a holder's key material, so the one message
 #: kind that can overwrite it is named, not guessed at from the presence of some JSON.
 KEY_ISSUE_SUBJECT: str = 'Master key for '
+
+#: The subject **half** a master key is delivered under — `key-split`'s message. The other
+#: half is the share committed in the repository, so acting on this one is `key-reconstruct`
+#: rather than a plain write. Like an issued key the payload is sealed to the recipient's
+#: public key, and unlike one it is inert even opened: without a current clone it is half a
+#: key. Named here with the other two for the same reason — three parties have to
+#: agree on it (`key-split` files it, :func:`verb_for` reads it, `msg act` re-checks it before
+#: it will put two halves of a key together).
+KEY_SHARE_SUBJECT: str = 'Master key share for '
 
 #: The subject a pull request is announced under — `git-push` files it the moment it opens
 #: one, and :func:`verb_for` reads it to make `msg act` on such a message the merge itself.
@@ -64,7 +73,7 @@ UNREGISTERED_SUBJECT: str = 'Answer not registered for '
 
 
 def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
-    """What a message is asking to have done: `save` | `authorize` | `merge` | `read`.
+    """What a message is asking to have done: `save` | `reconstruct` | `authorize` | `merge` | `read`.
 
     **The one rule, in one place.** `msg act <id>` runs it and the header's message chip
     labels its rows with it (:mod:`solver.web.user.msg_api`), so the two cannot drift — the
@@ -75,6 +84,8 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
     what one is for. The rules, decided against the constants the *filing* commands match on:
 
     - a **key issued to you** is `save`: the thing to do with a key is take it;
+    - **half a key** is `reconstruct`: the same thing to do, one step longer — it is completed
+      with the half your clone already carries before there is a key to take;
     - somebody else's **key request**, seen by staff, is `authorize` — the grant they are
       waiting for. Not your own: what you await on that one is the reply, not a self-grant;
     - a **pull request**, seen by staff, is `merge`. No `is_own` exclusion here, unlike a key
@@ -88,6 +99,10 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
         is_staff: Whether the caller is at :data:`~solver.web.msg.identity.STAFF_FLOOR`.
         is_own: Whether the caller wrote this message.
     """
+    # The share subject first: it is not a prefix of the issue one, but the two read alike,
+    # and the order says which is which without anybody having to check that.
+    if subject.startswith(KEY_SHARE_SUBJECT):
+        return 'reconstruct'
     if subject.startswith(KEY_ISSUE_SUBJECT):
         return 'save'
     if subject.startswith(KEY_REQUEST_SUBJECT) and is_staff and not is_own:

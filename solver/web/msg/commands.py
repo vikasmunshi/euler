@@ -50,7 +50,7 @@ from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.dialogue import Abort, Ask, Choice
 from solver.web.msg.client import call as _call
-from solver.web.msg import KEY_ISSUE_SUBJECT, PR_REVIEW_SUBJECT, verb_for
+from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_SHARE_SUBJECT, PR_REVIEW_SUBJECT, verb_for
 from solver.web.msg.identity import STAFF_FLOOR
 
 
@@ -63,7 +63,7 @@ _ACTIONS: dict[str, str] = {
     'read': 'open one message, and mark it read',
     'send': 'write to staff — or, as staff, to users',
     'dismiss': 'drop a message you are done with',
-    'act': 'do what a message asks: take a key, grant one, merge a pull request',
+    'act': 'do what a message asks: take a key, complete one, grant one, merge a pull request',
 }
 
 #: The verbs that name an existing message.
@@ -113,13 +113,18 @@ def _threads(_: Context, bound: dict[str, Any]) -> list[Choice]:
 
 
 def _recipients(_: Context, bound: dict[str, Any]) -> list[Choice]:
-    """Who a message can go to: staff, everyone, plus the known accounts when they can be read.
+    """Who a message can go to: staff, everyone, plus every collaborator in the roster.
 
     Asked of staff only (:func:`_needs_recipients`), so `staff` leads but is not the whole
-    menu. The roster is an admin-plane read, so a maintainer without sudo (or a web shell,
-    which cannot sudo at all) gets the two words and nothing else — which is why the menu is
-    not strict: identities can always be typed instead, comma-separated. Never raises; an
-    unreadable roster is a shorter menu, not a failed message.
+    menu. The names come from the tracked roster (`users/users.json`), which is a plain read
+    of the checkout — so a maintainer over the web gets the same menu the operator's terminal
+    does, where the old admin-plane read left them the two words and nothing else.
+
+    They are **slugs**, and that is what the spool wants: it routes by box key, and for a web
+    identity the box key *is* the slug (:func:`~solver.web.msg.identity.box_of`). So no e-mail
+    address has to be published anywhere to name a recipient. Still not strict — a slug the
+    roster has not caught up with can be typed — and it never raises: a menu is not a gate,
+    and the service decides what it will actually accept.
     """
     options = [Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
                Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
@@ -280,6 +285,8 @@ def _act(thread_id: str) -> int:
     match _verb_of(data):
         case 'save':
             return _save(thread_id, data)
+        case 'reconstruct':
+            return _reconstruct(thread_id, data)
         case 'authorize':
             from solver.crypto.keys import user_authorize
             return user_authorize(thread_id)
@@ -391,6 +398,38 @@ def _save(thread_id: str, data: dict[str, Any]) -> int:
     # dismiss is not failure to save: the key is written either way.
     if _call('dismiss', thread_id=thread_id) is None:
         console.print(f'[muted]Saved, but could not dismiss [accent]{thread_id}[/accent] — '
+                      '`msg dismiss` it yourself.[/muted]')
+    osc.messages_changed()
+    return 0
+
+
+def _reconstruct(thread_id: str, data: dict[str, Any]) -> int:
+    """Complete the half key delivered in *thread_id* with the repository's half, and store it.
+
+    The receiving half of `key-split`, and the sibling of :func:`_save`: same destination, one
+    step longer. What arrives here is not a key but a share sealed to this holder's public
+    key, worth nothing until it is unwrapped *and* put together with the one committed in the
+    clone — so the work is `key-reconstruct`'s, and this only decides that the message is one
+    to hand it.
+
+    The same two rules as a key: the **subject** must be the share one (checked again here
+    rather than trusted from the dispatch), and the body must carry exactly one share. Every
+    proof that the result is really the master key is `key-reconstruct`'s own, before it
+    writes anything.
+
+    Dismissed once it worked, for the reason a taken key is: the share's whole content is now
+    in the enc-key file, and a spool that keeps used key material keeps it for nobody.
+    """
+    from solver.crypto.keys import key_reconstruct, share_in_message
+    if not str(data.get('subject', '')).startswith(KEY_SHARE_SUBJECT):
+        console.print(f'[error]error:[/error] message [accent]{thread_id}[/accent] does not carry '
+                      'half a master key — reconstructing writes key material and nothing else')
+        return 1
+    share = share_in_message(str(data.get('body', '')))
+    if share is None or key_reconstruct(share) != 0:
+        return 1
+    if _call('dismiss', thread_id=thread_id) is None:
+        console.print(f'[muted]Reconstructed, but could not dismiss [accent]{thread_id}[/accent] — '
                       '`msg dismiss` it yourself.[/muted]')
     osc.messages_changed()
     return 0

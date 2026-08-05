@@ -13,8 +13,9 @@ it must emit **nothing on stdout** at import time; it depends only on the standa
 """
 from __future__ import annotations
 
-__all__ = ['config']
+__all__ = ['SHARE_FILE_ENV', 'config']
 
+import os
 from pathlib import Path
 from typing import TypedDict
 
@@ -33,6 +34,7 @@ class CryptoConfig(TypedDict):
     enc_key_file: Path  # THIS machine's two records: {verify, <my-public-key-hex>: <wrapped master key>}
     enc_key_verify: str  # the reserved entry name: the verify-by-decrypt ciphertext
     private_key_backups: int  # rolling backups kept of the private key file
+    share_file: Path  # this machine's half of the master key (`key-split`) -- operational, never tracked
     # per-user vault (envelope encryption of the private key + env)
     env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
     vault_file: Path  # {salt, iterations, wrapped_vk}: the vault key wrapped under the password key
@@ -49,6 +51,36 @@ class CryptoConfig(TypedDict):
     attr_line: str
     pkt_max: int  # max pkt-line payload (65520 - 4-byte length prefix)
     verify_text: bytes  # fixed known plaintext for the verify-by-decrypt master-key check
+
+
+#: Environment override for the share file (tests, and a machine that keeps it elsewhere).
+SHARE_FILE_ENV: str = 'EULER_SHARE_FILE'
+#: The deployed location: beside `authorizations.json`, root-owned and world-readable ON THE
+#: HOST. Readable is the point -- `key-split` and `key-reconstruct` only ever read it, so a
+#: maintainer's web shell (which can never obtain sudo) keeps working; only the operator writes.
+_SYSTEM_SHARE: Path = Path('/etc/euler/share.json')
+
+
+def _resolve_share_file(secrets_dir: Path) -> Path:
+    """Where this machine's half of the master key lives.
+
+    Three candidates, in order, and the reason for each:
+
+    1. **`$EULER_SHARE_FILE`** -- the tests, and any machine that keeps it elsewhere.
+    2. **`/etc/euler/share.json`**, when that directory exists: a deployed host. It is
+       operational state, not repository content -- committing it would publish the half to
+       everyone with a clone, and this repository is public, which would make "and a current
+       clone" no barrier at all to anybody.
+    3. **`~/.euler/share.json`** otherwise -- a plain checkout with no deployed tier, where
+       the secrets dir is already the machine-local home for key material.
+
+    The *directory* is probed rather than the file, so the first `key-split` on a deployed
+    host writes to the deployed location rather than inventing a second one in `~`.
+    """
+    override: str = os.environ.get(SHARE_FILE_ENV, '').strip()
+    if override:
+        return Path(override)
+    return _SYSTEM_SHARE if _SYSTEM_SHARE.parent.is_dir() else secrets_dir / 'share.json'
 
 
 _ROOT: Path = repo_root()
@@ -87,6 +119,14 @@ config: CryptoConfig = {
     'enc_key_file': _SECRETS_DIR / 'enc-key.json',
     'enc_key_verify': 'verify',
     'private_key_backups': 5,  # rolling backups kept of the private key file
+    # One half of a 2-of-2 split of the master key (`key-split`), plus the `verify` record
+    # saying which key it belongs to. **Operational state, never tracked.** A single share is
+    # a uniformly random point — independent of the secret — so committing it would leak
+    # nothing mathematically, and it was tracked for exactly that reason. It moved here
+    # because the repository is *public*: a half everyone can clone is not a second factor,
+    # so the sealed message plus the recipient's private key was the whole of it. Kept on the
+    # host, the two halves are protected by different things again.
+    'share_file': _resolve_share_file(_SECRETS_DIR),
     # per-user vault: both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
     'env_file': _SECRETS_DIR / 'env',  # same value as solver.config.env_file, kept import-free here

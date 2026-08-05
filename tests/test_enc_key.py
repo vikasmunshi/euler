@@ -26,6 +26,7 @@ real key material is read or written.
 from __future__ import annotations
 
 import json
+import os
 import unittest
 from pathlib import Path
 from secrets import token_bytes
@@ -34,12 +35,14 @@ from tempfile import TemporaryDirectory
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
+from solver.auth import roster
 from solver.config import config as app_config
 from solver.crypto import keys as keys_mod
 from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key_hex,
                                    read_enc_key_file, read_master_key, verify_master_key)
 from solver.crypto.config import config as crypto_config
 from solver.shell import dialogue
+from solver.web.msg import KEY_SHARE_SUBJECT, verb_for
 from tests import silence
 
 silence()   # these drive the console's refusal paths on purpose
@@ -260,22 +263,273 @@ class PublicKeyRegistryTests(unittest.TestCase):
         self.assertEqual(calls, [], 'no sudo should be spawned at all')
 
 
-class KeyReconstructTests(EncKeyTestCase):
-    """Shares are typed by hand, so a wrong reconstruction must not overwrite a good file."""
+class KeySplitTestCase(EncKeyTestCase):
+    """A temp secrets dir as above, plus a temp *roster* and a spool that records."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        # Two real files this must never touch: the tracked roster in the checkout, and the
+        # share, which on a deployed host is root-owned under /etc/euler — writing it there
+        # would put a sudo prompt in the middle of a test run.
+        self._saved_roster = os.environ.get(roster.ROSTER_FILE_ENV)
+        os.environ[roster.ROSTER_FILE_ENV] = str(self.secrets / 'users.json')
+        self._saved_share_file = crypto_config['share_file']
+        crypto_config['share_file'] = self.secrets / 'share.json'
+        self.addCleanup(self._restore_share)
+        self.sent: list[tuple[str, str, str]] = []
+        self._wired: list[str] = []
+        import solver.core.git as git_mod
+        import solver.web.msg.notify as notify_mod
+        for module, name, stub in (
+                (notify_mod, 'notify_user',
+                 lambda identity, subject, body: bool(self.sent.append((identity, subject, body))
+                                                      or True)),
+                (git_mod, 'enc_key_arrived', lambda edits=None: self._wired.append('wired')),
+                (keys_mod, 'sure', lambda _q, *, phrase='': True)):
+            saved = getattr(module, name)
+            setattr(module, name, stub)
+            self.addCleanup(setattr, module, name, saved)
+
+    def _record_key(self, identity: str, public_key: str) -> None:
+        """Put a public key in the roster — what `users set-keys` does on the operator's box."""
+        roster.upsert(identity, public_key=public_key, scope='web')
+
+    def _restore_share(self) -> None:
+        crypto_config['share_file'] = self._saved_share_file
+        if self._saved_roster is None:
+            os.environ.pop(roster.ROSTER_FILE_ENV, None)
+        else:
+            os.environ[roster.ROSTER_FILE_ENV] = self._saved_roster
+
+    def _hold_the_master_key(self) -> None:
+        """Become a holder: the enc-key file this machine can open, cache cleared."""
+        keys_mod.write_enc_key_file(self._issue_to(self.mine_key.public_key()))
+        read_master_key.cache_clear()
+
+    def _lay_the_local_share(self) -> None:
+        """The first `key-split` run: write this machine's half, send nothing."""
+        self.assertEqual(keys_mod.key_split('them@example.com', self.mine), 0)
+        self.assertEqual(self.sent, [], 'the laying run sends nothing')
+
+    def _split_to(self, identity: str, public_key: str = '') -> str:
+        """Run `key-split` for *identity* and return the **wrapped** share it sent."""
+        self.assertEqual(keys_mod.key_split(identity, public_key or self.mine), 0)
+        share = keys_mod.share_in_message(self.sent[-1][2])
+        assert share is not None, 'the message must carry exactly one share'
+        return share
+
+    def _open(self, wrapped: str, private: x25519.X25519PrivateKey | None = None) -> str:
+        """The share inside a wrapped blob, as its recipient reads it."""
+        share = keys_mod._unwrap_share(private or self.mine_key, wrapped)
+        assert share is not None, 'the blob must open with that private key'
+        return share
+
+    def _local_half(self) -> str:
+        share = keys_mod.read_local_share()
+        assert share is not None, 'this machine must hold a half'
+        return share['share']
+
+
+class KeySplitTests(KeySplitTestCase):
+    """Two halves: one committed, one sealed to its recipient. The first run writes the committed one."""
+
+    def test_the_first_run_writes_the_repository_share_and_sends_nothing(self) -> None:
+        """A half nobody can complete is worse than no half: the repository's share has to be
+        committable before anyone is sent the other one."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        self.assertTrue(crypto_config['share_file'].exists())
+
+    def test_the_second_run_sends_a_share_under_the_share_subject(self) -> None:
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com')
+        identity, subject, _ = self.sent[-1]
+        self.assertEqual(identity, 'them@example.com')
+        self.assertTrue(subject.startswith(KEY_SHARE_SUBJECT), subject)
+        self.assertEqual(verb_for(subject, is_staff=False, is_own=False), 'reconstruct')
+        self.assertNotEqual(self._open(wrapped), self._local_half(), 'the two halves must differ')
+
+    def test_the_message_carries_no_share_in_the_clear(self) -> None:
+        """The point of wrapping: a spool reader (or anyone the message is forwarded to) holds
+        a blob, and a blob plus a clone is nothing without the recipient's private key."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com')
+        body = self.sent[-1][2]
+        self.assertNotIn(self._open(wrapped), body, 'the plain share must not appear in the body')
+        self.assertNotIn(self.master.hex(), body)
+        self.assertIsNone(keys_mod._unwrap_share(self.theirs_key, wrapped),
+                          'a different private key must not open it')
+
+    def test_a_recipient_with_no_public_key_is_refused_before_anything_is_minted(self) -> None:
+        """There is nothing to seal a half to, and sending it in the clear is not the fallback
+        — a share plus a clone (which every collaborator has) is the master key."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        self.assertEqual(keys_mod.key_split('them@example.com'), 1)  # not in the roster at all
+        self._record_key('them@example.com', '')                     # …or in it with no key
+        self.assertEqual(keys_mod.key_split('them@example.com'), 1)
+        self.assertEqual(self.sent, [], 'nothing may be sent')
+
+    def test_the_roster_supplies_the_key_when_none_is_passed(self) -> None:
+        """The ordinary path, and the reason the roster is tracked: `users set-keys` recorded
+        the key, so the address is the only thing anyone has to type — from any clone, with no
+        sudo, which is what a maintainer's web shell could never do."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        self._record_key('them@example.com', self.mine)
+        self.assertEqual(keys_mod.key_split('them@example.com'), 0)
+        share = self._open(self._share_sent())                       # sealed to the roster's key
+        self.assertEqual(keys_mod._reconstruct_secret([self._local_half(), share]), self.master)
+
+    def test_a_send_records_the_issue_against_the_recipient(self) -> None:
+        """An act, dated: what the operator did, so a later rotation knows who to re-issue to.
+        Not a claim that they still hold it — that fact lives in their own enc-key file."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        self._split_to('them@example.com')
+        entry = roster.user_entry('them@example.com') or {}
+        self.assertEqual(entry.get('public_key'), self.mine)
+        self.assertTrue(entry.get('key_issued'), 'the issue must be dated')
+
+    def test_the_roster_holds_no_e_mail_address(self) -> None:
+        """Records are keyed by slug — the same decision that keeps addresses out of /home,
+        the process table and branch names, applied to a file in a public repository."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        self._split_to('them@example.com')
+        self.assertNotIn('them@example.com', roster.roster_path().read_text())
+        self.assertIn(roster.slug_of('them@example.com'), roster.read_roster()['users'])
+
+    def test_every_holder_gets_a_different_half_of_the_same_key(self) -> None:
+        """One committed share completes for everybody, and no two of them receive the same
+        thing — otherwise a share taken from one holder would be the one issued to the next."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        first = self._open(self._split_to('first@example.com'))
+        second = self._open(self._split_to('second@example.com', self.mine))
+        self.assertNotEqual(first, second)
+        for share in (first, second):
+            self.assertEqual(keys_mod._reconstruct_secret([self._local_half(), share]), self.master)
+
+    def test_the_repository_share_alone_is_not_the_key(self) -> None:
+        """The property the whole design rests on: the committed half is a random point, and
+        the file carries nothing else that could stand in for the other half."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        stored = crypto_config['share_file'].read_text()
+        self.assertNotIn(self.master.hex(), stored)
+        self.assertEqual(set(keys_mod.read_local_share() or {}), {'share', 'verify', 'since'})
+
+    def test_a_share_from_before_a_rotation_is_redrawn_rather_than_completed(self) -> None:
+        """A half minted against a stale share reconstructs into the retired key, and the
+        holder finds that out at the far end. `key-split` refuses to be that far end."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        stale = self._local_half()
+        keys_mod.write_enc_key_file(enc_key_payload(self.mine_key.public_key(), token_bytes(32)))
+        read_master_key.cache_clear()
+
+        self.assertEqual(keys_mod.key_split('them@example.com', self.mine), 0)
+        self.assertEqual(self.sent, [], 'a stale share is rewritten, not completed')
+        self.assertNotEqual(self._local_half(), stale)
+
+    def _share_sent(self) -> str:
+        """The wrapped share in the most recent message."""
+        share = keys_mod.share_in_message(self.sent[-1][2])
+        assert share is not None
+        return share
+
+
+class KeyReconstructTests(KeySplitTestCase):
+    """The receiving end: unwrap with your own key, then prove the halves before writing."""
+
+    def test_the_two_halves_make_the_key_and_wire_the_filter(self) -> None:
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com')
+        crypto_config['enc_key_file'].unlink()                       # they hold nothing yet
+        read_master_key.cache_clear()
+
+        self.assertEqual(keys_mod.key_reconstruct(wrapped), 0)
+        read_master_key.cache_clear()
+        self.assertEqual(read_master_key(), self.master)
+        self.assertEqual(self._wired, ['wired'], 'gaining access must wire the filter')
+
+    def test_a_share_wrapped_to_somebody_else_is_refused(self) -> None:
+        """The likeliest real mistake, and the one wrapping exists to catch: a maintainer
+        seals a half to the wrong public key."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com', self.theirs)     # sealed to another key
+        crypto_config['enc_key_file'].unlink()
+        read_master_key.cache_clear()
+
+        self.assertEqual(keys_mod.key_reconstruct(wrapped), 1)
+        self.assertFalse(crypto_config['enc_key_file'].exists(), 'nothing may be written')
+
+    def test_a_bare_share_still_works_by_hand(self) -> None:
+        """The out-of-band path: a share read off another screen is not wrapped to anything,
+        and refusing it would leave the manual route with nothing to type."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        bare = self._open(self._split_to('them@example.com'))
+        crypto_config['enc_key_file'].unlink()
+        read_master_key.cache_clear()
+
+        self.assertEqual(keys_mod.key_reconstruct(bare), 0)
+        read_master_key.cache_clear()
+        self.assertEqual(read_master_key(), self.master)
+
+    def test_a_wrong_share_is_caught_by_the_share_files_own_verify(self) -> None:
+        """The machine that needs to reconstruct is the one with no enc-key file to check
+        against — so the committed share carries the proof itself."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrong = keys_mod._counterpart(token_bytes(32), self._local_half())     # another secret
+        crypto_config['enc_key_file'].unlink()
+        read_master_key.cache_clear()
+
+        self.assertEqual(keys_mod.key_reconstruct(wrong), 1)
+        self.assertFalse(crypto_config['enc_key_file'].exists(), 'nothing may be written')
 
     def test_a_reconstruction_that_fails_verify_leaves_the_file_alone(self) -> None:
-        good = self._issue_to(self.mine_key.public_key())
-        keys_mod.write_enc_key_file(good)
-        shares = keys_mod._split_secret(token_bytes(32), 3, 2)           # a DIFFERENT secret
-        answers = iter(shares[:2])
-        saved, keys_mod.console.input = keys_mod.console.input, lambda *a, **k: next(answers)
-        self.addCleanup(setattr, keys_mod.console, 'input', saved)
-        saved_interactive, dialogue.interactive = dialogue.interactive, lambda: True
-        self.addCleanup(setattr, dialogue, 'interactive', saved_interactive)
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        good = read_enc_key_file()
+        wrong = keys_mod._counterpart(token_bytes(32), self._local_half())
 
-        self.assertEqual(keys_mod.key_reconstruct(2), 1)
+        self.assertEqual(keys_mod.key_reconstruct(wrong), 1)
         self.assertEqual(read_enc_key_file(), good, 'the working file must survive')
         self.assertTrue(verify_master_key(read_enc_key_file(), self.master))
+
+    def test_a_clone_with_no_share_says_so_rather_than_reconstructing(self) -> None:
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com')
+        crypto_config['share_file'].unlink()
+        self.assertEqual(keys_mod.key_reconstruct(wrapped), 1)
+
+    def test_a_mistyped_share_is_refused_on_shape(self) -> None:
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com')
+        for bad in (wrapped[:-2], wrapped + 'ab', wrapped[:-1] + 'z'):
+            with self.subTest(bad=bad[-8:]):
+                self.assertEqual(keys_mod.key_reconstruct(bad), 1)
+        with self.assertRaises(dialogue.Abort):                      # nothing given at all
+            keys_mod.key_reconstruct('')
+
+    def test_the_share_survives_the_prose_around_it(self) -> None:
+        """As with an issued key, the body is written for a person; the run of hex is the
+        contract `msg act` reads it under."""
+        self._hold_the_master_key()
+        self._lay_the_local_share()
+        wrapped = self._split_to('them@example.com')
+        self.assertEqual(keys_mod.share_in_message(f'Hi!\n\nshare: {wrapped}\n\nRegards\n'), wrapped)
+        self.assertIsNone(keys_mod.share_in_message('no share here, sorry'))
+        self.assertIsNone(keys_mod.share_in_message(f'{wrapped}\n{wrapped[:-1]}f\n'))
 
 
 if __name__ == '__main__':

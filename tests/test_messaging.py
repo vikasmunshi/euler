@@ -39,7 +39,8 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
-from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, PR_REVIEW_SUBJECT
+from solver.web.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
+                            PR_REVIEW_SUBJECT)
 from solver.web.msg.app import MessageService, build_admin_app, build_app
 from solver.web.msg.config import MsgConfig
 from solver.web.msg.identity import box_of
@@ -801,6 +802,9 @@ class MsgActTests(_MsgCommandCase):
                                        lambda branch: (done.append(f'merge {branch}'), 0)[1]))
         self.enterContext(patch.object(msg_commands, '_save',
                                        lambda thread_id, data: (done.append(f'save {thread_id}'), 0)[1]))
+        self.enterContext(patch.object(
+            msg_commands, '_reconstruct',
+            lambda thread_id, data: (done.append(f'reconstruct {thread_id}'), 0)[1]))
         return done
 
     async def _from_alice(self, subject: str, body: str = 'the body') -> str:
@@ -827,6 +831,16 @@ class MsgActTests(_MsgCommandCase):
         thread_id = await self._from_alice(f'{KEY_ISSUE_SUBJECT}{_ME}', '{"verify": "x"}')
         await asyncio.to_thread(self._run, 'act', thread_id)
         self.assertEqual(done, [f'save {thread_id}'])
+
+    @unittest_run_loop
+    async def test_half_a_key_is_put_together_with_the_repositorys_half(self) -> None:
+        """`key-split`'s message. It reads like an issued key and is not one: what arrives is
+        a share, worth nothing until the clone's half completes it — so the act is
+        `key-reconstruct`, and the two subjects must never be read as one another."""
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{KEY_SHARE_SUBJECT}{_ME}', f'share: {"ab" * 131}')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [f'reconstruct {thread_id}'])
 
     @unittest_run_loop
     async def test_a_key_request_is_granted_by_staff(self) -> None:
