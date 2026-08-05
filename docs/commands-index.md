@@ -509,7 +509,7 @@ it succeeds.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1515)
+[ecb_usd_rate=<float>] (default 1.1554)
 ```
 
 **arguments**
