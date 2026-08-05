@@ -184,18 +184,17 @@ def key_rekey() -> int:
     **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
     access means rotating the key they hold and re-issuing the new one to everyone else.
 
-    The list of who "everyone else" is comes from the **account roster** — each user's
-    `public_key`, registered in `users.json` (`users set-keys`). It used to be implicit
-    in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
-    found. With one file per machine there is nothing central to read, so the registry is
-    explicit — and it holds only *public* keys, which is why losing it costs nothing but a
-    round of re-registration.
+    The list of who "everyone else" is comes from the **tracked roster** — each holder's
+    `public_key` in `users/users.json`, written by the grant that issued to them. It used to be
+    implicit in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped
+    what it found. With one file per machine there is nothing central to read, so the registry
+    is explicit — and it holds only *public* keys, which is why losing it costs nothing but a
+    round of re-authorization.
 
     Each holder is sent their own payload through the message spool, exactly as
     `user-authorize` does; they run `msg act` on it to take it. An account with no registered
     public key cannot be re-issued to and is named, not skipped silently — that person loses
     access at this rotation, which is sometimes the intent and must never be a surprise.
-    `users set-keys` fills the registry from what every holder already has.
 
     Because the git filter is deterministic, every committed blob depends on the master key, so
     a rotation re-encrypts the tracked private files via `git add --renormalize`.
@@ -216,7 +215,7 @@ def key_rekey() -> int:
     console.print(f'[primary]re-issuing to {len(named)} registered public key(s)[/primary]')
     for identity in unregistered:
         console.print(f'  [warning]{identity}[/warning] has no registered public key — they LOSE '
-                      'access at this rotation (`users set-keys` first to keep them)')
+                      'access at this rotation — authorise them first to keep them)')
     if not sure(f'Rotate the master key, re-encrypt all private files, and re-issue to '
                 f'{len(named)} holder(s)? Anyone without a registered public key loses access.',
                 phrase='rekey'):
@@ -1180,8 +1179,8 @@ def _recipient_key(identity: str, public_key: str) -> X25519PublicKey | None:
         if not token:
             console.print(f'[error]error:[/error] [accent]{identity}[/accent] has no public key in '
                           f'[accent]{_share_label()}[/accent], so there is nothing to seal their '
-                          'half to. They mint one with `user`; then `users set-keys`, or pass the '
-                          'key here.')
+                          'half to. They mint one with `user` and are authorised once; or pass '
+                          'the key here.')
             return None
     return _public_key_from(token)
 
@@ -1252,7 +1251,7 @@ def key_split(identity: Annotated[str, Ask('Who should receive the other half?',
         identity: [asked] Who to send the other half to. Not asked — and not used — on the
             run that writes the repository's share.
         public_key: The recipient's 64-hex public key, for somebody the roster has no key for
-            yet — a first grant, before `users set-keys` has swept. Defaults to '', which
+            yet — a first grant, before anyone has been authorised. Defaults to '', which
             reads it from `users/users.json`.
     """
     from solver.web.msg.notify import notify_user

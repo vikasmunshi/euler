@@ -246,21 +246,23 @@ class RegenTests(EncKeyTestCase):
 
 
 class PublicKeyRegistryTests(unittest.TestCase):
-    """Registering a key for `key-rekey` is best-effort, and must fail quietly."""
+    """The registry a rotation reads is the tracked roster, and nothing else."""
 
-    def test_a_shell_that_cannot_elevate_does_not_try(self) -> None:
-        """A web shell's unit sets NoNewPrivileges, so sudo cannot work there — and does not
-        merely fail, it prints two lines about container configuration at somebody who asked
-        to authorise a key. Asking the kernel first turns that into a path not taken."""
+    def test_reading_the_registry_spawns_no_sudo(self) -> None:
+        """It used to be an admin-plane read, which meant a web shell — the one that most
+        needs it — could not do it at all, and a grant made from a browser left the registry
+        empty until somebody remembered to sweep. A tracked file needs no privilege, and the
+        proof is that no sudo is spawned even when one could be."""
         from solver.web.auth import commands as users_mod
         calls: list[tuple[str, ...]] = []
-        for name, stub in (('_can_elevate', lambda: False),
-                           ('_sudo_admin', lambda *a: calls.append(a) or 0)):
+        for name, stub in (('_sudo_admin', lambda *a: calls.append(a) or 0),
+                           ('_sudo_admin_capture', lambda *a, **k: calls.append(a) or (0, ''))):
             saved = getattr(users_mod, name)
             setattr(users_mod, name, stub)
             self.addCleanup(setattr, users_mod, name, saved)
-        self.assertFalse(users_mod.register_public_key('them@example.com', 'ab' * 32))
-        self.assertEqual(calls, [], 'no sudo should be spawned at all')
+        users_mod.registered_public_keys()
+        users_mod.account_identities()
+        self.assertEqual(calls, [], 'the roster is a file read, not an admin-plane call')
 
 
 class KeySplitTestCase(EncKeyTestCase):
@@ -291,7 +293,7 @@ class KeySplitTestCase(EncKeyTestCase):
             self.addCleanup(setattr, module, name, saved)
 
     def _record_key(self, identity: str, public_key: str) -> None:
-        """Put a public key in the roster — what `users set-keys` does on the operator's box."""
+        """Put a public key in the roster — what a grant records as it issues."""
         roster.upsert(identity, public_key=public_key, scope='web')
 
     def _restore_share(self) -> None:
@@ -373,7 +375,7 @@ class KeySplitTests(KeySplitTestCase):
         self.assertEqual(self.sent, [], 'nothing may be sent')
 
     def test_the_roster_supplies_the_key_when_none_is_passed(self) -> None:
-        """The ordinary path, and the reason the roster is tracked: `users set-keys` recorded
+        """The ordinary path, and the reason the roster is tracked: an earlier grant recorded
         the key, so the address is the only thing anyone has to type — from any clone, with no
         sudo, which is what a maintainer's web shell could never do."""
         self._hold_the_master_key()

@@ -34,12 +34,19 @@ not to publish who a collaborator is. The spool routes by that slug too (`box_of
 non-address unchanged), so a slug-keyed roster is enough to address a message, and the
 slug → identity mapping stays on the host where it belongs.
 
-**Lifecycle: acts, not states.** The stamps here (`invited`, `provisioned`, `key_issued`,
-`removed`) record what the **operator did**, dated at the moment it did it. They cannot drift,
-because nothing but the operator writes them. The states a *user* drives (registration) and
-the states enforcement depends on (`disabled`) deliberately stay on the host and are joined in
-at display time: a mirror of `disabled` reading `active` for a locked-out account is the kind
-of stale copy that gets trusted.
+**Lifecycle: immutable dated facts, not mutable states.** The stamps here (`invited`,
+`provisioned`, `key_issued`, `removed`) record what the **operator did**, dated at the moment
+it did it, and `created` records when the host's own account record was written. None of them
+can drift, because none of them can change once true — which is the property that makes a copy
+safe. The states a *user* drives (registration) and the states enforcement depends on
+(`disabled`) deliberately stay on the host and are joined in at display time: a mirror of
+`disabled` reading `active` for a locked-out account is the kind of stale copy that gets
+trusted.
+
+`created` arrives only by way of `scripts/ops/migrate-roster.py`, for the accounts that
+predate this file. The acts *it* cannot know — when they were invited, when they were issued a
+key — are left empty rather than guessed at: a plausible wrong date is worse than an absent
+one, and everything from here on records its own act as it happens.
 
 **Single writer.** The operator's `users` / `user-authorize` / `key-split` / `key-rekey` paths
 write this file and commit it; **no service and no per-user shell ever writes it**. That is
@@ -91,6 +98,7 @@ class UserEntry(TypedDict, total=False):
     provisioned: str
     key_issued: str                      # when the master key was last issued to `public_key`
     removed: str
+    created: str                         # when the host's own record was written (see below)
 
 
 class Roster(TypedDict, total=False):

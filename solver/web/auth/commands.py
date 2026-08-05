@@ -20,13 +20,10 @@ The verbs:
 - **mutations** (`add` / `change` / `enable` / `disable` / `remove`) — the direct
   account verbs, for identities that did not come through the request queue (a bare
   os-login, or an ad-hoc invite).
-- **`users set-keys`** — register every collaborator's X25519 **public** key, read from the
-  enc-key file each of them already holds, into the host store **and** the tracked roster
-  (`users/users.json`, :mod:`solver.auth.roster`). That file is the registry `key-rekey` and
-  `key-split` read: with one enc-key file per machine there is no central list of who holds
-  the master key, so a rotation needs to be told who to re-issue to — and it must be readable
-  without `sudo`, or the shell that most needs it (a maintainer's, over the web) cannot ask.
-  Public material only — losing it costs a sweep, never access. Idempotent, takes no identity.
+There is deliberately **no key-registration verb**. The public key a rotation re-issues
+against is written by the act that issues one — `user-authorize` / `key-split` record it in
+the roster as they send — so the two files stay in step by construction rather than by a
+sweep run afterwards. `users list` reports it when they have drifted anyway.
 - **`users redeploy`** — the host plane rather than an account verb: it drives the
   provisioning kit, never the admin CLI, and touches no account — so, like `list`, it
   takes no identity.
@@ -242,21 +239,11 @@ def account_identities() -> list[str]:
     non-address unchanged), so these names are usable as recipients exactly as they are, and
     no e-mail address has to be published to build the menu.
 
-    Falls back to the host roster when the file has nothing to say — a checkout from before
-    the roster existed, or one that has not synced — because a shorter menu is a worse answer
-    than a slower one only when it is empty.
+    No fallback to the host: every account verb writes this file, so an empty roster means
+    nobody is recorded rather than "ask somewhere else", and a menu is not the place to find
+    that out slowly. `users list` is where the drift shows.
     """
-    if slugs := roster.slugs(scope='web'):
-        return slugs
-    rc, payload = _sudo_admin_capture('roster-json', prompt=False)
-    if rc != 0:
-        return []
-    try:
-        rows = json.loads(payload or '[]')
-    except json.JSONDecodeError:
-        return []
-    return sorted(str(row['user']) for row in rows
-                  if isinstance(row, dict) and row.get('user') and row.get('scope') == 'web')
+    return roster.slugs(scope='web')
 
 
 def registered_public_keys() -> dict[str, str] | None:
@@ -275,32 +262,6 @@ def registered_public_keys() -> dict[str, str] | None:
     if not roster.roster_path().exists():
         return None
     return roster.public_keys()
-
-
-def _sweep_keys_into_roster() -> int:
-    """Copy every public key the host now holds into the tracked roster.
-
-    The second half of `set-keys`. The admin sweep reads each collaborator's own enc-key file
-    (the only place their public key can be read from) and writes the host store; this brings
-    the result into the file every clone can read, which is what `key-rekey` and `key-split`
-    actually consult. Public material throughout — losing it costs a sweep, never access.
-    """
-    rows = _roster()
-    if rows is None:
-        console.print('[error]error:[/error] keys registered on the host, but the roster could '
-                      'not be read back — run [accent]users set-keys[/accent] again')
-        return 1
-    written = 0
-    for row in rows:
-        identity, public_key = str(row.get('user', '')), str(row.get('public_key', ''))
-        if row.get('scope') != 'web' or not public_key:
-            continue
-        roster.upsert(identity, public_key=public_key, scope='web')
-        written += 1
-    console.print(f'[success]{written} public key(s) recorded in '
-                  f'[accent]{roster.roster_path().name}[/accent].[/success] '
-                  '[muted]Commit and push it.[/muted]')
-    return 0
 
 
 def _report_drift() -> None:
@@ -328,7 +289,7 @@ def _report_drift() -> None:
                for slug in roster.slugs()}
     for slug in sorted(set(host) - set(tracked)):
         console.print(f'  [warning]drift[/warning] {slug} is on the host but not in '
-                      f'{roster.roster_path().name} — `users set-keys` records them')
+                      f'{roster.roster_path().name} — a grant (`user-authorize`) records them')
     for slug in sorted(set(tracked) - set(host)):
         console.print(f'  [warning]drift[/warning] {slug} is in {roster.roster_path().name} but '
                       'not on the host — a message to them would be refused')
@@ -338,37 +299,9 @@ def _report_drift() -> None:
                           f'host says [accent]{host[slug]}[/accent] — the host is what applies')
 
 
-def _can_elevate() -> bool:
-    """Whether `sudo` could possibly work in this process.
-
-    A web shell's service unit sets `NoNewPrivileges=true`, which makes elevation
-    impossible for it and every child — so sudo does not merely fail there, it fails
-    *loudly*, printing two lines about container configuration that mean nothing to the
-    person reading them. Asking the kernel first turns a confusing diagnostic into a path
-    not taken.
-    """
-    try:
-        return 'NoNewPrivs:\t1' not in Path('/proc/self/status').read_text()
-    except OSError:
-        return True                     # no procfs: let sudo speak for itself
-
-
-def register_public_key(identity: str, public_key: str) -> bool:
-    """Record *public_key* against *identity*; False when the admin plane is out of reach.
-
-    Out of reach is the normal case in a **web shell** — `user-authorize` runs at maintainer,
-    which cannot sudo — so this reports rather than raises, and the caller prints the command
-    for the operator. The grant itself has already been delivered by then; registration only
-    decides whether the next rotation can find them.
-    """
-    if not _can_elevate():
-        return False
-    return _sudo_admin('set-key', identity, public_key) == 0
-
-
 @register(requires='admin')
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
-                          'remove', 'set-keys', 'redeploy'] = 'list',
+                          'remove', 'redeploy'] = 'list',
           identity: str = '',
           profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
@@ -377,12 +310,11 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
     under `sudo` (the SoR + admin socket are root-only). There is no reader/maintainer
     tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-    `set-keys` sweeps every collaborator and registers the X25519 **public** key each of
-    them already holds — the registry `key-rekey` re-issues a rotated master key to. It
-    takes no identity and reads no secret: a holder's enc-key file names their public key,
-    and that is all it copies. `user-authorize` registers as it issues when it can reach the
-    admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
-    run it whenever `users list` shows a blank column.
+    Every account verb writes **both** places it needs to: the host's system of record
+    (profile, SRP state) through the sudo'd admin CLI, and the tracked roster
+    (`users/users.json`) for the parts every clone must be able to read without `sudo`. There
+    is no separate registration step and no sweep to remember: a public key is recorded by the
+    grant that issues one (`user-authorize`), and `list` says so when the two have drifted.
 
     Args:
         action: What to do — `list` the roster, pending invites and the invite-request
@@ -390,12 +322,11 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
             dismiss each); `add` a map entry (`@email` also provisions the account and mints
             an invite, a bare os-login is local-only); `change` reassigns a profile;
             `enable` / `disable` the web SRP state; `remove` drops the account or entry;
-            `set-keys` registers every collaborator's public key for rekey; `redeploy`
-            re-asserts the per-user host layer and re-lays every collaborator's git hooks,
-            dropping live shells. Defaults to `list`.
+            `redeploy` re-asserts the per-user host layer and re-lays every collaborator's
+            git hooks, dropping live shells. Defaults to `list`.
         identity: Whose account to act on: a web email (with `@`) or a local OS login.
             Required for the account verbs, unused by `list` / `process-requests` /
-            `set-keys` / `redeploy`.
+            `redeploy`.
         profile: The profile to assign, for `add` / `change`. `admin` is valid only for a
             local os-login, never a web account.
     """
@@ -406,13 +337,6 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
 
     if action == 'process-requests':
         return _process_requests()                     # interactive: accept / ignore / dismiss
-
-    if action == 'set-keys':
-        # A sweep, not an account verb: it takes no identity and reads each collaborator's
-        # own enc-key file for the public key they already hold.
-        if (rc := _sudo_admin('set-keys')) != 0:
-            return rc
-        return _sweep_keys_into_roster()
 
     if action == 'redeploy':
         # The host plane, not an account verb — so it takes no identity and writes no SoR.
