@@ -28,8 +28,9 @@ because each user pushes as themselves.
 - [10 · Git](#10--git)
 - [11 · The site](#11--the-site)
 - [12 · The web shell](#12--the-web-shell)
-- [13 · Security posture](#13--security-posture)
-- [14 · Operating it](#14--operating-it)
+- [13 · Messaging](#13--messaging)
+- [14 · Security posture](#14--security-posture)
+- [15 · Operating it](#15--operating-it)
 
 ## 1 · Shape
 
@@ -626,10 +627,10 @@ Every command's declared floor is generated from the live registry into
 
 | Floor | Commands |
 |---|---|
-| `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `msg` (own threads + send to staff), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
+| `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `msg` (own threads + send to staff), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), `msg send` to anyone but staff, `user-authorize` (grants enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, `update-usd-rate`, web file-delete |
-| `admin` | `users` mutations, `key-rekey`, `key-split`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
+| `maintainer` | `summary` (rewrites the shared progress state), `gh-merge` (merges a solutions-only pull request), `msg send` to anyone but staff, `user-authorize` and `key-split` (grant enc-key access — the staff floor, so whoever receives a key request can act on it), `git-publish`, `update-usd-rate`, web file-delete |
+| `admin` | `users` (the whole command, sudo'd), `key-rekey`, `host-authorize` / `host-unlock`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:
 in the per-user model a shell escape grants nothing that `evaluate`'s arbitrary Python
@@ -945,7 +946,7 @@ failure mode collapses to one answer here (no keypair, a locked vault, no entry 
 
 Git is **native** in the user's own clone — there is no broker, and nothing proxies it.
 `git-status`/`git-sync`/`git-reset` sit at `reader`; `git-commit`/`git-push`/
-`git-hooks`/`git-identity` at `contributor`; `gh-pr` at `maintainer`; `git-publish` at
+`git-hooks`/`git-identity` at `contributor`; `gh-merge` at `maintainer`; `git-publish` at
 `admin`.
 
 `git-reset` is the one ref-moving verb at `reader`, and it earns it by what `--soft` does
@@ -973,14 +974,14 @@ one-tree rule and no per-body-of-work gate.
 - **`git-push`** pushes the current branch as the user (`-u origin <branch>`);
   `--force-with-lease` only after a rebase, and **never on master**. Pushing master needs
   `admin`. It then **opens the branch's pull request** onto master (`gh pr create`, the
-  same shape as `scripts/git/publish.sh`): landing on master needs `gh-pr merge`, so the
+  same shape as `scripts/git/publish.sh`): landing on master needs `gh-merge merge`, so the
   PR is how a collaborator actually asks for their work to land, and a branch sitting on
   origin that nobody has been asked to review is not delivered work. Idempotent — a
   branch already under review has its URL reported rather than a second PR opened, so
   re-pushing as the branch grows keeps working and the open PR picks up the new commits.
   Skipped on master, on a branch level with origin/master (nothing to review), and with
   `--no-pr`.
-- **`gh-pr`** is the one gate to master: `list` shows what is waiting, `merge <number>`
+- **`gh-merge`** is the one gate to master: `list` shows what is waiting, `merge <number>`
   squash-merges it. **A pull request must sit wholly inside `solutions/` or wholly inside
   `topics/`** — anything outside is refused, and a branch spanning both is asked to become
   two pull requests (one review is of one kind of work),
@@ -2422,7 +2423,7 @@ decision recorded here.
   `solutions/private/**` rests as ciphertext until the deliberate `user-authorize`;
   `gitfilter install` verifies key access **before** wiring anything.
 - **Master-key gate to master**: `git-push` on `master` needs `admin` and force-pushing it
-  is refused unconditionally; a collaborator's work lands only via `gh-pr merge`, which a
+  is refused unconditionally; a collaborator's work lands only via `gh-merge merge`, which a
   maintainer may run but only for a pull request confined to `solutions/` — never one
   touching `keys/`, the scripts or the framework. `git-publish` sits at `maintainer` so a
   maintainer can publish an enc-key grant they just made, and that does **not** widen the
