@@ -949,9 +949,10 @@ def install_content(app: web.Application, config: SiteConfig, authz: Authorizati
     # The /docs/file/ view may serve only these content trees — every one a
     # reader-floor read. These used to come from the policy's objects→paths map;
     # with the plain-profile re-simplification they are the service's own roots
-    # (structure, not policy).
-    app[READABLE_KEY] = ['docs/', 'topics/', 'solver/templates/', 'solutions/',
-                         'README.md', 'LICENSE', 'solver/web/content/vendor/README.md']
+    # (structure, not policy). The list lives in `content` because the link
+    # rewriter has to make the same call: a link pointing at a path this route
+    # refuses is a 404 that only shows up when somebody clicks it.
+    app[READABLE_KEY] = list(content.VIEWABLE_ROOTS)
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                          autoescape=jinja2.select_autoescape(['html', 'xml']))
     add_content_routes(app)

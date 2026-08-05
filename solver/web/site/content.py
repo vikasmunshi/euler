@@ -600,9 +600,13 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
 
     - a relative `foo.md` (or `docs/foo.md`) link → the *route_base* route;
     - a repo-relative `../<path>` link (docs/topics sit one level under the
-      repo root, so `../` reaches it) → the `/docs/file/<path>` view route,
-      so a link like `../solver/crypto/gitfilter.py` — which resolves natively
-      on GitHub — also resolves in the app viewer;
+      repo root, so `../` reaches it) → the `/docs/file/<path>` view route when
+      that route can serve it (:data:`VIEWABLE_ROOTS`), and **GitHub otherwise**.
+      This used to be unconditional, on the assumption that a link resolving
+      natively on GitHub also resolved in the viewer — but `/docs/file/` serves
+      only the declared trees and deliberately not the wider `solver/` source, so
+      every `../solver/…` link in a guide rendered as a live link to a 404. The
+      repository is public, so the honest destination for those is GitHub;
     - with *repo_base* set (the README, which sits **at** the repo root and so
       links its neighbours with no `../` to give them away): every remaining
       relative link and image → the `/docs/file/` viewer when it names a
@@ -621,7 +625,9 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
     rendered: str = _MD.renderer.render(tokens, _MD.options, {})
     rendered = re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"',
                       rf'href="{route_base}\1\2"', rendered)
-    rendered = re.sub(r'href="\.\./([^"#]+)"', r'href="/docs/file/\1"', rendered)
+    rendered = re.sub(r'href="\.\./([^"#]+)"',
+                      lambda m: f'href="{_repo_link(m.group(1), repo_base or README_REPO_BASE)}"',
+                      rendered)
     if repo_base:
         rendered = re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
                           lambda m: f'{m.group(1)}{_repo_link(m.group(2), repo_base)}"',
@@ -681,15 +687,14 @@ def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None)
 
 
 def _repo_link(path: str, repo_base: str) -> str:
-    """One README link: the file viewer for a readable tree, else *repo_base* (GitHub).
+    """One repo-relative link: the file viewer when it can serve the path, else GitHub.
 
     The bare `docs/` link is the exception — the guides have an index route of
     their own, and the file viewer serves files, not directories.
     """
     if path.rstrip('/') == 'docs':
         return '/docs/'
-    root = path.split('/', 1)[0]
-    return f'/docs/file/{path}' if root in _README_VIEWABLE else f'{repo_base}{path}'
+    return f'/docs/file/{path}' if _viewable(path) else f'{repo_base}{path}'
 
 
 def _page_title(text: str, fallback: str) -> str:
@@ -739,11 +744,27 @@ def _read_page(tree: Path, name: str) -> str | None:
 #: says what all the others are *for*, so it belongs in the index the guides sit in
 #: (it lives at the repo root, not under `docs/`, hence the special case).
 _README_MD = 'README.md'
-#: Repo trees the README's relative links may resolve to in the file viewer: the
-#: declared-readable ones. Anything else leaves for GitHub (`_repo_link`).
-_README_VIEWABLE = frozenset({'docs', 'about', 'solutions'})
-#: Where a README link the viewer cannot serve goes instead — the source of truth.
+#: The repo-relative prefixes `/docs/file/` may serve — **the** list, read by the service
+#: (`solver.web.site.app.build_app`) to scope the route and by :func:`_viewable` to decide
+#: where a link should point. One list, because the two answers must agree: a link rewritten
+#: to a route that then refuses it is a 404 nobody sees until they click it, which is exactly
+#: what happened to `../solver/…` links for as long as the rewrite was unconditional.
+#:
+#: `LICENSE` is deliberately absent though the route used to allow it: it has no suffix, so
+#: :data:`TEXT_SUFFIXES` misses it and the viewer would hand the browser a download rather
+#: than a page. The README always linked it to GitHub for that reason, and now the route
+#: agrees rather than offering a capability nobody could use.
+VIEWABLE_ROOTS: tuple[str, ...] = ('docs/', 'topics/', 'solver/templates/', 'solutions/',
+                                   'README.md', 'solver/web/content/vendor/README.md')
+#: Where a link the viewer cannot serve goes instead — the source of truth. The repository is
+#: public, so every path that is not viewable here is readable there.
 README_REPO_BASE = 'https://github.com/vikasmunshi/euler/blob/master/'
+
+
+def _viewable(path: str) -> bool:
+    """Whether `/docs/file/<path>` can actually serve this — i.e. whether to link it there."""
+    return any(path == root or path.startswith(root) for root in VIEWABLE_ROOTS)
+
 
 #: The packaged start-page **summary** — a tracked, generated file (the
 #: `update-docs` command rebuilds it from the README's HOME slice), shipped inside

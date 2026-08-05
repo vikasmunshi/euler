@@ -428,14 +428,34 @@ class ContentServiceTests(AioHTTPTestCase):
         resp = await self.client.get('/docs/authorizations', headers=_READER)
         page = await resp.text()
         self.assertIn('href="/docs/web-server-guide"', page)
-        # gitfilter-guide.md links ../solver/crypto/gitfilter.py — the repo-relative
-        # rewrite, which resolves natively on GitHub and via /docs/file/ in the app.
+        # gitfilter-guide.md links ../solver/crypto/gitfilter.py. `/docs/file/` deliberately
+        # does not serve the wider solver/ source, so that link goes to GitHub — the repo is
+        # public, and a live link to a 404 is worse than leaving the app.
         resp = await self.client.get('/docs/gitfilter-guide', headers=_READER)
         page = await resp.text()
-        self.assertIn('href="/docs/file/solver/crypto/gitfilter.py"', page)
+        self.assertIn(f'href="{content.README_REPO_BASE}solver/crypto/gitfilter.py"', page)
+        self.assertNotIn('href="/docs/file/solver/crypto/', page)
         self.assertNotIn('href="../solver', page)            # no dangling repo-relative link
         # internal links are boosted (swap #content), externals are left alone
-        self.assertRegex(page, r'href="/docs/file/[^"]+" hx-get="/docs/file/')
+        self.assertRegex(page, r'href="/docs/[^"]+" hx-get="/docs/')
+
+    @unittest_run_loop
+    async def test_every_doc_file_link_a_guide_emits_can_be_served(self) -> None:
+        """The invariant the rewrite exists for: a rendered guide never points at
+        `/docs/file/<path>` unless that route will actually serve it.
+
+        It was broken for as long as the rewrite was unconditional — every `../solver/…`
+        link in a guide rendered as a live link to a 404, and nothing caught it because the
+        old assertion pinned the *rewrite* rather than the *resolution*."""
+        docs_dir = Path(__file__).resolve().parents[1] / 'docs'
+        for name in sorted(p.stem for p in docs_dir.glob('*.md')):
+            resp = await self.client.get(f'/docs/{name}', headers=_READER)
+            if resp.status != 200:
+                continue                                     # not every .md is a routed guide
+            for path in re.findall(r'href="/docs/file/([^"]+)"', await resp.text()):
+                with self.subTest(doc=name, path=path):
+                    served = await self.client.get(f'/docs/file/{path}', headers=_READER)
+                    self.assertEqual(served.status, 200, f'{name} links a dead {path}')
 
     @unittest_run_loop
     async def test_doc_file_view_and_scope(self) -> None:
