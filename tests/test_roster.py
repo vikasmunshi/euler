@@ -114,6 +114,38 @@ class StoreTests(RosterFileTestCase):
         roster.upsert(_THEM, public_key='', scope='web')
         self.assertEqual(roster.public_keys(), {})
 
+    def test_fields_are_written_in_lifecycle_order(self) -> None:
+        """The file is read by people. A record listed `invited → provisioned → key_issued`
+        can be checked at a glance — each date no earlier than the one above — which is the
+        whole reason the order is the writer's job: `upsert` merges, so without it every new
+        field would land wherever it happened to be written first."""
+        roster.upsert(_THEM, removed=None, key_issued='c', profile='reader',
+                      provisioned='b', scope='web', invited='a', public_key='ab' * 32)
+        entry = roster.read_roster()['users'][system_slug(_THEM)]
+        self.assertEqual(list(entry), ['public_key', 'scope', 'profile',
+                                       'invited', 'provisioned', 'key_issued', 'removed'])
+
+    def test_local_logins_are_written_first(self) -> None:
+        """The operators — the accounts that hold the master key and run the verbs that write
+        this file — above the roll they administer. A hand-arranged order would otherwise last
+        exactly until the next grant, so the writer owns it."""
+        roster.upsert('zoe@example.com', scope='web')
+        roster.upsert('alice@example.com', scope='web')
+        roster.upsert('vikas', scope='local')
+        roster.upsert('adam', scope='local')
+        written = list(roster.read_roster()['users'])
+        self.assertEqual(written[:2], ['adam', 'vikas'], 'local logins first, alphabetically')
+        self.assertEqual(written[2:], sorted(written[2:]), 'then the web slugs, alphabetically')
+
+    def test_an_unknown_field_survives_a_round_trip(self) -> None:
+        """A record written by an older or newer schema must come back whole: this file is
+        merged like any other tracked text, and a writer that dropped what it did not
+        recognise would quietly delete a colleague's work on the way past."""
+        roster.upsert(_THEM, scope='web', mystery='keep me')
+        entry = roster.read_roster()['users'][system_slug(_THEM)]
+        self.assertEqual(entry.get('mystery'), 'keep me')       # type: ignore[typeddict-item]
+        self.assertEqual(list(entry)[-1], 'mystery', 'and after the fields we do know')
+
     def test_no_key_material_is_ever_written_here(self) -> None:
         """The roster holds public keys and dates, and that is the whole of it. Half the master
         key used to live here too — safe mathematically, wrong in a public repository."""

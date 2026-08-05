@@ -541,9 +541,10 @@ It holds *public* material only, so losing it costs a re-authorization, never ac
 account with no key in the roster loses access at the next rotation, which `key-rekey` names
 before you confirm.
 
-> The accounts that predate the roster were migrated once by
-> `scripts/ops/migrate-roster.py`, which also stripped the duplicate `public_key` column from
-> the auth service's own store. One store, one copy.
+> The accounts that predate the roster were migrated once (August 2026): their acts dated
+> from the registration record and the enc-key file's mtime, and the duplicate `public_key`
+> column stripped from the auth service's own store. One store, one copy. The migration
+> script was deleted with the commit that ran it — it was a migration, not a tool.
 
 **A rotation publishes before it issues, and that order is load-bearing.** `key-rekey`
 re-encrypts the tracked private tree under the new key, commits *only* `solutions/private`

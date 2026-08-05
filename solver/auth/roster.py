@@ -41,10 +41,11 @@ the states enforcement depends on (`disabled`) deliberately stay on the host and
 at display time: a mirror of `disabled` reading `active` for a locked-out account is the kind
 of stale copy that gets trusted.
 
-For the accounts that predate this file, `scripts/ops/migrate-roster.py` dated those acts from
-what the host could still show — the registration record, the enc-key file's mtime — and fell
-back to the migration's own timestamp where nothing could be deduced. An approximate date on
-an act that certainly happened beats an empty field that reads as "never".
+The accounts that predate this file were migrated once, in August 2026, and their acts dated
+from what the host could still show — the registration record for `invited` / `provisioned`,
+the enc-key file's mtime for `key_issued` — falling back to the migration's own clock where
+nothing could be deduced. An approximate date on an act that certainly happened beats an empty
+field, which reads as "never".
 
 **Single writer.** The operator's `users` / `user-authorize` / `key-split` / `key-rekey` paths
 write this file and commit it; **no service and no per-user shell ever writes it**. That is
@@ -144,19 +145,54 @@ def read_roster() -> Roster:
                       for slug, entry in (users or {}).items() if isinstance(entry, dict)}}
 
 
+#: The order a record's fields are written in: who they are, then what was done to them **in
+#: the order it happens**. Not alphabetical — this file is read by people, and a lifecycle
+#: listed `invited → provisioned → key_issued → removed` can be checked at a glance (each date
+#: should be no earlier than the one above it), where `invited, key_issued, provisioned,
+#: removed` cannot. Anything not named here is written after, in the order it arrived, so an
+#: older or newer schema's fields survive a round trip.
+_FIELD_ORDER: tuple[str, ...] = ('public_key', 'scope', 'profile',
+                                 'invited', 'provisioned', 'key_issued', 'removed')
+
+
+def _ordered(entry: UserEntry) -> UserEntry:
+    """One record with its fields in :data:`_FIELD_ORDER` — the shape a reader expects."""
+    known = {key: entry[key] for key in _FIELD_ORDER if key in entry}       # type: ignore[literal-required]
+    return cast(UserEntry, known | {key: value for key, value in entry.items() if key not in known})
+
+
+def _record_order(item: tuple[str, UserEntry]) -> tuple[bool, str]:
+    """Sort key: **local logins first**, then web slugs, each alphabetically.
+
+    Not a cosmetic choice. The local entries are the operators — the accounts that hold the
+    master key and run the verbs that write this file — and the web ones are the roll they
+    administer. Putting the short list of people who *act* above the longer list of people
+    acted upon is what makes the file read top-down. Alphabetical within each group keeps a
+    one-record change to a one-record diff.
+    """
+    slug, entry = item
+    return entry.get('scope') != 'local', slug
+
+
 def write_roster(roster: Roster) -> Path:
     """Serialise the roster and return the path written — for the caller to commit.
 
-    Sorted keys and a trailing newline: this file is reviewed in diffs and merged like any
-    other tracked text, so a stable order is what keeps a one-key change to a one-line diff.
-    Writing does **not** commit: the paths that write it know whether they can (see the
-    module docstring on the single writer), and a command that silently commits is a command
-    that surprises somebody mid-rebase.
+    Records in :func:`_record_order`, fields in lifecycle order, and a trailing newline: this
+    file is reviewed in diffs and merged like any other tracked text, so a stable order is
+    what keeps a one-field change to a one-line diff. It is also why the order lives here
+    rather than at the call sites — `upsert` merges, so without a canonical order every new
+    field would land wherever it was first written, and a shape somebody arranged by hand
+    would survive exactly until the next grant.
+
+    Writing does **not** commit: the paths that write it know whether they can (see the module
+    docstring on the single writer), and a command that silently commits is a command that
+    surprises somebody mid-rebase.
     """
     path: Path = roster_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     body: Roster = {'version': VERSION,
-                    'users': dict(sorted((roster.get('users') or {}).items()))}
+                    'users': {slug: _ordered(entry) for slug, entry
+                              in sorted((roster.get('users') or {}).items(), key=_record_order)}}
     path.write_text(dumps(body, indent=2, sort_keys=False) + '\n')
     return path
 
