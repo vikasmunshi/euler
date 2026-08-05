@@ -1,38 +1,45 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The tracked collaborator roster — `users/users.json`.
+"""The collaborator roster — `/etc/euler/roster/users.json`.
 
-The one thing about collaborators that lives **in the repository**: a slug-keyed record of who
-exists and the X25519 public key each of them holds. It is tracked, so every clone has it and
-no reader needs `sudo` — which is the whole reason it exists. The registry it replaces was an
-admin-plane read behind `sudo`, and a web shell can never obtain that: `key-rekey` refused to
-rotate when it could not read the roster, `key-split` had to be handed a public key by hand,
-and `msg send`'s recipient menu quietly shrank to two words.
+A slug-keyed record of who exists and the X25519 public key each of them holds: the registry
+`key-rekey` re-issues against, `key-split` seals to, and `msg send` builds its recipient menu
+from. **Host state, read by everyone and written by maintainers**, which is the shape those
+three readers actually need — the registry it replaced was an admin-plane read behind `sudo`,
+and a web shell can never obtain that.
+
+It was briefly a *tracked* file, which fixed the reading and broke the writing. `users` is
+admin-gated and runs under `sudo`, but `user-authorize` and `key-split` are **maintainer**
+commands: a maintainer granting from their web shell wrote the tracked file in their own clone,
+on their own branch, where it reached nobody until a pull request that nobody opened — and
+collided with the operator's copy at the next sync. One file both floors can write needs to
+live where both floors can write it.
+
+**Who may write it, and why that matters.** `/etc/euler/roster/` is `root:euler-maint 2775`
+(setgid, so new files inherit the group) and the file is `0664` — world-readable, writable by
+`euler-maint`, whose membership the account verbs keep at maintainer-and-above. The floor is
+not tidiness: `public_key` is the one field here that is *used* rather than displayed —
+:func:`~solver.crypto.keys._recipient_key` reads it to decide what a half gets sealed to — so
+whoever can write it can redirect a future grant to a key they hold. Combined with host read
+access to the share (`solver.crypto.config` `share_file`) that is the whole master key, which
+is why the group must be people who already have it. Every other field is advisory.
 
 **Public keys only. No key material.** Half the master key used to live here too, on the
 argument that a single share of a 2-of-2 split is a uniformly random point and reveals nothing.
-That is true and it was still wrong: this repository is *public*, so a half anybody can clone
-is not a second factor, and the sealed message plus the recipient's private key was the whole
-of the secret. It now lives on the host (`solver.crypto.config` `share_file`), where the two
-halves are protected by different things again.
+That is true and it was still wrong while this file was tracked: the repository is *public*, so
+a half anybody can clone is not a second factor.
 
-**What may be in here, and what may not.** Every collaborator can write their own clone (`!` is
-contributor-floored, and their per-user service serves that same clone). Two rules follow, and
-everything below obeys them:
-
-1. **Facts that verify themselves, or nothing.** A public key is checkable — it either unwraps
-   what was sealed to it or it does not. Tamper with one in your own clone and you break only
-   yourself. Nothing here is ever *believed*.
-2. **No decisions.** `profile` is a **mirror for display and menus**; the system of record is
-   `/etc/euler/authorizations.json`, root-owned and outside the repo, and every `rank()`
-   comparison still reads that. A tracked profile that gated anything would be a one-line
-   privilege escalation for the person whose own clone it is read from.
+**No decisions.** `profile` is a **mirror for display and menus**; the system of record is
+`/etc/euler/authorizations.json` beside it, root-owned, and every `rank()` comparison still
+reads that. The `euler-maint` group is a write-ACL for advisory data, not a second copy of the
+ladder: a stale member can write public keys and dates on a host they still have an account on,
+and nothing else.
 
 **No e-mail addresses.** Records are keyed by :func:`~solver.auth.identity.system_slug`, the
-same `u`+hash the uid, home, socket and branch already use — the project's standing decision
-not to publish who a collaborator is. The spool routes by that slug too (`box_of` leaves a
-non-address unchanged), so a slug-keyed roster is enough to address a message, and the
-slug → identity mapping stays on the host where it belongs.
+same `u`+hash the uid, home, socket and branch already use — the standing decision not to
+publish who a collaborator is. The spool routes by that slug too (`box_of` leaves a non-address
+unchanged), so a slug-keyed roster is enough to address a message, and the slug → identity
+mapping stays in `authorizations.json`.
 
 **Lifecycle: acts, not states.** The stamps here (`invited`, `provisioned`, `key_issued`,
 `removed`) record what the **operator did**, dated at the moment it did it. They cannot drift,
@@ -47,11 +54,11 @@ the enc-key file's mtime for `key_issued` — falling back to the migration's ow
 nothing could be deduced. An approximate date on an act that certainly happened beats an empty
 field, which reads as "never".
 
-**Single writer.** The operator's `users` / `user-authorize` / `key-split` / `key-rekey` paths
-write this file and commit it; **no service and no per-user shell ever writes it**. That is
-what keeps it out of the failure the tracked enc-key file used to have — that file had one
-writer per machine, so every rotation dirtied it in every clone and the merges collided. One
-writer and many readers is the pattern git handles without ceremony.
+**Writers**, all of them account acts and none of them a service: `users add` / `change` /
+`remove` (the operator), and `user-authorize` / `key-split` (any maintainer, recording the key
+they just sealed to). Writes are whole-file and atomic — a temp file in the same directory,
+then `os.replace` — because several maintainers share one file and a half-written roster reads
+as "nobody holds a key", which is what a rotation would act on.
 
 Stdlib-only and free of any :mod:`solver.config` dependency, so :mod:`solver.crypto` (which
 is on the git-filter path) and :mod:`solver.web.msg` (stdlib-only importable) can both read it.
@@ -65,17 +72,23 @@ import os
 from datetime import datetime, timezone
 from json import dumps, loads
 from pathlib import Path
+from tempfile import mkstemp
 from typing import Any, Literal, TypedDict, cast
 
 from solver.auth.identity import system_slug
 from solver.utils.repo_root import repo_root
 
-#: Environment override for the roster's location (tests, and any service pointed elsewhere).
+#: Environment override for the roster's location (tests, and any machine that keeps it
+#: elsewhere).
 ROSTER_FILE_ENV: str = 'EULER_ROSTER_FILE'
 
-#: Where the roster lives in the checkout. A directory of its own rather than a file at the
-#: root: it is neither solver code nor a solution, and `users/` says what it is.
-_REPO_PATH: tuple[str, str] = ('users', 'users.json')
+#: The deployed location: its own directory under `/etc/euler`, because the *directory* is
+#: what has to be group-writable — an atomic replace writes a temp file beside the target and
+#: renames over it, which needs write permission on the directory, not the file. A
+#: group-writable file in a root-owned directory would force truncate-and-rewrite in place,
+#: and a crash mid-write would leave an empty roster: "nobody holds a key", which is what the
+#: next rotation would act on.
+_SYSTEM_ROSTER: Path = Path('/etc/euler/roster/users.json')
 
 #: The schema version, so a reader can refuse a file it does not understand rather than
 #: guessing at it. Bump it only for a change a current reader could misread.
@@ -112,15 +125,27 @@ def stamp() -> str:
 
 
 def roster_path() -> Path:
-    """The roster file: `$EULER_ROSTER_FILE`, else `users/users.json` in the checkout.
+    """Where the roster lives: `$EULER_ROSTER_FILE`, the deployed host, or this machine.
 
-    Anchored at the repo root rather than at `__file__`, for the reason the share file was:
-    the deployed web tier runs this code from `/opt/euler/venv`, where `__file__` is the
-    installed copy and not the collaborator's tree — and one tree's roster answered to every
-    user would be worse than no roster at all.
+    The same three-step resolution the share file uses, and for the same reason — one machine,
+    one answer, whether the caller is a web service running from `/opt/euler/venv` or a shell
+    in somebody's clone:
+
+    1. **`$EULER_ROSTER_FILE`** — the tests, and any machine that keeps it elsewhere.
+    2. **`/etc/euler/roster/users.json`** when `/etc/euler` exists: a deployed host.
+    3. **`~/.euler/roster.json`** otherwise — a plain checkout with no deployed tier, where
+       the machine-local dot-directory beside the repo is already where such state lives.
+
+    The *parent* of the deployed directory is probed rather than the file, so a first write on
+    a deployed host lands in the deployed place rather than inventing a second copy in `~`.
     """
     override: str = os.environ.get(ROSTER_FILE_ENV, '').strip()
-    return Path(override) if override else repo_root().joinpath(*_REPO_PATH)
+    if override:
+        return Path(override)
+    if _SYSTEM_ROSTER.parent.parent.is_dir():
+        return _SYSTEM_ROSTER
+    root: Path = repo_root()
+    return root.parent / f'.{root.name}' / 'roster.json'
 
 
 def read_roster() -> Roster:
@@ -184,16 +209,30 @@ def write_roster(roster: Roster) -> Path:
     field would land wherever it was first written, and a shape somebody arranged by hand
     would survive exactly until the next grant.
 
-    Writing does **not** commit: the paths that write it know whether they can (see the module
-    docstring on the single writer), and a command that silently commits is a command that
-    surprises somebody mid-rebase.
+    **Atomic**, because several maintainers share one file: the body goes to a temp file in
+    the same directory and is renamed over the target, so a reader never sees a half-written
+    roster and a crash mid-write cannot leave an empty one. `0664` and the directory's setgid
+    group, which is what lets the next maintainer replace it in turn.
+
+    Raises:
+        OSError: If the file cannot be written — most likely a caller who is not in
+            `euler-maint`. Callers that have already acted (a grant is sent by the time it
+            records) report it rather than failing the act.
     """
     path: Path = roster_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     body: Roster = {'version': VERSION,
                     'users': {slug: _ordered(entry) for slug, entry
                               in sorted((roster.get('users') or {}).items(), key=_record_order)}}
-    path.write_text(dumps(body, indent=2, sort_keys=False) + '\n')
+    handle, staged = mkstemp(dir=path.parent, prefix=f'.{path.name}.')
+    try:
+        with os.fdopen(handle, 'w', encoding='utf-8') as stream:
+            stream.write(dumps(body, indent=2, sort_keys=False) + '\n')
+        os.chmod(staged, 0o664)               # the group writes it next; setgid gave it the group
+        os.replace(staged, path)
+    except BaseException:
+        Path(staged).unlink(missing_ok=True)
+        raise
     return path
 
 

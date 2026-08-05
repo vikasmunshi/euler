@@ -31,11 +31,12 @@ sweep run afterwards. `users list` reports it when they have drifted anyway.
 **Two files, and only one of them decides anything.** The system of record stays where it
 was — `/etc/euler/authorizations.json` (root-owned) for the profile, the euler-auth state dir
 for SRP — and every gate still reads it. What the account verbs additionally write is the
-**tracked roster**, `users/users.json`: slug-keyed, no e-mail addresses, carrying the public
-key, the scope, a profile *mirror* for display, and the dates of the operator's own acts
+**roster**, `/etc/euler/roster/users.json`: slug-keyed, no e-mail addresses, carrying the
+public key, the scope, a profile *mirror* for display, and the dates of the operator's own acts
 (`invited`, `provisioned`, `key_issued`, `removed`). It exists so that reading who exists and
-what key they hold costs no `sudo`; it decides nothing, because every collaborator can write
-their own clone of it. `users list` reports where the two disagree.
+what key they hold costs no `sudo` — and it is written by `euler-maint` rather than root,
+because `user-authorize` and `key-split` are maintainer commands. It decides nothing.
+`users list` reports where the two disagree.
 
 `add` is two-path: an `@`-address provisions the collaborator's **own OS instance**
 (uid, home, a filter-disabled clone on `user/<slug>`, the socket — via
@@ -136,9 +137,9 @@ def _add_account(identity: str, profile: str) -> int:
     to a box with no shell (provisioning is idempotent). Shared by the `add` verb and
     the `process-requests` accept path.
 
-    The tracked roster is written **last**, and only once the host has actually taken the
-    account: it records what this command did, so recording an invite that was never minted
-    would put a fiction into a file everybody reads.
+    The roster is written **last**, and only once the host has actually taken the account:
+    it records what this command did, so recording an invite that was never minted would put a
+    fiction into a file everybody reads.
     """
     web = '@' in identity
     if web:
@@ -155,7 +156,7 @@ def _add_account(identity: str, profile: str) -> int:
 
 
 def _record_act(identity: str, profile: str, scope: str, **acts: str) -> None:
-    """Write what the operator just did into the tracked roster, and say what to commit.
+    """Write what the operator just did into the roster.
 
     Acts, not states: `invited` / `provisioned` / `removed` are dated facts about this
     command's own work, so nothing else can make them stale. `profile` rides along as a
@@ -163,12 +164,16 @@ def _record_act(identity: str, profile: str, scope: str, **acts: str) -> None:
     rank comparison reads, and a collaborator editing their own clone changes what they see
     and never what they may do.
 
-    It does not commit. This is the operator's terminal, mid-onboarding, and a command that
-    committed on its own would fold an unrelated working tree into a roster change.
+    Best-effort on the write itself: the account act has already succeeded by the time this
+    runs, so a caller outside `euler-maint` is told what did not get recorded rather than
+    handed a failure for something that worked.
     """
-    roster.upsert(identity, profile=profile, scope=scope, **acts)
-    console.print(f'[muted]Recorded in [accent]{roster.roster_path().name}[/accent] — '
-                  'commit and push it so every clone sees them.[/muted]')
+    try:
+        roster.upsert(identity, profile=profile, scope=scope, **acts)
+    except OSError as exc:
+        console.print(f'[warning]note:[/warning] the account is set up, but '
+                      f'[accent]{roster.roster_path()}[/accent] could not be written ({exc}) — '
+                      'are you in the euler-maint group?')
 
 
 def _process_requests() -> int:
@@ -232,7 +237,7 @@ def _roster() -> list[dict[str, str]] | None:
 
 
 def account_identities() -> list[str]:
-    """Who a message can be addressed to: the tracked roster's live slugs.
+    """Who a message can be addressed to: the roster's live slugs.
 
     Read from the checkout, so it costs nothing and works everywhere — a web shell included,
     which the old `sudo -n` read never could. The spool routes by slug (`box_of` leaves a
@@ -265,7 +270,7 @@ def registered_public_keys() -> dict[str, str] | None:
 
 
 def _report_drift() -> None:
-    """Say where the tracked roster and the host's system of record disagree.
+    """Say where the roster and the host's system of record disagree.
 
     The mirror is advisory, which is exactly why it has to be *checked*: a stale entry is
     harmless until somebody trusts it, and the way nobody trusts it is by being told. Two
@@ -311,10 +316,11 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
     tier here — a web shell cannot get sudo, so nothing runs over the web.
 
     Every account verb writes **both** places it needs to: the host's system of record
-    (profile, SRP state) through the sudo'd admin CLI, and the tracked roster
-    (`users/users.json`) for the parts every clone must be able to read without `sudo`. There
-    is no separate registration step and no sweep to remember: a public key is recorded by the
-    grant that issues one (`user-authorize`), and `list` says so when the two have drifted.
+    (profile, SRP state) through the sudo'd admin CLI, and the roster
+    (`/etc/euler/roster/users.json`) for the parts every rung must be able to read without
+    `sudo`. There is no separate registration step and no sweep to remember: a public key is
+    recorded by the grant that issues one (`user-authorize`), and `list` says so when the two
+    have drifted.
 
     Args:
         action: What to do — `list` the roster, pending invites and the invite-request
@@ -332,7 +338,7 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
     """
     if action == 'list':
         rc = _sudo_admin('list')                       # roster + pending + invite-request queue
-        _report_drift()                                # …then what the tracked roster disagrees on
+        _report_drift()                                # …then what the roster disagrees on
         return rc
 
     if action == 'process-requests':

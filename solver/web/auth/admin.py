@@ -31,13 +31,16 @@ from __future__ import annotations
 
 __all__ = ['main']
 
+import grp
 import json
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
+from solver.auth.identity import system_slug
 from solver.web.auth import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
 from solver.web.auth.client import request
 from solver.web.envfile import env_file_values
@@ -48,6 +51,9 @@ _NO_IDENTITY = ('list', 'roster-json', 'requests-json')       # the views take n
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
 _AUTHZ_PATH = os.environ.get('EULER_AUTHZ_FILE', '/etc/euler/authorizations.json')
+#: The unix group that may write the roster, and the profiles that belong in it.
+_MAINT_GROUP = 'euler-maint'
+_MAINT_PROFILES = ('maintainer', 'admin')
 
 
 def _fail(message: str, code: int = 1) -> int:
@@ -84,6 +90,44 @@ def _authz_remove(identity: str) -> bool:
         return False
     _authz_save(data)
     return True
+
+
+# ── the roster write-ACL group ──────────────────────────────────────────────────────
+
+def _sync_maint_group(identity: str, profile: str, is_web: bool) -> None:
+    """Add or remove *identity*'s unix account from `euler-maint`, tracking the profile.
+
+    That group is the write-ACL on `/etc/euler/roster/` — the roster is read by everyone and
+    written by maintainers, and unix has no notion of a profile, so membership is what carries
+    the floor down to the filesystem. It is **not** a second copy of the ladder: it grants
+    "may write an advisory file" and nothing else, so a stale member can record public keys and
+    dates on a host they still have an account on, and that is the whole of it.
+
+    Best-effort, and deliberately: the account act itself has already succeeded by the time
+    this runs, and a missing group (a host where the roster kit was never laid down) must not
+    turn a successful `users change` into a failure. It reports instead.
+
+    Membership is read at login, so a promoted maintainer's **running** service keeps the old
+    groups until it restarts — `users redeploy` is what re-lays them.
+    """
+    account = system_slug(identity) if is_web else identity
+    wanted = profile in _MAINT_PROFILES
+    try:
+        members = grp.getgrnam(_MAINT_GROUP).gr_mem
+    except KeyError:
+        print(f'note: group {_MAINT_GROUP} is absent — run the auth kit to lay the roster down',
+              file=sys.stderr)
+        return
+    if wanted == (account in members):
+        return
+    done = subprocess.run(['gpasswd', '-a' if wanted else '-d', account, _MAINT_GROUP],
+                          capture_output=True, text=True)
+    if done.returncode != 0:
+        print(f'note: could not {"add" if wanted else "remove"} {account} '
+              f'{"to" if wanted else "from"} {_MAINT_GROUP}: {done.stderr.strip()}', file=sys.stderr)
+        return
+    print(f'{"added" if wanted else "removed"} {account} '
+          f'{"to" if wanted else "from"} {_MAINT_GROUP} (roster write access)')
 
 
 # ── euler-auth admin socket (SRP operations) ────────────────────────────────────────
@@ -161,6 +205,7 @@ def main(argv: list[str]) -> int:
 
         if action == 'add':
             _authz_set(identity, profile)                        # SoR write (both paths)
+            _sync_maint_group(identity, profile, is_web)
             if not is_web:
                 print(f'mapped local login {identity} → {profile}')
                 return 0
@@ -174,12 +219,14 @@ def main(argv: list[str]) -> int:
 
         if action == 'change':
             _authz_set(identity, profile)
+            _sync_maint_group(identity, profile, is_web)
             if is_web:
                 _api('POST', f'/admin/users/{identity}/revoke')   # new profile takes effect on re-login
             print(f'changed {identity} → {profile}')
             return 0
 
         if action == 'remove':
+            _sync_maint_group(identity, 'reader', is_web)        # drop the roster write-ACL first
             removed_map = _authz_remove(identity)
             removed_srp = False
             if is_web:

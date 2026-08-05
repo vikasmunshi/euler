@@ -17,7 +17,7 @@ entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two
   (`user-authorize` sends, `msg act` writes); a rotation of one's own key pair needs nobody.
 
 Granting it to somebody is one act with two halves. `user-authorize` records their **public
-key** in the tracked roster (`users/users.json`, :mod:`solver.auth.roster`) and delivers half
+key** in the roster (`/etc/euler/roster/users.json`, :mod:`solver.auth.roster`) and delivers half
 the master key, sealed to that key; the other half is this machine's `share_file`, which every
 uid on the host can read and only the operator writes. `key-reconstruct` puts the two together
 at their end. So no single artefact is ever the key — the message, the private key that opens
@@ -184,8 +184,8 @@ def key_rekey() -> int:
     **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
     access means rotating the key they hold and re-issuing the new one to everyone else.
 
-    The list of who "everyone else" is comes from the **tracked roster** — each holder's
-    `public_key` in `users/users.json`, written by the grant that issued to them. It used to be
+    The list of who "everyone else" is comes from the **roster** — each holder's `public_key`
+    in `/etc/euler/roster/users.json`, written by the grant that issued to them. It used to be
     implicit in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped
     what it found. With one file per machine there is nothing central to read, so the registry
     is explicit — and it holds only *public* keys, which is why losing it costs nothing but a
@@ -343,8 +343,8 @@ def user_authorize(target: str, identity: str = '') -> int:
       way. *identity* names who to send it to.
 
     Two things happen, and the first is the durable one. The public key is written to the
-    **tracked roster** (`users/users.json`), which is what a later rotation re-issues against
-    and what every shell — terminal or web — can read without `sudo`. Then delivery goes
+    **roster** (`/etc/euler/roster/users.json`), which is what a later rotation re-issues
+    against and what every shell — terminal or web — can read without `sudo`. Then delivery goes
     through `key-split`: half the master key, sealed to that public key, against the half the
     repository already carries. So a grant is never one artefact — the message, the private
     key that opens it and a current clone are all needed, and the recipient's own
@@ -1164,11 +1164,11 @@ def _public_key_from(token: str) -> X25519PublicKey | None:
 def _recipient_key(identity: str, public_key: str) -> X25519PublicKey | None:
     """The public key to seal a share to, or None with the reason already printed.
 
-    Given explicitly it is used as given; otherwise it comes from the **tracked roster**
-    (`users/users.json`), which is the whole reason that file is tracked: this lookup used to
-    be an admin-plane read behind `sudo`, so the one shell that most needs it — a maintainer's
-    web shell, which can never elevate — could not do it at all and had to be handed 64 hex
-    characters by hand.
+    Given explicitly it is used as given; otherwise it comes from the **roster**
+    (`/etc/euler/roster/users.json`), which is the whole reason that file exists: this lookup
+    used to be an admin-plane read behind `sudo`, so the one shell that most needs it — a
+    maintainer's web shell, which can never elevate — could not do it at all and had to be
+    handed 64 hex characters by hand.
 
     A key read from the roster is not *trusted*, it is *used*: seal a half to the wrong key and
     the recipient cannot open it, which is a failure at the far end and not a compromise.
@@ -1178,7 +1178,7 @@ def _recipient_key(identity: str, public_key: str) -> X25519PublicKey | None:
         token = (roster.public_keys().get(roster.slug_of(identity)) or '').strip().lower()
         if not token:
             console.print(f'[error]error:[/error] [accent]{identity}[/accent] has no public key in '
-                          f'[accent]{_share_label()}[/accent], so there is nothing to seal their '
+                          f'[accent]{roster.roster_path()}[/accent], so there is nothing to seal their '
                           'half to. They mint one with `user` and are authorised once; or pass '
                           'the key here.')
             return None
@@ -1233,7 +1233,7 @@ def key_split(identity: Annotated[str, Ask('Who should receive the other half?',
     Two halves of a 2-of-2 split, and **neither is worth anything alone**. One sits on this
     host (`/etc/euler/share.json`, readable by every uid there and written only by the
     operator); the other is minted per recipient, **sealed to that recipient's X25519 public
-    key** — read from the tracked roster — and sent through the message spool, which they take
+    key** — read from the roster — and sent through the message spool, which they take
     with `msg act`: that runs `key-reconstruct`, unwraps their half, puts the two together,
     and writes their enc-key file.
 
@@ -1252,7 +1252,7 @@ def key_split(identity: Annotated[str, Ask('Who should receive the other half?',
             run that writes the repository's share.
         public_key: The recipient's 64-hex public key, for somebody the roster has no key for
             yet — a first grant, before anyone has been authorised. Defaults to '', which
-            reads it from `users/users.json`.
+            reads it from the roster.
     """
     from solver.web.msg.notify import notify_user
     try:
@@ -1312,14 +1312,18 @@ def _record_issue(identity: str, public_key: str) -> None:
     `key_issued` and not "has access". A rotation reads the key beside it; the date is for the
     person reading `users list`.
 
-    Writing does not commit. The roster is tracked, so a grant made from a web shell writes
-    that shell's own clone and reaches nobody until the operator's master has it — and a
-    command that quietly committed and pushed on somebody's behalf would be worse than one
-    that says what is left to do.
+    The roster lives on the host and is writable by `euler-maint`, so a maintainer's grant
+    records itself where the next rotation will read it — which it could not do while the file
+    was tracked, since a web shell writes only its own clone. Best-effort all the same: the
+    half is already sent by the time this runs, so a write that fails is reported rather than
+    turned into a failed grant.
     """
-    path = roster.upsert(identity, public_key=public_key, key_issued=roster.stamp())
-    console.print(f'[muted]Recorded in [accent]{_share_label()}[/accent] — commit and push it '
-                  f'so the next rotation can find them.[/muted]' if path else '')
+    try:
+        roster.upsert(identity, public_key=public_key, key_issued=roster.stamp())
+    except OSError as exc:
+        console.print(f'[warning]note:[/warning] the share is sent, but '
+                      f'[accent]{roster.roster_path()}[/accent] could not be written ({exc}) — '
+                      'without their key recorded, the next rotation cannot re-issue to them.')
 
 
 @register(requires='reader')

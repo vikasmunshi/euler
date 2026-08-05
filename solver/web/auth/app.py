@@ -498,7 +498,7 @@ def build_admin_app(service: AuthService) -> web.Application:
             # OS login has no per-user instance, so it carries none.
             slug = system_slug(name) if scope == 'web' else ''
             # No public key here: the registry a rotation re-issues against is the tracked
-            # roster (`users/users.json`), read from any clone with no `sudo`. This plane holds
+            # roster (`/etc/euler/roster/users.json`), read by anyone with no `sudo`. This plane holds
             # the login secrets, and holding a *second* copy of the public keys only created a
             # pair that could disagree.
             roster.append({'user': name, 'profile': profile, 'scope': scope, 'state': state,

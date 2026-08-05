@@ -116,9 +116,9 @@ def _recipients(_: Context, bound: dict[str, Any]) -> list[Choice]:
     """Who a message can go to: staff, everyone, plus every collaborator in the roster.
 
     Asked of staff only (:func:`_needs_recipients`), so `staff` leads but is not the whole
-    menu. The names come from the tracked roster (`users/users.json`), which is a plain read
-    of the checkout — so a maintainer over the web gets the same menu the operator's terminal
-    does, where the old admin-plane read left them the two words and nothing else.
+    menu. The names come from the roster (`/etc/euler/roster/users.json`), a plain file read
+    — so a maintainer over the web gets the same menu the operator's terminal does, where the
+    old admin-plane read left them the two words and nothing else.
 
     They are **slugs**, and that is what the spool wants: it routes by box key, and for a web
     identity the box key *is* the slug (:func:`~solver.web.msg.identity.box_of`). So no e-mail

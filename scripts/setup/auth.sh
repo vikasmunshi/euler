@@ -62,6 +62,9 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
 AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # authorization SoR (root:root 0644)
+ROSTER_DIR="${SYS_DIR}/roster"                  # collaborator roster (root:euler-maint 2775)
+ROSTER_FILE="${ROSTER_DIR}/users.json"          # the roster itself (0664, group-writable)
+MAINT_GROUP="euler-maint"                       # may write the roster; kept by `users add/change`
 STATE_DIR="/var/lib/euler-auth"                 # euler-auth-only state
 TMPFILES_CONF="/etc/tmpfiles.d/euler.conf"      # /run/euler socket dir
 
@@ -299,6 +302,46 @@ PY
     sudo chmod 0644 "${AUTHZ_FILE}"
 }
 
+# Deploy the collaborator roster: /etc/euler/roster/users.json — who exists, the X25519
+# public key each of them holds, and the dates of the operator's acts. Read by everyone
+# (`key-rekey`, `key-split`, the `msg` recipient menu) and written by maintainers, which is
+# why the DIRECTORY carries the group rather than the file: an atomic replace renames a temp
+# file over the target, so it needs write permission on the directory. Setgid (2775) makes
+# every file created there inherit euler-maint, including the ones a maintainer writes.
+#
+# `public_key` is the one field that is *used* rather than displayed — a grant seals half the
+# master key to it — so whoever may write this file can redirect a future grant. That is why
+# the group is maintainer-and-above (people who already hold the master key) and never
+# euler-user or euler-web, which contain every collaborator.
+deploy_roster() {
+    if ! getent group "${MAINT_GROUP}" > /dev/null; then
+        echo "Creating the ${MAINT_GROUP} group (roster write access)..."
+        sudo groupadd --system "${MAINT_GROUP}"
+    fi
+    sudo install -d -m 2775 -o root -g "${MAINT_GROUP}" "${ROSTER_DIR}"
+    if [ ! -f "${ROSTER_FILE}" ]; then
+        echo "Seeding the collaborator roster (empty)..."
+        printf '{\n  "version": 1,\n  "users": {}\n}\n' | sudo tee "${ROSTER_FILE}" >/dev/null
+    fi
+    sudo chown root:"${MAINT_GROUP}" "${ROSTER_FILE}"
+    sudo chmod 0664 "${ROSTER_FILE}"
+    # Everyone the policy already ranks maintainer-or-above gets write access, the checkout
+    # owner included — they run the account verbs from a terminal, not a web shell, and are
+    # deliberately in none of the other euler groups.
+    sudo "${VENV_PY}" - "${AUTHZ_FILE}" "${MAINT_GROUP}" <<'ROSTER_PY'
+import json, pathlib, subprocess, sys
+from solver.auth.identity import system_slug
+authz_path, group = sys.argv[1], sys.argv[2]
+users = json.loads(pathlib.Path(authz_path).read_text()).get('users', {})
+for identity, profile in sorted(users.items()):
+    if profile not in ('maintainer', 'admin'):
+        continue
+    account = system_slug(identity) if '@' in identity else identity
+    done = subprocess.run(['gpasswd', '-a', account, group], capture_output=True, text=True)
+    print(f'  {account}: {"in " + group if done.returncode == 0 else done.stderr.strip()}')
+ROSTER_PY
+}
+
 # True when the deployed venv contains the auth service module (build-order step 4).
 venv_has_auth() {
     [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c 'import solver.web.auth' 2>/dev/null
@@ -371,6 +414,7 @@ do_deploy() {
     deploy_auth_env
     deploy_state_dir
     deploy_authz
+    deploy_roster
 
     if venv_has_auth; then
         install_unit
@@ -397,6 +441,7 @@ do_redeploy() {
     load_config || return 1
     deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
     deploy_authz
+    deploy_roster
     if [ -f "${SERVICE_DEST}" ] && venv_has_auth; then
         sudo systemctl restart "${SERVICE_NAME}"
         echo "Restarted ${SERVICE_NAME}"
@@ -423,7 +468,8 @@ do_remove() {
     read -r -p "Remove ${AUTH_ENV} (admin token), the ${STATE_DIR} state (user DB!), and the ${AUTH_USER} identity? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then
         sudo rm -f "${AUTH_ENV}" "${AUTHZ_FILE}"
-        sudo rm -rf "${STATE_DIR}"
+        sudo rm -rf "${STATE_DIR}" "${ROSTER_DIR}"
+        sudo groupdel "${MAINT_GROUP}" 2>/dev/null || true
         if getent passwd "${AUTH_USER}" > /dev/null; then sudo userdel "${AUTH_USER}" 2>/dev/null || true; fi
         if getent group "${AUTH_GROUP}" > /dev/null; then sudo groupdel "${AUTH_GROUP}" 2>/dev/null || true; fi
         if getent group "${LEGACY_ADM_GROUP}" > /dev/null; then sudo groupdel "${LEGACY_ADM_GROUP}" 2>/dev/null || true; fi
@@ -476,6 +522,11 @@ do_status() {
         echo "authz:       ✓ ${AUTHZ_FILE} ($(python3 -c "import json;print(len(json.load(open('${AUTHZ_FILE}')).get('users',{})))" 2>/dev/null || echo '?') users)"
     else
         echo "authz:       ✗ ${AUTHZ_FILE} missing (local shell uses the repo template)"
+    fi
+    if [ -f "${ROSTER_FILE}" ]; then
+        echo "roster:      ✓ ${ROSTER_FILE} ($(stat -c '%U:%G %a' "${ROSTER_DIR}" 2>/dev/null))"
+    else
+        echo "roster:      ✗ ${ROSTER_FILE} missing"
     fi
     if [ -d "${STATE_DIR}" ]; then
         echo "state:       ✓ ${STATE_DIR} ($(stat -c '%U:%G %a' "${STATE_DIR}" 2>/dev/null))"
