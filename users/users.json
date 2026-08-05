@@ -1,4 +1,29 @@
 {
   "version": 1,
-  "users": {}
+  "users": {
+    "u0a68e0": {
+      "public_key": "74635243ef9258270434b10dcaf5f46ff7c35951ee5a7b0ea13b43ef32c55e78",
+      "scope": "web"
+    },
+    "u3cc4d2": {
+      "public_key": "3e300a82254162d11f3d52c63da838b4c1e1bd7f4beff4d5219c80f5ea744d7b",
+      "scope": "web"
+    },
+    "u3f9e97": {
+      "public_key": "43ee4f92038279b6aa7ddf24c271141855192e875759bb81730beef8f15a7051",
+      "scope": "web"
+    },
+    "u6ac7a5": {
+      "public_key": "a5febeced405007559aa31be05ef387c89a89bd3b9e342b63c12ac6f73acb605",
+      "scope": "web"
+    },
+    "uaa7d3c": {
+      "public_key": "841b9b02b444b6f3f7e9c21b80e1304c85a63fcda359d764257536834168c248",
+      "scope": "web"
+    },
+    "uc448f9": {
+      "public_key": "b57ae236e7561cf1dec12b9393152690a402c16c08740989625242010389067d",
+      "scope": "web"
+    }
+  }
 }
