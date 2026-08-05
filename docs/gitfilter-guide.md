@@ -256,7 +256,7 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
   itself; nobody else is involved, and nothing is published.
 - **Rotate the master key:** `solver rekey` (admin). It verifies the current key, generates a
   new one, writes yours, re-issues it by message to every public key in the roster
-  (`users set-keys` fills it), and re-encrypts the tracked private files — redrawing the
+  (a grant records it there), and re-encrypts the tracked private files — redrawing the
   host's share along with them, so `key-split` never completes a half against a retired
   key. Commit the re-encrypted blobs. An account with no public key in the roster **loses
   access at that rotation** and is named before you confirm — sometimes the intent, never a

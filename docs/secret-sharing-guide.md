@@ -283,7 +283,7 @@ or a recipient who never filed one:
 
 ```bash
 key-split <identity>                    # public key from the roster
-key-split <identity> <public-key>       # …or given, before `users set-keys` has swept
+key-split <identity> <public-key>       # …or given, for a first grant
 ```
 
 Receiving it:

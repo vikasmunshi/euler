@@ -446,14 +446,17 @@ Four properties, each load-bearing:
   `system_slug` already keeps addresses out of `/home`, the process table and branch names.
   The spool routes by box key and a box key *is* the slug, so a recipient can be named
   without publishing who they are.
-- **Acts, not states.** `invited` / `provisioned` / `key_issued` / `removed` are dated facts
-  about what the operator did, so nothing else can make them stale. Registration state and
-  `disabled` stay on the host and are joined in at display time — a mirror of `disabled`
+- **Immutable dated facts, not mutable states.** `invited` / `provisioned` / `key_issued` /
+  `removed` are what the operator did, and `created` is when the host's record was written —
+  none of them can change once true, which is what makes a copy safe. Registration state and
+  `disabled` stay on the host and are joined in at display time: a mirror of `disabled`
   reading `active` for a locked-out account is exactly the stale copy that gets trusted.
-- **One writer.** The operator's `users` / `user-authorize` / `key-split` / `key-rekey` paths
-  write it and commit it; no service and no per-user shell ever does. That is what keeps it
-  clear of the failure the tracked enc-key file had, where every machine wrote it and the
-  merges collided. Writing never commits on its own — the commands say what to commit.
+- **One writer, and no sweep.** The operator's `users` / `user-authorize` / `key-split` /
+  `key-rekey` paths write it; no service and no per-user shell ever does. Each verb writes
+  both places it needs to — the host's SoR through the sudo'd admin CLI, and this file for
+  what every clone must read without `sudo` — so there is no registration step to remember
+  and no repair sweep to run. `users list` reports drift if they get out of step anyway.
+  Writing never commits on its own; the commands say what to commit.
 - **Total reader.** Absent, mangled (conflict markers included) or from a future schema all
   read as *empty*, because every caller's fallback is to ask the host, and a roster that
   raised would break commands that used to work without it.
@@ -524,20 +527,23 @@ users change alice@example.com contributor    # promote / demote
 users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
 users remove  alice@example.com               # delete the account/entry, pending invites, and deprovision
-users set-keys                                # register everyone's public key (for key-rekey)
 ```
 
-**`set-keys` fills the public-key registry.** With one enc-key file per machine (§9) there is
-no central list of who holds the master key, so `key-rekey` has to be told who to re-issue to.
-The sweep takes no identity and reads no secret: a holder's own enc-key file has two records,
-`verify` and their public key, and the one that is not `verify` *is* the key. (Their
-`~/.euler/id` would be authoritative but is vault-encrypted, and that vault opens only inside
-their own session.)
+**Every verb writes both places it needs to.** The host's system of record — profile in
+`authorizations.json`, SRP state in the service's own store — through the sudo'd admin CLI,
+and the tracked roster (§6.3) for what every clone must read without `sudo`. There is
+deliberately **no key-registration verb**: the public key `key-rekey` re-issues against is
+recorded by the grant that issues one (`user-authorize`), so the two files stay in step by
+construction rather than by a sweep somebody has to remember. `users list` reports it when
+they have drifted anyway.
 
-It holds *public* material only, so losing it costs a sweep, never access. `user-authorize`
-registers as it issues when it can reach the admin plane; a web shell has no sudo, so it
-prints this command instead. An account with no registered key loses access at the next
-rotation, which `key-rekey` names before you confirm.
+It holds *public* material only, so losing it costs a re-authorization, never access. An
+account with no key in the roster loses access at the next rotation, which `key-rekey` names
+before you confirm.
+
+> The accounts that predate the roster were migrated once by
+> `scripts/ops/migrate-roster.py`, which also stripped the duplicate `public_key` column from
+> the auth service's own store. One store, one copy.
 
 **A rotation publishes before it issues, and that order is load-bearing.** `key-rekey`
 re-encrypts the tracked private tree under the new key, commits *only* `solutions/private`

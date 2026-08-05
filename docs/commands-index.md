@@ -1181,18 +1181,17 @@ Rotate the master key and re-issue it to every registered public key.
 **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
 access means rotating the key they hold and re-issuing the new one to everyone else.
 
-The list of who "everyone else" is comes from the **account roster** — each user's
-`public_key`, registered in `users.json` (`users set-keys`). It used to be implicit
-in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped what it
-found. With one file per machine there is nothing central to read, so the registry is
-explicit — and it holds only *public* keys, which is why losing it costs nothing but a
-round of re-registration.
+The list of who "everyone else" is comes from the **tracked roster** — each holder's
+`public_key` in `users/users.json`, written by the grant that issued to them. It used to be
+implicit in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped
+what it found. With one file per machine there is nothing central to read, so the registry
+is explicit — and it holds only *public* keys, which is why losing it costs nothing but a
+round of re-authorization.
 
 Each holder is sent their own payload through the message spool, exactly as
 `user-authorize` does; they run `msg act` on it to take it. An account with no registered
 public key cannot be re-issued to and is named, not skipped silently — that person loses
 access at this rotation, which is sometimes the intent and must never be a surprise.
-`users set-keys` fills the registry from what every holder already has.
 
 Because the git filter is deterministic, every committed blob depends on the master key, so
 a rotation re-encrypts the tracked private files via `git add --renormalize`.
@@ -1244,7 +1243,7 @@ key-split
 | argument | description |
 |----------|-------------|
 | `identity` | Who to send the other half to. Not asked — and not used — on the run that writes the repository's share. |
-| `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before `users set-keys` has swept. Defaults to '', which reads it from `users/users.json`. |
+| `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before anyone has been authorised. Defaults to '', which reads it from `users/users.json`. |
 
 *Defined in* `solver.crypto.keys.key_split`.
 
@@ -2091,18 +2090,17 @@ The whole command is `admin`-floored and the account verbs re-execute the admin 
 under `sudo` (the SoR + admin socket are root-only). There is no reader/maintainer
 tier here — a web shell cannot get sudo, so nothing runs over the web.
 
-`set-keys` sweeps every collaborator and registers the X25519 **public** key each of
-them already holds — the registry `key-rekey` re-issues a rotated master key to. It
-takes no identity and reads no secret: a holder's enc-key file names their public key,
-and that is all it copies. `user-authorize` registers as it issues when it can reach the
-admin plane; a web shell cannot sudo, so this is the sweep that catches up. Idempotent —
-run it whenever `users list` shows a blank column.
+Every account verb writes **both** places it needs to: the host's system of record
+(profile, SRP state) through the sudo'd admin CLI, and the tracked roster
+(`users/users.json`) for the parts every clone must be able to read without `sudo`. There
+is no separate registration step and no sweep to remember: a public key is recorded by the
+grant that issues one (`user-authorize`), and `list` says so when the two have drifted.
 
 **usage**
 
 ```
 users
-[action=list|process-requests|add|change|enable|disable|remove|set-keys|redeploy] (default list)
+[action=list|process-requests|add|change|enable|disable|remove|redeploy] (default list)
 [identity=<str>] (default '')
 [profile=reader|contributor|maintainer|admin] (default reader)
 ```
@@ -2111,8 +2109,8 @@ users
 
 | argument | description |
 |----------|-------------|
-| `action` | What to do — `list` the roster, pending invites and the invite-request queue; `process-requests` walks that queue interactively (accept / ignore / dismiss each); `add` a map entry (`@email` also provisions the account and mints an invite, a bare os-login is local-only); `change` reassigns a profile; `enable` / `disable` the web SRP state; `remove` drops the account or entry; `set-keys` registers every collaborator's public key for rekey; `redeploy` re-asserts the per-user host layer and re-lays every collaborator's git hooks, dropping live shells. Defaults to `list`. |
-| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Required for the account verbs, unused by `list` / `process-requests` / `set-keys` / `redeploy`. |
+| `action` | What to do — `list` the roster, pending invites and the invite-request queue; `process-requests` walks that queue interactively (accept / ignore / dismiss each); `add` a map entry (`@email` also provisions the account and mints an invite, a bare os-login is local-only); `change` reassigns a profile; `enable` / `disable` the web SRP state; `remove` drops the account or entry; `redeploy` re-asserts the per-user host layer and re-lays every collaborator's git hooks, dropping live shells. Defaults to `list`. |
+| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Required for the account verbs, unused by `list` / `process-requests` / `redeploy`. |
 | `profile` | The profile to assign, for `add` / `change`. `admin` is valid only for a local os-login, never a web account. |
 
 *Defined in* `solver.web.auth.commands.users`.
