@@ -72,6 +72,8 @@ a profile on each channel.
 | `solver.core.test_cases` | `test-cases` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `edit` |  | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `show` | ✓ | ✓ | ✓ | ✓ |
+| `solver.crypto.keys` | `host-authorize` |  |  |  | ✓ |
+| `solver.crypto.keys` | `host-unlock` |  |  |  | ✓ |
 | `solver.crypto.keys` | `key-reconstruct` | ✓ | ✓ | ✓ | ✓ |
 | `solver.crypto.keys` | `key-rekey` |  |  |  | ✓ |
 | `solver.crypto.keys` | `key-split` |  |  | ✓ | ✓ |

@@ -46,9 +46,11 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | `reader` | Soft-reset your branch to origin/master — un-commit, keep every change. |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
-| [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
+| [`host-authorize`](commands-index.md#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
+| [`host-unlock`](commands-index.md#command-host-unlock) | — | `admin` | Take the mailed block from `host-authorize` and unlock this machine. |
+| [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Unwrap the half you were sent, complete it from the repository, store the key. |
 | [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
-| [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Print Shamir shares of the current master key. |
+| [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](commands-index.md#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`manage-config`](commands-index.md#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
@@ -73,7 +75,7 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`update-tags`](commands-index.md#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`update-usd-rate`](commands-index.md#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](commands-index.md#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
-| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
+| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
 | [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 | [`vault`](commands-index.md#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](commands-index.md#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |

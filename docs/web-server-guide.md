@@ -295,11 +295,11 @@ trust them.
 ### 4.6 State
 
 `/var/lib/euler-auth`, `euler-auth`-only `0600`, shared with no other uid — not even the
-repo owner. The admin commands never touch these files; they call the service (§6.3).
+repo owner. The admin commands never touch these files; they call the service (§6.5).
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, name, terms_version, terms_accepted_at, created, disabled}` per email. `name` is the display name, used for git authorship. **No profile** — that lives in `authorizations.json`, resolved fresh at each login. |
+| `users.json` | SRP verifier DB: `{salt, verifier, name, terms_version, terms_accepted_at, created, disabled}` per email. `name` is the display name, used for git authorship. **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with the tracked `users/users.json` (§6.3): this one holds the login secrets and never leaves the host; that one holds public keys and no address at all. |
 | `pending.json` | in-flight invites and resets, keyed by `hash(link-token)`. |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |
@@ -409,13 +409,68 @@ repo write cannot change policy. There is **no policy file in the repo**: absent
 deployed one the built-in default maps nobody, so the checkout owner floors to `admin`
 by uid and everyone else is `contributor`. The installer seeds the real file.
 
+### 6.2 The tracked roster is not the policy
+
+`users/users.json` (§6.3) carries a `profile` field, and it is a **mirror**. Every rank
+comparison — in the shell, in every service, on every route — reads the file above and only
+that file. The reason is not tidiness: `!` is contributor-floored and a collaborator's
+per-user service serves that collaborator's own clone, so a tracked profile would be a
+one-line self-promotion for the person whose tree it is read from. The rule the roster is
+built to is therefore *facts that verify themselves, or nothing* — a public key seals or it
+does not, a share verifies or it does not — and **no decisions**. `users list` reports where
+the two disagree; the host is what applies.
+
+### 6.3 The tracked roster (`users/users.json`)
+
+What the **repository** knows about collaborators, and the only account state that is
+tracked. It exists because the registry it replaces was an admin-plane read behind `sudo`,
+which the shell that most needs it — a maintainer's, over the web — can never obtain:
+`key-rekey` refused to rotate without it, `key-split` had to be handed a public key by hand,
+and `msg send`'s recipient menu shrank to two words.
+
+```json
+{
+  "version": 1,
+  "users": {
+    "u3f9a2c": {
+      "public_key": "…", "scope": "web", "profile": "contributor",
+      "invited": "…", "provisioned": "…", "key_issued": "…", "removed": null
+    }
+  }
+}
+```
+
+Four properties, each load-bearing:
+
+- **Keyed by slug, and no e-mail address anywhere in it.** The repository is public, and
+  `system_slug` already keeps addresses out of `/home`, the process table and branch names.
+  The spool routes by box key and a box key *is* the slug, so a recipient can be named
+  without publishing who they are.
+- **Acts, not states.** `invited` / `provisioned` / `key_issued` / `removed` are dated facts
+  about what the operator did, so nothing else can make them stale. Registration state and
+  `disabled` stay on the host and are joined in at display time — a mirror of `disabled`
+  reading `active` for a locked-out account is exactly the stale copy that gets trusted.
+- **One writer.** The operator's `users` / `user-authorize` / `key-split` / `key-rekey` paths
+  write it and commit it; no service and no per-user shell ever does. That is what keeps it
+  clear of the failure the tracked enc-key file had, where every machine wrote it and the
+  merges collided. Writing never commits on its own — the commands say what to commit.
+- **Total reader.** Absent, mangled (conflict markers included) or from a future schema all
+  read as *empty*, because every caller's fallback is to ask the host, and a roster that
+  raised would break commands that used to work without it.
+
+**No key material.** Half the master key lived here briefly, on the argument that a single
+share of a 2-of-2 split is a uniformly random point and reveals nothing. True, and beside the
+point: this repository is public, so a half anyone can clone is not a second factor. It now
+lives at `/etc/euler/share.json` on the host — see the
+[Secret Sharing Guide](secret-sharing-guide.md).
+
 This file used to carry `profiles`/`grants`/`objects` — an `object:permission` grant
 vocabulary whose real job was deriving per-path filesystem ACLs on a *shared* operator
 tree. Per-user uids retired that entire layer: each collaborator is alone in their own
 clone, so there is nothing to partition by path. A legacy-shaped file still loads; only
 its `users` map is read.
 
-### 6.2 Enforcement
+### 6.4 Enforcement
 
 - **Shell, at decoration time.** As each command module imports, `@register` checks the
   declared floor against the subject's profile. If it does not clear, the command is
@@ -446,7 +501,7 @@ password reset all revoke sessions, and the auth service additionally pushes a t
 to any live web shell (§12) — so revocation is immediate on every plane, not deferred
 until a running process happens to die.
 
-### 6.3 Administration — the `users` command
+### 6.5 Administration — the `users` command
 
 `users` splits by verb. **`users list`** registers at the `reader` floor and
 self-scopes for non-admins. The **mutating verbs require `admin`** and go through the
@@ -536,7 +591,7 @@ profile grant plus SRP plus uid isolation, with no channel backstop.
 
 There is no reset verb — reset is self-service.
 
-### 6.4 Command floors
+### 6.6 Command floors
 
 Every command's declared floor is generated from the live registry into
 [`authorizations.md`](authorizations.md) by `update-docs`. The shape of it:
@@ -1698,7 +1753,7 @@ hardest proven code with authorization already enforced at registration beats in
 bespoke command surface.
 
 Attach is gated on the `reader` floor plus a live session plus a one-time ticket. Inside,
-the rungs diverge by the same decorator floors as everywhere else (§6.4): a `reader`
+the rungs diverge by the same decorator floors as everywhere else (§6.6): a `reader`
 shell registers only the read commands and the shell's own safe AST expression evaluator
 (no calls, no attribute access), so it runs no user code at all; `contributor` adds edit,
 eval/benchmark, raw bash, the AI commands, and the git write verbs.
@@ -1884,7 +1939,7 @@ Two cheaper designs were also rejected, and for reasons worth keeping:
   group shadowing the profile ladder, reintroducing exactly the per-path filesystem-ACL
   layer the per-user model retired (§6.1). Worse, a demoted maintainer would keep
   broadcast rights until their group membership was fixed, breaking the immediate-revocation
-  contract of §6.2.
+  contract of §6.4.
 - **Per-user mailboxes in each collaborator's own tree**, pushed to their instance. Good
   at-rest story, but offline recipients, deprovisioned instances and retries all need a
   central spool anyway — and the operator is an os-login `admin` with no instance at all,
@@ -1968,7 +2023,7 @@ POST /staff/notice              {to: [email…] | '*', subject, body}     mainta
 
 The **admin socket** (`/run/euler-msg/admin.sock`, `0600`, euler-msg-private) carries the
 same staff verbs for the operator's *terminal*, reached under `sudo` with a token from
-root-readable `msg.env` — exactly the wheel-gated shape of the auth admin plane (§6.3), and
+root-readable `msg.env` — exactly the wheel-gated shape of the auth admin plane (§6.5), and
 for the same reason: the operator's ordinary uid is the most exposed on the host and is
 deliberately **not** in `euler-web`, so it cannot dial `msg.sock` at all.
 
@@ -2073,6 +2128,7 @@ which meant `msg_api.py` decided what a row was for and the command decided agai
 | the row is | the label it carries | what `msg act <id>` does |
 | --- | --- | --- |
 | a **key issued to you** | save | writes your enc-key file, reading the payload from the thread over the socket, so no key material reaches the browser |
+| **half a key** (`key-split`) | reconstruct | `key-reconstruct <share>` — the sealed half is read from the thread over the socket, unwrapped with your private key and completed with the half committed in your clone; same destination as save, one step longer |
 | somebody else's **key request**, read by staff | authorize | `user-authorize <id>` — the public key is read over the socket, and nobody retypes 64 hex characters off a screen |
 | a **pull request**, read by staff | merge | `gh-merge merge` — no id is needed, the verb walks the pull requests as GitHub knows them, and the merge closes this notice by the branch in its subject |
 | anything else | *(none)* | prints it and marks it read |
@@ -2119,7 +2175,7 @@ a convenience.
 
 ### 13.7 The `msg` command
 
-Verb-split like `users` (§6.3), registered from `solver/web/msg/commands.py`. Whichever
+Verb-split like `users` (§6.5), registered from `solver/web/msg/commands.py`. Whichever
 plane answers is `client.py`'s problem: a web shell's uid is in `euler-web`, so the PTY
 child dials `msg.sock` directly; the operator's terminal uid deliberately is not, and falls
 back to `sudo` against the admin socket.
@@ -2129,10 +2185,15 @@ msg list                                       # everything waiting for you, new
 msg read <id>                                  # one message, and mark it read
 msg act <id>                                   # do what it asks (see below)
 msg send subject="…" body="…"                  # → staff, the default audience
-msg send to=alice@example.com,bob@… subject="…" body="…"   # STAFF-only recipients
+msg send to=u3f9a2c,u81b0de subject="…" body="…"           # STAFF-only recipients
 msg send to=everyone subject="…" body="…"      # STAFF: broadcast
 msg dismiss <id>                               # drop a message you are done with
 ```
+
+Recipients are named by **slug**, and the menu offers them from the tracked roster (§6.3) —
+a plain read of the checkout, so a maintainer over the web gets the same list the operator's
+terminal does. An e-mail address still resolves (`box_of` collapses either form to the same
+box key), but nothing has to publish one to address a message.
 
 The subject and body are `name=value` tokens rather than bare positionals because the
 message id is the one argument that reads naturally in the leading position — `msg read
@@ -2149,8 +2210,10 @@ floor there is one possible answer (`staff`), and it is the default.
 **`act` is the message's own verb.** `save` used to be a verb for one message kind, so the
 reader had to know which of seven verbs their message wanted. A message knows what it is
 for: `verb_for(subject, is_staff=…, is_own=…)` in `solver/web/msg/__init__.py` maps it to
-**save** (take the key it carries), **authorize** (grant the key it asks for — staff, and
-not your own request), **merge** (land the pull request it announces — staff), or **read**.
+**save** (take the key it carries), **reconstruct** (complete the *half* key it carries with
+the half committed in the clone — `key-split`'s message), **authorize** (grant the key it asks
+for — staff, and not your own request), **merge** (land the pull request it announces —
+staff), or **read**.
 That one function is also what labels the header chip's rows, so the button and the command
 cannot drift, and the two staff acts are unreachable below `maintainer` because the function
 never hands them out there. Each act cleans up after itself, so nothing is left to dismiss:
@@ -2274,7 +2337,7 @@ exfiltration path.
 
 **`admin` is web-reachable.** With the channel axis gone, an `admin` account signed in
 over the web could run the highest-privilege operations. In practice the admin API will
-not assign `admin` to a web identity (§6.3), so this requires an out-of-band root edit —
+not assign `admin` to a web identity (§6.5), so this requires an out-of-band root edit —
 but nothing in the resolver caps it. **Why accepted:** the containment that matters is the
 uid plus SRP plus the profile grant, not which keyboard the request came from. **Standing
 controls:** keep `admin` assigned to the operator alone; the admin plane stays wheel-gated

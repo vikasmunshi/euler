@@ -9,6 +9,11 @@ The key material it relies on (your identity and the master key) is described in
 [User Guide §7](user-guide.md#7-key-exchange). Encryption is opt-in per file via
 `.gitattributes` (only `solutions/private/`).
 
+Three companion guides cover the schemes around it: the [Vault Guide](vault-guide.md) for how
+your private key rests encrypted, the [Secret Sharing Guide](secret-sharing-guide.md) for the
+2-of-2 master-key split (`key-split` / `key-reconstruct`), and the [SRP Guide](srp-guide.md)
+for the web login, which shares no key material with any of this.
+
 ---
 
 ## 1. What it does
@@ -225,7 +230,8 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 | --- | --- |
 | `rekey` | Rotate to a new master key, re-wrap it to **every** authorised public key, and re-encrypt tracked private files (`git add --renormalize`). Requires the current key to verify first. |
 | `authorize <public-key-hex>` | Wrap the current master key to another public key (add a user). |
-| `key-split <n> <t>` / `key-reconstruct <t>` | Split the master key into `n` shares (any `t` reconstruct) / recover it from `t` shares. |
+| `key-split <identity> [<public-key>]` | Send someone half the master key, sealed to their public key; the other half is `/etc/euler/share.json` on the host. The first run (or the first after a rotation) writes that half and stops. |
+| `key-reconstruct <share>` | Unwrap the half you were sent, complete it from the repository, prove the result, and store it. What `msg act` runs on a `key-split` message. |
 
 ---
 
@@ -233,15 +239,28 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 
 - **Add a user:** they run `solver user`, which creates their identity and files a key
   request over the message spool. A maintainer works it with `solver "authorize <message-id>"`
-  — the key and the requester come from the thread — and the payload is sent back as a reply.
-  The user runs `msg act <id>` to write it, and their private solutions decrypt in place.
+  — the key and the requester come from the thread. That records their public key in the
+  tracked roster (`users/users.json`) and delivers **half** the master key, sealed to that
+  key; the other half is `/etc/euler/share.json`, which their instance on this host already
+  reads. They run `msg act <id>`, and their private solutions decrypt in place.
+- **Lay the host's half:** `solver "key-split"` (maintainer), once per host. With no half yet
+  — or one from before a rotation — it writes `/etc/euler/share.json` and **stops**;
+  `user-authorize` refuses until it is there. It is never committed: a share published in a
+  public repository is no second factor at all.
+- **Authorize a machine that is not on this host:** `solver "host-authorize <public-key>
+  <email>"` (admin). There is no shared half to complete off the host, so this mails the whole
+  master key sealed to that machine's public key, and the far end runs `host-unlock` and pastes
+  the block. Two factors rather than three, deliberately — see the
+  [Secret Sharing Guide](secret-sharing-guide.md).
 - **Rotate your own key:** `solver "user --regen"`. It carries the master key to the new key
   itself; nobody else is involved, and nothing is published.
 - **Rotate the master key:** `solver rekey` (admin). It verifies the current key, generates a
-  new one, writes yours, re-issues it by message to every `public_key` registered on the
-  account roster (`users set-key`), and re-encrypts the tracked private files. Commit the
-  re-encrypted blobs. An account with no registered public key **loses access at that
-  rotation** and is named before you confirm — sometimes the intent, never a surprise.
+  new one, writes yours, re-issues it by message to every public key in the roster
+  (`users set-keys` fills it), and re-encrypts the tracked private files — redrawing the
+  host's share along with them, so `key-split` never completes a half against a retired
+  key. Commit the re-encrypted blobs. An account with no public key in the roster **loses
+  access at that rotation** and is named before you confirm — sometimes the intent, never a
+  surprise.
 
 > A rekey changes every encrypted blob (the derived keys change). Make sure all
 > private files are checked out (plaintext present) before rotating, then commit

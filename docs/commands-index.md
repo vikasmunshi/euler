@@ -75,9 +75,11 @@ a parameter that accepts repetition.
 | [`git-reset`](#command-git-reset-reset) | `reset` | `reader` | Soft-reset your branch to origin/master — un-commit, keep every change. |
 | [`git-status`](#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
-| [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Reconstruct the master key from Shamir shares and store it for this user. |
+| [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
+| [`host-unlock`](#command-host-unlock) | — | `admin` | Take the mailed block from `host-authorize` and unlock this machine. |
+| [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Unwrap the half you were sent, complete it from the repository, store the key. |
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
-| [`key-split`](#command-key-split) | — | `maintainer` | Print Shamir shares of the current master key. |
+| [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`manage-config`](#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
@@ -102,7 +104,7 @@ a parameter that accepts repetition.
 | [`update-tags`](#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`update-usd-rate`](#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
-| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Wrap the master key for someone else and send it to them. |
+| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
 | [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 | [`vault`](#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
@@ -1064,28 +1066,107 @@ git-sync
 
 ---
 
-#### Command: `key-reconstruct`
+#### Command: `host-authorize`
 
-Reconstruct the master key from Shamir shares and store it for this user.
+Mail the master key, sealed to one machine's public key — the off-host grant.
 
-* ⚑ needs reader or above.
+* ⚑ needs admin.
+* ✎ asks for anything you leave out.
 
-Prompts for the shares one at a time, reconstructs the key, and writes it wrapped to
-this holder's public key — the recovery path when no `user-authorize` grant is coming.
-Needs a private key already in place: run `user` first.
+`key-split` needs both halves to be reachable: the sealed message, and the half sitting on
+this host. A machine that is not *on* this host has no second half, so there is nothing to
+complete — and the spool cannot reach it either. This is that case, and it trades the
+split's third factor for a channel that actually arrives: the whole master key, sealed to
+the machine's public key so it is inert to the mail provider and to every mailbox it
+passes through, delivered by e-mail with a marked block to copy.
+
+The far end runs `host-unlock` and pastes the block. Nothing is recorded here and nothing
+is registered: an off-host machine has no account, no slug and no instance — which is why
+this asks for a public key rather than an identity.
+
+Mail is submitted through the loopback relay from **this terminal**, which the egress
+firewall permits for the operator's uid and bars for every per-user one. When the relay
+cannot be reached the block is printed instead, so the grant is never lost to a mail
+problem — send it yourself, by any channel you trust.
 
 **usage**
 
 ```
-key-reconstruct
-[threshold=<int>] (default 2)
+host-authorize
+[public_key=<str>] (asked)
+[email=<str>] (asked)
 ```
 
 **arguments**
 
 | argument | description |
 |----------|-------------|
-| `threshold` | How many shares to ask for — the threshold the shares were split at. Defaults to 2. |
+| `public_key` | The 64-hex X25519 public key of the machine being authorized — what `user` prints there. |
+| `email` | Where to send it. Their address, or your own if you intend to forward it by another route. |
+
+*Defined in* `solver.crypto.keys.host_authorize`.
+
+---
+
+#### Command: `host-unlock`
+
+Take the mailed block from `host-authorize` and unlock this machine.
+
+* ⚑ needs admin.
+* ✎ asks for anything you leave out.
+
+The receiving half of the off-host grant, and the same proof as every other way in: the
+payload must unwrap with **this machine's** private key and its `verify` must decrypt to
+the known text. Only then does it replace what is here — the file it overwrites may be the
+only thing between this machine and the whole private tree, so a bad or mistargeted block
+has to fail before the write, not be discovered after it.
+
+Paste everything between the markers; the surrounding prose is ignored, and so is whatever
+the mail client did to the line breaks.
+
+**usage**
+
+```
+host-unlock
+[payload=<str>] (asked)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `payload` | The block from the mail. Asked for over several lines when it is not given — end with a blank line. |
+
+*Defined in* `solver.crypto.keys.host_unlock`.
+
+---
+
+#### Command: `key-reconstruct`
+
+Unwrap the half you were sent, complete it from the repository, store the key.
+
+* ⚑ needs reader or above.
+* ✎ asks for anything you leave out.
+
+What `msg act` does with a `key-split` message, and what to run by hand when the share
+reached you some other way. The half sent to you is **sealed to your public key**, so
+only this machine's private key opens it; the other half is the one this machine already
+holds (`/etc/euler/share.json` on the host). The reconstructed key is proved before
+anything is written, and then stored wrapped to your public key. Needs a private key
+already in place: run `user` first.
+
+**usage**
+
+```
+key-reconstruct
+[share=<str>] (asked)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `share` | The share from your message — the wrapped blob as sent, or a bare 262-hex share handed to you out of band. Asked for when it is not given. |
 
 *Defined in* `solver.crypto.keys.key_reconstruct`.
 
@@ -1128,27 +1209,42 @@ key-rekey
 
 #### Command: `key-split`
 
-Print Shamir shares of the current master key.
+Send someone half the master key, sealed to their public key.
 
 * ⚑ needs maintainer or above.
+* ✎ asks for anything you leave out.
 
-Any `threshold` of the printed shares reconstruct the key through `key-reconstruct`;
-fewer reveal nothing. Store them apart from each other.
+Two halves of a 2-of-2 split, and **neither is worth anything alone**. One sits on this
+host (`/etc/euler/share.json`, readable by every uid there and written only by the
+operator); the other is minted per recipient, **sealed to that recipient's X25519 public
+key** — read from the tracked roster — and sent through the message spool, which they take
+with `msg act`: that runs `key-reconstruct`, unwraps their half, puts the two together,
+and writes their enc-key file.
+
+So a delivery has three independent parts and an attacker needs all of them: the message,
+the private key that opens it, and access to the host. That is the difference from an
+issued key, which is inert without the private key and nothing more — a stolen `~/.euler`
+plus a copy of the spool is enough for one and not for the other.
+
+The first run is the host's: with no local half yet (or one that predates the current
+master key) this **writes it and stops**, so nobody is sent a half they could not
+complete. Run it again to send. Off this host there is no shared half at all — use
+`host-authorize`.
 
 **usage**
 
 ```
 key-split
-[num_shares=<int>] (default 3)
-[threshold=<int>] (default 2)
+[identity=<str>] (asked)
+[public_key=<str>] (default '')
 ```
 
 **arguments**
 
 | argument | description |
 |----------|-------------|
-| `num_shares` | How many shares to print. Defaults to 3. |
-| `threshold` | How many of them are needed to reconstruct the key. Must be at least 2 and no more than `num_shares`. Defaults to 2. |
+| `identity` | Who to send the other half to. Not asked — and not used — on the run that writes the repository's share. |
+| `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before `users set-keys` has swept. Defaults to '', which reads it from `users/users.json`. |
 
 *Defined in* `solver.crypto.keys.key_split`.
 
@@ -1941,7 +2037,7 @@ user
 
 #### Command: `user-authorize` (`authorize`)
 
-Wrap the master key for someone else and send it to them.
+Record someone's public key and send them half the master key.
 
 * ⚑ needs maintainer or above.
 
@@ -1949,22 +2045,23 @@ Wrap the master key for someone else and send it to them.
 
 - a **16-hex message id** — the key-authorization request their `user` command filed
   (`msg list` shows them). The key and the requester come from that message, the grant
-  is confirmed, the payload is sent as **its own message** for them to `msg act` on, and
-  the request is dismissed — it is worked, and a queue that keeps worked requests is a
-  queue nobody trusts;
+  is confirmed, the half is sent as **its own message** for them to `msg act` on, and the
+  request is dismissed — it is worked, and a queue that keeps worked requests is a queue
+  nobody trusts;
 - a **64-hex public key** — the same act by hand, for a key that reached you some other
   way. *identity* names who to send it to.
 
-**Nothing is written to a shared file, because there is no shared file.** The payload is
-the whole of the recipient's enc-key file — `verify` plus the master key wrapped to their
-public key — and it travels through the spool for the same reason the old tracked file
-could sit in a public repo: without their private key it is inert. They run `msg act` on it
-to take it; until they do, nothing has changed for them.
+Two things happen, and the first is the durable one. The public key is written to the
+**tracked roster** (`users/users.json`), which is what a later rotation re-issues against
+and what every shell — terminal or web — can read without `sudo`. Then delivery goes
+through `key-split`: half the master key, sealed to that public key, against the half the
+repository already carries. So a grant is never one artefact — the message, the private
+key that opens it and a current clone are all needed, and the recipient's own
+`key-reconstruct` proves the result before it writes anything.
 
-The public key is also registered on their account (as `users set-keys` does in bulk),
-which is what `key-rekey` reads when it re-issues a rotated key. Best-effort: it needs
-the admin plane, so from a web shell it prints the command for the operator instead of
-failing the grant. Aliased as `authorize`.
+That is why this needs the repository's half to be **committed and pushed first**: it
+refuses rather than sending a half nobody can complete. `key-split` on its own lays that
+half down. Aliased as `authorize`.
 
 **usage**
 

@@ -131,6 +131,7 @@ solver/
   auth/                — The authorization kernel — identity, profiles, and the ladder.
     authorizations.py  — The authorization policy — `authorizations.json`.
     identity.py        — Identity resolution → a :class:`~solver.auth.subject.Subject`.
+    roster.py          — The tracked collaborator roster — `users/users.json`.
     subject.py         — The authorization **subject** — the resolved security principal.
   core/
     download.py        — Utility for downloading and caching files via HTTP.

@@ -52,6 +52,15 @@ authoritative command-language spec:
 | [Command Index](docs/commands-index.md)    | reference               | every command's aliases, flags, and exact usage                                  |
 | [Language reference](docs/syntax.md)       | the command language    | surface syntax, canonical form, semantics                                        |
 
+The cryptography has a guide per scheme — the mathematics, and how this project uses it:
+
+| Guide                                                  | Covers                                                                               |
+|--------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [Git Filter Guide](docs/gitfilter-guide.md)            | transparent encryption of `solutions/private/` — clean/smudge, the master key         |
+| [Vault Guide](docs/vault-guide.md)                     | envelope encryption of `~/.euler` — PBKDF2, AES-GCM, session-key delivery             |
+| [SRP Guide](docs/srp-guide.md)                         | SRP-6a web login — the verifier, the handshake, mutual proof                          |
+| [Secret Sharing Guide](docs/secret-sharing-guide.md)   | Shamir thresholds and the 2-of-2 master-key split (`key-split` / `key-reconstruct`)   |
+
 The command catalogue and command index are regenerated from the live registry by the
 `update-docs` shell command - `solver "update-docs"` after changing any command's name,
 alias, help, or usage (`solver "update-docs --check"` fails if they are stale).
@@ -235,6 +244,7 @@ solver/
   auth/                — The authorization kernel — identity, profiles, and the ladder.
     authorizations.py  — The authorization policy — `authorizations.json`.
     identity.py        — Identity resolution → a :class:`~solver.auth.subject.Subject`.
+    roster.py          — The tracked collaborator roster — `users/users.json`.
     subject.py         — The authorization **subject** — the resolved security principal.
   core/
     download.py        — Utility for downloading and caching files via HTTP.
