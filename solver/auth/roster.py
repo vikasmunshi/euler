@@ -34,19 +34,17 @@ not to publish who a collaborator is. The spool routes by that slug too (`box_of
 non-address unchanged), so a slug-keyed roster is enough to address a message, and the
 slug → identity mapping stays on the host where it belongs.
 
-**Lifecycle: immutable dated facts, not mutable states.** The stamps here (`invited`,
-`provisioned`, `key_issued`, `removed`) record what the **operator did**, dated at the moment
-it did it, and `created` records when the host's own account record was written. None of them
-can drift, because none of them can change once true — which is the property that makes a copy
-safe. The states a *user* drives (registration) and the states enforcement depends on
-(`disabled`) deliberately stay on the host and are joined in at display time: a mirror of
-`disabled` reading `active` for a locked-out account is the kind of stale copy that gets
-trusted.
+**Lifecycle: acts, not states.** The stamps here (`invited`, `provisioned`, `key_issued`,
+`removed`) record what the **operator did**, dated at the moment it did it. They cannot drift,
+because nothing but the operator writes them. The states a *user* drives (registration) and
+the states enforcement depends on (`disabled`) deliberately stay on the host and are joined in
+at display time: a mirror of `disabled` reading `active` for a locked-out account is the kind
+of stale copy that gets trusted.
 
-`created` arrives only by way of `scripts/ops/migrate-roster.py`, for the accounts that
-predate this file. The acts *it* cannot know — when they were invited, when they were issued a
-key — are left empty rather than guessed at: a plausible wrong date is worse than an absent
-one, and everything from here on records its own act as it happens.
+For the accounts that predate this file, `scripts/ops/migrate-roster.py` dated those acts from
+what the host could still show — the registration record, the enc-key file's mtime — and fell
+back to the migration's own timestamp where nothing could be deduced. An approximate date on
+an act that certainly happened beats an empty field that reads as "never".
 
 **Single writer.** The operator's `users` / `user-authorize` / `key-split` / `key-rekey` paths
 write this file and commit it; **no service and no per-user shell ever writes it**. That is
@@ -97,8 +95,7 @@ class UserEntry(TypedDict, total=False):
     invited: str                         # operator acts, ISO-8601 UTC, immutable once written
     provisioned: str
     key_issued: str                      # when the master key was last issued to `public_key`
-    removed: str
-    created: str                         # when the host's own record was written (see below)
+    removed: str | None                  # the date they were removed, or null while they are not
 
 
 class Roster(TypedDict, total=False):
@@ -184,7 +181,7 @@ def slug_of(identity: str) -> str:
     return system_slug(name) if '@' in name else name
 
 
-def upsert(identity: str, **fields: str) -> Path:
+def upsert(identity: str, **fields: str | None) -> Path:
     """Merge *fields* into *identity*'s record and write the file; returns the path.
 
     Merge rather than replace: the acts that touch a record arrive at different times from

@@ -7,18 +7,27 @@ not a tool, and everything it does is done by the ordinary account verbs from he
 
 Two halves of one change:
 
-1. **Backfill `users/users.json`** for the accounts that predate it. `users set-keys` (now
-   gone) recorded only a public key and a scope, so the records are missing the profile
-   mirror and every date. What can be filled honestly is filled: the profile from
-   `/etc/euler/authorizations.json`, the scope, and `created` — the date the host's own SRP
-   record was written. The lifecycle stamps a grant writes (`key_issued`) and the ones an
-   invite writes (`invited`, `provisioned`) are **not** invented: those acts happened before
-   anything recorded them, and a plausible-looking wrong date is worse than an absent one.
+1. **Backfill `users/users.json`** to the shape it was designed for — profile, scope, the
+   operator's dated acts, and the public key — for the accounts that predate it. Every act
+   recorded here certainly happened; only the dates were never written down, so each is dated
+   from the closest thing the host can still show, and from the migration's own clock when
+   nothing can:
 
-   `created` is a host fact rather than an operator act, which is a line the roster otherwise
-   holds. It qualifies on the property that line is really about: it is **immutable and
-   dateable**, so it cannot drift into a lie. `disabled` and registration state are mutable,
-   and stay on the host where they are read fresh.
+   - `invited`, `provisioned` ← **the SRP record's `created`**. They were invited and
+     provisioned before they could possibly register, so registration is a true upper bound
+     rather than a date invented for the field.
+   - `key_issued` ← **the mtime of their `~/.euler/enc-key.json`**. That file is written when
+     a grant is taken, so its mtime *is* when they last received the key.
+   - `removed` ← **null**. Nobody being migrated has been removed.
+   - anything undeducible ← **the migration timestamp**. An approximate date on an act that
+     certainly happened beats an empty field, which reads as "never".
+
+   A **local** os-login gets neither `invited` nor `provisioned`: those acts did not happen
+   late, they did not happen at all — a bare login is a map entry with no invite and no
+   instance. It does get a public key, since its home holds an enc-key file like any other.
+
+   The earlier revision of this script wrote a `created` field that is not part of the
+   schema; it is removed here.
 
 2. **Strip `public_key` from `/var/lib/euler-auth/users.json`.** That store holds the login
    secrets; a second copy of the public keys only created a pair that could disagree. The
@@ -34,8 +43,9 @@ from __future__ import annotations
 import json
 import os
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
@@ -56,21 +66,38 @@ def _load(path: Path) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def _public_key_of(slug: str) -> str:
-    """The public key in *slug*'s own enc-key file, or `''` when there is not exactly one.
+def _enc_key_file(name: str) -> Path:
+    """Where *name*'s enc-key file lives — their home is named for their slug (or login)."""
+    return Path(f'/home/{name}') / '.euler' / 'enc-key.json'
+
+
+def _public_key_of(name: str) -> str:
+    """The public key in *name*'s own enc-key file, or `''` when there is not exactly one.
 
     Their file holds two records — `verify` and the master key wrapped to their public key —
     so the entry that is not `verify` *is* the key. No unwrapping, no private key, no master
     key: this reads a name, not a secret. It is also the only place the key can be read from,
     since `~/.euler/id` is vault-encrypted and that vault opens only in its owner's session.
+
+    Local logins included, deliberately: a bare os-login has a home and an enc-key file like
+    anyone else, and the operator — the one account that is certainly a key holder — is one.
     """
-    data = _load(Path(f'/home/{slug}') / '.euler' / 'enc-key.json')
+    data = _load(_enc_key_file(name))
     keys = [key for key in data if key != 'verify' and len(str(key)) == 64]
     return str(keys[0]) if len(keys) == 1 else ''
 
 
-def backfill_roster(dry_run: bool) -> int:
-    """Fill in profile, scope and `created` for every account the host knows about."""
+def _key_issued_at(name: str) -> str:
+    """When *name* last took a grant: the mtime of the enc-key file writing one produces."""
+    try:
+        stamp = _enc_key_file(name).stat().st_mtime
+    except OSError:
+        return ''
+    return datetime.fromtimestamp(stamp, UTC).isoformat(timespec='seconds')
+
+
+def backfill_roster(dry_run: bool, now: str) -> int:
+    """Bring every account the host knows about up to the roster's designed shape."""
     profiles: dict[str, str] = {str(name).strip().lower(): str(profile)
                                 for name, profile in (_load(AUTHZ).get('users') or {}).items()}
     accounts: dict[str, dict[str, Any]] = _load(AUTH_STORE).get('users') or {}
@@ -81,25 +108,43 @@ def backfill_roster(dry_run: bool) -> int:
     for identity in sorted(set(profiles) | set(accounts)):
         scope = 'web' if '@' in identity else 'local'
         slug = system_slug(identity) if scope == 'web' else identity
-        fields: dict[str, str] = {'scope': scope}
+        fields: dict[str, str | None] = {'scope': scope, 'removed': None}
         if identity in profiles:
             fields['profile'] = profiles[identity]                # the mirror; the host decides
-        if created := str(accounts.get(identity, {}).get('created', '')):
-            fields['created'] = created
-        if scope == 'web' and (public_key := _public_key_of(slug)):
+        if public_key := _public_key_of(slug):
             fields['public_key'] = public_key                     # only what they actually hold
+            fields['key_issued'] = _key_issued_at(slug) or now
+        if scope == 'web':
+            # Invited and provisioned before they could possibly have registered, so the
+            # registration date is a true upper bound; the migration clock where even that
+            # is missing (an invite nobody has taken up yet).
+            when = str(accounts.get(identity, {}).get('created', '')) or now
+            fields['invited'] = fields['provisioned'] = when
         entry = roster.user_entry(slug) or {}
-        if all(entry.get(key) == value for key, value in fields.items()):
+        stale_created = 'created' in entry                        # written by an earlier revision
+        if not stale_created and all(entry.get(key) == value for key, value in fields.items()):
             continue
-        print(f'  {slug}: {", ".join(f"{k}={v[:16]}" for k, v in sorted(fields.items()))}')
+        print(f'  {slug}: {", ".join(sorted(fields))}'
+              f'{" (dropping created)" if stale_created else ""}')
         changed += 1
         if not dry_run:
+            if stale_created:
+                _drop_field(slug, 'created')
             roster.upsert(slug, **fields)
     print(f'{changed} roster record(s) {"would be " if dry_run else ""}updated '
           f'({roster.roster_path()})')
     if changed and not dry_run:
         print('  → commit and push it: the roster is tracked')
     return 0
+
+
+def _drop_field(slug: str, field: str) -> None:
+    """Remove one field from one record — `upsert` merges, so this is how a key leaves."""
+    data = roster.read_roster()
+    entry: dict[str, Any] = dict(data.get('users', {}).get(slug) or {})
+    entry.pop(field, None)
+    data.setdefault('users', {})[slug] = cast(roster.UserEntry, entry)
+    roster.write_roster(data)
 
 
 def strip_public_keys(dry_run: bool) -> int:
@@ -129,12 +174,14 @@ def strip_public_keys(dry_run: bool) -> int:
 
 def main(argv: list[str]) -> int:
     dry_run = '--dry-run' in argv
+    now = roster.stamp()                    # one timestamp for the whole run, so it reads as one act
     if dry_run:
         print('dry run — nothing will be written\n')
     print(f'roster:     {roster.roster_path()}')
     print(f'auth store: {AUTH_STORE}')
-    print(f'policy:     {AUTHZ}\n')
-    return backfill_roster(dry_run) or strip_public_keys(dry_run)
+    print(f'policy:     {AUTHZ}')
+    print(f'undeducible dates will read {now}\n')
+    return backfill_roster(dry_run, now) or strip_public_keys(dry_run)
 
 
 if __name__ == '__main__':
