@@ -10,6 +10,7 @@ solver.ai.update_models,True
 solver.ai.update_usd_rate,True
 solver.auth.authorizations,
 solver.auth.identity,
+solver.auth.roster,
 solver.auth.subject,
 solver.config,
 solver.core.download,
