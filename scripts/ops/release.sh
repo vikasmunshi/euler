@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Cut a new version and ship it — the whole release turnaround, in one command.
 #
-#   bash scripts/ops/make-new-version.sh [--dry-run] [--yes] [--skip-updates]
-#                                        [--no-deploy] [--no-follow] [--no-tmux] [--log FILE]
+#   bash scripts/ops/release.sh [--dry-run] [--yes] [--skip-updates]
+#                               [--no-deploy] [--no-follow] [--no-tmux] [--log FILE]
 #
 # The release flow is four steps that are always run in the same order and are easy to run
 # out of order (or to stop half-way through) by hand:
@@ -513,7 +513,7 @@ STEPS="$(mktemp "${TMPDIR:-/tmp}/euler-new-version-steps-XXXXXX.sh")" \
 
 cat > "${STEPS}" <<'STEPS_EOF'
 #!/usr/bin/env bash
-# Steps 3 and 4 of scripts/ops/make-new-version.sh, detached from the terminal that
+# Steps 3 and 4 of scripts/ops/release.sh, detached from the terminal that
 # started them. Generated per run and deleted on exit — do not edit; edit the parent.
 set -uo pipefail
 
