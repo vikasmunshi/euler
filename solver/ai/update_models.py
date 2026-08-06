@@ -16,10 +16,16 @@ rewritten — the enum members, their inline comments, and the `price` map. Cura
 comments are preserved across regenerations; a newly discovered model is commented with its
 display name. Everything outside the markers is left untouched.
 
-The USD→EUR rate `costs` converts with is *not* here: it is one managed setting refreshed by
+The USD→EUR rate `costs` converts with is *not* here: it is one setting refreshed by
 :mod:`solver.ai.update_usd_rate`, a maintainer command. It was split out because it is a
 different job at a different rung, and because a rate that drifts daily made `--check` below
 report stale on almost every run.
+
+The header's date stamp had crept back into the same trap from the other side: rendered as
+*today* and compared, it made the block differ from itself on any day it had not already
+been regenerated. It now records when the catalogue last **changed**, and a comparison
+ignores it (:func:`_undated`), so a release no longer carries a commit that moved a date and
+nothing else.
 
 Exposed as the `update-models` shell command: `solver "update-models"` to rewrite,
 `solver "update-models --check"` to verify (exit 1 if the block is out of date, writing
@@ -57,6 +63,9 @@ _PRICE_RE = re.compile(r'\$\s*([\d.]+)')
 #: A trailing dated-snapshot suffix (`-20251001`) normalised back to the alias form.
 _SNAPSHOT_RE = re.compile(r'-\d{8}$')
 
+#: The header's date stamp, so a comparison can ignore it. See :func:`_undated`.
+_DATED_RE = re.compile(r'\(last changed [^;]*;')
+
 
 def _ordinal(day: int) -> str:
     """`1` → `1st`, `2` → `2nd`, `18` → `18th`, `23` → `23rd`."""
@@ -71,6 +80,18 @@ def _today() -> str:
     """Today rendered as e.g. `18th June 2026`."""
     today = date.today()
     return f'{_ordinal(today.day)} {today:%B %Y}'
+
+
+def _undated(text: str) -> str:
+    """*text* with the header's date neutralised, for asking whether anything **else** moved.
+
+    The date is the one part of the block that changes without the catalogue changing, so
+    comparing it would make every run a rewrite: the block would be "out of date" on any day
+    it had not already been regenerated, `--check` would fail daily, and a release would
+    carry a commit that moved a date and nothing else. That is the same trap
+    `update-usd-rate` was split out of this command to escape, arriving by another door.
+    """
+    return _DATED_RE.sub('(last changed …;', text)
 
 
 def _enum_name(model_id: str) -> str:
@@ -176,7 +197,8 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
         for model_id, _display, inp, out in models
     ]
     return '\n'.join([
-        f'class Model(StrEnum):  # Available models (as of {_today()}; pricing from platform.claude.com)',
+        f'class Model(StrEnum):  # Available models (last changed {_today()}; '
+        f'pricing from platform.claude.com)',
         *members,
         '',
         '    @property',
@@ -208,6 +230,10 @@ def update_models(check: bool = False) -> int:
     with its display name. Nothing outside the markers is touched, and the USD→EUR rate is
     `update-usd-rate`'s to refresh.
 
+    The header's date says when the catalogue last **changed**, not when it was last looked
+    at: a run that finds nothing new writes nothing, so `--check` passes on any day the
+    models and their prices have not moved.
+
     A regenerated block is committed, staging `models.py` and nothing beside it.
 
     Args:
@@ -223,7 +249,9 @@ def update_models(check: bool = False) -> int:
         return ExitCodes.EXIT_ERROR
     body = _render(models, _existing_comments())
     rendered = _BLOCK_RE.sub(lambda m: f'{m.group(1)}{body}\n{m.group(2)}', original)
-    if rendered == original:
+    if _undated(rendered) == _undated(original):
+        # Nothing but the date differs, so nothing is written: the date says when the
+        # catalogue last *moved*, which is what a reader of a price table wants to know.
         if check:
             console.print('[success]models are up to date[/success]')
             return ExitCodes.EXIT_OK
