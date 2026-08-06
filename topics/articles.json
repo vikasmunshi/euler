@@ -552,7 +552,7 @@
     {
       "path": "domain/computational-geometry",
       "title": "Computational geometry",
-      "status": "draft",
+      "status": "final",
       "solved": 8,
       "problems": 46,
       "tags": ["computational-geometry"],
