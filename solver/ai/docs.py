@@ -20,8 +20,9 @@ from solver.shell import console
 from solver.templates.engine import Templates, filled_template
 from solver.utils.path_utils import write_file
 
+#: Notes run long — this ceiling is deliberately above `config.max_output_tokens`,
+#: which sizes a generated *solution*.
 max_output_tokens: int = 32_000
-api_timeout: float = 600.0  # seconds
 test_cases_retries: int = 2
 
 
@@ -54,7 +55,7 @@ def _generate_doc(prompt: str, model: Model, images: dict[str, bytes] | None = N
                 max_tokens=max_output_tokens,
                 system=system_blocks,
                 messages=messages,
-                timeout=api_timeout,
+                timeout=config.api_timeout,
         ) as stream:
             response = stream.get_final_message()
         usage = response.usage

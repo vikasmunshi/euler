@@ -143,7 +143,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
         `update-tags` reconciles the tag graph a *contributor* writes as they solve, so it
         reaches contributor and above — the solver skill runs it in the same pass that
         authors a problem's `tags.json`. `update-usd-rate` refreshes one managed setting in
-        `config.json` — data, and only what `costs` converts with — which is maintainer's.
+        `values.conf` — data, and only what `costs` converts with — which is maintainer's.
         `update-models` and `update-docs` generate source and keep their admin floor above
         (tested with the other admin-only verbs)."""
         self.assertIn('update-tags', self.web['contributor'])

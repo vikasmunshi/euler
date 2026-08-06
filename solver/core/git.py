@@ -113,7 +113,7 @@ TARGET_PATHS: dict[str, tuple[str, ...]] = {
     'solutions': ('solutions/',),
     'docs': ('docs/',),
     'topics': ('topics/', 'solutions/**/tags.json'),
-    'update': ('README.md', 'solver/modules.csv', 'solver/config.json', 'solver/ai/models.py',
+    'update': ('README.md', 'solver/modules.csv', 'solver/config/values.conf', 'solver/ai/models.py',
                'solver/ai/claude/CLAUDE.md', 'solver/web/content/home-summary.md'),
 }
 
@@ -123,7 +123,7 @@ TARGET_PATHS: dict[str, tuple[str, ...]] = {
 #: spans everything the four verbs write, so `git-commit docs update` lands a whole
 #: regeneration as one reviewable commit. An automatic commit has nobody looking, so it must
 #: not sweep up a sibling verb's uncommitted output — `update-models` staging the `update` set
-#: would carry off a stale `config.json` that `update-usd-rate` had not committed yet.
+#: would carry off a stale `values.conf` that `update-usd-rate` had not committed yet.
 #:
 #: Note `solver/ai/claude/CLAUDE.md` rather than the root `CLAUDE.md`: the root name is a
 #: gitignored symlink onto it, so the tracked path is the target's.
@@ -132,15 +132,15 @@ GENERATED_PATHS: dict[str, tuple[str, ...]] = {
                     'solver/ai/claude/CLAUDE.md', 'solver/web/content/home-summary.md'),
     'update-models': ('solver/ai/models.py',),
     'update-tags': ('topics/', 'solutions/**/tags.json'),
-    'update-usd-rate': ('solver/config.json',),
+    'update-usd-rate': ('solver/config/values.conf',),
 }
 
 
 def _in_scope(path: str, scope: tuple[str, ...]) -> bool:
     """Whether *path* is inside *scope*: `dir/` by prefix, `a/**/b` by glob, else exactly.
 
-    The exact and glob forms are what keep a scope narrow: `solver/config.json` admits that
-    one file and never the `solver/` tree around it, and `solutions/**/tags.json` admits a
+    The exact and glob forms are what keep a scope narrow: `solver/config/values.conf` admits
+    that one file and never the `solver/` tree around it, and `solutions/**/tags.json` admits a
     problem's tag leg without admitting the solution beside it.
     """
     for entry in scope:

@@ -346,8 +346,9 @@ you have solved a problem, or translate your Python into C for comparison.
   it starts, and records it as you switch.
 - **`-s` / `--save`** tees the interactive session (typed input + console output)
   to the session log.
-- **`manage-config`** shows or sets the managed settings (the solution timeouts
-  and `ecb_usd_rate`); they persist to `solver/config.json`.
+- **Settings** are a variable, not a command: `{config}` prints every one of them
+  (`{config.timeout_single}` for a single setting), and changing one means editing
+  `solver/config/values.conf`, which states them all with a comment on each.
 - **`! <cmd>`** runs a bash command in the current problem's solution directory
   (`! sh` / `! py` drop into a shell / Python interpreter).
 

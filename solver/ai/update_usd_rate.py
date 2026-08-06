@@ -3,13 +3,16 @@
 """The `update-usd-rate` command: refresh the USD→EUR reference rate.
 
 The Claude API prices every model in US dollars; `costs` reports the accumulated spend in
-euros. The conversion is a single managed setting, `ecb_usd_rate` in `solver/config.json`,
+euros. The conversion is a single setting, `ecb_usd_rate` in `solver/config/values.conf`,
 and currencies drift daily — so rather than hand-edit it, this command refreshes it from
 the European Central Bank's euro reference rates (`eurofxref-daily.xml`): authoritative,
 free, and needing no key. The feed quotes `1 EUR = N USD`, so `ecb_usd_rate` is `N`.
 
-Nothing else is touched: the rate is written back through `config.dump_managed_config()`,
-which round-trips only the settings named in `Config.managed`.
+Nothing else is touched, and that is meant literally: the rate is written back through
+`set_value`, which rewrites the one line assigning it and leaves the rest of the file —
+its sections, its comments, its other settings — exactly as it found them. Every other
+setting in that file is chosen by a person; this one is the only one kept up to date by a
+command, which is why it is the only one a command may write.
 
 This used to be the second half of `update-models`. The two moved apart because they are
 different jobs at different rungs — one regenerates package source from the model
@@ -26,6 +29,7 @@ __all__ = ['update_usd_rate']
 import re
 
 from solver.config import ExitCodes, config
+from solver.config.values import set_value
 from solver.core.download import download_file
 from solver.core.git import commit_regenerated
 from solver.shell import console, register
@@ -55,9 +59,9 @@ def _fetch_ecb_usd_rate() -> float | None:
     return float(match.group(1))
 
 
-# Maintainer: the rate is a *managed setting* — data in `solver/config.json`, the same file
-# `manage-config` edits — and it shapes what `costs` reports about API spend. Curating that
-# is maintainer's work. It writes no code, which is what separates it from `update-models`
+# Maintainer: the rate is *data* — one line in `solver/config/values.conf` — and it shapes
+# what `costs` reports about API spend. Curating that is maintainer's work. It writes no
+# code, which is what separates it from `update-models`
 # above it: this command's blast radius is one float that only a cost report reads.
 #
 # Unlike `update-models`, the write target is per-clone and per-user, so this completes
@@ -67,7 +71,7 @@ def update_usd_rate(check: bool = False) -> int:
     """Refresh the USD→EUR rate used to report API costs.
 
     Fetches the euro reference rate from the European Central Bank's daily feed and writes it
-    to `ecb_usd_rate` in `config.json`, the managed setting `costs` converts API spend with.
+    to `ecb_usd_rate` in `values.conf`, the setting `costs` converts API spend with.
     A rate within a rounding step of the stored one is left alone. Nothing else is touched.
 
     A rate that moved is committed, staging that one file and nothing beside it.
@@ -93,8 +97,8 @@ def update_usd_rate(check: bool = False) -> int:
         return ExitCodes.EXIT_ERROR
 
     previous, config.ecb_usd_rate = config.ecb_usd_rate, rate
-    config.dump_managed_config()
+    set_value(config.values_file, 'ecb_usd_rate', rate)
     console.print(f'[success]updated[/success] ecb_usd_rate in '
-                  f'{config.managed_config_file.relative_to(config.root_dir)} '
+                  f'{config.values_file.relative_to(config.root_dir)} '
                   f'([accent]{previous} → {rate}[/accent])')
     return commit_regenerated('update-usd-rate', quips['update-usd-rate'], [f'ecb_usd_rate: {previous} → {rate}'])

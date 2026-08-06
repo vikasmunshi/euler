@@ -1,11 +1,10 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `problems` and `manage-config` commands."""
+"""The `problems` command."""
 from typing import Literal
 
-__all__ = ['manage_config']
+__all__ = ['problems']
 
-from solver.config import config, ExitCodes
 from solver.core.problems import Problem, problems as problem_set
 from solver.shell import register, console
 
@@ -35,42 +34,3 @@ def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
         console.print(f'[accent.dim]{problem}[/accent.dim]')
     console.print(f'[accent]num {which} problems = {len(collection)}[/accent]')
     return 0
-
-
-@register(requires='admin')
-def manage_config(
-        param: Literal['all', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
-        value: float | int | None = None, /,
-) -> int:
-    """Show or update a managed configuration setting.
-
-    The managed settings persist to `solver/config.json` and override the
-    defaults in `config.py`: `timeout_single` / `timeout_multiple` (solution
-    timeouts in seconds for a single run and for repeated runs), and
-    `ecb_usd_rate` (the rate `costs` uses).
-
-    Args:
-        param: Which setting to act on. Defaults to 'all', which prints every setting.
-        value: The new value to assign to `param`, coerced to the setting's type and saved.
-            Defaults to '', which prints the setting's current value instead.
-    """
-    config_params: list[str] = ['timeout_multiple', 'timeout_single', 'ecb_usd_rate']
-    if param == 'all':
-        param_len: int = max(len(p) for p in config_params) + 1
-        for config_param in config_params:
-            console.print(f'[accent.dim]{config_param:<{param_len}}:[/accent.dim] {config[config_param]}')
-        return ExitCodes.EXIT_OK
-    if param not in config_params:
-        console.print(f'[error]unknown config parameter:[/error] {param}')
-        return ExitCodes.EXIT_USAGE
-    if value is None:
-        console.print(f'[accent.dim]{param}:[/accent.dim] {config[param]}')
-        return ExitCodes.EXIT_OK
-    try:
-        setattr(config, param, type(config[param])(value))
-        config.dump_managed_config()
-        console.print(f'[success]config parameter updated:[/success] {param} = {value}')
-        return ExitCodes.EXIT_OK
-    except ValueError:
-        console.print(f'[error]invalid value `{value}` for config parameter:[/error] {param}')
-        return ExitCodes.EXIT_USAGE

@@ -122,6 +122,11 @@ include = ["solver*"]
 # utils/loader.py); it must ship in the wheel so the deployed venv can import
 # the command modules.
 solver = ["*.html", "modules.csv"]
+# values.conf carries every setting's shipped value. The working tree's copy is what the
+# shell actually reads, so this is the fallback for a deployed venv whose tree somehow
+# lacks it — but without it, `pip install` would produce a package that cannot state its
+# own defaults, and the fallback would be the thing that is missing.
+"solver.config" = ["*.conf"]
 # `config.templates_dir` is package-relative, so the whole template set must ship:
 # the AI prompts (prompt_*.txt), the C solution template (new.c — new.py is a module
 # and ships anyway) and the blogger's article.md. Without these a deployed shell's

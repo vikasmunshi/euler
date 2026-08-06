@@ -8,6 +8,7 @@ The package is split by *what a value is*, not by who reads it:
   shell's explicit `enter_repo()`. Stdlib-only; the git-filter path may import it.
 - :mod:`~solver.config.config` — the static settings: every path and constant, and the
   `Config` class that holds them. Imports stdlib, `solver.version` and this package only.
+- :mod:`~solver.config.values` — reading `values.conf`, the editable half.
 - :mod:`~solver.config.identity` — dynamic: the resolved `Subject`, and per-user state.
 - :mod:`~solver.config.theme` — dynamic: the `rich` theme and `prompt_toolkit` style.
 
@@ -24,11 +25,12 @@ configuration stays pure: no chdir, no `PATH` edit, no identity resolution, no `
 """
 from __future__ import annotations
 
-__all__ = ['Config', 'ExitCodes', 'REPO_ROOT_ENV', 'config', 'enter_repo', 'package_root', 'repo_root']
+__all__ = ['Config', 'ExitCodes', 'REPO_ROOT_ENV', 'ValuesError', 'build_config', 'config',
+           'enter_repo', 'package_root', 'repo_root', 'settable_fields']
 
-from solver.config.config import Config, ExitCodes
+from solver.config.config import Config, ExitCodes, ValuesError, build_config, settable_fields
 from solver.config.paths import REPO_ROOT_ENV, enter_repo, package_root, repo_root
 
 #: The process-wide configuration singleton. Constructing it reads no identity and moves
 #: no process (see the module docstring), so import order carries no surprises.
-config: Config = Config()
+config: Config = build_config()

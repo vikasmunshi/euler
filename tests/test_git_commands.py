@@ -555,7 +555,7 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solutions/problems.json',
                       'docs/user-guide.md', 'topics/articles.json',
-                      'solutions/public/p0042/tags.json', 'README.md', 'solver/config.json']
+                      'solutions/public/p0042/tags.json', 'README.md', 'solver/config/values.conf']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -565,7 +565,7 @@ class GhPrTest(_GitCommandCase):
         """A regeneration is no longer a separate verb: one queue, one gate."""
         self.as_profile('maintainer')
         self.files = ['docs/user-guide.md', 'topics/articles.json', 'README.md',
-                      'solver/modules.csv', 'solver/config.json', 'solver/ai/claude/CLAUDE.md']
+                      'solver/modules.csv', 'solver/config/values.conf', 'solver/ai/claude/CLAUDE.md']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -573,12 +573,12 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
 
     def test_only_the_named_files_under_solver_are_admitted(self) -> None:
-        """`solver/config.json` is in scope; the `solver/` tree around it is not."""
+        """`solver/config/values.conf` is in scope; the `solver/` tree around it is not."""
         self.as_profile('maintainer')
         self.files = ['solver/config.py']
         self.assertEqual(git.gh_merge('merge', 12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
-        self.files = ['solver/config.json']
+        self.files = ['solver/config/values.conf']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -761,7 +761,7 @@ class CommitTargetsTest(unittest.TestCase):
 
     def test_update_is_what_the_generators_write_outside_docs(self) -> None:
         self.assertEqual(git._commit_paths(self.problem, ('update',)),
-                         ['README.md', 'solver/modules.csv', 'solver/config.json',
+                         ['README.md', 'solver/modules.csv', 'solver/config/values.conf',
                           'solver/ai/models.py', 'solver/ai/claude/CLAUDE.md',
                           'solver/web/content/home-summary.md'])
 
@@ -836,7 +836,7 @@ class GitCommitTest(_GitCommandCase):
                                         message='regenerate'), 0)
         self.assertEqual(self.cmdlines, [
             "git add -A docs/ topics/ ':(glob)solutions/**/tags.json' README.md "
-            'solver/modules.csv solver/config.json solver/ai/models.py '
+            'solver/modules.csv solver/config/values.conf solver/ai/models.py '
             'solver/ai/claude/CLAUDE.md solver/web/content/home-summary.md '
             "&& git commit --message regenerate"])
 
@@ -965,10 +965,10 @@ class CommitRegeneratedTest(_GitCommandCase):
     def test_a_verb_stages_only_its_own_output(self) -> None:
         """The reason this is not the `update` git-commit target: that target spans every
         generated file on purpose, so `update-models` using it would carry off an
-        uncommitted `config.json` belonging to `update-usd-rate`."""
+        uncommitted `values.conf` belonging to `update-usd-rate`."""
         git.commit_regenerated('update-models', ('quip',))
         self.assertIn('solver/ai/models.py', self.cmdlines[0])
-        self.assertNotIn('solver/config.json', self.cmdlines[0])
+        self.assertNotIn('solver/config/values.conf', self.cmdlines[0])
 
     def test_a_failed_commit_is_reported_not_swallowed(self) -> None:
         self.rcs = [1]

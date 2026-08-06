@@ -474,7 +474,7 @@ class ContentServiceTests(AioHTTPTestCase):
             self.assertEqual(resp.status, 200, path)
         # …but nothing outside the declared-readable trees, and no traversal
         for path in ('/docs/file/solver/config.py',          # solver source, not readable
-                     '/docs/file/solver/config.json',        # not a declared-readable tree
+                     '/docs/file/solver/config/values.conf',        # not a declared-readable tree
                      '/docs/file/solver/templates/../config.py',
                      '/docs/file/../README.md'):
             resp = await self.client.get(path, headers=_READER)

@@ -16,6 +16,7 @@ solver.config.config,
 solver.config.identity,
 solver.config.paths,
 solver.config.theme,
+solver.config.values,
 solver.core.download,
 solver.core.evaluate,True
 solver.core.git,True

@@ -106,9 +106,7 @@ class RotationRehomeTests(unittest.TestCase):
             patcher = patch.dict(crypto_config, {key: value})
             patcher.start()
             self.addCleanup(patcher.stop)
-        # `config` serves its settings out of a `_data` dict via __getattr__, so the entry is
-        # what there is to patch — there is no attribute to shadow.
-        patcher = patch.dict(import_module('solver.config').config._data, {'root_dir': self.repo})
+        patcher = patch.object(import_module('solver.config').config, 'root_dir', self.repo)
         patcher.start()
         self.addCleanup(patcher.stop)
         # Both loaders are process-wide lru_caches, and each test mints its own keypair: left
