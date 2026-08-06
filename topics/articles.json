@@ -2478,7 +2478,7 @@
     {
       "path": "domain/recurrence-relation",
       "title": "Recurrence relation",
-      "status": "draft",
+      "status": "final",
       "solved": 27,
       "problems": 129,
       "tags": ["recurrence-relation"],
