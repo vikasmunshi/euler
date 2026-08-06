@@ -1,4 +1,7 @@
 {
+  "enabledMcpjsonServers": [
+    "pycharm"
+  ],
   "permissions": {
     "allow": [
       "Bash(autoflake *)",
@@ -35,7 +38,8 @@
       "Skill(claude-api)",
       "Skill(claude-api:*)",
       "Skill(update-config)",
-      "WebFetch(domain:console.anthropic.com)"
+      "WebFetch(domain:console.anthropic.com)",
+      "mcp__pycharm"
     ]
   }
 }
