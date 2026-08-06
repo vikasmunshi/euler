@@ -133,9 +133,10 @@ solver/
     roster.py          — The collaborator roster — `/etc/euler/roster/users.json`.
     subject.py         — The authorization **subject** — the resolved security principal.
   config/              — Configuration: `from solver.config import config` — the one way in.
-    config.py          — The static configuration: every path and constant the solver reads, declared once.
+    env.py             — Reading `env.conf` — which environment variable carries each web-service setting.
     identity.py        — Dynamic configuration: **who** this process is running as.
     paths.py           — The two anchors every other path hangs off — and the one deliberate side effect.
+    settings.py        — The static configuration: every path and constant the solver reads, declared once.
     theme.py           — Dynamic configuration: how the shell **looks**.
     values.py          — Reading `values.conf` — the editable half of the configuration.
   core/
