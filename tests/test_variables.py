@@ -181,6 +181,37 @@ class NamedChoicesTests(unittest.TestCase):
         self.assertEqual(looped[0][0], 12, 'the loop body sees the object, not a Choice')
         self.assertEqual(self._choices(Ask(choices='open_widgets'))[0].value, '12')
 
+    def test_which_narrows_the_set_to_what_this_question_can_take(self) -> None:
+        """One variable behind every menu of the same thing; each question says which part.
+
+        The alternative was a variable per menu — `holders` beside `accounts` — which meant
+        two readings of the same file that could, and did, disagree about which records were
+        still live.
+        """
+        @variable('the open widgets')
+        def open_widgets() -> list[_Pull]:
+            return [_Pull((12, 'a title')), _Pull((13, 'another'))]
+
+        self.addCleanup(_forget, 'open_widgets')
+        ask = Ask(choices='open_widgets', which=lambda widget: widget[0] == 13)
+        self.assertEqual([choice.value for choice in self._choices(ask)], ['13'])
+
+    def test_which_sees_the_item_not_its_rendered_row(self) -> None:
+        """A filter reads the object's own fields — `account.holds_key`, not a row of text."""
+        @variable('the open widgets')
+        def open_widgets() -> list[_Pull]:
+            return [_Pull((12, 'a title'))]
+
+        self.addCleanup(_forget, 'open_widgets')
+        seen: list[object] = []
+        self._choices(Ask(choices='open_widgets', which=lambda item: seen.append(item) or True))
+        self.assertIsInstance(seen[0], _Pull)
+
+    def test_which_narrows_a_callable_set_too(self) -> None:
+        ask = Ask(choices=lambda _ctx, _bound: [Choice('a'), Choice('b')],
+                  which=lambda choice: choice.value == 'b')
+        self.assertEqual([choice.value for choice in self._choices(ask)], ['b'])
+
     def test_a_callable_still_works(self) -> None:
         ask = Ask(choices=lambda _ctx, _bound: [Choice('a')])
         self.assertEqual(self._choices(ask), [Choice('a')])

@@ -161,12 +161,16 @@ def _thread_choices(_: Context, bound: dict[str, Any]) -> list[Choice]:
             for thread in mailbox]
 
 
-@variable('who a message can be sent to')
-def recipients() -> list[Choice | roster.Account]:
-    """Who a message can go to: staff, everyone, plus every collaborator in the roster.
+def _recipient_choices(_: Context, __: dict[str, Any]) -> list[Choice]:
+    """Who a message can go to: two audiences, then every collaborator in the roster.
+
+    A callable rather than a variable, and not a filter on `{accounts}` either: `staff` and
+    `everyone` are **not accounts**. They are routing keys the spool accepts — which is why
+    this cannot be `choices='accounts', which=…`, and why naming the whole thing as a
+    variable would name a set that only a menu has any use for.
 
     Asked of staff only (:func:`_needs_recipients`), so `staff` leads but is not the whole
-    menu. The names come from the roster (`/etc/euler/roster/users.json`), a plain file read
+    menu. The people come from the roster (`/etc/euler/roster/users.json`), a plain file read
     — so a maintainer over the web gets the same menu the operator's terminal does, where the
     old admin-plane read left them the two words and nothing else.
 
@@ -176,11 +180,10 @@ def recipients() -> list[Choice | roster.Account]:
     roster has not caught up with can be typed — and it never raises: a menu is not a gate,
     and the service decides what it will actually accept.
     """
-    options: list[Choice | roster.Account] = [
-        Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
-        Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
+    options = [Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
+               Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
     try:
-        options.extend(roster.accounts(scope='web'))
+        options.extend(account.__choice__() for account in roster.accounts(scope='web'))
     except Exception:                                        # noqa: BLE001 — a menu, not a gate
         pass
     return options
@@ -511,7 +514,7 @@ def msg(action: Annotated[Literal['list', 'read', 'send', 'dismiss', 'act'],
                                    empty='no messages')] = '',
         subject: Annotated[str, Ask('Subject', when=_is_send)] = '',
         body: Annotated[str, Ask('Message', when=_is_send, multiline=True)] = '',
-        to: Annotated[str, Ask('Who should receive it?', choices='recipients',
+        to: Annotated[str, Ask('Who should receive it?', choices=_recipient_choices,
                                when=_needs_recipients, strict=False)] = '') -> int:
     """Read and send messages: what is waiting for you, and what it asks you to do.
 

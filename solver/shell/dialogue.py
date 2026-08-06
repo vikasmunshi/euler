@@ -31,7 +31,7 @@ command body never grows an `if not thread:` block.
 """
 from __future__ import annotations
 
-__all__ = ['Abort', 'Action', 'Ask', 'Choice', 'Choices', 'Choosable', 'MENU_MAX', 'SKIP',
+__all__ = ['Abort', 'Action', 'Ask', 'Choice', 'Choices', 'Choosable', 'Filter', 'MENU_MAX', 'SKIP',
            'WalkResult', 'as_choice', 'choose', 'confirm', 'interactive', 'pause', 'secret',
            'select', 'sure', 'text', 'walk']
 
@@ -108,6 +108,10 @@ Choices = Callable[[Any, dict[str, Any]], Sequence[Choice]]
 #: Decides whether a parameter is worth asking about at all, given the arguments bound so far.
 Predicate = Callable[[dict[str, Any]], bool]
 
+#: Decides whether one member of a choice set belongs in *this* menu. Sees the item itself —
+#: an `Account`, a `PullRequest` — not its rendered row.
+Filter = Callable[[Any], bool]
+
 
 @dataclass(frozen=True)
 class Ask:
@@ -131,6 +135,11 @@ class Ask:
     #: an earlier answer, which a variable cannot see. None derives the options from the
     #: annotation — `Literal` members, enum values, `bool` — so a static set needs neither.
     choices: Choices | str | None = None
+    #: Narrows `choices` to the members this question may take — `key-split` offers the
+    #: accounts a share can be *sealed* to, not every account. A subset is not a second set:
+    #: filtering here is what keeps one variable behind every menu of the same thing, rather
+    #: than a variable per menu that each re-read the same file and drifted.
+    which: Filter | None = None
     when: Predicate | None = None
     #: Shown when `choices` comes back empty: the emptiness is the answer ("no messages to
     #: read"), which a prefix-filtering completer could never tell us.

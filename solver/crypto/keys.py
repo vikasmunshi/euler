@@ -69,7 +69,6 @@ from solver.crypto.ciphers import (enc_key_payload, encrypt_blob, load_private_k
 from solver.shell import console, register
 from solver.shell import dialogue
 from solver.shell.dialogue import Abort, Ask, sure
-from solver.shell.variables import variable
 from solver.web.auth.commands import registered_public_keys
 from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT
 
@@ -1204,16 +1203,15 @@ def _recipient_key(identity: str, public_key: str) -> X25519PublicKey | None:
     return _public_key_from(token)
 
 
-@variable('collaborators a sealed share can be sent to')
-def holders() -> list[roster.Account]:
-    """Who a share can be sent to — `{accounts}` filtered to those with a key to seal it to.
+def _holds_a_key(account: Any) -> bool:
+    """Whether a share can actually be sealed to *account* — the filter a share menu needs.
 
-    A filter and not a second read: an account with no public key is left out rather than
-    offered, because `key-split` would refuse it a moment later and a menu must never offer
-    what the command will then refuse. Non-strict all the same, so a slug the roster has not
-    caught up with can still be typed.
+    An account with no public key is left out rather than offered: `key-split` would refuse
+    it a moment later, and a menu must never offer what the command will then refuse. A
+    filter on `{accounts}` rather than a variable of its own, because "who has a key" is a
+    property of an account, not a second list of people.
     """
-    return [account for account in roster.accounts() if account.holds_key]
+    return bool(getattr(account, 'holds_key', False))
 
 
 def _local_share_ready() -> bool:
@@ -1244,7 +1242,8 @@ def _sends_a_share(_: dict[str, Any]) -> bool:
 
 @register(requires='maintainer')
 def key_split(identity: Annotated[str, Ask('Who should receive the other half?',
-                                           choices='holders', when=_sends_a_share,
+                                           choices='accounts', which=_holds_a_key,
+                                           when=_sends_a_share,
                                            strict=False)] = '',
               public_key: str = '') -> int:
     """Send someone half the master key, sealed to their public key.

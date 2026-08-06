@@ -493,20 +493,30 @@ def _print_arg_error(spec: _CommandSpec, ctx: Context, args: tuple[str, ...], ex
 def _declared_choices(ask: Ask, ctx: Context, bound: dict[str, Any]) -> list[Choice]:
     """The options `Ask.choices` declares, whichever way it declares them.
 
-    A **string names a shell variable**: the same list `loop {open_prs}:` iterates, rendered
+    A **string names a shell variable**: the same list `loop {accounts}:` iterates, rendered
     for a menu through :func:`~solver.shell.dialogue.as_choice`. It is read here rather than
-    at import, so the queue is the one that exists when the question is put.
+    at import, so the set is the one that exists when the question is put.
 
     A callable is handed the context and the arguments bound so far, which is what a variable
     cannot see — `msg act` labels each row with what acting on it would do.
+
+    `Ask.which` then narrows it, seeing each member as it comes out of the set rather than as
+    a rendered row: one variable behind every menu of the same thing, and each question saying
+    which part of it it can take.
     """
-    if not isinstance(ask.choices, str):
-        return list(ask.choices(ctx, bound)) if ask.choices is not None else []
-    try:
-        value = variables[ask.choices]
-    except KeyError:
-        raise NameError(f'undefined variable: {ask.choices}') from None
-    return [as_choice(item) for item in (value() if callable(value) else value)]
+    if isinstance(ask.choices, str):
+        try:
+            value = variables[ask.choices]
+        except KeyError:
+            raise NameError(f'undefined variable: {ask.choices}') from None
+        items: list[Any] = list(value() if callable(value) else value)
+    elif ask.choices is not None:
+        items = list(ask.choices(ctx, bound))
+    else:
+        return []
+    if ask.which is not None:
+        items = [item for item in items if ask.which(item)]
+    return [as_choice(item) for item in items]
 
 
 def _ask_completions(spec: _CommandSpec, ctx: Context, name: str, incomplete: str,
