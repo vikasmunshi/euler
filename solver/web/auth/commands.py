@@ -57,7 +57,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from rich.text import Text
 
@@ -65,10 +65,20 @@ from solver.auth import roster
 from solver.auth.identity import system_slug
 from solver.config import config
 from solver.shell import console, register
-from solver.shell.dialogue import Action, Choice, SKIP, choose, walk
+from solver.shell.dialogue import Action, Ask, Choice, SKIP, choose, walk
+from solver.shell.variables import variable
 
 #: Profiles assignable to a web account (`admin` is local-os-login-only).
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')
+
+#: The verbs that act on an account that already exists, and so can offer a menu of them.
+#: `add` names one that does not yet; `list`, `process-requests` and `redeploy` name none.
+_ACCOUNT_VERBS: frozenset[str] = frozenset({'change', 'enable', 'disable', 'remove'})
+
+
+def _names_an_account(bound: dict[str, Any]) -> bool:
+    """Whether this verb acts on an existing account, and so is worth offering a menu for."""
+    return str(bound.get('action') or '') in _ACCOUNT_VERBS
 
 
 def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
@@ -251,6 +261,18 @@ def account_identities() -> list[str]:
     return roster.slugs(scope='web')
 
 
+@variable('the collaborator accounts on the roster')
+def accounts() -> list[Choice]:
+    """Every web account, as the admin verbs and a key grant name them.
+
+    The roster's slugs, which is what those verbs act on and what the message spool routes
+    by. Read from the checkout, so a web shell gets the same menu the operator's terminal
+    does. Not a gate: `users add` names an account that does not exist yet, so the menu is
+    never strict — it saves typing a slug out, and the command still decides.
+    """
+    return [Choice(slug) for slug in account_identities()]
+
+
 def registered_public_keys() -> dict[str, str] | None:
     """`{slug: public_key}` for every collaborator the roster records one for.
 
@@ -307,7 +329,8 @@ def _report_drift() -> None:
 @register(requires='admin')
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
                           'remove', 'redeploy'] = 'list',
-          identity: str = '',
+          identity: Annotated[str, Ask('Which account?', choices='accounts', strict=False,
+                                       when=_names_an_account, empty='no accounts yet')] = '',
           profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
 
@@ -330,9 +353,11 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
             `enable` / `disable` the web SRP state; `remove` drops the account or entry;
             `redeploy` re-asserts the per-user host layer and re-lays every collaborator's
             git hooks, dropping live shells. Defaults to `list`.
-        identity: Whose account to act on: a web email (with `@`) or a local OS login.
-            Required for the account verbs, unused by `list` / `process-requests` /
-            `redeploy`.
+        identity: [asked] Whose account to act on: a web email (with `@`) or a local OS
+            login. Offered as a menu of the roster for the verbs that act on an account
+            that already exists — `change` / `enable` / `disable` / `remove` — and not
+            asked for the others, since `add` names one that does not yet and `list` /
+            `process-requests` / `redeploy` name none.
         profile: The profile to assign, for `add` / `change`. `admin` is valid only for a
             local os-login, never a web account.
     """

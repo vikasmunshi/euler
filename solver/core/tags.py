@@ -325,7 +325,8 @@ def topics(problem: Problem) -> int:
 
 
 @register(requires='reader')
-def topic(name: str) -> int:
+def topic(name: Annotated[str, Ask('Which topic?', choices='articles', strict=False,
+                                   empty='no topics indexed — run `update-tags`')]) -> int:
     """List a topic article's declared tags and what each one maps to.
 
     Reads the article's `<!-- tags: [...] -->` declaration and, for each slug, prints its
@@ -334,8 +335,9 @@ def topic(name: str) -> int:
     matches.
 
     Args:
-        name: The article to report on: a `folder/leaf` path under `topics/`, or a bare
-            leaf name when it is unambiguous.
+        name: [asked] The article to report on: a `folder/leaf` path under `topics/`, or a
+            bare leaf name when it is unambiguous. Offered as a menu when omitted; not
+            strict, so a leaf name still works.
     """
     path = _find_article(name)
     if path is None:

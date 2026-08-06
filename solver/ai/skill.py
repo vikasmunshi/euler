@@ -8,7 +8,7 @@ __all__ = ['claude_solve', 'claude_blog']
 import json
 import shlex
 import subprocess
-from typing import Annotated, Any, Callable, Iterable, Literal
+from typing import Annotated, Any, Callable, Iterable, Literal, NamedTuple
 
 from prompt_toolkit.completion import Completion
 from rich.live import Live
@@ -20,7 +20,8 @@ from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
-from solver.shell.dialogue import Ask
+from solver.shell.dialogue import Ask, Choice
+from solver.shell.variables import variable
 
 
 #: What each action does, for the menu the adapter puts when one is left out.
@@ -82,24 +83,52 @@ def _find_topic(topic: str) -> dict[str, Any] | None:
             or next((r for r in rows if r['path'].rsplit('/', 1)[-1] == topic), None))
 
 
-def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """`claude-blog` targets: every topic in the article index as its `<folder>/<slug>` path —
-    the tag pages *and* the curated ones — **sorted alphabetically**.
+class Article(NamedTuple):
+    """One writable topic: a tag's own page or a curated one, as the index records it."""
 
-    Ranking by how much needs writing sounds helpful and is not: what a maintainer types is the
-    name of the topic they have in mind, and a list whose order shifts as pages get written is
-    one you cannot learn. Each entry shows its folder, the number of problems behind it, and
-    its status."""
-    rows = sorted((r for r in _topic_index() if incomplete in r['path']), key=lambda r: r['path'])
-    return [Completion(r['path'], start_position=-len(incomplete), display=r['path'].rsplit('/', 1)[-1],
-                       display_meta=f"{r['path'].rsplit('/', 1)[0]} · "
-                                    f"{len({ref.split('_')[0] for ref in r.get('refs', [])})}"
-                                    f" · {r['status']}")
-            for r in rows]
+    path: str
+    status: str
+    #: How many problems sit behind it — the reason to write it, or not.
+    problems: int
+
+    @property
+    def leaf(self) -> str:
+        """The name without its folder — what a maintainer has in mind when they type."""
+        return self.path.rsplit('/', 1)[-1]
+
+    @property
+    def folder(self) -> str:
+        return self.path.rsplit('/', 1)[0]
+
+    def __choice__(self) -> Choice:
+        """The row: the leaf reads, the full path is what the command binds."""
+        return Choice(self.path, self.leaf, f'{self.folder} · {self.problems} · {self.status}')
+
+
+@variable('every writable topic — the tag pages and the curated ones')
+def articles() -> list[Article]:
+    """The article index, **sorted alphabetically**.
+
+    Ranking by how much needs writing sounds helpful and is not: what a maintainer types is
+    the name of the topic they have in mind, and a list whose order shifts as pages get
+    written is one you cannot learn.
+    """
+    return sorted((Article(row['path'], row['status'],
+                           len({ref.split('_')[0] for ref in row.get('refs', [])}))
+                   for row in _topic_index()), key=lambda article: article.path)
+
+
+def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
+    """`claude-blog` targets: every topic in the article index, as its `<folder>/<slug>` path."""
+    return [Completion(article.path, start_position=-len(incomplete), display=article.leaf,
+                       display_meta=f'{article.folder} · {article.problems} · {article.status}')
+            for article in articles() if incomplete in article.path]
 
 
 @register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions})
-def claude_blog(ctx: Context, topic: str,
+def claude_blog(ctx: Context,
+                topic: Annotated[str, Ask('Which topic?', choices='articles',
+                                          empty='no topics indexed — run `update-tags`')],
                 additional_prompt: Annotated[str, Ask('Guidance for the writer — an angle, an '
                                                       'emphasis, a constraint — or Enter to '
                                                       'skip', skippable=True)] = '',
@@ -119,7 +148,8 @@ def claude_blog(ctx: Context, topic: str,
 
     Args:
         ctx: [injected] The live shell context; the decorator supplies it.
-        topic: The tag or topic to write about; completion offers the most-referenced first.
+        topic: [asked] The tag or topic to write about. Offered as a menu of the article
+            index when omitted; completion offers the same set.
         additional_prompt: [asked] Extra free-text guidance for the writer. Asked for in an
             interactive shell when omitted — the web's Write / Rewrite actions type a bare
             `claude-blog <path>`, so a maintainer would otherwise never get to pass an

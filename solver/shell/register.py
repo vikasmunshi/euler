@@ -764,11 +764,6 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
     except (ValueError, SyntaxError) as exc:
         _print_arg_error(spec, ctx, args, exc)
         return ExitCodes.EXIT_USAGE
-    try:
-        _ask_missing(spec, ctx, pos_args, kw_args)
-    except Abort as exc:
-        ctx.console.print(f'[muted]{exc.message}[/muted]')
-        return exc.rc
     if spec.problem_param is not None:
         # An explicit `problem=…` keyword (already coerced to a Problem) takes the
         # same path; reject supplying it both ways.
@@ -777,10 +772,20 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
                 _print_arg_error(spec, ctx, args, ValueError("problem given twice (positional and 'problem=')"))
                 return ExitCodes.EXIT_USAGE
             problem = kw_args.pop('problem')
+        # Settled **before** anything is asked: a question about this command's problem —
+        # which of its files to edit — has to be about the problem the command will act on,
+        # and `edit 42` with the filename left out would otherwise offer 41's files.
         if problem is not None:
             variables.problem = problem  # remember the user's choice as the current problem
         else:
             problem = variables.problem  # fall back to (and so default-select) the current problem
+    try:
+        _ask_missing(spec, ctx, pos_args, kw_args)
+    except Abort as exc:
+        ctx.console.print(f'[muted]{exc.message}[/muted]')
+        return exc.rc
+    if spec.problem_param is not None:
+        assert problem is not None
         if spec.problem_positional:
             pos_args = [problem, *pos_args]
         else:

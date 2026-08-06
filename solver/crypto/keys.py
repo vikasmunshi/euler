@@ -329,8 +329,23 @@ def _resolve_key_request(thread_id: str) -> tuple[str, str] | None:
     return found[0], identity
 
 
+def _needs_an_identity(bound: dict[str, Any]) -> bool:
+    """Whether the target carries no identity of its own, and so has to be told one.
+
+    A message id names its author, and taking the identity from the thread is the whole
+    point of the request form. Only a bare public key — which arrived some other way — needs
+    asking, and asking anyway would offer to override what the request already said.
+    """
+    return not _THREAD_ID_RE.fullmatch(str(bound.get('target') or '').strip().lower())
+
+
 @register(requires='maintainer', aliases=('authorize',))
-def user_authorize(target: str, identity: str = '') -> int:
+def user_authorize(target: Annotated[str, Ask('Which key request?', choices='key_requests',
+                                              strict=False,
+                                              empty='no key requests waiting')],
+                   identity: Annotated[str, Ask('Who does the key belong to?',
+                                                choices='accounts', strict=False,
+                                                when=_needs_an_identity)] = '') -> int:
     """Record someone's public key and send them half the master key.
 
     *target* is either form of the same act, told apart by shape:
@@ -356,9 +371,12 @@ def user_authorize(target: str, identity: str = '') -> int:
     half down. Aliased as `authorize`.
 
     Args:
-        target: The 16-hex id of a key-authorization message, or a 64-hex public key.
-        identity: Who the key belongs to. Taken from the thread for the message form;
-            required for the bare-key form, where there is nobody to send it to otherwise.
+        target: [asked] The 16-hex id of a key-authorization message, or a 64-hex public
+            key. Offered as a menu of the waiting requests when omitted; not strict, so a
+            bare key can still be pasted.
+        identity: [asked] Who the key belongs to. Taken from the thread for the message
+            form, so it is only asked for the bare-key form — where there is nobody to send
+            it to otherwise.
     """
     from solver.web.msg.notify import dismiss_thread
     token = target.strip().lower()

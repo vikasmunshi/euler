@@ -51,7 +51,8 @@ from solver.shell.command import Context
 from solver.shell.dialogue import Abort, Ask, Choice
 from solver.shell.variables import variable
 from solver.web.msg.client import call as _call
-from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_SHARE_SUBJECT, PR_REVIEW_SUBJECT, verb_for
+from solver.web.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
+                            PR_REVIEW_SUBJECT, verb_for)
 from solver.web.msg.identity import STAFF_FLOOR
 
 
@@ -124,6 +125,18 @@ def threads() -> list[Thread]:
                    author=str(thread.get('author_name', '')), updated=str(thread.get('updated', '')),
                    unread=bool(thread.get('unread')), verb=_verb_of(thread))
             for thread in result[1].get('threads') or []]
+
+
+@variable('the key-authorization requests waiting to be granted')
+def key_requests() -> list[Thread]:
+    """The messages asking for a master key, which `user-authorize` acts on by id.
+
+    A slice of the same mailbox read: staff see every collaborator's request, so this is
+    the queue a maintainer works through. Filtered on the subject the `user` command files
+    them under, which is also what `user-authorize` checks again before it grants anything
+    — a menu is not a gate.
+    """
+    return [thread for thread in threads() if thread.subject.startswith(KEY_REQUEST_SUBJECT)]
 
 
 def _thread_choices(_: Context, bound: dict[str, Any]) -> list[Choice]:

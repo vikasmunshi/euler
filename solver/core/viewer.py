@@ -18,7 +18,7 @@ import mimetypes
 from functools import lru_cache
 from pathlib import Path
 from subprocess import CalledProcessError, DEVNULL, run
-from typing import Iterable
+from typing import Annotated, Iterable
 
 from prompt_toolkit.completion import Completion
 
@@ -27,7 +27,8 @@ from solver.core import osc
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
-from solver.shell.variables import variables
+from solver.shell.dialogue import Ask
+from solver.shell.variables import variable, variables
 from solver.utils.path_utils import iterdir_recursive
 
 
@@ -75,22 +76,41 @@ def _target_problem(ctx: Context) -> Problem:
     return variables.problem
 
 
+def _files_of(problem: Problem) -> list[str]:
+    """*problem*'s solution-directory files, as `ls` lists them.
+
+    The files with a guessable mimetype, each as a POSIX path relative to the solution
+    directory — the form `edit` and the web viewer expect.
+    """
+    return sorted(name for name in iterdir_recursive(problem.solution_dir, rt='str')
+                  if mimetypes.guess_type(name)[0] is not None)
+
+
+@variable("the current problem's solution files")
+def solution_files() -> list[str]:
+    """The files of the problem the shell is working on.
+
+    The current problem, because that is what a variable can know: by the time a menu is
+    put the adapter has already settled which problem the command acts on, so `edit 42`
+    offers 42's files. In a block, `loop {solution_files}:` walks the workspace problem's.
+    """
+    return _files_of(variables.problem)
+
+
 def _solution_file_completions(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
     """Filename completions for `edit`: the target problem's files, as `ls` lists them.
 
-    The candidates are the solution-directory files with a guessable mimetype (the
-    same set `ls` shows), each as a POSIX path relative to the solution directory —
-    the form `edit`/the web viewer expect. The adapter prefix-filters them.
+    Reads the problem from the tokens typed so far rather than the workspace one, so
+    `edit 42 <TAB>` completes 42's files before the command has run. The adapter
+    prefix-filters them.
     """
-    problem = _target_problem(ctx)
-    return sorted(
-        name for name in iterdir_recursive(problem.solution_dir, rt='str')
-        if mimetypes.guess_type(name)[0] is not None
-    )
+    return _files_of(_target_problem(ctx))
 
 
 @register(requires='contributor', aliases=('ed',), quietable=True, completers={'filename': _solution_file_completions})
-def edit(problem: Problem, filename: str) -> int:
+def edit(problem: Problem,
+         filename: Annotated[str, Ask('Which file?', choices='solution_files',
+                                      empty='no files in this problem yet — run `new`')]) -> int:
     """Open a solution file in the web code editor.
 
     The counterpart to `show` (which opens the rendered problem): *problem* defaults
@@ -108,7 +128,8 @@ def edit(problem: Problem, filename: str) -> int:
 
     Args:
         problem: [problem] The problem owning the file.
-        filename: The solution-directory file to edit, as `ls` lists it. It must already
+        filename: [asked] The solution-directory file to edit, as `ls` lists it. Offered
+            as a menu when omitted. It must already
             exist.
     """
     if '..' in Path(filename).parts or Path(filename).is_absolute() \
