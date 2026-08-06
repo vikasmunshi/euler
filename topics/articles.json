@@ -1965,7 +1965,7 @@
     {
       "path": "domain/number-theory",
       "title": "Number theory",
-      "status": "draft",
+      "status": "final",
       "solved": 20,
       "problems": 142,
       "tags": ["number-theory"],
