@@ -3360,7 +3360,7 @@
     {
       "path": "takeaway/small-cases-reveal-recurrence",
       "title": "Small cases reveal the recurrence",
-      "status": "draft",
+      "status": "final",
       "solved": 1,
       "problems": 1,
       "tags": ["small-cases-reveal-recurrence"],
