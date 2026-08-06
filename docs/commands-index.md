@@ -1901,6 +1901,10 @@ input/output price (per million tokens) from the public pricing page, and rewrit
 with its display name. Nothing outside the markers is touched, and the USD→EUR rate is
 `update-usd-rate`'s to refresh.
 
+The header's date says when the catalogue last **changed**, not when it was last looked
+at: a run that finds nothing new writes nothing, so `--check` passes on any day the
+models and their prices have not moved.
+
 A regenerated block is committed, staging `models.py` and nothing beside it.
 
 **usage**
