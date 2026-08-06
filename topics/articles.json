@@ -2298,7 +2298,7 @@
     {
       "path": "domain/prime-number",
       "title": "Prime number",
-      "status": "draft",
+      "status": "final",
       "solved": 46,
       "problems": 99,
       "tags": ["prime-number"],
