@@ -123,7 +123,7 @@ Variable storage, the reserved names, and the two write channels are defined by
 | `problems` | list[Problem] | every known problem | computed, on each reference |
 | `random` | int | number of a random unsolved problem | computed, on each reference |
 | `rcode` | int | exit code of the most recently run evaluation | the shell |
-| `recipients` | list[Any] | who a message can be sent to | computed, on each reference |
+| `recipients` | list[Choice \| roster.Account] | who a message can be sent to | computed, on each reference |
 | `reserved` | list[str] | sorted list of every reserved name | nothing — fixed |
 | `solution_files` | list[str] | the current problem's solution files | computed, on each reference |
 | `solved` | list[Problem] | the solved problems | computed, on each reference |
