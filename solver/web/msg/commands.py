@@ -53,6 +53,7 @@ from solver.shell.variables import variable
 from solver.web.msg.client import call as _call
 from solver.web.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
                             PR_REVIEW_SUBJECT, verb_for)
+from solver.auth import roster
 from solver.web.msg.identity import STAFF_FLOOR
 
 
@@ -161,7 +162,7 @@ def _thread_choices(_: Context, bound: dict[str, Any]) -> list[Choice]:
 
 
 @variable('who a message can be sent to')
-def recipients() -> list[Any]:
+def recipients() -> list[Choice | roster.Account]:
     """Who a message can go to: staff, everyone, plus every collaborator in the roster.
 
     Asked of staff only (:func:`_needs_recipients`), so `staff` leads but is not the whole
@@ -175,10 +176,10 @@ def recipients() -> list[Any]:
     roster has not caught up with can be typed — and it never raises: a menu is not a gate,
     and the service decides what it will actually accept.
     """
-    options: list[Any] = [Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
-                          Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
+    options: list[Choice | roster.Account] = [
+        Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
+        Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
     try:
-        from solver.auth import roster
         options.extend(roster.accounts(scope='web'))
     except Exception:                                        # noqa: BLE001 — a menu, not a gate
         pass
