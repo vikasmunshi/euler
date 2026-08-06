@@ -13,7 +13,8 @@
       "hash-table",
       "collections-defaultdict-list",
       "dynamic-array",
-      "generation-of-primes"
+      "generation-of-primes",
+      "qsort"
     ]
   },
   "new-tags": []
