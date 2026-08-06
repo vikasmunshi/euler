@@ -51,7 +51,7 @@ reset verb.
 """
 from __future__ import annotations
 
-__all__ = ['users']
+__all__ = ['users', 'account_identities']
 
 import json
 import subprocess
@@ -59,13 +59,13 @@ import sys
 from pathlib import Path
 from typing import Any, Literal
 
+from rich.text import Text
+
 from solver.auth import roster
 from solver.auth.identity import system_slug
 from solver.config import config
-from rich.text import Text
-
 from solver.shell import console, register
-from solver.shell.dialogue import SKIP, Action, Choice, choose, walk
+from solver.shell.dialogue import Action, Choice, SKIP, choose, walk
 
 #: Profiles assignable to a web account (`admin` is local-os-login-only).
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')
@@ -74,10 +74,10 @@ _WEB_PROFILES = ('reader', 'contributor', 'maintainer')
 def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
     """Re-execute the admin CLI under sudo (writes the SoR + reaches euler-auth)."""
     argv = ['sudo', sys.executable, '-m', 'solver.web.auth.admin', action]
-    if action != 'list':                                  # only the roster view takes no args
+    if action != 'list':  # only the roster view takes no args
         argv += [identity, profile]
     try:
-        return subprocess.run(argv, check=False).returncode   # sudo prompt + output go to the terminal
+        return subprocess.run(argv, check=False).returncode  # sudo prompt + output go to the terminal
     except (OSError, KeyboardInterrupt) as exc:
         console.print(f'[error]error:[/error] could not run the admin CLI ({exc})')
         return 1
@@ -210,7 +210,7 @@ def _process_requests() -> int:
         if _add_account(email, profile) != 0:
             console.print('  [error]invite failed — left queued[/error]')
             return 1
-        _sudo_admin('dismiss', email)                  # onboarded → drop it from the queue
+        _sudo_admin('dismiss', email)  # onboarded → drop it from the queue
         console.print(f'  [success]invited {email} ({profile})[/success]')
         return 0
 
@@ -337,12 +337,12 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
             local os-login, never a web account.
     """
     if action == 'list':
-        rc = _sudo_admin('list')                       # roster + pending + invite-request queue
-        _report_drift()                                # …then what the roster disagrees on
+        rc = _sudo_admin('list')  # roster + pending + invite-request queue
+        _report_drift()  # …then what the roster disagrees on
         return rc
 
     if action == 'process-requests':
-        return _process_requests()                     # interactive: accept / ignore / dismiss
+        return _process_requests()  # interactive: accept / ignore / dismiss
 
     if action == 'redeploy':
         # The host plane, not an account verb — so it takes no identity and writes no SoR.
@@ -367,7 +367,7 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
         # Drop the account (SoR + SRP) first; then tear the OS instance down (prompted).
         rc = _sudo_admin('remove', identity, profile)
         if rc == 0 and '@' in identity:
-            _provision_kit('deprovision', system_slug(identity))   # teardown is advisory — the account is already gone
+            _provision_kit('deprovision', system_slug(identity))  # teardown is advisory — the account is already gone
         if rc == 0:
             # Marked removed, never deleted: the record says a key was once issued to that
             # public key, and a rotation reads `removed` to know not to re-issue. Dropping the
@@ -376,7 +376,7 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
                         removed=roster.stamp())
         return rc
 
-    rc = _sudo_admin(action, identity, profile)        # change | enable | disable
+    rc = _sudo_admin(action, identity, profile)  # change | enable | disable
     if rc == 0 and action == 'change':
         # The mirror follows the SoR that just moved. Only `change` touches a profile:
         # enable/disable are SRP state, which deliberately has no copy here.

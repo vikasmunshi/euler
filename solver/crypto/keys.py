@@ -60,9 +60,9 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from solver.auth import roster
 from solver.config import ExitCodes, config as app_config
-from solver.crypto import wire
 from solver.core import osc
 from solver.crypto import vault as vault_mod
+from solver.crypto import wire
 from solver.crypto.ciphers import (enc_key_payload, encrypt_blob, load_private_key, lock,
                                    public_key_hex, read_enc_key_file, read_master_key, unlock,
                                    verify_master_key)
@@ -976,7 +976,7 @@ def _counterpart(secret: bytes, share: str) -> str:
     intercept: int = int.from_bytes(secret, 'big')
     slope: int = (y1 - intercept) * pow(x1, -1, _PRIME) % _PRIME
     x2: int = x1
-    while x2 == x1:                                  # distinct points, or there is no line to draw
+    while x2 == x1:  # distinct points, or there is no line to draw
         x2 = randbelow(_PRIME - 1) + 1
     return _share_text(x2, _eval_poly([intercept, slope], x2))
 
@@ -1053,7 +1053,7 @@ def _write_local_share(master_key: bytes) -> str:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(body)
-        path.chmod(0o644)          # readable by every uid on the host; a share alone is inert
+        path.chmod(0o644)  # readable by every uid on the host; a share alone is inert
         return share
     except OSError:
         pass
@@ -1200,7 +1200,7 @@ def holders() -> list[Choice]:
     `{loop.value}` and has everything there is.
     """
     keys = roster.public_keys()
-    return [Choice(slug, slug, 'has a public key') for slug in sorted(keys)]
+    return [Choice(slug, slug, f'{slug} has a public key') for slug in sorted(keys)]
 
 
 def _local_share_ready() -> bool:
