@@ -300,6 +300,7 @@ Generate one of a problem's solution artifacts through the Claude API.
 
 * ⚑ needs contributor or above.
 * ❏ uses/sets current problem.
+* ✎ asks for anything you leave out.
 
 Dispatches to the generator for *target*, prints the USD/EUR cost of the call, and fails
 if the generator reports failure.
@@ -307,8 +308,9 @@ if the generator reports failure.
 **usage**
 
 ```
-claude-api <c|py|doc|notes|tags|test-cases>
+claude-api
 [problem=<n>] (default current)
+[target=c|py|doc|notes|tags|test-cases] (asked)
 [force=true|--force]
 [major=true|--major]
 [model=claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5|none] (default None)
@@ -319,7 +321,7 @@ claude-api <c|py|doc|notes|tags|test-cases>
 | argument | description |
 |----------|-------------|
 | `problem` | The problem to generate for. |
-| `target` | What to generate: 'c' or 'py' for code, 'doc' to refresh the in-source documentation, 'notes' for `notes.html`, 'tags' for `tags.json`, 'test-cases' for test cases. |
+| `target` | What to generate: 'c' or 'py' for code, 'doc' to refresh the in-source documentation, 'notes' for `notes.html`, 'tags' for `tags.json`, 'test-cases' for test cases. Offered as a menu when omitted. |
 | `force` | Generate even when the target already exists, overwriting it. Defaults to False. |
 | `major` | Regenerate after a major change — a new template or changed instructions — rather than an incremental one. Defaults to False. |
 | `model` | The model to generate with. Defaults to None, which picks Opus for code, docs and notes, and Sonnet for tags and test cases. |
@@ -375,6 +377,7 @@ claude-batch
 Write (or flesh out) a topic article via the claude-euler-blogger skill.
 
 * ⚑ needs maintainer or above.
+* ✎ asks for anything you leave out.
 
 *topic* names what to write about: a tag's `<facet>/<slug>` path (e.g.
 `technique/sieve-of-eratosthenes`), a bare tag slug, or a curated topic path
@@ -391,7 +394,7 @@ final when it is done writing it, and rewriting one is an explicit `--force`.
 
 ```
 claude-blog <topic>
-[additional_prompt=<str>] (default '')
+[additional_prompt=<str>] (asked)
 [force=true|--force]
 ```
 
@@ -400,7 +403,7 @@ claude-blog <topic>
 | argument | description |
 |----------|-------------|
 | `topic` | The tag or topic to write about; completion offers the most-referenced first. |
-| `additional_prompt` | Extra free-text guidance for the writer. Defaults to empty, which prompts for an angle in an interactive shell. |
+| `additional_prompt` | Extra free-text guidance for the writer. Asked for in an interactive shell when omitted — the web's Write / Rewrite actions type a bare `claude-blog <path>`, so a maintainer would otherwise never get to pass an angle. Enter skips it. Defaults to empty. |
 | `force` | Rewrite the article even when it is already final. Defaults to False. |
 
 *Defined in* `solver.ai.skill.claude_blog`.
@@ -413,6 +416,7 @@ Run Claude Code over a problem's solution files, via a skill.
 
 * ⚑ needs contributor or above.
 * ❏ uses/sets current problem.
+* ✎ asks for anything you leave out.
 
 Launches Claude Code headless against the given problem's solution directory,
 runs the requested action, and streams a
@@ -424,8 +428,9 @@ runs `solver` commands, edits files, evaluates, and iterates. Needs the
 **usage**
 
 ```
-claude-solve <solve|review>
+claude-solve
 [problem=<n>] (default current)
+[action=solve|review] (asked)
 [additional_prompt=<str>] (default '')
 ```
 
@@ -434,7 +439,7 @@ claude-solve <solve|review>
 | argument | description |
 |----------|-------------|
 | `problem` | The problem to work on. |
-| `action` | What to do — 'solve' writes and verifies a Python solution, translates it to C, then documents and summarises it; 'review' audits an existing solution for C↔Python parity, in-source documentation and `notes.html`. |
+| `action` | What to do — 'solve' writes and verifies a Python solution, translates it to C, then documents and summarises it; 'review' audits an existing solution for C↔Python parity, in-source documentation and `notes.html`. Offered as a menu when omitted. |
 | `additional_prompt` | Extra free-text instructions appended to the skill invocation. Defaults to empty. |
 
 *Defined in* `solver.ai.skill.claude_solve`.
@@ -1689,6 +1694,7 @@ summary
 Install or uninstall a system resource.
 
 * ⚑ needs admin.
+* ✎ asks for anything you leave out.
 
 Runs the setup script for *target* under `sudo`, after confirming. Each script is
 idempotent, so re-running an install is safe.
@@ -1696,7 +1702,8 @@ idempotent, so re-running an install is safe.
 **usage**
 
 ```
-sys-setup <chrome|dev-env|upgrade-service>
+sys-setup
+[target=chrome|dev-env|upgrade-service] (asked)
 [uninstall=true|--uninstall]
 [show_help=true|--show-help]
 ```
@@ -1705,7 +1712,7 @@ sys-setup <chrome|dev-env|upgrade-service>
 
 | argument | description |
 |----------|-------------|
-| `target` | Which resource to act on: 'chrome', 'dev-env' or 'upgrade-service'. |
+| `target` | Which resource to act on: 'chrome', 'dev-env' or 'upgrade-service'. Offered as a menu when omitted. |
 | `uninstall` | Uninstall the target instead of installing it. Defaults to False. |
 | `show_help` | Print the target script's own help and stop, doing nothing else. Defaults to False. |
 
