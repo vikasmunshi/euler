@@ -80,7 +80,7 @@ class VariableInfo:
 #: interpreter's own state, and their writers are the shell rather than a computation.
 _SEEDED: dict[str, tuple[Kind, str, str]] = {
     'config': ('read-only', 'Config', 'the global configuration singleton'),
-    'loop': ('read-only', 'Any', 'the current loop value; None outside a loop'),
+    'loop': ('shell-set', 'Any', 'the current loop value; None outside a loop'),
     'problem': ('shell-set', 'Problem | None', 'the workspace problem, as an object'),
     'rcode': ('shell-set', 'int', 'exit code of the most recently run evaluation'),
     'reserved': ('read-only', 'list[str]', 'sorted list of every reserved name'),

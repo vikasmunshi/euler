@@ -373,8 +373,9 @@ class MsgNoDeadEndTests(_DialogueCase):
             lambda verb, **kw: (self.calls.append((verb, kw)),
                                 (200, {'threads': [thread], 'queue': [thread]}))[1]))
         self.enterContext(patch.object(msg_commands, '_is_staff', lambda: True))
-        # `Ask(choices=fn)` captures the function *by value* at decoration time, so patching
-        # `_threads` / `_recipients` by name would not be seen. Stub what they read instead.
+        # Both bindings capture *by value* — a callable `Ask(choices=fn)` at decoration time,
+        # a named one at registration — so patching the provider by name would not be seen.
+        # Stub what they read instead, which is the seam that holds for either.
         self.enterContext(patch.object(auth_commands, 'account_identities', lambda: ['a@x.com']))
 
     def _verb(self, verb: str, *answers: str) -> int:

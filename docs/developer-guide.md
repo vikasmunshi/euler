@@ -397,9 +397,10 @@ A question whose answer *is* an argument does not belong in the body. Declare it
 parameter and the adapter puts it:
 
 ```python
-def msg(action: Annotated[Action, Ask('What would you like to do?', labels=_ACTIONS)] = 'list',
-        thread: Annotated[str, Ask('Which message?', choices=_threads, when=_needs_thread,
-                                   empty='no messages')] = '') -> int:
+def gh_merge(action: Literal['list', 'merge'] = 'list',
+             pr_number: Annotated[int, Ask('Which pull request?', choices='open_prs',
+                                           when=_is_merge, empty='no open pull requests')] = 0,
+             ) -> int:
 ```
 
 `Annotated[T, Ask(...)]` rather than a decorator flag, for three reasons: the function stays
@@ -410,10 +411,36 @@ instead of in a validation ladder.
 
 **Where the options come from.** Nothing, if the type already says: a `Literal` or an enum
 becomes a menu on its own, and `Ask(labels={...})` adds the reading text a type cannot
-carry. For a live set, `choices` is a callable `(ctx, bound) -> Sequence[Choice]`, called
-once when the dialogue fires — `bound` is every argument answered so far, so `msg act`
-labels each message with what acting on it would do. An empty result is an answer in itself: `Abort`
-with `empty=`, because "no messages to read" is more use than an empty menu.
+carry.
+
+For a live set, name a **shell variable** — `choices='open_prs'` above. That is one
+declaration serving two surfaces that would otherwise drift: the menu here, and
+`loop {open_prs}:` in a block. Declare it with `@variable` beside the read it wraps
+(§`solver/shell/variables.py`), returning whatever the loop body should see; an object says
+how it appears in a menu by implementing `__choice__()`:
+
+```python
+class PullRequest(NamedTuple):
+    number: int
+    title: str
+    branch: str
+
+    def __choice__(self) -> Choice:
+        return Choice(str(self.number), f'#{self.number}  {self.title}', self.branch)
+
+@variable('the open pull requests waiting for review')
+def open_prs() -> list[PullRequest]:
+    ...
+```
+
+`choices` may still be a callable `(ctx, bound) -> Sequence[Choice]`, and should be when the
+set has to narrow by an answer already given — which a variable cannot see. `msg`'s thread
+menu is the case: for `act` each row names what acting on it would do. Even there the *read*
+is the `threads` variable and the callable only labels it.
+
+An empty result is an answer in itself: `Abort` with `empty=`, because "no messages to read"
+is more use than an empty menu. A set that could not be read at all is **not** empty —
+raise, so that "not signed in" never reads as "nothing to merge".
 
 **One declaration, two surfaces.** `choices` also drives tab-completion for that parameter,
 positionally and as `name=`, with the label as display text — so `msg read <TAB>` offers

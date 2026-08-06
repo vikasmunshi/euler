@@ -34,6 +34,7 @@ from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
+from solver.shell.variables import variables
 from solver.shell.docstring import (GLYPH_ASKS, GLYPH_PROBLEM, GLYPH_REQUIRES, GLYPH_SILENT,
                                     help_model)
 from solver.utils.loader import load_commands, update_modules
@@ -208,6 +209,28 @@ def gen_flags_legend() -> str:
     return '\n'.join(rows)
 
 
+def gen_variable_table() -> str:
+    """The language reference's reserved-variable table, from the live store.
+
+    The set is no longer fixed: `@variable` registers one at import, so the names a block
+    can reference depend on `modules.csv` exactly as the commands do. A hand-written table
+    was stale the first time a module declared one.
+
+    `writable` is the answer to "may a `name = …` statement take this name", which for every
+    reserved name is no — the column says *who* writes it instead, which is the useful
+    distinction: the shell (`problem`, `rcode`), a computation on each reference, or nothing.
+    """
+    written = {'computed': 'computed, on each reference', 'shell-set': 'the shell',
+               'read-only': 'nothing — fixed'}
+    rows = ['| name | type | meaning | written by |',
+            '|------|------|---------|------------|']
+    # A union type carries a pipe, which is the table's own column separator.
+    rows += [f'| `{entry.name}` | {entry.type_name.replace("|", chr(92) + "|")} '
+             f'| {entry.description} | {written[entry.kind]} |'
+             for entry in variables.catalogue()]
+    return '\n'.join(rows)
+
+
 def gen_command_index() -> str:
     """The per-command reference: every command's `?` panel as markdown, rule-separated."""
     return '\n\n---\n\n'.join(_markdown_help(cmd) for cmd in registry.all())
@@ -300,6 +323,7 @@ GENERATORS: dict[str, Callable[[], str]] = {
     'command-index': gen_command_index,
     'flags-legend': gen_flags_legend,
     'authorization-table': gen_authorization_table,
+    'variable-table': gen_variable_table,
     'package-layout': gen_package_layout,
 }
 
