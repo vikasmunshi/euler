@@ -3324,7 +3324,7 @@
     {
       "path": "takeaway/rearrange-to-avoid-cancellation",
       "title": "Rearrange a formula to avoid cancellation",
-      "status": "draft",
+      "status": "final",
       "solved": 1,
       "problems": 1,
       "tags": ["rearrange-to-avoid-cancellation"],
