@@ -250,21 +250,37 @@ def main(argv: list[str]) -> int:
         return _fail(f'auth admin plane error ({exc}) — is euler-auth.service running, and are you root?')
 
 
+def _pending_note(record: dict[str, Any]) -> str:
+    """The in-flight invite / reset, as a suffix to whatever row it belongs to."""
+    return f'pending {record.get("kind")}/{record.get("state")}, expires in {record.get("expires_in_h")}h'
+
+
 def _print_listing(data: dict[str, Any]) -> None:
     """Render the roster — every identity in authorizations.json (web + local) with its
-    profile and registration state — plus in-flight invites."""
+    profile and registration state — plus in-flight invites.
+
+    One identity is one row: a pending record for an identity already on the roster is
+    an *attribute* of that account (mid-registration, or a reset in flight), not a
+    second account, so it folds into that row's state column. Only a pending record
+    with no roster entry — an invite whose map entry has since gone — stands alone.
+    """
     roster = data.get('roster', [])
+    pending: dict[str, list[dict[str, Any]]] = {}
+    for record in data.get('pending', []):
+        pending.setdefault(str(record.get('email')), []).append(record)
     for entry in roster:
         # The unix name (the per-user uid/home/socket) for a web account; a local
         # OS login has no per-user instance, so its column is blank.
+        notes = [_pending_note(record) for record in pending.pop(str(entry.get('user')), [])]
+        state = ' — '.join([str(entry.get('state')), *notes])
         print(f'  {entry.get("user"):40} {entry.get("slug") or "":10} {entry.get("profile"):18} '
-              f'{entry.get("scope"):6} {entry.get("state")}')
-    for record in data.get('pending', []):
-        # No account exists yet — hence no unix name — so the slug column is a placeholder,
-        # keeping the fields aligned with the roster rows above.
-        print(f'  {record.get("email"):40} {"—":10} {record.get("profile"):18} '
-              f'web    pending {record.get("kind")}/{record.get("state")}, '
-              f'expires in {record.get("expires_in_h")}h')
+              f'{entry.get("scope"):6} {state}')
+    for email, records in pending.items():                       # orphans: no account, no map entry
+        for record in records:
+            # No account exists — hence no unix name — so the slug column is a placeholder,
+            # keeping the fields aligned with the roster rows above.
+            print(f'  {email:40} {"—":10} {record.get("profile"):18} '
+                  f'web    {_pending_note(record)}')
     if not roster and not data.get('pending'):
         print('no accounts or pending invites')
 
