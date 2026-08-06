@@ -86,7 +86,6 @@ a profile on each channel.
 | `solver.shell.builtins` | `echo` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.doclint` | `check-commands` |  |  |  | ✓ |
 | `solver.utils.linter` | `lint` |  | ✓ | ✓ | ✓ |
-| `solver.utils.misc` | `manage-config` |  |  |  | ✓ |
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `pip-upgrade` |  |  |  | ✓ |
 | `solver.utils.scripts` | `sys-setup` |  |  |  | ✓ |

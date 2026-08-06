@@ -82,7 +82,6 @@ a parameter that accepts repetition.
 | [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. |
-| [`manage-config`](#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. |
 | [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. |
@@ -1314,36 +1313,6 @@ ls
 
 ---
 
-#### Command: `manage-config`
-
-Show or update a managed configuration setting.
-
-* ⚑ needs admin.
-
-The managed settings persist to `solver/config.json` and override the
-defaults in `config.py`: `timeout_single` / `timeout_multiple` (solution
-timeouts in seconds for a single run and for repeated runs), and
-`ecb_usd_rate` (the rate `costs` uses).
-
-**usage**
-
-```
-manage-config
-[param=all|timeout_multiple|timeout_single|ecb_usd_rate] (default all)
-[value=<float>|none] (default None)
-```
-
-**arguments**
-
-| argument | description |
-|----------|-------------|
-| `param` | Which setting to act on. Defaults to 'all', which prints every setting. |
-| `value` | The new value to assign to `param`, coerced to the setting's type and saved. Defaults to '', which prints the setting's current value instead. |
-
-*Defined in* `solver.utils.misc.manage_config`.
-
----
-
 #### Command: `mark` (`mark-solved`)
 
 Mark the current problem as solved — once its results confirm it.
@@ -1981,7 +1950,7 @@ Refresh the USD→EUR rate used to report API costs.
 * » supports --silent to suppress output.
 
 Fetches the euro reference rate from the European Central Bank's daily feed and writes it
-to `ecb_usd_rate` in `config.json`, the managed setting `costs` converts API spend with.
+to `ecb_usd_rate` in `values.conf`, the setting `costs` converts API spend with.
 A rate within a rounding step of the stored one is left alone. Nothing else is touched.
 
 A rate that moved is committed, staging that one file and nothing beside it.

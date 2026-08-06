@@ -238,7 +238,6 @@ its index entry, one click along its name.
 | [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](commands-index.md#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. |
-| [`manage-config`](commands-index.md#command-manage-config) | — | `admin` | Show or update a managed configuration setting. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. |
 | [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`new`](commands-index.md#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. |

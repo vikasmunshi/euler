@@ -115,7 +115,6 @@ they are current).
 ```
 solver/
   __main__.py          — Module entry point.
-  config.py            — Singleton Config: all paths, constants, command modules, and managed settings.
   main.py              — Entry point for the "solver shell" CLI.
   version.py           — The solver build version — the single source of truth.
   ai/
@@ -133,6 +132,12 @@ solver/
     identity.py        — Identity resolution → a :class:`~solver.auth.subject.Subject`.
     roster.py          — The collaborator roster — `/etc/euler/roster/users.json`.
     subject.py         — The authorization **subject** — the resolved security principal.
+  config/              — Configuration: `from solver.config import config` — the one way in.
+    config.py          — The static configuration: every path and constant the solver reads, declared once.
+    identity.py        — Dynamic configuration: **who** this process is running as.
+    paths.py           — The two anchors every other path hangs off — and the one deliberate side effect.
+    theme.py           — Dynamic configuration: how the shell **looks**.
+    values.py          — Reading `values.conf` — the editable half of the configuration.
   core/
     download.py        — Utility for downloading and caching files via HTTP.
     evaluate.py        — Solution evaluation: runs standalone scripts against test cases and reports results.
@@ -177,10 +182,9 @@ solver/
     doclint.py         — The `check-commands` command: hold every command docstring to the documented standard.
     linter.py          — Utilities for linting code.
     loader.py          — Utility for loading command modules.
-    misc.py            — The `problems` and `manage-config` commands.
+    misc.py            — The `problems` command.
     path_utils.py      — Utility functions for file and directory operations.
     quips.py           — The `update-*` verbs' commit subjects — one pool per verb, in one place.
-    repo_root.py       — Where the working tree is — the one answer, for every part of the solver that needs it.
     scripts.py         — Dependency and system-resource setup commands.
     search.py          — 'find' command: grep the solution stack for a regular expression.
     shell_utils.py     — Utility for running shell commands and capturing their output.
