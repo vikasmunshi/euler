@@ -103,31 +103,42 @@ Variable storage, the reserved names, and the two write channels are defined by
 * **User variable name:** `[a-z][a-z0-9_]*` (lowercase, leading letter, no dash —
   so a name never collides with a command name like `claude-api` or with
   subtraction `a-b`). It may not be a reserved name or a registered command name.
-* **Special (reserved) variables** — seeded by `variables.py`:
+* **Special (reserved) variables** — five seeded by `variables.py`, the rest registered
+  with `@variable` by the module that computes them, so which exist depends on
+  `solver/modules.csv` exactly as the command set does. **None** may be assigned to.
 
-  | name       | type            | meaning                                                        | writable by user |
-  |------------|-----------------|----------------------------------------------------------------|------------------|
-  | `config`   | Config          | the global configuration singleton                             | no               |
-  | `loop`     | Any             | current loop value (set only by `loop`; `None` outside a loop) | no               |
-  | `problem`  | Problem \| None | the workspace problem, as an object                            | no (shell-set)   |
-  | `rcode`    | int             | exit code of the most recently run evaluation                  | no (shell-set)   |
-  | `reserved` | list[str]       | sorted list of every reserved name                             | no               |
-  | `problems` | list[Problem]   | every known problem                                            | no               |
-  | `last`     | int             | number of the last solved problem                              | no (computed)    |
-  | `next`     | int             | number of the next unsolved problem                            | no (computed)    |
-  | `random`   | int             | number of a random unsolved problem                            | no (computed)    |
-  | `solved`   | list[Problem]   | the solved problems                                            | no (computed)    |
-  | `unsolved` | list[Problem]   | the unsolved problems                                          | no (computed)    |
+<!-- GEN:variable-table -->
+| name | type | meaning | written by |
+|------|------|---------|------------|
+| `config` | Config | the global configuration singleton | nothing — fixed |
+| `holders` | list[Choice] | collaborators a sealed share can be sent to | computed, on each reference |
+| `last` | int | number of the last solved problem | computed, on each reference |
+| `loop` | Any | the current loop value; None outside a loop | the shell |
+| `next` | int | number of the next unsolved problem | computed, on each reference |
+| `open_prs` | list[PullRequest] | the open pull requests waiting for review | computed, on each reference |
+| `problem` | Problem \| None | the workspace problem, as an object | the shell |
+| `problems` | list[Problem] | every known problem | computed, on each reference |
+| `random` | int | number of a random unsolved problem | computed, on each reference |
+| `rcode` | int | exit code of the most recently run evaluation | the shell |
+| `recipients` | list[Choice] | who a message can be sent to | computed, on each reference |
+| `reserved` | list[str] | sorted list of every reserved name | nothing — fixed |
+| `solved` | list[Problem] | the solved problems | computed, on each reference |
+| `threads` | list[Thread] | this caller's messages, newest first | computed, on each reference |
+| `unsolved` | list[Problem] | the unsolved problems | computed, on each reference |
+<!-- /GEN:variable-table -->
 
-  The *computed* specials (`last` / `next` / `random` / `problems` / `solved` /
-  `unsolved`) are dynamic — re-evaluated on **each** `{…}` reference (so `{random}`
-  yields a fresh pick and `{next}` / `{solved}` reflect current progress), whereas
-  the others (`config`, and the shell-set `problem` / `rcode`) hold a fixed value.
+  A **computed** special is re-evaluated on *each* `{…}` reference, so `{random}` yields a
+  fresh pick, `{next}` reflects current progress, and `{open_prs}` the queue as it is now.
+  Two references in one block are therefore two reads — put an expensive one in a `loop`
+  header, which is evaluated once, rather than in the body.
 
   `last` / `next` / `random` are bare problem **numbers** (handy as command
-  arguments: `init {next}`), while `problems` / `solved` / `unsolved` hold
-  `Problem` objects — use an attribute path to reach a field, e.g.
-  `{problem.number}`, `{loop.title}`.
+  arguments: `init {next}`), while the rest hold objects — use an attribute path to reach
+  a field, e.g. `{problem.number}`, `{loop.title}`, `{loop.branch}`.
+
+  A computed special may also name a menu: `Ask(choices='open_prs')` offers the same list
+  `loop {open_prs}:` iterates (see `docs/developer-guide.md` §3.11), so the two can never
+  disagree about what is on it.
 
 * **assign vs set** (see `variables.py`): a user `name = expr` statement assigns
   through the *assign* channel, which rejects every reserved name. The shell
