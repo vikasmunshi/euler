@@ -265,11 +265,11 @@ solver/
     viewer.py          — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/
     ciphers.py         — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
-    config.py          — Crypto configuration: the wire format, and where the key material is.
     gitfilter.py       — Transparent git clean/smudge encryption for tracked solution files.
     keys.py            — Cipher key management: create, persist, rotate and share the crypto key material.
     readenv.py         — Print the authoring env (`~/.euler/env`) as plaintext — the setup scripts' reader.
     vault.py           — The per-user vault: envelope encryption that makes a user's secrets opaque to the operator at rest.
+    wire.py            — The crypto wire formats: what two clones must agree on, byte for byte.
   runners/
     runner.h           — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py          — Runner framework for Project Euler solutions with benchmarking and validation.
