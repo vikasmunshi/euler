@@ -531,6 +531,7 @@ costs
 Seed a curated cross-cutting topic page.
 
 * ⚑ needs maintainer or above.
+* ✎ asks for anything you leave out.
 
 A curated topic (e.g. `number-theory/primes`) gathers several tags under one idea,
 unlike a tag's own auto-generated page.
@@ -546,7 +547,7 @@ Problems section is filled. Write it with `claude-blog <path>`.
 
 ```
 create-topic <path>
-[<tags>...]
+[tags=<str>] (asked)
 ```
 
 **arguments**
@@ -554,7 +555,7 @@ create-topic <path>
 | argument | description |
 |----------|-------------|
 | `path` | The `folder/leaf` location under `topics/` (lowercase words and hyphens). |
-| `*tags` | The tag slugs the page covers. Omit them to choose interactively. |
+| `*tags` | The tag slugs the page covers. Omit them and, in an interactive shell, pick them by search-and-select over the vocabulary. |
 
 *Defined in* `solver.core.tags.create_topic`.
 

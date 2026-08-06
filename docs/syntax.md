@@ -123,6 +123,7 @@ Variable storage, the reserved names, and the two write channels are defined by
 | `recipients` | list[Choice] | who a message can be sent to | computed, on each reference |
 | `reserved` | list[str] | sorted list of every reserved name | nothing — fixed |
 | `solved` | list[Problem] | the solved problems | computed, on each reference |
+| `tags` | list[Tag] | the central tag vocabulary | computed, on each reference |
 | `threads` | list[Thread] | this caller's messages, newest first | computed, on each reference |
 | `unsolved` | list[Problem] | the unsolved problems | computed, on each reference |
 <!-- /GEN:variable-table -->
