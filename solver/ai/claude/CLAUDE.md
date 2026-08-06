@@ -152,7 +152,7 @@ solver/
     viewer.py          — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/
     ciphers.py         — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
-    config.py          — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
+    config.py          — Crypto configuration: the wire format, and where the key material is.
     gitfilter.py       — Transparent git clean/smudge encryption for tracked solution files.
     keys.py            — Cipher key management: create, persist, rotate and share the crypto key material.
     readenv.py         — Print the authoring env (`~/.euler/env`) as plaintext — the setup scripts' reader.
