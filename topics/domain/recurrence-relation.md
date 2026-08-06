@@ -1,8 +1,168 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Recurrence relation
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Recurrence_relation>._
+A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a
+sequence from the terms before it: $a_n = F(a_{n-1}, \dots, a_{n-d})$, plus enough seed values to
+get started. It is the fourth-largest domain tag in this collection, and that is not an accident of
+taste — a recurrence is what you get whenever an object of size $n$ is *assembled* from smaller
+objects of the same kind, and most counting, probability and dynamics questions are exactly that.
+The recurrence itself is almost never the hard part. Finding it is a paragraph of reasoning;
+**evaluating it at the index the problem actually asks about** is the work.
+
+## Where they come from
+
+Four decompositions account for nearly every recurrence below, and it is worth being able to name
+them, because recognising the shape is what tells you which one to write down.
+
+- **Condition on the last piece.** Classify every complete object by its final move, then remove
+  that move. A row of length $i$ tiled with tiles of length $1..4$ ends in exactly one of four ways,
+  so $\text{dp}[i] = \text{dp}[i-1] + \text{dp}[i-2] + \text{dp}[i-3] + \text{dp}[i-4]$ — problem
+  117, tetranacci by another name. The classification has to *partition* the objects: every tiling
+  falls in exactly one case, which is what makes the counts add without double-counting. This is
+  [optimal substructure](/topics/domain/optimal-substructure) stated concretely, and the tiling
+  family (114, 115, 116, 117) is the cleanest place to see it.
+- **Condition on the first step.** In a probabilistic process, write the unknown at a state in terms
+  of the unknowns at the states one step away. Problem 227's expected hitting time gives
+  $E_i = 1 + \sum_D P(D)\, E_{(i+D) \bmod n}$, and problem 938's absorption probability gives a
+  two-term mixture of its two neighbours. Note the difference in what you then do with it: the
+  first is a *cyclic* dependency and becomes a [system of linear
+  equations](/topics/technique/system-of-linear-equations); the second is acyclic and becomes a
+  [dynamic programming](/topics/technique/dynamic-programming) sweep.
+- **Self-similar construction.** When the object is *defined* recursively, the recurrence is handed
+  to you and the only question is how to query it. Problem 230's strings satisfy
+  $T_k = T_{k-2}T_{k-1}$, so the *lengths* satisfy Fibonacci and a digit position can be chased down
+  through the concatenations without ever materialising a string; problem 872's trees are built by
+  one reparenting rule per step. The lesson generalises: recur on the **cheap shadow** of the
+  structure (lengths, counts, a state index), never on the structure itself.
+- **An algebraic ladder.** Solutions to a [Pell equation](/topics/technique/pells-equation), or
+  convergents of a [continued fraction](/topics/domain/continued-fraction), advance by a fixed
+  linear update. Problems 94, 140 and 65 all turn a search over candidates into a walk along the
+  answers.
+
+Sometimes you cannot see the decomposition at all, and the counts still obey a recurrence for
+structural reasons. That case has its own page —
+[small cases reveal the recurrence](/topics/takeaway/small-cases-reveal-recurrence) — and the move
+there is to brute-force the small terms and fit the coefficients rather than derive them.
+
+## Evaluating it without paying $O(n)$
+
+A recurrence read literally is a recipe for $n$ steps. Whether that is acceptable depends entirely
+on the index in the statement, and the statements here are usually chosen so it is not.
+
+**Iterate forward, with a window.** The honest baseline: $O(n)$ time, and $O(d)$ — not $O(n)$ —
+memory, because only the last $d$ terms are ever read. Prefer this to top-down
+[recursion](/topics/technique/recursion-computer-science) whenever the index tree is dense: naive
+recursion on a two-term recurrence is exponential, and even with
+[memoization](/topics/technique/memoization) you pay call overhead and risk a stack limit. Keep
+the table sized to the input and built inside `solve()` — a module-level table is
+[precomputation that hides from the benchmark](/topics/takeaway/precompute-once-reuse).
+
+Problem 2 is the miniature that makes the point that *which* sequence you recur on is a choice.
+Every third Fibonacci number is even, and the even ones satisfy a recurrence of their own,
+$E_{k+1} = 4E_k + E_{k-1}$, so the filter disappears into the generator:
+
+```python
+def _even_fibonacci_numbers() -> typing.Generator[int, None, None]:
+    """Yield successive even Fibonacci numbers below max_limit."""
+    even_fib_a, even_fib_b = (2, 8)
+    while even_fib_a < max_limit:
+        yield even_fib_a
+        even_fib_a, even_fib_b = (even_fib_b, 4 * even_fib_b + even_fib_a)
+```
+
+That is the whole of `solutions/public/p0002/` — two state variables, no array, no test for
+evenness. Re-indexing to the subsequence you actually want is the cheapest optimisation in this
+whole topic, and the one most often missed.
+
+**Jump by matrix power.** If the recurrence is
+[linear with constant coefficients](/topics/technique/linear-recurrence-with-constant-coefficients),
+stacking the last $d$ terms into a vector turns one step into a fixed
+[companion matrix](https://en.wikipedia.org/wiki/Companion_matrix), and $n$ steps into
+$M^n$ — computable by
+[exponentiation by squaring](/topics/technique/exponentiation-by-squaring) in $O(d^3 \log n)$.
+This is the standard escape when the index is $10^{12}$ or worse, and it composes: problem 940's
+two-variable $A(m,n)$ is a product of *two* transfer matrices, one advancing rows and one advancing
+columns, which additionally lets a double sum factor into a product of two accumulated sums instead
+of an $O(k^2)$ pairing. See [matrix exponentiation](/topics/technique/matrix-exponentiation) for the
+mechanics.
+
+**Descend the binary representation.** A recurrence whose arguments are $2n$ and $2n+1$ rather than
+$n-1$ and $n-2$ is not slow at all — it is $O(\log n)$, because each step halves the index. The
+catch is that the branches usually need *two* neighbouring values, so carry a pair (or a short
+vector) and read the bits of $m$ from the top down, applying one linear map per bit:
+
+```python
+lo, hi = seed                      # (a(1), a(2)), say
+for bit in bin(m)[3:]:             # skip "0b1": the leading bit is the seed
+    lo, hi = even_map(lo, hi) if bit == "0" else odd_map(lo, hi)
+```
+
+Problems 169 and 918 are both this shape, and problem 872's climb up a tree is its bitwise cousin —
+each step clears the top bit of a gap, so the loop runs
+[popcount](https://en.wikipedia.org/wiki/Hamming_weight) times.
+
+**Exploit a finite state space.** If the state that advances the recurrence lives in a finite set,
+the orbit must eventually repeat, and the sequence is
+[eventually periodic](/topics/domain/periodic-sequence). Then a huge index costs only the length of
+the tail plus the cycle. Two variants worth distinguishing:
+
+| | shape | how to detect | example |
+| --- | --- | --- | --- |
+| **eventually** periodic | a tail, then a cycle | compare against an earlier state, or [Floyd/Brent](/topics/technique/cycle-detection) | problem 197 — a float map truncated to nine decimals collapses onto a period-2 attractor |
+| **purely** periodic | no tail at all | the recurrence is **invertible** mod $m$, so the map is a permutation and the seed itself must recur | problem 225 — Tribonacci mod $m$, the [Pisano period](/topics/domain/pisano-period)'s cousin |
+
+The invertibility argument is the one to internalise, because it buys $O(1)$ memory: when the map
+is a permutation you can detect the period by waiting for the *seed* to come back, instead of
+storing every state you have visited.
+
+**Telescope it away.** Occasionally a sum of terms collapses to one term. Splitting $S(N)$ by index
+parity and substituting the recurrence can make almost everything cancel
+([telescoping](/topics/technique/telescoping-series)), leaving a
+[closed form](/topics/takeaway/closed-form-over-iteration) in a single value of the sequence — which
+you then evaluate by one of the methods above. Problem 918 does exactly this, turning a
+trillion-term sum into one evaluation. The same collapse in the other direction is what makes the
+partition function computable: the reciprocal of its
+[generating function](/topics/domain/generating-function) is almost all zeros, so $p(n)$ obeys a
+recurrence with only $O(\sqrt n)$ terms (problems 76 and 78).
+
+## How to reason about it
+
+- **Check the recurrence before you optimise it.** Every derivation above is a case analysis, and
+  case analyses are where the errors are. Write the $O(n)$ version, check it against the values in
+  the statement and against brute force on small inputs, and only then replace it with the matrix
+  power or the bit descent. Several solutions here keep the brute force in the directory precisely
+  so the fast path can be re-validated.
+- **Mind where the recurrence starts holding.** Recurrences frequently fail for the first few
+  indices, the small cases being genuinely special. Seed from an index you have verified, and
+  answer anything below it from a table.
+- **Constant coefficients or not.** $a_n = 3a_{n-1} + 2a_{n-2}$ is a different animal from
+  $a_n = n\,a_{n-1} + a_{n-2}$. The first has a companion matrix and a $\log n$ jump; the second is
+  [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) — still structured, but the matrix
+  changes every step, so there is no exponentiation shortcut and you are back to $O(n)$ unless a
+  closed form exists.
+- **Reduce, but reduce correctly.** If the answer is wanted mod $m$, keep every term reduced —
+  otherwise linear recurrences produce numbers with $\Theta(n)$ digits and the arithmetic, not the
+  loop, becomes the cost. Signed coefficients need care: in C a negative intermediate must be
+  stored as its residue, `((v % m) + m) % m`, or the next multiplication leaves the word
+  ([watch integer width](/topics/takeaway/watch-integer-width)). And when the problem does *not*
+  offer a modulus, expect big integers — the tetranacci count at $n = 500$ is a 140-digit number,
+  which Python handles for free and C does not.
+- **Watch the memory, not just the time.** A two-dimensional recurrence rarely needs its whole
+  grid. If every cell depends only on cells one step back along some direction, sweep along that
+  direction with two rolling buffers: problem 938's grid has both predecessors on the previous
+  anti-diagonal, which turns $O(RB)$ memory into $O(R)$ and, as a bonus, makes each sweep one
+  vectorised array operation instead of a Python loop.
+- **Floating point deserves suspicion.** A recurrence run in `double` accumulates error at every
+  step, and subtractive recurrences can amplify it catastrophically. Problem 197 gets away with an
+  *exact* equality test only because its map truncates to nine decimals, making the cycle bit-for-bit
+  identical; without a quantising step like that, use `fractions.Fraction`, integers, or an explicit
+  tolerance you can justify.
+
+The tell for this whole topic is a problem that describes a process — one more tile, one more turn,
+one more level — and then asks about it at an index you could never walk to. Write the recurrence
+first, in the most literal form you can defend. Then look at its *shape*: constant coefficients,
+halving arguments, a finite state, a telescoping sum. The shape picks the method.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
