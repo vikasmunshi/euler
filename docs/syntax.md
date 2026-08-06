@@ -110,10 +110,10 @@ Variable storage, the reserved names, and the two write channels are defined by
 <!-- GEN:variable-table -->
 | name | type | meaning | written by |
 |------|------|---------|------------|
-| `accounts` | list[Choice] | the collaborator accounts on the roster | computed, on each reference |
+| `accounts` | list[roster.Account] | the collaborator accounts on the roster | computed, on each reference |
 | `articles` | list[Article] | every writable topic — the tag pages and the curated ones | computed, on each reference |
 | `config` | Config | the global configuration singleton | nothing — fixed |
-| `holders` | list[Choice] | collaborators a sealed share can be sent to | computed, on each reference |
+| `holders` | list[roster.Account] | collaborators a sealed share can be sent to | computed, on each reference |
 | `key_requests` | list[Thread] | the key-authorization requests waiting to be granted | computed, on each reference |
 | `last` | int | number of the last solved problem | computed, on each reference |
 | `loop` | Any | the current loop value; None outside a loop | the shell |
@@ -123,7 +123,7 @@ Variable storage, the reserved names, and the two write channels are defined by
 | `problems` | list[Problem] | every known problem | computed, on each reference |
 | `random` | int | number of a random unsolved problem | computed, on each reference |
 | `rcode` | int | exit code of the most recently run evaluation | the shell |
-| `recipients` | list[Choice] | who a message can be sent to | computed, on each reference |
+| `recipients` | list[Any] | who a message can be sent to | computed, on each reference |
 | `reserved` | list[str] | sorted list of every reserved name | nothing — fixed |
 | `solution_files` | list[str] | the current problem's solution files | computed, on each reference |
 | `solved` | list[Problem] | the solved problems | computed, on each reference |
