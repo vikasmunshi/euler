@@ -47,7 +47,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, get_type_hints
 
-from solver.config.paths import package_root, repo_root, secrets_dir
+from solver.config.paths import package_root, repo_root, secrets_dir, share_file
 from solver.config.values import ValuesError, coerce, flatten, read_sections
 
 if TYPE_CHECKING:                       # imported lazily by the cached_property that needs it
@@ -66,10 +66,12 @@ VALUES_FILENAME: str = 'values.conf'
 _DERIVED: Path = Path('\x00derived')
 
 #: Fields that are not settings, and so are not the values file's to name. The anchors —
-#: where the checkout is, where the code was installed — are not matters of opinion, and a
-#: file cannot name the file it was itself read from. `scripts` is a setting, but a nested
-#: one: it comes from the `[scripts]` section rather than the flat namespace.
-_NOT_SETTINGS: frozenset[str] = frozenset({'root_dir', 'package_dir', 'scripts', 'values_file'})
+#: where the checkout is, where the code was installed — are not matters of opinion; a
+#: file cannot name the file it was itself read from; and `share_file` is *discovered*,
+#: its answer depending on whether this machine is a deployed host. `scripts` is a
+#: setting, but a nested one: it comes from the `[scripts]` section, not the flat namespace.
+_NOT_SETTINGS: frozenset[str] = frozenset({'root_dir', 'package_dir', 'scripts', 'share_file',
+                                           'values_file'})
 
 
 class ExitCodes(enum.IntEnum):
@@ -169,6 +171,10 @@ class Config:
     enc_key_file: Path = _DERIVED
     #: `{salt, iterations, wrapped_vk}` — the vault key under the password-derived key.
     vault_file: Path = _DERIVED
+    #: This machine's half of a 2-of-2 split of the master key. Discovered rather than
+    #: configured — a deployed host keeps it in `/etc/euler`, a plain checkout in the
+    #: secrets dir — so it is derived, and `values.conf` does not name it.
+    share_file: Path = _DERIVED
     #: Rolling backups kept of the private key file.
     private_key_backups: int = 5
     state_dir: Path = _DERIVED
@@ -200,6 +206,7 @@ class Config:
             ('private_key_file', secrets / 'id'),
             ('enc_key_file', secrets / 'enc-key.json'),
             ('vault_file', secrets / 'vault'),
+            ('share_file', share_file(self.root_dir)),
             ('solutions_dir', self.root_dir / 'solutions'),
             ('state_dir', self.root_dir / '.state'),
             ('static_file_problems', self.root_dir / 'solutions' / 'problems.json'),

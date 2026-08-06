@@ -249,18 +249,19 @@ class VaultRouteTests(_UserServiceCase):
     _SALT = bytes(range(16))
 
     async def get_application(self) -> web.Application:
-        from solver.crypto.config import config as crypto_config
+        from solver.config import config as app_config
+        from solver.crypto import wire
         from solver.web.user import vault_api
 
         secrets = Path(tempfile.mkdtemp(prefix='euler-vault-test-'))
         self.addCleanup(lambda: __import__('shutil').rmtree(secrets, True))
-        self._saved = {k: crypto_config[k] for k in
-                       ('private_key_file', 'env_file', 'vault_file',
-                        'vault_kdf_iterations')}
-        crypto_config['private_key_file'] = secrets / 'id'
-        crypto_config['env_file'] = secrets / 'env'
-        crypto_config['vault_file'] = secrets / 'vault'
-        crypto_config['vault_kdf_iterations'] = 1000
+        self._saved = {k: getattr(app_config, k) for k in
+                       ('private_key_file', 'env_file', 'vault_file')}
+        saved_iterations = wire.VAULT_KDF_ITERATIONS
+        app_config.private_key_file = secrets / 'id'
+        app_config.env_file = secrets / 'env'
+        app_config.vault_file = secrets / 'vault'
+        wire.VAULT_KDF_ITERATIONS = 1000
         # The unlock routes below write a session key, and write_session_key() takes its
         # directory from $XDG_RUNTIME_DIR — an env var the config rebinding above cannot
         # reach. Contain it here too, or these tests litter the developer's own runtime dir.
@@ -268,7 +269,9 @@ class VaultRouteTests(_UserServiceCase):
         os.environ['XDG_RUNTIME_DIR'] = str(secrets)
 
         def _restore() -> None:
-            crypto_config.update(self._saved)   # type: ignore[typeddict-item]
+            for name, value in self._saved.items():
+                setattr(app_config, name, value)
+            wire.VAULT_KDF_ITERATIONS = saved_iterations
             os.environ.pop('XDG_RUNTIME_DIR', None)
             if saved_runtime is not None:
                 os.environ['XDG_RUNTIME_DIR'] = saved_runtime

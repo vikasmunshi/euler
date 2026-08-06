@@ -19,7 +19,7 @@ from unittest.mock import MagicMock
 from solver.auth import Subject
 from solver.config import ExitCodes, config
 from solver.core import git
-from solver.crypto.config import config as crypto_config
+from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import dialogue
 from solver.shell.command import registry
@@ -109,8 +109,8 @@ class _GitCommandCase(unittest.TestCase):
         # operator's own clone still carried a pre-`-P` command. These tests are about the
         # verbs, not the wiring, so answer "wired, and current".
         self._saved_run_proc_base = git.run
-        current = filter_settings(crypto_config['filter_name'])[
-            f"filter.{crypto_config['filter_name']}.process"]
+        current = filter_settings(wire.FILTER_NAME)[
+            f"filter.{wire.FILTER_NAME}.process"]
         git.run = lambda *a, **k: MagicMock(returncode=0, stdout=current)  # type: ignore[assignment]
         git._current_branch = lambda: self.branch  # type: ignore[assignment]
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
@@ -660,8 +660,8 @@ class EncKeyPullFlowTest(_GitCommandCase):
         *recorded* defaults to exactly what `install` writes today, so "wired" means
         "wired correctly" unless a test says otherwise.
         """
-        current = filter_settings(crypto_config['filter_name'])[
-            f"filter.{crypto_config['filter_name']}.process"]
+        current = filter_settings(wire.FILTER_NAME)[
+            f"filter.{wire.FILTER_NAME}.process"]
 
         def fake_run(argv: Any = (), *_a: Any, **_k: Any) -> Any:
             # Two different reads go through `run` here: the recorded filter command, and

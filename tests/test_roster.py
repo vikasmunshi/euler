@@ -33,7 +33,7 @@ from solver.auth import roster
 from solver.auth.identity import system_slug
 from solver.crypto import keys as keys_mod
 from solver.crypto.ciphers import enc_key_payload, load_private_key, public_key_hex, read_master_key
-from solver.crypto.config import config as crypto_config
+from solver.config import config as app_config
 from solver.shell import dialogue
 from tests import silence
 
@@ -161,17 +161,17 @@ class AuthorizeTests(RosterFileTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self._saved_crypto = {key: crypto_config[key]
+        self._saved_crypto = {key: getattr(app_config, key)
                               for key in ('enc_key_file', 'private_key_file', 'share_file')}
-        crypto_config['enc_key_file'] = self.dir / 'enc-key.json'
-        crypto_config['private_key_file'] = self.dir / 'id'
-        crypto_config['share_file'] = self.dir / 'share.json'
+        app_config.enc_key_file = self.dir / 'enc-key.json'
+        app_config.private_key_file = self.dir / 'id'
+        app_config.share_file = self.dir / 'share.json'
         self.addCleanup(self._restore_crypto)
         self.master = token_bytes(32)
         self.their_key = x25519.X25519PrivateKey.generate()
         self.theirs = public_key_hex(self.their_key.public_key())
         mine = x25519.X25519PrivateKey.generate()
-        crypto_config['private_key_file'].write_bytes(
+        app_config.private_key_file.write_bytes(
             mine.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption()))
         load_private_key.cache_clear()
         keys_mod.write_enc_key_file(enc_key_payload(mine.public_key(), self.master))
@@ -192,7 +192,7 @@ class AuthorizeTests(RosterFileTestCase):
 
     def _restore_crypto(self) -> None:
         for key, value in self._saved_crypto.items():
-            crypto_config[key] = value
+            setattr(app_config, key, value)
         load_private_key.cache_clear()
         read_master_key.cache_clear()
 
@@ -239,15 +239,15 @@ class HostGrantTests(RosterFileTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self._saved_crypto = {key: crypto_config[key]
+        self._saved_crypto = {key: getattr(app_config, key)
                               for key in ('enc_key_file', 'private_key_file', 'share_file')}
-        crypto_config['enc_key_file'] = self.dir / 'enc-key.json'
-        crypto_config['private_key_file'] = self.dir / 'id'
-        crypto_config['share_file'] = self.dir / 'share.json'
+        app_config.enc_key_file = self.dir / 'enc-key.json'
+        app_config.private_key_file = self.dir / 'id'
+        app_config.share_file = self.dir / 'share.json'
         self.addCleanup(self._restore_crypto)
         self.master = token_bytes(32)
         self.mine = x25519.X25519PrivateKey.generate()
-        crypto_config['private_key_file'].write_bytes(
+        app_config.private_key_file.write_bytes(
             self.mine.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption()))
         load_private_key.cache_clear()
         keys_mod.write_enc_key_file(enc_key_payload(self.mine.public_key(), self.master))
@@ -267,7 +267,7 @@ class HostGrantTests(RosterFileTestCase):
 
     def _restore_crypto(self) -> None:
         for key, value in self._saved_crypto.items():
-            crypto_config[key] = value
+            setattr(app_config, key, value)
         load_private_key.cache_clear()
         read_master_key.cache_clear()
 
@@ -280,7 +280,7 @@ class HostGrantTests(RosterFileTestCase):
         self.assertIn(keys_mod._BLOCK_BEGIN, block)
         self.assertIn(keys_mod._BLOCK_END, block)
 
-        crypto_config['enc_key_file'].unlink()                   # a machine holding nothing
+        app_config.enc_key_file.unlink()                   # a machine holding nothing
         read_master_key.cache_clear()
         self.assertEqual(keys_mod.host_unlock(block), 0)
         read_master_key.cache_clear()
@@ -292,7 +292,7 @@ class HostGrantTests(RosterFileTestCase):
         The markers are for the person choosing what to copy; the braces are the contract."""
         keys_mod.host_authorize(public_key_hex(self.mine.public_key()), 'me@example.com')
         block = self.mailed[-1][1]
-        crypto_config['enc_key_file'].unlink()
+        app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
         self.assertEqual(keys_mod.host_unlock(f'Hi!\n\n{block}\n\n-- \nSent from my phone\n'), 0)
 
@@ -300,11 +300,11 @@ class HostGrantTests(RosterFileTestCase):
         theirs = x25519.X25519PrivateKey.generate()
         keys_mod.host_authorize(public_key_hex(theirs.public_key()), 'them@example.com')
         block = self.mailed[-1][1]
-        crypto_config['enc_key_file'].unlink()
+        app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
 
         self.assertEqual(keys_mod.host_unlock(block), 1)
-        self.assertFalse(crypto_config['enc_key_file'].exists(), 'nothing may be written')
+        self.assertFalse(app_config.enc_key_file.exists(), 'nothing may be written')
 
     def test_nothing_is_mailed_for_a_key_that_is_not_one(self) -> None:
         self.assertEqual(keys_mod.host_authorize('not-a-public-key', 'me@example.com'), 1)

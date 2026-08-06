@@ -109,7 +109,7 @@ fi
 # unwired (an unauthorized per-user clone moving files) is fine: the property
 # gated is the blob's content, not the wiring.
 section "encryption filter (solutions/private)"
-magic_hex=$("$VENV/bin/python" -c 'from solver.crypto.config import config; print(config["magic"].hex())' 2>/dev/null)
+magic_hex=$("$VENV/bin/python" -c 'from solver.crypto import wire; print(wire.MAGIC.hex())' 2>/dev/null)
 if [[ -z "$magic_hex" ]]; then
     fail "could not read the gitfilter magic (is the venv intact?)"
 else

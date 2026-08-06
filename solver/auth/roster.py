@@ -21,7 +21,7 @@ live where both floors can write it.
 not tidiness: `public_key` is the one field here that is *used* rather than displayed —
 :func:`~solver.crypto.keys._recipient_key` reads it to decide what a half gets sealed to — so
 whoever can write it can redirect a future grant to a key they hold. Combined with host read
-access to the share (`solver.crypto.config` `share_file`) that is the whole master key, which
+access to the share (`config.share_file`) that is the whole master key, which
 is why the group must be people who already have it. Every other field is advisory.
 
 **Public keys only. No key material.** Half the master key used to live here too, on the

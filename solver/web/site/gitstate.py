@@ -64,7 +64,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from solver.crypto.config import config as crypto_config
+from solver.crypto import wire
 
 log = logging.getLogger('euler-content')
 
@@ -203,7 +203,7 @@ def filter_wired(repo_root: Path) -> bool:
 
     Read from the file rather than asked of `git config`: it is the same answer for
     the price of one small read instead of a second subprocess per page. The driver's
-    name comes from :mod:`solver.crypto.config`, which owns every git-filter wire
+    name comes from :mod:`solver.crypto.wire`, which owns every git-filter wire
     constant — this must not carry a second copy of it.
 
     Unreadable (or absent) reads as not wired — the conservative direction, since the
@@ -213,7 +213,7 @@ def filter_wired(repo_root: Path) -> bool:
         text = (repo_root / '.git' / 'config').read_text(encoding='utf-8', errors='replace')
     except OSError:
         return False
-    return f'[filter "{crypto_config["filter_name"]}"]' in text
+    return f'[filter "{wire.FILTER_NAME}"]' in text
 
 
 def _fetch_due(repo_root: Path) -> bool:

@@ -283,7 +283,7 @@ Losing it is equivalent to forgetting the password.
 ## 9. Tests
 
 [`tests/test_vault.py`](../tests/test_vault.py) covers the layers separately, each against a
-temporary secrets dir with the crypto config rebound onto it:
+temporary secrets dir with the key locations rebound onto it:
 
 | class | what it pins |
 | --- | --- |
@@ -302,7 +302,8 @@ temporary secrets dir with the crypto config rebound onto it:
 | --- | --- |
 | [`solver/crypto/vault.py`](../solver/crypto/vault.py) | the whole scheme: KDF, wrap/unwrap, secret blobs, the vault file, session-key delivery |
 | [`solver/crypto/keys.py`](../solver/crypto/keys.py) | every interactive part: the `vault` command, `unlock_session`, key-file ownership |
-| [`solver/crypto/config.py`](../solver/crypto/config.py) | file locations, `vault_magic`, the iteration count, the two env-var names |
+| [`solver/crypto/wire.py`](../solver/crypto/wire.py) | `VAULT_MAGIC`, the iteration count, the two env-var names — the format, none of it configurable |
+| [`solver/config/values.conf`](../solver/config/values.conf) | `[crypto]` — where `id`, `enc-key.json`, `vault` and `env` live |
 | [`solver/crypto/ciphers.py`](../solver/crypto/ciphers.py) | `load_private_key` — the main consumer, transparently decrypting the vault form |
 | [`solver/crypto/readenv.py`](../solver/crypto/readenv.py) | prints the authoring env as plaintext, for the setup scripts |
 | [`solver/web/user/vault_api.py`](../solver/web/user/vault_api.py) | `/vault/unlock`, `/vault/rewrap`, the account panel's secrets |

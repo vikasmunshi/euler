@@ -4,7 +4,7 @@
 Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
 
 This is the non-interactive heart of `solver.crypto`. File locations and git-filter wire-format
-constants come from the `config` TypedDict in `solver.crypto.config` (the crypto package does **not**
+file locations come from `solver.config` and the wire-format constants from `solver.crypto.wire` (the
 import `solver.config`). On top of that, this module owns:
 
 - the asymmetric primitives -- load the plain (unencrypted) X25519 private key from `~/.euler/id`
@@ -22,7 +22,7 @@ All creation, persistence, rotation, sharing and the shell commands live in `sol
 (which is interactive and imports this module). The git filter (`solver.crypto.gitfilter`) imports
 only this module. Both of those callers run in contexts where stdout carries file content, so this
 module's hard contract is: **importing it, and everything it imports, emits nothing on stdout.** It
-imports only the standard library, `cryptography`, and `solver.crypto.config`; keep it that way.
+imports only the standard library, `cryptography`, `solver.config` and `solver.crypto.wire`; keep it that way.
 Verified: `python -c "import solver.crypto.ciphers"` writes 0 bytes to stdout.
 """
 from __future__ import annotations
@@ -59,7 +59,8 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import (Encoding, PublicFormat, load_pem_private_key)
 
-from solver.crypto.config import config
+from solver.config import config
+from solver.crypto import wire
 from solver.crypto.vault import decrypt_secret, is_vault_encrypted, session_vault_key
 
 
@@ -85,7 +86,7 @@ def load_private_key() -> X25519PrivateKey:
         ValueError:        If the key file is malformed, or is vault-encrypted while the vault is locked.
     Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
     """
-    key_file: Path = config['private_key_file']
+    key_file: Path = config.private_key_file
     if not key_file.exists():
         raise FileNotFoundError(f'private key {key_file} not found; run `solver user` to create one')
     raw: bytes = key_file.read_bytes()
@@ -143,14 +144,14 @@ def unlock(private_key: X25519PrivateKey, locked: str) -> bytes:
 # ==================================================================================================================== #
 def read_enc_key_file() -> dict[str, Any]:
     """Read and parse this machine's enc-key file; FileNotFoundError when there is none."""
-    return cast(dict[str, Any], loads(config['enc_key_file'].read_text()))
+    return cast(dict[str, Any], loads(config.enc_key_file.read_text()))
 
 
 def verify_master_key(data: dict[str, Any], master_key: bytes) -> bool:
     """Return True if `master_key` decrypts the stored `verify` ciphertext back to the known plaintext."""
     try:
-        blob = bytes.fromhex(str(data[config['enc_key_verify']]))
-        return decrypt_blob(blob, master_key) == bytes(config['verify_text'])
+        blob = bytes.fromhex(str(data[wire.ENC_KEY_VERIFY]))
+        return decrypt_blob(blob, master_key) == bytes(wire.VERIFY_TEXT)
     except (InvalidTag, ValueError, KeyError, TypeError):
         return False
 
@@ -180,7 +181,7 @@ def read_master_key() -> bytes:
     data: dict[str, Any] = read_enc_key_file()
     my_public: str = public_key_hex(private_key.public_key())
     if my_public not in data:
-        raise KeyError(f'public key {my_public} has no entry in {config["enc_key_file"]}')
+        raise KeyError(f'public key {my_public} has no entry in {config.enc_key_file}')
     try:
         master_key: bytes = unlock(private_key, str(data[my_public]))
     except InvalidTag as exc:
@@ -198,7 +199,7 @@ def enc_key_payload(public_key: X25519PublicKey, master_key: bytes) -> dict[str,
     to open, and it travels through the message spool for the same reason the old file could
     sit in a public repo: without the matching private key it is inert.
     """
-    return {config['enc_key_verify']: encrypt_blob(config['verify_text'], master_key).hex(),
+    return {wire.ENC_KEY_VERIFY: encrypt_blob(wire.VERIFY_TEXT, master_key).hex(),
             public_key_hex(public_key): lock(public_key, master_key)}
 
 
@@ -218,7 +219,7 @@ def _derive_keys(master_key: bytes) -> tuple[bytes, bytes]:
 
 def is_encrypted(blob: bytes) -> bool:
     """Return True if blob carries the filter's MAGIC header (i.e. is already ciphertext)."""
-    magic: bytes = config['magic']
+    magic: bytes = wire.MAGIC
     return blob[:len(magic)] == magic
 
 
@@ -236,8 +237,8 @@ def encrypt_blob_with(plaintext: bytes, cipher: AESGCM, mac_key: bytes) -> bytes
     """
     if is_encrypted(plaintext):
         return plaintext
-    magic: bytes = config['magic']
-    nonce: bytes = hmac_new(mac_key, plaintext, sha256).digest()[:config['nonce_len']]
+    magic: bytes = wire.MAGIC
+    nonce: bytes = hmac_new(mac_key, plaintext, sha256).digest()[:wire.NONCE_LEN]
     return magic + nonce + cipher.encrypt(nonce, plaintext, None)
 
 
@@ -245,8 +246,8 @@ def decrypt_blob_with(blob: bytes, cipher: AESGCM) -> bytes:
     """Decrypt with a prebuilt cipher; pass-through for content without MAGIC."""
     if not is_encrypted(blob):
         return blob
-    return cipher.decrypt(blob[len(config['magic']):config['header_len']],
-                          blob[config['header_len']:], None)
+    return cipher.decrypt(blob[len(wire.MAGIC):wire.HEADER_LEN],
+                          blob[wire.HEADER_LEN:], None)
 
 
 def encrypt_blob(plaintext: bytes, master_key: bytes) -> bytes:

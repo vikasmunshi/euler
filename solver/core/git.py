@@ -49,7 +49,7 @@ from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.problems import Problem
 from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
-from solver.crypto.config import config as crypto_config
+from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import console, register
 from solver.shell.dialogue import Ask, Choice
@@ -705,7 +705,7 @@ def enc_key_arrived(local_edits: dict[str, bytes] | None = None) -> None:
     # repair below materialises HEAD. Re-home first, or the re-checkout fails on the way.
     if not private_tree_opens():
         _rehome_on_origin(local_edits or {})
-    name: str = crypto_config['filter_name']
+    name: str = wire.FILTER_NAME
     recorded = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
                    cwd=config.root_dir, capture_output=True, text=True)
     wanted = filter_settings(name)[f'filter.{name}.process']

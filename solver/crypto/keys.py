@@ -29,7 +29,8 @@ whole master key to a public key and mail it) and `host-unlock` (take the mailed
 install it). Two commands rather than one because the two ends are two machines.
 
 The non-interactive primitives (load, lock/unlock, encrypt/decrypt) come from `solver.crypto.ciphers`
-and the configuration from `solver.crypto.config`; this module never re-implements them. The git
+the file locations from `solver.config` and the wire format from `solver.crypto.wire`; this module
+never re-implements them. The git
 filter (`solver.crypto.gitfilter`) does not import this module.
 
 Shell commands registered here: `user`, `vault`, `key-rekey`, `user-authorize`, `key-split`,
@@ -59,12 +60,12 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from solver.auth import roster
 from solver.config import ExitCodes, config as app_config
+from solver.crypto import wire
 from solver.core import osc
 from solver.crypto import vault as vault_mod
 from solver.crypto.ciphers import (enc_key_payload, encrypt_blob, load_private_key, lock,
                                    public_key_hex, read_enc_key_file, read_master_key, unlock,
                                    verify_master_key)
-from solver.crypto.config import config
 from solver.shell import console, register
 from solver.shell import dialogue
 from solver.shell.command import Context
@@ -110,7 +111,7 @@ def _rotate_backups(key_file: Path) -> None:
     """Rotate up to `private_key_backups` rolling backups of key_file (.1 newest ... .N oldest)."""
     if not key_file.exists():
         return
-    keep: int = config['private_key_backups']
+    keep: int = app_config.private_key_backups
     oldest: Path = key_file.with_suffix(f'.{keep}')
     if oldest.exists():
         oldest.unlink()
@@ -129,7 +130,7 @@ def _persist_private_key(private_key: X25519PrivateKey) -> None:
     no vault (the pre-vault operator setup) the key is written plain, protected by the `0600` secrets
     dir as before.
     """
-    key_file: Path = config['private_key_file']
+    key_file: Path = app_config.private_key_file
     key_file.parent.mkdir(parents=True, exist_ok=True)
     key_file.parent.chmod(0o700)
     data: bytes = private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption())
@@ -169,7 +170,7 @@ def write_enc_key_file(data: dict[str, str]) -> None:
     no commit, no push, nobody else's copy to reconcile with. That is the whole point of
     having moved it out of the checkout.
     """
-    enc_file: Path = config['enc_key_file']
+    enc_file: Path = app_config.enc_key_file
     enc_file.parent.mkdir(parents=True, exist_ok=True)
     enc_file.parent.chmod(0o700)
     enc_file.write_text(dumps(data, indent=2))
@@ -225,7 +226,7 @@ def key_rekey() -> int:
     # Ourselves first: a rotation that fails half way must still leave THIS machine able to
     # decrypt, or the operator has locked themselves out of the tree they just re-encrypted.
     write_enc_key_file(enc_key_payload(load_private_key().public_key(), new_master))
-    console.print(f'[success]master key rotated[/success] [muted]({config["enc_key_file"]})[/muted]')
+    console.print(f'[success]master key rotated[/success] [muted]({app_config.enc_key_file})[/muted]')
     # The local half follows the key it belongs to. One drawn against the retired key would
     # still *work* — any point plus a secret determines a line — so leaving it would mean
     # `key-split` quietly completing halves against a key that opens nothing, and the holder
@@ -269,7 +270,7 @@ def _land_reencrypted_blobs() -> int:
     which costs nothing, because nobody ever received this one.
     """
     console.print('[muted]Re-encrypting tracked private files...[/muted]')
-    root = config['root_dir']
+    root = app_config.root_dir
     paths = ['solutions/private']
     run(['git', 'add', '--renormalize', '--', *paths], cwd=root, check=False)
     staged = run(['git', 'diff', '--cached', '--name-only', '--', *paths],
@@ -541,7 +542,7 @@ def save_issued_key(body: str) -> bool:
     from solver.core.git import enc_key_arrived, private_local_edits
     local_edits = private_local_edits()
     write_enc_key_file(payload)
-    console.print(f'[success]Master key saved[/success] [muted]({config["enc_key_file"]})[/muted]')
+    console.print(f'[success]Master key saved[/success] [muted]({app_config.enc_key_file})[/muted]')
     enc_key_arrived(local_edits)
     return True
 
@@ -575,9 +576,9 @@ def user(regen: bool = False) -> int:
         regen: Replace the existing key pair with a fresh one, after confirmation, and
             re-wrap the master key to it. Defaults to False.
     """
-    app_user = app_config['subject']
+    app_user = app_config.subject
     console.print(f'[primary]solver user:[/primary] {app_user.user} [muted]({app_user.profile})[/muted]')
-    id_file: Path = config['private_key_file']
+    id_file: Path = app_config.private_key_file
     private_key: X25519PrivateKey | None = None
     minted: bool = False  # a key was created here — the only path that files a request
     if id_file.exists():
@@ -621,7 +622,7 @@ def user(regen: bool = False) -> int:
         if carry is not None:
             write_enc_key_file(enc_key_payload(private_key.public_key(), carry))
             console.print('[success]Master-key access carried to the new key[/success] '
-                          f'[muted]({config["enc_key_file"]})[/muted]')
+                          f'[muted]({app_config.enc_key_file})[/muted]')
         # A new identity is exactly what the account page's public-key panel shows —
         # nudge it to re-read (a no-op unless it is the visible pane). Only when a key
         # was actually minted: a bare `user` status view changed nothing.
@@ -729,16 +730,16 @@ def unlock_session(interactive: bool = True) -> bytes | None:
         return None
     # ensure_session_key() writes a key file itself when the env password answers, so compare
     # the exported path across the call: a change means the file is new, and ours.
-    before: str = os.environ.get(config['vault_key_env'], '')
+    before: str = os.environ.get(wire.VAULT_KEY_ENV, '')
     if (vault_key := vault_mod.ensure_session_key()) is not None:
-        after: str = os.environ.get(config['vault_key_env'], '')
+        after: str = os.environ.get(wire.VAULT_KEY_ENV, '')
         if after and after != before:
             _own_key_file(Path(after))
         return vault_key
     if not (interactive and dialogue.interactive()):
         return None
     try:
-        password: str = dialogue.secret('Vault password', hint=f'set ${config["vault_password_env"]}')
+        password: str = dialogue.secret('Vault password', hint=f'set ${wire.VAULT_PASSWORD_ENV}')
     except Abort:
         return None
     try:
@@ -770,14 +771,14 @@ def _orphaned_vault_files() -> list[str]:
     """
     if vault_mod.vault_exists():
         return []
-    return [p.name for p in (config['private_key_file'], config['env_file'])
+    return [p.name for p in (app_config.private_key_file, app_config.env_file)
             if p.exists() and vault_mod.is_vault_encrypted(p.read_bytes())]
 
 
 def _vault_status() -> int:
     """Report whether the vault exists, the state of each secret file, and whether this
     session's key actually decrypts them (a stale/foreign key is flagged, not hidden)."""
-    id_file: Path = config['private_key_file']
+    id_file: Path = app_config.private_key_file
     env_file: Path = app_config.env_file
     vault_key: bytes | None = vault_mod.session_vault_key() if vault_mod.vault_exists() else None
 
@@ -886,9 +887,9 @@ def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'stat
         return 1
     vault_mod.rewrap_vault(current, new_password)
     console.print('[success]Vault password changed.[/success]')
-    if os.environ.get(config['vault_password_env']):
+    if os.environ.get(wire.VAULT_PASSWORD_ENV):
         console.print('[warning]note:[/warning] [accent]$'
-                      f'{config["vault_password_env"]}[/accent] still holds the OLD password — '
+                      f'{wire.VAULT_PASSWORD_ENV}[/accent] still holds the OLD password — '
                       'update it wherever it is set, or the next non-interactive unlock fails.')
     return 0
 
@@ -1013,7 +1014,7 @@ def read_local_share() -> dict[str, str] | None:
     """This machine's half of the master key and its `verify`, or None when there is no pair.
 
     Operational state, not repository content: `/etc/euler/share.json` on a deployed host,
-    `~/.euler/share.json` on a plain checkout (:func:`solver.crypto.config._resolve_share_file`).
+    `~/.euler/share.json` on a plain checkout (:func:`solver.config.paths.share_file`).
     It is **read** by everything and written only by the operator, which is what lets a
     maintainer's web shell keep granting without ever needing `sudo`.
 
@@ -1023,7 +1024,7 @@ def read_local_share() -> dict[str, str] | None:
     key against `verify` before it writes anything.
     """
     try:
-        data = {str(k): str(v) for k, v in loads(config['share_file'].read_text()).items()}
+        data = {str(k): str(v) for k, v in loads(app_config.share_file.read_text()).items()}
     except (OSError, ValueError, AttributeError, TypeError):
         return None
     return data if _share_shape(data.get('share', '')) is None else None
@@ -1046,9 +1047,9 @@ def _write_local_share(master_key: bytes) -> str:
     """
     share: str = _random_share()
     body: str = dumps({'share': share,
-                       config['enc_key_verify']: encrypt_blob(config['verify_text'], master_key).hex(),
+                       wire.ENC_KEY_VERIFY: encrypt_blob(wire.VERIFY_TEXT, master_key).hex(),
                        'since': _now_stamp()}, indent=2) + '\n'
-    path: Path = config['share_file']
+    path: Path = app_config.share_file
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(body)
@@ -1077,7 +1078,7 @@ def _write_local_share(master_key: bytes) -> str:
 
 def _share_label() -> str:
     """The share file as a person should read it — a full path; it is not in the checkout."""
-    return str(config['share_file'])
+    return str(app_config.share_file)
 
 
 def _wrap_share(public_key: X25519PublicKey, share: str) -> str:
@@ -1375,8 +1376,8 @@ def key_reconstruct(share: Annotated[str, Ask('The share you were sent')] = '') 
     # old share, one meant for somebody else, or a machine whose half is from before a
     # rotation. Two independent checks, whichever is available — the share file's own
     # `verify`, and the enc-key file's when there is one.
-    for source in (local_share, read_enc_key_file() if config['enc_key_file'].exists() else {}):
-        if config['enc_key_verify'] in source and not verify_master_key(source, master_key):
+    for source in (local_share, read_enc_key_file() if app_config.enc_key_file.exists() else {}):
+        if wire.ENC_KEY_VERIFY in source and not verify_master_key(source, master_key):
             console.print('[error]error:[/error] the two halves do not make the master key '
                           '(wrong share, or this machine\'s half is stale) — nothing written')
             return 1
@@ -1386,6 +1387,6 @@ def key_reconstruct(share: Annotated[str, Ask('The share you were sent')] = '') 
     local_edits = private_local_edits()
     write_enc_key_file(enc_key_payload(private_key.public_key(), master_key))
     console.print('[success]Master key reconstructed and stored[/success] '
-                  f'[muted]({config["enc_key_file"]})[/muted]')
+                  f'[muted]({app_config.enc_key_file})[/muted]')
     enc_key_arrived(local_edits)
     return 0

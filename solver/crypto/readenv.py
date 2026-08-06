@@ -25,7 +25,7 @@ corrupts a blob. The dependency only ever points this way (here → `vault`), ne
 Deliberately stdlib + `cryptography` only, through :mod:`solver.crypto.vault`'s
 non-interactive surface: it runs during installs, sometimes under `sudo`, sometimes
 before much else exists. It reads the *repo-derived* secrets dir (`~euler` →
-`~/.euler`, see :mod:`solver.crypto.config`), never `$HOME`, so running it as root
+`~/.euler`, see :mod:`solver.config`), never `$HOME`, so running it as root
 still reads the operator's vault rather than root's.
 """
 from __future__ import annotations
@@ -38,8 +38,8 @@ from pathlib import Path
 
 from cryptography.exceptions import InvalidTag
 
-from solver.crypto import vault
-from solver.crypto.config import config
+from solver.config import config
+from solver.crypto import vault, wire
 
 
 def _resolve_vault_key() -> bytes | None:
@@ -51,7 +51,7 @@ def _resolve_vault_key() -> bytes | None:
     except (EOFError, OSError):
         # No tty (a service, a pipe): there is no one to ask.
         print('error: the vault is locked and there is no terminal to ask; '
-              f'set ${config["vault_password_env"]}', file=sys.stderr)
+              f'set ${wire.VAULT_PASSWORD_ENV}', file=sys.stderr)
         return None
     if not password:
         return None
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     if len(args) > 1:
         print('usage: python -m solver.crypto.readenv [PATH]', file=sys.stderr)
         return 1
-    env_file: Path = Path(args[0]) if args else config['env_file']
+    env_file: Path = Path(args[0]) if args else config.env_file
     if not env_file.exists():
         print(f'error: no authoring env at {env_file}', file=sys.stderr)
         return 1
@@ -86,7 +86,7 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(raw.decode('utf-8'))
         return 0
     if not vault.vault_exists():
-        print(f'error: {env_file} is vault-encrypted but {config["vault_file"]} is missing — '
+        print(f'error: {env_file} is vault-encrypted but {config.vault_file} is missing — '
               'its key is unrecoverable without it; restore that file from backup',
               file=sys.stderr)
         return 1

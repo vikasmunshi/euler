@@ -7,7 +7,7 @@
 nothing else does.
 
 There were four derivations of `repo_root`: :mod:`solver.config` (env, then a `git rev-parse`
-anchored at the package dir, then hard failure), :mod:`solver.crypto.config` (the same, plus
+anchored at the package dir, then hard failure), the crypto package (the same, plus
 a fallback), and the two web configs (a bare `parents[3]`). They drifted, and the drift
 cost real access: with the git filter correctly running under `-P`, `__file__` moved out
 of the checkout into `site-packages`, the package-anchored probe found no repository, and
@@ -43,7 +43,8 @@ content.
 """
 from __future__ import annotations
 
-__all__ = ['REPO_ROOT_ENV', 'enter_repo', 'package_root', 'repo_root', 'secrets_dir']
+__all__ = ['REPO_ROOT_ENV', 'SHARE_FILE_ENV', 'enter_repo', 'package_root', 'repo_root',
+           'secrets_dir', 'share_file']
 
 import os
 import sys
@@ -106,6 +107,40 @@ def secrets_dir(root: Path) -> Path:
     the checkout, so key material and the project env file never sit in the work tree.
     """
     return root.parent / f'.{root.name}'
+
+
+#: Environment override for the share file (tests, and a machine that keeps it elsewhere).
+SHARE_FILE_ENV: str = 'EULER_SHARE_FILE'
+
+#: The deployed location: beside `authorizations.json`, root-owned and world-readable ON THE
+#: HOST. Readable is the point — `key-split` and `key-reconstruct` only ever read it, so a
+#: maintainer's web shell (which can never obtain sudo) keeps working; only the operator writes.
+_SYSTEM_SHARE: Path = Path('/etc/euler/share.json')
+
+
+def share_file(root: Path) -> Path:
+    """Where this machine's half of the master key lives, for the checkout at *root*.
+
+    Discovered rather than configured, which is why it sits here with `repo_root` and not
+    in `values.conf`: writing it down would be writing down an answer that depends on
+    whether this machine is a deployed host. Three candidates, in order, and the reason
+    for each:
+
+    1. **`$EULER_SHARE_FILE`** — the tests, and any machine that keeps it elsewhere.
+    2. **`/etc/euler/share.json`**, when that directory exists: a deployed host. It is
+       operational state, not repository content — committing it would publish the half to
+       everyone with a clone, and this repository is public, which would make "and a current
+       clone" no barrier at all to anybody.
+    3. **`<secrets_dir>/share.json`** otherwise — a plain checkout with no deployed tier,
+       where the secrets dir is already the machine-local home for key material.
+
+    The *directory* is probed rather than the file, so the first `key-split` on a deployed
+    host writes to the deployed location rather than inventing a second one in `~`.
+    """
+    override: str = os.environ.get(SHARE_FILE_ENV, '').strip()
+    if override:
+        return Path(override)
+    return _SYSTEM_SHARE if _SYSTEM_SHARE.parent.is_dir() else secrets_dir(root) / 'share.json'
 
 
 def enter_repo(root: Path) -> Path:

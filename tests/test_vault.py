@@ -23,8 +23,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from solver.ai import models
 from solver.config import config as app_config
-from solver.crypto import ciphers, vault
-from solver.crypto.config import config as crypto_config
+from solver.crypto import ciphers, vault, wire
 from tests import silence
 
 silence()   # the key/vault tests drive console error paths on purpose
@@ -38,19 +37,18 @@ class VaultTestCase(unittest.TestCase):
         self.secrets = Path(self._tmp.name)
         self.id_file = self.secrets / 'id'
         self.env_file = self.secrets / 'env'
-        # Rebind the crypto config to the temp secrets dir.
-        self._saved_crypto = {k: crypto_config[k] for k in
+        # Rebind the key locations at the temp secrets dir. `env_file` is one setting now,
+        # read both by the vault and by `ai.models` for the Anthropic key — it used to be
+        # bound twice, once in each config, which is the duplication that is gone.
+        self._saved_crypto = {k: getattr(app_config, k) for k in
                               ('private_key_file', 'env_file', 'vault_file')}
-        crypto_config['private_key_file'] = self.id_file
-        crypto_config['env_file'] = self.env_file
-        crypto_config['vault_file'] = self.secrets / 'vault'
-        # ai.models reads solver.config.env_file for the Anthropic key.
-        self._saved_env_file = app_config.env_file
+        app_config.private_key_file = self.id_file
         app_config.env_file = self.env_file
+        app_config.vault_file = self.secrets / 'vault'
         # A cheap KDF so the suite is fast; the primitive is unchanged.
-        self._saved_iters = crypto_config['vault_kdf_iterations']
-        crypto_config['vault_kdf_iterations'] = 1000
-        self._saved_key_env = os.environ.pop(crypto_config['vault_key_env'], None)
+        self._saved_iters = wire.VAULT_KDF_ITERATIONS
+        wire.VAULT_KDF_ITERATIONS = 1000
+        self._saved_key_env = os.environ.pop(wire.VAULT_KEY_ENV, None)
         # write_session_key() writes into $XDG_RUNTIME_DIR — an environment variable, not
         # a config path, so rebinding the config above does NOT contain it. Point it at the
         # temp dir too, or every run drops live-looking key files in the developer's own
@@ -61,12 +59,11 @@ class VaultTestCase(unittest.TestCase):
 
     def tearDown(self) -> None:
         for k, v in self._saved_crypto.items():
-            crypto_config[k] = v
-        app_config.env_file = self._saved_env_file
-        crypto_config['vault_kdf_iterations'] = self._saved_iters
-        os.environ.pop(crypto_config['vault_key_env'], None)
+            setattr(app_config, k, v)
+        wire.VAULT_KDF_ITERATIONS = self._saved_iters
+        os.environ.pop(wire.VAULT_KEY_ENV, None)
         if self._saved_key_env is not None:
-            os.environ[crypto_config['vault_key_env']] = self._saved_key_env
+            os.environ[wire.VAULT_KEY_ENV] = self._saved_key_env
         os.environ.pop('XDG_RUNTIME_DIR', None)
         if self._saved_runtime is not None:
             os.environ['XDG_RUNTIME_DIR'] = self._saved_runtime
@@ -142,7 +139,7 @@ class VaultFileTest(VaultTestCase):
 
     def test_vault_file_is_0600(self) -> None:
         vault.init_vault('pw')
-        self.assertEqual(crypto_config['vault_file'].stat().st_mode & 0o777, 0o600)
+        self.assertEqual(app_config.vault_file.stat().st_mode & 0o777, 0o600)
 
 
 class SessionKeyTest(VaultTestCase):
@@ -151,21 +148,21 @@ class SessionKeyTest(VaultTestCase):
         path = vault.write_session_key(vk)
         self.addCleanup(lambda: path.exists() and path.unlink())
         self.assertEqual(path.stat().st_mode & 0o777, 0o600)
-        self.assertEqual(os.environ[crypto_config['vault_key_env']], str(path))
+        self.assertEqual(os.environ[wire.VAULT_KEY_ENV], str(path))
         self.assertEqual(vault.session_vault_key(), vk)
 
     def test_session_key_from_env_password_fallback(self) -> None:
         vk = vault.init_vault('terminal-pw')
-        os.environ[crypto_config['vault_password_env']] = 'terminal-pw'
-        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
+        os.environ[wire.VAULT_PASSWORD_ENV] = 'terminal-pw'
+        self.addCleanup(os.environ.pop, wire.VAULT_PASSWORD_ENV, None)
         # No key file set: must derive VK from the env password.
-        self.assertNotIn(crypto_config['vault_key_env'], os.environ)
+        self.assertNotIn(wire.VAULT_KEY_ENV, os.environ)
         self.assertEqual(vault.session_vault_key(), vk)
 
     def test_wrong_env_password_leaves_session_locked(self) -> None:
         vault.init_vault('right-pw')
-        os.environ[crypto_config['vault_password_env']] = 'wrong-pw'
-        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
+        os.environ[wire.VAULT_PASSWORD_ENV] = 'wrong-pw'
+        self.addCleanup(os.environ.pop, wire.VAULT_PASSWORD_ENV, None)
         self.assertIsNone(vault.session_vault_key())
 
     def test_locked_when_no_key_and_no_env_password(self) -> None:
@@ -174,11 +171,11 @@ class SessionKeyTest(VaultTestCase):
 
     def test_ensure_session_key_materialises_file_from_env_password(self) -> None:
         vk = vault.init_vault('pw')
-        os.environ[crypto_config['vault_password_env']] = 'pw'
-        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
+        os.environ[wire.VAULT_PASSWORD_ENV] = 'pw'
+        self.addCleanup(os.environ.pop, wire.VAULT_PASSWORD_ENV, None)
         got = vault.ensure_session_key()
         self.assertEqual(got, vk)
-        key_path = Path(os.environ[crypto_config['vault_key_env']])
+        key_path = Path(os.environ[wire.VAULT_KEY_ENV])
         self.addCleanup(lambda: key_path.exists() and key_path.unlink())
         self.assertEqual(key_path.read_bytes(), vk)
 
@@ -201,8 +198,8 @@ class UnlockSessionTest(VaultTestCase):
         vk = vault.init_vault('pw')
         vault.clear_session_key()
         self._clear_caches()
-        os.environ[crypto_config['vault_password_env']] = 'pw'
-        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
+        os.environ[wire.VAULT_PASSWORD_ENV] = 'pw'
+        self.addCleanup(os.environ.pop, wire.VAULT_PASSWORD_ENV, None)
         # interactive=False proves the env password alone carried it — no prompt involved.
         self.assertEqual(keys.unlock_session(interactive=False), vk)
 
@@ -325,7 +322,7 @@ class PkVaultTest(VaultTestCase):
         self.assertTrue(path.exists())
         vault.clear_session_key()
         self.assertFalse(path.exists())
-        self.assertNotIn(crypto_config['vault_key_env'], os.environ)
+        self.assertNotIn(wire.VAULT_KEY_ENV, os.environ)
         self.assertIsNone(vault.session_vault_key())
         vault.clear_session_key()                               # idempotent
 
@@ -397,7 +394,7 @@ class VaultFailureIsNeverANewIdentityTest(VaultTestCase):
         from solver.crypto.keys import _orphaned_vault_files, vault as vault_cmd
         vk, _ = self._encrypted_id()
         self.env_file.write_bytes(vault.encrypt_secret(vk, b'ANTHROPIC_API_KEY=sk-x\n'))
-        crypto_config['vault_file'].unlink()                # the vault file is LOST
+        app_config.vault_file.unlink()                # the vault file is LOST
         vault.clear_session_key()
         self._clear_caches()
         self.assertEqual(sorted(_orphaned_vault_files()), ['env', 'id'])

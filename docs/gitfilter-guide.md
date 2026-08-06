@@ -140,11 +140,18 @@ only wrapped keys and a ciphertext, never a plaintext key.
 
 ### Constants
 
-All crypto configuration — file locations **and** wire-format / filter constants —
-lives in one place, `solver.crypto.ciphers.config_dict` (`config_dict['magic']`,
-`config_dict['filter_name']`, `config_dict['attr_line']`, `config_dict['pkt_max']`,
-`config_dict['verify_text']`, …), so the filter and the audit script share a single
-source of truth and the crypto package does not depend on `solver.config`.
+The wire-format and filter constants — `wire.MAGIC`, `wire.FILTER_NAME`,
+`wire.ATTR_LINE`, `wire.PKT_MAX`, `wire.VERIFY_TEXT`, … — live in
+[`solver/crypto/wire.py`](../solver/crypto/wire.py), so the filter and the audit script
+share a single source of truth. None of them is configurable: each is part of a format
+something else already depends on — a blob in git, a file on another machine, a rule in
+the tracked `.gitattributes` — so changing one does not adjust behaviour, it makes
+existing data unreadable.
+
+Where the *files* are is the configurable part, and it is not kept here: the key
+locations are settings like any other, declared in `solver/config/config.py` and
+editable in the `[crypto]` section of
+[`solver/config/values.conf`](../solver/config/values.conf).
 
 ---
 

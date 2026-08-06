@@ -21,7 +21,7 @@ filter and already-encrypted blobs are never double-processed):
   throughput path and what `install` wires up.
 - `clean` / `smudge` -- one process per file. A fallback for direct/manual use.
 
-Import-time contract: this module imports only `solver.crypto.ciphers` and `solver.crypto.config`,
+Import-time contract: this module imports only `solver.crypto.ciphers`, `solver.crypto.wire` and `solver.config`,
 both of which emit **nothing on stdout when imported** -- in every filter mode stdout is the pkt-line
 / file-content channel, so a single stray byte written during import would corrupt every blob. Keep
 that property when editing these modules (verified: `python -c "import solver.crypto.gitfilter"`
@@ -41,10 +41,11 @@ from typing import BinaryIO
 
 from cryptography.exceptions import InvalidTag
 
-# Top-level import is safe because importing solver.crypto.ciphers and solver.crypto.config emit nothing on stdout --
+# Top-level import is safe because importing solver.crypto.ciphers, solver.crypto.wire and solver.config emit nothing --
 from solver.crypto.ciphers import (build_cipher, decrypt_blob, decrypt_blob_with, encrypt_blob, encrypt_blob_with,
                                    read_master_key)
-from solver.crypto.config import config
+from solver.config import config
+from solver.crypto import wire
 
 _KEY_ERRORS = (FileNotFoundError, KeyError, ValueError, InvalidTag)
 
@@ -106,8 +107,8 @@ def _write_response(dst: BinaryIO, content: bytes) -> None:
     """Write a success response: status, then the content chunked into pkt-lines, then end markers."""
     _write_text_pkt(dst, 'status=success')
     dst.write(b'0000')  # flush after status
-    for i in range(0, len(content), config['pkt_max']):
-        _write_pkt(dst, content[i:i + config['pkt_max']])
+    for i in range(0, len(content), wire.PKT_MAX):
+        _write_pkt(dst, content[i:i + wire.PKT_MAX])
     dst.write(b'0000')  # flush: end of content
     dst.write(b'0000')  # flush: empty trailing status list -> overall success
     dst.flush()
@@ -230,8 +231,8 @@ def _rule_present(attrs_path: Path) -> bool:
         text = attrs_path.read_text(encoding='utf-8', errors='replace')
     except OSError:
         return False
-    needle: str = f'filter={config["filter_name"]}'
-    path: str = config['attr_path']
+    needle: str = f'filter={wire.FILTER_NAME}'
+    path: str = wire.ATTR_PATH
     for raw in text.splitlines():
         line = raw.strip()
         if not line or line.startswith('#'):
@@ -285,8 +286,8 @@ def _install() -> int:
         return 1
     print('gitfilter: master key verified against the stored ciphertext.', file=sys.stderr)
 
-    name: str = config['filter_name']
-    root = config['root_dir']
+    name: str = wire.FILTER_NAME
+    root = config.root_dir
     settings: dict[str, str] = filter_settings(name)
     for key, value in settings.items():
         run(['git', 'config', '--local', key, value], cwd=root, check=True)
@@ -302,15 +303,15 @@ def _install() -> int:
     existing: str = attrs_path.read_text() if attrs_path.exists() else ''
     header = '' if existing.endswith('\n') or not existing else '\n'
     block = '# Transparent encryption for private solutions (solver.crypto.gitfilter).\n'
-    attrs_path.write_text(f'{existing}{header}{block}{config["attr_line"]}\n')
+    attrs_path.write_text(f'{existing}{header}{block}{wire.ATTR_LINE}\n')
     print(f'added rule to {attrs_path}', file=sys.stderr)
     return 0
 
 
 def _status() -> int:
     """Print whether the filter is wired up in git config / .gitattributes and the master key is valid."""
-    name: str = config['filter_name']
-    root = config['root_dir']
+    name: str = wire.FILTER_NAME
+    root = config.root_dir
     for action in ('process', 'clean', 'smudge', 'required'):
         result = run(['git', 'config', '--local', '--get', f'filter.{name}.{action}'],
                      cwd=root, capture_output=True, text=True)

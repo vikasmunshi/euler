@@ -5,7 +5,7 @@
 The rule is **tracked** — it ships in the repo, so a fresh clone already carries it and
 `gitfilter install` should only ever *recognise* it. The regression these tests pin is
 what happens when it does not: `-diff` was added to the tracked rule without updating
-`crypto.config['attr_line']`, the installer's exact-line match failed, and it appended a
+`wire.ATTR_LINE`, the installer's exact-line match failed, and it appended a
 second — weaker, `-diff`-less — copy of the same rule to a tracked file. Every
 collaborator clone then reported a modified `.gitattributes` after `git-sync`.
 
@@ -22,7 +22,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from solver.crypto.config import config as crypto_config
+from solver.crypto import wire
 from solver.crypto.gitfilter import _rule_present, filter_settings
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -34,12 +34,12 @@ class AttrLineMatchesTheTrackedRuleTests(unittest.TestCase):
 
     def test_attr_line_is_a_line_of_the_tracked_gitattributes(self) -> None:
         lines = _TRACKED_ATTRS.read_text(encoding='utf-8').splitlines()
-        self.assertIn(crypto_config['attr_line'], lines,
-                      'crypto.config attr_line has drifted from the tracked .gitattributes '
+        self.assertIn(wire.ATTR_LINE, lines,
+                      'wire.ATTR_LINE has drifted from the tracked .gitattributes '
                       'rule — the installer will append a duplicate to a tracked file')
 
     def test_attr_path_prefixes_attr_line(self) -> None:
-        self.assertTrue(crypto_config['attr_line'].startswith(crypto_config['attr_path'] + ' '))
+        self.assertTrue(wire.ATTR_LINE.startswith(wire.ATTR_PATH + ' '))
 
     def test_the_tracked_rule_is_recognised(self) -> None:
         self.assertTrue(_rule_present(_TRACKED_ATTRS))

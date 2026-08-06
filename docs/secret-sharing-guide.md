@@ -222,7 +222,7 @@ Operational state on the host, never repository content:
 }
 ```
 
-Resolved in this order (`solver/crypto/config.py`):
+Resolved in this order (`solver.config.paths.share_file`):
 
 | candidate | when |
 | --- | --- |
@@ -435,7 +435,7 @@ nothing, because an off-host machine has no account to record it against.
 | file | role |
 | --- | --- |
 | [`solver/crypto/keys.py`](../solver/crypto/keys.py) | the field arithmetic, the sealing, `key-split`, `key-reconstruct`, `user-authorize`, `host-authorize`, `host-unlock` |
-| [`solver/crypto/config.py`](../solver/crypto/config.py) | `share_file` — where the local half lives, and the order it is looked for in |
+| [`solver/config/paths.py`](../solver/config/paths.py) | `share_file()` — where the local half lives, and the order it is looked for in |
 | [`solver/crypto/ciphers.py`](../solver/crypto/ciphers.py) | `lock` / `unlock` — the X25519 envelope a sent half and a mailed key both ride in |
 | [`solver/auth/roster.py`](../solver/auth/roster.py) | the roster: public keys and the operator's dated acts, and no key material |
 | [`solver/web/auth/mail.py`](../solver/web/auth/mail.py) | `send_master_key` — the off-host delivery |

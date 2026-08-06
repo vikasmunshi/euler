@@ -41,7 +41,7 @@ from cryptography.exceptions import InvalidTag
 
 from solver.crypto import vault
 from solver.crypto.ciphers import load_private_key, public_key_hex, read_master_key
-from solver.crypto.config import config as crypto_config
+from solver.config import config
 from solver.web.site import gitstate
 from solver.web.site.app import requires
 from solver.web.site.render import render
@@ -87,7 +87,7 @@ def _public_key_state() -> tuple[str, str]:
     States: `key` (value = the hex to hand to the admin), `locked` (encrypted id,
     no session VK), `none` (no keypair yet — run `user` in the shell).
     """
-    if not crypto_config['private_key_file'].exists():
+    if not config.private_key_file.exists():
         return 'none', ''
     load_private_key.cache_clear()      # the shell may have regenerated the key since our last look
     try:
@@ -98,7 +98,7 @@ def _public_key_state() -> tuple[str, str]:
 
 def _env_lines(vault_key: bytes) -> list[str]:
     """The decrypted lines of `~/.euler/env` (empty when the file is absent)."""
-    env_file: Path = crypto_config['env_file']
+    env_file: Path = config.env_file
     if not env_file.exists():
         return []
     text = vault.decrypt_secret(vault_key, env_file.read_bytes()).decode('utf-8')
@@ -107,7 +107,7 @@ def _env_lines(vault_key: bytes) -> list[str]:
 
 def _write_env_lines(vault_key: bytes, lines: list[str]) -> None:
     """Encrypt the env lines under `VK` and write them back (0600)."""
-    env_file: Path = crypto_config['env_file']
+    env_file: Path = config.env_file
     body = ('\n'.join(lines) + '\n') if lines else ''
     env_file.parent.mkdir(parents=True, exist_ok=True)
     env_file.write_bytes(vault.encrypt_secret(vault_key, body.encode('utf-8')))
@@ -275,7 +275,7 @@ def add_vault_routes(app: web.Application) -> None:
         claude = await loop.run_in_executor(None, _claude_status)
         # The same reader the header's chip uses (one small file read), so the row
         # and the chip cannot disagree about the same clone.
-        wired = gitstate.filter_wired(crypto_config['root_dir'])
+        wired = gitstate.filter_wired(config.root_dir)
         # An X25519 unwrap over two small files, but it is filesystem work on the
         # event loop's thread — off it, like the tool probes beside it.
         can_decrypt = (pubkey_state == 'key') and await loop.run_in_executor(None, _can_decrypt)

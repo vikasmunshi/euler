@@ -36,7 +36,8 @@ protects a secret from the entity that controls the CPU. Do not over-claim "zero
 
 This module is imported on the git-filter path (via :mod:`solver.crypto.ciphers`), so its hard
 contract is the same: **importing it, and everything it imports, emits nothing on stdout**, and it
-depends only on the standard library, `cryptography`, and :mod:`solver.crypto.config`. All
+depends only on the standard library, `cryptography`, :mod:`solver.config` and
+:mod:`solver.crypto.wire`. All
 interactive parts (password prompts, the `vault` command) live in :mod:`solver.crypto.keys`.
 """
 from __future__ import annotations
@@ -78,7 +79,8 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from solver.crypto.config import config
+from solver.config import config
+from solver.crypto import wire
 
 _KEY_LEN: int = 32  # AES-256 / VK length
 _SALT_LEN: int = 16  # matches the SRP salt width (solver.web.auth.srp)
@@ -103,7 +105,7 @@ def derive_password_key(password: str, salt: bytes, iterations: int | None = Non
     WebCrypto-compatible: a browser derives the identical key from the same password, salt, and
     iteration count, so the web path can supply `PK` without shipping the password to the server.
     """
-    rounds: int = config['vault_kdf_iterations'] if iterations is None else iterations
+    rounds: int = wire.VAULT_KDF_ITERATIONS if iterations is None else iterations
     return PBKDF2HMAC(SHA256(), _KEY_LEN, salt, rounds).derive(password.encode('utf-8'))
 
 
@@ -133,7 +135,7 @@ def unwrap_vault_key(password_key: bytes, wrapped: str) -> bytes:
 # ==================================================================================================================== #
 def is_vault_encrypted(blob: bytes) -> bool:
     """Return True if `blob` carries the vault MAGIC header (i.e. is vault ciphertext, not plaintext)."""
-    magic: bytes = config['vault_magic']
+    magic: bytes = wire.VAULT_MAGIC
     return blob[:len(magic)] == magic
 
 
@@ -145,7 +147,7 @@ def encrypt_secret(vault_key: bytes, plaintext: bytes) -> bytes:
     """
     if is_vault_encrypted(plaintext):
         return plaintext
-    magic: bytes = config['vault_magic']
+    magic: bytes = wire.VAULT_MAGIC
     nonce: bytes = token_bytes(_NONCE_LEN)
     return magic + nonce + AESGCM(vault_key).encrypt(nonce, plaintext, None)
 
@@ -158,7 +160,7 @@ def decrypt_secret(vault_key: bytes, blob: bytes) -> bytes:
     """
     if not is_vault_encrypted(blob):
         return blob
-    magic: int = len(config['vault_magic'])
+    magic: int = len(wire.VAULT_MAGIC)
     nonce: bytes = blob[magic:magic + _NONCE_LEN]
     return AESGCM(vault_key).decrypt(nonce, blob[magic + _NONCE_LEN:], None)
 
@@ -168,12 +170,12 @@ def decrypt_secret(vault_key: bytes, blob: bytes) -> bytes:
 # ==================================================================================================================== #
 def vault_exists() -> bool:
     """Return True if this user's vault file is present (i.e. their secrets are vault-encrypted)."""
-    return config['vault_file'].exists()
+    return config.vault_file.exists()
 
 
 def read_vault() -> VaultData | None:
     """Read and parse `~/.euler/vault`; return None if the user has no vault (plaintext at rest)."""
-    vault_file: Path = config['vault_file']
+    vault_file: Path = config.vault_file
     if not vault_file.exists():
         return None
     return cast(VaultData, loads(vault_file.read_text()))
@@ -181,7 +183,7 @@ def read_vault() -> VaultData | None:
 
 def write_vault(salt: bytes, wrapped_vk: str, iterations: int) -> None:
     """Serialise `~/.euler/vault` (0600) with the wrapped vault key and its KDF parameters."""
-    vault_file: Path = config['vault_file']
+    vault_file: Path = config.vault_file
     vault_file.parent.mkdir(parents=True, exist_ok=True)
     vault_file.parent.chmod(0o700)
     body: VaultData = {'kdf': 'pbkdf2-sha256', 'iterations': iterations,
@@ -198,7 +200,7 @@ def init_vault(password: str, salt: bytes | None = None) -> bytes:
     browser derives the same `PK`.
     """
     salt = token_bytes(_SALT_LEN) if salt is None else salt
-    iterations: int = config['vault_kdf_iterations']
+    iterations: int = wire.VAULT_KDF_ITERATIONS
     vault_key: bytes = new_vault_key()
     password_key: bytes = derive_password_key(password, salt, iterations)
     write_vault(salt, wrap_vault_key(password_key, vault_key), iterations)
@@ -214,7 +216,7 @@ def unlock_vault(password: str) -> bytes:
     """
     vault: VaultData | None = read_vault()
     if vault is None:
-        raise FileNotFoundError(f'no vault at {config["vault_file"]}; run `vault --init`')
+        raise FileNotFoundError(f'no vault at {config.vault_file}; run `vault --init`')
     password_key: bytes = derive_password_key(password, bytes.fromhex(vault['salt']), vault['iterations'])
     return unwrap_vault_key(password_key, vault['wrapped_vk'])
 
@@ -227,7 +229,7 @@ def encrypt_secret_files(vault_key: bytes) -> list[str]:
     never created with its secrets left plain beside it.
     """
     encrypted: list[str] = []
-    for path in (config['private_key_file'], config['env_file']):
+    for path in (config.private_key_file, config.env_file):
         if not path.exists():
             continue
         raw: bytes = path.read_bytes()
@@ -249,7 +251,7 @@ def rewrap_vault(old_password: str, new_password: str) -> None:
     """
     vault_key: bytes = unlock_vault(old_password)
     salt: bytes = token_bytes(_SALT_LEN)
-    iterations: int = config['vault_kdf_iterations']
+    iterations: int = wire.VAULT_KDF_ITERATIONS
     write_vault(salt, wrap_vault_key(derive_password_key(new_password, salt, iterations), vault_key), iterations)
 
 
@@ -270,7 +272,7 @@ def unlock_vault_with_pk(password_key: bytes) -> bytes:
     """
     vault: VaultData | None = read_vault()
     if vault is None:
-        raise FileNotFoundError(f'no vault at {config["vault_file"]}')
+        raise FileNotFoundError(f'no vault at {config.vault_file}')
     return unwrap_vault_key(password_key, vault['wrapped_vk'])
 
 
@@ -281,7 +283,7 @@ def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
     derives the identical `PK`. Any plaintext `id`/`env` already on disk is encrypted in place --
     a vault must never coexist with plain secrets. Returns the plaintext `VK`.
     """
-    iterations: int = config['vault_kdf_iterations']
+    iterations: int = wire.VAULT_KDF_ITERATIONS
     vault_key: bytes = new_vault_key()
     write_vault(salt, wrap_vault_key(password_key, vault_key), iterations)
     encrypt_secret_files(vault_key)
@@ -299,7 +301,7 @@ def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_s
         cryptography.exceptions.InvalidTag: If `old_password_key` is wrong.
     """
     vault_key: bytes = unlock_vault_with_pk(old_password_key)
-    write_vault(new_salt, wrap_vault_key(new_password_key, vault_key), config['vault_kdf_iterations'])
+    write_vault(new_salt, wrap_vault_key(new_password_key, vault_key), wire.VAULT_KDF_ITERATIONS)
 
 
 def reset_vault() -> list[str]:
@@ -312,13 +314,13 @@ def reset_vault() -> list[str]:
     names of the files removed; the user re-provisions (`user --regen` + re-upload) afterwards.
     """
     removed: list[str] = []
-    vault_file: Path = config['vault_file']
+    vault_file: Path = config.vault_file
     if vault_file.exists():
         vault_file.unlink()
         removed.append(vault_file.name)
-    key_file: Path = config['private_key_file']
-    candidates: list[Path] = [key_file, config['env_file']]
-    candidates += [key_file.with_suffix(f'.{i}') for i in range(1, config['private_key_backups'] + 1)]
+    key_file: Path = config.private_key_file
+    candidates: list[Path] = [key_file, config.env_file]
+    candidates += [key_file.with_suffix(f'.{i}') for i in range(1, config.private_key_backups + 1)]
     for path in candidates:
         if path.exists() and is_vault_encrypted(path.read_bytes()):
             path.unlink()
@@ -350,7 +352,7 @@ def write_session_key(vault_key: bytes) -> Path:
         os.write(fd, vault_key)
     finally:
         os.close(fd)
-    os.environ[config['vault_key_env']] = name
+    os.environ[wire.VAULT_KEY_ENV] = name
     _resolve_session_key.cache_clear()
     return Path(name)
 
@@ -366,7 +368,7 @@ def _resolve_session_key() -> bytes | None:
     then finds. There is deliberately no password *file*: a password at rest beside the ciphertext it
     unlocks protects nothing that the secrets dir's own 0600 does not already protect.
     """
-    key_path: str = os.environ.get(config['vault_key_env'], '').strip()
+    key_path: str = os.environ.get(wire.VAULT_KEY_ENV, '').strip()
     if key_path and (path := Path(key_path)).exists():
         data: bytes = path.read_bytes()
         if len(data) == _KEY_LEN:
@@ -374,7 +376,7 @@ def _resolve_session_key() -> bytes | None:
     # The env password: a non-interactive unlock for a script or an automated run. Expensive (PBKDF2)
     # per process, so a shell calls ensure_session_key() once at startup to materialise the tmpfs file
     # and let its children take the fast path above.
-    password: str = os.environ.get(config['vault_password_env'], '')
+    password: str = os.environ.get(wire.VAULT_PASSWORD_ENV, '')
     if not (password and vault_exists()):
         return None
     try:
@@ -398,7 +400,7 @@ def clear_session_key() -> None:
     Called on logout and vault reset so a torn-down session leaves no reachable key material.
     Idempotent.
     """
-    key_path: str = os.environ.pop(config['vault_key_env'], '').strip()
+    key_path: str = os.environ.pop(wire.VAULT_KEY_ENV, '').strip()
     if key_path:
         Path(key_path).unlink(missing_ok=True)
     _resolve_session_key.cache_clear()
@@ -413,7 +415,7 @@ def ensure_session_key() -> bytes | None:
     None -- asking the operator is :func:`solver.crypto.keys.unlock_session`, which is what a shell
     calls at startup.
     """
-    key_path: str = os.environ.get(config['vault_key_env'], '').strip()
+    key_path: str = os.environ.get(wire.VAULT_KEY_ENV, '').strip()
     if key_path and Path(key_path).exists():
         return session_vault_key()
     vault_key: bytes | None = session_vault_key()

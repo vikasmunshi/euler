@@ -33,7 +33,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
 from solver.crypto.ciphers import enc_key_payload, load_private_key, read_master_key
-from solver.crypto.config import config as crypto_config
+from solver.config import config as app_config
 from tests import silence
 
 silence()  # the repair narrates what it is doing; the assertions are the record here
@@ -100,15 +100,12 @@ class RotationRehomeTests(unittest.TestCase):
         self._git('push', '-q', 'origin', 'master')
 
     def _patch_config(self) -> None:
-        """Redirect the crypto dict and `config.root_dir` at the throwaway repo."""
-        for key, value in (('root_dir', self.repo), ('private_key_file', self.secrets / 'id'),
-                           ('enc_key_file', self.secrets / 'enc-key.json')):
-            patcher = patch.dict(crypto_config, {key: value})
+        """Redirect the configuration the code under test reads at the throwaway repo."""
+        for name, value in (('root_dir', self.repo), ('private_key_file', self.secrets / 'id'),
+                            ('enc_key_file', self.secrets / 'enc-key.json')):
+            patcher = patch.object(app_config, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
-        patcher = patch.object(import_module('solver.config').config, 'root_dir', self.repo)
-        patcher.start()
-        self.addCleanup(patcher.stop)
         # Both loaders are process-wide lru_caches, and each test mints its own keypair: left
         # warm, the second test unwraps its own enc-key file with the first test's private key
         # and reads the result as "HEAD does not decrypt". Clear entering and leaving.

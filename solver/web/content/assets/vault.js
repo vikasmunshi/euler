@@ -11,7 +11,7 @@
 (() => {
   if (window.Vault) return;   // idempotent across htmx fragment re-injection
 
-  // Keep in sync with solver/crypto/config.py vault_kdf_iterations (the OWASP
+  // Keep in sync with solver/crypto/wire.py VAULT_KDF_ITERATIONS (the OWASP
   // floor for PBKDF2-SHA256). An older vault's own count arrives via /vault/status.
   const ITERATIONS = 600000;
   const PK_KEY = 'euler.vault.pk';

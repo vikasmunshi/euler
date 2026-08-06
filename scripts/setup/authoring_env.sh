@@ -22,7 +22,7 @@
 # Licensed under the MIT License.
 
 # The authoring source: a sibling dot-dir of the checkout (~/euler -> ~/.euler), matching
-# solver/crypto/config.py's own derivation. NOT $HOME-based: under sudo, $HOME is root's
+# solver/config/paths.py's own derivation. NOT $HOME-based: under sudo, $HOME is root's
 # while the vault is still the operator's.
 ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"
 
@@ -60,7 +60,7 @@ load_authoring_env() {
     [ -r "${file}" ] || return 1
 
     # Plaintext (a scoped runtime copy, or a pre-`vault init` authoring env): source it
-    # directly. The vault magic is 'VLT\x01' (solver/crypto/config.py); test its three
+    # directly. The vault magic is 'VLT\x01' (solver/crypto/wire.py); test its three
     # printable bytes, because the version byte is not one command substitution will
     # survive intact — and a mis-detected ciphertext gets *sourced*, which is how a
     # binary blob ends up being executed as shell.

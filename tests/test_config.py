@@ -92,7 +92,7 @@ class ImportPurityTests(unittest.TestCase):
 
     def test_the_crypto_path_stays_silent_on_stdout(self) -> None:
         """The git filter's stdout carries file content; a stray print corrupts a solution."""
-        out = _probe('import solver.crypto.config')
+        out = _probe('import solver.crypto.gitfilter')
         self.assertEqual(out, '')
 
 

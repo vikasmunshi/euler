@@ -29,11 +29,11 @@ solver.core.tags,True
 solver.core.test_cases,True
 solver.core.viewer,True
 solver.crypto.ciphers,
-solver.crypto.config,
 solver.crypto.gitfilter,
 solver.crypto.keys,True
 solver.crypto.readenv,
 solver.crypto.vault,
+solver.crypto.wire,
 solver.main,
 solver.runners.runner,
 solver.shell.bash,True

@@ -157,7 +157,7 @@ blob_head_hex() {
 # solver/crypto/gitfilter.py; a blob lacking it is plaintext that slipped past
 # the clean filter — block the push.
 section "Encryption-at-rest audit (solutions/private, blobs in this push)"
-magic_hex=$("$VENV/bin/python" -c 'from solver.crypto.config import config; print(config["magic"].hex())')
+magic_hex=$("$VENV/bin/python" -c 'from solver.crypto import wire; print(wire.MAGIC.hex())')
 if (( ${#PUSH_REFS[@]} == 0 )); then
     skip "no refs offered by git — this push adds no blobs to audit"
 elif [[ -z "$magic_hex" ]]; then

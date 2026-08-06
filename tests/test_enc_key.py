@@ -20,7 +20,7 @@ What is left to test is small, which is the point:
 - `user --regen` — carry the master key when it can be loaded, ask for it when it cannot,
   and never ask merely because the vault is locked.
 
-Everything runs against a temp secrets dir with the crypto config rebound onto it, so no
+Everything runs against a temp secrets dir with the key locations rebound onto it, so no
 real key material is read or written.
 """
 from __future__ import annotations
@@ -40,7 +40,6 @@ from solver.config import config as app_config
 from solver.crypto import keys as keys_mod
 from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key_hex,
                                    read_enc_key_file, read_master_key, verify_master_key)
-from solver.crypto.config import config as crypto_config
 from solver.shell import dialogue
 from solver.web.msg import KEY_SHARE_SUBJECT, verb_for
 from tests import silence
@@ -60,9 +59,9 @@ class EncKeyTestCase(unittest.TestCase):
     def setUp(self) -> None:
         self._tmp = TemporaryDirectory()
         self.secrets = Path(self._tmp.name)
-        self._saved = {key: crypto_config[key] for key in ('enc_key_file', 'private_key_file')}
-        crypto_config['enc_key_file'] = self.secrets / 'enc-key.json'
-        crypto_config['private_key_file'] = self.secrets / 'id'
+        self._saved = {key: getattr(app_config, key) for key in ('enc_key_file', 'private_key_file')}
+        app_config.enc_key_file = self.secrets / 'enc-key.json'
+        app_config.private_key_file = self.secrets / 'id'
         self.addCleanup(self._restore)
         self.master = token_bytes(32)
         self.mine_key, self.mine = _keypair()
@@ -71,14 +70,14 @@ class EncKeyTestCase(unittest.TestCase):
 
     def _restore(self) -> None:
         for key, value in self._saved.items():
-            crypto_config[key] = value
+            setattr(app_config, key, value)
         self._tmp.cleanup()
         load_private_key.cache_clear()
         read_master_key.cache_clear()
 
     def _be(self, private: x25519.X25519PrivateKey) -> None:
         """Become the holder of *private* — the identity the read path resolves."""
-        crypto_config['private_key_file'].write_bytes(private.private_bytes(
+        app_config.private_key_file.write_bytes(private.private_bytes(
             Encoding.PEM, PrivateFormat.PKCS8, NoEncryption()))
         load_private_key.cache_clear()
         read_master_key.cache_clear()
@@ -117,7 +116,7 @@ class ReadPathTests(EncKeyTestCase):
 
     def test_the_file_is_written_private(self) -> None:
         keys_mod.write_enc_key_file(self._issue_to(self.mine_key.public_key()))
-        self.assertEqual(crypto_config['enc_key_file'].stat().st_mode & 0o777, 0o600)
+        self.assertEqual(app_config.enc_key_file.stat().st_mode & 0o777, 0o600)
 
 
 class SaveIssuedKeyTests(EncKeyTestCase):
@@ -173,7 +172,7 @@ class SaveIssuedKeyTests(EncKeyTestCase):
         payload = enc_key_payload(self.mine_key.public_key(), token_bytes(32))
         payload['verify'] = self._issue_to(self.mine_key.public_key())['verify']
         self.assertFalse(keys_mod.save_issued_key(self._message(payload)))
-        self.assertFalse(crypto_config['enc_key_file'].exists(), 'nothing may be written')
+        self.assertFalse(app_config.enc_key_file.exists(), 'nothing may be written')
 
     def test_a_message_with_no_payload_is_refused(self) -> None:
         self.assertFalse(keys_mod.save_issued_key('here you go, good luck'))
@@ -275,8 +274,8 @@ class KeySplitTestCase(EncKeyTestCase):
         # would put a sudo prompt in the middle of a test run.
         self._saved_roster = os.environ.get(roster.ROSTER_FILE_ENV)
         os.environ[roster.ROSTER_FILE_ENV] = str(self.secrets / 'users.json')
-        self._saved_share_file = crypto_config['share_file']
-        crypto_config['share_file'] = self.secrets / 'share.json'
+        self._saved_share_file = app_config.share_file
+        app_config.share_file = self.secrets / 'share.json'
         self.addCleanup(self._restore_share)
         self.sent: list[tuple[str, str, str]] = []
         self._wired: list[str] = []
@@ -297,7 +296,7 @@ class KeySplitTestCase(EncKeyTestCase):
         roster.upsert(identity, public_key=public_key, scope='web')
 
     def _restore_share(self) -> None:
-        crypto_config['share_file'] = self._saved_share_file
+        app_config.share_file = self._saved_share_file
         if self._saved_roster is None:
             os.environ.pop(roster.ROSTER_FILE_ENV, None)
         else:
@@ -340,7 +339,7 @@ class KeySplitTests(KeySplitTestCase):
         committable before anyone is sent the other one."""
         self._hold_the_master_key()
         self._lay_the_local_share()
-        self.assertTrue(crypto_config['share_file'].exists())
+        self.assertTrue(app_config.share_file.exists())
 
     def test_the_second_run_sends_a_share_under_the_share_subject(self) -> None:
         self._hold_the_master_key()
@@ -420,7 +419,7 @@ class KeySplitTests(KeySplitTestCase):
         the file carries nothing else that could stand in for the other half."""
         self._hold_the_master_key()
         self._lay_the_local_share()
-        stored = crypto_config['share_file'].read_text()
+        stored = app_config.share_file.read_text()
         self.assertNotIn(self.master.hex(), stored)
         self.assertEqual(set(keys_mod.read_local_share() or {}), {'share', 'verify', 'since'})
 
@@ -451,7 +450,7 @@ class KeyReconstructTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         wrapped = self._split_to('them@example.com')
-        crypto_config['enc_key_file'].unlink()                       # they hold nothing yet
+        app_config.enc_key_file.unlink()                       # they hold nothing yet
         read_master_key.cache_clear()
 
         self.assertEqual(keys_mod.key_reconstruct(wrapped), 0)
@@ -465,11 +464,11 @@ class KeyReconstructTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         wrapped = self._split_to('them@example.com', self.theirs)     # sealed to another key
-        crypto_config['enc_key_file'].unlink()
+        app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
 
         self.assertEqual(keys_mod.key_reconstruct(wrapped), 1)
-        self.assertFalse(crypto_config['enc_key_file'].exists(), 'nothing may be written')
+        self.assertFalse(app_config.enc_key_file.exists(), 'nothing may be written')
 
     def test_a_bare_share_still_works_by_hand(self) -> None:
         """The out-of-band path: a share read off another screen is not wrapped to anything,
@@ -477,7 +476,7 @@ class KeyReconstructTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         bare = self._open(self._split_to('them@example.com'))
-        crypto_config['enc_key_file'].unlink()
+        app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
 
         self.assertEqual(keys_mod.key_reconstruct(bare), 0)
@@ -490,11 +489,11 @@ class KeyReconstructTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         wrong = keys_mod._counterpart(token_bytes(32), self._local_half())     # another secret
-        crypto_config['enc_key_file'].unlink()
+        app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
 
         self.assertEqual(keys_mod.key_reconstruct(wrong), 1)
-        self.assertFalse(crypto_config['enc_key_file'].exists(), 'nothing may be written')
+        self.assertFalse(app_config.enc_key_file.exists(), 'nothing may be written')
 
     def test_a_reconstruction_that_fails_verify_leaves_the_file_alone(self) -> None:
         self._hold_the_master_key()
@@ -510,7 +509,7 @@ class KeyReconstructTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         wrapped = self._split_to('them@example.com')
-        crypto_config['share_file'].unlink()
+        app_config.share_file.unlink()
         self.assertEqual(keys_mod.key_reconstruct(wrapped), 1)
 
     def test_a_mistyped_share_is_refused_on_shape(self) -> None:

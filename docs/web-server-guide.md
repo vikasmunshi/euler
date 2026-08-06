@@ -1006,7 +1006,7 @@ prune and the old branch shadows the next push.
 ## 11 · The site
 
 **Importing this package must stay free.** `solver/web/site/__init__.py` re-exports nothing:
-the content service's app, its `gitstate` reader and, through that, `solver.crypto.config`
+the content service's app, its `gitstate` reader and, through that, `solver.crypto.wire`
 are reached by naming the submodule, never by importing the package. The auth service reads
 exactly one module from here (`content`, for the start page's README), and it is the
 untrusted-input surface that holds no key material — so it must not acquire the crypt
@@ -1014,7 +1014,7 @@ filter's configuration as a side effect of an import.
 
 That was not hypothetical. The package used to re-export `build_app` for convenience, which
 made `from solver.web.site import content` execute the whole content app. It stayed invisible
-while `crypto.config` invented a repo root whenever it could not find one; the moment that
+while the crypto package invented a repo root whenever it could not find one; the moment that
 started refusing (§ Git), the auth service — which has no `EULER_REPO_ROOT`, because it needs
 no working tree — raised at import, never signalled readiness under `Type=notify`, and sat in
 `activating`. Caddy authenticates every request through it, so the site went down with it.
