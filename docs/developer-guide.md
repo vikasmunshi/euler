@@ -433,10 +433,24 @@ def open_prs() -> list[PullRequest]:
     ...
 ```
 
-`choices` may still be a callable `(ctx, bound) -> Sequence[Choice]`, and should be when the
-set has to narrow by an answer already given — which a variable cannot see. `msg`'s thread
-menu is the case: for `act` each row names what acting on it would do. Even there the *read*
-is the `threads` variable and the callable only labels it.
+**One variable, several questions.** A question that takes only *part* of a set says so with
+`which`, a predicate on each member — `key-split` offers the accounts a share can actually be
+sealed to:
+
+```python
+to: Annotated[str, Ask('Send half the key to?', choices='accounts', which=_holds_a_key)]
+```
+
+Not a second variable. `holders` beside `accounts` meant two readings of the same file that
+could — and did — disagree about which records were still live. A subset is a property of the
+set, so it belongs at the question, and `which` sees each member as the variable yields it
+(`account.holds_key`), not as a row of text.
+
+`choices` may still be a callable `(ctx, bound) -> Sequence[Choice]`, and should be for the
+two things `which` cannot express: a set that narrows by an answer already given — `msg`'s
+thread menu labels each row with what `act` would do to it — and a set with members that are
+not in any variable, like the `staff` and `everyone` audiences the recipient menu leads with.
+Even there the *read* is the variable and the callable only adds to it.
 
 An empty result is an answer in itself: `Abort` with `empty=`, because "no messages to read"
 is more use than an empty menu. A set that could not be read at all is **not** empty —
