@@ -131,6 +131,7 @@ that collapse in one guise or another.
 - ● [0232](/solutions/0232/) — The Race
 - ● [0240](/solutions/0240/) — Top Dice
 - ● [0249](/solutions/0249/) — Prime Subset Sums
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0301](/solutions/0301/) — Nim

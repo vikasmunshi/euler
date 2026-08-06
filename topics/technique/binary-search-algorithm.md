@@ -17,6 +17,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binary_search_
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0241](/solutions/0241/) — Perfection Quotients
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors

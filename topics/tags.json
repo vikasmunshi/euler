@@ -652,7 +652,7 @@
       "reference": "https://en.wikipedia.org/wiki/Convex_polygon",
       "additional-references": [],
       "summary": "A polygon whose interior angles are all less than 180 degrees, relevant to maximizing area given fixed side lengths.",
-      "refs": ["p0564"]
+      "refs": ["p0252", "p0564"]
     },
     {
       "slug": "coprime-integers",
@@ -3370,7 +3370,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0461_s0", "p0501_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0"]
+      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0461_s0", "p0501_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0"]
     },
     {
       "slug": "binomial-theorem",
@@ -3712,7 +3712,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cross_product",
       "additional-references": ["https://en.wikipedia.org/wiki/Cross_product#Cross_product_and_handedness"],
       "summary": "",
-      "refs": ["p0102_s0", "p0102_s1", "p0165_s0", "p0184_s0", "p0478_s0"]
+      "refs": ["p0102_s0", "p0102_s1", "p0165_s0", "p0184_s0", "p0252_s0", "p0478_s0"]
     },
     {
       "slug": "cycle-detection",
@@ -3928,7 +3928,7 @@
       "reference": "https://en.wikipedia.org/wiki/Dynamic_programming",
       "additional-references": ["https://en.wikipedia.org/wiki/Dynamic_programming#Bottom-up_approach"],
       "summary": "",
-      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0150_s0", "p0151_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0232_s0", "p0240_s0", "p0249_s0", "p0259_s0", "p0269_s0", "p0301_s0", "p0345_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0885_s0", "p0938_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0150_s0", "p0151_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0232_s0", "p0240_s0", "p0249_s0", "p0252_s0", "p0259_s0", "p0269_s0", "p0301_s0", "p0345_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0885_s0", "p0938_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "eisenstein-integer",
@@ -5125,7 +5125,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0304_s0", "p0319_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0720_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0304_s0", "p0319_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0720_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5227,6 +5227,15 @@
       "refs": ["p0103_s0", "p0103_s1", "p0118_s0", "p0152_s0", "p0357_s0"]
     },
     {
+      "slug": "prefix-maximum-scan",
+      "facet": "technique",
+      "name": "Prefix maximum scan",
+      "reference": "https://en.wikipedia.org/wiki/Prefix_sum",
+      "additional-references": [],
+      "summary": "Replacing a nested search for a dominating element with one running-maximum pass over an ordered sequence.",
+      "refs": ["p0252_s0"]
+    },
+    {
       "slug": "prefix-sum",
       "facet": "technique",
       "name": "Prefix sum",
@@ -5278,7 +5287,7 @@
       "reference": "https://en.cppreference.com/w/c/algorithm/qsort",
       "additional-references": ["https://en.wikipedia.org/wiki/Qsort"],
       "summary": "",
-      "refs": ["p0052_s0", "p0054_s0", "p0118_s0", "p0127_s0", "p0142_s0", "p0143_s0", "p0165_s0", "p0180_s0", "p0203_s0", "p0221_s0", "p0464_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p1000_s0"]
+      "refs": ["p0052_s0", "p0054_s0", "p0118_s0", "p0127_s0", "p0142_s0", "p0143_s0", "p0165_s0", "p0180_s0", "p0203_s0", "p0221_s0", "p0252_s0", "p0464_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p1000_s0"]
     },
     {
       "slug": "quadratic-formula",
@@ -5476,7 +5485,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sorting_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0070_s0", "p0096_s0", "p0098_s0", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0165_s0", "p0177_s0", "p0184_s0", "p0248_s0", "p0321_s0", "p0757_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0070_s0", "p0096_s0", "p0098_s0", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0165_s0", "p0177_s0", "p0184_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0757_s0", "p1000_s0"]
     },
     {
       "slug": "specular-reflection",
@@ -5710,7 +5719,7 @@
       "reference": "https://en.wikipedia.org/wiki/Two-pointer_technique",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0143_s0", "p0184_s0", "p0461_s0", "p0478_s0"]
+      "refs": ["p0004_s0", "p0143_s0", "p0184_s0", "p0252_s0", "p0461_s0", "p0478_s0"]
     },
     {
       "slug": "unranking",
@@ -5728,7 +5737,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0304_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0757_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0304_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0757_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
     },
     {
       "slug": "walrus-operator",
@@ -5800,7 +5809,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Represent computed geometric or numeric values as exact integers or reduced fractions when the answer depends on testing equality, since floating point can spuriously merge or split truly equal values.",
-      "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0239", "p0241", "p0243", "p0246", "p0259", "p0493", "p0751", "p0768", "p0800"]
+      "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0239", "p0241", "p0243", "p0246", "p0252", "p0259", "p0493", "p0751", "p0768", "p0800"]
     },
     {
       "slug": "exact-sums-resist-modular-shortcuts",
@@ -5827,7 +5836,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Keep the C and Python algorithms identical so benchmarks compare constant factors.",
-      "refs": ["p0014", "p0018", "p0049", "p0052", "p0054", "p0060", "p0061", "p0084", "p0088", "p0105", "p0126", "p0135", "p0144", "p0153", "p0169", "p0170", "p0181", "p0189", "p0192", "p0198", "p0203", "p0215", "p0223", "p0478", "p0487", "p0501", "p0504", "p0549", "p0650", "p0719", "p0720", "p0743", "p0845", "p0965"]
+      "refs": ["p0014", "p0018", "p0049", "p0052", "p0054", "p0060", "p0061", "p0084", "p0088", "p0105", "p0126", "p0135", "p0144", "p0153", "p0169", "p0170", "p0181", "p0189", "p0192", "p0198", "p0203", "p0215", "p0223", "p0252", "p0478", "p0487", "p0501", "p0504", "p0549", "p0650", "p0719", "p0720", "p0743", "p0845", "p0965"]
     },
     {
       "slug": "precompute-once-reuse",
