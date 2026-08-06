@@ -31,13 +31,13 @@ command body never grows an `if not thread:` block.
 """
 from __future__ import annotations
 
-__all__ = ['Abort', 'Action', 'Ask', 'Choice', 'Choices', 'MENU_MAX', 'SKIP', 'WalkResult',
-           'choose', 'confirm', 'interactive', 'pause', 'secret', 'select', 'sure', 'text',
-           'walk']
+__all__ = ['Abort', 'Action', 'Ask', 'Choice', 'Choices', 'Choosable', 'MENU_MAX', 'SKIP',
+           'WalkResult', 'as_choice', 'choose', 'confirm', 'interactive', 'pause', 'secret',
+           'select', 'sure', 'text', 'walk']
 
 import sys
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Mapping, Sequence
+from typing import Any, Callable, Iterable, Mapping, Protocol, Sequence, runtime_checkable
 
 from rich.table import Table
 from rich.text import Text
@@ -78,6 +78,27 @@ class Choice:
         return self.label or self.value
 
 
+@runtime_checkable
+class Choosable(Protocol):
+    """An object that knows how to offer itself in a menu.
+
+    Lets one list serve two surfaces: a `loop` body wants the object (`{loop.number}`,
+    `{loop.branch}`), a menu wants a row to read. Without it a choice set would have to be
+    built as `Choice`s and lose everything the body could have used, or built twice.
+    """
+
+    def __choice__(self) -> Choice: ...
+
+
+def as_choice(value: Any) -> Choice:
+    """Render *value* as a menu option: a `Choice`, a `Choosable`, or its string form."""
+    if isinstance(value, Choice):
+        return value
+    if isinstance(value, Choosable):
+        return value.__choice__()
+    return Choice(str(value))
+
+
 #: Builds a menu's options when the dialogue fires. Receives the live `Context` and the
 #: arguments bound so far, so a choice set can narrow by an earlier answer — `msg act` labels
 #: each message with what acting on it would do. Called once, never at import, never when the user typed
@@ -104,9 +125,12 @@ class Ask:
     `solver "msg"` still lists, exactly as before.
     """
     question: str = ''
-    #: Where the options come from. None derives them from the annotation — `Literal` members,
-    #: enum values, `bool` — so a static choice set needs no callable.
-    choices: Choices | None = None
+    #: Where the options come from. A **string names a shell variable** (`choices='open_prs'`),
+    #: which is the usual case: the list is then one declaration serving both a menu here and
+    #: `loop {open_prs}:` in a block. A callable is for the rest — a set that has to narrow by
+    #: an earlier answer, which a variable cannot see. None derives the options from the
+    #: annotation — `Literal` members, enum values, `bool` — so a static set needs neither.
+    choices: Choices | str | None = None
     when: Predicate | None = None
     #: Shown when `choices` comes back empty: the emptiness is the answer ("no messages to
     #: read"), which a prefix-filtering completer could never tell us.

@@ -36,7 +36,7 @@ from rich.text import Text
 from solver.config import ExitCodes
 from solver.core.problems import Problem, problems
 from solver.shell.command import Context, command
-from solver.shell.dialogue import Abort, Ask, Choice, choose, confirm, text
+from solver.shell.dialogue import Abort, Ask, Choice, as_choice, choose, confirm, text
 from solver.shell.variables import variables
 
 
@@ -489,6 +489,25 @@ def _print_arg_error(spec: _CommandSpec, ctx: Context, args: tuple[str, ...], ex
         ctx.console.print(usage_line)
 
 
+def _declared_choices(ask: Ask, ctx: Context, bound: dict[str, Any]) -> list[Choice]:
+    """The options `Ask.choices` declares, whichever way it declares them.
+
+    A **string names a shell variable**: the same list `loop {open_prs}:` iterates, rendered
+    for a menu through :func:`~solver.shell.dialogue.as_choice`. It is read here rather than
+    at import, so the queue is the one that exists when the question is put.
+
+    A callable is handed the context and the arguments bound so far, which is what a variable
+    cannot see — `msg act` labels each row with what acting on it would do.
+    """
+    if not isinstance(ask.choices, str):
+        return list(ask.choices(ctx, bound)) if ask.choices is not None else []
+    try:
+        value = variables[ask.choices]
+    except KeyError:
+        raise NameError(f'undefined variable: {ask.choices}') from None
+    return [as_choice(item) for item in (value() if callable(value) else value)]
+
+
 def _ask_completions(spec: _CommandSpec, ctx: Context, name: str, incomplete: str,
                      *, prefix: str = '') -> list[Completion]:
     """Tab-completions for an asked parameter, from the same `choices` its menu uses.
@@ -502,9 +521,13 @@ def _ask_completions(spec: _CommandSpec, ctx: Context, name: str, incomplete: st
         return []
     partial = incomplete[len(prefix):]
     bound = _bind_known(spec, [tok for tok in ctx.argv if _is_positional_token(tok)], {})
+    try:
+        options = _declared_choices(ask, ctx, bound)
+    except Exception:      # noqa: BLE001 — a completer must never raise into the prompt
+        return []
     return [Completion(prefix + choice.value, start_position=-len(incomplete),
                        display=choice.text, display_meta=choice.description)
-            for choice in ask.choices(ctx, bound) if choice.value.startswith(partial)]
+            for choice in options if choice.value.startswith(partial)]
 
 
 def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str | Completion]:
@@ -639,13 +662,13 @@ def _ask_choices(spec: _CommandSpec, ctx: Context, name: str, ask: Ask,
                  bound: dict[str, Any]) -> list[Choice] | None:
     """The options for an asked parameter, or None when it is free text.
 
-    A declared `choices` callable wins — it is the only thing that can enumerate a live set
-    (this user's message threads). Otherwise the options come from the annotation, so a
-    `Literal` or an enum needs no callable at all; `Ask.labels` adds the reading text a type
-    cannot carry.
+    A declared `choices` wins — a named shell variable or a callable, either way the only
+    thing that can enumerate a live set (this user's message threads). Otherwise the options
+    come from the annotation, so a `Literal` or an enum needs no declaration at all;
+    `Ask.labels` adds the reading text a type cannot carry.
     """
     if ask.choices is not None:
-        return list(ask.choices(ctx, bound))
+        return _declared_choices(ask, ctx, bound)
     annotation = spec.param_by_name[name].annotation
     labels = ask.labels or {}
     if typing.get_origin(annotation) is typing.Literal:

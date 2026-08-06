@@ -20,7 +20,8 @@ separate set and assign"*):
   read-write properties; the read-only specials (e.g. the loop value `loop`,
   which only :meth:`loop_through_iterable` may move) have no setter.
 
-Reserved variables seeded at construction:
+Four specials are seeded at construction, because they are the store's own state
+rather than anybody's data:
 
     config   → Config          the global configuration singleton     (read-only)
     loop     → Any             current loop value (read-only; driven by
@@ -28,23 +29,62 @@ Reserved variables seeded at construction:
     problem  → Problem | None  the current problem, as an object      (shell-settable)
     rcode    → int             exit code of the most recent evaluation (shell-settable)
     reserved → list[str]       sorted list of every reserved name     (read-only)
-    problems → list[Problem]   every known problem                    (computed)
-    next     → int             number of the next unsolved problem    (computed)
-    random   → int             number of a random unsolved problem    (computed)
-    solved   → list[Problem]   the solved problems                    (computed)
-    unsolved → list[Problem]   the unsolved problems                  (computed)
 
-The *computed* specials are callables, invoked by the interpreter at each `{…}`
-reference, so their value reflects current progress on every use.
+Everything else is **registered** with :func:`variable`, next to the code that knows
+how to compute it — the problem sets below, and the live reads that other modules
+declare (`open_prs` in `solver.core.git`, `threads` in the message commands). A
+registered variable is a zero-argument callable, invoked by the interpreter at *each*
+`{…}` reference, so its value reflects the world at the moment it is read: `{random}`
+yields a fresh pick, and `{open_prs}` a queue that may have changed since the last
+command. The cost is the other side of the same coin — two references in one block are
+two reads — which is why an expensive one belongs in a `loop` header (evaluated once)
+rather than in the body.
+
+Registration is at import, so `solver/modules.csv` decides which variables exist, exactly
+as it decides which commands do. It is also what lets one declaration serve two surfaces:
+a menu (`Ask(choices='open_prs')`) and a loop (`loop {open_prs}:`) read the same list.
 """
 from __future__ import annotations
 
-__all__ = ['Variables', 'variables']
+__all__ = ['VariableInfo', 'Variables', 'variable', 'variables']
 
-from typing import Any, Generator, Iterable, cast
+from dataclasses import dataclass
+from typing import Any, Callable, Generator, Iterable, Literal, TypeVar, cast
 
 from solver.config import config
 from solver.core.problems import Problem, problems
+
+#: A registered variable: no arguments, and a fresh value on every call.
+Compute = Callable[[], Any]
+
+_F = TypeVar('_F', bound=Compute)
+
+#: How a name is written, for the reader of `docs/syntax.md` §3.
+Kind = Literal['computed', 'shell-set', 'read-only']
+
+
+@dataclass(frozen=True)
+class VariableInfo:
+    """What is known about one name: enough to document it without reading the source."""
+
+    name: str
+    kind: Kind
+    #: The declared type, verbatim from the source — `list[Problem]`, `int`. Registered
+    #: variables take it from the function's return annotation (a string, because this
+    #: package is `from __future__ import annotations`), so it cannot drift from the code.
+    type_name: str
+    description: str
+
+
+#: The names the store seeds itself, which no module may register over: they are the
+#: interpreter's own state, and their writers are the shell rather than a computation.
+_SEEDED: dict[str, tuple[Kind, str, str]] = {
+    'config': ('read-only', 'Config', 'the global configuration singleton'),
+    'loop': ('read-only', 'Any', 'the current loop value; None outside a loop'),
+    'problem': ('shell-set', 'Problem | None', 'the workspace problem, as an object'),
+    'rcode': ('shell-set', 'int', 'exit code of the most recently run evaluation'),
+    'reserved': ('read-only', 'list[str]', 'sorted list of every reserved name'),
+}
 
 
 class Variables():
@@ -57,7 +97,7 @@ class Variables():
     the *set* channel.
     """
 
-    __slots__ = ('__dict__', '__reserved__')
+    __slots__ = ('__dict__', '__reserved__', '__info__')
     problems: list[Problem]
     solved: list[Problem]
     unsolved: list[Problem]
@@ -71,16 +111,45 @@ class Variables():
             'loop': None,
             'problem': None,
             'rcode': 0,
-            'last': lambda: problems.last_solved_problem.number,
-            'next': lambda: problems.next_unsolved_problem.number,
-            'random': lambda: problems.random_problem.number,
-            'problems': lambda: problems.problems_list,
-            'solved': lambda: problems.solved_problems,
-            'unsolved': lambda: problems.unsolved_problems,
             'reserved': [],
         }
         self.__reserved__: set[str] = set(self.__dict__.keys())
+        self.__info__: dict[str, VariableInfo] = {
+            name: VariableInfo(name, kind, type_name, description)
+            for name, (kind, type_name, description) in _SEEDED.items()
+        }
         self.__dict__['reserved'] = sorted(self.__reserved__)
+
+    # -- registration (the `variable` decorator's channel) -------------------
+
+    def define(self, name: str, compute: Compute, description: str, type_name: str = '') -> None:
+        """Register *compute* as the computed special *name*.
+
+        Raises:
+            KeyError: if *name* is one the store seeds itself. Those five are the
+                interpreter's own state — a module that redefined `rcode` would be
+                rewriting what `&&` means, from a file nobody reading a chain would think
+                to look in.
+        """
+        if name in _SEEDED:
+            raise KeyError(f'{name} is a built-in special and cannot be registered over')
+        self.__dict__[name] = compute
+        self.__info__[name] = VariableInfo(name, 'computed', type_name, description)
+        self.__reserved__.add(name)
+        self.__dict__['reserved'] = sorted(self.__reserved__)
+
+    def info(self, name: str) -> VariableInfo | None:
+        """What is known about *name*, or None for a user variable."""
+        return self.__info__.get(name)
+
+    def catalogue(self) -> list[VariableInfo]:
+        """Every reserved name, seeded and registered, in name order.
+
+        Read by `update-docs` to generate the table in `docs/syntax.md` §3: the set grows
+        by import, so a hand-written list would be stale the first time a module declared
+        one.
+        """
+        return sorted(self.__info__.values(), key=lambda entry: entry.name)
 
     # -- assign channel (user variables; reserved names rejected) -----------
 
@@ -175,3 +244,69 @@ class Variables():
 
 
 variables = Variables()
+
+
+def variable(description: str) -> Callable[[_F], _F]:
+    """Register the decorated zero-argument function as the shell variable of its own name.
+
+    The counterpart of `@register` for values rather than verbs, and it keeps the same
+    bargain: the function is returned unchanged, so it stays an ordinary Python callable
+    that anything may call directly. *description* is what the completer shows beside the
+    name and what the generated table in `docs/syntax.md` says it means; the declared
+    return type is read from the annotation, so the documentation cannot drift from the code.
+
+    Declare it beside the read it wraps, not here — a variable is a way of *naming* what
+    some module already knows how to fetch::
+
+        @variable('the open pull requests, newest first')
+        def open_prs() -> list[PullRequest]:
+            ...
+
+    That one line then serves both surfaces: `loop {open_prs}:` iterates it, and
+    `Ask(choices='open_prs')` offers it as a menu.
+
+    A single **trailing underscore is stripped** from the name, which is what that
+    convention is for: `{next}` and `{problems}` are the names the language wants, and
+    neither is available to a function — one is a builtin, the other is already the
+    problem set this module imported.
+    """
+    def decorate(compute: _F) -> _F:
+        name = compute.__name__[:-1] if compute.__name__.endswith('_') else compute.__name__
+        variables.define(name, compute, description,
+                         str(compute.__annotations__.get('return', '')))
+        return compute
+    return decorate
+
+
+# ── the problem sets ────────────────────────────────────────────────────────────────────
+# Registered rather than seeded, through the same door every other module uses: there is
+# nothing about progress that the store itself should know.
+
+@variable('every known problem')
+def problems_() -> list[Problem]:
+    return problems.problems_list
+
+
+@variable('the solved problems')
+def solved() -> list[Problem]:
+    return problems.solved_problems
+
+
+@variable('the unsolved problems')
+def unsolved() -> list[Problem]:
+    return problems.unsolved_problems
+
+
+@variable('number of the last solved problem')
+def last() -> int:
+    return problems.last_solved_problem.number
+
+
+@variable('number of the next unsolved problem')
+def next_() -> int:
+    return problems.next_unsolved_problem.number
+
+
+@variable('number of a random unsolved problem')
+def random() -> int:
+    return problems.random_problem.number
