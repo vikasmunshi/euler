@@ -1997,7 +1997,7 @@ review time and defeat the point:
 | Module | Role |
 |---|---|
 | `__main__.py` | Entry point: bind `msg.sock` (`0660 euler-web`) + `msg-admin.sock` (`0600`), serve until SIGTERM. |
-| `config.py` | `MsgConfig` from the environment, every path overridable for a scratch-dir dev run. |
+| `config.py` | `MsgConfig` from the environment — variable names and defaults in `[msg]` of `solver/config/env.conf`; every path overridable for a scratch-dir dev run. |
 | `app.py` | The public and admin apps: endpoints, the peer-uid middleware, profile floors, the delivery push. |
 | `store.py` | The thread store — single-writer JSON, TTL sweep, caps, read-state. |
 | `identity.py` | Peer uid → login → e-mail → profile, over `authorizations.json`; re-read on mtime change. |

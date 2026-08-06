@@ -105,7 +105,7 @@ def get_repo_owner_email() -> str:
 #:   and it is the only thing this target reaches inside `solutions/`.
 #: - `update` — everything else the `update-*` verbs write, wherever it
 #:   happens to live: the README plus its generated package-layout block and the web start
-#:   page's slice of it, the module registry, the managed settings (of which
+#:   page's slice of it, the module registry, the settings file (of which
 #:   `update-usd-rate` writes the FX rate), the `# GEN:models` block, and the Claude guidance the root
 #:   `CLAUDE.md` symlink points at. Source code by file type, generated data by content —
 #:   which is why it is a target of its own and not part of `docs`.
@@ -236,7 +236,7 @@ def git_commit(problem: Problem,
         *targets: What to stage — 'solution' (this problem plus the progress file),
             'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the
             articles and every problem's tag leg) or 'update' (what the `update-*` verbs
-            write outside `docs/` — the README, the module registry, the managed settings,
+            write outside `docs/` — the README, the module registry, the settings file,
             the model block, the Claude guidance). Defaults to 'solution'.
         message: [asked] The commit message. Required unless `amend` is set, and asked for
             at the prompt when it is left out.

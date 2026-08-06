@@ -149,7 +149,7 @@ the tracked `.gitattributes` — so changing one does not adjust behaviour, it m
 existing data unreadable.
 
 Where the *files* are is the configurable part, and it is not kept here: the key
-locations are settings like any other, declared in `solver/config/config.py` and
+locations are settings like any other, declared in `solver/config/settings.py` and
 editable in the `[crypto]` section of
 [`solver/config/values.conf`](../solver/config/values.conf).
 
