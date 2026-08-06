@@ -802,7 +802,7 @@ git-commit
 | argument | description |
 |----------|-------------|
 | `problem` | The problem whose solution directory the `solution` target stages. Ignored by every other target. |
-| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the articles and every problem's tag leg) or 'update' (what the `update-*` verbs write outside `docs/` — the README, the module registry, the managed settings, the model block, the Claude guidance). Defaults to 'solution'. |
+| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the articles and every problem's tag leg) or 'update' (what the `update-*` verbs write outside `docs/` — the README, the module registry, the settings file, the model block, the Claude guidance). Defaults to 'solution'. |
 | `message` | The commit message. Required unless `amend` is set, and asked for at the prompt when it is left out. |
 | `amend` | Fold the staged changes into HEAD instead of committing, keeping its message. Defaults to False. Refused with a message, with `reset`, or once HEAD is pushed. |
 | `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. `git-reset` is the same move without the re-commit. |
