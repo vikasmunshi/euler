@@ -5287,7 +5287,7 @@
       "reference": "https://en.cppreference.com/w/c/algorithm/qsort",
       "additional-references": ["https://en.wikipedia.org/wiki/Qsort"],
       "summary": "",
-      "refs": ["p0052_s0", "p0054_s0", "p0118_s0", "p0127_s0", "p0142_s0", "p0143_s0", "p0165_s0", "p0180_s0", "p0203_s0", "p0221_s0", "p0252_s0", "p0464_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0346_s0", "p0464_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p1000_s0"]
     },
     {
       "slug": "quadratic-formula",
