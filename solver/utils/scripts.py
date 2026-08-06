@@ -9,11 +9,11 @@ The venv dependency upgrade (`pip-upgrade`) and the system-resource installer
 from __future__ import annotations
 
 from tomllib import load
-from typing import Literal
+from typing import Annotated, Literal
 
 from solver.config import config
 from solver.shell import console, register
-from solver.shell.dialogue import Abort, confirm
+from solver.shell.dialogue import Abort, Ask, confirm
 from solver.utils.shell_utils import run_cmdline
 
 
@@ -45,8 +45,17 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
     return run_cmdline(f'{config.scripts.upgrade} {" ".join(packages)}')
 
 
+#: What each resource is, for the menu the adapter puts when one is left out.
+_RESOURCES: dict[str, str] = {
+    'chrome': 'the browser `show` and `edit` drive',
+    'dev-env': 'the apt packages, the venv, the hooks, completions, Node.js',
+    'upgrade-service': 'the unattended-upgrade timer',
+}
+
+
 @register(requires='admin', aliases=('install',))
-def sys_setup(target: Literal['chrome', 'dev-env', 'upgrade-service'],
+def sys_setup(target: Annotated[Literal['chrome', 'dev-env', 'upgrade-service'],
+                                Ask('Which resource?', labels=_RESOURCES)],
               uninstall: bool = False,
               show_help: bool = False) -> int:
     """Install or uninstall a system resource.
@@ -55,7 +64,8 @@ def sys_setup(target: Literal['chrome', 'dev-env', 'upgrade-service'],
     idempotent, so re-running an install is safe.
 
     Args:
-        target: Which resource to act on: 'chrome', 'dev-env' or 'upgrade-service'.
+        target: [asked] Which resource to act on: 'chrome', 'dev-env' or
+            'upgrade-service'. Offered as a menu when omitted.
         uninstall: Uninstall the target instead of installing it. Defaults to False.
         show_help: Print the target script's own help and stop, doing nothing else.
             Defaults to False.

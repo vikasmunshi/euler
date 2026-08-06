@@ -6,12 +6,13 @@ from __future__ import annotations
 __all__ = ['claude_api']
 
 from functools import lru_cache
-from typing import Literal, Protocol
+from typing import Annotated, Literal, Protocol
 
 from solver.ai.models import Model, get_accumulated_charges
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
+from solver.shell.dialogue import Ask
 
 
 class GeneratorFunc(Protocol):
@@ -42,9 +43,22 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
     }
 
 
+#: What each target means, for the menu the adapter puts when one is left out. The
+#: annotation stays the source of what is *valid*; these only say what each option does.
+_TARGETS: dict[str, str] = {
+    'py': 'the Python solution',
+    'c': 'the C translation',
+    'doc': 'refresh the in-source documentation',
+    'notes': 'notes.html — the write-up',
+    'tags': 'tags.json — the problem\'s tag leg',
+    'test-cases': 'test_cases.json',
+}
+
+
 @register(requires='contributor')
 def claude_api(problem: Problem,
-               target: Literal['c', 'py', 'doc', 'notes', 'tags', 'test-cases'], *,
+               target: Annotated[Literal['c', 'py', 'doc', 'notes', 'tags', 'test-cases'],
+                                 Ask('What should Claude generate?', labels=_TARGETS)], *,
                force: bool = False,
                major: bool = False,
                model: Model | None = None,
@@ -56,9 +70,9 @@ def claude_api(problem: Problem,
 
     Args:
         problem: [problem] The problem to generate for.
-        target: What to generate: 'c' or 'py' for code, 'doc' to refresh the in-source
-            documentation, 'notes' for `notes.html`, 'tags' for `tags.json`, 'test-cases'
-            for test cases.
+        target: [asked] What to generate: 'c' or 'py' for code, 'doc' to refresh the
+            in-source documentation, 'notes' for `notes.html`, 'tags' for `tags.json`,
+            'test-cases' for test cases. Offered as a menu when omitted.
         force: Generate even when the target already exists, overwriting it. Defaults to
             False.
         major: Regenerate after a major change — a new template or changed instructions —

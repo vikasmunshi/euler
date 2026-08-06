@@ -8,7 +8,7 @@ __all__ = ['claude_solve', 'claude_blog']
 import json
 import shlex
 import subprocess
-from typing import Any, Callable, Iterable, Literal
+from typing import Annotated, Any, Callable, Iterable, Literal
 
 from prompt_toolkit.completion import Completion
 from rich.live import Live
@@ -20,15 +20,22 @@ from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
-from solver.shell import dialogue
-from solver.shell.dialogue import text
+from solver.shell.dialogue import Ask
+
+
+#: What each action does, for the menu the adapter puts when one is left out.
+_SOLVE_ACTIONS: dict[str, str] = {
+    'solve': 'write and verify a solution, translate it to C, then document it',
+    'review': 'audit an existing solution for parity, documentation and notes',
+}
 
 
 @register(requires='contributor', pass_ctx=True)
 def claude_solve(
         ctx: Context,
         problem: Problem,
-        action: Literal['solve', 'review'],
+        action: Annotated[Literal['solve', 'review'],
+                          Ask('What should Claude do with it?', labels=_SOLVE_ACTIONS)],
         additional_prompt: str = '',
 ) -> int:
     """Run Claude Code over a problem's solution files, via a skill.
@@ -43,9 +50,10 @@ def claude_solve(
     Args:
         ctx: [injected] The live shell context; the decorator supplies it.
         problem: [problem] The problem to work on.
-        action: What to do — 'solve' writes and verifies a Python solution, translates it to
-            C, then documents and summarises it; 'review' audits an existing solution for
-            C↔Python parity, in-source documentation and `notes.html`.
+        action: [asked] What to do — 'solve' writes and verifies a Python solution,
+            translates it to C, then documents and summarises it; 'review' audits an
+            existing solution for C↔Python parity, in-source documentation and
+            `notes.html`. Offered as a menu when omitted.
         additional_prompt: Extra free-text instructions appended to the skill invocation.
             Defaults to empty.
     """
@@ -91,7 +99,11 @@ def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Complet
 
 
 @register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions})
-def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force: bool = False) -> int:
+def claude_blog(ctx: Context, topic: str,
+                additional_prompt: Annotated[str, Ask('Guidance for the writer — an angle, an '
+                                                      'emphasis, a constraint — or Enter to '
+                                                      'skip', skippable=True)] = '',
+                *, force: bool = False) -> int:
     """Write (or flesh out) a topic article via the claude-euler-blogger skill.
 
     *topic* names what to write about: a tag's `<facet>/<slug>` path (e.g.
@@ -108,8 +120,10 @@ def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force:
     Args:
         ctx: [injected] The live shell context; the decorator supplies it.
         topic: The tag or topic to write about; completion offers the most-referenced first.
-        additional_prompt: Extra free-text guidance for the writer. Defaults to empty, which
-            prompts for an angle in an interactive shell.
+        additional_prompt: [asked] Extra free-text guidance for the writer. Asked for in an
+            interactive shell when omitted — the web's Write / Rewrite actions type a bare
+            `claude-blog <path>`, so a maintainer would otherwise never get to pass an
+            angle. Enter skips it. Defaults to empty.
         force: Rewrite the article even when it is already final. Defaults to False.
     """
     entry = _find_topic(topic)
@@ -117,12 +131,6 @@ def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force:
         console.print(f'[muted]{entry["path"]} is already [accent]final[/accent] — '
                       f'use [accent]--force[/accent] to rewrite it.[/muted]')
         return ExitCodes.EXIT_OK
-    # The Write / Rewrite web Actions type a bare `claude-blog <path>`, so a maintainer never gets
-    # to pass an angle. Offer one interactively when none was given — Enter skips it. Only in an
-    # interactive shell (a terminal, or the web PTY); a command block has no tty and stays as-is.
-    if not additional_prompt and dialogue.interactive():
-        additional_prompt = text('Guidance for the writer — an angle, an emphasis, a '
-                                 'constraint — or Enter to skip', default=' ').strip()
     invocation = f'/claude-euler-blogger {topic} {additional_prompt}'.strip()
     return _run_skill(ctx, invocation, '[accent]claude · blog[/accent]')
 

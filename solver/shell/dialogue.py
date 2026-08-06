@@ -138,6 +138,10 @@ class Ask:
     #: Read the answer as hidden input (a password), or over several lines until a blank one.
     secret: bool = False
     multiline: bool = False
+    #: Enter accepts nothing and moves on, because nothing is a real answer here — an angle
+    #: for the writer, say. Off by default: for most questions an empty line is not an
+    #: answer, and re-asking is kinder than acting on it.
+    skippable: bool = False
     #: Accept only a listed value, re-asking otherwise — so a bad id is caught here rather
     #: than by the service it would have been sent to.
     strict: bool = True
@@ -251,7 +255,7 @@ def pause(message: str = 'paused') -> None:
 
 
 def text(question: str, *, default: str = '', validate: Callable[[str], str | None] | None = None,
-         multiline: bool = False, secret_input: bool = False) -> str:
+         multiline: bool = False, secret_input: bool = False, allow_empty: bool = False) -> str:
     """Read a free-text answer, re-asking until *validate* is satisfied.
 
     Args:
@@ -261,6 +265,9 @@ def text(question: str, *, default: str = '', validate: Callable[[str], str | No
             None, which accepts anything non-empty.
         multiline: Read lines until a blank one, joining them. Defaults to False.
         secret_input: Hide what is typed. Defaults to False.
+        allow_empty: Accept an empty answer instead of re-asking — for a question whose
+            answer is genuinely optional, where Enter means "skip this". Defaults to False,
+            because for most questions nothing typed is nothing said, not an answer.
     """
     _require_interactive(question, 'pass it as an argument')
     while True:
@@ -278,6 +285,8 @@ def text(question: str, *, default: str = '', validate: Callable[[str], str | No
                            password=secret_input)
             answer = answer or default
         if not answer:
+            if allow_empty:
+                return ''
             console.print('  [warning]nothing typed[/warning]')
             continue
         if validate and (problem := validate(answer)):

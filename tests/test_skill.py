@@ -16,8 +16,12 @@ from unittest.mock import patch
 from prompt_toolkit.completion import Completion
 
 from solver.ai import skill
-from solver.config import ExitCodes
+from solver.config import ExitCodes, config
 from solver.shell import dialogue
+from solver.shell.command import Context, registry
+from tests import silence
+
+silence()  # the blog prompt narrates its question; the assertions are the record here
 
 _INDEX: list[dict[str, Any]] = [
     {'path': 'domain/alpha', 'title': 'Alpha', 'status': 'draft', 'tags': ['alpha'],
@@ -99,19 +103,29 @@ class FinalGateTests(unittest.TestCase):
 
 class BlogPromptTests(unittest.TestCase):
     """A bare `claude-blog <path>` (as the web Write/Rewrite Actions emit) prompts for an angle
-    when the shell is interactive — Enter skips it; a command block never prompts."""
+    when the shell is interactive — Enter skips it; a command block never prompts.
+
+    Driven **through the registry**, because the asking lives in the `@register` adapter:
+    `claude_blog` itself is a plain callable that asks nothing, which is the whole point of
+    declaring the question on the parameter rather than writing the guard into the body.
+    """
 
     def setUp(self) -> None:
         self.launched: list[str] = []
         self.enterContext(patch.object(skill, '_topic_index', lambda: _INDEX))
         self.enterContext(patch.object(skill, '_run_skill',
                                        lambda _c, inv, _t: self.launched.append(inv) or ExitCodes.EXIT_OK))
+        self._saved_subject = config.subject
+        config.subject = config.subject._replace(profile='maintainer')
+        self.addCleanup(setattr, config, 'subject', self._saved_subject)
 
-    def _blog(self, topic: str, prompt: str = '', *, tty: bool, typed: str = '') -> None:
+    def _blog(self, *argv: str, tty: bool, typed: str = '') -> None:
         """`dialogue.interactive` is the one seam every prompt in the shell goes through."""
+        command = registry.resolve('claude-blog')
+        assert command is not None, 'claude-blog is not registered for this subject'
         with patch.object(dialogue, 'interactive', lambda: tty), \
              patch.object(skill.console, 'input', lambda *a, **k: typed):
-            skill.claude_blog(cast(Any, None), topic, prompt)
+            command.invoke(Context(argv=list(argv)))
 
     def test_interactive_and_empty_prompts_and_appends(self) -> None:
         self._blog('technique/gamma', tty=True, typed='emphasise the bound')
@@ -123,17 +137,15 @@ class BlogPromptTests(unittest.TestCase):
 
     def test_non_interactive_never_prompts(self) -> None:
         # console.input would raise if called; a command block must not block on a read.
-        with patch.object(dialogue, 'interactive', lambda: False), \
-             patch.object(skill.console, 'input',
+        with patch.object(skill.console, 'input',
                           lambda *a, **k: self.fail('must not prompt without a tty')):
-            skill.claude_blog(cast(Any, None), 'technique/gamma')
+            self._blog('technique/gamma', tty=False)
         self.assertEqual(self.launched, ['/claude-euler-blogger technique/gamma'])
 
     def test_a_given_prompt_is_not_overridden(self) -> None:
-        with patch.object(dialogue, 'interactive', lambda: True), \
-             patch.object(skill.console, 'input',
+        with patch.object(skill.console, 'input',
                           lambda *a, **k: self.fail('must not prompt when one was given')):
-            skill.claude_blog(cast(Any, None), 'technique/gamma', 'keep it short')
+            self._blog('technique/gamma', 'keep it short', tty=True)
         self.assertEqual(self.launched, ['/claude-euler-blogger technique/gamma keep it short'])
 
 

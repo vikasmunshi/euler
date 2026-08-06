@@ -734,7 +734,8 @@ def _ask_missing(spec: _CommandSpec, ctx: Context, pos_args: list[Any],
             default = '' if param.default in (inspect.Parameter.empty, None) else str(param.default)
             raw = (choose(question, options, default=default, empty=ask.empty, strict=ask.strict)
                    if options is not None
-                   else text(question, multiline=ask.multiline, secret_input=ask.secret))
+                   else text(question, multiline=ask.multiline, secret_input=ask.secret,
+                             allow_empty=ask.skippable))
             answer = _coerce(raw, param.annotation)
         kw_args[name] = bound[name] = answer
 
