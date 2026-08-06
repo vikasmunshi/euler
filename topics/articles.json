@@ -5457,7 +5457,7 @@
     {
       "path": "technique/qsort",
       "title": "qsort",
-      "status": "draft",
+      "status": "final",
       "solved": 16,
       "problems": 16,
       "tags": ["qsort"],
