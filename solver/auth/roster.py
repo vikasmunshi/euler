@@ -65,17 +65,21 @@ is on the git-filter path) and :mod:`solver.web.msg` (stdlib-only importable) ca
 """
 from __future__ import annotations
 
-__all__ = ['ROSTER_FILE_ENV', 'Roster', 'UserEntry', 'public_keys', 'read_roster',
-           'roster_path', 'slug_of', 'slugs', 'stamp', 'upsert', 'user_entry', 'write_roster']
+__all__ = ['ROSTER_FILE_ENV', 'Account', 'Roster', 'UserEntry', 'accounts', 'public_keys',
+           'read_roster', 'roster_path', 'slug_of', 'slugs', 'stamp', 'upsert', 'user_entry',
+           'write_roster']
 
 import os
 from datetime import datetime, timezone
 from json import dumps, loads
 from pathlib import Path
 from tempfile import mkstemp
-from typing import Any, Literal, TypedDict, cast
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypedDict, cast
 
 from solver.auth.identity import system_slug
+
+if TYPE_CHECKING:  # only a shell ever renders an account; see Account.__choice__
+    from solver.shell.dialogue import Choice
 from solver.config.paths import repo_root
 
 #: Environment override for the roster's location (tests, and any machine that keeps it
@@ -273,24 +277,76 @@ def upsert(identity: str, **fields: str | None) -> Path:
     return write_roster(roster)
 
 
+class Account(NamedTuple):
+    """One live collaborator, read out of the roster.
+
+    The record every menu of people is built from — who exists, what they may do, and
+    whether a key was ever issued to them. It carries the whole entry rather than the one
+    field a given caller wants, because the three menus that used to read this file each
+    read a *different* projection of it and drifted: one asked for slugs, one for
+    `{slug: key}`, one for slugs in a scope, and only one of the three remembered that a
+    removed record is not a person you may still send a key to.
+    """
+
+    slug: str
+    #: `web` (an instance, and therefore a mailbox) or `local` (the operator at a terminal).
+    scope: str
+    #: The roster's **mirror** of the profile. Never a gate — see the module docstring.
+    profile: str
+    #: X25519 public key hex, or '' when none has been recorded.
+    public_key: str
+    #: The operator's own acts, ISO-8601 UTC, or '' where the act has not happened.
+    invited: str
+    provisioned: str
+    key_issued: str
+
+    @property
+    def holds_key(self) -> bool:
+        """Whether a share can be sealed to them — the filter `key-split`'s menu needs."""
+        return bool(self.public_key)
+
+    def __choice__(self) -> Choice:
+        """How the account reads in a menu: the slug is the value, the profile is the context.
+
+        Not whether they hold a key — that is what *filters* `{holders}`, and a row has no
+        business announcing the property that decides which list it is in.
+
+        `Choice` is imported here rather than at module scope on purpose: this package is
+        the authorization kernel, read by services that have no shell and no `rich`, and a
+        menu row is the one thing about an account that only a shell ever wants.
+        """
+        from solver.shell.dialogue import Choice as _Choice
+        return _Choice(self.slug, self.slug, ' · '.join(part for part in (self.profile, self.scope) if part))
+
+
+def accounts(scope: str = '') -> list[Account]:
+    """Every **live** record, optionally filtered to a scope (`web` / `local`), sorted.
+
+    Live means not removed, and that is the whole reason this is one function: a removed
+    record's key was real, but issuing to somebody the operator retired is the mistake these
+    lists must not make easy, and it was previously remembered in one of the three places
+    that read them.
+    """
+    return sorted((Account(slug=slug,
+                           scope=str(entry.get('scope', '')),
+                           profile=str(entry.get('profile', '')),
+                           public_key=str(entry.get('public_key', '')),
+                           invited=str(entry.get('invited', '')),
+                           provisioned=str(entry.get('provisioned', '')),
+                           key_issued=str(entry.get('key_issued', '')))
+                   for slug, entry in (read_roster().get('users') or {}).items()
+                   if not entry.get('removed') and (not scope or entry.get('scope') == scope)),
+                  key=lambda account: account.slug)
+
+
 def public_keys() -> dict[str, str]:
     """`{slug: public_key}` for every live record that has one.
 
-    The registry a rotation re-issues against and `key-split` seals to. Removed records are
-    left out: their key was real, but issuing to somebody the operator retired is the one
-    mistake this list must not make easy.
+    The registry a rotation re-issues against and `key-split` seals to.
     """
-    return {slug: str(entry.get('public_key', ''))
-            for slug, entry in (read_roster().get('users') or {}).items()
-            if entry.get('public_key') and not entry.get('removed')}
+    return {account.slug: account.public_key for account in accounts() if account.holds_key}
 
 
 def slugs(scope: str = '') -> list[str]:
-    """Every live slug, optionally filtered to a scope (`web` / `local`), sorted.
-
-    What a recipient menu is built from. A `web` record has an instance and therefore a
-    mailbox; a `local` one is the operator at a terminal, who reads the spool but has nothing
-    to push a badge to.
-    """
-    return sorted(slug for slug, entry in (read_roster().get('users') or {}).items()
-                  if not entry.get('removed') and (not scope or entry.get('scope') == scope))
+    """Every live slug, optionally filtered to a scope (`web` / `local`), sorted."""
+    return [account.slug for account in accounts(scope)]

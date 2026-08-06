@@ -161,7 +161,7 @@ def _thread_choices(_: Context, bound: dict[str, Any]) -> list[Choice]:
 
 
 @variable('who a message can be sent to')
-def recipients() -> list[Choice]:
+def recipients() -> list[Any]:
     """Who a message can go to: staff, everyone, plus every collaborator in the roster.
 
     Asked of staff only (:func:`_needs_recipients`), so `staff` leads but is not the whole
@@ -175,11 +175,11 @@ def recipients() -> list[Choice]:
     roster has not caught up with can be typed — and it never raises: a menu is not a gate,
     and the service decides what it will actually accept.
     """
-    options = [Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
-               Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
+    options: list[Any] = [Choice(_STAFF_LABEL, _STAFF_LABEL, 'the maintainers and admins'),
+                          Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
     try:
-        from solver.web.auth.commands import account_identities
-        options.extend(Choice(identity) for identity in account_identities())
+        from solver.auth import roster
+        options.extend(roster.accounts(scope='web'))
     except Exception:                                        # noqa: BLE001 — a menu, not a gate
         pass
     return options

@@ -262,15 +262,16 @@ def account_identities() -> list[str]:
 
 
 @variable('the collaborator accounts on the roster')
-def accounts() -> list[Choice]:
-    """Every web account, as the admin verbs and a key grant name them.
+def accounts() -> list[roster.Account]:
+    """Every live account, as the admin verbs and a key grant name them.
 
-    The roster's slugs, which is what those verbs act on and what the message spool routes
-    by. Read from the checkout, so a web shell gets the same menu the operator's terminal
-    does. Not a gate: `users add` names an account that does not exist yet, so the menu is
-    never strict — it saves typing a slug out, and the command still decides.
+    The one read behind every menu of people: `{holders}` and `{recipients}` are filters and
+    additions on this, not second readings of the same file. Read from the checkout, so a web
+    shell gets the same menu the operator's terminal does. Not a gate: `users add` names an
+    account that does not exist yet, so those menus are never strict — they save typing a
+    slug out, and the command still decides.
     """
-    return [Choice(slug) for slug in account_identities()]
+    return roster.accounts()
 
 
 def registered_public_keys() -> dict[str, str] | None:

@@ -40,6 +40,7 @@ from tests import silence
 silence()   # these drive the console's refusal paths on purpose
 
 _THEM = 'them@example.com'
+_ME = 'me@example.com'
 
 
 class RosterFileTestCase(unittest.TestCase):
@@ -109,6 +110,41 @@ class StoreTests(RosterFileTestCase):
         self.assertIn(system_slug(_THEM), roster.read_roster()['users'])
         self.assertEqual(roster.public_keys(), {})
         self.assertEqual(roster.slugs(), [])
+
+    def test_every_menu_of_people_reads_the_same_records(self) -> None:
+        """`{accounts}`, `{holders}` and `{recipients}` are one read, a filter and an addition.
+
+        They were three projections of this file, and only one of the three remembered that a
+        removed record is not somebody you may still send a key to. `accounts()` is now the
+        single definition of "live", and the derived readers are expressed over it.
+        """
+        roster.upsert(_ME, public_key='cd' * 32, scope='web', profile='maintainer')
+        roster.upsert(_THEM, scope='web', profile='reader')          # no key yet
+        roster.upsert('operator', scope='local', profile='admin')
+        roster.upsert('gone', public_key='ef' * 32, scope='web')
+        roster.upsert('gone', removed=roster.stamp())
+
+        live = roster.accounts()
+        self.assertEqual([account.slug for account in live], sorted(roster.slugs()))
+        self.assertNotIn('gone', [account.slug for account in live], 'removed is not live')
+        self.assertEqual(roster.public_keys(),
+                         {account.slug: account.public_key for account in live if account.holds_key})
+        self.assertEqual([account.slug for account in roster.accounts(scope='local')], ['operator'])
+
+    def test_an_account_carries_what_a_menu_and_a_filter_both_need(self) -> None:
+        roster.upsert(_ME, public_key='cd' * 32, scope='web', profile='maintainer')
+        account, = roster.accounts()
+        self.assertTrue(account.holds_key)
+        self.assertEqual(account.__choice__().value, account.slug)
+        self.assertEqual(account.__choice__().description, 'maintainer · web',
+                         'the row places them; whether they hold a key is what filters the list')
+
+    def test_an_account_without_a_key_is_live_but_holds_none(self) -> None:
+        """The distinction `key-split`'s menu turns on: on the roster, not sealable to."""
+        roster.upsert(_THEM, scope='web', profile='reader')
+        account, = roster.accounts()
+        self.assertFalse(account.holds_key)
+        self.assertEqual(roster.public_keys(), {})
 
     def test_keys_without_a_value_are_not_a_registry_entry(self) -> None:
         roster.upsert(_THEM, public_key='', scope='web')

@@ -68,7 +68,7 @@ from solver.crypto.ciphers import (enc_key_payload, encrypt_blob, load_private_k
                                    verify_master_key)
 from solver.shell import console, register
 from solver.shell import dialogue
-from solver.shell.dialogue import Abort, Ask, Choice, sure
+from solver.shell.dialogue import Abort, Ask, sure
 from solver.shell.variables import variable
 from solver.web.auth.commands import registered_public_keys
 from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT
@@ -1205,20 +1205,15 @@ def _recipient_key(identity: str, public_key: str) -> X25519PublicKey | None:
 
 
 @variable('collaborators a sealed share can be sent to')
-def holders() -> list[Choice]:
-    """Who a share can be sent to — every roster record that has a key to seal it to.
+def holders() -> list[roster.Account]:
+    """Who a share can be sent to — `{accounts}` filtered to those with a key to seal it to.
 
-    Read straight from the checkout, so the menu is the same in a terminal and in a web shell.
-    Records without a public key are left out rather than offered: `key-split` would refuse
-    them a moment later, and a menu must never offer what the command will then refuse.
-    Non-strict all the same, so a slug the roster has not caught up with can still be typed.
-
-    `Choice` rather than a type of its own: there is nothing to a holder here but the slug
-    and the one thing worth saying about it, so a loop body (`loop {holders}:`) gets
-    `{loop.value}` and has everything there is.
+    A filter and not a second read: an account with no public key is left out rather than
+    offered, because `key-split` would refuse it a moment later and a menu must never offer
+    what the command will then refuse. Non-strict all the same, so a slug the roster has not
+    caught up with can still be typed.
     """
-    keys = roster.public_keys()
-    return [Choice(slug) for slug in sorted(keys)]
+    return [account for account in roster.accounts() if account.holds_key]
 
 
 def _local_share_ready() -> bool:
