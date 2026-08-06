@@ -23,6 +23,9 @@ from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import dialogue
 from solver.shell.command import registry
+from solver.shell.dialogue import Ask
+from solver.shell.register import _declared_choices
+from solver.shell.variables import variables
 from solver.utils.loader import load_commands
 from solver.web.msg import PR_REVIEW_SUBJECT
 from solver.web.msg import notify
@@ -302,6 +305,11 @@ class PullRequestTest(unittest.TestCase):
         self.assertEqual(self.calls[2][:3], ['gh', 'pr', 'create'])
 
 
+def _pr(number: int, title: str, branch: str) -> git.PullRequest:
+    """One open pull request, as the reader returns them."""
+    return git.PullRequest(number=number, title=title, branch=branch)
+
+
 class GhPrTest(_GitCommandCase):
     # The `git fetch` between the merge and the sync script belongs to `git-sync`, which reads
     # the *published* private tree before deciding whether it can merge at all — see
@@ -316,15 +324,20 @@ class GhPrTest(_GitCommandCase):
         super().setUp()
         self.files: list[str] | None = ['solutions/private/p0200_0299/p0217/p0217_s0.py',
                                         'solutions/problems.json']
-        self.open_prs: list[dict[str, object]] | None = [
-            {'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'}]
+        self.open_prs: list[git.PullRequest] | None = [_pr(12, 'Publish user/x', 'user/x')]
         self.answers: list[str] = []
         self.dismiss_count: int = 1     # what the fake spool reports dismissing
         self._saved_pr_files = git._pr_files
-        self._saved_open_prs = git._open_prs
+        self._saved_open_prs = git.open_prs
         self._saved_input = git.console.input
         git._pr_files = lambda number: self.files  # type: ignore[assignment]
-        git._open_prs = lambda: self.open_prs  # type: ignore[assignment]
+        # `open_prs` is stubbed in **both** its bindings: the module attribute the command
+        # paths call, and the registry entry `Ask(choices='open_prs')` resolves — registration
+        # captured the function object, so patching the module alone would leave the menu
+        # reaching the real `gh`. None means "gh could not tell us", which the real reader
+        # signals by raising.
+        git.open_prs = self._fake_open_prs  # type: ignore[assignment]
+        variables.define('open_prs', self._fake_open_prs, 'the open pull requests (test)')
         # Each prompt consumes the next queued keypress; an empty queue quits the walk.
         git.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
         # `dialogue.interactive()` is the one seam every prompt goes through, and it is False
@@ -343,13 +356,19 @@ class GhPrTest(_GitCommandCase):
         self.emits: list[str] = []
         git.osc.emit = lambda action, *fields: self.emits.append(action)  # type: ignore[assignment]
 
+    def _fake_open_prs(self) -> list[git.PullRequest]:
+        if self.open_prs is None:
+            raise dialogue.Abort(git._QUEUE_UNREADABLE, rc=ExitCodes.EXIT_ERROR)
+        return self.open_prs
+
     def _fake_dismiss(self, subject: str) -> int:
         self.dismissed.append(subject)
         return self.dismiss_count
 
     def tearDown(self) -> None:
         git._pr_files = self._saved_pr_files  # type: ignore[assignment]
-        git._open_prs = self._saved_open_prs  # type: ignore[assignment]
+        git.open_prs = self._saved_open_prs  # type: ignore[assignment]
+        variables.define('open_prs', self._saved_open_prs, 'the open pull requests')
         git.console.input = self._saved_input  # type: ignore[assignment]
         dialogue.interactive = self._saved_interactive  # type: ignore[assignment]
         notify.dismiss_by_subject = self._saved_dismiss  # type: ignore[assignment]
@@ -450,24 +469,40 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, [])
 
     def test_the_menu_offers_the_open_requests(self) -> None:
-        """The chooser's value is the number the argument binds; the branch reads as detail."""
-        self.open_prs = [{'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'},
-                         {'number': 13, 'title': 'Articles', 'headRefName': 'user/y'}]
-        choices = git._open_pr_choices(None, {})
+        """The chooser's value is the number the argument binds; the branch reads as detail.
+
+        Resolved the way the adapter resolves it — through the named variable — so this
+        covers the declaration `gh-merge` actually carries, not a function beside it.
+        """
+        self.open_prs = [_pr(12, 'Publish user/x', 'user/x'), _pr(13, 'Articles', 'user/y')]
+        choices = _declared_choices(Ask(choices='open_prs'), None, {})
         self.assertEqual([c.value for c in choices], ['12', '13'])
         self.assertEqual(choices[0].label, '#12  Publish user/x')
         self.assertEqual(choices[0].description, 'user/x')
 
-    def test_an_unreadable_queue_offers_no_menu_rather_than_raising(self) -> None:
+    def test_an_unreadable_queue_says_so_rather_than_offering_an_empty_menu(self) -> None:
+        """"Not signed in" must not read as "nothing to merge".
+
+        The menu used to be handed an empty list and say "no open pull requests", which is
+        the one answer that is certainly wrong when `gh` cannot be reached. The reader
+        raises now; the adapter turns that into the message and a non-zero code.
+        """
         self.open_prs = None
-        self.assertEqual(git._open_pr_choices(None, {}), [])
+        with self.assertRaises(dialogue.Abort) as caught:
+            _declared_choices(Ask(choices='open_prs'), None, {})
+        self.assertIn('signed in', caught.exception.message)
+
+    def test_the_same_declaration_feeds_a_loop(self) -> None:
+        """`loop {open_prs}:` iterates the requests themselves, not their menu rows."""
+        self.open_prs = [_pr(12, 'Publish user/x', 'user/x')]
+        looped = variables['open_prs']()
+        self.assertEqual([(pr.number, pr.branch) for pr in looped], [(12, 'user/x')])
 
     # ── a review notice's branch, resolved back to its request (msg act) ──
     def test_a_notice_branch_lands_that_request(self) -> None:
         """`msg act` on a notice must merge the branch it names, not offer the whole queue."""
         self.as_profile('maintainer')
-        self.open_prs = [{'number': 7, 'title': 'other', 'headRefName': 'user/other'},
-                         {'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'}]
+        self.open_prs = [_pr(7, 'other', 'user/other'), _pr(12, 'Publish user/x', 'user/x')]
         self.assertEqual(git.merge_pr_for_branch('user/x'), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -478,7 +513,7 @@ class GhPrTest(_GitCommandCase):
         """The notice outlived what it asked for — a menu of other people's work is not the
         answer, and neither is merging whatever happens to be first."""
         self.as_profile('maintainer')
-        self.open_prs = [{'number': 7, 'title': 'other', 'headRefName': 'user/other'}]
+        self.open_prs = [_pr(7, 'other', 'user/other')]
         self.assertEqual(git.merge_pr_for_branch('user/x'), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
         self.assertEqual(self.dismissed, [])

@@ -68,8 +68,8 @@ from solver.crypto.ciphers import (enc_key_payload, encrypt_blob, load_private_k
                                    verify_master_key)
 from solver.shell import console, register
 from solver.shell import dialogue
-from solver.shell.command import Context
 from solver.shell.dialogue import Abort, Ask, Choice, sure
+from solver.shell.variables import variable
 from solver.web.auth.commands import registered_public_keys
 from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT
 
@@ -1186,13 +1186,18 @@ def _recipient_key(identity: str, public_key: str) -> X25519PublicKey | None:
     return _public_key_from(token)
 
 
-def _holders(_: Context, __: dict[str, Any]) -> list[Choice]:
+@variable('collaborators a sealed share can be sent to')
+def holders() -> list[Choice]:
     """Who a share can be sent to — every roster record that has a key to seal it to.
 
     Read straight from the checkout, so the menu is the same in a terminal and in a web shell.
     Records without a public key are left out rather than offered: `key-split` would refuse
     them a moment later, and a menu must never offer what the command will then refuse.
     Non-strict all the same, so a slug the roster has not caught up with can still be typed.
+
+    `Choice` rather than a type of its own: there is nothing to a holder here but the slug
+    and the one thing worth saying about it, so a loop body (`loop {holders}:`) gets
+    `{loop.value}` and has everything there is.
     """
     keys = roster.public_keys()
     return [Choice(slug, slug, 'has a public key') for slug in sorted(keys)]
@@ -1226,7 +1231,7 @@ def _sends_a_share(_: dict[str, Any]) -> bool:
 
 @register(requires='maintainer')
 def key_split(identity: Annotated[str, Ask('Who should receive the other half?',
-                                           choices=_holders, when=_sends_a_share,
+                                           choices='holders', when=_sends_a_share,
                                            strict=False)] = '',
               public_key: str = '') -> int:
     """Send someone half the master key, sealed to their public key.

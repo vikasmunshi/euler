@@ -39,6 +39,7 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
+from solver.shell import dialogue
 from solver.web.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
                             PR_REVIEW_SUBJECT)
 from solver.web.msg.app import MessageService, build_admin_app, build_app
@@ -1136,6 +1137,65 @@ class DeliveryNudgeTests(unittest.IsolatedAsyncioTestCase):
         service = MessageService(config)
         self.assertFalse(service.policy.is_web('operator'))
         await service.notify(['operator'])       # must not raise, must not connect
+
+
+class MailboxVariableTests(unittest.TestCase):
+    """`{threads}` and the menu it feeds — the mailbox read, and the one thing it will not do.
+
+    The choice sets behind `msg` had no tests. The read is now the `threads` variable, so
+    `loop {threads}:` and the chooser cannot drift; what stays a callable is the labelling,
+    because only it can see which verb was already answered.
+    """
+
+    def setUp(self) -> None:
+        from solver.web.msg import commands
+        self.commands = commands
+        self.mailbox: object = {'threads': []}
+        self._saved_call = commands._call
+        commands._call = lambda action, **kw: (200, self.mailbox) if self.mailbox is not None else None
+        self.addCleanup(setattr, commands, '_call', self._saved_call)
+
+    def _rows(self, subject: str = 'a question', verb: str = 'read') -> None:
+        self.mailbox = {'threads': [{'id': 'm1', 'subject': subject, 'author_name': 'someone',
+                                     'updated': '', 'unread': True}]}
+
+    def test_the_mailbox_reads_as_threads(self) -> None:
+        self._rows()
+        thread, = self.commands.threads()
+        self.assertEqual((thread.id, thread.subject, thread.unread), ('m1', 'a question', True))
+
+    def test_an_empty_mailbox_is_empty_not_an_error(self) -> None:
+        self.assertEqual(self.commands.threads(), [])
+
+    def test_an_unreachable_spool_raises_rather_than_reading_as_empty(self) -> None:
+        """"No messages" is the one answer that is certainly wrong when nothing answered."""
+        self.mailbox = None
+        with self.assertRaises(dialogue.Abort) as caught:
+            self.commands.threads()
+        self.assertIn('not reachable', caught.exception.message)
+
+    def test_the_menu_is_the_same_read(self) -> None:
+        self._rows()
+        choice, = self.commands._thread_choices(None, {'action': 'read'})
+        self.assertEqual(choice.value, 'm1')
+        self.assertEqual(choice.label, 'a question')
+        self.assertIn('unread', choice.description)
+
+    def test_act_labels_each_row_with_what_it_would_do(self) -> None:
+        """The one thing a variable cannot do: the label depends on an answer already bound."""
+        self.mailbox = {'threads': [{'id': 'm1', 'subject': KEY_ISSUE_SUBJECT, 'author_name': 'staff',
+                                     'updated': '', 'unread': False}]}
+        plain, = self.commands._thread_choices(None, {'action': 'read'})
+        labelled, = self.commands._thread_choices(None, {'action': 'act'})
+        verb = self.commands.threads()[0].verb
+        self.assertNotEqual(verb, 'read', 'a key issue is something other than reading')
+        self.assertIn(verb, labelled.description)
+        self.assertNotIn(verb, plain.description, 'only act names the verb')
+
+    def test_an_empty_mailbox_names_the_action_it_cannot_serve(self) -> None:
+        with self.assertRaises(dialogue.Abort) as caught:
+            self.commands._thread_choices(None, {'action': 'dismiss'})
+        self.assertIn('dismiss', caught.exception.message)
 
 
 if __name__ == '__main__':

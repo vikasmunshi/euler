@@ -41,7 +41,7 @@ from __future__ import annotations
 
 __all__ = ['msg']
 
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, NamedTuple
 
 from solver.auth.subject import rank
 from solver.config import ExitCodes, config
@@ -49,6 +49,7 @@ from solver.core import osc
 from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.dialogue import Abort, Ask, Choice
+from solver.shell.variables import variable
 from solver.web.msg.client import call as _call
 from solver.web.msg import KEY_ISSUE_SUBJECT, KEY_SHARE_SUBJECT, PR_REVIEW_SUBJECT, verb_for
 from solver.web.msg.identity import STAFF_FLOOR
@@ -78,8 +79,30 @@ _EVERYONE_LABEL: str = 'everyone'
 _STAFF_LABEL: str = 'staff'
 
 
-def _threads(_: Context, bound: dict[str, Any]) -> list[Choice]:
-    """This caller's messages as menu options — the same mailbox read `msg list` prints.
+class Thread(NamedTuple):
+    """One message in this caller's mailbox, as a `loop` body and a menu both want it."""
+
+    id: str
+    subject: str
+    author: str
+    updated: str
+    unread: bool
+    #: What `act` would do to it, for this caller — `read`, `save`, `merge`, …
+    verb: str
+
+    @property
+    def note(self) -> str:
+        """The reading line beside the subject: who it is from, when, and whether it is new."""
+        return f'{self.author} · {_when(self.updated)}' + (' · unread' if self.unread else '')
+
+    def __choice__(self) -> Choice:
+        """The row, without the verb: see :func:`_thread_choices` for why that is separate."""
+        return Choice(self.id, self.subject, self.note)
+
+
+@variable("this caller's messages, newest first")
+def threads() -> list[Thread]:
+    """This caller's mailbox — the same read `msg list` prints.
 
     Always the mailbox, for every thread verb. `dismiss` used to read the *staff queue*, which
     holds inbound questions only (`store.inbound` filters on `kind == 'inbound'`), so a notice
@@ -88,31 +111,44 @@ def _threads(_: Context, bound: dict[str, Any]) -> list[Choice]:
     and it is exactly what the service will accept: staff may dismiss anything, anyone else a
     thread they are a party to.
 
-    For `act` each row also names **what acting on it would do**, from the same
-    :func:`~solver.web.msg.verb_for` the header chip labels its rows with. Without it the menu
-    would be a list of subjects and the reader would have to guess which one carries a key.
-    Only when there is something to name: `read` on every other line is the noise the label
-    exists to cut through, exactly as on the chip's rows.
+    An empty list means an empty mailbox. A spool that cannot be reached **raises**, for the
+    reason `open_prs` does: "no messages" is the one answer that is certainly wrong when
+    nothing answered, and a `loop {threads}:` over a dead service must not run zero times in
+    silence.
     """
-    action = str(bound.get('action') or '')
     result = _call('mailbox')
     if result is None or result[0] != 200 or not isinstance(result[1], dict):
-        return []
-    threads: list[dict[str, Any]] = result[1].get('threads') or []
-    if not threads:
+        raise Abort('the message service is not reachable (is euler-msg.service running?)',
+                    rc=ExitCodes.EXIT_ERROR)
+    return [Thread(id=str(thread.get('id', '')), subject=str(thread.get('subject', '')),
+                   author=str(thread.get('author_name', '')), updated=str(thread.get('updated', '')),
+                   unread=bool(thread.get('unread')), verb=_verb_of(thread))
+            for thread in result[1].get('threads') or []]
+
+
+def _thread_choices(_: Context, bound: dict[str, Any]) -> list[Choice]:
+    """The mailbox as menu options, labelled by the verb when the verb is the question.
+
+    The one choice set that stays a callable: for `act` each row also names **what acting on
+    it would do**, which depends on the answer already bound to `action` — and a variable
+    cannot see that. Without it the menu would be a list of subjects and the reader would
+    have to guess which one carries a key. Only when there is something to name: `read` on
+    every other line is the noise the label exists to cut through, exactly as on the header
+    chip's rows.
+
+    The read itself is the `threads` variable, so this and `loop {threads}:` cannot drift.
+    """
+    action = str(bound.get('action') or '')
+    mailbox = threads()
+    if not mailbox:
         raise Abort(f'no messages to {action or "act on"}', rc=ExitCodes.EXIT_ERROR)
-    options: list[Choice] = []
-    for thread in threads:
-        note = f'{str(thread.get("author_name", ""))} · {_when(str(thread.get("updated", "")))}'
-        if thread.get('unread'):
-            note += ' · unread'
-        if action == 'act' and (verb := _verb_of(thread)) != 'read':
-            note += f' · {verb}'
-        options.append(Choice(str(thread.get('id', '')), str(thread.get('subject', '')), note))
-    return options
+    return [thread.__choice__() if not (action == 'act' and thread.verb != 'read')
+            else Choice(thread.id, thread.subject, f'{thread.note} · {thread.verb}')
+            for thread in mailbox]
 
 
-def _recipients(_: Context, bound: dict[str, Any]) -> list[Choice]:
+@variable('who a message can be sent to')
+def recipients() -> list[Choice]:
     """Who a message can go to: staff, everyone, plus every collaborator in the roster.
 
     Asked of staff only (:func:`_needs_recipients`), so `staff` leads but is not the whole
@@ -457,11 +493,11 @@ def _dismiss(thread_id: str) -> int:
 @register(requires='reader', aliases=('messages',))
 def msg(action: Annotated[Literal['list', 'read', 'send', 'dismiss', 'act'],
                           Ask('What would you like to do?', labels=_ACTIONS)] = 'list',
-        thread: Annotated[str, Ask('Which message?', choices=_threads, when=_needs_thread,
+        thread: Annotated[str, Ask('Which message?', choices=_thread_choices, when=_needs_thread,
                                    empty='no messages')] = '',
         subject: Annotated[str, Ask('Subject', when=_is_send)] = '',
         body: Annotated[str, Ask('Message', when=_is_send, multiline=True)] = '',
-        to: Annotated[str, Ask('Who should receive it?', choices=_recipients,
+        to: Annotated[str, Ask('Who should receive it?', choices='recipients',
                                when=_needs_recipients, strict=False)] = '') -> int:
     """Read and send messages: what is waiting for you, and what it asks you to do.
 

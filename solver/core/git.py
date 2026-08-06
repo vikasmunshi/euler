@@ -41,7 +41,7 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import PurePosixPath
 from subprocess import run
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, NamedTuple
 
 from cryptography.exceptions import InvalidTag
 
@@ -52,7 +52,8 @@ from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
 from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import console, register
-from solver.shell.dialogue import Ask, Choice
+from solver.shell.dialogue import Abort, Ask, Choice
+from solver.shell.variables import variable
 from solver.utils.shell_utils import run_cmdline, run_command
 from solver.web.msg import PR_REVIEW_SUBJECT
 
@@ -1037,36 +1038,64 @@ def _pr_files(number: int) -> list[str] | None:
     return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
 
 
-def _open_prs() -> list[dict[str, object]] | None:
-    """The open pull requests as `{number, title, branch}` records, or None on failure.
+class PullRequest(NamedTuple):
+    """One open pull request: the three fields a reviewer needs to decide."""
 
-    None is NOT "no open PRs": an unauthenticated or offline `gh` fails here, and the
-    caller must not read that as an empty queue. `gh pr list` defaults to open PRs; the
-    JSON fields are the three a reviewer needs to decide (number, title, branch).
+    number: int
+    title: str
+    branch: str
+
+    def __choice__(self) -> Choice:
+        """How the row reads in a menu — the number is what gets bound to `pr_number`."""
+        return Choice(str(self.number), f'#{self.number}  {self.title}', self.branch)
+
+
+#: Said when `gh` cannot answer at all, which is never the same as an empty queue.
+_QUEUE_UNREADABLE: str = ('cannot read the open pull requests — is [accent]gh[/accent] '
+                          'signed in ([accent]git-identity[/accent])?')
+
+
+@variable('the open pull requests waiting for review')
+def open_prs() -> list[PullRequest]:
+    """The open pull requests. **Raises** rather than coming back empty when `gh` fails.
+
+    An empty list means an empty queue and nothing else. That distinction is the whole
+    reason this raises: an unauthenticated or offline `gh` used to return nothing, so a
+    menu said "no open pull requests" when the truth was "not signed in", and
+    `loop {open_prs}:` would have run zero times over a network error and said nothing at
+    all. `_open_queue` turns the raise back into the printed diagnostic for the command
+    paths, which is the one place that reading belongs.
+
+    `gh pr list` defaults to open requests; the JSON fields are the three
+    :class:`PullRequest` carries.
     """
     proc = run(['gh', 'pr', 'list', '--json', 'number,title,headRefName'],
                cwd=config.root_dir, capture_output=True, text=True)
     if proc.returncode != 0:
-        return None
+        raise Abort(_QUEUE_UNREADABLE, rc=ExitCodes.EXIT_ERROR)
     try:
         data = json.loads(proc.stdout or '[]')
     except json.JSONDecodeError:
-        return None
-    return data if isinstance(data, list) else None
+        raise Abort(_QUEUE_UNREADABLE, rc=ExitCodes.EXIT_ERROR) from None
+    if not isinstance(data, list):
+        raise Abort(_QUEUE_UNREADABLE, rc=ExitCodes.EXIT_ERROR)
+    return [PullRequest(number, str(pr.get('title', '')), str(pr.get('headRefName', '')))
+            for pr in data if isinstance(pr, dict) and isinstance(number := pr.get('number'), int)]
 
 
-def _open_queue() -> list[dict[str, object]] | None:
+def _open_queue() -> list[PullRequest] | None:
     """The open pull requests, reporting the one failure that stops every merge path.
 
     Both ways in — a number typed at `gh-merge merge`, and a branch named by a review
     notice — need the same read and fail it the same way, so the diagnostic lives here
-    rather than being written twice and drifting.
+    rather than being written twice and drifting. None is the "it could not be read" the
+    callers already branch on; the message is the one :func:`open_prs` raises with.
     """
-    prs: list[dict[str, object]] | None = _open_prs()
-    if prs is None:
-        console.print('[error]error:[/error] cannot read the open pull requests — is [accent]gh[/accent] '
-                      'signed in ([accent]git-identity[/accent])?')
-    return prs
+    try:
+        return open_prs()
+    except Abort as exc:
+        console.print(f'[error]error:[/error] {exc.message}')
+        return None
 
 
 def merge_pr_for_branch(branch: str) -> int:
@@ -1093,9 +1122,8 @@ def merge_pr_for_branch(branch: str) -> int:
     prs = _open_queue()
     if prs is None:
         return ExitCodes.EXIT_ERROR
-    number = next((pr.get('number') for pr in prs
-                   if str(pr.get('headRefName', '')) == branch), None)
-    if not isinstance(number, int):
+    number = next((pr.number for pr in prs if pr.branch == branch), None)
+    if number is None:
         console.print(f'[error]error:[/error] no open pull request for [accent]{branch}[/accent] — '
                       'it may already have been merged or closed. Run [accent]gh-merge list[/accent] '
                       'to see what is waiting.')
@@ -1161,24 +1189,9 @@ def _is_merge(bound: dict[str, Any]) -> bool:
     return bound.get('action') == 'merge'
 
 
-def _open_pr_choices(_ctx: Any, _bound: dict[str, Any]) -> list[Choice]:
-    """The open pull requests as menu options, so the number never has to be typed out.
-
-    The same read `gh-merge list` prints, offered as a chooser: each row is the number
-    (the value bound to `pr_number`), the title, and the branch it would land. An
-    unreadable queue comes back empty rather than raising — the dialogue says there is
-    nothing to choose, and the caller's own `_open_prs` read reports *why* on the path
-    that matters.
-    """
-    return [Choice(str(number), f'#{number}  {pr.get("title", "")}',
-                   str(pr.get('headRefName', '')))
-            for pr in _open_prs() or []
-            if isinstance(number := pr.get('number'), int)]
-
-
 @register(requires='maintainer', quietable=True, aliases=('merge',))
 def gh_merge(action: Literal['list', 'merge'] = 'list',
-             pr_number: Annotated[int, Ask('Which pull request?', choices=_open_pr_choices,
+             pr_number: Annotated[int, Ask('Which pull request?', choices='open_prs',
                                            when=_is_merge, empty='no open pull requests')] = 0,
              ) -> int:
     """List the open pull requests, or rebase-merge one onto master.
@@ -1224,14 +1237,14 @@ def gh_merge(action: Literal['list', 'merge'] = 'list',
                       '[accent]gh-merge merge <number>[/accent] — [accent]gh-merge list[/accent] '
                       'shows the queue.')
         return ExitCodes.EXIT_USAGE
-    record = next((pr for pr in prs if pr.get('number') == pr_number), None)
+    record = next((pr for pr in prs if pr.number == pr_number), None)
     if record is None:
         console.print(f'[error]error:[/error] no open pull request [accent]#{pr_number}[/accent] — '
                       'run [accent]gh-merge list[/accent] to see the queue.')
         return ExitCodes.EXIT_ERROR
     # The head ref comes from the same read that offered the row, so the notice `git-push`
     # filed under this branch is closed by the merge that answers it.
-    return _merge_pr(pr_number, branch=str(record.get('headRefName', '')))
+    return _merge_pr(pr_number, branch=record.branch)
 
 
 # ── hooks / audit ───────────────────────────────────────────────────────────────────────

@@ -125,6 +125,10 @@ class Variables():
     def define(self, name: str, compute: Compute, description: str, type_name: str = '') -> None:
         """Register *compute* as the computed special *name*.
 
+        The declared type is read from *compute*'s return annotation unless *type_name* says
+        otherwise — here rather than in the decorator, so every route in records it and a
+        re-registration (a test restoring what it replaced) cannot quietly lose it.
+
         Raises:
             KeyError: if *name* is one the store seeds itself. Those five are the
                 interpreter's own state — a module that redefined `rcode` would be
@@ -134,7 +138,8 @@ class Variables():
         if name in _SEEDED:
             raise KeyError(f'{name} is a built-in special and cannot be registered over')
         self.__dict__[name] = compute
-        self.__info__[name] = VariableInfo(name, 'computed', type_name, description)
+        declared = type_name or str(compute.__annotations__.get('return', ''))
+        self.__info__[name] = VariableInfo(name, 'computed', declared, description)
         self.__reserved__.add(name)
         self.__dict__['reserved'] = sorted(self.__reserved__)
 
@@ -272,8 +277,7 @@ def variable(description: str) -> Callable[[_F], _F]:
     """
     def decorate(compute: _F) -> _F:
         name = compute.__name__[:-1] if compute.__name__.endswith('_') else compute.__name__
-        variables.define(name, compute, description,
-                         str(compute.__annotations__.get('return', '')))
+        variables.define(name, compute, description)
         return compute
     return decorate
 
