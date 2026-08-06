@@ -29,6 +29,7 @@ import mimetypes
 import re
 import subprocess
 from functools import cache
+from html import escape
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -592,8 +593,81 @@ def _doc_slug(text: str) -> str:
     return re.sub(r'[^a-z0-9 -]+', '', text.lower()).strip(' ').replace(' ', '-').strip('-')
 
 
+#: What the masker walks, in precedence order. The first three alternatives are
+#: *shields* — matched only so that math cannot be found inside them, and handed
+#: back to the renderer untouched:
+#:
+#: - `fence` / `code`: fenced blocks and inline code spans. MathJax's own defaults
+#:   skip `<pre>`/`<code>` (see `site.js`), so a `$…$` in a snippet is not math and
+#:   must keep its backslashes *literal* — exactly what CommonMark already does there;
+#: - `esc`: `\$`, the documented escape for a literal dollar
+#:   (`convention_documentation.md`). Consuming it here stops it opening a span,
+#:   and leaves CommonMark to unescape it to a plain `$` as the convention promises.
+#:
+#: Then the two math forms, MathJax's configured delimiters (`site.js`: inline
+#: `$…$`, display `$$…$$`), display first so `$$` wins the tie. Inline math may
+#: cross a line — the corpus wraps it — but never a blank line: an unpaired `$` in
+#: prose then swallows a couple of lines at worst, not the rest of the document.
+_MASK_RE = re.compile(
+    r'(?P<fence>^ {0,3}(?P<f>```+|~~~+)[\s\S]*?(?:^ {0,3}(?P=f)[^\n]*$|\Z))'
+    r'|(?P<code>(?<!`)(?P<t>`+)(?!`)[\s\S]*?(?<!`)(?P=t)(?!`))'
+    r'|(?P<esc>\\\$)'
+    r'|(?P<display>\$\$(?:[^$]|\$(?!\$))+?\$\$)'
+    r'|(?P<inline>\$(?!\$)(?:[^$\n]|\n(?![ \t]*\n))+?\$)',
+    re.M)
+
+#: The stand-in a math span is parked under. Private-use codepoints: no Markdown
+#: meaning, nothing the inline parser will touch, and nothing an article can contain.
+_MASK_FMT = '\ue000{}\ue000'
+
+#: The same slot, read back: the index in it names which span belongs there.
+_MASK_SLOT = re.compile('\ue000([0-9]+)\ue000')
+
+
+def _mask_math(text: str) -> tuple[str, list[str]]:
+    """Lift every math span out of *text*, leaving a placeholder in its place.
+
+    CommonMark backslash-escapes run over the whole document, and TeX is full of
+    escaped ASCII punctuation: `\\,` `\\;` `\\{` `\\#` `\\%` `\\\\` all mean something
+    to MathJax and all are *escapable* characters, so the renderer ate the backslash
+    and MathJax got the bare character. Depending on which one, that is a hard error
+    (`\\#` → "You can't use 'macro parameter character #' in math mode"), a silently
+    wrong render (`\\{…\\}` losing its braces, `\\,` becoming a comma between factors),
+    or a swallowed line (`\\%` opening a TeX comment).
+
+    Masking is the fix that scales past the corpus: the spans never reach the inline
+    parser, so no article has to be written around the renderer's escape table.
+    """
+    spans: list[str] = []
+
+    def take(m: re.Match[str]) -> str:
+        math = m.group('display') or m.group('inline')
+        if math is None:
+            return m.group(0)             # a shield: code, a fence, or an escaped dollar
+        spans.append(math)
+        return _MASK_FMT.format(len(spans) - 1)
+
+    return _MASK_RE.sub(take, text), spans
+
+
+def _unmask_math(text: str, spans: list[str], *, raw: bool = False) -> str:
+    """Put the math spans back where their placeholders sit.
+
+    Into HTML they go back **escaped**, as the renderer would have escaped them:
+    that costs nothing, because MathJax reads *text* and so gets the `<` the author
+    wrote back out of `&lt;`, while the browser never sees markup an article did not
+    intend to emit. *raw* is for the heading slugs, which are computed from source
+    text and would otherwise anchor on `&amp;`.
+    """
+    return _MASK_SLOT.sub(lambda m: spans[int(m.group(1))] if raw else escape(spans[int(m.group(1))], quote=False),
+                          text)
+
+
 def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '') -> str:
     """Render Markdown to HTML: slugged heading ids + links rewired for the shell.
+
+    Math spans (`$…$`, `$$…$$`) ride around the parser untouched — see
+    :func:`_mask_math` for why they have to.
 
     Each heading gets the same slug `update_doc.py` assumes, so in-page and
     cross-doc `#anchor` links land. Then the link rewrites:
@@ -618,10 +692,13 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
       a full reload. External (`http…`) and `#anchor` links are untouched,
       so they navigate/scroll normally.
     """
-    tokens = _MD.parse(text)
+    masked, spans = _mask_math(text)
+    tokens = _MD.parse(masked)
     for i, token in enumerate(tokens):
         if token.type == 'heading_open':
-            token.attrSet('id', _doc_slug(tokens[i + 1].content))
+            # The slug is the *source* heading's, math and all, so `#anchor` links
+            # written against the article (and `update_doc.py`'s) still land.
+            token.attrSet('id', _doc_slug(_unmask_math(tokens[i + 1].content, spans, raw=True)))
     rendered: str = _MD.renderer.render(tokens, _MD.options, {})
     rendered = re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"',
                       rf'href="{route_base}\1\2"', rendered)
@@ -636,7 +713,7 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
         r'<a href="(/[^"]*)"',
         r'<a href="\1" hx-get="\1" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"',
         rendered)
-    return rendered
+    return _unmask_math(rendered, spans)   # last: no link rewrite may reach inside a formula
 
 
 #: The rendered form of `update-tags`' problems block: its opening HTML-comment marker,

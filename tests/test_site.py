@@ -930,6 +930,62 @@ class TopicCardStatusTests(unittest.TestCase):
         self.assertNotIn('card-bar', body)
 
 
+class MathSpanTests(unittest.TestCase):
+    """`$…$` / `$$…$$` ride around the Markdown parser, backslashes intact.
+
+    CommonMark unescapes ASCII punctuation everywhere, and TeX escapes ASCII
+    punctuation to mean things: `\\#` reached MathJax as `#` ("macro parameter
+    character in math mode"), `\\{…\\}` lost its braces, `\\%` opened a comment.
+    The renderer lifts the spans out before parsing and puts them back after.
+    """
+
+    def _md(self, text: str) -> str:
+        return content.render_markdown(text, route_base='/topics/')
+
+    def test_tex_escapes_survive_inline_and_display(self) -> None:
+        """The escapes that were being eaten — one of each kind, both delimiters."""
+        html = self._md('Bounded by $\\min(\\#\\text{paths}, m)$ over $\\{0, \\dots, m-1\\}$.\n\n'
+                        '$$\\sum_i h_i \\;-\\; m \\lfloor h_i/m \\rfloor \\% 2$$\n')
+        self.assertIn('$\\min(\\#\\text{paths}, m)$', html)
+        self.assertIn('$\\{0, \\dots, m-1\\}$', html)
+        self.assertIn('$$\\sum_i h_i \\;-\\; m \\lfloor h_i/m \\rfloor \\% 2$$', html)
+
+    def test_markdown_around_the_math_still_renders(self) -> None:
+        """Masking must not shield the prose: a span is lifted, its neighbours are not."""
+        html = self._md('A *stressed* [link](/topics/x) near $\\alpha\\,\\beta$ and `code`.\n')
+        self.assertIn('<em>stressed</em>', html)
+        self.assertIn('hx-get="/topics/x"', html)
+        self.assertIn('<code>code</code>', html)
+        self.assertIn('$\\alpha\\,\\beta$', html)
+
+    def test_code_is_not_math(self) -> None:
+        """MathJax skips pre/code, so the renderer must not mask there — a `$VAR` in a
+        snippet is a shell variable, and two of them are not a formula."""
+        html = self._md('Set `$EULER_BASE_URL` then read `$HOME`.\n\n```sh\necho "$a \\; $b"\n```\n')
+        self.assertIn('<code>$EULER_BASE_URL</code>', html)
+        self.assertIn('<code>$HOME</code>', html)
+        self.assertIn('echo &quot;$a \\; $b&quot;', html)
+
+    def test_an_escaped_dollar_stays_a_dollar(self) -> None:
+        """`\\$` is the documented literal (convention_documentation.md): it neither
+        opens a span nor keeps its backslash."""
+        html = self._md('It costs \\$5, not \\$6.\n')
+        self.assertIn('It costs $5, not $6.', html)
+
+    def test_math_is_escaped_back_into_the_html(self) -> None:
+        """MathJax reads text, so `&lt;` reaches it as `<` — and an article cannot
+        emit markup by hiding it between dollars."""
+        html = self._md('Then $a < b$ and $x <b>y</b> z$.\n')
+        self.assertIn('$a &lt; b$', html)
+        self.assertNotIn('<b>y</b>', html)
+
+    def test_a_heading_anchors_on_its_source_text(self) -> None:
+        """The slug is taken before masking, so `#anchor` links written against the
+        article (and the ones `update_doc.py` assumes) still land."""
+        html = self._md('## Move 3 — only $O(\\sqrt{N})$ quotients\n')
+        self.assertIn('id="move-3--only-osqrtn-quotients"', html)
+
+
 class CollapseProblemsTests(unittest.TestCase):
     """The topic page folds `update-tags`' generated Problems list into a <details>.
 
