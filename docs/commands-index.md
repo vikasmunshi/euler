@@ -393,7 +393,8 @@ final when it is done writing it, and rewriting one is an explicit `--force`.
 **usage**
 
 ```
-claude-blog <topic>
+claude-blog
+[topic=<str>] (asked)
 [additional_prompt=<str>] (asked)
 [force=true|--force]
 ```
@@ -402,7 +403,7 @@ claude-blog <topic>
 
 | argument | description |
 |----------|-------------|
-| `topic` | The tag or topic to write about; completion offers the most-referenced first. |
+| `topic` | The tag or topic to write about. Offered as a menu of the article index when omitted; completion offers the same set. |
 | `additional_prompt` | Extra free-text guidance for the writer. Asked for in an interactive shell when omitted — the web's Write / Rewrite actions type a bare `claude-blog <path>`, so a maintainer would otherwise never get to pass an angle. Enter skips it. Defaults to empty. |
 | `force` | Rewrite the article even when it is already final. Defaults to False. |
 
@@ -593,6 +594,7 @@ Open a solution file in the web code editor.
 
 * ⚑ needs contributor or above.
 * ❏ uses/sets current problem.
+* ✎ asks for anything you leave out.
 * » supports --silent to suppress output.
 
 The counterpart to `show` (which opens the rendered problem): *problem* defaults
@@ -611,8 +613,9 @@ like `show` (the channel is the resolved subject's):
 **usage**
 
 ```
-edit <filename>
+edit
 [problem=<n>] (default current)
+[filename=<str>] (asked)
 [silent=true|--silent]
 ```
 
@@ -621,7 +624,7 @@ edit <filename>
 | argument | description |
 |----------|-------------|
 | `problem` | The problem owning the file. |
-| `filename` | The solution-directory file to edit, as `ls` lists it. It must already exist. |
+| `filename` | The solution-directory file to edit, as `ls` lists it. Offered as a menu when omitted. It must already exist. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.viewer.edit`.
@@ -1784,6 +1787,7 @@ test-cases
 List a topic article's declared tags and what each one maps to.
 
 * ⚑ needs reader or above.
+* ✎ asks for anything you leave out.
 
 Reads the article's `<!-- tags: [...] -->` declaration and, for each slug, prints its
 facet and the problem/solution refs recorded on the central vocabulary's leg — the
@@ -1793,14 +1797,15 @@ matches.
 **usage**
 
 ```
-topic <name>
+topic
+[name=<str>] (asked)
 ```
 
 **arguments**
 
 | argument | description |
 |----------|-------------|
-| `name` | The article to report on: a `folder/leaf` path under `topics/`, or a bare leaf name when it is unambiguous. |
+| `name` | The article to report on: a `folder/leaf` path under `topics/`, or a bare leaf name when it is unambiguous. Offered as a menu when omitted; not strict, so a leaf name still works. |
 
 *Defined in* `solver.core.tags.topic`.
 
@@ -2016,6 +2021,7 @@ user
 Record someone's public key and send them half the master key.
 
 * ⚑ needs maintainer or above.
+* ✎ asks for anything you leave out.
 
 *target* is either form of the same act, told apart by shape:
 
@@ -2042,16 +2048,17 @@ half down. Aliased as `authorize`.
 **usage**
 
 ```
-user-authorize <target>
-[identity=<str>] (default '')
+user-authorize
+[target=<str>] (asked)
+[identity=<str>] (asked)
 ```
 
 **arguments**
 
 | argument | description |
 |----------|-------------|
-| `target` | The 16-hex id of a key-authorization message, or a 64-hex public key. |
-| `identity` | Who the key belongs to. Taken from the thread for the message form; required for the bare-key form, where there is nobody to send it to otherwise. |
+| `target` | The 16-hex id of a key-authorization message, or a 64-hex public key. Offered as a menu of the waiting requests when omitted; not strict, so a bare key can still be pasted. |
+| `identity` | Who the key belongs to. Taken from the thread for the message form, so it is only asked for the bare-key form — where there is nobody to send it to otherwise. |
 
 *Defined in* `solver.crypto.keys.user_authorize`.
 
@@ -2062,6 +2069,7 @@ user-authorize <target>
 Administer accounts on the authorization map + the auth service.
 
 * ⚑ needs admin.
+* ✎ asks for anything you leave out.
 
 The whole command is `admin`-floored and the account verbs re-execute the admin CLI
 under `sudo` (the SoR + admin socket are root-only). There is no reader/maintainer
@@ -2079,7 +2087,7 @@ have drifted.
 ```
 users
 [action=list|process-requests|add|change|enable|disable|remove|redeploy] (default list)
-[identity=<str>] (default '')
+[identity=<str>] (asked)
 [profile=reader|contributor|maintainer|admin] (default reader)
 ```
 
@@ -2088,7 +2096,7 @@ users
 | argument | description |
 |----------|-------------|
 | `action` | What to do — `list` the roster, pending invites and the invite-request queue; `process-requests` walks that queue interactively (accept / ignore / dismiss each); `add` a map entry (`@email` also provisions the account and mints an invite, a bare os-login is local-only); `change` reassigns a profile; `enable` / `disable` the web SRP state; `remove` drops the account or entry; `redeploy` re-asserts the per-user host layer and re-lays every collaborator's git hooks, dropping live shells. Defaults to `list`. |
-| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Required for the account verbs, unused by `list` / `process-requests` / `redeploy`. |
+| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Offered as a menu of the roster for the verbs that act on an account that already exists — `change` / `enable` / `disable` / `remove` — and not asked for the others, since `add` names one that does not yet and `list` / `process-requests` / `redeploy` name none. |
 | `profile` | The profile to assign, for `add` / `change`. `admin` is valid only for a local os-login, never a web account. |
 
 *Defined in* `solver.web.auth.commands.users`.
