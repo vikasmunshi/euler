@@ -4,9 +4,10 @@
 
 [`qsort`](https://en.cppreference.com/w/c/algorithm/qsort) is the only sort the C standard
 library gives you, and in this repository it is the C port's answer to a single line of Python.
-Every problem below has a Python sibling that wrote `sorted(...)` and moved on; the C side has to
-supply a comparator, decide what the array elements actually are, and find somewhere to put the
-context the comparator needs. That gap — one call versus a design decision — is why `qsort` shows
+Nearly every problem below has a Python sibling that wrote `sorted(...)` — or a `set`, which
+amounts to the same thing once you port it — and moved on; the C side has to supply a comparator,
+decide what the array elements actually are, and find somewhere to put the context the comparator
+needs. That gap — one call versus a design decision — is why `qsort` shows
 up as a technique tag at all, and why the same handful of mistakes recur.
 
 ## The idea
@@ -131,7 +132,13 @@ be inlined, which is the price of a type-erased sort in C — C++'s `std::sort` 
 because it inlines the comparison. On a few million elements this is a real but tolerable cost; if
 the sort is genuinely hot and the keys are small bounded integers, a
 [counting](https://en.wikipedia.org/wiki/Counting_sort) or
-[radix sort](https://en.wikipedia.org/wiki/Radix_sort) beats it outright. Keep the elements small
+[radix sort](https://en.wikipedia.org/wiki/Radix_sort) beats it outright. Problem 461 is the one
+port here that pays to escape the indirect call on its own terms: it sorts tens of millions of
+small records by a `double` key and hand-writes a typed
+[introsort](https://en.wikipedia.org/wiki/Introsort) with the comparison inlined, which is exactly
+why it is absent from the list below. That is the trade you are making — a page of sorting code,
+and a comparator you can no longer reuse for `bsearch`, bought with one saved indirect call per
+comparison. Almost never worth it; measure before you believe it. Keep the elements small
 for the same reason: `qsort` physically moves `size` bytes per swap, so sorting an array of fat
 structs is slower than sorting indices into them.
 

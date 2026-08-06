@@ -17,7 +17,8 @@
       "binary-search-algorithm",
       "set",
       "hash-table",
-      "sorting-algorithm"
+      "sorting-algorithm",
+      "qsort"
     ]
   },
   "new-tags": []

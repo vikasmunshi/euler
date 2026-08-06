@@ -7,6 +7,7 @@
   "techniques": {
     "s0": [
       "sorting-algorithm",
+      "qsort",
       "strcmp",
       "strtok",
       "prefix-sum"
