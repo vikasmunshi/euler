@@ -142,6 +142,11 @@ class Ask:
     #: for the writer, say. Off by default: for most questions an empty line is not an
     #: answer, and re-asking is kinder than acting on it.
     skippable: bool = False
+    #: Ask for **several** values through :func:`select` rather than one through
+    #: :func:`choose` — the shape a `*args` parameter needs, and the only shape that suits a
+    #: vocabulary too long to read (`create-topic` picks from 654 tags). Needs options, so
+    #: either `choices` or an annotation the adapter can enumerate.
+    multi: bool = False
     #: Accept only a listed value, re-asking otherwise — so a bad id is caught here rather
     #: than by the service it would have been sent to.
     strict: bool = True

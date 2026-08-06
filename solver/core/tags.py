@@ -37,14 +37,14 @@ import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, NamedTuple
 
 from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
 from solver.core.problems import Problem, problems, solution_dir
 from solver.shell import console, register
-from solver.shell import dialogue
-from solver.shell.dialogue import Abort, Choice, select
+from solver.shell.dialogue import Abort, Ask, Choice
+from solver.shell.variables import variable
 from solver.utils.quips import quips
 
 FACETS = ('domain', 'technique', 'takeaway')
@@ -760,20 +760,47 @@ def update_tags(check: bool = False) -> int:
 _TOPIC_SEG_RE = re.compile(r'[a-z0-9][a-z0-9-]*')
 
 
-def _select_tags_interactively(vocab: list[dict[str, Any]]) -> list[str]:
-    """The chosen tag slugs, picked by search-and-select over the vocabulary.
+class Tag(NamedTuple):
+    """One tag in the central vocabulary."""
 
-    A thin wrapper over `dialogue.select` — the shared multi-select, line-based on purpose so
-    it behaves identically in a terminal and in the web PTY. Raises `Abort` if the maintainer
-    quits, which leaves the topic uncreated.
+    slug: str
+    facet: str
+    name: str
+
+    def __choice__(self) -> Choice:
+        """How the tag reads in a menu — the slug is the value, the facet places it."""
+        return Choice(self.slug, self.slug, f'{self.facet} — {self.name}')
+
+
+@variable('the central tag vocabulary')
+def tags_() -> list[Tag]:
+    """Every tag in `topics/tags.json`, the authority a slug is checked against.
+
+    Named `tags_` so the decorator's trailing-underscore rule registers it as `{tags}`: the
+    `tags` in this module is the command that reports on the vocabulary, and the variable is
+    the vocabulary itself.
     """
-    return select('Which tags does it cover?',
-                  [Choice(tag['slug'], tag['slug'], f'{tag["facet"]} — {tag["name"]}')
-                   for tag in vocab])
+    return [Tag(tag['slug'], tag['facet'], tag['name']) for tag in _load_central()['tags']]
+
+
+def _path_is_creatable(bound: dict[str, Any]) -> bool:
+    """Whether picking tags is worth doing — i.e. whether the path could be created at all.
+
+    The adapter asks *before* the body runs, so without this a maintainer would search 654
+    tags, select five, and only then be told the path was malformed or already taken. The
+    body still checks both: this only decides whether to put the question.
+    """
+    path = str(bound.get('path') or '')
+    segments = path.removesuffix('.md').strip('/').split('/')
+    if len(segments) < 2 or not all(_TOPIC_SEG_RE.fullmatch(s) for s in segments):
+        return False
+    return not config.topics_dir.joinpath(*segments).with_suffix('.md').exists()
 
 
 @register(requires='maintainer')
-def create_topic(path: str, *tags: str) -> int:
+def create_topic(path: str,
+                 *tags: Annotated[str, Ask('Which tags does it cover?', choices='tags',
+                                           multi=True, when=_path_is_creatable)]) -> int:
     """Seed a curated cross-cutting topic page.
 
     A curated topic (e.g. `number-theory/primes`) gathers several tags under one idea,
@@ -788,7 +815,8 @@ def create_topic(path: str, *tags: str) -> int:
 
     Args:
         path: The `folder/leaf` location under `topics/` (lowercase words and hyphens).
-        *tags: The tag slugs the page covers. Omit them to choose interactively.
+        *tags: [asked] The tag slugs the page covers. Omit them and, in an interactive
+            shell, pick them by search-and-select over the vocabulary.
     """
     segments = path.removesuffix('.md').strip('/').split('/')
     if len(segments) < 2 or not all(_TOPIC_SEG_RE.fullmatch(s) for s in segments):
@@ -800,21 +828,17 @@ def create_topic(path: str, *tags: str) -> int:
         console.print(f'[error]error:[/error] {target.relative_to(config.topics_dir)} already exists')
         return ExitCodes.EXIT_ERROR
 
-    vocab = _load_central()['tags']
-    known = {t['slug'] for t in vocab}
-    if tags:
-        chosen = list(dict.fromkeys(tags))  # de-dupe, keep order
-        unknown = [t for t in chosen if t not in known]
-        if unknown:
-            console.print(f'[error]error:[/error] not in the vocabulary: {", ".join(unknown)}')
-            return ExitCodes.EXIT_ERROR
-    else:
-        if not dialogue.interactive():
-            raise Abort('no tags given and not an interactive shell — pass the slugs as '
-                        f'arguments, e.g. `create-topic {path} prime-number '
-                        'sieve-of-eratosthenes`', rc=ExitCodes.EXIT_USAGE)
-        console.print(f'[primary]New topic[/primary] [accent]{"/".join(segments)}[/accent]')
-        chosen = _select_tags_interactively(vocab)
+    if not tags:
+        # Interactively the adapter has already asked; reaching here empty means a command
+        # block, where a menu cannot be put and the slugs have to be written down.
+        raise Abort('no tags given and not an interactive shell — pass the slugs as '
+                    f'arguments, e.g. `create-topic {path} prime-number '
+                    'sieve-of-eratosthenes`', rc=ExitCodes.EXIT_USAGE)
+    chosen = list(dict.fromkeys(tags))               # de-dupe, keep order
+    known = {tag.slug for tag in tags_()}
+    if unknown := [tag for tag in chosen if tag not in known]:
+        console.print(f'[error]error:[/error] not in the vocabulary: {", ".join(unknown)}')
+        return ExitCodes.EXIT_ERROR
 
     title = segments[-1].replace('-', ' ').title()
     from solver.templates.engine import Templates, get_template

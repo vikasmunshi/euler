@@ -36,7 +36,8 @@ from rich.text import Text
 from solver.config import ExitCodes
 from solver.core.problems import Problem, problems
 from solver.shell.command import Context, command
-from solver.shell.dialogue import Abort, Ask, Choice, as_choice, choose, confirm, text
+from solver.shell.dialogue import (Abort, Ask, Choice, as_choice, choose, confirm, select,
+                                   text)
 from solver.shell.variables import variables
 
 
@@ -728,6 +729,19 @@ def _ask_missing(spec: _CommandSpec, ctx: Context, pos_args: list[Any],
         param = spec.param_by_name[name]
         question = ask.question or f'{name.replace("_", " ")}?'
         options = _ask_choices(spec, ctx, name, ask, bound)
+        if ask.multi:
+            if options is None:
+                raise ValueError(f'{spec.cmd_name}: {name} asks for several values but declares '
+                                 'no choices to pick them from')
+            answers = [_coerce(value, param.annotation) for value in select(question, options)]
+            # A `*args` parameter has no keyword to bind to — its answers *are* trailing
+            # positionals, and the ones already typed are why it was asked at all.
+            if param.kind is inspect.Parameter.VAR_POSITIONAL:
+                pos_args.extend(answers)
+            else:
+                kw_args[name] = answers
+            bound[name] = answers
+            continue
         if param.annotation is bool:
             answer: Any = confirm(question, default=param.default is True)
         else:

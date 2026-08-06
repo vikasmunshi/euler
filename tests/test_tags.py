@@ -17,6 +17,7 @@ from unittest.mock import patch
 from solver.config import config
 from solver.core import tags
 from solver.shell import dialogue
+from solver.shell.command import Context, registry
 from tests import silence
 
 silence()
@@ -187,41 +188,8 @@ class ArticleIndexTests(unittest.TestCase):
         self.assertNotEqual(tags._load_index(), tags._build_index(central))
 
 
-class SelectTagsInteractivelyTests(unittest.TestCase):
-    """The line-based search-and-select — the same input path a terminal and the web PTY share."""
-
-    _VOCAB = [
-        {'slug': 'prime-number', 'facet': 'domain', 'name': 'Prime number'},
-        {'slug': 'sieve-of-eratosthenes', 'facet': 'technique', 'name': 'Sieve of Eratosthenes'},
-        {'slug': 'trial-division', 'facet': 'technique', 'name': 'Trial division'},
-    ]
-
-    def _run(self, script: list[str]) -> list[str]:
-        """Drive the select loop through the two seams every dialogue shares."""
-        it = iter(script)
-        with (patch.object(tags.console, 'input', lambda *a, **k: next(it)),
-              patch.object(dialogue, 'interactive', lambda: True)):
-            return tags._select_tags_interactively(self._VOCAB)
-
-    def test_search_then_toggle_by_number_then_done(self) -> None:
-        # 'prime' matches prime-number, listed as 1 — the menus are 1-based throughout
-        self.assertEqual(self._run(['prime', '1', 'done']), ['prime-number'])
-
-    def test_a_second_toggle_removes(self) -> None:
-        # add then remove leaves nothing selected, so 'done' can't finish; add again and finish
-        self.assertEqual(self._run(['prime', '1', '1', 'prime', '1', 'done']), ['prime-number'])
-
-    def test_quit_aborts(self) -> None:
-        with self.assertRaises(dialogue.Abort):
-            self._run(['prime', '1', 'q'])
-
-    def test_a_number_without_a_search_is_ignored(self) -> None:
-        # '1' before any search has no results to index; then a real pick finishes
-        self.assertEqual(self._run(['1', 'trial', '1', 'done']), ['trial-division'])
-
-
-class CreateTopicTests(unittest.TestCase):
-    """The maintainer `create-topic` command: validation, and the seeded curated page."""
+class _TopicCase(unittest.TestCase):
+    """A scratch `topics/` tree and a two-tag vocabulary, for everything `create-topic` does."""
 
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory()
@@ -245,6 +213,90 @@ class CreateTopicTests(unittest.TestCase):
 
     def _page(self, rel: str) -> Path:
         return self.topics / f'{rel}.md'
+
+
+class TagSelectionTests(_TopicCase):
+    """Picking the tags for a new topic — driven through the adapter, which is where it lives.
+
+    `create-topic`'s `*tags` used to hand-roll `dialogue.select` in the body; it now declares
+    `Ask(multi=True, choices='tags')`, so what is worth testing is the whole path: the
+    variable supplies the vocabulary, the adapter runs the search-and-select, and the chosen
+    slugs arrive as the command's trailing positionals.
+
+    Through the **registry**, and against the real command: both the choice set and the
+    command itself are captured at registration, so patching either by module attribute
+    would leave the thing under test untouched.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.enterContext(patch.object(config, 'subject',
+                                       config.subject._replace(profile='maintainer')))
+
+    def _run(self, script: list[str], path: str = 'number-theory/primes') -> None:
+        """Drive the command through the two seams every dialogue shares."""
+        it = iter(script)
+        command = registry.resolve('create-topic')
+        assert command is not None
+        with (patch.object(tags.console, 'input', lambda *a, **k: next(it)),
+              patch.object(dialogue, 'interactive', lambda: True)):
+            command.invoke(Context(argv=[path]))
+
+    def _tags_of(self, rel: str = 'number-theory/primes') -> str:
+        """The `<!-- tags: [...] -->` line the page was seeded with, or '' if none was made."""
+        page = self._page(rel)
+        if not page.exists():
+            return ''
+        line = next(ln for ln in page.read_text().splitlines() if ln.startswith('<!-- tags:'))
+        return line.removeprefix('<!-- tags: [').removesuffix('] -->')
+
+    def test_search_then_toggle_by_number_then_done(self) -> None:
+        # 'prime' matches prime-number, listed as 1 — the menus are 1-based throughout
+        self._run(['prime', '1', 'done'])
+        self.assertEqual(self._tags_of(), 'prime-number')
+
+    def test_a_second_toggle_removes(self) -> None:
+        # add then remove leaves nothing selected, so 'done' can't finish; add again and finish
+        self._run(['prime', '1', '1', 'prime', '1', 'done'])
+        self.assertEqual(self._tags_of(), 'prime-number')
+
+    def test_quit_leaves_the_topic_uncreated(self) -> None:
+        self._run(['prime', '1', 'q'])
+        self.assertFalse(self._page('number-theory/primes').exists())
+
+    def test_a_number_without_a_search_is_ignored(self) -> None:
+        # '1' before any search has no results to index; then a real pick finishes
+        self._run(['1', 'trial', '1', 'done'])
+        self.assertEqual(self._tags_of(), 'trial-division')
+
+    def test_several_tags_arrive_in_selection_order(self) -> None:
+        self._run(['prime', '1', 'trial', '1', 'done'])
+        self.assertEqual(self._tags_of(), 'prime-number, trial-division')
+
+    def test_a_path_that_could_not_be_created_is_never_asked_about(self) -> None:
+        """Searching the vocabulary and *then* being told the path is malformed is backwards."""
+        with (patch.object(tags.console, 'input',
+                           lambda *a, **k: self.fail('must not ask about a bad path')),
+              patch.object(dialogue, 'interactive', lambda: True)):
+            command = registry.resolve('create-topic')
+            assert command is not None
+            command.invoke(Context(argv=['primes']))
+        self.assertFalse(self._page('primes').exists())
+
+    def test_an_existing_page_is_never_asked_about_either(self) -> None:
+        (self.topics / 'number-theory').mkdir(parents=True, exist_ok=True)
+        (self.topics / 'number-theory' / 'primes.md').write_text('<!-- tags: [prime-number] -->\n')
+        with (patch.object(tags.console, 'input',
+                           lambda *a, **k: self.fail('must not ask about a taken path')),
+              patch.object(dialogue, 'interactive', lambda: True)):
+            command = registry.resolve('create-topic')
+            assert command is not None
+            command.invoke(Context(argv=['number-theory/primes']))
+        self.assertEqual(self._tags_of(), 'prime-number', 'the existing page is untouched')
+
+
+class CreateTopicTests(_TopicCase):
+    """The maintainer `create-topic` command: validation, and the seeded curated page."""
 
     def test_creates_a_curated_page_with_all_its_tags(self) -> None:
         rc = tags.create_topic('number-theory/primes', 'prime-number', 'trial-division')
