@@ -1,18 +1,30 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """
-Crypto configuration: the single source of truth for every file location and git-filter wire constant.
+Crypto configuration: the wire format, and where the key material is.
 
-The crypto package takes **only the anchors** from `solver.config.paths` -- `repo_root()` and
-`secrets_dir()`, stdlib-only and side-effect-free, one implementation for the whole solver --
-and hangs everything else off them. It never touches the `Config` singleton's dynamic half:
-resolving an identity, or moving the process, on the git-filter path is exactly the kind of
-thing that ends with a filter confidently reading the wrong tree. `config` is a
-`CryptoConfig` TypedDict, so every
-`config['...']` access elsewhere in `solver.crypto` is type-checked against the field's declared type.
+Two kinds of thing used to be declared here as one. They are now sorted:
 
-This module is imported (transitively) on the git-filter path, where stdout carries file content, so
-it must emit **nothing on stdout** at import time; it depends only on the standard library.
+- **Where the files are** is *configuration*, and belongs in the one catalogue with
+  everything else: `solver/config/values.conf`, section `[crypto]`. This module reads
+  those four settings off `solver.config` rather than deriving the secrets directory a
+  second time — the derivation drifting is exactly how a filter once reported a private
+  key missing from a path no key had ever been at.
+- **The wire format** -- the magic bytes, the nonce length, the filter driver's name, the
+  `.gitattributes` line, the pkt-line ceiling, the verify plaintext -- is *protocol*. Two
+  clones must agree on it byte for byte, so it is not anybody's preference to set, and it
+  stays here as code. So does the vault's KDF iteration count, which the browser derives
+  the same key from, and the share file's location, which is *discovered* rather than
+  configured (see :func:`_resolve_share_file`).
+
+`config` remains a `CryptoConfig` TypedDict, so every `config['...']` access elsewhere in
+`solver.crypto` is still type-checked against the field's declared type.
+
+Reading `solver.config` costs nothing this path did not already pay: the settings are
+computed paths and constants, and none of the dynamic half — resolving an identity, moving
+the process — is touched. That matters because this module is imported (transitively) on
+the git-filter path, where stdout carries file content, so it must emit **nothing on
+stdout** at import time.
 """
 from __future__ import annotations
 
@@ -22,7 +34,8 @@ import os
 from pathlib import Path
 from typing import TypedDict
 
-from solver.config.paths import repo_root, secrets_dir
+from solver.config import config as app_config
+from solver.config.paths import secrets_dir
 
 
 # ==================================================================================================================== #
@@ -86,22 +99,24 @@ def _resolve_share_file(secrets_dir: Path) -> Path:
     return _SYSTEM_SHARE if _SYSTEM_SHARE.parent.is_dir() else secrets_dir / 'share.json'
 
 
-_ROOT: Path = repo_root()
+_ROOT: Path = app_config.root_dir
 #: Machine-local secrets dir: a sibling dot-directory named for the repo (e.g.
 #: repo `~/euler` -> `~/.euler`), *outside* the checkout so secrets never sit in
 #: the work tree. Holds the private key, the project env file, and the wrapped master
-#: key -- nothing about key material lives in the checkout any more.
+#: key -- nothing about key material lives in the checkout any more. Needed here only
+#: to place the share file, whose location is discovered rather than configured.
 _SECRETS_DIR: Path = secrets_dir(_ROOT)
 _MAGIC: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
 _NONCE_LEN: int = 12
 _FILTER_NAME: str = 'solver-crypt'  # git filter driver name (.gitattributes / git config)
 _VAULT_MAGIC: bytes = b'VLT\x01'  # 3-byte tag + 1-byte format version; marks a vault-encrypted secret
 
-#: All crypto configuration -- file locations and git-filter wire-format constants -- in one place.
+#: All crypto configuration: the locations, read from `values.conf` via `solver.config`, and
+#: the git-filter wire-format constants, which are protocol and declared above.
 config: CryptoConfig = {
     'root_dir': _ROOT,
-    # key material
-    'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
+    # key material -- `[crypto]` in solver/config/values.conf
+    'private_key_file': app_config.private_key_file,  # plain X25519 private key (PKCS8 PEM)
     # The master key, wrapped to THIS machine's public key. Two records and nothing else:
     # `verify`, and the holder's own entry. It lives in the machine-local secrets dir beside
     # the private key that opens it — NOT in the checkout.
@@ -118,9 +133,9 @@ config: CryptoConfig = {
     # One file per machine needs none of that. Distribution is the message spool (a
     # maintainer's `user-authorize` replies with the payload, `msg act` writes it), and a
     # rotation just re-wraps in place.
-    'enc_key_file': _SECRETS_DIR / 'enc-key.json',
+    'enc_key_file': app_config.enc_key_file,
     'enc_key_verify': 'verify',
-    'private_key_backups': 5,  # rolling backups kept of the private key file
+    'private_key_backups': app_config.private_key_backups,
     # One half of a 2-of-2 split of the master key (`key-split`), plus the `verify` record
     # saying which key it belongs to. **Operational state, never tracked.** A single share is
     # a uniformly random point — independent of the secret — so committing it would leak
@@ -131,8 +146,8 @@ config: CryptoConfig = {
     'share_file': _resolve_share_file(_SECRETS_DIR),
     # per-user vault: both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
-    'env_file': _SECRETS_DIR / 'env',  # same value as solver.config.env_file, kept import-free here
-    'vault_file': _SECRETS_DIR / 'vault',  # {salt, iterations, wrapped_vk}
+    'env_file': app_config.env_file,
+    'vault_file': app_config.vault_file,  # {salt, iterations, wrapped_vk}
     'vault_magic': _VAULT_MAGIC,
     'vault_kdf_iterations': 600_000,  # PBKDF2-HMAC-SHA256; WebCrypto-native so a browser can derive the same key
     'vault_key_env': 'EULER_VAULT_KEY_FILE',

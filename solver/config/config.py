@@ -163,6 +163,14 @@ class Config:
     env_file: Path = _DERIVED
     modules_file: Path = _DERIVED
     solutions_dir: Path = _DERIVED
+    #: The X25519 private key that opens everything else (plain PKCS8 PEM, `0600`).
+    private_key_file: Path = _DERIVED
+    #: This machine's two records: `verify`, and the master key wrapped to this holder.
+    enc_key_file: Path = _DERIVED
+    #: `{salt, iterations, wrapped_vk}` — the vault key under the password-derived key.
+    vault_file: Path = _DERIVED
+    #: Rolling backups kept of the private key file.
+    private_key_backups: int = 5
     state_dir: Path = _DERIVED
     static_file_problems: Path = _DERIVED
     static_file_progress: Path = _DERIVED
@@ -189,6 +197,9 @@ class Config:
             ('docs_dir', self.root_dir / 'docs'),
             ('env_file', secrets / 'env'),
             ('modules_file', self.package_dir / 'modules.csv'),
+            ('private_key_file', secrets / 'id'),
+            ('enc_key_file', secrets / 'enc-key.json'),
+            ('vault_file', secrets / 'vault'),
             ('solutions_dir', self.root_dir / 'solutions'),
             ('state_dir', self.root_dir / '.state'),
             ('static_file_problems', self.root_dir / 'solutions' / 'problems.json'),
