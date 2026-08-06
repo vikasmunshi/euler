@@ -3,9 +3,10 @@
 """Content-service runtime configuration, read from the environment.
 
 Like :class:`~solver.web.auth.config.AuthConfig`, every value has an env override
-so the service runs unprivileged in a scratch dir for local testing, and it never
-touches :mod:`solver.config` (which resolves the shell's identity + repo paths the
-service uid cannot use). The deployed unit sets these via `EnvironmentFile=` and
+so the service runs unprivileged in a scratch dir for local testing. It takes
+`repo_root()` from :mod:`solver.config.paths` — an anchor, computed and side-effect-free
+— and nothing else: never the shell's identity, and never a process the service uid did
+not ask to have moved. The deployed unit sets these via `EnvironmentFile=` and
 one `EULER_PROFILE=<profile>` per template-unit instance.
 """
 from __future__ import annotations
@@ -14,9 +15,9 @@ __all__ = ['SiteConfig']
 
 import os
 from pathlib import Path
-
-from solver.utils.repo_root import repo_root as find_repo_root
 from typing import NamedTuple
+
+from solver.config.paths import repo_root as find_repo_root
 
 #: Repo root as seen from this file (`solver/web/site/config.py` → up 3): the
 

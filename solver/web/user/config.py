@@ -5,7 +5,8 @@
 Union of what the content tier needs (:class:`~solver.web.site.config.SiteConfig`)
 and the web shell needs (:class:`~solver.web.ws.config.WsConfig`), plus the one field
 that defines the instance: :attr:`slug` (`EULER_USER_SLUG=%i`) — *whose* uid this
-process is. Like its predecessors it never imports :mod:`solver.config`; every value
+process is. Like its predecessors it takes only the `repo_root()` anchor from
+:mod:`solver.config.paths` and never the shell's identity; every value
 has an env override so the whole service runs unprivileged in a scratch dir for tests.
 The deployed `euler-user@<slug>` unit sets `EULER_USER_SLUG` and points
 `EULER_REPO_ROOT` at that user's `~/euler` clone.
@@ -19,7 +20,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-from solver.utils.repo_root import repo_root as find_repo_root
+from solver.config.paths import repo_root as find_repo_root
 from solver.web.auth import AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET
 from solver.web.site.config import SiteConfig
 

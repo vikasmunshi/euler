@@ -3,9 +3,12 @@
 """
 Crypto configuration: the single source of truth for every file location and git-filter wire constant.
 
-The crypto package does **not** import `solver.config` -- the repo root comes from
-`solver.utils.repo_root` (stdlib-only, one implementation for the whole solver) and everything
-else hangs off it. `config` is a `CryptoConfig` TypedDict, so every
+The crypto package takes **only the anchors** from `solver.config.paths` -- `repo_root()` and
+`secrets_dir()`, stdlib-only and side-effect-free, one implementation for the whole solver --
+and hangs everything else off them. It never touches the `Config` singleton's dynamic half:
+resolving an identity, or moving the process, on the git-filter path is exactly the kind of
+thing that ends with a filter confidently reading the wrong tree. `config` is a
+`CryptoConfig` TypedDict, so every
 `config['...']` access elsewhere in `solver.crypto` is type-checked against the field's declared type.
 
 This module is imported (transitively) on the git-filter path, where stdout carries file content, so
@@ -19,7 +22,7 @@ import os
 from pathlib import Path
 from typing import TypedDict
 
-from solver.utils.repo_root import repo_root
+from solver.config.paths import repo_root, secrets_dir
 
 
 # ==================================================================================================================== #
@@ -86,10 +89,9 @@ def _resolve_share_file(secrets_dir: Path) -> Path:
 _ROOT: Path = repo_root()
 #: Machine-local secrets dir: a sibling dot-directory named for the repo (e.g.
 #: repo `~/euler` -> `~/.euler`), *outside* the checkout so secrets never sit in
-#: the work tree. Holds the plain private key and the project env file; only
-#: Holds the private key, the project env file, and the wrapped master key -- nothing about
-#: key material lives in the checkout any more.
-_SECRETS_DIR: Path = _ROOT.parent / f'.{_ROOT.name}'
+#: the work tree. Holds the private key, the project env file, and the wrapped master
+#: key -- nothing about key material lives in the checkout any more.
+_SECRETS_DIR: Path = secrets_dir(_ROOT)
 _MAGIC: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
 _NONCE_LEN: int = 12
 _FILTER_NAME: str = 'solver-crypt'  # git filter driver name (.gitattributes / git config)

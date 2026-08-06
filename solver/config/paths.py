@@ -1,8 +1,12 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Where the working tree is — the one answer, for every part of the solver that needs it.
+"""The two anchors every other path hangs off — and the one deliberate side effect.
 
-There were four derivations of this: :mod:`solver.config` (env, then a `git rev-parse`
+`package_root` is where the code is, `repo_root()` is where the working tree is, and
+:func:`enter_repo` is the process-level move (chdir + `PATH`) that the *shell* wants and
+nothing else does.
+
+There were four derivations of `repo_root`: :mod:`solver.config` (env, then a `git rev-parse`
 anchored at the package dir, then hard failure), :mod:`solver.crypto.config` (the same, plus
 a fallback), and the two web configs (a bare `parents[3]`). They drifted, and the drift
 cost real access: with the git filter correctly running under `-P`, `__file__` moved out
@@ -28,22 +32,31 @@ So the order is fixed here, once:
 
 Otherwise it raises, naming the env var that settles it.
 
-**Pure**: it captures git's output and changes nothing — no chdir, no PATH edits, no caching.
-:mod:`solver.config` layers its own chdir on top; every other caller wants only the path.
+**`repo_root()` is pure**: it captures git's output and changes nothing — no chdir, no PATH
+edits, no caching. The chdir every earlier version of this did on the caller's behalf is
+:func:`enter_repo`, which the shell entry point calls **explicitly**; importing configuration
+moves no one's process.
 
-Stdlib-only and silent on stdout at import, because :mod:`solver.crypto` is on the git-filter
-path (where stdout carries file content) and must be able to import this.
+Stdlib-only and silent on stdout at import: this module sits under :mod:`solver.config`,
+which :mod:`solver.crypto` reaches from the git-filter path, where stdout carries file
+content.
 """
 from __future__ import annotations
 
-__all__ = ['REPO_ROOT_ENV', 'repo_root']
+__all__ = ['REPO_ROOT_ENV', 'enter_repo', 'package_root', 'repo_root', 'secrets_dir']
 
 import os
+import sys
 from pathlib import Path
 from subprocess import run
 
 #: Env var naming the working tree explicitly — the deployed web tier sets it per service.
 REPO_ROOT_ENV: str = 'EULER_REPO_ROOT'
+
+#: Where the installed code is: the `solver` package directory (this file's parent's parent).
+#: Anchors what ships *inside* the wheel — `modules.csv`, `templates/`, `config/values.conf` —
+#: as against `repo_root()`, which anchors the working tree those are read alongside.
+package_root: Path = Path(__file__).resolve().parents[1]
 
 
 def _probe(cwd: Path) -> Path | None:
@@ -84,3 +97,36 @@ def repo_root() -> Path:
         return fallback
     raise ValueError(f'failed to locate the repository root (set {REPO_ROOT_ENV}, '
                      'or run from inside the checkout)')
+
+
+def secrets_dir(root: Path) -> Path:
+    """The machine-local secrets directory for the checkout at *root*.
+
+    A sibling dot-directory named for the repo (repo `~/euler` → `~/.euler`), **outside**
+    the checkout, so key material and the project env file never sit in the work tree.
+    """
+    return root.parent / f'.{root.name}'
+
+
+def enter_repo(root: Path) -> Path:
+    """chdir into *root* and normalise `PATH`, then return it.
+
+    The **shell's** move, made explicitly at startup by :func:`solver.main.main` — not a
+    side effect of importing configuration. It used to happen at import of
+    :mod:`solver.config`, which meant a git filter, a web service or a test that wanted one
+    path constant silently had its process relocated.
+
+    PATH gains the interpreter's own bin dir (the venv) and `~/.local/bin` — where
+    the per-user Claude Code install drops the `claude` binary: the web
+    shell's service unit starts from systemd's minimal PATH, which never includes
+    it, and without it `claude-solve` / the account page's status probe can't
+    find the CLI. The WSL `/mnt` entries are dropped, and duplicates collapsed.
+    """
+    os.chdir(root)
+    env_path: list[str] = ([Path(sys.executable).parent.as_posix(),
+                            (Path.home() / '.local' / 'bin').as_posix()]
+                           + os.getenv('PATH', '').split(':'))
+    env_path = [p for p in env_path if not p.startswith('/mnt')]
+    env_path = list(dict.fromkeys(env_path))
+    os.environ['PATH'] = ':'.join(env_path)
+    return root

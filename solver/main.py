@@ -7,7 +7,7 @@ __all__ = ['main']
 
 import argparse
 
-from solver.config import config
+from solver.config import config, enter_repo
 from solver.crypto.keys import unlock_session
 from solver.shell import SolverShell
 from solver.utils.loader import load_commands
@@ -26,6 +26,12 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
     Returns:
         The exit status of the command block, or 0 on clean interactive exit.
     """
+    # The shell runs *from* the tree it found, with a PATH that can see the venv — and it
+    # says so, here, rather than inheriting it as a side effect of importing configuration.
+    # Everything downstream assumes it: `config.scripts` are repo-relative (`./scripts/…`),
+    # `!` runs bash in the working tree, and `claude-solve` launches Claude at the root.
+    enter_repo(config.root_dir)
+
     parser = argparse.ArgumentParser(prog='solver', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('cmdline', nargs='*',
                         help='run a command block, then exit with its status; omit for an interactive shell')

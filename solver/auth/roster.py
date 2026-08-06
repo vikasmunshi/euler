@@ -76,7 +76,7 @@ from tempfile import mkstemp
 from typing import Any, Literal, TypedDict, cast
 
 from solver.auth.identity import system_slug
-from solver.utils.repo_root import repo_root
+from solver.config.paths import repo_root
 
 #: Environment override for the roster's location (tests, and any machine that keeps it
 #: elsewhere).

@@ -1,22 +1,39 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Singleton Config: all paths, constants, command modules, and managed settings."""
+"""The static configuration: all paths, constants, command modules and settings.
+
+**Import this module and nothing happens.** It computes paths and holds constants; it does
+not chdir, does not rewrite `PATH`, does not resolve an identity and does not import `rich`.
+Everything that *does* something is either explicit (:func:`solver.config.paths.enter_repo`,
+called by the shell entry point) or lazy (:attr:`Config.subject`, :attr:`Config.theme` —
+`cached_property`, resolved on first use, from :mod:`solver.config.identity` and
+:mod:`solver.config.theme`).
+
+That purity is the point of the split. The git filter, the five web service tiers and the
+test suite all want a path constant or two, and every one of them used to get a relocated
+process and a resolved security subject along with it.
+
+Dependencies are therefore stdlib, :mod:`solver.version`, and this package's own helpers —
+nothing else at module scope.
+"""
 from __future__ import annotations
 
-__all__ = ['ExitCodes', 'config']
+__all__ = ['ExitCodes', 'Config']
 
 import enum
 import json
 import os
-import sys
+from functools import cached_property
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from prompt_toolkit.styles import Style
-from rich.theme import Theme
+from solver.config.paths import package_root, repo_root
 
-from solver.auth import INSTANCE_EMAIL_ENV, Subject, TICKET_ENV, resolve_subject
-from solver.utils.repo_root import repo_root
+if TYPE_CHECKING:                       # imported lazily by the cached_property that needs it
+    from prompt_toolkit.styles import Style
+    from rich.theme import Theme
+
+    from solver.auth import Subject
 
 
 class ExitCodes(enum.IntEnum):
@@ -26,36 +43,6 @@ class ExitCodes(enum.IntEnum):
     EXIT_USAGE = 2  #: parse / usage error
     EXIT_ABORT = 3  #: the user declined or quit an interactive dialogue
     EXIT_NOTFOUND = 127  #: unknown command
-
-
-def _enter_root(root: Path) -> Path:
-    """chdir into *root* and normalise `PATH`, then return it.
-
-    PATH gains the interpreter's own bin dir (the venv) and `~/.local/bin` — where
-    the per-user Claude Code install drops the `claude` binary: the web
-    shell's service unit starts from systemd's minimal PATH, which never includes
-    it, and without it `claude-solve` / the account page's status probe can't
-    find the CLI. The WSL `/mnt` entries are dropped, and duplicates collapsed.
-    """
-    os.chdir(root)
-    env_path: list[str] = ([Path(sys.executable).parent.as_posix(),
-                            (Path.home() / '.local' / 'bin').as_posix()]
-                           + os.getenv('PATH', '').split(':'))
-    env_path = [p for p in env_path if not p.startswith('/mnt')]
-    env_path = list(dict.fromkeys(env_path))
-    os.environ['PATH'] = ':'.join(env_path)
-    return root
-
-
-def _root_dir() -> Path:
-    """Return the repo working-tree root, cd into it, and clean PATH.
-
-    Discovery itself is :func:`solver.utils.repo_root.repo_root` — one implementation for
-    the shell, the crypto package and the web tier, because four copies of it drifted and
-    the drift cost a collaborator their decryption. What is *this* module's own is the side
-    effect: the shell runs from the tree it found, with a PATH that can see the venv.
-    """
-    return _enter_root(repo_root())
 
 
 class AttributeDict:
@@ -74,15 +61,33 @@ class AttributeDict:
             raise AttributeError(name) from None
 
     def __setattr__(self, name: str, value: Any) -> None:
-        """Write a value through to `_data` (so `obj.key = value` updates the record)."""
+        """Write a value through to `_data` (so `obj.key = value` updates the record).
+
+        A name declared on the *class* — a `cached_property` such as `subject`, or a
+        `ClassVar` — is written as an ordinary instance attribute instead. That is where
+        `cached_property` keeps its own cache, so assignment overrides a lazy setting
+        rather than being silently swallowed by `_data` and never read again.
+        """
         if name == '_data':  # the backing store itself is a genuine instance attribute
+            super().__setattr__(name, value)
+        elif hasattr(type(self), name):
             super().__setattr__(name, value)
         else:
             self._data[name] = value
 
     def __getitem__(self, key: str) -> Any:
-        """Read a value by name (so `obj['key']` works)."""
-        return self._data[key]
+        """Read a value by name (so `obj['key']` works).
+
+        Item access and attribute access answer the same question, so they resolve the
+        same way: `_data` first, then the class — otherwise `config['subject']` would
+        `KeyError` on exactly the settings that are resolved rather than stored.
+        """
+        if key in self._data:
+            return self._data[key]
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            raise KeyError(key) from None
 
 
 class Scripts(AttributeDict):
@@ -137,7 +142,8 @@ class Config(AttributeDict):
 
     # Annotation-only declarations of the settings served from `_data` via `__getattr__` (they assign no
     # value, so the lookup falls through to `__getattr__` at runtime). They give static checkers the
-    # precise per-field type of each `config.<name>` read.
+    # precise per-field type of each `config.<name>` read. The dynamic settings below are
+    # `cached_property` instead — declared as code, because they are resolved rather than stored.
     root_dir: Path
     package_dir: Path
     managed_config_file: Path
@@ -158,20 +164,12 @@ class Config(AttributeDict):
     timeout_multiple: float
     timeout_single: float
     ecb_usd_rate: float
-    subject: Subject
-    user: str
-    user_slug: str
-    user_profile: str
     backup_dir: Path
     cache_dir: Path
     docs_dir: Path
     env_file: Path
     state_dir: Path
-    user_state_dir: Path
-    history_file: Path
-    last_problem_file: Path
     modules_file: Path
-    session_file: Path
     solutions_dir: Path
     static_file_problems: Path
     static_file_progress: Path
@@ -179,35 +177,13 @@ class Config(AttributeDict):
     topics_dir: Path
     central_tags_file: Path
     topics_index_file: Path
-    theme: Theme
-    style: Style
 
     def __init__(self) -> None:
-        package_dir = Path(__file__).parent.resolve()
-        root_dir: Path = _root_dir()
-        # Ambient identity + profile: a one-time shell ticket (web PTY) or the
-        # checkout-owner uid (local terminal); anything else aborts. Keys per-user
-        # shell state (history, last problem) and command authorization.
+        package_dir: Path = package_root
+        root_dir: Path = repo_root()
         # Project dotenv: API key, SMTP + DNS credentials. Machine-local, in the
         # sibling secrets dir outside the checkout (repo `~/euler` -> `~/.euler/env`).
         env_file: Path = root_dir.parent / f'.{root_dir.name}' / 'env'
-        # Resolve the security subject once: identity + channel + profile +
-        # inheritance-expanded permissions, from authorizations.json (deployed SoR →
-        # built-in default). Drives per-user state and command/route authorization.
-        subject: Subject = resolve_subject(root_dir)
-        # One-hop ticket + identity handoff to descendant solver processes.
-        # The web shell's ticket is single-use and resolve_subject just consumed it;
-        # scrub it so a child solver (claude-solve's headless Claude, a nested
-        # `solver "…"`) does not inherit a dead ticket and abort at its own startup.
-        # Hand the resolved e-mail down in its place: under this per-user uid the
-        # child re-resolves via the instance-identity plane, which trusts the e-mail
-        # only because system_slug(email) matches the uid's EULER_USER_SLUG pin — an
-        # env value a child cannot forge past. Terminal subjects carry neither var.
-        if subject.channel == 'web':
-            os.environ.pop(TICKET_ENV, None)
-            os.environ[INSTANCE_EMAIL_ENV] = subject.user
-        user_state_dir: Path = root_dir / '.state' / subject.slug
-        user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
             'root_dir': root_dir,
             'package_dir': package_dir,
@@ -232,21 +208,12 @@ class Config(AttributeDict):
             'timeout_single': 90.0,  # timeout in seconds for single run
             'ecb_usd_rate': 1.00,  # euros per US dollar, used by `costs`; updated by update-models cmd
 
-            'subject': subject,
-            'user': subject.user,
-            'user_slug': subject.slug,
-            'user_profile': subject.profile,
             'backup_dir': root_dir / '.backup',
             'cache_dir': root_dir / '.cache',
             'docs_dir': root_dir / 'docs',
             'env_file': env_file,
             'state_dir': root_dir / '.state',
-            'user_state_dir': user_state_dir,
-            # Per-user shell state, keyed by the resolved identity's slug.
-            'history_file': user_state_dir / 'history',
-            'last_problem_file': user_state_dir / 'last_problem',
             'modules_file': package_dir / 'modules.csv',
-            'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
             'static_file_problems': root_dir / 'solutions/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
@@ -254,45 +221,57 @@ class Config(AttributeDict):
             'topics_dir': root_dir / 'topics',
             'central_tags_file': root_dir / 'topics' / 'tags.json',
             'topics_index_file': root_dir / 'topics' / 'articles.json',
-
-            'theme': Theme({
-                'accent': 'bold #f97316',  # warm orange accent (Junie highlight)
-                'accent.dim': '#c2410c',
-                'primary': '#e5e7eb',  # near-white body text
-                'muted': '#9ca3af',  # secondary / hints
-                'success': 'bold #22c55e',
-                'warning': 'bold #f59e0b',
-                'error': 'bold #ef4444',
-                'panel.border': '#3f3f46',
-                'prompt.path': '#60a5fa',
-                'prompt.symbol': 'bold #f97316',
-                'cmd.name': 'bold #fbbf24',
-                'cmd.help': '#9ca3af',
-                # Markdown rendering (rich.markdown.Markdown) — keyed only by rich's Markdown
-                # renderer; tuned to the dark theme so inline code etc. stay readable (no bg block).
-                'markdown.code': 'bold #fbbf24',  # inline `code` — amber, no background
-                'markdown.code_block': '#fbbf24',
-                'markdown.item.bullet': 'bold #f97316',
-                'markdown.h1': 'bold #f97316',
-                'markdown.h2': 'bold #f97316',
-                'markdown.h3': 'bold #fbbf24',
-                'markdown.h4': 'bold #fbbf24',
-                'markdown.link': '#60a5fa',
-                'markdown.link_url': '#60a5fa',
-            }),
-            #: prompt-toolkit style for the input line.
-            'style': Style.from_dict({
-                'prompt.bar': '#f97316 bold',
-                'prompt.path': '#60a5fa',
-                'prompt.symbol': '#f97316 bold',
-                'prompt.user': '#e5e7eb',
-                '': '#60a5fa',  # typed input text
-                'auto-suggestion': '#9ca3af',  # muted light grey
-                'bottom-toolbar': 'bg:#27272a #9ca3af',
-            }),
         })
 
         self.load_managed_config()
+
+    # -- dynamic settings: resolved on first use, never at import ------------------------
+
+    @cached_property
+    def subject(self) -> Subject:
+        """The resolved security subject — identity, channel, profile, permissions.
+
+        Lazy because resolving it reaches :mod:`solver.auth` and consumes the web shell's
+        one-shot ticket; `solver.main.main` forces it at startup, which is the moment that
+        handoff has to happen. See :mod:`solver.config.identity`.
+        """
+        from solver.config.identity import resolve_identity
+        return resolve_identity(self.root_dir)
+
+    @cached_property
+    def user_state_dir(self) -> Path:
+        """This subject's own state directory (`.state/<slug>`), created on first use."""
+        from solver.config.identity import user_state_dir
+        return user_state_dir(self.state_dir, self.subject)
+
+    @cached_property
+    def history_file(self) -> Path:
+        """Per-user shell history, keyed by the resolved identity's slug."""
+        return self.user_state_dir / 'history'
+
+    @cached_property
+    def last_problem_file(self) -> Path:
+        """The per-user record of the last active problem."""
+        return self.user_state_dir / 'last_problem'
+
+    @cached_property
+    def session_file(self) -> Path:
+        """The per-user session capture log (`solver --save`)."""
+        return self.user_state_dir / 'session'
+
+    @cached_property
+    def theme(self) -> Theme:
+        """The `rich` console theme (imports `rich` on first use only)."""
+        from solver.config.theme import console_theme
+        return console_theme()
+
+    @cached_property
+    def style(self) -> Style:
+        """The `prompt_toolkit` style for the input line."""
+        from solver.config.theme import console_style
+        return console_style()
+
+    # -- managed settings ---------------------------------------------------------------
 
     def __repr__(self) -> str:
         """Return the managed settings as a pretty-printed JSON object."""
@@ -322,6 +301,3 @@ class Config(AttributeDict):
                 self._data[param] = type(self._data[param])(persisted[param])
             except (TypeError, ValueError):
                 continue
-
-
-config: Config = Config()

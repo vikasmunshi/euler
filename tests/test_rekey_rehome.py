@@ -247,7 +247,7 @@ class RotationRehomeTests(unittest.TestCase):
         app_config = import_module('solver.config').config
         for channel, expected in (('web', 'header'), ('terminal', 'msg act')):
             subject = app_config.subject._replace(channel=channel)
-            with patch.dict(app_config._data, {'subject': subject}):
+            with patch.object(app_config, 'subject', subject):
                 self.assertIn(expected, git.key_waiting_hint(), f'{channel}: names its own way')
 
     def test_a_sync_refuses_rather_than_merging_what_it_cannot_read(self) -> None:
