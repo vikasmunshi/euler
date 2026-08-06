@@ -1,8 +1,123 @@
 <!-- tags: [prime-number] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Prime number
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prime_number>._
+A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ divisible
+only by $1$ and itself. What makes this tag cohere is not the definition but the *role* primality
+plays in the problems below: in almost none of them is a prime the object of study. Primality is a
+**predicate** — a condition bolted onto some other structure (a digit pattern, a quadratic, a run of
+consecutive sums, a spiral diagonal, a Fibonacci index) — and the problem is a search over that
+structure, filtered by the predicate. The mathematics of *what primes are* is covered on
+[Prime Numbers](/topics/number-theory/prime-numbers), and the decomposition view — a number read
+through its factors — on [prime factorisation](/topics/domain/prime-factorization). This page is
+about the other half: what happens to a program when "and it must be prime" is added to a search.
+
+## Why the predicate is the hard part
+
+There is no formula for the primes. You cannot enumerate them the way you enumerate squares or
+triangular numbers; you can only produce candidates and ask each one a question, and by the
+[prime number theorem](https://en.wikipedia.org/wiki/Prime_number_theorem) roughly one candidate in
+$\ln N$ survives. Two consequences follow, and between them they set the shape of every solution
+under this tag.
+
+The first is that **the predicate is queried far more often than the answer is used**. Problem 35
+(circular primes) tests every cyclic rotation of every candidate; problem 60 (prime pair sets) tests
+both concatenations of every pair of primes it considers; problem 27 (quadratic primes) walks a run
+of values per coefficient pair, each needing its own test. So the question is never "how do I test
+one number" but "how do I amortise a million tests", and the answer is almost always to precompute
+a table with a [sieve](/topics/technique/sieve-of-eratosthenes) and turn the test into an array
+lookup. The rule of thumb is blunt: if the candidates all live below a bound you can name, sieve to
+that bound and index; if they are few, unbounded, or enormous, test them one at a time with
+[trial division](/topics/technique/trial-division) or
+[Miller–Rabin](/topics/technique/miller-rabin-primality-test). Problem 37 (truncatable primes) shows
+the middle path — an *incremental* sieve as a generator, because the eleven answers are known to
+exist but their ceiling is not, so no bound can be chosen in advance.
+
+The second consequence is subtler and matters more: **the predicate has no algebra**. You cannot
+solve for a prime, invert it, or propagate it through an equation. Everything you can prove about a
+candidate before testing it, you must prove some *other* way — which is why the decisive step in
+these problems is almost never the primality test.
+
+## The win is upstream of the test
+
+Look at what actually collapses the search in the problems below, and it is a divisibility argument
+that throws candidates away before any test runs:
+
+| Problem | The pruning observation | Effect |
+| --- | --- | --- |
+| 41 (pandigital prime) | an $n$-digit pandigital has digit sum $n(n+1)/2$, divisible by $3$ for all $n$ but $4$ and $7$ | nine lengths → two |
+| 35 (circular primes) | any rotation ending in $0,2,4,5,6,8$ is composite, so the digits must come from $\{1,3,7,9\}$ | almost the entire range |
+| 27 (quadratic primes) | $n^2 + an + b$ at $n = 0$ is $b$, so $b$ itself must be prime | $2001$ values of $b$ → $168$ magnitudes |
+| 51 (prime digit replacements) | replacing digit $d$ admits only $10 - d$ family members, so an $8$-family needs $d \le 2$ | ten digit values → three |
+| 146 (investigating a prime pattern) | $n$ must be $\equiv 0 \pmod{10}$, and further residues knock out most of what is left | a $1.5 \times 10^8$ scan made feasible |
+
+The shape is always the same. Primality is expensive and opaque, but *compositeness is cheap and
+witnessed* — a single small modulus that divides a whole family of candidates disqualifies all of
+them at once, with no test performed. So the reflex is: before writing the search, ask which
+congruence classes can contain an answer at all. Problem 41's argument is the purest example,
+because it is the whole solution; the search that remains is $5040$ permutations checked by trial
+division, and would have been fast even done badly.
+
+The same reflex has a constructive form: instead of filtering a stream of candidates, *generate only
+the ones that can qualify*. Problem 111 (primes with runs) does this — rather than sieving the
+$9$ billion ten-digit numbers and bucketing them by repeated digit, it fixes the target shape,
+chooses which few positions deviate, and enumerates just those numbers. Problem 35's filter and
+problem 111's construction are the same idea seen from either end, and the constructive one wins
+whenever the surviving fraction is small enough to make enumeration of the survivors cheaper than
+rejection of the rest.
+
+## When the candidates are too big, or too many
+
+Past a certain scale a sieve over the candidates is not available, and each problem answers that in
+one of three ways.
+
+**Sieve something else.** Problem 216 asks how many values of $2n^2 - 1$ are prime for $n$ up to
+$5 \times 10^7$ — values reaching $5 \times 10^{15}$, hopeless to test individually. The move is to
+invert the question: rather than asking "is $t(n)$ prime?", ask which primes $p$ can divide
+$t(n)$ and at which indices. Solving $2n^2 \equiv 1 \pmod p$ is a
+[quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) condition that yields the
+arithmetic progressions of $n$ to cross out, so the sieve runs over the *index space* rather than
+the value space. This polynomial sieve is the standard escape whenever a problem imposes primality
+on a sequence rather than on an interval.
+
+**Sieve a window.** The primes near $10^{14}$ are spaced about $\ln(10^{14}) \approx 32$ apart, so
+the $100{,}000$ consecutive primes problem 304 needs occupy a window of only a few million integers.
+A [segmented sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve) over that
+window — crossing out multiples of the primes below $10^7$ — beats per-candidate testing by a wide
+margin, and the prime number theorem is what tells you in advance how wide to make the window.
+
+**Do not enumerate at all.** When the question is a *count* rather than a *list*, the primes can
+often be consulted wholesale. Problem 187 counts semiprimes below $10^8$ not by factoring anything
+but by fixing the smaller factor $p$ and adding $\pi\!\left(\lfloor (N-1)/p \rfloor\right) - \pi(p-1)$
+— differences of the
+[prime-counting function](https://en.wikipedia.org/wiki/Prime-counting_function) over an array the
+sieve already produced. Problem 845 goes further and never tests a number for primality at all: an
+integer qualifies according to its *digit sum*, so the search over $10^{16}$ integers becomes a count
+over the $\sim 150$ possible digit sums, of which the prime ones are found once by a trivial sieve.
+Problem 934 reorders a sum over $10^{17}$ integers into a sum over the primes consulted. In each
+case the primes shrink from the thing being searched to a small lookup table on the side.
+
+## How to reason about it
+
+When primality appears as a condition in a problem, work through it in this order:
+
+1. **Find the congruences first.** What must be true modulo $2$, $3$, $5$, $10$ for a candidate to
+   have any chance? This is where the orders of magnitude are won, and it costs nothing but algebra —
+   [reduce before coding](/topics/takeaway/reduce-before-coding).
+2. **Ask whether to filter or to construct.** If the survivors are a thin, describable set, build
+   them directly rather than sieving a haystack and rejecting it.
+3. **Count the queries, then pick the test.** Many tests below a known bound → sieve once into a
+   lookup table, sized to the input and built inside `solve()` so the benchmark counts it honestly
+   ([size the work to the input](/topics/takeaway/size-work-to-the-input)). Bound not known in
+   advance → an incremental sieve. A handful of large candidates → Miller–Rabin.
+4. **If the values are too large to sieve, sieve their indices.** Primality on a polynomial or a
+   sequence is a sieve over $n$, driven by the congruence conditions that let $p \mid f(n)$.
+5. **If the answer is a count, look for a formula over the primes** instead of a scan over the
+   integers — $\pi(x)$ differences, a digit-sum reformulation, a telescoping sum.
+
+The recurring mistake is to reach for a faster primality test when the real problem is that too many
+candidates are being tested at all. Almost every solution below that is fast is fast because of step
+one, not step three.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
