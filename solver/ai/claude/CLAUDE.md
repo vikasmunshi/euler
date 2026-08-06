@@ -101,6 +101,8 @@ User- and developer-facing docs live under `docs/`:
 - `docs/developer-guide.md` — extending the framework: the `@register` contract, command modules, the loader.
 - `docs/commands-index.md` — every command's aliases, flags, and exact usage.
 - `docs/syntax.md` — the authoritative command-language reference.
+- `docs/config-guide.md` — configuration: `values.conf` vs `env.conf`, precedence, and what is
+  deliberately not a setting.
 
 The command catalogue (in `user-guide.md`) and `commands-index.md` are **generated** from the live
 registry by the `update-docs` command (`solver/utils/update_doc.py`). After changing any command's

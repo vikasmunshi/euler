@@ -51,6 +51,7 @@ authoritative command-language spec:
 | [Developer Guide](docs/developer-guide.md) | extending the framework | the `@register` contract, command modules, the module loader                     |
 | [Command Index](docs/commands-index.md)    | reference               | every command's aliases, flags, and exact usage                                  |
 | [Language reference](docs/syntax.md)       | the command language    | surface syntax, canonical form, semantics                                        |
+| [Config Guide](docs/config-guide.md)       | configuration           | the two conf files, precedence, and what is deliberately not a setting           |
 
 The cryptography has a guide per scheme — the mathematics, and how this project uses it:
 

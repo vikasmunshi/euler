@@ -347,7 +347,8 @@ you have solved a problem, or translate your Python into C for comparison.
   to the session log.
 - **Settings** are a variable, not a command: `{config}` prints every one of them
   (`{config.timeout_single}` for a single setting), and changing one means editing
-  `solver/config/values.conf`, which states them all with a comment on each.
+  `solver/config/values.conf`, which states them all with a comment on each. The
+  [Config Guide](config-guide.md) covers where each setting lives and why.
 - **`! <cmd>`** runs a bash command in the current problem's solution directory
   (`! sh` / `! py` drop into a shell / Python interpreter).
 

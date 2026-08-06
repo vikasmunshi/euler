@@ -151,7 +151,8 @@ existing data unreadable.
 Where the *files* are is the configurable part, and it is not kept here: the key
 locations are settings like any other, declared in `solver/config/settings.py` and
 editable in the `[crypto]` section of
-[`solver/config/values.conf`](../solver/config/values.conf).
+[`solver/config/values.conf`](../solver/config/values.conf) — see the
+[Config Guide](config-guide.md) §5.1 for why the split falls where it does.
 
 ---
 
