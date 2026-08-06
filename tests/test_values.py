@@ -22,7 +22,7 @@ from dataclasses import fields
 from pathlib import Path
 
 from solver.config import build_config, settable_fields
-from solver.config.config import Scripts, values_file_for
+from solver.config.settings import Scripts, values_file_for
 from solver.config.paths import repo_root
 from solver.config.values import ValuesError, read_sections, set_value
 

@@ -25,8 +25,8 @@ side and run from the deployed `/opt/euler` venv.
 """
 from __future__ import annotations
 
-__all__ = ['ADMIN_SOCKET_ENV', 'DEFAULT_ADMIN_SOCKET', 'DEFAULT_MSG_SOCKET', 'KEY_ISSUE_SUBJECT',
-           'KEY_REQUEST_SUBJECT', 'KEY_SHARE_SUBJECT', 'MSG_SOCKET_ENV', 'PR_REVIEW_SUBJECT',
+__all__ = ['KEY_ISSUE_SUBJECT',
+           'KEY_REQUEST_SUBJECT', 'KEY_SHARE_SUBJECT', 'PR_REVIEW_SUBJECT',
            'UNREGISTERED_SUBJECT', 'verb_for']
 
 #: The subject a key-authorization request is filed under — the one message *kind* the
@@ -112,16 +112,9 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
     return 'read'
 
 
-#: Env var naming the public spool socket (the per-user service and the shell read it).
-MSG_SOCKET_ENV: str = 'EULER_MSG_SOCKET'
-#: Env var naming the local admin socket (the staff terminal path reads it).
-ADMIN_SOCKET_ENV: str = 'EULER_MSG_ADMIN_SOCKET'
-#: Production socket paths, overridable via the env vars above. The public socket joins
-#: the shared `/run/euler` fabric (`euler-web`-only, which the operator's own uid
-#: deliberately is not). The admin socket sits in this service's **own** runtime dir —
-#: `/run/euler-msg`, systemd's `RuntimeDirectory=` at `0700 euler-msg` — rather
-#: than in `/run/euler-adm`, which is euler-auth-private (`0750 euler-auth`) and
-#: therefore not writable by this service. Each admin plane owning its own directory is
-#: also the better shape: root traverses either, and nothing else traverses both.
-DEFAULT_MSG_SOCKET: str = '/run/euler/msg.sock'
-DEFAULT_ADMIN_SOCKET: str = '/run/euler-msg/admin.sock'
+# The socket paths and the variables that override them are settings, and live in the one
+# table: `[msg]` in `solver/config/env.conf`, read through `solver.config.env.load_spec`.
+# The reasoning that picks those values belongs beside them and is recorded there — the
+# public socket joins the shared `/run/euler` fabric (`euler-web`-only, which the
+# operator's own uid deliberately is not), while the admin socket sits in this service's
+# **own** runtime dir, `/run/euler-msg`, rather than in euler-auth-private `/run/euler-adm`.

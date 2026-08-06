@@ -16,15 +16,11 @@ and runs only from the deployed `/opt/euler` venv.
 """
 from __future__ import annotations
 
-__all__ = ['AUTH_SOCKET_ENV', 'ADMIN_SOCKET_ENV', 'DEFAULT_AUTH_SOCKET', 'DEFAULT_ADMIN_SOCKET']
-
-#: Env var naming the public auth socket (ticket redemption reads it).
-AUTH_SOCKET_ENV: str = 'EULER_AUTH_SOCKET'
-#: Env var naming the local admin socket (the admin CLI reads it).
-ADMIN_SOCKET_ENV: str = 'EULER_AUTH_ADMIN_SOCKET'
-#: Production socket paths, overridable via the env vars above. The
-#: admin socket lives in its own `euler-auth`-private runtime dir (0600 —
-#: the admin plane is **wheel-gated**: only root, via sudo, reaches it); the
-#: shared `/run/euler` is `euler-web`-only, which operators are not.
-DEFAULT_AUTH_SOCKET: str = '/run/euler/auth.sock'
-DEFAULT_ADMIN_SOCKET: str = '/run/euler-adm/auth-admin.sock'
+#: This package exports nothing. The socket paths and the variables that override them
+#: used to live here as four constants; they are settings, and settings live in one
+#: table — `[auth]` in `solver/config/env.conf`, read through
+#: :func:`solver.config.env.load_spec`. The admin socket's own `euler-auth`-private
+#: runtime dir (0600 — the admin plane is **wheel-gated**: only root, via sudo, reaches
+#: it) is documented there, beside the value that implements it; the shared `/run/euler`
+#: is `euler-web`-only, which operators are not.
+__all__: list[str] = []

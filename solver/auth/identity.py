@@ -141,9 +141,9 @@ def _redeem_ticket(ticket: str) -> tuple[str, str]:
     Any failure — service down, ticket unknown/expired/already redeemed — raises
     :class:`SystemExit`: an unvouched web shell must not start.
     """
-    from solver.web.auth import AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET
+    from solver.config.env import load_spec
     from solver.web.auth.client import request
-    socket_path = os.environ.get(AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET)
+    socket_path = load_spec('auth').raw('socket_path')
     try:
         status, data = request(socket_path, 'POST', '/shell-ticket/redeem', body={'ticket': ticket})
     except OSError as exc:

@@ -84,24 +84,26 @@ class ExitCodes(enum.IntEnum):
 
 
 class Scripts(NamedTuple):
-    """The shell scripts the solver drives, as repo-relative command lines.
+    """The shell scripts the solver drives.
 
-    Relative on purpose: they are run from the working tree the shell entered at startup
-    (:func:`~solver.config.paths.enter_repo`), so they name the same file in a collaborator's
-    clone as in the operator's.
+    Declared relative to the working tree and resolved against it by
+    :meth:`Config.__post_init__`, so what a caller reads is always an absolute path. A
+    relative one would be right only as long as the process stayed where
+    :func:`~solver.config.paths.enter_repo` put it — which a subprocess, a hook or a
+    filter need not do.
     """
 
-    audit: str = './scripts/git/audit.sh'
-    compile_c: str = './scripts/c/compile.sh'
-    configure_identity: str = './scripts/git/configure-identity.sh'
-    install_chrome: str = './scripts/setup/chrome.sh'
-    install_dev_env: str = './scripts/setup/dev_env.sh'
-    install_upgrade_service: str = './scripts/setup/upgrade_service.sh'
-    linter: str = './scripts/linters/check.sh'
-    publish: str = './scripts/git/publish.sh'
-    status: str = './scripts/git/status.sh'
-    sync: str = './scripts/git/sync.sh'
-    upgrade: str = './scripts/pip/upgrade.sh'
+    audit: str = 'scripts/git/audit.sh'
+    compile_c: str = 'scripts/c/compile.sh'
+    configure_identity: str = 'scripts/git/configure-identity.sh'
+    install_chrome: str = 'scripts/setup/chrome.sh'
+    install_dev_env: str = 'scripts/setup/dev_env.sh'
+    install_upgrade_service: str = 'scripts/setup/upgrade_service.sh'
+    linter: str = 'scripts/linters/check.sh'
+    publish: str = 'scripts/git/publish.sh'
+    status: str = 'scripts/git/status.sh'
+    sync: str = 'scripts/git/sync.sh'
+    upgrade: str = 'scripts/pip/upgrade.sh'
 
 
 def _package_version() -> str:
@@ -217,6 +219,10 @@ class Config:
         ):
             if getattr(self, name) is _DERIVED:
                 setattr(self, name, derived)
+        # A script named relative to the tree is resolved against it, so `values.conf` may
+        # write either `${root_dir}/scripts/...` or the bare path and mean the same file.
+        self.scripts = Scripts(**{name: value if value.startswith('/') else str(self.root_dir / value)
+                                  for name, value in self.scripts._asdict().items()})
 
     # -- dynamic settings: resolved on first use, never at import ------------------------
 

@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from solver.web.envfile import env_file_values
-from solver.web.msg import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
+from solver.config.env import load_spec
 from solver.web.unixhttp import request
 
 _METHODS = ('GET', 'POST', 'DELETE')
@@ -65,8 +65,9 @@ def _api(method: str, path: str, body: dict[str, Any]) -> tuple[int, dict[str, A
     """One call to the euler-msg admin socket, with the token from the scoped env file."""
     env_file = env_file_values(Path(os.environ.get('EULER_MSG_ENV', '/etc/euler/msg.env')))
     token = os.environ.get('EULER_MSG_ADMIN_TOKEN') or env_file.get('EULER_MSG_ADMIN_TOKEN', '')
-    socket_path = (os.environ.get(ADMIN_SOCKET_ENV) or env_file.get(ADMIN_SOCKET_ENV)
-                   or DEFAULT_ADMIN_SOCKET)
+    admin_socket = load_spec('msg').entries['admin_socket_path']
+    socket_path = (os.environ.get(admin_socket.env_var) or env_file.get(admin_socket.env_var)
+                   or admin_socket.default)
     if not token:
         raise RuntimeError('EULER_MSG_ADMIN_TOKEN not found '
                            '(is /etc/euler/msg.env deployed, and are you root?)')

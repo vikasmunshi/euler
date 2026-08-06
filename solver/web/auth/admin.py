@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Any
 
 from solver.auth.identity import system_slug
-from solver.web.auth import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
+from solver.config.env import load_spec
 from solver.web.auth.client import request
 from solver.web.envfile import env_file_values
 
@@ -137,8 +137,9 @@ def _api(method: str, path: str, *, body: dict[str, Any] | None = None,
     """One call to the euler-auth admin socket (raises SystemExit-style on failure)."""
     env_file = env_file_values(Path(os.environ.get('EULER_AUTH_ENV', '/etc/euler/auth.env')))
     token = os.environ.get('EULER_ADMIN_TOKEN') or env_file.get('EULER_ADMIN_TOKEN', '')
-    socket_path = (os.environ.get(ADMIN_SOCKET_ENV) or env_file.get(ADMIN_SOCKET_ENV)
-                   or DEFAULT_ADMIN_SOCKET)
+    admin_socket = load_spec('auth').entries['admin_socket_path']
+    socket_path = (os.environ.get(admin_socket.env_var) or env_file.get(admin_socket.env_var)
+                   or admin_socket.default)
     if not token:
         raise RuntimeError('EULER_ADMIN_TOKEN not found (is /etc/euler/auth.env deployed, and are you root?)')
     return request(socket_path, method, path, body=body, headers={'X-Admin-Token': token}, timeout=timeout)

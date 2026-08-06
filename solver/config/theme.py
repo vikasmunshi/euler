@@ -3,7 +3,7 @@
 """Dynamic configuration: how the shell **looks**.
 
 The one palette, in two dialects — a `rich` theme for everything the console prints and a
-`prompt_toolkit` style for the input line. Split out of :mod:`solver.config.config` because
+`prompt_toolkit` style for the input line. Split out of :mod:`solver.config.settings` because
 it is the only part of the configuration that needs those two libraries, and the static
 half must stay importable by processes that have neither reason nor room for them (the git
 filter, the web service tiers). :attr:`solver.config.Config.theme` and `.style` are

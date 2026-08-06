@@ -33,10 +33,9 @@ from __future__ import annotations
 __all__ = ['dismiss_by_subject', 'dismiss_thread', 'notify_staff', 'notify_user', 'read_thread']
 
 import logging
-import os
 from typing import Any
 
-from solver.web.msg import DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
+from solver.config.env import load_spec
 from solver.web.msg.client import call
 from solver.web.unixhttp import request
 
@@ -55,7 +54,7 @@ def notify_staff(subject: str, body: str) -> bool:
     command does, so the sender is this process's uid via `SO_PEERCRED` and there is
     no identity to pass or forge.
     """
-    socket_path = os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)
+    socket_path = load_spec('msg').raw('socket_path')
     try:
         status, _body = request(socket_path, 'POST', '/messages',
                                 body={'subject': subject, 'body': body}, timeout=_TIMEOUT)

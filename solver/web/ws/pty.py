@@ -42,7 +42,7 @@ import subprocess
 import sys
 import termios
 
-from solver.web.auth import AUTH_SOCKET_ENV
+from solver.config.env import load_spec
 
 #: How many bytes to pull off the master fd per read.
 _READ_CHUNK: int = 65536
@@ -83,7 +83,7 @@ class PtySession:
             # Without this it falls back to the compiled-in default path, which is
             # right only when the service happened to be configured by that env var
             # — the socket is the service's configuration, so pass it explicitly.
-            env[AUTH_SOCKET_ENV] = auth_socket
+            env[load_spec('ws').entries['auth_socket'].env_var] = auth_socket
         env.pop('SOLVER_USER', None)    # display-only; the ticket is the identity
         master, slave = pty.openpty()
         try:

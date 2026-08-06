@@ -16,11 +16,10 @@ from __future__ import annotations
 
 __all__ = ['MsgConfig']
 
-import os
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, get_type_hints
 
-from solver.web.msg import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET, DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
+from solver.config.env import load_spec
 
 
 class MsgConfig(NamedTuple):
@@ -46,20 +45,9 @@ class MsgConfig(NamedTuple):
 
     @classmethod
     def from_env(cls) -> MsgConfig:
-        """Build the configuration from the process environment.
+        """Build the configuration from the process environment (`[msg]` in `env.conf`).
 
-        `EULER_MSG_ADMIN_TOKEN` is required (the deployed `msg.env` provides it);
-        everything else has a production default.
+        `EULER_MSG_ADMIN_TOKEN` is marked `!required` there (the deployed `msg.env`
+        provides it); everything else has a production default.
         """
-        admin_token = os.environ.get('EULER_MSG_ADMIN_TOKEN', '').strip()
-        if not admin_token:
-            raise SystemExit('msg service: EULER_MSG_ADMIN_TOKEN must be set')
-        return cls(
-            state_dir=Path(os.environ.get('EULER_MSG_STATE_DIR', '/var/lib/euler-msg')),
-            socket_path=Path(os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)),
-            admin_socket_path=Path(os.environ.get(ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET)),
-            socket_group=os.environ.get('EULER_WEB_GROUP', 'euler-web'),
-            admin_socket_group=os.environ.get('EULER_ADM_GROUP', ''),
-            admin_token=admin_token,
-            user_socket_dir=os.environ.get('EULER_USER_SOCKET_DIR', '/run/euler').strip(),
-        )
+        return cls(**load_spec('msg').read(get_type_hints(cls)))

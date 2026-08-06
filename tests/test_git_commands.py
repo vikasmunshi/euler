@@ -366,7 +366,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
@@ -381,7 +381,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
 
     def test_a_pr_spanning_both_trees_is_admitted(self) -> None:
         """No one-tree rule: a branch may carry a solution and the article about it."""
@@ -390,7 +390,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
 
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
         # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/;
@@ -422,7 +422,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
 
     def test_a_number_that_is_not_open_is_refused(self) -> None:
         """A merged or invented number must not reach `gh` as a refusal nobody can act on."""
@@ -471,7 +471,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git.merge_pr_for_branch('user/x'), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
 
     def test_a_notice_whose_request_is_gone_says_so(self) -> None:
@@ -559,7 +559,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
 
     def test_a_docs_only_pr_merges_through_the_same_gate(self) -> None:
         """A regeneration is no longer a separate verb: one queue, one gate."""
@@ -569,7 +569,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
 
     def test_only_the_named_files_under_solver_are_admitted(self) -> None:
@@ -582,7 +582,7 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
-                                         './scripts/git/sync.sh'])
+                                         config.scripts.sync])
 
 
 class GitFilterCommandTest(_GitCommandCase):

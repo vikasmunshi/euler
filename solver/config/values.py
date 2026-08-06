@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Reading `values.conf` — the editable half of the configuration.
 
-The settings themselves are declared, typed and defaulted in :mod:`solver.config.config`.
+The settings themselves are declared, typed and defaulted in :mod:`solver.config.settings`.
 This module only turns the text file beside it into `{name: value}`, coerced to those
 declared types. Nothing here decides *what* a setting is; a key the class does not declare
 is ignored, and a value that will not coerce falls back to the declared default.

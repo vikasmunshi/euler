@@ -2,20 +2,23 @@
 # -*- coding: utf-8 -*-
 """Auth-service runtime configuration, read from the environment.
 
-The service runs as `euler-auth` from the `/opt/euler` system venv and reads
-its scoped `/etc/euler/auth.env` (via the unit's `EnvironmentFile=`) — never
-the repo owner's `~/.euler/env` and **never** :mod:`solver.config` (which resolves the
-shell's identity and repo paths the service user cannot read). Every value has
-an env override so the whole service can run unprivileged in a scratch dir for
-local testing.
+The service runs as `euler-auth` from the `/opt/euler` system venv and reads its scoped
+`/etc/euler/auth.env` (via the unit's `EnvironmentFile=`) — never the repo owner's
+`~/.euler/env`, and never a `Config`: it has no working tree, so resolving one would raise
+at import and take the service down before it could signal readiness. Which variable
+carries each setting, and what it is without one, is the `[auth]` section of
+`solver/config/env.conf`; this class declares the shape and does the normalising that a
+table cannot. Every value has an env override, so the whole service runs unprivileged in
+a scratch dir for local testing.
 """
 from __future__ import annotations
 
 __all__ = ['AuthConfig']
 
-import os
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, get_type_hints
+
+from solver.config.env import load_spec
 
 
 class AuthConfig(NamedTuple):
@@ -52,25 +55,11 @@ class AuthConfig(NamedTuple):
 
     @classmethod
     def from_env(cls) -> AuthConfig:
-        """Build the configuration from the process environment.
+        """Build the configuration from the process environment (`[auth]` in `env.conf`).
 
-        `EULER_ADMIN_TOKEN` and `EULER_BASE_URL` are required (the deployed
-        `auth.env` provides them); everything else has a production default.
+        `EULER_ADMIN_TOKEN` and `EULER_BASE_URL` are marked `!required` there, so an
+        unset one exits at startup naming itself; everything else has a production default.
         """
-        admin_token = os.environ.get('EULER_ADMIN_TOKEN', '').strip()
-        base_url = os.environ.get('EULER_BASE_URL', '').strip().rstrip('/')
-        if not admin_token or not base_url:
-            raise SystemExit('auth service: EULER_ADMIN_TOKEN and EULER_BASE_URL must be set')
-        return cls(
-            state_dir=Path(os.environ.get('EULER_AUTH_STATE_DIR', '/var/lib/euler-auth')),
-            socket_path=Path(os.environ.get('EULER_AUTH_SOCKET', '/run/euler/auth.sock')),
-            admin_socket_path=Path(os.environ.get('EULER_AUTH_ADMIN_SOCKET', '/run/euler-adm/auth-admin.sock')),
-            socket_group=os.environ.get('EULER_WEB_GROUP', 'euler-web'),
-            admin_socket_group=os.environ.get('EULER_ADM_GROUP', ''),
-            admin_token=admin_token,
-            base_url=base_url,
-            smtp_relay=os.environ.get('EULER_SMTP_RELAY', '127.0.0.1:8025'),
-            terms_version=os.environ.get('TERMS_VERSION', '1'),
-            owner_email=os.environ.get('EULER_OWNER_EMAIL', '').strip().lower(),
-            user_socket_dir=os.environ.get('EULER_USER_SOCKET_DIR', '/run/euler').strip(),
-        )
+        config = cls(**load_spec('auth').read(get_type_hints(cls)))
+        return config._replace(base_url=config.base_url.rstrip('/'),
+                               owner_email=config.owner_email.lower())

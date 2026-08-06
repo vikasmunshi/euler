@@ -35,7 +35,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from solver.web.msg import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET, DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV
+from solver.config.env import load_spec
 from solver.web.unixhttp import request
 
 log = logging.getLogger('solver.msg')
@@ -62,7 +62,7 @@ OPS: dict[str, tuple[str, str, str]] = {
 
 def _socket_path() -> str:
     """The public spool socket (env-overridable, for tests and dev runs)."""
-    return os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)
+    return load_spec('msg').raw('socket_path')
 
 
 def sudo_plane_present() -> bool:
@@ -73,7 +73,7 @@ def sudo_plane_present() -> bool:
     worse than saying the service is not reachable.
     """
     return (Path(os.environ.get('EULER_MSG_ENV', _MSG_ENV)).exists()
-            or Path(os.environ.get(ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET)).exists())
+            or Path(load_spec('msg').raw('admin_socket_path')).exists())
 
 
 def _direct(method: str, path: str, body: dict[str, Any] | None) -> tuple[int, Any] | None:

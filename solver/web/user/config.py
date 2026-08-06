@@ -15,22 +15,13 @@ from __future__ import annotations
 
 __all__ = ['UserConfig']
 
-import os
 import sys
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, get_type_hints
 
+from solver.config.env import load_spec
 from solver.config.paths import repo_root as find_repo_root
-from solver.web.auth import AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET
 from solver.web.site.config import SiteConfig
-
-#: Repo root as seen from this file (`solver/web/user/config.py` → up 3): the default
-_GITHUB_URL = 'https://github.com/vikasmunshi/euler'
-_GITHUB_BRANCH = 'master'
-
-
-def _truthy(value: str) -> bool:
-    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
 class UserConfig(NamedTuple):
@@ -60,11 +51,11 @@ class UserConfig(NamedTuple):
     shell_argv: tuple[str, ...]
     #: Seconds a shell may sit with zero attached sockets before the reaper closes it
     #: (hygiene, not security; 0 disables).
-    detached_ttl: int
+    detached_ttl: int = 86400
     #: Base URL of the repo on GitHub, for the problem page's source link.
-    github_url: str = _GITHUB_URL
+    github_url: str = 'https://github.com/vikasmunshi/euler'
     #: The branch those source links point at.
-    github_branch: str = _GITHUB_BRANCH
+    github_branch: str = 'master'
 
     def site_config(self) -> SiteConfig:
         """The content-tier view of this config (what the reused site handlers read)."""
@@ -76,26 +67,21 @@ class UserConfig(NamedTuple):
 
     @classmethod
     def from_env(cls) -> UserConfig:
-        """Build the configuration from the process environment (all optional)."""
-        # EULER_REPO_ROOT first (every deployed unit sets it), then discovery —
-        # `solver.utils.repo_root`, which refuses to invent a root rather than
-        # silently adopting site-packages as one.
+        """Build the configuration from the process environment (`[user]` in `env.conf`).
+
+        Three settings are not the table's to give. `repo_root` is *discovered* —
+        EULER_REPO_ROOT first (every deployed unit sets it), then
+        `solver.config.paths.repo_root`, which refuses to invent a root rather than
+        silently adopting site-packages as one. `static_dir` defaults to a path inside
+        whatever tree that turns out to be. And the socket's default name embeds the
+        slug, which is only known once the environment has been read.
+        """
+        values = load_spec('user').read(get_type_hints(cls))
         repo_root = find_repo_root()
-        static_dir = Path(os.environ.get('EULER_CONTENT_STATIC_DIR',
-                                         str(repo_root / 'solver/web/content')))
-        slug = os.environ.get('EULER_USER_SLUG', '').strip()
+        slug: str = values.get('slug', '')
         default_socket = f'/run/euler/user-{slug}.sock' if slug else '/run/euler/user.sock'
-        return cls(
-            repo_root=repo_root,
-            static_dir=static_dir,
-            socket_path=Path(os.environ.get('EULER_USER_SOCKET', default_socket)),
-            socket_group=os.environ.get('EULER_WEB_GROUP', 'euler-web'),
-            tcp_bind=os.environ.get('EULER_USER_TCP', '').strip(),
-            serve_static=_truthy(os.environ.get('EULER_CONTENT_SERVE_STATIC', '')),
-            slug=slug,
-            auth_socket=os.environ.get(AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET),
-            shell_argv=(sys.executable, '-m', 'solver'),
-            detached_ttl=int(os.environ.get('EULER_WS_DETACHED_TTL', '86400') or '0'),
-            github_url=os.environ.get('EULER_GITHUB_URL', _GITHUB_URL).strip().rstrip('/'),
-            github_branch=os.environ.get('EULER_GITHUB_BRANCH', _GITHUB_BRANCH).strip(),
-        )
+        values.setdefault('socket_path', Path(default_socket))
+        config = cls(repo_root=repo_root,
+                     static_dir=values.pop('static_dir', repo_root / 'solver/web/content'),
+                     shell_argv=(sys.executable, '-m', 'solver'), **values)
+        return config._replace(github_url=config.github_url.rstrip('/'))

@@ -13,12 +13,11 @@ from __future__ import annotations
 
 __all__ = ['WsConfig']
 
-import os
 import sys
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, get_type_hints
 
-from solver.web.auth import AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET
+from solver.config.env import load_spec
 
 
 class WsConfig(NamedTuple):
@@ -42,18 +41,15 @@ class WsConfig(NamedTuple):
     #: only in code (tests fork a stub instead of the full shell).
     shell_argv: tuple[str, ...]
     #: Seconds a shell may sit with zero attached sockets before the reaper closes
-    #: it (hygiene, not security; 0 disables).
-    detached_ttl: int
+    #: it (hygiene, not security; 0 or empty disables).
+    detached_ttl: int = 86400
 
     @classmethod
     def from_env(cls) -> WsConfig:
-        """Build the configuration from the process environment (all optional)."""
-        return cls(
-            socket_path=Path(os.environ.get('EULER_WS_SOCKET', '/run/euler/ws.sock')),
-            socket_group=os.environ.get('EULER_WEB_GROUP', 'euler-web'),
-            tcp_bind=os.environ.get('EULER_WS_TCP', '').strip(),
-            profile=os.environ.get('EULER_PROFILE', '').strip(),
-            auth_socket=os.environ.get(AUTH_SOCKET_ENV, DEFAULT_AUTH_SOCKET),
-            shell_argv=(sys.executable, '-m', 'solver'),
-            detached_ttl=int(os.environ.get('EULER_WS_DETACHED_TTL', '86400') or '0'),
-        )
+        """Build the configuration from the process environment (`[ws]` in `env.conf`).
+
+        `shell_argv` has no variable behind it: it is this interpreter, and overriding it
+        is a thing tests do in code (forking a stub), not a thing a deployment sets.
+        """
+        return cls(shell_argv=(sys.executable, '-m', 'solver'),
+                   **load_spec('ws').read(get_type_hints(cls)))

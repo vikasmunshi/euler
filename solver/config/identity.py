@@ -5,7 +5,7 @@
 The static half of the configuration is a function of the checkout — the same values
 in every process that reads the same tree. This half is not: it is resolved once per
 process from the ambient identity, and it decides what the shell may do and where its
-state lives. It is kept out of :mod:`solver.config.config` for that reason, and because
+state lives. It is kept out of :mod:`solver.config.settings` for that reason, and because
 resolving it costs an import of :mod:`solver.auth` that the git-filter path must not pay.
 
 Resolution is deliberately *lazy* — :attr:`solver.config.Config.subject` is a

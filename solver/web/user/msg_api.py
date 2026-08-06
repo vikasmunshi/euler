@@ -30,14 +30,14 @@ __all__ = ['add_message_routes']
 
 import json
 import logging
-import os
 from datetime import datetime, timezone
 from typing import Any
 
 import aiohttp
 from aiohttp import web
 
-from solver.web.msg import DEFAULT_MSG_SOCKET, MSG_SOCKET_ENV, verb_for
+from solver.config.env import load_spec
+from solver.web.msg import verb_for
 from solver.web.msg.identity import STAFF_FLOOR
 from solver.web.site.app import requires
 from solver.web.site.render import MSG_SPOOL_KEY, SUBJECT_KEY, render
@@ -57,7 +57,7 @@ _TIMEOUT = aiohttp.ClientTimeout(total=5)
 
 def _socket_path() -> str:
     """The spool socket this instance dials (env-overridable for tests and dev runs)."""
-    return os.environ.get(MSG_SOCKET_ENV, DEFAULT_MSG_SOCKET)
+    return load_spec('msg').raw('socket_path')
 
 
 async def _mailbox(request: web.Request) -> dict[str, Any]:

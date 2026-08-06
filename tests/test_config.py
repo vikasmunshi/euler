@@ -2,17 +2,19 @@
 # -*- coding: utf-8 -*-
 """Tests for the configuration package's two load-bearing invariants.
 
-**`solver.config.config` is the singleton, not the submodule.** The static settings live
-in a module of the same name inside the package, so importing it binds `config` on the
-package to that *module*; `__init__` rebinds the name to the instance immediately
-afterwards. Every one of the ~50 `from solver.config import config` call sites depends on
-that rebinding having happened, and the failure mode is silent — attribute reads on a
-module raise `AttributeError` far from the cause.
+**Importing it builds nothing.** No `Config`, no chdir, no `PATH` rewrite, no identity
+resolution, no `rich`. The singleton is resolved on first *access*. That is what lets the
+git filter, the five web service tiers and the tests read a path constant without having
+their process relocated or a one-shot shell ticket consumed on their behalf — and, more
+sharply, what lets `euler-auth`, `euler-msg` and `euler-ws` read `env.conf` at all: they
+run from `/opt/euler` with no working tree, so a `Config` built underneath them would
+raise at import and take the site down with euler-auth. Importing used to do all of it.
 
-**Importing configuration does nothing.** No chdir, no `PATH` rewrite, no identity
-resolution, no `rich`. This is what lets the git filter, the web service tiers and the
-tests read a path constant without having their process relocated or a one-shot shell
-ticket consumed on their behalf. It used to do all four, at import.
+**`solver.config.config` is the singleton and never a module.** The static settings live
+in `settings.py` precisely so that no submodule can claim that name: a `config` submodule
+would bind itself over the package attribute the first time anything imported it by path,
+and every `from solver.config import config` after that would quietly receive a module.
+The check below tries exactly that import and asserts it changes nothing.
 
 The purity checks run in a subprocess: this test process has long since imported
 everything, so the question can only be asked of a fresh interpreter.
@@ -43,17 +45,24 @@ class SingletonBindingTests(unittest.TestCase):
     def test_config_is_the_instance_not_the_module(self) -> None:
         self.assertIsInstance(config, Config)
 
-    def test_the_binding_survives_importing_the_submodule_by_path(self) -> None:
-        """The hazard in full: import the *submodule* first, then ask for the name.
+    def test_the_binding_survives_importing_every_submodule_by_path(self) -> None:
+        """The hazard in full: import every submodule first, then ask for the name.
 
-        A submodule cannot load without its parent package running to completion first,
-        so `__init__`'s rebinding always wins — but only as long as the rebinding is the
-        last thing `__init__` does with that name.
+        None of them is called `config`, which is the whole defence — a submodule of that
+        name would be bound over the package attribute by the import machinery itself,
+        and no amount of care in `__init__` could take it back afterwards.
         """
-        out = _probe('import solver.config.config\n'
+        out = _probe('import solver.config.settings, solver.config.paths\n'
+                     'import solver.config.values, solver.config.env\n'
                      'from solver.config import Config, config\n'
                      'print(type(config).__name__, isinstance(config, Config))')
         self.assertEqual(out, 'Config True')
+
+    def test_no_module_is_named_config_inside_the_package(self) -> None:
+        """Enforce the defence rather than trusting it: the name must stay unclaimed."""
+        package = Path(__file__).resolve().parents[1] / 'solver' / 'config'
+        self.assertFalse((package / 'config.py').exists(),
+                         'a `config` submodule would shadow the singleton on the package')
 
 
 class ImportPurityTests(unittest.TestCase):
@@ -72,6 +81,12 @@ class ImportPurityTests(unittest.TestCase):
                      'import solver.config\n'
                      'print(before == os.environ.get("PATH"))')
         self.assertEqual(out, 'True', 'importing solver.config rewrote PATH')
+
+    def test_importing_config_builds_no_config(self) -> None:
+        """The singleton arrives on first access, not at import — see the module docstring."""
+        out = _probe('import sys, solver.config\n'
+                     "print('config' in vars(sys.modules['solver.config']))")
+        self.assertEqual(out, 'False')
 
     def test_importing_config_resolves_no_identity(self) -> None:
         """`subject` is a `cached_property`: unresolved until something asks for it.

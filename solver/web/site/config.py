@@ -13,24 +13,11 @@ from __future__ import annotations
 
 __all__ = ['SiteConfig']
 
-import os
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, get_type_hints
 
+from solver.config.env import load_spec
 from solver.config.paths import repo_root as find_repo_root
-
-#: Repo root as seen from this file (`solver/web/site/config.py` → up 3): the
-
-#: This repo on GitHub — the default for :attr:`SiteConfig.github_url`, overridable
-#: with `EULER_GITHUB_URL` (a fork serves its own source links).
-_GITHUB_URL = 'https://github.com/vikasmunshi/euler'
-
-#: The branch the source links point at (`EULER_GITHUB_BRANCH`).
-_GITHUB_BRANCH = 'master'
-
-
-def _truthy(value: str) -> bool:
-    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
 class SiteConfig(NamedTuple):
@@ -55,27 +42,23 @@ class SiteConfig(NamedTuple):
     #: Base URL of the repo on GitHub, for the problem page's source link. It cannot
     #: be derived from `.git/config` — the service uid has no read access to `.git`
     #: — so it is configuration. Empty drops the link rather than guessing.
-    github_url: str = _GITHUB_URL
+    github_url: str = 'https://github.com/vikasmunshi/euler'
     #: The branch those source links point at.
-    github_branch: str = _GITHUB_BRANCH
+    github_branch: str = 'master'
 
     @classmethod
     def from_env(cls) -> SiteConfig:
-        """Build the configuration from the process environment (all optional)."""
-        # EULER_REPO_ROOT first (every deployed unit sets it), then discovery —
-        # `solver.utils.repo_root`, which refuses to invent a root rather than
-        # silently adopting site-packages as one.
+        """Build the configuration from the process environment (`[site]` in `env.conf`).
+
+        Two settings are not the table's to give. `repo_root` is *discovered* —
+        EULER_REPO_ROOT first (every deployed unit sets it), then
+        `solver.config.paths.repo_root`, which refuses to invent a root rather than
+        silently adopting site-packages as one — and `static_dir` defaults to a path
+        inside whatever tree that turns out to be.
+        """
+        values = load_spec('site').read(get_type_hints(cls))
         repo_root = find_repo_root()
-        static_dir = Path(os.environ.get('EULER_CONTENT_STATIC_DIR',
-                                         str(repo_root / 'solver/web/content')))
-        return cls(
-            repo_root=repo_root,
-            static_dir=static_dir,
-            socket_path=Path(os.environ.get('EULER_CONTENT_SOCKET', '/run/euler/content.sock')),
-            socket_group=os.environ.get('EULER_WEB_GROUP', 'euler-web'),
-            tcp_bind=os.environ.get('EULER_CONTENT_TCP', '').strip(),
-            serve_static=_truthy(os.environ.get('EULER_CONTENT_SERVE_STATIC', '')),
-            profile=os.environ.get('EULER_PROFILE', '').strip(),
-            github_url=os.environ.get('EULER_GITHUB_URL', _GITHUB_URL).strip().rstrip('/'),
-            github_branch=os.environ.get('EULER_GITHUB_BRANCH', _GITHUB_BRANCH).strip(),
-        )
+        config = cls(repo_root=repo_root,
+                     static_dir=values.pop('static_dir', repo_root / 'solver/web/content'),
+                     **values)
+        return config._replace(github_url=config.github_url.rstrip('/'))
