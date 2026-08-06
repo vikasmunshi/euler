@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cross_product>
 - ● [0102](/solutions/0102/) — Triangle Containment
 - ● [0165](/solutions/0165/) — Intersections
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0478](/solutions/0478/) — Mixtures
 
 <!-- /problems -->

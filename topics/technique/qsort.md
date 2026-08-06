@@ -17,6 +17,7 @@ _TODO: write this page. Start from <https://en.cppreference.com/w/c/algorithm/qs
 - ● [0180](/solutions/0180/) — Golden Triplets
 - ● [0203](/solutions/0203/) — Squarefree Binomial Coefficients
 - ● [0221](/solutions/0221/) — Alexandrian Integers
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0768](/solutions/0768/) — Chandelier

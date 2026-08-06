@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Two-pointer_te
 - ● [0004](/solutions/0004/) — Largest Palindrome Product
 - ● [0143](/solutions/0143/) — Torricelli Triangles
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0478](/solutions/0478/) — Mixtures
 

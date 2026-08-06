@@ -98,6 +98,7 @@ short the code looks.
 - ● [0203](/solutions/0203/) — Squarefree Binomial Coefficients
 - ● [0215](/solutions/0215/) — Crack-free Walls
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0501](/solutions/0501/) — Eight Divisors

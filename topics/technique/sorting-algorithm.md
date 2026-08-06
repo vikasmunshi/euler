@@ -188,6 +188,7 @@ is free from the second benchmark run onward, and the timing will lie about it.
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
+- ● [0252](/solutions/0252/) — Convex Holes
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [1000](/solutions/1000/) — Problem $1000$
