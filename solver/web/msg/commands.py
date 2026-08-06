@@ -166,7 +166,7 @@ def recipients() -> list[Choice]:
                Choice(_EVERYONE_LABEL, _EVERYONE_LABEL, 'every mapped identity')]
     try:
         from solver.web.auth.commands import account_identities
-        options.extend(Choice(identity, identity, f'user {identity}') for identity in account_identities())
+        options.extend(Choice(identity) for identity in account_identities())
     except Exception:                                        # noqa: BLE001 — a menu, not a gate
         pass
     return options

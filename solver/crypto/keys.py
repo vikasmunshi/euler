@@ -1200,7 +1200,7 @@ def holders() -> list[Choice]:
     `{loop.value}` and has everything there is.
     """
     keys = roster.public_keys()
-    return [Choice(slug, slug, f'{slug} has a public key') for slug in sorted(keys)]
+    return [Choice(slug) for slug in sorted(keys)]
 
 
 def _local_share_ready() -> bool:
