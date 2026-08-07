@@ -2883,7 +2883,7 @@
     {
       "path": "domain/summation",
       "title": "Summation",
-      "status": "draft",
+      "status": "final",
       "solved": 12,
       "problems": 92,
       "tags": ["summation"],
