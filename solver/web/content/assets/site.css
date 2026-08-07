@@ -193,6 +193,20 @@ details.menu > summary:hover { color: var(--text); background: color-mix(in srgb
 .menu-list form { margin: 0; }
 .menu-info { padding: 0.4rem 0.7rem 0.5rem; color: var(--muted); font-size: 0.85rem;
              border-bottom: 1px solid var(--border); margin-bottom: 0.3rem; }
+/* The group separator inside a panel (`<li class="menu-sep">`): the readout at the top
+   of a menu is `.menu-info` and rules itself off; this is the divider BETWEEN groups of
+   verbs further down — the terminal chip's session/window pair, and the git and message
+   menus' runs of commands. It is an empty li, so it has to be given its own height:
+   without one it collapsed to nothing, and three panels had been asking for a line that
+   was never drawn. It spans the panel's inner box — the same width as the rule under
+   `.menu-info`, because two hairlines of different lengths in one panel read as a
+   mistake rather than as two kinds of division. */
+.menu-list .menu-sep { height: 1px; margin: 0.35rem 0; background: var(--border); }
+/* …except straight after the readout, which already rules itself off: that pair draws
+   two hairlines a few pixels apart with nothing between them. Both the git and the
+   message panel open exactly that way — readout, then the sep that starts the verbs —
+   so the suppression lives here rather than being remembered in each template. */
+.menu-list .menu-info + .menu-sep { display: none; }
 
 /* the user glyph: initial in a circle */
 summary.user-glyph {
