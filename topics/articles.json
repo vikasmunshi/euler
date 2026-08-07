@@ -4089,7 +4089,7 @@
     {
       "path": "technique/dynamic-memory-allocation",
       "title": "Dynamic memory allocation",
-      "status": "draft",
+      "status": "final",
       "solved": 34,
       "problems": 34,
       "tags": ["dynamic-memory-allocation"],
