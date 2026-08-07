@@ -4449,7 +4449,7 @@
     {
       "path": "technique/generator",
       "title": "generator expression",
-      "status": "draft",
+      "status": "final",
       "solved": 25,
       "problems": 25,
       "tags": ["generator"],
@@ -5151,7 +5151,7 @@
     {
       "path": "technique/modular-exponentiation",
       "title": "Modular exponentiation",
-      "status": "draft",
+      "status": "final",
       "solved": 30,
       "problems": 30,
       "tags": ["modular-exponentiation"],
