@@ -5790,7 +5790,7 @@
     {
       "path": "technique/telescoping-series",
       "title": "Telescoping series",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["telescoping-series"],
