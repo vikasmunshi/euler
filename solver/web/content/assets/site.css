@@ -111,6 +111,31 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .nav-back.is-first { color: var(--border); }
 .nav-back.is-first:hover { color: var(--muted); background: none; }
 
+/* Bookmarks (_bookmarks.html) is the third mark in that row, so it takes the icon
+   button's padding and glyph size over the .menu chassis' label padding — three marks
+   of one size read as one control group, where a wider third would read as a fourth
+   thing that happens to sit nearby. Everything else about it is the standard menu. */
+summary.nav-bookmarks { display: inline-flex; align-items: center; padding: 0.25rem; }
+summary.nav-bookmarks svg { width: 1.05rem; height: 1.05rem; display: block; }
+/* Off-site rows keep the menu's own type size — `.ext` is sized for a link sitting in
+   running prose (the problem page's sources), and a menu whose items were 0.85rem would
+   be the one dropdown in the header set in small type. The ↗ stays: it is the marker
+   that says a click leaves, and it is the reason these are bookmarks and not nav. */
+.bookmarks-panel a.ext { font-size: inherit; border-bottom: 0; }
+/* Three groups in one panel, so the labels have to read as headings rather than as the
+   single info row `.menu-info` was cut for: no rule under each, mono and quiet like the
+   hero's kicker, and a little air above the second and third. */
+.bookmarks-panel .menu-info {
+  padding: 0.35rem 0.7rem 0.2rem;
+  border-bottom: 0;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.bookmarks-panel .menu-info ~ .menu-info { margin-top: 0.35rem; border-top: 1px solid var(--border); }
+
 /* breadcrumbs */
 .crumbs { display: flex; align-items: center; gap: 0.35rem; overflow: hidden; min-width: 0; }
 .crumbs a { text-decoration: none; color: var(--muted); }

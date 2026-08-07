@@ -1039,13 +1039,26 @@ pane scrolls its own overflow.
 ```
 
 - **Header** — one control surface, identical on every page: the brand (→ `/`), primary
-  nav, the **Actions** menu (page-specific verbs, always present even when empty), a
-  **back arrow**, **breadcrumbs**, the **terminal chip**, the **git chip** (§11.9), and
-  the **user glyph** (Account, Logout).
+  nav, the **Actions** menu (page-specific verbs, always present even when empty), the
+  three navigation marks — **back**, **refresh**, **bookmarks** — **breadcrumbs**, the
+  **terminal chip**, the **git chip** (§11.9), and the **user glyph** (Account, Logout).
 
   The back arrow is not redundant with the browser's. The browser's back navigates the
   *document* and would take the terminal with it, so the pane keeps a history of its own
-  and performs a swap, not a navigation.
+  and performs a swap, not a navigation. Refresh is the same move for the current page,
+  and for the same reason: the address bar's refresh would drop the shell.
+
+  **Bookmarks** (`_bookmarks.html`) is the third of those marks and the one that leaves:
+  the places the work refers to that this app does not host — Project Euler (site,
+  archive, your progress), the repository and its pull requests, and the three references
+  a solver actually opens mid-problem (OEIS, MathWorld, the Python docs). They are a menu
+  rather than nav items because the nav names pages this app renders. The list is static
+  chrome, so it is markup in the partial, not context — which is also what lets the auth
+  tier render it without a clone or a `config`. Every entry wears the `.ext` ↗ marker and
+  `site.js`'s `externalize()` opens it in a new tab, so following one never navigates the
+  pane the terminal lives in. It stays **live signed out** — with the brand and the user
+  pill, the third control that is not dimmed there, because an off-site link needs no
+  session.
 
   The terminal chip and git sit inside `.app-who`, before the user glyph: `margin-left:
   auto` pushes that group right, and both belong on the *identity* side of the gap — they

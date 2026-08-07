@@ -1,12 +1,12 @@
-{# The fixed header (web-server-guide § The site): brand · nav · Actions · back · breadcrumbs
-   · git · user menu, grouped by separators — one control surface, identical on every
-   page and in both tiers. Links swap only #content (plus hx-push-url); logout is
-   the only full-page exit. No hx-on / inline JS (CSP).
+{# The fixed header (web-server-guide § The site): brand · nav · Actions · back · refresh ·
+   bookmarks · breadcrumbs · git · user menu, grouped by separators — one control surface,
+   identical on every page and in both tiers. Links swap only #content (plus
+   hx-push-url); logout is the only full-page exit. No hx-on / inline JS (CSP).
 
    `subject` is the switch. Signed out the header is *present and inert*: the
-   visitor sees the shape of the place before being let into it. The brand and the
-   user pill stay live — they are the two things that still do something (home, and
-   the way in), so neither is dimmed.
+   visitor sees the shape of the place before being let into it. The brand, the
+   bookmarks and the user pill stay live — they are the three things that still do
+   something (home, off-site, and the way in), so none of them is dimmed.
 
    There is no theme control: the site is dark-only (site.css). #}
 <header class="app-header">
@@ -69,6 +69,9 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
       d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></svg>
   </a>
+  {# Third of the navigation marks, and the one that leaves: the places this work refers
+     to but does not host. Live in both tiers — see the partial. #}
+  {% include "_bookmarks.html" %}
   <span class="hsep" aria-hidden="true"></span>
   {% include "_crumbs.html" %}
   <div class="app-who">

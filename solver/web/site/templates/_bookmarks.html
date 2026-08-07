@@ -1,0 +1,52 @@
+{# The bookmarks menu (web-server-guide § The site): the header's third icon control,
+   after back and refresh. Back and refresh move you inside the pane; this one is the
+   mark that moves you OFF the site, and it sits with them because all three are
+   navigation rather than state.
+
+   Everything in it is off-site, and that is what makes it a menu instead of more nav
+   items: the primary nav names pages this app renders, and a row that mixed in
+   projecteuler.net would be claiming a page it cannot serve. The list is static chrome
+   — the same for every collaborator, no request state in it — so it is markup here
+   rather than context, exactly like the footer's documents.
+
+   Every link wears the `.ext` marker (↗) and site.js's externalize() gives it
+   target=_blank + rel=noopener: an off-site click opens a tab and leaves both panes
+   alone, so the terminal — the one thing the app promises never to drop — is never
+   navigated away from by following a bookmark.
+
+   Live signed out as well as in. An external link needs no session, and a visitor who
+   is not being let in yet can still be pointed at the problems and the source; it is
+   the third control, with the brand and the user pill, that is not dimmed out there. #}
+<details class="menu bookmarks-menu">
+  <summary class="nav-bookmarks" title="bookmarks — elsewhere on the web" aria-label="bookmarks">
+    {# A bookmark ribbon: the one glyph nobody has to be taught. DRAWN, not filled — the
+       arrow and the refresh loop beside it are line-weight marks, and a solid ribbon
+       reads as the heaviest thing in the header, next to a filled home crumb. #}
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linejoin="round" d="M17 4H7a1 1 0 0 0-1 1v15l6-2.6 6 2.6V5a1 1 0 0 0-1-1z"/></svg>
+  </summary>
+  <ul class="menu-list bookmarks-panel">
+    {# Where the problems come from. The archive and the progress page are the two
+       projecteuler.net pages this site cannot mirror: the archive is their index of
+       record, and progress is *their* account of what you have solved — the site's own
+       count comes from this clone's problems.json, which is only as current as the last
+       `update-progress`. #}
+    <li class="menu-info">The problems</li>
+    <li><a class="ext" href="https://projecteuler.net/">Project Euler</a></li>
+    <li><a class="ext" href="https://projecteuler.net/archives">Problem archive</a></li>
+    <li><a class="ext" href="https://projecteuler.net/progress">Your progress</a></li>
+    {# The source. Pull requests, not issues: the git chip's verbs end at `git-push`
+       and `gh-pr`, and this is where the branch they pushed is waiting to be read. #}
+    <li class="menu-info">This project</li>
+    <li><a class="ext" href="https://github.com/vikasmunshi/euler">Repository on GitHub</a></li>
+    <li><a class="ext" href="https://github.com/vikasmunshi/euler/pulls">Pull requests</a></li>
+    {# What a solver actually opens mid-problem: the sequence you just generated, the
+       theorem you half remember, and the standard library you are writing against.
+       Three, deliberately — a bookmark list long enough to need reading is one nobody
+       reads. #}
+    <li class="menu-info">Reference</li>
+    <li><a class="ext" href="https://oeis.org/">OEIS — integer sequences</a></li>
+    <li><a class="ext" href="https://mathworld.wolfram.com/">Wolfram MathWorld</a></li>
+    <li><a class="ext" href="https://docs.python.org/3/">Python documentation</a></li>
+  </ul>
+</details>
