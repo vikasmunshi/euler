@@ -4080,7 +4080,7 @@
     {
       "path": "technique/dynamic-array",
       "title": "Dynamic array",
-      "status": "draft",
+      "status": "final",
       "solved": 25,
       "problems": 25,
       "tags": ["dynamic-array"],
@@ -4143,7 +4143,7 @@
     {
       "path": "technique/euclidean-algorithm",
       "title": "Euclidean algorithm",
-      "status": "draft",
+      "status": "final",
       "solved": 23,
       "problems": 23,
       "tags": ["euclidean-algorithm"],
@@ -4539,7 +4539,7 @@
     {
       "path": "technique/hash-table",
       "title": "Hash table",
-      "status": "draft",
+      "status": "final",
       "solved": 26,
       "problems": 26,
       "tags": ["hash-table"],
