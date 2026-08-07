@@ -4629,7 +4629,7 @@
     {
       "path": "technique/int64",
       "title": "int64",
-      "status": "draft",
+      "status": "final",
       "solved": 33,
       "problems": 33,
       "tags": ["int64"],
