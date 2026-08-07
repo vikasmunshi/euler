@@ -3585,7 +3585,7 @@
     {
       "path": "technique/bit-manipulation",
       "title": "Bit manipulation",
-      "status": "draft",
+      "status": "final",
       "solved": 30,
       "problems": 30,
       "tags": ["bit-manipulation"],
