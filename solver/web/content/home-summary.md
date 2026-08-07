@@ -15,6 +15,7 @@ The framework around the solutions is deliberate. Problems are fetched, solution
 benchmarked, and later problems are encrypted – all from a single interactive/web shell. An incorporated AI agent enables
 reflection and learning: explore alternatives after solving a problem, translate Python to C for a performance
 comparison, or articulate the mathematical insight in plain language.
+
 **The point never is to get an answer but to understand why it is the answer.**
 
 *In accordance with [Project Euler's guidelines](https://projecteuler.net/about#publish), solutions and notes after the

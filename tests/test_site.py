@@ -986,6 +986,48 @@ class MathSpanTests(unittest.TestCase):
         self.assertIn('id="move-3--only-osqrtn-quotients"', html)
 
 
+class PullQuoteTests(unittest.TestCase):
+    """`class="pull"` on a paragraph that is nothing but a bold sentence.
+
+    The distinction the stylesheet needs and CSS cannot draw: `p > strong:only-child`
+    counts *element* siblings, so the text following a lead-in bold does not disqualify
+    it and every paragraph opening in bold matches too. The start page's thesis line is
+    painted from this mark, so what is marked has to stay exact.
+    """
+
+    def _md(self, text: str) -> str:
+        return content.render_markdown(text, route_base='/docs/')
+
+    def test_a_paragraph_that_is_only_bold_is_marked(self) -> None:
+        html = self._md('**The point never is to get an answer.**\n')
+        self.assertIn('<p class="pull"><strong>The point never is to get an answer.'
+                      '</strong></p>', html)
+
+    def test_bold_that_opens_a_paragraph_is_not(self) -> None:
+        """The case that made a CSS-only rule wrong: bold, then prose, one paragraph."""
+        html = self._md('**Two lenses on one structure.**\nProject Euler sits there.\n')
+        self.assertIn('<strong>Two lenses on one structure.</strong>', html)
+        self.assertNotIn('class="pull"', html)
+
+    def test_bold_that_ends_a_paragraph_is_not(self) -> None:
+        html = self._md('Prose first.\n**Then the bold tail.**\n')
+        self.assertNotIn('class="pull"', html)
+
+    def test_two_bold_runs_alone_in_a_paragraph_are_not_a_pull_quote(self) -> None:
+        """One sentence, not a bold-labelled pair: `**a** **b**` is two runs."""
+        html = self._md('**usage** **arguments**\n')
+        self.assertNotIn('class="pull"', html)
+
+    def test_the_packaged_start_page_summary_has_exactly_one(self) -> None:
+        """Home and the login page render this same string (content.readme_html), so the
+        one line the colour is for is the only line that may carry the mark."""
+        html = content.readme_html()
+        if not html:                                   # tree without a generated summary
+            self.skipTest('no packaged home-summary.md')
+        self.assertEqual(1, html.count('<p class="pull">'))
+        self.assertIn('<p class="pull"><strong>The point never is to get an answer', html)
+
+
 class CollapseProblemsTests(unittest.TestCase):
     """The topic page folds `update-tags`' generated Problems list into a <details>.
 

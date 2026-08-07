@@ -1026,6 +1026,24 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .readme .doc-body h2, .readme .doc-body h3 { margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
 .readme .doc-body > :first-child { margin-top: 0; }
 .readme .doc-body img { display: none; }   /* the badges: GitHub furniture, not site content */
+/* The thesis line — "The point never is to get an answer but to understand why it is
+   the answer." Bold does not carry it: the summary's own opening sentence is bold, and
+   the Highlights below it are a column of bold labels, so the one line that is the point
+   of the place was set in the same weight as its furniture. It takes the accent instead
+   — the orange every kicker, rule and lit tile already uses for "this is the one that
+   matters" — and the emphasis is then a colour nothing else in the prose is wearing.
+
+   Keyed on the SHAPE of a pull-quote, not on the words, so it survives a rewrite: the
+   README gives the line a paragraph of its own, and `render_markdown` marks a paragraph
+   that is nothing but a bold sentence `class="pull"` (it has to be done there — CSS's
+   `:only-child` counts elements, so the text after a lead-in bold does not disqualify
+   it, and the summary's opening sentence matched too). Scoped to `.readme`, so the
+   ~120 `**usage**` labels the guides carry stay as they are.
+
+   Home and the login page render the same `_home.html` from the same packaged
+   home-summary.md, so this is one rule for both; site.css is served ahead of
+   forward_auth, so the signed-out page gets it too. */
+.readme .doc-body p.pull > strong { color: var(--accent); }
 
 /* ── Editors ─────────────────────────────────────────────────────────────── */
 .editor-buffer {

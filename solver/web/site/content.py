@@ -663,6 +663,15 @@ def _unmask_math(text: str, spans: list[str], *, raw: bool = False) -> str:
                           text)
 
 
+#: A paragraph that is **nothing but** a bold sentence — the pull-quote a writer means by
+#: giving a line a paragraph of its own — gets `class="pull"` so a stylesheet can tell it
+#: from the bold that merely *opens* or *ends* a paragraph. CSS cannot make that
+#: distinction itself: `p > strong:only-child` counts element siblings, and the text after
+#: `**…**` is a text node, so every lead-in bold matches it too. The markup is where the
+#: difference is real, so the mark is made here, once, for every tree that renders.
+_PULL_RE = re.compile(r'<p>(<strong>(?:(?!</strong>).)*</strong>)</p>', re.DOTALL)
+
+
 def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '') -> str:
     """Render Markdown to HTML: slugged heading ids + links rewired for the shell.
 
@@ -700,6 +709,7 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
             # written against the article (and `update_doc.py`'s) still land.
             token.attrSet('id', _doc_slug(_unmask_math(tokens[i + 1].content, spans, raw=True)))
     rendered: str = _MD.renderer.render(tokens, _MD.options, {})
+    rendered = _PULL_RE.sub(r'<p class="pull">\1</p>', rendered)
     rendered = re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"',
                       rf'href="{route_base}\1\2"', rendered)
     rendered = re.sub(r'href="\.\./([^"#]+)"',
