@@ -1332,6 +1332,14 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   │ the page's own tiles, grids or prose              │
   ```
 
+  **The hero's three slots say three different things, in the same order on all five
+  pages.** The **kicker** is the page's one witty line — an aphorism, lowercase, no full
+  stop; it is *not* the section name, which the header nav and the strip already say twice.
+  The **h1** is the plain title (`Solutions`, `The guides`, `The mathematics`, `The solver
+  shell`; on home, the site's own name). The **lede** is the fact worth knowing, told with
+  the same voice as the kicker — a count and what is still ahead of it, never a restatement
+  of what the content below already shows.
+
   **The section strip** (`_sections.html`, one definition for all five pages) carries live
   **counts**, not prose: it repeats the header's nav on every page, so it has to say
   something the header cannot — how much is solved, how much is written, whether the shell
