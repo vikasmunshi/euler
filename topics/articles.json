@@ -5142,7 +5142,7 @@
     {
       "path": "technique/modular-arithmetic-application",
       "title": "Modular arithmetic (application)",
-      "status": "draft",
+      "status": "final",
       "solved": 35,
       "problems": 35,
       "tags": ["modular-arithmetic-application"],
