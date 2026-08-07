@@ -5547,7 +5547,7 @@
     {
       "path": "technique/recursion-computer-science",
       "title": "Recursion (computer science)",
-      "status": "draft",
+      "status": "final",
       "solved": 36,
       "problems": 36,
       "tags": ["recursion-computer-science"],
