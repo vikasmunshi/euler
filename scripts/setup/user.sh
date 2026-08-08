@@ -83,14 +83,16 @@ Usage: $0 <action> [args]
                                users must be deprovisioned first.
   upgrade                      Alias of deploy: re-assert the shared layer.
   redeploy                     Refresh /etc/euler/user.env, re-lay every provisioned
-                               user's git hooks from this repo, and stop the running
-                               instances so their sockets re-activate them against a
-                               freshly rebuilt venv (drops live shells).
+                               user's git hooks (and the .gitignore / .shellcheckrc they
+                               read) from this repo, and stop the running instances so
+                               their sockets re-activate them against a freshly rebuilt
+                               venv (drops live shells).
   provision <slug> <email> <profile>
                                Provision one collaborator: the uid <slug> + /home/<slug> (0700), a
                                filter-disabled clone of ~/euler from the public GitHub
                                repo on branch user/<slug> (cloned AS the user, through
-                               Squid), git hooks rendered from THIS repo's templates,
+                               Squid), git hooks rendered from THIS repo's templates
+                               plus the .gitignore / .shellcheckrc they read,
                                Claude Code (~/.local/bin, theirs), ~/.euler, and the
                                instance socket. Idempotent — re-run it to repair an
                                instance and re-lay its hooks; the clone is left as it
@@ -336,7 +338,8 @@ as_user() {
     sudo -Hu "${user}" env "$@" EGRESS_ENV="${EGRESS_ENV}" bash -s
 }
 
-# Lay the git hooks into a provisioned clone, rendered from THIS repo's templates.
+# Lay the git hooks — and the repo-root config they read — into a provisioned clone,
+# rendered from THIS repo's templates.
 #
 # The operator checkout is the source: the hooks a collaborator runs must be the ones this
 # repo ships, never whatever their clone happens to hold. A clone can sit behind master
@@ -375,7 +378,54 @@ provision_hooks() {
         rm -f "${rendered}"
         echo "Installed hook: ${hook}"
     done
+    provision_hook_config "${slug}"
     provision_filter_command "${slug}"
+}
+
+# Restore the two repo-root files the hooks READ, from this checkout into the clone.
+#
+# A hook is only as good as its configuration, and both of these are configuration:
+# `.gitignore` decides the pre-commit "gitignored files" verdict (its `!` negations are what
+# keep a tracked dotfile from reading as ignored), and `.shellcheckrc` decides how every
+# shell script is judged — `external-sources` above all, without which a script passes or
+# fails on whether the file it sources happened to be in the same shellcheck command. Ship
+# the hook from here and leave its config to the clone, and the gate a collaborator runs is
+# not the gate this repo chose.
+#
+# Copied ONLY when the clone's own HEAD already holds these exact bytes. That looks like a
+# no-op and is precisely the point: it puts the file back when a collaborator has edited
+# theirs, which is the only case where the two can disagree without git being involved.
+#
+# It is deliberately SKIPPED when the clone is behind on the file, and this is not caution —
+# it is the difference between a missing config and an unusable clone. Git refuses to merge
+# over a path whose worktree copy differs from HEAD: untracked, or tracked-and-modified, and
+# even when the bytes are byte-identical to what the merge is bringing in (both cases
+# verified). Copying into a behind clone would therefore trade "your shellcheck lane is
+# unconfigured until you sync" for "you cannot sync at all" — and the sync is exactly what
+# fixes the first. So the file waits for `git-sync`, which is the plane that can deliver it,
+# and the operator is told which clones are waiting.
+provision_hook_config() {
+    local slug="$1" user clone name src ours theirs
+    user="$(user_of "${slug}")"
+    clone="$(home_of "${slug}")/euler"
+    for name in .gitignore .shellcheckrc; do
+        src="${PROJECT_ROOT}/${name}"
+        if [ ! -f "${src}" ]; then
+            echo "warn: ${src} not found — skipping ${name}." >&2
+            continue
+        fi
+        # Blob hashes, not file contents: `rev-parse HEAD:<path>` is what the clone has
+        # COMMITTED, so this compares against the clone's own history and not its worktree —
+        # a worktree the collaborator may have edited, which is the case being repaired.
+        ours="$(git -C "${PROJECT_ROOT}" hash-object -- "${src}" 2> /dev/null || true)"
+        theirs="$(sudo -u "${user}" git -C "${clone}" rev-parse "HEAD:${name}" 2> /dev/null || true)"
+        if [ -z "${ours}" ] || [ "${ours}" != "${theirs}" ]; then
+            echo "note: ${clone} is behind on ${name} — it arrives when ${slug} runs git-sync."
+            continue
+        fi
+        sudo install -o "${user}" -g "${user}" -m 0644 "${src}" "${clone}/${name}"
+        echo "Installed config: ${name}"
+    done
 }
 
 # Point a clone's crypt filter at the deployed venv, with -P.

@@ -2515,9 +2515,24 @@ the venv — must have its `vX.Y.Z` tag on origin, or the redeploy refuses. That
 release that was bumped and tagged locally but never pushed from running the deployed venv
 ahead of what any collaborator clone can `git-sync` to.
 
-**Per-clone setup travels with the redeploy.** Two things inside a collaborator's clone are
-laid down from *this* checkout rather than by them: their git hooks, and their crypt filter's
-command. Both are things they cannot receive any other way. A clone keeps whatever filter
+**Per-clone setup travels with the redeploy.** Three things inside a collaborator's clone are
+laid down from *this* checkout rather than by them: their git hooks, the repo-root config
+those hooks read, and their crypt filter's command. All are things they cannot receive any
+other way.
+
+The config is `.gitignore` and `.shellcheckrc` — configuration in the same sense the hooks
+are, because each decides a verdict: `.gitignore`'s `!` negations are what the pre-commit
+"gitignored files" gate reads, and `.shellcheckrc`'s `external-sources` is what stops a shell
+script from passing or failing on whether the file it sources happened to be in the same
+`shellcheck` command. Shipping the hook from here while leaving its config to the clone would
+run a gate this repo did not choose. Unlike the hooks, though, these two are **tracked files**,
+so they are restored only when the clone's own HEAD already holds those exact bytes — putting
+the file back when a collaborator has edited theirs, and doing nothing otherwise. A clone that
+is *behind* on one is skipped and named in the output, deliberately: git refuses to merge over
+a path whose worktree copy differs from HEAD — untracked, or tracked-and-modified, and even
+when the bytes are identical to what the merge is bringing in. Copying into a behind clone
+would trade "your shellcheck lane is unconfigured until you sync" for "you cannot sync at
+all", and the sync is precisely what fixes the first. A clone keeps whatever filter
 command was recorded the day it was wired, and only `git-filter install` rewrites it — which
 needs the master key, so it runs in their own session and nowhere else; writing the command,
 though, needs no key at all (only the re-checkout does), so the operator can push it. It has
