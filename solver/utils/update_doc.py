@@ -80,6 +80,17 @@ _HOME_START = '<!-- HOME:START'
 _HOME_END = '<!-- HOME:END'
 HOME_SUMMARY: Path = ROOT / 'solver' / 'web' / 'content' / 'home-summary.md'
 
+#: The root `CLAUDE.md` this command rewrites is a **gitignored symlink** onto the tracked
+#: file inside the package, so writing through it changes that path and not this one. The
+#: commit has to name the target: a pathspec for `CLAUDE.md` matches nothing git tracks.
+CLAUDE_SYMLINK: Path = ROOT / 'CLAUDE.md'
+CLAUDE_TRACKED: str = 'solver/ai/claude/CLAUDE.md'
+
+
+def _tracked(path: Path) -> str:
+    """*path* as the repo-relative path git tracks — the form a commit pathspec takes."""
+    return CLAUDE_TRACKED if path == CLAUDE_SYMLINK else path.relative_to(ROOT).as_posix()
+
 
 def _home_summary(readme: str) -> str:
     """The README slice between the HOME markers — the web start page's summary.
@@ -355,14 +366,21 @@ def _render(text: str) -> tuple[str, list[str]]:
     return text, changed
 
 
-def _apply(check: bool) -> tuple[list[str], list[str]]:
-    """Render every doc; return *(updated, stale)* as `<file>: <blocks>` strings.
+def _apply(check: bool) -> tuple[list[str], list[str], list[str]]:
+    """Render every doc; return *(updated, stale, written)*.
 
     With *check* False, out-of-date docs are written and listed in *updated*;
     with *check* True nothing is written and they are listed in *stale* instead.
+
+    *updated* and *stale* are `<file>: <blocks>` strings for the reader. *written* is the
+    machine-readable half — the repo-relative path of each file this run actually rewrote,
+    which is what the commit stages. It is not derived from *updated* by splitting the
+    string: the two answer different questions, and `docs/` holds hand-written guides this
+    command must leave alone even while it is committing its own output beside them.
     """
     updated: list[str] = []
     stale: list[str] = []
+    written: list[str] = []
     targets = sorted(DOCS_DIR.glob('*.md')) + [ROOT / 'README.md', ROOT / 'CLAUDE.md']
     for doc in targets:
         original = doc.read_text()
@@ -375,6 +393,7 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
         else:
             doc.write_text(rendered)
             updated.append(entry)
+            written.append(_tracked(doc))
 
     # The web start page's summary — a whole-file artifact derived from the
     # README's HOME slice (not a GEN block). Read the README from disk after the
@@ -389,7 +408,8 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
         else:
             HOME_SUMMARY.write_text(desired)
             updated.append(entry)
-    return updated, stale
+            written.append(_tracked(HOME_SUMMARY))
+    return updated, stale, written
 
 
 @register(requires='admin', pass_ctx=True, quietable=True)
@@ -422,13 +442,14 @@ def update_docs(ctx: Context, check: bool = False) -> int:
         check: Write nothing and fail if any doc is out of date, listing the stale files.
             Defaults to False, which rewrites the docs in place and reports which changed.
     """
-    if update_modules():
+    modules_changed = update_modules()
+    if modules_changed:
         load_commands(refresh_modules=True)
         console.print('[success]modules updated[/success]')
     else:
         console.print('[muted]modules already up to date[/muted]')
 
-    updated, stale = _apply(check)
+    updated, stale, written = _apply(check)
     if check:
         if stale:
             console.print('[error]docs out of date[/error] (run [accent]update-docs[/accent]):')
@@ -442,6 +463,16 @@ def update_docs(ctx: Context, check: bool = False) -> int:
             console.print(f'[success]updated[/success] {entry}')
     else:
         console.print('[muted]docs already up to date[/muted]')
-    # Committed even when `updated` is empty: `update_modules()` above may have rewritten
-    # `solver/modules.csv`, which is this verb's output too and is not in that list.
-    return commit_regenerated('update-docs', quips['update-docs'], updated)
+    # `solver/modules.csv` is this verb's output too, rewritten by `update_modules()` above and
+    # reported by neither `updated` nor `written`, so it is added here by hand.
+    #
+    # A run that rewrites nothing now commits nothing — including the case where an *earlier*
+    # run wrote a doc and its commit failed, leaving it dirty. `update-models` and
+    # `update-usd-rate` re-offer their one file for exactly that case; this command cannot,
+    # because its scope is `docs/`, where a still-dirty generated file is indistinguishable
+    # from a guide someone is in the middle of writing. Sweeping up that draft is the worse
+    # error of the two, and the recovery is a person's `git-commit docs update` — which is the
+    # right shape for it: a human deciding what the leftover diff is.
+    if modules_changed:
+        written.append('solver/modules.csv')
+    return commit_regenerated('update-docs', quips['update-docs'], written, updated)

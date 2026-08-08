@@ -40,6 +40,7 @@ import logging
 import os
 import smtplib
 import sys
+from typing import NamedTuple
 
 MAX_LINE = 4096            # RFC 5321 command lines are far shorter
 MAX_SIZE = 64 * 1024       # OTP/invite mail is tiny; cap DATA hard
@@ -47,6 +48,21 @@ MAX_RCPT = 5
 SESSION_TIMEOUT = 60.0     # seconds of inactivity before the connection is dropped
 
 log = logging.getLogger('euler-smtp')
+
+
+class Config(NamedTuple):
+    """The upstream submission settings, read once from the environment at startup.
+
+    A NamedTuple rather than the `dict[str, object]` this used to be: every read then came
+    back as `object` and had to be re-coerced at the call site — `str(...)` around values
+    already known to be strings, and an `int(...)` around the port that no amount of casting
+    made honest, since `int` takes no `object`. The dict cost a `type: ignore` for a type
+    error that was never real. Here each field is typed once, where it is filled.
+    """
+    host: str
+    port: int
+    address: str
+    password: str
 
 
 def _require_env(name: str) -> str:
@@ -70,7 +86,7 @@ class Session:
     """One loopback SMTP session: minimal ESMTP state machine."""
 
     def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter,
-                 config: dict[str, object]) -> None:
+                 config: Config) -> None:
         self.reader = reader
         self.writer = writer
         self.config = config
@@ -154,13 +170,13 @@ class Session:
                 return
             chunks.append(raw)
         data = b''.join(chunks)
-        sender = str(self.config['address'])
+        sender = self.config.address
         rcpts = list(self.rcpts)
         self.reset()
         try:
             await asyncio.to_thread(_relay, sender, rcpts, data,
-                                    str(self.config['host']), int(self.config['port']),  # type: ignore[arg-type]
-                                    str(self.config['password']))
+                                    self.config.host, self.config.port,
+                                    self.config.password)
         except Exception as exc:             # transient to the client; never log the body
             log.warning('relay failed: %d rcpt, %d bytes: %s', len(rcpts), len(data), exc)
             await self.send('451 upstream submission failed, try again later')
@@ -170,7 +186,7 @@ class Session:
 
 
 async def handle(reader: asyncio.StreamReader, writer: asyncio.StreamWriter,
-                 config: dict[str, object]) -> None:
+                 config: Config) -> None:
     try:
         await Session(reader, writer, config).run()
     except (asyncio.TimeoutError, ValueError, ConnectionError):
@@ -189,16 +205,16 @@ async def main() -> None:
     logging.basicConfig(level=logging.INFO, format='%(name)s: %(message)s')
     listen = os.environ.get('EULER_SMTP_LISTEN', '127.0.0.1:8025')
     bind_host, _, bind_port = listen.rpartition(':')
-    config: dict[str, object] = {
-        'host': os.environ.get('SMTP_HOST', 'smtp.gmail.com'),
-        'port': int(os.environ.get('SMTP_PORT', '587')),
-        'address': _require_env('SMTP_ADDRESS'),
-        'password': _require_env('SMTP_APP_PASSWORD'),
-    }
+    config = Config(
+        host=os.environ.get('SMTP_HOST', 'smtp.gmail.com'),
+        port=int(os.environ.get('SMTP_PORT', '587')),
+        address=_require_env('SMTP_ADDRESS'),
+        password=_require_env('SMTP_APP_PASSWORD'),
+    )
     server = await asyncio.start_server(
         lambda r, w: handle(r, w, config), bind_host, int(bind_port), limit=MAX_LINE)
     log.info('listening on %s, upstream %s:%s as %s',
-             listen, config['host'], config['port'], config['address'])
+             listen, config.host, config.port, config.address)
     async with server:
         await server.serve_forever()
 

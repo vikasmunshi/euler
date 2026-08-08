@@ -638,6 +638,7 @@ do_remove() {
     leftover="$(euler_user_names || true)"
     if [ -n "${leftover}" ]; then
         echo "Refusing to uninstall — provisioned users remain:" >&2
+        # shellcheck disable=SC2001  # per-line indent of a multi-line string; ${//} can't anchor ^
         echo "${leftover}" | sed 's/^/  /' >&2
         echo "Deprovision each ('$0 deprovision <slug>') first." >&2
         return 1

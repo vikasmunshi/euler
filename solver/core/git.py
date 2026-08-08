@@ -118,13 +118,19 @@ TARGET_PATHS: dict[str, tuple[str, ...]] = {
                'solver/ai/claude/CLAUDE.md', 'solver/web/content/home-summary.md'),
 }
 
-#: What each `update-*` verb commits for itself (:func:`commit_regenerated`) — **exactly** the
-#: paths that verb writes, which is why this is its own table and not the `docs`/`update`
-#: targets above. Those targets are for a person naming a body of work: `update` deliberately
-#: spans everything the four verbs write, so `git-commit docs update` lands a whole
-#: regeneration as one reviewable commit. An automatic commit has nobody looking, so it must
-#: not sweep up a sibling verb's uncommitted output — `update-models` staging the `update` set
-#: would carry off a stale `values.conf` that `update-usd-rate` had not committed yet.
+#: The **envelope** each `update-*` verb may commit within (:func:`commit_regenerated`) — the
+#: outer bound on what that verb is allowed to touch, which is why this is its own table and
+#: not the `docs`/`update` targets above. Those targets are for a person naming a body of work:
+#: `update` deliberately spans everything the four verbs write, so `git-commit docs update`
+#: lands a whole regeneration as one reviewable commit. An automatic commit has nobody looking,
+#: so it must not sweep up a sibling verb's uncommitted output — `update-models` staging the
+#: `update` set would carry off a stale `values.conf` that `update-usd-rate` had not committed
+#: yet.
+#:
+#: What is actually committed is narrower still, and is **not** read from here: each verb
+#: reports the files it wrote, because two entries below are directory prefixes that also
+#: match hand-written work (`docs/` holds the prose guides, `topics/` the articles). This
+#: bounds that report; it does not stand in for it.
 #:
 #: Note `solver/ai/claude/CLAUDE.md` rather than the root `CLAUDE.md`: the root name is a
 #: gitignored symlink onto it, so the tracked path is the target's.
@@ -315,13 +321,29 @@ def _amend(paths: list[str], dirty: str, targets: tuple[str, ...]) -> int:
     return result
 
 
-def commit_regenerated(verb: str, quips: tuple[str, ...], detail: Sequence[str] = ()) -> int:
+def commit_regenerated(verb: str, quips: tuple[str, ...], written: Sequence[str],
+                       detail: Sequence[str] = ()) -> int:
     """Commit what *verb* just regenerated — the `update-*` verbs' own commit.
 
     A regeneration that stops at the working tree leaves the next person to guess whether the
     diff is theirs, and leaves the git chip counting it as their uncommitted work. So each
-    `update-*` verb lands its own output, staging exactly :data:`GENERATED_PATHS`\\ ``[verb]``
-    and nothing beside it.
+    `update-*` verb lands its own output — **the files it actually wrote**, and nothing beside
+    them.
+
+    *written* is that list, repo-relative: every file this run rewrote, reported by the verb
+    because only the verb knows it. It is required, and empty means the run wrote nothing and
+    there is nothing to commit. There is deliberately no "commit my whole scope instead"
+    fallback — :data:`GENERATED_PATHS`\\ ``[verb]`` names a directory for two of these verbs
+    (`docs/`, `topics/`), which also matches every *hand-written* guide and article under it,
+    so a fallback would land a half-finished page the verb never touched under a
+    `chore(update-*)` subject, and would do it precisely on the runs that regenerated least.
+    That table is the **envelope**: a written path outside it is dropped as a bug in the verb
+    rather than quietly committed.
+
+    A file is committed whole, including changes it was already carrying. That is deliberate:
+    these verbs reconcile hand edits rather than ignore them (a maintainer's tag edit is
+    `update-tags`' input), so "the file as it now stands" is the reviewable unit. Per-hunk
+    splitting would land a tags.json whose committed half contradicts its uncommitted half.
 
     The message is `chore(<verb>): <quip>` over a body naming what actually moved. The subject
     is deliberately a **`chore`**: `scripts/version/release.sh` derives the SemVer bump from
@@ -333,16 +355,51 @@ def commit_regenerated(verb: str, quips: tuple[str, ...], detail: Sequence[str] 
     Clean paths are nothing to do, not a failure. A *failing* commit is returned as-is rather
     than swallowed: the files are already written, so re-running is idempotent, and a hook that
     rejected the commit is something to see rather than to hide behind a zero.
+
+    The commit carries the **same pathspecs** as the `git add`, which is what makes "nothing
+    beside it" true. Scoping only the `add` does not: `git commit` with no pathspec commits the
+    whole index, so a regeneration run while the committer had staged work of their own carried
+    that work off under a `chore(update-*)` subject — someone else's changes, in a commit
+    nobody wrote for them, with a message describing none of it. A pathspec'd commit builds its
+    tree from HEAD plus these paths and leaves the rest of the index untouched, so staged work
+    is still staged afterwards.
     """
-    paths: list[str] = _pathspecs(GENERATED_PATHS[verb])
+    envelope: tuple[str, ...] = GENERATED_PATHS[verb]
+    stray = {path for path in written if not _in_scope(path, envelope)}
+    for path in sorted(stray):
+        console.print(f'[warning]warning:[/warning] {verb} wrote {path}, which is outside its '
+                      'declared scope — not committing it.')
+    # A path that names nothing is dropped too, and loudly. It is always a bug in the verb —
+    # a display string mistaken for a path, a stale name — and silence is the worst outcome:
+    # `git commit -- <spec>` fails outright on a pathspec that matches nothing, and a bad
+    # entry that survives the `_in_scope` prefix test would otherwise turn every one of that
+    # verb's commits into "clean, nothing to do". A path that is gone from disk but tracked
+    # is kept: that is a deletion, which is something to commit.
+    for path in sorted(set(written) - stray):
+        if config.root_dir.joinpath(path).exists():
+            continue
+        tracked = run(['git', 'ls-files', '--error-unmatch', '--', path],
+                      cwd=config.root_dir, capture_output=True, text=True).returncode == 0
+        if not tracked:
+            console.print(f'[warning]warning:[/warning] {verb} reported writing {path}, which is '
+                          'neither on disk nor tracked — not committing it.')
+            stray.add(path)
+    # `:(literal)` so a written path is matched as the name it is — these come from the
+    # filesystem, where a `*` or `[` is a character in a filename and not a pattern.
+    paths: list[str] = [f':(literal){path}' for path in sorted(set(written) - stray)]
+    if not paths:
+        return ExitCodes.EXIT_OK       # wrote nothing (or nothing it may commit): nothing to do
     dirty: str = run(['git', 'status', '--porcelain', '--', *paths],
                      cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
     if not dirty:
         return ExitCodes.EXIT_OK
     body = '\n'.join([f'Regenerated by `{verb}`:', '', *(f'  {line}' for line in detail)]) if detail else ''
     message = f'chore({verb}): {random.choice(quips)}' + (f'\n\n{body}\n' if body else '\n')
-    cmdline = ('git add -A ' + ' '.join(shlex.quote(spec) for spec in paths)
-               + ' && git commit --message ' + shlex.quote(message))
+    specs = ' '.join(shlex.quote(spec) for spec in paths)
+    # `add -A` first so a new or deleted generated file is in the index for the pathspec to
+    # match; the commit then re-reads those same paths and ignores everything else staged.
+    cmdline = (f'git add -A {specs}'
+               + ' && git commit --message ' + shlex.quote(message) + f' -- {specs}')
     result: int = run_cmdline(cmdline)
     if result == 0:
         osc.git_changed()
@@ -1253,10 +1310,10 @@ def gh_merge(action: Literal['list', 'merge'] = 'list',
 def git_hooks() -> int:
     """Run the git pre-commit and (simulated) pre-push checks on demand.
 
-    Runs the same checks the git hooks run — the pre-commit hook (whitespace
-    fixes, flake8, mypy) and a simulation of the pre-push hook — so you can
-    verify your changes will pass before committing or pushing. Reports the
-    combined pass/fail in the exit code.
+    Runs the same checks the git hooks run — the pre-commit hook (whitespace,
+    staged artifacts, shellcheck, flake8, mypy) and a simulation of the pre-push
+    hook — so you can verify your changes will pass before committing or pushing.
+    Reports the combined pass/fail in the exit code.
 
     Aliased as `hooks`.
     """

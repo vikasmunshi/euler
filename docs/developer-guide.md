@@ -328,7 +328,7 @@ it. Write the docstring once and both are right.
 
 `check-commands` walks the live registry and reports every docstring that breaks
 §3.8, as `command | rule | detail` rows. It is part of
-`scripts/linters/check.sh solver`, so it runs with `mypy` and `flake8`.
+`scripts/linters/check.sh solver`, so it runs with `mypy`, `flake8` and `shellcheck`.
 
 ```bash
 check-commands              # the whole registry
@@ -584,6 +584,7 @@ control over their argument line (`?`, `clear`, the `!` bash passthrough) use
       the help panel and in the catalogue's `Requires` column.
 - [ ] Module listed in `modules.csv` — run `python -m solver.utils.loader` (or
       `update-docs`) to add the row by scanning.
-- [ ] `scripts/linters/check.sh solver` clean (`mypy`, `flake8`, `check-commands`).
+- [ ] `scripts/linters/check.sh solver` clean (`mypy`, `flake8`, `check-commands`; plus
+      `shellcheck` when the directory holds shell scripts, as `scripts` does).
 - [ ] If you changed any command's name/help/usage, run the `update-docs`
       command to refresh the generated docs.

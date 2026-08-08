@@ -46,6 +46,11 @@ _USD_RATE_RE = re.compile(r"""currency=['"]USD['"]\s+rate=['"]([\d.]+)['"]""")
 _EPSILON = 5e-5
 
 
+def _written() -> str:
+    """This command's one output, as the repo-relative path its commit names."""
+    return config.values_file.relative_to(config.root_dir).as_posix()
+
+
 def _fetch_ecb_usd_rate() -> float | None:
     """Fetch the current USD→EUR rate (euros per dollar) from the ECB daily reference feed.
 
@@ -90,7 +95,8 @@ def update_usd_rate(check: bool = False) -> int:
         console.print('[muted]USD→EUR rate already up to date[/muted]')
         # Still offered to the committer: an earlier run may have written the rate and failed
         # to commit it, and "up to date" must not mean "left dirty forever". Clean is a no-op.
-        return commit_regenerated('update-usd-rate', quips['update-usd-rate'])
+        # This verb's whole output is the one file, so naming it is naming everything it writes.
+        return commit_regenerated('update-usd-rate', quips['update-usd-rate'], [_written()])
     if check:
         console.print(f'[error]USD→EUR rate out of date[/error] (run [accent]update-usd-rate[/accent]): '
                       f'[accent]{config.ecb_usd_rate} → {rate}[/accent]')
@@ -101,4 +107,5 @@ def update_usd_rate(check: bool = False) -> int:
     console.print(f'[success]updated[/success] ecb_usd_rate in '
                   f'{config.values_file.relative_to(config.root_dir)} '
                   f'([accent]{previous} → {rate}[/accent])')
-    return commit_regenerated('update-usd-rate', quips['update-usd-rate'], [f'ecb_usd_rate: {previous} → {rate}'])
+    return commit_regenerated('update-usd-rate', quips['update-usd-rate'], [_written()],
+                              [f'ecb_usd_rate: {previous} → {rate}'])

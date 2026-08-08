@@ -66,7 +66,8 @@ main() {
     local found_any=false
     for pycharm_version_dir in "$config_dir"/PyCharm*/; do
         if [[ -d "$pycharm_version_dir" ]]; then
-            local version_name=$(basename "$pycharm_version_dir")
+            local version_name
+            version_name=$(basename "$pycharm_version_dir")
             local vmoptions_file="$pycharm_version_dir/pycharm64.vmoptions"
 
             echo "Version: $version_name"

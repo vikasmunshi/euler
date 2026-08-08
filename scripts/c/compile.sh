@@ -45,23 +45,25 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUNNER_INCLUDE="${SCRIPT_DIR}/../../solver/runners"
 
-EXTRA_LIBS=""
+# One array element per flag: the link line is built word by word, so it survives
+# quoting on expansion instead of relying on the shell to re-split a string.
+EXTRA_LIBS=()
 if grep -q '^#include[[:space:]]*<primesieve\.h>' "${SOLUTION}"; then
-    EXTRA_LIBS="${EXTRA_LIBS} -lprimesieve"
+    EXTRA_LIBS+=(-lprimesieve)
 fi
 # Arbitrary-precision arithmetic: link the bignum library matching each include.
 # MPFR depends on GMP, so it pulls in -lgmp too (and must precede it on the line).
 if grep -q '^#include[[:space:]]*<mpfr\.h>' "${SOLUTION}"; then
-    EXTRA_LIBS="${EXTRA_LIBS} -lmpfr -lgmp"
+    EXTRA_LIBS+=(-lmpfr -lgmp)
 elif grep -q '^#include[[:space:]]*<gmp\.h>' "${SOLUTION}"; then
-    EXTRA_LIBS="${EXTRA_LIBS} -lgmp"
+    EXTRA_LIBS+=(-lgmp)
 fi
 if grep -q '^#include[[:space:]]*<openssl/bn\.h>' "${SOLUTION}"; then
-    EXTRA_LIBS="${EXTRA_LIBS} -lcrypto"
+    EXTRA_LIBS+=(-lcrypto)
 fi
 
 set +e
-gcc -O2 -Werror -I"${RUNNER_INCLUDE}" -o "${OUTPUT}" "${SOLUTION}" -lm ${EXTRA_LIBS}
+gcc -O2 -Werror -I"${RUNNER_INCLUDE}" -o "${OUTPUT}" "${SOLUTION}" -lm "${EXTRA_LIBS[@]}"
 GCC_EXIT_CODE=$?
 set -e
 

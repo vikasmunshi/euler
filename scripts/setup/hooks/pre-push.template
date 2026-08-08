@@ -11,7 +11,8 @@
 #   2. No compiled binaries (ELF blobs) anywhere in the tracked tree.
 #   3. flake8 on solver + solutions.
 #   4. mypy on solver + solutions.
-#   5. the unit tests — only when the push changes solver/, scripts/ or tests/.
+#   5. shellcheck on every tracked shell script (scripts + hook templates).
+#   6. the unit tests — only when the push changes solver/, scripts/ or tests/.
 #
 # Output contract: every check announces itself, prints its own detail on
 # failure, and the hook always ends with a single PASS/FAIL verdict that
@@ -225,15 +226,40 @@ else
     fail "flake8 reported issues"
 fi
 
-# ── 4. mypy on solver + solutions ────────────────────────────────────────
-section "mypy (solutions, solver)"
-if "$VENV/bin/mypy" solutions solver; then
+# ── 4. mypy on solver + solutions + scripts ──────────────────────────────
+# `scripts` holds tracked Python that ships and runs (scripts/setup/euler-smtp.py is
+# installed to /usr/local/bin and run as a service), so it is checked with the rest.
+section "mypy (solutions, solver, scripts)"
+if "$VENV/bin/mypy" solutions solver scripts; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"
 fi
 
-# ── 5. unit tests, when this push touches the code they cover ────────────
+# ── 5. shellcheck on every tracked shell script ──────────────────────────
+# The whole-tree backstop to pre-commit's staged-only lane: that one only sees the
+# scripts you touched, so a script edited around the hook (--no-verify, a rebase, a
+# merge) reaches the remote unlinted otherwise. Whole-tree like the flake8/mypy lanes
+# above, and about as quick as a single git command — every script is parsed
+# independently, nothing is resolved across files.
+#
+# The hook templates are in scope: they are shell, and only become .git/hooks/* once
+# githooks.sh substitutes __VENV__ — which means a broken template is discovered at
+# `githooks.sh install` time, i.e. as a broken hook, unless it is linted here.
+section "shellcheck (tracked shell scripts)"
+mapfile -t -d '' tracked_sh < <(git ls-files -z -- '*.sh' '*.template')
+if (( ${#tracked_sh[@]} == 0 )); then
+    skip "no shell scripts tracked"
+elif ! command -v shellcheck > /dev/null 2>&1; then
+    note "install it with: make install-system"
+    fail "shellcheck is not installed"
+elif shellcheck -- "${tracked_sh[@]}"; then
+    pass "shellcheck clean (${#tracked_sh[@]} script(s))"
+else
+    fail "shellcheck reported issues"
+fi
+
+# ── 6. unit tests, when this push touches the code they cover ────────────
 # The suite takes ~10s and covers solver/ + scripts/. A solutions-only push cannot
 # break it, and the collaborator pushing their problem should not wait on it — so the
 # trigger is scoped to what this push changes, like the audits above.

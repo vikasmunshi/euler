@@ -48,6 +48,12 @@ from solver.utils.quips import quips
 #: The module whose `Model` class this command maintains.
 MODELS_FILE: Path = Path(__file__).resolve().with_name('models.py')
 
+
+def _written() -> str:
+    """This command's one output, as the repo-relative path its commit names."""
+    return MODELS_FILE.relative_to(config.root_dir).as_posix()
+
+
 #: The public pricing page scraped for per-token prices (the Models API exposes none).
 PRICING_URL = 'https://platform.claude.com/docs/en/about-claude/pricing.md'
 
@@ -258,7 +264,8 @@ def update_models(check: bool = False) -> int:
         console.print('[muted]models already up to date[/muted]')
         # Still offered to the committer: an earlier run may have written the block and failed
         # to commit it, and "up to date" must not mean "left dirty forever". Clean is a no-op.
-        return commit_regenerated('update-models', quips['update-models'])
+        # This verb's whole output is the one file, so naming it is naming everything it writes.
+        return commit_regenerated('update-models', quips['update-models'], [_written()])
     if check:
         console.print('[error]models out of date[/error] (run [accent]update-models[/accent]): '
                       '[warning]model pricing[/warning]')
@@ -267,6 +274,6 @@ def update_models(check: bool = False) -> int:
     MODELS_FILE.write_text(rendered)
     console.print(f'[success]updated[/success] {MODELS_FILE.relative_to(config.root_dir)} '
                   f'([accent]{len(models)}[/accent] models)')
-    return commit_regenerated('update-models', quips['update-models'],
+    return commit_regenerated('update-models', quips['update-models'], [_written()],
                               [f'{model_id}: ${inp:.2f} in / ${out:.2f} out per MTok'
                                for model_id, _display, inp, out in models])

@@ -213,12 +213,14 @@ confirm() {
 
 # Kill the sudo keep-alive whatever way we leave. The detached deploy is NOT cleaned up
 # here — outliving this shell is its entire purpose.
+# shellcheck disable=SC2329  # invoked indirectly, by the trap below
 cleanup() {
     if [[ -n "${KEEPALIVE_PID}" ]]; then kill "${KEEPALIVE_PID}" 2> /dev/null; fi
 }
 trap cleanup EXIT TERM
 
 # Ctrl-C while following the detached deploy stops the following, not the deploy.
+# shellcheck disable=SC2329  # invoked indirectly, by the trap below
 on_int() {
     if [[ -n "${DEPLOY_PID}" ]] && kill -0 "${DEPLOY_PID}" 2> /dev/null; then
         say ""

@@ -89,7 +89,7 @@ require_creds() {
 split_fqdn() {
     local fqdn="$1"
     DOMAIN="$(printf '%s' "${fqdn}" | awk -F. '{ if (NF>=2) print $(NF-1)"."$NF; else print $0 }')"
-    if [ "${fqdn}" = "${DOMAIN}" ]; then HOST=""; else HOST="${fqdn%.${DOMAIN}}"; fi
+    if [ "${fqdn}" = "${DOMAIN}" ]; then HOST=""; else HOST="${fqdn%".${DOMAIN}"}"; fi
 }
 
 # Print the host's current public IPv4, or fail.

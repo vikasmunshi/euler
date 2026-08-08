@@ -87,14 +87,35 @@ def dumps_compact(obj: Any, level: int = 0) -> str:
     return json.dumps(obj)
 
 
-def _write_central(obj: Any) -> None:
+def _rel(path: Path) -> str:
+    """*path* repo-relative — the form `commit_regenerated` names a written file in.
+
+    A path *outside* the checkout is returned whole rather than raising. Nothing in a real run
+    produces one (every write below lands under `topics/` or a solution directory); a fixture
+    pointing `topics_dir` at a temp directory does, and a regeneration is not the place to
+    discover it. `commit_regenerated` then drops the absolute path as outside the verb's
+    envelope — the right answer for a file that is not in the repository at all.
+    """
+    try:
+        return path.relative_to(config.root_dir).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+#: Each writer returns what it wrote, repo-relative, so `update_tags` can hand
+#: `commit_regenerated` the exact file list. It cannot be inferred from the pathspecs this
+#: verb owns: `topics/` holds the articles themselves, and an article being *written by hand*
+#: right now is the one file a regeneration must not sweep into its own commit.
+def _write_central(obj: Any) -> str:
     """The central vocabulary: compact (scalar lists inline) so big refs legs stay one line."""
     config.central_tags_file.write_text(dumps_compact(obj) + '\n')
+    return _rel(config.central_tags_file)
 
 
-def _write_problem_tags(path: Path, obj: Any) -> None:
+def _write_problem_tags(path: Path, obj: Any) -> str:
     """A per-problem tags.json: plain, human-diffable json.dumps(indent=2)."""
     path.write_text(json.dumps(obj, indent=2) + '\n')
+    return _rel(path)
 
 
 # ── central vocabulary ──────────────────────────────────────────────────────────────────
@@ -600,20 +621,28 @@ def _create_article(path: Path, tag: dict[str, Any]) -> None:
     path.write_text(body)
 
 
-def _regen_articles(central: dict[str, Any], write: bool) -> list[str]:
+def _regen_articles(central: dict[str, Any], write: bool) -> tuple[list[str], list[str]]:
     """Create a page for every tag that lacks one, then rewrite each page's Problems section.
 
     Creation is what removes `missing` from the status vocabulary: every tag has a file, so the
-    only question a status answers is whether the page has been *written*. Returns issues.
+    only question a status answers is whether the page has been *written*. Returns
+    *(issues, written)* — the second being the pages this run actually created or rewrote.
+
+    An article whose generated block and status both come out unchanged is **not** in *written*,
+    even though it was read and re-rendered. That is the whole point of tracking it: the prose
+    around the block is hand-written and often half-finished, so a page this pass did not move
+    must stay out of the commit and remain the author's uncommitted work.
     """
     by_slug = {t['slug']: t for t in central['tags']}
     titles, solved = _problem_meta()
     issues: list[str] = []
+    written: list[str] = []
     if write:
         for tag in central['tags']:
             path = config.topics_dir / tag['facet'] / f"{tag['slug']}.md"
             if not path.exists():
                 _create_article(path, tag)
+                written.append(_rel(path))
     for path in _iter_articles():
         text = path.read_text()
         declared = _article_tags(text)
@@ -625,7 +654,8 @@ def _regen_articles(central: dict[str, Any], write: bool) -> list[str]:
         new_text = _stamp_status(new_text)
         if write and new_text != text:
             path.write_text(new_text)
-    return issues
+            written.append(_rel(path))
+    return issues, written
 
 
 def _build_index(central: dict[str, Any]) -> dict[str, Any]:
@@ -655,9 +685,10 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
     return {'articles': [rows[path] for path in sorted(rows)]}
 
 
-def _write_index(index: dict[str, Any]) -> None:
+def _write_index(index: dict[str, Any]) -> str:
     """The article index: compact (each row's tag list inline), one row per line."""
     config.topics_index_file.write_text(dumps_compact(index) + '\n')
+    return _rel(config.topics_index_file)
 
 
 def _load_index() -> dict[str, Any] | None:
@@ -712,7 +743,7 @@ def update_tags(check: bool = False) -> int:
 
     if check:
         issues = _validate(central, ptags)
-        issues += _regen_articles(central, write=False)
+        issues += _regen_articles(central, write=False)[0]   # nothing is written in a check run
         if _load_index() != _build_index(central):
             issues.append(f'{config.topics_index_file.name} is out of date')
         if missing:
@@ -728,30 +759,32 @@ def update_tags(check: bool = False) -> int:
     diff_changes = _maintainer_diff(central, ptags)
     promoted, warnings = _promote_new_tags(central, ptags)
     _rebuild_refs(central, ptags)
-    art_issues = _regen_articles(central, write=True)
+    art_issues, written_paths = _regen_articles(central, write=True)
     index = _build_index(central)  # after the stamping above, so statuses are current
 
     # Re-sort vocabulary (domain, technique, takeaway; by slug) and persist everything.
     order = {'domain': 0, 'technique': 1, 'takeaway': 2}
     central['tags'].sort(key=lambda t: (order.get(t['facet'], 9), t['slug']))
-    _write_central(central)
-    _write_index(index)
+    written_paths.append(_write_central(central))
+    written_paths.append(_write_index(index))
     for num, data in ptags.items():
-        _write_problem_tags(_problem_tags_path(num), data)
+        written_paths.append(_write_problem_tags(_problem_tags_path(num), data))
 
     if missing:
         warnings.append(f'{len(missing)} problem(s) have no {config.tags_filename} '
                         f'(author with [accent]claude-api tags[/accent] or the skill)')
     for msg in warnings + art_issues:
         console.print(f'  [warning]•[/warning] {msg}')
-    written = {status: sum(1 for a in index['articles'] if a['status'] == status) for status in STATUSES}
+    # `by_status`, not `written`: this counts articles per status for the report, and the file
+    # list the commit takes is `written_paths` — two different things a line apart.
+    by_status = {status: sum(1 for a in index['articles'] if a['status'] == status) for status in STATUSES}
     console.print(f'[accent]update-tags:[/accent] {len(ptags)} problem file(s), '
                   f'{promoted} tag(s) promoted, {diff_changes} maintainer edit(s) applied')
-    console.print('[accent]articles:[/accent] ' + ' · '.join(f'{written[s]} {s}' for s in STATUSES))
-    return commit_regenerated('update-tags', quips['update-tags'], [
+    console.print('[accent]articles:[/accent] ' + ' · '.join(f'{by_status[s]} {s}' for s in STATUSES))
+    return commit_regenerated('update-tags', quips['update-tags'], written_paths, [
         f'{len(ptags)} problem file(s), {promoted} tag(s) promoted, '
         f'{diff_changes} maintainer edit(s) applied',
-        'articles: ' + ' · '.join(f'{written[s]} {s}' for s in STATUSES),
+        'articles: ' + ' · '.join(f'{by_status[s]} {s}' for s in STATUSES),
     ])
 
 

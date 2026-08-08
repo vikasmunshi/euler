@@ -1,0 +1,25 @@
+# ShellCheck configuration for the whole checkout.
+#
+# ShellCheck reads this file by walking up from each script it checks, so every
+# consumer gets the same rules: the linter script (scripts/linters/check.sh), the
+# git hooks, an editor integration, and a bare `shellcheck path/to/script.sh` run
+# by hand. Options live here rather than on the gates' command lines precisely so
+# those four cannot drift apart.
+#
+# No `disable=` lines: a finding that is wrong for a particular site is silenced
+# at that site with `# shellcheck disable=SCxxxx  # <reason>`, where the reason is
+# visible next to the code it excuses. Switching a check off tree-wide hides the
+# next occurrence too, which is the one nobody has looked at yet.
+
+# Follow `source` / `.` into the file being sourced, using the `# shellcheck
+# source=...` directives the setup kits already carry. Without this, whether a
+# script is clean depends on WHICH FILES ARE IN THE SAME COMMAND — sourcing a file
+# that happens to be in the argument list is silent, sourcing one that is not is an
+# SC1091 "not following". That made the pre-commit lane (staged scripts only) report
+# findings the whole-tree lane did not.
+external-sources=true
+
+# Where those directives are resolved from: the repo root, reached from the
+# scripts/<kit>/ directories the setup scripts live in. Anchoring to the script's own
+# location rather than the caller's cwd keeps the result the same from anywhere.
+source-path=SCRIPTDIR/../..

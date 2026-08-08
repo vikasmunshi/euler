@@ -23,10 +23,12 @@ make install-all
 
 # Lint and type-check
 scripts/linters/check.sh solver   # runs mypy + flake8 on the solver package
+scripts/linters/check.sh scripts  # the same for the shell half: shellcheck
 
 # Individually
-mypy solver
+mypy solutions solver scripts     # the standard targets, as the git hooks run them
 flake8 solver                     # max-line-length 120
+shellcheck scripts/**/*.sh        # shell scripts; options in .shellcheckrc
 
 # Run the shell interactively
 make run
@@ -83,9 +85,11 @@ underlying script in `scripts/setup/` takes:
 
 The hooks are rendered from the templates in `scripts/setup/hooks/` (`pre-commit.template`, `pre-push.template`) into the **default** location `.git/hooks/` by `scripts/setup/githooks.sh install`. This runs via `make install-hooks` (and is part of `make install-all`), which also resets `core.hooksPath` to the default; `make uninstall-hooks` removes them. Edit the templates, not the installed copies, then re-run the installer.
 
-Pre-commit hook (`.git/hooks/pre-commit`) auto-fixes trailing whitespace in staged text files (and checks for leftover whitespace / conflict markers), then runs `flake8` and `mypy` on the `solutions` and `solver` directories. All checks must pass for the commit to proceed.
+Pre-commit hook (`.git/hooks/pre-commit`) checks staged changes for trailing whitespace / conflict markers, staged build artifacts, gitignored and unencrypted-private files, runs `shellcheck` over the **staged** shell scripts, and `flake8` + `mypy` over the `solutions` and `solver` directories. All checks must pass for the commit to proceed.
 
-Pre-push hook (`.git/hooks/pre-push`) runs additional checks before pushing to remote.
+Pre-push hook (`.git/hooks/pre-push`) runs additional checks before pushing to remote — among them `shellcheck` over **every tracked** shell script, the whole-tree backstop to the commit hook's staged-only lane.
+
+`shellcheck` covers `*.sh` **and** the `*.template` hook sources (they are shell; `__VENV__` is substituted at install time). Its options live in `.shellcheckrc` at the repo root — shared by the hooks, `scripts/linters/check.sh` and your editor — so a script is judged the same way everywhere. Silence a wrong finding at its site with `# shellcheck disable=SCxxxx  # <reason>`, never repo-wide. Note that a comment line beginning `# shellcheck` in front of a command is parsed as a *directive*: start such comments with any other word.
 
 To test the pre-push hook without actually pushing:
 ```bash

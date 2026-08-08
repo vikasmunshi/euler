@@ -12,7 +12,7 @@ fi
 fix_files=$(find "${dir_to_check}" -type f \( \
     -name '*.py' -o -name '*.c' -o -name '*.h' -o -name '*.html' \
     -o -name '*.json' -o -name '*.md' -o -name '*.sh' -o -name '*.txt' \
-    -o -name '*.yml' -o -name '*.yaml' \))
+    -o -name '*.template' -o -name '*.yml' -o -name '*.yaml' \))
 if [[ -n "$fix_files" ]]; then
     echo "$fix_files" | xargs -d '\n' sed -i 's/[[:space:]]*$//'
 fi
@@ -39,6 +39,33 @@ flake8 "${dir_to_check}"
 flake8_rc=$?
 echo "flake8 ${dir_to_check} -> ${flake8_rc}"
 
+# Shell lint — the shell half of the tree, held to the same bar as the Python half.
+# (This comment does not open with the tool's name: a comment starting `# shellcheck`
+# in front of a command is read as a *directive*, and an unparseable one is an error.)
+# The git-hook templates are shell too — they only become .git/hooks/* once
+# githooks.sh substitutes __VENV__ — so they are linted alongside the scripts that
+# render them. Options come from .shellcheckrc at the repo root — shared with the git
+# hooks and your editor — so nothing is configured on this command line. shellcheck is
+# a base apt package (scripts/setup/dev_env.sh), so a missing binary is a broken
+# install, not an opt-out — it fails.
+# The file list goes through an array rather than `| xargs`, so the reported code is
+# the linter's own 1 and not xargs' 123 — the lanes' codes are summed for the exit
+# status below, where a needlessly large one is both misleading and closer to the
+# wrap at 256.
+mapfile -t sh_files < <(find "${dir_to_check}" -type f \( -name '*.sh' -o -name '*.template' \))
+if (( ${#sh_files[@]} == 0 )); then
+    echo "No shell scripts found in ${dir_to_check}, skipping shellcheck"
+    shellcheck_rc=0
+elif ! command -v shellcheck > /dev/null 2>&1; then
+    echo "Error: shellcheck is not installed — run 'make install-system'" >&2
+    shellcheck_rc=1
+else
+    echo "checking shellcheck ${dir_to_check} ..."
+    shellcheck -- "${sh_files[@]}"
+    shellcheck_rc=$?
+    echo "shellcheck ${dir_to_check} -> ${shellcheck_rc}"
+fi
+
 # the interaction guard: `dialogue.interactive` must be called through its module, never
 # bound by import. A by-value copy is a second seam that `--silent` and the tests cannot
 # reach, so a command would prompt when it must not (docs/developer-guide.md §3.10).
@@ -61,4 +88,4 @@ if [[ "${dir_to_check}" == solver || "${dir_to_check}" == */solver ]]; then
     echo "command docstrings -> ${doclint_rc}"
 fi
 
-exit $(( "${ws_rc}" + "${mypy_rc}" + "${flake8_rc}" + "${seam_rc}" + "${doclint_rc}" ))
+exit $(( "${ws_rc}" + "${mypy_rc}" + "${flake8_rc}" + "${shellcheck_rc}" + "${seam_rc}" + "${doclint_rc}" ))

@@ -49,3 +49,4 @@ wheels/
 # the broad **/.* rule above, since the last matching pattern wins.
 !.gitattributes
 !.gitignore
+!.shellcheckrc

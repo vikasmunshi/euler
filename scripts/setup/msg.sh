@@ -39,7 +39,6 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # The system venv — OPT_DIR / VENV_DIR / VENV_PY / PYTHON, shared with the other app
 # kits. This kit reads it; auth.sh is the one that builds it.

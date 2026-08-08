@@ -186,6 +186,7 @@ status_hooks() {
     backups=$(find "${HOOKS_DIR}" -maxdepth 1 -name '*.bak.*' 2>/dev/null | sort)
     if [[ -n "${backups}" ]]; then
         echo "backups:     $(wc -l <<< "${backups}") rotated hook backup(s) ('$0 cleanup' removes them):"
+        # shellcheck disable=SC2001  # per-line indent of a multi-line string; ${//} can't anchor ^
         sed 's/^/  /' <<< "${backups}"
     else
         echo "backups:     none"
@@ -202,6 +203,7 @@ cleanup_backups() {
         return 0
     fi
     echo "Hook backups in ${HOOKS_DIR}:"
+    # shellcheck disable=SC2001  # per-line indent of a multi-line string; ${//} can't anchor ^
     sed 's/^/  /' <<< "${backups}"
     read -r -p "Remove these $(wc -l <<< "${backups}") backup(s)? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then

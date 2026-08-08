@@ -861,10 +861,10 @@ Run the git pre-commit and (simulated) pre-push checks on demand.
 * ⚑ needs contributor or above.
 * » supports --silent to suppress output.
 
-Runs the same checks the git hooks run — the pre-commit hook (whitespace
-fixes, flake8, mypy) and a simulation of the pre-push hook — so you can
-verify your changes will pass before committing or pushing. Reports the
-combined pass/fail in the exit code.
+Runs the same checks the git hooks run — the pre-commit hook (whitespace,
+staged artifacts, shellcheck, flake8, mypy) and a simulation of the pre-push
+hook — so you can verify your changes will pass before committing or pushing.
+Reports the combined pass/fail in the exit code.
 
 Aliased as `hooks`.
 

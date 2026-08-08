@@ -314,8 +314,8 @@ _probe() {
 #    ✗ HTTP 000. Retry the *allow* probe until it succeeds (a warm proxy passes on
 #    the first try, so this adds no delay to the common path).
 _probe_allow() {
-    local code i
-    for i in 1 2 3 4 5; do
+    local code
+    for _ in 1 2 3 4 5; do
         code="$(_probe "$1")"
         [[ "${code}" =~ ^[23] ]] && { printf '%s' "${code}"; return; }
         sleep 1

@@ -137,6 +137,35 @@ else
     fi
 fi
 
+# ── shellcheck: staged shell scripts ─────────────────────────────────────
+# Scoped to what you staged, unlike the flake8/mypy sweeps below: a shell script is
+# checked on its own with no cross-file resolution, so sweeping the tree here buys
+# nothing — pre-push does that as the backstop, the same commit-side/push-side pairing
+# the audits above use. The hook templates are shell too (they only become
+# .git/hooks/* once githooks.sh substitutes __VENV__), so they are linted with the
+# same rules as the scripts that render them.
+#
+# Like flake8/mypy, this reads the WORKTREE file rather than the staged blob, so a
+# finding names a real path and line you can jump to. shellcheck is a base apt package
+# (scripts/setup/dev_env.sh) — a missing binary is a broken install, not an opt-out.
+#
+# No options here: they live in .shellcheckrc at the repo root, so this lane, pre-push's
+# whole-tree lane, scripts/linters/check.sh and your editor all judge a script the same
+# way. `external-sources` there is what keeps THIS lane honest — without it, a script
+# would pass or fail on whether the file it sources happened to be staged alongside it.
+section "shellcheck (staged shell scripts)"
+mapfile -t staged_sh < <(git diff --cached --name-only --diff-filter=d -- '*.sh' '*.template')
+if (( ${#staged_sh[@]} == 0 )); then
+    pass "no shell scripts staged"
+elif ! command -v shellcheck > /dev/null 2>&1; then
+    note "install it with: make install-system"
+    fail "shellcheck is not installed"
+elif shellcheck -- "${staged_sh[@]}"; then
+    pass "shellcheck clean (${#staged_sh[@]} script(s))"
+else
+    fail "shellcheck reported issues"
+fi
+
 # ── flake8: solver + solutions ───────────────────────────────────────────
 # The whole solutions tree (public + decrypted private) is a proper package —
 # every directory carries an __init__.py — so module resolution is unambiguous
@@ -148,9 +177,13 @@ else
     fail "flake8 reported issues"
 fi
 
-# ── mypy: solver + solutions ─────────────────────────────────────────────
-section "mypy (solutions, solver)"
-if "$VENV/bin/mypy" solutions solver; then
+# ── mypy: solver + solutions + scripts ───────────────────────────────────
+# `scripts` is in scope because it holds tracked Python that ships and runs:
+# scripts/setup/euler-smtp.py is installed to /usr/local/bin and run as a service.
+# Type-checking the shell half of the tree (shellcheck, above) while leaving that
+# unchecked was the gap.
+section "mypy (solutions, solver, scripts)"
+if "$VENV/bin/mypy" solutions solver scripts; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"

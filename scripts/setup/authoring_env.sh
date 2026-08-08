@@ -24,6 +24,7 @@
 # The authoring source: a sibling dot-dir of the checkout (~/euler -> ~/.euler), matching
 # solver/config/paths.py's own derivation. NOT $HOME-based: under sudo, $HOME is root's
 # while the vault is still the operator's.
+# shellcheck disable=SC2034  # read by the kits that source this file, not by it
 ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"
 
 # An interpreter that can import solver, for reading a possibly-encrypted env.
