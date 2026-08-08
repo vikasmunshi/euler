@@ -4431,7 +4431,7 @@
     {
       "path": "technique/generate-and-test",
       "title": "Generate and test",
-      "status": "draft",
+      "status": "final",
       "solved": 26,
       "problems": 26,
       "tags": ["generate-and-test"],
@@ -4656,7 +4656,7 @@
     {
       "path": "technique/integer-square-root",
       "title": "Integer square root",
-      "status": "draft",
+      "status": "final",
       "solved": 21,
       "problems": 21,
       "tags": ["integer-square-root"],
@@ -5538,7 +5538,7 @@
     {
       "path": "technique/recurrence-relation-application",
       "title": "Recurrence relation (application)",
-      "status": "draft",
+      "status": "final",
       "solved": 22,
       "problems": 22,
       "tags": ["recurrence-relation-application"],
@@ -5601,7 +5601,7 @@
     {
       "path": "technique/set",
       "title": "set",
-      "status": "draft",
+      "status": "final",
       "solved": 24,
       "problems": 24,
       "tags": ["set"],
