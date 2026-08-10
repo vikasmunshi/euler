@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Stars_and_bars
 ## Problems
 
 - ● [0113](/solutions/0113/) — Non-bouncy Numbers
+- ● [0253](/solutions/0253/) — Tidying Up A
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 
 <!-- /problems -->

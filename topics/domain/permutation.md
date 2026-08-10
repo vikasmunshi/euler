@@ -18,7 +18,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Permutation>._
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
-- ○ [0253](/solutions/0253/) — Tidying Up A
 - ○ [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ○ [0367](/solutions/0367/) — Bozo Sort
