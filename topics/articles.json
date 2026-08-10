@@ -2460,7 +2460,7 @@
     {
       "path": "domain/random-walk",
       "title": "Random walk",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 19,
       "tags": ["random-walk"],
