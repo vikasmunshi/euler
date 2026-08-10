@@ -1803,7 +1803,7 @@
     {
       "path": "domain/markov-chain",
       "title": "Markov chain",
-      "status": "draft",
+      "status": "final",
       "solved": 6,
       "problems": 23,
       "tags": ["markov-chain"],
