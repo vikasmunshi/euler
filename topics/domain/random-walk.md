@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Random_walk>._
 
 - ● [0213](/solutions/0213/) — Flea Circus
 - ● [0227](/solutions/0227/) — The Chase
-- ○ [0253](/solutions/0253/) — Tidying Up A
+- ● [0253](/solutions/0253/) — Tidying Up A
 - ○ [0280](/solutions/0280/) — Ant and Seeds
 - ○ [0329](/solutions/0329/) — Prime Frog
 - ○ [0497](/solutions/0497/) — Drunken Tower of Hanoi
