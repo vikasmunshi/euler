@@ -3963,7 +3963,7 @@
     {
       "path": "technique/dict",
       "title": "dict",
-      "status": "draft",
+      "status": "final",
       "solved": 19,
       "problems": 19,
       "tags": ["dict"],
@@ -5421,7 +5421,7 @@
     {
       "path": "technique/prefix-sum",
       "title": "Prefix sum",
-      "status": "draft",
+      "status": "final",
       "solved": 19,
       "problems": 19,
       "tags": ["prefix-sum"],
