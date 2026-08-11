@@ -14,7 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Factorial>._
 - ● [0121](/solutions/0121/) — Disc Game Prize Fund
 - ● [0160](/solutions/0160/) — Factorial Trailing Digits
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
-- ○ [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ○ [0330](/solutions/0330/) — Euler's Number

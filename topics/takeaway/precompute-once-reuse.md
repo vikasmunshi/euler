@@ -132,6 +132,7 @@ let every later query pay a lookup instead of the full price.
 - ● [0199](/solutions/0199/) — Iterative Circle Packing
 - ● [0220](/solutions/0220/) — Heighway Dragon
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0461](/solutions/0461/) — Almost Pi

@@ -17,6 +17,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Canonical_form
 - ● [0165](/solutions/0165/) — Intersections
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
 - ● [0244](/solutions/0244/) — Sliders
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0259](/solutions/0259/) — Reachable Numbers
 
 <!-- /problems -->

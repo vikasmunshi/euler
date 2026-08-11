@@ -12,6 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Branch_and_bou
 - ● [0139](/solutions/0139/) — Pythagorean Tiles
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0241](/solutions/0241/) — Perfection Quotients
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 
 <!-- /problems -->

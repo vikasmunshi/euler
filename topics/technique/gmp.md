@@ -127,6 +127,7 @@ constant factor.
 - ● [0192](/solutions/0192/) — Best Approximations
 - ● [0203](/solutions/0203/) — Squarefree Binomial Coefficients
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0387](/solutions/0387/) — Harshad Numbers
 

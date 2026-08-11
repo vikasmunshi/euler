@@ -209,6 +209,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0250](/solutions/0250/) — $250250$
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0253](/solutions/0253/) — Tidying Up A
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial

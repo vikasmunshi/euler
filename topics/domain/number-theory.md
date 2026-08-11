@@ -215,7 +215,6 @@ it exists for exactly that reason.
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0251](/solutions/0251/) — Cardano Triplets
-- ○ [0254](/solutions/0254/) — Sums of Digit Factorials
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ○ [0272](/solutions/0272/) — Modular Cubes, Part 2

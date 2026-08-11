@@ -12,6 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lexicographic_
 - ● [0054](/solutions/0054/) — Poker Hands
 - ● [0068](/solutions/0068/) — Magic 5-gon Ring
 - ● [0124](/solutions/0124/) — Ordered Radicals
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 
