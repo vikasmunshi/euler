@@ -25,7 +25,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Digit_sum>._
 - ● [0171](/solutions/0171/) — Square Sum of the Digital Squares
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0238](/solutions/0238/) — Infinite String Tour
-- ○ [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ○ [0284](/solutions/0284/) — Steady Squares
 - ○ [0290](/solutions/0290/) — Digital Signature
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23

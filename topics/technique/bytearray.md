@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/stdtypes.h
 
 - ● [0010](/solutions/0010/) — Summation of Primes
 - ● [0077](/solutions/0077/) — Prime Summations
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0961](/solutions/0961/) — Removing Digits
 

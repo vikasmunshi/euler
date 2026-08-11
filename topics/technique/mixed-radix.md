@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Mixed_radix>._
 ## Problems
 
 - ● [0145](/solutions/0145/) — Reversible Numbers
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0868](/solutions/0868/) — Belfry Maths
 
 <!-- /problems -->

@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Factorial_numb
 ## Problems
 
 - ● [0024](/solutions/0024/) — Lexicographic Permutations
+- ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0868](/solutions/0868/) — Belfry Maths
 
