@@ -777,7 +777,7 @@
     {
       "path": "domain/digit-sum",
       "title": "Digit sum",
-      "status": "draft",
+      "status": "final",
       "solved": 25,
       "problems": 62,
       "tags": ["digit-sum"],
