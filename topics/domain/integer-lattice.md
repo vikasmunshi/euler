@@ -23,6 +23,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_lattic
 - ○ [0295](/solutions/0295/) — Lenticular Holes
 - ○ [0296](/solutions/0296/) — Angular Bisector and Tangent
 - ○ [0299](/solutions/0299/) — Three Similar Triangles
+- ● [0331](/solutions/0331/) — Cross Flips
 - ○ [0332](/solutions/0332/) — Spherical Triangles
 - ○ [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0353](/solutions/0353/) — Risky Moon

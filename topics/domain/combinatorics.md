@@ -207,7 +207,6 @@ of crossing it.
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
 - ○ [0324](/solutions/0324/) — Building a Tower
-- ○ [0331](/solutions/0331/) — Cross Flips
 - ○ [0333](/solutions/0333/) — Special Partitions
 - ○ [0338](/solutions/0338/) — Cutting Rectangular Grid Paper
 - ○ [0344](/solutions/0344/) — Silver Dollar Game

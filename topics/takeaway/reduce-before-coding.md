@@ -218,6 +218,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0321](/solutions/0321/) — Swapping Counters
+- ● [0331](/solutions/0331/) — Cross Flips
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
