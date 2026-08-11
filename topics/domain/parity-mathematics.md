@@ -16,7 +16,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Parity_(mathem
 - ● [0145](/solutions/0145/) — Reversible Numbers
 - ● [0174](/solutions/0174/) — Hollow Square Laminae II
 - ● [0242](/solutions/0242/) — Odd Triplets
-- ○ [0331](/solutions/0331/) — Cross Flips
+- ● [0331](/solutions/0331/) — Cross Flips
 - ○ [0430](/solutions/0430/) — Range Flips
 - ○ [0502](/solutions/0502/) — Counting Castles
 - ○ [0520](/solutions/0520/) — Simbers

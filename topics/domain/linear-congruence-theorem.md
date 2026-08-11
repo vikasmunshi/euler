@@ -8,7 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Linear_congrue
 ## Problems
 
 - ● [0134](/solutions/0134/) — Prime Pair Connection
-- ○ [0331](/solutions/0331/) — Cross Flips
 - ○ [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0552](/solutions/0552/) — Chinese Leftovers II
 - ○ [0728](/solutions/0728/) — Circle of Coins

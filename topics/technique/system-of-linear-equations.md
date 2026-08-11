@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/System_of_line
 ## Problems
 
 - ● [0227](/solutions/0227/) — The Chase
+- ● [0331](/solutions/0331/) — Cross Flips
 
 <!-- /problems -->

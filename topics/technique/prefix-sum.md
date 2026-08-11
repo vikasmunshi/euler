@@ -20,6 +20,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prefix_sum>._
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0331](/solutions/0331/) — Cross Flips
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums

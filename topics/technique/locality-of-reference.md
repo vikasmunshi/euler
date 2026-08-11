@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Locality_of_re
 
 - ● [0014](/solutions/0014/) — Longest Collatz Sequence
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
+- ● [0331](/solutions/0331/) — Cross Flips
 
 <!-- /problems -->

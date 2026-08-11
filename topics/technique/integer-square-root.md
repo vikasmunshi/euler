@@ -147,6 +147,7 @@ the same idea, implemented once, in C.
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0236](/solutions/0236/) — Luxury Hampers
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
+- ● [0331](/solutions/0331/) — Cross Flips
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0932](/solutions/0932/) — $2025$
