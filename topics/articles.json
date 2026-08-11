@@ -3693,7 +3693,7 @@
     {
       "path": "technique/canonical-form",
       "title": "Canonical form",
-      "status": "draft",
+      "status": "final",
       "solved": 12,
       "problems": 12,
       "tags": ["canonical-form"],
