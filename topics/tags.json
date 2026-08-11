@@ -4225,7 +4225,7 @@
       "reference": "https://docs.python.org/3/library/functools.html#functools.lru_cache",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0042_s0", "p0060_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0093_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0755_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0042_s0", "p0060_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0093_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0755_s0", "p1000_s0"]
     },
     {
       "slug": "functools-reduce",
@@ -5062,7 +5062,7 @@
       "reference": "https://docs.python.org/3/library/typing.html",
       "additional-references": ["https://docs.python.org/3/library/typing.html#typing.NamedTuple"],
       "summary": "",
-      "refs": ["p0151_s0"]
+      "refs": ["p0068_s0", "p0151_s0"]
     },
     {
       "slug": "narcissistic-number",

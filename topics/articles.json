@@ -3657,7 +3657,7 @@
     {
       "path": "technique/bytearray",
       "title": "bytearray",
-      "status": "draft",
+      "status": "final",
       "solved": 5,
       "problems": 5,
       "tags": ["bytearray"],
@@ -4395,11 +4395,11 @@
     {
       "path": "technique/functools-lru-cache",
       "title": "functools.lru_cache",
-      "status": "draft",
-      "solved": 13,
-      "problems": 13,
+      "status": "final",
+      "solved": 14,
+      "problems": 14,
       "tags": ["functools-lru-cache"],
-      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0042_s0", "p0060_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0093_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0755_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0042_s0", "p0060_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0093_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0755_s0", "p1000_s0"]
     },
     {
       "path": "technique/functools-reduce",
@@ -5232,11 +5232,11 @@
     {
       "path": "technique/namedtuple",
       "title": "NamedTuple",
-      "status": "draft",
-      "solved": 1,
-      "problems": 1,
+      "status": "final",
+      "solved": 2,
+      "problems": 2,
       "tags": ["namedtuple"],
-      "refs": ["p0151_s0"]
+      "refs": ["p0068_s0", "p0151_s0"]
     },
     {
       "path": "technique/narcissistic-number",
