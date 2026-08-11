@@ -3567,7 +3567,7 @@
     {
       "path": "technique/bit-array",
       "title": "Bit array",
-      "status": "draft",
+      "status": "final",
       "solved": 8,
       "problems": 8,
       "tags": ["bit-array"],
@@ -4233,7 +4233,7 @@
     {
       "path": "technique/extended-slice",
       "title": "extended slice",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["extended-slice"],
@@ -4368,7 +4368,7 @@
     {
       "path": "technique/frozenset",
       "title": "frozenset",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["frozenset"],
