@@ -5115,7 +5115,7 @@
     {
       "path": "technique/mixed-radix",
       "title": "Mixed radix",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["mixed-radix"],
