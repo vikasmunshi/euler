@@ -15,7 +15,8 @@
     "s0": [
       "dynamic-programming",
       "dynamic-array",
-      "memoization"
+      "memoization",
+      "functools-lru-cache"
     ]
   },
   "new-tags": []

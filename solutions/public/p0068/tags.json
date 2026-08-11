@@ -17,7 +17,8 @@
       "arbitrary-precision-arithmetic",
       "lexicographic-order",
       "canonical-form",
-      "itertools"
+      "itertools",
+      "namedtuple"
     ]
   },
   "new-tags": []
