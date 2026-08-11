@@ -138,6 +138,7 @@ instantly. Cache the number you need, not the objects it came from.
 - ● [0060](/solutions/0060/) — Prime Pair Sets
 - ● [0076](/solutions/0076/) — Counting Summations
 - ● [0077](/solutions/0077/) — Prime Summations
+- ● [0078](/solutions/0078/) — Coin Partitions
 - ● [0093](/solutions/0093/) — Arithmetic Expressions
 - ● [0161](/solutions/0161/) — Triominoes
 - ● [0259](/solutions/0259/) — Reachable Numbers
