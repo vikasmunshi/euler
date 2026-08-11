@@ -1011,7 +1011,7 @@
     {
       "path": "domain/factorial-number-system",
       "title": "Factorial number system",
-      "status": "draft",
+      "status": "final",
       "solved": 4,
       "problems": 4,
       "tags": ["factorial-number-system"],
