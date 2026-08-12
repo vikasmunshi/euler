@@ -5655,7 +5655,7 @@
     {
       "path": "technique/snprintf",
       "title": "snprintf",
-      "status": "draft",
+      "status": "final",
       "solved": 15,
       "problems": 15,
       "tags": ["snprintf"],
