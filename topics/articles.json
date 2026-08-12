@@ -3540,7 +3540,7 @@
     {
       "path": "technique/binary-search-algorithm",
       "title": "Binary search algorithm",
-      "status": "draft",
+      "status": "final",
       "solved": 18,
       "problems": 18,
       "tags": ["binary-search-algorithm"],
