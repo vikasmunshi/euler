@@ -4980,7 +4980,7 @@
     {
       "path": "technique/math-isqrt",
       "title": "math.isqrt",
-      "status": "draft",
+      "status": "final",
       "solved": 17,
       "problems": 17,
       "tags": ["math-isqrt"],
