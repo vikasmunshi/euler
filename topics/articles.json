@@ -3486,7 +3486,7 @@
     {
       "path": "technique/array-data-structure",
       "title": "Array data structure",
-      "status": "draft",
+      "status": "final",
       "solved": 14,
       "problems": 14,
       "tags": ["array-data-structure"],
