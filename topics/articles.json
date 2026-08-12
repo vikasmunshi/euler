@@ -660,7 +660,7 @@
     {
       "path": "domain/counting",
       "title": "Counting",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 72,
       "tags": ["counting"],
