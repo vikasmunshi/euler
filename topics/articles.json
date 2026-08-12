@@ -4494,7 +4494,7 @@
     {
       "path": "technique/greatest-common-divisor-application",
       "title": "Greatest common divisor (application)",
-      "status": "draft",
+      "status": "final",
       "solved": 13,
       "problems": 13,
       "tags": ["greatest-common-divisor-application"],
