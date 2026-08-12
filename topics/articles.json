@@ -462,7 +462,7 @@
     {
       "path": "domain/combinatorial-game-theory",
       "title": "Combinatorial game theory",
-      "status": "draft",
+      "status": "final",
       "solved": 5,
       "problems": 72,
       "tags": ["combinatorial-game-theory"],
