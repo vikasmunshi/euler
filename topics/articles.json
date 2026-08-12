@@ -3594,7 +3594,7 @@
     {
       "path": "technique/bitwise-operation",
       "title": "Bitwise operation",
-      "status": "draft",
+      "status": "final",
       "solved": 13,
       "problems": 13,
       "tags": ["bitwise-operation"],
