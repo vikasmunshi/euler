@@ -4917,7 +4917,7 @@
     {
       "path": "technique/lookup-table",
       "title": "Lookup table",
-      "status": "draft",
+      "status": "final",
       "solved": 15,
       "problems": 15,
       "tags": ["lookup-table"],
