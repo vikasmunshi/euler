@@ -5061,7 +5061,7 @@
     {
       "path": "technique/memoization",
       "title": "Memoization",
-      "status": "draft",
+      "status": "final",
       "solved": 18,
       "problems": 18,
       "tags": ["memoization"],
