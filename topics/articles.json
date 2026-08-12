@@ -4215,7 +4215,7 @@
     {
       "path": "technique/exponentiation-by-squaring",
       "title": "Exponentiation by squaring",
-      "status": "draft",
+      "status": "final",
       "solved": 17,
       "problems": 17,
       "tags": ["exponentiation-by-squaring"],
