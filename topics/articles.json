@@ -3972,7 +3972,7 @@
     {
       "path": "technique/digit-dp",
       "title": "Digit DP",
-      "status": "draft",
+      "status": "final",
       "solved": 13,
       "problems": 13,
       "tags": ["digit-dp"],
