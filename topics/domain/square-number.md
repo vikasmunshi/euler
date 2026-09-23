@@ -31,7 +31,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Square_number>
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ○ [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ○ [0359](/solutions/0359/) — Hilbert's New Hotel
-- ○ [0395](/solutions/0395/) — Pythagorean Tree
 - ○ [0408](/solutions/0408/) — Admissible Paths Through a Grid
 - ○ [0431](/solutions/0431/) — Square Space Silo
 - ○ [0459](/solutions/0459/) — Flipping Game

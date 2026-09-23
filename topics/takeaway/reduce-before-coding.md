@@ -223,6 +223,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals

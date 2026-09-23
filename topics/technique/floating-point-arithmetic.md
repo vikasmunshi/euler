@@ -14,6 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Floating-point
 - ● [0190](/solutions/0190/) — Maximising a Weighted Product
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0800](/solutions/0800/) — Hybrid Integers
 
 <!-- /problems -->

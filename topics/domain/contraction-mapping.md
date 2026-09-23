@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Contraction_ma
 ## Problems
 
 - ● [0197](/solutions/0197/) — A Recursively Defined Sequence
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 
 <!-- /problems -->

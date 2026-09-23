@@ -19,6 +19,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pythagorean_tr
 - ○ [0295](/solutions/0295/) — Lenticular Holes
 - ○ [0311](/solutions/0311/) — Biclinic Integral Quadrilaterals
 - ○ [0373](/solutions/0373/) — Circumscribed Circles
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 - ○ [0450](/solutions/0450/) — Hypocycloid and Lattice Points
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples
 - ○ [0583](/solutions/0583/) — Heron Envelopes

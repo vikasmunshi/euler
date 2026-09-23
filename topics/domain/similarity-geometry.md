@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Similarity_(ge
 
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
 - ○ [0299](/solutions/0299/) — Three Similar Triangles
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 
 <!-- /problems -->

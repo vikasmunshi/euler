@@ -10,6 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pythagorean_th
 - ● [0086](/solutions/0086/) — Cuboid Route
 - ● [0091](/solutions/0091/) — Right Triangles with Integer Coordinates
 - ● [0138](/solutions/0138/) — Special Isosceles Triangles
-- ○ [0395](/solutions/0395/) — Pythagorean Tree
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 
 <!-- /problems -->
