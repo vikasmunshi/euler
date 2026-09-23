@@ -190,5 +190,6 @@ the loop.
 - ○ [0939](/solutions/0939/) — Partisan Nim
 - ○ [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0958](/solutions/0958/) — Euclid's Labour
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

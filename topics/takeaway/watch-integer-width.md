@@ -189,5 +189,6 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0974](/solutions/0974/) — Very Odd Numbers
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

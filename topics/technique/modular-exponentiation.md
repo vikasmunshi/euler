@@ -160,5 +160,6 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0980](/solutions/0980/) — The Quaternion Group I
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

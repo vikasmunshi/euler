@@ -340,5 +340,6 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [1000](/solutions/1000/) — Problem $1000$
 - ○ [1001](/solutions/1001/) — Connections I
 - ○ [1004](/solutions/1004/) — Balanced Integer
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

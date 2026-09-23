@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/user/basics.bro
 ## Problems
 
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

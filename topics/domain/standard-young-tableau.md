@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Young_tableau>
 ## Problems
 
 - ○ [0412](/solutions/0412/) — Gnomon Numbering
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

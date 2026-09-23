@@ -151,5 +151,6 @@ the repetition.
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

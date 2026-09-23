@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Young_tableau#
 ## Problems
 
 - ○ [0923](/solutions/0923/) — Young's Game B
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

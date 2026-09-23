@@ -24,5 +24,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Partition_(num
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ○ [0922](/solutions/0922/) — Young's Game A
 - ○ [0939](/solutions/0939/) — Partisan Nim
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

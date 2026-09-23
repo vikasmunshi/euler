@@ -257,5 +257,6 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [1000](/solutions/1000/) — Problem $1000$
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

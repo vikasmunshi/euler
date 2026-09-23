@@ -101,5 +101,6 @@ one's distribution separately and convolve.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0980](/solutions/0980/) — The Quaternion Group I
+- ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->
