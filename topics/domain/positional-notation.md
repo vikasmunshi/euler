@@ -17,7 +17,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Positional_not
 - ● [0162](/solutions/0162/) — Hexadecimal Numbers
 - ● [0168](/solutions/0168/) — Number Rotations
 - ● [0206](/solutions/0206/) — Concealed Square
-- ○ [0255](/solutions/0255/) — Rounded Square Roots
+- ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ○ [0284](/solutions/0284/) — Steady Squares
 - ● [0288](/solutions/0288/) — An Enormous Factorial

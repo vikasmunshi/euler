@@ -12,7 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Digit-counting
 - ● [0057](/solutions/0057/) — Square Root Convergents
 - ● [0063](/solutions/0063/) — Powerful Digit Counts
 - ● [0156](/solutions/0156/) — Counting Digits
-- ○ [0255](/solutions/0255/) — Rounded Square Roots
+- ● [0255](/solutions/0255/) — Rounded Square Roots
 - ○ [0305](/solutions/0305/) — Reflexive Position
 - ○ [0368](/solutions/0368/) — A Kempner-like Series
 - ○ [0413](/solutions/0413/) — One-child Numbers
