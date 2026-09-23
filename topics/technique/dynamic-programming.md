@@ -137,6 +137,7 @@ that collapse in one guise or another.
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0301](/solutions/0301/) — Nim
 - ● [0345](/solutions/0345/) — Matrix Sum
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0679](/solutions/0679/) — Freefarea

@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Affine_transfo
 ## Problems
 
 - ● [0163](/solutions/0163/) — Cross-hatched Triangles
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 
 <!-- /problems -->

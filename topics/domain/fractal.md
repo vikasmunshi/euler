@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fractal>._
 - ● [0199](/solutions/0199/) — Iterative Circle Packing
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
-- ○ [0395](/solutions/0395/) — Pythagorean Tree
+- ● [0395](/solutions/0395/) — Pythagorean Tree
 - ○ [0535](/solutions/0535/) — Fractal Sequence
 - ○ [0570](/solutions/0570/) — Snowflakes
 - ○ [0702](/solutions/0702/) — Jumping Flea
