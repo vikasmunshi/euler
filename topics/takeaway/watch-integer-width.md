@@ -166,6 +166,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0250](/solutions/0250/) — $250250$
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial

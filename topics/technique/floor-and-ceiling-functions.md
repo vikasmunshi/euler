@@ -12,6 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Floor_and_ceil
 - ● [0197](/solutions/0197/) — A Recursively Defined Sequence
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
+- ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0745](/solutions/0745/) — Sum of Squares II
