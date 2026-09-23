@@ -2127,7 +2127,7 @@
     {
       "path": "domain/permutation",
       "title": "Permutation",
-      "status": "draft",
+      "status": "final",
       "solved": 15,
       "problems": 58,
       "tags": ["permutation"],
