@@ -140,6 +140,11 @@
      live for everyone — the rung least able to help itself is the one most likely to need
      it (solver/core/git.py, above `git_reset`). #}
   {{ verb('Un-commit, keep my changes', 'git-reset', 'reader') }}
+  {# Its destructive sibling, last of all: the way out of a clone wedged mid-merge, which
+     `git-sync` refuses to sync over and names this row for. The row only *starts* it — the
+     command lists what it will discard and waits for `discard` to be typed, so a stray click
+     costs nothing. `reader` for the same reason as the row above. #}
+  {{ verb('Discard everything, match origin', 'git-reset --hard', 'reader') }}
   {% if known %}
   <li class="menu-sep" aria-hidden="true"></li>
   {# The one piece of clone health that silently decides whether solutions/private

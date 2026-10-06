@@ -76,7 +76,7 @@ sync_onto_master() {
     #   thing that failed, since a completed sync whose stash will not pop is still a
     #   failure the caller must hear about.
     local has_changes="$1" verb="$2"; shift 2
-    local rc stashed=0 stash_before
+    local rc stashed=0 stash_before stash_ours=''
 
     stash_before=$(git rev-parse -q --verify refs/stash)
     if [[ ${has_changes} -eq 1 ]]; then
@@ -84,7 +84,8 @@ sync_onto_master() {
         # What was stashed, not what looked dirty: `git stash push` exits 0 whether or
         # not it created an entry ('No local changes to save'), so popping on the
         # strength of has_changes alone failed a sync that had already succeeded.
-        [[ "$(git rev-parse -q --verify refs/stash)" != "${stash_before}" ]] && stashed=1
+        stash_ours=$(git rev-parse -q --verify refs/stash)
+        [[ "${stash_ours}" != "${stash_before}" ]] && stashed=1
     fi
 
     eval_with_dry_run git "${verb}" "$@"
@@ -101,8 +102,24 @@ sync_onto_master() {
 
     if [[ ${stashed} -eq 1 ]]; then
         if ! eval_with_dry_run git stash pop; then
-            echo "Error: your changes are safe but still STASHED — recover with 'git stash pop'." >&2
             [[ ${rc} -eq 0 ]] && rc=1
+            # A pop that conflicts does not fail atomically: it stages what applied cleanly,
+            # marks the rest unmerged (UU), and KEEPS the stash entry. Left there, the clone is
+            # wedged — HEAD is level with origin, so every later sync reports "nothing to do"
+            # over a conflicted index, and the next stash it takes re-captures that half-state.
+            # Everything the pop touched is still in the stash, and before the pop the tracked
+            # tree was exactly HEAD, so resetting to HEAD loses nothing — but only while the
+            # stash entry is still the one this run pushed, which is checked, not assumed.
+            if [[ "$(git rev-parse -q --verify refs/stash)" == "${stash_ours}" ]] &&
+                eval_with_dry_run git reset --hard -q HEAD; then
+                echo "Error: synced, but your uncommitted changes conflict with the incoming work." >&2
+                echo "  The tree is left clean at HEAD; your changes are safe in stash@{0}." >&2
+                echo "  Inspect with 'git stash show -p', re-apply with 'git stash pop' and resolve" >&2
+                echo "  the conflicts by hand — or discard them with 'git stash drop'." >&2
+            else
+                echo "Error: your changes are safe but still STASHED, and the tree may be part-applied." >&2
+                echo "  Run 'git-reset --hard' to return to origin/master, then 'git stash pop'." >&2
+            fi
         fi
     fi
     return ${rc}
@@ -128,8 +145,10 @@ main() {
     # Returns:
     #   0 when the repository is in sync, or was deliberately left alone
     #     (up_to_date, local_ahead — declining to sync is not a failure)
-    #   1 when the state could not be determined, or the sync itself failed
-    local ahead behind has_changes state prune_out
+    #   1 when the state could not be determined, the clone is mid-merge (unmerged
+    #     paths, or a merge/rebase in progress), or the sync itself failed
+    local ahead behind has_changes state prune_out unmerged
+    local -a unmerged_paths
 
     # Fetch master. This one must succeed — it is the sync.
     if ! git fetch origin master 1>/dev/null 2>&1; then
@@ -189,6 +208,24 @@ main() {
         has_changes=0
     else
         has_changes=1
+    fi
+
+    # A clone left mid-operation — unmerged (UU) paths from a conflicted stash pop or merge,
+    # or a merge/rebase that never finished — is not "uncommitted changes": a stash refuses
+    # it, and when HEAD happens to be level with origin the states below would report
+    # "nothing to do" over a conflicted index, forever. Name it and stop; the way out
+    # discards local changes, so it is the user's call, not this script's.
+    unmerged=$(git diff --name-only --diff-filter=U 2>/dev/null)
+    if [[ -n "${unmerged}" ]] || verb_in_progress merge || verb_in_progress rebase; then
+        echo "Error: this clone is mid-merge — a merge, rebase or stash pop stopped part-way." >&2
+        if [[ -n "${unmerged}" ]]; then
+            mapfile -t unmerged_paths <<<"${unmerged}"
+            printf '  unmerged: %s\n' "${unmerged_paths[@]}" >&2
+        fi
+        echo "  Nothing was synced. To return to origin/master, DISCARDING uncommitted changes:" >&2
+        echo "    git-reset --hard" >&2
+        echo "  Or resolve the conflicts by hand ('git status' shows them), then run git-sync again." >&2
+        return 1
     fi
 
     if   [[ ${ahead} -eq 0 && ${behind} -eq 0 ]]; then

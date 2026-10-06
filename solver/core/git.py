@@ -52,7 +52,7 @@ from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
 from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import console, register
-from solver.shell.dialogue import Abort, Ask, Choice
+from solver.shell.dialogue import Abort, Ask, Choice, sure
 from solver.shell.variables import variable
 from solver.utils.shell_utils import run_cmdline, run_command
 from solver.web.msg import PR_REVIEW_SUBJECT
@@ -449,10 +449,15 @@ def _commits_ahead_of_master() -> int:
 # empty here. What the contributor floor did instead was strand the rung least able to help
 # itself: a reader whose clone had drifted ahead of origin/master had no verb for it at all,
 # which is a state they cannot reach by committing (they cannot) and so cannot be blamed for.
-# `scripts/ops/reset-user.sh` stays the operator's answer for the harder wedge — a conflicted
-# merge or a half-checked-out worktree needs `--hard`, which this deliberately is not.
+#
+# `--hard` is the other half, for the wedge `--soft` cannot reach — a conflicted stash pop or
+# merge, a half-checked-out worktree — which `git-sync` now refuses to sync over and points
+# here. It does destroy work, so it is gated by a typed confirmation rather than by a higher
+# floor: the reader stranded in that state is still the rung least able to get out of it any
+# other way, and `scripts/ops/reset-user.sh` stays the operator's version for a clone whose
+# owner cannot reach the shell at all.
 @register(requires='reader', quietable=True, aliases=('reset',))
-def git_reset() -> int:
+def git_reset(hard: bool = False) -> int:
     """Soft-reset your branch to origin/master — un-commit, keep every change.
 
     The undo `git-commit --reset` never lets you stop at: this runs
@@ -466,8 +471,20 @@ def git_reset() -> int:
         is already level with origin/master. Undone commits are not lost: they stay
         reachable through the reflog until git eventually prunes them.
 
+    `--hard` instead makes the clone match origin/master exactly — the way out of a clone
+        left mid-merge (unmerged paths, a stash pop or rebase that stopped part-way), which
+        `git-sync` refuses to sync over. It fetches first, lists what it is about to
+        discard — local commits and every uncommitted change — and asks you to type
+        `discard` to confirm. Stash entries and untracked files are left alone.
+
     Aliased as `reset`.
+
+    Args:
+        hard: Discard local commits and uncommitted changes, resetting the working tree to
+            origin/master, after a typed confirmation. Defaults to False.
     """
+    if hard:
+        return _reset_hard()
     ahead: int = _commits_ahead_of_master()
     result: int = run_cmdline('git reset --soft origin/master')
     if result != 0:
@@ -477,6 +494,64 @@ def git_reset() -> int:
                       'run [accent]git-commit[/accent] to re-commit.')
     else:
         console.print('already level with [accent]origin/master[/accent] — nothing to undo.')
+    osc.git_changed()
+    return int(ExitCodes.EXIT_OK)
+
+
+def _git_out(*args: str) -> str:
+    """The stripped stdout of `git <args>` at the repository root ('' when it fails)."""
+    proc = run(['git', *args], cwd=config.root_dir, capture_output=True, text=True)
+    return proc.stdout.strip() if proc.returncode == 0 else ''
+
+
+def _rebase_in_progress() -> bool:
+    """Whether a rebase stopped part-way still owns the tree (the state `sync.sh` reads too)."""
+    paths = (_git_out('rev-parse', '--git-path', name) for name in ('rebase-merge', 'rebase-apply'))
+    return any(path and (config.root_dir / path).is_dir() for path in paths)
+
+
+def _reset_hard() -> int:
+    """`git-reset --hard`: show what is about to go, confirm it by typing, then reset."""
+    if run_cmdline('git fetch --prune origin master') != 0:
+        console.print('[warning]could not fetch origin/master — resetting to it as last fetched.[/warning]')
+    ahead: int = _commits_ahead_of_master()
+    # `git status`, not `git diff`: on the filtered tree only status tells a clean private
+    # file from a changed one (scripts/git/sync.sh explains the disagreement).
+    changes: list[str] = _git_out('status', '--porcelain', '--untracked-files=no').splitlines()
+    rebasing: bool = _rebase_in_progress()
+    if not (ahead or changes or rebasing):
+        console.print('already identical to [accent]origin/master[/accent] — nothing to discard.')
+        return int(ExitCodes.EXIT_OK)
+    console.print('[primary]This will discard:[/primary]')
+    if ahead:
+        console.print(f'  [accent]{ahead}[/accent] local commit(s) not on origin/master '
+                      '[muted](recoverable from the reflog for a while)[/muted]')
+    if rebasing:
+        console.print('  a rebase that stopped part-way')
+    if changes:
+        console.print(f'  [accent]{len(changes)}[/accent] uncommitted change(s):')
+        for line in changes[:20]:
+            console.print(f'    {line}', markup=False, highlight=False)
+        if len(changes) > 20:
+            console.print(f'    [muted]… and {len(changes) - 20} more[/muted]')
+    if stashes := _git_out('stash', 'list').splitlines():
+        console.print(f'[muted]Kept: {len(stashes)} stash entr{"y" if len(stashes) == 1 else "ies"} '
+                      '(`! git stash list`) and untracked files.[/muted]')
+    if not sure('Reset this clone to origin/master? Uncommitted changes cannot be recovered.',
+                phrase='discard'):
+        raise Abort('reset cancelled — nothing was changed')
+    # `reset --hard` clears a merge's state but not a rebase's; `--quit` drops that state
+    # without touching the tree, which the reset is about to rewrite anyway.
+    if rebasing and run_cmdline('git rebase --quit') != 0:
+        return int(ExitCodes.EXIT_ERROR)
+    if run_cmdline('git reset --hard origin/master') != 0:
+        # The usual cause is the smudge filter: solutions/private must decrypt on checkout.
+        console.print('[error]error:[/error] the reset did not complete — if it failed decrypting '
+                      'solutions/private, unlock your vault (the Account page) and run it again, '
+                      'or ask a maintainer to reset this clone.')
+        osc.git_changed()
+        return int(ExitCodes.EXIT_ERROR)
+    console.print('[success]reset to origin/master[/success] — this clone now matches it exactly.')
     osc.git_changed()
     return int(ExitCodes.EXIT_OK)
 
