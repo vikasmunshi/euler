@@ -66,7 +66,7 @@
     {
       "path": "domain/adjacency-graph-theory",
       "title": "Adjacency (graph theory)",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 5,
       "tags": ["adjacency-graph-theory"],
