@@ -8,9 +8,10 @@ __all__ = ['Problem', 'SOLVED_DATE_FORMAT', 'format_solved_date', 'parse_solved_
 from datetime import datetime
 from functools import lru_cache
 from itertools import chain
-from json import loads
+from json import JSONDecodeError, loads
 from pathlib import Path
 from random import choice
+from subprocess import run
 from typing import Literal, NamedTuple, TypedDict
 from urllib.parse import urljoin
 
@@ -75,8 +76,25 @@ class ProblemInfoDict(TypedDict):
 
 @lru_cache(maxsize=None)
 def get_problems() -> dict[int, ProblemInfoDict]:
-    """Retrieve problems from a cached problems.json."""
-    return {int(k): v for k, v in loads(config.static_file_problems.read_text()).items()}
+    """Retrieve problems from a cached problems.json.
+
+    A worktree copy that does not parse — in practice, git conflict markers left by a sync
+    that stopped part-way — falls back to the committed copy at HEAD, with a warning. Every
+    shell start reads this file before the first prompt, so letting it raise crashed the
+    shell and locked its owner out of `git-reset --hard`, the one verb that repairs it.
+    """
+    try:
+        return {int(k): v for k, v in loads(config.static_file_problems.read_text()).items()}
+    except JSONDecodeError as exc:
+        rel = config.static_file_problems.relative_to(config.root_dir).as_posix()
+        committed = run(['git', 'show', f'HEAD:{rel}'], cwd=config.root_dir, capture_output=True, text=True)
+        if committed.returncode != 0:
+            raise
+        from solver.shell import console  # lazily: solver.shell imports this module
+        console.print(f'[warning]{rel} does not parse ({exc.msg}, line {exc.lineno}) — likely an '
+                      'unresolved merge conflict; using the committed copy. Run '
+                      '[accent]git-reset --hard[/accent] to repair this clone.[/warning]')
+        return {int(k): v for k, v in loads(committed.stdout).items()}
 
 
 class Problem(NamedTuple):
