@@ -118,7 +118,8 @@ sync_onto_master() {
                 echo "  the conflicts by hand — or discard them with 'git stash drop'." >&2
             else
                 echo "Error: your changes are safe but still STASHED, and the tree may be part-applied." >&2
-                echo "  Run 'git-reset --hard' to return to origin/master, then 'git stash pop'." >&2
+                echo "  Recover them with 'git stash pop' after resolving by hand — 'git-reset --hard'" >&2
+                echo "  returns to origin/master but DISCARDS the stash along with everything else." >&2
             fi
         fi
     fi
@@ -222,7 +223,7 @@ main() {
             mapfile -t unmerged_paths <<<"${unmerged}"
             printf '  unmerged: %s\n' "${unmerged_paths[@]}" >&2
         fi
-        echo "  Nothing was synced. To return to origin/master, DISCARDING uncommitted changes:" >&2
+        echo "  Nothing was synced. To return to origin/master, DISCARDING uncommitted changes and stashes:" >&2
         echo "    git-reset --hard" >&2
         echo "  Or resolve the conflicts by hand ('git status' shows them), then run git-sync again." >&2
         return 1

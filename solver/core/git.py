@@ -452,10 +452,11 @@ def _commits_ahead_of_master() -> int:
 #
 # `--hard` is the other half, for the wedge `--soft` cannot reach — a conflicted stash pop or
 # merge, a half-checked-out worktree — which `git-sync` now refuses to sync over and points
-# here. It does destroy work, so it is gated by a typed confirmation rather than by a higher
-# floor: the reader stranded in that state is still the rung least able to get out of it any
-# other way, and `scripts/ops/reset-user.sh` stays the operator's version for a clone whose
-# owner cannot reach the shell at all.
+# here. It clears the stash too, which a reader has no other way to do. It does destroy
+# work, so it is gated by a typed confirmation rather than by a higher floor: the reader
+# stranded in that state is still the rung least able to get out of it any other way, and
+# `scripts/ops/reset-user.sh` stays the operator's version for a clone whose owner cannot
+# reach the shell at all.
 @register(requires='reader', quietable=True, aliases=('reset',))
 def git_reset(hard: bool = False) -> int:
     """Soft-reset your branch to origin/master — un-commit, keep every change.
@@ -474,14 +475,18 @@ def git_reset(hard: bool = False) -> int:
     `--hard` instead makes the clone match origin/master exactly — the way out of a clone
         left mid-merge (unmerged paths, a stash pop or rebase that stopped part-way), which
         `git-sync` refuses to sync over. It fetches first, lists what it is about to
-        discard — local commits and every uncommitted change — and asks you to type
-        `discard` to confirm. Stash entries and untracked files are left alone.
+        discard — local commits, every uncommitted change, and every stash entry — and
+        asks you to type `discard` to confirm. Untracked files are left alone.
+
+    The stash goes too because a wedged sync is what fills it: each failed `git-sync`
+        stashes the half-applied tree, and popping one later re-creates the wedge. Without
+        this a reader (who has no `!`) could not clear it at all.
 
     Aliased as `reset`.
 
     Args:
-        hard: Discard local commits and uncommitted changes, resetting the working tree to
-            origin/master, after a typed confirmation. Defaults to False.
+        hard: Discard local commits, uncommitted changes and stash entries, resetting the
+            working tree to origin/master, after a typed confirmation. Defaults to False.
     """
     if hard:
         return _reset_hard()
@@ -519,7 +524,8 @@ def _reset_hard() -> int:
     # file from a changed one (scripts/git/sync.sh explains the disagreement).
     changes: list[str] = _git_out('status', '--porcelain', '--untracked-files=no').splitlines()
     rebasing: bool = _rebase_in_progress()
-    if not (ahead or changes or rebasing):
+    stashes: list[str] = _git_out('stash', 'list').splitlines()
+    if not (ahead or changes or rebasing or stashes):
         console.print('already identical to [accent]origin/master[/accent] — nothing to discard.')
         return int(ExitCodes.EXIT_OK)
     console.print('[primary]This will discard:[/primary]')
@@ -534,10 +540,14 @@ def _reset_hard() -> int:
             console.print(f'    {line}', markup=False, highlight=False)
         if len(changes) > 20:
             console.print(f'    [muted]… and {len(changes) - 20} more[/muted]')
-    if stashes := _git_out('stash', 'list').splitlines():
-        console.print(f'[muted]Kept: {len(stashes)} stash entr{"y" if len(stashes) == 1 else "ies"} '
-                      '(`! git stash list`) and untracked files.[/muted]')
-    if not sure('Reset this clone to origin/master? Uncommitted changes cannot be recovered.',
+    if stashes:
+        console.print(f'  [accent]{len(stashes)}[/accent] stash entr{"y" if len(stashes) == 1 else "ies"}:')
+        for line in stashes[:10]:
+            console.print(f'    {line}', markup=False, highlight=False)
+        if len(stashes) > 10:
+            console.print(f'    [muted]… and {len(stashes) - 10} more[/muted]')
+    console.print('[muted]Kept: untracked files.[/muted]')
+    if not sure('Reset this clone to origin/master? Uncommitted changes and stashes cannot be recovered.',
                 phrase='discard'):
         raise Abort('reset cancelled — nothing was changed')
     # `reset --hard` clears a merge's state but not a rebase's; `--quit` drops that state
@@ -549,6 +559,12 @@ def _reset_hard() -> int:
         console.print('[error]error:[/error] the reset did not complete — if it failed decrypting '
                       'solutions/private, unlock your vault (the Account page) and run it again, '
                       'or ask a maintainer to reset this clone.')
+        osc.git_changed()
+        return int(ExitCodes.EXIT_ERROR)
+    # After the reset, not before: a reset that fails leaves the stash as the only copy of
+    # whatever a user might still want back.
+    if stashes and run_cmdline('git stash clear') != 0:
+        console.print('[warning]reset to origin/master, but the stash could not be cleared.[/warning]')
         osc.git_changed()
         return int(ExitCodes.EXIT_ERROR)
     console.print('[success]reset to origin/master[/success] — this clone now matches it exactly.')
