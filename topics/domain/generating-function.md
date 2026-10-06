@@ -172,5 +172,6 @@ ask which coefficient you actually need.
 - ○ [0881](/solutions/0881/) — Divisor Graph Width
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
+- ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->

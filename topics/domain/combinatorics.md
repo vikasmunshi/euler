@@ -417,7 +417,7 @@ of crossing it.
 - ○ [0992](/solutions/0992/) — Another Frog Jumping
 - ○ [0993](/solutions/0993/) — Banana Beaver
 - ○ [0994](/solutions/0994/) — Counting Triangles
-- ○ [0996](/solutions/0996/) — Overtakes
+- ● [0996](/solutions/0996/) — Overtakes
 - ○ [0997](/solutions/0997/) — Dice Box
 - ○ [1001](/solutions/1001/) — Connections I
 - ○ [1003](/solutions/1003/) — Lonely Singles
