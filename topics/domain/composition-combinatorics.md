@@ -16,5 +16,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Composition_(c
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
+- ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->

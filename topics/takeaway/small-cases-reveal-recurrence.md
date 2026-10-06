@@ -159,5 +159,6 @@ Four cautions earn their keep:
 ## Problems
 
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
+- ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->

@@ -179,6 +179,6 @@ permutations of [Problem 720](/solutions/0720/). The tell is a problem that coun
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ○ [0928](/solutions/0928/) — Cribbage
 - ○ [0964](/solutions/0964/) — Musical Chairs Revisited
-- ○ [0996](/solutions/0996/) — Overtakes
+- ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->
