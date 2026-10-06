@@ -113,7 +113,8 @@ def _row_cells(line: str) -> list[str]:
 def _parse_pricing(markdown: str) -> dict[str, tuple[float, float]]:
     """Parse the `## Model pricing` table → `{display_name: (input, output)}` per MTok.
 
-    Reads the first table whose header carries both `Base Input Tokens` and `Output Tokens`.
+    Reads the first table whose header carries both `Base Input Tokens` and `Output Tokens`,
+    matched case-insensitively (the page has shipped both `Output Tokens` and `Output tokens`).
     The model column is the display name (e.g. `Claude Opus 4.8`), with any trailing
     `([deprecated]…)` / `([limited availability]…)` annotation stripped. Rows annotated
     `deprecated` or `retired` are skipped, so the enum tracks only current models.
@@ -121,10 +122,11 @@ def _parse_pricing(markdown: str) -> dict[str, tuple[float, float]]:
     lines = markdown.splitlines()
     prices: dict[str, tuple[float, float]] = {}
     for i, line in enumerate(lines):
-        if not (line.lstrip().startswith('|') and 'Base Input Tokens' in line and 'Output Tokens' in line):
+        if not (line.lstrip().startswith('|') and 'base input tokens' in line.lower()
+                and 'output tokens' in line.lower()):
             continue
-        header = _row_cells(line)
-        in_idx, out_idx = header.index('Base Input Tokens'), header.index('Output Tokens')
+        header = [cell.lower() for cell in _row_cells(line)]
+        in_idx, out_idx = header.index('base input tokens'), header.index('output tokens')
         for row in lines[i + 2:]:  # skip the `|---|` separator row
             if not row.lstrip().startswith('|'):
                 break
@@ -175,12 +177,18 @@ def _collect() -> list[tuple[str, str, float, float]] | None:
     """Join the API model list with scraped prices, sorted by price (then ID) descending.
 
     Returns `(model_id, display_name, input_price, output_price)` rows, or None if either
-    source could not be reached. Models with no matching price on the docs page are skipped.
+    source could not be reached or the pricing page yielded no prices. Models with no matching
+    price on the docs page are skipped.
     """
     if (fetched := _fetch_models()) is None:
         return None
     raw: bytes = download_file(PRICING_URL, refresh=True)
-    prices = _parse_pricing(raw.decode('utf-8'))
+    if not (prices := _parse_pricing(raw.decode('utf-8'))):
+        # The page's layout moved under the scraper. Rendering on would empty the enum (and
+        # break every `Model.X` reference), so stop here instead.
+        console.print(f'[error]error:[/error] no model prices parsed from {PRICING_URL} '
+                      '— has the pricing table changed shape?')
+        return None
     models: list[tuple[str, str, float, float]] = []
     for model_id, display in fetched:
         if (price := prices.get(display)) is None:  # deprecated/retired, or not on the pricing page
