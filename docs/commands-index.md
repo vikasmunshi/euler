@@ -1000,8 +1000,12 @@ Makes no commit, so it runs no hooks and is a clean no-op — exit 0 — when yo
 `--hard` instead makes the clone match origin/master exactly — the way out of a clone
     left mid-merge (unmerged paths, a stash pop or rebase that stopped part-way), which
     `git-sync` refuses to sync over. It fetches first, lists what it is about to
-    discard — local commits and every uncommitted change — and asks you to type
-    `discard` to confirm. Stash entries and untracked files are left alone.
+    discard — local commits, every uncommitted change, and every stash entry — and
+    asks you to type `discard` to confirm. Untracked files are left alone.
+
+The stash goes too because a wedged sync is what fills it: each failed `git-sync`
+    stashes the half-applied tree, and popping one later re-creates the wedge. Without
+    this a reader (who has no `!`) could not clear it at all.
 
 Aliased as `reset`.
 
@@ -1017,7 +1021,7 @@ git-reset
 
 | argument | description |
 |----------|-------------|
-| `hard` | Discard local commits and uncommitted changes, resetting the working tree to origin/master, after a typed confirmation. Defaults to False. |
+| `hard` | Discard local commits, uncommitted changes and stash entries, resetting the working tree to origin/master, after a typed confirmation. Defaults to False. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.git.git_reset`.
