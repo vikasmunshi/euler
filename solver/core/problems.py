@@ -17,6 +17,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
+from requests import RequestException
 
 from solver.config import config
 from solver.core.download import download_file
@@ -60,7 +61,7 @@ def parse_solved_date(text: str) -> datetime | None:
 def solution_dir(problem_number: int) -> Path:
     """Return the solution directory for a problem."""
     if problem_number > 100:
-        start_group: int = int(problem_number / 100) * 100
+        start_group: int = problem_number // 100 * 100
         end_group: int = start_group + 99
         return config.solutions_dir.joinpath('private', f'p{start_group:04d}_{end_group:04d}', f'p{problem_number:04d}')
     return config.solutions_dir.joinpath('public', f'p{problem_number:04d}')
@@ -107,8 +108,13 @@ class Problem(NamedTuple):
         return f'{self.number}:"{self.title}"'
 
     def as_title(self) -> str:
-        """Return a full label of the form 'Problem <number>: <title> [Level <difficulty>]'."""
-        return f'Problem {self.number}: {self.title} [Level {self.difficulty}]'
+        """Return a full label of the form 'Problem <number>: <title> [Level <difficulty>]'.
+
+        The level is left off for a problem projecteuler.net has not rated yet (`difficulty`
+        is `''` until it has), rather than rendering an empty `[Level ]`.
+        """
+        level: str = f' [Level {self.difficulty}]' if self.difficulty else ''
+        return f'Problem {self.number}: {self.title}{level}'
 
     @property
     def solution_dir(self) -> Path:
@@ -127,13 +133,16 @@ class Problem(NamedTuple):
             force_refresh:  When True, bypass the download cache and re-fetch the
                             page and resources. Defaults to False.
 
+        Nothing is written unless everything downloaded: the files are collected first and
+        written together at the end, so a failure leaves no half-populated directory.
+
         Raises:
-            ValueError: if the page or any resource fails to download, or the
-                        `problem_content` div is absent.
+            ValueError: if the page or any resource fails to download, the
+                        `problem_content` div is absent, or two resources would be
+                        saved under the same local name.
         """
         euler_url = urljoin(config.projecteuler_url, f'problem={self.number}')
-        if (problem_html := download_file(euler_url, refresh=force_refresh)) is None:
-            raise ValueError(f'Problem {self.number}: Failed to download HTML from {euler_url}')
+        problem_html: bytes = self._download(euler_url, refresh=force_refresh)
         problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
         content: BeautifulSoup = problem_soup.find('div', {'class': 'problem_content'})  # type: ignore [assignment]
         if not content:
@@ -147,8 +156,12 @@ class Problem(NamedTuple):
             if isinstance(src, str) and (src.startswith('resources/') or src.startswith('project/images/')):
                 url: str = urljoin(config.projecteuler_url, src)
                 local_filename: str = config.resource_dirname + '/' + src.split('/')[-1].split('?')[0]
-                if (resource := download_file(url, refresh=force_refresh)) is None:
-                    raise ValueError(f'Problem {self.number}: Failed to download {url}')
+                resource: bytes = self._download(url, refresh=force_refresh)
+                # Saved by basename alone, so two remote folders can offer the same name; the
+                # second would silently overwrite the first, and both links show one file.
+                if files.get(local_filename, resource) != resource:
+                    raise ValueError(f'Problem {self.number}: two resources would both be saved '
+                                     f'as {local_filename}')
                 files[local_filename] = resource
                 element[attr] = local_filename
         files[config.statement_filename] = str(content).encode('utf-8')
@@ -156,6 +169,13 @@ class Problem(NamedTuple):
             file: Path = self.solution_dir / filename
             file.parent.mkdir(parents=True, exist_ok=True)
             file.write_bytes(file_bytes)
+
+    def _download(self, url: str, *, refresh: bool) -> bytes:
+        """`download_file`, with any network or HTTP failure raised as the `ValueError` `init` promises."""
+        try:
+            return download_file(url, refresh=refresh)
+        except RequestException as exc:
+            raise ValueError(f'Problem {self.number}: failed to download {url}: {exc}') from exc
 
     @property
     def problem_statement(self) -> str:
@@ -169,7 +189,7 @@ class Problem(NamedTuple):
             return {}
         return {
             resource.relative_to(self.solution_dir).as_posix(): resource.read_bytes()
-            for resource in resources_path.iterdir()
+            for resource in resources_path.iterdir() if resource.is_file()
         }
 
     @classmethod
@@ -236,19 +256,23 @@ class Problems:
     def problems_list(self) -> list[Problem]:
         """All known problems, ascending by number (built lazily and cached).
 
-        On first build, any problem whose `solution_dir` is missing is `init()`-ed
-        (its statement and resources downloaded), so accessing this can have the
-        side effect of populating the stack.
+        A pure read of `problems.json`: no problem is downloaded here. It used to `init()`
+        every problem whose directory was missing, which made any lookup a network call
+        and, on a clone's first run, wrote statement files that then collided with the same
+        files arriving by `git-sync`. New problems are fetched where they are discovered —
+        `summary`, which writes `problems.json` (see `missing_problems`).
         """
         if not self.__problems_list:
             self.__problems_list = [
                 Problem(number=num, title=info['title'], difficulty=str(info['level']))
                 for num, info in sorted(get_problems().items(), key=lambda item: item[0])
             ]
-            for problem in self.__problems_list:
-                if not problem.solution_dir.exists():
-                    problem.init()
         return self.__problems_list
+
+    @property
+    def missing_problems(self) -> list[Problem]:
+        """Known problems with no `solution_dir` yet — the ones `init()` has not fetched."""
+        return [problem for problem in self.problems_list if not problem.solution_dir.exists()]
 
     @property
     def problems_dict(self) -> dict[int, Problem]:

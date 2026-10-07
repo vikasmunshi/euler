@@ -13,6 +13,11 @@ from requests import get
 
 from solver.config import config
 
+#: `(connect, read)` seconds for every request. Without one a stalled connection — a dead
+#: proxy, a host that accepts and never answers — blocks the caller forever, and the caller
+#: can be a shell waiting for its first prompt.
+TIMEOUT: tuple[float, float] = (10, 60)
+
 
 def download_file(
         url: str, *,
@@ -39,13 +44,13 @@ def download_file(
     cache_path = config.cache_dir / uuid5(NAMESPACE_URL, url).hex
     if not cache_path.exists():
         refresh = True
-    elif check_last_modified and (modified := get(url, stream=True).headers.get('Last-Modified')):
+    elif check_last_modified and (modified := get(url, stream=True, timeout=TIMEOUT).headers.get('Last-Modified')):
         modified_dt = parsedate_to_datetime(modified)
         cached_dt = datetime.fromtimestamp(cache_path.stat().st_mtime, tz=timezone.utc)
         if modified_dt > cached_dt:
             refresh = True
     if refresh:
-        response = get(url, stream=True)
+        response = get(url, stream=True, timeout=TIMEOUT)
         response.raise_for_status()
         content: bytes = b''.join(chunk for chunk in response.iter_content(chunk_size=8192))
         cache_path.parent.mkdir(parents=True, exist_ok=True)

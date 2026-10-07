@@ -186,6 +186,10 @@ def summary() -> int:
     how the shell learns your real progress, driving `{solved}` / `{unsolved}`,
     `progress`, and `solved`.
 
+    It is also where new problems arrive: each problem the page lists that has no
+    solution directory yet gets its statement and resources downloaded. A failed
+    download fails the command once the rest are done; re-running retries it.
+
     The import only ever **adds** solved problems: a problem `mark` recorded as solved
     keeps that record, and its date, even when the page does not show it as solved —
     which is the normal state of a problem solved here but whose answer has not been
@@ -209,6 +213,33 @@ def summary() -> int:
                       '[/muted]')
         return ExitCodes.EXIT_ERROR
     _update_problems_state(_problems)
+    return _fetch_new_problems()
+
+
+def _fetch_new_problems() -> int:
+    """Download the statement of every problem `problems.json` knows but the stack lacks.
+
+    This is the one place new problems are discovered, so it is the one place they are
+    fetched — no longer as a side effect of the first lookup, which made every clone fetch
+    on its first run and then collide with the same files arriving by `git-sync`. The new
+    directories are left for the operator to commit with the updated `problems.json`.
+
+    Each failure is reported and the rest carry on; the exit code says whether any failed,
+    and running `summary` again retries exactly those, since their directories are still
+    missing.
+    """
+    failed: int = 0
+    for problem in problems.missing_problems:
+        console.print(f'[muted]fetching statement for {problem}[/muted]')
+        try:
+            problem.init()
+        except ValueError as exc:
+            console.print(f'[error]error:[/error] {exc}')
+            failed += 1
+    if failed:
+        console.print(f'[warning]{failed} statement(s) could not be fetched — run '
+                      '[accent]summary[/accent] again to retry.[/warning]')
+        return ExitCodes.EXIT_ERROR
     return ExitCodes.EXIT_OK
 
 
