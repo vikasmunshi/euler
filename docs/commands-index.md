@@ -1683,6 +1683,10 @@ It is also where new problems arrive: each problem the page lists that has no
 solution directory yet gets its statement and resources downloaded. A failed
 download fails the command once the rest are done; re-running retries it.
 
+What it wrote is committed — `problems.json` and each new problem's statement,
+`__init__.py` and resources, and nothing beside them — so new problems reach other
+clones by `git-sync` instead of every clone fetching its own copy.
+
 The import only ever **adds** solved problems: a problem `mark` recorded as solved
 keeps that record, and its date, even when the page does not show it as solved —
 which is the normal state of a problem solved here but whose answer has not been

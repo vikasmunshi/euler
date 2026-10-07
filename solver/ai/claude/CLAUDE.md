@@ -193,7 +193,7 @@ solver/
     loader.py          — Utility for loading command modules.
     misc.py            — The `problems` command.
     path_utils.py      — Utility functions for file and directory operations.
-    quips.py           — The `update-*` verbs' commit subjects — one pool per verb, in one place.
+    quips.py           — The regenerating verbs' commit subjects — one pool per verb, in one place.
     scripts.py         — Dependency and system-resource setup commands.
     search.py          — 'find' command: grep the solution stack for a regular expression.
     shell_utils.py     — Utility for running shell commands and capturing their output.
