@@ -262,7 +262,9 @@ solver/
     new.py             — The `new` command and solution-file formatting (black / isort / autoflake).
     osc.py             — The shell → browser control channel: `OSC 5379`.
     problems.py        — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
+    progress.py        — The progress page → `problems.json` pipeline, shared by the shell and the web tier.
     results.py         — Results: save and retrieve problem results.
+    summary.py         — The `summary`, `progress` and `mark` commands: the shell's side of `problems.json`.
     tags.py            — Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
     test_cases.py      — Load test cases for evaluation
     viewer.py          — Open a problem or its files in the web front end: the `show` and `edit` commands.
@@ -304,7 +306,6 @@ solver/
     scripts.py         — Dependency and system-resource setup commands.
     search.py          — 'find' command: grep the solution stack for a regular expression.
     shell_utils.py     — Utility for running shell commands and capturing their output.
-    summary.py         — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py      — Regenerate the machine-maintained sections of the guides under `docs/`.
     version.py         — The `version` command: report the running solver build's version.
   web/                 — The web app services (see docs/web-server-guide.md).

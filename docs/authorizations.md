@@ -64,6 +64,9 @@ a profile on each channel.
 | `solver.core.list` | `ls` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.new` | `new` |  | ✓ | ✓ | ✓ |
 | `solver.core.results` | `results` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.summary` | `mark` |  | ✓ | ✓ | ✓ |
+| `solver.core.summary` | `progress` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.summary` | `summary` |  |  | ✓ | ✓ |
 | `solver.core.tags` | `create-topic` |  |  | ✓ | ✓ |
 | `solver.core.tags` | `tags` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `topic` | ✓ | ✓ | ✓ | ✓ |
@@ -91,9 +94,6 @@ a profile on each channel.
 | `solver.utils.scripts` | `sys-setup` |  |  |  | ✓ |
 | `solver.utils.search` | `search` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.shell_utils` | `pause` | ✓ | ✓ | ✓ | ✓ |
-| `solver.utils.summary` | `mark` |  | ✓ | ✓ | ✓ |
-| `solver.utils.summary` | `progress` | ✓ | ✓ | ✓ | ✓ |
-| `solver.utils.summary` | `summary` |  |  | ✓ | ✓ |
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
 | `solver.web.auth.commands` | `users` |  |  |  | ✓ |

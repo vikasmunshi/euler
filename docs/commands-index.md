@@ -1369,7 +1369,7 @@ mark
 | `problem` | The problem to mark solved. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
-*Defined in* `solver.utils.summary.mark`.
+*Defined in* `solver.core.summary.mark`.
 
 ---
 
@@ -1551,7 +1551,7 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 progress
 ```
 
-*Defined in* `solver.utils.summary.progress`.
+*Defined in* `solver.core.summary.progress`.
 
 ---
 
@@ -1705,7 +1705,7 @@ summary
 |----------|-------------|
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
-*Defined in* `solver.utils.summary.summary`.
+*Defined in* `solver.core.summary.summary`.
 
 ---
 
