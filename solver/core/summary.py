@@ -12,13 +12,16 @@ __all__ = ['summary', 'mark', 'progress']
 
 from datetime import datetime
 from json import JSONDecodeError, loads
+from pathlib import Path
 from typing import Any
 
 from solver.config import ExitCodes, config
+from solver.core.git import commit_regenerated
 from solver.core.problems import Problem, format_solved_date, problems
 from solver.core.progress import ProblemRecord, merge_progress, parse_progress
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
+from solver.utils.quips import quips
 from solver.web.msg import UNREGISTERED_SUBJECT
 
 
@@ -88,6 +91,10 @@ def summary() -> int:
     solution directory yet gets its statement and resources downloaded. A failed
     download fails the command once the rest are done; re-running retries it.
 
+    What it wrote is committed — `problems.json` and each new problem's statement,
+    `__init__.py` and resources, and nothing beside them — so new problems reach other
+    clones by `git-sync` instead of every clone fetching its own copy.
+
     The import only ever **adds** solved problems: a problem `mark` recorded as solved
     keeps that record, and its date, even when the page does not show it as solved —
     which is the normal state of a problem solved here but whose answer has not been
@@ -111,34 +118,43 @@ def summary() -> int:
                       '[/muted]')
         return ExitCodes.EXIT_ERROR
     _update_problems_state(_problems)
-    return _fetch_new_problems()
+    fetched, failed = _fetch_new_problems()
+    written: list[str] = [_relative(config.static_file_problems), *(_relative(path) for path in fetched)]
+    new: list[str] = sorted({_relative(path.parent) for path in fetched if path.name == config.statement_filename})
+    committed: int = commit_regenerated('summary', quips['summary'], written,
+                                        [f'new problem: {name}' for name in new])
+    return int(ExitCodes.EXIT_ERROR) if failed else committed
 
 
-def _fetch_new_problems() -> int:
+def _relative(path: Path) -> str:
+    """*path* as the repo-relative POSIX name `commit_regenerated` takes."""
+    return path.relative_to(config.root_dir).as_posix()
+
+
+def _fetch_new_problems() -> tuple[list[Path], int]:
     """Download the statement of every problem `problems.json` knows but the stack lacks.
 
     This is the one place new problems are discovered, so it is the one place they are
     fetched — no longer as a side effect of the first lookup, which made every clone fetch
-    on its first run and then collide with the same files arriving by `git-sync`. The new
-    directories are left for the operator to commit with the updated `problems.json`.
+    on its first run and then collide with the same files arriving by `git-sync`.
 
-    Each failure is reported and the rest carry on; the exit code says whether any failed,
-    and running `summary` again retries exactly those, since their directories are still
-    missing.
+    Returns every file written (for :func:`summary` to commit) and how many problems
+    failed. Each failure is reported and the rest carry on; running `summary` again
+    retries exactly those, since their directories are still missing.
     """
+    fetched: list[Path] = []
     failed: int = 0
     for problem in problems.missing_problems:
         console.print(f'[muted]fetching statement for {problem}[/muted]')
         try:
-            problem.init()
+            fetched.extend(problem.init())
         except ValueError as exc:
             console.print(f'[error]error:[/error] {exc}')
             failed += 1
     if failed:
         console.print(f'[warning]{failed} statement(s) could not be fetched — run '
                       '[accent]summary[/accent] again to retry.[/warning]')
-        return ExitCodes.EXIT_ERROR
-    return ExitCodes.EXIT_OK
+    return fetched, failed
 
 
 @register(requires='reader')

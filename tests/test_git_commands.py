@@ -980,8 +980,8 @@ class CommitRegeneratedTest(_GitCommandCase):
         """A fifth `update-*` verb must declare what it commits, or `GENERATED_PATHS[verb]`
         raises a KeyError at the end of an otherwise successful regeneration."""
         load_commands()  # this process is the checkout owner → admin, so nothing is filtered out
-        verbs = {cmd.name for cmd in registry.all() if cmd.name.startswith('update-')}
-        self.assertEqual(verbs, set(git.GENERATED_PATHS), 'every update-* verb needs a path set')
+        verbs = {cmd.name for cmd in registry.all() if cmd.name.startswith('update-')} | {'summary'}
+        self.assertEqual(verbs, set(git.GENERATED_PATHS), 'every update-* verb (and summary) needs a path set')
 
     def test_clean_paths_commit_nothing(self) -> None:
         self.dirty = ''

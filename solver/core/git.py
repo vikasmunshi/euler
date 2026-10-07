@@ -140,6 +140,11 @@ GENERATED_PATHS: dict[str, tuple[str, ...]] = {
     'update-models': ('solver/ai/models.py',),
     'update-tags': ('topics/', 'solutions/**/tags.json'),
     'update-usd-rate': ('solver/config/values.conf',),
+    # Not an `update-*` verb, but the same kind of write: `summary` regenerates the progress
+    # file and fetches each new problem's statement. Globs, not `solutions/`, so the envelope
+    # admits a statement and its resources but never a solution or a note beside them.
+    'summary': ('solutions/problems.json', 'solutions/**/statement.html', 'solutions/**/__init__.py',
+                'solutions/**/resources/*'),
 }
 
 

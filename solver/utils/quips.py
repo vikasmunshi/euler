@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `update-*` verbs' commit subjects — one pool per verb, in one place.
+"""The regenerating verbs' commit subjects — one pool per verb, in one place.
 
 Every regenerating verb lands its own output through
 :func:`~solver.core.git.commit_regenerated`, which writes `chore(<verb>): <quip>` over a body
@@ -33,6 +33,7 @@ Quips = TypedDict('Quips', {
     'update-models': tuple[str, ...],
     'update-tags': tuple[str, ...],
     'update-usd-rate': tuple[str, ...],
+    'summary': tuple[str, ...],
 })
 
 quips: Quips = {
@@ -171,5 +172,39 @@ quips: Quips = {
         'the peg, re-pegged',
         'accurate this morning, approximate by lunch',
         'one line changed; every cost in the report moved',
+    ),
+    'summary': (
+        'the progress page, read back into the ledger',
+        'new problems arrived; their statements came too',
+        'the scoreboard, transcribed',
+        'projecteuler.net published; the stack took notes',
+        'what is solved, according to the people who check',
+        'fresh problems, unsolved and on file',
+        'the grid grew a little',
+        'progress recorded, not merely felt',
+        'the ledger caught up with the leader board',
+        'another batch of things nobody has solved here yet',
+        'the to-do list lengthened itself',
+        'statements downloaded, solutions pending',
+        'the frontier moved; the map followed',
+        'a census of the problems, retaken',
+        'solved stays solved; new stays new',
+        'the progress page said so, so it is written',
+        'difficulty ratings, as the crowd now sees them',
+        'the problem set, as of this morning',
+        'more problems than yesterday, as usual',
+        'the record agrees with the website again',
+        'one-way merge: progress only goes up',
+        'titles, levels and dates, refreshed',
+        'the backlog, fetched and filed',
+        'new statements, waiting to be read',
+        'the century grid has new squares',
+        'the upstream count, mirrored downstream',
+        'nothing un-solved, something added',
+        'the queue of puzzles, topped up',
+        'percent-solved figures, re-taken',
+        'a snapshot of the leader board, as data',
+        'the problems file, re-derived from the source',
+        'homework, delivered',
     ),
 }

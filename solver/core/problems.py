@@ -122,7 +122,7 @@ class Problem(NamedTuple):
         """The on-disk directory holding this problem's files (see module-level `solution_dir`)."""
         return solution_dir(self.number)
 
-    def init(self, *, force_refresh: bool = False) -> None:
+    def init(self, *, force_refresh: bool = False) -> list[Path]:
         """Download the problem statement and its resources into `solution_dir`.
 
         Fetches the projecteuler.net page for this problem, extracts the
@@ -136,6 +136,9 @@ class Problem(NamedTuple):
 
         Nothing is written unless everything downloaded: the files are collected first and
         written together at the end, so a failure leaves no half-populated directory.
+
+        Returns:
+            Every file written, so a caller can stage exactly those (`summary` commits them).
 
         Raises:
             ValueError: if the page or any resource fails to download, the
@@ -166,10 +169,13 @@ class Problem(NamedTuple):
                 files[local_filename] = resource
                 element[attr] = local_filename
         files[config.statement_filename] = str(content).encode('utf-8')
+        written: list[Path] = []
         for filename, file_bytes in files.items():
             file: Path = self.solution_dir / filename
             file.parent.mkdir(parents=True, exist_ok=True)
             file.write_bytes(file_bytes)
+            written.append(file)
+        return written
 
     def _download(self, url: str, *, refresh: bool) -> bytes:
         """`download_file`, with any network or HTTP failure raised as the `ValueError` `init` promises."""
