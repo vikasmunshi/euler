@@ -25,6 +25,7 @@ __all__ = ['build_app', 'add_content_routes', 'install_content',
 
 import asyncio
 import html
+import json
 import logging
 import mimetypes
 from pathlib import Path
@@ -294,7 +295,8 @@ def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]
     """The `/solutions/` view context: grids, counts, crumbs, and its actions."""
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
     actions: list[Action] = []
-    if _subject(request).has('contributor'):
+    # Maintainer, the `summary` floor: the upload hands its import to `summary` (below).
+    if _subject(request).has('maintainer'):
         actions.append(Action(label='Upload progress', kind='get', path='/edit/solutions/'))
     return {
         'grids': content.centuries(problems),
@@ -816,7 +818,7 @@ async def file_delete(request: web.Request) -> web.StreamResponse:
     return response
 
 
-@requires('contributor')
+@requires('maintainer')
 async def progress_editor(request: web.Request) -> web.StreamResponse:
     """`GET /edit/solutions/` — the progress upload: an **empty** paste buffer.
 
@@ -831,14 +833,21 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('contributor')
+@requires('maintainer')
 async def progress_save(request: web.Request) -> web.StreamResponse:
-    """`POST /edit/solutions/` — save progress → the grid block + status.
+    """`POST /edit/solutions/` — store the page, then run `summary` in the terminal.
 
     Parse-or-reject: the paste must yield at least one problem before
-    `solutions/.progress.html` and the re-derived `problems.json` are
-    written; a broken paste never lands. Success renders the refreshed
-    century grids, failure re-renders the upload with the reason.
+    `solutions/.progress.html` is written; a broken paste never lands, and the upload
+    is re-rendered with the reason.
+
+    The import itself is **`summary`'s**, typed into this user's web shell by the
+    `euler-term-run` event (site.js) — the same path the git menu's verbs take. That
+    is what gives the upload everything `summary` does and this tier must not: the
+    solved-preserving merge into `problems.json`, the staff notice for unregistered
+    answers, fetching new problems from projecteuler.net, and the commit. It is also
+    why the floor is `summary`'s, maintainer. When the shell has re-written
+    `problems.json`, it says so (OSC `progress`) and the grid re-reads itself.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     form = await request.post()
@@ -854,6 +863,7 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
     response = render(request, 'solutions.html', _solutions_context(request, status=message),
                       block='content', fragment=True)
     response.headers['HX-Push-Url'] = '/solutions/'
+    response.headers['HX-Trigger'] = json.dumps({'euler-term-run': 'summary'})
     return response
 
 

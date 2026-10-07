@@ -1297,7 +1297,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET | `/git` | the header git chip's contents — the refresh the shell, the menu-open and the poll ask for (§11.9) | reader |
 | GET | `/messages` | the header's message chip alone — count, rows, verbs (§13) | reader |
-| GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save | contributor |
+| GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save the page, run `summary` in the terminal | maintainer |
 | GET/POST | `/edit/solutions/{n}/{filename}` | file editor → save | contributor |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete a bare `.py`/`.c` → the problem-page fragment | maintainer |
 | GET | `/ws` | the PTY WebSocket attach | reader |
@@ -1450,9 +1450,18 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   bottom edge pointing straight into the grid it measures — a century is a topic you have
   or have not worked through, so it says so the same way. It is an `<h2>`, not a link
   (there is no per-century page), so it keeps the chassis and drops the hover.
-- **Progress upload** — an **empty** paste buffer, because this is a *replace*, not an
-  edit: the previous `.progress.html` is superseded wholesale, parse-or-reject before
-  anything lands.
+- **Progress upload** (maintainer, the `summary` floor) — an **empty** paste buffer,
+  because this is a *replace*, not an edit: the previous `.progress.html` is superseded
+  wholesale, parse-or-reject before anything lands. The upload writes **only** that page;
+  the import is `summary`'s, which the response runs in the user's terminal
+  (`HX-Trigger: {"euler-term-run": "summary"}` → the same `run` message the git menu's
+  verbs post). So the upload gets everything `summary` does and this tier must not: the
+  solved-preserving merge into `problems.json`, the staff notice for unregistered answers,
+  fetching new problems' statements, and the commit. When the shell has re-written
+  `problems.json` it emits `OSC 5379` `progress;`, and a listener inside `solutions.html`
+  (`euler:progress-changed from:body`) re-reads the grid — scoped by presence, like the
+  account panel. A disconnected terminal cannot take the command; the status line says to
+  run `summary` there.
 - **Problem** — statement first, then test cases · results · files · notes. Two off-site
   links on the meta line (projecteuler.net and the GitHub solution directory). Test cases
   render as a table, not raw JSON. Files flow horizontally, plain-text links, zero-size

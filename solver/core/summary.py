@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from solver.config import ExitCodes, config
+from solver.core import osc
 from solver.core.git import commit_regenerated
 from solver.core.problems import Problem, format_solved_date, problems
 from solver.core.progress import ProblemRecord, merge_progress, parse_progress
@@ -73,6 +74,7 @@ def _update_problems_state(_problems: dict[int, ProblemRecord]) -> None:
     """
     unregistered: list[int] = merge_progress(config.static_file_problems, _problems)
     problems.clear_cache()
+    osc.progress_changed()   # a web upload's grid is waiting on this (solver.web.site.app.progress_save)
     if unregistered:
         _report_unregistered(unregistered)
 

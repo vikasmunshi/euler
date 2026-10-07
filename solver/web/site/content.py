@@ -37,7 +37,7 @@ from typing import Any, NamedTuple
 from markdown_it import MarkdownIt
 
 # Config-free by design (its module docstring), which is what makes this import allowed here.
-from solver.core.progress import merge_progress, parse_progress
+from solver.core.progress import parse_progress
 
 #: Markdown renderer for the guides/topics (GitHub-flavoured: tables + strikethrough).
 _MD = MarkdownIt('commonmark').enable(['table', 'strikethrough'])
@@ -283,17 +283,16 @@ def load_json(path: Path) -> Any | None:
 # ── progress (the /edit/solutions/ collection editor, 5d) ──────────────────────────
 
 def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
-    """The progress save gate: parse-or-reject, then write both derived files.
+    """The progress save gate: parse-or-reject, then store the page — and only the page.
 
-    The submitted page source must parse to at least one problem (the 5c
-    reject semantics — a broken paste never lands); on success it is stored as
-    `solutions/.progress.html` and merged into `solutions/problems.json` exactly as
-    the shell's `summary` command merges it — the parser and the merge are the same
-    functions (:mod:`solver.core.progress`), so a problem `mark` recorded as solved
-    ahead of the page stays solved. Each such disagreement is named in the status.
-
-    New problems are not fetched here (this tier has no business on projecteuler.net):
-    `summary` in the shell downloads their statements.
+    The submitted page source must parse to at least one problem (the 5c reject
+    semantics — a broken paste never lands); on success it is stored as
+    `solutions/.progress.html`, and nothing else is written. Deriving `problems.json`
+    from it is the shell's `summary`, which the upload runs in the user's terminal
+    (`solver.web.site.app.progress_save`): one writer, with the merge, the staff
+    notice, the new-problem fetch and the commit that this tier has no business doing.
+    The parser is shared with it (:mod:`solver.core.progress`), so what passes this
+    gate is exactly what `summary` will read.
     """
     try:
         text = content.decode('utf-8')
@@ -304,13 +303,8 @@ def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
         return False, ('no problems parsed — paste the full Page Source of '
                        'https://projecteuler.net/progress')
     (repo_root / 'solutions' / '.progress.html').write_text(text, encoding='utf-8')
-    unregistered = merge_progress(repo_root / 'solutions' / 'problems.json', problems)
-    message = (f'saved progress — {len(problems)} problems, '
-               f'{sum(1 for p in problems.values() if p["solved"])} solved')
-    if unregistered:
-        message += (f'; answer not registered on projecteuler.net for '
-                    f'{", ".join(str(n) for n in unregistered)}')
-    return True, message
+    return True, (f'saved the progress page ({len(problems)} problems) — importing it with '
+                  '`summary` in your terminal; connect the terminal and run it there if it is not running')
 
 
 # ── about (the footer pages, 5e) ────────────────────────────────────────────────────

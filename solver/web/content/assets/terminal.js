@@ -169,6 +169,8 @@
   //   edit;<NNNN>;<token>;<relpath>    → swap the pane to /edit/solutions/NNNN/<relpath>
   //   git;<token>                      → the header's git chip re-reads itself
   //   msg;<token>                      → the header's message chip re-reads itself
+  //   account;<token>                  → the account pane re-reads itself (if visible)
+  //   progress;<token>                 → the solutions grid re-reads itself (if visible)
   //
   // Two guards, for two different re-runs of the same sequence:
   //   · `live` — the attach replay redraws commands that already ran. Acting on
@@ -196,6 +198,9 @@
     if (action === 'account') {
       return { euler: 'account-changed' };
     }
+    if (action === 'progress') {
+      return { euler: 'progress-changed' };
+    }
     var number = parts[1];
     if (!/^\d+$/.test(number || '')) { return null; }
     if (action === 'open') {
@@ -209,9 +214,10 @@
   }
 
   //: Where the token sits: second field for the fieldless nudges (`git`, `msg`,
-  //: `account`), third for the pane actions that carry a problem number first (§ above).
+  //: `account`, `progress`), third for the pane actions that carry a problem number first (§ above).
   function oscToken(parts) {
-    var fieldless = parts[0] === 'git' || parts[0] === 'msg' || parts[0] === 'account';
+    var fieldless = parts[0] === 'git' || parts[0] === 'msg' || parts[0] === 'account' ||
+      parts[0] === 'progress';
     return Number(fieldless ? parts[1] : parts[2]) || 0;
   }
 

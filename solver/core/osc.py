@@ -21,6 +21,8 @@ payload carries a *token* (:func:`token`):
   re-read the header's message chip.
 - `account;<token>` — this user's account state changed (a new identity, a GitHub
   sign-in); re-read the account page — *if it is the visible pane*.
+- `progress;<token>` — `problems.json` changed (`summary`, `mark`); re-read the
+  solutions grid — *if it is the visible pane*.
 
 The token is a server-side millisecond clock, strictly increasing per command. On
 attach the service replays the scrollback, which redraws the sequences of commands
@@ -34,7 +36,7 @@ other.
 """
 from __future__ import annotations
 
-__all__ = ['OSC_CODE', 'account_changed', 'emit', 'git_changed', 'messages_changed', 'token']
+__all__ = ['OSC_CODE', 'account_changed', 'emit', 'git_changed', 'messages_changed', 'progress_changed', 'token']
 
 import sys
 import time
@@ -120,3 +122,16 @@ def account_changed() -> None:
     account panel listens for that event as well — so those need not emit both.
     """
     emit('account', str(token()))
+
+
+def progress_changed() -> None:
+    """Tell the page `problems.json` moved: the solutions grid re-reads itself.
+
+    Emitted when `summary` or `mark` re-writes the progress file. It matters most for
+    the web upload, which stores the pasted page and hands the import to `summary` in
+    this terminal — so the grid the upload left on screen is stale until the shell
+    finishes, and this is how it learns that it has. Like `account;`, the listener
+    lives inside the pane (`solutions.html`), so it is a no-op unless the grid is the
+    visible page.
+    """
+    emit('progress', str(token()))

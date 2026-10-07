@@ -455,6 +455,30 @@
     document.body.dispatchEvent(new CustomEvent('euler:account-changed'));
   });
 
+  // ── the solutions grid's refresh (OSC 5379 `progress`) ──────────────────────
+  // `summary` / `mark` re-wrote problems.json in the terminal. Same shape as the
+  // account nudge: the listener lives inside solutions.html, so this reaches nothing
+  // unless the grid is the visible pane.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'progress-changed') { return; }
+    document.body.dispatchEvent(new CustomEvent('euler:progress-changed'));
+  });
+
+  // ── a server response asking the terminal to run a command ─────────────────
+  // `HX-Trigger: {"euler-term-run": "<command>"}` — the progress upload stores the
+  // page and hands the import to `summary` this way, the same `run` message the git
+  // menu's [data-term-cmd] buttons post. The pane is revealed first: the command's
+  // output (warnings, the commit) is the answer, and a hidden terminal would swallow
+  // it. A disconnected terminal would drop the frame, so nothing is sent — the
+  // response's status line tells the user to run it themselves.
+  document.addEventListener('euler-term-run', function (ev) {
+    var command = ev.detail && ev.detail.value;
+    if (!command || !termConnected) { return; }
+    setWsHidden(false);
+    paintWsHidden();
+    postToTerminal({ euler: 'run', command: String(command) });
+  });
+
   // ── the message chip's refresh (both nudges) ────────────────────────────────
   // Two sources, one event, because the page's answer is the same either way: re-read
   // the chip.

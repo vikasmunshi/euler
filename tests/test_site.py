@@ -645,6 +645,12 @@ class EditRouteTests(AioHTTPTestCase):
             self.assertEqual(resp.status, 403, f'{method} {path}')
 
     @unittest_run_loop
+    async def test_progress_upload_gated_below_maintainer(self) -> None:
+        for method in ('GET', 'POST'):
+            resp = await self.client.request(method, '/edit/solutions/', headers=_CONTRIBUTOR)
+            self.assertEqual(resp.status, 403, method)
+
+    @unittest_run_loop
     async def test_editor_404_for_missing_or_uneditable(self) -> None:
         for path in ('/edit/solutions/0009/nope.py',       # editor edits; `new` creates
                      '/edit/solutions/0009/data.txt'):     # not an editable suffix
@@ -801,7 +807,7 @@ class EditRouteTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_progress_upload_starts_empty(self) -> None:
         (self.scratch / 'solutions' / '.progress.html').write_text('<p>PREVIOUS-UPLOAD</p>')
-        resp = await self.client.get('/edit/solutions/', headers=_CONTRIBUTOR)
+        resp = await self.client.get('/edit/solutions/', headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertIn('projecteuler.net/progress', body)
@@ -809,29 +815,31 @@ class EditRouteTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_progress_slashless_301s(self) -> None:
-        resp = await self.client.get('/edit/solutions', headers=_CONTRIBUTOR, allow_redirects=False)
+        resp = await self.client.get('/edit/solutions', headers=_MAINTAINER, allow_redirects=False)
         self.assertEqual(resp.status, 301)
         self.assertEqual(resp.headers['Location'], '/edit/solutions/')
 
     @unittest_run_loop
-    async def test_progress_save_rederives_problems_json(self) -> None:
+    async def test_progress_save_stores_the_page_and_hands_off_to_summary(self) -> None:
+        problems_json = self.scratch / 'solutions' / 'problems.json'
+        before = problems_json.read_bytes() if problems_json.exists() else None
         resp = await self.client.post('/edit/solutions/', data={'content': _PROGRESS_OK},
-                                      headers=_CONTRIBUTOR)
+                                      headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertIn('century-grid', body)                          # the grid block + status
-        self.assertIn('saved progress', body)
-        derived = json.loads((self.scratch / 'solutions' / 'problems.json').read_text())
-        self.assertEqual(derived['9']['pct'], 30)
-        self.assertEqual(derived['9']['level'], 3)                   # from the t_3 class
-        self.assertTrue(derived['9']['solved'])
+        self.assertIn('saved the progress page', body)
         self.assertTrue((self.scratch / 'solutions' / '.progress.html').exists())
+        # The import is `summary`'s, run in the terminal — this tier writes only the page.
+        self.assertEqual(json.loads(resp.headers['HX-Trigger']), {'euler-term-run': 'summary'})
+        self.assertEqual(problems_json.read_bytes() if problems_json.exists() else None, before)
 
     @unittest_run_loop
     async def test_broken_progress_paste_never_lands(self) -> None:
         resp = await self.client.post('/edit/solutions/', data={'content': '<p>not a progress page</p>'},
-                                      headers=_CONTRIBUTOR)
+                                      headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
+        self.assertNotIn('HX-Trigger', resp.headers)                 # nothing to import
         self.assertIn('no problems parsed', await resp.text())
         self.assertFalse((self.scratch / 'solutions' / '.progress.html').exists())
 
@@ -856,10 +864,10 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertNotIn('hx-delete', page)
         page = await (await self.client.get('/solutions/0009/p0009_s0.py', headers=_MAINTAINER)).text()
         self.assertIn('hx-delete', page)
-        # solutions index: Upload progress is contributor+
-        page = await (await self.client.get('/solutions/', headers=_READER)).text()
-        self.assertNotIn('Upload progress', page)
+        # solutions index: Upload progress is maintainer+ (the `summary` floor)
         page = await (await self.client.get('/solutions/', headers=_CONTRIBUTOR)).text()
+        self.assertNotIn('Upload progress', page)
+        page = await (await self.client.get('/solutions/', headers=_MAINTAINER)).text()
         self.assertIn('Upload progress', page)
 
     @unittest_run_loop

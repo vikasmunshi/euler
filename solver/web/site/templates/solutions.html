@@ -3,6 +3,11 @@
 {% block content %}
 {% from "_divider.html" import divider with context %}
 {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
+{# Re-reads this page when the shell re-writes problems.json (OSC `progress`: `summary`,
+   `mark`) — chiefly after an upload, whose import runs in the terminal. Inside the pane,
+   so it listens only while the grid is what is on screen. #}
+<span hidden hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML"
+      hx-trigger="euler:progress-changed from:body"></span>
 {# The five-page layout (web-server-guide § The site): hero · section strip · divider ·
    content. Frost, "Stopping by Woods on a Snowy Evening" — the count is the fact; the
    lede is for the miles still to go, not for restating what the grid shows. #}
