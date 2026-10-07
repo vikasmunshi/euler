@@ -27,8 +27,9 @@ SOLVED_DATE_FORMAT: str = '%a, %d %b %Y, %H:%M'
 """How a solved date is written in `problems.json` — the progress page's own wording.
 
 The field has two writers: the projecteuler.net progress page (scraped verbatim by
-`solver.utils.summary`) and the `mark` command. Both must speak this one format, or the
-record the second one writes is unreadable to everything that reads the first.
+`solver.core.progress`, via `summary` and the web upload) and the `mark` command. Both
+must speak this one format, or the record the second one writes is unreadable to
+everything that reads the first.
 """
 
 

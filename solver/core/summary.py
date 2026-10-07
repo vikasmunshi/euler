@@ -1,131 +1,33 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" Progress: parse .progress.html into problems.json and refresh in-memory state."""
+"""The `summary`, `progress` and `mark` commands: the shell's side of `problems.json`.
+
+The parsing and the solved-preserving merge are shared with the web tier's progress upload
+and live in :mod:`solver.core.progress`; this module adds what only the shell has — the
+config-resolved paths, the console, the staff notice, and fetching new problems.
+"""
 from __future__ import annotations
 
 __all__ = ['summary', 'mark', 'progress']
 
 from datetime import datetime
-from json import JSONDecodeError, dumps, loads
+from json import JSONDecodeError, loads
 from typing import Any
-
-from bs4 import BeautifulSoup, Tag
 
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem, format_solved_date, problems
+from solver.core.progress import ProblemRecord, merge_progress, parse_progress
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
 from solver.web.msg import UNREGISTERED_SUBJECT
 
 
-def _parse_progress_html() -> dict[int, dict[str, str | int | bool]]:
-    """Parse .progress.html and return problem metadata.
-
-    Returns dict mapping problem_number -> {title, level, pct, solved, date}.
-    level and pct are ints or '' when unknown; date is '' for unsolved problems.
-    """
+def _parse_progress_html() -> dict[int, ProblemRecord]:
+    """Parse `.progress.html` (see :func:`solver.core.progress.parse_progress`); `{}` when absent."""
     progress_file = config.static_file_progress
     if not progress_file.exists():
         return {}
-    soup: BeautifulSoup = BeautifulSoup(progress_file.read_text(encoding='utf-8', errors='replace'), 'html.parser')
-    _problems: dict[int, dict[str, str | int | bool]] = {}
-    for td in soup.find_all('td', class_='tooltip'):
-        a_tag = td.find('a', href=True)
-        if not a_tag or not str(a_tag.get('href', '')).startswith('problem='):
-            continue
-        try:
-            num = int(str(a_tag['href']).split('=')[1])
-        except (ValueError, IndexError):
-            continue
-        # Difficulty level from CSS class t_N
-        level: int | str = ''
-        for cls in (td.get('class') or []):
-            if cls.startswith('t_'):
-                try:
-                    level = int(cls[2:])
-                except ValueError:
-                    pass
-        # Title, percentage, and completion date from tooltip span
-        title: str = ''
-        pct: int | str = ''
-        date: str = ''
-        tooltip: Tag | None = a_tag.find('span', class_='tooltiptext_narrow')
-        if tooltip:
-            for div in tooltip.find_all('div'):
-                text: str = div.get_text(strip=True)
-                if text.startswith('"') and text.endswith('"'):
-                    title = text[1:-1]
-                elif 'Difficulty:' in text and '[' in text:
-                    try:
-                        pct = int(text.split('[')[1].split('%')[0].strip())
-                        if level == '' and 'Level' in text:
-                            level = int(text.split('Level')[1].split('[')[0].strip())
-                    except (ValueError, IndexError):
-                        pass
-                elif text.startswith('Completed on '):
-                    date = text[len('Completed on '):]
-        solved: bool = 'problem_solved' in (td.get('class') or [])
-        _problems[num] = {'title': title, 'level': level, 'pct': pct, 'solved': solved, 'date': date}
-    return _problems
-
-
-def _recorded_problems() -> dict[int, dict[str, str | int | bool]]:
-    """The problems file as it stands now, keyed by number — `{}` when it cannot be read.
-
-    A missing or unparsable file is not an error here: the first `summary` on a fresh clone
-    has nothing to compare against, and the write that follows is what creates it. Anything
-    unreadable is treated as "nothing recorded" rather than refused, since the parsed page is
-    the better of the two states either way.
-    """
-    try:
-        raw: Any = loads(config.static_file_problems.read_text())
-    except (OSError, JSONDecodeError):
-        return {}
-    if not isinstance(raw, dict):
-        return {}
-    recorded: dict[int, dict[str, str | int | bool]] = {}
-    for key, value in raw.items():
-        try:
-            number = int(key)
-        except (TypeError, ValueError):
-            continue
-        if isinstance(value, dict):
-            recorded[number] = value
-    return recorded
-
-
-def _carry_solved(_problems: dict[int, dict[str, str | int | bool]],
-                  recorded: dict[int, dict[str, str | int | bool]]) -> list[int]:
-    """Keep every `solved` record *recorded* already holds; return the numbers the page denies.
-
-    `solved` is written from two directions and only one of them is the progress page: `mark`
-    sets it the moment a problem's own `results.json` confirms the answer, which is *before*
-    the answer has been given to projecteuler.net (sometimes long before). A re-import that
-    simply overwrote the file would silently un-solve all of those, taking their dates with
-    them — so the merge is one-way: a solved record survives a page that does not carry it,
-    with its original date, and nothing here ever clears a `solved` flag.
-
-    The numbers returned are exactly the disagreements: solved in the file, not solved on the
-    page. Each one means the same thing — the answer was never registered upstream — which is
-    worth telling somebody about, because it is the half of solving a problem that the solver
-    cannot do for you.
-    """
-    unregistered: list[int] = []
-    for number, was in sorted(recorded.items()):
-        if not was.get('solved'):
-            continue
-        current = _problems.get(number)
-        if current is None:
-            # The page does not carry this problem at all (a partial save, or a problem
-            # withdrawn upstream). Carry the whole record over rather than drop a solution.
-            _problems[number] = dict(was)
-        elif not current.get('solved'):
-            current['solved'] = True
-            current['date'] = was.get('date') or current.get('date', '')
-        else:
-            continue
-        unregistered.append(number)
-    return unregistered
+    return parse_progress(progress_file.read_text(encoding='utf-8', errors='replace'))
 
 
 def _report_unregistered(numbers: list[int]) -> None:
@@ -154,23 +56,19 @@ def _report_unregistered(numbers: list[int]) -> None:
           'https://projecteuler.net, then run `summary` again.\n')
 
 
-def _update_problems_state(_problems: dict[int, dict[str, str | int | bool]]) -> None:
+def _update_problems_state(_problems: dict[int, ProblemRecord]) -> None:
     """Update the on-disk and in-memory problems state from parsed problem metadata.
 
-    The write is a merge, not a replacement: :func:`_carry_solved` folds the solved records
-    the file already holds into *_problems* first, so a re-imported progress page can add
-    solved problems but never take one away. Disagreements — solved here, not solved on the
-    page — are reported (:func:`_report_unregistered`).
+    The write is a merge, not a replacement (:func:`solver.core.progress.merge_progress`),
+    so a re-imported progress page can add solved problems but never take one away.
+    Disagreements — solved here, not solved on the page — are reported
+    (:func:`_report_unregistered`).
 
     Args:
         _problems: Dictionary mapping problem numbers to their metadata
                   (title, level, pct, solved, date).
     """
-    unregistered: list[int] = _carry_solved(_problems, _recorded_problems())
-    # By number, so a record carried over from the old file lands where it belongs rather
-    # than at the end. A no-op for a file the page already wrote in order.
-    ordered = {number: _problems[number] for number in sorted(_problems)}
-    config.static_file_problems.write_text(dumps(ordered, indent=2))
+    unregistered: list[int] = merge_progress(config.static_file_problems, _problems)
     problems.clear_cache()
     if unregistered:
         _report_unregistered(unregistered)
@@ -291,7 +189,7 @@ def mark(problem: Problem) -> int:
     Args:
         problem: [problem] The problem to mark solved.
     """
-    _problems: dict[int, dict[str, str | int | bool]] = {
+    _problems: dict[int, ProblemRecord] = {
         int(k): v
         for k, v in loads(config.static_file_problems.read_text()).items()
     }
