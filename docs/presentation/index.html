@@ -45,28 +45,39 @@
   </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
-  <h2>The obvious way works, until it doesn't</h2>
-  <ul class="draft-list">
-    <li>Same question below a billion, then below a trillion</li>
-    <li>Counting one by one: seconds, then hours, then centuries</li>
-    <li>The clever way: one formula, instant at any size</li>
-    <li>That gap is what every Project Euler problem is about</li>
-  </ul>
-  <aside class="notes"><p>Animate a stopwatch for each size. No algebra on screen; the "aha" is that a smarter question has a tiny answer.</p></aside>
+<section class="slide" data-viz="opener">
+  <h2>The obvious way stops working</h2>
+  <div class="story">
+    <div class="ob-table" data-role="rows">
+      <div class="ob-head"><span></span><span>Counting one by one</span><span></span><span>The clever way</span></div>
+    </div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Space adds a row: 1,000, a million and a hundred million are timed live on this laptop; a trillion and a billion billion are estimated from the measured speed. The last step explains the formula. The sums themselves are never shown.</p>
+    <p>If someone asks for Problem 1's answer, it's fine to say it aloud (the site allows sharing the first 100), but it isn't on the slide.</p>
+  </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
-  <h2>Project Euler: 1,013 puzzles and one rule</h2>
-  <ul class="draft-list">
-    <li>A website of maths puzzles that need a computer to finish</li>
-    <li>Each has a single number as its answer, checked by the site</li>
-    <li>The rule: solve it yourself, and share answers only for the first 100</li>
-    <li>Difficulty climbs from "an afternoon" to "a handful of people on Earth"</li>
-  </ul>
-  <aside class="notes"><p>Keep it to a minute. The sharing rule matters later, when we get to the vault.</p></aside>
+<section class="slide" data-viz="intro">
+  <h2>Project Euler: <span data-fill="total">1,013</span> puzzles and one rule</h2>
+  <div class="pe-intro">
+    <div class="pe-card">
+      <p class="pe-card-title">Problem 1: Multiples of 3 or 5</p>
+      <p class="pe-card-body">If we list all the natural numbers below 10 that are multiples of 3 or 5, we get 3, 5, 6 and 9. The sum of these multiples is 23. Find the sum of all the multiples of 3 or 5 below 1,000.</p>
+      <p class="pe-answer">Answer: <span class="pe-blank"></span></p>
+    </div>
+    <ul class="pe-facts">
+      <li>Maths puzzles that need a computer to finish, a new one most weeks.</li>
+      <li>Every answer is a single number, and the site checks it.</li>
+      <li>The rule: solve it yourself, and share answers only for the first 100.</li>
+      <li>Problem 1 has been solved by <span data-fill="first-solvers">853,325</span> people. Problem <span data-fill="fewest-n">0</span>, by <span data-fill="fewest-solvers">0</span>.</li>
+    </ul>
+  </div>
+  <aside class="notes"><p>Keep it to a minute. The card is Problem 1's statement as published. The sharing rule matters later, at the vault. The "fewest" problem leaves out the newest year, which few people have had time to try.</p></aside>
 </section>
 
 <section class="slide">
@@ -104,27 +115,22 @@
   </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
-  <h2>The long pause</h2>
-  <ul class="draft-list">
-    <li>March 2020 to July 2025: five years without a single solve</li>
-    <li>Life, work, and losing the thread</li>
-    <li>Coming back meant remembering where everything was</li>
-  </ul>
-  <aside class="notes"><p>The relatable part. Most people in the room have a project like this.</p></aside>
+<section class="slide" data-viz="pause">
+  <h2>Then nothing, for five years</h2>
+  <div class="story">
+    <div class="story-visual" data-role="visual"></div>
+    <div class="story-side">
+      <p class="story-step"><span data-fill="gap-months">64</span> months without a single solve.</p>
+      <p class="caption">From <span data-fill="gap-from">March 2020</span> to <span data-fill="gap-to">July 2025</span>. Each square is a month: blue when I solved something, darker for more. The grey stretch is the pause.</p>
+    </div>
+  </div>
+  <aside class="notes"><p>The relatable part: say in your own words why the project stopped (life, work, losing the thread) and what it took to come back.</p></aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
-  <h2>What changed</h2>
-  <ul class="draft-list">
-    <li>A workshop that remembers: every problem, test and timing in one place</li>
-    <li>A shell and a website that pick up exactly where I left off</li>
-    <li>AI as a sparring partner, with me checking every result</li>
-    <li>Collaborators working alongside, each with their own space</li>
-  </ul>
-  <aside class="notes"><p>The bridge into the demo and, later, the developer section.</p></aside>
+<section class="slide" data-viz="changed">
+  <h2>What changed: I built a workshop</h2>
+  <div class="wc-list" data-role="list"></div>
+  <aside class="notes"><p>The numbers are counted from the repository when the deck's data is built. Bridge to the next part: the AI help, and the developer section for how it's built.</p></aside>
 </section>
 
 <section class="slide" data-viz="staircase">
@@ -251,38 +257,88 @@
   </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
+<section class="slide" data-viz="vault">
   <h2>An honour code, backed by a vault</h2>
-  <ul class="draft-list">
-    <li>Answers past Problem 100 stay private, by the site's rule</li>
-    <li>On my machine: readable. Everywhere else: scrambled</li>
-    <li>Picture: the same file, as a page and as gibberish</li>
-    <li>Each collaborator holds their own key</li>
-  </ul>
-  <aside class="notes"><p>Show the scrambled view only. No private solution content in the deck, ever.</p></aside>
+  <div class="story">
+    <div class="vault-visual">
+      <div class="vault-pane vault-code">
+        <p class="vault-label" data-role="label"></p>
+        <pre data-role="code"></pre>
+      </div>
+      <div class="vault-pane vault-keys" data-role="keys">
+        <div class="vk-master">One master key</div>
+        <div class="vk-holders">
+          <div class="vk-holder"><span class="vk-lock">Sealed copy</span><span>My laptop</span></div>
+          <div class="vk-holder"><span class="vk-lock">Sealed copy</span><span>My web shell</span></div>
+          <div class="vk-holder"><span class="vk-lock">Sealed copy</span><span>A collaborator</span></div>
+        </div>
+        <p class="vk-note">Each copy opens only with its holder's own key.</p>
+      </div>
+      <div class="vault-pane vault-map" data-role="map"></div>
+    </div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Space: the readable public code (Problem 7), the same code encrypted live with a fresh random key, the key-sharing picture, then the map of open and locked problems.</p>
+    <p>Never show a real private solution here. The encrypted text is genuinely encrypted, but of public code.</p>
+  </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
+<section class="slide" data-viz="ai">
   <h2>Working with AI</h2>
-  <ul class="draft-list">
-    <li>What it helps with: explanations, translating to C, checking work, articles</li>
-    <li>What it doesn't do: publish anything I haven't reviewed</li>
-    <li>Before and after: a bare solution, then its written explanation</li>
-  </ul>
-  <aside class="notes"><p>Be candid. People are curious and a bit sceptical; own both.</p></aside>
+  <div class="ai-grid">
+    <div class="ai-col">
+      <p class="ai-head">What it helps with</p>
+      <ul>
+        <li>Writing the explanation beside each solution</li>
+        <li>Translating a Python solution into C</li>
+        <li>Reviewing my work for mistakes</li>
+        <li>Drafting the topic articles</li>
+      </ul>
+    </div>
+    <div class="ai-col">
+      <p class="ai-head">What it doesn't do</p>
+      <ul>
+        <li>Publish anything I haven't read</li>
+        <li>Decide when an answer is right: the tests and the site do</li>
+        <li>Push its own work: it stops at a local commit, and I take it from there</li>
+      </ul>
+    </div>
+  </div>
+  <div class="ai-example">
+    <p class="ai-label">Problem 15, solved by hand in 2019, before any AI</p>
+    <p class="ai-label">Its explanation, written later together with AI</p>
+    <pre class="ai-code">@runner.main
+def solve(*args: str) -&gt; str:
+    lattice_size = runner.parse_int(args[0])
+    return str(math.factorial(2 * lattice_size)
+               // math.factorial(lattice_size) ** 2)</pre>
+    <p class="ai-notes">“The crucial observation is that the geometry of the grid is irrelevant to the count: any valid path consists of exactly 2n unit steps, of which n must go right and n must go down. A path is fully determined by the order in which we interleave these two kinds of moves.”</p>
+  </div>
+  <aside class="notes">
+    <p>Be candid: people are curious and a bit sceptical; own both.</p>
+    <p>The example is Problem 15: the solution was written by hand in 2019, before AI tools existed; the explanation beside it (solutions/public/p0015/notes.html) was co-written with AI later. The method is the 2019 one; the @runner.main wrapper around it came later, when every solution moved onto the runner framework. The passage stops before the answer.</p>
+  </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
+<section class="slide" data-viz="demo">
   <h2>Live: pick a problem</h2>
-  <ul class="draft-list">
-    <li>Someone in the room picks a number from 1 to 100</li>
-    <li>Open it on the website, run it, watch the answer and timing appear</li>
-    <li>Backup: a recording of the same, in case the network fails</li>
-  </ul>
-  <aside class="notes"><p>Keep it to about sixty seconds and visual: the website, not the terminal.</p></aside>
+  <div class="demo">
+    <div class="demo-number" data-role="number">?</div>
+    <div class="demo-side">
+      <p class="story-step demo-title" data-role="title"></p>
+      <p class="caption" data-role="meta"></p>
+      <ol class="demo-steps">
+        <li>Call out a number from 1 to 100, or press Space to draw one.</li>
+        <li>I open it on the website and run it.</li>
+        <li>The answer and its timing appear there, not on this slide.</li>
+      </ol>
+    </div>
+  </div>
+  <aside class="notes"><p>Space draws a random problem from 1 to 100; R draws again. Keep the demo to about sixty seconds and visual: the website, not the terminal. Have a recording ready in case the network fails.</p></aside>
 </section>
 
 <section class="slide slide-title" data-viz="title-grid">
@@ -399,6 +455,7 @@
 <script src="triangle.js"></script>
 <script src="collatz.js"></script>
 <script src="bignum.js"></script>
+<script src="general.js"></script>
 <script src="deck.js"></script>
 </body>
 </html>
