@@ -156,6 +156,7 @@ both slower and harder to read.
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0252](/solutions/0252/) — Convex Holes
+- ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips

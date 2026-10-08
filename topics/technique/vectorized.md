@@ -161,6 +161,7 @@ unrolled across the array, with a boolean mask selecting which lanes act.
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0252](/solutions/0252/) — Convex Holes
+- ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient

@@ -11,7 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Triangular_til
 - ● [0163](/solutions/0163/) — Cross-hatched Triangles
 - ● [0189](/solutions/0189/) — Tri-colouring a Triangular Grid
 - ● [0202](/solutions/0202/) — Laserbeam
-- ○ [0257](/solutions/0257/) — Angular Bisectors
 - ○ [0577](/solutions/0577/) — Counting Hexagons
 - ○ [0702](/solutions/0702/) — Jumping Flea
 - ○ [0780](/solutions/0780/) — Toriangulations
