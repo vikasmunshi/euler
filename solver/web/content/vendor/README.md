@@ -17,6 +17,9 @@ update the `<script integrity="…">` in the templates that load it.
 | `xterm/xterm.js` | [xterm.js](https://xtermjs.org) (`@xterm/xterm`) | 5.5.0 | MIT | `M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/` |
 | `xterm/xterm-addon-fit.js` | [`@xterm/addon-fit`](https://github.com/xtermjs/xterm.js) | 0.10.0 | MIT | `iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn` |
 | `xterm/xterm.css` | `@xterm/xterm` (stylesheet) | 5.5.0 | MIT | `8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP` |
+| `docs/presentation/fonts/newsreader.woff2`, `newsreader-italic.woff2` | [Newsreader](https://github.com/productiontype/Newsreader) (Production Type) | Google Fonts v26, Latin | OFL-1.1 | font, `'self'` (no SRI) |
+| `docs/presentation/fonts/atkinson-hyperlegible-{400,700}.woff2` | [Atkinson Hyperlegible](https://brailleinstitute.org/freefont) (Braille Institute) | Google Fonts v12, Latin | OFL-1.1 | font, `'self'` (no SRI) |
+| `docs/presentation/fonts/jetbrains-mono.woff2` | [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) | Google Fonts v24, Latin | OFL-1.1 | font, `'self'` (no SRI) |
 
 MathJax typesets the `$…$` TeX in statements/notes (config + re-typeset-on-swap
 in `/assets/site.js`); the woff fonts are loaded by the bundle relative to its
@@ -83,6 +86,26 @@ integrity-checked. Both files carry a `//# sourceMappingURL=` line whose `.map` 
 would make the bytes diverge from the published ones the SRI above attests.
 License at `xterm/LICENSE`.
 
+**The presentation fonts** are the one entry not under this directory: they ship with the
+deck they serve, in `docs/presentation/fonts/`, and the per-user service hands them out at
+`/story/fonts/` with the rest of the deck (web-server-guide § 11.5, The story deck). They
+are bundled for the same reason as everything here — `default-src 'self'` refuses a Google
+Fonts stylesheet, and a bundled font also works offline. Each is the Latin subset as Google
+Fonts serves it (the deck's text is Latin; other characters fall back to system fonts),
+loaded by `@font-face` in `docs/presentation/deck.css`. Fonts are not scripts, so there is
+no SRI; to check a refresh, compare against these sha384 digests:
+
+| File | sha384 |
+|------|--------|
+| `newsreader.woff2` | `5TsIb3Y92/m28WF/gV7mdSO1juW62ueaN4e5hRZ4uC6CQV5Igadd+oBHDfLDyCX3` |
+| `newsreader-italic.woff2` | `NIkI1/BjDDT2w43BuJRu5j405Z8u8wvUcf6XRL2gHbDDk5sf74z1/ZmpfZXH6KMl` |
+| `atkinson-hyperlegible-400.woff2` | `idlpjMgZTjOmx6zrv5Ae+oGIwhOzri+uCqMmDHcHbeZSD83FdoJ3vrtowWb6+kH2` |
+| `atkinson-hyperlegible-700.woff2` | `nQ0Z7JQYR9+re+CEt4QFS/80lVM63lK+vHYQhrfJ4nQWibIMndxkRAdPQ3UA6pUw` |
+| `jetbrains-mono.woff2` | `9wWypBPwJyfsOnJFplExHD+Wz+6/I6+rtL7ITgA/6wSPgpj+tnQovOLWM9j2rhOF` |
+
+Their license texts sit beside them (`OFL-newsreader.txt`, `OFL-atkinsonhyperlegible.txt`,
+`OFL-jetbrainsmono.txt`, trailing whitespace stripped for the commit hook, wording unchanged).
+
 Fetch (pinned):
 
 ```bash
@@ -107,9 +130,30 @@ curl -sSfL -o xterm/xterm-addon-fit.js  "https://unpkg.com/@xterm/addon-fit@${FV
 for f in xterm/xterm.js xterm/xterm.css xterm/xterm-addon-fit.js; do
   printf '%-28s sha384-%s\n' "$f" "$(openssl dgst -sha384 -binary "$f" | openssl base64 -A)"
 done
+
+# the presentation fonts (into docs/presentation/fonts/, from the repo root): the Latin
+# files the Google Fonts css2 API lists for these families, and the OFL texts
+cd docs/presentation/fonts
+G=https://fonts.gstatic.com/s
+curl -sSfL -o newsreader.woff2        "$G/newsreader/v26/cY9AfjOCX1hbuyalUrK4397yjA.woff2"
+curl -sSfL -o newsreader-italic.woff2 "$G/newsreader/v26/cY9XfjOCX1hbuyalUrK439vogqCz_goCYw7oRd6JFYYzbA.woff2"
+curl -sSfL -o atkinson-hyperlegible-400.woff2 "$G/atkinsonhyperlegible/v12/9Bt23C1KxNDXMspQ1lPyU89-1h6ONRlW45G04pIo.woff2"
+curl -sSfL -o atkinson-hyperlegible-700.woff2 "$G/atkinsonhyperlegible/v12/9Bt73C1KxNDXMspQ1lPyU89-1h6ONRlW45G8Wbc9dCWP.woff2"
+curl -sSfL -o jetbrains-mono.woff2    "$G/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwg.woff2"
+for f in newsreader atkinsonhyperlegible jetbrainsmono; do
+  curl -sSfL "https://raw.githubusercontent.com/google/fonts/main/ofl/$f/OFL.txt" | sed 's/[ \t]*$//' > "OFL-$f.txt"
+done
 ```
 
 ## Licenses
+
+### Presentation fonts — SIL Open Font License 1.1
+
+Newsreader (Copyright 2020 The Newsreader Project Authors), Atkinson Hyperlegible
+(Copyright 2020 Braille Institute of America, Inc.) and JetBrains Mono (Copyright 2020 The
+JetBrains Mono Project Authors) are licensed under the SIL Open Font License, Version 1.1.
+The full text for each is in `docs/presentation/fonts/` (`OFL-*.txt`), and at
+<https://openfontlicense.org>.
 
 ### htmx — Zero-Clause BSD (0BSD)
 
