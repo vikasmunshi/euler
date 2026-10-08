@@ -3604,7 +3604,7 @@
       "reference": "https://en.wikipedia.org/wiki/Closed-form_expression",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0269_s0", "p0288_s0", "p0313_s0", "p0321_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0743_s0", "p0772_s0", "p0862_s0", "p0872_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0965_s0", "p1000_s0"]
+      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0288_s0", "p0313_s0", "p0321_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0743_s0", "p0772_s0", "p0862_s0", "p0872_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0965_s0", "p1000_s0"]
     },
     {
       "slug": "closure-computer-programming",
@@ -3892,7 +3892,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisor_function",
       "additional-references": [],
       "summary": "Compute the sum of proper divisors for every n up to N in O(N log N) by adding each candidate divisor onto all of its multiples, generalising the Sieve of Eratosthenes' additive pass.",
-      "refs": ["p0095_s0", "p0179_s0", "p0211_s0", "p0420_s0", "p0420_s1", "p0834_s0"]
+      "refs": ["p0095_s0", "p0179_s0", "p0211_s0", "p0256_s0", "p0420_s0", "p0420_s1", "p0834_s0"]
     },
     {
       "slug": "double-counting-proof-technique",
@@ -5179,7 +5179,7 @@
       "reference": "https://numpy.org/doc/stable/reference/arrays.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0304_s0", "p0319_s0", "p0420_s0", "p0420_s1", "p0464_s0"]
+      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0304_s0", "p0319_s0", "p0420_s0", "p0420_s1", "p0464_s0"]
     },
     {
       "slug": "open-addressing",
@@ -5450,6 +5450,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0175_s0"]
+    },
+    {
+      "slug": "segmented-sieve",
+      "facet": "technique",
+      "name": "Segmented sieve",
+      "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
+      "additional-references": [],
+      "summary": "Run a sieve over consecutive fixed-size windows so memory stays bounded and the search can extend until an answer appears.",
+      "refs": ["p0256_s0"]
     },
     {
       "slug": "sentinel-value",
@@ -5936,6 +5945,15 @@
       "additional-references": [],
       "summary": "Bound sieves, tables and caches by the actual inputs, built inside solve().",
       "refs": ["p0003", "p0004", "p0007", "p0010", "p0011", "p0013", "p0014", "p0021", "p0023", "p0026", "p0030", "p0036", "p0037", "p0038", "p0040", "p0043", "p0047", "p0049", "p0055", "p0056", "p0060", "p0061", "p0062", "p0063", "p0072", "p0078", "p0087", "p0088", "p0090", "p0092", "p0098", "p0103", "p0119", "p0122", "p0125", "p0126", "p0129", "p0131", "p0132", "p0135", "p0136", "p0145", "p0146", "p0151", "p0161", "p0164", "p0166", "p0171", "p0174", "p0181", "p0191", "p0193", "p0196", "p0197", "p0200", "p0201", "p0204", "p0211", "p0214", "p0215", "p0218", "p0221", "p0229", "p0230", "p0231", "p0251", "p0293", "p0304", "p0319", "p0347", "p0387", "p0461", "p0484", "p0642", "p0692", "p0710", "p0755", "p0800", "p0845", "p0974"]
+    },
+    {
+      "slug": "small-cases-reveal-closed-form",
+      "facet": "takeaway",
+      "name": "Small cases reveal a closed form",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Exhaustively solve small instances, read a closed-form characterisation off the table, and check it against the brute force before using it at scale.",
+      "refs": ["p0256"]
     },
     {
       "slug": "small-cases-reveal-recurrence",
