@@ -313,7 +313,7 @@ claude-api
 [target=c|py|doc|notes|tags|test-cases] (asked)
 [force=true|--force]
 [major=true|--major]
-[model=claude-fable-5-1|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-opus-5-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5-5|claude-sonnet-5|claude-haiku-4-5|none] (default None)
+[model=claude-fable-5-1|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-opus-5-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5-5|claude-sonnet-5|claude-haiku-4-5|claude-haiku-5-5|none] (default None)
 ```
 
 **arguments**
@@ -353,7 +353,7 @@ claude-batch
 [start=<int>] (default 0)
 [batch_id=<str>] (default '')
 [problems_list=<str>] (default '')
-[model=claude-fable-5-1|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-opus-5-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5-5|claude-sonnet-5|claude-haiku-4-5] (default claude-sonnet-5)
+[model=claude-fable-5-1|claude-fable-5|claude-opus-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-opus-5-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5-5|claude-sonnet-5|claude-haiku-4-5|claude-haiku-5-5] (default claude-sonnet-5)
 ```
 
 **arguments**
@@ -514,7 +514,7 @@ it succeeds.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.154)
+[ecb_usd_rate=<float>] (default 1.1177)
 ```
 
 **arguments**
