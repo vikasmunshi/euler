@@ -199,15 +199,21 @@
   </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
+<section class="slide" data-viz="triangle">
   <h2>Working from the bottom up</h2>
-  <ul class="draft-list">
-    <li>Problems 18 and 67: the best path down a triangle of numbers</li>
-    <li>Trying every path: longer than the age of the universe for 67</li>
-    <li>Fold the triangle up from the bottom, one row at a time</li>
-  </ul>
-  <aside class="notes"><p>Dynamic programming, without ever saying the words.</p></aside>
+  <div class="story">
+    <div class="story-visual" data-role="visual"></div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+      <p class="story-tally" data-role="tally" aria-live="polite"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Space steps through: the puzzle, trying all 8 paths (the best, 23, stays highlighted), the 100-row scale of Problem 67, then folding the small triangle from the bottom one row at a time until the top reads 23, and finally the 100-row triangle folding in one sweep.</p>
+    <p>The worked example is the one printed in Problem 18's statement, so 23 is fine to show. Don't give Problem 18's or 67's own answers.</p>
+    <p>This is dynamic programming again, from the other direction: each row only needs the best results from the row below it.</p>
+  </aside>
 </section>
 
 <section class="slide draft">
@@ -376,6 +382,7 @@
 <script src="data/history.js"></script>
 <script src="sieve.js"></script>
 <script src="lattice.js"></script>
+<script src="triangle.js"></script>
 <script src="deck.js"></script>
 </body>
 </html>

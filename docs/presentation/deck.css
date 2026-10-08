@@ -378,3 +378,31 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   .lp-routes.play .lp-route, .lp-node.fresh text, .lp-big.play .lp-dot { animation: none; }
   .lp-tilt, .lp-node text { transition: none; }
 }
+
+/* ---- the triangle ---- */
+
+.tr-layer { opacity: 0; transition: opacity 320ms ease; }
+.tr-layer.on { opacity: 1; }
+.tr-edge { stroke: #C9D1DB; stroke-width: 3; transition: stroke 240ms ease, opacity 240ms ease; }
+.tr-edge.chosen { stroke: var(--heat-4); stroke-width: 6; }
+.tr-edge.spent { opacity: 0.4; }
+.tr-trail { fill: none; stroke: var(--ink); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.tr-trail.best { stroke: var(--heat-4); }
+.tr-node circle { fill: #FFFFFF; stroke: var(--ink); stroke-width: 2.5; transition: fill 240ms ease, opacity 240ms ease; }
+.tr-value { font-family: var(--serif); font-size: 36px; fill: var(--ink); font-variant-numeric: lining-nums; }
+.tr-node.folded circle { fill: var(--heat-1); }
+.tr-node.spent circle { stroke: #C9D1DB; }
+.tr-node.spent .tr-value { fill: #A3AEBD; }
+.tr-node.folded.spent circle { fill: #D3E2EE; }
+.tr-node.folded.spent .tr-value { fill: #7D8DA3; }
+.tr-node.answer circle { fill: var(--ink); }
+.tr-node.answer .tr-value { fill: var(--paper); }
+
+.tr-dots circle { fill: #C9D1DB; }
+.tr-big.folding .tr-dots circle { animation: fold-dot 260ms ease-out var(--d, 0ms) both; }
+.tr-big.folded-all .tr-dots circle { fill: var(--ink); }
+@keyframes fold-dot { from { fill: #C9D1DB; } to { fill: var(--ink); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-big.folding .tr-dots circle { animation: none; fill: var(--ink); }
+}
