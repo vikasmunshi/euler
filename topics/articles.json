@@ -849,7 +849,7 @@
     {
       "path": "domain/divisor",
       "title": "Divisor",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 44,
       "tags": ["divisor"],
