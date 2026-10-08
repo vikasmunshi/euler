@@ -234,14 +234,21 @@
   </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
-  <h2>Numbers too big for a calculator</h2>
-  <ul class="draft-list">
-    <li>Problem 16: 2 multiplied by itself 1,000 times</li>
-    <li>All 302 digits shown across the slide</li>
-  </ul>
-  <aside class="notes"><p>A pure sense-of-scale moment. Let the digits fill the screen.</p></aside>
+<section class="slide" data-viz="bignum">
+  <h2>Too big for a calculator</h2>
+  <div class="story">
+    <div class="story-visual" data-role="visual"></div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+      <p class="story-tally" data-role="tally" aria-live="polite"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Space steps through: the first ten doublings, what a calculator shows, all 302 digits growing as 2 doubles up to the 1,000th power, doubling 32,768 by hand with carries, and the comparison with the roughly 10⁸⁰ atoms in the universe.</p>
+    <p>Problem 16 asks for the sum of these digits. That sum isn't on the slide; don't work it out aloud.</p>
+    <p>A pure sense-of-scale moment. Let the digits fill the screen before talking.</p>
+  </aside>
 </section>
 
 <section class="slide draft">
@@ -391,6 +398,7 @@
 <script src="lattice.js"></script>
 <script src="triangle.js"></script>
 <script src="collatz.js"></script>
+<script src="bignum.js"></script>
 <script src="deck.js"></script>
 </body>
 </html>

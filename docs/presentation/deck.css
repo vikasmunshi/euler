@@ -430,3 +430,43 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 @media (prefers-reduced-motion: reduce) {
   .cz-layer.play .cz-line, .cz-cloud.play .cz-dots, .cz-memo.play .cz-bar-new { animation: none; }
 }
+
+/* ---- big numbers ---- */
+
+.bn-stage { position: absolute; inset: 0; }
+.bn-layer { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center;
+  opacity: 0; visibility: hidden; transition: opacity 320ms ease, visibility 0s linear 320ms; }
+.bn-layer.on { opacity: 1; visibility: visible; transition: opacity 320ms ease; }
+
+.bn-ladder { gap: 4px; }
+.bn-rung { display: grid; grid-template-columns: 96px 1fr; align-items: baseline; font-family: var(--serif);
+  font-variant-numeric: lining-nums tabular-nums; border-bottom: 1px solid var(--rule); padding: 4px 0; }
+.bn-exp { font-size: 26px; color: var(--ink-soft); }
+.bn-val { font-size: 34px; color: var(--ink); }
+.bn-ladder.play .bn-rung { animation: rise 260ms ease-out var(--d, 0ms) both; }
+
+.bn-display { align-self: flex-start; display: flex; align-items: baseline; gap: 18px; padding: 28px 36px;
+  background: #DDE5D5; border: 3px solid var(--ink); border-radius: 14px; font-family: var(--mono); color: #1E2A1A; }
+.bn-mantissa { font-size: 48px; letter-spacing: 0.04em; }
+.bn-power { font-size: 34px; }
+.bn-lost { font-family: var(--serif); font-size: 32px; color: var(--ink-soft); margin: 36px 0 0; }
+
+.bn-digits { display: grid; grid-template-columns: repeat(18, 1fr); align-content: center; row-gap: 2px; }
+.bn-d { font-family: var(--serif); font-size: 27px; line-height: 1.18; text-align: center; color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums; border-radius: 3px; transition: background 300ms ease, color 300ms ease; }
+.bn-d.atom { background: var(--heat-2); color: var(--paper); }
+.bn-digits.atoms .bn-d:not(.atom) { color: var(--ink-soft); }
+
+.bn-sum-table { display: grid; grid-template-columns: repeat(var(--cols), 72px); justify-content: center;
+  font-family: var(--serif); font-variant-numeric: lining-nums tabular-nums; }
+.bn-sum-row { display: contents; }
+.bn-sum-row span { text-align: center; font-size: 64px; line-height: 1.25; }
+.bn-sum-row.carries span { font-size: 28px; line-height: 1.4; color: var(--heat-4); }
+.bn-sum-row.times span { border-bottom: 3px solid var(--ink); }
+.bn-sum-row .op { color: var(--ink-soft); }
+.bn-sum-row.result span.out { font-weight: 500; }
+.bn-sum-row span.play { animation: rise 300ms ease-out var(--d, 0ms) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bn-ladder.play .bn-rung, .bn-sum-row span.play { animation: none; }
+}
