@@ -12,7 +12,7 @@ from json import JSONDecodeError, loads
 from pathlib import Path
 from random import choice
 from subprocess import run
-from typing import Literal, NamedTuple, TypedDict
+from typing import Literal, NamedTuple, NotRequired, TypedDict
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -72,6 +72,7 @@ class ProblemInfoDict(TypedDict):
     title: str
     level: int | Literal['']
     pct: int | Literal['']
+    solvers: NotRequired[int | Literal['']]
     solved: bool
     date: str
 

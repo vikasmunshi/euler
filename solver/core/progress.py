@@ -23,8 +23,9 @@ from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 
-#: One problem's row in `problems.json`: `{title, level, pct, solved, date}` — `level` and
-#: `pct` are ints or `''` when unknown, `date` is `''` for an unsolved problem.
+#: One problem's row in `problems.json`: `{title, level, pct, solvers, solved, date}` — `level`,
+#: `pct` and `solvers` (how many people have solved it upstream) are ints or `''` when unknown,
+#: `date` is `''` for an unsolved problem.
 ProblemRecord = dict[str, str | int | bool]
 
 
@@ -52,9 +53,10 @@ def parse_progress(text: str) -> dict[int, ProblemRecord]:
                     level = int(cls[2:])
                 except ValueError:
                     pass
-        # Title, percentage, and completion date from tooltip span
+        # Title, percentage, solver count, and completion date from tooltip span
         title: str = ''
         pct: int | str = ''
+        solvers: int | str = ''
         date: str = ''
         tooltip: Tag | None = a_tag.find('span', class_='tooltiptext_narrow')
         if tooltip:
@@ -69,10 +71,16 @@ def parse_progress(text: str) -> dict[int, ProblemRecord]:
                             level = int(line.split('Level')[1].split('[')[0].strip())
                     except (ValueError, IndexError):
                         pass
+                elif line.startswith('Solved by '):
+                    try:
+                        solvers = int(line[len('Solved by '):].replace(',', ''))
+                    except ValueError:
+                        pass
                 elif line.startswith('Completed on '):
                     date = line[len('Completed on '):]
         solved: bool = 'problem_solved' in (td.get('class') or [])
-        problems[num] = {'title': title, 'level': level, 'pct': pct, 'solved': solved, 'date': date}
+        problems[num] = {'title': title, 'level': level, 'pct': pct, 'solvers': solvers, 'solved': solved,
+                         'date': date}
     return problems
 
 

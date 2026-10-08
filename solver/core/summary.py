@@ -70,7 +70,7 @@ def _update_problems_state(_problems: dict[int, ProblemRecord]) -> None:
 
     Args:
         _problems: Dictionary mapping problem numbers to their metadata
-                  (title, level, pct, solved, date).
+                  (title, level, pct, solvers, solved, date).
     """
     unregistered: list[int] = merge_progress(config.static_file_problems, _problems)
     problems.clear_cache()
