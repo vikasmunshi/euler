@@ -247,9 +247,13 @@
 
   // ---------------------------------------------------------------- rarity
 
+  const RECENT = 52;
+
   function rarity(slide) {
     const container = slide.querySelector('[data-role="chart"]');
-    const counted = solves.filter(p => p.solvers !== null);
+    // The newest year of problems (about one a week) is rare only because it is new: leave it out.
+    const newest = Math.max(...problems.map(p => p.n)) - RECENT;
+    const counted = solves.filter(p => p.solvers !== null && p.n <= newest);
     if (!counted.length) {
       container.innerHTML = '<div class="empty-state"><p>Solver counts appear after the next progress refresh.<br>'
         + 'Save the progress page, run <code>summary</code>, then <code>python docs/presentation/build_data.py</code>.</p></div>';
@@ -261,7 +265,7 @@
     const W = 1360, H = 600, labelW = 560, valueW = 150;
     const svg = svgRoot(container, W, H);
     svg.setAttribute('aria-label', 'How many people have solved each problem');
-    const lo = 100, hi = 1e6;
+    const lo = 10, hi = 1e6;
     const bx = v => labelW + (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) * (W - labelW - valueW);
     const rowH = Math.min(96, (H - 40) / rows.length);
     rows.forEach((p, i) => {
