@@ -49,7 +49,7 @@ make deploy-web         # also: remove-web | redeploy-web | upgrade-web
 make status-web
 
 # Cut a release, then ship it (see "Versioning" below):
-make release            # bump solver/version.py → commit → tag vX.Y.Z → push (ARGS=--dry-run|--no-push)
+make release            # bump solver/version.py (+ deck data) → commit → tag vX.Y.Z → push (ARGS=--dry-run|--no-push)
 make redeploy-web       # gated on check-version: refuses if the tag isn't on origin
 ```
 
@@ -65,8 +65,9 @@ past the tag HEAD is.
 
 **Never hand-edit the number.** `scripts/version/release.sh` (`make release`) is the only
 writer: it derives the next SemVer bump from Conventional Commits, rewrites `version.py`,
-commits `chore(release): vX.Y.Z`, tags the commit, and **pushes the commit + tag to origin**
-(`--no-push` opts out; `--dry-run` previews). `make check-version` fails unless the version
+refreshes the presentation deck's data (`docs/presentation/build_data.py` →
+`data/history.js`, staged into the same commit), commits `chore(release): vX.Y.Z`, tags the
+commit, and **pushes the commit + tag to origin** (`--no-push` opts out; `--dry-run` previews). `make check-version` fails unless the version
 `version.py` names has its `vX.Y.Z` tag on origin, and is a prerequisite of `redeploy-web` —
 so a locally-tagged-but-unpushed release can't be deployed ahead of collaborator clones.
 The deployed venv is only as current as the last release baked into it: **re-run

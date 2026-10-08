@@ -8,6 +8,9 @@ number, title, difficulty, upstream solver count, solved flag and date — never
 nothing from `solutions/private/`.
 
     python docs/presentation/build_data.py
+
+`make release` runs it too and stages the result into the release commit
+(scripts/version/release.sh), so a redeployed `/story/` shows the data as of that release.
 """
 from __future__ import annotations
 
