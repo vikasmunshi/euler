@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisor_functi
 - ● [0095](/solutions/0095/) — Amicable Chains
 - ● [0179](/solutions/0179/) — Consecutive Positive Divisors
 - ● [0211](/solutions/0211/) — Divisor Square Sum
+- ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0834](/solutions/0834/) — Add and Divide
 

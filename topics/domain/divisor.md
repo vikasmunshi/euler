@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisor>._
 - ● [0168](/solutions/0168/) — Number Rotations
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0225](/solutions/0225/) — Tribonacci Non-divisors
-- ○ [0256](/solutions/0256/) — Tatami-Free Rooms
+- ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ○ [0263](/solutions/0263/) — An Engineers' Dream Come True
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
