@@ -217,15 +217,21 @@
   </aside>
 </section>
 
-<section class="slide draft">
-  <span class="draft-mark">Draft</span>
+<section class="slide" data-viz="collatz">
   <h2>A simple rule, a wild ride</h2>
-  <ul class="draft-list">
-    <li>Problem 14: if even, halve it; if odd, triple it and add one</li>
-    <li>Plot how high different starting numbers climb before falling to 1</li>
-    <li>Nobody has proved that every number gets there</li>
-  </ul>
-  <aside class="notes"><p>The Collatz conjecture: a famous open problem hidden in an easy puzzle.</p></aside>
+  <div class="story">
+    <div class="story-visual" data-role="visual"></div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+      <p class="story-tally" data-role="tally"></p>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Space steps through: the rule from 6, the wild ride from 27 (peak 9,232), the cloud of chain lengths up to 10,000, the open problem, what remembering saves (light bars are full chains, dark bars the part actually worked out), and the total below one million.</p>
+    <p>The scatter stops at 10,000 on purpose: Problem 14's own answer is below one million, and it isn't on the slide. Don't say it.</p>
+    <p>Below one million: 131,434,272 steps one at a time against 5,226,259 with the memory, counted offline in Python.</p>
+  </aside>
 </section>
 
 <section class="slide draft">
@@ -384,6 +390,7 @@
 <script src="sieve.js"></script>
 <script src="lattice.js"></script>
 <script src="triangle.js"></script>
+<script src="collatz.js"></script>
 <script src="deck.js"></script>
 </body>
 </html>

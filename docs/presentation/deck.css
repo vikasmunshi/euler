@@ -406,3 +406,27 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 @media (prefers-reduced-motion: reduce) {
   .tr-big.folding .tr-dots circle { animation: none; fill: var(--ink); }
 }
+
+/* ---- Collatz ---- */
+
+.cz-layer { opacity: 0; transition: opacity 320ms ease; }
+.cz-layer.on { opacity: 1; }
+.cz-line { fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.cz-layer.play .cz-line { animation: strike 2400ms ease-in-out both; }
+.cz-six.play .cz-line { animation-duration: 1400ms; }
+.cz-point { fill: #FFFFFF; stroke: var(--ink); stroke-width: 3; }
+.cz-value { font-family: var(--serif); font-size: 24px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+.cz-peak { fill: none; stroke: var(--heat-4); stroke-width: 3.5; }
+.cz-note { font-size: 20px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 6px; stroke-linejoin: round; }
+.cz-dots circle { fill: var(--heat-2); opacity: 0.55; }
+.cz-cloud.play .cz-dots { animation: rise 900ms ease-out both; }
+.cz-cloud.muted .cz-dots circle { opacity: 0.2; }
+.cz-bar-all { fill: var(--cell-empty); }
+.cz-bar-new { fill: var(--ink); }
+.cz-memo.play .cz-bar-new { animation: rise 300ms ease-out var(--d, 0ms) both; }
+.cz-bar-label { font-size: 26px; fill: var(--ink); }
+.cz-bar-value { font-family: var(--serif); font-size: 34px; fill: var(--ink); font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cz-layer.play .cz-line, .cz-cloud.play .cz-dots, .cz-memo.play .cz-bar-new { animation: none; }
+}
