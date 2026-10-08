@@ -53,6 +53,10 @@
     function paint(s, animate) {
       const passes = Math.min(s, PRIMES.length);
       let delay = 0;
+      if (animate) {                      // drop the animation classes so a replay restarts them
+        for (const g of cells.values()) g.classList.remove('fresh');
+        void gridBox.getBoundingClientRect();
+      }
       for (const [n, g] of cells) {
         const at = crossedAt.get(n);
         const isPrime = n > 1 && !at;
