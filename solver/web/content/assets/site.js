@@ -119,6 +119,94 @@
     paintPaneFilter();
   });
 
+  // ── the pane's scroll memory (web-server-guide § The site) ──────────────────────────────
+  // Every page the left pane shows reopens where it was last left, for the rest of the
+  // browser session — whichever way you come back: the back arrow, refresh, a nav or crumb
+  // link, the terminal's `show`, the browser's own back/forward, or a document reload.
+  //
+  // The browser cannot do this for us. It restores the *window's* scroll, and the window
+  // never scrolls here: #content is its own scroll box beside the terminal (whose
+  // scrollback is xterm's and is never touched). And a swap keeps whatever scrollTop the
+  // old page had, clamped to the new one's height — so without this a page opened mid-way
+  // down for no reason at all.
+  //
+  // Filed per path (pathname + search) in sessionStorage, like the pane filter: a position
+  // is where you are in a sitting, so it dies with the tab. Recorded just before #content
+  // is replaced and when the document goes away; applied after the swap lands, and again
+  // once MathJax has typeset it, since the maths changes the page's height. A link with a
+  // #fragment goes to its anchor instead.
+  var SCROLL_KEY = 'euler:scroll';
+  var shownPath = null;           // the page #content holds: the key its offset is filed under
+  var pendingTop = null;          // a restore still waiting on the typeset — the offset it will set
+  var restoreSeq = 0;
+
+  function scrollMap() {
+    try { return JSON.parse(sessionStorage.getItem(SCROLL_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+
+  function saveScroll() {
+    var pane = document.getElementById('content');
+    if (!pane || shownPath === null) { return; }
+    // Mid-restore the pane sits at an un-typeset height; file where it is going, not where it is.
+    var top = pendingTop !== null ? pendingTop : pane.scrollTop;
+    var map = scrollMap();
+    if (top > 0) { map[shownPath] = top; } else { delete map[shownPath]; }
+    try { sessionStorage.setItem(SCROLL_KEY, JSON.stringify(map)); } catch (e) { /* private mode */ }
+  }
+
+  function restoreScroll(path, anchor) {
+    shownPath = path;
+    var seq = ++restoreSeq;
+    var pane = document.getElementById('content');
+    if (!pane || anchor) { pendingTop = null; return; }  // an anchor is htmx's (or the browser's) to scroll to
+    var top = scrollMap()[path] || 0;
+    pane.scrollTop = top;
+    pendingTop = top;
+    // The signed-out shell has no MathJax, so `typesetting` never settles there; the timer
+    // ends the wait regardless.
+    var settled = new Promise(function (resolve) { window.setTimeout(resolve, 2000); });
+    Promise.race([typesetting, settled]).then(function () {
+      if (seq !== restoreSeq) { return; }                // a newer page owns the pane now
+      var now = document.getElementById('content');
+      if (now) { now.scrollTop = top; }
+      pendingTop = null;
+    });
+  }
+
+  function isPaneSwap(ev) {
+    return ev.detail && ev.detail.target && ev.detail.target.id === 'content';
+  }
+
+  document.addEventListener('htmx:beforeSwap', function (ev) {
+    if (isPaneSwap(ev)) { saveScroll(); }
+  });
+
+  // A GET into #content is a page landing, filed under the path it actually answered from
+  // (after any redirect). Writes that re-render the pane (a save, a delete) leave it alone.
+  document.addEventListener('htmx:afterSwap', function (ev) {
+    if (!isPaneSwap(ev)) { return; }
+    var cfg = ev.detail.requestConfig;
+    if (!cfg || String(cfg.verb).toLowerCase() !== 'get') { return; }
+    var info = ev.detail.pathInfo || {};
+    restoreScroll(info.responsePath || info.finalRequestPath || panePath(), info.anchor);
+  });
+
+  // The browser's back/forward: htmx re-fetches the page itself (historyCacheSize 0),
+  // outside the swap events above — the URL has already moved, but shownPath has not.
+  document.addEventListener('htmx:historyCacheMiss', saveScroll);
+  document.addEventListener('htmx:historyRestore', function (ev) {
+    restoreScroll((ev.detail && ev.detail.path) || panePath(), window.location.hash);
+  });
+
+  window.addEventListener('pagehide', saveScroll);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') { saveScroll(); }
+  });
+  document.addEventListener('DOMContentLoaded', function () {
+    if ('scrollRestoration' in window.history) { window.history.scrollRestoration = 'manual'; }
+    restoreScroll(panePath(), window.location.hash);
+  });
+
   // ── the pane's back arrow (web-server-guide § The site) ─────────────────────────────────
   // The address bar's back button navigates the *document*, which tears down the
   // right pane's terminal — the session the shell promises never to lose. So the

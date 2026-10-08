@@ -1048,6 +1048,17 @@ pane scrolls its own overflow.
   and performs a swap, not a navigation. Refresh is the same move for the current page,
   and for the same reason: the address bar's refresh would drop the shell.
 
+  **Scroll memory.** Every page the left pane shows reopens at the scroll offset it was
+  last left at, for the rest of the browser session — however you return: back, refresh,
+  a nav or crumb link, the terminal's `show`, the browser's back/forward, or a reload. The
+  browser cannot provide this because the window never scrolls; `#content` is its own
+  scroll box. `site.js` files the offset per path (pathname + search) in `sessionStorage`
+  (`euler:scroll`) just before the pane is swapped and when the document is hidden, and
+  applies it after a GET lands in `#content` — again once MathJax has typeset the page,
+  which changes its height. A `#fragment` wins over the remembered offset; swaps from
+  writes (save, delete) leave the scroll alone; the terminal's scrollback is xterm's own
+  and is never touched.
+
   **Bookmarks** (`_bookmarks.html`) is the third of those marks and the one that leaves:
   the places the work refers to that this app does not host — Project Euler (site,
   archive, your progress), the repository and its pull requests, and the three references
