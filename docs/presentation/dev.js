@@ -1,5 +1,6 @@
 /* The developer section's one stepped slide: command blocks and the canonical form the real
-   lexer (solver/shell/lexer.py) turns them into, captured verbatim from `lex()`.
+   lexer (solver/shell/lexer.py) turns them into, captured verbatim from `lex()`, then the
+   variables the shell provides (docs/user-guide.md, Variables).
    Registers itself on window.DECK_PARTS (data-viz="lang"). */
 (() => {
   'use strict';
@@ -17,17 +18,33 @@
     ['loop {solved}: eval {loop.number} && benchmark {loop.number}',
       '{solved}:\n{\n    True: _ = eval {loop.number};\n    {rcode} == 0: _ = benchmark {loop.number};\n}',
       'A loop is part of the language: the header names the list, {loop} is the current element.'],
+    ['{problem}   the current problem\n'
+      + '{next}      next unsolved, by number\n'
+      + '{random}    random unsolved, fresh each use\n'
+      + '{solved}    solved problems, always current\n'
+      + '{unsolved}  the unsolved ones\n'
+      + '{loop}      the current loop element\n'
+      + '{rcode}     the last exit code\n\n'
+      + 'eval {next} && benchmark',
+      'None:\n{\n    True: _ = eval {next};\n    {rcode} == 0: _ = benchmark;\n}',
+      'benchmark has no number: it runs the problem eval just made current, the same {problem} the shell keeps.',
+      'Variables the shell provides', 'What the lexer normalises the last line to'],
   ];
+  const LABELS = ['What you type', 'What the lexer normalises it to'];
 
   function controller(slide) {
     const input = slide.querySelector('[data-role="input"]');
     const canonical = slide.querySelector('[data-role="canonical"]');
     const note = slide.querySelector('[data-role="note"]');
+    const inputLabel = slide.querySelector('[data-role="input-label"]');
+    const canonicalLabel = slide.querySelector('[data-role="canonical-label"]');
     const last = EXAMPLES.length - 1;
     let step = 0;
     const show = s => {
       step = s;
-      [input.textContent, canonical.textContent, note.textContent] = EXAMPLES[s];
+      const [typed, normal, said, typedLabel = LABELS[0], normalLabel = LABELS[1]] = EXAMPLES[s];
+      [input.textContent, canonical.textContent, note.textContent] = [typed, normal, said];
+      [inputLabel.textContent, canonicalLabel.textContent] = [typedLabel, normalLabel];
     };
     return {
       enter(direction) { show(direction < 0 ? last : 0); },

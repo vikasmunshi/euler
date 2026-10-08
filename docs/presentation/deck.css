@@ -595,3 +595,5 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .slide[data-theme="dev"] code, .dev-code, .dev-label, .dev-box, .dev-key, .dev-thrown dt, .prompt { font-variant-ligatures: none; }
 .dev-pair > * { min-width: 0; }
 .dev-code { font-size: 15px; white-space: pre-wrap; }
+.dev-points-tight { font-size: 19px; line-height: 1.45; margin-top: 14px; }
+.dev-points-tight li + li { margin-top: 4px; }
