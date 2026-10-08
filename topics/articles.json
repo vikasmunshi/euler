@@ -1542,7 +1542,7 @@
     {
       "path": "domain/integer-lattice",
       "title": "Integer lattice",
-      "status": "draft",
+      "status": "final",
       "solved": 8,
       "problems": 48,
       "tags": ["integer-lattice"],
