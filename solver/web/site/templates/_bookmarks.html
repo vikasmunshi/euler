@@ -3,20 +3,25 @@
    mark that moves you OFF the site, and it sits with them because all three are
    navigation rather than state.
 
-   Everything in it is off-site, and that is what makes it a menu instead of more nav
-   items: the primary nav names pages this app renders, and a row that mixed in
-   projecteuler.net would be claiming a page it cannot serve. The list is static chrome
-   — the same for every collaborator, no request state in it — so it is markup here
-   rather than context, exactly like the footer's documents.
+   Everything in it opens in a tab of its own, and that is what makes it a menu instead
+   of more nav items: the primary nav names pages this app renders INTO the left pane,
+   and a row that mixed in projecteuler.net would be claiming a page it cannot serve.
+   All of it is off-site but one — the story deck at /story/, which this app does serve
+   (web-server-guide § 11.5, The story deck), but as a fullscreen page of its own rather than
+   a pane view, so it belongs with the links that leave, not with the nav. The list is
+   static chrome — the same for every collaborator, no request state in it — so it is
+   markup here rather than context, exactly like the footer's documents.
 
-   Every link wears the `.ext` marker (↗) and site.js's externalize() gives it
-   target=_blank + rel=noopener: an off-site click opens a tab and leaves both panes
-   alone, so the terminal — the one thing the app promises never to drop — is never
-   navigated away from by following a bookmark.
+   Every link wears the `.ext` marker (↗). site.js's externalize() gives the off-site
+   ones target=_blank + rel=noopener; the deck, being same-origin, carries them in its
+   markup. Either way a click opens a tab and leaves both panes alone, so the terminal —
+   the one thing the app promises never to drop — is never navigated away from by
+   following a bookmark.
 
    Live signed out as well as in. An external link needs no session, and a visitor who
    is not being let in yet can still be pointed at the problems and the source; it is
-   the third control, with the brand and the user pill, that is not dimmed out there. #}
+   the third control, with the brand and the user pill, that is not dimmed out there.
+   (The deck is the exception that needs a session: signed out, it lands on the login.) #}
 <details class="menu bookmarks-menu">
   <summary class="nav-bookmarks" title="bookmarks — elsewhere on the web" aria-label="bookmarks">
     {# A bookmark ribbon: the one glyph nobody has to be taught. DRAWN, not filled — the
@@ -38,6 +43,9 @@
     {# The source. Pull requests, not issues: the git chip's verbs end at `git-push`
        and `gh-pr`, and this is where the branch they pushed is waiting to be read. #}
     <li class="menu-info">This project</li>
+    {# The talk about this project: eleven years of puzzles, then how the workshop is built.
+       Same-origin, so externalize() leaves it alone — it opens its own tab here. #}
+    <li><a class="ext" href="/story/" target="_blank" rel="noopener">The Euler story</a></li>
     <li><a class="ext" href="https://github.com/vikasmunshi/euler">Repository on GitHub</a></li>
     <li><a class="ext" href="https://github.com/vikasmunshi/euler/pulls">Pull requests</a></li>
     {# What a solver actually opens mid-problem: the sequence you just generated, the

@@ -1060,16 +1060,21 @@ pane scrolls its own overflow.
   and is never touched.
 
   **Bookmarks** (`_bookmarks.html`) is the third of those marks and the one that leaves:
-  the places the work refers to that this app does not host — Project Euler (site,
-  archive, your progress), the repository and its pull requests, and the three references
-  a solver actually opens mid-problem (OEIS, MathWorld, the Python docs). They are a menu
-  rather than nav items because the nav names pages this app renders. The list is static
-  chrome, so it is markup in the partial, not context — which is also what lets the auth
-  tier render it without a clone or a `config`. Every entry wears the `.ext` ↗ marker and
-  `site.js`'s `externalize()` opens it in a new tab, so following one never navigates the
-  pane the terminal lives in. It stays **live signed out** — with the brand and the user
-  pill, the third control that is not dimmed there, because an off-site link needs no
-  session.
+  everything in it opens in a tab of its own. Almost all of it is the places the work
+  refers to that this app does not host — Project Euler (site, archive, your progress),
+  the repository and its pull requests, and the three references a solver actually opens
+  mid-problem (OEIS, MathWorld, the Python docs). The one same-origin entry is **The Euler
+  story**, the presentation deck at `/story/` (§ 11.5, The story deck): this app serves it,
+  but as a fullscreen page of its own rather than a pane view, so it belongs with the links
+  that leave. They are a menu rather than nav items because the nav names pages this app
+  renders into the left pane. The list is static chrome, so it is markup in the partial,
+  not context — which is also what lets the auth tier render it without a clone or a
+  `config`. Every entry wears the `.ext` ↗ marker and opens in a new tab — `site.js`'s
+  `externalize()` does that for the off-site ones, the deck's link carries `target=_blank`
+  itself — so following one never navigates the pane the terminal lives in. It stays
+  **live signed out** — with the brand and the user pill, the third control that is not
+  dimmed there, because an off-site link needs no session (the deck does: signed out, it
+  lands on the login).
 
   The terminal chip and git sit inside `.app-who`, before the user glyph: `margin-left:
   auto` pushes that group right, and both belong on the *identity* side of the gap — they
@@ -1305,6 +1310,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/docs/file/{path}` | a doc-referenced repo file, from the readable roots only | reader |
 | GET | `/topics/` · `/topics/{name}` | topics index · a topic page (`{name}` may be a nested `folder/page` path) | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
+| GET | `/story/` · `/story/{path}` | the presentation deck's own files, raw: `docs/presentation/` (§ The story deck below) | reader |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET | `/git` | the header git chip's contents — the refresh the shell, the menu-open and the poll ask for (§11.9) | reader |
 | GET | `/messages` | the header's message chip alone — count, rows, verbs (§13) | reader |
@@ -1318,6 +1324,21 @@ GET returns a **301**, so each view has exactly one URL.
 
 The `/docs/file/` view may serve only the service's readable roots — `docs/`, `topics/`,
 `solver/templates/`, `solutions/`, `README.md`, `LICENSE`, and the vendor README.
+
+**The story deck.** `/story/` serves the project presentation (`docs/presentation/`, "Eleven
+Years of Puzzles") from the collaborator's own clone as the static files it is — not
+rendered into the shell, since it is a self-contained fullscreen page with its own scripts,
+styles and fonts. The bookmarks menu opens it in a tab of its own. `/story/` is its
+`index.html`; only the deck's file types (`.html`, `.css`, `.js`, `.woff2`, `.txt`) are
+served, and nothing outside the folder (`content.resolve_file` refuses traversal and
+symlink escape), so its `build_data.py` is not. Every response is a `FileResponse`, so it
+gets `no-cache` and the baseline CSP like any other file. The deck is written to fit that
+CSP — every script is a file, no inline `<script>`, and its fonts are bundled
+(`docs/presentation/fonts/`, SIL OFL) because `default-src 'self'` refuses a Google Fonts
+stylesheet; `test_story_deck_fits_the_csp` holds it there. The git middleware skips
+`/story/` like the static trees: a deck load is a dozen files, none of them wearing the chip.
+The data it shows (`data/history.js`) is what `build_data.py` last generated and committed —
+public metadata only, never an answer.
 
 **Page chrome via out-of-band swaps.** Breadcrumbs, Actions and the git chip live in the
 fixed header, which htmx never re-renders — so every fragment response carries them as

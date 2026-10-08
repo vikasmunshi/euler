@@ -2,6 +2,20 @@
    Main talk: squared paper and navy ink, colour reserved for difficulty.
    Developer section (data-theme="dev"): the solver shell's own palette. */
 
+/* Fonts are bundled (fonts/, SIL Open Font License — see the OFL-*.txt files beside them):
+   the deck then looks the same offline and under the web app's same-origin CSP, which
+   blocks a Google Fonts stylesheet. Latin subsets, as Google Fonts serves them. */
+@font-face { font-family: "Newsreader"; font-style: normal; font-weight: 400 500; font-display: swap;
+  src: url("fonts/newsreader.woff2") format("woff2"); }
+@font-face { font-family: "Newsreader"; font-style: italic; font-weight: 400; font-display: swap;
+  src: url("fonts/newsreader-italic.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("fonts/atkinson-hyperlegible-400.woff2") format("woff2"); }
+@font-face { font-family: "Atkinson Hyperlegible"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("fonts/atkinson-hyperlegible-700.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400 600; font-display: swap;
+  src: url("fonts/jetbrains-mono.woff2") format("woff2"); }
+
 :root {
   --paper: #F2F4F6;
   --rule: #E3E7EC;

@@ -58,6 +58,13 @@ CONFIG_KEY = web.AppKey('site_config', SiteConfig)
 #: object trees (declared-readable). Computed once from the policy in build_app.
 READABLE_KEY = web.AppKey('readable_roots', list)
 
+#: The presentation deck `/story/` serves (web-server-guide § 11.5, The story deck): its
+#: repo-relative folder, and the only file types in it the route hands out — the page,
+#: its scripts, styles, generated data and bundled fonts with their licences. Anything
+#: else in the folder (the `build_data.py` that regenerates the data) is not served.
+STORY_ROOT: str = 'docs/presentation'
+STORY_SUFFIXES: frozenset[str] = frozenset({'.html', '.css', '.js', '.woff2', '.txt'})
+
 #: Ceiling on a request body: the progress-page source (~600 KB today) + headroom;
 #: solution files are tiny. aiohttp's 1 MB default is already too close.
 _MAX_BODY = 4 * 1024 * 1024
@@ -497,6 +504,25 @@ async def doc_file(request: web.Request) -> web.StreamResponse:
 
 
 @requires('reader')
+async def story_file(request: web.Request) -> web.StreamResponse:
+    """`GET /story/{path}` — the presentation deck, served as the static files it is.
+
+    The deck (`docs/presentation/`) is a self-contained page with its own scripts,
+    styles and fonts, so it is handed out raw from this clone rather than rendered
+    into the app shell: the bookmarks menu opens it in a tab of its own, fullscreen.
+    `/story/` is its `index.html`. Only :data:`STORY_SUFFIXES` are served, and
+    :func:`content.resolve_file` rejects traversal and symlink escape, so the route
+    can reach nothing outside the deck's folder.
+    """
+    rel = request.match_info.get('path') or 'index.html'
+    root = request.app[CONFIG_KEY].repo_root / STORY_ROOT
+    target = content.resolve_file(root, rel)
+    if target is None or target.suffix not in STORY_SUFFIXES:
+        raise web.HTTPNotFound(text=f'{html.escape(rel)} is not part of the story deck')
+    return web.FileResponse(target)
+
+
+@requires('reader')
 async def doc_page(request: web.Request) -> web.StreamResponse:
     """`GET /docs/{name}` — one rendered guide (the file may live outside docs/)."""
     name = request.match_info['name']
@@ -901,6 +927,10 @@ def add_content_routes(app: web.Application) -> None:
         web.post(r'/edit/topics/{name:.+}', article_save),
         web.delete(r'/edit/topics/{name:.+}', article_delete),
         web.get(r'/about/{name}', about_page),
+        # the presentation deck: static files, opened in a tab of its own
+        web.get('/story', redirect_slash),
+        web.get('/story/', story_file),
+        web.get(r'/story/{path:.+}', story_file),
         # account
         web.get('/account', account),
         # edit routes (writes always answer with a fragment)
@@ -924,7 +954,8 @@ def git_middleware(repo_root: Path) -> Any:
 
     Skipped for anyone without a subject (nothing to show a chip to) and for the
     routes that render no chrome — the health probe, the static trees, the `/ws`
-    attach.
+    attach, and the `/story/` deck (a dozen files per load, none of them wearing
+    the chip, so a fetch per file would be pure cost).
 
     **When it fetches.** The divergence is measured against origin/master as the
     *remote* has it, which needs a network fetch (:func:`gitstate.read`'s *fetch*).
@@ -938,7 +969,7 @@ def git_middleware(repo_root: Path) -> Any:
     @web.middleware
     async def _middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
         if request.get(SUBJECT_KEY) is not None and request.method == 'GET' \
-                and not request.path.startswith(('/healthz', '/assets/', '/vendor/', '/ws')):
+                and not request.path.startswith(('/healthz', '/assets/', '/vendor/', '/ws', '/story')):
             fetch = (not is_htmx(request)) or request.path == '/git'
             request[GIT_KEY] = await gitstate.read(repo_root, fetch=fetch)
         return await handler(request)

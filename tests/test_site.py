@@ -481,6 +481,53 @@ class ContentServiceTests(AioHTTPTestCase):
             self.assertEqual(resp.status, 404, path)
 
     @unittest_run_loop
+    async def test_story_deck_served_raw(self) -> None:
+        """`/story/` hands out the deck's own files — page, scripts, data, fonts — raw."""
+        resp = await self.client.get('/story', headers=_READER, allow_redirects=False)
+        self.assertIn(resp.status, (301, 302, 307, 308))
+        self.assertEqual(resp.headers['Location'], '/story/')
+        resp = await self.client.get('/story/', headers=_READER)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.content_type, 'text/html')
+        self.assertIn('<title>Eleven Years of Puzzles</title>', await resp.text())
+        self.assertEqual(resp.headers['Cache-Control'], 'no-cache')     # a file: revalidate
+        self.assertIn('Content-Security-Policy', resp.headers)
+        for path, kind in (('/story/deck.js', 'text/javascript'),
+                           ('/story/deck.css', 'text/css'),
+                           ('/story/data/history.js', 'text/javascript'),
+                           ('/story/fonts/newsreader.woff2', 'font/woff2'),
+                           ('/story/fonts/OFL-newsreader.txt', 'text/plain')):
+            resp = await self.client.get(path, headers=_READER)
+            self.assertEqual((resp.status, resp.content_type), (200, kind), path)
+
+    @unittest_run_loop
+    async def test_story_deck_scope(self) -> None:
+        """Only the deck's file types, only inside its folder, only for a signed-in reader."""
+        for path in ('/story/build_data.py',                # in the folder, not a deck file type
+                     '/story/missing.js',
+                     '/story/fonts/../../README.md',
+                     '/story/../../README.md'):
+            resp = await self.client.get(path, headers=_READER)
+            self.assertEqual(resp.status, 404, path)
+        resp = await self.client.get('/story/')
+        self.assertEqual(resp.status, 401)
+
+    def test_story_deck_fits_the_csp(self) -> None:
+        """The deck runs under the app's same-origin CSP: no inline script, nothing off-site.
+
+        `script-src 'self'` refuses an inline `<script>` and `default-src 'self'` refuses
+        a remote stylesheet, font or script — so a deck edit that adds one would work from
+        disk and break silently at `/story/`.
+        """
+        deck = Path(__file__).resolve().parents[1] / 'docs/presentation'
+        page = (deck / 'index.html').read_text(encoding='utf-8')
+        self.assertEqual(re.findall(r'<script(?![^>]*\bsrc=)[^>]*>', page), [])
+        for name in ('index.html', 'deck.css'):
+            text = (deck / name).read_text(encoding='utf-8')
+            remote = re.findall(r'(?:src|href)="(https?:[^"]+)"|url\(["\']?(https?:[^"\')]+)', text)
+            self.assertEqual(remote, [], name)
+
+    @unittest_run_loop
     async def test_composed_ai_doc(self) -> None:
         """Every skill under `skills/` composes in — the doc globs the directory rather than
         naming each one, because the blogger spent its life missing from a hand-kept list."""
