@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Triangle_inequ
 ## Problems
 
 - ● [0102](/solutions/0102/) — Triangle Containment
+- ● [0257](/solutions/0257/) — Angular Bisectors
 
 <!-- /problems -->

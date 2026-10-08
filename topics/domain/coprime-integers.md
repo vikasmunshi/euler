@@ -132,6 +132,7 @@ factorisation beyond its disjointness from the other's.
 - ● [0157](/solutions/0157/) — Base-10 Diophantine Reciprocal
 - ● [0202](/solutions/0202/) — Laserbeam
 - ● [0251](/solutions/0251/) — Cardano Triplets
+- ● [0257](/solutions/0257/) — Angular Bisectors
 - ○ [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ○ [0351](/solutions/0351/) — Hexagonal Orchards

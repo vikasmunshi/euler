@@ -169,6 +169,7 @@ Euclidean quotient, because the quotient sequence is the answer's structure rath
 - ● [0182](/solutions/0182/) — RSA Encryption
 - ● [0183](/solutions/0183/) — Maximum Product of Parts
 - ● [0195](/solutions/0195/) — $60$-degree Triangle Inscribed Circles
+- ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0686](/solutions/0686/) — Powers of Two

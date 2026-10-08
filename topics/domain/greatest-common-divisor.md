@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Greatest_commo
 - ● [0120](/solutions/0120/) — Square Remainders
 - ● [0139](/solutions/0139/) — Pythagorean Tiles
 - ● [0157](/solutions/0157/) — Base-10 Diophantine Reciprocal
-- ○ [0257](/solutions/0257/) — Angular Bisectors
+- ● [0257](/solutions/0257/) — Angular Bisectors
 - ○ [0276](/solutions/0276/) — Primitive Triangles
 - ○ [0338](/solutions/0338/) — Cutting Rectangular Grid Paper
 - ○ [0343](/solutions/0343/) — Fractional Sequences

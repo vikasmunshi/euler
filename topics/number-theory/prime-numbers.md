@@ -374,6 +374,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
+- ● [0257](/solutions/0257/) — Angular Bisectors
 - ○ [0263](/solutions/0263/) — An Engineers' Dream Come True
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
