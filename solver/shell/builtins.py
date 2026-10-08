@@ -31,7 +31,7 @@ def _echo(ctx: Context, *args: str) -> int:
 
     Handy in command blocks to annotate progress or to surface a variable, since
     `{...}` references are substituted before the command runs — e.g.
-    `echo solved {len(solved)} problems`.
+    `echo {problem.title}`, or `n = len({solved}); echo solved {n} problems`.
 
     Args:
         ctx: [injected] The live shell context; the decorator supplies it.
