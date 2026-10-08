@@ -1795,8 +1795,8 @@
     "title": "Angular Bisectors",
     "level": 36,
     "pct": 91,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Thu, 08 Oct 2026, 14:22"
   },
   "258": {
     "title": "A Lagged Fibonacci Sequence",
