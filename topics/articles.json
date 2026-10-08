@@ -2235,7 +2235,7 @@
     {
       "path": "domain/positional-notation",
       "title": "Positional notation",
-      "status": "draft",
+      "status": "final",
       "solved": 16,
       "problems": 53,
       "tags": ["positional-notation"],
