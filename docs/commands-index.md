@@ -570,7 +570,7 @@ Print the given text to the console, then succeed.
 
 Handy in command blocks to annotate progress or to surface a variable, since
 `{...}` references are substituted before the command runs — e.g.
-`echo solved {len(solved)} problems`.
+`echo {problem.title}`, or `n = len({solved}); echo solved {n} problems`.
 
 **usage**
 
