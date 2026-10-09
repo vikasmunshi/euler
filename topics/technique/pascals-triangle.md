@@ -49,6 +49,49 @@ Two structural facts about each row are worth keeping in mind as well: it is
 **symmetric**, `C(n, k) = C(n, n−k)`, and **unimodal**, rising to the centre and falling after.
 Together they turn many "how many entries satisfy …" questions into finding one crossing point.
 
+## A worked example
+
+Take `C(6, 3) mod 8`. The true value is `C(6, 3) = 20`, so the answer is `4`.
+
+**The factorial route fails.** `6! = 720 ≡ 0 (mod 8)` and `3!·3! = 36 ≡ 4 (mod 8)`. The formula
+now asks for `0 · 4⁻¹ mod 8`, but `4` has no inverse mod 8 because `gcd(4, 8) = 4`. Worse, the zero
+in the numerator would make any "inverse" you forced through give `0`, which is wrong. Once you
+reduce `6!` early, the factors of 2 that the division was meant to cancel are already gone.
+
+**The triangle does not notice the problem.** Build the rows mod 8, each entry the sum of the two
+above it:
+
+```
+n = 0:  1
+n = 1:  1  1
+n = 2:  1  2  1
+n = 3:  1  3  3  1
+n = 4:  1  4  6  4  1
+n = 5:  1  5  2  2  5  1        10 ≡ 2
+n = 6:  1  6  7  4  7  6  1     5+2 = 7,  2+2 = 4
+```
+
+Row 6 reads `1 6 7 4 7 6 1`, which is `1 6 15 20 15 6 1` reduced mod 8. The `4` in the middle is
+the answer. No division happened, so nothing needed an inverse.
+
+In code, a single row updated in place is enough:
+
+```python
+def binomial_row(n, m):
+    row = [1] + [0] * n
+    for a in range(1, n + 1):
+        for k in range(a, 0, -1):          # right to left
+            row[k] = (row[k] + row[k - 1]) % m
+    return row
+
+binomial_row(6, 8)    # [1, 6, 7, 4, 7, 6, 1]
+```
+
+The direction of the inner loop matters. Going right to left, `row[k - 1]` still holds row `a−1`'s
+value when `row[k]` reads it. Run the same loop left to right and each entry adds in a neighbour
+that was already updated this pass. Row 6 then comes out as `1 6 20 48 90 132 132` (before
+reduction), which is nothing like a row of binomials.
+
 ## Where it does the work
 
 **Walking a row with an early exit.** Problem 0053 counts the `C(n, r)` above a million for
