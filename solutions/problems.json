@@ -6084,8 +6084,8 @@
     "level": 40,
     "pct": 100,
     "solvers": 324,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 09 Oct 2026, 17:13"
   },
   "762": {
     "title": "Amoebas in a 2D Grid",
