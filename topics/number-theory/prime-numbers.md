@@ -378,7 +378,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0263](/solutions/0263/) — An Engineers' Dream Come True
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
-- ○ [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ○ [0273](/solutions/0273/) — Sum of Squares
 - ○ [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes

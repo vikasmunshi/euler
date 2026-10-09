@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/bisect.htm
 ## Problems
 
 - ● [0134](/solutions/0134/) — Prime Pair Connection
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 
 <!-- /problems -->

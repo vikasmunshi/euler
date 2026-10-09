@@ -213,6 +213,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
