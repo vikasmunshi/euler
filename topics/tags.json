@@ -472,7 +472,7 @@
       "reference": "https://en.wikipedia.org/wiki/Combinatorial_game_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0260", "p0301", "p0306", "p0310", "p0325", "p0334", "p0335", "p0344", "p0366", "p0367", "p0391", "p0396", "p0400", "p0406", "p0409", "p0426", "p0444", "p0459", "p0477", "p0481", "p0488", "p0497", "p0509", "p0550", "p0560", "p0566", "p0629", "p0640", "p0644", "p0649", "p0653", "p0661", "p0664", "p0665", "p0666", "p0683", "p0690", "p0692", "p0711", "p0758", "p0761", "p0770", "p0787", "p0798", "p0806", "p0825", "p0847", "p0848", "p0855", "p0859", "p0860", "p0870", "p0882", "p0888", "p0895", "p0899", "p0900", "p0922", "p0923", "p0933", "p0939", "p0948", "p0949", "p0950", "p0953", "p0960", "p0961", "p0963", "p0976", "p0982", "p0986", "p1000"]
+      "refs": ["p0260", "p0301", "p0306", "p0310", "p0325", "p0334", "p0335", "p0344", "p0366", "p0367", "p0391", "p0396", "p0400", "p0406", "p0409", "p0426", "p0444", "p0459", "p0477", "p0481", "p0488", "p0497", "p0509", "p0550", "p0560", "p0566", "p0629", "p0640", "p0644", "p0649", "p0653", "p0661", "p0664", "p0665", "p0666", "p0683", "p0690", "p0692", "p0711", "p0758", "p0770", "p0787", "p0798", "p0806", "p0825", "p0847", "p0848", "p0855", "p0859", "p0860", "p0870", "p0882", "p0888", "p0895", "p0899", "p0900", "p0922", "p0923", "p0933", "p0939", "p0948", "p0949", "p0950", "p0953", "p0960", "p0961", "p0963", "p0976", "p0982", "p0986", "p1000"]
     },
     {
       "slug": "combinatorial-geometry",
@@ -652,7 +652,7 @@
       "reference": "https://en.wikipedia.org/wiki/Convex_polygon",
       "additional-references": [],
       "summary": "A polygon whose interior angles are all less than 180 degrees, relevant to maximizing area given fixed side lengths.",
-      "refs": ["p0252", "p0564"]
+      "refs": ["p0252", "p0564", "p0761"]
     },
     {
       "slug": "coprime-integers",
@@ -779,6 +779,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0131", "p0174", "p0176", "p0291"]
+    },
+    {
+      "slug": "differential-game",
+      "facet": "domain",
+      "name": "Differential game",
+      "reference": "https://en.wikipedia.org/wiki/Differential_game",
+      "additional-references": [],
+      "summary": "A continuous-time game in which players steer a dynamical system, solved through barriers and characteristics.",
+      "refs": ["p0761"]
     },
     {
       "slug": "digit-counting-function",
@@ -1210,7 +1219,7 @@
       "reference": "https://en.wikipedia.org/wiki/Game_theory",
       "additional-references": [],
       "summary": "Strategic decision-making among rational agents, here modeling pirates voting on treasure distribution.",
-      "refs": ["p0232", "p0950"]
+      "refs": ["p0232", "p0761", "p0950"]
     },
     {
       "slug": "gauss-circle-problem",
@@ -4363,6 +4372,15 @@
       "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0"]
     },
     {
+      "slug": "golden-section-search",
+      "facet": "technique",
+      "name": "Golden-section search",
+      "reference": "https://en.wikipedia.org/wiki/Golden-section_search",
+      "additional-references": [],
+      "summary": "Locating the extremum of a unimodal function by shrinking a bracket in the golden ratio.",
+      "refs": ["p0761_s0"]
+    },
+    {
       "slug": "greatest-common-divisor-application",
       "facet": "technique",
       "name": "Greatest common divisor (application)",
@@ -5143,7 +5161,7 @@
       "reference": "https://en.wikipedia.org/wiki/Newton%27s_method",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0229_s0"]
+      "refs": ["p0229_s0", "p0761_s0"]
     },
     {
       "slug": "nonlocal",
@@ -5443,6 +5461,15 @@
       "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0", "p1000_s0"]
     },
     {
+      "slug": "regula-falsi",
+      "facet": "technique",
+      "name": "Regula falsi",
+      "reference": "https://en.wikipedia.org/wiki/Regula_falsi",
+      "additional-references": [],
+      "summary": "Bracketed root-finding by secant interpolation, with the Illinois fix against one-sided stalling.",
+      "refs": ["p0761_s0"]
+    },
+    {
       "slug": "rotation-matrix",
       "facet": "technique",
       "name": "Rotation matrix",
@@ -5683,7 +5710,7 @@
       "reference": "https://en.wikipedia.org/wiki/Symmetry",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0"]
+      "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0", "p0761_s0"]
     },
     {
       "slug": "system-of-linear-equations",
@@ -5866,6 +5893,15 @@
       "refs": ["p0395"]
     },
     {
+      "slug": "calibrate-theory-on-known-answers",
+      "facet": "takeaway",
+      "name": "Calibrate a theory on the known answers",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When the analysis is subtle, demand that it reproduce every given value exactly before trusting it on the unknown case.",
+      "refs": ["p0761"]
+    },
+    {
       "slug": "cheap-checks-first",
       "facet": "takeaway",
       "name": "Order checks by cost",
@@ -5917,7 +5953,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
-      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0331", "p0346", "p0395", "p0420", "p0478", "p0565", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p1000"]
+      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0331", "p0346", "p0395", "p0420", "p0478", "p0565", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p1000"]
     },
     {
       "slug": "memo-key-is-the-full-state",

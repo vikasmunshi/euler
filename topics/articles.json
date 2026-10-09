@@ -464,9 +464,9 @@
       "title": "Combinatorial game theory",
       "status": "final",
       "solved": 5,
-      "problems": 72,
+      "problems": 71,
       "tags": ["combinatorial-game-theory"],
-      "refs": ["p0260", "p0301", "p0306", "p0310", "p0325", "p0334", "p0335", "p0344", "p0366", "p0367", "p0391", "p0396", "p0400", "p0406", "p0409", "p0426", "p0444", "p0459", "p0477", "p0481", "p0488", "p0497", "p0509", "p0550", "p0560", "p0566", "p0629", "p0640", "p0644", "p0649", "p0653", "p0661", "p0664", "p0665", "p0666", "p0683", "p0690", "p0692", "p0711", "p0758", "p0761", "p0770", "p0787", "p0798", "p0806", "p0825", "p0847", "p0848", "p0855", "p0859", "p0860", "p0870", "p0882", "p0888", "p0895", "p0899", "p0900", "p0922", "p0923", "p0933", "p0939", "p0948", "p0949", "p0950", "p0953", "p0960", "p0961", "p0963", "p0976", "p0982", "p0986", "p1000"]
+      "refs": ["p0260", "p0301", "p0306", "p0310", "p0325", "p0334", "p0335", "p0344", "p0366", "p0367", "p0391", "p0396", "p0400", "p0406", "p0409", "p0426", "p0444", "p0459", "p0477", "p0481", "p0488", "p0497", "p0509", "p0550", "p0560", "p0566", "p0629", "p0640", "p0644", "p0649", "p0653", "p0661", "p0664", "p0665", "p0666", "p0683", "p0690", "p0692", "p0711", "p0758", "p0770", "p0787", "p0798", "p0806", "p0825", "p0847", "p0848", "p0855", "p0859", "p0860", "p0870", "p0882", "p0888", "p0895", "p0899", "p0900", "p0922", "p0923", "p0933", "p0939", "p0948", "p0949", "p0950", "p0953", "p0960", "p0961", "p0963", "p0976", "p0982", "p0986", "p1000"]
     },
     {
       "path": "domain/combinatorial-geometry",
@@ -643,10 +643,10 @@
       "path": "domain/convex-polygon",
       "title": "Convex polygon",
       "status": "draft",
-      "solved": 1,
-      "problems": 2,
+      "solved": 2,
+      "problems": 3,
       "tags": ["convex-polygon"],
-      "refs": ["p0252", "p0564"]
+      "refs": ["p0252", "p0564", "p0761"]
     },
     {
       "path": "domain/coprime-integers",
@@ -773,6 +773,15 @@
       "problems": 4,
       "tags": ["difference-of-two-squares"],
       "refs": ["p0131", "p0174", "p0176", "p0291"]
+    },
+    {
+      "path": "domain/differential-game",
+      "title": "Differential game",
+      "status": "draft",
+      "solved": 1,
+      "problems": 1,
+      "tags": ["differential-game"],
+      "refs": ["p0761"]
     },
     {
       "path": "domain/digit-counting-function",
@@ -1201,10 +1210,10 @@
       "path": "domain/game-theory",
       "title": "Game theory",
       "status": "draft",
-      "solved": 1,
-      "problems": 2,
+      "solved": 2,
+      "problems": 3,
       "tags": ["game-theory"],
-      "refs": ["p0232", "p0950"]
+      "refs": ["p0232", "p0761", "p0950"]
     },
     {
       "path": "domain/gauss-circle-problem",
@@ -1273,7 +1282,7 @@
       "path": "domain/geometry",
       "title": "Geometry",
       "status": "final",
-      "solved": 10,
+      "solved": 11,
       "problems": 71,
       "tags": ["geometry"],
       "refs": ["p0086", "p0091", "p0144", "p0163", "p0177", "p0222", "p0228", "p0246", "p0247", "p0264", "p0279", "p0285", "p0295", "p0296", "p0299", "p0309", "p0311", "p0314", "p0332", "p0338", "p0353", "p0363", "p0373", "p0385", "p0390", "p0397", "p0404", "p0410", "p0428", "p0431", "p0460", "p0465", "p0476", "p0510", "p0525", "p0532", "p0547", "p0557", "p0563", "p0566", "p0579", "p0583", "p0587", "p0600", "p0607", "p0613", "p0620", "p0644", "p0667", "p0681", "p0727", "p0737", "p0747", "p0761", "p0775", "p0786", "p0841", "p0855", "p0883", "p0891", "p0894", "p0897", "p0904", "p0914", "p0919", "p0935", "p0962", "p0966", "p0972", "p0985", "p0998"]
@@ -3268,6 +3277,15 @@
       "refs": ["p0395"]
     },
     {
+      "path": "takeaway/calibrate-theory-on-known-answers",
+      "title": "Calibrate a theory on the known answers",
+      "status": "draft",
+      "solved": 1,
+      "problems": 1,
+      "tags": ["calibrate-theory-on-known-answers"],
+      "refs": ["p0761"]
+    },
+    {
       "path": "takeaway/cheap-checks-first",
       "title": "Order checks by cost",
       "status": "final",
@@ -3316,10 +3334,10 @@
       "path": "takeaway/exploit-symmetry",
       "title": "Exploit symmetry and complementary counting",
       "status": "final",
-      "solved": 54,
-      "problems": 54,
+      "solved": 55,
+      "problems": 55,
       "tags": ["exploit-symmetry"],
-      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0331", "p0346", "p0395", "p0420", "p0478", "p0565", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p1000"]
+      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0331", "p0346", "p0395", "p0420", "p0478", "p0565", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p1000"]
     },
     {
       "path": "takeaway/memo-key-is-the-full-state",
@@ -4573,6 +4591,15 @@
       "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0"]
     },
     {
+      "path": "technique/golden-section-search",
+      "title": "Golden-section search",
+      "status": "draft",
+      "solved": 1,
+      "problems": 1,
+      "tags": ["golden-section-search"],
+      "refs": ["p0761_s0"]
+    },
+    {
       "path": "technique/greatest-common-divisor-application",
       "title": "Greatest common divisor (application)",
       "status": "final",
@@ -5350,10 +5377,10 @@
       "path": "technique/newtons-method",
       "title": "Newton's method",
       "status": "draft",
-      "solved": 1,
-      "problems": 1,
+      "solved": 2,
+      "problems": 2,
       "tags": ["newtons-method"],
-      "refs": ["p0229_s0"]
+      "refs": ["p0229_s0", "p0761_s0"]
     },
     {
       "path": "technique/nonlocal",
@@ -5653,6 +5680,15 @@
       "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0", "p1000_s0"]
     },
     {
+      "path": "technique/regula-falsi",
+      "title": "Regula falsi",
+      "status": "draft",
+      "solved": 1,
+      "problems": 1,
+      "tags": ["regula-falsi"],
+      "refs": ["p0761_s0"]
+    },
+    {
       "path": "technique/rotation-matrix",
       "title": "Rotation matrix",
       "status": "draft",
@@ -5890,10 +5926,10 @@
       "path": "technique/symmetry",
       "title": "Symmetry",
       "status": "draft",
-      "solved": 6,
-      "problems": 6,
+      "solved": 7,
+      "problems": 7,
       "tags": ["symmetry"],
-      "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0"]
+      "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0", "p0761_s0"]
     },
     {
       "path": "technique/system-of-linear-equations",

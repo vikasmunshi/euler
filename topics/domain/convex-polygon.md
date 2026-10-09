@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Convex_polygon
 
 - ● [0252](/solutions/0252/) — Convex Holes
 - ○ [0564](/solutions/0564/) — Maximal Polygons
+- ● [0761](/solutions/0761/) — Runner and Swimmer
 
 <!-- /problems -->

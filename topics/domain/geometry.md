@@ -210,7 +210,7 @@ if the process is periodic, find the period instead of running it out.
 - ○ [0727](/solutions/0727/) — Triangle of Circular Arcs
 - ○ [0737](/solutions/0737/) — Coin Loops
 - ○ [0747](/solutions/0747/) — Triangular Pizza
-- ○ [0761](/solutions/0761/) — Runner and Swimmer
+- ● [0761](/solutions/0761/) — Runner and Swimmer
 - ○ [0775](/solutions/0775/) — Saving Paper
 - ○ [0786](/solutions/0786/) — Billiard
 - ○ [0841](/solutions/0841/) — Regular Star Polygons
