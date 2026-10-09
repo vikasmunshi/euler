@@ -4228,8 +4228,8 @@
     "level": 39,
     "pct": 98,
     "solvers": 435,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 09 Oct 2026, 14:28"
   },
   "530": {
     "title": "GCD of Divisors",
