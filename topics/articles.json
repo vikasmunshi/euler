@@ -5241,7 +5241,7 @@
     {
       "path": "technique/monotonic-function",
       "title": "Monotonic function",
-      "status": "draft",
+      "status": "final",
       "solved": 8,
       "problems": 8,
       "tags": ["monotonic-function"],
