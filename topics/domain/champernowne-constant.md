@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Champernowne_c
 ## Problems
 
 - ● [0040](/solutions/0040/) — Champernowne's Constant
-- ○ [0305](/solutions/0305/) — Reflexive Position
+- ● [0305](/solutions/0305/) — Reflexive Position
 
 <!-- /problems -->

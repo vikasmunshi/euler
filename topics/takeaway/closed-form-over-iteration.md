@@ -140,6 +140,7 @@ Three cautions earn their keep:
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0288](/solutions/0288/) — An Enormous Factorial
+- ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial

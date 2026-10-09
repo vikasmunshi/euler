@@ -12,6 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Monotonic_func
 - ● [0168](/solutions/0168/) — Number Rotations
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0800](/solutions/0800/) — Hybrid Integers
 
