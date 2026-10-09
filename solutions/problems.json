@@ -7604,8 +7604,8 @@
     "level": 11,
     "pct": 30,
     "solvers": 545,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 09 Oct 2026, 10:21"
   },
   "952": {
     "title": "Order Modulo Factorial",
