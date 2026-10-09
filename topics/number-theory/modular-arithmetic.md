@@ -387,7 +387,7 @@ handful of operations on small numbers.
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root
-- ○ [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
 - ○ [0950](/solutions/0950/) — Pirate Treasure

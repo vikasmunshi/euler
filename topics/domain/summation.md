@@ -285,7 +285,7 @@ problems are where the collection makes the point most bluntly.
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ○ [0933](/solutions/0933/) — Paper Cutting
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
-- ○ [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 - ○ [0960](/solutions/0960/) — Stone Game Solitaire
 - ○ [0968](/solutions/0968/) — 5D Summation
 - ○ [0986](/solutions/0986/) — Another Infinite Game

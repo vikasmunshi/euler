@@ -11,6 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Mask_(computin
 - ● [0161](/solutions/0161/) — Triominoes
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0679](/solutions/0679/) — Freefarea
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 
 <!-- /problems -->

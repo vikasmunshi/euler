@@ -17,6 +17,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Self-similarit
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
 - ○ [0702](/solutions/0702/) — Jumping Flea
 - ○ [0894](/solutions/0894/) — Spiral of Circles
-- ○ [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 
 <!-- /problems -->

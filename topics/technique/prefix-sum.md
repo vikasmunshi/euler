@@ -152,5 +152,6 @@ sums stop being an intermediate and become the data structure.
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0710](/solutions/0710/) — One Million Members
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 
 <!-- /problems -->
