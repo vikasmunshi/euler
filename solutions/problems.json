@@ -2172,8 +2172,8 @@
     "level": 26,
     "pct": 66,
     "solvers": 1441,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 09 Oct 2026, 09:18"
   },
   "273": {
     "title": "Sum of Squares",
