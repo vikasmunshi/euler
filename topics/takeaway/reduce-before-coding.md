@@ -257,6 +257,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
+- ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1000](/solutions/1000/) — Problem $1000$

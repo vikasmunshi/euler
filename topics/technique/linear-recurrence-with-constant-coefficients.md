@@ -13,5 +13,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Linear_recurre
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
+- ● [0951](/solutions/0951/) — A Game of Chance
 
 <!-- /problems -->

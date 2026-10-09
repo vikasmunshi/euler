@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pascal%27s_tri
 - ● [0194](/solutions/0194/) — Coloured Configurations
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0885](/solutions/0885/) — Sorted Digits
+- ● [0951](/solutions/0951/) — A Game of Chance
 
 <!-- /problems -->

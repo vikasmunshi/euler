@@ -148,6 +148,7 @@ that collapse in one guise or another.
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ● [0938](/solutions/0938/) — Exhausting a Colour
+- ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0961](/solutions/0961/) — Removing Digits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [0996](/solutions/0996/) — Overtakes
