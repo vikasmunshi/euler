@@ -186,6 +186,7 @@ the top bit of their XOR — three tight flags at once, one per coordinate.
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0301](/solutions/0301/) — Nim
+- ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0974](/solutions/0974/) — Very Odd Numbers
