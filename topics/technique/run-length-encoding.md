@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Run-length_enc
 ## Problems
 
 - ● [0175](/solutions/0175/) — Fractions and Sum of Powers of Two
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0951](/solutions/0951/) — A Game of Chance
 
 <!-- /problems -->

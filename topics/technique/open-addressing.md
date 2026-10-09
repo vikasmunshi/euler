@@ -19,5 +19,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Open_addressin
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0755](/solutions/0755/) — Not Zeckendorf
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 
 <!-- /problems -->

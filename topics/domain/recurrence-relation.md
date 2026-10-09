@@ -287,7 +287,7 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0935](/solutions/0935/) — Rolling Square
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
-- ○ [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 - ○ [0955](/solutions/0955/) — Finding Triangles
 - ○ [0968](/solutions/0968/) — 5D Summation
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping

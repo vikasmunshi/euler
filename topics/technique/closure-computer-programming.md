@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Closure_(compu
 ## Problems
 
 - ● [0088](/solutions/0088/) — Product-sum Numbers
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 
 <!-- /problems -->

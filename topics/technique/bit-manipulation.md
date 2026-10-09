@@ -181,6 +181,7 @@ buy the most where the instructions are real.
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
+- ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0961](/solutions/0961/) — Removing Digits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [1000](/solutions/1000/) — Problem $1000$
