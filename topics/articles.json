@@ -5574,7 +5574,7 @@
     {
       "path": "technique/quotient-blocking",
       "title": "quotient blocking",
-      "status": "draft",
+      "status": "final",
       "solved": 10,
       "problems": 10,
       "tags": ["quotient-blocking"],
