@@ -7540,8 +7540,8 @@
     "level": 30,
     "pct": 77,
     "solvers": 180,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 09 Oct 2026, 14:11"
   },
   "944": {
     "title": "Sum of Elevisors",
