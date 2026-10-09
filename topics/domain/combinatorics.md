@@ -260,7 +260,6 @@ of crossing it.
 - ○ [0523](/solutions/0523/) — First Sort I
 - ○ [0524](/solutions/0524/) — First Sort II
 - ○ [0528](/solutions/0528/) — Constrained Sums
-- ○ [0529](/solutions/0529/) — $10$-substrings
 - ○ [0534](/solutions/0534/) — Weak Queens
 - ○ [0537](/solutions/0537/) — Counting Tuples
 - ○ [0544](/solutions/0544/) — Chromatic Conundrum

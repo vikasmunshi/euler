@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Substring>._
 ## Problems
 
 - ● [0305](/solutions/0305/) — Reflexive Position
+- ● [0529](/solutions/0529/) — $10$-substrings
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
 
 <!-- /problems -->

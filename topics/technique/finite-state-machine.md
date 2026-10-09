@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Finite-state_m
 ## Problems
 
 - ● [0191](/solutions/0191/) — Prize Strings
+- ● [0529](/solutions/0529/) — $10$-substrings
 
 <!-- /problems -->

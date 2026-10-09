@@ -254,7 +254,7 @@ handful of operations on small numbers.
 - ○ [0517](/solutions/0517/) — A Real Recursion
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ○ [0528](/solutions/0528/) — Constrained Sums
-- ○ [0529](/solutions/0529/) — $10$-substrings
+- ● [0529](/solutions/0529/) — $10$-substrings
 - ○ [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0536](/solutions/0536/) — Modulo Power Identity
 - ○ [0537](/solutions/0537/) — Counting Tuples

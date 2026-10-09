@@ -11,6 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Linear_recurre
 - ● [0094](/solutions/0094/) — Almost Equilateral Triangles
 - ● [0219](/solutions/0219/) — Skew-cost Coding
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
+- ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0951](/solutions/0951/) — A Game of Chance
