@@ -5412,7 +5412,7 @@
     {
       "path": "technique/pascals-triangle",
       "title": "Pascal's triangle",
-      "status": "draft",
+      "status": "final",
       "solved": 5,
       "problems": 5,
       "tags": ["pascals-triangle"],
