@@ -144,6 +144,7 @@ sums stop being an intermediate and become the data structure.
 - ● [0205](/solutions/0205/) — Dice Game
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0238](/solutions/0238/) — Infinite String Tour
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals

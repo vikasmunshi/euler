@@ -217,7 +217,7 @@ it exists for exactly that reason.
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
-- ○ [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ○ [0273](/solutions/0273/) — Sum of Squares
 - ○ [0276](/solutions/0276/) — Primitive Triangles
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes

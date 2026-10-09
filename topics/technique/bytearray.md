@@ -118,6 +118,7 @@ found by editing a suffix in place, and the result is read back as an integer wi
 - ● [0010](/solutions/0010/) — Summation of Primes
 - ● [0077](/solutions/0077/) — Prime Summations
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0961](/solutions/0961/) — Removing Digits
 

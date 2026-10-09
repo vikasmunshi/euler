@@ -190,6 +190,7 @@ kept warm between them flatters the measurement.
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0255](/solutions/0255/) — Rounded Square Roots
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 

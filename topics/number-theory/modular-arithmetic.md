@@ -183,7 +183,7 @@ handful of operations on small numbers.
 - ○ [0258](/solutions/0258/) — A Lagged Fibonacci Sequence
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
-- ○ [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ○ [0274](/solutions/0274/) — Divisibility Multipliers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ○ [0282](/solutions/0282/) — The Ackermann Function

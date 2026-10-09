@@ -184,7 +184,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ● [0231](/solutions/0231/) — Prime Factorisation of Binomial Coefficients
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
-- ○ [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers

@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/itertools.
 ## Problems
 
 - ● [0050](/solutions/0050/) — Consecutive Prime Sum
+- ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 
 <!-- /problems -->
