@@ -167,7 +167,8 @@
   // its relpath last (a path may contain ';', so only the last field can absorb it):
   //   open;<NNNN>;<token>              → swap the pane to /solutions/NNNN/
   //   edit;<NNNN>;<token>;<relpath>    → swap the pane to /edit/solutions/NNNN/<relpath>
-  //   git;<token>                      → the header's git chip re-reads itself
+  //   nav;<token>;<path>               → swap the pane to /<path> (any site route)
+  //   git;<token>                     → the header's git chip re-reads itself
   //   msg;<token>                      → the header's message chip re-reads itself
   //   account;<token>                  → the account pane re-reads itself (if visible)
   //   progress;<token>                 → the solutions grid re-reads itself (if visible)
@@ -201,6 +202,12 @@
     if (action === 'progress') {
       return { euler: 'progress-changed' };
     }
+    // The shell vetted the path's shape and prefix (viewer.py); the parent's navigate
+    // listener still refuses anything but a same-origin path, so a leading '/' is ours.
+    if (action === 'nav') {
+      var path = parts.slice(2).join(';');    // rejoin: a path may contain ';'
+      return path && path.charAt(0) !== '/' ? { euler: 'navigate', path: '/' + path } : null;
+    }
     var number = parts[1];
     if (!/^\d+$/.test(number || '')) { return null; }
     if (action === 'open') {
@@ -213,11 +220,11 @@
     return null;
   }
 
-  //: Where the token sits: second field for the fieldless nudges (`git`, `msg`,
-  //: `account`, `progress`), third for the pane actions that carry a problem number first (§ above).
+  //: Where the token sits: second field for the nudges (`git`, `msg`, `account`,
+  //: `progress`) and `nav`, third for the pane actions that carry a problem number first (§ above).
   function oscToken(parts) {
     var fieldless = parts[0] === 'git' || parts[0] === 'msg' || parts[0] === 'account' ||
-      parts[0] === 'progress';
+      parts[0] === 'progress' || parts[0] === 'nav';
     return Number(fieldless ? parts[1] : parts[2]) || 0;
   }
 

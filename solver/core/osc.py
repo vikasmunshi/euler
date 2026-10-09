@@ -16,6 +16,8 @@ payload carries a *token* (:func:`token`):
 - `edit;<NNNN>;<token>;<relpath>` — open *relpath* in the pane's editor. The
   token sits *before* the path because a relpath may itself contain `;`: it is
   the one field that must stay last and be rejoined by the reader.
+- `nav;<token>;<path>` — swap the left pane to `/<path>`, any site route (`show <path>`).
+  The path is relative (no leading `/`) and last, rejoined like `edit`'s.
 - `git;<token>` — this clone's git state changed; re-read the header's chip.
 - `msg;<token>` — this user's mailbox changed (they read, sent, replied or dismissed);
   re-read the header's message chip.

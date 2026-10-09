@@ -7,7 +7,8 @@ Both drive the same channel-aware bridge to the browser — the app shell's left
 channel) — differing only in the URL. The channel is the resolved subject's
 (`config.subject.channel`), never a CLI flag:
 
-- `show` opens a problem's rendered documentation page (`<base_url>/solutions/NNNN/`).
+- `show` opens a problem's rendered documentation page (`<base_url>/solutions/NNNN/`),
+  or any site page given its relative path (`<base_url>/<path>`).
 - `edit` opens a solution file in the code editor (`<base_url>/edit/solutions/NNNN/<file>`).
 """
 from __future__ import annotations
@@ -155,13 +156,51 @@ def edit(problem: Problem,
 
 
 # ---------------------------------------------------------------------------
-# show — open the rendered documentation page
+# show — open the rendered documentation page, or any site page
 # ---------------------------------------------------------------------------
 
+#: The site routes `show <path>` may swap the pane to: its first segment must be one of
+#: these. Left out on purpose — `terminal` (the shell would frame itself), `git` (a
+#: header fragment, not a page) and `story` (the deck opens in a tab of its own).
+PANE_ROUTES: tuple[str, ...] = ('solutions', 'topics', 'docs', 'about', 'edit', 'account', 'shell')
+
+
+def _pane_path_error(path: str) -> str | None:
+    """Why *path* is not a relative web path `show` may open, or None if it is.
+
+    Shape first — relative, no `.`/`..` or empty segments (a trailing `/` is fine:
+    `topics/` is the canonical index), no query, fragment, backslash, whitespace or
+    control characters — then the first segment must name a :data:`PANE_ROUTES`
+    route. Whether the page exists is the site's to say: a miss is its 404, in the pane.
+    """
+    if not path or path.startswith('/'):
+        return 'must be a relative path (no leading /)'
+    if any(ch in path for ch in '?#\\') or any(ch.isspace() or not ch.isprintable() for ch in path):
+        return 'must be a plain path (no query, fragment, backslash or whitespace)'
+    segments = path.removesuffix('/').split('/')
+    if any(seg in ('', '.', '..') for seg in segments):
+        return 'must not contain empty, . or .. segments'
+    if segments[0] not in PANE_ROUTES:
+        return f'must start with one of: {", ".join(PANE_ROUTES)}'
+    return None
+
+
+def _pane_path_completions(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
+    """Path completions for `show`: the pane routes, then topic pages under `topics/`.
+
+    The topic pages are the articles' paths under `topics/` without their `.md` — the
+    route the site serves them at. The adapter prefix-filters them.
+    """
+    if not incomplete.startswith('topics/'):
+        return [f'{route}/' for route in PANE_ROUTES]
+    return sorted(f'topics/{name.removesuffix(".md")}'
+                  for name in iterdir_recursive(config.topics_dir, rt='str') if name.endswith('.md'))
+
+
 @register(requires='reader', aliases=('open', 'view'), quietable=True,
-          completers={'filename': _solution_file_completions})
-def show(problem: Problem, filename: str | None = None) -> int:
-    """Open a problem's documentation page, in a browser or the web viewer panel.
+          completers={'path': _pane_path_completions})
+def show(problem: Problem, path: str | None = None) -> int:
+    """Open a problem's page, or any site page, in a browser or the web viewer panel.
 
     When *problem* is omitted, opens the current problem. The path depends on the
     shell's channel (from the resolved subject):
@@ -180,27 +219,34 @@ def show(problem: Problem, filename: str | None = None) -> int:
       `<origin>/solutions/NNNN/`; the monotonic token lets the page ignore the
       sequence when the PTY replay buffer re-sends it on reconnect.
 
-    When *filename* is given, `show` opens that solution file in the code editor
-    instead of the rendered page — it delegates to `edit`, so the same file lookup,
-    channel handling, and browser tab apply.
+    When *path* is given, `show` opens that site page instead of the problem's —
+    `show topics/technique/concatenation` — over the same channels (`nav;<token>;<path>`
+    on web, the "solver-doc" tab on a terminal). The page ignores *problem*, but naming
+    one still makes it the current problem: `show 121 topics/…` selects 121.
 
     Args:
-        problem: [problem] The problem to open.
-        filename: A solution file to open in the code editor instead. Defaults to None,
-            which opens the rendered documentation page.
+        problem: [problem] The problem to open (and select as the current problem).
+        path: A relative site path to open instead, e.g. `topics/technique/concatenation`.
+            Its first segment must be one of solutions, topics, docs, about, edit,
+            account or shell. Defaults to None, which opens the problem's page.
     """
-    if filename is not None:
-        return edit(problem, filename)
+    if path is not None:
+        if (why := _pane_path_error(path)) is not None:
+            console.print(f'[error]error:[/error] [muted]{path}: {why}[/muted]')
+            return ExitCodes.EXIT_ERROR
+        target, label, fields = f'/{path}', path, (str(osc.token()), path)
+    else:
+        number = f'{problem.number:04d}'
+        target, label, fields = f'/solutions/{number}/', number, (number, str(osc.token()))
 
     if config.subject.channel == 'web':
-        osc.emit('open', f'{problem.number:04d}', str(osc.token()))
-        console.print(f'[muted]opening[/muted] [accent]{problem.number:04d}[/accent] '
+        osc.emit('nav' if path is not None else 'open', *fields)
+        console.print(f'[muted]opening[/muted] [accent]{label}[/accent] '
                       '[muted]in the viewer panel[/muted]')
         return ExitCodes.EXIT_OK
 
     if not _browser_is_available():
         return _browser_unavailable_error()
-    url: str = f'{config.base_url}/solutions/{problem.number:04d}/'
     pipe = DEVNULL if console.quiet else None
-    run(f'browser open-in-tab solver-doc {url}', shell=True, stdout=pipe, stderr=pipe)
+    run(f'browser open-in-tab solver-doc {config.base_url}{target}', shell=True, stdout=pipe, stderr=pipe)
     return ExitCodes.EXIT_OK

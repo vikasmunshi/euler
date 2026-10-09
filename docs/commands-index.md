@@ -91,7 +91,7 @@ a parameter that accepts repetition.
 | [`progress`](#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
 | [`results`](#command-results) | — | `reader` | List the recorded results for a problem. |
 | [`search`](#command-search-find) | `find` | `reader` | Search the solution stack for a case-insensitive regular expression. |
-| [`show`](#command-show-open-view) | `open`, `view` | `reader` | Open a problem's documentation page, in a browser or the web viewer panel. |
+| [`show`](#command-show-open-view) | `open`, `view` | `reader` | Open a problem's page, or any site page, in a browser or the web viewer panel. |
 | [`summary`](#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. |
 | [`sys-setup`](#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
 | [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
@@ -1618,7 +1618,7 @@ search <query>
 
 #### Command: `show` (`open`, `view`)
 
-Open a problem's documentation page, in a browser or the web viewer panel.
+Open a problem's page, or any site page, in a browser or the web viewer panel.
 
 * ⚑ needs reader or above.
 * ❏ uses/sets current problem.
@@ -1641,16 +1641,17 @@ shell's channel (from the resolved subject):
   `<origin>/solutions/NNNN/`; the monotonic token lets the page ignore the
   sequence when the PTY replay buffer re-sends it on reconnect.
 
-When *filename* is given, `show` opens that solution file in the code editor
-instead of the rendered page — it delegates to `edit`, so the same file lookup,
-channel handling, and browser tab apply.
+When *path* is given, `show` opens that site page instead of the problem's —
+`show topics/technique/concatenation` — over the same channels (`nav;<token>;<path>`
+on web, the "solver-doc" tab on a terminal). The page ignores *problem*, but naming
+one still makes it the current problem: `show 121 topics/…` selects 121.
 
 **usage**
 
 ```
 show
 [problem=<n>] (default current)
-[filename=<str>|none] (default None)
+[path=<str>|none] (default None)
 [silent=true|--silent]
 ```
 
@@ -1658,8 +1659,8 @@ show
 
 | argument | description |
 |----------|-------------|
-| `problem` | The problem to open. |
-| `filename` | A solution file to open in the code editor instead. Defaults to None, which opens the rendered documentation page. |
+| `problem` | The problem to open (and select as the current problem). |
+| `path` | A relative site path to open instead, e.g. `topics/technique/concatenation`. Its first segment must be one of solutions, topics, docs, about, edit, account or shell. Defaults to None, which opens the problem's page. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.viewer.show`.
