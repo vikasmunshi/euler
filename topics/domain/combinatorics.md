@@ -399,7 +399,7 @@ of crossing it.
 - ○ [0948](/solutions/0948/) — Left vs Right
 - ○ [0949](/solutions/0949/) — Left vs Right II
 - ○ [0950](/solutions/0950/) — Pirate Treasure
-- ○ [0951](/solutions/0951/) — A Game of Chance
+- ● [0951](/solutions/0951/) — A Game of Chance
 - ○ [0954](/solutions/0954/) — Heptaphobia
 - ○ [0957](/solutions/0957/) — Point Genesis
 - ○ [0960](/solutions/0960/) — Stone Game Solitaire

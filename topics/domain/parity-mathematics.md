@@ -26,6 +26,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Parity_(mathem
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ○ [0859](/solutions/0859/) — Cookie Game
 - ● [0868](/solutions/0868/) — Belfry Maths
+- ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ○ [0981](/solutions/0981/) — The Quaternion Group II

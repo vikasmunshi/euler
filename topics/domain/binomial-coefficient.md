@@ -42,6 +42,5 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binomial_coeff
 - ○ [0831](/solutions/0831/) — Triple Product
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0885](/solutions/0885/) — Sorted Digits
-- ○ [0951](/solutions/0951/) — A Game of Chance
 
 <!-- /problems -->
