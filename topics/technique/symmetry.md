@@ -13,5 +13,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Symmetry>._
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0761](/solutions/0761/) — Runner and Swimmer
 
 <!-- /problems -->

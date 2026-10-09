@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Newton%27s_met
 ## Problems
 
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
+- ● [0761](/solutions/0761/) — Runner and Swimmer
 
 <!-- /problems -->
