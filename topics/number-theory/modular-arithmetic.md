@@ -193,6 +193,7 @@ handful of operations on small numbers.
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0304](/solutions/0304/) — Primonacci
+- ● [0305](/solutions/0305/) — Reflexive Position
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10

@@ -9,7 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Power_of_two>.
 
 - ● [0207](/solutions/0207/) — Integer Partition Equations
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
-- ○ [0305](/solutions/0305/) — Reflexive Position
 - ○ [0442](/solutions/0442/) — Eleven-free Integers
 - ○ [0494](/solutions/0494/) — Collatz Prefix Families
 - ○ [0499](/solutions/0499/) — St. Petersburg Lottery

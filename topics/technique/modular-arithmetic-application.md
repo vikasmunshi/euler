@@ -127,6 +127,7 @@ Python original and both produce a plausible wrong number rather than a crash.
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
+- ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors

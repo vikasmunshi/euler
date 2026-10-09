@@ -128,6 +128,7 @@ against the brute force you replaced.
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0288](/solutions/0288/) — An Enormous Factorial
+- ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial

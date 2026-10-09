@@ -149,7 +149,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ○ [0284](/solutions/0284/) — Steady Squares
 - ● [0288](/solutions/0288/) — An Enormous Factorial
-- ○ [0305](/solutions/0305/) — Reflexive Position
+- ● [0305](/solutions/0305/) — Reflexive Position
 - ○ [0316](/solutions/0316/) — Numbers in Decimal Expansions
 - ○ [0361](/solutions/0361/) — Subsequence of Thue-Morse Sequence
 - ○ [0368](/solutions/0368/) — A Kempner-like Series
