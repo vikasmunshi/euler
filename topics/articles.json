@@ -3855,7 +3855,7 @@
     {
       "path": "technique/concatenation",
       "title": "Concatenation",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 9,
       "tags": ["concatenation"],
