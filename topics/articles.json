@@ -3423,7 +3423,7 @@
     {
       "path": "takeaway/small-cases-reveal-closed-form",
       "title": "Small cases reveal a closed form",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["small-cases-reveal-closed-form"],
@@ -3441,7 +3441,7 @@
     {
       "path": "takeaway/split-inputs-into-behaviour-classes",
       "title": "Split inputs into behaviour classes",
-      "status": "draft",
+      "status": "final",
       "solved": 4,
       "problems": 4,
       "tags": ["split-inputs-into-behaviour-classes"],
@@ -5943,7 +5943,7 @@
     {
       "path": "technique/symmetry",
       "title": "Symmetry",
-      "status": "draft",
+      "status": "final",
       "solved": 8,
       "problems": 8,
       "tags": ["symmetry"],
