@@ -18,5 +18,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Irrational_num
 - ○ [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ○ [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0911](/solutions/0911/) — Khinchin Exceptions
+- ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->

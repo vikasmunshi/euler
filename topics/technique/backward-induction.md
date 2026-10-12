@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Backward_induc
 ## Problems
 
 - ● [0232](/solutions/0232/) — The Race
+- ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->

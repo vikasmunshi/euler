@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
+- ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->

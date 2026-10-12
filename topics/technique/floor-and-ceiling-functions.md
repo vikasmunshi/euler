@@ -20,5 +20,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Floor_and_ceil
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0944](/solutions/0944/) — Sum of Elevisors
+- ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->
