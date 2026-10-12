@@ -40,7 +40,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binary_number>
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ○ [0877](/solutions/0877/) — XOR-Equation A
 - ○ [0878](/solutions/0878/) — XOR-Equation B
-- ○ [0882](/solutions/0882/) — Removing Bits
+- ● [0882](/solutions/0882/) — Removing Bits
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ○ [0912](/solutions/0912/) — Where are the Odds?

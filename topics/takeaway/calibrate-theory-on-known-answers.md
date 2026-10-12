@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0761](/solutions/0761/) — Runner and Swimmer
+- ● [0882](/solutions/0882/) — Removing Bits
 
 <!-- /problems -->
