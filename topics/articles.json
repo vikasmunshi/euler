@@ -3990,7 +3990,7 @@
     {
       "path": "technique/cycle-detection",
       "title": "Cycle detection",
-      "status": "draft",
+      "status": "final",
       "solved": 11,
       "problems": 11,
       "tags": ["cycle-detection"],
@@ -4431,7 +4431,7 @@
     {
       "path": "technique/floor-and-ceiling-functions",
       "title": "Floor and ceiling functions",
-      "status": "draft",
+      "status": "final",
       "solved": 14,
       "problems": 14,
       "tags": ["floor-and-ceiling-functions"],
@@ -5502,7 +5502,7 @@
     {
       "path": "technique/pells-equation",
       "title": "Pell's equation",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 9,
       "tags": ["pells-equation"],
