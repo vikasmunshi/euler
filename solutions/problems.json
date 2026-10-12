@@ -107,7 +107,7 @@
     "title": "Longest Collatz Sequence",
     "level": 1,
     "pct": 4,
-    "solvers": 238321,
+    "solvers": 238323,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 20:38"
   },
@@ -355,7 +355,7 @@
     "title": "Triangular, Pentagonal, and Hexagonal",
     "level": 0,
     "pct": 2,
-    "solvers": 86441,
+    "solvers": 86443,
     "solved": true,
     "date": "Wed, 4 Dec 2019, 10:56"
   },
@@ -7597,7 +7597,7 @@
     "pct": 78,
     "solvers": 197,
     "solved": true,
-    "date": "Mon, 12 Oct 2026, 09:13"
+    "date": "Mon, 12 Oct 2026, 14:53"
   },
   "951": {
     "title": "A Game of Chance",
