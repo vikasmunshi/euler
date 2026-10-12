@@ -1209,7 +1209,7 @@
     {
       "path": "domain/game-theory",
       "title": "Game theory",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["game-theory"],
@@ -2883,7 +2883,7 @@
     {
       "path": "domain/substring",
       "title": "Substring",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 3,
       "tags": ["substring"],
@@ -5736,7 +5736,7 @@
     {
       "path": "technique/run-length-encoding",
       "title": "Run-length encoding",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["run-length-encoding"],
