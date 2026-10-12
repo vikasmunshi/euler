@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/collection
 ## Problems
 
 - ● [0039](/solutions/0039/) — Integer Right Triangles
+- ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

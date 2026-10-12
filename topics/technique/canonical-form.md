@@ -139,5 +139,6 @@ a partition.
 - ● [0244](/solutions/0244/) — Sliders
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0259](/solutions/0259/) — Reachable Numbers
+- ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

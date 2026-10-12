@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Surreal_number
 ## Problems
 
 - ● [0882](/solutions/0882/) — Removing Bits
+- ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

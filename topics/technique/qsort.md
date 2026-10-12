@@ -198,6 +198,7 @@ too large or too structured to index directly.
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0926](/solutions/0926/) — Total Roundness
+- ● [0963](/solutions/0963/) — Removing Trits
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->
