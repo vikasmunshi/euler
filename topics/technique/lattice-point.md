@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lattice_point>
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0313](/solutions/0313/) — Sliding Game
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->

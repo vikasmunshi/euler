@@ -245,7 +245,7 @@ Mixing them is how a provably correct algorithm returns a wrong count.
 - ○ [0957](/solutions/0957/) — Point Genesis
 - ○ [0966](/solutions/0966/) — Triangle Circle Intersection
 - ○ [0972](/solutions/0972/) — Hyperbolic Plane
-- ○ [0983](/solutions/0983/) — Consonant Circle Crossing
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ○ [0994](/solutions/0994/) — Counting Triangles
 - ○ [0998](/solutions/0998/) — Squaring the Triangle
 

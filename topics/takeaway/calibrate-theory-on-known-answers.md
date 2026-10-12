@@ -10,5 +10,6 @@ _TODO: write this page. No reference on the tag._
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0963](/solutions/0963/) — Removing Trits
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->

@@ -16,5 +16,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Backtracking>.
 - ● [0122](/solutions/0122/) — Efficient Exponentiation
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0719](/solutions/0719/) — Number Splitting
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->

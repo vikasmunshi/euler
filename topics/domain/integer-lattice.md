@@ -172,6 +172,6 @@ them, but the three facts do the heavy lifting elsewhere.
 - ○ [0879](/solutions/0879/) — Touch-screen Password
 - ○ [0883](/solutions/0883/) — Remarkable Triangles
 - ○ [0962](/solutions/0962/) — Angular Bisector and Tangent 2
-- ○ [0983](/solutions/0983/) — Consonant Circle Crossing
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->

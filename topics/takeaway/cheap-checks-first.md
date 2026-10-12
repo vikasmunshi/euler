@@ -122,5 +122,6 @@ expensive checks off the candidates that were never going to survive.
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->
