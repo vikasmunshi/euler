@@ -180,6 +180,7 @@ both slower and harder to read.
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0980](/solutions/0980/) — The Quaternion Group I
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->

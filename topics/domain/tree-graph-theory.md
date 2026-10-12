@@ -11,6 +11,5 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tree_(graph_th
 - ○ [0677](/solutions/0677/) — Coloured Graphs
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ○ [0936](/solutions/0936/) — Peerless Trees
-- ○ [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->

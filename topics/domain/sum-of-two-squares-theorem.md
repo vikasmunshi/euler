@@ -18,6 +18,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sum_of_two_squ
 - ○ [0659](/solutions/0659/) — Largest Prime
 - ○ [0723](/solutions/0723/) — Pythagorean Quadrilaterals
 - ○ [0846](/solutions/0846/) — Magic Bracelets
-- ○ [0983](/solutions/0983/) — Consonant Circle Crossing
+- ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->
