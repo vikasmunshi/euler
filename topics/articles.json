@@ -3270,7 +3270,7 @@
     {
       "path": "number-theory/primes",
       "title": "Primes",
-      "status": "draft",
+      "status": "final",
       "solved": 39,
       "problems": 39,
       "tags": ["trial-division"],
