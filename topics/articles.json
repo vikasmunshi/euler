@@ -2091,7 +2091,7 @@
     {
       "path": "domain/partizan-game",
       "title": "Partizan game",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["partizan-game"],
@@ -3297,7 +3297,7 @@
     {
       "path": "takeaway/calibrate-theory-on-known-answers",
       "title": "Calibrate a theory on the known answers",
-      "status": "draft",
+      "status": "final",
       "solved": 4,
       "problems": 4,
       "tags": ["calibrate-theory-on-known-answers"],
@@ -4980,7 +4980,7 @@
     {
       "path": "technique/linear-recurrence-with-constant-coefficients",
       "title": "Linear recurrence with constant coefficients",
-      "status": "draft",
+      "status": "final",
       "solved": 8,
       "problems": 8,
       "tags": ["linear-recurrence-with-constant-coefficients"],
