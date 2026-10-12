@@ -4746,7 +4746,7 @@
     {
       "path": "technique/inclusion-exclusion-principle",
       "title": "Inclusion\u2013exclusion principle",
-      "status": "draft",
+      "status": "final",
       "solved": 12,
       "problems": 12,
       "tags": ["inclusion-exclusion-principle"],
@@ -4791,7 +4791,7 @@
     {
       "path": "technique/integer-overflow",
       "title": "Integer overflow",
-      "status": "draft",
+      "status": "final",
       "solved": 12,
       "problems": 12,
       "tags": ["integer-overflow"],
@@ -5142,7 +5142,7 @@
     {
       "path": "technique/matrix-exponentiation",
       "title": "Matrix exponentiation",
-      "status": "draft",
+      "status": "final",
       "solved": 3,
       "problems": 3,
       "tags": ["matrix-exponentiation"],
