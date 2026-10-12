@@ -146,6 +146,7 @@ that collapse in one guise or another.
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0845](/solutions/0845/) — Prime Digit Sum
+- ● [0882](/solutions/0882/) — Removing Bits
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0951](/solutions/0951/) — A Game of Chance

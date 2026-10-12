@@ -250,6 +250,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
+- ● [0882](/solutions/0882/) — Removing Bits
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0926](/solutions/0926/) — Total Roundness

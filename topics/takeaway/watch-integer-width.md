@@ -188,6 +188,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
+- ● [0882](/solutions/0882/) — Removing Bits
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0974](/solutions/0974/) — Very Odd Numbers

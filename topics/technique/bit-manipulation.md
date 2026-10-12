@@ -180,6 +180,7 @@ buy the most where the instructions are real.
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0872](/solutions/0872/) — Recursive Tree
+- ● [0882](/solutions/0882/) — Removing Bits
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0961](/solutions/0961/) — Removing Digits

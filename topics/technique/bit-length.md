@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bit-length>._
 
 - ● [0014](/solutions/0014/) — Longest Collatz Sequence
 - ● [0872](/solutions/0872/) — Recursive Tree
+- ● [0882](/solutions/0882/) — Removing Bits
 - ● [0899](/solutions/0899/) — DistribuNim I
 
 <!-- /problems -->
