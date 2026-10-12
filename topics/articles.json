@@ -2928,7 +2928,7 @@
     {
       "path": "domain/surreal-number",
       "title": "Surreal number",
-      "status": "draft",
+      "status": "final",
       "solved": 2,
       "problems": 2,
       "tags": ["surreal-number"],
