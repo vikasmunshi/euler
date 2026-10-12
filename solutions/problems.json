@@ -7700,8 +7700,8 @@
     "level": 40,
     "pct": 100,
     "solvers": 199,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 12 Oct 2026, 14:12"
   },
   "964": {
     "title": "Musical Chairs Revisited",
