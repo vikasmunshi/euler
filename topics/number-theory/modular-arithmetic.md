@@ -390,7 +390,6 @@ handful of operations on small numbers.
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
-- ○ [0950](/solutions/0950/) — Pirate Treasure
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
 - ○ [0956](/solutions/0956/) — Super Duper Sum
 - ○ [0960](/solutions/0960/) — Stone Game Solitaire

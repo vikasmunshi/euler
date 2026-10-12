@@ -250,7 +250,6 @@ weighting each winning mask by how many integers wear it.
 - ○ [0939](/solutions/0939/) — Partisan Nim
 - ○ [0948](/solutions/0948/) — Left vs Right
 - ○ [0949](/solutions/0949/) — Left vs Right II
-- ○ [0950](/solutions/0950/) — Pirate Treasure
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 - ○ [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0961](/solutions/0961/) — Removing Digits

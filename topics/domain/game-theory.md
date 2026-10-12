@@ -9,6 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Game_theory>._
 
 - ● [0232](/solutions/0232/) — The Race
 - ● [0761](/solutions/0761/) — Runner and Swimmer
-- ○ [0950](/solutions/0950/) — Pirate Treasure
+- ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->

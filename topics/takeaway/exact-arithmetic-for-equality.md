@@ -121,5 +121,6 @@ decision.
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0800](/solutions/0800/) — Hybrid Integers
+- ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->
