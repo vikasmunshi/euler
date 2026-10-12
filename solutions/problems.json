@@ -7860,8 +7860,8 @@
     "level": 40,
     "pct": 100,
     "solvers": 238,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 12 Oct 2026, 15:15"
   },
   "984": {
     "title": "Knights and Horses",
