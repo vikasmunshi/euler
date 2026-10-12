@@ -9,5 +9,6 @@ _TODO: write this page. No reference on the tag._
 
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

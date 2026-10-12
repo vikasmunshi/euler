@@ -151,6 +151,7 @@ that collapse in one guise or another.
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0961](/solutions/0961/) — Removing Digits
+- ● [0963](/solutions/0963/) — Removing Trits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1000](/solutions/1000/) — Problem $1000$

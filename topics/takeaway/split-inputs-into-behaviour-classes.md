@@ -10,5 +10,6 @@ _TODO: write this page. No reference on the tag._
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0305](/solutions/0305/) — Reflexive Position
+- ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

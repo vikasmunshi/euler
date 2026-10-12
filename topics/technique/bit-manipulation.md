@@ -184,6 +184,7 @@ buy the most where the instructions are real.
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0961](/solutions/0961/) — Removing Digits
+- ● [0963](/solutions/0963/) — Removing Trits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [1000](/solutions/1000/) — Problem $1000$
 

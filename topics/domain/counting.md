@@ -224,7 +224,7 @@ reach for wide or arbitrary-precision types
 - ○ [0907](/solutions/0907/) — Stacking Cups
 - ○ [0922](/solutions/0922/) — Young's Game A
 - ○ [0928](/solutions/0928/) — Cribbage
-- ○ [0963](/solutions/0963/) — Removing Trits
+- ● [0963](/solutions/0963/) — Removing Trits
 - ○ [0972](/solutions/0972/) — Hyperbolic Plane
 - ○ [0987](/solutions/0987/) — Straight Eight
 - ○ [0997](/solutions/0997/) — Dice Box
