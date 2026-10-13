@@ -2516,8 +2516,8 @@
     "level": 6,
     "pct": 18,
     "solvers": 4249,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 13 Oct 2026, 15:01"
   },
   "316": {
     "title": "Numbers in Decimal Expansions",
