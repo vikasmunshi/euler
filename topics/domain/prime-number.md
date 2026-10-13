@@ -158,7 +158,7 @@ one, not step three.
 - ○ [0266](/solutions/0266/) — Pseudo Square Root
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
 - ○ [0273](/solutions/0273/) — Sum of Squares
-- ○ [0274](/solutions/0274/) — Divisibility Multipliers
+- ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0304](/solutions/0304/) — Primonacci
 - ○ [0308](/solutions/0308/) — An Amazing Prime-generating Automaton
