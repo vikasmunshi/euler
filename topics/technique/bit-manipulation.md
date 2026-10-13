@@ -174,6 +174,7 @@ buy the most where the instructions are real.
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0244](/solutions/0244/) — Sliders
+- ● [0265](/solutions/0265/) — Binary Circles
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients

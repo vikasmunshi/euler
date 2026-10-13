@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binary_number>
 - ● [0036](/solutions/0036/) — Double-base Palindromes
 - ● [0169](/solutions/0169/) — Sums of Powers of Two
 - ● [0175](/solutions/0175/) — Fractions and Sum of Powers of Two
-- ○ [0265](/solutions/0265/) — Binary Circles
+- ● [0265](/solutions/0265/) — Binary Circles
 - ○ [0323](/solutions/0323/) — Bitwise-OR Operations on Random Integers
 - ○ [0361](/solutions/0361/) — Subsequence of Thue-Morse Sequence
 - ○ [0384](/solutions/0384/) — Rudin-Shapiro Sequence
