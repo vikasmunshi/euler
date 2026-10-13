@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Self-similarit
 - ● [0199](/solutions/0199/) — Iterative Circle Packing
 - ● [0220](/solutions/0220/) — Heighway Dragon
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
+- ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ○ [0535](/solutions/0535/) — Fractal Sequence

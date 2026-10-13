@@ -217,6 +217,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
+- ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0301](/solutions/0301/) — Nim
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences

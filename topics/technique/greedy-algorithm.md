@@ -13,6 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Greedy_algorit
 - ● [0111](/solutions/0111/) — Primes with Runs
 - ● [0152](/solutions/0152/) — Sums of Square Reciprocals
 - ● [0219](/solutions/0219/) — Skew-cost Coding
+- ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 
