@@ -194,7 +194,7 @@ of crossing it.
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0259](/solutions/0259/) — Reachable Numbers
-- ○ [0265](/solutions/0265/) — Binary Circles
+- ● [0265](/solutions/0265/) — Binary Circles
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ○ [0270](/solutions/0270/) — Cutting Squares
 - ○ [0275](/solutions/0275/) — Balanced Sculptures
