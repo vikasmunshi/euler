@@ -198,7 +198,7 @@ of crossing it.
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ○ [0270](/solutions/0270/) — Cutting Squares
 - ○ [0275](/solutions/0275/) — Balanced Sculptures
-- ○ [0276](/solutions/0276/) — Primitive Triangles
+- ● [0276](/solutions/0276/) — Primitive Triangles
 - ○ [0281](/solutions/0281/) — Pizza Toppings
 - ○ [0289](/solutions/0289/) — Eulerian Cycles
 - ○ [0292](/solutions/0292/) — Pythagorean Polygons

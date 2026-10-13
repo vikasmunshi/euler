@@ -139,6 +139,7 @@ Three cautions earn their keep:
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0242](/solutions/0242/) — Odd Triplets
+- ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0313](/solutions/0313/) — Sliding Game

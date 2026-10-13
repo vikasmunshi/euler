@@ -219,7 +219,7 @@ it exists for exactly that reason.
 - ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ○ [0273](/solutions/0273/) — Sum of Squares
-- ○ [0276](/solutions/0276/) — Primitive Triangles
+- ● [0276](/solutions/0276/) — Primitive Triangles
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ○ [0309](/solutions/0309/) — Integer Ladders
 - ● [0321](/solutions/0321/) — Swapping Counters
