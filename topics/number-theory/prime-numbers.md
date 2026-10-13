@@ -396,7 +396,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0333](/solutions/0333/) — Special Partitions
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
-- ○ [0351](/solutions/0351/) — Hexagonal Orchards
+- ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ○ [0362](/solutions/0362/) — Squarefree Factors

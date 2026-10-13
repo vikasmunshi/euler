@@ -135,7 +135,7 @@ factorisation beyond its disjointness from the other's.
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
-- ○ [0351](/solutions/0351/) — Hexagonal Orchards
+- ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
 - ○ [0388](/solutions/0388/) — Distinct Lines
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix

@@ -109,6 +109,7 @@ interval, never per `n`.
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors

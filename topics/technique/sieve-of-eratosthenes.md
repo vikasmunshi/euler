@@ -131,6 +131,7 @@ the sieve exists to avoid when the question is about a whole range.
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
+- ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
