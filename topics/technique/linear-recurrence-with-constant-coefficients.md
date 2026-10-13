@@ -150,5 +150,6 @@ Problem 529 turns a count per length into a cumulative count. Other problems nee
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0951](/solutions/0951/) — A Game of Chance
+- ● [0957](/solutions/0957/) — Point Genesis
 
 <!-- /problems -->

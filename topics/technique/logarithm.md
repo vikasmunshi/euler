@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Logarithm>._
 ## Problems
 
 - ● [0030](/solutions/0030/) — Digit Fifth Powers
+- ● [0957](/solutions/0957/) — Point Genesis
 
 <!-- /problems -->

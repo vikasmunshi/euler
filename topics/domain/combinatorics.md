@@ -399,7 +399,6 @@ of crossing it.
 - ○ [0949](/solutions/0949/) — Left vs Right II
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ○ [0954](/solutions/0954/) — Heptaphobia
-- ○ [0957](/solutions/0957/) — Point Genesis
 - ○ [0960](/solutions/0960/) — Stone Game Solitaire
 - ○ [0964](/solutions/0964/) — Musical Chairs Revisited
 - ○ [0968](/solutions/0968/) — 5D Summation

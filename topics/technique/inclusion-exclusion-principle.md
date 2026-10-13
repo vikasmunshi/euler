@@ -114,5 +114,6 @@ counts the repdigits twice, so it subtracts them once.
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
+- ● [0957](/solutions/0957/) — Point Genesis
 
 <!-- /problems -->
