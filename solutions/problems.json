@@ -2116,8 +2116,8 @@
     "level": 5,
     "pct": 14,
     "solvers": 5201,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 13 Oct 2026, 12:44"
   },
   "266": {
     "title": "Pseudo Square Root",
