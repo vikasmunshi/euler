@@ -170,7 +170,7 @@ optimisation inside the loop.
 - ○ [0300](/solutions/0300/) — Protein Folding
 - ○ [0327](/solutions/0327/) — Rooms of Doom
 - ○ [0328](/solutions/0328/) — Lowest-cost Search
-- ○ [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0336](/solutions/0336/) — Maximix Arrangements
 - ○ [0339](/solutions/0339/) — Peredur Fab Efrawg
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ○ [0352](/solutions/0352/) — Blood Tests

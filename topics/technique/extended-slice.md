@@ -88,5 +88,6 @@ Two rules govern the target, and they differ from ordinary slicing:
 
 - ● [0010](/solutions/0010/) — Summation of Primes
 - ● [0059](/solutions/0059/) — XOR Decryption
+- ● [0336](/solutions/0336/) — Maximix Arrangements
 
 <!-- /problems -->
