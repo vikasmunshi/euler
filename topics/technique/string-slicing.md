@@ -15,6 +15,7 @@ _TODO: write this page. Start from <https://docs.python.org/3/library/stdtypes.h
 - ● [0055](/solutions/0055/) — Lychrel Numbers
 - ● [0125](/solutions/0125/) — Palindromic Sums
 - ● [0206](/solutions/0206/) — Concealed Square
+- ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 
 <!-- /problems -->

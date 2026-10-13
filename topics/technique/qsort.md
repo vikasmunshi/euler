@@ -193,6 +193,7 @@ too large or too structured to index directly.
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0321](/solutions/0321/) — Swapping Counters
+- ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0757](/solutions/0757/) — Stealthy Numbers

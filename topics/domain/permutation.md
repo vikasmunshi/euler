@@ -133,7 +133,7 @@ permutations of [Problem 720](/solutions/0720/). The tell is a problem that coun
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
-- ○ [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ○ [0367](/solutions/0367/) — Bozo Sort
 - ○ [0393](/solutions/0393/) — Migrating Ants

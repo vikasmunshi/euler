@@ -95,6 +95,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 ## Problems
 
 - ● [0265](/solutions/0265/) — Binary Circles
+- ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0963](/solutions/0963/) — Removing Trits

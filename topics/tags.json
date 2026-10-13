@@ -2077,6 +2077,15 @@
       "refs": ["p0004", "p0036", "p0055", "p0125", "p0348", "p0473", "p0655", "p0808"]
     },
     {
+      "slug": "pancake-sorting",
+      "facet": "domain",
+      "name": "Pancake sorting",
+      "reference": "https://en.wikipedia.org/wiki/Pancake_sorting",
+      "additional-references": [],
+      "summary": "Sorting a sequence when the only allowed move reverses a prefix (or, mirrored, a suffix).",
+      "refs": ["p0336"]
+    },
+    {
       "slug": "pandigital-number",
       "facet": "domain",
       "name": "Pandigital number",
@@ -4126,7 +4135,7 @@
       "reference": "https://docs.python.org/3/library/functions.html#slice",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0010_s0", "p0059_s0"]
+      "refs": ["p0010_s0", "p0059_s0", "p0336_s0"]
     },
     {
       "slug": "fancy-indexing",
@@ -4756,7 +4765,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lexicographic_order",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0720_s0", "p0845_s0"]
+      "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0336_s0", "p0720_s0", "p0845_s0"]
     },
     {
       "slug": "linear-congruential-generator",
@@ -5395,7 +5404,7 @@
       "reference": "https://en.cppreference.com/w/c/algorithm/qsort",
       "additional-references": ["https://en.wikipedia.org/wiki/Qsort"],
       "summary": "",
-      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0346_s0", "p0464_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p0963_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0346_s0", "p0464_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p0963_s0", "p1000_s0"]
     },
     {
       "slug": "quadratic-formula",
@@ -5611,7 +5620,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sorting_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0070_s0", "p0096_s0", "p0098_s0", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0165_s0", "p0177_s0", "p0184_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0757_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0070_s0", "p0096_s0", "p0098_s0", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0165_s0", "p0177_s0", "p0184_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0757_s0", "p1000_s0"]
     },
     {
       "slug": "specular-reflection",
@@ -5692,7 +5701,7 @@
       "reference": "https://docs.python.org/3/library/stdtypes.html#common-sequence-operations",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0013_s0", "p0035_s0", "p0035_s1", "p0036_s0", "p0037_s0", "p0051_s0", "p0055_s0", "p0125_s0", "p0206_s0", "p0808_s0"]
+      "refs": ["p0013_s0", "p0035_s0", "p0035_s1", "p0036_s0", "p0037_s0", "p0051_s0", "p0055_s0", "p0125_s0", "p0206_s0", "p0336_s0", "p0808_s0"]
     },
     {
       "slug": "strtok",
@@ -5926,7 +5935,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the analysis is subtle, demand that it reproduce every given value exactly before trusting it on the unknown case.",
-      "refs": ["p0265", "p0761", "p0882", "p0963", "p0983"]
+      "refs": ["p0265", "p0336", "p0761", "p0882", "p0963", "p0983"]
     },
     {
       "slug": "cheap-checks-first",
@@ -6037,6 +6046,15 @@
       "refs": ["p0001", "p0020", "p0074", "p0077", "p0104", "p0143", "p0501"]
     },
     {
+      "slug": "run-the-process-backwards",
+      "facet": "takeaway",
+      "name": "Run the process backwards",
+      "reference": null,
+      "additional-references": [],
+      "summary": "To enumerate the inputs that drive a deterministic process to a given outcome, invert each step from the outcome instead of filtering every input.",
+      "refs": ["p0336"]
+    },
+    {
       "slug": "size-work-to-the-input",
       "facet": "takeaway",
       "name": "Size the work to the input",
@@ -6052,7 +6070,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Exhaustively solve small instances, read a closed-form characterisation off the table, and check it against the brute force before using it at scale.",
-      "refs": ["p0256", "p0276", "p0950", "p0963"]
+      "refs": ["p0256", "p0276", "p0336", "p0950", "p0963"]
     },
     {
       "slug": "small-cases-reveal-recurrence",
