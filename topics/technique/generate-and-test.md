@@ -172,6 +172,7 @@ whenever the property refers to smaller members of the same family.
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
 - ● [0206](/solutions/0206/) — Concealed Square
 - ● [0346](/solutions/0346/) — Strong Repunits
+- ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 

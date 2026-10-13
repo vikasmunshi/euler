@@ -139,7 +139,7 @@ logarithmic.
 - ○ [0311](/solutions/0311/) — Biclinic Integral Quadrilaterals
 - ● [0313](/solutions/0313/) — Sliding Game
 - ○ [0318](/solutions/0318/) — 2011 Nines
-- ○ [0348](/solutions/0348/) — Sum of a Square and a Cube
+- ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ○ [0360](/solutions/0360/) — Scary Sphere
 - ○ [0390](/solutions/0390/) — Triangles with Non Rational Sides and Integral Area
 - ○ [0397](/solutions/0397/) — Triangle on Parabola

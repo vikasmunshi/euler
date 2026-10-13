@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Palindromic_nu
 - ● [0036](/solutions/0036/) — Double-base Palindromes
 - ● [0055](/solutions/0055/) — Lychrel Numbers
 - ● [0125](/solutions/0125/) — Palindromic Sums
-- ○ [0348](/solutions/0348/) — Sum of a Square and a Cube
+- ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ○ [0473](/solutions/0473/) — Phigital Number Base
 - ○ [0655](/solutions/0655/) — Divisible Palindromes
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
