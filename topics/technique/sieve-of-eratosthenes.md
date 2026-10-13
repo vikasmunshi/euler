@@ -129,6 +129,7 @@ the sieve exists to avoid when the question is about a whole range.
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0313](/solutions/0313/) — Sliding Game
+- ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0351](/solutions/0351/) — Hexagonal Orchards

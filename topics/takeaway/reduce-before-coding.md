@@ -220,6 +220,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0301](/solutions/0301/) — Nim
 - ● [0313](/solutions/0313/) — Sliding Game
+- ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0331](/solutions/0331/) — Cross Flips
