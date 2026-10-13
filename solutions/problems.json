@@ -2684,8 +2684,8 @@
     "level": 5,
     "pct": 15,
     "solvers": 2723,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 13 Oct 2026, 12:52"
   },
   "337": {
     "title": "Totient Stairstep Sequences",
