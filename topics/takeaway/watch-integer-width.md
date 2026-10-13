@@ -169,6 +169,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0313](/solutions/0313/) — Sliding Game

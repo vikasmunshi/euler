@@ -289,6 +289,7 @@ loop was never needed.
 - ● [0253](/solutions/0253/) — Tidying Up A
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
+- ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0313](/solutions/0313/) — Sliding Game
