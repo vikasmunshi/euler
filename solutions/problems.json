@@ -2780,8 +2780,8 @@
     "level": 5,
     "pct": 14,
     "solvers": 4019,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 13 Oct 2026, 13:52"
   },
   "349": {
     "title": "Langton's Ant",
