@@ -172,6 +172,7 @@ bignum — in rising order of effort, chosen by how far the biggest intermediate
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ● [0288](/solutions/0288/) — An Enormous Factorial
+- ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient

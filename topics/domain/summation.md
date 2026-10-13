@@ -209,7 +209,7 @@ problems are where the collection makes the point most bluntly.
 - ● [0150](/solutions/0150/) — Sub-triangle Sums
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ○ [0261](/solutions/0261/) — Pivotal Square Sums
-- ○ [0297](/solutions/0297/) — Zeckendorf Representation
+- ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ○ [0326](/solutions/0326/) — Modulo Summations
 - ○ [0340](/solutions/0340/) — Crazy Function

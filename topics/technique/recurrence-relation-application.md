@@ -129,6 +129,7 @@ analysis are covered on the [recurrence relation](/topics/domain/recurrence-rela
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0230](/solutions/0230/) — Fibonacci Words
 - ● [0288](/solutions/0288/) — An Enormous Factorial
+- ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
