@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Concurrent_lin
 ## Problems
 
 - ● [0163](/solutions/0163/) — Cross-hatched Triangles
+- ● [0957](/solutions/0957/) — Point Genesis
 
 <!-- /problems -->

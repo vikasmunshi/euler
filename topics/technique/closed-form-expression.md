@@ -309,6 +309,7 @@ loop was never needed.
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [0957](/solutions/0957/) — Point Genesis
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 - ● [1000](/solutions/1000/) — Problem $1000$
 

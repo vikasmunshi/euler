@@ -203,7 +203,6 @@ optimisation inside the loop.
 - ○ [0886](/solutions/0886/) — Coprime Permutations
 - ○ [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [0893](/solutions/0893/) — Matchsticks
-- ○ [0957](/solutions/0957/) — Point Genesis
 - ○ [0966](/solutions/0966/) — Triangle Circle Intersection
 - ○ [1002](/solutions/1002/) — Connections II
 

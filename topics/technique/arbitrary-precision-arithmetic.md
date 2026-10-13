@@ -179,6 +179,7 @@ conversion altogether, and is usually faster besides.
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0957](/solutions/0957/) — Point Genesis
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 
 <!-- /problems -->

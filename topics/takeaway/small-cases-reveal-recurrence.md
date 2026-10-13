@@ -160,6 +160,7 @@ Four cautions earn their keep:
 
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
 - ● [0529](/solutions/0529/) — $10$-substrings
+- ● [0957](/solutions/0957/) — Point Genesis
 - ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->
