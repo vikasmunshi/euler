@@ -380,7 +380,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ○ [0273](/solutions/0273/) — Sum of Squares
-- ○ [0274](/solutions/0274/) — Divisibility Multipliers
+- ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ○ [0291](/solutions/0291/) — Panaitopol Primes
