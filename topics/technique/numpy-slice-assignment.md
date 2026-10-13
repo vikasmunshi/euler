@@ -13,6 +13,7 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/reference/array
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 

@@ -147,6 +147,7 @@ sums stop being an intermediate and become the data structure.
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums

@@ -142,7 +142,6 @@ them, but the three facts do the heavy lifting elsewhere.
 - ○ [0299](/solutions/0299/) — Three Similar Triangles
 - ● [0331](/solutions/0331/) — Cross Flips
 - ○ [0332](/solutions/0332/) — Spherical Triangles
-- ○ [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0353](/solutions/0353/) — Risky Moon
 - ○ [0360](/solutions/0360/) — Scary Sphere
 - ○ [0373](/solutions/0373/) — Circumscribed Circles
