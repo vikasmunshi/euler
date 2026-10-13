@@ -167,6 +167,7 @@ guessed bound never is.
 - ● [0177](/solutions/0177/) — Integer Angled Quadrilaterals
 - ● [0244](/solutions/0244/) — Sliders
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0504](/solutions/0504/) — Square on the Inside

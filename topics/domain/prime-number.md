@@ -163,7 +163,7 @@ one, not step three.
 - ● [0304](/solutions/0304/) — Primonacci
 - ○ [0308](/solutions/0308/) — An Amazing Prime-generating Automaton
 - ● [0313](/solutions/0313/) — Sliding Game
-- ○ [0315](/solutions/0315/) — Digital Root Clocks
+- ● [0315](/solutions/0315/) — Digital Root Clocks
 - ○ [0329](/solutions/0329/) — Prime Frog
 - ○ [0333](/solutions/0333/) — Special Partitions
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes

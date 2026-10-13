@@ -159,6 +159,7 @@ both slower and harder to read.
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ● [0304](/solutions/0304/) — Primonacci
+- ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube

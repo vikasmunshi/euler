@@ -10,7 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prime-counting
 - ● [0050](/solutions/0050/) — Consecutive Prime Sum
 - ● [0187](/solutions/0187/) — Semiprimes
 - ○ [0308](/solutions/0308/) — An Amazing Prime-generating Automaton
-- ○ [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ○ [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0501](/solutions/0501/) — Eight Divisors

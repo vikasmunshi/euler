@@ -389,7 +389,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0304](/solutions/0304/) — Primonacci
 - ○ [0308](/solutions/0308/) — An Amazing Prime-generating Automaton
 - ● [0313](/solutions/0313/) — Sliding Game
-- ○ [0315](/solutions/0315/) — Digital Root Clocks
+- ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ○ [0329](/solutions/0329/) — Prime Frog
