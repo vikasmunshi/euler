@@ -149,6 +149,7 @@ the same idea, implemented once, in C.
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0932](/solutions/0932/) — $2025$

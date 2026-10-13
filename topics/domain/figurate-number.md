@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Figurate_numbe
 - ● [0044](/solutions/0044/) — Pentagon Numbers
 - ● [0045](/solutions/0045/) — Triangular, Pentagonal, and Hexagonal
 - ● [0061](/solutions/0061/) — Cyclical Figurate Numbers
-- ○ [0348](/solutions/0348/) — Sum of a Square and a Cube
+- ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ○ [0799](/solutions/0799/) — Pentagonal Puzzle
 
