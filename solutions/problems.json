@@ -2204,8 +2204,8 @@
     "level": 33,
     "pct": 84,
     "solvers": 1521,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 13 Oct 2026, 12:40"
   },
   "277": {
     "title": "A Modified Collatz Sequence",
