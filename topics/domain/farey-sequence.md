@@ -1,5 +1,5 @@
 <!-- tags: [farey-sequence] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:03Z -->
 # Farey sequence
 
 The [Farey sequence](https://en.wikipedia.org/wiki/Farey_sequence) `F_n` is every reduced fraction

@@ -1279,8 +1279,8 @@
     {
       "path": "domain/farey-sequence",
       "title": "Farey sequence",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:03Z",
       "solved": 4,
       "problems": 6,
       "tags": ["farey-sequence"],
