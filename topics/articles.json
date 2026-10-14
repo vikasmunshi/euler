@@ -3341,8 +3341,8 @@
     },
     {
       "path": "number-theory/repunits-and-multiplicative-order",
-      "title": "Repunits And Multiplicative Order",
-      "status": "draft",
+      "title": "Repunits and multiplicative order: the order of 10 mod n, why A(n) is at most n, and composites with the prime repunit property",
+      "status": "final",
       "solved": 9,
       "problems": 17,
       "tags": ["repunit", "multiplicative-order", "carmichael-function", "primitive-root"],
