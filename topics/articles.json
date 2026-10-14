@@ -1015,8 +1015,8 @@
     {
       "path": "domain/directed-acyclic-graph",
       "title": "Directed acyclic graph",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:53Z",
       "solved": 3,
       "problems": 4,
       "tags": ["directed-acyclic-graph"],

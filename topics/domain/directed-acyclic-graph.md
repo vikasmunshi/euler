@@ -1,5 +1,5 @@
 <!-- tags: [directed-acyclic-graph] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:53Z -->
 # Directed acyclic graph
 
 A [directed acyclic graph](https://en.wikipedia.org/wiki/Directed_acyclic_graph) (DAG) is a set
