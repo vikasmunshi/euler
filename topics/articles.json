@@ -255,7 +255,7 @@
     {
       "path": "domain/binomial-coefficient",
       "title": "Binomial coefficient",
-      "status": "draft",
+      "status": "final",
       "solved": 22,
       "problems": 35,
       "tags": ["binomial-coefficient"],
