@@ -1,5 +1,5 @@
 <!-- tags: [repeating-decimal] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:08Z -->
 # Repeating decimal
 
 Every fraction has a decimal expansion that either stops or settles into a loop. That is the

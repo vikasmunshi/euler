@@ -3138,8 +3138,8 @@
     {
       "path": "domain/repeating-decimal",
       "title": "Repeating decimal",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:08Z",
       "solved": 3,
       "problems": 5,
       "tags": ["repeating-decimal"],
