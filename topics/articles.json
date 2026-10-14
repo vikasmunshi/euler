@@ -2460,7 +2460,7 @@
     {
       "path": "domain/pythagorean-triple",
       "title": "Pythagorean triple",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 26,
       "tags": ["pythagorean-triple"],
