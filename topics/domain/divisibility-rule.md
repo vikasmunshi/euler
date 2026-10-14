@@ -1,5 +1,5 @@
 <!-- tags: [divisibility-rule] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:56Z -->
 # Divisibility rule
 
 A [divisibility rule](https://en.wikipedia.org/wiki/Divisibility_rule) decides whether `d | n` by
