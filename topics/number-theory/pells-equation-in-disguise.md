@@ -1,8 +1,117 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: draft -->
-# Pells Equation In Disguise
+<!-- status: final -->
+# Pell equation in disguise
 
-_TODO: write this page. Curated topic — draw the through-line across the tags below yourself._
+Some Euler problems are about a probability, some about triangles, some about tiling a floor, and
+one about a generating function. None of them mentions
+[Pell's equation](https://en.wikipedia.org/wiki/Pell%27s_equation). Yet golden nuggets (137, 140),
+near-equilateral and near-isosceles triangles (94, 138), Pythagorean tiles (139), the
+almost-right triangles (223, 224), the disc-drawing probability (100) and the counter-swapping
+puzzle (321) all reduce to $X^2 - D Y^2 = N$ with $D \in \{2, 3, 5\}$ and a tiny $N$. After that,
+each is the same short loop: a three-term recurrence that jumps from one solution to the next.
+The [technique page](/topics/technique/pells-equation) explains how to *solve* Pell equations.
+This page is about *recognising* one, and about why so many of these problems end up walking
+literally the same sequence of numbers.
+
+## Taking off the disguise
+
+The reduction is always the same three moves:
+
+1. **Find the perfect-square condition.** A side, height or area must be an integer, or a
+   quadratic must have a rational root. Either way, some quadratic expression $q(n)$ must be a
+   square: $q(n) = m^2$.
+2. **Complete the square.** Multiply through by the leading coefficient and shift the variable,
+   so that $q(n) = m^2$ becomes $X^2 - D Y^2 = N$. Here $X$ is an affine image of $n$, such as
+   $2n - 1$, $3h \pm 2$ or $5k + 1$.
+3. **Keep the map back.** A Pell solution only counts if it maps back to an integer in range
+   (the right residue, positive, non-degenerate).
+
+Run that on each problem and they line up:
+
+| Problem | Hidden square condition | Pell form |
+|---|---|---|
+| 100 — two blue discs, probability exactly $\tfrac12$ | $2b(b-1) = n(n-1)$ | $(2n-1)^2 - 2(2b-1)^2 = -1$ |
+| 139 — hole of the pinwheel divides $c$ | primitive triple with $\lvert a-b\rvert = 1$ | $(a+b)^2 - 2c^2 = -1$ |
+| 223 — $a^2+b^2 = c^2+1$, on the diagonal $a=b$ | $2a^2 - 1 = c^2$ | $c^2 - 2a^2 = -1$ |
+| 224 — $a^2+b^2+1 = c^2$, on the diagonal $a=b$ | $2a^2 + 1 = c^2$ | $c^2 - 2a^2 = 1$ |
+| 321 — $n(n+2)$ moves is triangular | $8(n^2+2n)+1$ square | $(2k+1)^2 - 8(n+1)^2 = -7$ |
+| 94 — sides $a, a, a\pm1$, integral area | height$^2 = a^2 - h^2$, $a = 2h\mp1$ | $(3h\mp2)^2 - 3H^2 = 1$ |
+| 138 — isosceles, height $= b \pm 1$ | $L^2 = (2k\pm1)^2 + k^2$ | $(5k\pm2)^2 - 5L^2 = -1$ |
+| 137 — $A_F(x) = k$ has rational $x$ | discriminant $5k^2+2k+1$ square | $(5k+1)^2 - 5m^2 = -4$ |
+| 140 — the same for $A_G$ | discriminant $5k^2+14k+1$ square | $(5k+7)^2 - 5m^2 = 44$ |
+
+Two of these hide more deeply. Problem 139 starts as a divisibility test, $\lvert a-b\rvert$
+divides $c$, and only becomes Pell once you see that for a *primitive* triple the hole can only
+be $1$. Problems 223 and 224 are not Pell problems as a whole: their full solution sets are trees
+under the [Barning–Hall matrices](/topics/technique/tree-of-primitive-pythagorean-triples).
+But the symmetric spine $a = b$ of each tree is a Pell sequence, and the middle matrix restricted
+to that spine is exactly the Pell step $(c, a) \mapsto (3c + 4a,\ 2c + 3a)$.
+
+## One recurrence underneath
+
+If a norm-$1$ unit $u = x_1 + y_1\sqrt D$ steps from one solution to the next, then every
+coordinate of the solutions satisfies the same recurrence, whose multiplier is the unit's *trace*
+$T = u + u^{-1} = 2x_1$:
+
+$$s_{k+1} = T\,s_k - s_{k-1}.$$
+
+The problem's own variable is an affine image $p = (s - c)/d$ of a Pell coordinate. It obeys the
+same recurrence plus a constant, $p_{k+1} = T p_k - p_{k-1} + c(T-2)/d$. That is all the
+"magic" constants in these solutions are:
+
+- **$D = 2$, unit $3 + 2\sqrt2$, $T = 6$.** Problem 100 has blue counts $3, 15, 85, 493$ with
+  $b_{k+1} = 6b_k - b_{k-1} - 2$. Problem 139 has tiling hypotenuses $5, 29, 169, 985$ with
+  $c_{k+1} = 6c_k - c_{k-1}$. Problem 321 has $u = n + 1$ in each family following
+  $u_{k+1} = 6u_k - u_{k-1}$, because $8u^2 = 2(2u)^2$ puts it in the same ring.
+- **$D = 3$, unit $2 + \sqrt3$, $T = 4$.** Problem 94 has equal sides $5, 17, 65, 241$.
+  Consecutive Pell solutions alternate between the two families (base $a+1$, base $a-1$), so a
+  single $T = 4$ recurrence with an alternating correction walks both.
+- **$D = 5$, units built from the golden ratio $\varphi$.** Problem 138 steps by
+  $\varphi^6 = 9 + 4\sqrt5$, so $T = 18$: legs $17, 305, \dots$ with $L_{k+1} = 18L_k - L_{k-1}$.
+  The golden nuggets of 137 are $2, 15, 104, 714$, with $g_{k+1} = 7g_k - g_{k-1} + 1$. Here
+  $T = 7 = \varphi^4 + \varphi^{-4}$ comes from the half-integer unit $\varphi^4$.
+
+The $D = 2$ cluster is more than an analogy. The solutions of $x^2 - 2y^2 = \pm1$ are exactly the
+[convergents of $\sqrt2$](/topics/domain/convergent-continued-fraction) from
+[Problem 57](/solutions/0057/): $\tfrac11, \tfrac32, \tfrac75, \tfrac{17}{12}, \tfrac{41}{29},
+\tfrac{99}{70}, \dots$, with norms alternating $-1, +1$. The norm $-1$ convergents have
+denominators $1, 5, 29, 169, 985$. Those numbers are $2b - 1$ in Problem 100, the hypotenuses in
+Problem 139 and the diagonal legs in Problem 223, all at once. The norm $+1$ convergents
+$\tfrac32, \tfrac{17}{12}, \tfrac{99}{70}$ are the diagonal of Problem 224. Four problems, one
+sequence. The $D = 5$ cluster is the same story with Fibonacci numbers: the nuggets are
+$F_{2n}F_{2n+1}$, and the legs in 138 are $F_{6k+3}/2$.
+
+The public solution to Problem 94 shows how little code is left once the disguise is off. It is
+the whole algorithm, with the two families folded into one sign alternator:
+
+```python
+s, s1, s2, m, p = (0, 1, 1, 1, 0)
+while p <= max_perimeter:
+    s, s1, s2, m = (s + p, s2, 4 * s2 - s1 + 2 * m, -m)
+    p = 3 * s2 - m
+```
+
+## How to reason about it
+
+- **Smell it from the statement.** Watch for "integral area" or "integer height" (Heron's
+  formula, an altitude splitting an isosceles triangle), "exactly one half", "rational value of a
+  series", or "is triangular / square". Then look for a search bound like $10^{12}$ or "the 15th
+  such number", which no scan can reach. That combination almost always means a quadratic that
+  must be a square, and that means Pell.
+- **Brute-force the first few, then fit.** Brute force has a legitimate job here: generating the
+  first four or five solutions. Then solve for $T$ and $c$ in
+  $p_{k+1} = Tp_k - p_{k-1} + c$, and check the fit against a sixth term. $T$ should come out as
+  $2x_1$ for a recognisable unit. If it doesn't, you have more than one family interleaved
+  (Problem 94, Problem 321).
+- **Count the families.** For $N = \pm1$ there is one orbit. For $N = 44$ (Problem 140) or
+  $N = -7$ (Problem 321) there are several, and a missed seed silently drops every answer in that
+  family. Compare the merged sequence against all the terms the statement gives.
+- **Filter on the original variables.** Divisibility ($5 \mid X \mp 2$), positivity and
+  degeneracy ($k = 0$ in 138, $n = 0$ in 321) all belong to the problem, not to the Pell
+  equation. Apply them after mapping back.
+- **Expect geometric growth.** With $T$ between $4$ and $18$, the twelfth or fifteenth term is
+  already past 64 bits. Use Python integers, or a wider type in C, as Problem 137 does with
+  `__int128`.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
