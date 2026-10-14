@@ -2577,7 +2577,7 @@
     {
       "path": "domain/repunit",
       "title": "Repunit",
-      "status": "draft",
+      "status": "final",
       "solved": 7,
       "problems": 8,
       "tags": ["repunit"],
