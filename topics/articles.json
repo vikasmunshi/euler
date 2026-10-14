@@ -3269,8 +3269,8 @@
     },
     {
       "path": "game-theory/impartial-games-and-nim-values",
-      "title": "Impartial Games And Nim Values",
-      "status": "draft",
+      "title": "Impartial games and nim-values: Sprague-Grundy, mex, nim-sum, and when a closed form replaces the Grundy table",
+      "status": "final",
       "solved": 4,
       "problems": 34,
       "tags": ["impartial-game", "nimber", "mex-function-set-theory", "fibonacci-nim"],
