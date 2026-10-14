@@ -2632,8 +2632,8 @@
     {
       "path": "domain/periodic-continued-fraction",
       "title": "Periodic continued fraction",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:05Z",
       "solved": 3,
       "problems": 4,
       "tags": ["periodic-continued-fraction"],

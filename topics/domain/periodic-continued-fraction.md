@@ -1,5 +1,5 @@
 <!-- tags: [periodic-continued-fraction] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:05Z -->
 # Periodic continued fraction
 
 Every irrational number has an infinite continued fraction, and for most of them the partial
