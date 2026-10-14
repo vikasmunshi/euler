@@ -3268,6 +3268,15 @@
       "refs": ["p0297", "p0473", "p0692"]
     },
     {
+      "path": "game-theory/impartial-games-and-nim-values",
+      "title": "Impartial Games And Nim Values",
+      "status": "draft",
+      "solved": 4,
+      "problems": 34,
+      "tags": ["impartial-game", "nimber", "mex-function-set-theory", "fibonacci-nim"],
+      "refs": ["p0260", "p0301", "p0306", "p0310", "p0344", "p0366", "p0391", "p0400", "p0459", "p0488", "p0509", "p0550", "p0560", "p0629", "p0644", "p0649", "p0665", "p0692", "p0711", "p0798", "p0806", "p0832", "p0859", "p0860", "p0870", "p0888", "p0899", "p0900", "p0933", "p0939", "p0949", "p0953", "p0961", "p0976"]
+    },
+    {
       "path": "number-theory/diophantine-equations",
       "title": "Diophantine Equations",
       "status": "final",
