@@ -4777,8 +4777,8 @@
     {
       "path": "technique/carry-arithmetic",
       "title": "Carry (arithmetic)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:13Z",
       "solved": 7,
       "problems": 7,
       "tags": ["carry-arithmetic"],
