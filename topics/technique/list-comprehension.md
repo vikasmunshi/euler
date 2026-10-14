@@ -1,5 +1,5 @@
 <!-- tags: [list-comprehension] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:41Z -->
 # list comprehension
 
 A [list comprehension](https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions)

@@ -6251,8 +6251,8 @@
     {
       "path": "technique/list-comprehension",
       "title": "list comprehension",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:41Z",
       "solved": 6,
       "problems": 6,
       "tags": ["list-comprehension"],
