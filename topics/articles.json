@@ -543,7 +543,7 @@
     {
       "path": "domain/composition-combinatorics",
       "title": "Composition (combinatorics)",
-      "status": "draft",
+      "status": "final",
       "solved": 7,
       "problems": 11,
       "tags": ["composition-combinatorics"],
