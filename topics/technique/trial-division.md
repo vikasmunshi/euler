@@ -1,5 +1,5 @@
 <!-- tags: [trial-division] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T06:10Z -->
 # Trial division
 
 [Trial division](https://en.wikipedia.org/wiki/Trial_division) is the oldest factoring

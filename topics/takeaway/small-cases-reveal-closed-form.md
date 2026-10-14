@@ -1,5 +1,5 @@
 <!-- tags: [small-cases-reveal-closed-form] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:28Z -->
 # Small cases reveal a closed form
 
 Some problems hide a simple rule behind a definition that is expensive to evaluate even once.

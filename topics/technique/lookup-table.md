@@ -1,5 +1,5 @@
 <!-- tags: [lookup-table] -->
-<!-- status: final 2026-08-12 -->
+<!-- status: final 2026-08-12T06:57Z -->
 # Lookup table
 
 A [lookup table](https://en.wikipedia.org/wiki/Lookup_table) is the oldest optimisation in

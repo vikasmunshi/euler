@@ -1,5 +1,5 @@
 <!-- tags: [set] -->
-<!-- status: final 2026-08-08 -->
+<!-- status: final 2026-08-08T05:49Z -->
 # set
 
 Python's [`set`](https://docs.python.org/3/library/stdtypes.html#set) is a

@@ -1,5 +1,5 @@
 <!-- tags: [chinese-remainder-theorem] -->
-<!-- status: final 2026-08-01 -->
+<!-- status: final 2026-08-01T08:06Z -->
 # Chinese remainder theorem
 
 The [Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) (CRT) says

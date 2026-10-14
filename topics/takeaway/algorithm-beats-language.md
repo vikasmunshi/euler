@@ -1,5 +1,5 @@
 <!-- tags: [algorithm-beats-language] -->
-<!-- status: final 2026-07-23 -->
+<!-- status: final 2026-07-23T12:21Z -->
 # Algorithm beats language
 
 Reach for a faster language and you win a constant factor — a program that runs

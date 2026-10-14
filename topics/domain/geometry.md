@@ -1,5 +1,5 @@
 <!-- tags: [geometry] -->
-<!-- status: final 2026-08-02 -->
+<!-- status: final 2026-08-02T16:55Z -->
 # Geometry
 
 [Geometry](https://en.wikipedia.org/wiki/Geometry) is the mathematics of shape, size, position and

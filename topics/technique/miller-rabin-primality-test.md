@@ -1,5 +1,5 @@
 <!-- tags: [miller-rabin-primality-test] -->
-<!-- status: final 2026-08-02 -->
+<!-- status: final 2026-08-02T14:26Z -->
 # Miller–Rabin primality test
 
 The [Miller–Rabin primality test](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test)

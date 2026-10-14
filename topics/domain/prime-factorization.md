@@ -1,5 +1,5 @@
 <!-- tags: [prime-factorization] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T12:58Z -->
 # Prime factorization
 
 [Prime factorization](https://en.wikipedia.org/wiki/Integer_factorization) is what an integer

@@ -1,5 +1,5 @@
 <!-- tags: [frozenset] -->
-<!-- status: final 2026-08-11 -->
+<!-- status: final 2026-08-11T12:02Z -->
 # frozenset
 
 A [`frozenset`](https://docs.python.org/3/library/stdtypes.html#frozenset) is a

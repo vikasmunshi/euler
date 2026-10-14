@@ -1,5 +1,5 @@
 <!-- tags: [namedtuple] -->
-<!-- status: final 2026-08-11 -->
+<!-- status: final 2026-08-11T11:13Z -->
 # NamedTuple
 
 A [`NamedTuple`](https://docs.python.org/3/library/typing.html#typing.NamedTuple) is a tuple whose

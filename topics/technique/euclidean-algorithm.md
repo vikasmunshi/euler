@@ -1,5 +1,5 @@
 <!-- tags: [euclidean-algorithm] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-07T21:00Z -->
 # Euclidean algorithm
 
 The [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm) computes the greatest

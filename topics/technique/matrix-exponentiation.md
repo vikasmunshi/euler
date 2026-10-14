@@ -1,5 +1,5 @@
 <!-- tags: [matrix-exponentiation] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:45Z -->
 # Matrix exponentiation
 
 Matrix exponentiation here means computing an integer power $M^n$ of a square matrix by

@@ -1,5 +1,5 @@
 <!-- tags: [generator] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-07T17:42Z -->
 # generator expression
 
 A [generator](https://docs.python.org/3/glossary.html#term-generator) is a function that produces

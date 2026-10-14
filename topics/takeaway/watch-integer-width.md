@@ -1,5 +1,5 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: final 2026-07-30 -->
+<!-- status: final 2026-07-30T11:59Z -->
 # Watch integer width
 
 Every one of these problems is trivial in Python and a trap in C, for the same reason: Python's

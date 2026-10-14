@@ -1,5 +1,5 @@
 <!-- tags: [integer-overflow] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:46Z -->
 # Integer overflow
 
 [Integer overflow](https://en.wikipedia.org/wiki/Integer_overflow) is an arithmetic result that

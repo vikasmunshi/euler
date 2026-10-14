@@ -1,5 +1,5 @@
 <!-- tags: [sieve-of-sundaram] -->
-<!-- status: final 2026-07-27 -->
+<!-- status: final 2026-07-27T18:38Z -->
 # Sieve of Sundaram
 
 The [Sieve of Sundaram](https://en.wikipedia.org/wiki/Sieve_of_Sundaram) enumerates the primes

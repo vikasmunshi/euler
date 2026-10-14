@@ -1,5 +1,5 @@
 <!-- tags: [recursion-computer-science] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-07T08:55Z -->
 # Recursion (computer science)
 
 [Recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)) is a function that solves

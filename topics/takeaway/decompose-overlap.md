@@ -1,5 +1,5 @@
 <!-- tags: [decompose-overlap] -->
-<!-- status: final 2026-07-24 -->
+<!-- status: final 2026-07-24T05:36Z -->
 # Decompose overlapping conditions
 
 Some conditions are tangled: "a number containing all of the digits $0$, $1$ and A",

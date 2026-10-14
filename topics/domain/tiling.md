@@ -1,5 +1,5 @@
 <!-- tags: [tiling] -->
-<!-- status: final 2026-10-14 -->
+<!-- status: final 2026-10-14T07:28Z -->
 # Tiling
 
 A [tiling](https://en.wikipedia.org/wiki/Tessellation) covers a region with pieces that don't

@@ -1,5 +1,5 @@
 <!-- tags: [continued-fraction] -->
-<!-- status: final 2026-10-14 -->
+<!-- status: final 2026-10-14T07:30Z -->
 # Continued fraction
 
 A [continued fraction](https://en.wikipedia.org/wiki/Continued_fraction) writes a number as

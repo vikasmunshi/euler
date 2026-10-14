@@ -1,5 +1,5 @@
 <!-- tags: [exponentiation] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T07:07Z -->
 # Exponentiation
 
 [Exponentiation](https://en.wikipedia.org/wiki/Exponentiation) is the one elementary operation whose

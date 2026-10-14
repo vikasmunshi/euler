@@ -1,5 +1,5 @@
 <!-- tags: [arithmetic-progression] -->
-<!-- status: final 2026-07-23 -->
+<!-- status: final 2026-07-23T12:18Z -->
 # Arithmetic progression
 
 An [arithmetic progression](https://en.wikipedia.org/wiki/Arithmetic_progression) (AP) is a

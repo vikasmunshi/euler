@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T06:32Z -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is

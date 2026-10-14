@@ -1,5 +1,5 @@
 <!-- tags: [linear-recurrence-with-constant-coefficients] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:24Z -->
 # Linear recurrence with constant coefficients
 
 A [linear recurrence with constant coefficients](https://en.wikipedia.org/wiki/Linear_recurrence_with_constant_coefficients)

@@ -1,5 +1,5 @@
 <!-- tags: [symmetry] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:29Z -->
 # Symmetry
 
 A [symmetry](https://en.wikipedia.org/wiki/Symmetry) of a problem is a transformation that leaves

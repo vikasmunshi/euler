@@ -1,5 +1,5 @@
 <!-- tags: [prefix-sum] -->
-<!-- status: final 2026-08-11 -->
+<!-- status: final 2026-08-11T09:06Z -->
 # Prefix sum
 
 A [prefix sum](https://en.wikipedia.org/wiki/Prefix_sum) is the running total of a sequence:

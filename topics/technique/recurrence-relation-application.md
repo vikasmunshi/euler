@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation-application] -->
-<!-- status: final 2026-08-08 -->
+<!-- status: final 2026-08-08T05:49Z -->
 # Recurrence relation (application)
 
 This is the **technique** side of the [recurrence relation](/topics/domain/recurrence-relation) —

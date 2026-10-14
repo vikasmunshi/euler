@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-game-theory] -->
-<!-- status: final 2026-08-12 -->
+<!-- status: final 2026-08-12T00:49Z -->
 # Combinatorial game theory
 
 [Combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) studies

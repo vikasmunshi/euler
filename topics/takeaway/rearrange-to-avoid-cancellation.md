@@ -1,5 +1,5 @@
 <!-- tags: [rearrange-to-avoid-cancellation] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-06T22:09Z -->
 # Rearrange a formula to avoid cancellation
 
 A formula that is exact on paper can still be wrong in `double`, and the culprit is almost always

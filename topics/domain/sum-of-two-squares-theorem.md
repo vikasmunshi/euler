@@ -1,5 +1,5 @@
 <!-- tags: [sum-of-two-squares-theorem] -->
-<!-- status: final 2026-10-14 -->
+<!-- status: final 2026-10-14T07:22Z -->
 # Sum of two squares theorem
 
 Which integers are a sum of two squares, `n = a² + b²`, and in how many ways? Fermat stated the

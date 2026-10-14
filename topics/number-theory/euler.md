@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function, partition-number-theory, pentagonal-number-theorem, continued-fraction, amicable-numbers, eulerian-path, eulerian-number, linear-sieve] -->
-<!-- status: final 2026-07-24 -->
+<!-- status: final 2026-07-24T08:16Z -->
 # Euler
 
 More of the mathematics behind these problems traces to one man than to any other. [Leonhard

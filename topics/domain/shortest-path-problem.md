@@ -1,5 +1,5 @@
 <!-- tags: [shortest-path-problem] -->
-<!-- status: final 2026-08-01 -->
+<!-- status: final 2026-08-01T11:49Z -->
 # Shortest path problem
 
 The [shortest path problem](https://en.wikipedia.org/wiki/Shortest_path_problem) asks for the

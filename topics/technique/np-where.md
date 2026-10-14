@@ -1,5 +1,5 @@
 <!-- tags: [np-where] -->
-<!-- status: final 2026-08-04 -->
+<!-- status: final 2026-08-04T07:18Z -->
 # np.where
 
 [`np.where`](https://numpy.org/doc/stable/reference/generated/numpy.where.html) is the

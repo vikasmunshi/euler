@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T05:44Z -->
 # Euler's totient function
 
 [Euler's totient function](https://en.wikipedia.org/wiki/Euler%27s_totient_function) $\varphi(n)$

@@ -1,5 +1,5 @@
 <!-- tags: [multiplicative-function] -->
-<!-- status: final 2026-10-14 -->
+<!-- status: final 2026-10-14T07:13Z -->
 # Multiplicative function
 
 An arithmetic function $f$ is [multiplicative](https://en.wikipedia.org/wiki/Multiplicative_function)

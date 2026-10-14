@@ -1,5 +1,5 @@
 <!-- tags: [composition-combinatorics] -->
-<!-- status: final 2026-10-14 -->
+<!-- status: final 2026-10-14T07:25Z -->
 # Composition (combinatorics)
 
 A [composition](https://en.wikipedia.org/wiki/Composition_(combinatorics)) of $n$ is an *ordered*

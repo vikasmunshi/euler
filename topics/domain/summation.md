@@ -1,5 +1,5 @@
 <!-- tags: [summation] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-07T08:41Z -->
 # Summation
 
 [Summation](https://en.wikipedia.org/wiki/Summation) is the most deceptive domain tag in the

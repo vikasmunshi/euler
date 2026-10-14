@@ -1,5 +1,5 @@
 <!-- tags: [run-length-encoding] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:32Z -->
 # Run-length encoding
 
 [Run-length encoding](https://en.wikipedia.org/wiki/Run-length_encoding) describes a sequence by

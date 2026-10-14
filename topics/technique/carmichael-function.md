@@ -1,5 +1,5 @@
 <!-- tags: [carmichael-function] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T07:01Z -->
 # Carmichael function
 
 The [Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function) `λ(n)` is the smallest

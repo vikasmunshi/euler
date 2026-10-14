@@ -1,5 +1,5 @@
 <!-- tags: [game-theory] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:31Z -->
 # Game theory
 
 [Game theory](https://en.wikipedia.org/wiki/Game_theory) studies decisions made by rational agents

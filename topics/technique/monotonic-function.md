@@ -1,5 +1,5 @@
 <!-- tags: [monotonic-function] -->
-<!-- status: final 2026-10-09 -->
+<!-- status: final 2026-10-09T10:34Z -->
 # Monotonic function
 
 A [monotonic function](https://en.wikipedia.org/wiki/Monotonic_function) is one that never changes

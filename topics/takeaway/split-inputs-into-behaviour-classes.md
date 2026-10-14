@@ -1,5 +1,5 @@
 <!-- tags: [split-inputs-into-behaviour-classes] -->
-<!-- status: final 2026-10-12 -->
+<!-- status: final 2026-10-12T14:28Z -->
 # Split inputs into behaviour classes
 
 Many problems ask about a deterministic process run on *every* input in a huge range: the

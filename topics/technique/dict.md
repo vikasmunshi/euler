@@ -1,5 +1,5 @@
 <!-- tags: [dict] -->
-<!-- status: final 2026-08-11 -->
+<!-- status: final 2026-08-11T09:06Z -->
 # dict
 
 Python's [`dict`](https://docs.python.org/3/library/stdtypes.html#dict) is a

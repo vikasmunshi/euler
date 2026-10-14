@@ -1,5 +1,5 @@
 <!-- tags: [hash-table] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-07T20:59Z -->
 # Hash table
 
 A [hash table](https://en.wikipedia.org/wiki/Hash_table) turns a key into an array index by

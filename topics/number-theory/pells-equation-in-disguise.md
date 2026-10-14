@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: final 2026-10-14 -->
+<!-- status: final 2026-10-14T07:33Z -->
 # Pell equation in disguise
 
 Some Euler problems are about a probability, some about triangles, some about tiling a floor, and

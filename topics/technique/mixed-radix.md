@@ -1,5 +1,5 @@
 <!-- tags: [mixed-radix] -->
-<!-- status: final 2026-08-11 -->
+<!-- status: final 2026-08-11T04:46Z -->
 # Mixed radix
 
 Positional notation normally fixes one base and repeats it: decimal weights every place by ten,

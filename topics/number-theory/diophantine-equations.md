@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation, diophantine-equation] -->
-<!-- status: final 2026-07-29 -->
+<!-- status: final 2026-07-29T18:33Z -->
 # Diophantine Equations
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a polynomial

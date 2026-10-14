@@ -1,5 +1,5 @@
 <!-- tags: [bitwise-operation] -->
-<!-- status: final 2026-08-12 -->
+<!-- status: final 2026-08-12T07:19Z -->
 # Bitwise operation
 
 A [bitwise operation](https://en.wikipedia.org/wiki/Bitwise_operation) acts on an integer one bit at

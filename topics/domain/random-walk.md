@@ -1,5 +1,5 @@
 <!-- tags: [random-walk] -->
-<!-- status: final 2026-08-10 -->
+<!-- status: final 2026-08-10T13:07Z -->
 # Random walk
 
 A [random walk](https://en.wikipedia.org/wiki/Random_walk) is the simplest process that goes

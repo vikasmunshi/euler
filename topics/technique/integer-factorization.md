@@ -1,5 +1,5 @@
 <!-- tags: [integer-factorization] -->
-<!-- status: final 2026-08-03 -->
+<!-- status: final 2026-08-03T11:56Z -->
 # Integer factorization
 
 [Integer factorization](https://en.wikipedia.org/wiki/Integer_factorization) is the decomposition

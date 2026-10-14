@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: final 2026-08-07 -->
+<!-- status: final 2026-08-06T22:42Z -->
 # Recurrence relation
 
 A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a

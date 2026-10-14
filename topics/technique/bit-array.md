@@ -1,5 +1,5 @@
 <!-- tags: [bit-array] -->
-<!-- status: final 2026-08-11 -->
+<!-- status: final 2026-08-11T12:02Z -->
 # Bit array
 
 A [bit array](https://en.wikipedia.org/wiki/Bit_array) stores one boolean per *bit* — a set of

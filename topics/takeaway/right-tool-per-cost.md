@@ -1,5 +1,5 @@
 <!-- tags: [right-tool-per-cost] -->
-<!-- status: final 2026-07-24 -->
+<!-- status: final 2026-07-24T07:51Z -->
 # Match the abstraction to the hot path
 
 Every abstraction has a price. A generator, a dictionary, an arbitrary-precision

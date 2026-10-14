@@ -1,5 +1,5 @@
 <!-- tags: [pascals-triangle] -->
-<!-- status: final 2026-10-09 -->
+<!-- status: final 2026-10-09T08:29Z -->
 # Pascal's triangle
 
 [Pascal's triangle](https://en.wikipedia.org/wiki/Pascal%27s_triangle) is the table of

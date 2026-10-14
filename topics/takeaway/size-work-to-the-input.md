@@ -1,5 +1,5 @@
 <!-- tags: [size-work-to-the-input] -->
-<!-- status: final 2026-07-27 -->
+<!-- status: final 2026-07-27T18:19Z -->
 # Size the work to the input
 
 These solutions all take a size as their one argument — an n, a ceiling N, a

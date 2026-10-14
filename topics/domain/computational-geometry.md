@@ -1,5 +1,5 @@
 <!-- tags: [computational-geometry] -->
-<!-- status: final 2026-08-06 -->
+<!-- status: final 2026-08-06T21:17Z -->
 # Computational geometry
 
 [Computational geometry](https://en.wikipedia.org/wiki/Computational_geometry) is what is left of

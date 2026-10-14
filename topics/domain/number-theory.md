@@ -1,5 +1,5 @@
 <!-- tags: [number-theory] -->
-<!-- status: final 2026-08-06 -->
+<!-- status: final 2026-08-06T21:25Z -->
 # Number theory
 
 [Number theory](https://en.wikipedia.org/wiki/Number_theory) is the study of the integers on their

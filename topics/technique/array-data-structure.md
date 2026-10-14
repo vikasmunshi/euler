@@ -1,5 +1,5 @@
 <!-- tags: [array-data-structure] -->
-<!-- status: final 2026-08-12 -->
+<!-- status: final 2026-08-12T07:14Z -->
 # Array data structure
 
 An [array](https://en.wikipedia.org/wiki/Array_data_structure) is a block of memory holding
