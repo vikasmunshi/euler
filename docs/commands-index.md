@@ -121,11 +121,12 @@ Run a shell command from the shell, returning its exit code.
 
 * ⚑ needs contributor or above.
 
-Three forms escape into an *interactive* session that takes over the terminal:
+Four forms escape into an *interactive* session that takes over the terminal:
 
     `! sh` / `! bash`       an interactive bash subshell, in the solution dir
     `! py` / `! python`     an interactive Python interpreter, in the repo root
     `! claude [prompt]`     Claude Code, in the repo root
+    `! ssh <host> [...]`    an ssh session (or remote command), in the solution dir
 
 Any other command (`! ls`, `! git diff`, …) runs non-interactively in the
 current problem's solution directory — so paths are relative to that problem's
