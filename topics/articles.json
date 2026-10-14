@@ -6097,8 +6097,8 @@
     {
       "path": "technique/itertools",
       "title": "itertools",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:33Z",
       "solved": 9,
       "problems": 9,
       "tags": ["itertools"],

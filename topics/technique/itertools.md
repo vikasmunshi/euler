@@ -1,5 +1,5 @@
 <!-- tags: [itertools] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:33Z -->
 # itertools
 
 A good half of Project Euler is "try every arrangement, keep the ones that pass" —
