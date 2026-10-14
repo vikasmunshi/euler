@@ -1938,7 +1938,7 @@
     {
       "path": "domain/multiplicative-function",
       "title": "Multiplicative function",
-      "status": "draft",
+      "status": "final",
       "solved": 18,
       "problems": 38,
       "tags": ["multiplicative-function"],
