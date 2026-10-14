@@ -1,5 +1,5 @@
 <!-- tags: [strcmp] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T18:03Z -->
 # strcmp
 
 C has no string type, so it has no string comparison operator either. `a == b` on two `char *`
