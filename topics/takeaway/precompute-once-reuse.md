@@ -1,5 +1,5 @@
 <!-- tags: [precompute-once-reuse] -->
-<!-- status: final -->
+<!-- status: final 2026-07-28 -->
 # Precompute once, reuse
 
 Many of these problems ask the same small question thousands of times over: *is

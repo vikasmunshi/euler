@@ -1,5 +1,5 @@
 <!-- tags: [brute-force-search] -->
-<!-- status: final -->
+<!-- status: final 2026-08-04 -->
 # Brute-force search
 
 [Brute-force search](https://en.wikipedia.org/wiki/Brute-force_search) is the method with no

@@ -1,5 +1,5 @@
 <!-- tags: [expected-value] -->
-<!-- status: final -->
+<!-- status: final 2026-07-27 -->
 # Expected value
 
 The [expected value](https://en.wikipedia.org/wiki/Expected_value) of a random quantity is

@@ -1,5 +1,5 @@
 <!-- tags: [memoization] -->
-<!-- status: final -->
+<!-- status: final 2026-08-12 -->
 # Memoization
 
 [Memoization](https://en.wikipedia.org/wiki/Memoization) is the substitution of a table lookup for a

@@ -1,5 +1,5 @@
 <!-- tags: [greatest-common-divisor-application] -->
-<!-- status: final -->
+<!-- status: final 2026-08-12 -->
 # Greatest common divisor (application)
 
 The [greatest common divisor](https://en.wikipedia.org/wiki/Greatest_common_divisor) is usually met

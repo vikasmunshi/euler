@@ -1,5 +1,5 @@
 <!-- tags: [partizan-game] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Partizan game
 
 A [partizan game](https://en.wikipedia.org/wiki/Partizan_game) is a two-player game of perfect

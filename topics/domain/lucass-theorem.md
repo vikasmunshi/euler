@@ -1,5 +1,5 @@
 <!-- tags: [lucass-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-08-01 -->
 # Lucas's theorem
 
 [Lucas's theorem](https://en.wikipedia.org/wiki/Lucas%27s_theorem) is the statement that a

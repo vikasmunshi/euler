@@ -1,5 +1,5 @@
 <!-- tags: [exact-sums-resist-modular-shortcuts] -->
-<!-- status: final -->
+<!-- status: final 2026-08-06 -->
 # Exact sums resist modular shortcuts
 
 A per-item checksum, hash or score is defined "modulo $10^9+7$", and the question asks for the

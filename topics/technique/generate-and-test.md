@@ -1,5 +1,5 @@
 <!-- tags: [generate-and-test] -->
-<!-- status: final -->
+<!-- status: final 2026-08-08 -->
 # Generate and test
 
 [Generate and test](https://en.wikipedia.org/wiki/Generate_and_test) is the most honest algorithm

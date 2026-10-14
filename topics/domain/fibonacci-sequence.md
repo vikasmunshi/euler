@@ -1,5 +1,5 @@
 <!-- tags: [fibonacci-sequence] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Fibonacci sequence
 
 The [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence) is `0, 1, 1, 2, 3, 5,

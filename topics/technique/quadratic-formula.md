@@ -1,5 +1,5 @@
 <!-- tags: [quadratic-formula] -->
-<!-- status: final -->
+<!-- status: final 2026-08-02 -->
 # Quadratic formula
 
 The [quadratic formula](https://en.wikipedia.org/wiki/Quadratic_formula) is the first closed form

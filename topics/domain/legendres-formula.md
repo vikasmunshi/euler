@@ -1,5 +1,5 @@
 <!-- tags: [legendres-formula] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Legendre's formula
 
 [Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) answers one narrow

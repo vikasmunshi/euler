@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking] -->
-<!-- status: final -->
+<!-- status: final 2026-10-09 -->
 # quotient blocking
 
 Quotient blocking is the observation that `⌊n/k⌋`, as `k` runs from `1` to `n`, takes only about

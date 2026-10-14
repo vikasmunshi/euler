@@ -1,5 +1,5 @@
 <!-- tags: [divisor-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Divisor function
 
 The [divisor function](https://en.wikipedia.org/wiki/Divisor_function)

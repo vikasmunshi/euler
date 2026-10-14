@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final -->
+<!-- status: final 2026-07-30 -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the

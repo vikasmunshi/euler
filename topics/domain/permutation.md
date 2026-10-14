@@ -1,5 +1,5 @@
 <!-- tags: [permutation] -->
-<!-- status: final -->
+<!-- status: final 2026-09-23 -->
 # Permutation
 
 A [permutation](https://en.wikipedia.org/wiki/Permutation) is a rearrangement of a set: an

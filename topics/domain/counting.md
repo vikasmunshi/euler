@@ -1,5 +1,5 @@
 <!-- tags: [counting] -->
-<!-- status: final -->
+<!-- status: final 2026-08-12 -->
 # Counting
 
 [Counting](https://en.wikipedia.org/wiki/Counting) is the plainest question in the archive — *how

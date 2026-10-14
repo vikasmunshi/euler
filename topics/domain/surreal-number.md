@@ -1,5 +1,5 @@
 <!-- tags: [surreal-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Surreal number
 
 [Surreal numbers](https://en.wikipedia.org/wiki/Surreal_number) are John Conway's numbers built

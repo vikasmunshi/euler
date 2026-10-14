@@ -1,5 +1,5 @@
 <!-- tags: [bit-manipulation] -->
-<!-- status: final -->
+<!-- status: final 2026-08-07 -->
 # Bit manipulation
 
 [Bit manipulation](https://en.wikipedia.org/wiki/Bit_manipulation) is what you reach for when a

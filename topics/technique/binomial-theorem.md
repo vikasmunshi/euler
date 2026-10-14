@@ -1,5 +1,5 @@
 <!-- tags: [binomial-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-08-03 -->
 # Binomial theorem
 
 The [binomial theorem](https://en.wikipedia.org/wiki/Binomial_theorem) is the one-line statement

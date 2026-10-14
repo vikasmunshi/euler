@@ -1,5 +1,5 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final -->
+<!-- status: final 2026-08-07 -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes

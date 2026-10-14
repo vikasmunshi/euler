@@ -1,5 +1,5 @@
 <!-- tags: [cycle-detection] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Cycle detection
 
 [Cycle detection](https://en.wikipedia.org/wiki/Cycle_detection) is finding where an iterated

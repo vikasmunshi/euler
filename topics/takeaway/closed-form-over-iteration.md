@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
-<!-- status: final -->
+<!-- status: final 2026-07-28 -->
 # Prefer closed form over iteration
 
 A loop that adds up a structured sequence is doing arithmetic the sequence has

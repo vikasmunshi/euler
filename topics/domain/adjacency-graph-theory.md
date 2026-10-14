@@ -1,5 +1,5 @@
 <!-- tags: [adjacency-graph-theory] -->
-<!-- status: final -->
+<!-- status: final 2026-10-06 -->
 # Adjacency (graph theory)
 
 Two vertices are [adjacent](https://en.wikipedia.org/wiki/Adjacency_(graph_theory)) when an edge

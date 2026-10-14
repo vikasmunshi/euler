@@ -1,5 +1,5 @@
 <!-- tags: [repunit, multiplicative-order, carmichael-function, primitive-root] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Repunits and multiplicative order
 
 A [repunit](https://en.wikipedia.org/wiki/Repunit) is a number written with only ones: `R(k) = 11…1`

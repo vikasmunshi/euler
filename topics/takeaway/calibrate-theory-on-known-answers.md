@@ -1,5 +1,5 @@
 <!-- tags: [calibrate-theory-on-known-answers] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Calibrate a theory on the known answers
 
 Some problems are mostly argument. The code at the end is short, but it encodes a claim that is

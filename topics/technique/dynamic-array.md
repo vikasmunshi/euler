@@ -1,5 +1,5 @@
 <!-- tags: [dynamic-array] -->
-<!-- status: final -->
+<!-- status: final 2026-08-07 -->
 # Dynamic array
 
 A [dynamic array](https://en.wikipedia.org/wiki/Dynamic_array) is an array that does not need its

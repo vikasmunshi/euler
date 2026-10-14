@@ -1,5 +1,5 @@
 <!-- tags: [int64] -->
-<!-- status: final -->
+<!-- status: final 2026-08-07 -->
 # int64
 
 A 64-bit signed integer is the default working width of every solution here that leaves Python's

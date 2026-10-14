@@ -1,5 +1,5 @@
 <!-- tags: [functools-lru-cache] -->
-<!-- status: final -->
+<!-- status: final 2026-08-11 -->
 # functools.lru_cache
 
 [`functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache) is

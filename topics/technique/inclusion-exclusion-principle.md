@@ -1,5 +1,5 @@
 <!-- tags: [inclusion-exclusion-principle] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Inclusion–exclusion principle
 
 The [inclusion–exclusion principle](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)

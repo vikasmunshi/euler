@@ -1,5 +1,5 @@
 <!-- tags: [repunit] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Repunit
 
 A [repunit](https://en.wikipedia.org/wiki/Repunit) is a number written entirely with ones:

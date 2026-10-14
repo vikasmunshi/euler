@@ -1,5 +1,5 @@
 <!-- tags: [markov-chain] -->
-<!-- status: final -->
+<!-- status: final 2026-08-10 -->
 # Markov chain
 
 A [Markov chain](https://en.wikipedia.org/wiki/Markov_chain) is a random process that forgets:

@@ -1,5 +1,5 @@
 <!-- tags: [quadratic-residue] -->
-<!-- status: final -->
+<!-- status: final 2026-08-02 -->
 # Quadratic residue
 
 A [quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) modulo `p` is a number that

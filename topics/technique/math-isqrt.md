@@ -1,5 +1,5 @@
 <!-- tags: [math-isqrt] -->
-<!-- status: final -->
+<!-- status: final 2026-08-12 -->
 # math.isqrt
 
 [`math.isqrt(n)`](https://docs.python.org/3/library/math.html#math.isqrt) returns the largest integer

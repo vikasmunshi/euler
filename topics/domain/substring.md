@@ -1,5 +1,5 @@
 <!-- tags: [substring] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Substring
 
 A [substring](https://en.wikipedia.org/wiki/Substring) is a contiguous run of characters inside a

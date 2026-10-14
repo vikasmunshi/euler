@@ -1,5 +1,5 @@
 <!-- tags: [pythagorean-triple] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Pythagorean triple
 
 A [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple) is a triple of positive

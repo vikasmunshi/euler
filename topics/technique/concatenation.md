@@ -1,5 +1,5 @@
 <!-- tags: [concatenation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-09 -->
 # Concatenation
 
 [Concatenation](https://en.wikipedia.org/wiki/Concatenation) is joining strings end to end:

@@ -1,5 +1,5 @@
 <!-- tags: [snprintf] -->
-<!-- status: final -->
+<!-- status: final 2026-08-12 -->
 # snprintf
 
 [`snprintf`](https://en.cppreference.com/w/c/io/fprintf) is how a C solution turns a number into

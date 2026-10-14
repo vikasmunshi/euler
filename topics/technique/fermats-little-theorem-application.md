@@ -1,5 +1,5 @@
 <!-- tags: [fermats-little-theorem-application] -->
-<!-- status: final -->
+<!-- status: final 2026-08-04 -->
 # Fermat's little theorem (application)
 
 [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem) is one line of

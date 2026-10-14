@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Pell's equation
 
 [Pell's equation](https://en.wikipedia.org/wiki/Pell%27s_equation) is $x^2 - D y^2 = 1$ for a

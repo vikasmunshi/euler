@@ -1,5 +1,5 @@
 <!-- tags: [parity-mathematics] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Parity (mathematics)
 
 [Parity](https://en.wikipedia.org/wiki/Parity_(mathematics)) is whether an integer is even or odd —

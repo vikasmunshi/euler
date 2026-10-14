@@ -1,5 +1,5 @@
 <!-- tags: [factorial-number-system] -->
-<!-- status: final -->
+<!-- status: final 2026-08-11 -->
 # Factorial number system
 
 The [factorial number system](https://en.wikipedia.org/wiki/Factorial_number_system) — factoradic,

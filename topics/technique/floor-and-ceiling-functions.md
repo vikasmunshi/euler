@@ -1,5 +1,5 @@
 <!-- tags: [floor-and-ceiling-functions] -->
-<!-- status: final -->
+<!-- status: final 2026-10-12 -->
 # Floor and ceiling functions
 
 The [floor and ceiling](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions) functions round

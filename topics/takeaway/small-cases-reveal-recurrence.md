@@ -1,5 +1,5 @@
 <!-- tags: [small-cases-reveal-recurrence] -->
-<!-- status: final -->
+<!-- status: final 2026-08-07 -->
 # Small cases reveal the recurrence
 
 Some counting problems admit no formula worth deriving, yet the object being

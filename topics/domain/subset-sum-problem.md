@@ -1,5 +1,5 @@
 <!-- tags: [subset-sum-problem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Subset sum problem
 
 The [subset sum problem](https://en.wikipedia.org/wiki/Subset_sum_problem) asks whether some subset

@@ -1,5 +1,5 @@
 <!-- tags: [markov-chain, expected-value-application, stationary-distribution, random-walk] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14 -->
 # Markov chains and expected value
 
 A large share of the archive's probability problems ask for an *expected* something — turns until

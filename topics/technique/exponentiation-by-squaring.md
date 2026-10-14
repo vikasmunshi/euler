@@ -1,5 +1,5 @@
 <!-- tags: [exponentiation-by-squaring] -->
-<!-- status: final -->
+<!-- status: final 2026-08-12 -->
 # Exponentiation by squaring
 
 [Exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) computes
