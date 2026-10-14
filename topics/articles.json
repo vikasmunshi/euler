@@ -960,8 +960,8 @@
     {
       "path": "domain/digit-counting-function",
       "title": "Digit-counting function",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:00Z",
       "solved": 7,
       "problems": 12,
       "tags": ["digit-counting-function"],
