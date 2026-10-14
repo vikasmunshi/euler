@@ -1,5 +1,5 @@
 <!-- tags: [tuple] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:49Z -->
 # Tuple
 
 A [tuple](https://en.wikipedia.org/wiki/Tuple) is a fixed-length, ordered group of values. In
