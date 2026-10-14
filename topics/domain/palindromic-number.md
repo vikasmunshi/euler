@@ -1,5 +1,5 @@
 <!-- tags: [palindromic-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:58Z -->
 # Palindromic number
 
 A [palindromic number](https://en.wikipedia.org/wiki/Palindromic_number) reads the same forwards

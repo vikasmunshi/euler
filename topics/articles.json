@@ -2533,8 +2533,8 @@
     {
       "path": "domain/palindromic-number",
       "title": "Palindromic number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:58Z",
       "solved": 6,
       "problems": 8,
       "tags": ["palindromic-number"],
