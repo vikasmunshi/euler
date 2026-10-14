@@ -1,6 +1,6 @@
 <!-- tags: [impartial-game, nimber, mex-function-set-theory, fibonacci-nim] -->
 <!-- status: final -->
-# Impartial games and nim-values: Sprague-Grundy, mex, nim-sum, and when a closed form replaces the Grundy table
+# Impartial games and nim-values
 
 An [impartial game](https://en.wikipedia.org/wiki/Impartial_game) is a two-player game where both
 players have the same moves from every position, there is no chance, and (under the

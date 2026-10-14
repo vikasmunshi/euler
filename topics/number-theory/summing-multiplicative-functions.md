@@ -1,6 +1,6 @@
 <!-- tags: [quotient-blocking, mobius-inversion-formula, mobius-function-application, dirichlet-convolution, divisor-summatory-function, totient-summatory-recursion] -->
 <!-- status: final -->
-# Summing multiplicative functions fast: quotient blocking, Möbius inversion, Dirichlet hyperbola and totient-summatory recursion as one sublinear toolkit
+# Summing multiplicative functions fast
 
 A whole family of Project Euler problems asks for $\sum_{n \le N} f(n)$, where $f$ is a
 [multiplicative function](/topics/domain/multiplicative-function) and $N$ is $10^{11}$, $10^{15}$ or

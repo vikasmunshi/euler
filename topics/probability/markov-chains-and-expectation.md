@@ -1,6 +1,6 @@
 <!-- tags: [markov-chain, expected-value-application, stationary-distribution, random-walk] -->
 <!-- status: final -->
-# Markov Chains and Expected Value
+# Markov chains and expected value
 
 A large share of the archive's probability problems ask for an *expected* something — turns until
 a game ends, empty squares after fifty hops, distinct colours in a handful of balls — about a
