@@ -1,5 +1,5 @@
 <!-- tags: [dataclass] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:52Z -->
 # Dataclass
 
 A [dataclass](https://docs.python.org/3/library/dataclasses.html) is a Python class whose

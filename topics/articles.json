@@ -5040,9 +5040,9 @@
     },
     {
       "path": "technique/dataclass",
-      "title": "dataclass",
-      "status": "draft",
-      "written": null,
+      "title": "Dataclass",
+      "status": "final",
+      "written": "2026-10-14T17:52Z",
       "solved": 2,
       "problems": 2,
       "tags": ["dataclass"],
