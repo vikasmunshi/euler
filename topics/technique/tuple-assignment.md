@@ -1,5 +1,5 @@
 <!-- tags: [tuple-assignment] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:44Z -->
 # tuple assignment
 
 Tuple assignment is Python's `a, b = b, a + b`: build a tuple on the right, then unpack it into
