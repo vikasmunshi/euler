@@ -17,12 +17,6 @@
 #   * any `feat:` / `feat(scope):`                     → MINOR
 #   * anything else (fix, perf, refactor, …)           → PATCH
 #
-# The release is preceded by a refresh of the presentation deck's data: the script runs
-# `solver update-presentation-data`, which rewrites docs/presentation/data/history.js and
-# lands it as its own `chore(update-presentation-data)` commit when the data materially
-# changed — so the deck `/story/` serves from a redeployed release shows the progress and
-# counts as of that release. A failed refresh stops the release before the version moves.
-#
 # Releasing is a deliberate step, run by a maintainer from a clean checkout — not
 # automatic on push. Pass --dry-run to preview the release and exit, or --no-push
 # to bump/commit/tag locally but stop before publishing to origin.
@@ -74,12 +68,11 @@ new="v${major}.${minor}.${patch}"
 number="${new#v}"
 root="$(git rev-parse --show-toplevel)"
 version_file="${root}/solver/version.py"
-python_bin="${PYTHON:-${root}/.venv/bin/python}"
 
 if (( dry_run )); then
     tail_action="commits, tags, then pushes to origin"
     (( no_push )) && tail_action="commits, then tags (no push)"
-    echo "[dry-run] $last -> $new (writes $number to solver/version.py, refreshes the deck data, ${tail_action})"
+    echo "[dry-run] $last -> $new (writes $number to solver/version.py, ${tail_action})"
     exit 0
 fi
 
@@ -89,15 +82,6 @@ fi
 # tree. `git status` refreshes the index and ignores that noise.
 if [[ -n "$(git status --porcelain)" ]]; then
     echo "release: working tree is dirty — commit or stash before releasing $new" >&2
-    exit 1
-fi
-
-# Refresh the deck's data before touching the version. The command commits its own
-# output (or nothing, when the data is current), so the tree is clean again either way;
-# on failure the data file is restored, so a half-written file never rides along.
-if ! "$python_bin" -m solver "update-presentation-data"; then
-    git -C "$root" checkout -q -- docs/presentation/data/history.js 2>/dev/null
-    echo "release: refreshing the presentation data failed (update-presentation-data) — nothing released" >&2
     exit 1
 fi
 

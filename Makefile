@@ -120,12 +120,11 @@ run: $(VENV)
 version: $(VENV)
 	@$(VENV)/bin/solver version
 
-## Cut a release: refresh the presentation deck's data (update-presentation-data,
-## its own commit), bump solver/version.py from Conventional Commits, commit,
+## Cut a release: bump solver/version.py from Conventional Commits, commit,
 ## tag, and push the commit + tag to origin. ARGS=--dry-run previews; ARGS=--no-push
 ## stops before publishing.
 release:
-	@PYTHON=$(PYTHON) ./scripts/version/release.sh $(ARGS)
+	@./scripts/version/release.sh $(ARGS)
 
 ## Guard: the version redeploy-web would ship (solver/version.py) must have its
 ## vX.Y.Z tag on origin, so a redeploy never runs a release collaborator clones
