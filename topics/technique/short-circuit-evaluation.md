@@ -1,5 +1,5 @@
 <!-- tags: [short-circuit-evaluation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:47Z -->
 # Short-circuit evaluation
 
 [Short-circuit evaluation](https://en.wikipedia.org/wiki/Short-circuit_evaluation) means a
