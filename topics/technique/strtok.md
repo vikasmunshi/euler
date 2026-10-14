@@ -1,5 +1,5 @@
 <!-- tags: [strtok] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T18:00Z -->
 # strtok
 
 Three early problems give you a data file instead of a number. 22 has a file of five thousand
