@@ -1,5 +1,5 @@
 <!-- tags: [digit-counting-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:00Z -->
 # Digit-counting function
 
 The [digit-counting function](https://en.wikipedia.org/wiki/Digit-counting_function) answers "how
