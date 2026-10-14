@@ -3027,7 +3027,7 @@
     {
       "path": "domain/tiling",
       "title": "Tiling",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 20,
       "tags": ["tiling"],
