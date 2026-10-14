@@ -1,5 +1,5 @@
 <!-- tags: [functools-reduce] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:50Z -->
 # functools.reduce
 
 [`functools.reduce`](https://docs.python.org/3/library/functools.html#functools.reduce) collapses
