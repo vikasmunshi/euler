@@ -1194,7 +1194,7 @@ def section_state(repo_root: Path) -> SectionState:
 #: rather than importing it: that module pulls in the shell framework (prompt-toolkit and the
 #: command registry), which has no business inside a web service. Three lines of regex is the
 #: cheaper coupling.
-_ARTICLE_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)(?:\s+\d{4}-\d{2}-\d{2})?\s*-->', re.IGNORECASE)
+_ARTICLE_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)(?:\s+\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z)?\s*-->', re.IGNORECASE)
 
 
 def topic_status(text: str) -> str:

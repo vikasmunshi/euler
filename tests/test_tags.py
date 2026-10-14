@@ -8,11 +8,13 @@ used throughout so `_apply_membership` never needs on-disk solution indices.
 """
 from __future__ import annotations
 
+import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from solver.config import config
 from solver.core import tags
@@ -116,18 +118,37 @@ class ArticleIndexTests(unittest.TestCase):
 
     def test_solved_after_names_the_problems_solved_since_the_page_was_written(self) -> None:
         refs = ['p0001', 'p0002_s0', 'p0002_s1', 'p0003', 'p0004']
-        dates = {1: '2026-07-01', 2: '2026-08-01', 3: '2026-07-23'}             # p0004 unsolved
-        self.assertEqual(tags._solved_after(refs, '2026-07-23', dates), ['p0002', 'p0003'])
-        self.assertEqual(tags._solved_after(refs, '2026-09-01', dates), [])
+        dates = {1: '2026-07-23T09:59Z', 2: '2026-08-01T12:00Z', 3: '2026-07-23T10:00Z'}  # p0004 unsolved
+        self.assertEqual(tags._solved_after(refs, '2026-07-23T10:00Z', dates), ['p0002', 'p0003'])
+        self.assertEqual(tags._solved_after(refs, '2026-09-01T00:00Z', dates), [])
         self.assertEqual(tags._solved_after(refs, None, dates), [])
 
-    def test_a_final_status_carries_the_date_it_was_written(self) -> None:
-        dated = '<!-- status: final 2026-10-14 -->\n# Alpha\n'
+    def test_a_final_status_carries_the_time_it_was_written(self) -> None:
+        dated = '<!-- status: final 2026-10-14T08:32Z -->\n# Alpha\n'
         self.assertEqual(tags.article_status(dated), 'final')
-        self.assertEqual(tags.article_written(dated), '2026-10-14')
+        self.assertEqual(tags.article_written(dated), '2026-10-14T08:32Z')
         self.assertEqual(tags._stamp_status(dated), dated)                       # no second comment
         self.assertIsNone(tags.article_written('<!-- status: final -->\n# Alpha\n'))
-        self.assertIsNone(tags.article_written('<!-- status: draft 2026-10-14 -->\n# Alpha\n'))
+        self.assertIsNone(tags.article_written('<!-- status: draft 2026-10-14T08:32Z -->\n# Alpha\n'))
+
+    def test_stamp_dates_an_undated_final_and_nothing_else(self) -> None:
+        with patch.object(tags, '_now_written', return_value='2026-10-14T08:32Z'):
+            stamped = tags._stamp_status('<!-- tags: [alpha] -->\n<!-- status: final -->\n# Alpha\n')
+            self.assertEqual(stamped, '<!-- tags: [alpha] -->\n<!-- status: final 2026-10-14T08:32Z -->\n# Alpha\n')
+            draft = '<!-- status: draft -->\n# Alpha\n'
+            self.assertEqual(tags._stamp_status(draft), draft)                   # a draft stays undated
+            older = '<!-- status: final 2026-08-03T14:12Z -->\n# Alpha\n'
+            self.assertEqual(tags._stamp_status(older), older)                   # a stamp is never moved
+
+    def test_solve_dates_are_local_times_read_into_utc(self) -> None:
+        problem = MagicMock(number=7)
+        fake = MagicMock(solved_problems=[problem], solutions_history={7: 'Wed, 14 Oct 2026, 10:32'})
+        try:
+            with patch.object(tags, 'problems', fake), patch.dict(os.environ, {'TZ': 'Europe/Amsterdam'}):
+                time.tzset()
+                self.assertEqual(tags._solve_dates(), {7: '2026-10-14T08:32Z'})  # CEST is UTC+2
+        finally:
+            time.tzset()                                                   # back to the real zone
 
     def test_stamp_lands_under_the_tags_comment_and_is_idempotent(self) -> None:
         stamped = tags._stamp_status('<!-- tags: [alpha] -->\n# Alpha\n')
@@ -144,18 +165,18 @@ class ArticleIndexTests(unittest.TestCase):
         The solved set is pinned here: it is real progress in a real clone, and a test that
         read it would pass or fail on which problems this checkout has solved."""
         self._article('domain/alpha.md',
-                      '<!-- tags: [alpha] -->\n<!-- status: final 2026-10-14 -->\n# Alpha, at length\n')
+                      '<!-- tags: [alpha] -->\n<!-- status: final 2026-10-14T08:32Z -->\n# Alpha, at length\n')
         self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
         with (patch.object(tags, '_problem_meta', return_value=({}, {2})),
-              patch.object(tags, '_solve_dates', return_value={2: '2026-10-14'})):
+              patch.object(tags, '_solve_dates', return_value={2: '2026-10-14T08:32Z'})):
             index = tags._build_index(_central())
         rows = {row['path']: row for row in index['articles']}
         self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
-        self.assertEqual(rows['domain/alpha']['solved_after'], ['p0002'])             # solved that day
+        self.assertEqual(rows['domain/alpha']['solved_after'], ['p0002'])             # solved that minute
         self.assertEqual(rows['curated/mix']['solved_after'], [])                     # a draft is never stale
         self.assertEqual(set(rows), {'domain/alpha', 'curated/mix'})                 # pages only
         self.assertEqual(rows['domain/alpha']['status'], 'final')
-        self.assertEqual(rows['domain/alpha']['written'], '2026-10-14')
+        self.assertEqual(rows['domain/alpha']['written'], '2026-10-14T08:32Z')
         self.assertIsNone(rows['curated/mix']['written'])                             # a draft is undated
         self.assertEqual(rows['domain/alpha']['title'], 'Alpha, at length')          # the page's own H1
         self.assertEqual(rows['domain/alpha']['refs'], ['p0002', 'p0003'])

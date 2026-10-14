@@ -24,10 +24,10 @@ page's subtitle), and its **status**:
 
 The status of record lives in the article itself, as a `<!-- status: … -->`
 comment next to its `<!-- tags: … -->` one — the index only reflects it. A
-`final` comment also carries the date the page was written
-(`<!-- status: final 2026-10-14 -->`), mirrored as the index row's `written`.
-`update-tags` stamps a missing comment as `draft`; the blogger skill promotes
-its page to `final` when it finishes writing.
+`final` comment also carries the UTC time the page was written
+(`<!-- status: final 2026-10-14T08:32Z -->`), mirrored as the index row's `written`.
+`update-tags` stamps a missing comment as `draft`, and an undated `final` with the
+current time; the blogger skill promotes its page to `final` when it finishes writing.
 """
 from __future__ import annotations
 
@@ -38,6 +38,7 @@ import json
 import re
 import subprocess
 from collections import defaultdict
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any, NamedTuple
 
@@ -65,12 +66,17 @@ _GEN_RE = re.compile(r'<!--\s*' + re.escape(_GEN_OPEN) + r'\s*-->.*?<!--\s*'
 #: The article statuses, in writing order. There is no `missing`: update-tags creates a page for
 #: every tag, so a topic always has a file and the only question is whether it has been written.
 STATUSES = ('draft', 'final')
-#: A `final` status may carry the date the article was written, as an ISO 8601 calendar date
-#: (`<!-- status: final 2026-10-14 -->`): lexically sortable, and directly comparable with the
-#: problems' solve dates, which is what finds an article written before some of its problems
-#: were solved. It lives inside the status comment rather than beside it because it *is* the
-#: status's date - when the page became final - and so is machine-owned on the same footing.
-_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)(?:\s+(\d{4}-\d{2}-\d{2}))?\s*-->', re.IGNORECASE)
+#: A `final` status carries the time the article was written, as an ISO 8601 UTC timestamp to
+#: the minute (`<!-- status: final 2026-10-14T08:32Z -->`). A string, not a Unix integer: it is
+#: read by people in the page and its diffs, and one fixed-width format in one zone still sorts and
+#: compares as plain text. UTC, not local-with-offset, because mixed offsets (summer/winter) break
+#: that text order. Minutes, because the problems' solve times - what it is compared against, to
+#: find an article written before some of its problems were solved - go no finer. It lives inside
+#: the status comment because it *is* the status's time - when the page became final - and so is
+#: machine-owned on the same footing: `update-tags` stamps an undated `final` (`_stamp_status`).
+WRITTEN_FORMAT = '%Y-%m-%dT%H:%MZ'
+_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)(?:\s+(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z))?\s*-->',
+                        re.IGNORECASE)
 
 # ── compact JSON (scalar lists inline, object lists multi-line) ─────────────────────────
 
@@ -237,15 +243,27 @@ def article_status(text: str) -> str:
 
 
 def article_written(text: str) -> str | None:
-    """The date a `final` article was written (`YYYY-MM-DD`), or None — a draft has no date."""
+    """The UTC time a `final` article was written (:data:`WRITTEN_FORMAT`), or None — a draft
+    has none, and nor does a `final` that `update-tags` has yet to stamp."""
     m = _STATUS_RE.search(text)
     return m.group(2) if m and m.group(1).lower() == 'final' else None
 
 
+def _now_written() -> str:
+    """The current time as a `written` stamp (:data:`WRITTEN_FORMAT`)."""
+    return datetime.now(UTC).strftime(WRITTEN_FORMAT)
+
+
 def _stamp_status(text: str) -> str:
     """Give an article that carries no status comment a `draft` one, under its tags
-    comment (or at the top when it has none). Text that already declares one is left alone."""
-    if _STATUS_RE.search(text):
+    comment (or at the top when it has none), and an undated `final` the current time.
+
+    The time is stamped here rather than by the blogger: the skill marks its page `final` and
+    commits it, and the `update-tags` run that follows within the minute dates it - from the
+    clock, not from a model's idea of the time. Any other declared status is left alone."""
+    if m := _STATUS_RE.search(text):
+        if m.group(1).lower() == 'final' and m.group(2) is None:
+            return f'{text[:m.start()]}<!-- status: final {_now_written()} -->{text[m.end():]}'
         return text
     marker = '<!-- status: draft -->'
     if m := _TAGS_RE.search(text):
@@ -596,24 +614,25 @@ def _problem_meta() -> tuple[dict[int, str], set[int]]:
 
 
 def _solve_dates() -> dict[int, str]:
-    """`number → solve date` (`YYYY-MM-DD`) for every solved problem with a readable date.
+    """`number → solve time` (:data:`WRITTEN_FORMAT`, UTC) for every solved problem with a
+    readable date — the form an article's `written` stamp takes, so the two compare as text.
 
-    The ISO calendar date, so it compares as text with an article's `written` date. Day
-    granularity is the article side's: the blogger knows the date it writes on, not the time.
+    `problems.json` records a naive local time (the progress page's display, and `mark`'s
+    `datetime.now()`), so it is read as this machine's zone and converted to UTC.
     """
     dates: dict[int, str] = {}
     for p in problems.solved_problems:
         if when := parse_solved_date(problems.solutions_history.get(p.number, '')):
-            dates[p.number] = when.date().isoformat()
+            dates[p.number] = when.astimezone(UTC).strftime(WRITTEN_FORMAT)
     return dates
 
 
 def _solved_after(refs: list[str], written: str | None, dates: dict[int, str]) -> list[str]:
-    """The problems behind an article that were solved on or after the day it was *written*.
+    """The problems behind an article that were solved at or after the minute it was *written*.
 
     Each is a solution the article could not have drawn on, so a non-empty list marks the page
-    as a candidate for a rewrite. A same-day solve counts: with only the day to go on, it may
-    have come after the writing, and a false alarm costs a reread where a miss costs a stale page.
+    as a candidate for a rewrite. A same-minute solve counts: it may have come after the writing,
+    and a false alarm costs a reread where a miss costs a stale page.
     A draft (no *written*) has nothing to be stale against. `pNNNN` granularity, sorted.
     """
     if written is None:

@@ -105,14 +105,15 @@ count and status. Three statuses:
 | `final` | the article is done |
 
 The article is the source of truth (`update-tags` stamps a `draft` comment on any page missing one);
-the index only mirrors it. The blogger skill sets `final` when it finishes writing a page, dated with
-the day it was written as an ISO 8601 calendar date — `<!-- status: final 2026-10-14 -->` — which the
-index mirrors as the row's `written` (`null` for a draft). The date sorts and compares as plain text,
-and set against each covered problem's solve date it finds the articles written before some of their
-problems were solved: each row's `solved_after` lists the problems solved on or after its `written`
-day (a same-day solve counts, since the day is all the date says), and the `update-tags` report
-names those articles as rewrite candidates. `claude-blog` then refuses that topic unless run with `--force`. The index also drives `claude-blog`
-tab-completion (unwritten and most-referenced first) and the web `/topics` grid.
+the index only mirrors it. The blogger skill sets `final` when it finishes writing a page, and the next
+`update-tags` run stamps it with the time it was written: an ISO 8601 UTC timestamp to the minute,
+`<!-- status: final 2026-10-14T08:32Z -->`, which the index mirrors as the row's `written` (`null`
+for a draft). One fixed-width format in one zone, so it sorts and compares as plain text; set against
+each covered problem's solve time (read from `problems.json` as local time, converted to UTC) it
+finds the articles written before some of their problems were solved: each row's `solved_after`
+lists the problems solved at or after its `written` minute, and the `update-tags` report names those
+articles as rewrite candidates. `claude-blog` then refuses that topic unless run with `--force`. The
+index also drives `claude-blog` tab-completion (unwritten and most-referenced first) and the web `/topics` grid.
 
 ## Choosing good tags
 

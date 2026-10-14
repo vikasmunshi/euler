@@ -7,7 +7,7 @@ description: Use when Claude is launched by the `claude-blog` command via
   is a tag's `<facet>/<slug>` path (e.g. `technique/sieve-of-eratosthenes`), a bare tag slug, or a
   curated topic path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
   post" or for solving problems.
-version: 0.5.0
+version: 0.6.0
 model: opus
 ---
 
@@ -101,10 +101,11 @@ The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated t
    edit that changes them.
 
 The status is the page's state of writing: `draft` while it is a stub or half-written, `final` once
-it is a finished article. A `final` status also carries the **date the article was written**
-(`<!-- status: final 2026-10-14 -->`, see Phase 4). `topics/articles.json` (the article index,
-maintained by `update-tags`) mirrors both — the date as the row's `written`. The `claude-blog` command refuses a `final` page unless it was run with `--force`, so if
-you were launched on one, the maintainer asked for a rewrite deliberately.
+it is a finished article. A `final` status also carries the **time the article was written**
+(`<!-- status: final 2026-10-14T08:32Z -->`), which `update-tags` stamps — see Phase 4.
+`topics/articles.json` (the article index, maintained by `update-tags`) mirrors both — the time as
+the row's `written`. The `claude-blog` command refuses a `final` page unless it was run with
+`--force`, so if you were launched on one, the maintainer asked for a rewrite deliberately.
 
 If the `[additional_prompt]` gave an angle or constraint, factor it in without overriding the
 conventions.
@@ -149,16 +150,17 @@ fill.
 Writing the page is not delivering it. The four steps run **in order** — each is worth nothing
 without the one before it — and any of them failing is a stop-and-report:
 
-1. **Mark the page final, and date it.** The article is written, so change its status comment to
+1. **Mark the page final — undated.** The article is written, so change its status comment to
+   exactly
 
-       <!-- status: final YYYY-MM-DD -->
+       <!-- status: final -->
 
-   with **today's date** (from your environment's "Today's date") as an ISO 8601 calendar date —
-   e.g. `<!-- status: final 2026-10-14 -->`: zero-padded, year first, one space after `final`,
-   nothing else in the comment. The date records which problems' solutions the article could
-   draw on — it is compared with each covered problem's solve date (`solutions/problems.json`) to
-   find articles written before some of their problems were solved — so it is the date of *this*
-   writing: on a `--force` rewrite of a page that is already `final`, replace its old date.
+   with **no timestamp**, even on a `--force` rewrite of a page that already carries one
+   (`<!-- status: final 2026-08-03T14:12Z -->` → `<!-- status: final -->`). The refresh in step 3
+   stamps the current UTC time on it; that time is compared with each covered problem's solve time
+   (`solutions/problems.json`) to find articles written before some of their problems were solved,
+   so it must be the time of *this* writing — a stale timestamp left in place would hide exactly
+   the problems you just drew on. Do not write a time yourself.
 
    Do this only for a page you actually finished — if you stopped short (missing research, an
    unresolved `update-tags` issue, a half-written section), leave it `draft`, say so in the summary,
@@ -184,8 +186,9 @@ without the one before it — and any of them failing is a stop-and-report:
    `solutions/pNNNN` directory plus `problems.json`, *not* a topic page, so it would not commit
    your work at all.
 3. **Refresh the Problems section:** `solver "update-tags"` — it rewrites every article's
-   Problems section (fresh titles and solved markers), reconciles the graph, and updates
-   `topics/articles.json` (where your new status lands), committing whatever it changed. Then
+   Problems section (fresh titles and solved markers), stamps your `final` with the current time,
+   reconciles the graph, and updates `topics/articles.json` (where your new status lands),
+   committing whatever it changed. Then
    `solver "update-tags --check"` must exit `0`; fix any issue it names (an unknown tag in your
    `<!-- tags: -->` comment, most likely) and re-run.
 4. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
