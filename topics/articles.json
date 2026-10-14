@@ -2599,8 +2599,8 @@
     {
       "path": "domain/pentagonal-number-theorem",
       "title": "Pentagonal number theorem",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:46Z",
       "solved": 3,
       "problems": 4,
       "tags": ["pentagonal-number-theorem"],

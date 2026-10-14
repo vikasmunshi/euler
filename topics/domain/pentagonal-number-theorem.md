@@ -1,5 +1,5 @@
 <!-- tags: [pentagonal-number-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:46Z -->
 # Pentagonal number theorem
 
 Euler's [pentagonal number theorem](https://en.wikipedia.org/wiki/Pentagonal_number_theorem) says
