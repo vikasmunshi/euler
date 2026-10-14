@@ -4733,8 +4733,8 @@
     {
       "path": "technique/c-dynamic-memory-allocation",
       "title": "calloc",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:55Z",
       "solved": 11,
       "problems": 11,
       "tags": ["c-dynamic-memory-allocation"],
