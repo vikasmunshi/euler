@@ -4,7 +4,7 @@
 The `!` (`sh` / `bash`) built-in command: run a bash command in the current
 problem's solution directory.
 
-Interactive subshells (`sh`/`bash`, `py`, `claude`) take over the terminal
+Interactive subshells (`sh`/`bash`, `py`, `claude`, `ssh`) take over the terminal
 directly; every other command streams its combined output through
 `sys.stdout` so the shell's session-log tee can capture it.
 """
@@ -165,11 +165,12 @@ def _run_streamed(ctx: Context, cmdline: str, cwd: Path) -> int:
 def _bash(ctx: Context, *args: str) -> int:
     """Run a shell command from the shell, returning its exit code.
 
-    Three forms escape into an *interactive* session that takes over the terminal:
+    Four forms escape into an *interactive* session that takes over the terminal:
 
         `! sh` / `! bash`       an interactive bash subshell, in the solution dir
         `! py` / `! python`     an interactive Python interpreter, in the repo root
         `! claude [prompt]`     Claude Code, in the repo root
+        `! ssh <host> [...]`    an ssh session (or remote command), in the solution dir
 
     Any other command (`! ls`, `! git diff`, …) runs non-interactively in the
     current problem's solution directory — so paths are relative to that problem's
@@ -188,7 +189,7 @@ def _bash(ctx: Context, *args: str) -> int:
     if not (cmdline := ' '.join(shlex.quote(a) for a in args)):
         ctx.console.print('[muted]usage:[/muted] [accent]! <command ...>[/accent]')
         return ExitCodes.EXIT_USAGE
-    # Pick a runner for the command.  Interactive subshells (sh/bash, py, claude) take over the terminal directly;
+    # Pick a runner for the command.  Interactive subshells (sh/bash, py, claude, ssh) take over the terminal directly;
     # other command streams through sys.stdout so the shell's session-log tee can capture its output.
     runner: Runner
     if cmdline in ('sh', 'bash'):
@@ -201,6 +202,9 @@ def _bash(ctx: Context, *args: str) -> int:
         runner = _run_interactive
     elif cmdline == 'claude' or cmdline.startswith('claude '):
         cwd = config.root_dir
+        runner = _run_interactive
+    elif cmdline == 'ssh' or cmdline.startswith('ssh '):
+        cwd = ctx.variables.problem.solution_dir
         runner = _run_interactive
     else:
         cwd = ctx.variables.problem.solution_dir
