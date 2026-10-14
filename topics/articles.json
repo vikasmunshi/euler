@@ -3776,8 +3776,8 @@
     {
       "path": "domain/triangular-number",
       "title": "Triangular number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:43Z",
       "solved": 10,
       "problems": 20,
       "tags": ["triangular-number"],
