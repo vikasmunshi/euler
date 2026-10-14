@@ -876,7 +876,7 @@
     {
       "path": "domain/divisor-function",
       "title": "Divisor function",
-      "status": "draft",
+      "status": "final",
       "solved": 16,
       "problems": 43,
       "tags": ["divisor-function"],
