@@ -2784,7 +2784,7 @@
     {
       "path": "domain/square-number",
       "title": "Square number",
-      "status": "draft",
+      "status": "final",
       "solved": 24,
       "problems": 42,
       "tags": ["square-number"],
