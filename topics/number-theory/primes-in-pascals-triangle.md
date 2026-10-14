@@ -1,6 +1,6 @@
 <!-- tags: [lucass-theorem, kummers-theorem, legendres-formula, p-adic-valuation] -->
 <!-- status: final -->
-# Primes in Pascal’s triangle: Lucas, Kummer and Legendre as one toolkit for divisibility of binomial coefficients
+# Primes in Pascal’s triangle
 
 A surprising number of problems ask something about a [binomial
 coefficient](/topics/domain/binomial-coefficient) or a [factorial](/topics/domain/factorial) that is

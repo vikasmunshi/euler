@@ -1,6 +1,6 @@
 <!-- tags: [repunit, multiplicative-order, carmichael-function, primitive-root] -->
 <!-- status: final -->
-# Repunits and multiplicative order: the order of 10 mod n, why A(n) is at most n, and composites with the prime repunit property
+# Repunits and multiplicative order
 
 A [repunit](https://en.wikipedia.org/wiki/Repunit) is a number written with only ones: `R(k) = 11…1`
 (`k` ones). The "which repunits does `n` divide?" questions, the recurring-decimal questions, the
