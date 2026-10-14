@@ -5580,8 +5580,8 @@
     {
       "path": "technique/for-else",
       "title": "for/else",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:53Z",
       "solved": 2,
       "problems": 2,
       "tags": ["for-else"],

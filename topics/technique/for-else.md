@@ -1,5 +1,5 @@
 <!-- tags: [for-else] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:53Z -->
 # for/else
 
 Python lets a loop carry an `else` clause, and the clause runs only when the loop ends *without*
