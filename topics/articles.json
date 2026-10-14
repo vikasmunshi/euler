@@ -553,8 +553,8 @@
     {
       "path": "domain/collatz-conjecture",
       "title": "Collatz conjecture",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:10Z",
       "solved": 2,
       "problems": 3,
       "tags": ["collatz-conjecture"],

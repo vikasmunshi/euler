@@ -1,5 +1,5 @@
 <!-- tags: [collatz-conjecture] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:10Z -->
 # Collatz conjecture
 
 The [Collatz map](https://en.wikipedia.org/wiki/Collatz_conjecture) halves an even number and
