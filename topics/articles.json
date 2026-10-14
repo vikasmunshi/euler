@@ -2478,8 +2478,8 @@
     {
       "path": "domain/optimal-substructure",
       "title": "Optimal substructure",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:49Z",
       "solved": 7,
       "problems": 9,
       "tags": ["optimal-substructure"],
