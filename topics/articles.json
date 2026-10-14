@@ -6471,8 +6471,8 @@
     {
       "path": "technique/memcpy",
       "title": "memcpy",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:59Z",
       "solved": 5,
       "problems": 5,
       "tags": ["memcpy"],
