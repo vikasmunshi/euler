@@ -3359,8 +3359,8 @@
     },
     {
       "path": "probability/markov-chains-and-expectation",
-      "title": "Markov Chains And Expectation",
-      "status": "draft",
+      "title": "Markov Chains and Expected Value",
+      "status": "final",
       "solved": 7,
       "problems": 34,
       "tags": ["markov-chain", "expected-value-application", "stationary-distribution", "random-walk"],
