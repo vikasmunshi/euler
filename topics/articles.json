@@ -4755,8 +4755,8 @@
     {
       "path": "technique/c-string-handling",
       "title": "C string handling",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:57Z",
       "solved": 7,
       "problems": 7,
       "tags": ["c-string-handling"],

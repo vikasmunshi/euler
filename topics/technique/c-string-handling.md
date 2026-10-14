@@ -1,5 +1,5 @@
 <!-- tags: [c-string-handling] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:57Z -->
 # C string handling
 
 C has no string type. A "string" is a `char` array that ends at the first zero byte, and every
