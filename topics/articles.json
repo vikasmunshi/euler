@@ -2100,7 +2100,7 @@
     {
       "path": "domain/parity-mathematics",
       "title": "Parity (mathematics)",
-      "status": "draft",
+      "status": "final",
       "solved": 15,
       "problems": 24,
       "tags": ["parity-mathematics"],
