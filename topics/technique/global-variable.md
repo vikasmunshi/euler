@@ -1,5 +1,5 @@
 <!-- tags: [global-variable] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:43Z -->
 # Global variable
 
 A [global variable](https://en.wikipedia.org/wiki/Global_variable) is state that lives outside
