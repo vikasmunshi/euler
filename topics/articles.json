@@ -2937,7 +2937,7 @@
     {
       "path": "domain/sum-of-two-squares-theorem",
       "title": "Sum of two squares theorem",
-      "status": "draft",
+      "status": "final",
       "solved": 6,
       "problems": 12,
       "tags": ["sum-of-two-squares-theorem"],
