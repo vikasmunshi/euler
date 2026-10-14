@@ -1,5 +1,5 @@
 <!-- tags: [endianness] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T18:01Z -->
 # Endianness
 
 [Endianness](https://en.wikipedia.org/wiki/Endianness) is the order in which the parts of a
