@@ -1101,7 +1101,7 @@
     {
       "path": "domain/fibonacci-sequence",
       "title": "Fibonacci sequence",
-      "status": "draft",
+      "status": "final",
       "solved": 12,
       "problems": 37,
       "tags": ["fibonacci-sequence"],
