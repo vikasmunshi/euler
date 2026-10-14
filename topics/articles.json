@@ -5591,8 +5591,8 @@
     {
       "path": "technique/fractions-fraction",
       "title": "fractions.Fraction",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:38Z",
       "solved": 8,
       "problems": 8,
       "tags": ["fractions-fraction"],
