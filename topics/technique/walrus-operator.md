@@ -1,5 +1,5 @@
 <!-- tags: [walrus-operator] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:40Z -->
 # walrus operator
 
 The [assignment expression](https://docs.python.org/3/reference/expressions.html#assignment-expressions)
