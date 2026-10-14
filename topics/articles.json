@@ -1367,8 +1367,8 @@
     {
       "path": "domain/figurate-number",
       "title": "Figurate number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:48Z",
       "solved": 4,
       "problems": 6,
       "tags": ["figurate-number"],
