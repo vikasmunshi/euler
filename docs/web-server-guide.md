@@ -1331,13 +1331,13 @@ rendered into the shell, since it is a self-contained fullscreen page with its o
 styles and fonts. The bookmarks menu opens it in a tab of its own. `/story/` is its
 `index.html`; only the deck's file types (`.html`, `.css`, `.js`, `.woff2`, `.txt`) are
 served, and nothing outside the folder (`content.resolve_file` refuses traversal and
-symlink escape), so its `build_data.py` is not. Every response is a `FileResponse`, so it
+symlink escape), so anything else in the folder is not. Every response is a `FileResponse`, so it
 gets `no-cache` and the baseline CSP like any other file. The deck is written to fit that
 CSP — every script is a file, no inline `<script>`, and its fonts are bundled
 (`docs/presentation/fonts/`, SIL OFL) because `default-src 'self'` refuses a Google Fonts
 stylesheet; `test_story_deck_fits_the_csp` holds it there. The git middleware skips
 `/story/` like the static trees: a deck load is a dozen files, none of them wearing the chip.
-The data it shows (`data/history.js`) is what `build_data.py` last generated and committed —
+The data it shows (`data/history.js`) is what `update-presentation-data` last generated and committed —
 public metadata only, never an answer.
 
 **Page chrome via out-of-band swaps.** Breadcrumbs, Actions and the git chip live in the
@@ -1486,8 +1486,10 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   because this is a *replace*, not an edit: the previous `.progress.html` is superseded
   wholesale, parse-or-reject before anything lands. The upload writes **only** that page;
   the import is `summary`'s, which the response runs in the user's terminal
-  (`HX-Trigger: {"euler-term-run": "summary"}` → the same `run` message the git menu's
-  verbs post). So the upload gets everything `summary` does and this tier must not: the
+  (`HX-Trigger: {"euler-term-run": "summary && …"}` → the same `run` message the git menu's
+  verbs post), chained with `&&` to the regenerating verbs in data-flow order —
+  `update-models`, `update-usd-rate`, `update-tags`, `update-docs`,
+  `update-presentation-data` — less any above the uploader's rung (`_PROGRESS_CHAIN`). So the upload gets everything `summary` does and this tier must not: the
   solved-preserving merge into `problems.json`, the staff notice for unregistered answers,
   fetching new problems' statements, and the commit. When the shell has re-written
   `problems.json` it emits `OSC 5379` `progress;`, and a listener inside `solutions.html`

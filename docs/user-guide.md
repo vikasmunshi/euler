@@ -256,6 +256,7 @@ its index entry, one click along its name.
 | [`topics`](commands-index.md#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
 | [`update-models`](commands-index.md#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
+| [`update-presentation-data`](commands-index.md#command-update-presentation-data) | — | `maintainer` | Refresh the presentation deck's data from the progress file. |
 | [`update-tags`](commands-index.md#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`update-usd-rate`](commands-index.md#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](commands-index.md#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |

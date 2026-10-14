@@ -17,12 +17,11 @@
 #   * any `feat:` / `feat(scope):`                     → MINOR
 #   * anything else (fix, perf, refactor, …)           → PATCH
 #
-# The release commit also carries the presentation deck's data: the script reruns
-# docs/presentation/build_data.py and, when data/history.js changed, stages it with
-# solver/version.py — so the deck `/story/` serves from a redeployed release shows the
-# progress and counts as of that release. One commit, not two: the data counts commits
-# up to the release, and a second commit would make it one short. A failed rebuild
-# stops the release before anything is written.
+# The release is preceded by a refresh of the presentation deck's data: the script runs
+# `solver update-presentation-data`, which rewrites docs/presentation/data/history.js and
+# lands it as its own `chore(update-presentation-data)` commit when the data materially
+# changed — so the deck `/story/` serves from a redeployed release shows the progress and
+# counts as of that release. A failed refresh stops the release before the version moves.
 #
 # Releasing is a deliberate step, run by a maintainer from a clean checkout — not
 # automatic on push. Pass --dry-run to preview the release and exit, or --no-push
@@ -75,8 +74,6 @@ new="v${major}.${minor}.${patch}"
 number="${new#v}"
 root="$(git rev-parse --show-toplevel)"
 version_file="${root}/solver/version.py"
-deck_build="${root}/docs/presentation/build_data.py"
-deck_data="${root}/docs/presentation/data/history.js"
 python_bin="${PYTHON:-${root}/.venv/bin/python}"
 
 if (( dry_run )); then
@@ -95,18 +92,13 @@ if [[ -n "$(git status --porcelain)" ]]; then
     exit 1
 fi
 
-# Refresh the deck's data before touching the version, so a failed build leaves the
-# tree exactly as it was. Restoring the data file on failure keeps that promise even
-# when the build wrote half a file.
-if ! "$python_bin" "$deck_build"; then
-    git checkout -q -- "$deck_data" 2>/dev/null
-    echo "release: refreshing the presentation data failed ($deck_build) — nothing released" >&2
+# Refresh the deck's data before touching the version. The command commits its own
+# output (or nothing, when the data is current), so the tree is clean again either way;
+# on failure the data file is restored, so a half-written file never rides along.
+if ! "$python_bin" -m solver "update-presentation-data"; then
+    git -C "$root" checkout -q -- docs/presentation/data/history.js 2>/dev/null
+    echo "release: refreshing the presentation data failed (update-presentation-data) — nothing released" >&2
     exit 1
-fi
-deck_note=""
-if [[ -n "$(git status --porcelain -- "$deck_data")" ]]; then
-    git add "$deck_data"
-    deck_note="Presentation deck data refreshed (docs/presentation/data/history.js)."
 fi
 
 # Rewrite ONLY the number in the source of truth (leaving the docstring and the
@@ -118,13 +110,9 @@ if ! grep -qE "^__version__ = '[^']*'" "$version_file"; then
 fi
 sed -i -E "s/^__version__ = '[^']*'/__version__ = '${number}'/" "$version_file"
 git add "$version_file"
-if [[ -n "$deck_note" ]]; then
-    git commit -q -m "chore(release): $new" -m "$deck_note"
-else
-    git commit -q -m "chore(release): $new"
-fi
+git commit -q -m "chore(release): $new"
 git tag -a "$new" -m "release $new"
-echo "released $new — solver/version.py bumped${deck_note:+, deck data refreshed}, committed, and tagged"
+echo "released $new — solver/version.py bumped, committed, and tagged"
 
 if (( no_push )); then
     echo "not pushed (--no-push); publish with: git push origin HEAD $new"

@@ -9,7 +9,8 @@
 #
 #   1. regenerate everything that is machine-maintained, so the release commit describes
 #      the software that actually exists — `update-models`, `update-usd-rate`,
-#      `update-tags`, `update-docs`, in that order (see "Why that order" below);
+#      `update-tags`, `update-docs`, `update-presentation-data`, in that order (see "Why
+#      that order" below);
 #   2. `make release`  — derive the SemVer bump from the Conventional Commits since the
 #      last tag, rewrite solver/version.py, commit, tag vX.Y.Z, push commit + tag.
 #      **Skipped, not fatal, when there is nothing to release**: an unchanged tree since
@@ -28,7 +29,9 @@
 # the enum *before* the docs are generated from it, or the catalogue ships a model list
 # that was already stale when it was written. `update-usd-rate` and `update-tags` are
 # independent of the docs, but they are cheap and they commit — running them first keeps
-# the release commit at the top of a fully reconciled tree.
+# the release commit at the top of a fully reconciled tree. `update-presentation-data` goes
+# last because it counts what the others write: the articles `update-tags` indexes and the
+# commands `update-docs` catalogues.
 #
 # ── Steps 3 and 4 are detached, and everything is logged ──────────────────────────────
 #
@@ -116,7 +119,7 @@ TMUX_SESSION='euler-release'
 
 # The regenerating verbs, in the order step 1 runs them. Each is a solver command that
 # commits its own output (`chore(<verb>): …`) and is a no-op on an already-current tree.
-UPDATE_VERBS=(update-models update-usd-rate update-tags update-docs)
+UPDATE_VERBS=(update-models update-usd-rate update-tags update-docs update-presentation-data)
 
 usage() {
     cat <<USAGE

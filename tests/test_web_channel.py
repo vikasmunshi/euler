@@ -151,6 +151,16 @@ class WebChannelCommandSetTest(unittest.TestCase):
         self.assertIn('update-usd-rate', self.web['maintainer'])
         self.assertNotIn('update-usd-rate', self.web['contributor'])
 
+    def test_the_progress_chain_floors_match_the_registry(self) -> None:
+        """The progress upload filters its `&&` chain by floors the site tier declares
+        itself (it does not load the shell registry). A floor that drifted from the
+        command's `requires` would either offer a verb the terminal then refuses — stopping
+        every verb after it — or silently skip one the user may run."""
+        from solver.web.site.app import _PROGRESS_CHAIN
+        floors = {cmd.name: cmd.requires for cmd in registry.all()}
+        for verb, floor in _PROGRESS_CHAIN:
+            self.assertEqual(floors.get(verb), floor, f'{verb}: chain floor drifted from the registry')
+
 
 if __name__ == '__main__':
     unittest.main()

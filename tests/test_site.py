@@ -503,7 +503,7 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_story_deck_scope(self) -> None:
         """Only the deck's file types, only inside its folder, only for a signed-in reader."""
-        for path in ('/story/build_data.py',                # in the folder, not a deck file type
+        for path in ('/story/build_data.py',                # not a deck file type (nor, now, present)
                      '/story/missing.js',
                      '/story/fonts/../../README.md',
                      '/story/../../README.md'):
@@ -877,8 +877,10 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('century-grid', body)                          # the grid block + status
         self.assertIn('saved the progress page', body)
         self.assertTrue((self.scratch / 'solutions' / '.progress.html').exists())
-        # The import is `summary`'s, run in the terminal — this tier writes only the page.
-        self.assertEqual(json.loads(resp.headers['HX-Trigger']), {'euler-term-run': 'summary'})
+        # The import is `summary`'s, run in the terminal — this tier writes only the page —
+        # followed by the regenerating verbs a maintainer may run (the admin-floored two left out).
+        self.assertEqual(json.loads(resp.headers['HX-Trigger']), {'euler-term-run': (
+            'summary && update-usd-rate && update-tags && update-presentation-data')})
         self.assertEqual(problems_json.read_bytes() if problems_json.exists() else None, before)
 
     @unittest_run_loop

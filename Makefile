@@ -120,8 +120,8 @@ run: $(VENV)
 version: $(VENV)
 	@$(VENV)/bin/solver version
 
-## Cut a release: bump solver/version.py from Conventional Commits, refresh the
-## presentation deck's data (docs/presentation/build_data.py) into the same commit,
+## Cut a release: refresh the presentation deck's data (update-presentation-data,
+## its own commit), bump solver/version.py from Conventional Commits, commit,
 ## tag, and push the commit + tag to origin. ARGS=--dry-run previews; ARGS=--no-push
 ## stops before publishing.
 release:

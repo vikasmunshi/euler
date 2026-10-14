@@ -554,7 +554,8 @@
 
   // ── a server response asking the terminal to run a command ─────────────────
   // `HX-Trigger: {"euler-term-run": "<command>"}` — the progress upload stores the
-  // page and hands the import to `summary` this way, the same `run` message the git
+  // page and hands the import to `summary` (and the update verbs chained after it) this
+  // way, the same `run` message the git
   // menu's [data-term-cmd] buttons post. The pane is revealed first: the command's
   // output (warnings, the commit) is the answer, and a hidden terminal would swallow
   // it. A disconnected terminal would drop the frame, so nothing is sent — the

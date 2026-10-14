@@ -61,7 +61,7 @@ READABLE_KEY = web.AppKey('readable_roots', list)
 #: The presentation deck `/story/` serves (web-server-guide § 11.5, The story deck): its
 #: repo-relative folder, and the only file types in it the route hands out — the page,
 #: its scripts, styles, generated data and bundled fonts with their licences. Anything
-#: else in the folder (the `build_data.py` that regenerates the data) is not served.
+#: else in the folder is not served.
 STORY_ROOT: str = 'docs/presentation'
 STORY_SUFFIXES: frozenset[str] = frozenset({'.html', '.css', '.js', '.woff2', '.txt'})
 
@@ -859,6 +859,35 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
+#: What a progress upload runs in the terminal: `summary`, then the regenerating verbs, each
+#: with its `requires` floor (tests/test_web_channel.py holds these to the registry's).
+#:
+#: The order is by data flow. `summary` first: it is the import, and its `problems.json` is
+#: the deck's main input. `update-models` before `update-docs`, which quotes the `Model` enum
+#: in the command catalogue's usage lines. `update-usd-rate` and `update-tags` are independent
+#: of the docs, but `update-tags` rewrites `topics/articles.json`, which the deck counts.
+#: `update-presentation-data` last: it reads all three — the progress file, the article index
+#: and the command catalogue — so it must see each already regenerated.
+_PROGRESS_CHAIN: tuple[tuple[str, str], ...] = (
+    ('summary', 'maintainer'),
+    ('update-models', 'admin'),
+    ('update-usd-rate', 'maintainer'),
+    ('update-tags', 'contributor'),
+    ('update-docs', 'admin'),
+    ('update-presentation-data', 'maintainer'),
+)
+
+
+def _progress_chain(subject: Subject) -> str:
+    """The `&&` chain a progress upload types into *subject*'s terminal.
+
+    A verb above the subject's rung is left out rather than left to be refused: a refusal is
+    a non-zero status, and under `&&` it would stop every verb after it — a maintainer's
+    upload would never reach `update-tags` behind the admin-floored `update-models`.
+    """
+    return ' && '.join(verb for verb, floor in _PROGRESS_CHAIN if subject.has(floor))
+
+
 @requires('maintainer')
 async def progress_save(request: web.Request) -> web.StreamResponse:
     """`POST /edit/solutions/` — store the page, then run `summary` in the terminal.
@@ -874,6 +903,9 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
     answers, fetching new problems from projecteuler.net, and the commit. It is also
     why the floor is `summary`'s, maintainer. When the shell has re-written
     `problems.json`, it says so (OSC `progress`) and the grid re-reads itself.
+
+    `summary` is followed by the regenerating verbs (:func:`_progress_chain`), so an
+    upload leaves the whole machine-maintained tree reconciled, not just the progress file.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     form = await request.post()
@@ -889,7 +921,7 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
     response = render(request, 'solutions.html', _solutions_context(request, status=message),
                       block='content', fragment=True)
     response.headers['HX-Push-Url'] = '/solutions/'
-    response.headers['HX-Trigger'] = json.dumps({'euler-term-run': 'summary'})
+    response.headers['HX-Trigger'] = json.dumps({'euler-term-run': _progress_chain(_subject(request))})
     return response
 
 

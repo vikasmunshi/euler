@@ -138,6 +138,7 @@ GENERATED_PATHS: dict[str, tuple[str, ...]] = {
     'update-docs': ('docs/', 'README.md', 'solver/modules.csv',
                     'solver/ai/claude/CLAUDE.md', 'solver/web/content/home-summary.md'),
     'update-models': ('solver/ai/models.py',),
+    'update-presentation-data': ('docs/presentation/data/history.js',),
     'update-tags': ('topics/', 'solutions/**/tags.json'),
     'update-usd-rate': ('solver/config/values.conf',),
     # Not an `update-*` verb, but the same kind of write: `summary` regenerates the progress

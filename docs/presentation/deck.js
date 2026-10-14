@@ -1,5 +1,5 @@
 /* Eleven Years of Puzzles — navigation and the data-driven slides.
-   Data comes from window.HISTORY (data/history.js, built by build_data.py). */
+   Data comes from window.HISTORY (data/history.js, built by the update-presentation-data command). */
 (() => {
   'use strict';
 
@@ -256,7 +256,7 @@
     const counted = solves.filter(p => p.solvers !== null && p.n <= newest);
     if (!counted.length) {
       container.innerHTML = '<div class="empty-state"><p>Solver counts appear after the next progress refresh.<br>'
-        + 'Save the progress page, run <code>summary</code>, then <code>python docs/presentation/build_data.py</code>.</p></div>';
+        + 'Save the progress page, run <code>summary</code>, then <code>update-presentation-data</code>.</p></div>';
       return;
     }
     const first = byNumber.get(1);
