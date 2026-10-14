@@ -1,5 +1,5 @@
 <!-- tags: [figurate-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:48Z -->
 # Figurate number
 
 A [figurate number](https://en.wikipedia.org/wiki/Figurate_number) counts the dots in a regular
