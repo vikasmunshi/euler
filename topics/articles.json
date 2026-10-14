@@ -1749,7 +1749,7 @@
     {
       "path": "domain/legendres-formula",
       "title": "Legendre's formula",
-      "status": "draft",
+      "status": "final",
       "solved": 9,
       "problems": 10,
       "tags": ["legendres-formula"],
