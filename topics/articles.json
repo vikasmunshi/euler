@@ -3322,6 +3322,15 @@
       "refs": ["p0003_s0", "p0010_s3", "p0012_s0", "p0012_s1", "p0021_s0", "p0023_s1", "p0027_s0", "p0029_s0", "p0029_s1", "p0041_s0", "p0046_s0", "p0047_s0", "p0051_s0", "p0058_s0", "p0060_s0", "p0069_s0", "p0108_s0", "p0118_s0", "p0128_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0152_s0", "p0157_s0", "p0170_s0", "p0176_s0", "p0188_s0", "p0202_s0", "p0221_s0", "p0234_s0", "p0243_s0", "p0248_s0", "p0251_s0", "p0293_s0", "p0357_s0", "p0478_s0", "p0545_s0", "p0694_s0", "p0853_s0", "p0926_s0", "p0932_s0"]
     },
     {
+      "path": "number-theory/repunits-and-multiplicative-order",
+      "title": "Repunits And Multiplicative Order",
+      "status": "draft",
+      "solved": 9,
+      "problems": 17,
+      "tags": ["repunit", "multiplicative-order", "carmichael-function", "primitive-root"],
+      "refs": ["p0026", "p0129", "p0130", "p0130_s0", "p0132", "p0133", "p0250_s0", "p0288", "p0346", "p0417", "p0437", "p0533", "p0622", "p0750", "p0752", "p0847", "p0885", "p0952"]
+    },
+    {
       "path": "takeaway/algorithm-beats-language",
       "title": "Algorithm beats language",
       "status": "final",
