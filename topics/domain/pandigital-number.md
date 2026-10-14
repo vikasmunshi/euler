@@ -1,5 +1,5 @@
 <!-- tags: [pandigital-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:55Z -->
 # Pandigital number
 
 A [pandigital number](https://en.wikipedia.org/wiki/Pandigital_number) uses every digit of
