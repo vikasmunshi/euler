@@ -1,5 +1,5 @@
 <!-- tags: [partition-number-theory] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:44Z -->
 # Partition (number theory)
 
 A [partition](https://en.wikipedia.org/wiki/Partition_(number_theory)) of *n* is a way of writing
