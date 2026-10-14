@@ -1,8 +1,172 @@
 <!-- tags: [digit-sum, palindromic-number, string-slicing, positional-notation] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Digit Manipulation
 
-_TODO: write this page. Curated topic — draw the through-line across the tags below yourself._
+A surprising share of Project Euler is about the *writing* of a number rather than the number:
+reverse it, test it for a palindrome, add up its digits, sort them, map each one through a table.
+Every one of those operations needs the same first step — get the digits out of the integer — and
+there are exactly two ways to take it. Either you hand the integer to the runtime's formatter and work
+on the resulting **string**, or you peel digits off with **arithmetic**, `n % 10` and `n // 10`, one
+[positional](https://en.wikipedia.org/wiki/Positional_notation) place at a time. The two are
+interchangeable in meaning and wildly different in cost, and the cost runs in *opposite directions*
+in Python and in C. This page is about choosing between them; the algebra of the digit sum itself
+(mod 9, carries, digit DP) lives on [Digit sum](/topics/domain/digit-sum).
+
+## Two ways to read a number
+
+Write $n = \sum_{i=0}^{D-1} d_i\,10^i$ with $D = \lfloor \log_{10} n \rfloor + 1$ digits. The
+arithmetic route reads that sum right to left:
+
+```python
+def digit_sum(n: int) -> int:
+    total = 0
+    while n:
+        n, d = divmod(n, 10)                     # d is the units digit; n drops one place
+        total += d
+    return total
+```
+
+The string route asks the formatter for all $D$ digits at once, most significant first, and then
+treats them as a sequence:
+
+```python
+sum(map(int, str(n)))                            # digit sum
+int(str(n)[::-1])                                # reversal
+"".join(sorted(str(n)))                          # order-blind fingerprint
+```
+
+Two differences in *shape* matter before any timing does. The arithmetic loop yields digits
+**least-significant first**, which is exactly the order a reversal needs — `r = r * 10 + n % 10`
+builds the mirror image while it consumes the original, with no buffer at all. The string yields
+them **most-significant first** and *all at once*, which is what you want for anything positional
+from the left — prefixes, truncations, the left half of a palindrome, slicing in general (see
+[String slicing](/topics/technique/string-slicing)). And the arithmetic loop never sees a leading
+zero, while a string can carry one (`"007"`), which is either a bug or exactly the fixed-width view
+you wanted.
+
+## Python: the formatter is the fast path
+
+In CPython the decision comes down to one fact: `str(n)` is a single call into C, while the
+`divmod` loop is $D$ trips through the interpreter. Timings on the machine this page was written on
+(CPython 3.14, nanoseconds per call):
+
+| digits $D$ | `sum(map(int, str(n)))` | `divmod` loop | `int(str(n)[::-1])` | `r*10 + n%10` loop |
+| ---------: | ----------------------: | ------------: | ------------------: | -----------------: |
+|          1 |                     192 |            68 |                 130 |                 63 |
+|          5 |                     267 |           217 |                 145 |                209 |
+|          9 |                     352 |           395 |                 154 |                371 |
+|         20 |                     608 |           967 |                 197 |              1 273 |
+|        302 |                   6 971 |        24 925 |               1 840 |             46 908 |
+|      6 021 |                 468 495 |     5 260 430 |           4 469 995 |         12 510 725 |
+
+Below about five digits the string's fixed costs — allocate a `str`, call `int` per character —
+lose to a handful of arithmetic steps. Past that the string wins, and once $n$ outgrows a machine
+word the gap turns structural: each `n // 10` on a $D$-digit big integer is itself $O(D)$, so the
+loop is **quadratic**, and every step of it is interpreted, whereas the formatter converts in C, a
+word-sized chunk of digits at a time. Reversal tilts further toward strings than the sum does,
+because `[::-1]` is a single C-level copy (an [extended slice](/topics/technique/extended-slice))
+with no per-digit Python call at all.
+
+That is why the public big-integer problems are one-liners. Problem 16 sums the digits of
+$2^{1000}$, problem 20 those of $100!$, problem 56 those of every $a^b$ for $a, b < 100$ — each is
+`sum(int(d) for d in str(...))` over Python's
+[arbitrary-precision](/topics/technique/arbitrary-precision-arithmetic) integers, and the
+hundreds-of-digits sizes involved sit squarely in the rows where the string is three to four times
+faster. Problem 55 runs reverse-and-add on numbers that grow past fifty digits, and its whole inner
+step is
+
+```python
+number += int(str(number)[::-1])
+if str(number) == str(number)[::-1]: ...
+```
+
+— the [Lychrel](/topics/domain/lychrel-number) iteration written as directly as the statement.
+Problems 4 and 36 test [palindromes](/topics/domain/palindromic-number) the same way, and 36 goes
+further: it *generates* its decimal palindromes by string concatenation, `digits + digits[::-1]`
+(the odd-length ones with a middle digit spliced in), and checks the binary side with
+`bin(n)[2:][::-1]`. Problem 52's test that $x, 2x, \dots, 6x$ are digit permutations of one another
+is a set of fingerprints, `"".join(sorted(str(k * x)))` — a canonical form the string gives you for
+free. Problem 34 never leaves string-land: it keys its digit-factorial table by the characters
+`"0"`…`"9"`, so a digit never has to become an `int`.
+
+Two caveats keep this from being a blanket rule. First, since CPython 3.11 `str()` refuses integers
+beyond 4 300 digits by default (a denial-of-service guard against quadratic conversion); the digit
+sum of $2^{20000}$ needs `sys.set_int_max_str_digits(0)` first. Second, when the numbers are *small
+and hot* — the successor function of an iterated map, called millions of times on values under
+$10^7$ — the arithmetic loop is level with or ahead of the string, and it is what problems 74 and 92
+use:
+
+```python
+while n > 0:
+    result += digit_factorials[n % 10]           # problem 74: the digit-factorial successor
+    n //= 10
+```
+
+The arithmetic form also *composes* with tables in a way the string does not. If the per-digit
+function is additive, precompute it for $0 \dots 999$ inside `solve()` and the successor becomes
+`T[n % 1000] + T[n // 1000 % 1000] + T[n // 1000000]` — three lookups instead of seven iterations,
+which is digit manipulation in base 1000. Better still is not to touch each number's digits at all:
+problem 92 counts digit-square-sum *buckets* by convolution and only ever classifies the few hundred
+distinct sums, and problem 30 enumerates digit multisets rather than numbers. The fastest digit loop
+is the one you replaced with a count.
+
+## C: the formatter is the slow path
+
+C reverses every conclusion. There is no interpreter overhead to amortise; `n % 10` and `n / 10` on
+a `long long` compile to a multiply-and-shift by a magic constant, with no division instruction; and
+`snprintf` is a general-purpose formatting engine — format-string parsing, a buffer to fill, a
+`strlen` to find its end — invoked to do what a few instructions per digit already do. Measured over
+twenty million twelve-digit values with `gcc -O2`:
+
+| operation       | `% 10` / `/ 10` loop | `snprintf` + char loop |
+| --------------- | -------------------: | ---------------------: |
+| digit sum       |              11.9 ns |                36.9 ns |
+| palindrome test |              12.8 ns |                38.9 ns |
+
+So in C the arithmetic route is the default, and the solutions mostly take it: problems 30, 34, 74
+and 92 compute their digit maps with `% 10` loops, problem 36 extracts bits with `& 1` and `>>= 1`
+for its binary palindrome check, and problem 52 pulls its digits out arithmetically before sorting
+them. Where a C port still formats, it is usually a literal translation of a Python string idiom,
+and usually off the hot path: problem 4 formats each product with `snprintf` and compares from both
+ends (problem 34 formats too, for a digit-membership screen), but its descending search breaks out after a few candidates per row, so the 3× is immaterial.
+Problem 36 is the instructive counter-case — it builds each palindrome with `snprintf("%s%s", …)`
+and parses it back with `atoll`, a round trip through text for what is pure arithmetic:
+
+```c
+long long p = half, t = odd ? half / 10 : half;  /* mirror the left half onto itself */
+while (t) { p = p * 10 + t % 10; t /= 10; }
+```
+
+The same goes for fingerprints. Problem 52's C sorts the digit characters with `qsort`, faithful to
+the Python; a ten-slot histogram — or the counts packed four bits apiece into one integer — is the
+same canonical form with no sort and no string compare.
+
+The big-integer problems turn the question inside out. C has no built-in big integer, so problems
+16, 20, 55 and 56 must choose a representation, and they choose **a little-endian array of decimal
+digits**, `digits[0]` the units place. That is the string route, done by hand and kept permanently:
+the number is never anything *but* its digits, so the digit sum is a plain loop over the array, and
+problem 55's reverse-and-add needs no reversed copy at all — index $i$ of the little-endian number is
+index $D-1-i$ of its reversal, so `a[i] + a[n-1-i]` adds the two in one pass. The price is paid in
+multiplication, which must carry one digit at a time (see
+[Carry arithmetic](/topics/technique/carry-arithmetic)); limbs of $10^9$ would multiply about nine
+times faster and then make every digit query a `% 10` loop again. Store what the problem *asks
+about*: when the output is a digit property, base-10 storage is the right trade.
+
+## Choosing
+
+- **Python, big integers or one-shot work** — use the string. `str`, slicing, `sorted` and `join`
+  run in C; anything you write per digit does not. Mind the 4 300-digit conversion limit.
+- **Python, small numbers in a hot loop** — the arithmetic loop is competitive, and it is the one
+  that extends to chunked lookup tables. Better: restructure so the per-number digit work
+  disappears (multisets, bucket counts, memoised chains).
+- **C, anything that fits in 64 bits** — arithmetic, always. Reversal is `r = r*10 + n%10`, a
+  palindrome is `n == rev(n)`, a fingerprint is a histogram. Reach for `snprintf` only to print.
+- **C, big integers** — store decimal digits when the question is about digits; the representation
+  *is* the string, and the manipulation becomes array indexing.
+- **Either language** — mind the edges: `0` has one digit but the `while n` loop sees none; leading
+  zeros exist in strings and in fixed-width digit arrays but not in integers; and the reversal of a
+  number ending in `0` is shorter than the original, so `n == rev(n)` is the palindrome test only
+  for the numbers that *are* palindromes — a trailing zero can never mirror a leading one.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
