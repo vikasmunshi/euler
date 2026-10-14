@@ -1,5 +1,5 @@
 <!-- tags: [memcpy] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:59Z -->
 # memcpy
 
 C arrays aren't values. You can't assign one array to another, you can't return one from a
