@@ -3350,8 +3350,8 @@
     },
     {
       "path": "number-theory/summing-multiplicative-functions",
-      "title": "Summing Multiplicative Functions",
-      "status": "draft",
+      "title": "Summing multiplicative functions fast: quotient blocking, M\u00f6bius inversion, Dirichlet hyperbola and totient-summatory recursion as one sublinear toolkit",
+      "status": "final",
       "solved": 19,
       "problems": 27,
       "tags": ["quotient-blocking", "mobius-inversion-formula", "mobius-function-application", "dirichlet-convolution", "divisor-summatory-function", "totient-summatory-recursion"],
