@@ -1,5 +1,5 @@
 <!-- tags: [functional-graph] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:06Z -->
 # Functional graph
 
 A [functional graph](https://en.wikipedia.org/wiki/Functional_graph) is what you get when you take

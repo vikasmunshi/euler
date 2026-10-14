@@ -1466,8 +1466,8 @@
     {
       "path": "domain/functional-graph",
       "title": "Functional graph",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:06Z",
       "solved": 2,
       "problems": 8,
       "tags": ["functional-graph"],
