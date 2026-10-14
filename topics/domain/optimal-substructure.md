@@ -1,5 +1,5 @@
 <!-- tags: [optimal-substructure] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:49Z -->
 # Optimal substructure
 
 A problem has **optimal substructure** when an optimal solution to it is built out of optimal
