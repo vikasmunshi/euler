@@ -7351,8 +7351,8 @@
     {
       "path": "technique/strcmp",
       "title": "strcmp",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T18:03Z",
       "solved": 2,
       "problems": 2,
       "tags": ["strcmp"],
