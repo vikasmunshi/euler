@@ -4535,8 +4535,8 @@
     {
       "path": "technique/backtracking",
       "title": "Backtracking",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:11Z",
       "solved": 11,
       "problems": 11,
       "tags": ["backtracking"],

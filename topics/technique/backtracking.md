@@ -1,5 +1,5 @@
 <!-- tags: [backtracking] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:11Z -->
 # Backtracking
 
 [Backtracking](https://en.wikipedia.org/wiki/Backtracking) builds a solution one decision at a time
