@@ -5756,8 +5756,8 @@
     {
       "path": "technique/global-variable",
       "title": "Global variable",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:43Z",
       "solved": 5,
       "problems": 5,
       "tags": ["global-variable"],
