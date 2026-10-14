@@ -2577,8 +2577,8 @@
     {
       "path": "domain/partition-number-theory",
       "title": "Partition (number theory)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:44Z",
       "solved": 7,
       "problems": 18,
       "tags": ["partition-number-theory"],
