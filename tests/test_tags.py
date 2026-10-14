@@ -114,6 +114,14 @@ class ArticleIndexTests(unittest.TestCase):
         # a page on disk is never 'missing', whatever its comment claims
         self.assertEqual(tags.article_status('<!-- status: missing -->\n# Alpha\n'), 'draft')
 
+    def test_a_final_status_carries_the_date_it_was_written(self) -> None:
+        dated = '<!-- status: final 2026-10-14 -->\n# Alpha\n'
+        self.assertEqual(tags.article_status(dated), 'final')
+        self.assertEqual(tags.article_written(dated), '2026-10-14')
+        self.assertEqual(tags._stamp_status(dated), dated)                       # no second comment
+        self.assertIsNone(tags.article_written('<!-- status: final -->\n# Alpha\n'))
+        self.assertIsNone(tags.article_written('<!-- status: draft 2026-10-14 -->\n# Alpha\n'))
+
     def test_stamp_lands_under_the_tags_comment_and_is_idempotent(self) -> None:
         stamped = tags._stamp_status('<!-- tags: [alpha] -->\n# Alpha\n')
         self.assertEqual(stamped.splitlines()[:2], ['<!-- tags: [alpha] -->', '<!-- status: draft -->'])
@@ -128,7 +136,8 @@ class ArticleIndexTests(unittest.TestCase):
 
         The solved set is pinned here: it is real progress in a real clone, and a test that
         read it would pass or fail on which problems this checkout has solved."""
-        self._article('domain/alpha.md', '<!-- tags: [alpha] -->\n<!-- status: final -->\n# Alpha, at length\n')
+        self._article('domain/alpha.md',
+                      '<!-- tags: [alpha] -->\n<!-- status: final 2026-10-14 -->\n# Alpha, at length\n')
         self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
         with patch.object(tags, '_problem_meta', return_value=({}, {2})):
             index = tags._build_index(_central())
@@ -136,6 +145,8 @@ class ArticleIndexTests(unittest.TestCase):
         self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
         self.assertEqual(set(rows), {'domain/alpha', 'curated/mix'})                 # pages only
         self.assertEqual(rows['domain/alpha']['status'], 'final')
+        self.assertEqual(rows['domain/alpha']['written'], '2026-10-14')
+        self.assertIsNone(rows['curated/mix']['written'])                             # a draft is undated
         self.assertEqual(rows['domain/alpha']['title'], 'Alpha, at length')          # the page's own H1
         self.assertEqual(rows['domain/alpha']['refs'], ['p0002', 'p0003'])
         self.assertEqual(rows['curated/mix']['status'], 'draft')                     # no comment → draft

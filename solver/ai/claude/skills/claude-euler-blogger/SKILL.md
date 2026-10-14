@@ -7,7 +7,7 @@ description: Use when Claude is launched by the `claude-blog` command via
   is a tag's `<facet>/<slug>` path (e.g. `technique/sieve-of-eratosthenes`), a bare tag slug, or a
   curated topic path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
   post" or for solving problems.
-version: 0.4.0
+version: 0.5.0
 model: opus
 ---
 
@@ -101,8 +101,9 @@ The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated t
    edit that changes them.
 
 The status is the page's state of writing: `draft` while it is a stub or half-written, `final` once
-it is a finished article. `topics/articles.json` (the article index, maintained by `update-tags`)
-mirrors it. The `claude-blog` command refuses a `final` page unless it was run with `--force`, so if
+it is a finished article. A `final` status also carries the **date the article was written**
+(`<!-- status: final 2026-10-14 -->`, see Phase 4). `topics/articles.json` (the article index,
+maintained by `update-tags`) mirrors both — the date as the row's `written`. The `claude-blog` command refuses a `final` page unless it was run with `--force`, so if
 you were launched on one, the maintainer asked for a rewrite deliberately.
 
 If the `[additional_prompt]` gave an angle or constraint, factor it in without overriding the
@@ -135,7 +136,7 @@ in the flow of the idea (a public one when you want to quote code — see the pr
 but do not duplicate the list.
 
 Keep it tight — a topic page, not an essay. Leave the `<!-- tags: [...] -->` comment, the
-`<!-- status: … -->` comment, and the whole `<!-- problems … -->` … `<!-- /problems -->` section
+`<!-- status: … -->` comment (until Phase 4 marks it final), and the whole `<!-- problems … -->` … `<!-- /problems -->` section
 exactly as they are — `update-tags` owns them. Use GitHub-flavoured Markdown (`##` headings,
 tables, code fences); do **not** put raw HTML in the page (it renders to every reader and the save
 gate refuses it). A new curated page must open with its own `<!-- tags: [slug, …] -->` comment,
@@ -148,9 +149,16 @@ fill.
 Writing the page is not delivering it. The four steps run **in order** — each is worth nothing
 without the one before it — and any of them failing is a stop-and-report:
 
-1. **Mark the page final.** The article is written, so change its status comment to
+1. **Mark the page final, and date it.** The article is written, so change its status comment to
 
-       <!-- status: final -->
+       <!-- status: final YYYY-MM-DD -->
+
+   with **today's date** (from your environment's "Today's date") as an ISO 8601 calendar date —
+   e.g. `<!-- status: final 2026-10-14 -->`: zero-padded, year first, one space after `final`,
+   nothing else in the comment. The date records which problems' solutions the article could
+   draw on — it is compared with each covered problem's solve date (`solutions/problems.json`) to
+   find articles written before some of their problems were solved — so it is the date of *this*
+   writing: on a `--force` rewrite of a page that is already `final`, replace its old date.
 
    Do this only for a page you actually finished — if you stopped short (missing research, an
    unresolved `update-tags` issue, a half-written section), leave it `draft`, say so in the summary,

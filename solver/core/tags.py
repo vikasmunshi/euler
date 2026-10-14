@@ -23,14 +23,16 @@ page's subtitle), and its **status**:
     The page is done: `claude-blog` refuses to rewrite it without `--force`.
 
 The status of record lives in the article itself, as a `<!-- status: … -->`
-comment next to its `<!-- tags: … -->` one — the index only reflects it.
+comment next to its `<!-- tags: … -->` one — the index only reflects it. A
+`final` comment also carries the date the page was written
+(`<!-- status: final 2026-10-14 -->`), mirrored as the index row's `written`.
 `update-tags` stamps a missing comment as `draft`; the blogger skill promotes
 its page to `final` when it finishes writing.
 """
 from __future__ import annotations
 
 __all__ = ['tags', 'topics', 'topic', 'update_tags', 'create_topic', 'format_vocabulary',
-           'facet_map', 'STATUSES', 'article_status']
+           'facet_map', 'STATUSES', 'article_status', 'article_written']
 
 import json
 import re
@@ -63,7 +65,12 @@ _GEN_RE = re.compile(r'<!--\s*' + re.escape(_GEN_OPEN) + r'\s*-->.*?<!--\s*'
 #: The article statuses, in writing order. There is no `missing`: update-tags creates a page for
 #: every tag, so a topic always has a file and the only question is whether it has been written.
 STATUSES = ('draft', 'final')
-_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)\s*-->', re.IGNORECASE)
+#: A `final` status may carry the date the article was written, as an ISO 8601 calendar date
+#: (`<!-- status: final 2026-10-14 -->`): lexically sortable, and directly comparable with the
+#: problems' solve dates, which is what finds an article written before some of its problems
+#: were solved. It lives inside the status comment rather than beside it because it *is* the
+#: status's date - when the page became final - and so is machine-owned on the same footing.
+_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)(?:\s+(\d{4}-\d{2}-\d{2}))?\s*-->', re.IGNORECASE)
 
 # ── compact JSON (scalar lists inline, object lists multi-line) ─────────────────────────
 
@@ -227,6 +234,12 @@ def article_status(text: str) -> str:
     fact, the comment only distinguishes finished from still-being-written."""
     m = _STATUS_RE.search(text)
     return 'final' if m and m.group(1).lower() == 'final' else 'draft'
+
+
+def article_written(text: str) -> str | None:
+    """The date a `final` article was written (`YYYY-MM-DD`), or None — a draft has no date."""
+    m = _STATUS_RE.search(text)
+    return m.group(2) if m and m.group(1).lower() == 'final' else None
 
 
 def _stamp_status(text: str) -> str:
@@ -680,7 +693,8 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
         refs = _article_refs(declared, by_slug)
         n_solved, n_problems = _article_counts(refs, solved)
         rows[path] = {'path': path, 'title': _article_title(text, file.stem),
-                      'status': article_status(text), 'solved': n_solved, 'problems': n_problems,
+                      'status': article_status(text), 'written': article_written(text),
+                      'solved': n_solved, 'problems': n_problems,
                       'tags': declared, 'refs': refs}
     return {'articles': [rows[path] for path in sorted(rows)]}
 
