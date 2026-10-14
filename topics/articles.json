@@ -3269,7 +3269,7 @@
     },
     {
       "path": "game-theory/impartial-games-and-nim-values",
-      "title": "Impartial games and nim-values: Sprague-Grundy, mex, nim-sum, and when a closed form replaces the Grundy table",
+      "title": "Impartial games and nim-values",
       "status": "final",
       "solved": 4,
       "problems": 34,
@@ -3332,7 +3332,7 @@
     },
     {
       "path": "number-theory/primes-in-pascals-triangle",
-      "title": "Primes in Pascal\u2019s triangle: Lucas, Kummer and Legendre as one toolkit for divisibility of binomial coefficients",
+      "title": "Primes in Pascal\u2019s triangle",
       "status": "final",
       "solved": 15,
       "problems": 19,
@@ -3341,7 +3341,7 @@
     },
     {
       "path": "number-theory/repunits-and-multiplicative-order",
-      "title": "Repunits and multiplicative order: the order of 10 mod n, why A(n) is at most n, and composites with the prime repunit property",
+      "title": "Repunits and multiplicative order",
       "status": "final",
       "solved": 9,
       "problems": 17,
@@ -3350,7 +3350,7 @@
     },
     {
       "path": "number-theory/summing-multiplicative-functions",
-      "title": "Summing multiplicative functions fast: quotient blocking, M\u00f6bius inversion, Dirichlet hyperbola and totient-summatory recursion as one sublinear toolkit",
+      "title": "Summing multiplicative functions fast",
       "status": "final",
       "solved": 19,
       "problems": 27,
@@ -3359,7 +3359,7 @@
     },
     {
       "path": "probability/markov-chains-and-expectation",
-      "title": "Markov Chains and Expected Value",
+      "title": "Markov chains and expected value",
       "status": "final",
       "solved": 7,
       "problems": 34,
