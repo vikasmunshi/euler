@@ -1,5 +1,5 @@
 <!-- tags: [c-dynamic-memory-allocation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:55Z -->
 # calloc
 
 Most C solutions here keep their working state on the heap. That state might be a sieve, a
