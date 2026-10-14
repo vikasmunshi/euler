@@ -3332,8 +3332,8 @@
     },
     {
       "path": "number-theory/primes-in-pascals-triangle",
-      "title": "Primes In Pascals Triangle",
-      "status": "draft",
+      "title": "Primes in Pascal\u2019s triangle: Lucas, Kummer and Legendre as one toolkit for divisibility of binomial coefficients",
+      "status": "final",
       "solved": 15,
       "problems": 19,
       "tags": ["lucass-theorem", "kummers-theorem", "legendres-formula", "p-adic-valuation"],
