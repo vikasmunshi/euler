@@ -90,6 +90,7 @@ a profile on each channel.
 | `solver.utils.doclint` | `check-commands` |  |  |  | ✓ |
 | `solver.utils.linter` | `lint` |  | ✓ | ✓ | ✓ |
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |
+| `solver.utils.presentation` | `update-presentation-data` |  |  | ✓ | ✓ |
 | `solver.utils.scripts` | `pip-upgrade` |  |  |  | ✓ |
 | `solver.utils.scripts` | `sys-setup` |  |  |  | ✓ |
 | `solver.utils.search` | `search` | ✓ | ✓ | ✓ | ✓ |

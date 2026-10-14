@@ -302,6 +302,7 @@ solver/
     loader.py          — Utility for loading command modules.
     misc.py            — The `problems` command.
     path_utils.py      — Utility functions for file and directory operations.
+    presentation.py    — The `update-presentation-data` command: refresh the presentation deck's data file.
     quips.py           — The regenerating verbs' commit subjects — one pool per verb, in one place.
     scripts.py         — Dependency and system-resource setup commands.
     search.py          — 'find' command: grep the solution stack for a regular expression.

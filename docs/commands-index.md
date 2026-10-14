@@ -100,6 +100,7 @@ a parameter that accepts repetition.
 | [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
 | [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
+| [`update-presentation-data`](#command-update-presentation-data) | — | `maintainer` | Refresh the presentation deck's data from the progress file. |
 | [`update-tags`](#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`update-usd-rate`](#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
@@ -1944,6 +1945,42 @@ update-models
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.ai.update_models.update_models`.
+
+---
+
+#### Command: `update-presentation-data`
+
+Refresh the presentation deck's data from the progress file.
+
+* ⚑ needs maintainer or above.
+* » supports --silent to suppress output.
+
+Rebuilds `docs/presentation/data/history.js` — the script the deck at `/story/` loads —
+from `solutions/problems.json`, the article index, the command catalogue and counts of
+the solution files. Only public metadata is exported: never an answer, and nothing read
+from inside `solutions/private/`.
+
+The generation date and commit count are refreshed only alongside a real change, never
+on their own, so a current file is left alone.
+
+A file that changed is committed, staging that one file and nothing beside it.
+
+**usage**
+
+```
+update-presentation-data
+[check=true|--check]
+[silent=true|--silent]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `check` | Write nothing and fail if the data file is out of date. Defaults to False, which refreshes it in place. |
+| `silent` | Suppress this command's output; errors and the result line still show. |
+
+*Defined in* `solver.utils.presentation.update_presentation_data`.
 
 ---
 
