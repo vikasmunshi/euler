@@ -597,7 +597,7 @@
     {
       "path": "domain/continued-fraction",
       "title": "Continued fraction",
-      "status": "draft",
+      "status": "final",
       "solved": 6,
       "problems": 12,
       "tags": ["continued-fraction"],
