@@ -1,5 +1,5 @@
 <!-- tags: [string-slicing] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:35Z -->
 # string slicing
 
 [Slicing](https://docs.python.org/3/library/stdtypes.html#common-sequence-operations) is
