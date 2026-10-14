@@ -1,5 +1,5 @@
 <!-- tags: [parallel-assignment] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T17:46Z -->
 # Parallel assignment
 
 [Parallel assignment](https://en.wikipedia.org/wiki/Parallel_assignment) updates several

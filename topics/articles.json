@@ -6845,8 +6845,8 @@
     {
       "path": "technique/parallel-assignment",
       "title": "Parallel assignment",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T17:46Z",
       "solved": 4,
       "problems": 4,
       "tags": ["parallel-assignment"],
