@@ -3305,8 +3305,8 @@
     },
     {
       "path": "number-theory/pells-equation-in-disguise",
-      "title": "Pells Equation In Disguise",
-      "status": "draft",
+      "title": "Pell equation in disguise",
+      "status": "final",
       "solved": 51,
       "problems": 120,
       "tags": ["pells-equation", "recurrence-relation-application", "pythagorean-triple", "diophantine-equation"],
