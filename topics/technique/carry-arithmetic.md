@@ -1,5 +1,5 @@
 <!-- tags: [carry-arithmetic] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T12:13Z -->
 # Carry (arithmetic)
 
 Python integers have no upper limit, so a Python solution that adds a hundred 50-digit numbers or
