@@ -19,7 +19,7 @@ from solver.config import ExitCodes, config
 from solver.core import osc
 from solver.core.git import commit_regenerated
 from solver.core.problems import Problem, format_solved_date, problems
-from solver.core.progress import ProblemRecord, merge_progress, parse_progress
+from solver.core.progress import RECORD_TZ, ProblemRecord, merge_progress, parse_progress
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
 from solver.utils.quips import quips
@@ -239,7 +239,7 @@ def mark(problem: Problem) -> int:
         console.print(f'[error]error:[/error] [muted]{problem} is not solved.[/muted]')
         return ExitCodes.EXIT_ERROR
     _problems[problem.number]['solved'] = True
-    _problems[problem.number]['date'] = format_solved_date(datetime.now())
+    _problems[problem.number]['date'] = format_solved_date(datetime.now(RECORD_TZ))
     _update_problems_state(_problems)
     return ExitCodes.EXIT_OK
 

@@ -140,11 +140,11 @@ class ArticleIndexTests(unittest.TestCase):
             older = '<!-- status: final 2026-08-03T14:12Z -->\n# Alpha\n'
             self.assertEqual(tags._stamp_status(older), older)                   # a stamp is never moved
 
-    def test_solve_dates_are_local_times_read_into_utc(self) -> None:
+    def test_solve_dates_are_amsterdam_times_whatever_zone_the_machine_runs_in(self) -> None:
         problem = MagicMock(number=7)
         fake = MagicMock(solved_problems=[problem], solutions_history={7: 'Wed, 14 Oct 2026, 10:32'})
         try:
-            with patch.object(tags, 'problems', fake), patch.dict(os.environ, {'TZ': 'Europe/Amsterdam'}):
+            with patch.object(tags, 'problems', fake), patch.dict(os.environ, {'TZ': 'UTC'}):
                 time.tzset()
                 self.assertEqual(tags._solve_dates(), {7: '2026-10-14T08:32Z'})  # CEST is UTC+2
         finally:

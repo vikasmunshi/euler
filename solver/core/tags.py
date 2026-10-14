@@ -617,8 +617,8 @@ def _solve_dates() -> dict[int, str]:
     """`number → solve time` (:data:`WRITTEN_FORMAT`, UTC) for every solved problem with a
     readable date — the form an article's `written` stamp takes, so the two compare as text.
 
-    `problems.json` records a naive local time (the progress page's display, and `mark`'s
-    `datetime.now()`), so it is read as this machine's zone and converted to UTC.
+    `problems.json` records Amsterdam wall-clock times (`solver.core.progress.RECORD_TZ`),
+    which `parse_solved_date` reads as such — never as this machine's zone.
     """
     dates: dict[int, str] = {}
     for p in problems.solved_problems:
