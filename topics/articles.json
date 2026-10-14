@@ -4117,8 +4117,8 @@
     {
       "path": "recreational/digit-manipulation",
       "title": "Digit Manipulation",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:24Z",
       "solved": 53,
       "problems": 110,
       "tags": ["digit-sum", "palindromic-number", "string-slicing", "positional-notation"],
