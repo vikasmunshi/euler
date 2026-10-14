@@ -43,7 +43,7 @@ from typing import Annotated, Any, NamedTuple
 
 from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
-from solver.core.problems import Problem, problems, solution_dir
+from solver.core.problems import Problem, parse_solved_date, problems, solution_dir
 from solver.shell import console, register
 from solver.shell.dialogue import Abort, Ask, Choice
 from solver.shell.variables import variable
@@ -595,6 +595,33 @@ def _problem_meta() -> tuple[dict[int, str], set[int]]:
     return titles, solved
 
 
+def _solve_dates() -> dict[int, str]:
+    """`number → solve date` (`YYYY-MM-DD`) for every solved problem with a readable date.
+
+    The ISO calendar date, so it compares as text with an article's `written` date. Day
+    granularity is the article side's: the blogger knows the date it writes on, not the time.
+    """
+    dates: dict[int, str] = {}
+    for p in problems.solved_problems:
+        if when := parse_solved_date(problems.solutions_history.get(p.number, '')):
+            dates[p.number] = when.date().isoformat()
+    return dates
+
+
+def _solved_after(refs: list[str], written: str | None, dates: dict[int, str]) -> list[str]:
+    """The problems behind an article that were solved on or after the day it was *written*.
+
+    Each is a solution the article could not have drawn on, so a non-empty list marks the page
+    as a candidate for a rewrite. A same-day solve counts: with only the day to go on, it may
+    have come after the writing, and a false alarm costs a reread where a miss costs a stale page.
+    A draft (no *written*) has nothing to be stale against. `pNNNN` granularity, sorted.
+    """
+    if written is None:
+        return []
+    nums = sorted({int(r.split('_')[0][1:]) for r in refs})
+    return [f'p{n:04d}' for n in nums if dates.get(n, '') >= written]
+
+
 def _problems_block(declared: list[str], by_slug: dict[str, Any],
                     titles: dict[int, str], solved: set[int]) -> str:
     """The visible, machine-owned Problems section for an article: the distinct problems its tags
@@ -679,12 +706,14 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
     a tag (`number-theory/primes`) join on the same footing. Each row carries the page's own
     `refs`, the same list the page's generated comment holds, so a consumer can rank or filter
     without re-deriving it from the vocabulary — plus the `solved`/`problems` pair derived
-    from those refs, which is what the web topics index shows as each card's subtitle. It is
+    from those refs, which is what the web topics index shows as each card's subtitle — and
+    `solved_after`, the problems solved since a final page was `written` (see `_solved_after`). It is
     stored rather than recomputed per request: the derivation needs the whole vocabulary and the
     solved set, and the index is exactly the place that already holds both.
     """
     by_slug = {t['slug']: t for t in central['tags']}
     _, solved = _problem_meta()
+    dates = _solve_dates()
     rows: dict[str, dict[str, Any]] = {}
     for file in _iter_articles():
         text = file.read_text()
@@ -692,10 +721,12 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
         declared = _article_tags(text)
         refs = _article_refs(declared, by_slug)
         n_solved, n_problems = _article_counts(refs, solved)
+        written = article_written(text)
         rows[path] = {'path': path, 'title': _article_title(text, file.stem),
-                      'status': article_status(text), 'written': article_written(text),
+                      'status': article_status(text), 'written': written,
                       'solved': n_solved, 'problems': n_problems,
-                      'tags': declared, 'refs': refs}
+                      'tags': declared, 'refs': refs,
+                      'solved_after': _solved_after(refs, written, dates)}
     return {'articles': [rows[path] for path in sorted(rows)]}
 
 
@@ -728,7 +759,9 @@ def update_tags(check: bool = False) -> int:
     vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
     the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
     the topic articles' problem lists and rewrite the article index `topics/articles.json`
-    (one row per writable topic: title, status, solved/problem counts, tags and refs). A
+    (one row per writable topic: title, status, written date, solved/problem counts, tags, refs
+    and the problems solved since the page was written), and name the final articles those
+    later solves have overtaken — the rewrite candidates. A
     problem with notes but no `tags.json` is reported, not created here — the
     `claude-api tags` target (or the skill) authors it.
 
@@ -795,11 +828,26 @@ def update_tags(check: bool = False) -> int:
     console.print(f'[accent]update-tags:[/accent] {len(ptags)} problem file(s), '
                   f'{promoted} tag(s) promoted, {diff_changes} maintainer edit(s) applied')
     console.print('[accent]articles:[/accent] ' + ' · '.join(f'{by_status[s]} {s}' for s in STATUSES))
+    stale = [a for a in index['articles'] if a['solved_after']]
+    stale_line = (f'{len(stale)} final article(s) written before some of their problems were solved'
+                  ' (see `solved_after` in ' + _rel(config.topics_index_file) + ')')
+    if stale:
+        console.print(f'[accent]stale:[/accent] {stale_line}')
+        # Most-overtaken first: the page that has missed the most solves gains most from a rewrite.
+        for a in sorted(stale, key=lambda a: (-len(a['solved_after']), a['path']))[:_STALE_SHOWN]:
+            console.print(f"  [warning]•[/warning] {a['path']} ({a['written']}): {' '.join(a['solved_after'])}")
+        if len(stale) > _STALE_SHOWN:
+            console.print(f'  … and {len(stale) - _STALE_SHOWN} more')
     return commit_regenerated('update-tags', quips['update-tags'], written_paths, [
         f'{len(ptags)} problem file(s), {promoted} tag(s) promoted, '
         f'{diff_changes} maintainer edit(s) applied',
         'articles: ' + ' · '.join(f'{by_status[s]} {s}' for s in STATUSES),
+        *([f'stale: {stale_line}'] if stale else []),
     ])
+
+
+#: How many stale articles the update-tags report names; the full list is in the index.
+_STALE_SHOWN = 10
 
 
 # ── curated topics ──────────────────────────────────────────────────────────────────────

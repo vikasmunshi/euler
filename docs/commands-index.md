@@ -1957,7 +1957,9 @@ Order (maintainer beats solver/contributor): apply maintainer edits to the centr
 vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
 the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
 the topic articles' problem lists and rewrite the article index `topics/articles.json`
-(one row per writable topic: title, status, solved/problem counts, tags and refs). A
+(one row per writable topic: title, status, written date, solved/problem counts, tags, refs
+and the problems solved since the page was written), and name the final articles those
+later solves have overtaken — the rewrite candidates. A
 problem with notes but no `tags.json` is reported, not created here — the
 `claude-api tags` target (or the skill) authors it.
 

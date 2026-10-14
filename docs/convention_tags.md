@@ -109,7 +109,9 @@ the index only mirrors it. The blogger skill sets `final` when it finishes writi
 the day it was written as an ISO 8601 calendar date — `<!-- status: final 2026-10-14 -->` — which the
 index mirrors as the row's `written` (`null` for a draft). The date sorts and compares as plain text,
 and set against each covered problem's solve date it finds the articles written before some of their
-problems were solved. `claude-blog` then refuses that topic unless run with `--force`. The index also drives `claude-blog`
+problems were solved: each row's `solved_after` lists the problems solved on or after its `written`
+day (a same-day solve counts, since the day is all the date says), and the `update-tags` report
+names those articles as rewrite candidates. `claude-blog` then refuses that topic unless run with `--force`. The index also drives `claude-blog`
 tab-completion (unwritten and most-referenced first) and the web `/topics` grid.
 
 ## Choosing good tags

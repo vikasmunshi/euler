@@ -114,6 +114,13 @@ class ArticleIndexTests(unittest.TestCase):
         # a page on disk is never 'missing', whatever its comment claims
         self.assertEqual(tags.article_status('<!-- status: missing -->\n# Alpha\n'), 'draft')
 
+    def test_solved_after_names_the_problems_solved_since_the_page_was_written(self) -> None:
+        refs = ['p0001', 'p0002_s0', 'p0002_s1', 'p0003', 'p0004']
+        dates = {1: '2026-07-01', 2: '2026-08-01', 3: '2026-07-23'}             # p0004 unsolved
+        self.assertEqual(tags._solved_after(refs, '2026-07-23', dates), ['p0002', 'p0003'])
+        self.assertEqual(tags._solved_after(refs, '2026-09-01', dates), [])
+        self.assertEqual(tags._solved_after(refs, None, dates), [])
+
     def test_a_final_status_carries_the_date_it_was_written(self) -> None:
         dated = '<!-- status: final 2026-10-14 -->\n# Alpha\n'
         self.assertEqual(tags.article_status(dated), 'final')
@@ -139,10 +146,13 @@ class ArticleIndexTests(unittest.TestCase):
         self._article('domain/alpha.md',
                       '<!-- tags: [alpha] -->\n<!-- status: final 2026-10-14 -->\n# Alpha, at length\n')
         self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
-        with patch.object(tags, '_problem_meta', return_value=({}, {2})):
+        with (patch.object(tags, '_problem_meta', return_value=({}, {2})),
+              patch.object(tags, '_solve_dates', return_value={2: '2026-10-14'})):
             index = tags._build_index(_central())
         rows = {row['path']: row for row in index['articles']}
         self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
+        self.assertEqual(rows['domain/alpha']['solved_after'], ['p0002'])             # solved that day
+        self.assertEqual(rows['curated/mix']['solved_after'], [])                     # a draft is never stale
         self.assertEqual(set(rows), {'domain/alpha', 'curated/mix'})                 # pages only
         self.assertEqual(rows['domain/alpha']['status'], 'final')
         self.assertEqual(rows['domain/alpha']['written'], '2026-10-14')
