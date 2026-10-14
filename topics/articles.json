@@ -2555,8 +2555,8 @@
     {
       "path": "domain/pandigital-number",
       "title": "Pandigital number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:55Z",
       "solved": 8,
       "problems": 11,
       "tags": ["pandigital-number"],
