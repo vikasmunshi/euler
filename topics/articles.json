@@ -1653,8 +1653,8 @@
     {
       "path": "domain/greatest-common-divisor",
       "title": "Greatest common divisor",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T12:01Z",
       "solved": 10,
       "problems": 30,
       "tags": ["greatest-common-divisor"],
