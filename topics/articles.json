@@ -2910,7 +2910,7 @@
     {
       "path": "domain/subset-sum-problem",
       "title": "Subset sum problem",
-      "status": "draft",
+      "status": "final",
       "solved": 10,
       "problems": 14,
       "tags": ["subset-sum-problem"],
