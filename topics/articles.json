@@ -3358,6 +3358,15 @@
       "refs": ["p0073_s2", "p0153", "p0153_s0", "p0193_s0", "p0202_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0401", "p0429_s0", "p0452", "p0464_s0", "p0478_s0", "p0478_s1", "p0484", "p0501_s0", "p0530", "p0565_s1", "p0608", "p0615", "p0625", "p0639", "p0641", "p0642_s0", "p0694", "p0745", "p0745_s0", "p0926_s0"]
     },
     {
+      "path": "probability/markov-chains-and-expectation",
+      "title": "Markov Chains And Expectation",
+      "status": "draft",
+      "solved": 7,
+      "problems": 34,
+      "tags": ["markov-chain", "expected-value-application", "stationary-distribution", "random-walk"],
+      "refs": ["p0084", "p0151", "p0213", "p0227", "p0253", "p0253_s0", "p0280", "p0298", "p0329", "p0339", "p0367", "p0470", "p0493_s0", "p0497", "p0499", "p0575", "p0589", "p0595", "p0610", "p0640", "p0648", "p0661", "p0683", "p0697", "p0807", "p0819", "p0825", "p0852", "p0930", "p0938", "p0959", "p0970", "p0973", "p0978", "p0979"]
+    },
+    {
       "path": "takeaway/algorithm-beats-language",
       "title": "Algorithm beats language",
       "status": "final",
