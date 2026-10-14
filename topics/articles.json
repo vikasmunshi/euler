@@ -2093,8 +2093,8 @@
     {
       "path": "domain/lattice-path",
       "title": "Lattice path",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-14T11:51Z",
       "solved": 3,
       "problems": 16,
       "tags": ["lattice-path"],

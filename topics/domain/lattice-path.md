@@ -1,5 +1,5 @@
 <!-- tags: [lattice-path] -->
-<!-- status: final -->
+<!-- status: final 2026-10-14T11:51Z -->
 # Lattice path
 
 A **lattice path** is a walk on the integer grid ℤ² made from a fixed set of steps — most often
