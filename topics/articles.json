@@ -4635,12 +4635,12 @@
       "path": "technique/bit-manipulation",
       "title": "Bit manipulation",
       "status": "final",
-      "written": "2026-08-07T16:34Z",
+      "written": "2026-10-15T10:50Z",
       "solved": 34,
       "problems": 34,
       "tags": ["bit-manipulation"],
       "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0244_s0", "p0265_s0", "p0269_s0", "p0345_s0", "p0704_s0", "p0755_s0", "p0768_s0", "p0872_s0", "p0882_s0", "p0918_s0", "p0943_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p1000_s0"],
-      "solved_after": ["p0265", "p0882", "p0943", "p0963"]
+      "solved_after": []
     },
     {
       "path": "technique/bitwise-operation",
