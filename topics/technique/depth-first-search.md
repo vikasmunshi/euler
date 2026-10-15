@@ -1,5 +1,5 @@
 <!-- tags: [depth-first-search] -->
-<!-- status: final 2026-08-01T12:58Z -->
+<!-- status: final -->
 # Depth-first search
 
 [Depth-first search](https://en.wikipedia.org/wiki/Depth-first_search) (DFS) explores a
@@ -8,8 +8,9 @@ course it is one of two ways to visit the vertices of a given graph; in Project 
 is almost always something slightly different and more useful — a way to *enumerate
 constructed objects*. There is no graph on disk. The tree is implicit: a node is a partly
 built object, an edge is one more choice, and a leaf is a finished candidate. Sets of
-primes, factorisations, addition chains, digit strings, tilings, Pythagorean triples —
-the problems below all build their answers that way.
+primes, factorisations, addition chains, digit strings, binary circles, tilings,
+Pythagorean triples, squares packed under a curve — the problems below all build their
+answers that way.
 
 ## The idea — a tree you never store
 
@@ -50,6 +51,25 @@ as `if prime <= current_list[-1]: continue` — members are added in ascending o
 five-element set is built once rather than $5!$ times, and the first clique found is
 automatically the minimal one.
 
+The node need not carry what has been built; it can carry **what is left to build**.
+Problem 248 inverts Euler's totient — every $n$ with $\varphi(n) = 13!$ — and its node is
+a *residual*: the part of $13!$ not yet accounted for. Taking prime $p$ to the power $a$
+peels $p^{a-1}(p-1)$ off the residual, so the only primes worth listing are those with
+$(p-1) \mid 13!$, a child exists only if $(p-1)$ divides what remains, and a leaf is a
+residual of $1$. The ascending-prime rule does the deduplication exactly as in 204, and
+the divisibility test is the prune — a much sharper one than a size bound, because almost
+every candidate prime fails it.
+
+Cyclic objects need one more decision before the order can do its work: *where the cycle
+starts*. Problem 265 counts binary circles — $2^N$ bits whose $N$-bit windows, read around
+the circle, are all different ([de Bruijn sequences](https://en.wikipedia.org/wiki/De_Bruijn_sequence)).
+Every circle has $2^N$ rotations, but exactly one begins with its all-zeros window, so
+the search fixes those $N$ zeros as the root and grows only the rest. One anchoring
+choice divides the tree by $2^N$ and makes each circle's numeric reading unique — the
+same symmetry-breaking move as the strict inequality, applied to rotation instead of
+permutation. The seam is the one place the anchor is not free: the $N-1$ windows that
+wrap around the end must be checked once the circle is complete.
+
 When the tree really is a walk over a graph, you pay the other way: the same vertex is
 reachable by many paths and you need explicit bookkeeping. Problem 61 chains four-digit
 figurate numbers by their overlapping digits and hunts for cycles, so it carries a
@@ -69,8 +89,12 @@ for next_num in number_mapping.get(current, []):
 That four-line sandwich — mutate, recurse, un-mutate — is *backtracking*, and it is the
 single most common source of wrong answers in a DFS. Anything you change on the way down
 has to be restored on the way up, exactly. Passing a fresh copy of the state to each child
-avoids the bug at the cost of copying; mutating and restoring is faster and is what the
-solutions here do.
+avoids the bug at the cost of copying, so mutate-and-restore is the default for a `set`
+or a list. But when the state fits in a machine word the trade-off flips: problem 265's
+"windows already seen" is a $2^N$-bit integer mask, and the child receives
+`used | 1 << window` — a new value, built in one instruction, with nothing to undo. Make
+the state an immutable value whenever it is small enough, and the backtracking bug
+cannot be written.
 
 ## Pruning is the algorithm
 
@@ -82,7 +106,11 @@ Three flavours recur:
   breaks the bound, stop. Multiplying primes into a smooth number (204) or a powerful
   number (484) is monotone in exactly this sense — the loop over exponents halts the
   instant the product passes $L$, and no branch that cannot yield a valid number is ever
-  entered.
+  entered. The monotone quantity need not be the size: in problem 245 (composites whose
+  "coresilience" $(n-\varphi(n))/(n-1)$ is a unit fraction) it is the ratio
+  $\varphi(m)/m$, which only falls as primes are multiplied in, and the condition can only
+  hold while it stays above $\tfrac12$ — so a prefix that drops below is dead however
+  small it still is.
 - **Branch and bound.** For an *optimisation*, complete the current prefix as optimistically
   as the rules allow and compare that bound with the best answer so far. Problem 170 builds
   a pandigital product one digit at a time from the most significant end and pads the prefix
@@ -108,6 +136,43 @@ in exactly one line — which of two validity conditions is checked first — an
 line dominates the running time, because the expensive $O(2^n)$ test runs on every candidate
 the cheap $O(n^2)$ test would have rejected for free. Cheap and discriminating first, always.
 
+## Stop one level early
+
+In a branching tree most of the nodes are leaves, so most of the cost of a DFS is its
+last level. The strongest optimisation is often not a better prune but **not descending
+into that level at all** — replacing it by arithmetic over the whole fan-out at once.
+
+- **Solve for the last choice.** In problem 245 the unknown largest prime $q$ appears
+  linearly once the prefix $m$ of smaller primes is fixed: for each small integer $K$
+  the condition rearranges to $q = (K\varphi(m)+1)/\bigl(m - K(m-\varphi(m))\bigr)$. The
+  search walks prefixes only; at each one it tries the handful of $K$ that keep $q$ in
+  range, checks divisibility, and runs one primality test. A leaf level that would have
+  been "every prime up to $L/m$" becomes a few lines of algebra.
+- **Count the last choice in bulk.** Problem 272 sums the $n \le L$ with a prescribed
+  number of cube roots of unity, which fixes how many primes $\equiv 1 \pmod 3$ divide
+  $n$. The DFS chooses all but the last of those primes; the last prime $p$ and the
+  free cofactor below $T/p$ are then summed together, with the large $p$ grouped by the
+  value of $\lfloor T/p \rfloor$ and priced by prefix sums over primes and over
+  admissible cofactors. The deepest level — by far the widest — is never enumerated.
+
+The pattern is the same in both: let the DFS do the combinatorial part, where the
+choices genuinely interact, and hand the final, independent choice to a formula or a
+table. See [closed form over iteration](/topics/takeaway/closed-form-over-iteration).
+
+## A node can be a set of inputs
+
+So far each node has been one partial object. A more powerful reading makes a node a
+*block of inputs that share the same history*. Problem 255 asks for the average number of
+steps a rounded Heron's-method square root takes over every 14-digit $n$ — $9 \times 10^{13}$
+separate runs. But each step maps the current estimate $x$ to
+$\lfloor (x + \lceil n/x \rceil)/2 \rfloor$, and $\lceil n/x \rceil$ is constant on runs of
+$x$ consecutive $n$. So the search starts from the interval of all inputs, splits it into
+one child interval per possible next estimate, and closes a branch the moment the estimate
+repeats, adding *step count × interval length* to the total. The tree has about
+$10^7$ nodes rather than $10^{14}$ leaves; the DFS is over the computation's decision
+tree, not over its inputs. Whenever a per-input procedure branches on a quantity that is
+piecewise constant in the input, this is how to run it on all inputs at once.
+
 ## Depth, recursion, and the explicit stack
 
 Depth is DFS's one resource, and it is not always as small as it looks. Problems 139, 218
@@ -124,6 +189,13 @@ Reach for the explicit form when the depth is data-dependent and unbounded, when
 writing C, or when you want to swap traversal order later — a stack becomes a queue with a
 one-line change, which is exactly the experiment you want to be able to run.
 
+The explicit stack also lets you shape *what* it holds. Problem 255's root interval has an
+enormous fan-out but each subtree beneath it is shallow, so pushing every child of the root
+would fill the stack with millions of deferred siblings. Its solution walks the root's
+children with an ordinary loop and runs a fresh stack per subtree; inside, the last child
+of each node is followed in place rather than pushed, since most nodes have only one.
+Memory then tracks one subtree's open branches, which is the DFS promise kept in practice.
+
 ## When DFS is the wrong tool — and how it comes back
 
 DFS gives no guarantee about *distance*. If the question is a shortest path, DFS answers
@@ -139,6 +211,17 @@ optimal by construction. BFS establishes the metric; DFS enumerates within it. T
 is worth remembering whenever a problem asks not for the shortest path but for something
 summed over all of them. See also [shortest path problem](/topics/domain/shortest-path-problem).
 
+The same caution applies to *ranking*. Problem 247 packs squares under $y = 1/x$: each
+region yields one square and two smaller sub-regions, and the question is the position of
+a given square when all of them are sorted by size. That reads like a job for best-first
+search — a priority queue popping the largest square each time. But the tree is
+**heap-ordered**: a child's square is always smaller than its parent's. So once the target
+square's side $s$ is known, the squares at least as large as it form a connected subtree at
+the root, and a plain DFS that refuses to enter any region whose square is smaller than $s$
+visits exactly them. Their count is the rank, found with a stack and no heap. When values
+fall monotonically down every branch, "the top $k$" is a pruned DFS, and the order of the
+visit stops mattering.
+
 The other repair is [iterative deepening](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search)
 (IDDFS): run a depth-limited DFS at limit $1$, then $2$, then $3$, until an answer appears.
 The first solution found is then shortest, as with BFS, but memory stays $O(\text{depth})$,
@@ -153,15 +236,19 @@ Reach for DFS when the answer is *built* rather than looked up, when the number 
 candidates is astronomically larger than the number of *plausible* candidates, and when a
 partial candidate can be judged before it is finished. Then, in order:
 
-1. **Define the node** — what a partial object is, and what "complete" means.
+1. **Define the node** — what a partial object is (or what is still left to build, or
+   which block of inputs shares this history), and what "complete" means.
 2. **Fix a canonical extension order**, so each object is reachable one way. This is
-   usually a strict inequality on the choices, and it is free.
+   usually a strict inequality on the choices, plus an anchor for anything cyclic, and it
+   is free.
 3. **Find the prune.** Without it you have brute force with extra steps; the prune *is*
    the solution. Make sure it is admissible — a bound that can be wrong silently discards
    real answers, which is much worse than being slow.
 4. **Order the children** so a strong incumbent arrives early, and **order the leaf tests**
    cheapest-first.
-5. **Check the depth** before trusting recursion.
+5. **Look at the last level.** If the final choice is independent of the rest, solve for
+   it or count it in bulk instead of descending.
+6. **Check the depth** before trusting recursion.
 
 And, as everywhere in this repository, build the sieves and tables the search needs
 *inside* `solve()`, sized to the inputs — the harness times repeated calls, and anything
