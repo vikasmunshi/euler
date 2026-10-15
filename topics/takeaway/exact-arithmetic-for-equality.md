@@ -1,5 +1,5 @@
 <!-- tags: [exact-arithmetic-for-equality] -->
-<!-- status: final -->
+<!-- status: final 2026-10-15T10:37Z -->
 # Use exact arithmetic for equality checks
 
 Floating point is built for *approximation*. It gives up a little accuracy to gain speed and
