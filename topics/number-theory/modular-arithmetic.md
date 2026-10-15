@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final -->
+<!-- status: final 2026-10-15T10:23Z -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
