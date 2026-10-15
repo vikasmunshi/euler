@@ -1,13 +1,15 @@
 <!-- tags: [arbitrary-precision-arithmetic] -->
-<!-- status: final 2026-07-30T17:45Z -->
+<!-- status: final -->
 # Arbitrary-precision arithmetic
 
 [Arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) is
 integer (or fractional) arithmetic whose operands are limited by memory rather than by a register
-width. It recurs across these problems for two quite different reasons. Sometimes the *answer* is a
-big number — the digits of 21000, of 100!, of the 1000-digit Fibonacci term. Far more often
+width. It recurs across these problems for quite different reasons. Sometimes the *answer* is a
+big number — the digits of $2^{1000}$, of $100!$, of the 1000-digit Fibonacci term. Far more often
 the big number is an *intermediate*: an exact rational, a convergent's numerator, a scaled square
-root, a binomial coefficient that must be compared for equality rather than approximated. In Python
+root, a binomial coefficient that must be compared for equality rather than approximated. And
+sometimes it is not really a number at all, but a container — a bit array or a packed vector that
+happens to be stored as one huge integer. In Python
 this is invisible — [`int`](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
 is unbounded and the arithmetic just works. In the C port it is a decision you have to make and
 implement, and that asymmetry is what makes this tag worth a page.
@@ -43,11 +45,13 @@ machine word.
 
 Above a certain complexity you stop hand-rolling. Several private solutions link
 [GMP](https://gmplib.org/) and work in `mpz_t` — problems 168, 169, 172, 176, 178, 180, 192, 203,
-321 and 387 all do — because once you need division, comparison, exact binomials and a sort over
-big values, a library that has already been tuned (with sub-quadratic multiplication above a
-threshold) beats anything you will write in an afternoon.
+239, 321, 387 and 768 all do — because once you need division, comparison, exact binomials and a
+sort over big values, a library that has already been tuned (with sub-quadratic multiplication above
+a threshold) beats anything you will write in an afternoon. GMP also says what you mean:
+Problem 239's port divides its rolling factorial and binomial with `mpz_divexact_ui`, which both
+documents and exploits the fact that those divisions never leave a remainder.
 
-Three shapes of use recur, and it is worth naming them separately:
+Four shapes of use recur, and it is worth naming them separately:
 
 - **The answer is the digits.** Problems 13, 16, 20 and 25 want a digit sum or a digit count, so the
   full expansion has to exist. Nothing clever avoids it; the only question is how efficiently you
@@ -59,6 +63,11 @@ Three shapes of use recur, and it is worth naming them separately:
   (Problem 66), squarefree tests on binomial coefficients (Problem 203) — in each case a `double`
   would silently agree with itself to fifteen digits and give the wrong count. This is the same
   instinct as [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
+  It holds even when the answer *is* a decimal: Problem 239 wants a probability to twelve places,
+  but it is an alternating inclusion–exclusion sum of factorial-sized terms divided by $100!$, and
+  cancellation in that sum would eat a `double`'s sixteen digits. Keeping numerator and
+  denominator as integers and rounding half-up only at the end,
+  `(2 * num * 10**12 + den) // (2 * den)`, makes every printed digit exact by construction.
 - **Fixed point in disguise.** To get $d$ digits of an irrational, scale by $10^{2d}$ and take an
   *integer* square root. Problem 80 does exactly this — `number *= 10 ** (2 * digits)`, then
   [Heron's method](https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method)
@@ -66,6 +75,18 @@ Three shapes of use recur, and it is worth naming them separately:
   root, [`decimal`](https://docs.python.org/3/library/decimal.html) with an explicit
   `getcontext().prec` does the same job: problems 686 and 751 both set a precision in the hundreds of
   digits and compute fractional parts of logarithms there rather than in binary floating point.
+- **A big integer as a container.** An unbounded `int` is also an unbounded
+  [bit array](https://en.wikipedia.org/wiki/Bit_array) whose shifts, masks and
+  [population counts](https://en.wikipedia.org/wiki/Hamming_weight) run in compiled code. Problem 238
+  keeps the set of reachable digit-sum residues as one integer of about 80 million bits, built in a
+  single `int(runs, 2)`, and rotates it with `(bits >> s) | (bits << (T - s))` masked to $T$ bits,
+  counting what is left with `bit_count()`. Problem 768 packs a whole coordinate vector into one
+  integer instead: it evaluates the vector at a base $B$ large enough that no coordinate of any sum
+  can carry into its neighbour, so adding two packed integers adds the vectors coordinate-wise, and
+  "this subset's vector is zero" becomes a single comparison and a dictionary key. In C both
+  containers have to be made explicit — a `uint64_t` word array for 238 (stored as two consecutive
+  copies, so a rotation reads as a plain 64-bit window), and an `__int128` for 768, which holds the
+  packed codes for the inputs that matter and reports an overflow rather than wrapping beyond them.
 
 ## How to reason about it
 
@@ -77,6 +98,17 @@ asks whether two quantities are equal, a well-chosen invariant often decides it 
 either. A big integer that exists only because you did not think about reduction first is a cost you
 chose.
 
+**Division is where reduction gets hard.** Problem 250 wants a count modulo $10^{16}$ and builds it
+from rows of binomials $\binom{c}{i}$. Python takes the easy road: it runs the exact recurrence
+`b = b * (c - i) // (i + 1)` in big integers and reduces only when folding each coefficient in. The C
+port cannot, because division by $i + 1$ has no meaning modulo $10^{16}$ unless $i + 1$ is coprime to
+it. So it carries each binomial factored as $2^{a} \cdot 5^{b} \cdot u$ — strips the twos and fives
+out of every numerator and denominator, keeps the unit $u$ coprime to the modulus, and divides by
+multiplying with a [modular inverse](/topics/technique/modular-multiplicative-inverse-application) —
+with `__int128` products keeping each step exact. Python's big integers are buying the *right to
+divide*, and the C port has to earn it back with number theory; the reward is $24$ ms against
+Python's $0.95$ s.
+
 **When you do need it, the base and the algorithm dominate — not the language.** The benchmarks here
 make that unusually vivid. For Problem 25 (repeated addition, base-$10^9$ limbs), C runs in
 $0.66$ ms against Python's $12$ ms — an 18× win. For Problem 65 (exact rationals) the C `BigInt`
@@ -87,13 +119,27 @@ takes $0.24$ ms — Python is **122× faster**. Nothing about C is at fault; the
 the base $n$ times over single-decimal-digit limbs, an $O(n^2)$ walk, while `2 ** 10000` uses
 [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) over 30-bit
 limbs. A naive bignum in a fast language loses to a good bignum in a slow one, every time. This is
-[algorithm beats language](/topics/takeaway/algorithm-beats-language) in its purest form.
+[algorithm beats language](/topics/takeaway/algorithm-beats-language) in its purest form. The same
+fact narrows the gap whenever Python's big integers carry the inner loop: Problem 238's bitset sweep
+is only $6.8\times$ slower in Python ($3.51$ s against $0.51$ s), far less than an interpreted
+bit-twiddling loop would suggest, because every shift and popcount is already a compiled pass over
+the limbs; C wins by fusing them into one. And where both sides use a real bignum library, the
+library decides — Problem 239's C port is about $4.8\times$ faster simply because GMP's
+multiplications are faster than CPython's.
 
 **Know the ladder, and stop at the lowest rung that holds.** 64-bit native → `__int128` (~38 digits,
 still machine speed) → a hand-rolled base-$10^9$ `BigInt` (fine for add/multiply/compare) → GMP
 (when you need division, roots, or performance at scale). Problem 80's two solutions bracket this:
 `s0` picks the algorithm that keeps the numbers small and finishes the 999-root sweep in $5.3$ ms in
-C, while `s1`'s heavier big-integer work takes $281$ ms for the same answer.
+C, while `s1`'s heavier big-integer work takes $281$ ms for the same answer. Problem 957 sits on
+the `__int128` rung by design: its answer is a closed form whose dominant term grows like
+$11 \cdot 16^n$, past 64 bits at the main input $n = 16$, so the C port computes in `__int128`,
+rejects $n > 30$ where even that would overflow, and needs its own decimal formatter because `printf`
+cannot print a 128-bit value — while Python, unbounded, answers for any $n$. The rungs also mix
+within one program: Problem 768's C keeps its packed vector codes in `__int128` but switches to GMP
+for the truncated polynomial power at the end, where the counts outgrow 64 bits quickly and reach
+34 digits already at $n = 720$ — too close to the `__int128` ceiling to trust it.
+Pick the rung per quantity, not per program.
 
 **Two pitfalls specific to Python.** First, `int` being free is exactly why the C translation
 surprises you — the overflow you never saw is now yours to handle, and the port is not a
