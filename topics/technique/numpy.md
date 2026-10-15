@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-08-03T06:32Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -56,7 +56,48 @@ gives a formula in $d$, evaluating it over $d = 1 \dots N$ is one expression:
 `counts = upper // (d * d)`, then a dot product against a sieved table. That is the
 whole inner loop of the squarefree count in [193](/solutions/0193/), and the
 divisor-block sums in [944](/solutions/0944/) are the same move over the
-$O(\sqrt{n})$ distinct values of $\lfloor n/x \rfloor$.
+$O(\sqrt{n})$ distinct values of $\lfloor n/x \rfloor$. The range need not be the
+answer's index: [257](/solutions/0257/) parametrises its triangles by a fraction
+$p/q$, and for each $q$ the admissible $p$ are one `arange`, filtered to the coprime
+ones by `np.gcd(p, q) == 1`, with every primitive shape's scalings counted by one
+floor division — the Python loop runs over $q$ only.
+
+**A table indexed by an array is a vectorised branch.** A case analysis on a residue
+is a lookup: [274](/solutions/0274/) needs a multiplier that depends on $p \bmod 10$,
+so it stores the four cases in a ten-entry array and writes
+`TABLE[primes % 10] * primes` — one gather, no `if`. Two-dimensional tables work the
+same way: [315](/solutions/0315/) precomputes a saving for every (last two digits,
+digit sum) pair and reads it for every prime at once as `first[big % 100, sums]`.
+
+**Loop over the digits, not the numbers.** Digit work on a million integers is a
+handful of passes, not a million calls: `rem, d = np.divmod(rem, 10); sums += d`
+until `rem` is zero computes every digit sum in [315](/solutions/0315/) in at most
+ten array operations. [348](/solutions/0348/) tests palindromes the same way, one
+digit pair per pass from the outside in, and *keeps only the survivors* each time —
+a [cheap check first](/topics/takeaway/cheap-checks-first) that shrinks the array
+roughly tenfold per pass, so the whole filter costs barely more than its first
+comparison. `np.unique(..., return_counts=True)` then tallies how many ways each sum
+was reached.
+
+**Vectorise across instances, not just across a range.** Nothing requires the
+elements to share a modulus. [421](/solutions/0421/) runs square-and-multiply on an
+array of primes, each entry reduced by its *own* prime: `np.where(odd, r * f % p, r)`
+is the conditional multiply, and the exponent array shifts right until it is zero.
+Even a retry loop vectorises — searching for a base whose power is not 1, it keeps a
+`pending` index array of the primes still unsatisfied and shrinks it each round, so
+the work per round is only the stragglers.
+
+**Broadcasting builds the pairwise table.** `xs[None, :] - xs[:, None]` is every
+difference vector between $n$ points as one $n \times n$ array. [252](/solutions/0252/)
+reduces each by `np.gcd` so that exactly collinear directions become *equal integers*
+(floats only order them, never decide equality), sorts every row by angle with
+`argsort(axis=1)`, turns the sorted order into ranks with `cumsum` and
+`put_along_axis`, and decides which triangles are empty with
+`np.maximum.accumulate` — a running maximum along each row in place of a scan over
+third points. When the objects are points but the tool wants scalars, pack them:
+[983](/solutions/0983/) encodes a lattice point as one `int64` key $xB + y$, after
+which `np.unique`, `np.isin` and `searchsorted` handle sets of points as sets of
+integers.
 
 **`searchsorted` is a vectorised binary search.** Given a sorted array of primes,
 [`np.searchsorted`](https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html)
@@ -81,7 +122,11 @@ walk simultaneously instead of one walk at a time. The subtlest instance is the
 "add this item to every reachable subset sum" pass. The two slices *overlap*, and
 NumPy buffers the right-hand read before writing — which is exactly the
 descending-index update the recurrence requires, and exactly what a hand-written
-ascending Python loop would get wrong.
+ascending Python loop would get wrong. The same slice is polynomial arithmetic: hold a
+generating function as its coefficient array and multiplying by $y^s$ is
+`out[s:] = p[:-s]`. [996](/solutions/0996/) advances a whole transfer recurrence of
+polynomials that way — each step a few shifted sums, every coefficient updated
+together.
 
 ## How to reason about it
 
@@ -92,8 +137,21 @@ correctness argument. [944](/solutions/0944/) does square-and-multiply on arrays
 the invariant that every partial product stays under $m^2 < 2^{63}$;
 [249](/solutions/0249/) knows each pass at most doubles a count, so it can run ten
 passes before reducing `mod` $10^{16}$, and sums a `uint64` array in chunks small
-enough that no partial sum wraps. If you cannot state the bound, you do not have a
-correct program — you have one that happens to work on the test case.
+enough that no partial sum wraps. [421](/solutions/0421/) does both halves of the
+job: it *refuses* inputs past $2^{32}$, where a product of two residues would leave
+`uint64`, rather than wrap; and since its final sum can pass $2^{64}$ even though no
+term does, it sums the high and low 32-bit halves separately and rejoins them as
+Python ints. [348](/solutions/0348/) caps its digit bands at the length whose sums
+still fit. If you cannot state the bound, you do not have a correct program — you
+have one that happens to work on the test case.
+
+**Floats estimate; integers decide.** `np.sqrt` on an `int64` array goes through
+`float64`, which has 53 bits of mantissa, so past $2^{53}$ the truncated root can be
+off by one either way. [331](/solutions/0331/) takes the float root as a guess and
+corrects it with exact integer comparisons — `root -= root * root > v`, then the
+mirror step up — a vectorised [integer square root](/topics/technique/integer-square-root).
+[252](/solutions/0252/) applies the same division of labour to angles: `arctan2`
+sorts directions, but equality is decided on gcd-reduced integers.
 
 **The dtype is also the memory budget.** A Möbius array only ever holds $-1, 0, +1$,
 so `int8` costs one byte per entry and a sieve to $2^{25}$ fits in 32 MB instead of
@@ -109,6 +167,11 @@ algorithm genuinely is scalar and branchy, the right move is `.tolist()` once an
 loop over plain Python. [464](/solutions/0464/) does exactly that — NumPy for the
 sieve, the prefix sums and the sort, then a hand-written Fenwick tree over Python
 lists, because a pointer-chasing $O(\log n)$ update has nothing to vectorise.
+The converse split works too: [983](/solutions/0983/) is a
+[depth-first search](/topics/technique/depth-first-search), and the recursion stays
+plain Python, but each node carries the table of every signed sum of its chosen
+vectors as an array (tripled per level with one `concatenate`), so the pruning test
+at each node is a couple of `np.isin` calls rather than a nested loop.
 
 **It is a constant factor, not a complexity class.** A $50\times$ speedup never
 rescues the wrong exponent; see [algorithm beats language](/topics/takeaway/algorithm-beats-language).
@@ -122,8 +185,13 @@ a table built at module import is free on every run after the first and the repo
 cost is a fiction. Size the sieve to the actual input and build it per call.
 
 **When it does not apply:** irregular control flow, data-dependent recursion,
-pointer-chasing structures, and anything needing exact arithmetic past 64 bits (where
-Python's own bignums are the tool). NumPy wants the same operation, over a dense
+pointer-chasing structures, and heavy exact arithmetic past 64 bits, where Python's
+own bignums are the tool. A `dtype=object` array holds Python ints and keeps the
+slicing and broadcasting, but its arithmetic runs at interpreter speed — useful as a
+switch, not as a speed-up: [996](/solutions/0996/) writes its recurrence once and
+picks `int64` when the input supplies a modulus and `object` when it asks for the
+exact value, so one body of code serves both the small exact examples and the large
+reduced one. NumPy wants the same operation, over a dense
 contiguous range, with the branches expressed as masks rather than `if`s. When the
 work has that shape, reach for it; when it does not, forcing it produces code that is
 both slower and harder to read.
