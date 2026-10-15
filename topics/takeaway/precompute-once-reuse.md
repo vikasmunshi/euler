@@ -1,5 +1,5 @@
 <!-- tags: [precompute-once-reuse] -->
-<!-- status: final 2026-07-28T07:20Z -->
+<!-- status: final -->
 # Precompute once, reuse
 
 Many of these problems ask the same small question thousands of times over: *is
@@ -58,11 +58,46 @@ one [topological](https://en.wikipedia.org/wiki/Topological_sorting) sweep, and
 every cell's answer is then a $O(1)$ read of its two
 finalised neighbours.
 
+**A table over a small key, not over the queries.** Sometimes there are far too
+many queries to tabulate, but each answer depends on its query only through a
+short key, and the key space is small enough to tabulate. [Digital Root
+Clocks](/solutions/0315/) needs a saving for every prime in a range of ten
+million integers. For primes below $10^{10}$ the digit sum is under $100$, so the
+saving depends only on the prime's last two digits and its digit sum. A
+$100 \times 100$ table for the first step and a 100-entry table for the rest of
+the chain, together only a few thousand segment comparisons, turn each prime into
+two reads. With NumPy the reads become a single fancy-indexed gather over the whole
+sieved array. [Sums of Digit Factorials](/solutions/0254/) uses the same move
+through a quotient–remainder split. Each candidate is written as
+$F = q \cdot 9! + r$, and the unbounded quotient adds only $q$ to the cost. The
+rest of the cost is read from two tables over the $9! = 362\,880$ residues: the
+factorial-base digit sum of $r$, and a lexicographic tie-break rank packed into
+one integer, so that comparing two candidates is one integer comparison. Both
+tables are built in one pass by extending them one factorial digit at a time.
+The candidates grow far beyond anything a table could index, but the tables
+never grow.
+
+**Tabulate at the lowest arity the work allows.** [A Huge Binomial
+Coefficient](/solutions/0365/) sums a
+[Chinese-remainder](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) lift
+over every triple of primes in a range, about twenty million triples. Each lift
+needs an inverse such as $(qr)^{-1} \bmod p$. That inverse factors as
+$q^{-1}_p \cdot r^{-1}_p$, so every inverse the triple loop will ever read is a
+*pairwise* one: an $O(P^2)$ table, built once. The parts of each coefficient that
+do not involve the third prime are scaled once per pair as well. The triple loop
+stays $O(P^3)$, because the summand really does depend on all three primes, but
+each iteration shrinks from three modular exponentiations to a few multiplies and
+two conditional subtractions. This is
+[loop-invariant code motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion)
+carried to its conclusion: compute each subexpression at the outermost loop whose
+indices it depends on, and store it there.
+
 ## How to reason about it
 
 Reach for a precomputed table when the *same* expensive answer is needed more
-than once and the set of possible answers is bounded — the candidates share a
-range, a graph, or a grid. The tell is a loop whose inner call would recompute
+than once and the answers range over something you can bound: a shared range,
+graph or grid, or a small key that the queries reduce to even when the queries
+themselves are unbounded. The tell is a loop whose inner call would recompute
 something an earlier iteration already found. The payoff is asymptotic, not a
 constant factor: $Q$ queries drop from $Q \cdot C$ to $\text{build} + Q$, and
 when $\text{build} \ll Q \cdot C$ that reshapes the running time.
@@ -72,7 +107,13 @@ A few cautions earn their keep:
 - **Overlap is the whole justification.** A table amortises only when it is read
   many times; precomputing a value queried once is pure overhead, and a sieve to
   $N$ to answer a single membership test is slower than one direct check. Confirm
-  the queries actually reuse the work before you build for it.
+  the queries actually reuse the work before you build for it. The binomial
+  problem draws this line within a single function. Its per-prime
+  [Lucas](https://en.wikipedia.org/wiki/Lucas%27s_theorem) step does build a
+  factorial table mod $p$, since evaluating any factorial directly would cost
+  $O(p)$ anyway. It skips the matching inverse-factorial table, because each prime
+  has only about six base-$p$ digits, and a few Fermat inversions cost less than
+  $p$ table entries.
 - **Size the table to the input, not to a fixed bound.** Build the sieve, cache,
   or DP array *inside* `solve()`, dimensioned from the arguments — a bound sized
   to the input is the companion habit of
