@@ -1,10 +1,10 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final 2026-07-30T11:59Z -->
+<!-- status: final -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
 arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
-collection under some rule. It is the largest domain in this archive — 286 problems carry the tag,
+collection under some rule. It is the largest domain in this archive — 278 problems carry the tag,
 more than any other — and that is not an accident of tagging. Project Euler's favourite question
 shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
 discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
@@ -51,6 +51,23 @@ question, off by orders of magnitude, with no error message. Problem 181 (groupi
 indistinguishable objects) is the same discipline in two dimensions: each group-type is folded in
 completely, in one canonical order, so every multiset is built exactly once.
 
+The inner loop's *direction* carries the other half of the model. Problem 249 counts subsets of the
+primes below 5000 with a prime sum, and folds each prime into the same one-dimensional table — but a
+subset uses each prime at most once, so the sweep runs *downward*, reading $c_{s-p}$ before this
+prime has touched it. Run it upward, as problem 31 does, and every prime may be reused: you have
+silently switched from a [subset sum](/topics/domain/subset-sum-problem) to an unbounded
+[knapsack](/topics/technique/knapsack-problem), and again nothing complains.
+
+"Exactly once" is also the test for any decomposition. Problem 240 counts ordered dice rolls whose
+top ten values hit a target — awkward, because whether a die is "in the top ten" depends on every
+other die. Fixing the value $v$ of the tenth-largest die resolves it: each die is then above, equal
+to, or below $v$, and that split is a property of the roll, not of a choice made while counting. So
+summing over the split counts each roll once with no correction, and each term is a product —
+a [multinomial](/topics/technique/multinomial-theorem) for which positions hold which class (the
+"ordered" requirement discharged in closed form), a small sum table for the dice above, and
+$(v-1)^{\ell}$ for the free dice below. Pick the statistic that classifies, and the overlaps you
+would otherwise subtract never arise.
+
 ## The four shapes an answer takes
 
 Across these problems the resolution nearly always falls into one of four moves.
@@ -62,7 +79,12 @@ a grid holds $\binom{m+1}{2}\binom{n+1}{2}$ of them — problem 85's brute-force
 collapses to that. [Catalan numbers](/topics/domain/catalan-number) count balanced structures;
 [necklace counting](/topics/domain/necklace-counting) handles arrangements up to rotation. Problem
 24's rank-to-permutation unranking is a closed form in disguise: repeated `divmod` by $(n-1)!$ picks
-each digit directly, never touching the million permutations it skips. See
+each digit directly, never touching the million permutations it skips. Sometimes the formula only
+appears once you notice how little the question asks: problem 242 wants pairs $(n, k)$ for which the
+number of odd-sum $k$-subsets of $\{1..n\}$ is odd, over $n \le 10^{12}$. Only *parity* matters,
+and modulo 2 [Lucas' theorem](/topics/domain/lucass-theorem) makes binomials rigid — the subset
+count's generating function collapses to $x(1+x)^{n-1}$, and the whole census becomes
+$\sum_t 2^{\operatorname{popcount}(t)}$, summed bit by bit in forty steps. See
 [closed-form expression](/topics/technique/closed-form-expression).
 
 **A recurrence, evaluated as a table.** When no formula exists, decompose by the last decision. It
@@ -75,13 +97,27 @@ seams so that "no running crack" becomes `mask_a & mask_b == 0`, and the wall co
 layered walk over a compatibility graph. The pattern is always: define the state, enumerate the last
 move, sum the disjoint cases. See also [recurrence relations](/topics/domain/recurrence-relation)
 and [generating functions](/topics/domain/generating-function), which are the same recurrences
-written as algebra.
+written as algebra — and which earn their place when the algebra does work the table cannot.
+Problem 249's table *is* the product $\prod_p (1 + x^p)$, one factor per prime. Problem 996 builds
+a polynomial left to right whose coefficients count overtake tuples, and gets the parity and
+"no entry above half the total" constraints by algebraic manipulation of the weights
+($\tfrac12(f(y) + f(-y))$ keeps the even part) rather than by extra state — so the run time is
+independent of the total bound $k$. Problem 768 goes furthest: a balanced chandelier on 360 sockets
+factors into twelve independent copies of the 30-socket problem, and the answer is one coefficient
+of $G_{30}(z)^{12}$.
 
 **Count the complement, or inclusion–exclusion.** "At least one" is usually harder than "none".
 Problem 116 subtracts the single all-grey tiling rather than tracking a "used a colour yet?" flag
 through the recurrence. When constraints overlap, [inclusion–exclusion](/topics/technique/inclusion-exclusion-principle)
 adds back what double-subtraction removed. Reach for it whenever the forbidden set is easier to
-describe than the permitted one.
+describe than the permitted one. Problem 951 is a clean case: after showing a card game is fair
+exactly when the deck holds a single-colour run of length 2, "decks with such a run" is messy, but
+the complement — red and black run lengths forming two interleaved
+[compositions](/topics/domain/composition-combinatorics) of $n$ with no part equal to 2 — is a
+short sum, subtracted from $\binom{2n}{n}$. The multiplicative cousin is
+[Möbius inversion](/topics/technique/mobius-inversion-formula): problem 276 counts *all* integer
+triangles up to a perimeter in closed form, then strips the non-primitive ones, since every
+triangle is $g$ times a primitive one — count the easy superset, then invert the scaling.
 
 **Quotient by symmetry.** If configurations related by rotation, reflection, or relabelling count as
 one, do not enumerate and deduplicate — divide the work by the symmetry group up front, or count
@@ -96,13 +132,21 @@ for r in range(0, n // 2 + 1):
     c = c * (n - r) // (r + 1)      # Pascal's recurrence, no factorials
 ```
 
-Note the second line as well: that recurrence sidesteps building $n!$ entirely. See
+Note the second line as well: that recurrence sidesteps building $n!$ entirely.
+
+Symmetry also shrinks a *search*, not just a count. Problem 265 sums binary circles whose every
+window is distinct — [de Bruijn sequences](/topics/domain/de-bruijn-sequence) — and rather than
+generate every rotation and deduplicate, it searches only strings starting at the all-zeros window,
+a [canonical form](/topics/technique/canonical-form) that names each circle exactly once. Problem 244
+is a 15 puzzle with tiles that are only coloured, seven red and eight blue; treating same-colour
+tiles as interchangeable cuts $16!/2$ states to $16 \cdot \binom{15}{7} \approx 10^5$, and a plain
+[breadth-first search](/topics/technique/breadth-first-search) finishes the job. See
 [exploit symmetry](/topics/takeaway/exploit-symmetry).
 
 ## The counts themselves are the other hazard
 
 Combinatorial answers grow explosively, and this domain's most common companion tag is
-[modular arithmetic](/topics/domain/modular-arithmetic) — 78 of these 286 problems carry it. That
+[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 278 problems carry it. That
 pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
 the deliverable and you work in the ring from line one), or it wants the honest integer and you
 need [arbitrary precision](/topics/technique/arbitrary-precision-arithmetic). Python gives you the
@@ -113,6 +157,13 @@ Decide which régime you are in *before* writing the accumulator.
 Watch the intermediate values too, not just the answer. Computing $\binom{n}{k}$ as
 $n! / (k!(n-k)!)$ builds enormous factorials to produce a modest result; the Pascal recurrence above
 keeps every intermediate near the size of the answer.
+
+And check that the reduction actually commutes with what you are asked for. Problem 249 wants the
+last 16 digits of a sum of counts, so holding every count modulo $10^{16}$ is sound — additions only,
+nothing to divide. Problem 244 looks similar and is not: its answer is the plain sum of per-path
+checksums that were each reduced on their own, so a DP carrying (count, sum of checksums) modulo
+$100\,000\,007$ would lose track of how many of them wrapped. There the paths must be walked one by one — affordable
+only because the BFS shows how few shortest paths there are.
 
 ## How to reason about it
 
@@ -134,10 +185,21 @@ paths, partitions — at a size where listing them is hopeless. When you catch i
   usually cheaper counted the other way round.
 - **Decide the arithmetic régime up front.** A stated modulus means reduce after every operation;
   no modulus means big integers, and in C that means thinking about width before the first
-  multiply.
+  multiply. Either way, confirm the reduction commutes with what is actually being summed.
+- **Conjecture from small cases, then check against a brute force.** A guessed structure that is
+  only *plausible* is the domain's most expensive mistake.
 
 Brute force does have a place — it is how you get the small terms that verify a formula or seed a
-sequence lookup. Just never expect it to reach the answer. The domain is defined by the distance
+sequence lookup, and increasingly how the structure is *found*. Problem 256's tatami-free rooms
+follow a band rule that no one hands you: an exhaustive row-by-row tiling checker printed the bad
+lengths per width, the bands were read off the listing, and the rule was trusted only after it
+matched every room up to $16 \times 90$. Problem 996's characterisation of reachable overtake tuples
+was conjectured, then checked against a breadth-first search for every $n \le 7$. The checker is
+also what catches the plausible wrong idea: in problem 768 the natural guess — a balanced chandelier
+is a union of regular polygons — is a theorem for moduli with two prime factors and false for 360,
+which has three; already on 30 sockets the polygon unions miss 30 of the 525 balanced 6-subsets.
+See [small cases reveal the closed form](/topics/takeaway/small-cases-reveal-closed-form). Just
+never expect brute force to reach the answer. The domain is defined by the distance
 between what you can enumerate and what you are asked to count, and every technique here is a way
 of crossing it.
 
