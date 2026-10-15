@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-07-30T11:59Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -29,9 +29,19 @@ $10^{10}$ throughout, it never handles anything bigger than $10^{20}$. Problem 1
 modulo 7, so counting how often the first of a month is a Sunday is pure arithmetic mod 7, no date
 library required.
 
+The same closure makes huge **counts** cheap. Problems 249 and 250 count subsets of a set — $2^{669}$
+and $2^{250250}$ of them — by a property of their sum, and ask only for the last sixteen digits. A
+subset-sum dynamic programme only ever adds and multiplies counts, so every table entry can live
+modulo $10^{16}$ from the first step. Problem 250 goes one level further: "the sum is divisible by
+250" depends only on each element's residue, so the $250250$ elements collapse to a census of how
+many land on each residue mod 250, and the generating function is multiplied out in
+$\mathbb{Z}[x]/(x^{250} - 1)$ — a ring where $x^{250} = 1$, so the *exponents* wrap modulo 250 on
+their own. Reducing both the coefficients and the exponents keeps the whole computation to a
+250-slot array.
+
 The catch is that congruence is preserved by $+$, $-$, and $\times$ **but not by division** — and
-not, in general, by exponentiation done naively. Those two operations are what the rest of this page
-is about.
+not, in general, by exponentiation done naively. Those two operations are what most of this page is
+about.
 
 ## Exponentiation: square-and-multiply
 
@@ -41,7 +51,8 @@ per term in problem 48). [**Modular exponentiation**](https://en.wikipedia.org/w
 via [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) reads the
 exponent's binary digits instead: repeatedly square the base, and fold it into the result only where
 a bit of $b$ is set. That computes the power in $O(\log b)$ multiplications — about 23 instead of 7.8
-million for problem 97.
+million for problem 97, and about 60 for exponents near $10^{18}$, the size of the hook-length
+multiplicities that problem 1010 raises its factors to.
 
 In Python you almost never write the loop yourself; the built-in three-argument `pow` does the
 reduction *inside* the squaring loop, so the full power is never materialised. Problem 48 (public,
@@ -63,6 +74,14 @@ does the same modulo any $m$ using [Euler's totient](https://en.wikipedia.org/wi
 $\varphi(m)$. That is how "tower of powers" problems (188's hyperexponentiation) stay finite: you
 reduce each exponent modulo the totient of the modulus one level up.
 
+The sharper version of that lever is the [Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function)
+$\lambda(m)$, the smallest exponent that sends *every* unit to 1, and it turns "exponents repeat" into
+"the whole sequence repeats". Problem 250's elements are $k^k$ for $k \le 250250$. Split
+$250 = 2 \cdot 5^3$: the residue mod 2 depends only on the parity of $k$, and mod 125 neither the
+base ($500 \equiv 0$) nor the exponent ($\lambda(125) = 100$ divides $500$) changes under
+$k \mapsto k + 500$. So $k^k \bmod 250$ is periodic with period 500 (from $k = 3$ on), and one block
+of 500 powers stands in for all quarter-million.
+
 ## Division: the modular inverse
 
 You cannot divide by $a$ modulo $m$ directly, but you can multiply by its
@@ -77,15 +96,78 @@ no inverse and division is genuinely undefined. There are two standard ways to c
 - When the modulus is prime, Fermat's little theorem gives it for free: $a^{-1} \equiv a^{p-2}
   \pmod p$, one modular exponentiation.
 
-In Python both collapse to `pow(a, -1, m)` (a negative exponent asks for the inverse). The inverse is
-what turns a [**linear congruence**](https://en.wikipedia.org/wiki/Linear_congruence_theorem) into a
-closed form: to solve $a x \equiv c \pmod m$ you write $x \equiv c \cdot a^{-1} \pmod m$ — no search.
-Problem 134 does exactly this: "the number ending in the digits of prime $p_1$ and divisible by
-$p_2$" becomes $10^d k \equiv -p_1 \pmod{p_2}$, solved in one line as
-`k = (-p1 * pow(d, -1, p2)) % p2`; the inverse exists because $p_2 > 5$ shares no factor with
-$10^d$. Inverses also appear as the object of study in their own right — problem 451 hunts for
-*self-inverse* residues ($m$ with $m^2 \equiv 1 \pmod n$), and modular binomial coefficients (needed
-whenever a count is asked "modulo a prime") are computed with inverse factorials.
+In Python both collapse to `pow(a, -1, m)` (a negative exponent asks for the inverse); the C ports
+here write out one or the other. The inverse is what turns a
+[**linear congruence**](https://en.wikipedia.org/wiki/Linear_congruence_theorem) into a closed form:
+to solve $a x \equiv c \pmod m$ you write $x \equiv c \cdot a^{-1} \pmod m$ — no search. Problem 134
+does exactly this: "the number ending in the digits of prime $p_1$ and divisible by $p_2$" becomes
+$10^d k \equiv -p_1 \pmod{p_2}$, solved in one line as `k = (-p1 * pow(d, -1, p2)) % p2`; the inverse
+exists because $p_2 > 5$ shares no factor with $10^d$. Sometimes the inverse *is* the answer:
+problem 274's "divisibility multiplier" for a prime $p$ turns out to be exactly $10^{-1} \bmod p$.
+Because the number being inverted is the fixed 10, it even has a closed form keyed by $p$'s last
+digit — $(kp + 1)/10$ with $k = 9, 3, 7, 1$ for $p \equiv 1, 3, 7, 9 \pmod{10}$ — which vectorises
+over a NumPy array of primes where a per-prime `pow` call could not. Inverses also appear as the
+object of study — problem 451 hunts for *self-inverse* residues ($m$ with $m^2 \equiv 1 \pmod n$).
+
+### Check the modulus before you divide
+
+Whether you may divide is a property of the **modulus**, and it is worth checking before writing the
+first line. A prime modulus makes the residues a [field](https://en.wikipedia.org/wiki/Finite_field):
+every non-zero element is invertible, so anything you would compute with fractions over the
+rationals can be computed modulo $p$. That is what licenses the hook length formula in problem 1010 —
+$f^\lambda = n!/\prod h(c)$, with a prime modulus larger than $n$ so that no hook length is a multiple
+of it — and the binomial coefficients of problem 996, each a falling product times $(n!)^{-1}$. It
+also licenses whole algorithms: [Berlekamp–Massey](https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm),
+which problem 529 uses to recover a linear recurrence of order 2772 from a digit automaton's counts,
+divides by a discrepancy at every step and so only works over a field — there, modulo $10^9 + 7$.
+
+A **composite** modulus is the opposite case. Problem 250 needs binomial coefficients modulo
+$10^{16}$, and the natural row recurrence $\binom{c}{i+1} = \binom{c}{i} \cdot \frac{c-i}{i+1}$
+divides by $i + 1$, which for most $i$ shares a factor with $10^{16}$ and has no inverse there. The
+division is exact over the integers but meaningless in the residues. The Python carries each binomial
+as an exact big integer and reduces only when storing it; the C, without that luxury, writes it as
+$2^{e_2} \cdot 5^{e_5} \cdot u$ — the primes of the modulus tracked as exponents, the remaining unit
+$u$ coprime to 10 and therefore safely invertible. That factor-out-the-modulus's-primes move is the
+general repair; the general lesson is that with a composite modulus, every division in your
+derivation is a bug waiting for an input that shares a factor with it.
+
+### Counting the solutions of a congruence
+
+A congruence also *counts*. Its solutions form an
+[arithmetic progression](https://en.wikipedia.org/wiki/Arithmetic_progression) with step $m$, so the
+number of them in an interval is two floor divisions, not a loop — and that turns many searches into
+sums of closed forms. Problem 251 reduces Cardano triplets to a parameter $d$ pinned by
+$8 d n_1 \equiv 3 \pmod{b_1^2}$: one inverse gives the smallest $d$, one division counts every
+admissible $d$ below a ceiling, and a whole family of triplets is counted in constant time. Problem
+305 counts the occurrences of a digit string that straddle two consecutive integers of the
+Champernowne stream by demanding that the left integer end in a given suffix — a congruence modulo
+$10^i$ that absorbs any carry automatically. (In C, `/` truncates towards zero; a progression count
+whose bounds can go negative needs a true floor division.)
+
+## The unit group: roots of unity, and how many there are
+
+Some problems ask not for a residue but for **how many** residues solve a polynomial congruence, and
+the answer comes from the structure of the
+[multiplicative group of integers modulo $n$](https://en.wikipedia.org/wiki/Multiplicative_group_of_integers_modulo_n).
+Modulo a prime $p$ (and an odd prime power) that group is **cyclic**, of order $\varphi(p^e)$, and a
+cyclic group of order $N$ has exactly $\gcd(r, N)$ solutions of $x^r = 1$. That one fact settles a
+family of problems without testing a single residue:
+
+- Problem 272 wants the $n$ with exactly 242 nontrivial cube roots of unity. $\gcd(3, p-1)$ is 3 for
+  $p \equiv 1 \pmod 3$ and 1 otherwise, so each such prime triples the count (as does a factor of 9),
+  the total is $3^k$, and "242 roots" means "exactly five such factors" — the problem becomes a
+  depth-first enumeration of products rather than a root count per $n$.
+- Problem 421 sums the primes $p \le 10^8$ dividing $n^{15} + 1$. The solutions of
+  $n^{15} \equiv -1 \pmod p$ are the negatives of the 15th roots of unity, and there are
+  $\gcd(15, p-1) \in \{1, 3, 5, 15\}$ of them, decided by $p \bmod 3$ and $p \bmod 5$. A root of
+  unity of order $r$ is $a^{(p-1)/r}$ for any base $a$ that does not give 1 — one modular
+  exponentiation per prime.
+- Problem 245 needs the roots of $x^2 - x + 1 \equiv 0 \pmod \ell$; they are $-\omega$ for a primitive
+  cube root of unity $\omega$, found the same way and cheaper than a general modular square root.
+
+Problem 421 also shows the swap that makes such problems feasible at all: instead of factoring
+$10^{11}$ numbers of up to 165 digits, exchange the order of summation and ask, per prime, how many
+$n \le N$ fall in its few residue classes — the progression count from above, one division per root.
 
 ## Combining moduli: the Chinese Remainder Theorem
 
@@ -96,24 +178,59 @@ system of congruences with pairwise-coprime moduli has a unique solution modulo 
 $$x \equiv a_1 \pmod{m_1}, \quad x \equiv a_2 \pmod{m_2} \;\Longrightarrow\; \text{a unique } x
 \pmod{m_1 m_2}.$$
 
-This is a workhorse for two reasons. First, it lets you *combine* separately-derived constraints:
-problem 531 asks for the smallest $x$ with $x \equiv a \pmod n$ and $x \equiv b \pmod m$ — a direct
-CRT solve (returning nothing when the moduli are not coprime and the residues clash). Second, it lets
-you *decompose* a hard modulus: to solve a polynomial congruence like $x^3 \equiv 1 \pmod n$
-(problem 271) you factor $n$, solve modulo each prime power separately where the structure is simple,
-and glue the residue sets back together with CRT. The number of solutions multiplies across the
-factors — which is why $S(91) = S(7 \cdot 13)$ in problem 271 has $2 \times 4 = 8$ roots.
+This is a workhorse for two reasons. First, it lets you *combine* separately-derived residues.
+Problem 365 wants $\binom{10^{18}}{10^9}$ — over nine billion digits — modulo $pqr$ for every triple of
+primes between 1000 and 5000. [Lucas's theorem](https://en.wikipedia.org/wiki/Lucas%27s_theorem)
+gives the binomial modulo each prime from its base-$p$ digits, and CRT lifts the three residues to one
+modulo $pqr$. With twenty million triples the lift must be cheap, and it is once you notice that
+$(qr)^{-1} \bmod p = q^{-1} r^{-1} \bmod p$: every inverse the sum needs is a *pairwise* one,
+tabulated once. (Problem 531 is CRT at its barest: the smallest $x$ meeting two congruences, and
+nothing when non-coprime moduli clash.)
+
+Second, it lets you *decompose* a hard modulus: answer the question modulo each prime power, where the
+structure is simple, and glue the answers back together. The number of solutions of a polynomial
+congruence is therefore **multiplicative** across the factors — which is why $x^3 \equiv 1 \pmod{91}$
+has $3 \times 3 = 9$ solutions (8 besides $x = 1$) in problems 271 and 272, and why the $3^k$ count
+above works at all. Problem 250 uses the same split for a proof rather than a computation: the
+period of $k^k \bmod 250$ was established modulo 2 and modulo 125 separately.
+
+## Reduce what the problem reduces — and nothing else
+
+Reducing early is only sound when the quantity you reduce is the one the statement reduces. Problem
+244's checksum is a rolling hash taken modulo $100\,000\,007$ for each shortest path, and the answer
+is the **plain, unreduced** sum of those checksums. The tempting dynamic programme carries
+$(\text{count}, \text{sum of hashes})$ through the search layers — but that sum would be known only
+modulo $100\,000\,007$, because once the individual hashes have wrapped, modular arithmetic cannot
+tell how many of them did. The correct route is to produce each shortest path and add its reduced
+hash as an ordinary integer. Read the statement for exactly where the modulus applies; a `% m` one
+level too high gives a plausible, wrong number.
 
 ## The overflow trap
 
-Modular arithmetic's one sharp edge is a language pitfall, not a mathematical one. Two residues below
-$m$ multiply to a product approaching $m^2$; with $m = 10^{10}$ that is $10^{20}$, past the
-$\approx 9.2 \times 10^{18}$ ceiling of a signed 64-bit integer. Python's arbitrary-precision
-integers make this invisible, but in C the intermediate product overflows and silently corrupts the
-answer. The fix used throughout the C solutions here is to widen just the multiply — cast one operand
-to `__int128`, form the product at 128-bit precision, and reduce back to 64 bits immediately — so the
-oversized value is transient and never stored. Whenever a modulus exceeds about $3 \times 10^9$, that
-widening (or a modulus small enough that $m^2$ still fits) is mandatory.
+Modular arithmetic's other sharp edge is a language pitfall, not a mathematical one. Two residues
+below $m$ multiply to a product approaching $m^2$; with $m = 10^{10}$ that is $10^{20}$, past the
+$\approx 9.2 \times 10^{18}$ ceiling of a signed 64-bit integer. Python's arbitrary-precision integers
+make this invisible, but in C the intermediate product overflows and silently corrupts the answer.
+The rule of thumb: **a modular multiply is safe in 64 bits only while $m < 2^{32}$** (about
+$3 \times 10^9$ for a signed type). Past that, the fix used throughout the C solutions here is to
+widen just the multiply — cast one operand to `__int128`, form the product at 128-bit precision, and
+reduce back to 64 bits immediately — so the oversized value is transient and never stored. The
+[Miller–Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test) tests in problems
+245 and 248 hit exactly this: their candidates pass $3 \times 10^9$, and squaring one overflows a
+signed 64-bit word.
+
+Three variations on the same budget:
+
+- **Guard the input, and size the total.** Problem 421 multiplies residues below $p \le M$, so it
+  rejects $M \ge 2^{32}$ up front rather than let a larger input corrupt the result quietly — and its
+  *total*, which grows like $4 N \pi(M)$, approaches the 64-bit ceiling although no single residue
+  comes close. Estimate the size of the answer, not only of its terms.
+- **Reduce lazily when you can prove headroom.** Problem 529's C port accumulates a polynomial
+  product's terms in an unsigned 64-bit word and subtracts $8m^2$ whenever the sum reaches it, taking
+  one `%` per output coefficient instead of one per term.
+- **Know which operations multiply.** Problem 996's polynomial DP only shifts, adds and doubles —
+  never multiplies two residues — so NumPy `int64` arrays stay exact modulo its $1.2 \times 10^9$
+  prime, where a product of two residue vectors would not.
 
 ## How to reason about it
 
@@ -121,15 +238,19 @@ The recurring cue is a question that depends only on a remainder — *last digit
 *a count modulo a prime*, *a periodic or cyclic structure* — attached to a value too large to form
 directly. When you see it:
 
-- Reduce **early and often**. Never build the full number; reduce after every $+$ or $\times$ so
-  operands stay in $[0, m)$.
+- Reduce **early and often** — counts, and where the question allows, elements and exponents too —
+  but only the quantity the statement actually reduces.
 - Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
-  Fermat/Euler when the base is coprime to the modulus.
+  Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
-  for a prime one — and remember it exists only when $\gcd(a, m) = 1$.
+  for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
+  under a composite one, audit every division.
+- Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
+  the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
-  Remainder Theorem, working prime power by prime power.
-- Writing **C** (or any fixed-width language)? Guard every modular multiply against overflow.
+  Remainder Theorem, working prime power by prime power; solution counts multiply.
+- Writing **C** (or any fixed-width language)? Widen every modular multiply once $m \ge 2^{32}$, and
+  bound the accumulated total as well as each product.
 
 The classic mistake is to compute the honest quantity first and reduce at the end — materialising the
 million-digit power, or the true factorial, before taking the remainder. The whole point is that you
