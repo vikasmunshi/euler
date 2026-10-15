@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-07-28T07:48Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -65,6 +65,30 @@ or the largest prime factor of a number (problem 3, public in `solutions/public/
 uniqueness is what lets you compute a global answer prime-by-prime and multiply the pieces together —
 the same decompose-and-recombine move that the [Chinese Remainder Theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
 performs on the modulus side.
+
+The lens works in reverse too, and that is where it saves the most. When a problem fixes the *value*
+of a multiplicative function and asks which $n$ produce it, the search space is the target's
+factorisations, not the integers. Problem 248 inverts Euler's totient at $13!$: because
+$\varphi(p^a) = p^{a-1}(p-1)$, a prime can divide $n$ only if $p - 1$ divides the target, so the
+$1584$ divisors of $13!$ yield an alphabet of a few hundred candidate primes, and a depth-first search
+over products of their factors replaces a scan over tens of billions of $n$. One trap is worth
+knowing: $p = 2$ at exponent $1$ contributes the factor $1$, so every odd solution has an even twin at
+twice its value, and a search that stops when the residual target reaches $1$ loses half the answers.
+Problem 241 runs the same kind of search on the abundancy index $\sigma(n)/n$. Each prime power can
+only *raise* the index, and the reduced residual $a/b$ must have $b$ dividing the part not yet built.
+Together those prune a $10^{18}$ range down to about a million partial factorisations. Problem 245
+derives structure before it searches at all. If $p^2 \mid n$ then $p$ would divide both $n - \varphi(n)$
+and $n - 1$, so every candidate is squarefree. Fixing all but the largest prime then makes the
+condition *linear* in that prime, so the program solves for it and tests it rather than looping over
+it.
+
+[Coprimality](https://en.wikipedia.org/wiki/Coprime_integers) is the same lens with the exponents
+reduced to "shares a prime or not". Problem 351 counts the lattice points visible from the centre of a
+hexagonal orchard. A point $(a, b)$ is hidden exactly when $\gcd(a, b) > 1$, and since
+$\gcd(a, b) = \gcd(a, a + b)$, the visible points on ring $s$ number $\varphi(s)$. The geometry
+reduces to one totient sum. Problems 251 and 257 use the same move as a parametrisation tool: split
+off $d = \gcd$, or reduce a ratio to lowest terms $p/q$, and the leftover coprime parts satisfy a
+divisibility condition clean enough to count whole families with a single floor division.
 
 Unique factorisation also explains the exotic *shapes* the problems name. A
 [truncatable prime](https://en.wikipedia.org/wiki/Truncatable_prime) (problem 37) stays prime as you
@@ -151,6 +175,15 @@ changes sign infinitely often, the first crossing hiding somewhere near the almo
 Skewes bound — a standing reminder that an asymptotic law is not a promise about the numbers you can
 reach.
 
+The hypothesis has an equivalent form an engineer can watch happening. The
+[Mertens function](https://en.wikipedia.org/wiki/Mertens_function) $M(x) = \sum_{k \le x} \mu(k)$
+adds up the [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) ($\pm 1$ for a
+squarefree $k$ by the parity of its prime count, $0$ otherwise). The Riemann hypothesis is true exactly
+when $M(x) = O(x^{1/2 + \varepsilon})$ for every $\varepsilon > 0$: the signs of the squarefree numbers
+must cancel like coin flips. Problem 464 depends on that cancellation without needing it proved. Up to
+$2 \times 10^7$, $M(x)$ never leaves a band about $\pm 1500$ wide. So a Fenwick tree indexed by
+*Mertens value* needs only a few thousand slots, not one per integer.
+
 ### Order inside the randomness
 
 The tension between local chaos and global law runs right through the open problems. The gaps between
@@ -166,6 +199,15 @@ problem 46 tests Goldbach's *other* conjecture, problem 196 hunts twin- and trip
 neighbourhoods, and problem 50 chases the longest run of consecutive primes that sums to a prime —
 each a small window onto the same theme, that the primes are random enough to be endlessly surprising
 and structured enough that the surprises obey laws.
+
+Residue classes obey a law too.
+[Dirichlet's theorem](https://en.wikipedia.org/wiki/Dirichlet%27s_theorem_on_arithmetic_progressions)
+says the primes split *evenly* among the $\varphi(q)$ residue classes modulo $q$ that are coprime to
+$q$. Problem 421 sorts the $5.76$ million primes below $10^8$ by whether $p \equiv 1 \pmod 3$ and
+whether $p \equiv 1 \pmod 5$. The four classes come out at $\tfrac38, \tfrac38, \tfrac18, \tfrac18$
+of the total, matching the prediction to three digits. That regularity is useful: it lets you estimate
+the answer's magnitude before writing the program, and here the estimate showed the sum would land
+just under the 64-bit ceiling.
 
 ## Generating and testing primes
 
@@ -203,6 +245,28 @@ crosses each composite off exactly once (via its smallest prime factor), handing
 table as a by-product — useful when a problem needs the least prime factor of every $n \le N$, not
 just a primality flag.
 
+Several practical points follow from the problems below. Storing **odd numbers only** halves the
+array. Problem 315 sieves to $2 \times 10^8$ that way, in 100 MB rather than 200 MB. When the
+**answer's location is unknown**, process consecutive fixed-size windows until one contains it.
+Problem 256 runs a divisor-style sieve over $2^{24}$-wide windows of areas for this reason. **Size the
+sieve to the structure**, not the problem's headline bound. Problem 272 needs primes only up to
+$10^{11}$ divided by the smallest product of four admissible factors, which is a few million. Problem
+245 needs primes only to $\sqrt N$, because only the smaller factors are enumerated. And sometimes the
+sieve's only output is a **count**. Problem 239 needs nothing but $\pi(100) = 25$, because its
+derangement formula treats every prime the same, so their values cancel out of the argument.
+Problem 249 sieves the *sums* of prime subsets, up to the total of all primes below $5000$, about
+$1.5$ million, to know which totals are prime.
+
+**Count without listing — sublinear summatory functions.** Some problems need a sum over every
+$n \le 10^{10}$, such as $\sum \varphi(n)$ or $\sum \mu(n)$, and no sieve reaches that far. The way
+out is a convolution identity that holds for every $v$: $\sum_{d \le v} \Phi(\lfloor v/d \rfloor) =
+v(v+1)/2$ for the totient sum $\Phi$, and $\sum_{d \le v} M(\lfloor v/d \rfloor) = 1$ for Mertens.
+Solved for the $d = 1$ term, each identity becomes a recursion that only ever evaluates the function at
+the $O(\sqrt v)$ distinct quotients $\lfloor v/d \rfloor$. Sieve directly up to $v^{2/3}$, recurse
+above that, and the cost balances at $O(v^{2/3})$. Problem 351 uses this for the totient sum at
+$10^8$. Problem 319 uses it for Mertens at $10^{10}$: it counts distinct real roots $m^{1/i}$, and
+the Möbius function is just inclusion–exclusion over the primes dividing the exponent.
+
 **Factor or test a single number — [trial division](https://en.wikipedia.org/wiki/Trial_division).**
 When you have one number, not a range, sieving the whole space below it is wasteful. To factor $n$,
 divide by $2, 3, 4, \dots$ and peel off each divisor you find; to test primality, divide by
@@ -226,8 +290,41 @@ multiplies your confidence — and for $n$ below fixed thresholds a *specific sm
 the test **deterministic**, exactly correct with no probability left. Its cost is $O(k \log^3 n)$ for
 $k$ bases: effectively instant even for numbers with dozens of digits, which is why the
 higher-numbered primality problems (and RSA key generation) reach for it rather than a sieve. It is
-this cheap, one-sided test — easy to *confirm* a prime, hard to *factor* a composite — that the next
-section turns into a lever.
+The most common pattern in the problems is a **hybrid**: sieve the small primes, and run
+Miller–Rabin on the large candidates a search *constructs*. Problem 245 sieves only to $\sqrt N$, then
+tests each solved-for largest prime $q$, which can reach $N/3$. Problem 248 tests $d + 1$ for each
+divisor $d$ of its target, with candidates beyond $3 \times 10^9$. Sieving that far to check a
+thousand numbers would be the single-number mistake on a large scale.
+
+## Arithmetic modulo a prime
+
+A prime modulus is more than a convenient reduction. The nonzero residues modulo $p$ form a
+[cyclic group](https://en.wikipedia.org/wiki/Multiplicative_group_of_integers_modulo_n) of order
+$p - 1$, and that one structural fact answers a whole class of counting questions in constant time:
+
+- **How many solutions does $x^k \equiv 1 \pmod p$ have?** Exactly $\gcd(k, p - 1)$, because a
+  cyclic group of order $m$ has one subgroup of each order dividing $m$. Problem 421 is the clearest
+  example. It asks for the prime factors below $10^8$ of $n^{15} + 1$ for $10^{11}$ values of $n$, and
+  it becomes tractable once the sum is **reordered to run over primes**: each prime $p$ divides
+  $n^{15} + 1$ for exactly $\gcd(15, p - 1)$ residues of $n$, and each residue class is counted with a
+  single floor division. The reordering also shows why every such number is composite: the residue
+  $-1$ is always a root.
+- **Glue prime powers together with CRT.** Problem 272 counts cube roots of unity modulo $n$. By the
+  Chinese Remainder Theorem the count is multiplicative. Each prime $p \equiv 1 \pmod 3$ contributes a
+  factor $3$, and so does the prime $3$ when $9 \mid n$; every other prime contributes $1$. So "exactly $242$ roots besides $1$"
+  becomes "exactly five such factors", and the rest is a pruned enumeration.
+- **Binomials and inverses.** Modulo a prime, [Lucas's theorem](https://en.wikipedia.org/wiki/Lucas%27s_theorem)
+  computes $\binom{n}{k}$ digit by digit in base $p$. Problem 365 reduces a coefficient with nine
+  billion digits to one residue per prime, then recombines triples of primes by CRT. Every inverse it
+  needs factors into *pairwise* inverses, $(qr)^{-1}_p = q^{-1}_p r^{-1}_p$. Problem 274's divisibility
+  multiplier is just $10^{-1} \bmod p$, and it has a closed form that depends only on $p$'s last digit,
+  so no Euclid call is needed.
+- **Residuosity restricts which primes can divide a polynomial.** In problem 245,
+  $4(x^2 - x + 1) = (2x - 1)^2 + 3$. So a prime can divide $x^2 - x + 1$ only if $-3$ is a
+  [quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) modulo it, which means
+  $p = 3$ or $p \equiv 1 \pmod 3$. Half the candidate moduli disappear before the search starts.
+
+The same structure, at cryptographic sizes, is what the next section turns into a lever.
 
 ## The asymmetry that pays the modern bills
 
@@ -278,7 +375,13 @@ that makes some larger quantity computable:
 
 - **See a multiplicative quantity** — a divisor count, a totient, a coprimality condition, a "product
   of two primes" — and reach for the factorisation. The exponent vector is the object you actually
-  manipulate; the answer is a product over the primes dividing $n$.
+  manipulate; the answer is a product over the primes dividing $n$. When the *value* is given and $n$
+  is wanted, search the factorisations of the target (problems 241, 248), not the integers.
+- **See a congruence summed over a huge range** — and consider reordering the sum to run over the
+  primes. The cyclic group modulo $p$ answers "how many residues" in $O(1)$ (problem 421). CRT
+  multiplies those counts across prime powers (problem 272).
+- **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$ — and a sieve will not reach.
+  Use the quotient-set recursion at $O(n^{2/3})$ (problems 319, 351).
 - **Need a bound or a density** — how many primes below $N$, how large the $n$-th prime, how many
   semiprimes in a range — and the prime number theorem ($\pi(x) \sim x/\ln x$, $p_n \sim n \ln n$) is
   your estimate. Use it to *size* a sieve, not to replace an exact count.
@@ -289,7 +392,8 @@ that makes some larger quantity computable:
   to the inputs ($n \ln n$ for "the $n$-th prime") and built *inside* `solve()` so the benchmark
   counts it honestly. Factor one number, or a modest range → trial division to $\sqrt{n}$ with
   full division-out and a $6k \pm 1$ wheel. A yes/no on one *large* number → Miller–Rabin with a
-  deterministic base set. The classic mistake is answering a range question one number at a time — a
+  deterministic base set; a search that builds large candidates from small primes → sieve the small
+  primes and Miller–Rabin the candidates it builds. The classic mistake is answering a range question one number at a time — a
   primality test in a loop where a single $O(N \log \log N)$ sieve would produce the whole set — or
   answering a single-number question with a sieve of millions of primes to check just one.
 
