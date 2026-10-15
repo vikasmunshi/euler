@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-08-03T11:42Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -45,7 +45,10 @@ a digit-suffix condition, a [Farey](https://en.wikipedia.org/wiki/Farey_sequence
 relation, a residue class modulo 3, a divisibility constraint from a
 [Diophantine](https://en.wikipedia.org/wiki/Diophantine_equation) reduction — but each ends at
 `something · unknown ≡ constant (mod n)`, and each is then `O(1)`. When you see that line at the end
-of a derivation, stop searching.
+of a derivation, stop searching. At its barest the unknown *is* the inverse: problem 0274's
+"divisibility multiplier" — the `m` that makes `a + b·m` a test for divisibility of `10a + b` by `p`
+— turns out, after one line of algebra (`10·f(n) = n + b(10m − 1)`), to be exactly `10⁻¹ mod p`. A
+puzzle phrased about digits is a sum of inverses.
 
 **2 — The glue in the Chinese remainder theorem.** The
 [CRT](/topics/technique/chinese-remainder-theorem) tells you a solution exists; an inverse is what
@@ -78,6 +81,17 @@ interpolation weights, which are reciprocal factorials; 0365 needs a
 walks a trinomial sum by the ratio between consecutive terms, which is a fraction. In every case the
 inverse is what makes "the formula has a division in it" a non-issue.
 
+Two newer problems show how far the denominator can be from anything you would build. Problem 0996
+ends at a sum of binomials `C(t + n, n)` whose top `t` is far too large for any factorial table, but
+whose bottom `n` is small — so each one is a falling factorial of `n` terms times `(n!)⁻¹`, and the
+table you would normally precompute is replaced by a short product. Problem 1010 counts
+standard Young tableaux by the
+[hook length formula](https://en.wikipedia.org/wiki/Hook_length_formula), `n! / ∏ h`, multiplied
+over some 10¹⁶ partitions it never lists: the whole product collapses to `(n!)^N / ∏ h^(c_h)`, so the
+denominator is assembled as exponents per hook length and inverted once. Both lean on the same
+guarantee — a prime modulus larger than every factor in the denominator, so nothing on the bottom
+line can vanish.
+
 A variant of the same idea is the inverse as *undo*. Problem 0926 sweeps a running product across
 segment boundaries and multiplies by a factor's inverse to remove it again when the segment ends;
 0650 keeps a running `p^(−v)` for the same reason. Where a sliding window over sums would use a
@@ -104,13 +118,21 @@ the repetition.
   ```
 
 - **Hoist loop-invariant inverses.** If the divisor depends on the outer index only, invert once
-  outside — 0650 precomputes `(p − 1)⁻¹` per prime before the sweep, not per iteration of it.
+  outside — 0650 precomputes `(p − 1)⁻¹` per prime before the sweep, not per iteration of it. In
+  0996 every binomial in the sum shares the same `n!` denominator, so one `(n!)⁻¹` serves them all.
+- **Divide once, at the end.** When the answer is one big quotient of products, keep numerator and
+  denominator as separate running residues — or, as in 1010, as exponent counts per factor — and
+  invert the denominator a single time. Per-term inverses turn `k` multiplications into `k`
+  exponentiations for no gain; a quotient of products is a product of one quotient.
 - **Ask whether you need one at all.** Problem 0381 is the instructive case. Its derivation ends at
   `S(p) ≡ −3 · 8⁻¹ (mod p)`, an inverse per prime over millions of primes. But `8·S ≡ −3` with
   `0 ≤ S < p` forces `8S = t·p − 3` for a small `t` determined by `p mod 8`, so a four-entry lookup
-  table replaces every inverse with a multiply, a subtract and an exact shift. When the modulus
-  varies but the *numerator* is a small constant, look for the integer identity before reaching for
-  the general machinery.
+  table replaces every inverse with a multiply, a subtract and an exact shift. Problem 0274 is the
+  same move from the other side: `10⁻¹ mod p` is `(k·p + 1) / 10`, with `k ∈ {9, 3, 7, 1}` fixed by
+  `p`'s last digit, so the inverses of 10 modulo 660-odd thousand primes become one branch-free
+  [vectorised](/topics/technique/vectorized) expression over the sieve's output array — no
+  per-prime Euclid at all. When the modulus varies but the *inverted value* is a small constant,
+  look for the integer identity before reaching for the general machinery.
 
 ## Getting it right
 
@@ -118,7 +140,9 @@ the repetition.
   numbers rather than exceptions. When the shared factor is structural, strip it first: problem 0160
   pulls all factors of 5 out of a factorial before working modulo `5⁵`, precisely so the remaining
   quantity is invertible. Problem 0134's statement excludes one prime pair for the same reason — the
-  inverse genuinely does not exist there.
+  inverse genuinely does not exist there — and 0274 masks out 2 and 5, the only primes sharing a
+  factor with 10. The cheapest proof of invertibility is a size argument: in 0996 and 1010 the prime
+  modulus exceeds every factor of the denominator, so the check is done before the code starts.
 - **A composite modulus is not a field, but inverses still work.** `gcd(a, m) = 1` is the only
   requirement; primality is not. Problem 0152 inverts squares modulo `p²` and problem 0251 works
   modulo an odd square, both perfectly well. What primality buys is only the Fermat shortcut and the
