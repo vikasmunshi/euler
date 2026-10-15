@@ -1,11 +1,11 @@
 <!-- tags: [closed-form-expression] -->
-<!-- status: final 2026-10-09T10:48Z -->
+<!-- status: final -->
 # Closed-form expression
 
 A [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression) computes a
 quantity with a bounded formula — a finite chain of arithmetic, powers, roots, binomials and a few
 named functions — instead of a loop that walks every case. It is the most common single lever in
-this problem set: the sixty-six problems below each hide a formula behind a process, a grid, a game
+this problem set: the seventy problems below each hide a formula behind a process, a grid, a game
 or a recurrence. In every one, the obvious program enumerates something astronomically large while
 the real program evaluates an expression whose size does not grow with the input. The bounds
 Project Euler chooses — $10^{12}$, $10^{16}$, a googol — are often the setter's way of saying
@@ -58,6 +58,14 @@ polynomials. The rest of this family is about *getting a problem into that shape
 - **Double counting.** Problem 944 swaps the order of summation, tallying each integer's
   contribution across all $2^n$ subsets. It lands on a closed form whose one remaining sum runs
   over the $O(\sqrt n)$ distinct values of $\lfloor n/x \rfloor$.
+- **Rounding is a periodic correction.** A term like $\operatorname{round}(k^2/12)$ looks
+  unsummable, but $k^2 \bmod 12$ takes only four values, so the term is $(k^2 + c(k))/12$ with $c$
+  periodic. Its prefix sum is the square-pyramidal polynomial plus whole periods of $c$ plus a
+  twelve-entry remainder table — a
+  [quasi-polynomial](https://en.wikipedia.org/wiki/Quasi-polynomial). Problem 276 uses exactly this
+  for [Alcuin's sequence](https://oeis.org/A005044), the count of integer triangles by perimeter,
+  and Problem 950's opening regime sums $C - \lfloor (n-1)/2 \rfloor$ to
+  $LC - \lfloor (L-1)^2/4 \rfloor$ the same way.
 
 ### 2. Counting without listing
 
@@ -99,6 +107,11 @@ Smaller counting formulas often sit *inside* a search as its $O(1)$ kernel:
   closed form, since it is a
   [Gauss circle problem](https://en.wikipedia.org/wiki/Gauss_circle_problem), so it is summed row
   by row.
+- Problem 276 needs only the *primitive* triangles. Its $O(1)$ count of all triangles up to a
+  perimeter is evaluated at each of the $O(\sqrt N)$ floor quotients $\lfloor N/k \rfloor$, and
+  [Möbius inversion](https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula) peels off the
+  non-primitive ones in $O(N^{3/4})$ total. Without the closed form, every quotient would cost a
+  sum of its own and the inversion would be no faster than a sieve.
 
 ### 3. A theorem collapses the statement
 
@@ -126,6 +139,12 @@ The step before the theorem is usually **algebra on the statement itself**:
 - Problem 772's balanceability is equivalent to a clean divisibility condition.
 - Problem 269's integer-root condition becomes a divisibility test that prunes a digit DP down to a
   handful of candidate roots.
+- Problem 274's divisibility multiplier turns out to be the
+  [inverse of 10](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) modulo $p$, and
+  that inverse has a closed form keyed on $p$'s last digit: $m = (kp+1)/10$ with
+  $k = 9, 3, 7, 1$ for $p \equiv 1, 3, 7, 9 \pmod{10}$. A formula can replace an *algorithm*, not
+  just a loop: no extended Euclid per prime, and branch-free arithmetic that vectorises over every
+  prime below the limit in one NumPy expression.
 
 ### 4. Recurrences that have a formula
 
@@ -138,6 +157,14 @@ and takes the trailing digits from the recurrence mod $10^9$. In Problem 137 the
 [Pell equation](https://en.wikipedia.org/wiki/Pell%27s_equation) whose solutions are products of
 Fibonacci numbers. In Problem 321 the minimum move count $n(n+2)$ meets the triangular numbers in
 another Pell-like equation.
+
+The recurrence need not be given; it can be *found*. Problem 957 asks how many points a
+projective construction has turned blue after 16 days. An exact simulation (in log coordinates,
+with FFT sumsets) reaches day 13 before the sets grow too large. On those values the
+[Berlekamp–Massey algorithm](https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm)
+finds an order-five linear recurrence whose characteristic roots are $4, 2, -2, 1, -1$; solving it
+gives the count as a polynomial in $4^n$, $2^n$, $(-2)^n$ and $(-1)^n$ over 864. Day 16, or day
+1000, is then $O(1)$ big-integer arithmetic.
 
 Non-linear and bitwise recurrences have closed forms more often than one expects:
 
@@ -205,9 +232,10 @@ derivation effort and it brings some standing hazards.
 - **Find the formula however you can, then prove it.** Not every closed form here was derived
   first. Problem 313's minimum move count, Problem 321's $n(n+2)$, Problem 256's tatami-free test
   and Problem 167's XOR rule were all *discovered*: an exact brute force (a BFS, a transfer matrix,
-  a direct sieve) ran on small cases and the pattern was read off. That is legitimate and often
-  fastest. But the brute force stays on as the referee, and the pattern has to be checked well
-  past the cases it was read from.
+  a direct sieve) ran on small cases and the pattern was read off. Problem 957 makes the reading
+  off mechanical with Berlekamp–Massey. That is legitimate and often fastest. But the brute force
+  stays on as the referee, and the pattern has to be checked well past the cases it was read
+  from: Problem 957's recurrence is fixed by ten terms and confirmed by three more.
 - **Keep the slow method behind a flag.** Several solutions keep the obvious $O(N^2)$ version,
   such as Problem 28's spiral walk, behind `--show`. It runs on small inputs purely to confirm the
   formula, because a sign slip is invisible once the loop is gone.
@@ -222,8 +250,14 @@ derivation effort and it brings some standing hazards.
     back (Problems 44, 141);
   - compare candidates exactly rather than as floats (Problem 183 decides termination on the
     reduced fraction, not the decimal);
+  - a floor of an irrational quotient can still be exact: Problem 950 evaluates
+    $\lfloor x/\sqrt m \rfloor$ as $\lfloor \sqrt{\lfloor x^2/m \rfloor} \rfloor$ with `isqrt`;
   - when a float is unavoidable, as with Binet for leading digits in Problem 104, use it only for
     the digits that floating point can actually resolve.
+- **Size the intermediates, not just the answer.** A closed form multiplies large factors before
+  it divides. Problem 276's answer fits in 64 bits but its $k(k+1)(2k+1)$ does not, so the C port
+  works in `__int128`; Problem 957's dominant term grows like $11 \cdot 16^n$, so its C port
+  refuses $n > 30$ while Python's unbounded integers take any $n$.
 - **Work in the modulus from the start.** When the answer is wanted mod $m$, evaluate the closed
   form with modular inverses and modular powers (Problems 381, 487, 944, 1000). The formula only
   helps if no intermediate is ever formed at full size.
@@ -231,7 +265,10 @@ derivation effort and it brings some standing hazards.
   because optimal play trades off variance state by state, and Problem 210's circle count is a
   Gauss circle sum. There the closed form bounds the search instead (Problem 232 caps the useful
   $T$ at the smallest value with $2^{T-1} \ge b$), or it settles every region except the one that
-  genuinely needs a loop.
+  genuinely needs a loop. Problem 950's pirate game is closed-form only up to $n = 2C+2$; after
+  that, closed forms describe each *run* of failed proposals (constant coins, linearly growing
+  walks), so the search jumps run to run, and the runs roughly double, reaching $10^{16}$ in a few
+  dozen steps.
 - **Evaluate polynomials with [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method).**
   `N * (N * (a*N + b) + c) + d` keeps intermediates small and uses the fewest multiplications.
 
