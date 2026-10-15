@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-07-30T11:59Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -12,7 +12,8 @@ see that the quantity asked for is a remainder, an astronomically large computat
 one that never leaves $[0, m)$. The mechanics that follow from that — fast exponentiation, the
 modular inverse, the Chinese Remainder Theorem, the overflow trap — are the subject of the deeper
 [Modular Arithmetic](/topics/number-theory/modular-arithmetic) note; here I want to catalogue the
-disguises the domain wears, so you learn to spot it.
+disguises the domain wears, so you learn to spot it, and the few facts about the modulus that
+decide what you are allowed to do once you have.
 
 ## The one property, in one line
 
@@ -23,7 +24,8 @@ $$(a + b) \bmod m = ((a \bmod m) + (b \bmod m)) \bmod m,$$
 
 and likewise for $a - b$ and $a \times b$. You may therefore reduce after every step and never let
 an intermediate value grow. Every disguise below is ultimately a chance to apply that one closure
-property early instead of late.
+property early instead of late. Note what is *missing* from the list: division. Whether you may
+divide depends on the modulus, and that is the subject of the section after the disguises.
 
 ## The disguises
 
@@ -32,8 +34,8 @@ decimal digits of $N$ are exactly $N \bmod 10^k$. Problem 97 wants the final ten
 $28433 \times 2^{7830457} + 1$, a number with over two million digits; working modulo $10^{10}$
 throughout, nothing bigger than $10^{20}$ is ever formed. Problem 48 (public,
 `solutions/public/p0048/`) sums $1^1 + 2^2 + \dots + 1000^{1000}$ and asks the same "last ten
-digits", and the private problems 104 (Fibonacci terminal digits) and 250 (subset sums whose total
-ends in a run of zeros) are the same instinct dressed differently.
+digits", and the private problem 104 (Fibonacci terminal digits) is the same instinct dressed
+differently.
 
 **"Is this divisible by …?"** is a residue-is-zero question. Problem 78 (public,
 `solutions/public/p0078/`) asks for the first $n$ whose partition count $p(n)$ is divisible by one
@@ -50,15 +52,32 @@ partitions.append(partition_value)
 
 The private problems 129 and 132 (when does a [repunit](https://en.wikipedia.org/wiki/Repunit)
 become divisible by $n$?) and columns of "$B$-trivisible" or "unlucky prime" divisibility tests
-across the later archive are the same shape.
+across the later archive are the same shape. Problem 274 runs the idea backwards: it asks for the
+multiplier $m$ that makes the schoolbook divisibility rule "drop the last digit $b$, add $b \cdot m$"
+exact for a prime $p$. Writing $n = 10a + b$ gives $10 f(n) = n + b(10m - 1)$, so the rule works
+precisely when $10m \equiv 1 \pmod p$ — every such divisibility trick is a
+[modular inverse](/topics/domain/modular-multiplicative-inverse) of $10$ in disguise, and this one
+even has a closed form that depends only on the last digit of $p$.
 
 **"Give the answer modulo $1\,000\,000\,007$."** Counting problems whose true answer overflows any
 integer type hand you the modulus explicitly — the residue *is* the deliverable. Here the domain is
 not a shortcut you discover but a contract you are handed: every count, product, and
 [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient) is computed in the ring
-from the start. The prime modulus is chosen deliberately, because it makes division available (see
-the [modular inverse](/topics/domain/modular-multiplicative-inverse)); this is the register a large
-fraction of the combinatorial problems past 300 are written in.
+from the start. This is the register a large fraction of the combinatorial problems past 300 are
+written in — and, as the section after the disguises shows, the *kind* of modulus you are handed
+matters.
+
+**"How many of these sum to a multiple of $m$?"** When the question counts objects by the residue
+of a total, put the residue in the exponent. Problem 250 counts the subsets of
+$\{1^1, 2^2, \dots, 250250^{250250}\}$ whose sum is divisible by $250$ — out of $2^{250250}$
+subsets. Each element matters only through $k^k \bmod 250$, so a quarter-million elements become a
+census over $250$ residues, and the subset-sum
+[generating function](/topics/domain/generating-function) $\prod_k (1 + x^{k^k})$ is computed not in
+$\mathbb{Z}[x]$ but in $\mathbb{Z}[x]/(x^{250} - 1)$, where $x^{250} = 1$ makes exponents add
+modulo $250$ by themselves: the state is $250$ counters, never a polynomial of growing degree. The
+smallest instance of the same trick is parity — problem 996 keeps only the even-total terms of a
+generating function as $\tfrac12\big(f(y) + f(-y)\big)$, the [root-of-unity
+filter](/topics/domain/root-of-unity) for modulus $2$.
 
 **Periodicity and cyclic structure.** Residues wrap around, so any process defined by "$+$" or
 "$\times$ a constant" is eventually periodic modulo $m$, and the period is often the real question.
@@ -67,29 +86,85 @@ Problem 19 (public, `solutions/public/p0019/`) is a calendar: the day of the wee
 needed. [Pisano periods](https://en.wikipedia.org/wiki/Pisano_period) (the cycle length of Fibonacci
 numbers mod $m$, problem 854), the [multiplicative order](https://en.wikipedia.org/wiki/Multiplicative_order)
 of an element, and "clock"-flavoured problems (506, 790, 891) all turn on the same idea: find the
-cycle, then jump across billions of steps by reducing the step count modulo its length.
+cycle, then jump across billions of steps by reducing the step count modulo its length. The period
+is often *provable* rather than merely observed: in problem 250 the map $k \mapsto k^k \bmod 250$
+repeats every $500$ values of $k$ (for $k \ge 3$), because $250 = 2 \cdot 5^3$ and the
+[Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function) gives
+$\lambda(125) = 100$, so a shift by $500$ leaves base and exponent alike unchanged modulo each
+factor — a quarter-million exponentiations become one block of five hundred. Where no theorem hands
+you the period, detect it: problem 943 walks deterministic sequences of parity masks only until
+one repeats, then answers "the first $k$ terms" by counting whole periods.
 
 **Congruences as the object of study.** Sometimes the residues are not a tool but the thing being
 counted. Problems 271 and 272 (Modular Cubes) ask for the solutions of $x^3 \equiv 1 \pmod n$;
 problem 451 hunts *self-inverse* residues with $m^2 \equiv 1 \pmod n$; problem 801 studies pairs
 with $x^y \equiv y^x$. These are number theory proper — you factor the modulus, understand the
 structure prime power by prime power, and glue the answer back with the Chinese Remainder Theorem —
-and they are where the domain stops being a convenience and becomes the subject.
+and they are where the domain stops being a convenience and becomes the subject. In 272 that glue
+is the whole solution: the [unit group](https://en.wikipedia.org/wiki/Multiplicative_group_of_integers_modulo_n)
+modulo an odd prime power is cyclic, a cyclic group of order $k$ holds exactly $\gcd(3, k)$ cube
+roots of unity, and so the count of solutions is a power of $3$ read straight off the
+factorisation of $n$ — the search becomes one over factorisations, not over residues. Problem 421
+reaches the same structure from the other side. It asks for the prime factors below $10^8$ of
+$n^{15} + 1$ for $10^{11}$ values of $n$, which is hopeless; swap the order of summation and ask
+each prime $p$ instead "for which residues $n$ does $p \mid n^{15} + 1$?" The answer is the
+negatives of the $15$th roots of unity mod $p$ — exactly $\gcd(15, p - 1)$ of them — and each
+residue class contributes its count of $n \le N$ by a single division. Factorisation turned into
+counting residues.
+
+## What the modulus allows
+
+Addition and multiplication survive reduction modulo *any* $m$. Everything else depends on the
+modulus, so read it before you write the first line:
+
+- **A prime modulus is a field**, and every nonzero residue has an inverse. That is why setters
+  choose $10^9 + 7$ or $1234567891$, and the primality is often load-bearing rather than cosmetic.
+  Problem 529 finds a linear recurrence of order $2772$ with the
+  [Berlekamp–Massey algorithm](https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm),
+  which divides by discrepancies and so needs a field; problems 996 and 1010 divide by $n!$ and by
+  products of hook lengths, legal only because the prime exceeds every factor involved — check that
+  inequality too, since a prime *smaller* than your factorials makes them vanish.
+- **A composite modulus is a product of smaller problems.** By the [Chinese Remainder
+  Theorem](/topics/technique/chinese-remainder-theorem) a squarefree $m = pqr$ splits into three
+  prime fields, so you solve in each and glue. Problem 365 wants $\binom{10^{18}}{10^9}$ — over nine
+  billion digits — modulo some twenty million products of three primes; per prime it is one
+  application of [Lucas's theorem](/topics/domain/lucass-theorem), and the recombination factors so
+  that only pairwise inverses are ever needed.
+- **A composite modulus also takes division away.** In problem 250 the answer is wanted mod
+  $10^{16}$, and the binomial recurrence $\binom{c}{i+1} = \binom{c}{i}(c-i)/(i+1)$ divides by
+  numbers that share factors with $10$ — no inverse exists. The two escapes are the two
+  implementations: carry the coefficient as an exact big integer and reduce only when storing it
+  (Python), or strip the powers of $2$ and $5$ into exponents and invert only the unit that remains
+  (C). Reach for the second shape whenever a recurrence divides and the modulus is not prime.
+- **Mind the width.** A modulus near $10^{16}$ means the product of two residues no longer fits in
+  64 bits, and a sum that is *not* reduced — problem 421's lands just under $2^{63}$ — leaves no
+  headroom at all; estimate the magnitude before choosing the type. The fixes (`__int128`, a split
+  multiply, reducing the operands first) are in the
+  [Modular Arithmetic](/topics/number-theory/modular-arithmetic) note.
 
 ## How to reason about it
 
 The recurring cue is a question about a **remainder** — last digits, divisibility, a count returned
-mod a prime, a periodic or cyclic structure — hung on a value far too large to form directly. When
-you catch it:
+mod a prime, a count of totals hitting a residue, a periodic or cyclic structure — hung on a value
+far too large to form directly. When you catch it:
 
-- **Name the modulus first.** "Last $k$ digits" means mod $10^k$; "divisible by $d$" means residue
-  $0$ mod $d$; a stated `1_000_000_007` means work in that ring from line one.
+- **Name the modulus first, then classify it.** "Last $k$ digits" means mod $10^k$; "divisible by
+  $d$" means residue $0$ mod $d$; a stated `1_000_000_007` means work in that ring from line one.
+  Prime means you may divide; composite means factor it, then split by CRT or keep division out of
+  the ring.
 - **Reduce early and often.** Never build the honest quantity and take its remainder at the end —
   reduce after each $+$ and $\times$ so operands stay in $[0, m)$. The classic mistake is to
   materialise the million-digit power or the true factorial first; the whole point is that you
   never have to.
+- **Collapse inputs to their residues.** If only the residue of a total matters, a quarter-million
+  elements are a census over $m$ buckets, and their generating function can live in
+  $\mathbb{Z}[x]/(x^m - 1)$.
 - **Look for the cycle.** If a sequence is defined by adding or multiplying a constant, it is
-  periodic mod $m$; find the period and you can leap over an astronomical number of steps.
+  periodic mod $m$; prove the period from the factorisation of $m$, or detect it, and leap over an
+  astronomical number of steps.
+- **Turn the sum around.** When a sum over $n$ asks which primes divide something, summing over
+  the primes and asking which residue classes of $n$ each one divides is often the tractable
+  direction.
 - **Then reach for the machinery.** Powers, division, and composite moduli each have a standard
   device — [modular exponentiation](/topics/technique/modular-exponentiation), the
   [modular inverse](/topics/domain/modular-multiplicative-inverse), and the Chinese Remainder
