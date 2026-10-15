@@ -4338,12 +4338,12 @@
       "path": "takeaway/small-cases-reveal-recurrence",
       "title": "Small cases reveal the recurrence",
       "status": "final",
-      "written": "2026-08-06T22:16Z",
+      "written": "2026-10-15T11:04Z",
       "solved": 4,
       "problems": 4,
       "tags": ["small-cases-reveal-recurrence"],
       "refs": ["p0237", "p0529", "p0957", "p0996"],
-      "solved_after": ["p0529", "p0957", "p0996"]
+      "solved_after": []
     },
     {
       "path": "takeaway/split-inputs-into-behaviour-classes",
