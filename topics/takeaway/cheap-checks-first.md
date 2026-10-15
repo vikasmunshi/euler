@@ -1,5 +1,5 @@
 <!-- tags: [cheap-checks-first] -->
-<!-- status: final -->
+<!-- status: final 2026-10-15T10:44Z -->
 # Order checks by cost
 
 A program that filters candidates spends its time inside the tests it runs. When

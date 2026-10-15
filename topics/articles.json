@@ -4162,12 +4162,12 @@
       "path": "takeaway/cheap-checks-first",
       "title": "Order checks by cost",
       "status": "final",
-      "written": "2026-07-30T11:59Z",
+      "written": "2026-10-15T10:44Z",
       "solved": 15,
       "problems": 15,
       "tags": ["cheap-checks-first"],
       "refs": ["p0103", "p0200", "p0206", "p0216", "p0236", "p0237", "p0241", "p0245", "p0331", "p0347", "p0348", "p0357", "p0719", "p0808", "p0983"],
-      "solved_after": ["p0241", "p0245", "p0331", "p0348", "p0983"]
+      "solved_after": []
     },
     {
       "path": "takeaway/closed-form-over-iteration",
