@@ -1,5 +1,5 @@
 <!-- tags: [size-work-to-the-input] -->
-<!-- status: final 2026-07-27T18:19Z -->
+<!-- status: final -->
 # Size the work to the input
 
 These solutions all take a size as their one argument — an n, a ceiling N, a
@@ -15,7 +15,7 @@ guess.
 
 A solver is a function of its input, and so is the work it should do. The size of
 every sieve, table, cache, and search loop is itself a *function of the argument*;
-the job is to write that function down instead of picking a number. Three shapes
+the job is to write that function down instead of picking a number. Four shapes
 recur.
 
 **A bound that is the argument.** The simplest case: the input already names the
@@ -36,6 +36,16 @@ $n \ln n$. The ceiling is still computed from the input — just through a
 closed-form bound rather than the raw value. Deriving the right ceiling is a small
 [closed-form](/topics/takeaway/closed-form-over-iteration) step in its own right.
 
+A sharper version of the same move divides the limit by the *smallest thing the
+rest of the answer could be*. [Modular Cubes, Part 2](/solutions/0272/) sums the
+$n \le L$ built from exactly $k$ prime-like factors times a free cofactor. Since
+those $k$ factors multiply to at least the product of the $k$ smallest candidates
+($7 \cdot 9 \cdot 13 \cdot 19 \cdot 31$ for $k = 5$), the cofactor table only
+needs to reach $L$ divided by that product, and the prime list only $L$ divided by
+the smallest $(k-1)$-factor product. Both sizes come from the two arguments, and
+both come out orders of magnitude below $L$ — the structure of the problem, read
+off the input, is what makes the scaffolding small.
+
 **A bound that shrinks as the work proceeds.** Sometimes the right size is not
 known up front but tightens as you go. [Largest Prime Factor](/solutions/0003/)
 trial-divides only up to $\sqrt{r}$, where $r$ is the *remaining* cofactor — and
@@ -43,6 +53,21 @@ each time it peels off a factor it recomputes that ceiling from the smaller $r$.
 The search limit tracks the live state of the input, so a large prime factor found
 early collapses the rest of the search instead of grinding on to a fixed
 $\sqrt{n}$.
+
+**A size chosen to balance two costs.** The first three shapes are about
+*correctness* — the bound below which the answer lives. The fourth is a size that
+correctness does not fix at all, only cost. [Bounded Sequences](/solutions/0319/)
+needs the [Mertens function](https://en.wikipedia.org/wiki/Mertens_function) at
+every quotient $\lfloor n/d \rfloor$; it sieves the Möbius function directly up to
+some $K$ and recurses above it. Any $K$ gives the same answer, but sieving costs
+about $K$ while the recursion costs about $n/\sqrt{K}$, and the two meet at
+$K = n^{2/3}$ — so that is where the sieve stops, not at $n$.
+[Cardano Triplets](/solutions/0251/) has the same shape in a different dress: it
+counts with one walk while a parameter $b_1$ is small (where each step yields many
+solutions) and a different walk once it is large (where most steps would yield
+none), and balancing the two costs puts the switch at $b_1 \approx L^{1/4}$. In
+both the split point is a formula in the input, derived from the cost model, not
+a number tuned on the main case.
 
 ## How to reason about it
 
@@ -53,7 +78,11 @@ Two forces push the same way.
 - **Correctness.** A bound hard-coded to a fixed maximum is right only for inputs
   below it. Size it to the argument and the one solution answers the whole family
   of inputs the harness can throw at it — the test cases deliberately run several
-  sizes per problem for exactly this reason.
+  sizes per problem for exactly this reason. They catch more than short tables:
+  the C port of Cardano Triplets formed a product that wrapped 64 bits only above
+  $L \approx 1.9 \times 10^8$, invisible at the main input and exposed by the
+  larger benchmark cases. Values grow with the input too, so [integer
+  width](/topics/takeaway/watch-integer-width) is part of the size.
 - **Honest measurement.** Build the structure *inside* `solve()`, dimensioned from
   the arguments — never at module import with a fixed ceiling. The benchmark runs
   `solve()` repeatedly under `--runs=N` and times the repeats, so a sieve built
@@ -73,12 +102,25 @@ A couple of cautions earn their keep:
 - **Do not over-size out of caution, either.** A bound padded to "surely big
   enough" wastes the very memory and time you were trying to spend precisely.
   Matching the work to the input means matching it — not swapping one arbitrary
-  constant for a larger one.
+  constant for a larger one. Bounded Sequences is the vivid case: sieving all the
+  way to $n = 10^{10}$ is "obviously enough" and also infeasible, while the
+  balanced $n^{2/3}$ is a few million entries.
+- **A cost-balanced split is free to test.** Because any crossover gives the same
+  answer, moving it is a built-in cross-check: Cardano Triplets was run with its
+  switch anywhere from $1$ to $1601$, and Bounded Sequences with its sieve at
+  $n^{1/2}$, $n^{0.55}$ and $n^{0.75}$; the totals never moved, and the timings
+  bottomed out where the cost model said they would. If shifting the split changes
+  the answer, one side of it is wrong.
+- **Clamp the formula at the small end.** An asymptotic size like $n^{2/3}$ can
+  round to something degenerate on tiny inputs, so Bounded Sequences takes
+  `min(n, max(1000, n ** (2/3)))` — the formula for the real input, and a floor
+  below which a plain sieve to $n$ is simply cheaper than any recursion.
 
 The through-line: the input is not merely the data your solution reads, it is the
-*specification for how much work to do*. Read the size off the argument, build to
-it, and the solution comes out both correct across the range and honest on the
-clock.
+*specification for how much work to do*. Read the size off the argument — directly,
+through a bound, or through a cost model that splits the work between two methods —
+build to it, and the solution comes out both correct across the range and honest
+on the clock.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
