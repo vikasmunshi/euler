@@ -1,5 +1,5 @@
 <!-- tags: [sieve-of-eratosthenes] -->
-<!-- status: final 2026-07-28T07:48Z -->
+<!-- status: final -->
 # Sieve of Eratosthenes
 
 The [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) finds
@@ -7,7 +7,8 @@ every prime up to a bound `N` by elimination: start with all numbers from 2 to `
 marked prime, then for each number still marked, strike out its multiples. Whatever
 survives is prime. It is the default answer whenever a problem needs *many* primes below
 a bound you know in advance — but its real value in Project Euler is often the artefact
-it leaves behind, not the enumeration itself.
+it leaves behind, not the enumeration itself, and at the largest bounds it survives as
+the small-number tier of an algorithm that never touches most of the range.
 
 ## The mechanism
 
@@ -52,6 +53,41 @@ factor**, and you can factor any number up to the bound by repeated lookup, with
 division at all — the right tool when a problem needs the *factorisations* of a whole
 range, not merely which numbers are prime.
 
+Sometimes the oracle is queried about numbers the problem never names. Problem 249 counts
+the subsets of the primes below 5000 whose sum is prime: the subset sums are tabulated by a
+0/1-knapsack pass, and the sieve exists to answer "is this *total* prime?" — so it runs to
+the largest possible sum, about 1.5 million, not to 5000. And sometimes only one number
+off the table matters: in problem 239 the formula is symmetric in the primes, so the sieve
+is consulted once, for the count `π(100)`, and which discs carry primes never enters the
+argument.
+
+## Sieve a function, not a flag
+
+The strike-out loop does not care what it writes. Visit each prime's multiples and apply
+that prime's contribution, and any [multiplicative
+function](https://en.wikipedia.org/wiki/Multiplicative_function) falls out for the whole
+range at once. Euler's totient is the classic case — every multiple of `p` loses the factor
+`(p-1)/p` (`solutions/public/p0072/`):
+
+```python
+euler_totients = list(range(max_d + 1))
+for n in range(2, max_d + 1):
+    if euler_totients[n] == n:          # untouched, so n is prime
+        for j in range(n, max_d + 1, n):
+            euler_totients[j] = euler_totients[j] // n * (n - 1)
+```
+
+No separate primality array is needed: a cell still equal to its index has never been
+touched, so it is prime. The [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function)
+is the same shape with a different rule — start every entry at `+1`, flip the sign on each
+prime's multiples, zero the multiples of each prime's square — and it underlies problems
+319 and 464, whose answers are built from its running sum, the [Mertens
+function](https://en.wikipedia.org/wiki/Mertens_function). Problem 319 adds one economy
+worth knowing: sieve with only the primes up to `√K`, keep a parallel array that divides out
+every prime power found, and any cofactor left above 1 is a single prime greater than `√K`
+(two would exceed `K`), settled by one closing sign flip. That swaps a loop over all `π(K)`
+primes for one over `π(√K)`.
+
 ## Variants, and when you need them
 
 - **Bounded array** — the default above. You know `N`, it fits in memory, you want a table.
@@ -65,6 +101,11 @@ range, not merely which numbers are prime.
 - **Segmented** — when `N` is known but the array will not fit: sieve `[1, √N]` once for
   the small primes, then sweep the range in cache-sized windows, marking each window with
   those primes. Same primes, bounded memory.
+- **Odd-only** — store only the odd numbers, index `i` standing for `2i+1`. Half the
+  memory and half the strikes, at the price of index arithmetic. It matters when the sieve
+  *is* the program: in problem 315 the per-prime work collapses to two table lookups, so
+  sieving to `2·10⁸` is what remains, and its cost is mostly memory traffic — 100 MB beats
+  200 MB.
 - **Sieve of Sundaram** — a variant that marks `i + j + 2ij` to knock out the odd
   composites directly (`solutions/public/p0010/` has one for contrast). It is a tidy
   curio, but at `O(N log N)` it is asymptotically slower than Eratosthenes; reach for it to
@@ -74,12 +115,44 @@ For contrast, the same `solutions/public/p0010/` also solves the problem by tria
 primality on each candidate — correct, and `O(N√N / log N)`, which is exactly the blow-up
 the sieve exists to avoid when the question is about a whole range.
 
-## Two things to get right
+## When the bound is too big to sieve
+
+Past about `10⁹` a full table stops being an option — problem 245 works up to `2·10¹¹`,
+where a totient sieve would need hundreds of gigabytes. The sieve does not disappear; it
+shrinks to a *fraction* of the bound and becomes one tier of a larger algorithm. Two
+patterns recur.
+
+- **Sieve the small primes, construct the large one.** Every `n ≤ N` has at most one prime
+  factor above `√N`, and at most two above `N^(1/3)`. So sieve to the root, and handle the
+  part beyond it by algebra plus a primality test rather than by lookup. In problem 245 the
+  sieve runs to `√N`, the largest prime of each candidate is *solved for* from the
+  divisibility condition, and a deterministic
+  [Miller–Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test) test
+  confirms it. Problem 241 sieves only to `N^(1/3)`: any tail of larger primes must have
+  the shape `p`, `p²` or `pq`, and each shape pins its primes through a residual fraction —
+  the `pq` case as the roots of a quadratic. Problem 251 uses its sieve, to `√((L+1)/6)`,
+  only as the prime list for trial division.
+- **Sieve to `n^(2/3)`, recurse above it.** Summatory functions — `Φ(n) = Σ φ(k)` in
+  problem 351, the Mertens function in problem 319 — satisfy identities such as
+  `Σ_{d≤v} Φ(⌊v/d⌋) = v(v+1)/2` that express the value at `v` through values at the
+  quotients `⌊v/d⌋`. Only `O(√n)` distinct quotients exist, so a function sieve answers
+  every quotient below a cutoff `L` directly and the recursion fills in the few above it.
+  The two costs, `O(L)` for the sieve and `O(n/√L)` for the recursion, balance at
+  `L = n^(2/3)`, which is the whole algorithm's complexity: problem 319 reaches `n = 10¹⁰`
+  from a sieve of under five million entries.
+
+## Things to get right
 
 - **Size it to the inputs.** When the problem gives you an *index* — "the `n`-th prime" —
   rather than a value ceiling, use the prime number theorem's estimate that the `n`-th
   prime is near `n·ln n` and sieve that far. When it gives a value bound, sieve to the
-  bound.
+  bound — or to the largest number you will actually *query*, which is not always the
+  input (problem 249's subset sums), and not always all of it (the roots and `n^(2/3)`
+  above).
+- **Know whether it is the bottleneck.** In problem 365 the sieve covers primes below
+  10 000 and is then followed by twenty million Chinese-remainder lifts; a segmented or
+  wheel sieve there would be effort spent on nothing. In problem 315 the sieve *is* the
+  cost, and halving it pays. Measure before optimising it.
 - **Build it inside `solve()`.** Construct the sieve on each call, sized to the inputs —
   not once at module level. With `--runs=N` the harness times repeated `solve()` calls; a
   sieve built once at import is excluded from the first run and free thereafter, which
