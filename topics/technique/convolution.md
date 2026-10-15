@@ -1,5 +1,5 @@
 <!-- tags: [convolution] -->
-<!-- status: final 2026-07-31T20:03Z -->
+<!-- status: final -->
 # Convolution
 
 [Convolution](https://en.wikipedia.org/wiki/Convolution) is the operation that combines two
@@ -54,12 +54,50 @@ multinomials, and consecutive terms differ by a fixed ratio, so the whole thing 
 loop with no array at all. Recognising the polynomial is what buys the closed form; convolution
 is the *model*, not necessarily the *method*.
 
+Even without a closed form, one coefficient is cheaper than a product. The coefficient of `x^k`
+in `A·B` is a single dot product, `Σᵢ a[i]·b[k-i]` — O(*k*), not the O(*k*²) of the full
+convolution. March of the Penguins (problem 1010) leans on this hard: it counts, over every
+partition of *n*, the cells of each hook length, and each cell position splits a partition into
+three independent regions, each counted by a partition generating function — two of them
+[Gaussian binomials](https://en.wikipedia.org/wiki/Gaussian_binomial_coefficient), partitions
+fitting in a box. The count it wants is one coefficient of their triple product, so it convolves two of the
+factors once (`np.convolve`) and then reads off the coefficients it needs, for every arm length at
+once, as a vectorised dot product against the third.
+
+**Many identical parts: power by squaring, truncated.** When the same part repeats *t* times and
+*t* is large, raise its polynomial to the *t*-th by
+[repeated squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) — O(log *t*)
+multiplications instead of *t*. If only degrees up to *m* matter, drop every term above *m* after
+each multiply, and the cost is O(*m*² log *t*) however large the true product would be. Chandelier
+(problem 768) ends exactly this way: the structure of the roots of unity splits a balanced
+arrangement into *t* independent layers, each with the same distribution of candle counts, and the
+answer is the coefficient of `x^m` in that distribution's *t*-th power. The hard part of the
+problem is finding the independence; once found, the combination is a three-line function.
+
+Repeated parts also collapse the other way. Problem 250 multiplies one factor `(1 + x^r)` per
+element, but its elements fall into only 250 residue classes, so each class of *c* equal factors
+is `(1 + x^r)^c` — written down directly from a row of binomial coefficients rather than built by
+*c* multiplications. Group equal factors before multiplying anything.
+
 **The index set need not be the integers.** Convolution is defined over any group — replace
-`i + j` with the group operation. The Quaternion Group I (problem 980) tallies how many blocks map
-to each element of the 8-element quaternion group *Q₈*, then pairs them by `Σ_g cnt[g]·cnt[g⁻¹]`.
-That is a convolution over *Q₈* evaluated at the identity, and it turns an O(*N*²) pairing over
-10¹² ordered pairs into a linear tally over eight buckets. When a problem's parts compose by some
-associative rule other than addition, look for the same collapse.
+`i + j` with the group operation. The everyday case is the cyclic group ℤ/*m*: "how many subsets
+have a sum divisible by *m*?" is a product of `(1 + x^e)` factors in the ring
+`ℤ[x]/(x^m − 1)`, where exponents add modulo *m* and the array has a fixed length *m* forever —
+an index past the end wraps to the front instead of growing the array. Problem 250 asks this for
+the 250250 numbers `k^k` with *m* = 250, and the subset count is the coefficient of `x⁰` in a
+product of at most 250 cyclic multiplies, never wider than 250 slots. Elements in residue class
+0 do not even need a multiply: each one doubles every count, so the whole class is a scalar
+`2^c`.
+
+The exotic case works the same way. The Quaternion Group I (problem 980) tallies how many blocks
+map to each element of the 8-element quaternion group *Q₈*, then pairs them by
+`Σ_g cnt[g]·cnt[g⁻¹]`. That is a convolution over *Q₈* evaluated at the identity, and it turns an
+O(*N*²) pairing over 10¹² ordered pairs into a linear tally over eight buckets. Chandelier's
+[meet-in-the-middle](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack) step is the same
+move in two variables at once: each half's subsets are tallied by (vector sum, size); the halves
+are joined only where their sums cancel — the sum variable evaluated at the identity — while the
+sizes convolve in full. When a problem's parts compose by some associative rule other than
+addition, look for the same collapse.
 
 **A comparison is a convolution plus a prefix sum.** "How often does one sum beat another?" is not
 a single coefficient but a triangular sum over the product distribution. Precompute the prefix sums
@@ -69,22 +107,30 @@ off-by-one (*strictly* greater, so exclude the tie) doing real work.
 ## How to reason about it
 
 - **Cost.** The direct double loop is O(*mn*) for arrays of length *m* and *n*. That is fine when
-  the totals are small — dice sums, digit-square sums, a few hundred slots — and it is what every
-  problem here uses. Only when the arrays get long (tens of thousands and up) does it pay to reach
+  the totals are small — dice sums, digit-square sums, 250 residues, a few hundred slots — and it is
+  what every problem here uses, `np.convolve` included. Only when the arrays get long (tens of thousands and up) does it pay to reach
   for an [FFT](https://en.wikipedia.org/wiki/Convolution_theorem)-based multiply at
   O(*n* log *n*), or an [NTT](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_over_a_ring)
   when the answer is wanted modulo a prime.
 - **Stay in integers.** Convolving *counts* rather than *probabilities* keeps the arithmetic exact
   through thousands of additions; divide by the size of the outcome space once, at the end. Floats
   accumulate error and can cost you the last of the seven decimal places a problem asks for.
+  When the counts outgrow a machine word, either reduce them modulo the answer's modulus after
+  every multiply (problem 250 keeps only 16 digits — and in C the product of two 16-digit
+  residues still needs 128 bits) or prove they cannot overflow: NumPy's `int64` wraps silently,
+  and problem 1010 is safe only because every coefficient it convolves counts partitions of at
+  most 300, which stay below 10¹⁶.
 - **Watch the array's length.** Each convolution step grows the support by the new part's span, so
   either allocate a fresh array of length `len(a) + span` or extend in place — and be clear whether
   the old contents should survive (they encode the zero-contribution case) or be cleared first.
-  Truncating early to the degree you care about is a legitimate and often large saving.
+  Truncating early to the degree you care about is a legitimate and often large saving
+  (problem 768 never holds more than *m* + 1 terms); working modulo `x^m − 1` stops the growth
+  altogether.
 - **Look for independence first.** The whole technique is unlocked by the observation that two
   quantities do not constrain each other. If they do — if some choice couples the parts — either
   find a variable that decouples them (problem 240 conditions on the value of the tenth-largest
-  die, after which the three classes of dice are independent) or accept that convolution is the
+  die, after which the three classes of dice are independent; problem 1010 fixes one cell and
+  its arm and leg, after which the three regions around it are) or accept that convolution is the
   wrong tool.
 
 The tell is a brute force whose cost is a *product* of independent ranges. When you catch yourself
