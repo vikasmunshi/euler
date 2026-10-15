@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function, partition-number-theory, pentagonal-number-theorem, continued-fraction, amicable-numbers, eulerian-path, eulerian-number, linear-sieve] -->
-<!-- status: final 2026-07-24T08:16Z -->
+<!-- status: final -->
 # Euler
 
 More of the mathematics behind these problems traces to one man than to any other. [Leonhard
@@ -40,9 +40,39 @@ for prime_num in primes_generator():
 The same function carries [Euler's theorem](https://en.wikipedia.org/wiki/Euler%27s_theorem) —
 `a^φ(n) ≡ 1 (mod n)` for `gcd(a, n) = 1`, the generalisation of Fermat's little theorem — which is
 what lets the RSA problem (182) and the hyperexponentiation problem (188) collapse an astronomical
-exponent down modulo `φ(n)`. When a problem needs `φ` across a whole range rather than at one
-point, compute it with a sieve (a modified Sieve of Eratosthenes seeding `φ(p) = p-1`), not by
-factoring each number in turn.
+exponent down modulo `φ(n)`.
+
+Evaluating `φ` at one point is the easy direction. The problems push it three other ways, and each
+needs a different tool:
+
+- **Across a range.** When a problem needs `φ` for every `n` up to a bound, sieve it (a modified
+  Sieve of Eratosthenes seeding `φ(p) = p-1`, or the linear sieve below) rather than factoring each
+  number in turn.
+- **Summed, past where a sieve fits.** Often the range is wanted only as a total. Problem 351
+  (Hexagonal Orchards) is that case in disguise: a lattice point is hidden from the centre exactly
+  when its coordinates share a factor, so each ring of a hexagonal sector shows `φ(s)` points and
+  the hidden count is the total minus six copies of the
+  [totient summatory function](https://mathworld.wolfram.com/TotientSummatoryFunction.html)
+  `Φ(n) = Σ φ(s)`. You do not need the individual values. Every pair `1 ≤ a ≤ b ≤ v` has exactly one
+  reduced form, which gives `Σ_d Φ(⌊v/d⌋) = v(v+1)/2`. That identity mentions `Φ` only at the
+  `O(√n)` distinct quotients `⌊n/k⌋`, so a sieve up to `n^(2/3)` plus quotient blocking for the
+  larger values brings the cost down to `O(n^(2/3))`. The sieve becomes the bottom tier of the
+  algorithm instead of the whole of it.
+- **Backwards.** Problem 248 asks for every `n` with `φ(n) = 13!`. The product form
+  `φ(n) = ∏ p^(a-1)(p-1)` turns this inversion into a factorisation of the *target*: a prime can
+  occur in `n` only if `p-1` divides it, so the alphabet is "divisors plus one that are prime" (a
+  few hundred numbers), and a depth-first descent over that alphabet emits every solution exactly
+  once. One subtlety catches people: `φ(2) = 1`, so `φ(2m) = φ(m)` for odd `m`. A descent that
+  stops the moment the residual reaches 1 loses half the answers.
+- **As a constraint.** Problem 245 (Coresilience) asks when `(n - φ(n)) / (n - 1)` is a unit
+  fraction, with `n` up to `2·10¹¹`, which is far beyond any sieve. Here the product form is used
+  for *proofs*. If `p² | n`, then `p` divides both `n` and `n - φ(n)`, so qualifying `n` are
+  squarefree. With three or more prime factors, every prefix must keep `φ(m)/m > 1/2`, which rules
+  out even `n` and prunes whole subtrees. The search then *constructs* candidates (solving for the
+  largest prime given the rest) instead of filtering a range.
+
+The common lesson is that once the bound is too large to sieve, the multiplicative structure stops
+being a way to evaluate `φ` and becomes a way to avoid evaluating it at all.
 
 ## Generating functions: partitions and the pentagonal number theorem
 
@@ -70,6 +100,18 @@ while (pent := pentagonal(k)) <= n:
 
 Problems 76 and 77 are partitions under a constraint (which parts are allowed); 45 and 76/78 are
 where the pentagonal (and its cousin figurate) numbers show up directly.
+
+Generating functions also count partitions that you never get to *see*. In problem 1010 (March of
+the Penguins), the penguins' displacements form a partition and each legal step adds one box to its
+[Young diagram](https://en.wikipedia.org/wiki/Young_tableau#Diagrams), so the answer is a product of
+[hook-length](https://en.wikipedia.org/wiki/Hook_length_formula) counts over roughly 10¹⁶
+partitions. That product depends only on *how many boxes have each hook length* across all of the
+partitions. Marking one box cuts the diagram around it into independent pieces, each a partition
+that fits in a rectangle, and the count of such pieces is a coefficient of a
+[Gaussian binomial](https://en.wikipedia.org/wiki/Gaussian_binomial_coefficient), Euler's product
+cut down to a finite box. You build the polynomials with a two-term recurrence, convolve them, and
+read off the counts. The partitions themselves are never listed, which is the same move as the
+pentagonal recurrence: a statistic of the whole family, computed through its generating function.
 
 ## Continued fractions
 
@@ -116,6 +158,11 @@ The lesson is not "memorise Euler's results" but recognising the shape that invi
   convergents.
 - A **huge exponent modulo `n`** — reduce the exponent mod `φ(n)` by Euler's theorem before you
   compute anything.
+- A **sum of a multiplicative function** to a bound too large to sieve — look for an identity over
+  the quotients `⌊n/d⌋` and evaluate it sublinearly.
+- A multiplicative function **run backwards** or used as a **constraint** — enumerate factorisations
+  of the target, or derive the structural facts (squarefree, parity, a ratio bound) that let you
+  build candidates instead of scanning for them.
 
 The pitfall in every case is doing the brute-force version first. These identities exist precisely
 because the direct count is infeasible; the win comes from spotting the structure *before* writing
