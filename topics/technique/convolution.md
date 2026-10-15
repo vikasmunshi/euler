@@ -1,5 +1,5 @@
 <!-- tags: [convolution] -->
-<!-- status: final -->
+<!-- status: final 2026-10-15T11:05Z -->
 # Convolution
 
 [Convolution](https://en.wikipedia.org/wiki/Convolution) is the operation that combines two
