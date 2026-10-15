@@ -1,5 +1,5 @@
 <!-- tags: [cheap-checks-first] -->
-<!-- status: final 2026-07-30T11:59Z -->
+<!-- status: final -->
 # Order checks by cost
 
 A program that filters candidates spends its time inside the tests it runs. When
@@ -44,9 +44,12 @@ if k % 9 in (0, 1) and passes_expensive_check(k):
     accept(k)
 ```
 
-That is the shape of nearly every solution below: a sieve or generator produces a
+The simplest form is a flat filter chain: a sieve or generator produces a
 constrained candidate stream, one or two $O(1)$ filters strip the bulk of it, and
-only the residue pays for the heavy test.
+only the residue pays for the heavy test. The same rule then carries over to two
+places where the `and` is not written out: the nodes of a search tree, where a
+cheap rejection discards a whole subtree rather than one candidate, and vectorized
+code, where there is no short-circuit operator and you have to build one.
 
 ## How to reason about it
 
@@ -60,7 +63,8 @@ leaf of the search. The measured effect is large and grows with the search: in C
 $n = 7$ drops from about $0.068$ s to $0.009$ s (~7.8×), and $n = 8$ from $1.52$ s
 to $0.32$ s (~4.8×). Same algorithm, same answer, one line moved.
 
-The rest are filter chains where a structural insight yields the cheap front test:
+In the flat filter chains, the cheap front test comes from some structural insight
+into the problem:
 
 - [Prime Generating Integers](/solutions/0357/) needs $d + n/d$ prime for every
   divisor $d$ of $n$. A single $d = 2$ test — one array lookup asking whether
@@ -81,6 +85,69 @@ The rest are filter chains where a structural insight yields the cheap front tes
 - [Prime-proof Squbes](/solutions/0200/) generates sparse squbes, then applies a
   substring test before the costly prime-proof mutation check, so only the few
   candidates that could possibly qualify pay for it.
+- [Cross Flips](/solutions/0331/) runs the rule at the level of a whole input. An
+  odd board is solvable only if every row has an odd number of black disks, so
+  the sweep over an odd board stops at the first row of even width. For the boards
+  asked, that row turns up almost immediately, and those boards cost nothing next
+  to the even ones. When one cheap witness is enough to prove "no", look for it
+  before you compute the full answer.
+
+### In a search tree, a check prunes a subtree
+
+In a depth-first search, the conjunction is evaluated at every node, and a
+rejection there discards every descendant. Selectivity now multiplies by the size
+of the subtree that never gets built, so the cheap test is worth far more than it
+is in a flat filter.
+
+- [Perfection Quotients](/solutions/0241/) searches over factorisations, carrying
+  the residual abundancy $a/b$ that the unplaced primes must still supply. Each
+  node runs four tests, cheapest first: has the target been overshot ($a < b$),
+  has it been hit exactly, can the denominator $b$ still divide the unplaced part,
+  and could the remaining primes supply the residual at all. The third test is a
+  single `gcd` against a precomputed product of small primes, and it is by far the
+  most productive one. Adding it cut the run at $10^{14}$ from twenty-five seconds
+  to a tenth of a second. The fourth test is a bound, and the solution keeps it
+  cheap with prefix sums and a binary search, so it never costs more than the
+  subtree it saves.
+- [Coresilience](/solutions/0245/) prunes on a running ratio. For three or more
+  prime factors, every valid prefix $m$ needs $\varphi(m) > m/2$. That one
+  comparison rules out every even $m$ outright, and since the ratio only falls as
+  primes are added, the moment a prefix fails, its whole subtree goes.
+- [Consonant Circle Crossing](/solutions/0983/) stacks three tiers of cost. It
+  skips any radius with too few lattice-vector classes before searching at all.
+  Inside the backtracking, it rejects a branch with a sign-free relation table of
+  $3^k$ sums. The exact $O(4^K)$ check over all cube vertices runs only on the rare
+  branch that the table cannot settle, and symmetry cuts that check to two
+  signings instead of $2^{K-1}$.
+
+Taken far enough, a strong necessary condition stops being a filter and becomes
+the generator. Coresilience cannot afford a totient sieve to $2 \times 10^{11}$,
+so it turns its divisibility condition around to *construct* the second prime
+from the first. Every candidate it generates already satisfies the cheap
+condition, and only primality is left to check.
+
+### Without `and`: short-circuit by compaction
+
+Array code applies every operation to every element. A NumPy mask such as
+`(A) & (B)` evaluates `B` on the whole array even where `A` already failed, so
+writing the conditions in a sensible order buys nothing. To get the saving back,
+you compact the array between stages so that each later test sees only the
+survivors. [Sum of a Square and a Cube](/solutions/0348/) does this for its
+palindrome test. Every value in a band has the same digit count $d$, so the test
+compares the outermost digit pair first and keeps only the matches, then moves
+inward:
+
+```python
+for j in range(d // 2):                  # outermost pair first
+    lo = v // 10**j % 10
+    hi = v // 10**(d - 1 - j) % 10
+    v = v[lo == hi]                      # compact: the next pass sees ~1/10
+```
+
+Each pass keeps about a tenth of its input, so the whole test costs barely more
+than its first pass. The expensive step, counting each sum's multiplicity with
+`np.unique`, then runs only on the palindromes. The C port gets the same effect
+for free from an early `return` after the first mismatched pair.
 
 A few cautions earn their keep:
 
@@ -90,6 +157,13 @@ A few cautions earn their keep:
   structure and satisfy yourself it admits *every* solution; a filter with a false
   negative silently corrupts the answer, and it will still pass the small example
   that happens to have none.
+- **Keep the final check exact.** The other half of that rule: whatever the cheap
+  stages let through, or whatever a shortcut produces, should be confirmed by the
+  full condition. Perfection Quotients solves its last one or two primes
+  algebraically instead of searching for them, then checks every candidate against
+  the exact identity $2\,\mathrm{num}\,\sigma(m) = \text{target}\cdot\mathrm{den}\cdot m$.
+  A slip in the algebra can then only lose a solution, never invent one, and a
+  lost solution shows up in a cross-check against brute force.
 - **Order by cost *and* selectivity, not cost alone.** The front test should be the
   one with the best ratio of candidates-killed to time-spent. A cheap test nobody
   fails just adds a branch.
@@ -103,8 +177,10 @@ A few cautions earn their keep:
 
 The through-line is that for a conjunction of pure tests correctness is
 order-independent but cost is not. Spend a moment deciding which check is cheapest
-and kills the most, put it first, and let short-circuit evaluation keep the
-expensive checks off the candidates that were never going to survive.
+and kills the most, and put it first. Then let short-circuit evaluation keep the
+expensive checks off the candidates that were never going to survive. In a search,
+put it at the node, where it saves a whole subtree. In array code, compact the
+array between stages, because the language will not short-circuit for you.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
