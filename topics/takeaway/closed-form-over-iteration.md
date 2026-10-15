@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
-<!-- status: final 2026-07-28T07:48Z -->
+<!-- status: final -->
 # Prefer closed form over iteration
 
 A loop that adds up a structured sequence is doing arithmetic the sequence has
@@ -7,10 +7,11 @@ already promised. When the terms follow a rule — an [arithmetic](https://en.wi
 or [geometric progression](https://en.wikipedia.org/wiki/Geometric_progression),
 a count of lattice paths, the corners of a spiral — that rule usually collapses
 into a [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression):
-a fixed formula that returns the answer in a constant number of operations, no
-matter how large the input. Across the problems below the same move recurs —
-spot the structure, write the formula, delete the loop — and it is the single
-highest-leverage habit these puzzles teach.
+a fixed formula whose cost does not grow with the number of things it counts.
+Often that means a constant number of operations; sometimes it means a short sum
+— a few dozen terms standing in for $10^{12}$ cases. Across the problems below
+the same move recurs — spot the structure, write the formula, delete the loop —
+and it is the single highest-leverage habit these puzzles teach.
 
 ## What a closed form buys
 
@@ -51,12 +52,77 @@ a [generating function](https://en.wikipedia.org/wiki/Generating_function), a
 combinatorial identity — but the principle is one and the same: let the
 structure do the counting.
 
+## Closed forms as building blocks
+
+In the harder problems the formula rarely *is* the answer. It is a component —
+the part of the computation that would otherwise be the inner loop — and the
+surrounding algorithm is designed around having it. Four shapes recur.
+
+**A formula per item, in place of a search per item.**
+[Divisibility Multipliers](/solutions/0274/) asks, for every prime $p$ coprime
+to 10, for the smallest multiplier $m$ that preserves divisibility under a
+digit-shuffling map. The obvious program tries $m = 1, 2, \dots$ for each prime.
+A line of algebra shows the condition is $10m \equiv 1 \pmod p$ — $m$ is the
+[modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse)
+of 10 — and that inverse has a closed form, $(kp+1)/10$, with $k$ read off a
+four-entry table by $p$'s last digit. The outer sum over primes remains; the
+per-prime search is gone, and what is left vectorises into one array expression.
+
+**A formula for the full blocks, iteration only along the boundary.** Counting
+up to an arbitrary bound $N$ rarely closes in one formula, but the count over a
+*complete* block — all $b$-bit numbers, all $D$-digit numbers — usually does.
+[Odd Triplets](/solutions/0242/) reduces, through
+[Lucas' theorem](https://en.wikipedia.org/wiki/Lucas%27s_theorem), to summing
+$2^{\operatorname{popcount}(t)}$ over $t \le T$; over a free block of $b$ bits
+that sum is exactly $3^b$ (each bit contributes a factor $1 + 2$). Walking the
+bits of $T$ from the top, every 1-bit closes off one full block, so a sum over
+a quarter of a trillion values takes under forty steps. [Reflexive Position](/solutions/0305/)
+uses the same split on decimal digits: occurrences of a string inside a
+$D$-digit integer at a fixed offset leave the other digits free, a power of 10
+apiece, and only the top length needs a comparison against $N$. This is the
+skeleton of a [digit DP](https://en.wikipedia.org/wiki/Dynamic_programming),
+with the closed form doing the work the memo table would.
+
+**A cheap count you can invert.** Once "how many up to $N$" costs
+$O(\log N)$, "where is the $n$-th one" is a
+[binary search](https://en.wikipedia.org/wiki/Binary_search_algorithm) over a
+monotone function — which is how Reflexive Position locates the $n$-th
+occurrence of $n$ in the Champernowne string without ever writing the string
+out. The closed form did not answer the question; it made the question
+searchable.
+
+**A formula at the leaves of a quotient recursion.**
+[Möbius inversion](https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula)
+over the floor quotients $\lfloor n/d \rfloor$ — the engine behind
+[Primitive Triangles](/solutions/0276/) and [Bounded Sequences](/solutions/0319/)
+— evaluates some summatory function at only $O(\sqrt n)$ distinct arguments,
+which is sublinear *only if* each evaluation is cheap. Primitive Triangles needs
+the count of all integer triangles with perimeter $\le v$: that is a prefix sum
+of [Alcuin's sequence](https://oeis.org/A005044), $\operatorname{round}(k^2/12)$,
+and the rounding, being periodic in $k \bmod 12$, folds into the
+square-pyramidal sum as a correction term — $O(1)$ per quotient, $O(n^{3/4})$
+overall. Bounded Sequences reduces its count to $F(m) = \sum_{h \le m} (3^h - 2^h - 1)$,
+two geometric series evaluated with modular exponentiation at each large
+quotient. Without these leaf formulas each method would be a linear scan in
+disguise.
+
+The plainest variant is a sum that is short rather than constant.
+[Twenty-two Foolish Primes](/solutions/0239/) asks a probability over all $100!$
+permutations; [inclusion–exclusion](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
+over which displaced discs are nevertheless fixed gives an alternating sum of
+binomial-times-factorial terms — the
+[derangement](https://en.wikipedia.org/wiki/Derangement) formula, generalised —
+with as many terms as there are displaced discs. Twenty-three exact
+big-integer terms replace an enumeration no computer could finish.
+
 ## How to reason about it
 
 Reach for a closed form when the quantity you are accumulating is *structured* —
 the terms obey a recurrence or an algebraic rule, not arbitrary data. The tells
 are concrete: an arithmetic or geometric run, a triangular / pyramidal / binomial
-count, a sum over a regular grid, a linear recurrence with constant coefficients.
+count, a sum over a regular grid, a linear recurrence with constant coefficients,
+a count over all numbers with a fixed number of digits or bits, or a term that
+is a polynomial up to a periodic wobble (floors and rounds of $k^2/c$).
 When the summand is genuinely irregular — the rectangle counts scanned in
 [Counting Rectangles](/solutions/0085/), where the search stops at the shape
 nearest a target — no formula collapses the whole thing, and iteration is the
@@ -73,11 +139,25 @@ Three cautions earn their keep:
 - **Mind the arithmetic.** Formulas multiply before they divide, so intermediate
   values can be far larger than the answer — a real overflow risk in C, and a
   reason to prefer exact integer arithmetic (Python's big integers, or careful
-  ordering so the division is exact) over anything that rounds.
+  ordering so the division is exact) over anything that rounds. Division is the
+  sharp edge. Under a modulus the halving in $(3^{m+1} - 3)/2$ is not a plain
+  division; Bounded Sequences works modulo $2M$, where the residue stays even,
+  and halves that. A `round` inside the summand, as in Alcuin's sequence, is
+  not something to evaluate in floating point term by term; Primitive Triangles
+  folds it into a periodic integer correction. Twenty-two Foolish Primes keeps
+  its probability as an exact ratio of two big integers and rounds to twelve
+  decimals in integer arithmetic.
 - **A formula is worth deriving once and reusing.** The triangular and
   pyramidal-number identities recur across many of the problems below; naming
   them as small helpers, as these solutions do, keeps each new use a one-liner
   rather than a fresh derivation.
+- **Closed form is not always cheaper per call.** When you need a formula at
+  every small argument in order, a running total costs $O(1)$ per step, while
+  re-evaluating the formula can cost more (a modular power each time). Bounded
+  Sequences accumulates $F$ incrementally below $\sqrt n$ and switches to the
+  closed form only for the scattered large quotients. Use the formula where it
+  lets you skip arguments, and plain iteration where you visit every one
+  anyway.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
