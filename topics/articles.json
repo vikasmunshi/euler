@@ -6010,12 +6010,12 @@
       "path": "technique/integer-square-root",
       "title": "Integer square root",
       "status": "final",
-      "written": "2026-08-08T05:49Z",
+      "written": "2026-10-15T10:54Z",
       "solved": 25,
       "problems": 25,
       "tags": ["integer-square-root"],
       "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0331_s0", "p0348_s0", "p0501_s0", "p0808_s0", "p0932_s0", "p0950_s0"],
-      "solved_after": ["p0276", "p0331", "p0348", "p0950"]
+      "solved_after": []
     },
     {
       "path": "technique/integral",
