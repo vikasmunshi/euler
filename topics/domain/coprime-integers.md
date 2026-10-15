@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers] -->
-<!-- status: final -->
+<!-- status: final 2026-10-15T10:55Z -->
 # Coprime integers
 
 Two integers are [coprime](https://en.wikipedia.org/wiki/Coprime_integers) when
