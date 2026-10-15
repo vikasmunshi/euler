@@ -1,15 +1,17 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: final 2026-07-30T11:59Z -->
+<!-- status: final -->
 # Watch integer width
 
-Every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
+Almost every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
 `int` is an [arbitrary-precision](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
 "bignum" that grows to fit whatever you compute, while C's integers are
 [fixed-width](https://en.wikipedia.org/wiki/C_data_types#Basic_types) boxes that
 [overflow](https://en.wikipedia.org/wiki/Integer_overflow) the moment a value outgrows them. The
 takeaway is a habit: when you translate a working Python solution to C — as every problem here does
 — stop at each multiply, sum, and power and ask *how big can this actually get?* The number that
-matters is not the final answer but the largest **intermediate** value on the way to it.
+matters is not the final answer but the largest **intermediate** value on the way to it — and, as
+the later problems show, the one place Python *does* overflow is the fixed-width NumPy array
+underneath it.
 
 ## The idea
 
@@ -41,6 +43,13 @@ for (int j = i; j < i + length; j++)
     product *= (number[j] - '0');
 ```
 
+"Fits in 64 bits" is a claim to check, not assume, once the answer gets close to the ceiling.
+Problems 240 and 242 land at 80–97% of $2^{63}-1$, and both C ports keep `long long` only after
+bounding every term added; 242's answer grows like $t^{\log_2 3}$, so a modestly larger input would
+cross the line. Problem 365's answer sits near $9 \times 10^{18}$ — inside `long long`, but close
+enough that the port takes an `unsigned __int128` accumulator as the honest choice rather than
+defend a margin of a few percent.
+
 **Tier 2 — the intermediate overflows 64 bits, even though the answer doesn't.** Problem 48 sums
 $i^i \bmod 10^{10}$. The *answer* is a ten-digit number, but computing it multiplies two operands
 each near $10^{10}$, and their product $\approx 10^{20}$ blows past a signed 64-bit `long long`.
@@ -55,6 +64,34 @@ result = (__int128)result * base % mod;
 
 Where `__int128` isn't available, the same job is done by a `mulmod` built from repeated
 doubling, or by splitting the operands into high and low halves.
+
+The single most common Tier 2 site in this collection is the modular squaring inside
+[Miller–Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test): a candidate near
+$3 \times 10^9$ already squares past $2^{63}$ (problem 248), so problems 241, 245 and 248 all route
+that one multiply through `__int128` — which is also how the C keeps pace with CPython's compiled
+`pow(a, d, n)`. The widened operation need not be a modular one: problem 255 keeps every interval
+bound and its total in `long long` and widens only the final rounding step, which multiplies by
+$2 \times 10^{10}$.
+
+The other half of Tier 2 is the **accumulator**. A running total of many 64-bit terms can clear
+$2^{64}$ even when no single term comes close: problem 421's total grows as $4N\pi(M)$ and passes
+$2^{64}$ by a quarter, and 272, 276, 297, 882 and 963 all have sums that outgrow 64 bits while the
+per-step values fit comfortably. The fix is an `unsigned __int128` total — and then a small printer,
+because `printf` has no conversion for it:
+
+```c
+static const char *format_u128(unsigned __int128 value) {
+    static char digits[40];                        /* 2^128 has 39 decimal digits */
+    char *cursor = digits + sizeof digits - 1;
+    *cursor = '\0';
+    do { *--cursor = (char)('0' + (int)(value % 10)); value /= 10; } while (value);
+    return cursor;
+}
+```
+
+Even 128 bits is a box with walls. Problem 241 carries exact fractions in `unsigned __int128` and
+needs two guards to keep every product under $2^{128}$, one of them capping a product of primes at
+the largest primorial that fits — a cap the Python mirrors so both run the identical algorithm.
 
 **Tier 3 — no fixed width is enough; you must build the bignum yourself.** Problem 16 wants the
 digit sum of $2^{1000}$ — a 302-digit number — and problem 25 hunts the first 1000-digit
@@ -75,28 +112,76 @@ for (int j = 0; j < len; j++) {
 while (carry > 0) { digits[len++] = (unsigned char)(carry % 10); carry /= 10; }
 ```
 
+When the bignum is only needed some of the time, don't pay for it all of the time. Problem 254's
+candidate length reaches about $10^{51}$ for the largest inputs, so its C uses
+[GMP](https://gmplib.org/) `mpz_t` — but keeps a native `unsigned long long` fast path for every
+candidate of at most 19 digits, which covers the dense small cases, and falls back to GMP only on
+the sparse large ones where a candidate or two settles the answer.
+
 That is the whole spectrum: pick a wider built-in, widen just the risky operation, or hand-roll a
 bignum — in rising order of effort, chosen by how far the biggest intermediate exceeds the box.
+
+## Two places overflow hides
+
+**Inside a bound test.** A guard like `n1 * n1 * e < room` reads as harmless, but the products a
+bound test exists to *reject* are exactly the large ones, so they are exactly the ones that
+overflow. In problem 251 that product wrapped for a large divisor, the wrapped value passed the
+test, and the count came out inflated — invisible on the main input, caught only by the larger
+benchmark cases. Problem 245's prefix tests $m p^2$ have the same shape. There are two fixes:
+evaluate the test in `__int128` (245), or rearrange it so the large product is never formed (251),
+comparing against a cap computed once:
+
+```c
+/* n1*n1*e < room  <=>  n1 <= isqrt((room - 1) / e) — no product can wrap */
+unsigned long long cap = isqrt((room - 1) / e);
+```
+
+**Inside NumPy.** Python's `int` cannot overflow, but a NumPy `int64` / `uint64` array is a C
+array, and its arithmetic wraps just as silently. Problem 421 sums millions of `uint64` terms; turning
+the array sum into a Python `int` afterwards does not help, because the array sum is what overflows.
+It splits each term into 32-bit halves first, so neither partial sum can wrap:
+
+```python
+total = (int((terms >> 32).sum()) << 32) + int((terms & 0xFFFFFFFF).sum())
+```
+
+Problem 249 sums its counters in chunks of 1024 for the same reason, and problem 1010 trusts its
+`int64` arithmetic only after proving the bound: every term counts a partition, the counts sum to
+an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on every run.
 
 ## How to reason about it
 
 - **Bound the intermediate, not the answer.** A ten-digit result computed through a twenty-digit
   product is Tier 2, not Tier 1. Trace the largest value that ever exists, including inside a
   multiply before the `% mod` lands (problem 48), or a factorial or power that is reduced later
-  (problems 97, 288). This is where a Python-to-C port most often goes wrong.
-- **Reduce early to stay small.** In modular problems, take the remainder after *every* operation
-  so operands never grow. That is what keeps [modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation)
-  (problems 48, 97) inside 64 bits between multiplies — leaving only the single product to widen.
+  (problems 97, 288). The intermediate need not be on the path to the answer at all: in problem
+  943 a deep subtree's leaf count can outgrow the root's, so its counts and sums are `__int128`.
+  This is where a Python-to-C port most often goes wrong.
+- **Reduce early to stay small — or spend the headroom on purpose.** In modular problems, taking
+  the remainder after *every* operation keeps operands small; that is what keeps
+  [modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) (problems 48, 97)
+  inside 64 bits between multiplies — leaving only the single product to widen. But the `%` is the
+  expensive part, and the width you have is a budget. Problem 249's fold can at most double a
+  counter, so starting below $10^{16}$ it runs ten folds before reducing — the worst case,
+  $2^{10} \cdot 10^{16} \approx 1.02 \times 10^{19}$, still fits an unsigned 64-bit word — and that
+  batching cut the Python run time by more than half.
+- **Make the width limit an explicit input limit.** Where a representation caps the input, say so
+  up front instead of letting it wrap later. Problem 421's modular multiply needs $p^2 < 2^{64}$,
+  so both versions reject a prime bound $M \ge 2^{32}$ on entry; problem 963 packs a shape into an
+  `unsigned long long`, which caps it at 13 trits.
 - **Mind the order and exactness of mixed operations.** `(2*n+1)*(n+1)*n / 6` (problem 6) must
   keep the product exact before the division; reorder or widen so no partial product overflows and
   the final divide stays whole.
 - **Signed overflow is undefined, so it hides.** Unlike Python, a C overflow throws no error and
   may pass small tests. When a C port disagrees with a verified Python solution only on the large
   input, an overflowed intermediate is the first suspect — reach for `long long`, then `__int128`,
-  then a digit array.
-- **Let the Python version be the oracle.** Because Python can't overflow, its answer is
-  trustworthy by construction. Port to C for speed, but keep the Python solution as the reference
-  the C output must match — the discipline these problems teach.
+  then a digit array. Unsigned overflow, by contrast, is defined: it wraps modulo $2^{64}$, so a
+  total that is off by an exact multiple of $2^{64}$ points straight at the accumulator.
+- **Let the Python version be the oracle — where it is pure Python.** Python's own integers can't
+  overflow, so arithmetic done in them is trustworthy by construction. Port to C for speed, but keep
+  the Python solution as the reference the C output must match. That guarantee stops at the NumPy
+  boundary: a vectorised solution needs the same width audit as its C port (problems 249, 421,
+  1010), and a brute force in plain Python ints is the better oracle for both.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
