@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation, diophantine-equation] -->
-<!-- status: final 2026-07-29T18:33Z -->
+<!-- status: final -->
 # Diophantine Equations
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a polynomial
@@ -21,7 +21,7 @@ brute force never reaches the first one. Problem 66 asks for the minimal solutio
 $D = 661$ the smallest $x$ already exceeds $10^{17}$, so any loop bounded by the *magnitude* of the
 answer would run forever. The whole art of Diophantine problems is to replace search over values
 with **structure** — a closed form, a parametrisation, or a recurrence that jumps directly from one
-solution to the next. Four moves recur.
+solution to the next. A handful of moves recur.
 
 ## The toolbox
 
@@ -38,6 +38,30 @@ solution. Every primitive [Pythagorean triple](https://en.wikipedia.org/wiki/Pyt
 $(m^2 - n^2,\, 2mn,\, m^2 + n^2)$ for coprime $m > n$ of opposite parity; iterating the parameters
 enumerates triples directly instead of testing candidate sides. When a parametrisation exists it is
 almost always the right tool — it makes the infinite solution set walkable.
+
+**Bound the unknown before solving for it.** Some equations have a free integer on one side, such
+as "the ratio is an integer $k$". An inequality can often pin $k$ to a few values before any search
+starts. Problem 257 asks for triangles whose area ratio, $(a+b)(a+c)/(bc)$, is an integer. With
+$a \le b \le c$ each factor $(a+b)/b$ and $(a+c)/c$ lies in $(1, 2]$, so $k \in \{2, 3, 4\}$. One
+open-ended equation becomes three fixed ones, and each can be parametrised separately.
+
+**Count families, not members.** When the question is *how many* solutions lie under a bound,
+generating them one at a time is slow even after the algebra is done. A good parametrisation makes
+each parameter choice stand for a whole family, and a family can be counted in $O(1)$. In problem
+257, writing $(a+b)/b$ as a reduced fraction $p/q$ turns each primitive triangle into a
+[coprime](https://en.wikipedia.org/wiki/Coprime_integers) pair. Every other triangle is that shape
+scaled by an integer, so a pair whose smallest triangle has perimeter $L$ contributes
+$\lfloor N/L \rfloor$ triangles in one division. Problem 251 (Cardano triplets) needs one more
+step. Cubing away the nested cube roots gives $a = 3n - 1$ and $b^2 c = n^2(8n - 3)$. Splitting
+$n$ and $b$ by their [gcd](https://en.wikipedia.org/wiki/Greatest_common_divisor) leaves a
+coprime pair. For that pair the last free variable has a linear upper bound and must lie in a
+single residue class modulo $b_1^2$. The class has a
+[modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) as its first
+member, and the count is how many members of that progression fall under the bound. The gcd split
+is what makes the pair coprime, and coprimality is what makes the congruence solvable. Problem 251
+also shows that the loop order is part of the design. When $b_1$ is small the residue class is dense,
+so the solution walks the cofactor. When $b_1$ is large the class is nearly empty, so it walks the
+quotient and tests divisors instead. Switching near $N^{1/4}$ balances the two halves.
 
 **Pell's equation and its recurrence.** The equation $x^2 - D y^2 = \pm 1$ (for non-square $D$) is
 the workhorse. It has infinitely many integer solutions, and — this is the key fact — they are *not*
@@ -82,6 +106,21 @@ often with the [Stern–Brocot tree](https://en.wikipedia.org/wiki/Stern%E2%80%9
 [mediants](https://en.wikipedia.org/wiki/Mediant_(mathematics)) as the concrete way to walk between
 approximations of increasing denominator.
 
+## When nothing reduces
+
+Not every Diophantine question gives way to algebra, and it is worth recognising that case rather
+than hunting for structure that is not there. Problem 348 asks for palindromes expressible as
+$a^2 + b^3$ in exactly four ways. Being a palindrome is a property of base-10 digits, and the number
+of representations has no closed form, so the problem really is a search. What is left to decide is
+the direction of the search. You can test targets: take each palindrome, try every cube below it, and
+check whether the remainder is a perfect square. Or you can generate every pair $(a, b)$ and filter
+the sums. Both cost $O(N^{5/6})$. Pair generation wins on constants because it needs no square roots,
+and for a fixed $b$ the sums form one contiguous run that NumPy can build and filter as a single
+array. The bound on $N$ is unknown, so the search runs one decimal-length band $[10^{d-1}, 10^d)$ at
+a time. A finished band yields all its palindromes in order, so the search stops at the first band
+that completes the count. Integer width still sets the limit: a 64-bit $a^2 + b^3$ caps the method
+at 18 digits, and the solution checks that limit explicitly rather than letting the value wrap.
+
 ## How to reason about it
 
 The moment a problem says "integer" and a naive search would overrun the magnitude of the answer,
@@ -93,14 +132,27 @@ stop searching and look for structure:
 - Does the equation reduce to $x^2 - D y^2 = N$? It is **Pell** or Pell-like — find the fundamental
   solution (directly, or via the continued fraction of $\sqrt{D}$) and iterate the recurrence
   (problems 66, 94, 100).
+- Is there an integer unknown with **no obvious bound** (a ratio, a quotient)? Use the ordering of
+  the variables to confine it to a few values, then solve each case (problem 257).
+- Is the question **how many**, not which? Parametrise by primitive solutions, usually coprime
+  pairs. Count each family with $\lfloor N/L \rfloor$ or a residue-class count, and never list its
+  members (problems 251, 257).
 - Is the question really about **best rational approximation**? Reach for continued-fraction
   convergents.
+- **Nothing reduces?** Then it is a search, so choose its direction by constant factors as well as
+  exponent. Generating candidates and filtering them can beat testing targets when it avoids roots
+  and vectorises (problem 348).
+- **Mind the integer width.** Solutions and intermediates grow quickly. Python's integers are
+  unbounded, but a C port is not. The C port of problem 251 silently wrapped a product used only in a
+  bound test, and its count came out too high. Compare against a precomputed integer-square-root cap
+  instead of forming the product, and keep equality tests exact rather than within a tolerance.
 
-The recurring mistake is to treat these as search problems at all — to loop over candidate $x$ up to
-some bound and test the equation. For a genuine Diophantine problem that bound is astronomically
-larger than the number of solutions you need, and the loop never finishes. The solutions are almost
-always few and highly structured; the work is finding the structure, after which the enumeration is
-logarithmic.
+The recurring mistake is to treat these as search problems by default, looping over candidate $x$ up
+to some bound and testing the equation. For a genuine Diophantine problem that bound is
+astronomically larger than the number of solutions you need, and the loop never finishes. When the
+solutions are few, finding the structure makes the enumeration logarithmic. When they are many, it
+turns the count into one division per family. Search is the honest fallback only once you have
+checked that no structure exists, and even then the integer view decides how to run it.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
