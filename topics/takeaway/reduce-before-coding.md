@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final 2026-07-30T17:45Z -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the
@@ -9,7 +9,9 @@ paper on a problem's structure so the program that follows is smaller, tighter,
 or gone entirely. The payoff runs from the modest (one nested loop removed) to
 the total (an O(n) scan collapsed to a formula), but it is the same move every
 time: simplify the math first, because the cheapest loop is the one you never
-have to run.
+have to run. Past the first hundred problems it stops being optional — the
+search spaces run to $2^{669}$ subsets or $10^{24}$ index pairs, and the only
+program that finishes is the one written after the reduction.
 
 ## The reduction, in degrees
 
@@ -50,18 +52,87 @@ $T(H)\cdot T(W)$ with $T(n) = \tfrac{n(n+1)}{2}$ — two independent
 a two-dimensional enumeration. [Number Spiral Diagonals](/solutions/0028/) sums
 each ring's four corners in closed form to
 $\tfrac{N(N(4N+3)+8)-9}{6}$, an $O(N^2)$ grid replaced by one arithmetic line.
-This is the endpoint the [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration)
+The same move scales a long way: [Odd Triplets](/solutions/0242/) asks about
+roughly $10^{24}$ pairs $(n, k)$, but only about the *parity* of a subset count,
+and two applications of
+[Lucas' theorem](https://en.wikipedia.org/wiki/Lucas%27s_theorem) reduce that
+parity to $\binom{n-1}{k-1} \bmod 2$ — so each admissible $n = 4t + 1$
+contributes $2^{\mathrm{popcount}(t)}$ pairs, and nothing is ever counted one
+at a time. This is the endpoint the [closed-form-over-iteration](/topics/takeaway/closed-form-over-iteration)
 takeaway is about; reducing before coding is the wider discipline that *reaches*
 it — and that is content to stop one step short when the algebra will not close
 all the way.
 
-The heavier problems on the list are the same move dressed up. Several — the
-Diophantine-reciprocal problems [108](/solutions/0108/) and
-[110](/solutions/0110/) among them — turn a search for solution *pairs* into a
-[divisor-counting](https://en.wikipedia.org/wiki/Divisor_function) question by
-first transforming the defining equation, so the program counts divisors of a
-derived quantity rather than sweeping a plane. The reduction is done in the
-mathematics; the code merely reads it off.
+## Reductions that change the question
+
+The four degrees above simplify a computation that is already the right one.
+The harder problems on the list mostly need something earlier: a reduction that
+changes *what* is computed before any of it is simplified. Four such moves
+recur.
+
+**Restate the condition.** The question as posed is often the awkward form of
+an easier one. [Twenty-two Foolish Primes](/solutions/0239/) asks for 22 of
+the 25 primes to be *away* from home; "3 are at home" is the same event, and
+fixed points are what
+[inclusion–exclusion](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
+counts well. [Coresilience](/solutions/0245/) asks for a unit fraction, which
+is a divisibility, which forces $n$ to be squarefree and turns the search into a
+construction. [A Game of Chance](/solutions/0951/) asks whether a deck is fair;
+that is a statement about the parity of the turn count, the parity factors over
+the deck's single-colour runs, and the run bias obeys a small recurrence that
+is zero at exactly one length — so "fair" becomes a pattern-avoidance count with
+no probability left in it. Each restatement is a line of algebra, and each one
+is where the problem actually gets solved.
+
+**Translate into a known object.** Sometimes the restated problem is one that
+mathematics has already solved under another name. The Diophantine-reciprocal
+problems [108](/solutions/0108/) and [110](/solutions/0110/) become
+[divisor counting](https://en.wikipedia.org/wiki/Divisor_function).
+[Cross Flips](/solutions/0331/) is
+[Lights Out](https://en.wikipedia.org/wiki/Lights_Out_(game)), and so linear
+algebra over $\mathbb{F}_2$. [Chandelier](/solutions/0768/) is divisibility by
+a [cyclotomic polynomial](https://en.wikipedia.org/wiki/Cyclotomic_polynomial).
+[March of the Penguins](/solutions/1010/) is a walk through Young diagrams,
+whose complete marches are
+[standard Young tableaux](https://en.wikipedia.org/wiki/Young_tableau) counted
+by the [hook length formula](https://en.wikipedia.org/wiki/Hook_length_formula) —
+so about $10^{16}$ partitions collapse to $n$ hook-length exponents.
+[Removing Bits](/solutions/0882/) is a partisan game whose positions are
+[surreal numbers](https://en.wikipedia.org/wiki/Surreal_number) that simply
+add. Once the object has a name, its theory comes with it, and the code
+implements a theorem rather than a search.
+
+**Keep only what the answer reads.** Most inputs carry far more information
+than the question uses, and finding the part it uses shrinks the state.
+[$250250$](/solutions/0250/) needs each $k^k$ only modulo 250, so a quarter of
+a million elements collapse to a census of 250 residues.
+[A Huge Binomial Coefficient](/solutions/0365/) never forms a number with nine
+billion digits: the squarefree modulus splits by the
+[Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
+into prime fields, where Lucas' theorem answers digit by digit.
+[Digital Root Clocks](/solutions/0315/) shows the per-prime saving depends only
+on the last two digits and the digit sum, so two small tables replace any
+simulation. [Rounded Square Roots](/solutions/0255/) reads $n$ only through
+$\lceil n/x \rceil$, so whole intervals of $n$ share a path and are processed
+as one. The question to ask is: *what is this result actually a function of?*
+The answer is the real state space.
+
+**Search the answer's structure, not the input range.** When the inputs are too
+many to visit, walk the thing that generates the answers instead.
+[Prime Factors of $n^{15}+1$](/solutions/0421/) exchanges the order of
+summation — instead of factorising $10^{11}$ huge numbers, it asks each of
+the primes below $10^8$ how many $n$ it divides, which group theory answers
+in $O(1)$. [Euler's Totient Function Equals 13!](/solutions/0248/) inverts
+$\varphi$ by enumerating factorisations of the target into
+$p^{a-1}(p-1)$ pieces — a few hundred candidate primes rather than tens of
+billions of candidate $n$. [Modular Cubes, Part 2](/solutions/0272/) and
+[Perfection Quotients](/solutions/0241/) likewise build $n$ from the prime
+factors the condition demands, and
+[Sums of Digit Factorials](/solutions/0254/) inverts a chain of digit functions
+through the
+[factorial number system](https://en.wikipedia.org/wiki/Factorial_number_system)
+rather than iterating it. Construction beats filtering whenever the answers are
+sparse and the space is not.
 
 ## How to reason about it
 
@@ -70,7 +141,12 @@ Reach for a reduction whenever the quantities you are about to iterate over are
 ordering, a recurrence, a symmetry, a counting structure. The tell is that you
 can write down an equation the answer must satisfy. Spend the algebra there: each
 equation you solve is a loop you delete, a dimension you drop, or a bound you
-tighten.
+tighten. A second tell is a search space that dwarfs the answer — $2^{669}$
+subsets when only the totals matter, as in
+[Prime Subset Sums](/solutions/0249/), or $40!$ fill orders when the state that matters is a
+step count, a segment count and two boundary flags, as in [Tidying Up A](/solutions/0253/). That gap means
+the problem has a smaller state hiding in it, and finding that state is the
+reduction.
 
 Three cautions keep the habit honest:
 
@@ -79,18 +155,38 @@ Three cautions keep the habit honest:
   the *count* to $T(H)\cdot T(W)$ but still searches grid shapes for the one
   nearest a target, because that outer question has no closed form — the honest
   reduction is partial, and that is fine. A reduction that removes one loop of
-  three is already a win.
+  three is already a win. Most of the later reductions end the same way — in a
+  smaller computation, not a formula: a generating-function DP over board
+  positions in [Overtakes](/solutions/0996/), a four-wide table over depth in
+  [Pythagorean Tree](/solutions/0395/).
 - **Derive, then verify.** An algebraic reduction is only as good as its
   derivation, and an off-by-one in a bound or a dropped term fails silently. Keep
   the brute-force version as an oracle and check the two against each other on
   small inputs — [Number Spiral Diagonals](/solutions/0028/) ships exactly that,
   running an $O(N^2)$ spiral simulation under `--show` purely to confirm its
-  formula.
+  formula. The check matters most when the reduction is a guess.
+  [Chandelier](/solutions/0768/) is the warning: "every balanced set is a union
+  of regular polygons" is a theorem when $n$ has at most two prime factors and
+  false for 360, which has three — already in $\mathbb{Z}_{30}$ there are 525
+  balanced 6-subsets against 495 polygon unions. [Overtakes](/solutions/0996/)
+  shows the honest version: its characterisation was conjectured, then checked
+  against a breadth-first brute force for every $n \le 7$ before any fast code
+  was trusted. And small edge cases hide in correct derivations too: in
+  [Euler's Totient Function Equals 13!](/solutions/0248/) the factor contributed
+  by the prime 2 at exponent 1 is $1$, so a search that stops when the residual
+  target reaches 1 silently drops half the solutions.
 - **Mind the arithmetic you introduce.** Reductions multiply before they divide
   and can form intermediates far larger than the answer — an overflow risk in C,
   and a reason to keep the algebra in exact integers (compute $c = S - a - b$, not
   $\sqrt{a^2+b^2}$) so equality checks stay reliable. See
   [exact-arithmetic-for-equality](/topics/takeaway/exact-arithmetic-for-equality).
+  An alternating inclusion–exclusion sum, as in
+  [Twenty-two Foolish Primes](/solutions/0239/), cancels catastrophically, so it
+  stays in exact integers until the final division. Reducing modulo the
+  requested digits is safe only when the reduced formula uses addition and
+  multiplication alone — true of the subset-sum table in
+  [Prime Subset Sums](/solutions/0249/), and something to check rather than
+  assume once a division appears.
 
 The discipline underneath all of it is order of operations, in the human sense:
 do the mathematics *first*. A loop written before the algebra is a loop you will
