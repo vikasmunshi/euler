@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-08-01T08:12Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -47,8 +47,14 @@ no cleverness: whichever loop runs more often becomes the array axis. Problem 23
 pairwise sum of abundant numbers by adding one abundant number to the whole remaining slice;
 [problem 165](/solutions/0165/) tests one line segment against all later segments in a single
 pass of cross-product arithmetic; [problem 757](/solutions/0757/) enumerates one factor in
-Python and sweeps the co-factor as an `int64` array. The Python loop survives — it just runs
-`√N` times instead of `N` times, and that is enough. When you want to erase *both* levels,
+Python and sweeps the co-factor as an `int64` array; [problem 257](/solutions/0257/) loops
+over a denominator `q` and sweeps every numerator `p` at once, filtering to coprime pairs with
+`np.gcd` and summing the floor divisions `limit // span` in one reduction. The Python loop
+survives — it just runs `√N` times instead of `N` times, and that is enough. The outer loop
+need not even be a loop: [problem 983](/solutions/0983/) runs a
+[depth-first search](/topics/technique/depth-first-search) in plain Python, but each node
+carries the array of every signed subset sum chosen so far, so the test that decides whether
+to descend is a handful of array operations over all of them. When you want to erase *both* levels,
 [broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html) does it: an
 `(m, 1)` column against a `(1, n)` row produces the full `m × n` grid of combinations in one
 expression, at the price of materialising it.
@@ -59,7 +65,23 @@ and combine. `mask = n <= limit` then `n[mask]` is the vectorized `if`;
 turns a predicate into the indices satisfying it, and `count_nonzero` turns it into a tally.
 This is what lets a filter-heavy computation stay in array form: you do not skip the failing
 elements, you compute them and discard them — cheaper than branching per element, provided the
-discarded work is cheap.
+discarded work is cheap. When the filter has several stages, compact between them rather than
+`&`-ing the masks together: [problem 348](/solutions/0348/) tests palindromes one digit pair at
+a time, outermost first, and keeps only the survivors after each comparison, so every pass runs
+on roughly a tenth of the previous array and the whole filter costs little more than its first
+pass — [cheap checks first](/topics/takeaway/cheap-checks-first), in array form.
+
+**Tables replace functions.** When a per-element function depends on only a small piece of
+its input, compute it once in plain Python for every value of that piece and let
+[fancy indexing](https://numpy.org/doc/stable/user/basics.indexing.html#advanced-indexing)
+apply it. [Problem 274](/solutions/0274/) needs a branch on each prime's last digit; a
+ten-entry array indexed by `primes % 10` *is* that branch, for all primes at once.
+[Problem 315](/solutions/0315/) pushes it further: everything it needs about a prime below
+`10**10` reduces to its last two digits and its digit sum (which is under 100), so a
+`100 × 100` table built with ordinary loops is indexed as `first[p % 100, s]` across every
+sieved prime. The digit sums themselves come from the bounded-iteration shape below — one
+`np.divmod(rem, 10)` per digit position, ten array steps instead of a Python loop per prime.
+The slow, readable code runs over the tiny domain; only the indexing touches the big one.
 
 **Batch the lookups.**
 [`np.searchsorted`](https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html)
@@ -69,7 +91,14 @@ semiprimes by turning the prime-counting function `π` into two array lookups ov
 prime array; [problem 461](/solutions/0461/) uses it as the join step of a
 [meet-in-the-middle](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack) search, locating
 the nearest partner for every candidate at once. Sorting once and searching in bulk is often
-faster than a dictionary, because the search never leaves compiled code.
+faster than a dictionary, because the search never leaves compiled code. The same holds for
+the other dictionary and set idioms: `np.unique(values, return_counts=True)` is a bulk
+`Counter` (problem 348 tallies how many square-plus-cube representations each palindrome has
+with it), and [`np.isin`](https://numpy.org/doc/stable/reference/generated/numpy.isin.html)
+is bulk set membership. Both want flat scalar keys, so when the items are tuples, pack them:
+problem 983 stores each lattice vector `(x, y)` as the single integer `x * 2**21 + y`. The
+encoding is *linear*, so adding two vectors is adding their keys, and the whole search runs on
+one-dimensional `int64` arrays.
 
 **Advance the whole ensemble.** When many independent processes share one update rule, make
 the process an *axis* and step them in lockstep. [Problem 213](/solutions/0213/) tracks the
@@ -101,7 +130,11 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   and `int64` overflow wraps **silently** — no exception, just a wrong answer. Before writing a
   product into an array, bound it: keep every intermediate under `2**63`, reduce modulo `m`
   before multiplying when `m*m` fits, and say so in a comment. See
-  [watch integer width](/topics/takeaway/watch-integer-width). Choosing the *smallest*
+  [watch integer width](/topics/takeaway/watch-integer-width). Better still, put the bound in
+  code: problem 348 scans palindromes by digit count and raises `OverflowError` past 18
+  digits, the last length whose sums still fit, instead of letting a 19th band wrap silently.
+  Packed keys need the same accounting, since each field must fit its share of the 64 bits,
+  sums included. Choosing the *smallest*
   sufficient dtype is also a speed decision: an `int8` Möbius table
   ([problem 193](/solutions/0193/)) is eight times more cache-friendly than `int64`, and
   bandwidth is what these loops are limited by.
@@ -117,7 +150,13 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   Python loop. But look for slack before conceding: problem 149's
   [lagged Fibonacci](https://en.wikipedia.org/wiki/Lagged_Fibonacci_generator) generator has a
   smallest lag of 24, so 24 terms can be produced per vectorized step without the output
-  aliasing its own input. Better still, look for a closed form. A
+  aliasing its own input. If the recurrence is a running sum, minimum or maximum, it is a
+  [scan](/topics/technique/prefix-maximum-scan), and `np.add.accumulate` /
+  `np.maximum.accumulate` compute it in compiled code — along any axis, so every row of a
+  matrix gets its own scan in one call. [Problem 252](/solutions/0252/) uses this to test
+  whole rows of fan triangles for emptiness: a triangle is empty exactly when one direction
+  rank is a running maximum of the ranks before it, so one prefix scan per row replaces a
+  scan over every third point. Better still, look for a closed form. A
   [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator)
   looks hopelessly sequential, yet its `k`-th term is `a**k` times the seed, so
   [problem 980](/solutions/0980/) generates its stream in bulk with a baby-step/giant-step
@@ -130,8 +169,11 @@ unrolled across the array, with a boolean mask selecting which lanes act.
 - **Floating point buys speed and costs exactness.** Array arithmetic in `float64` is fast, but
   equality and near-misses become delicate: problem 461 uses
   [`expm1`](https://numpy.org/doc/stable/reference/generated/numpy.expm1.html) to avoid
-  catastrophic cancellation and widens its search with an epsilon before deciding. When the
-  answer depends on exact equality, keep integers — see
+  catastrophic cancellation and widens its search with an epsilon before deciding. Floats and
+  integers can also split the work. Problem 252 sorts direction vectors with `np.arctan2`,
+  but decides which directions are *equal* by comparing the integer vectors reduced by
+  `np.gcd`, so the float only ever has to order directions that it can safely tell apart.
+  When the answer depends on exact equality, keep integers — see
   [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
 - **In C, this problem does not exist.** Every one of these solutions has a C counterpart that
   simply writes the nested loops, because a compiled loop already has no interpreter tax and
