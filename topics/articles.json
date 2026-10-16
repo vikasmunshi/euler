@@ -6955,8 +6955,8 @@
     {
       "path": "technique/primesieve",
       "title": "primesieve",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:38Z",
       "solved": 14,
       "problems": 14,
       "tags": ["primesieve"],
