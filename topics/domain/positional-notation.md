@@ -1,5 +1,5 @@
 <!-- tags: [positional-notation] -->
-<!-- status: final 2026-10-08T12:26Z -->
+<!-- status: final -->
 # Positional notation
 
 [Positional notation](https://en.wikipedia.org/wiki/Positional_notation) is the convention that a
@@ -73,6 +73,16 @@ while length_with_num_digits < n:
     length_with_num_digits += num_digits * 9 * 10 ** (num_digits - 1)
 ```
 
+Problem 305 goes much deeper into the same string: it asks where the $n$-th occurrence of a digit pattern
+starts, at positions around $10^{12}$ and beyond, so scanning is out. The fix is to count instead of find.
+Let $C(N)$ be the number of occurrences that start inside one of $1 \dots N$. It is monotone, so a binary
+search for the smallest $N$ with $C(N) \ge n$ finds the right integer. $C$ itself splits into two kinds
+of occurrence. An occurrence that lies inside one integer is a count of free digits around a fixed
+window. An occurrence that crosses from $p-1$ into $p$ is the more instructive kind. "$p-1$ ends in this
+prefix" is just the congruence $p \equiv \text{prefix} + 1 \pmod{10^i}$, and the congruence handles the
+carry for you. That is the value view doing work the string view cannot: the carry that turns
+`…1999` into `…2000` would be awkward to handle as a string, but it costs nothing as a congruence.
+
 Problem 156 counts how often a digit $d$ is written from $0$ to $n$; summed column by column, each
 place value contributes a closed-form amount, so the count is $O(\log n)$ — a
 [digit-counting function](/topics/domain/digit-counting-function). Problem 162 counts hexadecimal
@@ -97,6 +107,12 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
   bases 2 and 10; problem 926 sums the trailing zeros of $n!$ in *every* base, which turns into
   counting pairs $(b, k)$ with $b^k \mid n!$ — a question about the prime factorisation, since
   "trailing zeros in base $b$" is just divisibility by powers of $b$.
+- **The number as a word.** Problem 963 plays a [game](/topics/domain/combinatorial-game-theory) in
+  which moves delete a $0$, $1$ or $2$ from a number's ternary expansion. There the value of $x$ hardly
+  matters. The integer is only a label for a ternary word, and everything follows from the word's
+  structure. The game's number part comes from the word with its $2$s deleted, and its infinitesimal part
+  comes from how many zeros follow each leading $2$. When the object is a word, analyse the word, and
+  stop looking for arithmetic in the value.
 - **The base as structure.** Problem 288 hands you a number already written as $\sum T_n p^n$ with
   $0 \le T_n < p$ — that is, its base-$p$ digits — and [Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula)
   in its digit-sum form, $v_p(N!) = (N - s_p(N))/(p-1)$, lets you answer without ever forming $N$.
@@ -124,7 +140,9 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
   ordinary algebra.
 - **Mind the leading zero.** It is the commonest off-by-one in the family: a rotation or reversal that
   produces a leading zero is not a $k$-digit number (problems 145, 168), and inclusion–exclusion over
-  digit strings must treat the first position separately (problem 162).
+  digit strings must treat the first position separately (problem 162). Sometimes the rule is the
+  whole problem. In problem 963, deleting a leading $2$ also drops the run of zeros behind it, so one
+  move removes several digits. The game's infinitesimals come entirely from that one effect.
 - **Do not trust floating point for digit counts.** `len(str(n))` or an integer-only loop is exact;
   `int(math.log10(n)) + 1` is wrong near powers of ten for large $n$ — see
   [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
