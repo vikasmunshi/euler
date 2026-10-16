@@ -7307,8 +7307,8 @@
     {
       "path": "technique/square-root",
       "title": "Square root",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:51Z",
       "solved": 11,
       "problems": 11,
       "tags": ["square-root"],

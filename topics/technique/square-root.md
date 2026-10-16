@@ -1,5 +1,5 @@
 <!-- tags: [square-root] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:51Z -->
 # Square root
 
 Almost no problem here wants $\sqrt n$ as a number. What they want is a *fact* about it: where a
