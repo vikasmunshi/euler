@@ -1,5 +1,5 @@
 <!-- tags: [math-gcd] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:48Z -->
 # math.gcd
 
 [`math.gcd`](https://docs.python.org/3/library/math.html#math.gcd) and its partner

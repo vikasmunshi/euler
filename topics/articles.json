@@ -6383,8 +6383,8 @@
     {
       "path": "technique/math-gcd",
       "title": "math.gcd",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:48Z",
       "solved": 10,
       "problems": 10,
       "tags": ["math-gcd"],
