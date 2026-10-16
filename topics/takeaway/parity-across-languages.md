@@ -1,5 +1,5 @@
 <!-- tags: [parity-across-languages] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:06Z -->
 # Hold complexity fixed across ports
 
 Most of the problems below carry two solutions for one index — a Python `pNNNN_sK.py` and a C
