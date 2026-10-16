@@ -4833,12 +4833,12 @@
       "path": "technique/chinese-remainder-theorem",
       "title": "Chinese remainder theorem",
       "status": "final",
-      "written": "2026-08-01T08:06Z",
+      "written": "2026-10-16T07:22Z",
       "solved": 6,
       "problems": 6,
       "tags": ["chinese-remainder-theorem"],
       "refs": ["p0160_s0", "p0245_s0", "p0272_s0", "p0365_s0", "p0932_s0", "p0934_s0"],
-      "solved_after": ["p0245", "p0272"]
+      "solved_after": []
     },
     {
       "path": "technique/circular-buffer",
