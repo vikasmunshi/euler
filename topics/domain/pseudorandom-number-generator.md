@@ -1,5 +1,5 @@
 <!-- tags: [pseudorandom-number-generator] -->
-<!-- status: final 2026-07-31T16:58Z -->
+<!-- status: final -->
 # Pseudorandom number generator
 
 A [pseudorandom number generator](https://en.wikipedia.org/wiki/Pseudorandom_number_generator)
@@ -39,7 +39,9 @@ answer with no symptom, since a corrupted pseudorandom stream still looks pseudo
 things go wrong in practice.
 
 **Indexing.** Sequences start at $s_0$ or $s_1$ depending on the problem, and "the first $n$ points"
-may consume $2n$ terms. Check the worked example the statement gives (it always gives one) before
+may consume $2n$ terms. Problem 252 takes point $k$ as $(T_{2k-1}, T_{2k})$, so the very first
+output is already a coordinate; an off-by-one there shifts every point and still yields a perfectly
+plausible-looking cloud. Check the worked example the statement gives (it always gives one) before
 trusting a single downstream number.
 
 **Overflow in C.** The house generator squares a state below $50515093$, and $50515093^2 \approx
@@ -72,7 +74,8 @@ are $S_n \bmod p$ — uniform by construction, so the digit sum that [Legendre's
 formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) wants is accumulated in one pass with
 no representation of the number itself. Problems 252, 456 and 630 scatter points over a rectangle
 uniformly enough that geometric structure — a convex hull, an angular sort, a line arrangement —
-behaves as the average case rather than an adversarial one.
+behaves as the average case rather than an adversarial one — in size, at least; in degeneracy it
+can be worse than a textbook assumes (see below).
 
 *Random order.* This is the strongest gift and the easiest to miss. Several classical algorithms are
 fast in expectation only when the input arrives in random order, and normally you pay for that with
@@ -85,7 +88,30 @@ divide-and-conquer method — *because* the arrival order is random. No shuffle,
 
 *Bounded magnitude.* A projection into $[0, M)$ caps every value, which is what makes counting
 sorts, bucket structures and fixed-width arithmetic safe. Knowing the range is knowing the data
-structure.
+structure. It also makes [exact arithmetic](/topics/takeaway/exact-arithmetic-for-equality) cheap:
+coordinates below $1000$ in magnitude keep every [cross product](/topics/technique/cross-product)
+far inside 64 bits, so a geometric predicate never needs a float.
+
+*Free test instances.* The input is a stream, so its prefixes are a ladder of nested instances —
+the first $6$ points, the first $14$, the first $80$ — each as legitimate as the full one. That is
+what makes a brute-force cross-check practical. Problem 252 runs an exhaustive $2^N$ subset search
+against its fast dynamic programme for every $N$ up to $14$, a naive transcription of the
+recurrence up to $80$, and the statement's own small-$N$ answer as the anchor; a subtle bug in the
+angular ordering surfaced at $N = 6$, long before the $500$-point case could have shown it.
+
+## Random is not general position
+
+The flip side of "behaves like the average case" is a trap: pseudorandom input is *not* the
+[general position](https://en.wikipedia.org/wiki/General_position) that textbook geometry assumes.
+Projecting onto a small integer grid makes coincidences a matter of counting, not luck. Problem 252
+asks for the largest empty [convex polygon](/topics/domain/convex-polygon) among $500$ points with
+coordinates in $[-1000, 999]$; there are about $2 \times 10^7$ triples, and with only $2000$
+values per axis a handful of them are exactly collinear. Each one lands on a case the algorithm
+must decide deliberately — a point on a fan diagonal is inside the hole, a point on an edge is on
+its permitted perimeter, a straight vertex adds nothing — and a float angle comparison would decide
+them arbitrarily. The lesson generalises: when a problem's points come from a PRNG, estimate how
+many degeneracies the range admits before assuming there are none. Uniform does not mean distinct,
+and it certainly does not mean non-collinear.
 
 ## When the generator becomes the subject
 
@@ -135,6 +161,11 @@ deterministic program that happens to explore cleverly.
 - **Ask what the randomness lets you assume.** Uniform values, uniform positions, and random arrival
   order each unlock a different class of expected-case algorithm. That assumption is usually the
   intended solution, not a shortcut.
+- **Count the coincidences the range allows.** Random values on a small grid collide, and random
+  points on one fall on common lines. Handle the degenerate cases exactly rather than hoping they
+  are absent.
+- **Test on prefixes.** The first few terms of the stream are a valid small instance; check a
+  brute force against the fast method there before trusting the full run.
 - **Consider the period.** Finite state means eventual repetition. If the term count is astronomical
   while the modulus is merely large, find the cycle — the answer is on it.
 - **Seed anything you randomise yourself.** Reproducibility is worth more than entropy in a
