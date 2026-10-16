@@ -1,13 +1,14 @@
 <!-- tags: [sorting-algorithm] -->
-<!-- status: final 2026-08-03T06:14Z -->
+<!-- status: final -->
 # Sorting algorithm
 
 A [sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm) puts a sequence in
 order, and in a Project Euler solution that is almost never the point. Look at the problems
 below and the ordered list is a means every time: a way to make two things comparable, to
 find the *k*-th of something, to let a greedy loop be correct, or to bring equal items next
-to each other. `sorted()` is one call and one `n log n` line in the cost model — what
-matters is which of those jobs you are buying.
+to each other. Even problem 336, whose statement *is* a sorting algorithm, asks a question
+about one sort that a second, ordinary sort answers. `sorted()` is one call and one `n log n`
+line in the cost model — what matters is which of those jobs you are buying.
 
 ## Sorting as a canonical form
 
@@ -67,6 +68,22 @@ the smallest few across both. Either family alone is already ascending; together
 interleave. Sorting explicitly costs one `n log n` on a list made of two ordered runs, which
 [Timsort](https://en.wikipedia.org/wiki/Timsort) merges in nearly linear time precisely
 because it detects runs. Pay it.
+
+Problem 336 is the family's most instructive member, because it makes you choose between
+sorting and *not* sorting. Its train driver rearranges carriages by reversing suffixes — a
+mirrored [pancake sort](https://en.wikipedia.org/wiki/Pancake_sorting) with a fixed greedy
+rule — and the problem wants the `k`-th lexicographic arrangement among those that drive
+that rule to its worst case. Because the rule is deterministic it can be run backwards from
+the sorted train, which enumerates the worst cases directly instead of filtering all `n!`
+permutations; there turn out to be `(n − 2)!` of them. From there, two roads. One is
+[unranking](https://en.wikipedia.org/wiki/Permutation#Numbering_permutations): count how
+many worst cases begin with each prefix and descend letter by letter, never materialising
+the set. The other is to build the set, sort it, and index. The reversal-and-splice
+construction makes the prefix counts awkward, and `9!` is under 400 000 strings, so the
+solution sorts — and because the arrangements are strings, the lexicographic order the
+problem asks for is just the default comparison, with no `key=` at all. The rule of thumb:
+unrank when the set is too big to hold, sort when it is not, and be honest about which side
+of that line you are on.
 
 ## Sorting so a greedy loop is correct
 
@@ -128,6 +145,26 @@ Problem 184 is the geometric member of the family, sorting lattice points by
 triangle contain the origin?" becomes a question about angular spans, answerable by a
 two-pointer sweep over the sorted list rather than a test per triple.
 
+Problem 252 — the largest empty convex polygon on 500 points — pushes angular sorting much
+further, and adds two lessons 184 does not need. Its `O(n³)` fan dynamic programme fixes
+each point as the lowest vertex of a hole and sorts the points above it by direction; in
+that order a fan can only grow forwards, "is this triangle empty?" becomes "is this
+direction a running maximum over the prefix before it?", and the set of legal predecessors
+for a convex turn becomes another prefix, so every `max` in the recurrence comes from one
+merge of two sorted lists. Sorting turns three nested predicates into prefix scans.
+
+The first extra lesson is to **replace angles with ranks**. Rather than carry floating-point
+angles into the inner loops, the solution sorts each point's directions once and keeps only
+each direction's integer position in that order — a
+[coordinate compression](https://en.wikipedia.org/wiki/Discretization) of the angle. The
+difference vectors are reduced by their gcd first, so two directions get the same rank
+exactly when the three points are collinear; ties, which decide whether a point sits on a
+hole's perimeter or inside it, are settled by integers, not tolerances. The second is that
+**angular order is circular**: `atan2` cuts the circle at `±π`, and a half turn that
+straddles the cut is not one increasing run. Each list is therefore re-based — rotated to
+start at the spoke direction — before it is scanned, the same fix a sorted circular buffer
+always needs.
+
 ## How to reason about it
 
 **The cost model.** Any comparison sort is `Ω(n log n)`; Python's `list.sort` and `sorted`
@@ -164,7 +201,13 @@ of them.
 **Do not sort floats you intend to compare for equality.** Problem 165 sorts exact rationals
 (integer numerator/denominator pairs, reduced) precisely so that dedup is a comparison and
 not a tolerance test. If a sort key is a float and you then check adjacent elements for
-equality, you have written a bug that appears at scale.
+equality, you have written a bug that appears at scale. A float key is fine for *ordering*
+when you can bound how close two distinct keys get: problem 252's Python sorts by `atan2`
+because its distinct reduced directions differ by far more than double precision, but it
+decides equality on the reduced integer vectors, never on the angles. Its C port goes one
+step further and sorts with a cross-product comparator, so no trigonometric function is
+evaluated at all — when the comparison you need has an exact integer form, a comparator
+beats a computed key.
 
 **Build the list inside `solve()`.** A candidate list assembled and sorted at module import
 is free from the second benchmark run onward, and the timing will lie about it.
