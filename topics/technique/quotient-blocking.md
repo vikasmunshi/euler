@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking] -->
-<!-- status: final 2026-10-09T07:22Z -->
+<!-- status: final -->
 # quotient blocking
 
 Quotient blocking is the observation that `⌊n/k⌋`, as `k` runs from `1` to `n`, takes only about
@@ -56,6 +56,26 @@ each block contributes `g(q)·(M(k_end) − M(k−1))`. Problems 0319 and 0478 b
 `Σ_d μ(d)·g(⌊n/d⌋)`; 0319 then needs `M` at every point of `V(n)`, which is itself a
 quotient-blocked recursion, `M(v) = 1 − Σ_{j≥2} M(⌊v/j⌋)`.
 
+**Inverting "every object is a multiple of a primitive one".** That Mertens recursion is one
+instance of a pattern common enough to recognise on sight. Suppose `S(N)` counts all objects of
+size at most `N` and is cheap — a closed form — while `P(N)` counts only the primitive ones. If every
+object is uniquely `g` times a primitive object of size at most `⌊N/g⌋`, then
+`S(N) = Σ_{g≥1} P(⌊N/g⌋)`, and peeling off the `g = 1` term gives
+
+```python
+P(v) = S(v) - sum(P(v // g) for g in range(2, v + 1))   # blocked: each run of g costs one step
+```
+
+No Möbius function appears, and no sieve is needed for correctness. Problem 0276 counts primitive
+integer triangles this way: `S` is a cumulative [Alcuin's sequence](https://oeis.org/A005044), which a
+period-12 correction to `round(k²/12)` turns into a closed form, and `P` falls out of the recursion.
+Problem 0351 counts hidden points in a hexagonal orchard; the visible ones total the
+[totient summatory function](/topics/domain/eulers-totient-function) `Φ(n)`, and since every pair
+`1 ≤ a ≤ b ≤ v` reduces to exactly one coprime pair, `S(v) = v(v+1)/2`. The two problems are the
+same recursion with different `S`. Both fill a `small`/`large` table bottom-up — small quotients in
+ascending order, then `large[k]` from the largest `k` down — so that every `P(⌊v/g⌋)` a step reads
+is already stored, with no call stack and no memo dictionary.
+
 **Sieving at the key values only.** The Lucy_Hedgehog prime-counting DP — a cousin of the
 [Meissel–Lehmer algorithm](https://en.wikipedia.org/wiki/Meissel%E2%80%93Lehmer_algorithm) and the
 engine of the [Min_25 sieve](/topics/technique/min-25-sieve) — computes the
@@ -87,12 +107,21 @@ interval, never per `n`.
   or as `⌊n/k⌋` times a weight with an `O(1)` prefix sum — block it. If it does not, try swapping the
   order of summation: `Σ_{m≤n} Σ_{d|m} f(d)` is `Σ_d f(d)·⌊n/d⌋`, and the floor appears.
 - **The cost moves to the prefix sums.** Blocking is free only if `F(k_end) − F(k−1)` is. Triangular
-  numbers and power sums are closed forms; `M(x)` and `π(x)` are not, and computing them at all of
-  `V(n)` is usually the real work — about `O(n^{3/4})`, or `O(n^{2/3})` with a sieve up to `n^{2/3}`
-  for the small arguments. Budget for that, not for the `O(√n)` outer loop.
+  numbers and power sums are closed forms; `M(x)`, `Φ(x)` and `π(x)` are not, and computing them at
+  all of `V(n)` is usually the real work. Blocking every step of the recursion costs `Σ_{v∈V(n)} √v
+  = O(n^{3/4})`; 0276 runs that pure form, and its timings grow by about 35× from `N = 10⁷` to
+  `10⁹`, close to the predicted `100^{3/4} ≈ 32`. Sieving every argument below a cutoff `L` and
+  recursing only above it costs `O(L + n/√L)`, which balances at `L = n^{2/3}` — 0351's choice for
+  `Φ(10⁸)`. Budget for that, not for the `O(√n)` outer loop.
+- **Recognise the inversion from the counting story.** "All objects" versus "primitive objects",
+  with scaling by `g` mapping one to the other, is a Dirichlet convolution with `1`; it inverts by
+  the recursion above whether the objects are triangles, lattice directions or fractions. If `S`
+  has a closed form, the problem is already sublinear.
 - **Use `n // q` for the run end, not a float.** `int(n / q)` loses precision past `2⁵³`; integer
-  division is exact and costs the same. In C, keep `n` and its products in 64 bits (or
-  [`__int128`](/topics/technique/int128) when weights are multiplied before a modular reduction).
+  division is exact and costs the same. In C, keep `n` and its products in 64 bits — and check
+  the size of the *values*, not just the arguments: `Φ(n) ≈ 3n²/π²` leaves 64 bits once `n` passes
+  about `5.5·10⁹`, and 0276's `k(k+1)(2k+1)` overflows well before its answer does, so both C ports
+  carry [`__int128`](/topics/technique/int128).
 - **Get the boundary at `√n` right.** The `small`/`large` split must agree on which side `⌊√n⌋`
   itself falls, and the lookup `large[n / v]` is valid only because `v` came from `V(n)`. Use an
   exact integer square root (`math.isqrt`), never `int(n ** 0.5)`.
