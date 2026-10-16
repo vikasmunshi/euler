@@ -1,5 +1,5 @@
 <!-- tags: [expected-value] -->
-<!-- status: final 2026-07-27T18:19Z -->
+<!-- status: final -->
 # Expected value
 
 The [expected value](https://en.wikipedia.org/wiki/Expected_value) of a random quantity is
@@ -8,7 +8,8 @@ common probabilistic ask in Project Euler: the expected number of empty squares,
 colours, of moves, of rolls, of steps. What makes it a *domain* worth its own page is that
 the honest way to compute it is almost never the obvious way. The obvious way enumerates every
 joint outcome and its probability; the useful way finds a structure that lets you avoid that
-enumeration entirely. Most of the problems below are exercises in spotting which structure applies.
+enumeration entirely — or, when the statistic will not split, a state small enough to carry its
+whole distribution. Most of the problems below are exercises in spotting which structure applies.
 
 ## The idea
 
@@ -81,21 +82,70 @@ stake. The art in all of these is
 [choosing the state](/topics/technique/dynamic-programming) — the minimal description of a
 position that makes the recurrence exact.
 
+## When the quantity is not a sum: carry the distribution
+
+Linearity has a hard edge: it covers sums, and nothing else. A **maximum** is not a sum, and
+$\mathbb{E}[\max_k s_k]$ is not $\max_k \mathbb{E}[s_k]$ — the expected peak of a fluctuating walk
+sits strictly above the peak of its expected path. Problem 253 asks exactly this: forty pieces are
+laid into a row in uniformly random order, the number of separate segments $s_k$ rises and falls, and
+the target is the expected *largest* segment count seen along the way. Neither indicators nor a
+recurrence on $\mathbb{E}[s]$ can produce that. What works is to stop tracking an expectation and
+track a **distribution**: add the running peak to the state, push probability mass forward step by
+step through the [Markov chain](/topics/domain/markov-chain), and only at the end read off
+$\mathbb{E}[M] = \sum_m m \Pr[M = m]$. Forward probability propagation is first-step analysis run in
+the other direction, and it is the move to reach for whenever the statistic is a max, a min, a
+"first time above", or anything else non-linear in the path.
+
+The harder half of 253 is making that state small. The next move depends on the widths of the empty
+gaps, and carrying the multiset of widths means carrying an integer partition — millions of states.
+The reduction is a conditional-symmetry argument: given the segment count and whether each end cell
+is still empty, the gap widths form a uniform random
+[composition](/topics/domain/composition-combinatorics) of the empty cells, *independently of the
+history* that produced them. So the widths are not state at all; they can be averaged away using two
+marginals of a uniform composition of $E$ into $P$ parts — mean part $E/P$, and a designated part
+equal to $1$ with probability $(P-1)/(E-1)$. This is the same instinct as linearity, applied one
+level up: [find the symmetry](/topics/takeaway/exploit-symmetry) that lets a high-dimensional
+variable be replaced by its average, and make sure the quantity you replace it in is linear in it.
+
+## When the "random" input is just every input
+
+Sometimes the probability is a veneer. "The average number of iterations over all fourteen-digit
+$n$" (problem 255) is an expectation under the uniform distribution on a finite set, which is to say
+a *total divided by a count*. There is no clever probability to compute and no indicator to name; the
+only obstacle is that the set has $9 \times 10^{13}$ elements. The leverage here is
+[splitting inputs into behaviour classes](/topics/takeaway/split-inputs-into-behaviour-classes):
+the integer Heron iteration reads $n$ only through $\lceil n/x \rceil$, which is constant on blocks
+of consecutive $n$, so a whole interval of inputs that share an estimate splits into a handful of
+sub-intervals that share the next one ([quotient blocking](/topics/technique/quotient-blocking),
+applied recursively). Each leaf contributes (steps) × (width) to an integer total, and the tree has
+roughly $\sqrt{10^{14}}$ nodes rather than $10^{14}$. When an expectation is defined as an average
+over an enumerable population, ask what the computation actually *reads* from each input — inputs
+that read the same thing contribute the same amount, and can be counted together.
+
 ## How to reason about it
 
 - **Try to avoid enumerating.** Before summing over a joint outcome space, ask whether the answer
-  is a sum of pieces (linearity) or the value of a process (conditioning). One of the two almost
-  always applies, and either one replaces an intractable sum with a tractable one.
+  is a sum of pieces (linearity), the value of a process (conditioning), or an average over a
+  population whose members fall into a few behaviour classes. One of these almost always applies,
+  and each replaces an intractable sum with a tractable one.
 - **Indicators for counts, first-step for processes.** "Expected number of X" → write X as
   $\sum$ indicators and add probabilities. "Expected value/length of a game or walk" → define
   $E[\text{state}]$ and relate each state to its neighbours.
+- **Check that the statistic is linear before using linearity.** Maxima, minima, products and
+  "ever reached" questions are not sums. For those, propagate the full distribution with the
+  statistic folded into the state (problem 253's running peak), and take the expectation last.
 - **Keep it exact when the output demands it.** Many of these ask for an answer to six, nine, or
   thirteen decimal places. An expectation is a sum or ratio of rationals, so the exact answer is a
   fraction; carrying it as integers (Python's arbitrary precision, or `__int128` / a rational type
   in C) and rounding only at the very end avoids the floating-point drift that a `double`
-  accumulates over a long sum — problems 121 and 493 both hinge on this. Reserve floating point,
-  and a [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) simulation, for
-  *cross-checking* the exact result, not producing it.
+  accumulates over a long sum — problems 121 and 493 both hinge on this, and problem 255 keeps an
+  integer total and rounds to ten places with an integer formula, using `__int128` in C only for
+  the one product that would overflow. But exactness is a judgement, not a rule: a forward pass that
+  only adds and multiplies non-negative probabilities summing to $1$ is numerically benign, and
+  problem 253 runs it in plain [`double`](/topics/technique/double-precision-floating-point-format)
+  after confirming against one exact rational run that the error sits orders of magnitude below the
+  places asked for. Reserve a [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method)
+  simulation for *cross-checking* the result, not producing it.
 - **Continuous expectations are integrals.** When $x$ is drawn uniformly from an interval
   (problem 965's $\{nx\}$, or distance between random points), the expectation is an integral of a
   piecewise-defined function; the work is in cutting the interval into pieces where the integrand
