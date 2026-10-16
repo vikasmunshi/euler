@@ -1,5 +1,5 @@
 <!-- tags: [extended-slice] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:12Z -->
 # extended slice
 
 An [extended slice](https://docs.python.org/3/library/functions.html#slice) is `seq[start:stop:step]`
