@@ -1,5 +1,5 @@
 <!-- tags: [linear-recurrence-with-constant-coefficients] -->
-<!-- status: final 2026-10-12T14:24Z -->
+<!-- status: final -->
 # Linear recurrence with constant coefficients
 
 A [linear recurrence with constant coefficients](https://en.wikipedia.org/wiki/Linear_recurrence_with_constant_coefficients)
@@ -9,7 +9,8 @@ $$a_n = c_1 a_{n-1} + c_2 a_{n-2} + \dots + c_d a_{n-d}.$$
 
 The [Fibonacci numbers](/topics/domain/fibonacci-sequence) are the standard example, with $d = 2$
 and $c_1 = c_2 = 1$. The problems below arrive dressed as continued fractions, triangles, prefix
-codes, board tours, digit strings, two-variable functions and card games. In every one, the
+codes, board tours, digit strings, two-variable functions, card games and points spreading across
+a plane. In every one, the
 quantity being asked for is produced by the *same linear step applied over and over* to a small,
 fixed state. That is all a constant-coefficient recurrence is. Once I can see it, a question about
 the $10^{12}$th or $10^{18}$th term costs a logarithm, not a loop.
@@ -38,12 +39,21 @@ and $a_n$ is a component of $M^n$ applied to the seed. Two consequences do most 
 There are two ways to get the coefficients. Most of these problems **derive** them: a convergent
 update $(p, q) \to (p + 2q, p + q)$, a
 [Pell equation](/topics/technique/pells-equation)'s solution ladder, a leaf of cost $c$ splitting
-into costs $c + 1$ and $c + 4$, or a card run's win bias conditioned on the first turn. Problems 237
-and 529 instead **discover** them from computed terms, which the takeaway
+into costs $c + 1$ and $c + 4$, or a card run's win bias conditioned on the first turn. Problems
+237, 529 and 957 instead **discover** them from computed terms, which the takeaway
 [small cases reveal the recurrence](/topics/takeaway/small-cases-reveal-recurrence) covers in
 detail. Problem 529 uses
 [Berlekamp–Massey](/topics/technique/berlekamp-massey-algorithm) because its order runs into the
 thousands.
+
+Discovery has a price: pinning down a recurrence of order $d$ takes $2d$ terms, and a few more to
+confirm it. Problem 957 shows what to do when terms are expensive. Its plane construction can be
+simulated exactly only through day 13, because the point sets grow about fourfold a day. The count
+it needs, the number of concurrent line triples, grows like $\tfrac{7}{12}a_n^2$ for a pencil size
+$a_n$ that already has a closed form. The square of a recurrent sequence is itself recurrent, so
+that leading part is no mystery. Subtracting it leaves a residual of order only five, which ten
+simulated terms fix and the remaining three confirm. Peeling off the part you already understand
+lowers $d$, and with it the number of terms you have to pay for.
 
 In code, a low-order recurrence is just a simultaneous update. Problem 57's whole step is:
 
@@ -62,6 +72,7 @@ How I evaluate a recurrence depends on the order $d$ and how far away the target
 | Every term up to $n$ is needed, or terms grow past the bound fast | step the recurrence | $O(nd)$, or $O(\log N)$ steps when terms grow geometrically (57, 94, 219) |
 | One far term, small $d$ | [matrix power](/topics/technique/matrix-exponentiation) of the companion matrix | $O(d^3 \log n)$ (237, 940) |
 | One far term, moderate $d$ | $x^n \bmod$ the characteristic polynomial | $O(d^2 \log n)$ |
+| Characteristic roots are small integers | solve once for the closed form $\sum k_i r_i^{\,n}$ | $O(1)$ big-integer operations (957) |
 | One far term, $d$ in the thousands | [Bostan–Mori](https://arxiv.org/abs/2008.08822) on the [generating function](/topics/domain/generating-function) $P(x)/Q(x)$, with [FFT](/topics/technique/fast-fourier-transform) products | $O(d \log d \log n)$ (529) |
 
 The polynomial method is worth keeping in a scratch file. It never forms the matrix: it
@@ -100,7 +111,10 @@ order of $10^{12}$, which is far too many. Working on the generating function ne
 
 The sum $S_n = a_1 + \dots + a_n$ of a recurrent sequence is itself recurrent, of order one
 higher. You get it by carrying the running total as one more state component, which is how
-Problem 529 turns a count per length into a cumulative count. Other problems need a little more:
+Problem 529 turns a count per length into a cumulative count. The termwise product of two
+recurrent sequences is recurrent too, with characteristic roots the pairwise products $r_i s_j$.
+That is why Problem 957 can treat $a_n^2$ as known and fit a recurrence only to what is left. Other
+problems need a little more:
 
 - **Problem 940** has a two-variable function, linear in each direction. It becomes
   $e_1^{\mathsf T} N^{n} M^{m} e_2$ for two $2 \times 2$ matrices. Because that expression is
@@ -126,11 +140,14 @@ Problem 529 turns a count per length into a cumulative count. Other problems nee
 - **Pick the evaluator by $d$ and $n$, not by habit.** For a few terms, step. For one far term
   with small $d$, use a matrix power. Once $d$ reaches the hundreds, switch to polynomial methods.
   The growth rate tells you up front how many steps a bounded search will take.
-- **Keep it in integers.** The closed form $\sum k_i r_i^{\,n}$ (for Fibonacci,
+- **Keep it in integers.** When the roots are irrational, the closed form $\sum k_i r_i^{\,n}$
+  (for Fibonacci,
   [Binet's formula](https://en.wikipedia.org/wiki/Fibonacci_sequence#Binet's_formula)) is for
-  reasoning, not for computing: in double precision it stops being exact after about seventy terms. Exact
-  big integers are correct, but they cost $O(n)$ digits per term, which is why Problem 57 is
-  $O(n^2)$ overall.
+  reasoning, not for computing: in double precision it stops being exact after about seventy terms.
+  When the characteristic polynomial factors into small integer roots, as Problem 957's does
+  ($4$, $\pm 2$, $\pm 1$), the closed form *is* integer arithmetic. Clear the denominators of the
+  $k_i$, evaluate, and assert that the division comes out exact. Exact big integers are correct,
+  but they cost $O(n)$ digits per term, which is why Problem 57 is $O(n^2)$ overall.
 - **Reduce under the modulus carefully.** Reducing after every product is valid because the
   answer is wanted modulo $m$. A negative coefficient must be stored as its residue, and the
   products must fit the word: a modulus below $2^{31}$ keeps a product below $2^{62}$ in C (see
