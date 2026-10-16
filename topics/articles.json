@@ -6549,12 +6549,12 @@
       "path": "technique/miller-rabin-primality-test",
       "title": "Miller\u2013Rabin primality test",
       "status": "final",
-      "written": "2026-08-02T14:26Z",
+      "written": "2026-10-16T15:21Z",
       "solved": 11,
       "problems": 11,
       "tags": ["miller-rabin-primality-test"],
       "refs": ["p0111_s0", "p0131_s0", "p0146_s0", "p0200_s0", "p0241_s0", "p0245_s0", "p0248_s0", "p0293_s0", "p0387_s0", "p0487_s0", "p0545_s0"],
-      "solved_after": ["p0248"]
+      "solved_after": []
     },
     {
       "path": "technique/min-25-sieve",
