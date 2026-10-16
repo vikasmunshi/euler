@@ -1,5 +1,5 @@
 <!-- tags: [generate-and-test] -->
-<!-- status: final 2026-08-08T05:49Z -->
+<!-- status: final -->
 # Generate and test
 
 [Generate and test](https://en.wikipedia.org/wiki/Generate_and_test) is the most honest algorithm
@@ -37,6 +37,14 @@ digit sum at most $9d$, which caps the base — and problem 200 sidesteps the de
 its ceiling tenfold until enough survivors appear, which is the honest fallback when no clean bound
 exists.
 
+Problem 348 makes that fallback exact. It wants the smallest palindromes expressible as
+$a^2 + b^3$ in exactly four ways, and the property has no ceiling to derive. But every $d$-digit
+palindrome lives in the band $[10^{d-1}, 10^d)$, and once that band has been scanned its survivors
+are known *completely*. So the search runs band by band in increasing $d$ and stops at the first
+band that brings the tally up to the count it needs. The order is guaranteed, no scanned value is
+ever thrown away, and no guess is needed. When "the first $k$" is the question and the property
+splits cleanly by width, [search in complete bands](/topics/takeaway/search-in-complete-bands).
+
 **Generate the shape, not the space.** If the property constrains the *form* of a candidate, build
 the form directly. Problem 36 wants numbers palindromic in base 10 and base 2; it emits only decimal
 palindromes, by mirroring each left half:
@@ -60,6 +68,13 @@ power?" is far harder than enumerating $b^e$ and asking "is the digit sum $b$?".
 values that are repunits in more than one base, so it generates repunits per base rather than
 testing integers. Problem 87 sums $p^2 + q^3 + r^4$ over sieved primes instead of factoring
 candidates. In each case the expensive direction of the property is replaced by the cheap one.
+
+Sometimes neither direction wins on paper. In problem 348, testing each palindrome (try every cube,
+then check whether the remainder is a square) and generating every pair $(a, b)$ both cost
+$O(N^{5/6})$. The tie is broken by constants. Pair generation needs no square roots, and for a fixed
+$b$ the sums $a^2 + b^3$ form one contiguous run that NumPy builds as a single
+[vectorised](/topics/technique/vectorized) array. Once the exponents agree, choose the direction
+whose inner loop is the simplest machine work.
 
 **Constrain the parts jointly.** Problem 32 wants a multiplicand, multiplier and product that
 together use 1–9 exactly once. Counting digits shows only the $(1,4)$ and $(2,3)$ operand splits can
@@ -86,6 +101,19 @@ logarithms. So the tail test gates the head test, and the float work runs on a h
 instead of all of them. Problem 35 checks that a prime's digits avoid `024568` before rotating it,
 and problem 111 tests digit *shapes* before primality. Ordering a filter chain by ascending cost is
 the reliable free win here — see [cheap checks first](/topics/takeaway/cheap-checks-first).
+
+The same principle works on a whole array at once. Problem 348 never reverses a number to test it
+for being a palindrome. Every value in a band has the same width, so it compares the outermost digit
+pair, keeps the matches, and moves one pair inwards:
+
+```python
+for j in range(digits // 2):
+    values = values[(values // 10**j) % 10 == (values // 10**(digits - 1 - j)) % 10]
+```
+
+Each pass keeps about a tenth of what it was given, so the whole test costs little more than its
+first comparison. A filter chain does not have to be a sequence of different tests. It can be one
+test split into stages, cheapest stage first.
 
 **Order the stream so the first hit is the answer.** Problem 41 wants the *largest* pandigital prime,
 so it generates descending and takes `next()`:
@@ -135,7 +163,10 @@ whenever the property refers to smaller members of the same family.
 - **Deduplicate deliberately.** Enumerating over a parametrisation usually reaches the same value by
   several routes. Problems 32, 87, 141 and 346 all collect into a
   [set](/topics/technique/set) and answer with `sum(set(...))` or `len(set(...))`, which is
-  cheap insurance against a double count that is otherwise almost invisible.
+  cheap insurance against a double count that is otherwise almost invisible. When the property
+  *is* the number of routes, as in problem 348's "exactly four ways", do not throw duplicates away.
+  Count them, with `np.unique(..., return_counts=True)` or a sort followed by run lengths, and let
+  the multiplicity be the test.
 - **Prune inside the loop nest, not after it.** Problem 87's nested prime loops break as soon as a
   partial sum exceeds the budget, so the nominally cubic search visits only productive triples.
   Problem 88 prunes its recursive factorisation against a running best. A break in the outer loop is
