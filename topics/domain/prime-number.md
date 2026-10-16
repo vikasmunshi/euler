@@ -1,5 +1,5 @@
 <!-- tags: [prime-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:17Z -->
 # Prime number
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ divisible
