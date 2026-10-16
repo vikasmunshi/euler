@@ -1,5 +1,5 @@
 <!-- tags: [graph-theory] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:53Z -->
 # Graph theory
 
 [Graph theory](https://en.wikipedia.org/wiki/Graph_theory) studies things joined by pairwise

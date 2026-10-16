@@ -1631,8 +1631,8 @@
     {
       "path": "domain/graph-theory",
       "title": "Graph theory",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:53Z",
       "solved": 10,
       "problems": 43,
       "tags": ["graph-theory"],
