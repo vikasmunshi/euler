@@ -7066,12 +7066,12 @@
       "path": "technique/quotient-blocking",
       "title": "quotient blocking",
       "status": "final",
-      "written": "2026-10-09T07:22Z",
+      "written": "2026-10-16T07:27Z",
       "solved": 12,
       "problems": 12,
       "tags": ["quotient-blocking"],
       "refs": ["p0153_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0429_s0", "p0478_s1", "p0501_s0", "p0565_s1", "p0642_s0", "p0926_s0"],
-      "solved_after": ["p0276", "p0351"]
+      "solved_after": []
     },
     {
       "path": "technique/randomized-incremental-algorithm",
