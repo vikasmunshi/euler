@@ -5723,8 +5723,8 @@
     {
       "path": "technique/generation-of-primes",
       "title": "Generation of primes",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:42Z",
       "solved": 11,
       "problems": 11,
       "tags": ["generation-of-primes"],

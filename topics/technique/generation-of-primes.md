@@ -1,5 +1,5 @@
 <!-- tags: [generation-of-primes] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:42Z -->
 # Generation of primes
 
 Almost every prime problem starts with the same step: get hold of some primes. The
