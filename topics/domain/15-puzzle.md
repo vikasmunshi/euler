@@ -1,5 +1,5 @@
 <!-- tags: [15-puzzle] -->
-<!-- status: final 2026-07-23T07:46Z -->
+<!-- status: final -->
 # 15 puzzle
 
 The [15 puzzle](https://en.wikipedia.org/wiki/15_puzzle) is a $4 \times 4$ tray of fifteen
@@ -28,7 +28,10 @@ Two facts about the graph shape everything you do with it:
   arrangements — a [parity](https://en.wikipedia.org/wiki/15_puzzle#Solvability) invariant (the
   sign of the tile permutation, combined with the blank's row) is preserved by every move, so
   configurations with the wrong parity simply live in a different connected component. Before you
-  search for a path, it is worth knowing whether one can exist at all.
+  search for a path, it is worth knowing whether one can exist at all. The invariant is a
+  property of *distinguishable* tiles, though: once two tiles share a colour, swapping them is an
+  odd permutation that leaves the board looking the same, so both parity classes collapse onto
+  the same coloured boards and the obstruction disappears.
 - **The full graph is astronomically large.** With all tiles distinct there are $16!/2 \approx
   10^{13}$ reachable states, far too many to enumerate. The naive state — "the permutation of all
   tiles" — is almost never the state you actually want.
@@ -49,17 +52,31 @@ distances, and they fall on a couple of straight lines — the search *reveals a
 then answers the real (huge) question with no search at all. That is a habit worth keeping: use a
 correct-but-slow BFS as an oracle to discover the pattern, then prove and exploit it.
 
-Problem 244 ("Sliders") keeps the tiles distinguishable — seven red, eight blue — and asks not
-for the length of a shortest path but for a fingerprint (a checksum) summed over *all* shortest
-paths. Counting shortest paths, rather than finding one, is still a BFS: the states at each BFS
-level form a layered directed acyclic graph, and you accumulate over predecessors on that
-shortest-path DAG instead of stopping at the first arrival. Searching from both the start and the
-target and meeting in the middle keeps the frontier small enough to be practical.
+Problem 244 ("Sliders") applies the same collapse to colours — seven red tiles, eight blue —
+and the state becomes *(blank cell, bitmask of red cells)*: at most $16 \binom{15}{7} = 102\,960$
+boards instead of $10^{13}$, every one of them reachable (the parity point above, made concrete),
+and a slide is a two-bit XOR on the mask. What it asks for is not the length of a shortest path
+but a checksum summed over *all* shortest paths, and that changes how you use the BFS:
+
+- **Search from the target, not the start.** Because moves are reversible, one BFS out of the
+  target labels every state with its distance *to* the target — exactly the label a path walker
+  needs. Stop when the start is labelled: every shorter layer is already complete, and a shortest
+  path visits nothing else.
+- **The shortest paths are the strictly descending edges.** From a state labelled $d$, step only
+  to neighbours labelled $d-1$. Those edges form a layered
+  [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph) whose root-to-sink paths are
+  precisely the shortest move sequences, so a depth-first walk needs no visited set.
+- **Check whether the quantity factors over the DAG before you write a DP.** Path *counts*, or a
+  sum of hashes taken modulo $p$, propagate layer by layer as (count, sum) pairs. Problem 244's
+  total does not: it is the plain sum of per-path checksums that were each reduced modulo $p$,
+  and a DP over residues cannot know how many of them wrapped. So each path is walked explicitly,
+  carrying its partial hash down the branch — affordable only because the shortest-path DAG turns
+  out to be thin. Read the aggregation rule as carefully as the puzzle.
 
 So the engineering through-line across the 15-puzzle problems is not any one algorithm but a
-sequence of modelling decisions: recognise the board graph, check parity before you search,
+sequence of modelling decisions: recognise the board graph, check whether parity (still) applies,
 compress the state down to what actually matters, and let BFS give you either the distance, the
-count of shortest paths, or the data from which a closed form falls out. A sketch of the reduced
+layered DAG of all shortest paths, or the data from which a closed form falls out. A sketch of the reduced
 step for the single-counter version is all of two lines —
 
 ```python
