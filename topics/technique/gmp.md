@@ -1,5 +1,5 @@
 <!-- tags: [gmp] -->
-<!-- status: final 2026-07-31T19:49Z -->
+<!-- status: final -->
 # GMP
 
 [GMP](https://gmplib.org/) — the GNU Multiple Precision Arithmetic Library — is the bignum library
@@ -42,7 +42,10 @@ run without a scratch variable.
 **The `_ui` / `_si` suffixes are the whole performance story at small scale.** Where one operand is a
 machine word, the suffixed variant takes it directly (`mpz_mul_ui`, `mpz_add_ui`, `mpz_sub_ui`,
 `mpz_cmp_ui`) and skips converting it into a temporary `mpz_t` first. In an inner loop that
-difference is most of the cost. The same instinct explains `mpz_divexact_ui`, which divides when you
+difference is most of the cost. The division variants go one better and *return* the remainder as an
+`unsigned long`: `r = mpz_fdiv_q_ui(q, n, d)` is Python's `q, r = divmod(n, d)` in one call, with
+the small half landing straight in a machine word, ready to index a table (Problem 254 splits every
+candidate by $9!$ this way). The same instinct explains `mpz_divexact_ui`, which divides when you
 already know the division is exact and therefore skips computing a remainder, and `mpz_mul_2exp` /
 `mpz_fdiv_q_2exp`, which are shifts rather than general multiply and divide.
 
@@ -54,7 +57,7 @@ hard part of the port, and these are exactly the ones the problems below reach f
 | `mpz_powm`, `mpz_powm_ui` | modular exponentiation $a^b \bmod m$ | [Miller–Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test) primality once the modulus passes $2^{64}$ (Problem 387) |
 | `mpz_bin_uiui` | an exact [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient) $\binom{n}{k}$ | Pascal-triangle entries far past 64 bits (Problem 203) |
 | `mpz_set_str`, `mpz_get_str` | decimal string ↔ value, any base | writing a bound like $10^{100}$ or $10^{25}$ as a literal, and printing the result (Problems 168, 169) |
-| `mpz_sizeinbase` | digit or bit count without materialising the string | a length test that would otherwise cost a full conversion |
+| `mpz_sizeinbase` | digit or bit count without materialising the string | checking that the answer fits its output buffer before `mpz_get_str` writes it (Problem 254) |
 | `mpz_ui_pow_ui`, `mpz_pow_ui` | exact powers | scaling a probability to an integer before dividing (Problem 239) |
 | `mpq_*` with `mpq_canonicalize` | exact rationals, kept in lowest terms | a sum of fractions that must be compared for exact equality (Problem 180) |
 
@@ -85,16 +88,31 @@ need this page at all.
 with a GMP fallback: run the loop in `unsigned __int128` while the operands stay under $2^{64}$ and
 promote to `mpz_t` only above it. Problem 387 carries a small `mpz_set_u128` bridge for exactly
 this — 128-bit modular arithmetic is a few instructions, `mpz_powm` is a call into a library, and
-you want the second only where the first would wrap.
+you want the second only where the first would wrap. The guard need not be a value comparison.
+Problem 254 builds each candidate as a string of decimal digits, so it branches on the *length*:
+nineteen digits or fewer always fit an `unsigned long long`, and only a longer candidate goes
+through `mpz_set_str`. The fast path covers the dense part of the scan, and GMP handles the few
+large candidates where one or two settle the answer.
 
-**Expect a 5–20× win over CPython for the same algorithm — and much less on small values.** On this
-project's benchmarks, on the same test case with the same approach, the GMP port beats the Python
-original by 12× on Problem 192 ($4.2$ s → $332$ ms), 20× on Problem 180 ($1.6$ s → $81$ ms), 12× on
-Problem 387 ($2.0$ s → $166$ ms) and 5× on Problem 239 ($857$ ms → $179$ ms). But Problem 321, whose
-values are big yet whose loop is trivially short, gains only about 1.3× — per-operation overhead is
-the same in both, and there is not enough arithmetic for the asymptotics to matter. CPython's `int`
-is itself a competent bignum (30-bit digits, Karatsuba above a threshold); GMP wins on tuning and on
-not paying for object allocation per result, not by magic. Where a Python solution is slow because
+**Know which inputs actually need the bignum.** Python reaches a width boundary without noticing,
+so check where the port actually crosses it. In Problem 254, every value for the problem's own
+bound fits in 64 bits. GMP is in the C port so that the same code also handles the stress input
+($i \le 500$), where the count of nines reaches about $10^{51}$. That is a good reason to link it,
+but say so in the source. A reader who sees `mpz_t` will otherwise assume the stated problem
+overflows, and anyone who later tries to remove GMP needs to know which input breaks without it.
+
+**Expect a 5–20× win over CPython when GMP does the work, and more when it mostly stays out of
+it.** On this project's benchmarks, on the same test case with the same approach, the GMP port beats
+the Python original by 12× on Problem 192 ($4.2$ s → $332$ ms), 20× on Problem 180 ($1.6$ s →
+$81$ ms), 12× on Problem 387 ($2.0$ s → $166$ ms) and 5× on Problem 239 ($857$ ms → $179$ ms). But
+Problem 321, whose values are big yet whose loop is trivially short, gains only about 1.3× —
+per-operation overhead is the same in both, and there is not enough arithmetic for the asymptotics
+to matter. At the other end, Problem 254 gains 81× ($1.43$ s → $18$ ms). That is not because GMP is
+fast. The hot loop runs over a million candidates on native words and table lookups, and the
+interpreter's cost per candidate is what the port removes. In short, the speedup comes from the
+work the bignum does not do. CPython's `int` is itself a competent bignum (30-bit digits, Karatsuba
+above a threshold); GMP wins on tuning and on not paying for object allocation per result, not by
+magic. Where a Python solution is slow because
 of its *algorithm*, porting it to GMP will faithfully reproduce the slowness —
 [algorithm beats language](/topics/takeaway/algorithm-beats-language).
 
@@ -110,7 +128,11 @@ pass that.
 **Keep the numbers small before you make them big.** GMP's cost grows with the operand size, so the
 reductions that matter most are the ones that stop growth: work modulo something and the values
 never leave a machine word ([modular arithmetic](/topics/domain/modular-arithmetic)); track a digit
-count instead of the digits; carry the last $k$ digits when the question only asks for them. A
+count instead of the digits; carry the last $k$ digits when the question only asks for them.
+Problem 254 is the extreme case. The number it reasons about has about $10^{10}$ digits, far too
+many to build even with GMP. So the solution stores it as a pair: how many nines it starts with,
+plus a residue below $9!$ that encodes the remaining digits. The only bignum is that count of nines,
+and the answer, a digit sum, follows from the pair directly. A
 `mpz_t` that exists because nobody
 [reduced the problem before coding](/topics/takeaway/reduce-before-coding) is a self-inflicted
 constant factor.
