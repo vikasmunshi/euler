@@ -1,5 +1,5 @@
 <!-- tags: [inclusion-exclusion-principle] -->
-<!-- status: final 2026-10-12T14:44Z -->
+<!-- status: final -->
 # Inclusion–exclusion principle
 
 The [inclusion–exclusion principle](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
@@ -54,7 +54,16 @@ digit polynomials with at least one integer root. Only a few candidate roots are
 sums over non-empty subsets of them, and a digit DP counts the polynomials that vanish at every
 root in the subset. Problem 234 wants numbers divisible by *exactly one* of two primes. Changing
 the weighting gives $\Sigma_p + \Sigma_q - 2\Sigma_{pq}$: the overlap is subtracted twice, because it
-must contribute nothing at all.
+must contribute nothing at all. Problem 957 needs the opposite threshold, *at least two* of three
+conditions. In its log-coordinate model a point turns blue when two of its three coordinates already
+occur, and the three conditions are $u \in U$, $v \in V$ and $u - v \in W$. Each pairwise
+intersection is a product of two sets, so it has $a_n^2$ points. The triple intersection is the
+set of $T_n$ concurrent triples. The right weights are $+1$ on each pair and $-2$ on the triple,
+which gives $g(n) = 3a_n^2 - 2T_n$. A point meeting exactly two conditions is counted once, and a
+point meeting all three is counted $3 - 2 = 1$ time. Here inclusion–exclusion moves the difficulty
+rather than removing it: the pairs are free, and all the work goes into $T_n$, which the solution
+simulates for small $n$ and then fits with a
+[linear recurrence](/topics/technique/linear-recurrence-with-constant-coefficients).
 
 **Symmetric conditions, so $N(S)$ depends only on $|S|$.** Then the $2^k$ terms collapse into
 $k + 1$ binomially weighted ones. Problem 239 counts permutations in which a prescribed number of
@@ -92,7 +101,8 @@ counts the repdigits twice, so it subtracts them once.
   of these, inclusion–exclusion is only practical for small $k$.
 - **Write the weights, then check them.** For "exactly one", "exactly $j$" or "at least two", work
   out the coefficient each object receives and confirm it is $1$ for the objects you want and $0$
-  otherwise. Problem 234's factor of $2$ comes straight out of that check.
+  otherwise. Problem 234's factor of $2$ for "exactly one" comes straight out of that check, and
+  so does 957's $-2$ for "at least two of three".
 - **Look for a second overlap.** A correction can itself overcount, as with 184's collinear
   triples. Brute-force a small case and compare. A missing second-order term shows up immediately.
 - **Signs under a modulus.** Alternating sums produce negative intermediates. Python's `%` with a positive
