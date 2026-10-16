@@ -4767,12 +4767,12 @@
       "path": "technique/canonical-form",
       "title": "Canonical form",
       "status": "final",
-      "written": "2026-08-11T03:16Z",
+      "written": "2026-10-16T07:21Z",
       "solved": 14,
       "problems": 14,
       "tags": ["canonical-form"],
       "refs": ["p0029_s0", "p0029_s1", "p0052_s0", "p0054_s0", "p0061_s0", "p0062_s0", "p0068_s0", "p0089_s0", "p0165_s0", "p0177_s0", "p0244_s0", "p0254_s0", "p0259_s0", "p0265_s0", "p0963_s0"],
-      "solved_after": ["p0265", "p0963"]
+      "solved_after": []
     },
     {
       "path": "technique/carmichael-function",

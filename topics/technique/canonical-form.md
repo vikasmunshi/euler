@@ -1,5 +1,5 @@
 <!-- tags: [canonical-form] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:21Z -->
 # Canonical form
 
 A [canonical form](https://en.wikipedia.org/wiki/Canonical_form) is one chosen representative for
