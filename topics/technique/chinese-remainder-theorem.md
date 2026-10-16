@@ -1,5 +1,5 @@
 <!-- tags: [chinese-remainder-theorem] -->
-<!-- status: final 2026-08-01T08:06Z -->
+<!-- status: final -->
 # Chinese remainder theorem
 
 The [Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) (CRT) says
@@ -8,7 +8,8 @@ factors, done side by side. That sounds like a statement about congruences, and 
 recipe for solving them, but in practice it is a *structural* tool: it is the licence to take a
 problem stated modulo one awkward number and replace it with several independent problems modulo
 friendlier ones. Every problem below reaches for it at a different point in the pipeline — to split
-a modulus, to count a solution set, or to grow one — and the theorem is the same each time.
+a modulus, to count a solution set, to build one, or to grow a modulus — and the theorem is the same
+each time.
 
 ## The theorem
 
@@ -62,7 +63,9 @@ One [modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inver
 supplied by the [extended Euclidean algorithm](/topics/technique/extended-euclidean-algorithm) (or
 by Python's `pow(a, -1, m)`). Fold it over a list to handle any number of moduli. Its virtue is that
 the intermediate values stay bounded by the product *so far*, which is what you want when the moduli
-accumulate one at a time.
+accumulate one at a time. It also merges whole *sets* cheaply: when the first modulus carries a list
+of residues `R` and the second a list `S`, the inverse `m₁⁻¹ mod m₂` is shared by all `|R|·|S|`
+pairs, so a merge is one inverse and a product of lists — the form problems 0245 and 0934 both use.
 
 **All moduli at once (Gauss).** With `M_i = m / m_i`,
 
@@ -78,7 +81,7 @@ drawn from a pool of 501 primes, and since `(qr)⁻¹ mod p` factors as `q⁻¹�
 it will ever need is one of `O(P²)` *pairwise* ones. The `O(P³)` triple loop then contains no
 inverse at all, just a few multiplications.
 
-## Three things it is actually used for
+## Four things it is actually used for
 
 **Split a hard modulus into tractable ones.** The textbook use. Problem 0160 wants five digits of a
 factorial modulo `10⁵`, and the difficulty is that the value shares its factors `2` and `5` with the
@@ -87,16 +90,35 @@ one prime per component, and *within* a component you can strip that prime's pow
 divide them back out with an inverse — a manoeuvre that is meaningless modulo the composite. The
 split does not just make the arithmetic smaller; it makes an otherwise-blocked step legal.
 
-**Construct and count a solution set.** Because the isomorphism is a bijection, solutions modulo `m`
-correspond exactly to *tuples* of solutions in the components — so the count is
-[multiplicative](https://en.wikipedia.org/wiki/Multiplicative_function), and CRT is the constructor
-that turns a choice per component into an actual residue. Problem 0932 needs the `s` with
-`s(s−1) ≡ 0 (mod m)`. Consecutive integers are coprime, so each prime power of `m` must divide `s`
-or `s−1` *entirely*, never split across both: `k` distinct prime factors give exactly `2ᵏ` residues,
-one per binary choice, each assembled by CRT. That converts a scan over a huge interval into a walk
-along a handful of arithmetic progressions. Read this direction of the theorem carefully — it is the
-one people miss. CRT is not only how you *solve* a congruence system, it is how you *enumerate* the
-solutions of a condition that is local to each prime.
+**Count a solution set without finding it.** Because the isomorphism is a bijection, solutions
+modulo `m` correspond exactly to *tuples* of solutions in the components — so their number is a
+[multiplicative function](https://en.wikipedia.org/wiki/Multiplicative_function) of `m`, and you can
+know it without constructing a single one. Problem 0272 counts the `x` with `x³ ≡ 1 (mod n)`. The
+isomorphism restricts to the unit groups, `(ℤ/n)ˣ ≅ ∏ (ℤ/pᵉ)ˣ`, and for an odd prime each factor is
+[cyclic](https://en.wikipedia.org/wiki/Multiplicative_group_of_integers_modulo_n), where `x³ = 1` has
+exactly `gcd(3, order)` solutions. So each prime power contributes a factor `3` or `1`, decided by
+`p mod 3` alone, and the count is `3ᵏ`. The question "which `n` have exactly 242 non-trivial cube
+roots of unity" has stopped being about congruences at all: it is "which `n` have exactly five
+contributing factors", a factor-shape enumeration that never computes a root. That is the payoff of
+the counting direction — the theorem translates an arithmetic condition into a statement about the
+shape of the factorisation, and the search runs over factorisations instead of over residues.
+
+**Construct a solution set, one prime at a time.** When you do need the solutions, CRT is the
+constructor that turns a choice per component into an actual residue. Problem 0932 needs the `s`
+with `s(s−1) ≡ 0 (mod m)`. Consecutive integers are coprime, so each prime power of `m` must divide
+`s` or `s−1` *entirely*, never split across both: `k` distinct prime factors give exactly `2ᵏ`
+residues, one per binary choice, each assembled by CRT. That converts a scan over a huge interval
+into a walk along a handful of arithmetic progressions. Read this direction of the theorem
+carefully — it is the one people miss. CRT is not only how you *solve* a congruence system, it is
+how you *enumerate* the solutions of a condition that is local to each prime.
+
+The general recipe for a polynomial congruence `f(x) ≡ 0 (mod m)` has three stages: find the roots
+modulo each prime `p`, lift them to `pᵉ` with [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma),
+and glue across primes with CRT. Problem 0245 runs it on `x² − x + 1`. Its roots modulo a prime are
+`−ω` for `ω` a primitive cube root of unity — so they exist only for `p ≡ 1 (mod 3)`, plus a single
+root at `3` itself, the same primes that carried the factor `3` in problem 0272 — and a modulus with
+`j` such prime factors carries `2ʲ` roots. The per-prime step is where the number theory lives; CRT
+is the mechanical part, which is exactly the point.
 
 **Grow a modulus incrementally.** When the constraints arrive as a sequence, maintain a running
 modulus `M` and the set `R` of residues modulo `M` that satisfy everything so far; each new prime
@@ -107,6 +129,13 @@ shape, and it shows why the technique is worth the trouble — `M` grows *multip
 grows by a much smaller factor per prime, so within about fifteen steps `M` overshoots a bound of
 `10¹⁷` and the survivor set collapses to nothing. Counting the integers in `[1, N]` covered by a
 residue class is then a division, and a sum over `10¹⁷` values becomes a loop over fifteen primes.
+
+The same growth can branch instead of running in a line. Problem 0245 needs the roots of
+`x² − x + 1` modulo *every* solvable modulus up to a bound, not modulo one big one, so it grows them
+as a depth-first tree: each node is a modulus with its root list, and each child appends one more
+prime power and merges the parent's list with that prime power's roots. Every node is itself an
+answer, and every root list is computed once and inherited by all its children — the tree is the
+memo.
 
 ## Getting it right
 
@@ -126,6 +155,12 @@ residue class is then a division, and a sum over `10¹⁷` values becomes a loop
 - **Normalise the sign in C.** `(a₂ − a₁)` is routinely negative and C's `%` follows the dividend's
   sign, so the merge needs `((x % m) + m) % m`. Python's `%` already returns a non-negative result
   for a positive modulus.
+- **Expect a few primes to break the pattern.** The per-component answer is usually a rule in `p`,
+  but the small primes that divide the problem's own constants are exceptions, and each needs its
+  own case. In problem 0272 the prime `3` contributes a cube root only from `9` upward, and `2` never
+  does; in problem 0245 `3` divides `x² − x + 1` but `9` never does, so Hensel lifting must stop
+  there. Check every prime power below a small bound by brute force before trusting the general
+  rule.
 - **Watch what the components cost.** CRT is only a win if the per-component work is cheaper than
   the original. It usually is — a smaller modulus means smaller tables and, for a *prime* component,
   the whole toolbox that needs a field:
@@ -133,9 +168,10 @@ residue class is then a division, and a sum over `10¹⁷` values becomes a loop
   [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), free division.
   But the glue costs an inverse per component, so for a one-off lift with two small moduli the split
   can be pure overhead.
-- **Recognise the trigger.** Any of these three should make you reach for it: the modulus is
-  composite and its factorisation is known; a condition is stated independently at each prime; or
-  constraints modulo several coprime numbers must hold simultaneously. In all three the theorem
+- **Recognise the trigger.** Any of these should make you reach for it: the modulus is composite
+  and its factorisation is known; a condition is stated independently at each prime; you are asked
+  to count or list the roots of a polynomial modulo many different `n`; or constraints modulo
+  several coprime numbers must hold simultaneously. In all three the theorem
   turns a global problem into local ones, and local problems are the ones you can solve.
 
 <!-- problems (generated by update-tags) -->
