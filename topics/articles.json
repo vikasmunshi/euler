@@ -4,12 +4,12 @@
       "path": "domain/15-puzzle",
       "title": "15 puzzle",
       "status": "final",
-      "written": "2026-07-23T07:46Z",
+      "written": "2026-10-16T07:29Z",
       "solved": 2,
       "problems": 2,
       "tags": ["15-puzzle"],
       "refs": ["p0244", "p0313"],
-      "solved_after": ["p0244"]
+      "solved_after": []
     },
     {
       "path": "domain/3-smooth-numbers-not-in-list",

@@ -1,5 +1,5 @@
 <!-- tags: [15-puzzle] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:29Z -->
 # 15 puzzle
 
 The [15 puzzle](https://en.wikipedia.org/wiki/15_puzzle) is a $4 \times 4$ tray of fifteen
