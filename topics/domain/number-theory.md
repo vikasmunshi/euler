@@ -1,10 +1,10 @@
 <!-- tags: [number-theory] -->
-<!-- status: final 2026-08-06T21:25Z -->
+<!-- status: final -->
 # Number theory
 
 [Number theory](https://en.wikipedia.org/wiki/Number_theory) is the study of the integers on their
 own terms — divisibility, primes, remainders, and the arithmetic functions built on top of them.
-With 142 problems it is the third-largest domain tag in the archive, behind only
+With 141 problems it is the third-largest domain tag in the archive, behind only
 [combinatorics](/topics/domain/combinatorics) and
 [modular arithmetic](/topics/domain/modular-arithmetic), and it is the one most often paired with
 something sharper: 35 of these problems also carry `modular-arithmetic`, 24
@@ -12,7 +12,7 @@ something sharper: 35 of these problems also carry `modular-arithmetic`, 24
 [Diophantine equation](/topics/domain/diophantine-equation), 19
 [multiplicative function](/topics/domain/multiplicative-function), 16
 [divisor function](/topics/domain/divisor-function). Those pages describe the *objects*. This one
-is about what all 142 have in common — the shape the question takes, and the small set of moves
+is about what all 141 have in common — the shape the question takes, and the small set of moves
 that turn it from impossible into a few seconds of work.
 
 ## The question is almost always a summatory function
@@ -40,6 +40,17 @@ whose "resilience" drops below a given ratio; resilience is $\varphi(d)/(d-1)$. 
 $n$ where $n$ and $n+1$ have equally many divisors; that is the divisor function $\tau$, twice.
 Problem 124 sorts integers by their radical; the radical is a multiplicative function. Once the
 function has a name, its literature — and its algorithms — come with it.
+
+Sometimes the translation yields a *description* of the qualifying $n$ rather than a sum. Problem
+272 counts the nontrivial cube roots of unity modulo $n$ and asks for every $n \le 10^{11}$ that
+has exactly 242 of them. The [Chinese remainder theorem](/topics/technique/chinese-remainder-theorem)
+splits a root modulo $n$ into independent roots modulo each prime power, so the count (with $x = 1$
+included) is multiplicative. Each unit group modulo an odd prime power is
+[cyclic](https://en.wikipedia.org/wiki/Cyclic_group), so it holds $\gcd(3, |G|)$ cube roots.
+Together these give exactly $3^k$ roots, where $k$ counts the primes $p \equiv 1 \pmod 3$ dividing
+$n$, plus one if $9 \mid n$. The statement's $C(91) = 8$ checks it: $91 = 7 \cdot 13$, $3^2 - 1 = 8$.
+"242 roots" therefore means $k = 5$, a condition on *which primes* divide $n$ and on nothing else.
+Move 5 below is what you do with a condition like that.
 
 ## Move 1 — build the whole table in one pass
 
@@ -130,6 +141,22 @@ summatory functions like $\sum \tau(n)$ or $\sum \varphi(n)$ in sublinear time. 
 926 both lean on it. It is the standard finishing move once move 2 has produced a floor-laden sum,
 and the pair together is the reason $N = 10^{15}$ is not automatically hopeless.
 
+Moves 2 and 3 combine most neatly when the *unrestricted* count is easy and you want only the
+coprime part. Problem 276 counts integer triangles with $\gcd(a, b, c) = 1$ and perimeter at most
+$N$. Ignoring the gcd, the count $S(N)$ has an $O(1)$ closed form (see "Exactness" below). Every triangle is $g$
+times a primitive one of perimeter at most $\lfloor N/g \rfloor$, so
+$S(N) = \sum_{g \ge 1} P(\lfloor N/g \rfloor)$, which inverts to
+
+$$P(N) = S(N) - \sum_{g \ge 2} P\!\left(\left\lfloor \frac{N}{g} \right\rfloor\right).$$
+
+No Möbius function appears: the recursion runs only over the $O(\sqrt{N})$ distinct quotients, and
+each of those costs a blocked $O(\sqrt{v})$ loop, so the total is $O(N^{3/4})$. That is sublinear,
+where sieving $\mu$ up to $N$ would be linear. Fill the values bottom-up, with one array indexed
+by small $v$ and one by $k$ for $v = \lfloor N/k \rfloor$, and no dictionary or call stack is
+needed. This is the same skeleton as the
+[Mertens function](https://en.wikipedia.org/wiki/Mertens_function) recursion, and it applies
+whenever "all of them" is a formula and "the primitive ones" is the question.
+
 ## Move 4 — reduce the algebra before you write the loop
 
 The three moves above are all mechanical once the sum exists. Getting to the sum is not, and the
@@ -156,6 +183,31 @@ ones. The candidates collapse to multiples of a
 checks. Three problems, three different things reduced: the formula, the comparison, the candidate
 set.
 
+## Move 5 — when only the prime set matters, enumerate the shape
+
+A condition that depends only on which primes divide $n$, like problem 272's "exactly five
+cube-root factors", should not be tested one $n$ at a time. Enumerate the *shape* instead. Write
+each qualifying $n$ uniquely as $A \cdot m$. Here $A$ is the product of the prime powers the
+condition cares about, and the cofactor $m$ is built only from primes it does not care about. The
+answer then becomes
+
+$$\sum_{A} A \cdot S\!\left(\left\lfloor \frac{L}{A} \right\rfloor\right),$$
+
+where $S(x)$ sums the admissible cofactors up to $x$. $S$ is one sieve (strike out the excluded
+primes) followed by a [prefix sum](/topics/technique/prefix-sum), and it is small, because five
+mandatory factors already cost at least $7 \cdot 9 \cdot 13 \cdot 19 \cdot 31$. A depth-first
+search builds the $A$, choosing primes in increasing order and pruning once the remaining slots
+cannot fit even at the current prime.
+
+Most of the work is the last prime, and move 3 removes it. Let $T$ be what $L$ leaves for the last
+factor. Every prime above $\sqrt{T}$ appears only to the first power. Its cofactor bound
+$\lfloor T/p \rfloor$ also takes fewer than $\sqrt{T}$ values, so the loop runs over the quotient
+$q$ instead of the prime. Each $q$ multiplies $S(q)$ by the *sum of the eligible primes* in the
+interval that shares it, read from a second prefix-sum array by bisection. The same quotient
+blocking applies, but the blocks are over primes rather than consecutive integers. Problem 268
+("at least four distinct prime factors below 100") and the other $\omega(n)$-shaped problems have
+the same structure.
+
 ## Exactness is the discipline
 
 Number theory asks questions whose answers are exact integers, and the characteristic bug in this
@@ -167,12 +219,18 @@ problem's answer lives by construction. Cross-multiply and compare integers inst
 applies to $\sqrt{\cdot}$: use `math.isqrt`, not `int(math.sqrt(x))`, which starts losing integers
 around $2^{52}$ — problems 179 and 193 both depend on an exact integer square root. Where floats
 are genuinely the right tool, as in problem 800's logarithms, treat a near-boundary comparison as
-undecided and re-check it exactly. See
+undecided and re-check it exactly. A rounding in a closed form deserves the same treatment.
+Problem 276's unrestricted triangle count is built on
+[Alcuin's sequence](https://oeis.org/A005044), $\operatorname{round}(k^2/12)$. Since
+$k^2 \bmod 12$ only takes the values $0, 1, 4, 9$, the rounding becomes an exact integer
+correction with period 12. That makes the sum of the sequence a square-pyramidal number plus a
+linear term, with no float involved. See
 [use exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
 
 The second trap is width, and it is language-shaped. Python's integers are arbitrary-precision, so
-a solution that works in Python can overflow silently the moment it is ported to C — problems 241
-and 251 both need `__int128` or a reduction that keeps intermediates small, and problems 168 and
+a solution that works in Python can overflow silently the moment it is ported to C. Problems 241,
+251, 272 and 276 all need `__int128` or a reduction that keeps intermediates small. In 276 the
+answer itself still fits in 64 bits, but the intermediate $k(k+1)(2k+1)$ does not. Problems 168 and
 321 need [GMP](https://gmplib.org/) outright. The Python version gives no warning that the C
 version is about to be wrong. See [watch integer width](/topics/takeaway/watch-integer-width).
 
@@ -186,6 +244,8 @@ The tells are reasonably reliable:
 | $N \ge 10^{12}$, or "below $2^{50}$" | find a summatory identity; sieve only $\sqrt{N}$ (moves 2–3) |
 | "coprime", "gcd is 1", "squarefree", "exactly $k$ prime factors" | Möbius / inclusion–exclusion over divisors (move 2) |
 | $\lfloor N/d \rfloor$ anywhere in the derived sum | quotient blocking (move 3) |
+| the total is a formula, the question asks for the gcd-1 part | invert over floor quotients, $O(N^{3/4})$ (moves 2–3) |
+| the condition only sees which primes divide $n$ | enumerate the prime part, prefix-sum the cofactors (move 5) |
 | $f$ is multiplicative | build $f$ from prime powers; a sieve exists |
 | the number is too large to write down | work in logs, or modulo whatever the question actually asks for |
 | a ratio, a root, or an equality test | integers only — cross-multiply, `isqrt`, check the width |
@@ -195,7 +255,10 @@ in moves 2 and 3. That is why a rewrite in C rarely rescues a number-theory prob
 representation almost always does. The cost is that each move demands the derivation be right
 before a line is written — a sieve indexed off by one, or a Möbius identity with the wrong bound,
 produces a plausible number rather than an error. Verify on the small case the statement gives you;
-it exists for exactly that reason.
+it exists for exactly that reason. When there is no small case, as in problem 276, make one: a
+brute force for tiny $N$, plus an asymptotic check. Primitive triangles should be about
+$1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that badly. See
+[calibrate theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers).
 
 <!-- problems (generated by update-tags) -->
 ## Problems
