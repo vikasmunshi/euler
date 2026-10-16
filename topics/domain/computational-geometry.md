@@ -1,5 +1,5 @@
 <!-- tags: [computational-geometry] -->
-<!-- status: final 2026-08-06T21:17Z -->
+<!-- status: final -->
 # Computational geometry
 
 [Computational geometry](https://en.wikipedia.org/wiki/Computational_geometry) is what is left of
@@ -8,8 +8,10 @@ recurring move is [reduce before coding](/topics/takeaway/reduce-before-coding):
 object the picture is secretly describing and compute with that instead. The forty-six problems
 here are the ones where that move only gets you halfway. You are handed five thousand segments, or
 fifty thousand cuboids, or thirty-four thousand lattice points, and there is no formula that
-collapses them — you have to *compute on the configuration itself*. The subject is what that costs
-and how to make it exact.
+collapses them — you have to *compute on the configuration itself*. Sometimes the configuration is
+not even given: a rule grows it, or the problem asks for the best one that exists, and then you also
+have to find a representation in which you can build it exactly. The subject is what all of that
+costs and how to make it exact.
 
 ## One primitive does almost all the work
 
@@ -79,7 +81,11 @@ Two habits keep this tractable:
 - **Brute-force the small case.** Every one of these problems ships a worked example, and an
   $O(n^3)$ reference implementation over twenty points will find a sign error that a proof will
   not. Problem 184's sweep was verified exhaustively against the naïve triple loop before being
-  trusted at $r = 105$.
+  trusted at $r = 105$. When the small case is the only evidence for a structural guess, it serves
+  as the proof itself and not just a test (see
+  [calibrate theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers)). Problem
+  983's whole model rests on an exhaustive search over small radii, which showed every perfect set
+  coming in exactly the sizes the model predicts.
 
 ## Integers, or a canonical rational — never a float
 
@@ -103,11 +109,19 @@ Three patterns cover almost every case:
 - **Carry doubled areas.** Polygon areas are half-integers; hold twice the area as an integer
   throughout and halve once at the end. Problem 252's trailing `.5` is exact rather than a rounded
   float because of this.
+- **Pack vectors linearly.** When the question is "does this sum of vectors equal one of those
+  vectors?", encode $(x, y)$ as the single integer $x \cdot 2^{21} + y$. The map is linear, so the
+  key of a sum is the sum of the keys, and while $|y|$ stays well below $2^{20}$ it is also
+  injective. Problem 983 tests thousands of signed vector sums against a set of lattice vectors this
+  way, using a hash table in C and a sorted NumPy array with `searchsorted` in Python, and never
+  builds a tuple.
 
 The cost is that intermediate values grow. Cross products of coordinates near $10^5$ are fine in
 64 bits; sums of $\binom{34608}{3}$-sized counts, or products of numerators, are not. Problem 184
 reaches for `__int128` in C and relies on Python's arbitrary-precision integers on the other side —
-the port's only real asymmetry. [Watch integer width](/topics/takeaway/watch-integer-width) is a
+the port's only real asymmetry. Problem 957 makes the same split. Its count grows like $16^n$, and
+the C port's `__int128` holds it only up to $n = 30$, so the port rejects larger inputs instead of
+wrapping silently. [Watch integer width](/topics/takeaway/watch-integer-width) is a
 standing hazard here, and it is silent when you get it wrong.
 
 ## Four ways out of the quadratic
@@ -155,6 +169,56 @@ chord plus a scaled copy of itself, which gives the integral in closed form and 
 under two hundred interval evaluations. Problem 287's quadtree is the same idea as a data
 structure: describe the region, not the pixels.
 
+## When the configuration is built, not given
+
+In the problems so far the points arrive as input and the degeneracies are hazards to get through.
+In two of the newer ones the configuration is *generated*: a rule grows it, or you have to search
+for an extremal one. The degeneracies then stop being hazards. They become what the problem is
+about, either the thing to avoid or the thing that must not happen. Both problems are solved the
+same way: change coordinates until the plane becomes an integer group, at which point every
+coincidence is an explicit linear relation you can test exactly.
+
+**Incidence only? Then the frame is yours to choose.** Problem 957 starts from three red and two
+blue points, and each day it draws every red–blue line and turns each new crossing blue. Only
+*which points lie on which lines* matters, so the process is invariant under any
+[projective transformation](/topics/technique/projective-transformation)
+([projective geometry](/topics/domain/projective-geometry)). Sending the three red points to the
+coordinate vertices turns their three pencils into the lines $y = c$, $x = c$ and $x/y = c$. A
+[logarithm](/topics/technique/logarithm) then turns them into three families of *parallel* lines,
+$u = c$, $v = c$ and $u - v = c$. A point turns blue exactly when two of its three coordinates are
+already present among the blue points, and the
+[concurrent](/topics/technique/concurrent-lines) triples drop out by
+[inclusion–exclusion](/topics/technique/inclusion-exclusion-principle). "Maximal" means general
+position: every coincidence that geometry does not force has to be absent. The exact way to model
+that is to give the second blue point multiplicatively independent coordinates, so the reachable
+values form the free group $\mathbb{Z}^2$ and the process becomes sumsets of integer sets. Random
+float coordinates would only make accidental coincidences unlikely. The sets grow about fourfold a
+day, so an exact simulation stops long before the target day. It still produces enough terms for the
+[Berlekamp–Massey algorithm](/topics/technique/berlekamp-massey-algorithm) to find a
+constant-coefficient recurrence and confirm it on the terms it was not fitted to. The final program
+evaluates the resulting [closed form](/topics/takeaway/small-cases-reveal-closed-form) in $O(1)$.
+
+**The degeneracies *are* the constraint.** Problem 983 asks for equal circles on lattice centres
+that meet in lattice points, with as few distinct intersection points as there are circles. Each
+circle–point incidence is a lattice vector of norm $N = r^2$, so the
+[sum of two squares theorem](/topics/domain/sum-of-two-squares-theorem) lists the candidates. Two
+circles harmonise when their centres differ by $u + v$ with $v \ne \pm u$, and they are tangent when
+the centres differ by $2u$. The worked example contains the structure that matters: a
+[hypercube](/topics/domain/hypercube-graph) projected into the plane. Choose $K$ vectors; their
+even-weight subset sums are centres and their odd-weight sums are intersection points. The cube
+fails exactly when some signed sum $\sum \delta_i a_i$ with $\delta \in \{-1, 0, 1\}^K$ equals $0$,
+$2u$ or a stray $u + v$. Validity is therefore the *absence of forbidden linear relations*, and a
+[backtracking](/topics/technique/backtracking) search can carry the table of all $3^k$ signed sums
+of its partial choice and kill a branch the moment a relation appears.
+[Symmetry](/topics/takeaway/exploit-symmetry) then removes most of the sign choices. Flipping two
+signs only translates the cube, and flipping one swaps centres with intersection points, so only two
+signings out of $2^{K-1}$ ever need the expensive exact test.
+
+The two problems turn the degeneracy discussion around. Problems 102–252 must *survive* collinear
+triples. Problem 957 must *rule out* every coincidence that is not forced, and problem 983 must
+*rule out* a specific list of them. In both, the work is finding the group in which "these points
+coincide" is an equation over integers.
+
 ## When the answer really is a real number
 
 A minority of these problems are genuinely continuous — an area, a crossing time, a threshold index
@@ -189,7 +253,11 @@ Mixing them is how a provably correct algorithm returns a wrong count.
   in this domain are off by exactly the degenerate cases.
 - **Assume the degeneracies are present.** Lattice inputs guarantee collinear triples and shared
   rays. A pseudo-random generator over a small range guarantees coincident points. Handle them by
-  construction, not by hoping.
+  construction, not by hoping. When the problem asks for the *maximum*, the opposite holds and
+  general position is what you want. Model it exactly with independent generators, not with random
+  coordinates.
+- **Choose the frame when only incidence matters.** A projective map, a logarithm or a lattice
+  basis can turn a picture into integer arithmetic in which every coincidence is a linear relation.
 - **Sort, then sweep.** Angular order is the preprocessing that turns pair enumeration into a
   linear pass, and it is what makes the two-pointer and prefix-maximum tricks legal.
 - **Exploit locality before cleverness.** If objects are small relative to the space, a grid bucket
