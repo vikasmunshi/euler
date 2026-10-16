@@ -1,11 +1,12 @@
 <!-- tags: [counting] -->
-<!-- status: final 2026-08-12T00:57Z -->
+<!-- status: final -->
 # Counting
 
 [Counting](https://en.wikipedia.org/wiki/Counting) is the plainest question in the archive — *how
 many?* — and the answer is always a single integer. The problems carrying this tag have almost
 nothing else in common: dart checkouts, lattice triangles, squarefree integers, words over a
-four-letter alphabet, rolls of twenty dice, grids of digits. About two thirds of them also carry
+four-letter alphabet, rolls of twenty dice, grids of digits, opening positions of a two-player game.
+About two thirds of them also carry
 [combinatorics](/topics/domain/combinatorics); the rest count number-theoretic or geometric objects
 — solutions of a Diophantine equation, integers with a given factorisation shape, triangles with
 integral coordinates. What unites them is not the subject but the predicament: **you are asked for
@@ -130,6 +131,30 @@ top half by its interface, then look up each bottom half's complement. That is
 [meet in the middle](/topics/technique/meet-in-the-middle-attack): $O(|R|^2)$ instead of
 $O(|R|^4)$, bought with memory.
 
+## When the predicate is an equality, count collisions
+
+Many counts ask how many tuples satisfy $f(\text{left}) = f(\text{right})$. Then you never need the
+tuples: group each side by its value $v$, let $M(v)$ be the size of each group, and the count is
+$\sum_v M(v)^2$ — or $\sum_v M_L(v)\,M_R(v)$ when the two sides differ. The whole cost moves from
+the number of tuples to the number of **distinct values**, and the hard work becomes finding a key
+that makes "equal" checkable by comparing keys.
+
+Problem 963 is the extreme case. It counts the *fair* openings of a two-player game played on four
+numbers up to $10^5$ — two on each player's paper — where fair means the player to move loses.
+[Combinatorial game theory](/topics/domain/combinatorial-game-theory) turns that into an equality:
+the position is the sum of four independent single-number games, the opponent's paper enters
+negated, and the first player loses exactly when the sum is zero — so fair means
+$G(a_1) + G(a_2) = G(b_1) + G(b_2)$. The game values themselves are exotic (numbers plus
+infinitesimals such as $*$ and $\uparrow$), but only about three thousand distinct ones occur, and
+each can be written as a short integer vector so that game addition becomes vector addition. From
+there it is the collision count: tally the unordered pair sums $M(v)$, square, add. Nothing about
+$10^{20}$ quadruples is ever touched — the work is quadratic in the three thousand values, and
+grouping them first by their infinitesimal part keeps each tally small.
+
+The lesson generalises past games: when the predicate is an equality, look for the **invariant** —
+the coarsest key that still decides it — before you look for an algorithm. See
+[split inputs into behaviour classes](/topics/takeaway/split-inputs-into-behaviour-classes).
+
 ## Getting the number right
 
 Counting fails silently. There is no exception, no crash, no wrong type — just a number that is a
@@ -138,11 +163,18 @@ factor of two off, and nothing to tell you. Three habits catch nearly all of it.
 **Use the statement's small case as a test.** Every counting problem here ships one: eleven ways to
 check out on 6, forty-one laminae from a hundred tiles, 1111 rolls of five dice. Put it in
 `test_cases.json` before writing the real input. It is the only cheap oracle you will get, and it
-catches double counting and off-by-one immediately.
+catches double counting and off-by-one immediately. When the fast method rests on a pattern you
+fitted rather than proved, keep the slow reference around and widen the check: problem 963's closed
+form for its game values came from a small canonical-form engine, which reproduced $F(5) = 21$ by
+brute force and then confirmed the formula for every number up to $10^6$ — ten times past the input
+— before the formula was trusted
+([calibrate theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers)).
 
 **Decide explicitly when two objects are the same.** Is order significant? Problem 240's statement
 spells out that two rolls with the same multiset count separately; problem 109's does the opposite
 for the two free darts, while keeping the finishing dart ordered — one problem, both conventions.
+Problem 963 mixes them the same way: the two numbers on a paper are unordered, the two papers are
+not, so a value paired with itself contributes $w(w+1)/2$ pairs, not $w^2$.
 Then check the generation itself: a canonical order ($p < q$, $t \ge 1$) is what turns "I think I
 counted each once" into a proof.
 
