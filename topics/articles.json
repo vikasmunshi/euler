@@ -5768,12 +5768,12 @@
       "path": "technique/gmp",
       "title": "GMP",
       "status": "final",
-      "written": "2026-07-31T19:49Z",
+      "written": "2026-10-16T15:15Z",
       "solved": 12,
       "problems": 12,
       "tags": ["gmp"],
       "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0"],
-      "solved_after": ["p0254"]
+      "solved_after": []
     },
     {
       "path": "technique/golden-section-search",
