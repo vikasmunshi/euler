@@ -1,5 +1,5 @@
 <!-- tags: [binary-search-algorithm] -->
-<!-- status: final 2026-08-12T02:37Z -->
+<!-- status: final -->
 # Binary search algorithm
 
 [Binary search](https://en.wikipedia.org/wiki/Binary_search_algorithm) is the first non-trivial
@@ -66,6 +66,7 @@ monotone predicate over the integers (or the reals) and a cheap way to evaluate 
 | 80 | the integer $x$ | $x^2$ against the scaled radicand |
 | 156 | $n$ over $[0, 10^{12}]$ | $f(n,d)$, the digit-$d$ tally, non-decreasing in $n$ |
 | 235 | the real ratio $r$ | the closed-form partial sum $s(5000)$, strictly falling |
+| 305 | the integer $N$ of the concatenation | $C(N)$, occurrences of a digit string starting inside $1..N$, non-decreasing |
 | 587 | the count $n$ of circles | the area ratio $\rho(n)$, strictly falling |
 | 686 | the index $J$ | $\mathrm{count}(J)$, the hits so far, non-decreasing |
 | 800 | the prime index $j$ | $q\ln p + p\ln q$, increasing in its larger argument |
@@ -81,6 +82,31 @@ $\mathrm{count}$ is non-decreasing, binary search finds the smallest $J$ reachin
 logarithmic factor. The whole solve is $O(\log^2 n)$ — a few thousand big-integer operations,
 regardless of how large the answer is.
 
+Problem 686's search lands on the answer directly, because each index holds at most one hit. When
+the axis is coarser than the thing you are counting, the search finds a **bucket**, and the counting
+function finds the rank inside it. Problem 305 wants the position of the $n$-th occurrence of
+$\text{str}(n)$ in the Champernowne digit stream $123456789101112\ldots$, which for a 7-digit pattern
+lies around digit $10^{12}$. It does not bisect over digit positions. It bisects over the *integers*
+being concatenated, with $C(N)$ the number of occurrences that start inside one of $1..N$. The
+smallest $N$ with $C(N) \ge n$ is the integer the wanted occurrence starts in, and
+$n - C(N-1)$ says which of the few occurrences starting there it is. That residue is resolved by
+scanning a few dozen characters, not by a second search:
+
+```python
+rank = n - count(hi - 1)        # which occurrence inside integer hi
+```
+
+Choosing the integer as the axis is what makes $C$ cheap. Counted per integer, every occurrence
+either sits wholly inside one integer or crosses a boundary, and both classes reduce to closed forms
+in the digits of $N$ (the crossing class through a congruence on the next integer). Counted per digit
+position, there is no structure to exploit. The general move is **invert a counting function**: when
+you want the $n$-th item, binary search the smallest prefix whose count reaches $n$, then subtract to
+get the rank. And choose the prefix's unit so that the count has a formula. There is one more lesson
+in 305. The few occurrences that swallow a short integer whole do not fit either formula, so the
+solution enumerates those $O(L^2)$ candidates once, before the search starts, and folds them into
+every $C(N)$ as a fixed list. Fix the irregular cases up front, so that the predicate the loop calls
+stays a pure formula.
+
 Note that the evaluator is usually the hard part and the search is the easy part. Once problem 587
 has a closed form for $\rho(n)$, "find the least $n$ with $\rho(n) \le p$" is thirty lines of
 bisection over `long long`. Getting the closed form took an integral.
@@ -91,14 +117,16 @@ Textbook binary search is handed both ends. Real ones usually know only that the
 *somewhere above here*, which is why several of these solutions bracket before they bisect: start
 from a known-safe `lo`, double `hi` until the predicate flips, then halve.
 [Exponential search](https://en.wikipedia.org/wiki/Exponential_search) is the standard name; problems
-587, 686 and 235 all do it.
+587, 686, 235 and 305 all do it.
 
 Doubling costs another $O(\log)$ — asymptotically free — and it buys something better than speed:
 the bound becomes **proved** rather than guessed. A hand-picked ceiling is a silent correctness
 risk, because a binary search over an interval that does not contain the answer returns an endpoint
 with total confidence. Problem 686 illustrates the discipline: it *estimates* the ceiling from the
 density of hits ($\approx 1/L$ per index), then doubles until $\mathrm{count}(hi) \ge n$ before
-trusting it. The estimate makes the doubling short; the doubling makes the estimate safe.
+trusting it. The estimate makes the doubling short; the doubling makes the estimate safe. Problem
+305 skips the estimate entirely and doubles from `hi = 1`. Each $C(N)$ costs only $O(L^2)$
+arithmetic, so the forty-odd extra evaluations are cheaper than deriving a density bound would be.
 
 Problem 156 is the same instinct applied in reverse, and worth studying as the general form. It
 wants *every* fixed point of $f(n,d) = n$, not the single crossing of a threshold, so there is no
@@ -192,11 +220,12 @@ more cheaply than you can enumerate it. Then, in order:
 2. **Prove the monotonicity** on that axis — not on the quantity the problem talks about. This is
    where wrong answers come from, and it costs one paragraph of thought.
 3. **Make the evaluator cheap.** A closed form, a floor-sum recursion, a prefix-sum lookup. The
-   search contributes $\log$; the evaluator sets the constant.
+   search contributes $\log$; the evaluator sets the constant. If you want the $n$-th item, the
+   evaluator is a count, and the axis is whatever unit makes that count a formula.
 4. **Bracket by doubling** rather than guessing a ceiling, so the interval provably contains the
    answer.
 5. **State the invariant in the loop**, halt on `hi - lo > 1`, and return the endpoint the invariant
-   names.
+   names. If that endpoint is a bucket, get the rank inside it by subtraction, $n - C(hi - 1)$.
 6. **Check the neighbours** if the question was "nearest" rather than "equal".
 7. **Then ask whether you need it at all** — sorted queries want two pointers, structured keys want
    direct indexing.
