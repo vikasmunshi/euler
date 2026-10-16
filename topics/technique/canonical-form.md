@@ -1,5 +1,5 @@
 <!-- tags: [canonical-form] -->
-<!-- status: final 2026-08-11T03:16Z -->
+<!-- status: final -->
 # Canonical form
 
 A [canonical form](https://en.wikipedia.org/wiki/Canonical_form) is one chosen representative for
@@ -29,7 +29,7 @@ confirmed by a real comparison. Adding **completeness** (equal keys $\Rightarrow
 makes it a canonical form and lets you skip the confirmation entirely. Every use below is complete;
 that is the point of the effort.
 
-Five shapes cover the problems on this page.
+Six shapes cover the problems on this page.
 
 **Sort the parts.** When the relation is "same multiset", sorting *is* the canonicalisation.
 Problem 52 asks for the smallest $x$ whose first six multiples are digit permutations of one another,
@@ -76,7 +76,15 @@ counts quadrilaterals up to similarity, where relabelling the vertices generates
 eight relabellings of each accepted angle tuple and keeps the lexicographically smallest. Problem 68
 shows the alternative, and the better one where it is available: rather than generating duplicates
 and folding them afterwards, it *pins* the smallest free value at position 0 during generation, so no
-two rotations of a ring are ever produced in the first place.
+two rotations of a ring are ever produced in the first place. Problem 265 takes pinning as far as
+it goes. Its circles of $2^N$ bits, each $N$-bit window distinct, are binary
+[de Bruijn sequences](https://en.wikipedia.org/wiki/De_Bruijn_sequence), and the statement already
+names a representative: read each circle from the rotation that gives the smallest number. That
+rotation starts at the all-zeros window, and the all-zeros window appears in each circle *exactly
+once*. A landmark that occurs once is the ideal anchor. You never compare rotations at all; you
+start the search with $N$ zeros already written, and every string it finishes is already in
+canonical form. When the objects do not come with a unique feature, the minimum over the orbit is
+the fallback, and you pay for computing it.
 
 **Encode a state.** In the [state-space searches](/topics/technique/breadth-first-search) the
 canonical form is the visited-set key, and it must be exact in both directions — one integer per
@@ -88,6 +96,26 @@ That collapse is not an optimisation — it is the reason the problem is searcha
 is the same move at the level of the answer: numbers with the same digit multiset share the value of
 $f$, so the search runs over multisets, and the smallest number realising one is that multiset
 written in ascending order.
+
+**Coordinates that respect the operation.** Most keys only answer "are these two equal?". Problem
+963 needs a key that can also be *added*. Each of four ternary numbers is a partisan
+[game](/topics/domain/combinatorial-game-theory), the
+position is their [disjunctive sum](https://en.wikipedia.org/wiki/Disjunctive_sum), and a setting
+is fair exactly when $G(a_1) + G(a_2) = G(b_1) + G(b_2)$. Game equality has a canonical form of its
+own: delete the dominated options, bypass the reversible ones, and
+equal games become the identical game tree. The solution uses a small engine of exactly that kind,
+but only to discover a pattern, then
+[checks the closed form against it](/topics/takeaway/calibrate-theory-on-known-answers) far past the
+input size.
+Every value it produced turned out to be a number plus a combination of independent
+infinitesimals, $q + s\,{*} + \sum_k c_k \uparrow^k$, and a closed form read straight off the
+trits gives the vector $(q, s, c_1, c_2, \dots)$. Because the generators are independent, that
+vector is a complete key. Because it is a coordinate vector, the key of a sum is the sum of the
+keys (with the star parity xored). So "count the pairs whose sums are equal" becomes grouping
+vector sums in a dict, and no game tree is ever built at the real input size. The
+lesson generalises: when the question is about sums, products or composites of the objects, look
+for a canonical form that is a [homomorphism](https://en.wikipedia.org/wiki/Homomorphism), and
+compute the composite's key from the parts' keys instead of canonicalising the composite.
 
 One variant is worth separating out. Problem 54's `HandRank` — a `(category, tie-breakers)` pair with
 tie-breakers ordered most-significant first — is a canonical form for *comparison* rather than
@@ -102,8 +130,10 @@ a partition.
   and the gap is an equivalence relation. Name it before you write the loop.
 - **Prefer not generating duplicates to removing them.** Canonicalising an orbit costs $|G|$ work per
   object and you paid to generate the duplicates first. If a constraint can be pinned during
-  generation — problem 68's smallest node first, problem 254's digits in ascending order — the
-  canonical form becomes an invariant of the search rather than a filter on its output.
+  generation — problem 68's smallest node first, problem 265's leading zeros, problem 254's digits
+  in ascending order — the canonical form becomes an invariant of the search rather than a filter
+  on its output. Look for a feature that occurs exactly once in each object. If there is one, anchor
+  on it and the pinning costs nothing.
 - **Choose the cheapest key that is still complete.** Sorting $d$ digits into a string is
   $O(d \log d)$; a ten-element digit-frequency count is $O(d)$ and just as exact. When a grouping is
   the bottleneck, look at the key before you look at the table.
@@ -122,7 +152,10 @@ a partition.
   In C nothing enforces it and there are no composite keys at all, so the same signature is serialised
   into a string (problem 29 writes `"2:6,5:3"`) or packed into a single integer (problem 244's board).
   Packing is much the better option when the state is small and bounded: it makes the key an array
-  index and removes the [hash table](/topics/technique/hash-table) from the problem entirely.
+  index and removes the [hash table](/topics/technique/hash-table) from the problem entirely. A
+  packed key can carry arithmetic as well. Problem 963 stores its $c_k$ coefficients in 5-bit fields
+  that are wide enough never to overflow under one addition, so adding two keys is a single integer
+  `+`, and only the star bit needs separate handling with xor.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
