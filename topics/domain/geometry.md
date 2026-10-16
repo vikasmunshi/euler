@@ -1,11 +1,11 @@
 <!-- tags: [geometry] -->
-<!-- status: final 2026-08-02T16:55Z -->
+<!-- status: final -->
 # Geometry
 
 [Geometry](https://en.wikipedia.org/wiki/Geometry) is the mathematics of shape, size, position and
 space. Seventy-one problems here carry the tag, and they look wildly unalike — a spider crossing a
-cuboid, a laser rattling around an ellipse, twenty-one balls stacked in a pipe, a diagonal slicing
-the corner of a rectangle. What they share is not a technique but a *posture*: **the figure is
+cuboid, a laser rattling around an ellipse, twenty-one balls stacked in a pipe, squares packed
+greedily under a hyperbola, a runner chasing a swimmer round the edge of a hexagonal pool. What they share is not a technique but a *posture*: **the figure is
 never the answer.** You are asked for a count, a length, an extremum or a threshold index, and the
 drawing is only the statement of the constraint. The work is finding the algebraic object that the
 picture is secretly describing, and then computing with that instead.
@@ -66,7 +66,7 @@ of parametrisation — turns your irrational constants into integers.
 
 ## Exact where it must be, floating where it may
 
-This is the domain's sharpest hazard, and it splits cleanly in two.
+This is the domain's sharpest hazard. It splits into two clean cases, plus a third that sits between them.
 
 **If a predicate decides membership, get to integers.** Any test of the form "is this a perfect
 square", "do these three lines meet inside the region", "is this angle exactly right" must not be
@@ -103,6 +103,20 @@ uses the tolerance the statement itself grants; 587 evaluates a closed form rath
 numerically. The discipline is the same in each — do the algebra symbolically, then evaluate once.
 See [floating-point arithmetic](/topics/technique/floating-point-arithmetic).
 
+**If a discrete answer rests on real comparisons, make them agree with each other.** Problem 247
+breaks the clean split. Squares are packed greedily under $y = 1/x$, and the answer is a *rank*: a
+count of the squares at least as large as a given one. That is an integer, but it is decided by
+comparing millions of nearly equal real side lengths, each the root of $(x + s)(y + s) = 1$ with
+nested square roots in its corner, so there are no integers to retreat to. Two choices make plain
+`double` correct anyway. First, how the root is written. The textbook form
+$s = \bigl(\sqrt{(x-y)^2 + 4} - (x+y)\bigr)/2$ subtracts two nearly equal numbers once $x$ is large,
+which is [catastrophic cancellation](/topics/technique/catastrophic-cancellation). The equivalent
+$s = 2(1 - xy)/\bigl((x+y) + \sqrt{(x-y)^2 + 4}\bigr)$ adds them instead and keeps every digit
+([rearrange to avoid cancellation](/topics/takeaway/rearrange-to-avoid-cancellation)). Second, the
+threshold is computed along the same sequence of operations that the counting walk later repeats,
+so the two values are bit-for-bit identical and a plain `<` puts the boundary square on the right
+side with no epsilon. Comparisons do not need exact values; they need values computed the same way.
+
 ## The four shapes these problems take
 
 Reading across the list, nearly every problem is one of four kinds, and knowing which you are in
@@ -126,12 +140,31 @@ decisive step is proving a *structural* property before choosing an algorithm. P
 function is concave in the neighbouring radii, which forces the optimal stack into a valley — the
 smallest ball in the middle — and that shape is exactly what makes an $O(n^2)$
 [dynamic programme](/topics/technique/dynamic-programming) over the two chain ends correct rather
-than merely plausible. Convexity, concavity or monotonicity is the licence for bisection or DP;
-without it you are guessing.
+than merely plausible. Problem 247's greedy packing has a structural property of a different kind:
+each square splits what it leaves behind into exactly two regions of the *same shape* as the
+original, one to its right and one above it, each described entirely by its corner. So the packing
+is a [binary tree](/topics/domain/binary-tree), and a square's index is the count of right and up
+steps on its path. Sides shrink down every branch, so a
+[depth-first search](/topics/technique/depth-first-search) can drop a whole subtree as soon as it
+falls below the threshold, and it never has to sort anything. Convexity, concavity, monotonicity or
+self-similarity is the licence for bisection, DP or pruning; without it you are guessing.
 
-**Simulation of a process.** Reflections, rolling, rotation, motion. The trap is re-deriving the
-state from scratch each step. Solve one step in closed form, verify it is exact, and iterate;
-if the process is periodic, find the period instead of running it out.
+**Motion — simulated or played.** Reflections, rolling, rotation, pursuit. When the motion is a
+process, the trap is re-deriving the state from scratch each step. Solve one step in closed form,
+verify it is exact, and iterate; if the process is periodic, find the period instead of running it
+out. When the motion is a [differential game](/topics/domain/differential-game), as in problem 761
+(a swimmer trying to leave a pool before the runner on its edge reaches her landing point), you do
+not simulate at all. The payoff does not depend on position, so optimal play is straight dashes at
+full speed. The best landing point obeys a refraction rule much like
+[Snell's law](https://en.wikipedia.org/wiki/Snell%27s_law): the swimmer meets the edge at angle
+$\arcsin(1/v)$ from the normal. The question then becomes a static one about shape: is there a
+central convex region where the runner is safe wherever he stands? The critical speed is the
+smallest $v$ at which such a region exists. For the circle that region is a disk, and the answer is
+the classical tangent escape, $\tan\theta = \theta + \pi$. For polygons it is a smaller copy of the
+pool sharing its symmetry, so checking one vertex and one side covers all of them. The search over
+its size uses [golden-section search](/topics/technique/golden-section-search), and the root in $v$
+uses [regula falsi](/topics/technique/regula-falsi), because the slack is close to linear in $v$
+near the root.
 
 ## How to reason about it
 
@@ -146,13 +179,18 @@ if the process is periodic, find the period instead of running it out.
   point above or below; case by case. Splitting into disjoint, individually easy cases beats one
   unified expensive search.
 - **Decide the arithmetic régime before the first line.** Discrete predicate → integers, exactly;
-  continuous answer → closed form evaluated once, with a stated tolerance. Mixing them is how a
-  correct algorithm returns a wrong count.
+  continuous answer → closed form evaluated once, with a stated tolerance; a count over real
+  comparisons → cancellation-free formulas, with every compared value computed the same way.
+  Mixing them is how a correct algorithm returns a wrong count.
 - **Establish monotonicity or convexity before choosing the search.** It is what turns "find the
   least $n$" into a bisection and "find the best arrangement" into a DP.
 - **Check the small case in the statement.** Every one of these problems hands you a worked example.
   A reduction that reproduces it is probably right; one that doesn't is wrong now rather than after
-  an hour of runtime.
+  an hour of runtime. Problem 761 gives two known answers, for the circle and the square, before
+  asking for the hexagon, and they show the right order of work: the criterion was accepted only once
+  it matched both to all eight digits, *then* applied to the hexagon. The code searches for the core
+  shape instead of hard-coding one shape's algebra, so the extra polygons act as more checks
+  ([calibrate theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers)).
 
 <!-- problems (generated by update-tags) -->
 ## Problems
