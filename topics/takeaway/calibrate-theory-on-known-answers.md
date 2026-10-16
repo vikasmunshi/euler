@@ -1,15 +1,16 @@
 <!-- tags: [calibrate-theory-on-known-answers] -->
-<!-- status: final 2026-10-12T14:23Z -->
+<!-- status: final -->
 # Calibrate a theory on the known answers
 
 Some problems are mostly argument. The code at the end is short, but it encodes a claim that is
 hard to prove and easy to get slightly wrong: a game's values are all numbers, an optimal
-configuration has a particular shape, a pursuit game is decided by a particular inequality. For
+configuration has a particular shape, a pursuit game is decided by a particular inequality, a
+greedy process can be run backwards one-to-one. For
 those problems the statement's worked examples are the most valuable thing on the page. They are
 answers computed by someone who already solved it, so they make a free and independent test
 suite. The rule this page describes is simple to state. Before trusting a theory on the unknown
 case, **make it reproduce every given value exactly**, and where the givens are thin, make your
-own with a brute force. All four problems below were finished that way. In each one, the step
+own with a brute force. Every problem below was finished that way. In each one, the step
 from "plausible" to "correct" was a check against a known answer, not a proof.
 
 ## The idea: known answers test the method, not the number
@@ -35,6 +36,28 @@ calibration:
   the record of how the theory was earned.
 
 ## How the problems use it
+
+**Problem 265** shows the habit at its cheapest. The statement asks for circles of $2^N$ bits
+whose $N$-bit windows are all distinct, and gives only $S(3) = 52$. The theory is a reduction:
+such a circle is a binary [de Bruijn sequence](https://en.wikipedia.org/wiki/De_Bruijn_sequence),
+and starting the encoding at the all-zeros window is a
+[canonical form](/topics/technique/canonical-form) that removes rotations, so a backtracking
+search only has to build strings with that prefix. Both steps are standard, and both are easy to
+get subtly wrong at the seam where the circle closes. One given value is thin, so a brute force
+that tests every prefixed integer directly made a second one, $S(4)$, in seconds. The search had
+to match both before I ran it on $N = 5$. The literature supplies a third check for free: the
+number of sequences the search finds must equal the known count $2^{2^{N-1}-N}$.
+
+**Problem 336** asks for the $k$-th lexicographic "maximix" arrangement: a permutation of
+carriages that a fixed greedy suffix-reversal routine takes the most steps to sort. Rather than
+filter all $n!$ permutations, I ran the deterministic routine backwards and argued that each
+sequence of choices yields a distinct maximix arrangement. That claim predicts there are exactly
+$(n-2)!$ of them. The statement gives three independent checks: the two arrangements for four
+carriages, the count of $24$ for six, and the tenth of those. The construction matched all
+three. They are still only three samples, so a brute force simulated the greedy routine on every
+permutation for $n = 3, \dots, 9$, kept those with the worst step count, and compared the
+*whole sorted set* with the construction's. They agreed at every size, and the counts
+$1, 2, 6, \dots, 5040$ confirmed the $(n-2)!$ formula along the way.
 
 **Problem 761** is a pursuit game in a pool: a swimmer tries to reach the edge before a runner
 on the edge can get there. The statement gives the critical runner speed for a circular pool and
@@ -79,6 +102,15 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - **Check the claim, not just the output.** In 882 the assertion "every node has
   $\max L < \min R$" is a direct test of the hypothesis. An end-to-end match only shows that it
   held on the inputs tried. Assert the intermediate claim wherever you can.
+- **Build the oracle from the statement, not from the theory.** A brute force that reuses the
+  theory's own characterisation will agree with it, mistakes included. In 336 the oracle never
+  sees the "carriage strictly inside the suffix" condition the construction rests on. It just
+  runs Simon's routine and takes the maximum step count, as the statement defines it. 983's final
+  check is independent of the cube model for the same reason.
+- **Compare the whole object when you can.** A count or a single ranked element can match by
+  luck. A whole set cannot. 336 compares every arrangement for each $n$, not just the one that
+  gets asked about, and a derived count such as $(n-2)!$ or 265's $2^{2^{N-1}-N}$ is a cheap
+  extra check that comes with the set.
 - **Hold some checks back.** A pattern fitted on a range of brute-force values proves nothing on
   that range. Verify it on inputs the fit never saw, as 963 did up to $10^6$. The sister takeaway,
   [small cases reveal the recurrence](/topics/takeaway/small-cases-reveal-recurrence), makes the
