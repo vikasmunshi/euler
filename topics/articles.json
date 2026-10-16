@@ -5119,12 +5119,12 @@
       "path": "technique/digit-dp",
       "title": "Digit DP",
       "status": "final",
-      "written": "2026-08-12T07:25Z",
+      "written": "2026-10-16T15:10Z",
       "solved": 14,
       "problems": 14,
       "tags": ["digit-dp"],
       "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0301_s0", "p0529_s0", "p0725_s0", "p0845_s0", "p0974_s0", "p1000_s0"],
-      "solved_after": ["p0529"]
+      "solved_after": []
     },
     {
       "path": "technique/dijkstras-algorithm",
