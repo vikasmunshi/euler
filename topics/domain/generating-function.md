@@ -1,5 +1,5 @@
 <!-- tags: [generating-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:10Z -->
 # Generating function
 
 A [generating function](https://en.wikipedia.org/wiki/Generating_function) is a whole infinite
