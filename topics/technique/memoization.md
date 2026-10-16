@@ -1,5 +1,5 @@
 <!-- tags: [memoization] -->
-<!-- status: final 2026-08-12T04:59Z -->
+<!-- status: final -->
 # Memoization
 
 [Memoization](https://en.wikipedia.org/wiki/Memoization) is the substitution of a table lookup for a
@@ -58,6 +58,19 @@ quadratic-looking sweep into a linear one.
 constantly; problem 21 memoises the $O(\sqrt n)$ proper-divisor sum because amicability asks for
 $d(d(x))$ and so queries each value roughly twice. Here the cache is not the algorithm, only a way
 of not repeating yourself.
+
+**A self-similar tree.** Problem 943 is the extreme case of the opening sentence. It asks for prefix
+sums of a two-symbol [Kolakoski](https://en.wikipedia.org/wiki/Kolakoski_sequence)-style sequence
+whose run lengths are the sequence itself. Read backwards, each element is the parent of the run it
+describes, so the first $2.2 \times 10^{13}$ terms are the leaves of a derivation tree only a few
+dozen levels deep. The tree is far too big to walk, but most of its subtrees have the same shape,
+so the memo is keyed on the subtree. The first key that comes to mind, (value, height), is not
+enough. A node's children take their symbol from the parity of the node's *position*, and that
+parity depends on everything to its left. The key that actually fixes a subtree adds a bitmask of
+those parities, one bit per level. With it, the distinct keys peak near
+$N^{\log 2 / \log(a+b)}$: a few million for the densest pair and a few dozen once $a+b$ is in the
+hundreds. That is roughly $10^{13}$ leaves served from $10^6$ table entries, and the answer becomes
+one root-to-leaf descent that adds up the cached totals of every whole subtree to the left.
 
 ## Four ways to write the table
 
@@ -119,6 +132,13 @@ memoization strategy: index 0 stores one integer per node — the chain length �
 store the whole tail *list*. Identical asymptotics, and `0.914 s` against `2.53 s` and `2.57 s`,
 with memory in a worse ratio still. Cache the number you need, not the objects it was derived from;
 if the cached value is bigger than the computation that made it, the table has become the cost.
+The exception proves the rule. Problem 943 *does* cache lists: for each run of same-valued
+siblings it stores prefix sums of their counts and totals, plus the point where their mask sequence
+starts to cycle. It does this because the questions that follow are "the first $k$ of them" for many
+different $k$. A run up to 223 long would otherwise be re-walked on every query; with the stored
+prefix and its period, each query is answered in $O(1)$ by counting whole periods. Storing a
+structure is right when it answers a whole family of later queries. It is wrong when it only holds
+one value, more expensively than a number would.
 
 **Caching what is cheaper to recompute.** A cache hit is a hash, a probe and a function-call frame.
 Problem 78 memoises `pentagonal(x)`, which is `x * (3 * x - 1) // 2` — two arithmetic operations,
@@ -136,7 +156,12 @@ sidestep the question entirely by defining the memoised function as a
 [closure](/topics/technique/closure-computer-programming) inside `solve()`, which is both honest and
 correct — a closure's results depend on what it captured, so a cache that outlives the capture can
 answer a later call with a value computed under a different bound. Build the cache where the input
-lives.
+lives. Problem 943 shows the same rule at a finer grain. Its key leaves out the pair $(a, b)$, so the
+memo is valid for one pair only, and the Python solution rebuilds it inside the per-pair function,
+roughly fifty thousand times per call. The C port does not free and reallocate fifty thousand
+tables. It stamps every slot with a generation counter and bumps the counter between pairs, so a
+slot from an earlier pair reads as empty. That invalidates the whole cache in $O(1)$ with no clearing
+pass.
 
 ## How to reason about it
 
@@ -145,7 +170,9 @@ lives.
 - **Choosing the arguments is choosing the state.** Every parameter joins the key: a redundant one
   multiplies the table, a missing one is a correctness bug, and two spellings of the same state
   ([canonical form](/topics/technique/canonical-form) — an unsorted tuple, `1` versus `1.0`) split
-  entries that should have merged.
+  entries that should have merged. To find the key, ask what *fixes* the result, not what
+  describes it. Problem 943's subtrees look like they depend on (value, height), but they actually
+  depend on a parity mask as well.
 - **Prefer an array when the keys are small integers.** A `dict` is the general answer; an indexed
   array is the fast one, and in C it is usually the only one you get without writing a hash table
   yourself.
