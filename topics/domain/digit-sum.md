@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum] -->
-<!-- status: final 2026-08-11T03:07Z -->
+<!-- status: final -->
 # Digit sum
 
 The [digit sum](https://en.wikipedia.org/wiki/Digit_sum) $s(n)$ — add up the decimal digits and stop
@@ -27,6 +27,12 @@ per-factor digital roots are never computed by summing digits at all, which turn
 a divisor-sieve DP into one modulo. In base $b$ the statement generalises to $s_b(n) \equiv n
 \pmod{b-1}$, so the trick is about the base, not about ten.
 
+The closed form gives you the *destination*, not the route. Problem 315 feeds primes to
+[seven-segment](/topics/domain/seven-segment-display) "digital root clocks" that display every
+intermediate value of $p \to s(p) \to s(s(p)) \to \dots$, and charges for the segments switched
+between consecutive displays — so the whole chain matters and $1 + (p-1) \bmod 9$ is of no use. What
+rescues it is the next section's property: only the first step is expensive.
+
 Addition is where the structure stops. Carrying moves $10$ into $1$, losing $9$ each time:
 
 $$s(a + b) = s(a) + s(b) - 9c,$$
@@ -52,6 +58,13 @@ most $81d$, the digit-factorial sum at most $9! \cdot d$. So the value of $s$ is
 *state*: for the twenty-digit range of problem 171 there are $10^{20}$ numbers but fewer than $1621$
 distinct digit-square sums, and for the seventeen-digit range of problem 845 fewer than $154$ digit
 sums. A hopeless enumeration becomes a table you can index.
+
+The same bound makes *iterating* $s$ cheap after one application. Below $10^{10}$, $s(n) \le 90$, so
+everything downstream of the first digit sum is a function on $\{1, \dots, 90\}$ and can be
+[tabulated](/topics/technique/lookup-table) once. Problem 315 goes one better: the two-digit $s(p)$,
+right-aligned under $p$, only ever meets $p$'s last two digits, so each prime's contribution is a
+function of the pair $(p \bmod 100,\ s(p))$ — a few thousand table entries — and the per-prime work
+shrinks to one digit sum and two lookups. The cost of the problem moves entirely into the prime sieve.
 
 **The digit sum ignores order.** $s$ depends only on the *multiset* of digits, so $123$, $321$ and
 $213$ are the same object. Two ways to cash that in. Enumerate the multisets directly — problems 30
@@ -95,7 +108,15 @@ Problem 217 shows the state need not be a single running sum — a balanced numb
 keyed by digit sum, and the middle digit of an odd-length number cancels from both sides, so the two
 halves are counted independently and convolved. And problem 164, whose constraint is "no three
 consecutive digits exceed $9$", keeps the trailing *pair* of digits as its state: what matters is that
-the state is bounded and the constraint is local, not that it happens to be a sum.
+the state is bounded, not that it happens to be a sum.
+
+The constraint need not even look local. Problem 529 asks that *every* digit lie in some contiguous
+substring summing to $10$ — a condition on all substrings at once. It still has a bounded state,
+because digits are non-negative: a running sum that passes $10$ can never come back. So the state is
+the set of suffix sums still $\le 10$ (an $11$-bit mask) plus the sum from the earliest uncovered
+digit, which kills the number the moment it exceeds $10$. Non-negativity is what turns a global
+substring property into a [finite automaton](/topics/technique/finite-state-machine) read left to
+right; look for that monotonicity whenever a digit condition quantifies over substrings.
 
 Once you can count, you can [unrank](/topics/technique/unranking). To find the $n$-th number with a
 digit property — problem 845 wants the $n$-th whose digit sum is prime, for $n$ up to $10^{16}$;
@@ -103,6 +124,17 @@ problem 974 the $n$-th "very odd" number — never iterate. Fix the length by co
 digits from the most significant down, at each position subtracting the count of completions that
 start with a smaller digit until the remaining rank fits. The work is $O(d^2)$ and completely
 independent of $n$, which is the difference between microseconds and never finishing.
+
+"Polynomial in the digit count" stops being good enough when the digit count is itself
+astronomical: problem 529 wants the count over all numbers of up to $10^{18}$ digits. A digit DP is
+then a fixed automaton run for $L$ steps, and its count of accepted words of length $L$ obeys a
+[linear recurrence with constant coefficients](/topics/technique/linear-recurrence-with-constant-coefficients)
+of order at most the number of states ([Cayley–Hamilton](/topics/domain/cayley-hamilton-theorem) on
+the transition matrix). With a few thousand states, matrix powers are too slow, but you do not need
+the matrix: run the DP for twice the (minimised) state count, let
+[Berlekamp–Massey](/topics/technique/berlekamp-massey-algorithm) recover the recurrence, and jump to
+index $10^{18}$ with $O(\log L)$ polynomial products. The automaton's size is what makes the fit
+*rigorous* rather than a guess from a short prefix.
 
 ## When the digit sum is the target
 
@@ -133,6 +165,8 @@ checksum at the end. Recognising which family you are in is the first decision.
   digit multiset, the search space is $O(d)$ or $O(d^{10})$ states, not $10^d$ numbers. If it depends
   on the digits' *order* too, you usually still win — the state is a bounded suffix.
 - **Count, then unrank.** "The $n$-th number such that…" is never a loop over $n$.
+- **When the length is huge, fit the recurrence.** A digit DP over a fixed automaton is a linear
+  recurrence in the length; recover it from a prefix sized by the state count, then jump.
 - **Mod $9$ is necessary, never sufficient.** $s(n) \equiv n \pmod 9$ prunes candidates and proves
   nothing; a digital-root argument that concludes an equality is wrong.
 - **Keep the arithmetic exact.** Digit conditions are equalities on integers. Problem 112's
