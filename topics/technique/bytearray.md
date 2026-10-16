@@ -1,5 +1,5 @@
 <!-- tags: [bytearray] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:08Z -->
 # bytearray
 
 A [`bytearray`](https://docs.python.org/3/library/stdtypes.html#bytearray) is a mutable sequence of
