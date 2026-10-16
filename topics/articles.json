@@ -6615,12 +6615,12 @@
       "path": "technique/modular-exponentiation",
       "title": "Modular exponentiation",
       "status": "final",
-      "written": "2026-08-07T17:41Z",
+      "written": "2026-10-16T15:23Z",
       "solved": 31,
       "problems": 31,
       "tags": ["modular-exponentiation"],
       "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0478_s1", "p0487_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"],
-      "solved_after": ["p1010"]
+      "solved_after": []
     },
     {
       "path": "technique/modular-multiplicative-inverse-application",
