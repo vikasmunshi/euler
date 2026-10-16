@@ -1,5 +1,5 @@
 <!-- tags: [bytearray] -->
-<!-- status: final 2026-08-11T11:13Z -->
+<!-- status: final -->
 # bytearray
 
 A [`bytearray`](https://docs.python.org/3/library/stdtypes.html#bytearray) is a mutable sequence of
@@ -59,6 +59,25 @@ $O(\sqrt{n})$ bands of large primes sharing an exponent in $n!$, how many primes
 and gets it with `sieve[lo + 1:hi + 1].count(1)`, one buffer scan per band instead of a Python loop
 over the range.
 
+The same strided slice works for any set of moduli, not just all primes. Problem 272 counts cube
+roots of unity modulo $n$, and the structure of the problem splits every qualifying $n$ into a
+product of "good" primes ($p \equiv 1 \pmod 3$, plus a factor $9$) and a cofactor that must avoid
+all of them. Its cofactor table is a sieve that strikes out only the multiples of $3$ and of each good
+prime:
+
+```python
+free = bytearray([1]) * (bound + 1)
+for p in [3, *good_primes]:
+    free[p::p] = bytes(len(range(p, bound + 1, p)))
+```
+
+The survivors are not primes — they are the integers *coprime to a chosen set* — and the flags are
+then folded into a [prefix sum](/topics/technique/prefix-sum) of the surviving values, so a query
+"sum of admissible cofactors up to $x$" is one lookup. The primes themselves come from
+`primesieve`; the `bytearray` does the part no prime library does. And the reduction keeps it small:
+the table only has to reach $L$ divided by the smallest five-factor product, about $2 \times 10^5$
+for $L = 10^{11}$.
+
 ## The other two jobs
 
 **A bit-addressed DP table.** When the state of a dynamic program is a bitmask, the table is indexed
@@ -104,7 +123,9 @@ found by editing a suffix in place, and the result is read back as an integer wi
   available. On problem 10 at $2 \times 10^6$, the slice-assigned sieve takes `0.058 s`; the
   [`primesieve`](/topics/technique/primesieve) library, a wheel-factorised C sieve, takes `0.0028 s`.
   Twenty times faster for one import — but also a dependency, and one that only solves the prime
-  problem. `bytearray` is what you use when the array is not a sieve of primes.
+  problem. `bytearray` is what you use when the array is not a sieve of primes — and the two
+  combine cleanly: problem 272 takes its primes from `primesieve` and builds only its custom
+  "coprime to these" table as a `bytearray`.
 - **It is the one Python idiom that ports to C unchanged.** A `bytearray` is a `calloc`'d `char *`,
   and the strided slice assignment is the `for (j = i*i; j <= n; j += i) sieve[j] = 0` you would have
   written anyway. That is why the sieve is the one place where the Python and C siblings in this
