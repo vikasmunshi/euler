@@ -1,10 +1,10 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final 2026-08-07T17:41Z -->
+<!-- status: final -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes
-`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in thirty problems
-below: over and over, the quantity a problem asks for is a *residue* — the last ten digits, a count
+`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in more than thirty
+problems below: over and over, the quantity a problem asks for is a *residue* — the last ten digits, a count
 modulo `10^9+7`, whether some power lands on `1` — while the power itself has more digits than
 there are atoms in the universe. The naive route computes a number you cannot store to answer a
 question about a number that fits in a register. Reducing at every step keeps every intermediate
@@ -50,7 +50,7 @@ precision integers, and a hand-rolled version is strictly slower. The same probl
 ## The roles it plays
 
 The reason this tag lands on so many solutions is that `pow(b, e, m)` is rarely the *answer* — it
-is the primitive that other number-theoretic machinery is built from. Six recurring roles:
+is the primitive that other number-theoretic machinery is built from. Seven recurring roles:
 
 | Role | Shape | Seen in |
 | --- | --- | --- |
@@ -60,6 +60,7 @@ is the primitive that other number-theoretic machinery is built from. Six recurr
 | [Multiplicative order](/topics/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133 |
 | Modular square root | `pow(a, (p+1)//4, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 745 |
 | Period argument | no code — `λ(m)` bounds the exponent | 188, 250 |
+| Product by multiplicity | `∏ pow(b, count[b], m)` | 1010 |
 
 The inverse row deserves a note, because it is the most common use by volume. By [Fermat's little
 theorem](/topics/technique/fermats-little-theorem-application), `a^(p-1) ≡ 1 (mod p)`, so
@@ -69,6 +70,17 @@ once per division. Python's `pow(a, -1, m)` (3.8+) does the same job for a gener
 [extended Euclidean algorithm](/topics/technique/extended-euclidean-algorithm), and is both faster
 and honest about failure: it raises when `a` is not invertible, where `pow(a, m-2, m)` silently
 returns garbage if `m` is composite.
+
+The last row is the newest, and it turns the usual relationship around: the exponent is not given,
+it is *counted*. Problem 1010 asks for a product of tableau counts over every partition of `300`
+into at most `150` parts — about `9 × 10^15` factors, far too many to multiply. But each factor is
+`n!` divided by a product of hook lengths, and hook lengths only run from `1` to `n`. So the whole
+product is `(n!)^N / ∏ h^(c_h)`, where `N` is the number of partitions and `c_h` the number of boxes
+with hook `h` across all of them. The hard work moves into *counting* `N` and the `c_h` (generating
+functions, not enumeration); once those exponents are known, `n + 1` calls to `pow` and a single
+inverse finish the job. Whenever a product ranges over more objects than you can visit but its
+factors come from a small alphabet, count multiplicities and let modular exponentiation absorb
+them — and divide once, at the end, rather than once per factor.
 
 ## Reducing the exponent
 
@@ -107,13 +119,17 @@ the bare reduction gives a wrong answer that looks plausible.
   iterations — 23 with square-and-multiply, but both finish instantly, and the linear one is easier
   to read. Square-and-multiply earns its keep when the exponent is genuinely large (`10^18`), or
   when you call it in a loop millions of times over, as problem 820 does once per denominator.
+  The exponents in problem 1010 are counts near `10^18`; there no loop but square-and-multiply
+  would finish at all.
 - **In C, watch the width.** Two residues below `m` multiply to nearly `m²`. With `m` near `10^10`
   the product is `10^20` and a `long long` silently overflows — hence the
   [`__int128`](/topics/technique/int128) casts above. The rule of thumb: a 64-bit modulus needs
   128-bit intermediates, or [Montgomery
   multiplication](https://en.wikipedia.org/wiki/Montgomery_modular_multiplication) if you cannot
-  afford them. Python has no such trap, which is exactly why the C translation of a working Python
-  solution is where this bug appears.
+  afford them. The converse saves work: a modulus below `2^32` — problem 1010's `1234567891` —
+  keeps every product under `2^64`, and an `unsigned long long` needs no widening. Python has no
+  such trap, which is exactly why the C translation of a working Python solution is where this bug
+  appears.
 - **Reduce the base before the loop, not after.** `base %= mod` on entry costs one division and
   bounds every subsequent operand; skipping it is how a "correct" `mod_pow` overflows on its first
   squaring.
