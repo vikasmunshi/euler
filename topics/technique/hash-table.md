@@ -1,5 +1,5 @@
 <!-- tags: [hash-table] -->
-<!-- status: final 2026-08-07T20:59Z -->
+<!-- status: final -->
 # Hash table
 
 A [hash table](https://en.wikipedia.org/wiki/Hash_table) turns a key into an array index by
@@ -65,6 +65,25 @@ addressing degrades sharply as the table fills, because clusters merge and probe
 keeping the load factor at or below one half and doubling on the way past it is what preserves the
 $O(1)$ expectation.
 
+Deletion has a second way out: never delete. Problem 983 scans radii one after another and runs a
+backtracking search at each, and its tables — one of them $2^{22}$ slots — must start empty for every
+radius and every search node. Rather than `memset` four million slots thousands of times, each slot
+carries a stamp, and a slot counts as occupied only if its stamp equals the table's current
+generation:
+
+```c
+static void map_clear(map_t *m) { m->gen++; }
+/* probe: while (m->stamp[h] == m->gen) { ... } */
+```
+
+Clearing becomes one increment, stale entries become empty slots in place, and the
+probe-chain-through-a-deleted-slot bug cannot arise because nothing is ever removed one at a time.
+The same file also picks its bucket differently from djb2-and-mask: it multiplies the 64-bit key by
+$2^{64}/\varphi$ (`0x9E3779B97F4A7C15`) and keeps the **top** bits —
+[Fibonacci hashing](https://en.wikipedia.org/wiki/Hash_function#Fibonacci_hashing). A mask keeps
+the low bits, which is fine after djb2 has stirred them; for a raw integer key whose low bits are
+patterned, the multiply carries every input bit into the high end, and the shift reads them out.
+
 ## What it is actually used for
 
 Four roles cover nearly every appearance below, and naming which one you are in tends to answer the
@@ -117,7 +136,11 @@ points in neighbouring cells; the key is a coordinate pair, the table is the spa
   compares equal exactly when you want it to is what makes the technique work. Sorting a number's
   digits into a string, as problem 62 does, is $O(d \log d)$ per key; a ten-element digit-frequency
   count would be $O(d)$ and hashes just as well. When a hash-based grouping is the bottleneck, look at
-  the key first.
+  the key first. A key can also be chosen for its *algebra*: problem 983 packs a lattice vector
+  $(x, y)$ into the integer $x \cdot 2^{21} + y$, which is injective over its coordinate range and
+  linear — the key of $u + v$ is the sum of the keys. Every relation it tests ("is this signed sum
+  equal to $2u$ for some $u$?", "is it some $u + v$?") becomes plain integer addition followed by one
+  probe, with no tuple ever built.
 - **Pre-size it, and use a power of two.** These tables are declared at their final size — `1 << 20`
   buckets for problem 60's pair cache, `1 << 22` for problem 29's set — because the entry count is roughly
   known and rehashing millions of entries mid-run is pure waste. Powers of two additionally allow the
@@ -127,12 +150,18 @@ points in neighbouring cells; the key is a coordinate pair, the table is the spa
   table to a linked list and an open-addressed one to a linear scan. With adversarial input this is an
   attack; with mathematical input it is usually a hash that ignores the structure of the keys — hashing
   a coordinate pair as `x + y`, for instance, collides every point on an anti-diagonal. Mix both
-  components multiplicatively, as problem 60's `cache_hash` does.
+  components multiplicatively, as problem 60's `cache_hash` does, or pack them injectively into one
+  integer and run that through a multiplicative hash, as problem 983 does.
 - **At small $n$, sorted array plus binary search wins.** Problem 49's C port replaces the Python
   set membership test with `qsort` and a binary search over the prime strings, and says so in a
   comment. $O(\log n)$ with no allocation, no hash function and no collision policy beats $O(1)$ with
   all three when $n$ is a few thousand and the set is built once and never mutated. The build-once,
   query-many, no-deletions case is exactly where a hash table is *not* the obvious answer in C.
+  Vectorised Python reaches the same conclusion for a different reason: problem 983's NumPy version
+  keeps its key sets as sorted arrays and tests a whole batch of thousands of sums at once with
+  `np.isin` and `np.searchsorted`, because a `set` can only be probed one Python-level call at a time.
+  Its C port, free of that interpreter cost, goes back to open-addressed tables — the same key sets,
+  the right structure chosen per language.
 - **Keys must be hashable, which means immutable.** Python enforces it: tuples and `frozenset`s are
   valid keys, lists and sets are not — which is why problem 259 canonicalises its reachable values
   into a `frozenset` before caching on them. The rule behind the error message is that mutating a key
