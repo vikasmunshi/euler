@@ -1,5 +1,5 @@
 <!-- tags: [extended-euclidean-algorithm] -->
-<!-- status: final 2026-07-29T18:33Z -->
+<!-- status: final -->
 # Extended Euclidean algorithm
 
 The [extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)
@@ -58,12 +58,34 @@ its unknown, and as the glue step inside the
 0160, 0932 and 0934 all use it that way: each merges congruences modulo coprime factors, and each
 merge is one inverse.
 
-There is a language asymmetry here that recurs in five of the six problems below. Python has the
+There is a language asymmetry here that recurs in six of the eight problems below. Python has the
 inverse built in — `pow(a, -1, m)` since 3.8 — so the Python solution is a single expression and
 the technique is invisible in the source. The C port has no such primitive and carries a
 hand-written `mod_inverse` doing the loop above. When you compare a Python and a C solution in this
 stack and the only structural difference is a fifteen-line helper near the top of the C file, this
-is usually what it is.
+is usually what it is. Problem 0250 is the asymmetry taken one step further: there the Python side
+needs no inverse *at all*, and only the C side does — see the next section.
+
+## When the divisor is not a unit
+
+The `g ≠ 1` verdict is not always the end of the road. Problem 0250 counts subsets by residue and
+needs whole rows of binomial coefficients modulo `10¹⁶`, built by the multiplicative recurrence
+`C(n, i+1) = C(n, i)·(n−i)/(i+1)`. That division is exact over the integers but not legal modulo
+`10¹⁶`: half the denominators are even, a fifth are multiples of 5, and neither has an inverse.
+Python dodges the question by carrying the binomial as an exact big integer and reducing only when
+it stores it. The C port cannot, and the fix is worth knowing in general: split the running value
+into the part the modulus can see and the part it cannot,
+
+```
+C(n, i) = 2^e₂ · 5^e₅ · u        with gcd(u, 10) = 1
+```
+
+Strip every factor of 2 and 5 out of each numerator and denominator into the exponent counters
+`e₂`, `e₅` (which may go up and down), and what remains of the denominator is coprime to `10¹⁶`, so
+extended Euclid inverts it and the division becomes a multiplication on `u`. The coefficient is
+reassembled as `u · 2^e₂ · 5^e₅ mod 10¹⁶` only when it is needed. The recipe generalises to any
+composite modulus: the primes it shares with your denominators are tracked as exponents, everything
+else is a unit, and units are exactly what the algorithm can invert.
 
 An alternative exists when the modulus is prime: by
 [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), `a⁻¹ ≡ a^(p-2)
@@ -94,9 +116,19 @@ a known interval, and after iterating the narrowest interval the remaining two-v
 decided in `O(1)` per candidate by exactly this range-intersection test. A brute-force scan over
 the widest interval instead would have been thousands of times the work.
 
-Problem 0198 sits between the two cases: its inner count is "how many integers in `[lo, hi]` are
-congruent to `r (mod m)`", where `r` is an inverse from the Farey-neighbour relation `bc - ad = 1`
-— a Bézout identity that the problem hands you rather than one you have to compute.
+Between the two cases sits a pattern common enough to name: *count* the solutions of a linear
+congruence in a range rather than find one. The solutions of `a·x ≡ c (mod m)` with
+`gcd(a, m) = 1` are the single class `x ≡ c·a⁻¹ (mod m)`, so the number of them in `[lo, hi]` is
+an arithmetic-progression count — `O(1)` once you have the inverse, however wide the range.
+Problem 0198's inner count has exactly this shape, with `r` an inverse that falls out of the
+Farey-neighbour relation `bc − ad = 1` — a Bézout identity the problem hands you rather than one
+you have to compute. Problem 0251 (Cardano triplets) shows it at scale: after splitting `b`
+against `n` by their gcd, the divisibility condition becomes `8·n₁·d ≡ 3 (mod b₁²)`, so for each
+coprime pair `(n₁, b₁)` the admissible `d` are one residue class modulo `b₁²`, its smallest member
+is `3·(8n₁)⁻¹ mod b₁²`, and the count up to a bound is a single floor division. Note how existence
+is settled by structure rather than tested: `b₁` is forced odd, and pairs with `gcd(n₁, b₁) > 1`
+are skipped before the inverse is ever asked for. A search over triplets collapses into one
+inverse per `(n₁, b₁)` pair.
 
 ## Getting it right
 
@@ -108,7 +140,8 @@ congruent to `r (mod m)`", where `r` is an inverse from the Farey-neighbour rela
   they stay bounded by roughly `max(a, b)`, so the danger is not the coefficients themselves but the
   `x·a` products you form afterwards. Reduce operands modulo `m` *before* multiplying, and reach for
   a wider type when the intermediate does not fit — problems 0236 and 0932 both do the arithmetic in
-  `__int128` on the C side for this reason, where Python's
+  `__int128` on the C side for this reason, and 0250, whose modulus `10¹⁶` already fills most of a
+  64-bit word, runs the Euclid loop itself in `__int128`, where Python's
   [arbitrary-precision integers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic)
   simply absorb it.
 - **Floor, don't truncate.** The recurrence and the interval clipping both assume floored division.
