@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-optimization] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:04Z -->
 # Combinatorial optimization
 
 [Combinatorial optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) is the
