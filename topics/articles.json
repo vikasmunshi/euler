@@ -2985,12 +2985,12 @@
       "path": "domain/pseudorandom-number-generator",
       "title": "Pseudorandom number generator",
       "status": "final",
-      "written": "2026-07-31T16:58Z",
+      "written": "2026-10-16T07:35Z",
       "solved": 7,
       "problems": 19,
       "tags": ["pseudorandom-number-generator"],
       "refs": ["p0149", "p0185", "p0238", "p0252", "p0288", "p0334", "p0375", "p0426", "p0456", "p0630", "p0653", "p0790", "p0793", "p0803", "p0816", "p0839", "p0917", "p0941", "p0980"],
-      "solved_after": ["p0252"]
+      "solved_after": []
     },
     {
       "path": "domain/pythagorean-theorem",

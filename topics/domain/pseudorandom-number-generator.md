@@ -1,5 +1,5 @@
 <!-- tags: [pseudorandom-number-generator] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:35Z -->
 # Pseudorandom number generator
 
 A [pseudorandom number generator](https://en.wikipedia.org/wiki/Pseudorandom_number_generator)
