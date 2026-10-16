@@ -1,5 +1,5 @@
 <!-- tags: [summation] -->
-<!-- status: final 2026-08-07T08:41Z -->
+<!-- status: final -->
 # Summation
 
 [Summation](https://en.wikipedia.org/wiki/Summation) is the most deceptive domain tag in the
@@ -21,7 +21,7 @@ integers not expressible as two abundant numbers, problem 125 sums the palindrom
 runs of consecutive squares. Here the range is small enough to walk, the tag is descriptive rather
 than prescriptive, and all the difficulty sits in deciding *which* terms qualify.
 
-In the second kind — the large majority above, and everything past problem 300 — the range is the
+In the second kind — the large majority above, and nearly everything from problem 297 on — the range is the
 whole difficulty. $f$ is often cheap to evaluate at any single point and completely out of reach to
 evaluate $10^{15}$ times. Problem 401 wants $\sum_{n \le 10^{15}} \sigma_2(n)$; problem 918 wants
 $\sum_{n \le 10^{12}} a_n$; problem 760 wants a double sum out to $10^{18}$. Nothing about the
@@ -128,13 +128,41 @@ is the hinge of problem 326.
 
 ### Descend the structure
 
-When $f$ is defined by a self-similar process rather than a formula, the sum often decomposes the
-same way the process does. Problems 884 and 672 both sum a step-count over an enormous range where
-the step count is constant on long blocks — so you sum over blocks, recursing on the sub-range each
-block leaves behind. Problem 739 iterates partial summation until one term remains; the answer is a
-binomial identity hiding in the triangle. The general instruction is the same one that governs
+When $f$ is defined by a [self-similar](/topics/domain/self-similarity) process rather than a
+formula, the sum decomposes the same way the process does. The shape is always the same: tabulate
+the sum over each *whole* block the process builds, then compute $S(N)$ by walking down to $N$,
+adding every whole block that lies to its left and recursing only into the one block that $N$
+splits. The walk is as long as the structure is deep — logarithmic — however large $N$ is.
+
+Problem 297 is the cleanest instance. $z(n)$ counts the terms in the
+[Zeckendorf representation](/topics/domain/zeckendorfs-theorem) of $n$, summed below $10^{17}$.
+Every $n$ in $[F_i, F_{i+1})$ is $F_i$ plus a remainder below $F_{i-1}$, so $z(n) = 1 + z(n - F_i)$,
+and the whole-block sums $T_i = \sum_{n < F_i} z(n)$ obey a recurrence of their own,
+$T_{i+1} = T_i + F_{i-1} + T_{i-1}$. A general limit falls out the same way:
+$S(N) = T_i + (N - F_i) + S(N - F_i)$ for the largest $F_i \le N$. Unroll that and the descent *is*
+the greedy Zeckendorf decomposition of $N$ — about eighty steps. It is digit-by-digit summation, in
+a number system whose digits happen to be Fibonacci numbers.
+
+Problem 943 shows what happens when the blocks are not all alike. Its sequence is a two-symbol
+[Kolakoski](/topics/domain/kolakoski-sequence)-style sequence that is its own run-length encoding,
+and the task is a prefix sum $T(a, b, N)$ at $N \approx 2 \times 10^{13}$ for some fifty thousand
+$(a, b)$ pairs. Read backwards, each element is the parent of the run it describes, so the prefix is
+the leaf level of a shallow derivation tree, and $T$ is one root-to-leaf descent adding up the
+subtrees to the left of leaf $N$. The catch is that a subtree is *not* fixed by its root's value:
+which symbol its descendants carry depends on the parity of their positions, which depends on
+everything to their left. The memo key has to carry that parity on every level, a bitmask beside
+the value and height — the [memo key is the full state](/topics/takeaway/memo-key-is-the-full-state),
+and a key without the mask returns plausible, wrong sums. With the right key, $10^{13}$ leaves
+collapse to a few million distinct subtree shapes at worst. And when a node has hundreds of
+identical children, the sequence of their masks repeats after a short prefix, so
+[cycle detection](/topics/technique/cycle-detection) answers "the sum of the first $k$ children" by
+counting whole periods instead of walking them.
+
+Problems 884 and 672 sum a step-count that is constant on long blocks and recurse on the sub-range
+each block leaves behind; problem 739 iterates partial summation until a binomial identity in the
+triangle falls out. The general instruction is the same one that governs
 [recurrence relations](/topics/domain/recurrence-relation): recur on the cheap shadow of the
-structure — a block, a bit, a count — never on the elements themselves.
+structure — a block, a bit, a subtree shape — never on the elements themselves.
 
 Two more escape hatches worth naming. When the sum ranges over something random,
 **linearity of expectation** lets you sum the expected contribution of each term independently,
@@ -161,6 +189,11 @@ and mind what it changes:
   [`__int128`](/topics/technique/int128) is for, while Python's
   [arbitrary precision](/topics/technique/arbitrary-precision-arithmetic) hides the issue until
   you port the file.
+- **The modulus does not protect the intermediates.** Problem 943 reduces its final total mod
+  $2233222333$, but its memoised subtree counts and sums are exact quantities that get compared
+  against $N$ and multiplied by period counts — they cannot be reduced, and a deep subtree's leaf
+  sum outgrows 64 bits. Problem 297 asks for no modulus at all, and its $10^{18}$ variant already
+  passes $2^{64}$. Both C ports carry those values in `__int128`.
 - **Signs.** A telescoped or alternating sum produces negative intermediates; C's `%` follows the
   sign of the dividend, Python's does not. Normalise once, at a single choke point.
 
@@ -179,7 +212,10 @@ A practical order of attack when a statement hands you a $\sum$:
 2. **Write the brute force anyway.** Fifteen lines, correct by construction, and useless at scale —
    but it is your oracle. Every identity below is a claim, and a claim you have checked against
    $S(10)$ and $S(1000)$ is worth far more than one you derived carefully and never tested. The
-   given sample values in the statement exist for exactly this.
+   given sample values in the statement exist for exactly this. Check against more than the given
+   samples when the method has state that the samples might never reach: problem 943's descent was
+   held against direct generation of the sequence on two thousand random $(a, b, N)$, which is what
+   catches an under-specified memo key.
 3. **Look at $f$'s definition, not at the loop.** If $f$ is itself a sum, swap the order. If $f$
    obeys a recurrence, try to telescope. If $f$ is defined digit-wise or bit-wise, sum over digits.
    If $f$ is piecewise-constant on long blocks, sum over blocks.
