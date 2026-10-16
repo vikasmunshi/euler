@@ -1,5 +1,5 @@
 <!-- tags: [permutation] -->
-<!-- status: final 2026-09-23T09:26Z -->
+<!-- status: final -->
 # Permutation
 
 A [permutation](https://en.wikipedia.org/wiki/Permutation) is a rearrangement of a set: an
@@ -40,6 +40,20 @@ with each digit read from the left or the right end depending on the parity of t
 far. Whenever a problem asks "which one is the N-th" or "how many come before this one", reach for
 [numbering permutations](https://en.wikipedia.org/wiki/Permutation#Numbering_permutations), not a
 generator.
+
+Unranking needs the size of every block, though, and when the list is a *filtered* subset of the
+permutations those sizes can be awkward to count. [Problem 336](/solutions/0336/) asks for the
+N-th "maximix" arrangement: the permutations on which a greedy
+[pancake sort](https://en.wikipedia.org/wiki/Pancake_sorting) by suffix reversals takes its
+worst-case number of moves. Filtering all `11!` arrangements through a simulation works, but the
+greedy rule is deterministic, so it can be run **backwards** from the sorted train: undoing each
+placement is one forced reversal followed by a free choice of where the second one starts, and
+every distinct choice sequence yields a distinct worst case. The members are in bijection with
+those choice sequences, which counts them at `(n − 2)!` — the statement's 24 for six carriages —
+and generates exactly them, nothing else. At a few hundred thousand strings, sorting the generated
+set and indexing into it is simpler than an unranking scheme, and plenty fast. The lesson
+generalises: when the set is "inputs on which a fixed procedure behaves a certain way", invert the
+procedure rather than test every input.
 
 ### As an equivalence class — "is a permutation of"
 
@@ -98,7 +112,22 @@ letters (a binomial) is split from the choice of their order. Out-of-order adjac
 what the move-to-front sort of [Problems 523](/solutions/0523/) and [524](/solutions/0524/)
 reacts to, so its expected cost over all `n!` inputs becomes a question about how such pairs
 appear as the sort proceeds, not a simulation; a forbidden three-term arithmetic pattern defines the "unpredictable"
-permutations of [Problem 720](/solutions/0720/). The tell is a problem that counts permutations
+permutations of [Problem 720](/solutions/0720/).
+
+Inversions are also the right lens on a permutation *built up* from adjacent swaps, because an
+[adjacent transposition](https://en.wikipedia.org/wiki/Transposition_(mathematics)) flips the
+relative order of exactly one pair. In [Problem 996](/solutions/0996/) players on a leader board
+swap adjacent ranks day after day and end where they started; the question is which tuples of
+per-player overtake counts are possible. Following the permutation step by step is hopeless, but
+reading it pair by pair settles it: a pair that ends in its original order has crossed an even
+number of times, alternately, so each player's count is a sum of per-pair halves — the degree
+sequence of a multigraph, hence an even total with no entry above half of it. The line geometry adds
+one more rule: a player who never overtakes never moves, and so walls the board into independent
+runs. The permutation then drops out entirely, leaving a count of integer tuples that a
+[generating function](https://en.wikipedia.org/wiki/Generating_function) handles in time independent
+of the number of days. The conjecture that those conditions are also *sufficient* was the part to
+distrust, and it was confirmed against a brute-force search of small boards before it was used. The
+tell is a problem that counts permutations
 *by a property of adjacent or ordered pairs*: look the statistic up in
 [OEIS](https://oeis.org/) before writing a search.
 
@@ -111,6 +140,9 @@ permutations of [Problem 720](/solutions/0720/). The tell is a problem that coun
   [assignment problem](https://en.wikipedia.org/wiki/Assignment_problem) of
   [Problem 345](/solutions/0345/) — one entry per row and column — is a maximum over `15!`
   permutations that a bitmask DP settles over `2¹⁵` subsets.
+- **Run a deterministic process backwards.** If the permutations you want are defined by how a fixed
+  procedure treats them (a sort's worst case, a shuffle's end state), undo the procedure from its
+  output to generate exactly those permutations, rather than filtering all `n!` of them.
 - **Separate "which" from "in what order".** Choosing a set (binomial, multiset) and arranging it
   (factorial, multinomial, Eulerian) are independent factors far more often than not.
 - **Mind duplicates.** Digit problems permute a *multiset*: repeated digits collapse arrangements,
