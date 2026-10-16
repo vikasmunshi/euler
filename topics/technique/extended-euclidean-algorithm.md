@@ -1,5 +1,5 @@
 <!-- tags: [extended-euclidean-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:24Z -->
 # Extended Euclidean algorithm
 
 The [extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)
