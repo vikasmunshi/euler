@@ -5822,8 +5822,8 @@
     {
       "path": "technique/hamming-weight",
       "title": "Hamming weight",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:43Z",
       "solved": 10,
       "problems": 10,
       "tags": ["hamming-weight"],

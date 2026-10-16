@@ -1,5 +1,5 @@
 <!-- tags: [hamming-weight] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:43Z -->
 # Hamming weight
 
 The [Hamming weight](https://en.wikipedia.org/wiki/Hamming_weight) of an integer is the number of
