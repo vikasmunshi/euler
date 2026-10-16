@@ -1,5 +1,5 @@
 <!-- tags: [generating-function] -->
-<!-- status: final 2026-08-03T06:53Z -->
+<!-- status: final -->
 # Generating function
 
 A [generating function](https://en.wikipedia.org/wiki/Generating_function) is a whole infinite
@@ -41,6 +41,18 @@ reduced mod 10¹⁶ throughout; the series is never written down, only walked.
 `[x^k](1 + b·x + x²)^k` at *k* = 10⁸ — a central trinomial coefficient with a multinomial closed
 form, computable as one O(*k*) loop with no array at all. Recognising the polynomial is what buys
 the shortcut; the generating function is the *model*, not the *method*.
+
+**Extract by powering.** When the independent parts are also *identical*, the product is a power,
+and a power takes [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring):
+log *t* multiplies, each truncated at the degree you will read. Problem 768 counts balanced
+chandeliers, meaning *m* candles in a ring of *n* sockets whose unit vectors sum to zero. Here the
+generating function shows up twice. First the subset itself is a polynomial `f_S(x) = Σ_{k∈S} xᵏ`,
+and "balanced" means `f_S(ζₙ) = 0`, so the [cyclotomic polynomial](https://en.wikipedia.org/wiki/Cyclotomic_polynomial)
+`Φₙ` divides it. That algebra splits the ring into `t = n/rad(n)` interleaved copies of the
+squarefree ring, and each copy must balance on its own. Second, if `G(z)` counts the balanced
+*k*-subsets of one copy, the answer is `[z^m] G(z)^t`. The real work is the census of one 30-socket
+copy. After that, combining the copies is a dozen lines of truncated powering, and its cost depends
+on *n* only through `log t`.
 
 **Extract by an identity.** The partition generating function `∏ 1/(1 - x^k)` has a reciprocal with
 almost all coefficients zero — [Euler's pentagonal number theorem](https://en.wikipedia.org/wiki/Pentagonal_number_theorem) —
@@ -99,6 +111,21 @@ This is the direction worth internalising: **a generating function is a bridge t
 subject**. Rational ⇒ linear recurrence ⇒ Diophantine machinery. The series itself is scaffolding
 you take down afterwards.
 
+Rationality also pays off when you never solve anything: keep the numerator, and read the
+denominator from a formula. Problem 996 counts the tuples of overtake counts that tennis players
+can accumulate in at most *k* ≈ 4.6 million days. Each board position gets a rational weight in `y`:
+
+- a positive count is `y/(1 - y)`;
+- the even-total condition keeps the even part `½(f(y) + f(-y))`, the two-term case of a
+  [series multisection](https://en.wikipedia.org/wiki/Series_multisection);
+- tuples that break the half-sum bound are subtracted as `y²/(1 - y²)` terms.
+
+Every denominator divides `1 - y²`. Clear it from each factor and the product becomes a numerator
+polynomial `N(y)` of degree 2*n*, built by a left-to-right DP whose states are polynomials. What is
+left is `(1 - y²)ⁿ(1 - y)`, and its coefficients come in closed form (stars and bars, then the
+hockey-stick identity). So the answer is a sum of 2*n* + 1 products `Nᵢ·C(⌊(k-i)/2⌋ + n, n)`.
+Never expand the series to degree *k*: here *k* is only a binomial argument.
+
 ## Working modulo something
 
 Two different reductions show up, and they are not the same trick.
@@ -108,7 +135,9 @@ held mod *m* throughout — sound as long as the extraction uses only `+` and `�
 subtraction in a signed recurrence: Euler's pentagonal sum alternates, and in C the running total
 can go negative, so `((v % m) + m) % m` rather than a bare `%`. Python's `%` already returns
 non-negative, which is exactly the kind of difference that makes a C port disagree with its Python
-original.
+original. Division is the other hazard. Problem 996's `½(f(y) + f(-y))` would need an inverse of 2.
+It avoids one by carrying the half-sum and half-difference as separate states, so every update
+stays a shift and an addition.
 
 **Reduce the exponents.** If only the total *mod m* matters, work in `ℤ[x]/(xᵐ - 1)` — the
 [group algebra](https://en.wikipedia.org/wiki/Group_ring) of `ℤ/mℤ` — where `xᵐ = 1` makes exponents
@@ -131,12 +160,14 @@ becomes an array of 250 machine words.
   degree-*D* array. Fine at a few million slots (problem 249 runs ~10⁹ additions this way, which is
   the scale where array-level arithmetic wins and per-element Python loops lose). Only past that
   does an [FFT](https://en.wikipedia.org/wiki/Convolution_theorem)-based multiply, or an NTT modulo
-  a prime, start to pay.
+  a prime, start to pay. A *t*-fold power of one factor costs O(*D*² log *t*) by squaring, not *t*
+  passes (problem 768).
 - **Look for the structure before the array.** The best outcomes here are not faster expansions but
   escapes from expanding at all: a sparse reciprocal (problem 78), a closed-form coefficient
   (problem 743), a periodicity that makes the input census O(1) (problem 250), a rational form that
-  hands the problem to number theory (problems 137, 140). Write the generating function down first;
-  then look hard at what it *is* before you start multiplying.
+  hands the problem to number theory (problems 137, 140), a known denominator that takes the target
+  degree out of the cost (problem 996). Write the generating function down first; then look hard at
+  what it *is* before you start multiplying.
 
 The tell is a counting question whose brute force is a product of independent ranges, or a sequence
 defined by a recurrence you cannot see past. Write one factor per independent choice, multiply, and
