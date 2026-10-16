@@ -1,11 +1,11 @@
 <!-- tags: [combinatorial-optimization] -->
-<!-- status: final 2026-07-29T18:27Z -->
+<!-- status: final -->
 # Combinatorial optimization
 
 [Combinatorial optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) is the
 search for the *best* member of a finite set: the shortest pipe, the heaviest matching, the
-special set with the smallest total. "Finite" is cold comfort — the sets here have $15!$ or
-$10^{16}$ members. What unites the problems below is not a technique but a predicament: an optimum
+special set with the smallest total. "Finite" is cold comfort — the sets here have $15!$,
+$10^{16}$ or $2^{500}$ members. What unites the problems below is not a technique but a predicament: an optimum
 provably exists, and you provably cannot find it by looking at all the candidates. Everything on
 this page is a way of not looking.
 
@@ -32,7 +32,10 @@ is the [assignment problem](/topics/domain/assignment-problem) and $60$ years of
 Problem 60 asks for five primes that pairwise concatenate to primes — make each prime a node and
 each valid pair an edge and it is a minimum-weight [clique](/topics/domain/clique-problem). Problem
 185 (Number Mind) is a [constraint satisfaction problem](/topics/domain/constraint-satisfaction).
-Problem 222 is a permutation-ordering problem with a travelling-salesman flavour.
+Problem 222 is a permutation-ordering problem with a travelling-salesman flavour. Problem 252 asks
+for the largest "hole" among $500$ pseudo-random points, and is the *largest empty convex polygon*
+problem of [computational geometry](/topics/domain/computational-geometry), which has a published
+$O(n^3)$ algorithm (Dobkin, Edelsbrunner and Overmars) waiting to be used.
 
 Naming it tells you immediately what is known: whether a polynomial algorithm exists, which bounds
 are standard, and — often the most useful fact — that the general case is
@@ -81,6 +84,16 @@ algorithm](https://en.wikipedia.org/wiki/Hungarian_algorithm) also solves proble
 $n = 15$ the bitmask sweep is faster to write, easier to get right, and fast enough. Asymptotics
 decide nothing until you know the input size.
 
+Sometimes there is no small state until you rewrite the constraint. In problem 252 a polygon is
+admissible only if *no* point lies inside it, a condition on the whole shape that a chain of
+vertices can't carry forward. The fix is a decomposition. Fix the polygon's lowest vertex $p$ as an
+apex and fan the polygon into triangles $(p, v_i, v_{i+1})$. Then the polygon is empty exactly when
+every fan triangle is empty and no point sits on an internal diagonal, and its area is the sum of
+the triangle areas. Now emptiness, area and convexity all depend only on the last edge of the chain,
+so the DP state is "best chain ending in edge $q_i \to q_j$" for each apex. The general move is to
+find a decomposition that turns a global feasibility test into a local one. A memo cannot hold a
+constraint like "nothing inside", but it can hold one edge.
+
 **Bound and prune.** [Branch and bound](/topics/technique/branch-and-bound) needs two things: an
 *incumbent* (some feasible solution, giving an upper bound on the optimum) and a *lower bound* on
 anything a partial solution can still become. When the bound meets the incumbent, the subtree dies.
@@ -105,6 +118,19 @@ multiplier](https://en.wikipedia.org/wiki/Lagrange_multiplier) exercise whose st
 gives $x_i = 2i/(m+1)$ directly, and the search vanishes into a
 [closed form](/topics/technique/closed-form-expression). See
 [reduce algebraically before coding](/topics/takeaway/reduce-before-coding).
+
+The structure can also describe *all* the optima rather than just one. Problem 336 runs a fixed
+greedy [pancake-style](/topics/domain/pancake-sorting) sort on a train of carriages and asks about
+the arrangements that force its worst case. A bound comes first: each placement costs at most two
+reversals, so the worst case is $2n-3$. It is attained exactly when every placement finds its
+carriage strictly inside the unsorted suffix. Filtering all $11!$ permutations against that
+condition would work. The better observation is that the sort is deterministic, so you can
+[run it backwards](/topics/takeaway/run-the-process-backwards): start from the sorted train and
+undo each placement in every way that keeps it maximal. The choices are in bijection with the
+maximisers, so the method *generates* the $(n-2)!$ optima and never visits anything else. The
+count matches the statement's examples, a free check of the
+theory ([calibrate on known answers](/topics/takeaway/calibrate-theory-on-known-answers)). If the
+optimum set has a shape you can describe, building that set beats sifting for it.
 
 Be careful here, and this is the domain's sharpest trap: a plausible structural intuition is not a
 proof. Problem 222's optimum puts the two *largest* balls at the exposed ends, which reads as
@@ -153,7 +179,8 @@ discrete arrangements too large to enumerate. When you catch it:
 
 The recurring lesson is that the leverage is almost never in the search code. It is in the
 observation made just before it — that order does not matter, that the cost function is concave,
-that the constraint has a multiplier — each of which deletes more of the space than any amount of
+that the constraint has a multiplier, that a global condition splits into a fan of local ones, that
+a deterministic process can be run in reverse — each of which deletes more of the space than any amount of
 optimisation inside the loop.
 
 <!-- problems (generated by update-tags) -->
