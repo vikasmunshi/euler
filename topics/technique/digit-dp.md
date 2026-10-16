@@ -1,5 +1,5 @@
 <!-- tags: [digit-dp] -->
-<!-- status: final 2026-08-12T07:25Z -->
+<!-- status: final -->
 # Digit DP
 
 [Digit DP](https://en.wikipedia.org/wiki/Digit_DP) counts numbers by walking their digits instead of
@@ -9,7 +9,9 @@ but the property being asked about can be decided while reading the digits left 
 only a small amount of information forward. The bound stops being a count of candidates and becomes a
 count of *positions*: a limit of $10^{40}$ is forty steps, not $10^{40}$ tests. That trade is why
 this tag recurs across the problems below, which otherwise have nothing in common — balanced numbers,
-step numbers, Nim, Pascal's triangle modulo 7.
+step numbers, Nim, Pascal's triangle modulo 7. And when even the positions are too many — problem 529
+asks about numbers with up to $10^{18}$ digits — the same DP, read as a fixed automaton, turns into a
+linear recurrence that can be jumped along instead of walked.
 
 ## The idea
 
@@ -63,6 +65,7 @@ What these problems carry is worth reading as a catalogue of the moves available
 | 145 (reversible) | carry, plus a stack of pending mirror-column sums | small |
 | 269 (integer roots) | one running quotient per candidate root | hundreds |
 | 301 (Nim) | previous bit | 2 |
+| 529 (10-substrings) | mask of suffix sums $\le 10$, sum since the earliest uncovered digit | 5630 reachable |
 
 Two of these earn their place by a reduction made *before* the DP was written, and they are the ones
 worth studying ([reduce before coding](/topics/takeaway/reduce-before-coding)). Problem 178 asks for
@@ -72,6 +75,15 @@ contiguous interval — containing all ten is therefore just *touched 0* and *to
 instead of a mask. Problem 974 has the mirror-image experience: it genuinely needs five parity bits,
 because "each odd digit occurs an odd number of times" is five independent facts, and 32 is small
 enough to pay for. Knowing which case you are in is the skill.
+
+Problem 529 shows the reduction working on a condition that does not look digit-local at all: every
+digit must lie inside *some* contiguous run summing to 10. Two observations make it finite. Any future
+run must start inside a current suffix whose sum is still at most 10, so the prefix need only keep the
+*set* of such suffix sums — an 11-bit mask, updated per digit $d$ by a shift left by $d$, setting bit
+$d$, and dropping everything above bit 10, the same shift-and-mask move as a
+[bitwise](/topics/technique/bitwise-operation) string matcher. And of all the digits not yet covered,
+only the earliest matters: a run ending here that covers it covers every later one too, so a single
+running sum from that digit (dead once it passes 10) replaces a set of pending obligations.
 
 The rest of the catalogue is the standard vocabulary. A **running remainder** handles divisibility,
 because $v \mapsto 10v + d$ is well defined modulo anything; 974 tracks the value mod 7 that way while
@@ -142,6 +154,30 @@ parity question about subset sums to a weighted popcount sum over binary digits,
 free bits contributes $3^b$. Problem 1000's Nim sub-problem counts triples whose coordinates all share
 the top bit of their XOR — three tight flags at once, one per coordinate.
 
+## When the length is the bound
+
+The collapse from magnitude to positions is only a collapse if the positions are few. Problem 529
+counts qualifying numbers below $10^{n}$ for $n = 10^{18}$, so the DP's time axis is itself
+astronomically long, and walking it one digit at a time is exactly the enumeration digit DP was meant
+to avoid. What rescues it is that the bound is a power of the base: there is no tight flag, so every
+step applies the *same* transition — the DP is a fixed matrix $A$ over the automaton's states, and the
+count at length $L$ is a fixed linear functional of $A^{L}$. By
+[Cayley–Hamilton](https://en.wikipedia.org/wiki/Cayley%E2%80%93Hamilton_theorem), any such sequence
+satisfies a [linear recurrence](/topics/technique/linear-recurrence-with-constant-coefficients) of order
+at most the number of states, so the question becomes "find the recurrence, then jump to term
+$10^{18}$".
+
+With thousands of states, [matrix exponentiation](/topics/technique/matrix-exponentiation) is cubic
+and out of reach, so 529 never builds the matrix power. It
+[minimises the automaton](/topics/technique/dfa-minimization) — only to obtain a *rigorous* bound on the
+recurrence order, which says how many terms are enough — runs the ordinary forward digit DP for twice
+that many lengths, lets [Berlekamp–Massey](/topics/technique/berlekamp-massey-algorithm) recover the
+recurrence from those terms, and extracts the one far coefficient of the resulting rational generating
+function by Bostan–Mori with [FFT](/topics/technique/fast-fourier-transform) products. The digit DP is
+still the part that encodes the problem; it has simply become a term generator for a
+[small-cases-reveal-the-recurrence](/topics/takeaway/small-cases-reveal-recurrence) pipeline, and
+everything that does depend on $n$ costs $O(\log n)$ polynomial products.
+
 ## How to reason about it
 
 - **Ask whether the property is digit-local first.** If deciding it needs the whole number — its
@@ -150,6 +186,10 @@ the top bit of their XOR — three tight flags at once, one per coordinate.
 - **Count the state space before writing anything.** Multiply out the components. If the product is in
   the hundreds or thousands, the DP is instant; if it is $2^{10}$ per position and climbing, look for
   the reduction that collapses it (problem 178's two booleans) before accepting the cost.
+- **Count the positions too.** $O(L)$ is only cheap while $L$ is a digit count of a bound you were
+  handed. If the problem hands you the length itself and it is huge, check that the transition is
+  position-independent (no tight flag, no per-position rule) and go looking for the recurrence instead
+  of the loop, as 529 does.
 - **You may not need the tight flag at all.** It is only for hugging an arbitrary bound. Half of these
   problems ask about "all numbers with at most $L$ digits", which — with leading zeros allowed — is
   exactly "all length-$L$ digit strings", so the DP is a plain
