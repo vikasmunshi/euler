@@ -1,11 +1,11 @@
 <!-- tags: [prime-factorization] -->
-<!-- status: final 2026-08-03T12:58Z -->
+<!-- status: final -->
 # Prime factorization
 
 [Prime factorization](https://en.wikipedia.org/wiki/Integer_factorization) is what an integer
 *is*, as opposed to what it looks like written down. The
 [fundamental theorem of arithmetic](https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic)
-says every n>1 has exactly one decomposition n=p1e1p2e2⋯pkek, and
+says every $n > 1$ has exactly one decomposition $n = p_1^{e_1} p_2^{e_2} \cdots p_k^{e_k}$, and
 the seventy-odd problems below are, almost without exception, problems about that decomposition
 rather than about the number. This page is about the *object* — what the exponent vector tells you
 and how to reason in it. The mechanics of obtaining one are
@@ -64,6 +64,7 @@ once you have the vector the function is a product over $k$ terms rather than a 
 | divisor sum $\sigma(n)$ | $\prod \frac{p_i^{e_i+1} - 1}{p_i - 1}$ | 650 |
 | [totient](/topics/domain/eulers-totient-function) $\varphi(n)$ | $n \prod \left(1 - \frac{1}{p_i}\right)$ | 69, 248, 342 |
 | [radical](/topics/domain/radical-of-an-integer) $\mathrm{rad}(n)$ | $\prod p_i$ | 124 |
+| solutions of $x^3 \equiv 1 \pmod n$ | $3^{\#\{p_i \equiv 1 \ (3)\}}$, times $3$ if $9 \mid n$ | 272 |
 
 Two habits follow from that table. The first is that "count the divisors of $n$" is never a
 divisor-counting loop; it is a factorization and a product. Problem 108 goes one step further and
@@ -87,6 +88,18 @@ which reduces to $r_2(m)$, the number of representations of $m$ as an ordered su
 and [Jacobi's two-square theorem](https://en.wikipedia.org/wiki/Sum_of_two_squares_theorem) makes
 *that* a product over the exponents of the primes $\equiv 1 \pmod 4$. A great many counting
 questions that look geometric or combinatorial are multiplicative functions in disguise.
+
+The last row of the table is the most reusable shape of all: *the number of solutions of a
+congruence modulo $n$*. The [Chinese remainder theorem](/topics/technique/chinese-remainder-theorem)
+splits a solution modulo $n$ into independent solutions modulo each $p_i^{e_i}$, so the count is
+multiplicative whatever the congruence. Problem 272 counts cube roots of unity; for an odd prime the
+[unit group](/topics/domain/cyclic-group) modulo $p^e$ is cyclic of order $p^{e-1}(p - 1)$, and a
+cyclic group of order $m$ holds exactly $\gcd(3, m)$ solutions of $x^3 = 1$. Notice which
+coordinate that reads. Not the exponent, which is irrelevant everywhere except at $p = 3$, but the
+*residue class of the prime itself*: every $p \equiv 1 \pmod 3$ triples the count, and every other
+prime contributes nothing. A target such as "exactly 242 non-trivial roots" therefore becomes
+"exactly five tripling factors", which is a constraint on the support of the vector, and the search
+proceeds from there (below).
 
 ## Valuations: coordinates of numbers you cannot write down
 
@@ -116,6 +129,30 @@ prime powers — reducing $10^8$ separate questions to a table indexed by $p^e$.
 If a problem's numbers are factorials, binomials, or products of them, do not reach for
 [bignums](/topics/technique/arbitrary-precision-arithmetic). Reach for valuations.
 
+## Factoring a whole family: walk the primes, not the numbers
+
+Valuations read one prime's coordinate of one huge number. The same move scales to a *family* of
+numbers whose factorizations you want in aggregate: fix the prime, and ask which members of the
+family it divides. Problem 421 sums the prime factors below $M = 10^8$ of $n^{15} + 1$ for every
+$n \le 10^{11}$ — $10^{11}$ factorizations of numbers up to 165 digits, if read literally. Exchanging
+the order of summation,
+
+$$\sum_{n \le N} \; \sum_{\substack{p \le M \\ p \mid n^{15}+1}} p
+  \;=\; \sum_{p \le M} p \cdot \#\{\, n \le N : n^{15} \equiv -1 \pmod p \,\},$$
+
+trades those factorizations for one question per prime, and that question is again about a cyclic
+group: the solutions of $n^{15} \equiv -1$ are the negatives of the
+[15th roots of unity](/topics/domain/root-of-unity) modulo $p$, of which there are exactly
+$\gcd(15, p - 1)$. As in 272, the count is decided by the prime's residue class — here modulo $3$
+and modulo $5$ — and each root contributes a floor division's worth of $n$. The cost is linear in
+$\pi(M)$ and independent of $N$; the factorization of $n^{15}+1$ is never computed for any $n$.
+
+That is the general pattern whenever the numbers come from a polynomial: $p \mid f(n)$ depends only
+on $n \bmod p$, so the primes that divide the family are found by solving $f(x) \equiv 0 \pmod p$
+once per prime, not by factoring $f(n)$ once per $n$. It is the
+[sieve](/topics/technique/sieve-of-eratosthenes) idea transplanted from the integers to the values
+of $f$.
+
 ## Constraints on the vector, not on the number
 
 The other recurring inversion is generative. If a problem's condition is really a condition on the
@@ -128,6 +165,12 @@ them, and each one you build already satisfies the condition.
   $2^{a_1} 3^{a_2} 5^{a_3} \cdots$ directly. Problem 347 fixes the support at exactly two primes,
   and uniqueness of factorization then guarantees the resulting values are distinct with no
   deduplication needed. Problems 516, 668 and 682 constrain the support by smoothness.
+- **Split the vector into a constrained part and a free part.** In problem 272 only the primes
+  $\equiv 1 \pmod 3$ (and $9$) are constrained — exactly five of them — while the rest of $n$ is a
+  cofactor drawn from the remaining primes. So $n = A \cdot m$ uniquely, a depth-first search
+  enumerates the few products $A$, and the cofactors are never enumerated at all: a
+  [prefix sum](/topics/technique/prefix-sum) of the admissible $m$ answers
+  $\sum m \le \lfloor L/A \rfloor$ in one lookup per $A$.
 - **Invert a multiplicative function by factoring its value.** Problem 248 wants every $n$ with
   $\varphi(n) = 13!$. Since $\varphi(n) = \prod p_i^{e_i - 1}(p_i - 1)$, each factor divides the
   target, so a prime may appear in $n$ only when $p - 1$ divides $13!$ — a small candidate
@@ -151,10 +194,11 @@ When a problem smells multiplicative, work down this list.
    "smooth", "a perfect square", "coprime to" — every one of these is a statement about exponents.
    Write it that way before writing any code; the algorithm usually falls out of the restatement.
 2. **Ask which coordinates the answer actually depends on.** $\varphi$'s ratio ignores exponents;
-   $\tau$ ignores the primes themselves; $\mathrm{rad}$ ignores multiplicity. Whatever the formula
-   discards, the search can discard too.
+   $\tau$ ignores the primes themselves; $\mathrm{rad}$ ignores multiplicity; a root count reads
+   only each prime's residue class. Whatever the formula discards, the search can discard too.
 3. **Ask whether you need the number at all.** If it is a factorial or a binomial, valuations give
-   you its factorization without it.
+   you its factorization without it. If it is one of many values of a polynomial, loop over the
+   primes and solve the congruence instead.
 4. **Ask whether to enumerate forward.** Generating numbers of a prescribed multiplicative shape is
    almost always cheaper than generating integers and decomposing them.
 5. **Only then decide how to factor.** One number or a scattered few: trial division against a
