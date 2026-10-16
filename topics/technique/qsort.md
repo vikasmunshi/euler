@@ -1,5 +1,5 @@
 <!-- tags: [qsort] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:02Z -->
 # qsort
 
 [`qsort`](https://en.cppreference.com/w/c/algorithm/qsort) is the only sort the C standard
