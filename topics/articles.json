@@ -4646,12 +4646,12 @@
       "path": "technique/bitwise-operation",
       "title": "Bitwise operation",
       "status": "final",
-      "written": "2026-08-12T07:19Z",
+      "written": "2026-10-16T15:08Z",
       "solved": 14,
       "problems": 14,
       "tags": ["bitwise-operation"],
       "refs": ["p0122_s0", "p0136_s0", "p0177_s0", "p0201_s0", "p0208_s0", "p0215_s0", "p0216_s0", "p0229_s0", "p0238_s0", "p0301_s0", "p0315_s0", "p0679_s0", "p0899_s0", "p0944_s0"],
-      "solved_after": ["p0315"]
+      "solved_after": []
     },
     {
       "path": "technique/brahmagupta-fibonacci-identity",
