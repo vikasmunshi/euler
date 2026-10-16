@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-game-theory] -->
-<!-- status: final 2026-08-12T00:49Z -->
+<!-- status: final -->
 # Combinatorial game theory
 
 [Combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) studies
@@ -37,8 +37,10 @@ def wins(position):                       # True iff the player to move wins
 Written with [memoization](/topics/technique/memoization) over a canonical encoding of the
 position, this is the brute force you should write *first* for any of these problems — not because
 it will reach the required size (it never does), but because it is the ground truth against which
-you check the pattern you are about to conjecture. Two of the solved problems here, 301 and 899,
-keep exactly such a brute-force script beside the fast solution for that purpose.
+you check the pattern you are about to conjecture. Several of the solved problems here keep exactly
+such a script beside the fast solution — 301 and 899 an outcome search, 882 an exact-`Fraction`
+value table, 963 a canonical-form engine that reproduces the statement's $F(5) = 21$ before any
+closed form is trusted (see [calibrate theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers)).
 
 ## Sums of games: mex, Grundy values, and Nim
 
@@ -72,8 +74,8 @@ $(n, 2n, 3n)$ a loss and thereby turns a game into a question about the binary d
 Once you hold this, a large family of the problems below is one template: **compute the Grundy
 value of a single heap under the variant's move rule, then XOR**. The variants change only the move
 rule — remove a square number (310), a proper divisor (509), an amount coprime to the heap (560),
-one of a fixed set or a split (888), split into at most $k$ parts (629), delete a digit in some base
-(882, 963). The difficulty moves entirely into the *arithmetic of the Grundy sequence*: it is
+one of a fixed set or a split (888), split into at most $k$ parts (629). The difficulty moves
+entirely into the *arithmetic of the Grundy sequence*: it is
 usually eventually periodic, or determined by a heap's factorisation or its bit pattern, and finding
 that structure — then proving it on a brute-force table — is the problem.
 
@@ -87,8 +89,8 @@ independent parts.
 
 ## When the decomposition fails
 
-Plenty of these problems refuse to split, and reaching for XOR anyway is the classic way to get a
-confidently wrong answer. Three situations to recognise:
+Plenty of these problems refuse the Grundy template, and reaching for XOR anyway is the classic way
+to get a confidently wrong answer. Three situations to recognise:
 
 **One indivisible position.** When a move's legality depends on the *other* components — remove a
 multiple of the smaller pile (325), take the smallest pile's worth spread across piles (899, 900),
@@ -105,16 +107,57 @@ conjecture.
 
 **Partisan games.** If the two players have *different* moves — Left removes from the left, Right
 from the right (948, 949); one player deletes gold coins, the other silver (860, 895); a player may
-only strip their own piles (939); X and O place different symbols (976) — Sprague–Grundy does not
-apply at all. These are [partizan games](/topics/domain/partizan-game), whose values live in
-[Conway's surreal numbers](https://en.wikipedia.org/wiki/Surreal_number) rather than in the nimbers,
-and a position must be classified by *four* outcomes (Left wins whoever starts, Right wins whoever
-starts, first player wins, second player wins). The recurring Euler phrasing "whoever plays first
-loses" or "the arrangement is fair" is precisely the fourth outcome — a game of value zero.
+only strip their own piles (939); X and O place different symbols (976); Dr. One deletes a binary
+1 while Dr. Zero deletes a 0 (882) — Sprague–Grundy does not apply. These are
+[partizan games](/topics/domain/partizan-game), and a position must be classified by *four*
+outcomes (Left wins whoever starts, Right wins whoever starts, first player wins, second player
+wins). The recurring Euler phrasing "whoever plays first loses" or "the arrangement is fair" is
+precisely the fourth outcome — a game of value zero. Note what fails here is the *nimber*, not the
+sum: a partisan position can still be a disjunctive sum, and then it has a theory of its own (next
+section).
 
 **Misère play.** When the player taking the last stone *loses*, the normal-play Grundy machinery
 breaks; misère Nim has a famous patch, but misère variants in general do not, and you must redo the
 induction with the terminal condition flipped rather than adjust the answer at the end.
+
+## Partisan sums: numbers, infinitesimals, and value zero
+
+If each move still touches one component but the players differ, Conway's theory replaces the
+nimber with a general game value $G = \{\,\text{Left's options} \mid \text{Right's options}\,\}$, and
+the value of a sum is still the sum of the values. What changes is the arithmetic those values live
+in, and the two digit-deletion problems show both ends of it.
+
+In 882 each integer on the board is a component — Left deletes a 1 from its binary string, Right a
+0 — and every component turns out to be a [surreal number](/topics/domain/surreal-number), in fact a
+dyadic rational: $\{0 \mid\,\} = 1$, $\{0 \mid 1\} = \tfrac12$, $\{1 \mid\,\} = 2$. Whenever Left's
+best option lies below Right's, Conway's *simplicity rule* says the value is the simplest dyadic
+strictly between them, so one bottom-up table over the integers values every component from just
+its two best options, and the whole board is a single rational $V$. Numbers make the rest of the
+problem arithmetic. A skip turn is a free move for Right, i.e. the integer game $-1$, so $k$ skips
+add $-k$; Left moves first and Right wins exactly when $V - k \le 0$, which makes the minimal number
+of skips $\lceil V \rceil$ — no search over the board at all. Because the denominators are powers of
+two bounded by the bit length, the values can be held as integers scaled by $2^B$, and the simplest
+number between $\ell$ and $r$ is a bit-clearing trick rather than a loop.
+
+Problem 963 plays the same game in ternary, with one change: a digit 2 may be deleted by *either*
+player. That single shared move is enough to break the numbers. The values pick up
+[infinitesimals](https://en.wikipedia.org/wiki/Infinitesimal) — star $* = \{0 \mid 0\}$, up
+$\uparrow = \{0 \mid *\}$ and a tower of smaller ones — which are neither positive, negative nor zero
+in the way a number is, so a value can no longer be stored as a fraction and compared with `<`.
+Two structural facts still carry the problem. Exchanging the players' roles is game *negation*, so a
+setting $(a_1, a_2 \mid b_1, b_2)$ has value $G(a_1) + G(a_2) - G(b_1) - G(b_2)$, "fair" means that
+value is zero, and the count of fair settings is $\sum_v M(v)^2$ over the multiplicities $M(v)$ of
+each pair sum. And equality of games is decidable through their
+[canonical form](/topics/technique/canonical-form): delete dominated options, bypass reversible
+ones, and equal games become the same object. A small canonical-form engine is the honest brute
+force here; its output showed every value is a number plus an infinitesimal, which could then be
+written as a vector of coefficients over independent infinitesimals — with the number part read off
+882's table for the string with the 2s deleted. Once values are vectors, game equality is vector
+equality and game addition is vector addition, and the count is ordinary bucketing.
+
+The lesson across the pair: in a partisan sum, first find out *what kind of value* the components
+take. Numbers give you a total order and plain arithmetic; anything hotter or fuzzier needs a
+canonical representation before you can even test equality, let alone count.
 
 ## Beyond win-or-lose
 
@@ -154,7 +197,10 @@ pipeline is nearly always the same three stages:
    [generating function](https://en.wikipedia.org/wiki/Generating_function) over $k$ heaps, since
    "the XOR of $k$ independent values is zero" is a counting problem in
    $(\mathbb{Z}/2)^{b}$ that a Walsh–Hadamard style transform or a per-bit argument handles in
-   $O(\text{bits})$ rather than $O(n^k)$ — that is the shape of 409, 560 and 888.
+   $O(\text{bits})$ rather than $O(n^k)$ — that is the shape of 409, 560 and 888. With partisan
+   values the same step is a sum or a multiplicity count over values: a rounded-up total (882),
+   or the number of equal pair sums (963), which is cheap because only a few thousand distinct
+   values occur among $10^5$ components.
 
 Problem 961 is a compact illustration of the whole arc: the game is played on the decimal digits of
 an integer, but only the pattern of zero and non-zero slots matters, so a position is a small
@@ -166,8 +212,8 @@ weighting each winning mask by how many integers wear it.
 - **Write the honest brute force first, and keep it.** Every pattern you will conjecture is a
   pattern in its output, and it is the only check you have that the fast version is right.
 - **Ask whether the position is a sum.** If a move touches exactly one independent component, compute
-  Grundy values and XOR. If a move's legality depends on the other components, do not — characterise
-  the whole position instead.
+  Grundy values and XOR — or, for a partisan game, Conway values and add. If a move's legality
+  depends on the other components, do neither — characterise the whole position instead.
 - **Check the convention before anything else.** Normal or misère; impartial or partisan. Both
   mistakes are silent, and both invalidate the entire machinery.
 - **Look at the losing positions in binary.** Then in their factorisations, then as sums of
