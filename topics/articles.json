@@ -7099,12 +7099,12 @@
       "path": "technique/recurrence-relation-application",
       "title": "Recurrence relation (application)",
       "status": "final",
-      "written": "2026-08-08T05:49Z",
+      "written": "2026-10-16T15:24Z",
       "solved": 23,
       "problems": 23,
       "tags": ["recurrence-relation-application"],
       "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0650_s0", "p0692_s0", "p0720_s0"],
-      "solved_after": ["p0297"]
+      "solved_after": []
     },
     {
       "path": "technique/recursion-computer-science",
