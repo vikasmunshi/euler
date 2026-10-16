@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic-application] -->
-<!-- status: final 2026-08-07T15:55Z -->
+<!-- status: final -->
 # Modular arithmetic (application)
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) as a *technique* is not the
@@ -50,6 +50,22 @@ the first several primes until roughly 499 of every 500 candidates fall away bef
 shape in all three — the residue argument is *cheap* (an integer division, or nothing at all,
 because the stride encodes it) and the work it avoids is expensive.
 
+Once a condition is a stride, the last step is to stop walking it. Problem 305 needs to count where
+a digit string $s$ occurs in the [Champernowne](https://en.wikipedia.org/wiki/Champernowne_constant)
+stream $123456789101112\ldots$ up to integers near $10^{12}$, and the hard case is an occurrence that
+straddles two integers: its head $s[{:}i]$ must end $p-1$ and its tail must begin $p$. "Ends in" a
+digit string, with the carry from $p-1$ to $p$ thrown in, sounds like casework; written as a
+congruence it is one line, $p \equiv s[{:}i] + 1 \pmod{10^i}$, and the carry takes care of itself.
+The candidates for $p$ are then an arithmetic progression inside an interval, and those are never
+enumerated — they are *counted*:
+
+```python
+(hi - r) // m - (lo - 1 - r) // m      # members of {p ≡ r (mod m)} in [lo, hi]
+```
+
+A count that would have been a scan over $10^{12}$ integers becomes two floor divisions, cheap
+enough to sit inside a [binary search](/topics/technique/binary-search-algorithm) on the count.
+
 **3 — Carry the residue as the state.** When the quantity itself is unbounded but the question
 depends only on its remainder, the residue becomes the loop's state variable, and an infinite or
 astronomically large state space becomes a finite one. Problem 225 asks whether a Tribonacci
@@ -76,7 +92,8 @@ there to prevent.
 
 The cue is a question whose answer depends only on a remainder attached to a value too large to
 form. When you see it, ask in this order: can the modulus be applied *on paper* to collapse the
-expression (shape 1)? Can it be applied *to the enumeration* as a stride (shape 2)? Can it be the
+expression (shape 1)? Can it be applied *to the enumeration* as a stride — or, better, as a count
+of the stride (shape 2)? Can it be the
 *state* (shape 3)? Only then reach for the arithmetic itself.
 
 Two failure modes are worth naming, because both survive testing on small inputs.
@@ -96,7 +113,9 @@ $-$, $\times$ *in the same modulus as the final answer*.
 **Language semantics on the C side.** Python's `%` returns a non-negative result for a positive
 modulus; C's truncates toward zero, so any expression that can go negative — a difference of two
 residues, an inverse-scaled term — needs normalising, which is why `((x % m) + m) % m` appears in C
-solution after C solution here. The companion hazard is that two residues below $m$ multiply to
+solution after C solution here. Division has the same split: the progression count above relies on
+Python's `//` flooring, and with `lo - 1 - r` negative C's `/` would round the wrong way, so the C
+port of problem 305 carries a small `floor_div` helper. The companion hazard is that two residues below $m$ multiply to
 nearly $m^2$, past the 64-bit ceiling once $m$ exceeds about $3 \times 10^9$; see
 [`__int128`](/topics/technique/int128) for the standard widening. Both bugs are invisible in the
 Python original and both produce a plausible wrong number rather than a crash.
