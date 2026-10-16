@@ -1,5 +1,5 @@
 <!-- tags: [stack-abstract-data-type] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:55Z -->
 # Stack (abstract data type)
 
 A [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)) is the simplest

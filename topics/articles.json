@@ -7318,8 +7318,8 @@
     {
       "path": "technique/stack-abstract-data-type",
       "title": "Stack (abstract data type)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:55Z",
       "solved": 9,
       "problems": 9,
       "tags": ["stack-abstract-data-type"],
