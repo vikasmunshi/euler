@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: final 2026-08-06T22:42Z -->
+<!-- status: final -->
 # Recurrence relation
 
 A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a
@@ -34,7 +34,13 @@ them, because recognising the shape is what tells you which one to write down.
   $T_k = T_{k-2}T_{k-1}$, so the *lengths* satisfy Fibonacci and a digit position can be chased down
   through the concatenations without ever materialising a string; problem 872's trees are built by
   one reparenting rule per step. The lesson generalises: recur on the **cheap shadow** of the
-  structure (lengths, counts, a state index), never on the structure itself.
+  structure (lengths, counts, a state index), never on the structure itself. Problem 943 hides
+  the recurrence one level deeper: its sequence is
+  [its own run-length encoding](https://en.wikipedia.org/wiki/Kolakoski_sequence), a definition
+  with no index arithmetic in it at all. Read it backwards, though, and every element is the
+  *parent* of the run it describes. The prefix is then the leaf level of a derivation tree only
+  logarithmically tall, and a prefix sum becomes one root-to-leaf descent that banks every whole
+  subtree to its left. This is 230's digit chase again, with the tree made explicit.
 - **An algebraic ladder.** Solutions to a [Pell equation](/topics/technique/pells-equation), or
   convergents of a [continued fraction](/topics/domain/continued-fraction), advance by a fixed
   linear update. Problems 94, 140 and 65 all turn a search over candidates into a walk along the
@@ -148,6 +154,16 @@ recurrence with only $O(\sqrt n)$ terms (problems 76 and 78).
   ([watch integer width](/topics/takeaway/watch-integer-width)). And when the problem does *not*
   offer a modulus, expect big integers — the tetranacci count at $n = 500$ is a 140-digit number,
   which Python handles for free and C does not.
+- **Find the state that actually determines the subproblem.** A recurrence over a tree is cheap
+  only if many subtrees coincide, and that depends on what you key them by. In problem 943 a
+  subtree is *not* fixed by its root value: what its descendants are depends on the parity of
+  their positions, so the value of every node below it depends on everything to its left. The
+  key that works is (value, height, a bitmask of those parities down the left edge), and each
+  subtree returns the parities its successor needs. Too small a key gives wrong answers; too
+  large a key shares nothing. With the right key, $2 \times 10^{13}$ leaves collapse to a few
+  million distinct shapes. The siblings' masks then form a deterministic chain over a finite
+  set, so a run of 200-odd identical children is a short tail plus a cycle, which is the
+  finite-state trick above in miniature.
 - **Watch the memory, not just the time.** A two-dimensional recurrence rarely needs its whole
   grid. If every cell depends only on cells one step back along some direction, sweep along that
   direction with two rolling buffers: problem 938's grid has both predecessors on the previous
