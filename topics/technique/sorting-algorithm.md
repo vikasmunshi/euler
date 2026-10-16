@@ -1,5 +1,5 @@
 <!-- tags: [sorting-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:28Z -->
 # Sorting algorithm
 
 A [sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm) puts a sequence in

@@ -7264,12 +7264,12 @@
       "path": "technique/sorting-algorithm",
       "title": "Sorting algorithm",
       "status": "final",
-      "written": "2026-08-03T06:14Z",
+      "written": "2026-10-16T07:28Z",
       "solved": 21,
       "problems": 21,
       "tags": ["sorting-algorithm"],
       "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0070_s0", "p0096_s0", "p0098_s0", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0165_s0", "p0177_s0", "p0184_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0757_s0", "p1000_s0"],
-      "solved_after": ["p0252", "p0336"]
+      "solved_after": []
     },
     {
       "path": "technique/specular-reflection",
