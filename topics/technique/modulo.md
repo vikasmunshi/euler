@@ -1,5 +1,5 @@
 <!-- tags: [modulo] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:46Z -->
 # Modulo
 
 This page is about the [modulo operation](https://en.wikipedia.org/wiki/Modulo) as an *operator* —

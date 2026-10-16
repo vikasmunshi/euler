@@ -6636,8 +6636,8 @@
     {
       "path": "technique/modulo",
       "title": "Modulo",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:46Z",
       "solved": 11,
       "problems": 11,
       "tags": ["modulo"],
