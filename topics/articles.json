@@ -6395,12 +6395,12 @@
       "path": "technique/math-isqrt",
       "title": "math.isqrt",
       "status": "final",
-      "written": "2026-08-12T06:45Z",
+      "written": "2026-10-16T07:25Z",
       "solved": 19,
       "problems": 19,
       "tags": ["math-isqrt"],
       "refs": ["p0064_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0179_s0", "p0180_s0", "p0187_s0", "p0193_s0", "p0198_s0", "p0206_s0", "p0216_s0", "p0218_s0", "p0229_s0", "p0246_s0", "p0348_s0", "p0420_s0", "p0420_s1", "p0429_s0", "p0484_s0", "p0719_s0", "p0950_s0"],
-      "solved_after": ["p0348", "p0950"]
+      "solved_after": []
     },
     {
       "path": "technique/math-prod",
