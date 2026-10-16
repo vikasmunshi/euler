@@ -1,5 +1,5 @@
 <!-- tags: [trial-division] -->
-<!-- status: final 2026-08-03T06:10Z -->
+<!-- status: final -->
 # Trial division
 
 [Trial division](https://en.wikipedia.org/wiki/Trial_division) is the oldest factoring
@@ -106,6 +106,14 @@ but instead of dividing out, you record both `d` and `n/d` on each hit. That enu
 different payload — reach for pairing when you want the divisor list, for peeling when you
 want the prime structure.
 
+The two combine, too. If you peel first, you can build the full divisor list from the
+exponent vector: start from `[1]`, and for each `pᵉ` you strip, multiply every divisor so
+far by `1, p, …, pᵉ`. Problem 251 does exactly this, dividing only by sieved primes. Pairing
+always costs `√n` steps, even when `n` is smooth. Peel-and-expand costs the factorisation
+plus `τ(n)` multiplications, and against a prime list the factorisation stops as soon as
+`p² > remainder`. When you need the divisors of many unrelated large numbers, that
+difference is the budget.
+
 ## When to reach for something else
 
 Trial division is the default until one of three things is true.
@@ -115,7 +123,14 @@ Trial division is the default until one of three things is true.
   sieve replaces it with one `O(n log log n)` build plus `O(log n)` lookups per number.
   Problems 130 and 545 both do this. The contrast is on display in `solutions/public/p0010/`,
   which solves the same problem four ways: the trial-division version is `O(n√n / log n)`
-  and is there precisely to show what the sieve buys.
+  and is there precisely to show what the sieve buys. The condition is a *whole range*,
+  though, not just *many numbers*. Problem 251 factorises one number per step of a walk
+  whose values are spaced far apart and reach into the tens of millions. A
+  smallest-prime-factor table over that span would mostly cover numbers it never reads. So
+  the solution sieves only to the square root and trial-divides each visited number against
+  that prime list. It caps the number of visits by placing a crossover at `L^(1/4)`, past
+  which a different walk takes over. Trial division is the per-item cost that crossover is
+  tuned against.
 - **You only need the verdict, and `n` is large.** `√10¹⁸` is a billion divisions;
   Miller–Rabin settles the same number in a handful of modular exponentiations. Problems
   131, 248, 293 and 545 all pair a small-prime trial-division prefilter with Miller–Rabin
