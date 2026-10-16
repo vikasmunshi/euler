@@ -1,5 +1,5 @@
 <!-- tags: [integer-lattice] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T07:34Z -->
 # Integer lattice
 
 The [integer lattice](https://en.wikipedia.org/wiki/Integer_lattice) $\mathbb{Z}^n$ is the set of
