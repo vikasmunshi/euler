@@ -6230,12 +6230,12 @@
       "path": "technique/linear-recurrence-with-constant-coefficients",
       "title": "Linear recurrence with constant coefficients",
       "status": "final",
-      "written": "2026-10-12T14:24Z",
+      "written": "2026-10-16T15:18Z",
       "solved": 9,
       "problems": 9,
       "tags": ["linear-recurrence-with-constant-coefficients"],
       "refs": ["p0057_s0", "p0094_s0", "p0219_s0", "p0237_s0", "p0529_s0", "p0918_s0", "p0940_s0", "p0951_s0", "p0957_s0"],
-      "solved_after": ["p0957"]
+      "solved_after": []
     },
     {
       "path": "technique/linear-sieve",
