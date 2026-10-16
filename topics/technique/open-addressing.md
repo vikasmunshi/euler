@@ -1,5 +1,5 @@
 <!-- tags: [open-addressing] -->
-<!-- status: final -->
+<!-- status: final 2026-10-16T15:40Z -->
 # Open addressing
 
 Python gives every solution a `dict` and a `set` at no cost. C gives you nothing like them. Each

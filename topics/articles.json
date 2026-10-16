@@ -6823,8 +6823,8 @@
     {
       "path": "technique/open-addressing",
       "title": "Open addressing",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-16T15:40Z",
       "solved": 13,
       "problems": 13,
       "tags": ["open-addressing"],
