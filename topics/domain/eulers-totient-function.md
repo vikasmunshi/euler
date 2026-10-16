@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function] -->
-<!-- status: final 2026-08-03T05:44Z -->
+<!-- status: final -->
 # Euler's totient function
 
 [Euler's totient function](https://en.wikipedia.org/wiki/Euler%27s_totient_function) $\varphi(n)$
@@ -65,22 +65,36 @@ for n in range(2, max_d + 1):
 The trick worth stealing is the primality test: a cell still equal to its index has had no prime
 factor applied, so it is prime. The integer division comes *first* so the arithmetic stays exact.
 Cost is $O(N \log \log N)$; a [linear sieve](/topics/technique/linear-sieve) gets $O(N)$ if the
-$\log \log$ matters. This is the right tool up to roughly $10^8$ cells, and it is what problems 72,
-214 and 337 are built on.
+$\log \log$ matters. This is the right tool when you need *individual* values $\varphi(n)$ for every
+$n$ up to some $10^7$–$10^8$, and it is what problems 72, 214 and 337 are built on.
 
 **A single $\varphi(n)$** needs a factorisation, so it costs whatever factoring costs — fine for
 one number, hopeless for $10^{11}$ of them.
 
-**The summatory $\Phi(N) = \sum_{n \le N} \varphi(n)$ past sieve range** is the recurring wall.
-Sum the first identity over $n \le N$ and it inverts into
+**The summatory $\Phi(N) = \sum_{n \le N} \varphi(n)$** is the recurring wall. Sum the first
+identity over $n \le N$ and it inverts into
 
-$$\Phi(N) = \frac{N(N+1)}{2} - \sum_{q = 2}^{N} \Phi\!\left(\left\lfloor N/q \right\rfloor\right),$$
+$$\Phi(N) = \frac{N(N+1)}{2} - \sum_{q = 2}^{N} \Phi\!\left(\left\lfloor N/q \right\rfloor\right).$$
 
-which, with [quotient blocking](/topics/technique/quotient-blocking) (only $O(\sqrt N)$ distinct
-values of $\lfloor N/q \rfloor$ exist) plus a sieved base case and memoisation, evaluates in about
-$O(N^{2/3})$. That is the standard escape for problems 432, 512 and 931, and the same skeleton as
-the [Meissel–Lehmer](/topics/domain/meissel-lehmer-algorithm) prime count. When the summand is a
-messier multiplicative function than $\varphi$ itself, the generalisation is the
+The identity has a counting reading worth keeping: the $N(N+1)/2$ pairs $1 \le a \le b \le N$ each
+have exactly one reduced form, and the pairs whose gcd is $q$ are the coprime pairs below
+$\lfloor N/q \rfloor$. With [quotient blocking](/topics/technique/quotient-blocking) (only
+$O(\sqrt N)$ distinct values of $\lfloor N/q \rfloor$ exist) and a sieved base case it evaluates in
+about $O(N^{2/3})$. That is the standard escape for problems 432, 512 and 931, and the same skeleton
+as the [Meissel–Lehmer](/topics/domain/meissel-lehmer-algorithm) prime count.
+
+Problem 351 is the cleanest worked instance, and it shows three details the formula hides. First,
+the arguments the recursion ever reaches are exactly the quotients $\lfloor N/k \rfloor$, because
+$\lfloor \lfloor N/k \rfloor / d \rfloor = \lfloor N/(kd) \rfloor$. So instead of a memo dict you
+can keep an array indexed by $k$ and fill it from the largest $k$ down: every large value a step
+needs sits at index $kd$, already done. Second, the cutoff between sieve and recursion is a
+balance, not a constant. A sieve to $L$ costs $O(L)$, the recursion above it costs about
+$O(N/\sqrt{L})$, and the two meet at $L = N^{2/3}$. Third, $\Phi(N) \approx 3N^2/\pi^2$ outgrows 64
+bits once $N$ passes about $5.5 \times 10^9$. The table-backed partial sums stay small, but the
+top-level values need wide integers (`__int128` in C). Its main input is $10^8$, which is still
+within reach of a plain sieve. The recursion wins there anyway: it touches a table of
+$N^{2/3} \approx 2 \times 10^5$ entries rather than $10^8$ of them, and runs in milliseconds. When
+the summand is a messier multiplicative function than $\varphi$ itself, the generalisation is the
 [Min-25 sieve](/topics/technique/min-25-sieve) or the
 [Dirichlet hyperbola method](/topics/technique/dirichlet-hyperbola-method).
 
@@ -91,8 +105,13 @@ Three routes, and it is worth learning to recognise which one you are on.
 **Counting coprime things.** The statement is about reduced fractions, visible lattice points, or
 directions — problems 72, 243, 245, 351, 228, 441. Nothing here needs group theory; you need the
 closed form and a fast table. The tell is a $\gcd(\cdot,\cdot) = 1$ condition, explicit or
-disguised: problem 351 hides it as "hidden from the centre" (a lattice point $(x,y)$ is visible
-exactly when $\gcd(x,y) = 1$), and problem 228 hides it as "distinct edge directions" of a
+disguised. Problem 351 hides it as "hidden from the centre" of a hexagonal orchard. Written in the
+lattice's own basis, a point $(a, b)$ is visible exactly when $\gcd(a, b) = 1$. The step that makes
+it a totient problem is choosing coordinates: take one $60^\circ$ sector and group its points by
+ring $s = a + b$. Then $\gcd(a, b) = \gcd(a, s)$, so ring $s$ holds exactly $\varphi(s)$ visible
+points. A sector shows $\Phi(n)$ points, and the hidden count is the total minus six of those. It is
+also a reminder to count the coprime side and subtract, even when the question asks for the other
+side. Problem 228 hides it as "distinct edge directions" of a
 [Minkowski sum](https://en.wikipedia.org/wiki/Minkowski_addition), a direction $p/q$ in lowest
 terms being contributed by exactly the $\varphi(q)$ choices of $p$.
 
@@ -139,7 +158,9 @@ and the algorithm is usually a recursive walk over prime choices with hard pruni
 - **Know your ceiling before you write the sieve.** A `list` of $10^7$ totients is comfortable;
   $10^{11}$ is not, and the moment the bound crosses about $10^8$ the answer is a quotient-blocked
   recurrence or a structural search, never a bigger array. Problems 245, 432 and 448 all fail on
-  this point first.
+  this point first. If the problem only needs the *sum* $\Phi(N)$, reach for the recurrence well
+  before that ceiling: problem 351 uses it at $10^8$, where a sieve would still fit, because a
+  $2 \times 10^5$-entry table beats a $10^8$-entry one.
 - **A modulus in the question does not license a modulus in the middle.** When a problem asks for
   $\Phi(N) \bmod m$, reduce only the final additive accumulation. $\varphi$ itself is defined by
   divisibility and factorisation, and comparisons, divisions and gcds inside the derivation are all
