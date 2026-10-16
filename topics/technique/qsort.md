@@ -1,11 +1,12 @@
 <!-- tags: [qsort] -->
-<!-- status: final 2026-08-06T22:33Z -->
+<!-- status: final -->
 # qsort
 
 [`qsort`](https://en.cppreference.com/w/c/algorithm/qsort) is the only sort the C standard
 library gives you, and in this repository it is the C port's answer to a single line of Python.
-Nearly every problem below has a Python sibling that wrote `sorted(...)` — or a `set`, which
-amounts to the same thing once you port it — and moved on; the C side has to supply a comparator,
+Nearly every problem below has a Python sibling that wrote `sorted(...)` — or a `set`, a
+`Counter` or a dict of them, which all amount to the same thing once you port them — and moved
+on; the C side has to supply a comparator,
 decide what the array elements actually are, and find somewhere to put the context the comparator
 needs. That gap — one call versus a design decision — is why `qsort` shows
 up as a technique tag at all, and why the same handful of mistakes recur.
@@ -32,12 +33,21 @@ them:
 - **Count or collapse duplicates.** C has no `set` and no `dict`. When the Python sibling wrote
   `len(set(values))`, the C port sorts the array and counts the places where an element differs
   from its predecessor. Problems 757, 221 and 165 all end this way; problem 203 does it over GMP
-  integers, summing each distinct value once as it scans.
+  integers, summing each distinct value once as it scans. The same scan counts *multiplicities*
+  as easily as distinct values: after the sort, how many times a value occurred is the length of
+  its run. Problem 348 wants the sums reachable in exactly a given number of ways, and where its
+  Python sibling asked `np.unique` for counts, the C port sorts the hits and reads each run's
+  length — a `Counter` with no hash table.
 - **Bring equal keys into contiguous runs.** Once sorted by a key, a `while` loop can walk one
   group at a time. Problems 142, 926 and 1000 all use this run-scan: gather the block of records
   sharing a key, process it as a unit, advance. Problem 1000 depends on it for *correctness*: it
   walks edges in increasing weight, and all the edges of one weight must be applied as a single
   snapshot so that two of them never chain — only the sort puts them adjacent to be grouped.
+  Sort by a *composite* key and the runs nest: problem 963's Python groups values in a dict of
+  `Counter`s (outer key → inner value → count), and the port replaces the whole structure with
+  one sort on `(outer, inner)`. A single pass then collapses equal pairs into a weight and records
+  where each outer key's block begins in an offsets array, so "the inner values of key `s`" is the
+  slice `[start[s], start[s + 1])` — the two-level map flattened into two arrays.
 - **Create the monotonicity a later search relies on.** Problem 143 sorts each adjacency list so
   membership becomes a binary search instead of a scan; problem 127 sorts candidates by radical so
   an inner loop can `break` at the first failure; problem 768 sorts *both* halves of a
@@ -58,7 +68,12 @@ qsort(tmp, (size_t)len, 1, cmp_char);
 ```
 
 Note the element size of `1`: `qsort` sorts an array of anything, including raw `char`s, and a
-digit-permutation test becomes `strcmp`.
+digit-permutation test becomes `strcmp`. The element size does not have to be a `sizeof` at all.
+Problem 336 enumerates fixed-length letter arrangements into one flat buffer, `n` bytes per row,
+and sorts the *rows* in place with `qsort(level, count, n, compare_rows)` and a comparator that
+is just `memcmp` over `n` bytes. That is Python's `sorted(list_of_strings)` with no per-string
+allocation and no pointer array: for fixed-width byte strings, `memcmp` order *is* lexicographic
+order.
 
 ## Writing the comparator
 
@@ -74,8 +89,10 @@ return (x > y) - (x < y);   /* -1, 0, or +1 — no subtraction, no overflow */
 ```
 
 Both parenthesised comparisons yield `0` or `1`, so the difference is exactly the sign, and the
-compiler emits it without a branch. Problems 118, 757, 221, 926, 768 and 1000 all carry this exact
-line. It is worth making a habit — it costs nothing and removes an entire class of bug.
+compiler emits it without a branch. Problems 118, 757, 221, 926, 768, 1000, 348 and 963 all carry
+this exact line. On *unsigned* keys subtraction does not even overflow — it wraps, so `x - y`
+cast to `int` gives garbage signs — which is why problem 963's comparator on its `unsigned long
+long` field compares explicitly too. It is worth making a habit — it costs nothing and removes an entire class of bug.
 
 **Give the comparator a total order if you want determinism.** `qsort` is **not stable**: elements
 your comparator calls equivalent may come out in any order, and the order can differ between libc
@@ -94,13 +111,15 @@ else — no user-data parameter. Three ways out appear here:
 
 | approach | seen in | cost |
 | --- | --- | --- |
-| a file-scope variable the comparator reads | 464 (`g_key`), 252 (`sort_base`) | not reentrant; fine in a single-threaded `solve()` |
+| a file-scope variable the comparator reads | 464 (`g_key`), 252 (`sort_base`), 336 (`row_width`) | not reentrant; fine in a single-threaded `solve()` |
 | a [GCC nested function](https://gcc.gnu.org/onlinedocs/gcc/Nested-Functions.html) closing over locals | 127, 142 | a GNU extension, not ISO C |
 | [`qsort_r`](https://man7.org/linux/man-pages/man3/qsort_r.3.html) / C11 `qsort_s` | — | correct, but the argument order differs between glibc and BSD |
 
 Problem 464's declaration says the quiet part out loud: `qsort has no context pointer without
 qsort_r; single-threaded solve() only`. Writing that comment is the honest version of using a
-global here — it is a deliberate, scoped exception, not an accident.
+global here — it is a deliberate, scoped exception, not an accident. Problem 336 shows how thin
+the interface really is: the context its comparator needs is the row width, a number `qsort`
+was handed as its own `size` argument and never passes on.
 
 ## After the sort
 
@@ -119,7 +138,14 @@ sum, so they scan without writing.
 
 The third shape is the run walk: an outer `while` that finds the end of the current key's block
 with an inner `while`, handles the block, then jumps `i` to the block's end. It costs one pass and
-it is how 142, 926, 1000 and 464 all consume their sorted arrays.
+it is how 142, 926, 1000, 464, 348 and 963 all consume their sorted arrays — 348 needs nothing
+from the block but its length `j - i`.
+
+The shapes combine. Problem 963's single post-sort pass compacts in place, keeps a weight per
+surviving element (how many duplicates it absorbed), and notes each outer-key boundary — and it
+asks "differs from its predecessor?" by calling the **comparator itself** rather than restating
+the key fields. Reusing it keeps the scan's notion of equality identical to the sort's, so a key
+field added to one cannot be forgotten in the other.
 
 If what you want is a lookup rather than a pass, the standard library's
 [`bsearch`](https://en.cppreference.com/w/c/algorithm/bsearch) takes the **same comparator** —
