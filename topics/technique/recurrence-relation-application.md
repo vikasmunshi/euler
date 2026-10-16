@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation-application] -->
-<!-- status: final 2026-08-08T05:49Z -->
+<!-- status: final -->
 # Recurrence relation (application)
 
 This is the **technique** side of the [recurrence relation](/topics/domain/recurrence-relation) —
@@ -69,10 +69,27 @@ digits — costs $O(\log n)$, not $O(n)$. Problem 169 counts representations of 
 of two using each power at most twice; it reads the bits of $n$ from the top down, carrying the pair
 $(f(m), f(m-1))$ for the prefix built so far and applying one of two linear maps per bit. Problem 148
 does the base-7 version for Pascal entries not divisible by 7, keeping a running "value so far" and a
-running block weight; problem 692 does the Fibonacci-base (Zeckendorf) version; problem 230 descends
-the *lengths* of a self-similar string rather than the string. The tell is a quantity that is a
-function of a number's representation in some base — then the recurrence runs over digits, and the
-index size stops mattering.
+running block weight; problem 230 descends the *lengths* of a self-similar string rather than the
+string. The tell is a quantity that is a function of a number's representation in some base — then
+the recurrence runs over digits, and the index size stops mattering.
+
+When the question is a *sum* over $0 \le n < N$ rather than one value, the recurrence moves from the
+digits to the **blocks** they delimit. Problems 297 and 692 both work in the
+[Zeckendorf](https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem) (Fibonacci) base. Every $n$ in
+$[F_i, F_{i+1})$ is $F_i + m$ with $m < F_{i-1}$, so the block is a shifted copy of a smaller
+prefix, and the prefix sums $T_i$ over $[0, F_i)$ obey a three-term recurrence. The limit $N$ is
+then peeled greedily, one Zeckendorf term at a time, and each term adds a whole $T_i$ plus a
+correction for the numbers that carry $F_i$ as their leading term:
+
+$$S(N) = T_i + c(F_i, N) + S(N - F_i).$$
+
+The two problems share this skeleton line for line and differ only in $c$. Problem 297 counts terms,
+so every $n \ge F_i$ gains exactly one and $c = N - F_i$. Problem 692 sums the *least* term, which
+the leading $F_i$ only sets when nothing lies below it, so the correction collapses to the single
+number $n = F_i$ and $c = F_i$. That is the reusable part: the block
+recurrence and the greedy peel are fixed, and the problem's function only enters through how one
+leading digit changes it. Problem 148's base-7 count has the same shape with powers of 7 for the
+blocks. In every case about $\log_\varphi N$ (or $\log_7 N$) steps replace $N$ evaluations.
 
 ## Condition on the last piece
 
@@ -100,7 +117,9 @@ analysis are covered on the [recurrence relation](/topics/domain/recurrence-rela
   $O(n^2)$ in digit operations — problem 57's counter is dominated by big-integer addition, and it
   also has to lift Python 3.11's `int`-to-`str` conversion cap when the numerators get long enough.
   In C the same ladder overflows instead: problem 141's discriminant needs `__int128` because the
-  intermediate exceeds $2^{63}$. See [watch integer width](/topics/takeaway/watch-integer-width).
+  intermediate exceeds $2^{63}$. Problem 297's block sums show a quieter case: the step and the limit
+fit in 64 bits, but the running total for a $10^{18}$ limit does not, so only the accumulator moves
+to `unsigned __int128` (printed by hand, since `printf` has no format for it). See [watch integer width](/topics/takeaway/watch-integer-width).
 - **Know the alternative you are beating.** If the direct formula is cheap and the index count is
   small, a recurrence is extra code and extra places to be wrong. The move pays when the index is
   large, when the direct evaluation is superlinear (factorials, powers, valuations), or when it
