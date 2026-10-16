@@ -1,5 +1,5 @@
 <!-- tags: [lookup-table] -->
-<!-- status: final 2026-08-12T06:57Z -->
+<!-- status: final -->
 # Lookup table
 
 A [lookup table](https://en.wikipedia.org/wiki/Lookup_table) is the oldest optimisation in
@@ -29,9 +29,9 @@ What ends up in the slots falls into four recurring shapes:
 
 | What the table holds | Indexed by | Seen in |
 | --- | --- | --- |
-| A relation with no formula | a symbol or small integer | 17 (number → English word), 89 (Roman symbol ↔ value), 103 (the small cases given in the statement) |
+| A relation with no formula | a symbol or small integer | 17 (number → English word), 89 (Roman symbol ↔ value), 103 (the small cases given in the statement), 315 (digit → seven-segment glyph) |
 | Values of an expensive function | its argument | 34, 862 (factorials), 365 ($i! \bmod p$), 160 (running products of units mod $p^5$), 504 ($\gcd(i,j)$), 177 ($\sin(k\pi/n)$), 254 (factorial-base digit sums) |
-| The outcome of a case analysis | the discriminant | 381 ($p \bmod 8$), 159 (digital root), 244 (legal moves per blank cell) |
+| The outcome of a case analysis | the discriminant | 381 ($p \bmod 8$), 315 ($p \bmod 100$ and the digit sum), 159 (digital root), 244 (legal moves per blank cell) |
 | An entire state space's answers | a packed state | 244 (distance to target per board state) |
 
 ## When the table is the specification
@@ -59,8 +59,41 @@ Problem 17 spells numbers in English on the same principle: the table carries $0
 tens, which is exactly the part of English that is irregular, and everything above is composed by
 rule from comma-separated triplets. Problem 103 uses a table for a third reason again — the optimum
 sets for the small sizes named in the statement seed a recursive search, so the table is a **base
-case** rather than an optimisation. In none of these three is the table making anything faster. It
-is the input.
+case** rather than an optimisation. Problem 315 opens with the purest case of all: ten 7-bit masks,
+one per digit, saying which segments of a [seven-segment
+display](https://en.wikipedia.org/wiki/Seven-segment_display) a glyph lights. Nothing derives them —
+whether a "7" lights its top-left segment is a convention the statement's pictures settle — and once
+they are masks, "segments two digits share" is `(SEGMENTS[x] & SEGMENTS[y]).bit_count()`, a
+[bitwise](/topics/technique/bitwise-operation) AND and a popcount. In none of these four is the
+table making anything faster. It is the input.
+
+## Shrink the key until a table fits
+
+The most useful lookup tables are not found, they are *earned*: the input space is huge, and a
+short argument shows the answer depends on only a small projection of it. Problem 381 is one
+instance — a factorial sum modulo a prime collapses to a function of $p \bmod 8$. Problem 315 is a
+sharper one, because the projection has two coordinates and has to be argued for carefully.
+
+Its quantity, summed over every prime in a range up to $2 \times 10^8$, is the segment overlap
+along the chain $p \to s(p) \to s(s(p)) \to \dots$ of digit sums. On the face of it that is a
+per-prime simulation. But for $p < 10^{10}$ the digit sum is below $100$, so, right-aligned, it only
+meets $p$'s last two digits, and every later step depends on $s(p)$ alone. The answer for one prime
+is therefore a function of the pair $(p \bmod 100,\ s(p))$ — a $100 \times 100$ table — plus a
+100-entry table for the rest of the chain. Two hundred million candidates become ten thousand
+slots, and the per-prime work is a digit sum and two reads.
+
+Two things are worth taking from how that table is built:
+
+- **A projection must keep everything the answer can see.** The tail of $103$ is $03$, and its tens
+  position really displays a lit "0"; the integer $3$ does not. Keying on $p \bmod 100$ as a bare
+  number would silently drop that segment. The solution indexes overlaps against $100 + t$, which
+  pins the tens digit for every tail. Reducing the key is a proof obligation, not a convenience, and
+  this is the place it is easiest to discharge sloppily.
+- **A table can be filled from itself.** The chain table is defined recursively — the saving from
+  $s$ onward is the overlap of $s$ with $s(s)$ plus the saving from $s(s)$ — and because
+  $s(s) < s$, filling it in increasing order guarantees every right-hand side is already there.
+  That is [memoization](/topics/technique/memoization)'s recurrence with the order made explicit:
+  no recursion, no hash, and every slot filled whether or not it is read.
 
 ## When the table is a speed decision, the index is the design
 
@@ -105,6 +138,13 @@ table is read one scalar at a time from a Python loop — problem 254 at 1.43 s 
 problem 504 at 7.06 s against 0.097 s, both around 75×. Same technique, same tables; the difference
 is whether the index is a scalar or a whole array (see [vectorised](/topics/technique/vectorized)).
 
+Problem 315 goes one step further, because its table is two-dimensional and NumPy indexes both axes
+at once: `first[p % 100, s]` with `p` and `s` both arrays of every prime and its digit sum is a
+single gather. The digit sums themselves come from a `divmod` loop that runs once per *digit
+position*, not once per prime. The recorded averages on the $[10^8, 2 \times 10^8]$ benchmark are
+1.14 s in Python against 0.82 s in C — a factor of 1.4, with both sides now spending most of their
+time on the sieve rather than on the table.
+
 The other end of the range is worth seeing too. Problem 177 precomputes $\sin(k\pi/n)$ once and
 indexes it throughout — the textbook trigonometric table — in both languages, and the two land at
 2.149 s and 2.135 s. When the table does enough of the work, the language stops mattering.
@@ -141,6 +181,9 @@ guessed bound never is.
   away from being one (`p % 8`, a packed state, a digit), the table is an array and the lookup is
   free. If it is not, you are choosing between a hash and a redesign of the encoding — problem 244
   chose the redesign.
+- **Look for a projection the answer depends on.** A residue, a digit tail, a digit sum: when a
+  short argument shows the answer sees only that, a vast input becomes a small table (381, 315) —
+  provided the reduced key keeps every detail the answer can observe.
 - **Dense fills an array; sparse wants a hash.** Estimate what fraction of slots you would actually
   use before allocating.
 - **Pad rather than remap.** Unreachable slots that keep the index arithmetic-free are cheaper than
@@ -150,7 +193,8 @@ guessed bound never is.
 - **Put the exceptions in the data.** Every irregularity you can move from control flow into a table
   is a branch you cannot get wrong.
 - **If the index can be an array, the whole case analysis vectorises** — which is the one advantage
-  a table has over a memo, and it is frequently the difference between a 2× gap to C and a 75× one.
+  a table has over a memo, and it is frequently the difference between a 1.4–2.2× gap to C and a
+  75× one.
 - **Build it inside the timed function**, sized to the actual input.
 
 <!-- problems (generated by update-tags) -->
