@@ -169,12 +169,12 @@
       "path": "domain/arithmetic-progression",
       "title": "Arithmetic progression",
       "status": "final",
-      "written": "2026-07-23T12:18Z",
+      "written": "2026-10-16T07:31Z",
       "solved": 9,
       "problems": 10,
       "tags": ["arithmetic-progression"],
       "refs": ["p0001", "p0028", "p0049", "p0058", "p0135", "p0136", "p0198", "p0235", "p0720", "p0828"],
-      "solved_after": ["p0235"]
+      "solved_after": []
     },
     {
       "path": "domain/arithmetico-geometric-sequence",
