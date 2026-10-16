@@ -1,5 +1,5 @@
 <!-- tags: [adjacency-graph-theory] -->
-<!-- status: final 2026-10-06T14:44Z -->
+<!-- status: final -->
 # Adjacency (graph theory)
 
 Two vertices are [adjacent](https://en.wikipedia.org/wiki/Adjacency_(graph_theory)) when an edge
@@ -90,25 +90,36 @@ to carry the frontier's connectivity pattern, and that pattern is the state that
 ## What adjacency forbids
 
 Sometimes the leverage runs the other way. Problem 996 starts as a leader board, but restricting
-swaps to adjacent ranks makes it a statement about the path graph. Two observations follow, both
-caused by the adjacency restriction:
+swaps to adjacent ranks makes it a statement about the path graph. The question is which tuples
+of per-player overtake counts are possible once everyone is back where they started. The answer
+uses two graphs, and it helps to keep them apart:
 
-- **Each pair crosses an even number of times, alternately.** Every player ends where they began,
-  so each pair's crossings alternate between the two players. A player's overtake count is then
-  the [degree](/topics/domain/degree-graph-theory) of a vertex in a multigraph built from those
-  pairwise crossings. That immediately forces an even total and stops any one count from
-  exceeding half the total.
-- **A player who never overtakes is a wall.** On a path, a player can only pass someone by
-  swapping with them as a direct neighbour. A player with zero overtakes never moves up, and so
-  must never move down, which means nobody passes them. The board splits into independent pieces
-  at every such player, a [cut vertex](https://en.wikipedia.org/wiki/Biconnected_component) built
-  by the dynamics.
+- **The players' crossing multigraph.** Two players can only change order by swapping as direct
+  neighbours, and each pair has to end in its original order. So any pair crosses an even number
+  of times, and the crossings alternate between the two players. If a pair crosses $2t$ times,
+  each of them gets $t$ overtakes from it. A player's overtake count is then their
+  [degree](/topics/domain/degree-graph-theory) in a loopless multigraph on the *players*. That
+  multigraph is not the board. It forces an even total, and no count can exceed half the total.
+- **The board's path, through its walls.** A player with zero overtakes never moves up. Since
+  they also have to end at home, they never move down either, so nobody passes them. The board
+  splits at every such player, a [cut vertex](https://en.wikipedia.org/wiki/Biconnected_component)
+  created by the dynamics. A positive run of length one is therefore impossible, because a lone
+  player between two walls has nobody to swap with.
 
-Neither of these holds for arbitrary transpositions. The whole reduction comes from the edge set
-being a path. It was conjectured from the structure and confirmed against a brute-force search
-on small boards before it was counted with a
-[generating function](/topics/domain/generating-function). See
+The surprise is how little else the path rules out. Inside a run of at least two positive
+counts, the even-sum and half-sum conditions are also *sufficient*. Players move, so any two of
+them in the same segment can eventually become neighbours, and the realisable tuples are exactly
+the degree sequences you would get if every pair could meet. The adjacency restriction matters
+only at the walls. This characterisation was a conjecture until a breadth-first brute force over
+(permutation, counts) states for all $n \le 7$ agreed with it exactly. See
 [small cases reveal the recurrence](/topics/takeaway/small-cases-reveal-recurrence).
+
+The counting step then uses the locality from the previous section in its smallest form. The
+board is a path, so the frontier of a left-to-right sweep is one position, and the state only has
+to record how the current run stands: just after a wall, at length one (not allowed to close yet),
+or at length two or more. Each of these states carries a polynomial in the total overtake count,
+built with a [generating function](/topics/domain/generating-function), and the sweep costs
+$O(n^2)$ whatever the number of days.
 
 ## How to reason about it
 
@@ -125,7 +136,8 @@ on small boards before it was counted with a
   has to record: a colour, an in/out flag, or a connectivity label.
 - **Ask what the adjacency rules out.** A restriction to neighbouring moves often brings parity,
   alternation, or separation with it, as in problem 996. Those facts can remove most of the search
-  before it starts.
+  before it starts. Then check what the restriction does *not* rule out: in problem 996 it acts
+  only at the walls, and between them the board behaves as if every pair could meet.
 - **Reach for the matrix when you need walks.** If the question counts paths or walks of a given
   length, the $(i,j)$ entry of $A^k$ counts the walks of length $k$ from $i$ to $j$, and
   [matrix exponentiation](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) reaches large
