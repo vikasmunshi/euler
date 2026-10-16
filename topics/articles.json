@@ -81,12 +81,12 @@
       "path": "domain/adjacency-graph-theory",
       "title": "Adjacency (graph theory)",
       "status": "final",
-      "written": "2026-10-06T14:44Z",
+      "written": "2026-10-16T07:30Z",
       "solved": 2,
       "problems": 5,
       "tags": ["adjacency-graph-theory"],
       "refs": ["p0189", "p0393", "p0701", "p0984", "p0996"],
-      "solved_after": ["p0996"]
+      "solved_after": []
     },
     {
       "path": "domain/algebraic-number-conjugates",
