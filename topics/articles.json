@@ -5944,12 +5944,12 @@
       "path": "technique/inclusion-exclusion-principle",
       "title": "Inclusion\u2013exclusion principle",
       "status": "final",
-      "written": "2026-10-12T14:44Z",
+      "written": "2026-10-16T15:17Z",
       "solved": 13,
       "problems": 13,
       "tags": ["inclusion-exclusion-principle"],
       "refs": ["p0001_s0", "p0001_s2", "p0001_s3", "p0001_s4", "p0113_s0", "p0162_s0", "p0184_s0", "p0193_s0", "p0202_s0", "p0234_s0", "p0239_s0", "p0269_s0", "p0319_s0", "p0710_s0", "p0725_s0", "p0957_s0"],
-      "solved_after": ["p0957"]
+      "solved_after": []
     },
     {
       "path": "technique/insertion-sort",
