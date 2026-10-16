@@ -1,5 +1,5 @@
 <!-- tags: [prime-number] -->
-<!-- status: final 2026-08-06T22:26Z -->
+<!-- status: final -->
 # Prime number
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ divisible
@@ -7,10 +7,13 @@ only by $1$ and itself. What makes this tag cohere is not the definition but the
 plays in the problems below: in almost none of them is a prime the object of study. Primality is a
 **predicate** — a condition bolted onto some other structure (a digit pattern, a quadratic, a run of
 consecutive sums, a spiral diagonal, a Fibonacci index) — and the problem is a search over that
-structure, filtered by the predicate. The mathematics of *what primes are* is covered on
+structure, filtered by the predicate. Where it is not a filter, it is a **domain**: the problem
+asks for some quantity attached to each prime and summed over all of them, and the prime is just the
+index of the sum (and often the modulus inside it). The mathematics of *what primes are* is covered on
 [Prime Numbers](/topics/number-theory/prime-numbers), and the decomposition view — a number read
 through its factors — on [prime factorisation](/topics/domain/prime-factorization). This page is
-about the other half: what happens to a program when "and it must be prime" is added to a search.
+about the other half: what happens to a program when "and it must be prime" is added to a search, or
+"for every prime below $N$" is put in front of a computation.
 
 ## Why the predicate is the hard part
 
@@ -97,6 +100,41 @@ over the $\sim 150$ possible digit sums, of which the prime ones are found once 
 Problem 934 reorders a sum over $10^{17}$ integers into a sum over the primes consulted. In each
 case the primes shrink from the thing being searched to a small lookup table on the side.
 
+## When the primes are the domain, not the filter
+
+A second family has no search to prune at all. The primes are given, all of them below a bound, and
+the work is a per-prime quantity summed over the lot. Problem 274 (divisibility multipliers) asks,
+for each prime $p$ coprime to $10$, for the multiplier $m$ that makes "drop the last digit, add $m$
+times it" a test for divisibility by $p$. Problem 315 (digital root clocks) feeds every prime in a
+range to two seven-segment clocks and asks how many segment transitions one saves over the other
+while each clock steps down the prime's digit-sum chain. Here the sieve is not a lookup table the
+search consults. It is the loop itself, and it runs exactly once per prime.
+
+That changes where the effort goes. The congruence reflex of the previous sections has nothing to
+throw away, because every prime counts. What is left is the per-prime body, and the aim is to make
+it so cheap that the sieve is the whole cost. Both problems get there by finding that the per-prime
+quantity depends on far less than the prime:
+
+- In 274 the multiplier turns out to be the
+  [inverse of $10$ modulo $p$](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse). Here
+  the prime plays its other usual part, as a modulus. The obvious body is a
+  [`pow(10, -1, p)`](/topics/technique/extended-euclidean-algorithm) per prime. Since the modulus
+  is $10$, though, the inverse has a closed form $m = (kp + 1)/10$, where $k$ is picked by the last
+  digit of $p$ alone. That is four cases, a ten-entry table, and an expression that vectorises over
+  the whole prime array.
+- In 315 the saving for one prime depends only on its last two digits and its digit sum. The digit
+  sum of a number below $10^{10}$ has at most two digits, so on a right-aligned display it only
+  overlaps the prime's units and tens, and every later step depends on the digit sum alone. So
+  $\Delta(p)$ is a function of $(p \bmod 100,\ s(p))$, a few thousand table entries computed once.
+  The per-prime work drops to one digit sum and two lookups.
+
+The lesson is the counterpart of "the win is upstream of the test": when nothing can be pruned,
+**find the small key the per-prime answer depends on**, and tabulate over the key instead of
+computing over the prime. After that the remaining cost is just generating the primes. Both
+solutions' benchmarks are almost all sieve, which means it is the sieve that is worth optimising: an
+odd-only array that halves the memory traffic, or a segmented library sieve such as
+[primesieve](https://github.com/kimwalisch/primesieve).
+
 ## How to reason about it
 
 When primality appears as a condition in a problem, work through it in this order:
@@ -114,10 +152,15 @@ When primality appears as a condition in a problem, work through it in this orde
    sequence is a sieve over $n$, driven by the congruence conditions that let $p \mid f(n)$.
 5. **If the answer is a count, look for a formula over the primes** instead of a scan over the
    integers — $\pi(x)$ differences, a digit-sum reformulation, a telescoping sum.
+6. **If every prime counts, shrink the per-prime body.** Look for the few residues or digits the
+   quantity actually depends on, and replace the work with a closed form or a table over that key.
+   The sieve should be what you are left paying for.
 
 The recurring mistake is to reach for a faster primality test when the real problem is that too many
-candidates are being tested at all. Almost every solution below that is fast is fast because of step
-one, not step three.
+candidates are being tested at all. Almost every filtered search below that is fast is fast because
+of step one, not step three. The domain problems follow the same rule from the other side: they are
+fast because the work done per prime has been cut down to almost nothing, not because anything
+clever was done with the primes themselves.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
