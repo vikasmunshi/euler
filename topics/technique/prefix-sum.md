@@ -1,5 +1,5 @@
 <!-- tags: [prefix-sum] -->
-<!-- status: final 2026-08-11T09:06Z -->
+<!-- status: final -->
 # Prefix sum
 
 A [prefix sum](https://en.wikipedia.org/wiki/Prefix_sum) is the running total of a sequence:
@@ -53,6 +53,20 @@ Problem 205 shows the probabilistic form. Each player's dice total is
 sum over one distribution is its cumulative distribution function — so "how often does Peter beat
 Colin?" becomes one lookup per outcome instead of enumerating the $4^9 \times 6^6$ joint space.
 
+Problem 943 asks for the sum of the first $N \approx 2 \times 10^{13}$ terms of a self-describing
+([Kolakoski-style](https://en.wikipedia.org/wiki/Kolakoski_sequence)) sequence, and uses the index
+job with two twists. First, it keeps *parallel* prefix arrays over a run of sibling subtrees — leaf
+counts and leaf sums. It finds the sibling that contains the $N$-th term by a `bisect` on the
+counts, then reads the sums at that same index. One array locates, the other answers. Second, the
+sibling chain is eventually periodic: after a lead-in of $\mu$ entries it repeats with period $p$.
+So the arrays only ever hold one period, and the prefix at any $k$ is the stored remainder plus
+whole periods:
+
+$$P(k) = P(\mu + r) + q \bigl(P(\mu + p) - P(\mu)\bigr), \qquad k - \mu = qp + r.$$
+
+That is a prefix sum of an unbounded sequence in $O(1)$ space per chain — the arithmetic version of
+the periodic stream in problem 238.
+
 **When the prefix sum *is* the answer.** For a [multiplicative
 function](/topics/domain/multiplicative-function) $f$, the object of interest is almost always the
 summatory function $\sum_{k \le n} f(k)$; a sieve gives you $f$ pointwise, and the cumulative sum is
@@ -69,10 +83,24 @@ for n in range(2, max_d + 1):
     result += euler_totients[n]
 ```
 
+Problem 351 needs the same totient sum, but at $n = 10^8$ instead of $10^6$. The geometry
+reduces to $3n(n+1) - 6\,\Phi(n)$, so the whole problem comes down to one value of the
+[totient summatory function](https://en.wikipedia.org/wiki/Totient_summatory_function). Here the
+table no longer has to reach $n$. It sieves $\Phi$ with `np.cumsum` only up to about $n^{2/3}$, and
+gets the larger values from the identity $\sum_{d \ge 1} \Phi(\lfloor v/d \rfloor) = v(v+1)/2$,
+evaluated at each quotient $v = \lfloor n/k \rfloor$ from smallest to largest. The prefix table
+stops being the answer and becomes the base case of a sublinear recursion. That is the move to
+reach for once $n$ is too large to sieve.
+
 Once that table exists, the standard number-theoretic machinery applies on top of it: problem 233
-reads a sieved prefix table at $\lfloor \text{limit}/c \rfloor$ for each core, and problems 319 and
-464 group the $O(\sqrt n)$ distinct values of $\lfloor n/d \rfloor$ into *differences* of the
-cumulative table — see [quotient blocking](/topics/technique/quotient-blocking).
+reads a sieved prefix table at $\lfloor \text{limit}/c \rfloor$ for each core, and problems 319, 351
+and 464 group the $O(\sqrt n)$ distinct values of $\lfloor n/d \rfloor$ into *differences* of the
+cumulative table — see [quotient blocking](/topics/technique/quotient-blocking). Problem 272, a
+sibling of 233, multiplies two prefix tables together. Its last prime factor $p > \sqrt T$ can only
+appear to the first power, so it groups those primes by $q = \lfloor T/p \rfloor$. Each group then
+contributes (the sum of good primes in $(T/(q+1),\, T/q]$, a difference of a prime prefix sum found
+by `bisect`) × (the prefix sum of admissible cofactors up to $q$). Two tables, one subtraction each,
+and the primes above $\sqrt T$ are never visited one at a time.
 
 **A second scan over the prefix array.** The prefix array is itself a sequence, and the deeper uses
 scan it again. Maximum subarray is the canonical one:
@@ -99,7 +127,9 @@ sums stop being an intermediate and become the data structure.
   rather than [`accumulate`](/topics/technique/itertools-accumulate) alone. The $n$-entry variant
   needs a special case for $i = 0$, and that is where the off-by-one lives.
 - **It needs an *invertible* operation.** Sum, xor, count, product in a field: all fine, because the
-  query is a subtraction. Min and max are not — no prefix bookkeeping recovers $\min a[i{:}j]$. That
+  query is a subtraction. Problem 943 carries a third, xor array of parity bitmasks beside its
+  counts and sums. Because xor is its own inverse, $q$ whole periods contribute the period's xor
+  once if $q$ is odd and not at all if $q$ is even. Min and max are not — no prefix bookkeeping recovers $\min a[i{:}j]$. That
   is precisely why maximum subarray is solved by a running minimum *over the prefixes* rather than by
   a range-minimum query, and why real range minima need a sparse table or a monotone deque.
 - **Only for a static array.** Any update to the underlying values invalidates every prefix past it.
@@ -110,7 +140,8 @@ sums stop being an intermediate and become the data structure.
 - **Watch the accumulator's width.** A `np.cumsum` in `int64` overflows silently and the result looks
   like data ([watch integer width](/topics/takeaway/watch-integer-width)). Problem 565 bounds its
   chunk width so no chunk's `int64` cumulative sum can overflow and carries the running total as a
-  Python `int`; problem 710 reduces every count mod $m$ as it extends the arrays. Under a modulus,
+  Python `int`; problem 351 keeps its totient prefix sums in `int64` and records, next to each
+  vectorised sum, why that sum stays under $2^{63}$; problem 710 reduces every count mod $m$ as it extends the arrays. Under a modulus,
   remember that the query is a subtraction and needs reducing back into range. In floating point,
   differencing two large nearly-equal prefix sums is
   [catastrophic cancellation](/topics/technique/catastrophic-cancellation) — the technique loses
