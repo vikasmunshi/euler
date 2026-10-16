@@ -1,5 +1,5 @@
 <!-- tags: [bitwise-operation] -->
-<!-- status: final 2026-08-12T07:19Z -->
+<!-- status: final -->
 # Bitwise operation
 
 A [bitwise operation](https://en.wikipedia.org/wiki/Bitwise_operation) acts on an integer one bit at
@@ -33,6 +33,25 @@ no two adjacent set bits. A game-theory question about
 $N$ of them. Problem 899's analysis of a distributed Nim variant turns on the same kind of statement
 about binary structure — a condition on one player's low bits being all ones, which is
 `(b + 1) % 2**k == 0` written as a fact about bit patterns.
+
+**Count the bits and the same identity becomes inclusion–exclusion.** Take the
+[popcount](https://en.wikipedia.org/wiki/Hamming_weight) of both sides — no carries means no
+cross-talk between positions, so it distributes — and you get
+$|a| + |b| = |a \oplus b| + 2\,|a \wedge b|$: the sizes of two sets are their symmetric difference
+plus their intersection counted twice. Problem 315 is this identity dressed as hardware. Each digit
+of a seven-segment display is a 7-bit mask; a clock that blanks the panel between two numbers pays
+`|x| + |y|` transitions, one that flips only the segments that change pays the
+[Hamming distance](https://en.wikipedia.org/wiki/Hamming_distance) `|x ^ y|`, so the saving per step
+is exactly twice the lit segments the two numbers share:
+
+```python
+saving += 2 * (SEGMENTS[dx] & SEGMENTS[dy]).bit_count()     # C: __builtin_popcount((unsigned)(...))
+```
+
+Neither cost needs to be simulated — the difference the problem asks for is a sum of `&`-popcounts
+alone, and because it depends only on digit pairs it collapses into a small table the
+[lookup](/topics/technique/lookup-table) can serve. In Python spell popcount `int.bit_count()`
+(3.10+); `bin(x).count('1')` builds a string to do the same job.
 
 **A shift is exact multiplication or division by a power of two, and the exactness is the point.**
 `x << k` is $x \cdot 2^k$ and `x >> k` is $\lfloor x / 2^k \rfloor$ — never a rounding error, never a
