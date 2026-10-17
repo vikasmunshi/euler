@@ -1,5 +1,5 @@
 <!-- tags: [direct-addressing] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:39Z -->
 # Direct addressing
 
 Direct addressing is the plainest map there is: when every key is a small non-negative integer,

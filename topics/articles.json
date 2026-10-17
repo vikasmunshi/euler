@@ -5140,8 +5140,8 @@
     {
       "path": "technique/direct-addressing",
       "title": "Direct addressing",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:39Z",
       "solved": 8,
       "problems": 8,
       "tags": ["direct-addressing"],
