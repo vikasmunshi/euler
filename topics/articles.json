@@ -3391,8 +3391,8 @@
     {
       "path": "domain/square-free-integer",
       "title": "Square-free integer",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:05Z",
       "solved": 6,
       "problems": 18,
       "tags": ["square-free-integer"],
