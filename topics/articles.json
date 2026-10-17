@@ -4667,8 +4667,8 @@
     {
       "path": "technique/branch-and-bound",
       "title": "Branch and bound",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:41Z",
       "solved": 7,
       "problems": 7,
       "tags": ["branch-and-bound"],
