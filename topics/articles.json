@@ -4513,8 +4513,8 @@
     {
       "path": "technique/array-programming",
       "title": "Array programming",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:21Z",
       "solved": 5,
       "problems": 5,
       "tags": ["array-programming"],

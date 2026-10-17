@@ -1,5 +1,5 @@
 <!-- tags: [array-programming] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:21Z -->
 # Array programming
 
 [Array programming](https://en.wikipedia.org/wiki/Array_programming) means writing a program
