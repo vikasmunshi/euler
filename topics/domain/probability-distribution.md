@@ -1,5 +1,5 @@
 <!-- tags: [probability-distribution] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:37Z -->
 # Probability distribution
 
 A [probability distribution](https://en.wikipedia.org/wiki/Probability_distribution) is a table:
