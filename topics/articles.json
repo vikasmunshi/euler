@@ -4678,8 +4678,8 @@
     {
       "path": "technique/branch-and-bound-search",
       "title": "Branch and bound",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:33Z",
       "solved": 5,
       "problems": 5,
       "tags": ["branch-and-bound-search"],

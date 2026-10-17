@@ -1,5 +1,5 @@
 <!-- tags: [branch-and-bound-search] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:33Z -->
 # Branch and bound
 
 A [branch-and-bound](https://en.wikipedia.org/wiki/Branch_and_bound) search is only as fast as the
