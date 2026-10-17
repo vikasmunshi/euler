@@ -1,5 +1,5 @@
 <!-- tags: [rational-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:59Z -->
 # Rational number
 
 A [rational number](https://en.wikipedia.org/wiki/Rational_number) is a ratio p/q of integers with
