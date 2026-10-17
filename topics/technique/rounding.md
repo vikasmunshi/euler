@@ -1,5 +1,5 @@
 <!-- tags: [rounding] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:53Z -->
 # Rounding
 
 Rounding maps a value onto a grid: the nearest integer, the nearest multiple of 10⁻ᵈ, or the floor
