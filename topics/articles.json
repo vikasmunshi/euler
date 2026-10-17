@@ -7505,8 +7505,8 @@
     {
       "path": "technique/tree-of-primitive-pythagorean-triples",
       "title": "Tree of primitive Pythagorean triples",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:13Z",
       "solved": 6,
       "problems": 6,
       "tags": ["tree-of-primitive-pythagorean-triples"],
