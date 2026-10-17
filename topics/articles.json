@@ -2654,8 +2654,8 @@
     {
       "path": "domain/periodic-sequence",
       "title": "Periodic sequence",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:27Z",
       "solved": 5,
       "problems": 15,
       "tags": ["periodic-sequence"],
