@@ -2841,8 +2841,8 @@
     {
       "path": "domain/prime-counting-function",
       "title": "Prime-counting function",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:35Z",
       "solved": 5,
       "problems": 11,
       "tags": ["prime-counting-function"],
