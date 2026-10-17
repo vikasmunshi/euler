@@ -1,5 +1,5 @@
 <!-- tags: [mobius-inversion-formula] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:48Z -->
 # Möbius inversion formula
 
 Many counts are easy to take *with* multiplicity and hard to take without it. Counting all
