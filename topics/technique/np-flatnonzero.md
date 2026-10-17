@@ -1,5 +1,5 @@
 <!-- tags: [np-flatnonzero] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:33Z -->
 # np.flatnonzero
 
 [`np.flatnonzero`](https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html)
