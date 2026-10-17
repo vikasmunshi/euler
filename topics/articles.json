@@ -6185,8 +6185,8 @@
     {
       "path": "technique/lattice-point",
       "title": "Lattice point",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:23Z",
       "solved": 5,
       "problems": 5,
       "tags": ["lattice-point"],

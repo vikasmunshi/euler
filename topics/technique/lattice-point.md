@@ -1,5 +1,5 @@
 <!-- tags: [lattice-point] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:23Z -->
 # Lattice point
 
 A [lattice point](https://en.wikipedia.org/wiki/Lattice_point) is a point with integer
