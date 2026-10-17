@@ -1,5 +1,5 @@
 <!-- tags: [tree-of-primitive-pythagorean-triples] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:13Z -->
 # Tree of primitive Pythagorean triples
 
 The [tree of primitive Pythagorean triples](https://en.wikipedia.org/wiki/Tree_of_primitive_Pythagorean_triples)
