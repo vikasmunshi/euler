@@ -1,5 +1,5 @@
 <!-- tags: [primality-test] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:30Z -->
 # Primality test
 
 A [primality test](https://en.wikipedia.org/wiki/Primality_test) decides whether a number is
