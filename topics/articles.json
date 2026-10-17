@@ -3248,8 +3248,8 @@
     {
       "path": "domain/self-similarity",
       "title": "Self-similarity",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:56Z",
       "solved": 6,
       "problems": 12,
       "tags": ["self-similarity"],
