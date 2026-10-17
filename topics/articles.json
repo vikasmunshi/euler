@@ -6944,8 +6944,8 @@
     {
       "path": "technique/prime-factorization-application",
       "title": "Prime factorization (application)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:44Z",
       "solved": 7,
       "problems": 7,
       "tags": ["prime-factorization-application"],

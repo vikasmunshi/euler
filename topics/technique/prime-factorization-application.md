@@ -1,5 +1,5 @@
 <!-- tags: [prime-factorization-application] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:44Z -->
 # Prime factorization (application)
 
 The [Prime Numbers](/topics/number-theory/prime-numbers) page explains *why* factorisation matters.
