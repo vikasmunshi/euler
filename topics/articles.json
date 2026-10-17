@@ -4898,8 +4898,8 @@
     {
       "path": "technique/combination",
       "title": "Combination",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:46Z",
       "solved": 7,
       "problems": 7,
       "tags": ["combination"],
