@@ -1,5 +1,5 @@
 <!-- tags: [divisor-sum-sieve] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:08Z -->
 # Divisor-sum sieve
 
 A divisor-sum sieve fills a whole table $f[1..N]$ at once, where each $f(n)$ is a sum over the
