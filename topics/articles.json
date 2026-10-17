@@ -5217,8 +5217,8 @@
     {
       "path": "technique/divisor-sum-sieve",
       "title": "Divisor-sum sieve",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:08Z",
       "solved": 6,
       "problems": 6,
       "tags": ["divisor-sum-sieve"],
