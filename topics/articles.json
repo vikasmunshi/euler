@@ -6592,8 +6592,8 @@
     {
       "path": "technique/mobius-inversion-formula",
       "title": "M\u00f6bius inversion formula",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:48Z",
       "solved": 6,
       "problems": 6,
       "tags": ["mobius-inversion-formula"],
