@@ -1,5 +1,5 @@
 <!-- tags: [p-adic-valuation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:01Z -->
 # P-adic valuation
 
 The [$p$-adic valuation](https://en.wikipedia.org/wiki/P-adic_valuation) $v_p(n)$ is the exponent
