@@ -1,5 +1,5 @@
 <!-- tags: [combination] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:46Z -->
 # Combination
 
 A combination is a selection where order does not matter: k items chosen from n, with
