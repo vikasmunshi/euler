@@ -1,5 +1,5 @@
 <!-- tags: [binary-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:31Z -->
 # Binary number
 
 A [binary number](https://en.wikipedia.org/wiki/Binary_number) writes $n$ as a sum of distinct

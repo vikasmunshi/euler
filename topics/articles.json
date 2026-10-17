@@ -278,8 +278,8 @@
     {
       "path": "domain/binary-number",
       "title": "Binary number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:31Z",
       "solved": 8,
       "problems": 42,
       "tags": ["binary-number"],
