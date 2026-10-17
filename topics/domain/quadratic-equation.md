@@ -1,5 +1,5 @@
 <!-- tags: [quadratic-equation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:35Z -->
 # Quadratic equation
 
 A [quadratic equation](https://en.wikipedia.org/wiki/Quadratic_equation) is rarely what a Project
