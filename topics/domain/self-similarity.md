@@ -1,5 +1,5 @@
 <!-- tags: [self-similarity] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:56Z -->
 # Self-similarity
 
 An object is self-similar when it is built from smaller copies of itself: a dragon curve made of two
