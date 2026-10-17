@@ -2797,8 +2797,8 @@
     {
       "path": "domain/power-of-two",
       "title": "Power of two",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:10Z",
       "solved": 6,
       "problems": 15,
       "tags": ["power-of-two"],
