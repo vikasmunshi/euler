@@ -1,5 +1,5 @@
 <!-- tags: [two-pointer-technique] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:37Z -->
 # Two-pointer technique
 
 The [two-pointer technique](https://en.wikipedia.org/wiki/Two-pointer_technique) keeps two

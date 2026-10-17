@@ -7571,8 +7571,8 @@
     {
       "path": "technique/two-pointer-technique",
       "title": "Two-pointer technique",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:37Z",
       "solved": 7,
       "problems": 7,
       "tags": ["two-pointer-technique"],
