@@ -1,5 +1,5 @@
 <!-- tags: [double-precision-floating-point-format] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:18Z -->
 # Double-precision floating-point format
 
 The [floating-point arithmetic](/topics/technique/floating-point-arithmetic) page asks *when* a

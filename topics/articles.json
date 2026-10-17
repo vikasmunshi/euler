@@ -5239,8 +5239,8 @@
     {
       "path": "technique/double-precision-floating-point-format",
       "title": "Double-precision floating-point format",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:18Z",
       "solved": 5,
       "problems": 5,
       "tags": ["double-precision-floating-point-format"],
