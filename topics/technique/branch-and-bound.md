@@ -1,5 +1,5 @@
 <!-- tags: [branch-and-bound] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:41Z -->
 # Branch and bound
 
 [Branch and bound](https://en.wikipedia.org/wiki/Branch_and_bound) splits a search space into
