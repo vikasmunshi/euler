@@ -1,5 +1,5 @@
 <!-- tags: [mobius-function-application] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T06:50Z -->
 # Möbius function (application)
 
 The [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) $\mu(n)$ is $0$ when

@@ -6581,8 +6581,8 @@
     {
       "path": "technique/mobius-function-application",
       "title": "M\u00f6bius function (application)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:50Z",
       "solved": 6,
       "problems": 6,
       "tags": ["mobius-function-application"],
