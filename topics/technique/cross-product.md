@@ -1,5 +1,5 @@
 <!-- tags: [cross-product] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:16Z -->
 # Cross product
 
 The [cross product](https://en.wikipedia.org/wiki/Cross_product) of two plane vectors,
