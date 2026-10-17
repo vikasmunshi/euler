@@ -1,5 +1,5 @@
 <!-- tags: [mask-computing] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:03Z -->
 # Mask (computing)
 
 A [mask](https://en.wikipedia.org/wiki/Mask_(computing)) is an integer whose bits are read as a row

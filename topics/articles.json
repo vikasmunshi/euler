@@ -6361,8 +6361,8 @@
     {
       "path": "technique/mask-computing",
       "title": "Mask (computing)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:03Z",
       "solved": 6,
       "problems": 6,
       "tags": ["mask-computing"],
