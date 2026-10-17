@@ -2511,8 +2511,8 @@
     {
       "path": "domain/p-adic-valuation",
       "title": "P-adic valuation",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:01Z",
       "solved": 6,
       "problems": 10,
       "tags": ["p-adic-valuation"],
