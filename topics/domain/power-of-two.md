@@ -1,5 +1,5 @@
 <!-- tags: [power-of-two] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:10Z -->
 # Power of two
 
 A [power of two](https://en.wikipedia.org/wiki/Power_of_two) is $2^k$ for some integer
