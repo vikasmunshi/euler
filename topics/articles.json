@@ -7153,8 +7153,8 @@
     {
       "path": "technique/rounding",
       "title": "Rounding",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T06:53Z",
       "solved": 6,
       "problems": 6,
       "tags": ["rounding"],
