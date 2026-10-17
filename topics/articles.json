@@ -2929,8 +2929,8 @@
     {
       "path": "domain/probability-distribution",
       "title": "Probability distribution",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:37Z",
       "solved": 5,
       "problems": 40,
       "tags": ["probability-distribution"],
