@@ -2830,8 +2830,8 @@
     {
       "path": "domain/primality-test",
       "title": "Primality test",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-17T07:30Z",
       "solved": 5,
       "problems": 6,
       "tags": ["primality-test"],
