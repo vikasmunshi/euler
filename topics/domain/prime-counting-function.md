@@ -1,5 +1,5 @@
 <!-- tags: [prime-counting-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-17T07:35Z -->
 # Prime-counting function
 
 The [prime-counting function](https://en.wikipedia.org/wiki/Prime-counting_function) `π(x)` is the
