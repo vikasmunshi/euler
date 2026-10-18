@@ -1,5 +1,5 @@
 <!-- tags: [meet-in-the-middle-attack] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:08Z -->
 # Meet-in-the-middle attack
 
 The [meet-in-the-middle attack](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack) comes from
