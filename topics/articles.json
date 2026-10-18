@@ -6724,8 +6724,8 @@
     {
       "path": "technique/natural-logarithm",
       "title": "Natural logarithm",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:22Z",
       "solved": 4,
       "problems": 4,
       "tags": ["natural-logarithm"],
