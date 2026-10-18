@@ -2346,8 +2346,8 @@
     {
       "path": "domain/modular-multiplicative-inverse",
       "title": "Modular multiplicative inverse",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:15Z",
       "solved": 4,
       "problems": 8,
       "tags": ["modular-multiplicative-inverse"],
