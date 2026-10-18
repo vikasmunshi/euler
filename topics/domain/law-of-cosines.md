@@ -1,5 +1,5 @@
 <!-- tags: [law-of-cosines] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:37Z -->
 # Law of cosines
 
 The [law of cosines](https://en.wikipedia.org/wiki/Law_of_cosines),
