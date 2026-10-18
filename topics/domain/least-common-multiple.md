@@ -1,5 +1,5 @@
 <!-- tags: [least-common-multiple] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:19Z -->
 # Least common multiple
 
 The [least common multiple](https://en.wikipedia.org/wiki/Least_common_multiple)
