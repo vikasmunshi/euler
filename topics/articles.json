@@ -4744,8 +4744,8 @@
     {
       "path": "technique/c-mathematical-functions",
       "title": "C mathematical functions",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T09:58Z",
       "solved": 5,
       "problems": 5,
       "tags": ["c-mathematical-functions"],

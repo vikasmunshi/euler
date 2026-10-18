@@ -1,5 +1,5 @@
 <!-- tags: [c-mathematical-functions] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T09:58Z -->
 # C mathematical functions
 
 `<math.h>` is where a C solution goes the moment a problem stops being pure integer arithmetic:
