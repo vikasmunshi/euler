@@ -3787,8 +3787,8 @@
     {
       "path": "domain/triangular-tiling",
       "title": "Triangular tiling",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:12Z",
       "solved": 4,
       "problems": 7,
       "tags": ["triangular-tiling"],
