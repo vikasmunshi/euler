@@ -5833,8 +5833,8 @@
     {
       "path": "technique/harmonic-series-mathematics",
       "title": "Harmonic series (mathematics)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:20Z",
       "solved": 4,
       "problems": 4,
       "tags": ["harmonic-series-mathematics"],

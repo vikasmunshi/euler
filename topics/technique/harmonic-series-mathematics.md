@@ -1,5 +1,5 @@
 <!-- tags: [harmonic-series-mathematics] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:20Z -->
 # Harmonic series (mathematics)
 
 The [harmonic series](https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)) is
