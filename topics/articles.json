@@ -4623,8 +4623,8 @@
     {
       "path": "technique/bit-length",
       "title": "Bit-length",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:17Z",
       "solved": 4,
       "problems": 4,
       "tags": ["bit-length"],
