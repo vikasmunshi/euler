@@ -1,5 +1,5 @@
 <!-- tags: [transfer-matrix-method] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:38Z -->
 # Transfer matrix method
 
 The [transfer-matrix method](https://en.wikipedia.org/wiki/Transfer-matrix_method) counts
