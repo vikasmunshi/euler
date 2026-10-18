@@ -2104,8 +2104,8 @@
     {
       "path": "domain/law-of-cosines",
       "title": "Law of cosines",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T12:37Z",
       "solved": 3,
       "problems": 8,
       "tags": ["law-of-cosines"],
