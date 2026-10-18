@@ -1,5 +1,5 @@
 <!-- tags: [sqrt] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:05Z -->
 # sqrt
 
 C has no integer square root. When a C solution needs $\lfloor\sqrt n\rfloor$, a loop bound, or a

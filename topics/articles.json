@@ -7285,8 +7285,8 @@
     {
       "path": "technique/sqrt",
       "title": "sqrt",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:05Z",
       "solved": 5,
       "problems": 5,
       "tags": ["sqrt"],
