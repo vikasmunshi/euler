@@ -1,5 +1,5 @@
 <!-- tags: [locality-of-reference] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:40Z -->
 # Locality of reference
 
 [Locality of reference](https://en.wikipedia.org/wiki/Locality_of_reference) is the observation
