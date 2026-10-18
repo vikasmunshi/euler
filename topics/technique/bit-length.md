@@ -38,8 +38,9 @@ limit $N$. Any $x \le N/2$ has $2x$ in range with a chain one step longer, so th
 $(N/2, N]$. The Python sets its scan's lower bound to `2 ** (max_number.bit_length() - 1)`, the
 largest power of two $P \le N$. That is a cautionary use. $P$ is always above $N/2$, so the scan
 also skips $(N/2, P]$, which the doubling argument does not cover. For $N = 10^6$ that is
-$(500000, 524288]$. Both recorded answers lie above $P$, so the results are right, but the sound
-bound is `N // 2`. When you replace an arithmetic bound with a bit-length one, check that it
+$(500000, 524288]$. The C's doubling loop finds the largest power *below* $N$, which is the same $P$
+whenever $N$ is not a power of two, so it skips the same slice. Both recorded answers lie above
+$P$, so the results are right, but the sound bound is `N // 2`. When you replace an arithmetic bound with a bit-length one, check that it
 rounds in the safe direction.
 
 Problem 872 climbs a recursively built tree, where the parent of node $k$ in $T_n$ is $k$ plus the
