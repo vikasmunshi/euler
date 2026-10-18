@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:15Z -->
 # Modular multiplicative inverse
 
 The [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse)
