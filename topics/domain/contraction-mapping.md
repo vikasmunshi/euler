@@ -1,5 +1,5 @@
 <!-- tags: [contraction-mapping] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:43Z -->
 # Contraction mapping
 
 A [contraction mapping](https://en.wikipedia.org/wiki/Contraction_mapping) is a map $T$ that
