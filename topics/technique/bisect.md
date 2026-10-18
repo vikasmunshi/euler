@@ -1,5 +1,5 @@
 <!-- tags: [bisect] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:31Z -->
 # bisect
 
 Python's [`bisect`](https://docs.python.org/3/library/bisect.html) module does one job. Given a
