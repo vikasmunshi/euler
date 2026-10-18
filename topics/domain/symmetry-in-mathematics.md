@@ -1,5 +1,5 @@
 <!-- tags: [symmetry-in-mathematics] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:33Z -->
 # Symmetry in mathematics
 
 A [symmetry](https://en.wikipedia.org/wiki/Symmetry_in_mathematics) of a problem is
