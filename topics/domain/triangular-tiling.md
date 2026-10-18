@@ -1,5 +1,5 @@
 <!-- tags: [triangular-tiling] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:12Z -->
 # Triangular tiling
 
 The [triangular tiling](https://en.wikipedia.org/wiki/Triangular_tiling) fills the plane with
