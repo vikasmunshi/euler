@@ -2126,8 +2126,8 @@
     {
       "path": "domain/least-common-multiple",
       "title": "Least common multiple",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:19Z",
       "solved": 4,
       "problems": 11,
       "tags": ["least-common-multiple"],
