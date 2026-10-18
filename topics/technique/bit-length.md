@@ -1,5 +1,5 @@
 <!-- tags: [bit-length] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:17Z -->
 # Bit-length
 
 The [bit-length](https://en.wikipedia.org/wiki/Bit-length) of a positive integer $n$ is the number
