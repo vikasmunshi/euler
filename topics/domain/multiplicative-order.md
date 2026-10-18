@@ -1,5 +1,5 @@
 <!-- tags: [multiplicative-order] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:03Z -->
 # Multiplicative order
 
 The [multiplicative order](https://en.wikipedia.org/wiki/Multiplicative_order) of `a` modulo `n`,
