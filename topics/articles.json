@@ -5448,8 +5448,8 @@
     {
       "path": "technique/fancy-indexing",
       "title": "fancy-indexing",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:09Z",
       "solved": 4,
       "problems": 4,
       "tags": ["fancy-indexing"],

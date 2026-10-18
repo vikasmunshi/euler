@@ -1,5 +1,5 @@
 <!-- tags: [fancy-indexing] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:09Z -->
 # fancy-indexing
 
 NumPy has two kinds of subscript. A slice `a[lo:hi:step]` selects a regular stride and returns a
