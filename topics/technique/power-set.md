@@ -1,5 +1,5 @@
 <!-- tags: [power-set] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:16Z -->
 # Power set
 
 The [power set](https://en.wikipedia.org/wiki/Power_set) of an $n$-element set is the set of all
