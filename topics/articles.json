@@ -2379,8 +2379,8 @@
     {
       "path": "domain/multiplicative-order",
       "title": "Multiplicative order",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:03Z",
       "solved": 5,
       "problems": 11,
       "tags": ["multiplicative-order"],
