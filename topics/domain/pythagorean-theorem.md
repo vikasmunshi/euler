@@ -76,7 +76,7 @@ $a^2 + s^2$ is a perfect square, and the two languages answer that differently:
 86's Python float test is exact only because $a^2 + s^2$ stays below about $6.6 \times 10^6$, far
 under $2^{53}$. The C version confirms its rounded root with an integer square, which stays correct
 at any size (see [sqrt](/topics/technique/sqrt) for the general rule). 138 is the other extreme: the
-leg lengths grow exponentially, and the 96th has over 120 digits. Python does not need to change
+leg lengths grow exponentially, and by 96 triangles the running total has over 120 digits. Python does not need to change
 anything, while the C needs its own big-integer type. When the theorem leads to a recurrence, check
 the growth rate before choosing the integer type.
 
