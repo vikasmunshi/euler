@@ -62,7 +62,7 @@ is [wheel factorisation](https://en.wikipedia.org/wiki/Wheel_factorization) aime
 polynomial instead of at $n$. A wheel's size is set by its primorial. Adding the next prime
 multiplies the table by $p$ and the survivors by the fraction that $p$ allows. 146 stops the wheel
 at 13 and handles 17 to 37 with per-prime forbidden-residue lookups instead, because a $37\#$
-wheel would have $7 \times 10^{15}$ slots.
+wheel would have $7.4 \times 10^{12}$ slots.
 
 **The growth bound: 293.** Admissible numbers have prime factors that are a prefix of
 $2, 3, 5, \dots$. The primorial is the smallest admissible number using $k$ primes, so
