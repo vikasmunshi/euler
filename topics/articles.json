@@ -6966,8 +6966,8 @@
     {
       "path": "technique/primorial",
       "title": "Primorial",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:21Z",
       "solved": 4,
       "problems": 4,
       "tags": ["primorial"],
