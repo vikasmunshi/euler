@@ -5844,8 +5844,8 @@
     {
       "path": "technique/hash-function",
       "title": "Hash function",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:00Z",
       "solved": 5,
       "problems": 5,
       "tags": ["hash-function"],
