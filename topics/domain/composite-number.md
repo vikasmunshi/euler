@@ -1,5 +1,5 @@
 <!-- tags: [composite-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:13Z -->
 # Composite number
 
 A [composite number](https://en.wikipedia.org/wiki/Composite_number) is an integer greater than 1

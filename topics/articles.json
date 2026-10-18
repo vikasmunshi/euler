@@ -652,8 +652,8 @@
     {
       "path": "domain/composite-number",
       "title": "Composite number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:13Z",
       "solved": 4,
       "problems": 5,
       "tags": ["composite-number"],
