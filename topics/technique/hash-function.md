@@ -1,5 +1,5 @@
 <!-- tags: [hash-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:00Z -->
 # Hash function
 
 A [hash function](https://en.wikipedia.org/wiki/Hash_function) maps a key of any shape to a
