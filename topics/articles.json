@@ -3754,8 +3754,8 @@
     {
       "path": "domain/transfer-matrix-method",
       "title": "Transfer matrix method",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T12:38Z",
       "solved": 3,
       "problems": 7,
       "tags": ["transfer-matrix-method"],
