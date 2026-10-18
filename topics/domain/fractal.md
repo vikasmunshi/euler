@@ -1,5 +1,5 @@
 <!-- tags: [fractal] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:36Z -->
 # Fractal
 
 A [fractal](https://en.wikipedia.org/wiki/Fractal) has detail at every scale: zoom in anywhere and
