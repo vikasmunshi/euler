@@ -1,5 +1,5 @@
 <!-- tags: [primorial] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:21Z -->
 # Primorial
 
 The [primorial](https://en.wikipedia.org/wiki/Primorial) $p_k\#$ is the product of the first $k$
