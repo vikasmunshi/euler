@@ -2995,8 +2995,8 @@
     {
       "path": "domain/pythagorean-theorem",
       "title": "Pythagorean theorem",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:22Z",
       "solved": 4,
       "problems": 4,
       "tags": ["pythagorean-theorem"],

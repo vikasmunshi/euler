@@ -1,5 +1,5 @@
 <!-- tags: [pythagorean-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:22Z -->
 # Pythagorean theorem
 
 The [Pythagorean theorem](https://en.wikipedia.org/wiki/Pythagorean_theorem) says the legs and
