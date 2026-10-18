@@ -1,5 +1,5 @@
 <!-- tags: [knapsack-problem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T12:41Z -->
 # Knapsack problem
 
 The [knapsack problem](https://en.wikipedia.org/wiki/Knapsack_problem) is usually stated as an
