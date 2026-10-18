@@ -6460,8 +6460,8 @@
     {
       "path": "technique/meet-in-the-middle-attack",
       "title": "Meet-in-the-middle attack",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:08Z",
       "solved": 4,
       "problems": 4,
       "tags": ["meet-in-the-middle-attack"],
