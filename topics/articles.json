@@ -7329,8 +7329,8 @@
     {
       "path": "technique/stars-and-bars-combinatorics",
       "title": "Stars and bars (combinatorics)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:11Z",
       "solved": 4,
       "problems": 4,
       "tags": ["stars-and-bars-combinatorics"],
