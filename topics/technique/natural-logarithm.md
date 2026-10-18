@@ -1,5 +1,5 @@
 <!-- tags: [natural-logarithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-18T10:22Z -->
 # Natural logarithm
 
 The [natural logarithm](https://en.wikipedia.org/wiki/Natural_logarithm) turns products into sums
