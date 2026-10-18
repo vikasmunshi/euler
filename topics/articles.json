@@ -6911,8 +6911,8 @@
     {
       "path": "technique/power-set",
       "title": "Power set",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T10:16Z",
       "solved": 4,
       "problems": 4,
       "tags": ["power-set"],
