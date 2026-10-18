@@ -861,8 +861,8 @@
     {
       "path": "domain/cyclic-group",
       "title": "Cyclic group",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-18T12:29Z",
       "solved": 3,
       "problems": 9,
       "tags": ["cyclic-group"],
