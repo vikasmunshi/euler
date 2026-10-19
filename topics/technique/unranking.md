@@ -1,5 +1,5 @@
 <!-- tags: [unranking] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:39Z -->
 # Unranking
 
 [Unranking](https://en.wikipedia.org/wiki/Unranking) is the inverse of ranking: given an index $k$
