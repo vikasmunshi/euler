@@ -1,5 +1,5 @@
 <!-- tags: [collections-defaultdict-list] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:46Z -->
 # collections.defaultdict(list)
 
 [`collections.defaultdict(list)`](https://docs.python.org/3/library/collections.html#collections.defaultdict)
