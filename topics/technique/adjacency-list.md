@@ -1,5 +1,5 @@
 <!-- tags: [adjacency-list] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:52Z -->
 # Adjacency list
 
 An [adjacency list](https://en.wikipedia.org/wiki/Adjacency_list) stores a graph as, for each
