@@ -7142,8 +7142,8 @@
     {
       "path": "technique/round-off-error",
       "title": "Round-off error",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:35Z",
       "solved": 3,
       "problems": 3,
       "tags": ["round-off-error"],
