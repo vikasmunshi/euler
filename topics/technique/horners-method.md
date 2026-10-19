@@ -1,5 +1,5 @@
 <!-- tags: [horners-method] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:46Z -->
 # Horner's method
 
 [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method) evaluates a polynomial by
