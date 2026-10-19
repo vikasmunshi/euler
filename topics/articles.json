@@ -5668,8 +5668,8 @@
     {
       "path": "technique/gauss-summation",
       "title": "Gauss summation trick",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:31Z",
       "solved": 3,
       "problems": 3,
       "tags": ["gauss-summation"],
