@@ -1,5 +1,5 @@
 <!-- tags: [breadth-first-search] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:41Z -->
 # Breadth-first search
 
 [Breadth-first search](https://en.wikipedia.org/wiki/Breadth-first_search) (BFS) explores
