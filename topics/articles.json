@@ -4436,8 +4436,8 @@
     {
       "path": "technique/amortized-analysis",
       "title": "Amortized analysis",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:49Z",
       "solved": 3,
       "problems": 3,
       "tags": ["amortized-analysis"],
