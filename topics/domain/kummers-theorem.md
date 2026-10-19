@@ -1,5 +1,5 @@
 <!-- tags: [kummers-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:44Z -->
 # Kummer's theorem
 
 [Kummer's theorem](https://en.wikipedia.org/wiki/Kummer%27s_theorem) says that the exponent
