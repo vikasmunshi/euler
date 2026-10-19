@@ -1,5 +1,5 @@
 <!-- tags: [difference-of-two-squares] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:45Z -->
 # Difference of two squares
 
 The [difference of two squares](https://en.wikipedia.org/wiki/Difference_of_two_squares) is

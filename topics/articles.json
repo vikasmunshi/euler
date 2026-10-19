@@ -938,8 +938,8 @@
     {
       "path": "domain/difference-of-two-squares",
       "title": "Difference of two squares",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:45Z",
       "solved": 3,
       "problems": 4,
       "tags": ["difference-of-two-squares"],
