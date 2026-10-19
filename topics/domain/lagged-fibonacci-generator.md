@@ -1,5 +1,5 @@
 <!-- tags: [lagged-fibonacci-generator] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:37Z -->
 # Lagged Fibonacci generator
 
 A [lagged Fibonacci generator](https://en.wikipedia.org/wiki/Lagged_Fibonacci_generator) (LFG)
