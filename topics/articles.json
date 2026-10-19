@@ -4997,8 +4997,8 @@
     {
       "path": "technique/cross-multiplication",
       "title": "Cross-multiplication",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:48Z",
       "solved": 3,
       "problems": 3,
       "tags": ["cross-multiplication"],
