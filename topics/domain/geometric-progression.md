@@ -1,5 +1,5 @@
 <!-- tags: [geometric-progression] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:42Z -->
 # Geometric progression
 
 A [geometric progression](https://en.wikipedia.org/wiki/Geometric_progression) is a sequence

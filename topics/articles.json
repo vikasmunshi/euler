@@ -1554,8 +1554,8 @@
     {
       "path": "domain/geometric-progression",
       "title": "Geometric progression",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:42Z",
       "solved": 3,
       "problems": 11,
       "tags": ["geometric-progression"],
