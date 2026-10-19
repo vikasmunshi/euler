@@ -1,5 +1,5 @@
 <!-- tags: [round-off-error] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:35Z -->
 # Round-off error
 
 [Round-off error](https://en.wikipedia.org/wiki/Round-off_error) is the gap between a real number and
