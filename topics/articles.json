@@ -3259,8 +3259,8 @@
     {
       "path": "domain/semiprime",
       "title": "Semiprime",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:39Z",
       "solved": 3,
       "problems": 4,
       "tags": ["semiprime"],
