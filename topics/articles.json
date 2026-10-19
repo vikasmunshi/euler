@@ -850,8 +850,8 @@
     {
       "path": "domain/cycle-graph",
       "title": "Cycle graph",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:40Z",
       "solved": 3,
       "problems": 10,
       "tags": ["cycle-graph"],

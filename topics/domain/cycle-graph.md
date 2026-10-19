@@ -1,5 +1,5 @@
 <!-- tags: [cycle-graph] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:40Z -->
 # Cycle graph
 
 A [cycle graph](https://en.wikipedia.org/wiki/Cycle_graph) $C_n$ is $n$ vertices joined in a single
