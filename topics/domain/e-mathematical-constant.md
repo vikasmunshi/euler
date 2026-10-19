@@ -23,8 +23,8 @@ $e$'s are $a_0 = 2$ and then the repeating triple $1, 2k, 1$ for $k = 1, 2, \dot
 Its convergents therefore come from the usual recurrence $h_k = a_k h_{k-1} + h_{k-2}$ with an
 explicit $a_k$. The calculus face appears whenever a quantity is split into equal parts and then
 multiplied, because the maximiser of $(N/x)^x$ is $x = N/e$. The series face is behind any
-"expected number of uniform draws" or "sum of $1/i!$" problem. The probability that $n$ uniforms are in
-increasing order is $1/n!$, so the expected count of draws until their sum exceeds 1 is $e$.
+"expected number of uniform draws" or "sum of $1/i!$" problem. The probability that $n$ uniforms sum to
+less than 1 is $1/n!$, so the expected count of draws until their sum exceeds 1 is $\sum_{n \ge 0} 1/n! = e$.
 
 ## Three faces across the problems
 
