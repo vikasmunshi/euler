@@ -1,5 +1,5 @@
 <!-- tags: [highly-composite-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:50Z -->
 # Highly composite number
 
 A [highly composite number](https://en.wikipedia.org/wiki/Highly_composite_number) has more

@@ -1774,8 +1774,8 @@
     {
       "path": "domain/highly-composite-number",
       "title": "Highly composite number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:50Z",
       "solved": 3,
       "problems": 4,
       "tags": ["highly-composite-number"],
