@@ -5195,8 +5195,8 @@
     {
       "path": "technique/divide-and-conquer-algorithm",
       "title": "Divide-and-conquer algorithm",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:35Z",
       "solved": 3,
       "problems": 3,
       "tags": ["divide-and-conquer-algorithm"],
