@@ -1,5 +1,5 @@
 <!-- tags: [frequency-statistics] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:42Z -->
 # Frequency (statistics)
 
 A [frequency](https://en.wikipedia.org/wiki/Frequency_(statistics)) is how many times a value occurs
