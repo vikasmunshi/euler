@@ -1,5 +1,5 @@
 <!-- tags: [concave-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:38Z -->
 # Concave function
 
 A function is [concave](https://en.wikipedia.org/wiki/Concave_function) when the chord between

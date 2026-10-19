@@ -685,8 +685,8 @@
     {
       "path": "domain/concave-function",
       "title": "Concave function",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:38Z",
       "solved": 3,
       "problems": 3,
       "tags": ["concave-function"],
