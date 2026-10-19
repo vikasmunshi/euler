@@ -41,7 +41,7 @@ $n < 10^7$ with $\varphi(n)$ a digit permutation of $n$. Since $n/\varphi(n) = \
 distinct prime factor increases the ratio, and small ones increase it most. A prime is ruled out:
 $\varphi(p) = p - 1$ has a different digit sum mod 9 from $p$. So the best candidates
 are semiprimes with both factors near $\sqrt{10^7}$, whose totient $(p-1)(q-1)$ needs no
-factorisation. The search covers a narrow band of prime pairs. Here is the public Python:
+factorisation. The search covers a narrow band of prime pairs. In outline, the public Python is:
 
 ```python
 for prime_1 in (p for p in primes_generator() if p > min_prime_1):
@@ -88,7 +88,7 @@ form in $p, q, r$ because of the same shared-factor structure.
   every $\pi$, and `np.arange` subtracts the indices. C calls the primesieve C API and runs a
   hand-written `upper_bound` once per small prime. It finds the cut-off by binary search on
   `p * p < limit`, so no floating-point square root is involved.
-- **245**: the two prefix-bound products $m p^2$ that the pruning test exists to reject are the ones that
+- **245**: the prefix-bound products $m p^2$ that the pruning test exists to reject are exactly the ones that
   overflow `int64`, so C evaluates them in `__int128`. It also uses `__int128` in the Miller–Rabin
   multiply that Python gets from `pow(a, d, n)`.
 
