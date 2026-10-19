@@ -1,5 +1,5 @@
 <!-- tags: [counting-sort] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:39Z -->
 # Counting sort
 
 [Counting sort](https://en.wikipedia.org/wiki/Counting_sort) sorts integers from a small range
