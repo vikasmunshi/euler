@@ -1,5 +1,5 @@
 <!-- tags: [divide-and-conquer-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:35Z -->
 # Divide-and-conquer algorithm
 
 A [divide-and-conquer algorithm](https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm)
