@@ -1,5 +1,5 @@
 <!-- tags: [discriminant] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:36Z -->
 # Discriminant
 
 The [discriminant](https://en.wikipedia.org/wiki/Discriminant) of $ax^2 + bx + c$ is

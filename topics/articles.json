@@ -5173,8 +5173,8 @@
     {
       "path": "technique/discriminant",
       "title": "Discriminant",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:36Z",
       "solved": 3,
       "problems": 3,
       "tags": ["discriminant"],
