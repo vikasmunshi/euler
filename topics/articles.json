@@ -5932,8 +5932,8 @@
     {
       "path": "technique/in-place-algorithm",
       "title": "In-place algorithm",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:37Z",
       "solved": 3,
       "problems": 3,
       "tags": ["in-place-algorithm"],

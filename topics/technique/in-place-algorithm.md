@@ -1,5 +1,5 @@
 <!-- tags: [in-place-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:37Z -->
 # In-place algorithm
 
 An [in-place algorithm](https://en.wikipedia.org/wiki/In-place_algorithm) transforms its data
