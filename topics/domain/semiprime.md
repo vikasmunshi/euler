@@ -1,5 +1,5 @@
 <!-- tags: [semiprime] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:39Z -->
 # Semiprime
 
 A [semiprime](https://en.wikipedia.org/wiki/Semiprime) is a product of exactly two primes,
