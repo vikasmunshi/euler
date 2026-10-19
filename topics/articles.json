@@ -4392,8 +4392,8 @@
     {
       "path": "technique/adjacency-list",
       "title": "Adjacency list",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:52Z",
       "solved": 3,
       "problems": 3,
       "tags": ["adjacency-list"],
