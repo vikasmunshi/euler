@@ -1,5 +1,5 @@
 <!-- tags: [constraint-propagation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:32Z -->
 # Constraint propagation
 
 [Constraint propagation](https://en.wikipedia.org/wiki/Constraint_propagation) means using what the
