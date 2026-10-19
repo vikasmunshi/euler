@@ -1,5 +1,5 @@
 <!-- tags: [exclusive-or] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:34Z -->
 # Exclusive or
 
 [Exclusive or](https://en.wikipedia.org/wiki/Exclusive_or) (XOR, $\oplus$, `^` in both C and Python) is
