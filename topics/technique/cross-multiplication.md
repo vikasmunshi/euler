@@ -1,5 +1,5 @@
 <!-- tags: [cross-multiplication] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:48Z -->
 # Cross-multiplication
 
 [Cross-multiplication](https://en.wikipedia.org/wiki/Cross-multiplication) replaces a test on
