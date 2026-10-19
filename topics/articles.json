@@ -4942,8 +4942,8 @@
     {
       "path": "technique/constraint-propagation",
       "title": "Constraint propagation",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:32Z",
       "solved": 3,
       "problems": 3,
       "tags": ["constraint-propagation"],
