@@ -1,5 +1,5 @@
 <!-- tags: [decimal] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:47Z -->
 # decimal
 
 Python's [`decimal`](https://docs.python.org/3/library/decimal.html) module is

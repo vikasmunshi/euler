@@ -5052,8 +5052,8 @@
     {
       "path": "technique/decimal",
       "title": "decimal",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:47Z",
       "solved": 3,
       "problems": 3,
       "tags": ["decimal"],
