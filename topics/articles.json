@@ -2049,8 +2049,8 @@
     {
       "path": "domain/lagged-fibonacci-generator",
       "title": "Lagged Fibonacci generator",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:37Z",
       "solved": 3,
       "problems": 4,
       "tags": ["lagged-fibonacci-generator"],
