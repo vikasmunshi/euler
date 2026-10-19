@@ -1213,8 +1213,8 @@
     {
       "path": "domain/exclusive-or",
       "title": "Exclusive or",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T09:34Z",
       "solved": 3,
       "problems": 17,
       "tags": ["exclusive-or"],
