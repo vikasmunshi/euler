@@ -46,7 +46,7 @@ band of cubes and looks for a group of exactly five:
 permuted_cubes: dict[str, list[int]] = collections.defaultdict(list)
 for cube_number in cube_numbers:
     permuted_cubes["".join(sorted(str(cube_number)))].append(cube_number)
-solutions = set(min(v) for k, v in permuted_cubes.items() if len(v) == num_permutations)
+solutions: set[int] = set((min(v) for k, v in permuted_cubes.items() if len(v) == num_permutations))
 ```
 
 Grouping a whole band before testing matters. "Exactly five" can only be decided once no more
