@@ -81,14 +81,15 @@ transition. Here BFS is used for its layer-completeness guarantee.
 - **244**: Python uses a `bytearray` of $2^{20}$ for `dist`, a `collections.deque` as the queue
   (`len(frontier)` pops per layer), and a list of tuples as the DFS stack. C uses static arrays: a
   `dist[1 << 20]`, an `int` queue array with `head`/`tail` indices marking each layer's end, and
-  three parallel stack arrays. The Python per-state cost is the roughly 19× gap; the algorithm is the same.
+  three parallel stack arrays. C is about 19 times faster, all of it interpreter overhead in the BFS layer
+  expansion, since the algorithm is the same.
 - **387**: the frontier is a Python list of tuples rebuilt each level. In C it is two growable
   `Frontier` buffers swapped between levels. Values go up to $10^{32}$, so C stores them as
   `unsigned __int128` and calls GMP's `mpz_powm` for primality tests past $2^{64}$. Python's `int`
   and `pow(a, d, n)` handle both ranges.
 - **679**: Python builds the trie as a list of `dict`s, so it can test `ch in goto[node]`. C uses a
-  fixed `goto_tbl[32][4]` with $-1$ for missing edges and a 32-slot array as the BFS queue. The tree
-  has 13 nodes, so a fixed-size array is enough.
+  fixed `goto_tbl[32][4]` with $-1$ for missing edges and a 32-slot array as the BFS queue. The trie
+  of four 4-letter keywords has at most 17 nodes, so a fixed-size array is enough.
 
 ## How to reason about it
 
