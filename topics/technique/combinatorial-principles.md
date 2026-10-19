@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-principles] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:53Z -->
 # Combinatorial principles
 
 The [combinatorial principles](https://en.wikipedia.org/wiki/Combinatorial_principles) are the

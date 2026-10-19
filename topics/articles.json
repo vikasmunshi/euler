@@ -4909,8 +4909,8 @@
     {
       "path": "technique/combinatorial-principles",
       "title": "Combinatorial principles",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:53Z",
       "solved": 3,
       "problems": 3,
       "tags": ["combinatorial-principles"],
