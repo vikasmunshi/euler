@@ -1,5 +1,5 @@
 <!-- tags: [amortized-analysis] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:49Z -->
 # Amortized analysis
 
 [Amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis) bounds the *total*
