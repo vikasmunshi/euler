@@ -1,5 +1,5 @@
 <!-- tags: [fermats-little-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:38Z -->
 # Fermat's little theorem
 
 [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem) says that for a
