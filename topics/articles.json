@@ -2896,8 +2896,8 @@
     {
       "path": "domain/prime-power",
       "title": "Prime power",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:51Z",
       "solved": 3,
       "problems": 7,
       "tags": ["prime-power"],

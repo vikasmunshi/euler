@@ -1,5 +1,5 @@
 <!-- tags: [prime-power] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:51Z -->
 # Prime power
 
 A [prime power](https://en.wikipedia.org/wiki/Prime_power) is a number $p^k$ with $p$ prime
