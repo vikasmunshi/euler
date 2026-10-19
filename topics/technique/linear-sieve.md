@@ -1,5 +1,5 @@
 <!-- tags: [linear-sieve] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:43Z -->
 # Linear (Euler) sieve
 
 The [linear sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve), also
