@@ -1103,8 +1103,8 @@
     {
       "path": "domain/e-mathematical-constant",
       "title": "E (mathematical constant)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:52Z",
       "solved": 3,
       "problems": 6,
       "tags": ["e-mathematical-constant"],
