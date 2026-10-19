@@ -1,5 +1,5 @@
 <!-- tags: [gauss-summation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:31Z -->
 # Gauss summation trick
 
 The story goes that the young Gauss, told to add the numbers from 1 to 100, paired the first with the last,
