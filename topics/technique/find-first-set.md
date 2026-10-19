@@ -1,5 +1,5 @@
 <!-- tags: [find-first-set] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T09:32Z -->
 # Find first set
 
 [Find first set](https://en.wikipedia.org/wiki/Find_first_set) (ffs) returns the position of the lowest
