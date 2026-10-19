@@ -1,5 +1,5 @@
 <!-- tags: [completing-the-square] -->
-<!-- status: final -->
+<!-- status: final 2026-10-19T06:40Z -->
 # Completing the square
 
 [Completing the square](https://en.wikipedia.org/wiki/Completing_the_square) rewrites

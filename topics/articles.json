@@ -630,8 +630,8 @@
     {
       "path": "domain/completing-the-square",
       "title": "Completing the square",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-19T06:40Z",
       "solved": 3,
       "problems": 3,
       "tags": ["completing-the-square"],
