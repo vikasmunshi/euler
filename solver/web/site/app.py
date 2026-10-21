@@ -863,15 +863,17 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
 #: with its `requires` floor (tests/test_web_channel.py holds these to the registry's).
 #:
 #: The order is by data flow. `summary` first: it is the import, and its `problems.json` is
-#: the deck's main input. `update-models` before `update-docs`, which quotes the `Model` enum
-#: in the command catalogue's usage lines. `update-usd-rate` and `update-tags` are independent
-#: of the docs, but `update-tags` rewrites `topics/articles.json`, which the deck counts.
-#: `update-presentation-data` last: it reads all three — the progress file, the article index
-#: and the command catalogue — so it must see each already regenerated.
+#: the deck's main input. `update-tags` is independent of the docs, but it rewrites
+#: `topics/articles.json`, which the deck counts. `update-presentation-data` last: it reads all
+#: three — the progress file, the article index and the command catalogue — so it must see each
+#: already regenerated.
+#:
+#: `update-models` and `update-usd-rate` are deliberately **not** here: they rewrite files inside
+#: the package (`solver/ai/models.py`, `solver/config/values.conf`), and an upload is no reason
+#: to move the code under a web shell's feet (the change fails the unit tests run from it). They
+#: stay verbs run on their own.
 _PROGRESS_CHAIN: tuple[tuple[str, str], ...] = (
     ('summary', 'maintainer'),
-    ('update-models', 'admin'),
-    ('update-usd-rate', 'maintainer'),
     ('update-tags', 'contributor'),
     ('update-docs', 'admin'),
     ('update-presentation-data', 'maintainer'),
@@ -883,7 +885,7 @@ def _progress_chain(subject: Subject) -> str:
 
     A verb above the subject's rung is left out rather than left to be refused: a refusal is
     a non-zero status, and under `&&` it would stop every verb after it — a maintainer's
-    upload would never reach `update-tags` behind the admin-floored `update-models`.
+    upload would never reach `update-presentation-data` behind the admin-floored `update-docs`.
     """
     return ' && '.join(verb for verb, floor in _PROGRESS_CHAIN if subject.has(floor))
 
