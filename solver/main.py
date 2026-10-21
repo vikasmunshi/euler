@@ -10,18 +10,22 @@ import argparse
 from solver.config import config, enter_repo
 from solver.crypto.keys import unlock_session
 from solver.shell import SolverShell
+from solver.shell.extension import Extension, ExtensionError, load_extension
 from solver.utils.loader import load_commands
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
-def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual entry
+def main(argv: list[str] | None = None, *, extension: Extension | None = None) -> int:  # pragma: no cover
     """Parse CLI arguments and launch the solver shell.
 
     Arguments:
         (none)      Launch an interactive shell session.
         COMMANDS    Run as a single command block, then exit with its status.
+
+    *extension* is how a package built on the shell adds commands and overlays to it
+    (:mod:`solver.shell.extension`); the plain `solver` entry point passes none.
 
     Returns:
         The exit status of the command block, or 0 on clean interactive exit.
@@ -44,6 +48,11 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
     # resolved subject — the checkout-owner uid or a redeemed shell ticket — so no
     # caller can choose the command set it gets by passing an argument.
     load_commands()
+    if extension is not None:
+        try:
+            load_extension(extension)
+        except ExtensionError as exc:
+            raise SystemExit(f'extension: {exc} — refusing to start') from None
 
     # The vault gate, before any command runs. `id` and `env` rest encrypted, and the
     # readers that need them — the git clean/smudge filter above all — are

@@ -19,7 +19,7 @@ Functions:
 """
 from __future__ import annotations
 
-__all__ = ['register']
+__all__ = ['register', 'replace_body']
 
 import ast
 import enum
@@ -840,6 +840,35 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
     return result
 
 
+#: Every `register()`-ed command's spec, by command name — what :func:`replace_body` swaps
+#: the function inside, so the adapter, its parsing and its completion all stay as built.
+_specs: dict[str, _CommandSpec] = {}
+
+
+def _contract(func: Callable[..., Any]) -> tuple[list[inspect.Parameter], Any]:
+    """The parts of *func*'s signature a replacement must match: parameters with `Ask`
+    metadata stripped (the adapter keeps the original's), and the return annotation."""
+    signature = inspect.signature(func, eval_str=True)
+    return _split_asks(list(signature.parameters.values()))[0], signature.return_annotation
+
+
+def replace_body(name: str, func: Callable[..., int]) -> None:
+    """Make the `register()`-ed command *name* run *func* instead of its own function.
+
+    The extension mechanism's `replace` overlay (docs/package-split.md § 3.2). Only the body
+    changes: the adapter, usage, flags, completion and the docstring the help shows are the
+    original's, which is why *func* must have the same signature — anything else raises
+    :class:`ValueError`. Direct Python calls to the original function are unaffected.
+    """
+    spec = _specs.get(name)
+    if spec is None:
+        raise ValueError(f'{name!r} is not a register()-ed command')
+    if _contract(func) != _contract(spec.func):
+        raise ValueError(f'{name!r}: replacement {func.__module__}.{func.__qualname__} '
+                         f'does not match the signature of {spec.func.__module__}.{spec.func.__qualname__}')
+    spec.func = func
+
+
 def register[**P](
         *,
         aliases: tuple[str, ...] = (),
@@ -921,6 +950,7 @@ def register[**P](
     def _register(func: Callable[P, int]) -> Callable[P, int]:
         name = func.__name__.replace('_', '-')
         spec = _build_command_spec(func, name, pass_ctx, quietable, completers)
+        _specs[name] = spec
 
         def _completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
             return _complete(spec, ctx, incomplete)

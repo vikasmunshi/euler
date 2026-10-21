@@ -101,6 +101,9 @@ class CommandRegistry():
     def __init__(self) -> None:
         self._commands: dict[str, Command] = {}
         self._by_alias: dict[str, str] = {}
+        #: Names of commands that exist but were left unregistered because the subject is
+        #: below their floor — so an extension's overlay on one is skipped, not "unknown".
+        self.withheld: set[str] = set()
 
     def register(self, cmd: Command) -> Command:
         """Register *cmd*; raises :class:`ValueError` on name/alias conflict."""
@@ -173,6 +176,7 @@ def command(
     def _decorate(func: CommandFn) -> CommandFn:
         cmd_name = name or func.__name__.lstrip('_').replace('_', '-')
         if not is_permitted(requires):
+            registry.withheld.add(cmd_name)
             return func
         registry.register(Command(
             name=cmd_name,

@@ -44,6 +44,7 @@ solver.shell.builtins,True
 solver.shell.command,
 solver.shell.dialogue,
 solver.shell.docstring,
+solver.shell.extension,
 solver.shell.interpreter,
 solver.shell.lexer,
 solver.shell.parser,

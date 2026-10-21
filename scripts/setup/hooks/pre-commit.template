@@ -189,6 +189,16 @@ else
     fail "mypy reported type errors"
 fi
 
+# ── layering: the solver shell must not import the web tier ──────────────
+# docs/package-split.md § 3.1. Known couplings sit in scripts/linters/layers.allow,
+# which only ratchets down: a new import fails, and so does a stale allowlist line.
+section "layering (solver ↛ web)"
+if "$VENV/bin/python" scripts/linters/layers.py .; then
+    pass "no new solver → web imports"
+else
+    fail "solver imports the web tier (or layers.allow has a stale line)"
+fi
+
 # ── Verdict ──────────────────────────────────────────────────────────────
 print_verdict
 exit $?

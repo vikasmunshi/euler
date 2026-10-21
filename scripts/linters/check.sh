@@ -81,11 +81,18 @@ echo "interaction guard ${dir_to_check} -> ${seam_rc}"
 # registry is what it walks, and only an admin subject sees all of it (the command is
 # admin-floored, so a lesser profile finds no such command and this step is skipped).
 doclint_rc=0
+layers_rc=0
 if [[ "${dir_to_check}" == solver || "${dir_to_check}" == */solver ]]; then
     echo "checking command docstrings ..."
     solver "check-commands"
     doclint_rc=$?
     echo "command docstrings -> ${doclint_rc}"
+
+    # layering: the solver shell must not import the web tier (docs/package-split.md § 3.1).
+    echo "checking layering ..."
+    python "$(dirname "$0")/layers.py" "$(dirname "${dir_to_check}")"
+    layers_rc=$?
+    echo "layering -> ${layers_rc}"
 fi
 
-exit $(( "${ws_rc}" + "${mypy_rc}" + "${flake8_rc}" + "${shellcheck_rc}" + "${seam_rc}" + "${doclint_rc}" ))
+exit $(( "${ws_rc}" + "${mypy_rc}" + "${flake8_rc}" + "${shellcheck_rc}" + "${seam_rc}" + "${doclint_rc}" + "${layers_rc}" ))

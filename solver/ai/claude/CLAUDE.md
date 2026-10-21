@@ -106,6 +106,10 @@ User- and developer-facing docs live under `docs/`:
 - `docs/syntax.md` — the authoritative command-language reference.
 - `docs/config-guide.md` — configuration: `values.conf` vs `env.conf`, precedence, and what is
   deliberately not a setting.
+- `docs/package-split.md` — design of record for splitting the tree into the solver shell, content
+  site and web shell packages (in progress; phased plan in § 4). Until it lands, the solver side
+  must not import the web tier: `scripts/linters/layers.py` (pre-commit) enforces it, with known
+  couplings in `scripts/linters/layers.allow`, which only ratchets down.
 
 The command catalogue (in `user-guide.md`) and `commands-index.md` are **generated** from the live
 registry by the `update-docs` command (`solver/utils/update_doc.py`). After changing any command's
@@ -174,6 +178,7 @@ solver/
     command.py         — Command framework for shell v2: Context, Command, registry, and decorator.
     dialogue.py        — Every question the shell asks: one interaction model, in one place.
     docstring.py       — Reading a command's docstring: the shape both `?` and `check-commands` rely on.
+    extension.py       — Extensions: how a package built on the solver shell adds to it, without the shell knowing.
     interpreter.py     — Interpreter for shell v2: execute the parser's statements.
     lexer.py           — Lexer for shell v2: syntax-check a command block and normalise it.
     parser.py          — Parser for shell v2: canonical form (the lexer's output) → typed statements.
