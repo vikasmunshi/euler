@@ -878,7 +878,7 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('saved the progress page', body)
         self.assertTrue((self.scratch / 'solutions' / '.progress.html').exists())
         # The import is `summary`'s, run in the terminal — this tier writes only the page —
-        # followed by the regenerating verbs a maintainer may run (the admin-floored `update-docs` left out).
+        # followed by the regenerating verbs (no admin verb rides an upload).
         self.assertEqual(json.loads(resp.headers['HX-Trigger']), {'euler-term-run': (
             'summary && update-tags && update-presentation-data')})
         self.assertEqual(problems_json.read_bytes() if problems_json.exists() else None, before)

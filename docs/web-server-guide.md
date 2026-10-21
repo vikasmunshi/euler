@@ -1488,10 +1488,11 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   the import is `summary`'s, which the response runs in the user's terminal
   (`HX-Trigger: {"euler-term-run": "summary && …"}` → the same `run` message the git menu's
   verbs post), chained with `&&` to the regenerating verbs in data-flow order —
-  `update-tags`, `update-docs`, `update-presentation-data` — less any above the uploader's
-  rung (`_PROGRESS_CHAIN`). `update-models` and `update-usd-rate` are left out: they rewrite
-  files inside the package (`solver/ai/models.py`, `solver/config/values.conf`), which an
-  upload has no business moving. So the upload gets everything `summary` does and this tier must not: the
+  `update-tags`, `update-presentation-data` — less any above the uploader's rung
+  (`_PROGRESS_CHAIN`). `update-models`, `update-docs` and `update-usd-rate` are left out:
+  there is no admin over the web shell, and they rewrite source and settings
+  (`solver/ai/models.py`, `docs/`, `solver/config/values.conf`) that an upload has no
+  business moving. So the upload gets everything `summary` does and this tier must not: the
   solved-preserving merge into `problems.json`, the staff notice for unregistered answers,
   fetching new problems' statements, and the commit. When the shell has re-written
   `problems.json` it emits `OSC 5379` `progress;`, and a listener inside `solutions.html`

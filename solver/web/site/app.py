@@ -863,19 +863,18 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
 #: with its `requires` floor (tests/test_web_channel.py holds these to the registry's).
 #:
 #: The order is by data flow. `summary` first: it is the import, and its `problems.json` is
-#: the deck's main input. `update-tags` is independent of the docs, but it rewrites
-#: `topics/articles.json`, which the deck counts. `update-presentation-data` last: it reads all
-#: three — the progress file, the article index and the command catalogue — so it must see each
-#: already regenerated.
+#: the deck's main input. `update-tags` next: it rewrites `topics/articles.json`, which the deck
+#: counts. `update-presentation-data` last: it reads both, so it must see each already
+#: regenerated.
 #:
-#: `update-models` and `update-usd-rate` are deliberately **not** here: they rewrite files inside
-#: the package (`solver/ai/models.py`, `solver/config/values.conf`), and an upload is no reason
-#: to move the code under a web shell's feet (the change fails the unit tests run from it). They
-#: stay verbs run on their own.
+#: The admin verbs are deliberately **not** here — there is no admin over the web shell.
+#: `update-models`, `update-docs` and `update-usd-rate` regenerate source and settings inside the
+#: package and the docs tree (`solver/ai/models.py`, `docs/`, `solver/config/values.conf`), and
+#: an upload is no reason to move them under a web shell's feet (the change fails the unit tests
+#: run from it). They stay verbs run on their own, from the terminal.
 _PROGRESS_CHAIN: tuple[tuple[str, str], ...] = (
     ('summary', 'maintainer'),
     ('update-tags', 'contributor'),
-    ('update-docs', 'admin'),
     ('update-presentation-data', 'maintainer'),
 )
 
@@ -884,8 +883,7 @@ def _progress_chain(subject: Subject) -> str:
     """The `&&` chain a progress upload types into *subject*'s terminal.
 
     A verb above the subject's rung is left out rather than left to be refused: a refusal is
-    a non-zero status, and under `&&` it would stop every verb after it — a maintainer's
-    upload would never reach `update-presentation-data` behind the admin-floored `update-docs`.
+    a non-zero status, and under `&&` it would stop every verb after it.
     """
     return ' && '.join(verb for verb, floor in _PROGRESS_CHAIN if subject.has(floor))
 
