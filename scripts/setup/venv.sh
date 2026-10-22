@@ -75,11 +75,13 @@ deploy_content() {
     local project_root="$1" scratch
     scratch="$(mktemp -d)"
     echo "Staging euler-content (the public tree) and installing it into ${VENV_DIR}..."
-    if "${PYTHON}" "${project_root}/scripts/content/stage.py" "${scratch}/content" \
-            && sudo "${VENV_PY}" -m pip install --quiet --upgrade "${scratch}/content"; then
-        rm -rf "${scratch}"
-    else
-        rm -rf "${scratch}"
+    local ok=0
+    "${PYTHON}" "${project_root}/scripts/content/stage.py" "${scratch}/content" \
+        && sudo "${VENV_PY}" -m pip install --quiet --upgrade "${scratch}/content" || ok=1
+    # The install builds in place, as root (build/, *.egg-info), so the scratch dir is
+    # partly root-owned: remove it as root, and never let the cleanup fail the deploy.
+    sudo rm -rf "${scratch}" || true
+    if [ "${ok}" -ne 0 ]; then
         echo "Error: euler-content did not install — the public site has nothing to serve." >&2
         return 1
     fi
