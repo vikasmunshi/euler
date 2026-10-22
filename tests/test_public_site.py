@@ -15,6 +15,7 @@ from unittest.mock import patch
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
+from euler_site.cache import build_fingerprint
 from euler_site.site.app import build_public_app
 from euler_site.site.config import SiteConfig
 from tests import silence
@@ -50,6 +51,17 @@ class StageTests(unittest.TestCase):
     def test_the_content_version_is_the_codes(self) -> None:
         from solver.version import __version__
         self.assertEqual(stage.version(), __version__)
+
+
+class FingerprintTests(unittest.TestCase):
+    def test_any_change_to_the_build_changes_the_fingerprint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'a.md').write_text('one', encoding='utf-8')
+            before = build_fingerprint(root)
+            self.assertEqual(build_fingerprint(root), before, 'stable while nothing changes')
+            (root / 'a.md').write_text('two!', encoding='utf-8')
+            self.assertNotEqual(build_fingerprint(root), before)
 
 
 class PublicSiteTests(AioHTTPTestCase):
@@ -117,6 +129,31 @@ class PublicSiteTests(AioHTTPTestCase):
             with self.subTest(method=method, path=path):
                 resp = await self.client.request(method, path, headers=_ADMIN)
                 self.assertIn(resp.status, (404, 405), f'{method} {path}')
+
+    @unittest_run_loop
+    async def test_a_page_is_public_and_revalidated(self) -> None:
+        resp = await self.client.get('/solutions/0001/')
+        self.assertEqual(resp.headers['Cache-Control'], 'public, no-cache')
+        self.assertIn('HX-Request', resp.headers['Vary'])
+        etag = resp.headers['ETag']
+        again = await self.client.get('/solutions/0001/', headers={'If-None-Match': etag})
+        self.assertEqual(again.status, 304)
+        self.assertEqual(await again.read(), b'')
+
+    @unittest_run_loop
+    async def test_a_fragment_and_a_page_are_different_entries(self) -> None:
+        page = await self.client.get('/docs/')
+        fragment = await self.client.get('/docs/', headers={'HX-Request': 'true'})
+        self.assertNotEqual(page.headers['ETag'], fragment.headers['ETag'])
+        stale = await self.client.get('/docs/', headers={'HX-Request': 'true', 'If-None-Match': page.headers['ETag']})
+        self.assertEqual(stale.status, 200, "a page's tag does not revalidate the fragment")
+
+    @unittest_run_loop
+    async def test_an_error_is_not_kept(self) -> None:
+        resp = await self.client.get('/solutions/0101/p0101_s0.py')
+        self.assertEqual(resp.status, 404)
+        self.assertEqual(resp.headers['Cache-Control'], 'no-store')
+        self.assertNotIn('ETag', resp.headers)
 
     @unittest_run_loop
     async def test_identity_headers_are_ignored(self) -> None:

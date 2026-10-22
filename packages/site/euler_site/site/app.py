@@ -37,7 +37,7 @@ import jinja2
 from aiohttp import web
 
 from solver.auth import LADDER, Authorizations, Subject, slugify
-from euler_site.cache import cache_middleware
+from euler_site.cache import build_fingerprint, cache_middleware, revalidated_middleware
 from euler_site.csp import csp_middleware
 from euler_site.site import content, gitstate
 from euler_site.site.config import SiteConfig
@@ -47,6 +47,8 @@ from euler_site.site.validate import EDITABLE_SUFFIXES, validate, validate_artic
 log = logging.getLogger('euler-content')
 
 _TEMPLATES = Path(__file__).resolve().parent / 'templates'
+#: The site package itself — code and templates: what the public pages are rendered by.
+_PACKAGE_DIR = Path(__file__).resolve().parent.parent
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 #: The capability every authenticated profile holds — "may view the site".
@@ -1089,7 +1091,13 @@ def build_public_app(config: SiteConfig) -> web.Application:
     own with no access to any home. There is no identity middleware — the identity headers
     are never read, so a request carrying them is as anonymous as one without — and only the
     read routes exist.
+
+    Its pages are the same for everyone and change only with a deploy, so they carry
+    validators (:func:`~euler_site.cache.revalidated_middleware`): an `ETag` from a
+    fingerprint of the content tree and this package, taken once at startup, and a 304 for
+    a browser that already holds the page.
     """
-    app = web.Application(middlewares=[cache_middleware, csp_middleware])
+    fingerprint = build_fingerprint(config.repo_root, _PACKAGE_DIR)
+    app = web.Application(middlewares=[cache_middleware, csp_middleware, revalidated_middleware(fingerprint)])
     install_content(app, config, None, public=True)
     return app

@@ -242,7 +242,9 @@ refuses outright if anything under `solutions/private` would be included. `euler
 returns the installed tree, and the content readers take it exactly as they take a clone.
 
 The public copy is as current as the last deploy: every venv deploy re-stages and reinstalls
-it, so `make redeploy-web` refreshes it with the code.
+it, so `make redeploy-web` refreshes it with the code. That is also what lets its pages be
+cached: each carries an `ETag` from a fingerprint of the installed tree and the site package,
+revalidated on every use and answered with a 304 without rendering (web server guide § 11.10).
 
 ---
 

@@ -1863,6 +1863,20 @@ Two paths need naming because they are easy to miss:
   a history miss, and htmx re-requests the pane (`refreshOnHistoryMiss` stays `false`, so
   it is an ajax fetch, not a full reload).
 
+**The public site's pages are the exception to `no-store`.** Signed out, a page is the same
+for everyone and changes only when a deploy replaces the content package and the code, so
+`euler-site` gives every successful page validators (`revalidated_middleware`): an `ETag`
+from a fingerprint of the installed content tree and the site package — path, size and
+mtime of every file, taken once at startup, so every deploy changes it — combined with the
+path, the query and the headers the body depends on (`HX-Request`, `Sec-Fetch-Dest`, which
+`Vary` names: a fragment and a full page share a URL). The directive is `public, no-cache`:
+kept, by a browser or a shared cache, and revalidated before every use. A revalidation with
+a matching `If-None-Match` is a **304 answered before the handler runs**, so nothing is
+rendered. Errors stay `no-store`, files keep their own validators, and a page whose body
+carried its response's CSP nonce would be left untagged (a 304 brings a fresh nonce in its
+header; no template uses one today). Signed-in pages stay `no-store`: they are per-user and
+follow the clone.
+
 **No positive `max-age` anywhere, deliberately.** Nothing here is addressed by a versioned
 URL: `/assets/site.css` is the same path before and after a redeploy. Caching those hard
 would need content-stamped URLs (`site.css?v=<hash>`) generated into the templates and an

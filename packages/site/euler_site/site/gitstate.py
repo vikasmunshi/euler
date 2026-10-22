@@ -64,7 +64,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from solver.crypto import wire
+# The module, as wire.py asks — in the spelling incremental mypy resolves stably across packages.
+import solver.crypto.wire as wire
 
 log = logging.getLogger('euler-content')
 
