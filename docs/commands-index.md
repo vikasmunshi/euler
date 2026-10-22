@@ -601,16 +601,10 @@ Open a solution file in the web code editor.
 
 The counterpart to `show` (which opens the rendered problem): *problem* defaults
 to the current problem, and *filename* completes to the files `ls` lists. The
-file must already exist — run `new` to create a solution first. Channel-aware,
-like `show` (the channel is the resolved subject's):
-
-- **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
-  that the xterm.js page rides over the PTY → WebSocket pipe to point the app
-  shell's left pane at the file's editor (`<origin>/edit/solutions/NNNN/<relpath>`).
-
-- **terminal** — opens that editor URL in the named browser tab "solver-edit"
-  (via `browser open-in-tab`); errors early if the `browser` command is
-  unavailable.
+file must already exist — run `new` to create a solution first. Opens the file's
+editor (`<base_url>/edit/solutions/NNNN/<file>`) in the named browser tab
+"solver-edit" (via `browser open-in-tab`), and errors early if the `browser`
+command is unavailable; in the web shell it opens in the viewer panel instead.
 
 **usage**
 
@@ -1626,26 +1620,16 @@ Open a problem's page, or any site page, in a browser or the web viewer panel.
 * ❏ uses/sets current problem.
 * » supports --silent to suppress output.
 
-When *problem* is omitted, opens the current problem. The path depends on the
-shell's channel (from the resolved subject):
-
-- **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
-  browser tab "solver-doc" (via
-  `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
-  focused and refreshed, a different problem navigates the tab in place, and the
-  tab is recreated if it has been closed. Prints an error and returns early if
-  the "browser" command is not available.
-
-- **web** — the shell has no local browser to drive (it runs on the server while
-  the user's browser is elsewhere), so it emits an `OSC 5379` control sequence
-  (`open;<NNNN>;<token>`) on stdout. The xterm.js page rides it over the
-  PTY → WebSocket pipe and swaps the app shell's left pane to
-  `<origin>/solutions/NNNN/`; the monotonic token lets the page ignore the
-  sequence when the PTY replay buffer re-sends it on reconnect.
+When *problem* is omitted, opens the current problem. Opens the problem's page
+(`<base_url>/solutions/NNNN/`) in the named browser tab "solver-doc" (via
+`browser open-in-tab`). Every `show` reuses that one tab: the same problem is
+focused and refreshed, a different problem navigates the tab in place, and the
+tab is recreated if it has been closed. Prints an error and returns early if
+the "browser" command is not available. In the web shell, which has no local
+browser to drive, the page opens in the viewer panel instead.
 
 When *path* is given, `show` opens that site page instead of the problem's —
-`show topics/technique/concatenation` — over the same channels (`nav;<token>;<path>`
-on web, the "solver-doc" tab on a terminal). The page ignores *problem*, but naming
+`show topics/technique/concatenation`. The page ignores *problem*, but naming
 one still makes it the current problem: `show 121 topics/…` selects 121.
 
 **usage**

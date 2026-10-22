@@ -154,7 +154,6 @@ solver/
     git.py             — Git and GitHub (gh) commands and helpers — the repository workflow.
     list.py            — List solution directory contents.
     new.py             — The `new` command and solution-file formatting (black / isort / autoflake).
-    osc.py             — The shell → browser control channel: `OSC 5379`.
     problems.py        — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     progress.py        — The progress page → `problems.json` pipeline, shared by the shell and the web tier.
     results.py         — Results: save and retrieve problem results.
@@ -239,6 +238,10 @@ solver/
       identity.py      — Who is calling: `SO_PEERCRED` → login → identity → profile.
       notify.py        — Send a message **from a command** — the message layer's actual purpose.
       store.py         — The message spool at `<state>/messages.json` — messages and read-state.
+    shell/             — The web shell: the solver shell, extended for a PTY framed by the browser.
+      __main__.py      — Web shell entry point: `python -m solver.web.shell` — what the per-user service's PTY runs.
+      osc.py           — The shell → browser control channel: `OSC 5379`.
+      viewer.py        — The web shell's `show` and `edit`: swap the app shell's left pane instead of opening a tab.
     site/              — The content service — server-rendered pages + htmx fragments.
       __main__.py      — Content service entry point: `python -m solver.web.site`.
       app.py           — The content service aiohttp app: identity from forward_auth, routes, gating.
