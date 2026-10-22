@@ -180,6 +180,7 @@ solver/
     extension.py       — Extensions: how a package built on the solver shell adds to it, without the shell knowing.
     interpreter.py     — Interpreter for shell v2: execute the parser's statements.
     lexer.py           — Lexer for shell v2: syntax-check a command block and normalise it.
+    login.py           — Login: who the session runs as, and whether its vault is open — settled before any command.
     parser.py          — Parser for shell v2: canonical form (the lexer's output) → typed statements.
     register.py        — The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
     session.py         — Session capture: tee shell output and typed input to a plain-text log file.
@@ -240,6 +241,7 @@ solver/
       store.py         — The message spool at `<state>/messages.json` — messages and read-state.
     shell/             — The web shell: the solver shell, extended for a PTY framed by the browser.
       __main__.py      — Web shell entry point: `python -m solver.web.shell` — what the per-user service's PTY runs.
+      identity.py      — The web shell's identity: a one-time shell ticket, redeemed at the auth service.
       osc.py           — The shell → browser control channel: `OSC 5379`.
       viewer.py        — The web shell's `show` and `edit`: swap the app shell's left pane instead of opening a tab.
     site/              — The content service — server-rendered pages + htmx fragments.
