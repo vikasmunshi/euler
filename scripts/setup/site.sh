@@ -1,0 +1,295 @@
+#!/usr/bin/env bash
+# Public site service (euler-site)
+# ================================================================================
+#
+# Deploys / removes the public site — the published content (guides, topics, the public
+# solutions, the progress grid) for visitors who are not signed in (docs/package-split.md
+# § 3.4; docs/web-server-guide.md § The public site). Sibling to msg.sh / auth.sh.
+#
+# Model:
+#   - The service (python -m solver.web.site, EULER_SITE_PUBLIC=1) runs as the dedicated
+#     `euler-site` user from the shared root-owned /opt/euler venv, which **auth.sh owns**:
+#     its deploy also installs `euler-content`, the packaged public tree this serves. This
+#     kit never builds or reinstalls the venv; it only restarts the service against it.
+#   - It reads nothing but that installed package: no clone, no git, no home — the unit
+#     has ProtectHome=true, so no collaborator's tree (and no private solution) is even
+#     visible to it. There is no identity: it never reads X-User, and it has only the read
+#     routes.
+#   - One unix socket, /run/euler/site.sock (0660 euler-site:euler-web), Caddy's upstream
+#     for GET/HEAD of the content paths from a browser carrying no session cookie
+#     (frontend.sh). No network at all: RestrictAddressFamilies=AF_UNIX.
+#
+#   /etc/euler/site.env                     root:euler-site 0640  (generated here)
+#   /etc/systemd/system/euler-site.service  (root-owned, boot-enabled)
+#
+# Actions: deploy | remove | upgrade | redeploy | status | help
+#
+# Author: Vikas Munshi <vikas.munshi@gmail.com>
+# Copyright (c) 2026. All rights reserved.
+# Licensed under the MIT License.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# The system venv — OPT_DIR / VENV_DIR / VENV_PY / PYTHON, shared with the other app
+# kits. This kit reads it; auth.sh is the one that builds it.
+# shellcheck source=scripts/setup/venv.sh
+. "${SCRIPT_DIR}/venv.sh"
+
+SYS_DIR="/etc/euler"
+SITE_ENV="${SYS_DIR}/site.env"                  # scoped runtime config (root:euler-site 0640)
+SITE_USER="euler-site"
+SITE_GROUP="euler-site"
+WEB_GROUP="euler-web"
+SITE_SOCKET="/run/euler/site.sock"
+
+SERVICE_NAME="euler-site.service"
+SERVICE_DEST="/etc/systemd/system/${SERVICE_NAME}"
+
+usage() {
+    cat <<USAGE
+Usage: $0 [deploy|remove|upgrade|redeploy|status|help]
+
+  deploy     Create the euler-site user and ${SITE_ENV}, and install the root-owned,
+             boot-enabled ${SERVICE_NAME}. Idempotent.
+  upgrade    Alias of deploy — the deploy path is already the re-assert path.
+  redeploy   Fast path: restart the service against the current /opt/euler venv
+             (auth.sh redeploy is what refreshes the venv and the content package);
+             deploys it instead when it is not installed yet.
+  remove     Remove the service, its env file and the euler-site identity.
+  status     Report the unit, the identity, the config, and probe /healthz.
+
+  Needs the shared venv with euler-content in it (make deploy-auth). This kit never
+  touches ${VENV_DIR} itself.
+USAGE
+}
+
+check_can_sudo() {
+    if ! command -v sudo &> /dev/null; then
+        echo "Error: sudo is not installed or not found in PATH" >&2
+        return 1
+    fi
+    if ! sudo -v 2>/dev/null; then
+        echo "Error: current user does not have sudo privileges" >&2
+        return 1
+    fi
+}
+
+require_systemd() {
+    if [ ! -d /run/systemd/system ] || ! command -v systemctl &> /dev/null; then
+        echo "Error: systemd is required for the public site; it is not active here." >&2
+        return 1
+    fi
+}
+
+require_venv() {
+    if [ ! -x "${VENV_PY}" ]; then
+        echo "Error: ${VENV_DIR} is not deployed — run 'make deploy-auth' first (it owns the venv)." >&2
+        return 1
+    fi
+    if ! sudo "${VENV_PY}" -P -c 'import solver.web.site, euler_content' 2>/dev/null; then
+        echo "Error: solver.web.site or euler_content is not importable from ${VENV_DIR}." >&2
+        echo "       Run 'make redeploy-auth' to reinstall this checkout and its content." >&2
+        return 1
+    fi
+}
+
+# The dedicated euler-site user. In euler-web only to chgrp its own socket at bind time.
+ensure_site_user() {
+    if ! getent group "${SITE_GROUP}" > /dev/null; then
+        sudo groupadd --system "${SITE_GROUP}"
+    fi
+    if ! getent group "${WEB_GROUP}" > /dev/null; then
+        sudo groupadd --system "${WEB_GROUP}"
+    fi
+    if ! getent passwd "${SITE_USER}" > /dev/null; then
+        echo "Creating system user ${SITE_USER}..."
+        sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
+            -g "${SITE_GROUP}" -G "${WEB_GROUP}" "${SITE_USER}"
+    else
+        sudo usermod -a -G "${WEB_GROUP}" "${SITE_USER}"
+    fi
+}
+
+# The scoped runtime config. Nothing secret: the public site holds no secret at all.
+deploy_site_env() {
+    sudo mkdir -p "${SYS_DIR}"
+    sudo tee "${SITE_ENV}" > /dev/null <<EOF
+# GENERATED by scripts/setup/site.sh — scoped runtime config for euler-site.
+# The public site: the packaged content, read routes only, no identity, no secrets.
+EULER_SITE_PUBLIC=1
+EULER_CONTENT_SOCKET=${SITE_SOCKET}
+EULER_WEB_GROUP=${WEB_GROUP}
+EOF
+    sudo chown root:"${SITE_GROUP}" "${SITE_ENV}"
+    sudo chmod 0640 "${SITE_ENV}"
+}
+
+deploy_unit() {
+    echo "Installing ${SERVICE_NAME} (as ${SITE_USER}, unix socket only)..."
+    sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
+[Unit]
+Description=euler public site (the published content, signed out)
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/package-split.md
+After=network.target
+
+[Service]
+# Type=simple, like every sibling kit: the app never sd_notify()s.
+Type=simple
+User=${SITE_USER}
+Group=${SITE_GROUP}
+# euler-web: to chgrp its own socket at bind time, so Caddy can connect.
+SupplementaryGroups=${WEB_GROUP}
+EnvironmentFile=${SITE_ENV}
+ExecStart=${VENV_PY} -m solver.web.site
+Restart=on-failure
+RestartSec=5s
+
+# Egress: none — AF_UNIX only. It serves files from a package and talks to nobody.
+IPAddressDeny=any
+RestrictAddressFamilies=AF_UNIX
+
+# Hardening. ProtectHome=true is the point: no clone, and so no private solution, is
+# visible to this process at all — what it can serve is what the package installed.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+# The shared socket dir is provisioned by tmpfiles.d (auth.sh) and owned by no service,
+# so ProtectSystem=strict's read-only /run must be opened for the socket.
+ReadWritePaths=/run/euler
+PrivateTmp=true
+PrivateDevices=true
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    sudo systemctl daemon-reload
+}
+
+# `systemctl restart` returns before the service binds; wait (bounded) so do_status reports
+# what is, not a race.
+wait_for_socket() {
+    local i
+    for ((i = 0; i < 50; i++)); do
+        if sudo test -S "${SITE_SOCKET}"; then return 0; fi
+        sleep 0.1
+    done
+    return 0
+}
+
+do_deploy() {
+    check_can_sudo || return 1
+    require_systemd || return 1
+    require_venv || return 1
+    ensure_site_user
+    deploy_site_env
+    deploy_unit
+    sudo systemctl enable --now "${SERVICE_NAME}"
+    sudo systemctl restart "${SERVICE_NAME}"
+    # The service uid joins the nftables egress drop set (defence in depth: the unit
+    # already makes off-host traffic impossible).
+    if [ -f /etc/systemd/system/euler-firewall.service ]; then
+        echo "Reloading the egress firewall to include ${SITE_USER}..."
+        "${SCRIPT_DIR}/firewall.sh" reload
+    fi
+    wait_for_socket
+    do_status
+}
+
+do_redeploy() {
+    check_can_sudo || return 1
+    require_venv || return 1
+    # The first redeploy after this kit appeared finds no unit: the edge already routes
+    # signed-out reads here (frontend.sh), so lay the service down rather than leave them
+    # on the holding page. Every later redeploy is the restart below.
+    if [ ! -f "${SERVICE_DEST}" ]; then
+        echo "${SERVICE_NAME} is not installed yet — deploying it."
+        do_deploy
+        return
+    fi
+    echo "Restarting ${SERVICE_NAME} against ${VENV_DIR}..."
+    sudo systemctl restart "${SERVICE_NAME}"
+    wait_for_socket
+    do_status
+}
+
+do_remove() {
+    check_can_sudo || return 1
+    if [ -f "${SERVICE_DEST}" ]; then
+        sudo systemctl disable --now "${SERVICE_NAME}" 2>/dev/null || true
+        sudo rm -f "${SERVICE_DEST}"
+        sudo systemctl daemon-reload
+    fi
+    sudo rm -f "${SITE_SOCKET}" "${SITE_ENV}"
+    if getent passwd "${SITE_USER}" > /dev/null; then sudo userdel "${SITE_USER}" 2>/dev/null || true; fi
+    if getent group "${SITE_GROUP}" > /dev/null; then sudo groupdel "${SITE_GROUP}" 2>/dev/null || true; fi
+    echo "Public site uninstall complete (signed-out visitors now get the login page)."
+}
+
+# Probe the socket's /healthz and the start page. Needs sudo: the socket is euler-web-only
+# and the operator deliberately is not in that group.
+probe_socket() {
+    if ! command -v curl > /dev/null 2>&1; then
+        echo "healthz:     … unknown (curl not installed)"
+        return 0
+    fi
+    local reply code
+    reply="$(sudo curl -sS --max-time 3 --unix-socket "${SITE_SOCKET}" \
+                  http://localhost/healthz 2>/dev/null || true)"
+    if [ "${reply}" = "ok" ]; then
+        echo "healthz:     ✓ ${SITE_SOCKET} serving"
+    else
+        echo "healthz:     ✗ ${SITE_SOCKET} not answering"
+        return 0
+    fi
+    code="$(sudo curl -sS -o /dev/null -w '%{http_code}' --max-time 5 --unix-socket "${SITE_SOCKET}" \
+                 http://localhost/solutions/ 2>/dev/null || true)"
+    echo "content:     $([ "${code}" = 200 ] && echo '✓' || echo '✗') /solutions/ → ${code}"
+}
+
+do_status() {
+    if [ -f "${SERVICE_DEST}" ] && command -v systemctl &> /dev/null; then
+        echo "${SERVICE_NAME}: $(systemctl is-active "${SERVICE_NAME}" 2>/dev/null)/$(systemctl is-enabled "${SERVICE_NAME}" 2>/dev/null)"
+    else
+        echo "${SERVICE_NAME}: ✗ not installed"
+    fi
+    if getent passwd "${SITE_USER}" > /dev/null; then
+        echo "identity:    ✓ ${SITE_USER} (groups: $(id -nG "${SITE_USER}" 2>/dev/null))"
+    else
+        echo "identity:    ✗ ${SITE_USER} missing"
+    fi
+    if [ -f "${SITE_ENV}" ]; then
+        echo "config:      ✓ ${SITE_ENV} ($(stat -c '%U:%G %a' "${SITE_ENV}" 2>/dev/null))"
+    else
+        echo "config:      ✗ ${SITE_ENV} missing"
+    fi
+    if [ -x "${VENV_PY}" ]; then
+        local version
+        version="$(sudo "${VENV_PY}" -P -c 'import euler_content._version as v; print(v.__version__)' 2>/dev/null || true)"
+        if [ -n "${version}" ]; then
+            echo "package:     ✓ euler-content ${version}"
+        else
+            echo "package:     ✗ euler-content not installed (make redeploy-auth)"
+        fi
+    fi
+    probe_socket
+}
+
+# ── Dispatch ──────────────────────────────────────────────────────────────────────
+ACTION="${1:-status}"
+case "${ACTION}" in
+    deploy)    do_deploy ;;
+    upgrade)   do_deploy ;;
+    redeploy)  do_redeploy ;;
+    remove)    do_remove ;;
+    status)    do_status ;;
+    -h | --help | help) usage ;;
+    *) echo "Unknown action: ${ACTION}"; usage; exit 1 ;;
+esac

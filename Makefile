@@ -14,6 +14,7 @@
         deploy-smtp remove-smtp upgrade-smtp \
         deploy-auth remove-auth upgrade-auth redeploy-auth \
         deploy-msg remove-msg upgrade-msg redeploy-msg \
+        deploy-site remove-site upgrade-site redeploy-site \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web status-web \
         test run audit uninstall version release check-version
@@ -290,6 +291,29 @@ redeploy-msg:
 	./scripts/setup/msg.sh redeploy
 	@printf "✓ redeploy-msg complete: message spool restarted\n"
 
+## Deploy the public site: the euler-site user + /etc/euler/site.env + euler-site.service,
+## serving the packaged content (euler-content, installed into the shared venv by
+## deploy-auth) to signed-out visitors (docs/package-split.md § 3.4)
+deploy-site:
+	./scripts/setup/site.sh deploy
+	@printf "✓ deploy-site complete: public site deployed\n"
+
+## Remove the public site (signed-out visitors get the login page again)
+remove-site:
+	./scripts/setup/site.sh remove
+	@printf "✓ remove-site complete: public site removed\n"
+
+## Upgrade the public site (alias of deploy: refresh config + unit, restart)
+upgrade-site:
+	./scripts/setup/site.sh upgrade
+	@printf "✓ upgrade-site complete: public site upgraded\n"
+
+## Restart the public site against the current /opt/euler venv and content package
+## (redeploy-auth rebuilds both); deploys it when it is not installed yet
+redeploy-site:
+	./scripts/setup/site.sh redeploy
+	@printf "✓ redeploy-site complete: public site restarted\n"
+
 ## Deploy the per-user provisioning layer (MT-7): the euler-user group,
 ## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
 ## uids/homes/clones are created later by `users add <email>`
@@ -320,17 +344,17 @@ redeploy-user:
 ## per-user provisioning layer (MT-4 — the retired per-profile content/ws kits are
 ## no longer deployed). Each kit stays independently operable; the later kits
 ## reload the firewall as their service users appear. (sudo required)
-deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smtp deploy-auth deploy-msg deploy-user
+deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smtp deploy-auth deploy-msg deploy-site deploy-user
 	@printf "✓ deploy-web complete: full web stack deployed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-remove-web: remove-user remove-msg remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
+remove-web: remove-user remove-site remove-msg remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
 	@printf "✓ remove-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
 ## ddns and firewall have no upgrade action — their deploy is idempotent and doubles
 ## as one, and the firewall reload is the final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-msg upgrade-user
+upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-msg upgrade-site upgrade-user
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
@@ -341,7 +365,7 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 ## live terminals are dropped. The everyday "I changed Python/templates/CSS/JS,
 ## push it" turnaround. Gated on check-version so the deployed build's tag is on
 ## origin (run serially — the default — so the guard runs before any deploy step).
-redeploy-web: check-version redeploy-auth redeploy-msg redeploy-user redeploy-frontend
+redeploy-web: check-version redeploy-auth redeploy-msg redeploy-site redeploy-user redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 ## Report the whole web stack in one read-only sweep, in deploy order: the edge, the
@@ -370,5 +394,7 @@ status-web:
 	@./scripts/setup/auth.sh status || true
 	@printf "\n══ message spool (user↔staff threads) ════════════════════════════════\n"
 	@./scripts/setup/msg.sh status || true
+	@printf "\n══ public site (signed-out content) ══════════════════════════════════\n"
+	@./scripts/setup/site.sh status || true
 	@printf "\n══ per-user tier (collaborators + their web shells) ══════════════════\n"
 	@./scripts/setup/user.sh status || true

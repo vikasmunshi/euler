@@ -186,3 +186,24 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
     `check-commands` in `check.sh` runs under the host shell too.
   - *Lost, as accepted:* a plain `solver` run inside a web shell (`! solver "git-push"`)
     files no notice — it has no carrier. The web shell's own `git-push` does.
+
+- **Phase 5**: signed-out browsing.
+  - *Content package:* `content/` is the `euler-content` source (`pyproject.toml`,
+    `euler_content/__init__.py` with `root()`); `scripts/content/stage.py` stages it with
+    the public tree — tracked files only, under fixed public roots, refusing
+    `solutions/private` — and the version stamped from `solver/version.py`. `venv.sh`
+    installs it into `/opt/euler` on every venv deploy, so `redeploy-web` refreshes it.
+  - *ContentRoot:* rather than a class, the two roots are the two ways the one app is
+    built — `build_public_app` on the packaged tree (`SiteConfig.public`, read routes
+    only, no identity middleware, no git) and the per-user service on the clone. The
+    content readers keep taking a root directory; the packaged tree mirrors the repo's
+    layout, so they need no second code path.
+  - *Service and edge:* `scripts/setup/site.sh` (`euler-site`, `/run/euler/site.sock`,
+    `ProtectHome=true`, AF_UNIX only) with `make deploy-site` etc., in the `*-web`
+    aggregates; `frontend.sh` routes content GETs without a session cookie to it.
+  - *Templates:* `browsable` (navigation live) is split from `subject` (what is yours);
+    the public right pane is a sign-in card. The auth tier's signed-out pages now link
+    into the public site instead of wearing padlocks.
+  - *Not done:* public responses are still `no-store` — positive caching needs versioned
+    URLs (web-server-guide § Caching) — and the crawl found 20 broken links that the
+    signed-in site has too (topics not yet written, statement-relative PE links).

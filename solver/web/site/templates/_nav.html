@@ -3,14 +3,15 @@
    identical on every page and in both tiers. Links swap only #content (plus
    hx-push-url); logout is the only full-page exit. No hx-on / inline JS (CSP).
 
-   `subject` is the switch. Signed out the header is *present and inert*: the
-   visitor sees the shape of the place before being let into it. The brand, the
-   bookmarks and the user pill stay live — they are the three things that still do
-   something (home, off-site, and the way in), so none of them is dimmed.
+   Two switches. `browsable` makes the navigation live: true for a subject, and for anyone
+   on the public site (the published content needs no login). `subject` decides what is
+   *yours* — Actions, the terminal, the chips, the account. Where neither holds (the auth
+   tier's own pages) the header is *present and inert*: the brand, the bookmarks and the
+   user pill stay live — home, off-site, and the way in — so none of them is dimmed.
 
    There is no theme control: the site is dark-only (site.css). #}
 <header class="app-header">
-  <a class="brand" href="/" {% if subject %}hx-get="/" hx-target="#content" hx-swap="innerHTML"
+  <a class="brand" href="/" {% if browsable %}hx-get="/" hx-target="#content" hx-swap="innerHTML"
      hx-push-url="true"{% endif %} title="euler — home">
     {# Euler's identity, geometrically: the unit semicircle 1 → −1 (rotation by π)
        and the unit segment −1 → 0. The same figure is the favicon. #}
@@ -23,7 +24,7 @@
   </a>
   <span class="hsep" aria-hidden="true"></span>
   <nav class="app-nav" aria-label="Primary">
-    {% if subject %}
+    {% if browsable %}
     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
     <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
     <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>

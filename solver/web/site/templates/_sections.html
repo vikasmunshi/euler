@@ -15,9 +15,9 @@
 
    Two switches, and they are independent:
 
-     `subject`  — signed out the tiles are the same boxes with the same copy, inert,
-                  wearing a padlock where the arrow goes. The visitor should see what is
-                  behind the login.
+     `browsable` — where the content cannot be navigated (the auth tier's own pages) the
+                  tiles are the same boxes with the same copy, inert, wearing a padlock
+                  where the arrow goes. Signed in, and on the public site, they are live.
      `sections` — the live counts (`content.section_state`). The auth tier renders this
                   strip too and has no clone to count, so where it is absent every tile
                   falls back to its prose line. Never invent a number that would drift.
@@ -27,7 +27,7 @@
 
 {% macro tile(key, href, glyph, title, desc) %}
 {% set is_here = (here | default('')) == key %}
-{% if subject %}
+{% if browsable %}
 <a class="card{% if is_here %} is-here{% endif %}" href="{{ href }}"
    hx-get="{{ href }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
    {% if is_here %}aria-current="page"{% endif %}

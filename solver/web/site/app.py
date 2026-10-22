@@ -20,7 +20,7 @@ Actions; the live terminal lands on the same spine.
 """
 from __future__ import annotations
 
-__all__ = ['build_app', 'add_content_routes', 'install_content',
+__all__ = ['build_app', 'build_public_app', 'add_content_routes', 'install_content',
            'CONFIG_KEY', 'READABLE_KEY', '_MAX_BODY']
 
 import asyncio
@@ -40,7 +40,7 @@ from solver.web.cache import cache_middleware
 from solver.web.csp import csp_middleware
 from solver.web.site import content, gitstate
 from solver.web.site.config import SiteConfig
-from solver.web.site.render import GIT_KEY, SUBJECT_KEY, is_htmx, render
+from solver.web.site.render import GIT_KEY, PUBLIC_KEY, SUBJECT_KEY, is_htmx, render
 from solver.web.site.validate import EDITABLE_SUFFIXES, validate, validate_article
 
 log = logging.getLogger('euler-content')
@@ -123,9 +123,18 @@ def _subject(request: web.Request) -> Subject:
     return subject
 
 
-def _file_entries(repo_root: Path, sdir: Path) -> list[FileEntry]:
-    """The problem's files with their git state (clean files carry empty css)."""
-    states = content.git_status(repo_root, sdir)
+def _has(request: web.Request, floor: str) -> bool:
+    """Whether the request's subject is at *floor* — False for an anonymous visitor."""
+    subject: Subject | None = request.get(SUBJECT_KEY)
+    return subject is not None and subject.has(floor)
+
+
+def _file_entries(repo_root: Path, sdir: Path, *, git: bool = True) -> list[FileEntry]:
+    """The problem's files with their git state (clean files carry empty css).
+
+    *git* False skips the status read: the public site's packaged tree is not a clone.
+    """
+    states = content.git_status(repo_root, sdir) if git else {}
     return [
         FileEntry(name=name,
                   git_css=states.get(name, ('', ''))[0],
@@ -162,12 +171,18 @@ def requires(capability: str) -> Callable[[_Handler], _Handler]:
 
     401 when there is no subject (an unauthenticated caller that bypassed Caddy);
     403 when the subject lacks the grant. Mirrors the shell decorator's contract.
+
+    The one exception is the **public** site (:func:`build_public_app`), where a read at the
+    `VIEW` floor needs no subject: its content is the published copy, already public on
+    GitHub. Anything above `VIEW` still needs a subject, which that app never has.
     """
 
     def _wrap(handler: _Handler) -> _Handler:
         async def _guarded(request: web.Request) -> web.StreamResponse:
             subject: Subject | None = request.get(SUBJECT_KEY)
             if subject is None:
+                if capability == VIEW and request.app.get(PUBLIC_KEY, False):
+                    return await handler(request)
                 raise web.HTTPUnauthorized(text='authentication required')
             if not subject.has(capability):
                 raise web.HTTPForbidden(text=f'requires {capability}')
@@ -303,7 +318,7 @@ def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
     actions: list[Action] = []
     # Maintainer, the `summary` floor: the upload hands its import to `summary` (below).
-    if _subject(request).has('maintainer'):
+    if _has(request, 'maintainer'):
         actions.append(Action(label='Upload progress', kind='get', path='/edit/solutions/'))
     return {
         'grids': content.centuries(problems),
@@ -368,7 +383,7 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'statement': content.prepare_statement(read_html('statement.html'), number, sdir),
         'notes': read_html('notes.html'),
         'tags': content.problem_tag_view(repo_root, number),
-        'files': _file_entries(repo_root, sdir),
+        'files': _file_entries(repo_root, sdir, git=not request.app.get(PUBLIC_KEY, False)),
         'test_cases': test_cases,
         'results': content.load_json(sdir / 'results.json') or [],
         'crumbs': [_HOME, ('solutions', '/solutions/'), (f'{number:04d}', None)],
@@ -441,13 +456,12 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
     except UnicodeDecodeError:
         return web.FileResponse(target)
 
-    subject = _subject(request)
     bare = '/' not in filename
     actions: list[Action] = []
-    if bare and target.suffix in EDITABLE_SUFFIXES and subject.has('contributor'):
+    if bare and target.suffix in EDITABLE_SUFFIXES and _has(request, 'contributor'):
         actions.append(Action(label='Edit', kind='get',
                               path=f'/edit/solutions/{number:04d}/{filename}'))
-    if bare and target.suffix in _DELETABLE_SUFFIXES and subject.has('maintainer'):
+    if bare and target.suffix in _DELETABLE_SUFFIXES and _has(request, 'maintainer'):
         actions.append(Action(label='Delete', kind='delete',
                               path=f'/edit/solutions/{number:04d}/{filename}',
                               confirm=f'Delete {filename}?'))
@@ -552,7 +566,7 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     actions: list[Action] = []
-    if _subject(request).has('maintainer'):
+    if _has(request, 'maintainer'):
         actions.append(Action(label='Show drafts', kind='get', path='/topics/all'))
     return render(request, 'topics.html', {
         'groups': content.list_topic_groups(repo_root),
@@ -598,7 +612,7 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
     # not the index, so a page written since the last update-tags is not offered a stale verb;
     # claude-blog refuses a final page without --force, so offering "Write" on one would decline.
     actions: list[Action] = []
-    if _subject(request).has('maintainer'):
+    if _has(request, 'maintainer'):
         actions.append(Action(label='Edit', kind='get', path=f'/edit/topics/{name}'))
         if content.topic_status(text) == 'final':
             actions.append(Action(label='Rewrite', kind='term', command=f'claude-blog {name} --force'))
@@ -675,7 +689,7 @@ def _editor_context(request: web.Request, number: int, filename: str, text: str,
                     diagnostics: list[Any] | None = None) -> dict[str, Any]:
     """The file-editor view context, shared by GET / save-ok / save-refused."""
     actions: list[Action] = [Action(label='Save', kind='submit')]
-    if Path(filename).suffix in _DELETABLE_SUFFIXES and _subject(request).has('maintainer'):
+    if Path(filename).suffix in _DELETABLE_SUFFIXES and _has(request, 'maintainer'):
         actions.append(Action(label='Delete', kind='delete',
                               path=f'/edit/solutions/{number:04d}/{filename}',
                               confirm=f'Delete {filename}?'))
@@ -927,18 +941,11 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
 
 # ── app wiring ────────────────────────────────────────────────────────────────────────
 
-def add_content_routes(app: web.Application) -> None:
-    """Register the content route surface (the web-server-guide § The site contract) on *app*.
-
-    Shared by :func:`build_app` (the per-profile content service) and the per-user
-    service (:mod:`solver.web.user`), which folds these routes together with `/ws` —
-    so the one route table has a single definition and the two tiers cannot drift.
-    """
-    app.add_routes([
+def _read_routes() -> list[web.RouteDef]:
+    """The read surface: every route a visitor may follow — the public site serves exactly these."""
+    return [
         web.get('/healthz', healthz),
         web.get('/', home),
-        web.get('/git', git_chip),
-        web.get('/terminal', terminal),
         web.get('/shell', shell_page),      # the page ABOUT the terminal (nav: Terminal)
         # solutions — canonical with the trailing slash (web-server-guide § The site)
         web.get('/solutions', redirect_slash),
@@ -955,14 +962,31 @@ def add_content_routes(app: web.Application) -> None:
         web.get('/topics/', topics_index),
         web.get('/topics/all', topics_all),         # before the catch-all, which would match it
         web.get(r'/topics/{name:.+}', topic_page),  # {name} may be a nested folder/page path
-        web.get(r'/edit/topics/{name:.+}', article_editor),
-        web.post(r'/edit/topics/{name:.+}', article_save),
-        web.delete(r'/edit/topics/{name:.+}', article_delete),
         web.get(r'/about/{name}', about_page),
         # the presentation deck: static files, opened in a tab of its own
         web.get('/story', redirect_slash),
         web.get('/story/', story_file),
         web.get(r'/story/{path:.+}', story_file),
+    ]
+
+
+def add_content_routes(app: web.Application, *, public: bool = False) -> None:
+    """Register the content route surface (the web-server-guide § The site contract) on *app*.
+
+    Shared by :func:`build_app`, the per-user service (:mod:`solver.web.user`), which folds
+    these routes together with `/ws` — so the one route table has a single definition and the
+    tiers cannot drift — and, *public*, by :func:`build_public_app`, which gets the read
+    surface alone: no terminal, no git chip, no account, no writes.
+    """
+    app.add_routes(_read_routes())
+    if public:
+        return
+    app.add_routes([
+        web.get('/git', git_chip),
+        web.get('/terminal', terminal),
+        web.get(r'/edit/topics/{name:.+}', article_editor),
+        web.post(r'/edit/topics/{name:.+}', article_save),
+        web.delete(r'/edit/topics/{name:.+}', article_delete),
         # account
         web.get('/account', account),
         # edit routes (writes always answer with a fragment)
@@ -1009,16 +1033,20 @@ def git_middleware(repo_root: Path) -> Any:
     return _middleware
 
 
-def install_content(app: web.Application, config: SiteConfig, authz: Authorizations) -> None:
+def install_content(app: web.Application, config: SiteConfig, authz: Authorizations | None,
+                    *, public: bool = False) -> None:
     """Wire the content surface (config, readable roots, jinja, routes, static) onto *app*.
 
     The caller owns app creation + the identity middleware (which differs between the
     per-profile and per-user tiers); this installs everything else — including the git
     middleware, which is appended *after* the caller's identity middleware so it can
-    read the subject that one resolved.
+    read the subject that one resolved. *public* installs the read surface alone, with no
+    git middleware: the public site has no clone and no subject.
     """
     app[CONFIG_KEY] = config
-    app.middlewares.append(git_middleware(config.repo_root))
+    app[PUBLIC_KEY] = public
+    if not public:
+        app.middlewares.append(git_middleware(config.repo_root))
     # The /docs/file/ view may serve only these content trees — every one a
     # reader-floor read. These used to come from the policy's objects→paths map;
     # with the plain-profile re-simplification they are the service's own roots
@@ -1028,7 +1056,7 @@ def install_content(app: web.Application, config: SiteConfig, authz: Authorizati
     app[READABLE_KEY] = list(content.VIEWABLE_ROOTS)
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                          autoescape=jinja2.select_autoescape(['html', 'xml']))
-    add_content_routes(app)
+    add_content_routes(app, public=public)
     if config.serve_static:
         # Dev only — in production Caddy serves these from /etc/euler/web-content.
         app.router.add_static('/assets', config.static_dir / 'assets')
@@ -1048,4 +1076,18 @@ def build_app(config: SiteConfig) -> web.Application:
     app = web.Application(middlewares=[cache_middleware, csp_middleware, identity_middleware],
                           client_max_size=_MAX_BODY)
     install_content(app, config, authz)
+    return app
+
+
+def build_public_app(config: SiteConfig) -> web.Application:
+    """Build the **public** site: the published content, for visitors who are not signed in.
+
+    docs/package-split.md § 3.4. It serves the packaged copy (`euler-content`, *config*'s
+    `repo_root`), which holds no `solutions/private` at all; its unit runs on a uid of its
+    own with no access to any home. There is no identity middleware — the identity headers
+    are never read, so a request carrying them is as anonymous as one without — and only the
+    read routes exist.
+    """
+    app = web.Application(middlewares=[cache_middleware, csp_middleware])
+    install_content(app, config, None, public=True)
     return app

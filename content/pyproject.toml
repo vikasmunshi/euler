@@ -1,0 +1,26 @@
+# euler-content: the published content as a data-only wheel (docs/package-split.md Q3).
+#
+# Not built from here directly: `scripts/content/stage.py` copies this folder to a scratch
+# directory, lays the public tree into `euler_content/tree/` (tracked files only, never
+# `solutions/private`) and stamps `euler_content/_version.py` from `solver/version.py` —
+# lockstep with the code (Q5). The public site (`euler-site`) serves from the installed copy.
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "euler-content"
+description = "The published Project Euler Solver content: guides, topics, public solutions."
+requires-python = ">=3.14"
+license = "MIT"
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "euler_content._version.__version__" }
+
+[tool.setuptools]
+packages = ["euler_content"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+euler_content = ["tree/**/*"]

@@ -425,7 +425,9 @@ def build_public_app(service: AuthService) -> web.Application:
             email, profile = identity
             subject = Subject(user=email, slug=system_slug(email), channel='web',
                               auth_method='session-cookie', profile=profile)
-        return {'subject': subject, 'readme_html': content.readme_html()}
+        # Signed out, the content is still browsable: the public site serves it, so the start
+        # page's tiles and the header's nav lead there rather than wearing padlocks.
+        return {'subject': subject, 'browsable': True, 'readme_html': content.readme_html()}
 
     app = web.Application(
         middlewares=[cache_middleware, csp_middleware, aiohttp_jinja2.context_processors_middleware])

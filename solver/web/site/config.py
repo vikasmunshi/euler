@@ -11,7 +11,7 @@ one `EULER_PROFILE=<profile>` per template-unit instance.
 """
 from __future__ import annotations
 
-__all__ = ['SiteConfig']
+__all__ = ['SiteConfig', 'packaged_root']
 
 from pathlib import Path
 from typing import NamedTuple, get_type_hints
@@ -45,20 +45,33 @@ class SiteConfig(NamedTuple):
     github_url: str = 'https://github.com/vikasmunshi/euler'
     #: The branch those source links point at.
     github_branch: str = 'master'
+    #: Serve the **public** site: the packaged content (`euler-content`) to visitors who are
+    #: not signed in, read routes only (docs/package-split.md § 3.4). `repo_root` is then the
+    #: installed content tree, never a clone.
+    public: bool = False
 
     @classmethod
     def from_env(cls) -> SiteConfig:
         """Build the configuration from the process environment (`[site]` in `env.conf`).
 
-        Two settings are not the table's to give. `repo_root` is *discovered* —
-        EULER_REPO_ROOT first (every deployed unit sets it), then
-        `solver.config.paths.repo_root`, which refuses to invent a root rather than
-        silently adopting site-packages as one — and `static_dir` defaults to a path
-        inside whatever tree that turns out to be.
+        Two settings are not the table's to give. `repo_root` is *discovered* — for the
+        public site, the installed content package; otherwise EULER_REPO_ROOT first (every
+        deployed unit sets it), then `solver.config.paths.repo_root`, which refuses to invent
+        a root rather than silently adopting site-packages as one — and `static_dir`
+        defaults to a path inside whatever tree that turns out to be.
         """
         values = load_spec('site').read(get_type_hints(cls))
-        repo_root = find_repo_root()
+        repo_root = packaged_root() if values.get('public') else find_repo_root()
         config = cls(repo_root=repo_root,
                      static_dir=values.pop('static_dir', repo_root / 'solver/web/content'),
                      **values)
         return config._replace(github_url=config.github_url.rstrip('/'))
+
+
+def packaged_root() -> Path:
+    """The installed `euler-content` tree — the public site's only content."""
+    try:
+        import euler_content
+    except ImportError:
+        raise SystemExit('site: the public site needs the euler-content package installed') from None
+    return Path(euler_content.root())

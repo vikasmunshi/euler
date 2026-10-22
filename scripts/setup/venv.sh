@@ -62,8 +62,27 @@ deploy_venv() {
         echo "warn: primesieve.numpy build failed — numpy-backed solutions will break at runtime."
         echo "      Fix the toolchain (dev_env.sh install primesieve c) then re-run 'venv.sh deploy'."
     fi
+    deploy_content "${project_root}"
     sudo chown -R root:"${web_group}" "${OPT_DIR}"
     clean_build_artifacts "${project_root}"
+}
+
+# Install the published content (euler-content) into the venv — what the public site serves
+# (docs/package-split.md § 3.4). Staged as the operator, from tracked files only and never
+# solutions/private (scripts/content/stage.py), into a scratch directory outside the checkout;
+# then installed as root like the code. Same version as the code, from the same tree.
+deploy_content() {
+    local project_root="$1" scratch
+    scratch="$(mktemp -d)"
+    echo "Staging euler-content (the public tree) and installing it into ${VENV_DIR}..."
+    if "${PYTHON}" "${project_root}/scripts/content/stage.py" "${scratch}/content" \
+            && sudo "${VENV_PY}" -m pip install --quiet --upgrade "${scratch}/content"; then
+        rm -rf "${scratch}"
+    else
+        rm -rf "${scratch}"
+        echo "Error: euler-content did not install — the public site has nothing to serve." >&2
+        return 1
+    fi
 }
 
 # Remove the in-tree build artifacts the setuptools backend leaves behind. A source
@@ -112,6 +131,11 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
         status)
             if venv_has_module solver; then
                 echo "venv: ✓ solver importable from ${VENV_DIR} ([${VENV_EXTRAS}])"
+                if venv_has_module euler_content; then
+                    echo "content: ✓ euler_content importable (the public site's tree)"
+                else
+                    echo "content: ✗ euler_content missing (run 'venv.sh deploy')"
+                fi
             else
                 echo "venv: ✗ ${VENV_DIR} not deployed (run 'venv.sh deploy' or a kit's deploy)"
             fi ;;

@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 """Content service entry point: `python -m solver.web.site`.
 
-Run by `euler-content@<profile>.service` as the per-profile `euler-content`
-uid from the `/opt/euler` system venv, configured entirely by the environment.
-Binds the public unix socket (`/run/euler/content.sock`, group `euler-web` —
-Caddy's upstream) and serves until SIGTERM.
+Deployed as the **public site**: `euler-site.service` runs it as the `euler-site` uid from
+the `/opt/euler` system venv with `EULER_SITE_PUBLIC=1`, serving the packaged content
+(`euler-content`) on `/run/euler/site.sock` (group `euler-web` — Caddy's upstream) to
+visitors who are not signed in. Without that flag it is the header-identity content app,
+kept for local testing (signed-in pages are the per-user service's, `solver.web.user`).
 
 For local testing, bind a TCP port and serve the static assets from the app::
 
@@ -23,7 +24,7 @@ import signal
 
 from aiohttp import web
 
-from solver.web.site.app import build_app
+from solver.web.site.app import build_app, build_public_app
 from solver.web.site.config import SiteConfig
 
 log = logging.getLogger('euler-content')
@@ -31,7 +32,7 @@ log = logging.getLogger('euler-content')
 
 async def serve() -> None:
     config = SiteConfig.from_env()
-    runner = web.AppRunner(build_app(config), access_log=None)
+    runner = web.AppRunner(build_public_app(config) if config.public else build_app(config), access_log=None)
     await runner.setup()
 
     if config.tcp_bind:                                   # dev: TCP listener

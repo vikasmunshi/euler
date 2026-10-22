@@ -1020,6 +1020,36 @@ no working tree — raised at import, never signalled readiness under `Type=noti
 `activating`. Caddy authenticates every request through it, so the site went down with it.
 Nothing had ever imported those names from the package.
 
+### 11.0 Two content roots: the public site and your clone
+
+The content is served from one of two copies, by the same app (`solver/web/site/app.py`)
+with the same templates (docs/package-split.md § 3.4):
+
+| Visitor | Served by | Content | Surface |
+|---|---|---|---|
+| Not signed in | `euler-site` (`python -m solver.web.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json` and the few `solver/` files the pages link to | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
+| Signed in | their own `euler-user@<slug>` instance | their own `~/euler` clone | everything, by profile |
+
+The docs, topics and public solutions are published unencrypted on GitHub anyway, so asking
+for a login to read them protected nothing. What the public site cannot show is structural,
+not a check: the wheel holds no `solutions/private` (`scripts/content/stage.py` refuses one),
+and the unit runs `ProtectHome=true` on a uid of its own, AF_UNIX only — no clone is even
+visible to it. A private problem's page shows its title and solved state from
+`problems.json` (public on projecteuler.net), and nothing else.
+
+Caddy picks the copy by the **session cookie**: a GET/HEAD of a content path (`/`,
+`/solutions/…`, `/docs/…`, `/topics/…`, `/about/…`, `/shell`, `/story/…`) from a browser with
+no `solver_session` / `solver_remember` cookie goes to `site.sock`; everything else goes
+through `forward_auth` as before (§ The edge). That is not a trust decision — either copy is
+public content to whoever asks — so a forged or missing cookie gains nothing. A *stale* cookie
+lands on the login page, as before.
+
+In the templates, `browsable` (navigation is live: a subject, or the public site) is separate
+from `subject` (what is *yours*: Actions, the terminal, the chips, the account). On the public
+site the right pane, where the terminal would be, is the way in (`_signin.html`). The public
+copy is as current as the last `make redeploy-web` — it is versioned with the code (the
+release that installed it), where a signed-in visitor sees their clone as it is.
+
 ### 11.1 The app shell
 
 `GET /` serves the whole shell; every other path renders **into a region of it**. Four
@@ -2530,11 +2560,11 @@ stack needs are `deploy` / `remove` / `redeploy`, because they touch root's syst
 
 ```bash
 echo 'EULER_TLS_DOMAIN=euler.example.com' >> ~/.euler/env   # if not already set
-make deploy-web    # frontend → egress → ddns → firewall → smtp → auth → msg → user
+make deploy-web    # frontend → egress → ddns → firewall → smtp → auth → msg → site → user
 ```
 
 Or per kit: `make deploy-frontend | deploy-egress | deploy-ddns | deploy-firewall |
-deploy-smtp | deploy-auth | deploy-msg | deploy-user`. Every kit's `deploy` is idempotent, so
+deploy-smtp | deploy-auth | deploy-msg | deploy-site | deploy-user`. Every kit's `deploy` is idempotent, so
 re-running it is the safe way to re-assert a drifted host.
 
 `~/.euler/env` is the **deploy-time authoring source of truth**, read by the deploy path

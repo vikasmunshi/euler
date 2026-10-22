@@ -22,7 +22,7 @@ places the same partials in the header directly (`oob` unset).
 """
 from __future__ import annotations
 
-__all__ = ['render', 'render_block', 'is_htmx', 'SUBJECT_KEY', 'GIT_KEY', 'MSG_SPOOL_KEY']
+__all__ = ['render', 'render_block', 'is_htmx', 'SUBJECT_KEY', 'GIT_KEY', 'MSG_SPOOL_KEY', 'PUBLIC_KEY']
 
 from typing import Any
 
@@ -43,6 +43,10 @@ GIT_KEY: str = 'git'
 #: auth tier renders the same header and has none — so this is a plain flag, and the
 #: count arrives later from the chip's own `/messages` fetch.
 MSG_SPOOL_KEY: str = 'msg_spool'
+#: aiohttp app key: True on the **public** site (:func:`solver.web.site.app.build_public_app`),
+#: which serves the published content to visitors who are not signed in. It is what makes the
+#: header's nav and the section tiles live without a subject (`browsable` in the context).
+PUBLIC_KEY = web.AppKey('public', bool)
 #: htmx sets this on every fetch; its presence selects fragment rendering.
 _HX_HEADER = 'HX-Request'
 
@@ -60,10 +64,16 @@ def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, An
     to None and `msg_spool` to False, which are the two chips' inert states: the auth
     tier builds its own contexts and has neither a clone nor a spool behind it, and
     neither does a signed-out visitor.
+
+    `browsable` is whether the content can be navigated: by a subject, or by anyone on the
+    public site. `subject` still decides everything that is *yours* — the terminal, the
+    chips, the Actions, the account.
     """
+    subject = request.get(SUBJECT_KEY)
     ctx: dict[str, Any] = {
         'csp_nonce': request.get(NONCE_KEY, ''),
-        'subject': request.get(SUBJECT_KEY),
+        'subject': subject,
+        'browsable': subject is not None or request.app.get(PUBLIC_KEY, False),
         'crumbs': [],
         'actions': [],
         'git': request.get(GIT_KEY),

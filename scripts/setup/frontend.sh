@@ -602,6 +602,22 @@ ${DOMAIN} {
 		reverse_proxy unix//run/euler/auth.sock
 	}
 
+	# Signed out, the published content is public (docs/package-split.md § 3.4): a read
+	# of the content paths from a browser carrying NO session cookie goes to the public
+	# site (euler-site), which serves the packaged copy — no clone, no private tree, no
+	# identity, read routes only. A browser with a session cookie skips this and goes
+	# through forward_auth below, to its own instance; a stale cookie lands on the login
+	# page as before. Nothing here is a trust decision: the cookie only picks which copy
+	# of public content to show, and the public site reads no identity header at all.
+	@public_read {
+		method GET HEAD
+		path / /solutions /solutions/* /docs /docs/* /topics /topics/* /about/* /shell /story /story/*
+		not header_regexp Cookie (^|;\s*)solver_(session|remember)=
+	}
+	handle @public_read {
+		reverse_proxy unix//run/euler/site.sock
+	}
+
 	# Everything else requires an authenticated session: the auth service
 	# answers 200 + X-User/X-Profile/X-User-Slug (copied onto the proxied request)
 	# or 401, which becomes a redirect to the login page. route{} preserves written

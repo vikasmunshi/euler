@@ -7,11 +7,11 @@
    content is the README summary — prose, not tiles — so it is the one page whose
    divider carries no filter and no count.
 
-   `subject` is the switch for the strip (live tiles vs locked) and for the count in the
+   `browsable` is the switch for the strip (live tiles vs locked) and for the count in the
    lede. Signed out the auth service has no clone and no problems.json, so it cannot know
    the count, and inventing a number that drifts from the truth is worse than not saying it.
 
-   Context: `subject` (or undefined), `sections` + `solved` + `total` (signed in only),
+   Context: `browsable`, `sections` + `solved` + `total` (where there is content to count),
    `readme_html` (content.readme_html(), pre-rendered and trusted — our own file). #}
 {% from "_divider.html" import divider with context %}
 <header class="hero">
@@ -20,7 +20,7 @@
      uses (solver/crypto/wire.py). #}
   <p class="kicker">to hold infinity in the folds of your mind, and eternity in an hour</p>
   <h1>Project Euler Solver</h1>
-  {% if subject %}
+  {% if browsable and total %}
   <p class="lede">{{ solved }} of {{ total }} problems down.
      The remaining {{ total - solved }} are not going to solve themselves —
      though once you drop into the shell, what you solve is solving you.</p>
@@ -43,7 +43,7 @@
 {{ divider('readme') }}
 <section class="readme">
   <div class="doc-body">{{ readme_html | safe }}</div>
-  {% if subject %}
+  {% if browsable %}
   <p class="readme-more"><a href="/docs/readme" hx-get="/docs/readme" hx-target="#content"
      hx-swap="innerHTML" hx-push-url="true">Read the full README &rarr;</a></p>
   {% else %}

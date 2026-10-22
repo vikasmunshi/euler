@@ -63,6 +63,10 @@
     </main>
     <aside id="ws" class="pane pane-ws" aria-label="{% block ws_label %}solver terminal{% endblock %}">
       {% block ws %}
+      {% if not subject %}
+      {# The public site: no session, so no terminal — the way in, where the terminal would be. #}
+      {% include "_signin.html" %}
+      {% else %}
       {# The terminal's titlebar: its name, then the two controls this window owns —
          connect/disconnect, and hide. They sit here, on the window they act on,
          rather than in the user menu: the session is a property of this pane, and a
@@ -96,6 +100,7 @@
       </div>
       <iframe id="terminal" class="terminal-frame" src="/terminal"
               title="solver terminal"></iframe>
+      {% endif %}
       {% endblock %}
     </aside>
   </div>
@@ -111,7 +116,7 @@
   <footer class="app-footer">
     <span class="muted">©&nbsp;Vikas&nbsp;Munshi</span>
     <span class="fsep" aria-hidden="true">·</span>
-    {% if subject %}
+    {% if browsable %}
     <a href="/about/license" hx-get="/about/license" hx-target="#content"
        hx-swap="innerHTML" hx-push-url="true">license</a>
     {% else %}
@@ -127,7 +132,7 @@
        hx-swap="innerHTML" hx-push-url="true">terms of use</a>
     {% endblock %}
     <span class="fsep" aria-hidden="true">·</span>
-    {% if subject %}
+    {% if browsable %}
     <a href="/about/acknowledgements" hx-get="/about/acknowledgements" hx-target="#content"
        hx-swap="innerHTML" hx-push-url="true">acknowledgements</a>
     {% else %}
