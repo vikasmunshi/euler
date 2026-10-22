@@ -158,6 +158,7 @@ solver/
     git.py             — Git and GitHub (gh) commands and helpers — the repository workflow.
     list.py            — List solution directory contents.
     new.py             — The `new` command and solution-file formatting (black / isort / autoflake).
+    notices.py         — Notices: what a command tells the people who act on it — through whatever carries it.
     problems.py        — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     progress.py        — The progress page → `problems.json` pipeline, shared by the shell and the web tier.
     results.py         — Results: save and retrieve problem results.
@@ -245,7 +246,10 @@ solver/
       store.py         — The message spool at `<state>/messages.json` — messages and read-state.
     shell/             — The web shell: the solver shell, extended for a PTY framed by the browser.
       __main__.py      — Web shell entry point: `python -m solver.web.shell` — what the per-user service's PTY runs.
+      host.py          — Host terminal entry point: `python -m solver.web.shell.host` — what `solver-host` runs.
       identity.py      — The web shell's identity: a one-time shell ticket, redeemed at the auth service.
+      keys.py          — Key distribution: issuing the master key over the message spool and by mail.
+      notices.py       — The message spool as the carrier of the solver shell's notices (:mod:`solver.core.notices`).
       osc.py           — The shell → browser control channel: `OSC 5379`.
       viewer.py        — The web shell's `show` and `edit`: swap the app shell's left pane instead of opening a tab.
     site/              — The content service — server-rendered pages + htmx fragments.

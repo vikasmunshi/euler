@@ -77,8 +77,9 @@ a parameter that accepts repetition.
 | [`git-sync`](#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
 | [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`host-unlock`](#command-host-unlock) | — | `admin` | Take the mailed block from `host-authorize` and unlock this machine. |
+| [`key-export`](#command-key-export) | — | `admin` | Print the master key sealed to a machine's public key, to carry there yourself. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Unwrap the half you were sent, complete it from the repository, store the key. |
-| [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
+| [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-encrypt every private file under the new one. |
 | [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. |
@@ -1120,7 +1121,7 @@ host-authorize
 | `public_key` | The 64-hex X25519 public key of the machine being authorized — what `user` prints there. |
 | `email` | Where to send it. Their address, or your own if you intend to forward it by another route. |
 
-*Defined in* `solver.crypto.keys.host_authorize`.
+*Defined in* `solver.web.shell.keys.host_authorize`.
 
 ---
 
@@ -1157,6 +1158,35 @@ host-unlock
 
 ---
 
+#### Command: `key-export`
+
+Print the master key sealed to a machine's public key, to carry there yourself.
+
+* ⚑ needs admin.
+* ✎ asks for anything you leave out.
+
+The plain way to issue the key, needing no spool and no mail: the whole master key, sealed
+to the machine's X25519 public key so it is inert to anyone without that machine's private
+key, printed between markers. Carry it by any channel you trust; the far end runs
+`host-unlock` and pastes it. The web host's `host-authorize` mails the same block.
+
+**usage**
+
+```
+key-export
+[public_key=<str>] (asked)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `public_key` | The 64-hex X25519 public key of the machine — what `user` prints there. |
+
+*Defined in* `solver.crypto.keys.key_export`.
+
+---
+
 #### Command: `key-reconstruct`
 
 Unwrap the half you were sent, complete it from the repository, store the key.
@@ -1190,24 +1220,17 @@ key-reconstruct
 
 #### Command: `key-rekey` (`rekey`)
 
-Rotate the master key and re-issue it to every registered public key.
+Rotate the master key and re-encrypt every private file under the new one.
 
 * ⚑ needs admin.
 
 **Revocation lives here, and it is the only thing that revokes.** Dropping somebody's
-access means rotating the key they hold and re-issuing the new one to everyone else.
+access means rotating the key they hold and issuing the new one to everyone else.
 
-The list of who "everyone else" is comes from the **roster** — each holder's `public_key`
-in `/etc/euler/roster/users.json`, written by the grant that issued to them. It used to be
-implicit in the shared enc-key file: every authorised key was in it, so a rekey re-wrapped
-what it found. With one file per machine there is nothing central to read, so the registry
-is explicit — and it holds only *public* keys, which is why losing it costs nothing but a
-round of re-authorization.
-
-Each holder is sent their own payload through the message spool, exactly as
-`user-authorize` does; they run `msg act` on it to take it. An account with no registered
-public key cannot be re-issued to and is named, not skipped silently — that person loses
-access at this rotation, which is sometimes the intent and must never be a surprise.
+Every other holder loses access at the rotation until the new key reaches them. Where the
+shell has a roster and a message spool (the web shell, `solver-host`), this also re-issues
+it to every registered public key, and names anyone it cannot reach; elsewhere, carry it
+to each holder with `key-export`.
 
 Because the git filter is deterministic, every committed blob depends on the master key, so
 a rotation re-encrypts the tracked private files via `git add --renormalize`.
@@ -1261,7 +1284,7 @@ key-split
 | `identity` | Who to send the other half to. Not asked — and not used — on the run that writes the repository's share. |
 | `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before anyone has been authorised. Defaults to '', which reads it from the roster. |
 
-*Defined in* `solver.crypto.keys.key_split`.
+*Defined in* `solver.web.shell.keys.key_split`.
 
 ---
 
@@ -1875,6 +1898,9 @@ lesser profile's registry would drop every admin-floored command from the audit 
 and the command index — silently, and in exactly the documents whose worth is being
 complete. The floor is what keeps the generated view whole.
 
+For the same reason it runs from the shell with every command loaded: where the web
+host's shell is installed, that is `solver-host`, and a plain `solver` refuses.
+
 **usage**
 
 ```
@@ -2109,7 +2135,7 @@ user-authorize
 | `target` | The 16-hex id of a key-authorization message, or a 64-hex public key. Offered as a menu of the waiting requests when omitted; not strict, so a bare key can still be pasted. |
 | `identity` | Who the key belongs to. Taken from the thread for the message form, so it is only asked for the bare-key form — where there is nobody to send it to otherwise. |
 
-*Defined in* `solver.crypto.keys.user_authorize`.
+*Defined in* `solver.web.shell.keys.user_authorize`.
 
 ---
 

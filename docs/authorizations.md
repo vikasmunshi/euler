@@ -75,13 +75,11 @@ a profile on each channel.
 | `solver.core.test_cases` | `test-cases` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `edit` |  | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `show` | ✓ | ✓ | ✓ | ✓ |
-| `solver.crypto.keys` | `host-authorize` |  |  |  | ✓ |
 | `solver.crypto.keys` | `host-unlock` |  |  |  | ✓ |
+| `solver.crypto.keys` | `key-export` |  |  |  | ✓ |
 | `solver.crypto.keys` | `key-reconstruct` | ✓ | ✓ | ✓ | ✓ |
 | `solver.crypto.keys` | `key-rekey` |  |  |  | ✓ |
-| `solver.crypto.keys` | `key-split` |  |  | ✓ | ✓ |
 | `solver.crypto.keys` | `user` | ✓ | ✓ | ✓ | ✓ |
-| `solver.crypto.keys` | `user-authorize` |  |  | ✓ | ✓ |
 | `solver.crypto.keys` | `vault` | ✓ | ✓ | ✓ | ✓ |
 | `solver.shell.bash` | `!` |  | ✓ | ✓ | ✓ |
 | `solver.shell.builtins` | `?` | ✓ | ✓ | ✓ | ✓ |
@@ -99,4 +97,7 @@ a profile on each channel.
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
 | `solver.web.auth.commands` | `users` |  |  |  | ✓ |
 | `solver.web.msg.commands` | `msg` | ✓ | ✓ | ✓ | ✓ |
+| `solver.web.shell.keys` | `host-authorize` |  |  |  | ✓ |
+| `solver.web.shell.keys` | `key-split` |  |  | ✓ | ✓ |
+| `solver.web.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
 <!-- /GEN:authorization-table -->

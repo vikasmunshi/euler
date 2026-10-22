@@ -233,8 +233,9 @@ its index entry, one click along its name.
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
 | [`host-authorize`](commands-index.md#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`host-unlock`](commands-index.md#command-host-unlock) | — | `admin` | Take the mailed block from `host-authorize` and unlock this machine. |
+| [`key-export`](commands-index.md#command-key-export) | — | `admin` | Print the master key sealed to a machine's public key, to carry there yourself. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Unwrap the half you were sent, complete it from the repository, store the key. |
-| [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-issue it to every registered public key. |
+| [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-encrypt every private file under the new one. |
 | [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](commands-index.md#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. |
