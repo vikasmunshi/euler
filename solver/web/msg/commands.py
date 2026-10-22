@@ -45,7 +45,7 @@ from typing import Annotated, Any, Literal, NamedTuple
 
 from solver.auth.subject import rank
 from solver.config import ExitCodes, config
-from solver.core import osc
+from solver.web.shell import osc
 from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.dialogue import Abort, Ask, Choice
@@ -337,9 +337,13 @@ def _act(thread_id: str) -> int:
         return 1
     match _verb_of(data):
         case 'save':
-            return _save(thread_id, data)
+            rc = _save(thread_id, data)
+            osc.git_changed()  # a key landed: solutions/private re-checked-out
+            return rc
         case 'reconstruct':
-            return _reconstruct(thread_id, data)
+            rc = _reconstruct(thread_id, data)
+            osc.git_changed()
+            return rc
         case 'authorize':
             from solver.crypto.keys import user_authorize
             return user_authorize(thread_id)
@@ -350,7 +354,10 @@ def _act(thread_id: str) -> int:
             # the whole queue as a menu. It dismisses this message itself, by the same
             # branch (`solver.core.git._dismiss_pr_notice`).
             from solver.core.git import merge_pr_for_branch
-            return merge_pr_for_branch(str(data.get('subject', '')).removeprefix(PR_REVIEW_SUBJECT))
+            rc = merge_pr_for_branch(str(data.get('subject', '')).removeprefix(PR_REVIEW_SUBJECT))
+            osc.git_changed()  # master moved
+            osc.messages_changed()  # the landed request's notice is dismissed
+            return rc
         case _:
             return _show(data)
 

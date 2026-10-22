@@ -123,3 +123,27 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
 | 5 | `ContentRoot`, `euler-content`, public `euler-site` unit, Caddy public route | Signed-out browsing works; private unreachable |
 | 6 | Physical move to `packages/`, three pyprojects, import renames, units, Makefile/hooks/tests, lockstep release | install, audit, pre-push, `redeploy-web` pass |
 | 7 | Resource-side enforcement for admin/maintainer commands; terminal vs web catalogues; docs | Audit table recorded |
+
+## 5. Progress
+
+- **Phase 0–1** (`32066ade2`): this document; `scripts/linters/layers.py` + `layers.allow`;
+  `solver/shell/extension.py` and `main(extension=)`.
+- **Phase 2**: OSC lives in `solver/web/shell/` (the future `euler_webshell`): `osc.py`
+  (moved from `solver/core/`, plus `nudge`), `overlays.toml`, `viewer.py` (the pane-swapping
+  `show` / `edit`), and the entry point `python -m solver.web.shell`, which the per-user
+  service's PTY now runs. The solver's `show` / `edit` only open a browser tab, and
+  `git` / `summary` / `keys` emit nothing. The message commands, web-side themselves, emit
+  directly — including the git nudge after `msg act` saves a key or merges a request.
+  - *Coarser nudges, as designed:* an overlay fires after the command whatever happened
+    (e.g. `gh-merge` nudges the message chip even when no notice was dismissed). Each is a
+    cheap re-read.
+  - *Nested shells:* a `solver …` run from inside the web shell (`!`, `claude-solve`) is a
+    plain solver shell: it sends no OSC (previously it did, and Claude's captured output
+    carried the escapes) and its `show` looks for a local browser.
+
+### Found along the way — queued for phase 3
+
+- `solver/shell/shell.py` runs a quiet `git-sync` at startup when the channel is `web`; the
+  web shell should own that (an `Extension` startup hook) once the channel leaves solver.
+- `solver/main.py` decides vault-prompting by channel; `login` takes it over.
+- `solver/core/git.py` `key_waiting_hint` words its hint by channel (phase 4, with the spool).

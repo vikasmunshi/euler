@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 #: Modules that belong to the web tier (and the packages it will become).
-WEB_SIDE: tuple[str, ...] = ('solver.web', 'solver.core.osc', 'solver.auth.roster', 'euler_site', 'euler_webshell')
+WEB_SIDE: tuple[str, ...] = ('solver.web', 'solver.auth.roster', 'euler_site', 'euler_webshell')
 #: The allowlist, next to this script.
 ALLOW_FILE: Path = Path(__file__).with_name('layers.allow')
 #: The loader manifest, repo-relative.

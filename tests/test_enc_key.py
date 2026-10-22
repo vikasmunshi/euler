@@ -202,8 +202,6 @@ class RegenTests(EncKeyTestCase):
             saved = getattr(keys_mod, name)
             setattr(keys_mod, name, stub)
             self.addCleanup(setattr, keys_mod, name, saved)
-        saved_emit, keys_mod.osc.emit = keys_mod.osc.emit, lambda *a, **k: None
-        self.addCleanup(setattr, keys_mod.osc, 'emit', saved_emit)
         saved_subject = app_config.subject
         self.addCleanup(setattr, app_config, 'subject', saved_subject)
 

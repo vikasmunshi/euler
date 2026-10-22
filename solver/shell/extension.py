@@ -31,7 +31,8 @@ skipped.
 """
 from __future__ import annotations
 
-__all__ = ['Extension', 'ExtensionError', 'Overlay', 'apply_overlays', 'load_extension', 'read_overlays']
+__all__ = ['Extension', 'ExtensionError', 'Overlay', 'apply_overlays', 'check_overlays', 'load_extension',
+           'read_overlays']
 
 import importlib
 import tomllib
@@ -40,8 +41,8 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
 
-from solver.shell.command import CommandFn, CommandRegistry, Context, registry
-from solver.shell.register import replace_body
+from solver.shell.command import Command, CommandFn, CommandRegistry, Context, registry
+from solver.shell.register import check_replacement, replace_body
 
 #: The keys an overlay may carry.
 _OVERLAY_KEYS: frozenset[str] = frozenset({'emit', 'replace'})
@@ -114,8 +115,13 @@ def _emitting(func: CommandFn, events: tuple[str, ...], notify: Callable[[str], 
     return _after
 
 
-def apply_overlays(extension: Extension, commands: CommandRegistry = registry) -> None:
-    """Apply *extension*'s overlays to the registered commands."""
+def _applicable(extension: Extension, commands: CommandRegistry) -> list[tuple[Overlay, Command]]:
+    """Every overlay of *extension* paired with its registered command, all checked first.
+
+    Raises :class:`ExtensionError` on the first overlay that does not fit, changing nothing;
+    an overlay on a withheld command is left out.
+    """
+    applicable: list[tuple[Overlay, Command]] = []
     for overlay in extension.overlays:
         cmd = commands.resolve(overlay.command)
         if cmd is None or cmd.name != overlay.command:
@@ -125,12 +131,27 @@ def apply_overlays(extension: Extension, commands: CommandRegistry = registry) -
                                  + (f' (an alias of {cmd.name!r})' if cmd else ''))
         if overlay.replace:
             try:
-                replace_body(cmd.name, _resolve(overlay.replace))
+                check_replacement(cmd.name, _resolve(overlay.replace))
             except ValueError as exc:
                 raise ExtensionError(str(exc)) from None
+        if overlay.emit and extension.notify is None:
+            raise ExtensionError(f'overlay {overlay.command!r} emits, but the extension has no notify')
+        applicable.append((overlay, cmd))
+    return applicable
+
+
+def check_overlays(extension: Extension, commands: CommandRegistry = registry) -> None:
+    """Raise :class:`ExtensionError` unless every overlay fits *commands*; changes nothing."""
+    _applicable(extension, commands)
+
+
+def apply_overlays(extension: Extension, commands: CommandRegistry = registry) -> None:
+    """Apply *extension*'s overlays to the registered commands — all of them, or (on a misfit) none."""
+    for overlay, cmd in _applicable(extension, commands):
+        if overlay.replace:
+            replace_body(cmd.name, _resolve(overlay.replace))
         if overlay.emit:
-            if extension.notify is None:
-                raise ExtensionError(f'overlay {overlay.command!r} emits, but the extension has no notify')
+            assert extension.notify is not None  # checked by _applicable
             cmd.func = _emitting(cmd.func, overlay.emit, extension.notify)
 
 

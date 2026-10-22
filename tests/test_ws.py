@@ -8,7 +8,7 @@ gated on the session cookie, redeem single-use): identity/pin refusals, the
 ticket-then-fork flow, the binary/resize wire protocol, replay + shared attach
 for a second tab, mint-refusal close, and the `/internal/logout` teardown
 push. The PTY child is a stub echo shell so the suite stays fast; one
-integration test forks the **real** `python -m solver` and drives it over the
+integration test forks the **real** `python -m solver.web.shell` and drives it over the
 ticket plane (the child redeems against the fake socket via
 `EULER_AUTH_SOCKET`).
 """
@@ -359,11 +359,11 @@ class ReaperTests(_WsServiceCase):
 
 
 class RealShellTest(_WsServiceCase):
-    """Integration: fork the real `python -m solver`; the child redeems the
+    """Integration: fork the real `python -m solver.web.shell`; the child redeems the
     ticket against the fake auth socket (`EULER_AUTH_SOCKET`) and starts as
     the web-channel subject; `exit` ends it and the service closes the socket."""
 
-    shell_argv: tuple[str, ...] = (sys.executable, '-m', 'solver')
+    shell_argv: tuple[str, ...] = (sys.executable, '-m', 'solver.web.shell')
 
     @unittest_run_loop
     async def test_real_shell_attach_and_exit(self) -> None:

@@ -203,7 +203,7 @@ class ServiceConfigTests(unittest.TestCase):
         self.assertEqual(config.socket_path, Path('/run/euler/ws.sock'))
         self.assertEqual(config.auth_socket, '/run/euler/auth.sock')
         self.assertEqual(config.detached_ttl, 86400)
-        self.assertEqual(config.shell_argv, (sys.executable, '-m', 'solver'))
+        self.assertEqual(config.shell_argv, (sys.executable, '-m', 'solver.web.shell'))
 
     def test_user_names_its_socket_for_its_slug(self) -> None:
         with mock.patch.dict(os.environ, {'EULER_USER_SLUG': 'u0a68e0'}):

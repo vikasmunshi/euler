@@ -12,7 +12,7 @@ to the signed-in user's **persistent** solver shell:
 - attach is gated on the reader floor (the "may run the solver at all"
   grant) via the :mod:`solver.auth` kernel;
 - on first attach the service forwards the caller's session cookie to the auth
-  service's `POST /shell-ticket` and forks `python -m solver` with only
+  service's `POST /shell-ticket` and forks `python -m solver.web.shell` with only
   `SOLVER_TICKET` (+ `TERM`) added to the child environment — the child
   redeems the ticket and becomes the web-channel Subject;
 - the shell survives disconnects: a background drainer buffers output

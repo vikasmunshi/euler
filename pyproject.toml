@@ -141,3 +141,4 @@ solver = ["*.html", "modules.csv"]
     "content/home-summary.md",
 ]
 "solver.web.site" = ["templates/*.html"]  # content-service pages (Phase 5)
+"solver.web.shell" = ["overlays.toml"]   # the web shell's overlays (docs/package-split.md § 3.2)

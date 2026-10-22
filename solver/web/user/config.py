@@ -83,5 +83,5 @@ class UserConfig(NamedTuple):
         values.setdefault('socket_path', Path(default_socket))
         config = cls(repo_root=repo_root,
                      static_dir=values.pop('static_dir', repo_root / 'solver/web/content'),
-                     shell_argv=(sys.executable, '-m', 'solver'), **values)
+                     shell_argv=(sys.executable, '-m', 'solver.web.shell'), **values)
         return config._replace(github_url=config.github_url.rstrip('/'))

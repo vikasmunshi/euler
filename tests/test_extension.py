@@ -100,6 +100,13 @@ class ExtensionTests(unittest.TestCase):
         with self.assertRaises(ExtensionError):
             apply_overlays(self.ext(Overlay('zz-ext-echo', replace=f'{__name__}:_nowhere')))
 
+    def test_a_misfit_anywhere_applies_nothing(self) -> None:
+        """Checked before applied: the shell refuses to start, so a half-applied table never runs."""
+        with self.assertRaises(ExtensionError):
+            apply_overlays(self.ext(Overlay('zz-ext-echo', emit=('git',)), Overlay('zz-ext-nothing', emit=('git',))))
+        self.assertEqual(_run('zz-ext-echo', 'hi'), 0)
+        self.assertEqual(self.events, [])
+
     def test_an_overlay_on_no_command_is_refused(self) -> None:
         with self.assertRaisesRegex(ExtensionError, 'names no command'):
             apply_overlays(self.ext(Overlay('zz-ext-nothing', emit=('git',))))

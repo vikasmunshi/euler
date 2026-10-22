@@ -2,18 +2,20 @@
 # -*- coding: utf-8 -*-
 """Open a problem or its files in the web front end: the `show` and `edit` commands.
 
-Both drive the same channel-aware bridge to the browser — the app shell's left pane
-(web channel, over the terminal's OSC pipe) or a named browser tab (terminal
-channel) — differing only in the URL. The channel is the resolved subject's
-(`config.subject.channel`), never a CLI flag:
+Both open a page of the site (`config.base_url`) in a named browser tab, differing only in
+the URL:
 
 - `show` opens a problem's rendered documentation page (`<base_url>/solutions/NNNN/`),
   or any site page given its relative path (`<base_url>/<path>`).
 - `edit` opens a solution file in the code editor (`<base_url>/edit/solutions/NNNN/<file>`).
+
+A front end that frames the shell replaces both bodies (docs/package-split.md § 3.2) to open
+the page in its own viewer instead; the checks that decide *what* may be opened —
+:func:`edit_path`, :func:`pane_path_error` — are public so a replacement makes the same ones.
 """
 from __future__ import annotations
 
-__all__ = ['show', 'edit']
+__all__ = ['PANE_ROUTES', 'edit', 'edit_path', 'pane_path_error', 'show']
 
 import mimetypes
 from functools import lru_cache
@@ -24,7 +26,6 @@ from typing import Annotated, Iterable
 from prompt_toolkit.completion import Completion
 
 from solver.config import ExitCodes, config
-from solver.core import osc
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
@@ -108,6 +109,20 @@ def _solution_file_completions(ctx: Context, incomplete: str) -> Iterable[str | 
     return _files_of(_target_problem(ctx))
 
 
+def edit_path(problem: Problem, filename: str) -> str | None:
+    """*filename* as the POSIX path `edit` opens, or None (reported) if it is no file of *problem*.
+
+    Relative, inside the solution directory, and existing — `edit` never creates a file.
+    """
+    if '..' in Path(filename).parts or Path(filename).is_absolute() \
+            or not (problem.solution_dir / filename).is_file():
+        console.print(f'[error]error:[/error] [muted]{filename} not found in '
+                      f'[accent]{problem.number:04d}[/accent]; run [accent]new[/accent] '
+                      'to create a solution[/muted]')
+        return None
+    return Path(filename).as_posix()
+
+
 @register(requires='contributor', aliases=('ed',), quietable=True, completers={'filename': _solution_file_completions})
 def edit(problem: Problem,
          filename: Annotated[str, Ask('Which file?', choices='solution_files',
@@ -116,16 +131,10 @@ def edit(problem: Problem,
 
     The counterpart to `show` (which opens the rendered problem): *problem* defaults
     to the current problem, and *filename* completes to the files `ls` lists. The
-    file must already exist — run `new` to create a solution first. Channel-aware,
-    like `show` (the channel is the resolved subject's):
-
-    - **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
-      that the xterm.js page rides over the PTY → WebSocket pipe to point the app
-      shell's left pane at the file's editor (`<origin>/edit/solutions/NNNN/<relpath>`).
-
-    - **terminal** — opens that editor URL in the named browser tab "solver-edit"
-      (via `browser open-in-tab`); errors early if the `browser` command is
-      unavailable.
+    file must already exist — run `new` to create a solution first. Opens the file's
+    editor (`<base_url>/edit/solutions/NNNN/<file>`) in the named browser tab
+    "solver-edit" (via `browser open-in-tab`), and errors early if the `browser`
+    command is unavailable; in the web shell it opens in the viewer panel instead.
 
     Args:
         problem: [problem] The problem owning the file.
@@ -133,20 +142,8 @@ def edit(problem: Problem,
             as a menu when omitted. It must already
             exist.
     """
-    if '..' in Path(filename).parts or Path(filename).is_absolute() \
-            or not (problem.solution_dir / filename).is_file():
-        console.print(f'[error]error:[/error] [muted]{filename} not found in '
-                      f'[accent]{problem.number:04d}[/accent]; run [accent]new[/accent] '
-                      'to create a solution[/muted]')
+    if (rel := edit_path(problem, filename)) is None:
         return ExitCodes.EXIT_ERROR
-    rel: str = Path(filename).as_posix()
-
-    if config.subject.channel == 'web':
-        osc.emit('edit', f'{problem.number:04d}', str(osc.token()), rel)
-        console.print(f'[muted]editing[/muted] [accent]{rel}[/accent] '
-                      '[muted]in the viewer panel[/muted]')
-        return ExitCodes.EXIT_OK
-
     if not _browser_is_available():
         return _browser_unavailable_error()
     url: str = f'{config.base_url}/edit/solutions/{problem.number:04d}/{rel}'
@@ -165,7 +162,7 @@ def edit(problem: Problem,
 PANE_ROUTES: tuple[str, ...] = ('solutions', 'topics', 'docs', 'about', 'edit', 'account', 'shell')
 
 
-def _pane_path_error(path: str) -> str | None:
+def pane_path_error(path: str) -> str | None:
     """Why *path* is not a relative web path `show` may open, or None if it is.
 
     Shape first — relative, no `.`/`..` or empty segments (a trailing `/` is fine:
@@ -202,26 +199,16 @@ def _pane_path_completions(ctx: Context, incomplete: str) -> Iterable[str | Comp
 def show(problem: Problem, path: str | None = None) -> int:
     """Open a problem's page, or any site page, in a browser or the web viewer panel.
 
-    When *problem* is omitted, opens the current problem. The path depends on the
-    shell's channel (from the resolved subject):
-
-    - **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
-      browser tab "solver-doc" (via
-      `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
-      focused and refreshed, a different problem navigates the tab in place, and the
-      tab is recreated if it has been closed. Prints an error and returns early if
-      the "browser" command is not available.
-
-    - **web** — the shell has no local browser to drive (it runs on the server while
-      the user's browser is elsewhere), so it emits an `OSC 5379` control sequence
-      (`open;<NNNN>;<token>`) on stdout. The xterm.js page rides it over the
-      PTY → WebSocket pipe and swaps the app shell's left pane to
-      `<origin>/solutions/NNNN/`; the monotonic token lets the page ignore the
-      sequence when the PTY replay buffer re-sends it on reconnect.
+    When *problem* is omitted, opens the current problem. Opens the problem's page
+    (`<base_url>/solutions/NNNN/`) in the named browser tab "solver-doc" (via
+    `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
+    focused and refreshed, a different problem navigates the tab in place, and the
+    tab is recreated if it has been closed. Prints an error and returns early if
+    the "browser" command is not available. In the web shell, which has no local
+    browser to drive, the page opens in the viewer panel instead.
 
     When *path* is given, `show` opens that site page instead of the problem's —
-    `show topics/technique/concatenation` — over the same channels (`nav;<token>;<path>`
-    on web, the "solver-doc" tab on a terminal). The page ignores *problem*, but naming
+    `show topics/technique/concatenation`. The page ignores *problem*, but naming
     one still makes it the current problem: `show 121 topics/…` selects 121.
 
     Args:
@@ -230,21 +217,10 @@ def show(problem: Problem, path: str | None = None) -> int:
             Its first segment must be one of solutions, topics, docs, about, edit,
             account or shell. Defaults to None, which opens the problem's page.
     """
-    if path is not None:
-        if (why := _pane_path_error(path)) is not None:
-            console.print(f'[error]error:[/error] [muted]{path}: {why}[/muted]')
-            return ExitCodes.EXIT_ERROR
-        target, label, fields = f'/{path}', path, (str(osc.token()), path)
-    else:
-        number = f'{problem.number:04d}'
-        target, label, fields = f'/solutions/{number}/', number, (number, str(osc.token()))
-
-    if config.subject.channel == 'web':
-        osc.emit('nav' if path is not None else 'open', *fields)
-        console.print(f'[muted]opening[/muted] [accent]{label}[/accent] '
-                      '[muted]in the viewer panel[/muted]')
-        return ExitCodes.EXIT_OK
-
+    if path is not None and (why := pane_path_error(path)) is not None:
+        console.print(f'[error]error:[/error] [muted]{path}: {why}[/muted]')
+        return ExitCodes.EXIT_ERROR
+    target: str = f'/{path}' if path is not None else f'/solutions/{problem.number:04d}/'
     if not _browser_is_available():
         return _browser_unavailable_error()
     pipe = DEVNULL if console.quiet else None

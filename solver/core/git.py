@@ -46,7 +46,6 @@ from typing import Annotated, Any, Literal, NamedTuple
 from cryptography.exceptions import InvalidTag
 
 from solver.config import ExitCodes, config
-from solver.core import osc
 from solver.core.problems import Problem
 from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
 from solver.crypto import wire
@@ -290,8 +289,6 @@ def git_commit(problem: Problem,
     cmdline += ['git', 'add', '-A', *(shlex.quote(spec) for spec in paths), '&&']
     cmdline += ['git', 'commit', '--message', shlex.quote(message)]
     result: int = run_cmdline(' '.join(cmdline))
-    if result == 0:
-        osc.git_changed()
     return result
 
 
@@ -322,8 +319,6 @@ def _amend(paths: list[str], dirty: str, targets: tuple[str, ...]) -> int:
         return ExitCodes.EXIT_OK
     result: int = run_cmdline('git add -A ' + ' '.join(shlex.quote(spec) for spec in paths)
                               + ' && git commit --amend --no-edit')
-    if result == 0:
-        osc.git_changed()
     return result
 
 
@@ -407,9 +402,7 @@ def commit_regenerated(verb: str, quips: tuple[str, ...], written: Sequence[str]
     cmdline = (f'git add -A {specs}'
                + ' && git commit --message ' + shlex.quote(message) + f' -- {specs}')
     result: int = run_cmdline(cmdline)
-    if result == 0:
-        osc.git_changed()
-    else:
+    if result != 0:
         console.print(f'[warning]warning:[/warning] {verb} rewrote its files but the commit failed — '
                       'they are in the working tree, uncommitted.')
     return result
@@ -505,7 +498,6 @@ def git_reset(hard: bool = False) -> int:
                       'run [accent]git-commit[/accent] to re-commit.')
     else:
         console.print('already level with [accent]origin/master[/accent] — nothing to undo.')
-    osc.git_changed()
     return int(ExitCodes.EXIT_OK)
 
 
@@ -565,16 +557,13 @@ def _reset_hard() -> int:
         console.print('[error]error:[/error] the reset did not complete — if it failed decrypting '
                       'solutions/private, unlock your vault (the Account page) and run it again, '
                       'or ask a maintainer to reset this clone.')
-        osc.git_changed()
         return int(ExitCodes.EXIT_ERROR)
     # After the reset, not before: a reset that fails leaves the stash as the only copy of
     # whatever a user might still want back.
     if stashes and run_cmdline('git stash clear') != 0:
         console.print('[warning]reset to origin/master, but the stash could not be cleared.[/warning]')
-        osc.git_changed()
         return int(ExitCodes.EXIT_ERROR)
     console.print('[success]reset to origin/master[/success] — this clone now matches it exactly.')
-    osc.git_changed()
     return int(ExitCodes.EXIT_OK)
 
 
@@ -604,8 +593,6 @@ def git_publish(*targets: Literal['scripts', 'solutions', 'solver'],
         result = run_cmdline(f'{config.scripts.publish} --dry-run {" ".join(targets)}')
     else:
         result = run_cmdline(f'{config.scripts.publish} {" ".join(targets)}')
-    if result == 0:
-        osc.git_changed()
     return result
 
 
@@ -831,7 +818,6 @@ def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
     if local_edits:
         console.print(f'[muted]kept your [accent]{len(local_edits)}[/accent] local edit(s) to '
                       'solutions/private[/muted]')
-    osc.git_changed()
     return True
 
 
@@ -905,11 +891,7 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     result = run_cmdline(f'{sys.executable} -P -m solver.crypto.gitfilter install')
     if result != 0:
         return result
-    # The filter is wired from here on, whatever the re-checkout below does — so both
-    # tails nudge the header's chip (its private-solutions row just changed).
-    result = resmudge_private()
-    osc.git_changed()
-    return result
+    return resmudge_private()
 
 
 @register(requires='reader', aliases=('sync',))
@@ -963,8 +945,6 @@ def git_sync(dry_run: bool = False) -> int:
             console.print(f'[warning]{hint}[/warning]')
             return int(ExitCodes.EXIT_ERROR)
         result = run_cmdline(config.scripts.sync)
-        if result == 0:
-            osc.git_changed()  # the fetch moved origin/master, the merge moved the branch
     return result
 
 
@@ -981,8 +961,6 @@ def git_identity() -> int:
     Aliased as `identity`.
     """
     result = run_cmdline(config.scripts.configure_identity)
-    if result == 0:
-        osc.account_changed()  # gh sign-in flips the account page's GitHub-CLI row
     return result
 
 
@@ -1059,15 +1037,13 @@ def _dismiss_pr_notice(branch: str) -> None:
     so the merge holds no thread id — the subject is the only handle either side shares.
 
     Silent and best-effort, like the announcement: the pull request is merged either way,
-    and a wedged spool must not turn a landed review into a failure. On a real dismissal
-    the message chip is nudged, since the row it just removed is on screen.
+    and a wedged spool must not turn a landed review into a failure.
     """
     if not branch:
         return
     from solver.web.msg.notify import dismiss_by_subject
     if dismiss_by_subject(f'{PR_REVIEW_SUBJECT}{branch}'):
         console.print('[muted]the review notice has been dismissed.[/muted]')
-        osc.messages_changed()
 
 
 def _ensure_pull_request(branch: str) -> int:
@@ -1150,8 +1126,6 @@ def git_push(force: bool = False, pr: bool = True) -> int:
             return ExitCodes.EXIT_ERROR
     lease: str = ' --force-with-lease' if force else ''
     result: int = run_cmdline(f'git push -u{lease} origin {branch}')
-    if result == 0:
-        osc.git_changed()  # origin/<branch> moved up to HEAD: the chip's ahead count
     if result != 0 or not pr or branch == 'master':
         return result
     return _ensure_pull_request(branch)
@@ -1295,8 +1269,7 @@ def _merge_pr(number: int, *, branch: str = '') -> int:
     One gate, one question: **is every file in the allowlist?** A pull request may carry
     as many commits, and span as many of `git-commit`'s targets, as the work needed — what
     makes this a maintainer's command rather than an admin's is that nothing outside
-    :data:`PR_SCOPE` rode along. On a clean merge the header chip is nudged
-    (:func:`osc.git_changed`), since master moved.
+    :data:`PR_SCOPE` rode along.
 
     *branch* is the request's head ref, carried only so a landed merge can close the
     notice that asked for it (:func:`_dismiss_pr_notice`). Optional because the merge is

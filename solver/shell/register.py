@@ -19,7 +19,7 @@ Functions:
 """
 from __future__ import annotations
 
-__all__ = ['register', 'replace_body']
+__all__ = ['check_replacement', 'register', 'replace_body']
 
 import ast
 import enum
@@ -852,21 +852,27 @@ def _contract(func: Callable[..., Any]) -> tuple[list[inspect.Parameter], Any]:
     return _split_asks(list(signature.parameters.values()))[0], signature.return_annotation
 
 
-def replace_body(name: str, func: Callable[..., int]) -> None:
-    """Make the `register()`-ed command *name* run *func* instead of its own function.
-
-    The extension mechanism's `replace` overlay (docs/package-split.md § 3.2). Only the body
-    changes: the adapter, usage, flags, completion and the docstring the help shows are the
-    original's, which is why *func* must have the same signature — anything else raises
-    :class:`ValueError`. Direct Python calls to the original function are unaffected.
-    """
+def check_replacement(name: str, func: Callable[..., int]) -> None:
+    """Raise :class:`ValueError` unless *func* may replace the `register()`-ed command *name*'s body."""
     spec = _specs.get(name)
     if spec is None:
         raise ValueError(f'{name!r} is not a register()-ed command')
     if _contract(func) != _contract(spec.func):
         raise ValueError(f'{name!r}: replacement {func.__module__}.{func.__qualname__} '
                          f'does not match the signature of {spec.func.__module__}.{spec.func.__qualname__}')
-    spec.func = func
+
+
+def replace_body(name: str, func: Callable[..., int]) -> None:
+    """Make the `register()`-ed command *name* run *func* instead of its own function.
+
+    The extension mechanism's `replace` overlay (docs/package-split.md § 3.2). Only the body
+    changes: the adapter, usage, flags, completion and the docstring the help shows are the
+    original's, which is why *func* must have the same signature — anything else raises
+    :class:`ValueError` (:func:`check_replacement`). Direct Python calls to the original
+    function are unaffected.
+    """
+    check_replacement(name, func)
+    _specs[name].func = func
 
 
 def register[**P](

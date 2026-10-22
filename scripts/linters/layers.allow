@@ -2,12 +2,6 @@
 # Format: <repo-relative path> <imported web-side module>. Ratchets down only:
 # scripts/linters/layers.py fails on a new coupling AND on a line that no longer matches.
 
-# phase 2 — OSC out of solver
-solver/core/git.py solver.core.osc
-solver/core/summary.py solver.core.osc
-solver/core/viewer.py solver.core.osc
-solver/crypto/keys.py solver.core.osc
-
 # phase 3 — login: the ticket plane leaves solver.auth
 solver/auth/identity.py solver.web.auth.client
 

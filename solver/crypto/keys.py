@@ -60,7 +60,6 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from solver.auth import roster
 from solver.config import ExitCodes, config as app_config
-from solver.core import osc
 from solver.crypto import vault as vault_mod
 from solver.crypto import wire
 from solver.crypto.ciphers import (enc_key_payload, encrypt_blob, load_private_key, lock,
@@ -640,10 +639,6 @@ def user(regen: bool = False) -> int:
             write_enc_key_file(enc_key_payload(private_key.public_key(), carry))
             console.print('[success]Master-key access carried to the new key[/success] '
                           f'[muted]({app_config.enc_key_file})[/muted]')
-        # A new identity is exactly what the account page's public-key panel shows —
-        # nudge it to re-read (a no-op unless it is the visible pane). Only when a key
-        # was actually minted: a bare `user` status view changed nothing.
-        osc.account_changed()
         minted = True
     pub: str = public_key_hex(private_key.public_key())
     # It must answer for the key material as it is NOW. `read_master_key` is

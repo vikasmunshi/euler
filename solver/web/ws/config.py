@@ -51,5 +51,5 @@ class WsConfig(NamedTuple):
         `shell_argv` has no variable behind it: it is this interpreter, and overriding it
         is a thing tests do in code (forking a stub), not a thing a deployment sets.
         """
-        return cls(shell_argv=(sys.executable, '-m', 'solver'),
+        return cls(shell_argv=(sys.executable, '-m', 'solver.web.shell'),
                    **load_spec('ws').read(get_type_hints(cls)))

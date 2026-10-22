@@ -105,7 +105,6 @@ class _GitCommandCase(unittest.TestCase):
         self._saved_branch = git._current_branch
         self._saved_pr = git._ensure_pull_request
         self._saved_subject = config.subject
-        self._saved_emit = git.osc.emit
         git.run_cmdline = fake_run_cmdline  # type: ignore[assignment]
         # `git-sync`'s tail asks git for the recorded filter command (enc_key_arrived).
         # Unstubbed it reads the REAL checkout — which is how this fixture noticed the
@@ -119,10 +118,6 @@ class _GitCommandCase(unittest.TestCase):
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
         # like run_cmdline, so no test can touch a real remote (module docstring).
         git._ensure_pull_request = fake_ensure_pr  # type: ignore[assignment]
-        # The subject is web-channel, so the commands' osc.git_changed() nudges would
-        # write raw OSC 5379 escape sequences to the test's stdout. This suite is not
-        # the OSC wire's test (that is test_web_channel) — swallow the emit.
-        git.osc.emit = lambda *a, **k: None  # type: ignore[assignment]
 
     def tearDown(self) -> None:
         # Every subclass that stubs `git.run` further leaves the restore to here, and must:
@@ -134,7 +129,6 @@ class _GitCommandCase(unittest.TestCase):
         git.run_cmdline = self._saved_run  # type: ignore[assignment]
         git._current_branch = self._saved_branch  # type: ignore[assignment]
         git._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
-        git.osc.emit = self._saved_emit  # type: ignore[assignment]
         config.subject = self._saved_subject
 
     def as_profile(self, profile: str) -> None:
@@ -351,10 +345,6 @@ class GhPrTest(_GitCommandCase):
         self.dismissed: list[str] = []
         self._saved_dismiss = notify.dismiss_by_subject
         notify.dismiss_by_subject = self._fake_dismiss  # type: ignore[assignment]
-        # The base case swallows the OSC nudges; here they are the assertion that the chip
-        # is told only when a row actually went away.
-        self.emits: list[str] = []
-        git.osc.emit = lambda action, *fields: self.emits.append(action)  # type: ignore[assignment]
 
     def _fake_open_prs(self) -> list[git.PullRequest]:
         if self.open_prs is None:
@@ -536,7 +526,6 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
-        self.assertIn('msg', self.emits, 'the chip must be told the row is gone')
 
     def test_the_notice_goes_before_the_sync_not_after_it(self) -> None:
         """A sync that fails leaves work on this clone — not a request still awaiting review."""
@@ -565,15 +554,12 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.dismissed, [])
 
-    def test_no_matching_notice_means_no_chip_nudge(self) -> None:
-        """A merge of a branch nobody was told about says nothing about the spool: a nudge
-        that fires when nothing moved trains the reader to ignore it."""
+    def test_no_matching_notice_still_merges(self) -> None:
+        """A merge of a branch nobody was told about dismisses nothing and still lands."""
         self.as_profile('maintainer')
         self.dismiss_count = 0
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
-        self.assertNotIn('msg', self.emits)
-        self.assertIn('git', self.emits, 'the sync still moved master')
 
     # ── the allowlist: one gate, admitting exactly what `git-commit` can stage ──
     def test_the_allowlist_is_the_union_of_the_commit_targets(self) -> None:

@@ -23,7 +23,6 @@ solver.core.evaluate,True
 solver.core.git,True
 solver.core.list,True
 solver.core.new,True
-solver.core.osc,
 solver.core.problems,
 solver.core.progress,
 solver.core.results,True
@@ -96,6 +95,8 @@ solver.web.msg.config,
 solver.web.msg.identity,
 solver.web.msg.notify,
 solver.web.msg.store,
+solver.web.shell.osc,
+solver.web.shell.viewer,
 solver.web.site.app,
 solver.web.site.config,
 solver.web.site.content,

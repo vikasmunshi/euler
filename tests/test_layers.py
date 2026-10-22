@@ -51,17 +51,17 @@ class LayersTests(unittest.TestCase):
     def test_finds_top_level_lazy_and_submodule_imports(self) -> None:
         self.write('solver/core/a.py', 'from solver.web.msg import X\n')
         self.write('solver/core/b.py', 'def f():\n    import solver.web.auth.client\n')
-        self.write('solver/core/c.py', 'from solver.core import osc\n')
+        self.write('solver/core/c.py', 'from solver.auth import roster\n')
         self.write('solver/core/d.py', 'from solver.core import problems\n')       # fine
         self.assertEqual(layers.violations(self.root), {
             ('solver/core/a.py', 'solver.web.msg'),
             ('solver/core/b.py', 'solver.web.auth.client'),
-            ('solver/core/c.py', 'solver.core.osc'),
+            ('solver/core/c.py', 'solver.auth.roster'),
         })
 
     def test_web_side_modules_may_import_anything(self) -> None:
         self.write('solver/web/site/app.py', 'from solver.web.msg import X\n')
-        self.write('solver/core/osc.py', 'from solver.web import csp\n')
+        self.write('solver/auth/roster.py', 'from solver.web import csp\n')
         self.assertEqual(layers.violations(self.root), set())
 
     def test_the_manifest_may_not_load_web_command_modules(self) -> None:

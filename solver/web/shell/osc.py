@@ -31,17 +31,20 @@ attach the service replays the scrollback, which redraws the sequences of comman
 that already ran; the token lets the browser tell a replay from a fresh act and obey
 only the latter (`terminal.js`, § the OSC handler).
 
-This module is the one definition of that wire. It holds no state and imports only
-:mod:`solver.config` (for the channel), so both the viewer (:mod:`solver.core.viewer`)
-and the git commands (:mod:`solver.core.git`) can emit without depending on each
-other.
+This module is the one definition of that wire, and it lives on the web side: the solver
+shell knows nothing of it. The *state-changed* payloads are sent by :func:`nudge`, the web
+shell's `notify` — `overlays.toml` names the commands after which each one fires
+(docs/package-split.md § 3.2) — and the pane-swapping ones by the web shell's `show` / `edit`
+(:mod:`solver.web.shell.viewer`). The message commands, web-side themselves, emit directly.
 """
 from __future__ import annotations
 
-__all__ = ['OSC_CODE', 'account_changed', 'emit', 'git_changed', 'messages_changed', 'progress_changed', 'token']
+__all__ = ['EVENTS', 'OSC_CODE', 'account_changed', 'emit', 'git_changed', 'messages_changed', 'nudge',
+           'progress_changed', 'token']
 
 import sys
 import time
+from typing import Callable
 
 from solver.config import config
 
@@ -76,8 +79,8 @@ def emit(action: str, *fields: str) -> None:
 def git_changed() -> None:
     """Tell the page this clone's git state moved: the header re-reads its chip.
 
-    Emitted by the git commands (:mod:`solver.core.git`) on the success paths
-    that can change what the chip shows — a commit, a sync, a push, a wired filter.
+    Emitted after the commands that can change what the chip shows — a commit, a sync,
+    a push, a wired filter, a regenerating verb's commit (`overlays.toml`).
     The header reads its state once per navigation and never polls, so without this
     the chip would be at its most wrong exactly after the user acted. It is only a
     *nudge*: the browser answers by re-reading `/git`, so a lost or replayed
@@ -114,7 +117,7 @@ def messages_changed() -> None:
 def account_changed() -> None:
     """Tell the page this user's account state moved: refresh the account panel.
 
-    Emitted by the commands that change what the account page shows about *you* — a
+    Emitted after the commands that change what the account page shows about *you* — a
     new key pair (`user`), a GitHub sign-in (`git-identity`). The nudge reaches
     the page the same way `git;` does; the difference is on the browser side, where
     the listening element lives **inside** the account fragment, so it re-reads only
@@ -129,7 +132,7 @@ def account_changed() -> None:
 def progress_changed() -> None:
     """Tell the page `problems.json` moved: the solutions grid re-reads itself.
 
-    Emitted when `summary` or `mark` re-writes the progress file. It matters most for
+    Emitted after `summary` and `mark`, which re-write the progress file. It matters most for
     the web upload, which stores the pasted page and hands the import to `summary` in
     this terminal — so the grid the upload left on screen is stale until the shell
     finishes, and this is how it learns that it has. Like `account;`, the listener
@@ -137,3 +140,17 @@ def progress_changed() -> None:
     visible page.
     """
     emit('progress', str(token()))
+
+
+#: The state-changed events an overlay may emit, each to the function that sends it.
+EVENTS: dict[str, Callable[[], None]] = {
+    'git': git_changed,
+    'msg': messages_changed,
+    'account': account_changed,
+    'progress': progress_changed,
+}
+
+
+def nudge(event: str) -> None:
+    """The web shell's `notify`: send the *event* named in an overlay (:data:`EVENTS`)."""
+    EVENTS[event]()
