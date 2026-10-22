@@ -797,4 +797,20 @@
         refreshBack();
       });
   });
+
+  // Signing in and out return to the page the pane is on (auth/returnto.py validates it).
+  // The header is not re-rendered as the pane moves, so the server-rendered `next` is the
+  // page the document was loaded on; the path is stamped here, at the moment of the click,
+  // in the capture phase so it lands before the navigation or the form post.
+  function currentPage() { return location.pathname + location.search; }
+  document.addEventListener('click', function (ev) {
+    var link = ev.target.closest && ev.target.closest('a[data-login]');
+    if (link) { link.href = '/login?next=' + encodeURIComponent(currentPage()); }
+  }, true);
+  document.addEventListener('submit', function (ev) {
+    var form = ev.target;
+    if (!form.matches || !form.matches('form[data-logout]')) { return; }
+    var field = form.querySelector('input[name="next"]');
+    if (field) { field.value = currentPage(); }
+  }, true);
 })();

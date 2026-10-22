@@ -74,6 +74,9 @@ def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, An
         'csp_nonce': request.get(NONCE_KEY, ''),
         'subject': subject,
         'browsable': subject is not None or request.app.get(PUBLIC_KEY, False),
+        # The page being rendered, for the login link's and the logout form's `next`
+        # (auth/returnto.py) — site.js refreshes both on click, since the pane moves on.
+        'page_path': request.path_qs,
         'crumbs': [],
         'actions': [],
         'git': request.get(GIT_KEY),

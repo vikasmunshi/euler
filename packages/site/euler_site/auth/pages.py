@@ -36,6 +36,7 @@ from aiohttp import web
 from euler_site.auth.app import AuthService, _client_key, utcnow_iso
 from euler_site.auth.pending import PendingRecord
 from euler_site.auth.requests import NAME_MAX, REMARKS_MAX, sanitize
+from euler_site.auth.returnto import return_path
 from euler_site.auth.users import normalize_email
 
 log = logging.getLogger('euler-auth')
@@ -150,6 +151,8 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
             context['notice'] = 'Registration complete — sign in with your new password.'
         elif 'reset' in request.query:
             context['notice'] = 'Password updated — sign in with your new password.'
+        # Where the reader was (returnto): login.js lands there once the handshake succeeds.
+        context['next'] = return_path(request.query.get('next'), signed_in=True)
         return aiohttp_jinja2.render_template('login.html', request, context)
 
     # ── the shared invite/reset pipeline ───────────────────────────────────

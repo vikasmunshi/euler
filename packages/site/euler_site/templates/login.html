@@ -7,7 +7,8 @@
      handshake is unchanged. #}
   {% set note %}<b>SRP-6a</b> · password proven, never sent — the server has never seen it.{% endset %}
   {% call authwin('sign in', 'the shell, the notes and the editor are one handshake away.', note) %}
-    <form id="login-form" class="auth-form authwin-form" method="post" action="#" novalidate>
+    <form id="login-form" class="auth-form authwin-form" method="post" action="#" novalidate
+          data-next="{{ next | default('/') }}">
       <label for="email">email</label>
       <input id="email" name="email" type="email" autocomplete="username" required autofocus>
       <label for="password">passwd</label>

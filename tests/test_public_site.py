@@ -105,7 +105,7 @@ class PublicSiteTests(AioHTTPTestCase):
         body = await (await self.client.get('/')).text()
         self.assertIn('hx-get="/solutions/"', body)          # the nav is live…
         self.assertNotIn('src="/terminal"', body)             # …there is no terminal…
-        self.assertIn('href="/login"', body)                  # …only the way to one
+        self.assertIn('href="/login?next=/"', body)          # …only the way to one, back to here
 
     @unittest_run_loop
     async def test_a_public_solution_file_is_served(self) -> None:

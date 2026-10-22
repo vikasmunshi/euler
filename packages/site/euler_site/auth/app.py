@@ -40,6 +40,7 @@ from aiohttp import web
 from solver.auth import Authorizations, Subject
 from solver.auth.identity import system_slug
 from euler_site.auth import policy
+from euler_site.auth.returnto import return_path
 from euler_site.site import content
 from euler_site.cache import cache_middleware
 from euler_site.csp import csp_middleware
@@ -364,14 +365,17 @@ def build_public_app(service: AuthService) -> web.Application:
             service.remember.revoke(remember_cookie)
         if identity is not None:
             await service.push_shell_teardown(identity[0])   # the user left — reap the shell
-        # A browser form post (the site's user menu) lands on home — 303 turns
-        # the POST into GET /, where the now-absent session bounces to /login.
+        # A browser form post (the site's user menu) lands back on the page it came from
+        # (its `next` field — returnto), now served signed out by the public site; a page
+        # only a session can see, or none, lands on home. 303 turns the POST into a GET.
         # A programmatic caller (no text/html Accept) keeps the JSON contract.
         if 'text/html' in request.headers.get('Accept', ''):
+            form = await request.post() if request.content_type == 'application/x-www-form-urlencoded' else {}
+            location = return_path(str(form.get('next', '')), signed_in=False)
             # A plain 303, not web.HTTPSeeOther: a handler *returning* an HTTPException
             # is deprecated in aiohttp (it is meant to be raised), and this one must be
             # returned so the cookie deletions below land on it.
-            response: web.Response = web.Response(status=303, headers={'Location': '/'})
+            response: web.Response = web.Response(status=303, headers={'Location': location})
         else:
             response = web.json_response({'ok': True})
         response.del_cookie(policy.SESSION_COOKIE, path='/')
@@ -427,7 +431,8 @@ def build_public_app(service: AuthService) -> web.Application:
                               auth_method='session-cookie', profile=profile)
         # Signed out, the content is still browsable: the public site serves it, so the start
         # page's tiles and the header's nav lead there rather than wearing padlocks.
-        return {'subject': subject, 'browsable': True, 'readme_html': content.readme_html()}
+        # `page_path` stays empty: an auth page is never the place a sign-in returns to.
+        return {'subject': subject, 'browsable': True, 'page_path': '', 'readme_html': content.readme_html()}
 
     app = web.Application(
         middlewares=[cache_middleware, csp_middleware, aiohttp_jinja2.context_processors_middleware])

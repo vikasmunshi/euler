@@ -177,12 +177,12 @@
         {# No terminal item here: connect/disconnect belongs on the terminal's own
            titlebar (base.html), where the act and the thing it acts on are one
            control. The header's chip beside the git menu carries the state. #}
-        <li><form method="post" action="/auth/logout"><button type="submit">Logout</button></form></li>
+        <li><form method="post" action="/auth/logout" data-logout><input type="hidden" name="next" value="{{ page_path }}"><button type="submit">Logout</button></form></li>
       </ul>
       {% else %}
       <ul class="menu-list menu-right">
         <li class="menu-info">not signed in</li>
-        <li><a href="/login">Login</a></li>
+        <li><a href="/login{% if page_path %}?next={{ page_path | urlencode }}{% endif %}" data-login>Login</a></li>
       </ul>
       {% endif %}
     </details>

@@ -59,7 +59,9 @@
       try {
         if (window.Vault) Vault.store(await Vault.derivePk(secret, salt), salt);
       } catch (err) { /* vault stays locked */ }
-      window.location.replace('/');
+      // Back to the page the reader came from — validated by the server (auth/returnto.py)
+      // before it was written into the form; anything else was already `/`.
+      window.location.replace(form.dataset.next || '/');
     } catch (err) {
       fail('Sign-in failed: ' + (err && err.message ? err.message : 'unexpected error'));
     }

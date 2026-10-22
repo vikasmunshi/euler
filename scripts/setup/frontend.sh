@@ -635,7 +635,9 @@ ${DOMAIN} {
 					# login page; 302 is not heuristically cacheable, so this is
 					# belt-and-braces — but the belt costs one header.
 					header Cache-Control "no-store"
-					redir * /login 302
+					# Back to this page once signed in (?next=; the auth service
+					# validates it — euler_site/auth/returnto.py).
+					redir * /login?next={http.request.uri.path} 302
 				}
 			}
 

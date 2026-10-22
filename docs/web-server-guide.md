@@ -251,6 +251,20 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
    cookie if asked). On failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
 
+**Signing in and out keep your place.** Both are full-page trips through this service, so
+the page the left pane is on travels with them as `next`: the header's *Login* link and the
+public site's *Sign in* button carry `/login?next=<path>`, the *Logout* form a `next` field,
+and Caddy's redirect of an expired session `?next=` its path. `site.js` stamps the live path
+on the click (the header is not re-rendered as the pane moves). Signed in, `login.js` lands on
+it; signed out, the 303 goes back to it — served now by the public site — unless it is a page
+only a session can see (`/account`), which lands on `/`.
+
+`next` is attacker-controlled, so it is an allowlist rather than a sanitiser
+(`packages/site/euler_site/auth/returnto.py`): `/` or a path under one of the left pane's
+routes (`/solutions`, `/docs`, `/topics`, `/about`, `/shell`, and `/account` after signing
+in). Another host — `//evil.example`, or `/\evil.example`, which browsers read as one — a
+scheme, an auth page, the terminal or an API route is `/`.
+
 The browser client (`packages/site/euler_site/content/assets/srp.js`) interoperates byte-for-byte with
 `srp.py`: RFC 5054 2048-bit group, `g=2`, SHA-256, `PAD`-to-`|N|` on `A`/`B`/`S`.
 `tests/test_srp_interop.py` cross-tests them (needs `make install-nodejs`).

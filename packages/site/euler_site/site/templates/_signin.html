@@ -6,6 +6,6 @@
   <h2>The solver terminal</h2>
   <p>Signed in, this pane is a live shell on your own copy of the repository: run and benchmark
      solutions, read the private notes, and edit the work in the pane beside it.</p>
-  <p><a class="btn btn-primary" href="/login">Sign in</a></p>
+  <p><a class="btn btn-primary" href="/login{% if page_path %}?next={{ page_path | urlencode }}{% endif %}" data-login>Sign in</a></p>
   <p class="muted">No account? <a href="/request-invite">Request an invite</a>.</p>
 </div>
