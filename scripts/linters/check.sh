@@ -80,11 +80,12 @@ echo "interaction guard ${dir_to_check} -> ${seam_rc}"
 # `check-commands` shell command. Only meaningful for the solver package — the command
 # registry is what it walks, and only an admin subject sees all of it (the command is
 # admin-floored, so a lesser profile finds no such command and this step is skipped).
+# Run from the host shell, which loads the web host's commands as well as the solver's.
 doclint_rc=0
 layers_rc=0
 if [[ "${dir_to_check}" == solver || "${dir_to_check}" == */solver ]]; then
     echo "checking command docstrings ..."
-    solver "check-commands"
+    python -m solver.web.shell.host "check-commands"
     doclint_rc=$?
     echo "command docstrings -> ${doclint_rc}"
 

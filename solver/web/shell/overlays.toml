@@ -73,3 +73,10 @@ replace = "solver.web.shell.viewer:show"
 
 [edit]
 replace = "solver.web.shell.viewer:edit"
+
+# ── key distribution ────────────────────────────────────────────────────────────────────
+# Rotation re-issues the new key to every registered holder over the spool (as in host.toml),
+# and commits the re-encrypted tree.
+[key-rekey]
+emit = ["git"]
+replace = "solver.web.shell.keys:key_rekey"

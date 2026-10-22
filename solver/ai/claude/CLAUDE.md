@@ -107,14 +107,18 @@ User- and developer-facing docs live under `docs/`:
 - `docs/config-guide.md` — configuration: `values.conf` vs `env.conf`, precedence, and what is
   deliberately not a setting.
 - `docs/package-split.md` — design of record for splitting the tree into the solver shell, content
-  site and web shell packages (in progress; phased plan in § 4). Until it lands, the solver side
-  must not import the web tier: `scripts/linters/layers.py` (pre-commit) enforces it, with known
-  couplings in `scripts/linters/layers.allow`, which only ratchets down.
+  site and web shell packages (in progress; phased plan in § 4). The solver side must not import
+  the web tier: `scripts/linters/layers.py` (pre-commit) enforces it, and its allowlist
+  `scripts/linters/layers.allow` is empty and stays so. The web host's commands load through an
+  `Extension`: the web shell (`python -m solver.web.shell`) and `solver-host`
+  (`python -m solver.web.shell.host`) for the operator's terminal.
 
 The command catalogue (in `user-guide.md`) and `commands-index.md` are **generated** from the live
 registry by the `update-docs` command (`solver/utils/update_doc.py`). After changing any command's
-name, alias, docstring, or signature, run `update-docs` (`solver "update-docs --check"` verifies
-they are current).
+name, alias, docstring, or signature, run `update-docs` from the host shell, which loads every
+command: `python -m solver.web.shell.host "update-docs"` (`… "update-docs --check"` verifies they
+are current). A plain `solver` refuses, since it lacks the web host's commands (`msg`, `users`,
+`user-authorize`, `key-split`, `host-authorize`).
 
 ## Architecture
 

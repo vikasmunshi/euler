@@ -1,16 +1,5 @@
 # Known solver → web couplings, burned down by phase (docs/package-split.md § 4).
 # Format: <repo-relative path> <imported web-side module>. Ratchets down only:
 # scripts/linters/layers.py fails on a new coupling AND on a line that no longer matches.
-
-# phase 4 — key distribution and staff notices to the web side
-solver/core/git.py solver.web.msg
-solver/core/git.py solver.web.msg.notify
-solver/core/summary.py solver.web.msg
-solver/core/summary.py solver.web.msg.notify
-solver/crypto/keys.py solver.auth.roster
-solver/crypto/keys.py solver.web.auth.commands
-solver/crypto/keys.py solver.web.auth.mail
-solver/crypto/keys.py solver.web.msg
-solver/crypto/keys.py solver.web.msg.notify
-solver/modules.csv solver.web.auth.commands
-solver/modules.csv solver.web.msg.commands
+#
+# Empty since phase 4: the solver shell imports no web code. Keep it that way.

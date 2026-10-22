@@ -104,6 +104,7 @@ actions = ["install", "check", "uninstall"]
 # /opt/euler system venv (python -m solver.web.<svc>), not a
 # detached-process CLI.
 solver = "solver.main:main"
+solver-host = "solver.web.shell:host_main"   # the solver shell + the web host's commands (docs/package-split.md)
 solver-gitfilter = "solver.crypto.gitfilter:main"
 
 [tool.setuptools.dynamic]
@@ -141,4 +142,4 @@ solver = ["*.html", "modules.csv"]
     "content/home-summary.md",
 ]
 "solver.web.site" = ["templates/*.html"]  # content-service pages (Phase 5)
-"solver.web.shell" = ["overlays.toml"]   # the web shell's overlays (docs/package-split.md § 3.2)
+"solver.web.shell" = ["overlays.toml", "host.toml"]   # the web shell's overlays (docs/package-split.md § 3.2)

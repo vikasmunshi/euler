@@ -17,12 +17,13 @@ from typing import Any
 
 from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
+from solver.core import notices
+from solver.core.notices import UNREGISTERED_SUBJECT
 from solver.core.problems import Problem, format_solved_date, problems
 from solver.core.progress import RECORD_TZ, ProblemRecord, merge_progress, parse_progress
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
 from solver.utils.quips import quips
-from solver.web.msg import UNREGISTERED_SUBJECT
 
 
 def _parse_progress_html() -> dict[int, ProblemRecord]:
@@ -36,12 +37,11 @@ def _parse_progress_html() -> dict[int, ProblemRecord]:
 def _report_unregistered(numbers: list[int]) -> None:
     """Say — on the console, and to staff — which solved answers the progress page lacks.
 
-    Best-effort on the message, like every other :mod:`solver.web.msg.notify` caller: the
-    state is already written and correct, so a spool that is down or absent costs a nudge and
-    nothing else. The console line is printed either way, since the person who just ran
+    Best-effort on the message, like every :mod:`solver.core.notices` caller: the state is
+    already written and correct, so a carrier that is down or absent costs a nudge and nothing
+    else. The console line is printed either way, since the person who just ran
     `summary` is the one who can go and register the answer.
     """
-    from solver.web.msg.notify import notify_staff
     listed: str = ', '.join(str(number) for number in numbers)
     what: str = f'problem {listed}' if len(numbers) == 1 else f'{len(numbers)} problems'
     if len(numbers) == 1:
@@ -50,7 +50,7 @@ def _report_unregistered(numbers: list[int]) -> None:
     else:
         console.print(f'[warning]answer not registered on projecteuler.net for '
                       f'{len(numbers)} problems: {listed}[/warning]')
-    notify_staff(
+    notices.to_staff(
         f'{UNREGISTERED_SUBJECT}{what}',
         'These problems are recorded as solved, but the progress page does not show them as '
         'solved — so the answer was never registered on projecteuler.net:\n\n'

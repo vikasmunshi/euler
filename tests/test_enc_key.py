@@ -38,6 +38,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 from solver.auth import roster
 from solver.config import config as app_config
 from solver.crypto import keys as keys_mod
+from solver.web.shell import keys as web_keys
 from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key_hex,
                                    read_enc_key_file, read_master_key, verify_master_key)
 from solver.shell import dialogue
@@ -134,7 +135,7 @@ class SaveIssuedKeyTests(EncKeyTestCase):
         self.addCleanup(setattr, git_mod, 'enc_key_arrived', saved)
 
     def _message(self, payload: dict[str, str]) -> str:
-        return keys_mod._issue_body(payload)
+        return web_keys._issue_body(payload)
 
     def _master_on_disk(self) -> bytes:
         """Re-read the file, past `read_master_key`'s cache.
@@ -278,13 +279,14 @@ class KeySplitTestCase(EncKeyTestCase):
         self.sent: list[tuple[str, str, str]] = []
         self._wired: list[str] = []
         import solver.core.git as git_mod
-        import solver.web.msg.notify as notify_mod
+        notify_mod = web_keys                                     # binds the spool calls by name
         for module, name, stub in (
                 (notify_mod, 'notify_user',
                  lambda identity, subject, body: bool(self.sent.append((identity, subject, body))
                                                       or True)),
                 (git_mod, 'enc_key_arrived', lambda edits=None: self._wired.append('wired')),
-                (keys_mod, 'sure', lambda _q, *, phrase='': True)):
+                (keys_mod, 'sure', lambda _q, *, phrase='': True),
+                (web_keys, 'sure', lambda _q, *, phrase='': True)):
             saved = getattr(module, name)
             setattr(module, name, stub)
             self.addCleanup(setattr, module, name, saved)
@@ -307,12 +309,12 @@ class KeySplitTestCase(EncKeyTestCase):
 
     def _lay_the_local_share(self) -> None:
         """The first `key-split` run: write this machine's half, send nothing."""
-        self.assertEqual(keys_mod.key_split('them@example.com', self.mine), 0)
+        self.assertEqual(web_keys.key_split('them@example.com', self.mine), 0)
         self.assertEqual(self.sent, [], 'the laying run sends nothing')
 
     def _split_to(self, identity: str, public_key: str = '') -> str:
         """Run `key-split` for *identity* and return the **wrapped** share it sent."""
-        self.assertEqual(keys_mod.key_split(identity, public_key or self.mine), 0)
+        self.assertEqual(web_keys.key_split(identity, public_key or self.mine), 0)
         share = keys_mod.share_in_message(self.sent[-1][2])
         assert share is not None, 'the message must carry exactly one share'
         return share
@@ -366,9 +368,9 @@ class KeySplitTests(KeySplitTestCase):
         — a share plus a clone (which every collaborator has) is the master key."""
         self._hold_the_master_key()
         self._lay_the_local_share()
-        self.assertEqual(keys_mod.key_split('them@example.com'), 1)  # not in the roster at all
+        self.assertEqual(web_keys.key_split('them@example.com'), 1)  # not in the roster at all
         self._record_key('them@example.com', '')                     # …or in it with no key
-        self.assertEqual(keys_mod.key_split('them@example.com'), 1)
+        self.assertEqual(web_keys.key_split('them@example.com'), 1)
         self.assertEqual(self.sent, [], 'nothing may be sent')
 
     def test_the_roster_supplies_the_key_when_none_is_passed(self) -> None:
@@ -378,7 +380,7 @@ class KeySplitTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         self._record_key('them@example.com', self.mine)
-        self.assertEqual(keys_mod.key_split('them@example.com'), 0)
+        self.assertEqual(web_keys.key_split('them@example.com'), 0)
         share = self._open(self._share_sent())                       # sealed to the roster's key
         self.assertEqual(keys_mod._reconstruct_secret([self._local_half(), share]), self.master)
 
@@ -430,7 +432,7 @@ class KeySplitTests(KeySplitTestCase):
         keys_mod.write_enc_key_file(enc_key_payload(self.mine_key.public_key(), token_bytes(32)))
         read_master_key.cache_clear()
 
-        self.assertEqual(keys_mod.key_split('them@example.com', self.mine), 0)
+        self.assertEqual(web_keys.key_split('them@example.com', self.mine), 0)
         self.assertEqual(self.sent, [], 'a stale share is rewritten, not completed')
         self.assertNotEqual(self._local_half(), stale)
 
@@ -486,7 +488,7 @@ class KeyReconstructTests(KeySplitTestCase):
         against — so the committed share carries the proof itself."""
         self._hold_the_master_key()
         self._lay_the_local_share()
-        wrong = keys_mod._counterpart(token_bytes(32), self._local_half())     # another secret
+        wrong = keys_mod.counterpart(token_bytes(32), self._local_half())     # another secret
         app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
 
@@ -497,7 +499,7 @@ class KeyReconstructTests(KeySplitTestCase):
         self._hold_the_master_key()
         self._lay_the_local_share()
         good = read_enc_key_file()
-        wrong = keys_mod._counterpart(token_bytes(32), self._local_half())
+        wrong = keys_mod.counterpart(token_bytes(32), self._local_half())
 
         self.assertEqual(keys_mod.key_reconstruct(wrong), 1)
         self.assertEqual(read_enc_key_file(), good, 'the working file must survive')

@@ -21,6 +21,7 @@ from solver.shell.tty import console
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 _TRUTHY = ('true', '1', 'yes')
+_WEB = 'solver.web.'
 _commands_loaded = False
 
 
@@ -45,8 +46,11 @@ def update_modules() -> bool:
         for file in sorted(iterdir_recursive(config.modules_file.parent, rt='path')):
             if file.suffix != '.py' or file.stem.startswith('_'):
                 continue
-            registers = 'True' if registers_re.search(file.read_text()) else ''
             module = canonical_path(file.with_suffix('')).replace('/', '.')
+            # `solver/web` is the web shell's package still living in this tree: its command
+            # modules load through its Extension, never the solver shell's manifest
+            # (docs/package-split.md; phase 6 moves it out, and this line with it).
+            registers = 'True' if registers_re.search(file.read_text()) and not module.startswith(_WEB) else ''
             writer.writerow([module, registers])
             updated[module] = registers
 

@@ -5,6 +5,7 @@ the OSC nudges it sends, and the `show` / `edit` bodies that replace the solver 
 from __future__ import annotations
 
 import contextlib
+import importlib
 import io
 import os
 import sys
@@ -22,7 +23,7 @@ from solver.core.problems import Problem
 from solver.shell.command import registry
 from solver.shell.extension import check_overlays
 from solver.utils.loader import load_commands
-from solver.web.shell import extension, identity, osc, sync_at_start, viewer
+from solver.web.shell import extension, host_extension, identity, osc, sync_at_start, viewer
 from tests import silence
 
 silence()
@@ -50,9 +51,27 @@ class OverlayTableTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         load_commands()                 # this process is the owner → admin: nothing is withheld
+        for module in extension().modules:
+            importlib.import_module(module)
 
     def test_the_table_fits_the_registry(self) -> None:
         check_overlays(extension())
+
+    def test_the_host_table_fits_the_registry(self) -> None:
+        check_overlays(host_extension())
+
+    def test_both_bring_the_hosts_commands_and_the_spool(self) -> None:
+        for ext in (extension(), host_extension()):
+            self.assertIn('solver.web.shell.keys', ext.modules)
+            self.assertIsNotNone(ext.notices)
+        self.assertIn('header', extension().notices.key_hint())          # type: ignore[union-attr]
+        self.assertIn('msg act', host_extension().notices.key_hint())    # type: ignore[union-attr]
+
+    def test_the_host_terminal_is_the_os_login_and_may_prompt(self) -> None:
+        ext = host_extension()
+        self.assertIsNone(ext.identity)
+        self.assertTrue(ext.prompt_vault)
+        self.assertIsNone(ext.notify)
 
     def test_every_overlay_names_a_registered_command(self) -> None:
         """Withheld commands are skipped at startup; under the owner none may be, or a typo hides."""

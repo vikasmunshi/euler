@@ -246,20 +246,21 @@ Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.ke
 ## 6. Multi-user and key rotation
 
 - **Add a user:** they run `solver user`, which creates their identity and files a key
-  request over the message spool. A maintainer works it with `solver "authorize <message-id>"`
+  request over the message spool. A maintainer works it with `authorize <message-id>` in a web shell or `solver-host`
   — the key and the requester come from the thread. That records their public key in the
   roster (`/etc/euler/roster/users.json`) and delivers **half** the master key, sealed to that
   key; the other half is `/etc/euler/share.json`, which their instance on this host already
   reads. They run `msg act <id>`, and their private solutions decrypt in place.
-- **Lay the host's half:** `solver "key-split"` (maintainer), once per host. With no half yet
+- **Lay the host's half:** `key-split` (maintainer, web shell or `solver-host`), once per host. With no half yet
   — or one from before a rotation — it writes `/etc/euler/share.json` and **stops**;
   `user-authorize` refuses until it is there. It is never committed: a share published in a
   public repository is no second factor at all.
-- **Authorize a machine that is not on this host:** `solver "host-authorize <public-key>
+- **Authorize a machine that is not on this host:** `solver-host "host-authorize <public-key>
   <email>"` (admin). There is no shared half to complete off the host, so this mails the whole
   master key sealed to that machine's public key, and the far end runs `host-unlock` and pastes
   the block. Two factors rather than three, deliberately — see the
-  [Secret Sharing Guide](secret-sharing-guide.md).
+  [Secret Sharing Guide](secret-sharing-guide.md). With no mail relay — any machine running
+  the plain solver shell — `key-export <public-key>` prints the same block to carry by hand.
 - **Rotate your own key:** `solver "user --regen"`. It carries the master key to the new key
   itself; nobody else is involved, and nothing is published.
 - **Rotate the master key:** `solver rekey` (admin). It verifies the current key, generates a

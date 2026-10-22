@@ -277,8 +277,8 @@ def accounts() -> list[roster.Account]:
 def registered_public_keys() -> dict[str, str] | None:
     """`{slug: public_key}` for every collaborator the roster records one for.
 
-    The registry :func:`~solver.crypto.keys.key_rekey` re-issues a rotated master key to, and
-    :func:`~solver.crypto.keys.key_split` seals a half to. It is a **tracked file** read, not
+    The registry :func:`~solver.web.shell.keys.key_rekey` re-issues a rotated master key to, and
+    :func:`~solver.web.shell.keys.key_split` seals a half to. It is a **tracked file** read, not
     an admin-plane one: that is the point of the roster, since the shell that most needs this
     — a maintainer's web shell — can never obtain `sudo`.
 

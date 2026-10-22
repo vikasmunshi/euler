@@ -520,6 +520,10 @@ until a running process happens to die.
 
 ### 6.5 Administration — the `users` command
 
+`users`, like `msg` and the key-distribution commands, belongs to the web host: it loads in
+the web shell and in **`solver-host`** (the operator's terminal on the host — the solver
+shell plus these commands), never in a plain `solver` (docs/package-split.md).
+
 `users` splits by verb. **`users list`** registers at the `reader` floor and
 self-scopes for non-admins. The **mutating verbs require `admin`** and go through the
 **wheel-gated admin plane**: the CLI (`solver.web.auth.admin`) re-executed under `sudo`,
@@ -2689,7 +2693,7 @@ expiry and `/healthz`.
 
 ### 15.6 Verify
 
-1. `solver "users add you@example.com"` emails a 7-day invite; opening it walks Terms
+1. `solver-host "users add you@example.com"` emails a 7-day invite; opening it walks Terms
    (scroll-gated) → OTP → set-password and lands on `/login?registered=1`.
 2. Signing in never places the password in a request body. A tampered or expired token
    shows the generic page, and `/register` with no token is linked from nowhere.

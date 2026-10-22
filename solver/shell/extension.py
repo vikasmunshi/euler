@@ -9,8 +9,8 @@ an extension into *every* shell of a venv it is installed in, the terminal one i
 
 An extension may bring its own **identity** (who the session runs as, in place of the OS
 login), say whether the vault may be unlocked by prompting, and run a step before the first
-prompt. It contributes extra command modules and an **overlay table**, one overlay per
-command it changes:
+prompt, and carry the notices commands file (:mod:`solver.core.notices`). It contributes extra
+command modules and an **overlay table**, one overlay per command it changes:
 
 - `emit` — events passed to the extension's `notify` after the command returns, whatever its
   exit code (a failed command may still have changed state, and every event is meant as an
@@ -33,7 +33,7 @@ skipped.
 """
 from __future__ import annotations
 
-__all__ = ['Extension', 'ExtensionError', 'Overlay', 'apply_overlays', 'check_overlays', 'load_extension',
+__all__ = ['Extension', 'ExtensionError', 'Overlay', 'active', 'apply_overlays', 'check_overlays', 'load_extension',
            'read_overlays']
 
 import importlib
@@ -44,6 +44,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 from solver.auth import Subject
+from solver.core import notices
+from solver.core.notices import Delivery
 from solver.shell.command import Command, CommandFn, CommandRegistry, Context, registry
 from solver.shell.register import check_replacement, replace_body
 
@@ -79,6 +81,8 @@ class Extension:
     prompt_vault: bool = True
     #: Runs once before the first interactive prompt, given the shell's `dispatch`.
     on_start: Callable[[Callable[[str], int]], None] | None = None
+    #: Carries the notices commands file (:mod:`solver.core.notices`); None sends nothing.
+    notices: Delivery | None = None
 
 
 def read_overlays(path: Path) -> tuple[Overlay, ...]:
@@ -166,11 +170,22 @@ def apply_overlays(extension: Extension, commands: CommandRegistry = registry) -
             cmd.func = _emitting(cmd.func, overlay.emit, extension.notify)
 
 
+_active: Extension | None = None
+
+
+def active() -> Extension | None:
+    """The extension this process's shell was started with, if any."""
+    return _active
+
+
 def load_extension(extension: Extension, commands: CommandRegistry = registry) -> None:
-    """Import *extension*'s command modules, then apply its overlays."""
+    """Import *extension*'s command modules, apply its overlays, and install its notices."""
     for module in extension.modules:
         try:
             importlib.import_module(module)
         except ImportError as exc:
             raise ExtensionError(f'module {module!r}: {exc}') from None
     apply_overlays(extension, commands)
+    notices.install(extension.notices)
+    global _active
+    _active = extension

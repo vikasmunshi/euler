@@ -18,7 +18,8 @@ from unittest.mock import MagicMock
 
 from solver.auth import Subject
 from solver.config import ExitCodes, config
-from solver.core import git
+from solver.core import git, notices
+from solver.core.notices import PR_REVIEW_SUBJECT
 from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import dialogue
@@ -27,8 +28,6 @@ from solver.shell.dialogue import Ask
 from solver.shell.register import _declared_choices
 from solver.shell.variables import variables
 from solver.utils.loader import load_commands
-from solver.web.msg import PR_REVIEW_SUBJECT
-from solver.web.msg import notify
 from tests import silence
 
 silence()  # the command tests drive console error/progress paths on purpose
@@ -338,22 +337,26 @@ class GhPrTest(_GitCommandCase):
         # under the runner (stdin is not a tty) — so a walk under test declares itself asked.
         self._saved_interactive = dialogue.interactive
         dialogue.interactive = lambda: True  # type: ignore[assignment]
-        # A landed merge closes the notice `git-push` filed for that branch. Recorded here,
-        # never dialled: unstubbed it would reach this host's real spool — or, since the
-        # operator's uid is deliberately outside `euler-web`, its **sudo** plane, which is
-        # not something a test run may prompt for.
+        # A landed merge closes the notice `git-push` filed for that branch. Recorded by a
+        # stand-in carrier (`solver.core.notices`), never dialled.
         self.dismissed: list[str] = []
-        self._saved_dismiss = notify.dismiss_by_subject
-        notify.dismiss_by_subject = self._fake_dismiss  # type: ignore[assignment]
+        notices.install(self)
 
     def _fake_open_prs(self) -> list[git.PullRequest]:
         if self.open_prs is None:
             raise dialogue.Abort(git._QUEUE_UNREADABLE, rc=ExitCodes.EXIT_ERROR)
         return self.open_prs
 
-    def _fake_dismiss(self, subject: str) -> int:
+    # -- the notices carrier (solver.core.notices.Delivery) --
+    def to_staff(self, subject: str, body: str) -> bool:
+        return False
+
+    def dismiss(self, subject: str) -> bool:
         self.dismissed.append(subject)
-        return self.dismiss_count
+        return self.dismiss_count > 0
+
+    def key_hint(self) -> str:
+        return ''
 
     def tearDown(self) -> None:
         git._pr_files = self._saved_pr_files  # type: ignore[assignment]
@@ -361,7 +364,7 @@ class GhPrTest(_GitCommandCase):
         variables.define('open_prs', self._saved_open_prs, 'the open pull requests')
         git.console.input = self._saved_input  # type: ignore[assignment]
         dialogue.interactive = self._saved_interactive  # type: ignore[assignment]
-        notify.dismiss_by_subject = self._saved_dismiss  # type: ignore[assignment]
+        notices.install(None)
         super().tearDown()
 
     def test_list_is_the_default_action(self) -> None:

@@ -793,9 +793,9 @@ class MsgActTests(_MsgCommandCase):
 
     def _dispatched(self) -> list[str]:
         """Record which act ran, without running either heavy one for real."""
-        from solver.crypto import keys as keys_mod
         from solver.core import git as git_mod
         from solver.web.msg import commands as msg_commands
+        from solver.web.shell import keys as keys_mod
         done: list[str] = []
         self.enterContext(patch.object(keys_mod, 'user_authorize',
                                        lambda thread_id: (done.append(f'authorize {thread_id}'), 0)[1]))

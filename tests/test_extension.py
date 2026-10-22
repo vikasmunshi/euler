@@ -13,7 +13,9 @@ from typing import Iterator
 from solver.auth import Subject
 from solver.config import config
 from solver.shell.command import Context, registry
-from solver.shell.extension import (Extension, ExtensionError, Overlay, apply_overlays, load_extension,
+from solver.core import notices
+from solver.shell import extension as extension_mod
+from solver.shell.extension import (Extension, ExtensionError, Overlay, active, apply_overlays, load_extension,
                                     read_overlays)
 from solver.shell.register import register
 from tests import silence
@@ -122,6 +124,28 @@ class ExtensionTests(unittest.TestCase):
     def test_emitting_without_notify_is_refused(self) -> None:
         with self.assertRaisesRegex(ExtensionError, 'no notify'):
             apply_overlays(Extension(overlays=(Overlay('zz-ext-echo', emit=('git',)),)))
+
+    def test_loading_installs_the_notices_carrier(self) -> None:
+        class Carrier:
+            def to_staff(self, subject: str, body: str) -> bool:
+                return True
+
+            def dismiss(self, subject: str) -> bool:
+                return True
+
+            def key_hint(self) -> str:
+                return 'by pigeon'
+
+        try:
+            load_extension(Extension(notices=Carrier()))
+            self.assertTrue(notices.to_staff('s', 'b'))
+            self.assertEqual(notices.key_hint(), 'by pigeon')
+            self.assertIsNotNone(active())
+        finally:
+            notices.install(None)
+            extension_mod._active = None
+        self.assertFalse(notices.to_staff('s', 'b'), 'with no carrier nothing is delivered')
+        self.assertIn('host-unlock', notices.key_hint())
 
     def test_an_unimportable_module_is_refused(self) -> None:
         with self.assertRaisesRegex(ExtensionError, 'module'):

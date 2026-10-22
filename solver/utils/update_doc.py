@@ -24,6 +24,7 @@ from within the solver shell, or non-interactively for a pre-commit / CI lane �
 from __future__ import annotations
 
 import ast
+import importlib.util
 import re
 from pathlib import Path
 from typing import Callable
@@ -34,11 +35,24 @@ from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
+from solver.shell.extension import active
 from solver.shell.variables import variables
 from solver.shell.docstring import (GLYPH_ASKS, GLYPH_PROBLEM, GLYPH_REQUIRES, GLYPH_SILENT,
                                     help_model)
 from solver.utils.loader import load_commands, update_modules
 from solver.utils.quips import quips
+
+
+#: The extending shell whose commands the generated docs also cover, while the catalogue is still
+#: one (docs/package-split.md, phase 7 splits it). Named, never imported: the solver shell does
+#: not import it, and does not load its commands.
+_HOST_SHELL: str = 'solver.web.shell'
+
+
+def _catalogue_incomplete() -> bool:
+    """True when this shell lacks commands the docs cover: an extending shell is installed but
+    this one was not started with it, so the registry would drop its commands from the docs."""
+    return active() is None and importlib.util.find_spec(_HOST_SHELL) is not None
 
 
 def _allowed_profiles(cmd: Command) -> list[str]:
@@ -437,11 +451,19 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     and the command index — silently, and in exactly the documents whose worth is being
     complete. The floor is what keeps the generated view whole.
 
+    For the same reason it runs from the shell with every command loaded: where the web
+    host's shell is installed, that is `solver-host`, and a plain `solver` refuses.
+
     Args:
         ctx: [injected] The live shell context; the decorator supplies it.
         check: Write nothing and fail if any doc is out of date, listing the stale files.
             Defaults to False, which rewrites the docs in place and reports which changed.
     """
+    if _catalogue_incomplete():
+        console.print('[error]error:[/error] this shell does not load the web host\'s commands, so the '
+                      'docs would lose them — run it from [accent]solver-host[/accent] '
+                      '([accent]python -m solver.web.shell.host[/accent]).')
+        return ExitCodes.EXIT_ERROR
     modules_changed = update_modules()
     if modules_changed:
         load_commands(refresh_modules=True)

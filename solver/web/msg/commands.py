@@ -345,7 +345,7 @@ def _act(thread_id: str) -> int:
             osc.git_changed()
             return rc
         case 'authorize':
-            from solver.crypto.keys import user_authorize
+            from solver.web.shell.keys import user_authorize
             return user_authorize(thread_id)
         case 'merge':
             # The branch out of the subject, not the thread id: the queue this act works is

@@ -22,7 +22,6 @@ import os
 import subprocess
 import sys
 import unittest
-from importlib import import_module
 from json import dumps
 from pathlib import Path
 from secrets import token_bytes
@@ -237,13 +236,18 @@ class RotationRehomeTests(unittest.TestCase):
         self.rotate_without_the_key()
         self.assertTrue(git.private_tree_opens('HEAD'), 'own history, own key: still readable')
         self.assertFalse(git.private_tree_opens('origin/master'), 'the published tree is not')
-        # Named where the reader is looking: the header's message chip over the web, whose key
-        # row has its own save button, and the shell verbs in a terminal, which has no header.
-        app_config = import_module('solver.config').config
-        for channel, expected in (('web', 'header'), ('terminal', 'msg act')):
-            subject = app_config.subject._replace(channel=channel)
-            with patch.object(app_config, 'subject', subject):
-                self.assertIn(expected, git.key_waiting_hint(), f'{channel}: names its own way')
+        # Named where the reader is looking, as the front end's carrier words it: the header's
+        # message chip over the web, the spool verbs on the host's terminal, and the plain
+        # receiving commands anywhere else.
+        from solver.core import notices
+        from solver.web.shell.notices import HOST_KEY_HINT, WEB_KEY_HINT, Spool
+        for delivery, expected in ((Spool(WEB_KEY_HINT), 'header'), (Spool(HOST_KEY_HINT), 'msg act'),
+                                   (None, 'host-unlock')):
+            notices.install(delivery)
+            try:
+                self.assertIn(expected, git.key_waiting_hint(), f'{delivery}: names its own way')
+            finally:
+                notices.install(None)
 
     def test_a_sync_refuses_rather_than_merging_what_it_cannot_read(self) -> None:
         """Merging anyway left a live clone with a filter traceback and a deleted file.

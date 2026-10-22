@@ -19,9 +19,11 @@ real users.json is never read or written.
 """
 from __future__ import annotations
 
+
 import json
 import os
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from secrets import token_bytes
 from tempfile import TemporaryDirectory
@@ -32,6 +34,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 from solver.auth import roster
 from solver.auth.identity import system_slug
 from solver.crypto import keys as keys_mod
+from solver.web.shell import keys as web_keys
 from solver.crypto.ciphers import enc_key_payload, load_private_key, public_key_hex, read_master_key
 from solver.config import config as app_config
 from solver.shell import dialogue
@@ -214,14 +217,15 @@ class AuthorizeTests(RosterFileTestCase):
         read_master_key.cache_clear()
         self.sent: list[tuple[str, str, str]] = []
         self.dismissed: list[str] = []
-        import solver.web.msg.notify as notify_mod
+        notify_mod = web_keys                                     # binds the spool calls by name
         for module, name, stub in (
                 (notify_mod, 'notify_user',
                  lambda identity, subject, body: bool(self.sent.append((identity, subject, body))
                                                       or True)),
                 (notify_mod, 'dismiss_thread',
                  lambda thread_id: bool(self.dismissed.append(thread_id) or True)),
-                (keys_mod, 'sure', lambda _q, *, phrase='': True)):
+                (keys_mod, 'sure', lambda _q, *, phrase='': True),
+                (web_keys, 'sure', lambda _q, *, phrase='': True)):
             saved = getattr(module, name)
             setattr(module, name, stub)
             self.addCleanup(setattr, module, name, saved)
@@ -233,8 +237,8 @@ class AuthorizeTests(RosterFileTestCase):
         read_master_key.cache_clear()
 
     def test_a_grant_records_the_key_and_sends_half_of_one(self) -> None:
-        keys_mod.key_split(_THEM, self.theirs)                   # lay the repository's half
-        self.assertEqual(keys_mod.user_authorize(self.theirs, _THEM), 0)
+        web_keys.key_split(_THEM, self.theirs)                   # lay the repository's half
+        self.assertEqual(web_keys.user_authorize(self.theirs, _THEM), 0)
         self.assertEqual((roster.user_entry(_THEM) or {}).get('public_key'), self.theirs)
         self.assertEqual(len(self.sent), 1)
         share = keys_mod._unwrap_share(self.their_key,
@@ -246,27 +250,27 @@ class AuthorizeTests(RosterFileTestCase):
     def test_a_grant_refuses_while_the_repository_has_no_half(self) -> None:
         """The failure `key-split` alone cannot catch: it would lay a fresh half, report
         success, and the request would be dismissed as worked with nothing delivered."""
-        self.assertEqual(keys_mod.user_authorize(self.theirs, _THEM), 1)
+        self.assertEqual(web_keys.user_authorize(self.theirs, _THEM), 1)
         self.assertEqual(self.sent, [], 'nothing may be sent')
         self.assertEqual(self.dismissed, [], 'and the request stays in the queue')
 
     def test_a_grant_refuses_while_the_repositorys_half_predates_the_key(self) -> None:
-        keys_mod.key_split(_THEM, self.theirs)
+        web_keys.key_split(_THEM, self.theirs)
         keys_mod.write_enc_key_file(enc_key_payload(load_private_key().public_key(),
                                                     token_bytes(32)))     # rotated under it
         read_master_key.cache_clear()
-        self.assertEqual(keys_mod.user_authorize(self.theirs, _THEM), 1)
+        self.assertEqual(web_keys.user_authorize(self.theirs, _THEM), 1)
         self.assertEqual(self.sent, [])
 
     def test_a_bare_key_still_needs_somebody_to_send_it_to(self) -> None:
         """A key on its own names nobody: there is no thread to take a requester from, and a
         half sent to nobody is a half in the spool with no reader."""
-        keys_mod.key_split(_THEM, self.theirs)
-        self.assertEqual(keys_mod.user_authorize(self.theirs), 1)
+        web_keys.key_split(_THEM, self.theirs)
+        self.assertEqual(web_keys.user_authorize(self.theirs), 1)
         self.assertEqual(self.sent, [])
 
     def test_a_target_that_is_neither_a_key_nor_a_message_id_is_refused(self) -> None:
-        self.assertEqual(keys_mod.user_authorize('not-a-key', _THEM), 1)
+        self.assertEqual(web_keys.user_authorize('not-a-key', _THEM), 1)
         self.assertEqual(self.sent, [])
 
 
@@ -296,7 +300,8 @@ class HostGrantTests(RosterFileTestCase):
                 (mail_mod.Mailer, 'send_master_key',
                  lambda _self, rcpt, block: self.mailed.append((rcpt, block))),
                 (git_mod, 'enc_key_arrived', lambda edits=None: self._wired.append('wired')),
-                (keys_mod, 'sure', lambda _q, *, phrase='': True)):
+                (keys_mod, 'sure', lambda _q, *, phrase='': True),
+                (web_keys, 'sure', lambda _q, *, phrase='': True)):
             saved = getattr(module, name)
             setattr(module, name, stub)
             self.addCleanup(setattr, module, name, saved)
@@ -309,7 +314,7 @@ class HostGrantTests(RosterFileTestCase):
 
     def test_the_mailed_block_unlocks_the_machine_it_was_sealed_to(self) -> None:
         """The whole round trip: seal to a public key, mail it, paste it back."""
-        self.assertEqual(keys_mod.host_authorize(public_key_hex(self.mine.public_key()),
+        self.assertEqual(web_keys.host_authorize(public_key_hex(self.mine.public_key()),
                                                  'me@example.com'), 0)
         rcpt, block = self.mailed[-1]
         self.assertEqual(rcpt, 'me@example.com')
@@ -323,10 +328,24 @@ class HostGrantTests(RosterFileTestCase):
         self.assertEqual(read_master_key(), self.master)
         self.assertEqual(self._wired, ['wired'], 'gaining access must wire the filter')
 
+    def test_an_exported_block_unlocks_the_machine_it_was_sealed_to(self) -> None:
+        """`key-export`: the same block with no mail — printed, for the operator to carry."""
+        printed: list[str] = []
+        with patch.object(keys_mod.console, 'print', lambda text='', **_: printed.append(str(text))):
+            self.assertEqual(keys_mod.key_export(public_key_hex(self.mine.public_key())), 0)
+        block = '\n'.join(printed)
+        self.assertIn(keys_mod._BLOCK_BEGIN, block)
+        self.assertEqual(self.mailed, [], 'nothing is mailed')
+        app_config.enc_key_file.unlink()
+        read_master_key.cache_clear()
+        self.assertEqual(keys_mod.host_unlock(block), 0)
+        read_master_key.cache_clear()
+        self.assertEqual(read_master_key(), self.master)
+
     def test_the_block_survives_a_mail_client(self) -> None:
         """It crosses a mail client, so it arrives quoted, wrapped and surrounded by prose.
         The markers are for the person choosing what to copy; the braces are the contract."""
-        keys_mod.host_authorize(public_key_hex(self.mine.public_key()), 'me@example.com')
+        web_keys.host_authorize(public_key_hex(self.mine.public_key()), 'me@example.com')
         block = self.mailed[-1][1]
         app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
@@ -334,7 +353,7 @@ class HostGrantTests(RosterFileTestCase):
 
     def test_a_block_sealed_to_another_machine_is_refused(self) -> None:
         theirs = x25519.X25519PrivateKey.generate()
-        keys_mod.host_authorize(public_key_hex(theirs.public_key()), 'them@example.com')
+        web_keys.host_authorize(public_key_hex(theirs.public_key()), 'them@example.com')
         block = self.mailed[-1][1]
         app_config.enc_key_file.unlink()
         read_master_key.cache_clear()
@@ -343,7 +362,7 @@ class HostGrantTests(RosterFileTestCase):
         self.assertFalse(app_config.enc_key_file.exists(), 'nothing may be written')
 
     def test_nothing_is_mailed_for_a_key_that_is_not_one(self) -> None:
-        self.assertEqual(keys_mod.host_authorize('not-a-public-key', 'me@example.com'), 1)
+        self.assertEqual(web_keys.host_authorize('not-a-public-key', 'me@example.com'), 1)
         self.assertEqual(self.mailed, [])
 
     def test_an_unreachable_relay_prints_the_block_rather_than_losing_it(self) -> None:
@@ -357,12 +376,12 @@ class HostGrantTests(RosterFileTestCase):
         saved = mail_mod.Mailer.send_master_key
         mail_mod.Mailer.send_master_key = refuse                 # type: ignore[method-assign]
         self.addCleanup(setattr, mail_mod.Mailer, 'send_master_key', saved)
-        self.assertEqual(keys_mod.host_authorize(public_key_hex(self.mine.public_key()),
+        self.assertEqual(web_keys.host_authorize(public_key_hex(self.mine.public_key()),
                                                  'me@example.com'), 1)
 
     def test_both_ends_need_something_to_work_with(self) -> None:
         with self.assertRaises(dialogue.Abort):
-            keys_mod.host_authorize('', 'me@example.com')
+            web_keys.host_authorize('', 'me@example.com')
         with self.assertRaises(dialogue.Abort):
             keys_mod.host_unlock('')
 

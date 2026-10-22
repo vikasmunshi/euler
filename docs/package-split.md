@@ -161,3 +161,28 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
     `reader`, not `admin`; an infra `euler-*` uid gets `reader` instead of aborting.
   - *Still in solver, for phase 4:* `solver/core/git.py` `key_waiting_hint` words its hint
     by channel.
+
+- **Phase 4**: `layers.allow` is empty — the solver shell imports no web code.
+  - *Notices:* `solver/core/notices.py` is the escape hatch § 3.2 kept for what an overlay
+    cannot express — a notice whose text depends on what the command found (`git-push`'s
+    pull request, `summary`'s unregistered answers, `user`'s key request, the merge that
+    dismisses a review notice). Solver commands file through it; an `Extension` installs the
+    carrier (`solver/web/shell/notices.py`, the spool). With none, nothing is sent and each
+    caller says what to do by hand. The subjects live there too, and `solver.web.msg`
+    re-exports them. The waiting-key hint is the carrier's wording, so no channel check
+    remains in solver.
+  - *Key distribution (Q1):* `user-authorize`, `key-split` and `host-authorize` moved to
+    `solver/web/shell/keys.py`; `key-rekey`'s re-issue to the roster is an overlay `replace`
+    there. The solver keeps holding and receiving — `user`, `vault`, `key-reconstruct`,
+    `host-unlock`, a local `key-rekey` — and gains `key-export`, which prints the sealed
+    block `host-unlock` takes: the file-based issue Q1 promised.
+  - *Command modules:* `msg`, `users` and the key commands load through the extension's
+    `modules`, not `modules.csv` (the loader marks `solver/web` rows non-registering until
+    phase 6 moves the tree out). Hence **`solver-host`** (`python -m solver.web.shell.host`):
+    the solver shell plus those commands and the spool, with the OS login and a terminal
+    vault prompt, for the operator on the host.
+  - *Docs:* while the catalogue is one (phase 7 splits it), `update-docs` must see every
+    command, so it refuses in a plain `solver` when the web shell is installed;
+    `check-commands` in `check.sh` runs under the host shell too.
+  - *Lost, as accepted:* a plain `solver` run inside a web shell (`! solver "git-push"`)
+    files no notice — it has no carrier. The web shell's own `git-push` does.

@@ -46,6 +46,8 @@ from typing import Annotated, Any, Literal, NamedTuple
 from cryptography.exceptions import InvalidTag
 
 from solver.config import ExitCodes, config
+from solver.core import notices
+from solver.core.notices import PR_REVIEW_SUBJECT
 from solver.core.problems import Problem
 from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
 from solver.crypto import wire
@@ -54,7 +56,6 @@ from solver.shell import console, register
 from solver.shell.dialogue import Abort, Ask, Choice, sure
 from solver.shell.variables import variable
 from solver.utils.shell_utils import run_cmdline, run_command
-from solver.web.msg import PR_REVIEW_SUBJECT
 
 
 # ── GitHub identity (gh) ────────────────────────────────────────────────────────────────
@@ -749,20 +750,14 @@ def key_waiting_hint() -> str:
     same act: take the key a maintainer has already sent. Naming that is the whole point. The
     generic "run `git-sync` to see why" is a dead end here — `git-sync` is precisely what does
     not work — and it was what a collaborator actually saw at login while the answer sat unread
-    in their spool.
+    in their spool. *Where* the key is taken is the front end's to say
+    (:func:`solver.core.notices.key_hint`): the header's message chip over the web, `msg act`
+    on the host, `host-unlock` / `key-reconstruct` anywhere else.
     """
     if private_tree_opens('HEAD') and private_tree_opens('origin/master'):
         return ''
-    waiting = ('a new master key is waiting for you — this clone cannot read the published '
-               'solutions until you take it: ')
-    # Point at whatever the reader is actually looking at. Over the web that is the envelope
-    # chip in the header, whose key row carries its own [save] button, so nobody has to type a
-    # message id they would have to go and find first. A terminal has no header — there, the
-    # verbs are the only answer there is.
-    if config.subject.channel == 'web':
-        return waiting + ('open the [accent]✉ messages[/accent] menu in the header and press '
-                          '[accent]save[/accent] on the master-key message.')
-    return waiting + 'run [accent]msg list[/accent], then [accent]msg act <id>[/accent].'
+    return ('a new master key is waiting for you — this clone cannot read the published '
+            'solutions until you take it: ' + notices.key_hint())
 
 
 def _rehome_on_origin(local_edits: dict[str, bytes]) -> bool:
@@ -997,7 +992,7 @@ def _announce_pull_request(branch: str, url: str) -> None:
     A pull request nobody has been told about is the same dead end `user` had before the
     message layer existed: the collaborator has done everything they can, and the act that
     lands it belongs to somebody who has no reason to be looking. So the command that opens
-    the request also files it, under :data:`~solver.web.msg.PR_REVIEW_SUBJECT` — the subject
+    the request also files it, under :data:`~solver.core.notices.PR_REVIEW_SUBJECT` — the subject
     the header's chip reads to offer **merge** on that row.
 
     Only for a **newly opened** request. Re-pushing a branch as it grows is the normal way
@@ -1008,16 +1003,15 @@ def _announce_pull_request(branch: str, url: str) -> None:
     this notice without a thread id (:func:`_dismiss_pr_notice`), and what
     :func:`merge_pr_for_branch` turns back into a number when the chip's row is pressed.
 
-    Best-effort and silent on failure, like every other :mod:`solver.web.msg.notify` caller:
-    the branch is pushed and the request is open either way, and a spool that is down must
-    not fail the push that reached GitHub.
+    Best-effort and silent on failure, like every :mod:`solver.core.notices` caller: the
+    branch is pushed and the request is open either way, and a carrier that is down — or none
+    at all, outside the web shell — must not fail the push that reached GitHub.
     """
-    from solver.web.msg.notify import notify_staff
     # The number is the URL's last segment. The body names a command that lands *this*
     # request rather than a bare `gh-merge merge`, which would open a menu of the whole
     # queue — a notice about one branch should not make its reader pick it out again.
     number: str = url.rstrip('/').rsplit('/', 1)[-1]
-    sent = notify_staff(
+    sent = notices.to_staff(
         f'{PR_REVIEW_SUBJECT}{branch}',
         f'{branch} has a pull request open onto master:\n\n'
         f'    {url}\n\n'
@@ -1041,8 +1035,7 @@ def _dismiss_pr_notice(branch: str) -> None:
     """
     if not branch:
         return
-    from solver.web.msg.notify import dismiss_by_subject
-    if dismiss_by_subject(f'{PR_REVIEW_SUBJECT}{branch}'):
+    if notices.dismiss(f'{PR_REVIEW_SUBJECT}{branch}'):
         console.print('[muted]the review notice has been dismissed.[/muted]')
 
 
@@ -1229,7 +1222,7 @@ def _open_queue() -> list[PullRequest] | None:
 def merge_pr_for_branch(branch: str) -> int:
     """Merge the open pull request for *branch* — the act behind a review notice.
 
-    `msg act` on a :data:`~solver.web.msg.PR_REVIEW_SUBJECT` message must land **that**
+    `msg act` on a :data:`~solver.core.notices.PR_REVIEW_SUBJECT` message must land **that**
     request, and the subject names a branch where the gate needs a number. The open queue
     is what turns one into the other, and it is the read the merge wants anyway.
 
