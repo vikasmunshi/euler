@@ -230,9 +230,9 @@ class Config:
     def subject(self) -> Subject:
         """The resolved security subject — identity, channel, profile, permissions.
 
-        Lazy because resolving it reaches :mod:`solver.auth` and consumes the web shell's
-        one-shot ticket; `solver.main.main` forces it at startup, which is the moment that
-        handoff has to happen. See :mod:`solver.config.identity`.
+        Lazy because resolving it reaches :mod:`solver.auth`, which the git-filter path must
+        not pay for; `solver.main.main` settles it at startup (:mod:`solver.shell.login`),
+        where an extension may supply its own. See :mod:`solver.config.identity`.
         """
         from solver.config.identity import resolve_identity
         return resolve_identity(self.root_dir)

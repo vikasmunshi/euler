@@ -3,7 +3,7 @@
 """The authorization **subject** — the resolved security principal.
 
 One immutable value describing *who* is running this process and *what* they may
-do, resolved once at startup by :func:`solver.auth.identity.resolve_subject`.
+do, resolved once at startup by :mod:`solver.shell.login`.
 Every enforcement point (the command decorator, the web app router) checks
 against it; nothing else re-derives identity.
 
@@ -41,8 +41,9 @@ class Subject(NamedTuple):
                         for prompts/logs and per-user state.
     - `slug`        — filesystem-safe form of `user` (per-user state dirs).
     - `channel`     — `'terminal'` or `'web'`: where this process runs.
-    - `auth_method` — how identity was proven (`shell-ticket` / `os-login`
-                        / `checkout-owner`), for audit.
+    - `auth_method` — how identity and role were settled, for audit: `shell-ticket`,
+                        `policy` / `policy-account` (the deployed policy's entry for
+                        the login / its per-user e-mail), `checkout-owner`, `os-login`.
     - `profile`     — the assigned rung (`reader`/`contributor`/
                         `maintainer`/`admin`).
     """

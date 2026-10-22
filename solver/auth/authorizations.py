@@ -73,15 +73,18 @@ class Authorizations:
         else the built-in default (an empty users map).
         """
         for candidate in (os.environ.get(AUTHZ_FILE_ENV), DEFAULT_AUTHZ_FILE):
-            if not candidate:
-                continue
-            try:
-                data = json.loads(Path(candidate).read_text(encoding='utf-8'))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if isinstance(data, dict):
-                return cls(data)
+            if candidate and (policy := cls.read(Path(candidate))) is not None:
+                return policy
         return cls(dict(_DEFAULT_POLICY))
+
+    @classmethod
+    def read(cls, path: Path) -> Authorizations | None:
+        """The policy in *path*, or None if it is missing or not a JSON object."""
+        try:
+            data = json.loads(path.read_text(encoding='utf-8'))
+        except (OSError, json.JSONDecodeError):
+            return None
+        return cls(data) if isinstance(data, dict) else None
 
     # ── queries ────────────────────────────────────────────────────────────────────
 

@@ -24,7 +24,7 @@ decisions and the plan; it is updated as each phase lands.
 | Q1 | Key distribution over the message spool / mail (`user-authorize`, `host-authorize`, key sharing) | Moves to the web-shell package. The standalone solver keeps the local key commands; keys travel by file export/import there. |
 | Q2 | Where the auth and msg services live | `auth` → site package (it owns public vs authenticated). `msg` → web-shell package. Three packages. |
 | Q3 | Freshness of public content | Packaged, as a separate data-only `euler-content` wheel, so content and code version independently. |
-| Q4 | Role source | `/etc/euler/roles.json` (root-owned) when present; otherwise the owner of the install is `admin`. Signed grants only if a need appears. |
+| Q4 | Role source | The root-owned policy when present; otherwise the owner of the install is `admin`. Signed grants only if a need appears. The policy is the existing `/etc/euler/authorizations.json` (root-owned, already keyed by e-mail *or* OS login) rather than a new `roles.json`. |
 | Q5 | Versioning | Lockstep: one version, one tag; `release.sh` writes every package's `version.py`, and the web shell pins `euler-solver==X.Y.Z`. |
 
 ### 2.1 Why role is a guardrail, not a boundary
@@ -60,7 +60,7 @@ is. What unlocking *grants* is the master key (private solutions) and the API ke
 packages/
   solver/    euler-solver    import solver          shell, core, crypto, ai, runners, templates, utils, config, auth (login/role)
   site/      euler-site      import euler_site      site app, auth service, cache/csp/store/unixhttp/envfile, env.conf, static assets
-  webshell/  euler-webshell  import euler_webshell  ws, per-user service, msg, osc, overlays, ticket/instance identity, roster, `users`, key distribution
+  webshell/  euler-webshell  import euler_webshell  ws, per-user service, msg, osc, overlays, ticket identity, roster, `users`, key distribution
 content/     euler-content   data-only wheel: docs, topics, README, public solutions, problems.json
 ```
 
@@ -95,13 +95,21 @@ replace = "euler_webshell.viewer:show"      # body replaced; signature must matc
 
 ### 3.3 `login`
 
-Runs at startup before any command; produces `Subject(user, slug, channel, role,
-vault_unlocked)`:
+`solver/shell/login.py`, run by `main()` at startup:
 
-1. **Who** — an `IdentityProvider`: solver ships `OsLogin`; the web shell supplies the
-   shell-ticket and instance providers.
-2. **Vault** — `EULER_VAULT_KEY_FILE` → `EULER_VAULT_PASSWORD` → terminal prompt.
-3. **Role** — the Q4 chain; a web-shell role comes from ticket redemption.
+1. **Who and role** — `identify()`, before any command module loads (each command's floor
+   is checked as it registers). The solver shell's own is the OS login — the real uid's
+   account name, never `$USER` — with the Q4 chain (`solver/auth/identity.py`): the
+   root-owned policy's entry for the login; else the e-mail whose `system_slug` *is* the
+   login (a per-user web uid, so a `solver` run inside a web shell holds its owner's rung);
+   else `reader`. No policy → the checkout owner is `admin`, anyone else `contributor`. A
+   policy counts only if it and every directory above it are root-owned. An `Extension` may
+   bring its own identity: the web shell redeems its one-time ticket
+   (`solver/web/shell/identity.py`).
+2. **Vault** — `unlock()`: `EULER_VAULT_KEY_FILE` → `EULER_VAULT_PASSWORD` → a terminal
+   prompt, unless the extension says `prompt_vault=False` (the web shell: the browser
+   unlocks). The vault's state is read where it matters (the key file), not copied onto the
+   `Subject`.
 
 ### 3.4 Content site: one app, two content roots
 
@@ -141,9 +149,15 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
     plain solver shell: it sends no OSC (previously it did, and Claude's captured output
     carried the escapes) and its `show` looks for a local browser.
 
-### Found along the way — queued for phase 3
-
-- `solver/shell/shell.py` runs a quiet `git-sync` at startup when the channel is `web`; the
-  web shell should own that (an `Extension` startup hook) once the channel leaves solver.
-- `solver/main.py` decides vault-prompting by channel; `login` takes it over.
-- `solver/core/git.py` `key_waiting_hint` words its hint by channel (phase 4, with the spool).
+- **Phase 3**: `login` (`solver/shell/login.py`) settles identity before commands load and
+  the vault after; `Extension` gained `identity`, `prompt_vault` and `on_start`. `solver.auth`
+  is the OS login plus the Q4 role chain only; the ticket plane is
+  `solver/web/shell/identity.py`. The instance-identity plane (`EULER_USER_EMAIL` handed
+  down to child `solver` processes) is gone: a child is a plain solver shell, and the policy
+  maps its per-user uid back to its owner's e-mail and rung. The web shell's quiet start-up
+  `git-sync` is its `on_start` hook.
+  - *Tightened:* the login is read from the uid, not `$USER`; an `EULER_AUTHZ_FILE` the
+    user can write is ignored; with a policy deployed, an unlisted checkout owner is
+    `reader`, not `admin`; an infra `euler-*` uid gets `reader` instead of aborting.
+  - *Still in solver, for phase 4:* `solver/core/git.py` `key_waiting_hint` words its hint
+    by channel.

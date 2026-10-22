@@ -17,7 +17,7 @@ import shlex
 import sys
 from contextlib import contextmanager
 from time import time
-from typing import Any, Iterable, Iterator
+from typing import Any, Callable, Iterable, Iterator
 
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
@@ -54,19 +54,6 @@ def _var_meta(name: str) -> str:
         return 'computed'
     text = repr(value)
     return text if len(text) <= 40 else f'{text[:37]}...'
-
-
-def _stale_clone_hint() -> str:
-    """Why the start-up sync did not happen, in the terms the reader can act on.
-
-    The generic line — "run `git-sync` to see why" — is the right answer only when the reason
-    is something git will explain: a diverged branch, no network. It is the wrong answer, and
-    a dead end, after a key rotation, where `git-sync` is the very thing that cannot work and
-    the fix is a message sitting unread in the spool. Ask that first.
-    """
-    from solver.core.git import key_waiting_hint
-    return key_waiting_hint() or ('could not sync with origin/master — this clone may be '
-                                  'stale; run [accent]git-sync[/accent] to see why.')
 
 
 def _current_fragment(text: str) -> str:
@@ -290,8 +277,13 @@ class SolverShell:
                 self._persist_last_problem(last_problem)
             return rc
 
-    def run_interactive(self, intro: bool = True, intro_message: str = '') -> int:
-        """Run the interactive prompt loop until `exit` / EOF; return the status."""
+    def run_interactive(self, intro: bool = True, intro_message: str = '',
+                        on_start: Callable[[Callable[[str], int]], None] | None = None) -> int:
+        """Run the interactive prompt loop until `exit` / EOF; return the status.
+
+        *on_start*, if given, runs once before the first prompt with :meth:`dispatch`
+        (an extension's start-up step — :class:`~solver.shell.extension.Extension`).
+        """
         with self._runtime():
             # Piped/redirected stdin: read blocks without the interactive chrome
             # (no banner, no history, no prompt) so scripted output stays clean.
@@ -311,18 +303,8 @@ class SolverShell:
                 bottom_toolbar=self._bottom_toolbar,
             )
             try:
-                if config.subject.channel == 'web':
-                    prev_quiet, self.console.quiet = self.console.quiet, True
-                    try:
-                        sync_rc = self.dispatch('git-sync')
-                    finally:
-                        self.console.quiet = prev_quiet
-                    # The one thing the quiet must not swallow: a sync that did NOT happen.
-                    # Silence would open the shell on a stale clone with no hint — a diverged
-                    # branch, a locked vault, no network. One line, printed after the quiet is
-                    # restored, naming the command that shows why (it reports what it refused).
-                    if sync_rc != 0:
-                        self.console.print(f'[warning]{_stale_clone_hint()}[/warning]')
+                if on_start is not None:
+                    on_start(self.dispatch)
                 previous_eof: float = 0.0
                 while True:
                     try:

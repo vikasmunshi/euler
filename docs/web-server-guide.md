@@ -307,8 +307,8 @@ repo owner. The admin commands never touch these files; they call the service (�
 
 ## 5 · Identity
 
-`solver/auth` resolves a single **subject** once per process, at startup, with no
-anonymous fallback:
+A single **subject** is resolved once per process, at startup, with no anonymous
+fallback (`solver/shell/login.py`; docs/package-split.md § 3.3):
 
 ```
 Subject(user, slug, channel, auth_method, profile)
@@ -318,13 +318,12 @@ Subject(user, slug, channel, auth_method, profile)
 filesystem-safe form; `channel` is `terminal` or `web`; `auth_method` records how
 identity was proven, for audit. Nothing else in the codebase re-derives identity.
 
-Three planes, each with an explicit voucher, tried in order:
+Two front ends, each with an explicit voucher:
 
-| Plane | Voucher | Mechanism |
+| Front end | Voucher | Mechanism |
 |---|---|---|
-| Web shell | auth service | `SOLVER_TICKET` — a one-time ticket redeemed over `auth.sock` |
-| Per-user instance | the OS | a `<slug>`-named uid (in the `euler-user` group) whose `EULER_USER_SLUG` pin maps back to its own handed-down email |
-| Local terminal | the OS | `os.getuid()` owns the repo checkout → `admin`; a real non-owner login → `contributor` |
+| Web shell (`python -m solver.web.shell`) | auth service | `SOLVER_TICKET` — a one-time ticket redeemed over `auth.sock` (`solver/web/shell/identity.py`) |
+| Solver shell (`solver`) | the OS | the real uid's account name (`pwd`, never `$USER`), its role from the root-owned `authorizations.json` (`solver/auth/identity.py`) |
 
 **The shell ticket.** Nothing carried in the environment can be a credential:
 `/proc/<pid>/environ` is same-uid-readable, so anything there is readable by any sibling
@@ -340,20 +339,17 @@ instance's `EULER_USER_SLUG` **aborts**. That instance *is* that user's uid — 
 home, keys, and clone — so a ticket for anyone else means misrouting or a bypass, and
 the process must not run.
 
-**Service uids.** A service uid that is neither a ticketed web shell nor a properly
-pinned per-user instance **aborts**. This is what stops a web shell from running `unset
-SOLVER_TICKET; solver` to re-resolve itself into a different identity. Two things count
-as a service uid: an infra `euler-*` account (by name), and a **member of the root-owned
-`euler-user` group** — the per-user instances, whose uids carry no distinguishing name.
-The group is what makes the check un-forgeable from inside a web shell: a shell cannot
-add or remove its own membership, so it cannot demote itself into the local-terminal
-plane. There is no assume-an-identity path: `SOLVER_USER` is display-only.
-
-**The local terminal.** The profile is the `authorizations.json` `users`-map value for
-the OS login. The **checkout owner floors to `admin`** when unlisted — you cannot lock
-yourself out of your own checkout — but an explicit entry wins, so the operator can
-deliberately run local at a lower rung. Anyone else with an entry-less real login gets
-`contributor`.
+**The solver shell's role.** When a root-owned `authorizations.json` is deployed — the
+file *and every directory above it* root-owned, since a root-owned file in a user-owned
+directory can be renamed away — it decides: the login's own entry; else the e-mail whose
+`system_slug` *is* this login (a per-user uid, so a `solver` run inside a web shell —
+`claude-solve`'s headless Claude, a nested `solver "…"`, an `unset SOLVER_TICKET; solver` —
+is that same collaborator at that same rung, never more); else `reader`. An
+`EULER_AUTHZ_FILE` override is honoured only under the same ownership rule. With no policy
+deployed (a collaborator's own machine) the **checkout owner is `admin`** and anyone else
+`contributor`. The role is a guardrail inside one uid, not a boundary (package-split § 2.1);
+the boundaries are the uids, file permissions and the separate-uid services. There is no
+assume-an-identity path: `SOLVER_USER` is display-only.
 
 The slug scheme is worth one note. `slugify` emits a `.`-bearing form
 (`mercanther_gmail.com-3f9e97`) that **fails `useradd`'s `NAME_REGEX`**, so the system

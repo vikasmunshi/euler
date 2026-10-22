@@ -8,9 +8,9 @@ __all__ = ['main']
 import argparse
 
 from solver.config import config, enter_repo
-from solver.crypto.keys import unlock_session
 from solver.shell import SolverShell
 from solver.shell.extension import Extension, ExtensionError, load_extension
+from solver.shell.login import identify, unlock
 from solver.utils.loader import load_commands
 
 
@@ -44,36 +44,20 @@ def main(argv: list[str] | None = None, *, extension: Extension | None = None) -
 
     args = parser.parse_args(argv)
 
-    # The channel (terminal / web) is **not** a CLI flag: it comes from the
-    # resolved subject — the checkout-owner uid or a redeemed shell ticket — so no
-    # caller can choose the command set it gets by passing an argument.
+    # Who this is, before any command loads: every command's floor is checked against the
+    # subject as it registers. Not a CLI flag — no caller picks its command set by argument.
+    identify(extension)
     load_commands()
     if extension is not None:
         try:
             load_extension(extension)
         except ExtensionError as exc:
             raise SystemExit(f'extension: {exc} — refusing to start') from None
-
-    # The vault gate, before any command runs. `id` and `env` rest encrypted, and the
-    # readers that need them — the git clean/smudge filter above all — are
-    # subprocesses with no terminal to be asked anything: the key must reach them as
-    # the inherited key file this call materialises. So the asking happens here, once,
-    # at the one moment there is still a person to ask.
-    # It is a no-op when there is no vault and when $EULER_VAULT_PASSWORD answers. A
-    # declined or wrong password is not fatal — the shell runs locked, and the private
-    # solutions and `claude-api` are what stay unavailable.
-    #
-    # Only the TERMINAL is ever asked. On the web the vault is the browser's job: it
-    # derives PK from the password it already holds and the service writes the key file
-    # before forking this shell (§ the web unlock path). A web shell that stopped to ask
-    # for a vault password would be asking for something the design deliberately never
-    # routes through the server — and, on a locked vault, would stall every attach behind
-    # a prompt. `vault unlock` still prompts on any channel: that one the user asked for.
-    unlock_session(interactive=config.subject.channel == 'terminal')
+    unlock(extension)
     shell = SolverShell(save=args.save and not args.cmdline)
     if args.cmdline:
         return shell.run_command(args.cmdline)
-    return shell.run_interactive(intro_message='')
+    return shell.run_interactive(intro_message='', on_start=extension.on_start if extension is not None else None)
 
 
 if __name__ == '__main__':  # pragma: no cover

@@ -7,7 +7,9 @@ the web shell — hands :func:`solver.main.main` an :class:`Extension` instead o
 discovered. Composition is explicit on purpose: plugin discovery (`entry_points`) would load
 an extension into *every* shell of a venv it is installed in, the terminal one included.
 
-An extension contributes extra command modules and an **overlay table**, one overlay per
+An extension may bring its own **identity** (who the session runs as, in place of the OS
+login), say whether the vault may be unlocked by prompting, and run a step before the first
+prompt. It contributes extra command modules and an **overlay table**, one overlay per
 command it changes:
 
 - `emit` — events passed to the extension's `notify` after the command returns, whatever its
@@ -41,6 +43,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
 
+from solver.auth import Subject
 from solver.shell.command import Command, CommandFn, CommandRegistry, Context, registry
 from solver.shell.register import check_replacement, replace_body
 
@@ -68,6 +71,14 @@ class Extension:
     overlays: tuple[Overlay, ...] = ()
     #: Receives each `emit` event; required when any overlay emits.
     notify: Callable[[str], None] | None = None
+    #: Who the shell runs as, in place of the OS login (:mod:`solver.shell.login`). Called once,
+    #: before any command module loads; raises :class:`SystemExit` to refuse the session.
+    identity: Callable[[], Subject] | None = None
+    #: Whether a locked vault may be unlocked by asking at the terminal. A front end that
+    #: unlocks it some other way (the web shell: the browser) says no.
+    prompt_vault: bool = True
+    #: Runs once before the first interactive prompt, given the shell's `dispatch`.
+    on_start: Callable[[Callable[[str], int]], None] | None = None
 
 
 def read_overlays(path: Path) -> tuple[Overlay, ...]:

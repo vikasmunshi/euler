@@ -10,40 +10,25 @@ resolving it costs an import of :mod:`solver.auth` that the git-filter path must
 
 Resolution is deliberately *lazy* — :attr:`solver.config.Config.subject` is a
 `cached_property`, so it happens on first use rather than at import. :func:`solver.main.main`
-forces it at startup, which is where the one-shot ticket handoff below needs to happen while
-there is still exactly one process holding it.
+settles it at startup through :mod:`solver.shell.login`, before any command module loads.
 """
 from __future__ import annotations
 
 __all__ = ['resolve_identity', 'user_state_dir']
 
-import os
 from pathlib import Path
 
-from solver.auth import INSTANCE_EMAIL_ENV, Subject, TICKET_ENV, resolve_subject
+from solver.auth import Subject, resolve_subject
 
 
 def resolve_identity(root: Path) -> Subject:
-    """Resolve the security subject for this process, and hand identity down to children.
+    """Resolve the security subject for this process: the OS login and its role.
 
-    Ambient identity + profile: a one-time shell ticket (web PTY) or the checkout-owner
-    uid (local terminal); anything else aborts. The subject is identity + channel +
-    profile + inheritance-expanded permissions, from `authorizations.json` (deployed SoR →
-    built-in default), and it drives per-user state and command/route authorization.
-
-    The handoff is the second half. The web shell's ticket is single-use and
-    `resolve_subject` just consumed it; it is scrubbed so a child solver (`claude-solve`'s
-    headless Claude, a nested `solver "…"`) does not inherit a dead ticket and abort at its
-    own startup. The resolved e-mail goes down in its place: under this per-user uid the
-    child re-resolves via the instance-identity plane, which trusts the e-mail only because
-    `system_slug(email)` matches the uid's `EULER_USER_SLUG` pin — an env value a child
-    cannot forge past. Terminal subjects carry neither var.
+    A front end that brings its own identity (the web shell's one-time ticket) sets
+    `config.subject` before anything reads it (:mod:`solver.shell.login`), so this default
+    is never reached there.
     """
-    subject: Subject = resolve_subject(root)
-    if subject.channel == 'web':
-        os.environ.pop(TICKET_ENV, None)
-        os.environ[INSTANCE_EMAIL_ENV] = subject.user
-    return subject
+    return resolve_subject(root)
 
 
 def user_state_dir(state_dir: Path, subject: Subject) -> Path:

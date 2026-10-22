@@ -58,8 +58,7 @@ EGRESS_ENV="${SYS_DIR}/egress.env"                     # HTTPS_PROXY (egress.sh)
 WEB_GROUP="euler-web"
 # Parent group: every per-user uid joins it. It is also the ROSTER — the per-user uids are
 # named for the slug alone (ue0f4a1), so there is no name prefix left to enumerate them by,
-# and this root-owned membership is what identifies them here, in firewall.sh, and in
-# solver.auth.identity (per_user_login).
+# and this root-owned membership is what identifies them here and in firewall.sh.
 USER_GROUP="euler-user"
 USER_HOME_BASE="/home"                                 # per-user homes: /home/<slug>
 
@@ -292,7 +291,7 @@ sock_of()  { echo "/run/euler/user-$1.sock"; }
 
 # The per-user roster, by group membership. With the euler-user- name prefix gone there is
 # nothing to grep /etc/passwd for; the parent group is the enumerable set (and the same one
-# solver.auth.identity.per_user_login and firewall.sh read). Lists the group's members,
+# firewall.sh reads). Lists the group's members,
 # one per line, most-recent-last; empty when none are provisioned.
 euler_user_names() {
     getent group "${USER_GROUP}" 2>/dev/null | awk -F: '{print $4}' | tr ',' '\n' | sed '/^$/d'

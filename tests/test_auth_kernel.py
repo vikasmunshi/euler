@@ -1,20 +1,21 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """Unit tests for the solver/auth kernel (re-simplified): the plain profile
-ladder (rank comparison, fail-closed), the users map, and resolve_subject's planes."""
+ladder (rank comparison, fail-closed), the users map, and the OS-login identity with its role."""
 from __future__ import annotations
 
 import json
 import os
+import pwd
 import re
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-from solver.auth import Authorizations, Subject, resolve_subject
+from solver.auth import Authorizations, Subject, identity, resolve_subject
 from solver.auth.authorizations import AUTHZ_FILE_ENV
-from solver.auth.identity import system_slug
+from solver.auth.identity import deployed_policy, subject_for, system_slug
 
 _POLICY = {
     'ladder': ['reader', 'contributor', 'maintainer', 'admin'],
@@ -68,141 +69,56 @@ class AuthorizationsTest(unittest.TestCase):
 
 
 class ResolveSubjectTest(unittest.TestCase):
+    """The solver shell's identity: the OS login, its role from the root-owned policy."""
+
     def setUp(self) -> None:
         self.authz = Authorizations(_POLICY)
-        self.root = Path('/some/repo')
 
-    def _resolve(self, **env: str) -> Subject:
-        with mock.patch.dict(os.environ, env, clear=False):
-            os.environ.pop('SOLVER_TICKET', None)     # never inherit the caller's
-            os.environ.pop('EULER_USER_SLUG', None)   # ditto the instance pin
-            os.environ.pop('EULER_USER_EMAIL', None)  # ditto the instance-identity handoff
-            for k, v in env.items():
-                os.environ[k] = v
-            return resolve_subject(self.root, self.authz)
+    def test_no_policy_owner_is_admin(self) -> None:
+        subj = subject_for('vikas', owner=True, policy=None)
+        self.assertEqual((subj.profile, subj.channel, subj.auth_method), ('admin', 'terminal', 'checkout-owner'))
 
-    def test_owner_uid_floors_to_admin_when_unlisted(self) -> None:
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value='vikas'), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=True):
-            subj = self._resolve()
-        self.assertEqual(subj.profile, 'admin')
-        self.assertEqual(subj.channel, 'terminal')
-        self.assertEqual(subj.auth_method, 'checkout-owner')
-        self.assertTrue(subj.has('admin'))
+    def test_no_policy_non_owner_is_contributor(self) -> None:
+        subj = subject_for('carol', owner=False, policy=None)
+        self.assertEqual((subj.profile, subj.auth_method), ('contributor', 'os-login'))
 
-    def test_explicit_map_entry_wins_over_owner_floor(self) -> None:
-        # bob owns the checkout but is mapped contributor → contributor, not admin.
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value='bob'), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=True):
-            subj = self._resolve()
-        self.assertEqual(subj.profile, 'contributor')
-        self.assertFalse(subj.has('admin'))
+    def test_a_listed_login_takes_its_entry_even_as_owner(self) -> None:
+        subj = subject_for('bob', owner=True, policy=self.authz)
+        self.assertEqual((subj.profile, subj.auth_method), ('contributor', 'policy'))
 
-    def test_non_owner_unlisted_login_is_contributor(self) -> None:
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value='carol'), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
-            subj = self._resolve()
-        self.assertEqual(subj.profile, 'contributor')
-        self.assertEqual(subj.auth_method, 'os-login')
+    def test_with_a_policy_an_unlisted_owner_is_not_admin(self) -> None:
+        """Q4: when the policy is deployed it decides — owning a clone grants nothing."""
+        subj = subject_for('carol', owner=True, policy=self.authz)
+        self.assertEqual(subj.profile, 'reader')
 
-    def test_service_uid_without_ticket_aborts(self) -> None:
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value='euler-ws'), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
-            with self.assertRaises(SystemExit):
-                self._resolve()
-
-    def test_instance_identity_plane_resolves_a_ticketless_descendant(self) -> None:
-        """A per-user uid (named for the slug) whose ticket has been scrubbed resolves
-        from the handed-down e-mail; profile comes from policy (alice → maintainer)."""
+    def test_a_per_user_account_holds_its_emails_rung(self) -> None:
+        """A `solver` run under a per-user web uid (named for the e-mail's system slug) is
+        that collaborator: their e-mail and rung, with the uid as the slug."""
         slug = system_slug('alice@example.com')
-        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
-             mock.patch('solver.auth.identity.getpass.getuser', return_value=slug):
-            subj = self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
-        self.assertEqual(subj.channel, 'web')
-        self.assertEqual(subj.auth_method, 'instance-identity')
-        self.assertEqual(subj.user, 'alice@example.com')
-        self.assertEqual(subj.slug, slug)
-        self.assertEqual(subj.profile, 'maintainer')
+        subj = subject_for(slug, owner=True, policy=self.authz)
+        self.assertEqual((subj.user, subj.slug, subj.profile, subj.auth_method),
+                         ('alice@example.com', slug, 'maintainer', 'policy-account'))
 
-    def test_instance_identity_unlisted_user_floors_to_the_weakest_rung(self) -> None:
-        slug = system_slug('nobody@example.com')
-        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
-             mock.patch('solver.auth.identity.getpass.getuser', return_value=slug):
-            subj = self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='nobody@example.com')
-        self.assertEqual(subj.profile, 'reader')          # fail closed low, never admin
+    def test_resolution_reads_the_uid_not_the_environment(self) -> None:
+        """$USER / $LOGNAME are the user's to set; the uid is not."""
+        with mock.patch.dict(os.environ, {'USER': 'bob', 'LOGNAME': 'bob'}), \
+             mock.patch('solver.auth.identity.deployed_policy', return_value=self.authz):
+            subj = resolve_subject(Path('/'))
+        self.assertEqual(subj.user, pwd.getpwuid(os.getuid()).pw_name)
 
-    def test_instance_identity_rejects_a_forged_email(self) -> None:
-        """A child cannot swap in a different e-mail: its system_slug no longer matches the
-        uid's pin, so the plane declines and the service account aborts."""
-        pin = system_slug('alice@example.com')
-        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
-             mock.patch('solver.auth.identity.getpass.getuser', return_value=pin):
-            with self.assertRaises(SystemExit):
-                self._resolve(EULER_USER_SLUG=pin, EULER_USER_EMAIL='attacker@evil.com')
+    def test_a_policy_the_user_can_write_is_ignored(self) -> None:
+        """EULER_AUTHZ_FILE pointing at a user-owned file does not grant a role."""
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / 'authz.json'
+            f.write_text(json.dumps({'users': {pwd.getpwuid(os.getuid()).pw_name: 'admin'}}), encoding='utf-8')
+            with mock.patch.dict(os.environ, {AUTHZ_FILE_ENV: str(f)}), \
+                 mock.patch('solver.auth.identity.DEFAULT_AUTHZ_FILE', str(Path(tmp) / 'absent.json')):
+                self.assertIsNone(deployed_policy())
 
-    def test_instance_identity_requires_the_uid_to_be_the_pin(self) -> None:
-        """A shared service uid (euler-ws) is not a per-user instance even with the env set."""
-        slug = system_slug('alice@example.com')
-        with mock.patch('solver.auth.identity.getpass.getuser', return_value='euler-ws'), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
-            with self.assertRaises(SystemExit):
-                self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
-
-    def test_group_membership_makes_a_prefixless_uid_a_service_account(self) -> None:
-        """The discriminator that replaced the euler-user- name prefix: a login in the
-        root-owned euler-user group must resolve through the instance plane or abort —
-        it can no longer fall through to the local-terminal plane and pick up a profile.
-        """
-        slug = system_slug('alice@example.com')
-        with mock.patch('solver.auth.identity.per_user_login', return_value=True), \
-             mock.patch('solver.auth.identity.getpass.getuser', return_value=slug), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
-            with self.assertRaises(SystemExit):
-                self._resolve()                    # no pin, no e-mail → no identity at all
-
-    def test_a_non_member_login_is_still_an_ordinary_terminal_identity(self) -> None:
-        """The group check must not swallow real logins: a name-shaped-like-a-slug login
-        that is NOT in the group resolves on the terminal plane as usual."""
-        with mock.patch('solver.auth.identity.per_user_login', return_value=False), \
-             mock.patch('solver.auth.identity.getpass.getuser', return_value='carol'), \
-             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
-            subj = self._resolve()
-        self.assertEqual(subj.channel, 'terminal')
-        self.assertEqual(subj.profile, 'contributor')
-
-    def test_ticket_plane_web_is_not_capped(self) -> None:
-        """The per-user model drops the admin→maintainer web cap — an admin
-        account keeps full authority over the web, contained by its own uid + SRP."""
-        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'admin')):
-            subj = self._resolve(SOLVER_TICKET='t')
-        self.assertEqual(subj.channel, 'web')
-        self.assertEqual(subj.profile, 'admin')           # NOT capped
-        self.assertTrue(subj.has('admin'))
-        self.assertEqual(subj.auth_method, 'shell-ticket')
-
-    def test_ticket_failure_aborts(self) -> None:
-        with mock.patch('solver.auth.identity._redeem_ticket', side_effect=SystemExit('rejected')):
-            with self.assertRaises(SystemExit):
-                self._resolve(SOLVER_TICKET='bad')
-
-    def test_ticket_user_must_match_the_instance_slug_pin(self) -> None:
-        """The forking instance *is* the user's uid, so a ticket whose e-mail
-        maps to a different system slug means misrouting or a bypass — the child aborts."""
-        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'maintainer')):
-            with self.assertRaises(SystemExit):
-                self._resolve(SOLVER_TICKET='t', EULER_USER_SLUG='someone-else-000000')
-
-    def test_ticket_matching_the_slug_pin_starts(self) -> None:
-        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'contributor')):
-            subj = self._resolve(SOLVER_TICKET='t', EULER_USER_SLUG=system_slug('x@y.z'))
-        self.assertEqual(subj.profile, 'contributor')
-        self.assertEqual(subj.slug, system_slug('x@y.z'))
-
-    def test_admin_ticket_matches_its_own_slug_pin(self) -> None:
-        """An admin account's PTY child on its own per-user instance resolves as admin."""
-        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('boss@y.z', 'admin')):
-            subj = self._resolve(SOLVER_TICKET='t', EULER_USER_SLUG=system_slug('boss@y.z'))
-        self.assertEqual(subj.profile, 'admin')
+    def test_root_ownership_runs_all_the_way_up(self) -> None:
+        self.assertTrue(identity._root_owned(Path('/etc')))
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertFalse(identity._root_owned(Path(tmp) / 'x.json'))
 
 
 class SystemSlugTest(unittest.TestCase):
