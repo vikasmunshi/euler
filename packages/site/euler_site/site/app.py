@@ -28,6 +28,7 @@ import html
 import json
 import logging
 import mimetypes
+import posixpath
 from pathlib import Path
 from typing import Any, Awaitable, Callable, TypedDict
 
@@ -626,7 +627,7 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
         # presentation choice, so it wraps the rendered HTML, not the source article.
         # problems.json feeds the solved/total count on the fold summary.
         'body': content.collapse_problems(
-            content.render_markdown(text, route_base='/topics/'),
+            content.render_markdown(text, route_base='/topics/', page_dir=posixpath.dirname(name)),
             content.load_problems(repo_root)),
         'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
         'actions': actions,

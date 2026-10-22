@@ -27,6 +27,7 @@ __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
 
 import json
 import mimetypes
+import posixpath
 import re
 import subprocess
 from functools import cache
@@ -343,10 +344,34 @@ def rewrite_statement_links(html: str, number: int) -> str:
     the absolute `/solutions/NNNN/…` path (the same route :func:`resolve_file` serves)
     makes them resolve identically however the page was reached. Scheme (`http:`),
     already-absolute (`/…`) and anchor (`#`) URLs are left untouched.
+
+    Links to other projecteuler.net *pages* (`problem=67`, `about=…`) are not resources:
+    a problem goes to its page here, anything else to projecteuler.net.
     """
     base = f'/solutions/{number:04d}/'
+    html = _PE_PAGE_LINK_RE.sub(_pe_page_link, html)
     return re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
                   lambda m: f'{m.group(1)}{base}{m.group(2)}"', html)
+
+
+#: A statement's link to another projecteuler.net *page* — `problem=67`, `about=roman_numerals`:
+#: relative on their site, where every page is `/<key>=<value>` at the root. Rooted at our
+#: problem path they would 404, so they are resolved where they belong first (below).
+_PE_PAGE_LINK_RE = re.compile(r'<a\b([^>]*?)\bhref="([a-z_]+)=([^"/]*)"')
+
+#: Where projecteuler.net's own pages live.
+_PE_SITE: str = 'https://projecteuler.net/'
+
+
+def _pe_page_link(match: re.Match[str]) -> str:
+    """`problem=N` → this site's page for problem N, swapped into the pane; any other
+    projecteuler.net page → that page on projecteuler.net."""
+    attrs, key, value = match.group(1), match.group(2), match.group(3)
+    if key == 'problem' and value.isdigit() and 0 < int(value) < 10000:
+        target = f'/solutions/{int(value):04d}/'
+        return (f'<a{attrs}href="{target}" hx-get="{target}" hx-target="#content" '
+                f'hx-swap="innerHTML" hx-push-url="true"')
+    return f'<a{attrs}href="{_PE_SITE}{key}={value}"'
 
 
 #: projecteuler.net's emphasis colours, remapped for a dark ground. Their markup is
@@ -626,7 +651,7 @@ def _unmask_math(text: str, spans: list[str], *, raw: bool = False) -> str:
 _PULL_RE = re.compile(r'<p>(<strong>(?:(?!</strong>).)*</strong>)</p>', re.DOTALL)
 
 
-def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '') -> str:
+def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '', page_dir: str = '') -> str:
     """Render Markdown to HTML: slugged heading ids + links rewired for the shell.
 
     Math spans (`$…$`, `$$…$$`) ride around the parser untouched — see
@@ -635,7 +660,11 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
     Each heading gets the same slug `update_doc.py` assumes, so in-page and
     cross-doc `#anchor` links land. Then the link rewrites:
 
-    - a relative `foo.md` (or `docs/foo.md`) link → the *route_base* route;
+    - a relative `foo.md` (or `docs/foo.md`) link → the *route_base* route; for a page in a
+      sub-folder of its tree (*page_dir*, e.g. a topic under `domain/`), resolved against that
+      folder first — `functional-graph.md` and `../technique/memoization.md` from
+      `domain/repeating-decimal` are `/topics/domain/functional-graph` and
+      `/topics/technique/memoization`;
     - a repo-relative `../<path>` link (docs/topics sit one level under the
       repo root, so `../` reaches it) → the `/docs/file/<path>` view route when
       that route can serve it (:data:`VIEWABLE_ROOTS`), and **GitHub otherwise**.
@@ -664,6 +693,10 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
             token.attrSet('id', _doc_slug(_unmask_math(tokens[i + 1].content, spans, raw=True)))
     rendered: str = _MD.renderer.render(tokens, _MD.options, {})
     rendered = _PULL_RE.sub(r'<p class="pull">\1</p>', rendered)
+    if page_dir:
+        rendered = re.sub(r'href="(?!\w+:|/|#)([^"#]+)\.md(#[^"]*)?"',
+                          lambda m: f'href="{_nested_link(route_base, page_dir, m.group(1), m.group(2) or "")}"',
+                          rendered)
     rendered = re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"',
                       rf'href="{route_base}\1\2"', rendered)
     rendered = re.sub(r'href="\.\./([^"#]+)"',
@@ -678,6 +711,19 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
         r'<a href="\1" hx-get="\1" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"',
         rendered)
     return _unmask_math(rendered, spans)   # last: no link rewrite may reach inside a formula
+
+
+def _nested_link(route_base: str, page_dir: str, target: str, anchor: str) -> str:
+    """A page's relative `.md` link resolved against its folder within the *route_base* tree.
+
+    A link that climbs out of the tree (`../../docs/x.md` from a topic) is handed back
+    repo-relative (`../docs/x.md` — the tree is one level under the repo root), for the
+    repo-link rule that follows.
+    """
+    resolved = posixpath.normpath(posixpath.join(page_dir, target))
+    if resolved == '..' or resolved.startswith('../'):
+        return f'{resolved}.md{anchor}'
+    return f'{route_base}{resolved}{anchor}'
 
 
 #: The rendered form of `update-tags`' problems block: its opening HTML-comment marker,
