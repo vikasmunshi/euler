@@ -18,6 +18,8 @@ listing. What four columns cannot show — whether a command takes a problem num
 it supports `--silent`, what it asks for — is in its index entry, one click along its name.
 
 <!-- GEN:command-table -->
+**In every shell** — `solver`, the web shell and `solver-host`:
+
 | Command | Aliases | Requires | Description |
 |---------|---------|----------|-------------|
 | [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
@@ -46,16 +48,13 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | `reader` | Soft-reset your branch to origin/master — un-commit, keep every change. |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
-| [`host-authorize`](commands-index.md#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`host-unlock`](commands-index.md#command-host-unlock) | — | `admin` | Take the mailed block from `host-authorize` and unlock this machine. |
 | [`key-export`](commands-index.md#command-key-export) | — | `admin` | Print the master key sealed to a machine's public key, to carry there yourself. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | `reader` | Unwrap the half you were sent, complete it from the repository, store the key. |
 | [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-encrypt every private file under the new one. |
-| [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](commands-index.md#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](commands-index.md#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. |
-| [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`new`](commands-index.md#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. |
 | [`pause`](commands-index.md#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
@@ -76,10 +75,18 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`update-tags`](commands-index.md#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`update-usd-rate`](commands-index.md#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](commands-index.md#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
-| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
-| [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 | [`vault`](commands-index.md#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](commands-index.md#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
+
+**On the web host only** — loaded by the web shell and `solver-host`, which have the message spool, the roster and the mail relay these need:
+
+| Command | Aliases | Requires | Description |
+|---------|---------|----------|-------------|
+| [`host-authorize`](commands-index.md#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
+| [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
+| [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
+| [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
+| [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 <!-- /GEN:command-table -->
 
 ### What the web shell changes
@@ -91,4 +98,27 @@ browser tab — and the ones that change state refresh the part of the page they
 Generated from that table by `update-docs`.
 
 <!-- GEN:web-overlays -->
+| Command | In the web shell |
+|---------|------------------|
+| `git-commit` | then refreshes the git chip |
+| `git-push` | then refreshes the git chip |
+| `git-sync` | then refreshes the git chip |
+| `git-reset` | then refreshes the git chip |
+| `git-filter` | then refreshes the git chip |
+| `git-publish` | then refreshes the git chip |
+| `key-reconstruct` | then refreshes the git chip |
+| `host-unlock` | then refreshes the git chip |
+| `gh-merge` | then refreshes the git chip, the message chip |
+| `update-docs` | then refreshes the git chip |
+| `update-tags` | then refreshes the git chip |
+| `update-models` | then refreshes the git chip |
+| `update-usd-rate` | then refreshes the git chip |
+| `update-presentation-data` | then refreshes the git chip |
+| `summary` | then refreshes the solutions grid, the git chip |
+| `mark` | then refreshes the solutions grid, the git chip |
+| `user` | then refreshes the account page |
+| `git-identity` | then refreshes the account page |
+| `show` | runs `euler_webshell.shell.viewer.show` instead |
+| `edit` | runs `euler_webshell.shell.viewer.edit` instead |
+| `key-rekey` | runs `euler_webshell.shell.keys.key_rekey` instead; then refreshes the git chip |
 <!-- /GEN:web-overlays -->

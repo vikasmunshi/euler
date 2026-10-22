@@ -47,6 +47,8 @@ a parameter that accepts repetition.
 <summary>command catalogue (click to expand) — each name jumps to its entry below</summary>
 
 <!-- GEN:command-summary -->
+**In every shell** — `solver`, the web shell and `solver-host`:
+
 | Command | Aliases | Requires | Description |
 |---------|---------|----------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
@@ -75,16 +77,13 @@ a parameter that accepts repetition.
 | [`git-reset`](#command-git-reset-reset) | `reset` | `reader` | Soft-reset your branch to origin/master — un-commit, keep every change. |
 | [`git-status`](#command-git-status-status) | `status` | `reader` | Display the sync state between the local branch and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | `reader` | Bring the local repository in sync with origin/master. |
-| [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`host-unlock`](#command-host-unlock) | — | `admin` | Take the mailed block from `host-authorize` and unlock this machine. |
 | [`key-export`](#command-key-export) | — | `admin` | Print the master key sealed to a machine's public key, to carry there yourself. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | `reader` | Unwrap the half you were sent, complete it from the repository, store the key. |
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | `admin` | Rotate the master key and re-encrypt every private file under the new one. |
-| [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`lint`](#command-lint) | — | `contributor` | Lint the problem's solution files, optionally auto-fixing them. |
 | [`ls`](#command-ls) | — | `reader` | List the files in a problem's solution directory. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | `contributor` | Mark the current problem as solved — once its results confirm it. |
-| [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`new`](#command-new) | — | `contributor` | Generate new solution and/or test-case files for the problem. |
 | [`pause`](#command-pause) | — | `reader` | Wait for the user to press Enter before the block carries on. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
@@ -105,10 +104,18 @@ a parameter that accepts repetition.
 | [`update-tags`](#command-update-tags) | — | `contributor` | The glue for the double-entry tag graph. |
 | [`update-usd-rate`](#command-update-usd-rate) | — | `maintainer` | Refresh the USD→EUR rate used to report API costs. |
 | [`user`](#command-user) | — | `reader` | Show the solver user, the current identity, and whether it can decrypt. |
-| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
-| [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 | [`vault`](#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
+
+**On the web host only** — loaded by the web shell and `solver-host`, which have the message spool, the roster and the mail relay these need:
+
+| Command | Aliases | Requires | Description |
+|---------|---------|----------|-------------|
+| [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
+| [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
+| [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
+| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
+| [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
 <!-- /GEN:command-summary -->
 
 </details>
@@ -1121,7 +1128,7 @@ host-authorize
 | `public_key` | The 64-hex X25519 public key of the machine being authorized — what `user` prints there. |
 | `email` | Where to send it. Their address, or your own if you intend to forward it by another route. |
 
-*Defined in* `euler_webshell.shell.keys.host_authorize`.
+*Defined in* `euler_webshell.shell.keys.host_authorize` — on the web host only (the web shell and `solver-host`).
 
 ---
 
@@ -1284,7 +1291,7 @@ key-split
 | `identity` | Who to send the other half to. Not asked — and not used — on the run that writes the repository's share. |
 | `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before anyone has been authorised. Defaults to '', which reads it from the roster. |
 
-*Defined in* `euler_webshell.shell.keys.key_split`.
+*Defined in* `euler_webshell.shell.keys.key_split` — on the web host only (the web shell and `solver-host`).
 
 ---
 
@@ -1433,7 +1440,7 @@ msg
 | `body` | The message text, for `send`. |
 | `to` | Who a `send` goes to: `staff` (the default, and the only audience below the `maintainer` floor), `everyone`, or one or more identities, comma-separated. Staff are offered the known accounts as a menu where the roster can be read. |
 
-*Defined in* `euler_webshell.msg.commands.msg`.
+*Defined in* `euler_webshell.msg.commands.msg` — on the web host only (the web shell and `solver-host`).
 
 ---
 
@@ -2136,7 +2143,7 @@ user-authorize
 | `target` | The 16-hex id of a key-authorization message, or a 64-hex public key. Offered as a menu of the waiting requests when omitted; not strict, so a bare key can still be pasted. |
 | `identity` | Who the key belongs to. Taken from the thread for the message form, so it is only asked for the bare-key form — where there is nobody to send it to otherwise. |
 
-*Defined in* `euler_webshell.shell.keys.user_authorize`.
+*Defined in* `euler_webshell.shell.keys.user_authorize` — on the web host only (the web shell and `solver-host`).
 
 ---
 
@@ -2175,7 +2182,7 @@ users
 | `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Offered as a menu of the roster for the verbs that act on an account that already exists — `change` / `enable` / `disable` / `remove` — and not asked for the others, since `add` names one that does not yet and `list` / `process-requests` / `redeploy` name none. |
 | `profile` | The profile to assign, for `add` / `change`. `admin` is valid only for a local os-login, never a web account. |
 
-*Defined in* `euler_webshell.users.users`.
+*Defined in* `euler_webshell.users.users` — on the web host only (the web shell and `solver-host`).
 
 ---
 
