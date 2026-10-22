@@ -130,7 +130,7 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
 | 4 | Key distribution and staff notices to the web side | Allowlist empty |
 | 5 | `ContentRoot`, `euler-content`, public `euler-site` unit, Caddy public route | Signed-out browsing works; private unreachable |
 | 6 | Physical move to `packages/`, three pyprojects, import renames, units, Makefile/hooks/tests, lockstep release | install, audit, pre-push, `upgrade-web` pass |
-| 7 | Resource-side enforcement for admin/maintainer commands; terminal vs web catalogues; docs | Audit table recorded |
+| 7 | Resource-side enforcement for admin/maintainer commands; terminal vs web catalogues; docs | Audit table recorded ✓ |
 
 ## 5. Progress
 
@@ -232,3 +232,17 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
     …), so this release needs `make upgrade-web` (re-lays every unit), not `redeploy-web`.
     Collaborators' clones pick up the layout at their next `git-sync`; until then, the few
     pages that read the clone's `solver/` files (the AI doc, the template links) 404.
+
+- **Phase 7**: the audit, the catalogues, the docs. The split is complete.
+  - *Enforcement audit:* `docs/authorizations.md` § Where it is enforced — every
+    `maintainer` / `admin` command, what it changes, and the boundary that actually decides
+    (own clone + GitHub's locked `master`, the master key, sudo, the spool's `SO_PEERCRED`
+    check, the `euler-maint` group, the relay firewall). No command relies on its floor
+    alone; no gap needed fixing. `tests/test_enforcement_audit.py` holds the table to the
+    live registry, so a new privileged command fails until it is audited.
+  - *Catalogues:* the generated catalogue is two tables — every shell, and the web host only
+    (the web shell and `solver-host`) — and the command index marks the web-host-only
+    entries. A generated table lists what the web shell's overlays change.
+  - *Docs:* the developer guide's § 9 (three packages, extensions, notices, which shell has
+    which command) and its checklist; the user guide's web section (public pages, the web
+    shell, `solver-host`).

@@ -81,3 +81,14 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`vault`](commands-index.md#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](commands-index.md#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
 <!-- /GEN:command-table -->
+
+### What the web shell changes
+
+The web shell runs these same commands with an overlay table on top
+(`packages/webshell/euler_webshell/shell/overlays.toml`; docs/package-split.md § 3.2): a few
+run a different body — `show` and `edit` swap the page's left pane instead of opening a
+browser tab — and the ones that change state refresh the part of the page they changed.
+Generated from that table by `update-docs`.
+
+<!-- GEN:web-overlays -->
+<!-- /GEN:web-overlays -->

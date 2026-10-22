@@ -101,3 +101,60 @@ a profile on each channel.
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
 <!-- /GEN:authorization-table -->
+
+## Where it is enforced
+
+The floors above are a **guardrail**, not a boundary (docs/package-split.md § 2.1): inside one
+uid, someone who can edit their clone or run `!` can call any function the shell can. So
+every `maintainer` and `admin` command was audited for where its **effect** lands, and what
+stops someone below its floor there (phase 7). The answer is never "the floor":
+
+- **own clone** — it changes the caller's own working tree. It reaches anyone else only by
+  landing on `master`, and `master` is locked on GitHub (branch protection: pull request with
+  one approving review, `lock_branch`; only the repository admin bypasses), so landing is
+  GitHub's decision, made against the GitHub account, not the shell profile.
+- **the master key** — it needs the master key, and holding the master key *is* the
+  authority over it (proof of possession, § 9 of the web server guide): whoever can unwrap it
+  can seal it to anyone, with or without this command.
+- **sudo** — it goes through `sudo`; only the operator is in the `sudo` group, and no
+  per-user uid is.
+- **the spool** — `euler-msg` resolves the caller from `SO_PEERCRED` against the root-owned
+  `authorizations.json` and refuses a staff verb (a notice to a named user, a staff dismiss)
+  below `maintainer` itself.
+- **euler-maint** — `/etc/euler/roster/` is `root:euler-maint 2775`, and the admin plane
+  keeps that group at maintainer and above (`users add/change`), so writing the roster is a
+  file permission.
+- **relay firewall** — mail goes through the loopback relay, which nftables opens to the
+  operator's uid and `euler-auth` only; every per-user uid is barred.
+
+| Command | Floor | What it changes | Enforced by |
+|---|---|---|---|
+| `check-commands` | admin | nothing — reads docstrings | nothing to enforce |
+| `host-authorize` | admin | mails the master key, sealed to a public key | the master key; relay firewall |
+| `host-unlock` | admin | this machine's own enc-key file, only if it unwraps with this machine's private key | the private key: a block sealed to another machine is refused before anything is written |
+| `key-export` | admin | prints the master key sealed to a public key | the master key |
+| `key-rekey` | admin | rotates this clone's key, commits re-encrypted blobs, re-issues over the spool | the master key; own clone (landing: GitHub); the spool for the re-issue |
+| `pip-upgrade` | admin | the running venv | file ownership: `/opt/euler` is root's, so from a web shell it fails; a terminal's own `.venv` is its owner's anyway |
+| `sys-setup` | admin | system packages and services | sudo |
+| `update-docs` | admin | generated docs, committed | own clone (landing: GitHub) |
+| `update-models` | admin | the model catalogue, committed | own clone (landing: GitHub) |
+| `users` | admin | accounts, profiles, instances (`list` is reader and read-only) | sudo (the wheel-gated admin plane) |
+| `claude-batch` | maintainer | tags, via the Batches API | the caller's own API key (their vault); own clone (landing: GitHub) |
+| `claude-blog` | maintainer | a topic article, via Claude Code | the caller's own Claude credentials; own clone (landing: GitHub) |
+| `create-topic` | maintainer | a new topic article | own clone (landing: GitHub) |
+| `gh-merge` | maintainer | merges a pull request onto `master` | GitHub: the merge is made as the caller's GitHub account, and `master` is locked to the repository admin |
+| `git-publish` | maintainer | pushes and opens a pull request | GitHub (a direct push to `master` only for the repository owner's account) |
+| `key-split` | maintainer | lays the host's half (first run), or sends a sealed half | the master key; sudo for `/etc/euler/share.json` (root's); the spool for the send; euler-maint for the roster record |
+| `summary` | maintainer | `problems.json`, committed; a staff notice | own clone (landing: GitHub); the spool accepts a notice *to* staff from anyone |
+| `update-presentation-data` | maintainer | the deck's data file, committed | own clone (landing: GitHub) |
+| `update-usd-rate` | maintainer | `values.conf`, committed | own clone (landing: GitHub) |
+| `user-authorize` | maintainer | records a public key, sends half the master key, dismisses the request | euler-maint for the roster; the master key and the spool for the send; the spool for the dismiss |
+
+The site's write routes are the same shape: a file edit, a delete, a progress upload or a
+topic edit changes only the signed-in user's own clone, through their own instance (their
+uid), on a profile the auth service vouched for (`forward_auth`, a separate uid) — and
+reaches anyone else only through GitHub.
+
+**No gaps were found**: nothing above depends on the floor alone. `tests/test_enforcement_audit.py`
+holds this table to the live registry, so a new `maintainer` or `admin` command fails the
+tests until it has a row here.

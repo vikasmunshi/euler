@@ -97,6 +97,15 @@ swaps the left pane in place; from a local terminal it opens `$EULER_BASE_URL`
 `solver-doc`, which every later `show` reuses — refreshing it for the same
 problem, navigating it for another.
 
+Signed out, the same pages — solutions, docs, topics — are public: they are served from a
+packaged copy of the published content, without the private solutions and without a
+terminal; the right pane is the way to sign in.
+
+The browser's shell is the **web shell**: the same `solver` shell, plus the web host's own
+commands (`msg`, `users`, `user-authorize`, `key-split`, `host-authorize`) and a few
+changes for the page (§3, *What the web shell changes*). On the web host, the operator's
+terminal gets those commands from **`solver-host`** rather than `solver`.
+
 The code editor (and the read-only file viewer) is CodeMirror 6, with a
 line-number gutter, syntax highlighting for Python/C/JSON, and word-wrap always
 on, so long lines soft-wrap rather than running off-screen. It is progressive
@@ -266,6 +275,17 @@ its index entry, one click along its name.
 | [`vault`](commands-index.md#command-vault) | — | `reader` | Encrypt this user's `id` + `env` at rest under a password-derived vault key. |
 | [`version`](commands-index.md#command-version) | — | `reader` | Print the installed build version, plus live git detail of the clone. |
 <!-- /GEN:command-table -->
+
+### What the web shell changes
+
+The web shell runs these same commands with an overlay table on top
+(`packages/webshell/euler_webshell/shell/overlays.toml`; docs/package-split.md § 3.2): a few
+run a different body — `show` and `edit` swap the page's left pane instead of opening a
+browser tab — and the ones that change state refresh the part of the page they changed.
+Generated from that table by `update-docs`.
+
+<!-- GEN:web-overlays -->
+<!-- /GEN:web-overlays -->
 
 > The table above is generated from the live command registry by the
 > `update-docs` command. The same block stands on its own as

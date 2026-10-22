@@ -584,7 +584,58 @@ control over their argument line (`?`, `clear`, the `!` bash passthrough) use
       the help panel and in the catalogue's `Requires` column.
 - [ ] Module listed in `modules.csv` — run `python -m solver.utils.loader` (or
       `update-docs`) to add the row by scanning.
-- [ ] `scripts/linters/check.sh solver` clean (`mypy`, `flake8`, `check-commands`; plus
-      `shellcheck` when the directory holds shell scripts, as `scripts` does).
+- [ ] `scripts/linters/check.sh packages` clean (`mypy`, `flake8`, `check-commands`, the
+      layering check; plus `shellcheck` when the directory holds shell scripts, as `scripts`
+      does).
 - [ ] If you changed any command's name/help/usage, run the `update-docs`
-      command to refresh the generated docs.
+      command (from `solver-host`, §9) to refresh the generated docs.
+- [ ] A `maintainer` or `admin` floor? Add its row to the enforcement audit
+      (`docs/authorizations.md` § Where it is enforced) — say what, besides the floor, stops
+      a lesser profile. `tests/test_enforcement_audit.py` fails until you do.
+
+---
+
+## 9. Three packages, one shell
+
+The code is three packages (docs/package-split.md), and dependencies point one way:
+
+```
+packages/webshell/euler_webshell  →  packages/site/euler_site  →  packages/solver/solver
+  the web shell, the per-user        the content site, the         the solver shell:
+  service, the message spool,        auth service                  standalone, no web code
+  `users`, key distribution
+```
+
+`scripts/linters/layers.py` (pre-commit, `check.sh`) fails on an import that points up.
+So a command goes in the **solver** package unless it needs something only the web host has —
+the message spool, the roster, the mail relay — in which case it goes in `euler_webshell` and
+loads through an extension.
+
+**Extensions.** The solver shell never discovers code; a package that extends it hands
+`solver.main.main(extension=…)` an `Extension` (`packages/solver/solver/shell/extension.py`):
+
+| Field | What it adds |
+|---|---|
+| `modules` | command modules to import after the shell's own (the web host's: `HOST_COMMANDS`) |
+| `overlays` + `notify` | an overlay table: events to `notify` after a command, and/or a replacement body with the same signature (`overlays.toml`) |
+| `identity` | who the session runs as, instead of the OS login (the web shell: its one-time ticket) |
+| `prompt_vault` | whether a locked vault may be unlocked by prompting (the web shell: no — the browser unlocks) |
+| `on_start` | a step before the first prompt (the web shell: a quiet `git-sync`) |
+| `notices` | the carrier for `solver.core.notices` — staff notices and the waiting-key hint (the spool) |
+
+An overlay that names no command, or a replacement whose signature differs, stops the shell
+from starting rather than drifting silently; `tests/test_web_shell.py` checks the real tables
+against the registry.
+
+**Which shell has which command.** `solver` has the solver package's commands. The web shell
+(`python -m euler_webshell.shell`, what the browser's terminal runs) and **`solver-host`**
+(`python -m euler_webshell.shell.host`, the operator's terminal on the web host) add the
+web host's. The catalogue is split the same way (`docs/commands-catalogue.md`), and the web
+shell's overlays have their own generated table there. Because the docs cover both,
+`update-docs` and `check-commands` run from `solver-host`; a plain `solver` refuses
+`update-docs` where the web shell is installed.
+
+**Something the command finds half way through, for somebody else to act on** — a pull
+request opened, an answer not registered — is a notice, not an overlay:
+`solver.core.notices.to_staff(subject, body)` files it through whatever carrier the shell was
+given, and returns False when there is none, so the command says what to do by hand.

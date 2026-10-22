@@ -35,7 +35,7 @@ from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
-from solver.shell.extension import active
+from solver.shell.extension import active, read_overlays
 from solver.shell.variables import variables
 from solver.shell.docstring import (GLYPH_ASKS, GLYPH_PROBLEM, GLYPH_REQUIRES, GLYPH_SILENT,
                                     help_model)
@@ -181,11 +181,64 @@ def _command_table(link_prefix: str) -> str:
     *link_prefix* is prepended to each command's anchor — `commands-index.md#`
     when the table lives in another file, `#` when it lives in the index itself.
     """
-    rows = ['| Command | Aliases | Requires | Description |',
-            '|---------|---------|----------|-------------|']
-    for cmd in registry.all():
-        link = f'[`{cmd.name}`]({link_prefix}{_fragment(cmd)})'
-        rows.append(f'| {link} | {_aliases(cmd)} | `{cmd.requires}` | {cmd.help} |')
+    sections: list[str] = []
+    for heading, commands in _catalogues():
+        rows = [heading, '', '| Command | Aliases | Requires | Description |',
+                '|---------|---------|----------|-------------|']
+        for cmd in commands:
+            link = f'[`{cmd.name}`]({link_prefix}{_fragment(cmd)})'
+            rows.append(f'| {link} | {_aliases(cmd)} | `{cmd.requires}` | {cmd.help} |')
+        sections.append('\n'.join(rows))
+    return '\n\n'.join(sections)
+
+
+#: The two catalogues (docs/package-split.md, phase 7): what every shell has, and what only
+#: the web host's shells load through their extension — told apart by the defining package.
+_EVERY_SHELL: str = '**In every shell** — `solver`, the web shell and `solver-host`:'
+_WEB_HOST: str = ('**On the web host only** — loaded by the web shell and `solver-host`, which have the '
+                  'message spool, the roster and the mail relay these need:')
+
+
+def _is_solvers(cmd: Command) -> bool:
+    """Whether *cmd* is the solver shell's own (every shell has it)."""
+    return _module_of(cmd).split('.')[0] == 'solver'
+
+
+def _catalogues() -> list[tuple[str, list[Command]]]:
+    """The catalogue's sections, in order, each non-empty."""
+    commands = registry.all()
+    sections = [(_EVERY_SHELL, [c for c in commands if _is_solvers(c)]),
+                (_WEB_HOST, [c for c in commands if not _is_solvers(c)])]
+    return [(heading, cmds) for heading, cmds in sections if cmds]
+
+
+#: The web shell's overlay table, read as a file: the solver shell does not import the web shell.
+_WEB_OVERLAYS: str = 'packages/webshell/euler_webshell/shell/overlays.toml'
+
+#: What each overlay event refreshes on the page (the web shell's `osc.EVENTS`).
+_EVENT_EFFECTS: dict[str, str] = {
+    'git': 'the git chip',
+    'msg': 'the message chip',
+    'progress': 'the solutions grid',
+    'account': 'the account page',
+}
+
+
+def gen_web_overlays() -> str:
+    """What the web shell changes about the solver shell's commands, from its overlay table."""
+    path = config.root_dir / _WEB_OVERLAYS
+    if not path.is_file():
+        return '_No web shell in this checkout._'
+    rows = ['| Command | In the web shell |', '|---------|------------------|']
+    for overlay in read_overlays(path):
+        effects: list[str] = []
+        if overlay.replace:
+            module, _, attr = overlay.replace.partition(':')
+            effects.append(f'runs `{module}.{attr}` instead')
+        if overlay.emit:
+            refreshed = ', '.join(_EVENT_EFFECTS.get(event, f'`{event}`') for event in overlay.emit)
+            effects.append(f'then refreshes {refreshed}')
+        rows.append(f'| `{overlay.command}` | {"; ".join(effects)} |')
     return '\n'.join(rows)
 
 
@@ -223,7 +276,8 @@ def _markdown_help(cmd: Command) -> str:
                   for name, description in model.arguments]
     for title, body in model.sections:
         parts += ['', f'**{title}**', '', body]
-    parts += ['', f'*Defined in* `{model.fqn}`.']
+    where = '' if _is_solvers(cmd) else ' — on the web host only (the web shell and `solver-host`)'
+    parts += ['', f'*Defined in* `{model.fqn}`{where}.']
     return '\n'.join(parts)
 
 
@@ -355,6 +409,7 @@ GENERATORS: dict[str, Callable[[], str]] = {
     'authorization-table': gen_authorization_table,
     'variable-table': gen_variable_table,
     'package-layout': gen_package_layout,
+    'web-overlays': gen_web_overlays,
 }
 
 
