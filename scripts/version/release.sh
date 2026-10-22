@@ -67,7 +67,7 @@ fi
 new="v${major}.${minor}.${patch}"
 number="${new#v}"
 root="$(git rev-parse --show-toplevel)"
-# Lockstep (docs/package-split.md Q5): one number in every package's version.py, and in the
+# Lockstep (docs/package-guide.md § 5.2): one number in every package's version.py, and in the
 # pins between them — euler-site and euler-webshell require exactly this euler-solver.
 version_files=("${root}/packages/solver/solver/version.py"
                "${root}/packages/site/euler_site/version.py"

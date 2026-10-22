@@ -44,7 +44,7 @@ from solver.utils.quips import quips
 
 
 #: The extending shell whose commands the generated docs also cover, while the catalogue is still
-#: one (docs/package-split.md, phase 7 splits it). Named, never imported: the solver shell does
+#: one (docs/package-guide.md § 3.4). Named, never imported: the solver shell does
 #: not import it, and does not load its commands.
 _HOST_SHELL: str = 'euler_webshell.shell'
 
@@ -192,7 +192,7 @@ def _command_table(link_prefix: str) -> str:
     return '\n\n'.join(sections)
 
 
-#: The two catalogues (docs/package-split.md, phase 7): what every shell has, and what only
+#: The two catalogues (docs/package-guide.md § 3.4): what every shell has, and what only
 #: the web host's shells load through their extension — told apart by the defining package.
 _EVERY_SHELL: str = '**In every shell** — `solver`, the web shell and `solver-host`:'
 _WEB_HOST: str = ('**On the web host only** — loaded by the web shell and `solver-host`, which have the '

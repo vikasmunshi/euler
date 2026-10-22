@@ -1,5 +1,5 @@
 # euler-webshell: the web shell — the solver shell extended for the browser and the web
-# host (docs/package-split.md § 3.1): the PTY service, the per-user service, the message
+# host (docs/package-guide.md § 1): the PTY service, the per-user service, the message
 # spool, OSC, overlays, the ticket identity, the roster, `users` and key distribution.
 [build-system]
 requires = ["setuptools>=68"]

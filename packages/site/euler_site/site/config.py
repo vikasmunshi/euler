@@ -46,7 +46,7 @@ class SiteConfig(NamedTuple):
     #: The branch those source links point at.
     github_branch: str = 'master'
     #: Serve the **public** site: the packaged content (`euler-content`) to visitors who are
-    #: not signed in, read routes only (docs/package-split.md § 3.4). `repo_root` is then the
+    #: not signed in, read routes only (docs/package-guide.md § 4). `repo_root` is then the
     #: installed content tree, never a clone.
     public: bool = False
 

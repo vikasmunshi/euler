@@ -286,7 +286,7 @@ its index entry, one click along its name.
 ### What the web shell changes
 
 The web shell runs these same commands with an overlay table on top
-(`packages/webshell/euler_webshell/shell/overlays.toml`; docs/package-split.md § 3.2): a few
+(`packages/webshell/euler_webshell/shell/overlays.toml`; docs/package-guide.md § 3.2): a few
 run a different body — `show` and `edit` swap the page's left pane instead of opening a
 browser tab — and the ones that change state refresh the part of the page they changed.
 Generated from that table by `update-docs`.

@@ -106,12 +106,12 @@ User- and developer-facing docs live under `docs/`:
 - `docs/syntax.md` — the authoritative command-language reference.
 - `docs/config-guide.md` — configuration: `values.conf` vs `env.conf`, precedence, and what is
   deliberately not a setting.
-- `docs/package-split.md` — design of record for splitting the tree into the solver shell, content
-  site and web shell packages (in progress; phased plan in § 4). The solver side must not import
-  the web tier: `scripts/linters/layers.py` (pre-commit) enforces it, and its allowlist
-  `scripts/linters/layers.allow` is empty and stays so. The web host's commands load through an
-  `Extension`: the web shell (`python -m euler_webshell.shell`) and `solver-host`
-  (`python -m euler_webshell.shell.host`) for the operator's terminal.
+- `docs/package-guide.md` — the three packages (`euler_webshell → euler_site → solver`, never
+  upward: `scripts/linters/layers.py` enforces it in pre-commit), extensions and overlays, login
+  and role, the public vs signed-in content roots, lockstep versions, and redeploy vs upgrade.
+  The web host's commands load through an `Extension`: the web shell
+  (`python -m euler_webshell.shell`) and `solver-host` (`python -m euler_webshell.shell.host`)
+  for the operator's terminal.
 
 The command catalogue (in `user-guide.md`) and `commands-index.md` are **generated** from the live
 registry by the `update-docs` command (`packages/solver/solver/utils/update_doc.py`). After changing any command's
@@ -208,13 +208,13 @@ packages/solver/solver/
     shell_utils.py                — Utility for running shell commands and capturing their output.
     update_doc.py                 — Regenerate the machine-maintained sections of the guides under `docs/`.
     version.py                    — The `version` command: report the running solver build's version.
-packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-split.md § 3.1;
+packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-guide.md § 1;
   cache.py                        — Cache-Control middleware: what a browser may reuse, and for how long (shared).
   csp.py                          — Content-Security-Policy middleware with a per-response nonce (shared).
   envfile.py                      — Minimal `KEY=VALUE` reader for the scoped runtime env files under `/etc/euler`.
   store.py                        — Shared JSON persistence and untrusted-text hygiene for the service stores.
   unixhttp.py                     — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
-  version.py                      — The euler-site build version — in lockstep with `solver.version` (docs/package-split.md Q5).
+  version.py                      — The euler-site build version — in lockstep with `solver.version` (docs/package-guide.md § 5.2).
   auth/                           — Web authentication: the auth service and its clients.
     __main__.py                   — Auth service entry point: `python -m euler_site.auth`.
     admin.py                      — The admin-plane CLI: run **under sudo** by the `users` shell command.
@@ -241,10 +241,10 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     gitstate.py                   — The header chip's git state: three reads of this user's clone, by need.
     render.py                     — The full-page-vs-block render contract (§4.5).
     validate.py                   — The save gate: the checks every write passes.
-packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-split.md).
+packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-guide.md).
   roster.py                       — The collaborator roster — `/etc/euler/roster/users.json`.
   users.py                        — The `users` shell command: account administration for the operator.
-  version.py                      — The euler-webshell build version — in lockstep with `solver.version` (docs/package-split.md Q5).
+  version.py                      — The euler-webshell build version — in lockstep with `solver.version` (docs/package-guide.md § 5.2).
   msg/                            — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
     __main__.py                   — Message service entry point: `python -m euler_webshell.msg`.
     admin.py                      — The message admin plane CLI: run **under sudo** by the `msg` shell command.

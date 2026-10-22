@@ -308,7 +308,7 @@ repo owner. The admin commands never touch these files; they call the service (�
 ## 5 · Identity
 
 A single **subject** is resolved once per process, at startup, with no anonymous
-fallback (`packages/solver/solver/shell/login.py`; docs/package-split.md § 3.3):
+fallback (`packages/solver/solver/shell/login.py`; docs/package-guide.md § 2):
 
 ```
 Subject(user, slug, channel, auth_method, profile)
@@ -347,7 +347,7 @@ directory can be renamed away — it decides: the login's own entry; else the e-
 is that same collaborator at that same rung, never more); else `reader`. An
 `EULER_AUTHZ_FILE` override is honoured only under the same ownership rule. With no policy
 deployed (a collaborator's own machine) the **checkout owner is `admin`** and anyone else
-`contributor`. The role is a guardrail inside one uid, not a boundary (package-split § 2.1);
+`contributor`. The role is a guardrail inside one uid, not a boundary (package-guide § 2.2);
 the boundaries are the uids, file permissions and the separate-uid services. There is no
 assume-an-identity path: `SOLVER_USER` is display-only.
 
@@ -522,7 +522,7 @@ until a running process happens to die.
 
 `users`, like `msg` and the key-distribution commands, belongs to the web host: it loads in
 the web shell and in **`solver-host`** (the operator's terminal on the host — the solver
-shell plus these commands), never in a plain `solver` (docs/package-split.md).
+shell plus these commands), never in a plain `solver` (docs/package-guide.md).
 
 `users` splits by verb. **`users list`** registers at the `reader` floor and
 self-scopes for non-admins. The **mutating verbs require `admin`** and go through the
@@ -1023,7 +1023,7 @@ Nothing had ever imported those names from the package.
 ### 11.0 Two content roots: the public site and your clone
 
 The content is served from one of two copies, by the same app (`packages/site/euler_site/site/app.py`)
-with the same templates (docs/package-split.md § 3.4):
+with the same templates (docs/package-guide.md § 4):
 
 | Visitor | Served by | Content | Surface |
 |---|---|---|---|

@@ -602,7 +602,7 @@ ${DOMAIN} {
 		reverse_proxy unix//run/euler/auth.sock
 	}
 
-	# Signed out, the published content is public (docs/package-split.md § 3.4): a read
+	# Signed out, the published content is public (docs/package-guide.md § 4): a read
 	# of the content paths from a browser carrying NO session cookie goes to the public
 	# site (euler-site), which serves the packaged copy — no clone, no private tree, no
 	# identity, read routes only. A browser with a session cookie skips this and goes

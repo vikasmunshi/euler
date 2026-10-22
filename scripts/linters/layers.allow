@@ -1,4 +1,4 @@
-# Known imports of a higher layer (docs/package-split.md § 3.1: euler_webshell → euler_site → solver).
+# Known imports of a higher layer (docs/package-guide.md § 1: euler_webshell → euler_site → solver).
 # Format: <repo-relative path> <imported module>. Ratchets down only:
 # scripts/linters/layers.py fails on a new violation AND on a line that no longer matches.
 #

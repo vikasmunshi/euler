@@ -1,4 +1,4 @@
-# The checkout is three packages and a content wheel (docs/package-split.md), each with its own
+# The checkout is three packages and a content wheel (docs/package-guide.md), each with its own
 # pyproject.toml:
 #
 #   packages/solver/pyproject.toml     euler-solver    import solver           the solver shell

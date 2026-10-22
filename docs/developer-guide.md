@@ -597,7 +597,7 @@ control over their argument line (`?`, `clear`, the `!` bash passthrough) use
 
 ## 9. Three packages, one shell
 
-The code is three packages (docs/package-split.md), and dependencies point one way:
+The code is three packages (docs/package-guide.md), and dependencies point one way:
 
 ```
 packages/webshell/euler_webshell  →  packages/site/euler_site  →  packages/solver/solver

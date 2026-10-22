@@ -34,7 +34,7 @@ only the latter (`terminal.js`, § the OSC handler).
 This module is the one definition of that wire, and it lives on the web side: the solver
 shell knows nothing of it. The *state-changed* payloads are sent by :func:`nudge`, the web
 shell's `notify` — `overlays.toml` names the commands after which each one fires
-(docs/package-split.md § 3.2) — and the pane-swapping ones by the web shell's `show` / `edit`
+(docs/package-guide.md § 3.2) — and the pane-swapping ones by the web shell's `show` / `edit`
 (:mod:`euler_webshell.shell.viewer`). The message commands, web-side themselves, emit directly.
 """
 from __future__ import annotations

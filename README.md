@@ -42,7 +42,7 @@ the [Key Exchange](docs/user-guide.md#7-key-exchange) section of the User Guide.
 
 ### Documentation
 
-The framework is documented in four guides under [`docs/`](docs/), plus the
+The framework is documented in guides under [`docs/`](docs/), plus the
 authoritative command-language spec:
 
 | Guide                                      | For                     | Covers                                                                           |
@@ -53,6 +53,7 @@ authoritative command-language spec:
 | [Command Index](docs/commands-index.md)    | reference               | every command's aliases, flags, and exact usage                                  |
 | [Language reference](docs/syntax.md)       | the command language    | surface syntax, canonical form, semantics                                        |
 | [Config Guide](docs/config-guide.md)       | configuration           | the two conf files, precedence, and what is deliberately not a setting           |
+| [Package Guide](docs/package-guide.md)     | the code's packaging    | the three packages, extensions and overlays, login and role, versions, deploying |
 
 The cryptography has a guide per scheme — the mathematics, and how this project uses it:
 
@@ -64,8 +65,9 @@ The cryptography has a guide per scheme — the mathematics, and how this projec
 | [Secret Sharing Guide](docs/secret-sharing-guide.md)   | Shamir thresholds and the 2-of-2 master-key split (`key-split` / `key-reconstruct`)   |
 
 The command catalogue and command index are regenerated from the live registry by the
-`update-docs` shell command - `solver "update-docs"` after changing any command's name,
-alias, help, or usage (`solver "update-docs --check"` fails if they are stale).
+`update-docs` shell command - `solver-host "update-docs"` after changing any command's name,
+alias, help, or usage (`solver-host "update-docs --check"` fails if they are stale); see the
+Package Guide § 3.4 for why it is `solver-host`.
 
 This README covers everything *outside* those guides: installation, dependencies, and the
 design notes.
@@ -312,13 +314,13 @@ packages/solver/solver/
     shell_utils.py                — Utility for running shell commands and capturing their output.
     update_doc.py                 — Regenerate the machine-maintained sections of the guides under `docs/`.
     version.py                    — The `version` command: report the running solver build's version.
-packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-split.md § 3.1;
+packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-guide.md § 1;
   cache.py                        — Cache-Control middleware: what a browser may reuse, and for how long (shared).
   csp.py                          — Content-Security-Policy middleware with a per-response nonce (shared).
   envfile.py                      — Minimal `KEY=VALUE` reader for the scoped runtime env files under `/etc/euler`.
   store.py                        — Shared JSON persistence and untrusted-text hygiene for the service stores.
   unixhttp.py                     — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
-  version.py                      — The euler-site build version — in lockstep with `solver.version` (docs/package-split.md Q5).
+  version.py                      — The euler-site build version — in lockstep with `solver.version` (docs/package-guide.md § 5.2).
   auth/                           — Web authentication: the auth service and its clients.
     __main__.py                   — Auth service entry point: `python -m euler_site.auth`.
     admin.py                      — The admin-plane CLI: run **under sudo** by the `users` shell command.
@@ -345,10 +347,10 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     gitstate.py                   — The header chip's git state: three reads of this user's clone, by need.
     render.py                     — The full-page-vs-block render contract (§4.5).
     validate.py                   — The save gate: the checks every write passes.
-packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-split.md).
+packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-guide.md).
   roster.py                       — The collaborator roster — `/etc/euler/roster/users.json`.
   users.py                        — The `users` shell command: account administration for the operator.
-  version.py                      — The euler-webshell build version — in lockstep with `solver.version` (docs/package-split.md Q5).
+  version.py                      — The euler-webshell build version — in lockstep with `solver.version` (docs/package-guide.md § 5.2).
   msg/                            — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
     __main__.py                   — Message service entry point: `python -m euler_webshell.msg`.
     admin.py                      — The message admin plane CLI: run **under sudo** by the `msg` shell command.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""euler-site: the content site and the auth service (docs/package-split.md § 3.1;
+"""euler-site: the content site and the auth service (docs/package-guide.md § 1;
 docs/web-server-guide.md).
 
 It builds on the solver package's domain modules — never its shell — and nothing here imports

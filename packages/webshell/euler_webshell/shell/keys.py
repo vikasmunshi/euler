@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Key distribution: issuing the master key over the message spool and by mail.
 
-docs/package-split.md Q1. The solver shell holds and receives keys (:mod:`solver.crypto.keys`);
+docs/package-guide.md § 6. The solver shell holds and receives keys (:mod:`solver.crypto.keys`);
 *sending* them needs the roster (`/etc/euler/roster/users.json`, :mod:`euler_webshell.roster`), the
 spool and the mail relay, which only the web host has. So these commands load with the web
 shell's extension, not the solver shell's manifest:

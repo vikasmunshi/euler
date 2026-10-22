@@ -1,4 +1,4 @@
-# The web shell's overlays on the solver shell's commands (docs/package-split.md § 3.2).
+# The web shell's overlays on the solver shell's commands (docs/package-guide.md § 3.2).
 #
 # emit    — state-changed events sent after the command returns, whatever its exit code
 #           (euler_webshell.shell.osc.EVENTS): the page re-reads the chip or pane they name.

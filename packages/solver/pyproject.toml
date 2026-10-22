@@ -1,4 +1,4 @@
-# euler-solver: the solver shell — standalone, with no web code (docs/package-split.md).
+# euler-solver: the solver shell — standalone, with no web code (docs/package-guide.md).
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"

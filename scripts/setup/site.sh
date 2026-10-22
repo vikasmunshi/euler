@@ -3,7 +3,7 @@
 # ================================================================================
 #
 # Deploys / removes the public site — the published content (guides, topics, the public
-# solutions, the progress grid) for visitors who are not signed in (docs/package-split.md
+# solutions, the progress grid) for visitors who are not signed in (docs/package-guide.md
 # § 3.4; docs/web-server-guide.md § The public site). Sibling to msg.sh / auth.sh.
 #
 # Model:
@@ -131,7 +131,7 @@ deploy_unit() {
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler public site (the published content, signed out)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/package-split.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/package-guide.md
 After=network.target
 
 [Service]

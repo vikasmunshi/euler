@@ -1,4 +1,4 @@
-# The host terminal's overlays on the solver shell's commands (`solver-host`; docs/package-split.md § 3.2).
+# The host terminal's overlays on the solver shell's commands (`solver-host`; docs/package-guide.md § 3.2).
 # Same format as overlays.toml; no `emit` — a terminal has no page to nudge.
 
 # Rotation re-issues the new key to every registered holder over the spool.

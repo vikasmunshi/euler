@@ -3,7 +3,7 @@
 """Identity resolution → a :class:`~solver.auth.subject.Subject`.
 
 The solver shell's identity is the **OS login** of the process uid, and its role comes from
-a policy the user cannot rewrite (docs/package-split.md § 2, Q4):
+a policy the user cannot rewrite (docs/package-guide.md § 2.2):
 
 1. **Who** — the account name of the real uid (`pwd`, never `$USER` / `$LOGNAME`, which the
    user sets).

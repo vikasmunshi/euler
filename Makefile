@@ -295,7 +295,7 @@ redeploy-msg:
 
 ## Deploy the public site: the euler-site user + /etc/euler/site.env + euler-site.service,
 ## serving the packaged content (euler-content, installed into the shared venv by
-## deploy-auth) to signed-out visitors (docs/package-split.md § 3.4)
+## deploy-auth) to signed-out visitors (docs/package-guide.md § 4)
 deploy-site:
 	./scripts/setup/site.sh deploy
 	@printf "✓ deploy-site complete: public site deployed\n"

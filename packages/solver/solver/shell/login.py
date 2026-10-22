@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Login: who the session runs as, and whether its vault is open — settled before any command.
 
-docs/package-split.md § 3.3. Two steps, both run by :func:`solver.main.main`:
+docs/package-guide.md § 2. Two steps, both run by :func:`solver.main.main`:
 
 1. :func:`identify` — the :class:`~solver.auth.Subject`, before any command module loads,
    because each command's floor is checked against it as it registers. The solver shell's

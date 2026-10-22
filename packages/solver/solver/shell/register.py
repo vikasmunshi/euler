@@ -865,7 +865,7 @@ def check_replacement(name: str, func: Callable[..., int]) -> None:
 def replace_body(name: str, func: Callable[..., int]) -> None:
     """Make the `register()`-ed command *name* run *func* instead of its own function.
 
-    The extension mechanism's `replace` overlay (docs/package-split.md § 3.2). Only the body
+    The extension mechanism's `replace` overlay (docs/package-guide.md § 3.2). Only the body
     changes: the adapter, usage, flags, completion and the docstring the help shows are the
     original's, which is why *func* must have the same signature — anything else raises
     :class:`ValueError` (:func:`check_replacement`). Direct Python calls to the original

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the public site (docs/package-split.md § 3.4): the packaged content
+"""Tests for the public site (docs/package-guide.md § 4): the packaged content
 (`scripts/content/stage.py` → euler-content) served by `build_public_app` to visitors who
 are not signed in — read routes only, no identity, and no private tree anywhere."""
 from __future__ import annotations

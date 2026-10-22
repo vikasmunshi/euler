@@ -54,7 +54,7 @@ from subprocess import run
 #: Env var naming the working tree explicitly — the deployed web tier sets it per service.
 REPO_ROOT_ENV: str = 'EULER_REPO_ROOT'
 
-#: The solver package's place in the checkout (docs/package-split.md): the working tree's own
+#: The solver package's place in the checkout (docs/package-guide.md): the working tree's own
 #: copy of what `package_root` is in an install.
 PACKAGE_DIR: str = 'packages/solver/solver'
 

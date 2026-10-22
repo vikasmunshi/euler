@@ -1083,7 +1083,7 @@ def build_app(config: SiteConfig) -> web.Application:
 def build_public_app(config: SiteConfig) -> web.Application:
     """Build the **public** site: the published content, for visitors who are not signed in.
 
-    docs/package-split.md § 3.4. It serves the packaged copy (`euler-content`, *config*'s
+    docs/package-guide.md § 4. It serves the packaged copy (`euler-content`, *config*'s
     `repo_root`), which holds no `solutions/private` at all; its unit runs on a uid of its
     own with no access to any home. There is no identity middleware — the identity headers
     are never read, so a request carrying them is as anonymous as one without — and only the

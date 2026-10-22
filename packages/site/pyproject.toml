@@ -1,4 +1,4 @@
-# euler-site: the content site and the auth service (docs/package-split.md § 3.1).
+# euler-site: the content site and the auth service (docs/package-guide.md § 1).
 # Imports the solver's domain modules (problems, the progress parser, paths, auth policy),
 # never its shell; nothing here imports the web shell.
 [build-system]

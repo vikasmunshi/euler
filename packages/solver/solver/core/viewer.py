@@ -9,7 +9,7 @@ the URL:
   or any site page given its relative path (`<base_url>/<path>`).
 - `edit` opens a solution file in the code editor (`<base_url>/edit/solutions/NNNN/<file>`).
 
-A front end that frames the shell replaces both bodies (docs/package-split.md § 3.2) to open
+A front end that frames the shell replaces both bodies (docs/package-guide.md § 3.2) to open
 the page in its own viewer instead; the checks that decide *what* may be opened —
 :func:`edit_path`, :func:`pane_path_error` — are public so a replacement makes the same ones.
 """

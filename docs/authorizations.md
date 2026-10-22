@@ -104,7 +104,7 @@ a profile on each channel.
 
 ## Where it is enforced
 
-The floors above are a **guardrail**, not a boundary (docs/package-split.md § 2.1): inside one
+The floors above are a **guardrail**, not a boundary (docs/package-guide.md § 2.2): inside one
 uid, someone who can edit their clone or run `!` can call any function the shell can. So
 every `maintainer` and `admin` command was audited for where its **effect** lands, and what
 stops someone below its floor there (phase 7). The answer is never "the floor":

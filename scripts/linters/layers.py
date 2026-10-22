@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """The layering guard: dependencies between the three packages point one way.
 
-docs/package-split.md § 3.1 — `euler_webshell → euler_site → solver`. Each package lives in
+docs/package-guide.md § 1 — `euler_webshell → euler_site → solver`. Each package lives in
 its own folder under `packages/`; this checker reads every module of each and fails on an
 import of a package *above* it — top-level or lazily inside a function, `import x` or
 `from x import y`:
@@ -99,7 +99,7 @@ def check(root: Path, allow_file: Path = ALLOW_FILE) -> int:
     for rel, module in stale:
         print(f'{allow_file.name}: stale entry "{rel} {module}" — remove it')
     if new:
-        print('^ dependencies point one way: euler_webshell → euler_site → solver (docs/package-split.md § 3.1)')
+        print('^ dependencies point one way: euler_webshell → euler_site → solver (docs/package-guide.md § 1)')
     return 1 if new or stale else 0
 
 

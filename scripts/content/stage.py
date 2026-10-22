@@ -5,7 +5,7 @@
     python scripts/content/stage.py OUT_DIR      # then: pip install OUT_DIR
 
 Copies `content/` to *OUT_DIR*, lays the public tree into `OUT_DIR/euler_content/tree/` and
-stamps `_version.py` from `packages/solver/solver/version.py` (docs/package-split.md Q3, Q5). Only **tracked**
+stamps `_version.py` from `packages/solver/solver/version.py` (docs/package-guide.md § 4.1, § 5.2). Only **tracked**
 files under the public roots are copied — an untracked scratch file never ships — and the
 working-tree copy is what ships, as with the code the same deploy installs. Anything under
 `solutions/private` is refused outright: that tree is not public, and must not be in a package

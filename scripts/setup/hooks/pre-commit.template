@@ -190,7 +190,7 @@ else
 fi
 
 # ── layering: the solver shell must not import the web tier ──────────────
-# docs/package-split.md § 3.1. Known couplings sit in scripts/linters/layers.allow,
+# docs/package-guide.md § 1. Known couplings sit in scripts/linters/layers.allow,
 # which only ratchets down: a new import fails, and so does a stale allowlist line.
 section "layering (webshell → site → solver)"
 if "$VENV/bin/python" scripts/linters/layers.py .; then

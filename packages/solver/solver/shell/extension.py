@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Extensions: how a package built on the solver shell adds to it, without the shell knowing.
 
-docs/package-split.md § 3.2. The solver shell runs standalone; a package that extends it —
+docs/package-guide.md § 3. The solver shell runs standalone; a package that extends it —
 the web shell — hands :func:`solver.main.main` an :class:`Extension` instead of being
 discovered. Composition is explicit on purpose: plugin discovery (`entry_points`) would load
 an extension into *every* shell of a venv it is installed in, the terminal one included.

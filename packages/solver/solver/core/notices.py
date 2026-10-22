@@ -9,7 +9,7 @@ to — the web shell's message spool — installs a :class:`Delivery` through it
 :class:`~solver.shell.extension.Extension`. With none installed nothing is sent, and each
 caller says what to do by hand instead.
 
-This is the escape hatch docs/package-split.md § 3.2 keeps for what an overlay cannot express:
+This is the escape hatch docs/package-guide.md § 3.3 keeps for what an overlay cannot express:
 the notice's text depends on what the command found half way through.
 
 The **subjects** are the contract between the commands that file notices and the spool that

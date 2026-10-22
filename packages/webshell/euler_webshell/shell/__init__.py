@@ -3,7 +3,7 @@
 """The web shell: the solver shell, extended for a PTY framed by the browser.
 
 The solver shell runs standalone and knows nothing of the web. This package composes it with
-an :class:`~solver.shell.extension.Extension` (docs/package-split.md § 3.2): the overlay table
+an :class:`~solver.shell.extension.Extension` (docs/package-guide.md § 3.2): the overlay table
 `overlays.toml` makes the state-changing commands nudge the page over `OSC 5379`
 (:mod:`euler_webshell.shell.osc`) and replaces `show` / `edit` with bodies that swap the app
 shell's left pane (:mod:`euler_webshell.shell.viewer`). The session's identity is a one-time ticket

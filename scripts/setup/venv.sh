@@ -49,7 +49,7 @@ deploy_venv() {
     # (setuptools `attr:`, see [tool.setuptools.dynamic] in each pyproject.toml) — no git,
     # so this root build against the operator-owned checkout produces the SAME number
     # a developer's `pip install -e` does, with nothing to special-case here.
-    # Three packages (docs/package-split.md), installed together so their lockstep pins
+    # Three packages (docs/package-guide.md), installed together so their lockstep pins
     # resolve against each other rather than an index. The single `solver` distribution
     # they replace is removed first: it owns the same `solver/` files.
     sudo "${VENV_PY}" -m pip uninstall --quiet --yes solver 2>/dev/null || true
@@ -73,7 +73,7 @@ deploy_venv() {
 }
 
 # Install the published content (euler-content) into the venv — what the public site serves
-# (docs/package-split.md § 3.4). Staged as the operator, from tracked files only and never
+# (docs/package-guide.md § 4). Staged as the operator, from tracked files only and never
 # solutions/private (scripts/content/stage.py), into a scratch directory outside the checkout;
 # then installed as root like the code. Same version as the code, from the same tree.
 deploy_content() {

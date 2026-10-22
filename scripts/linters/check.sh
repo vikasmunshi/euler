@@ -89,7 +89,7 @@ if [[ "${dir_to_check}" == packages || "${dir_to_check}" == */packages ]]; then
     doclint_rc=$?
     echo "command docstrings -> ${doclint_rc}"
 
-    # layering: webshell → site → solver, never upward (docs/package-split.md § 3.1).
+    # layering: webshell → site → solver, never upward (docs/package-guide.md § 1).
     echo "checking layering ..."
     python "$(dirname "$0")/layers.py" "$(dirname "${dir_to_check}")"
     layers_rc=$?
