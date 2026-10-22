@@ -334,6 +334,7 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     ratelimit.py                  — A small in-memory sliding-window rate limiter for the auth endpoints.
     remember.py                   — Persistent "remember me" tokens at `<state>/remember.json`.
     requests.py                   — Prospective-collaborator invite requests at `<state>/requests.json`.
+    returnto.py                   — Where a sign-in or a sign-out returns to: the page the reader was on.
     sessions.py                   — In-memory web session table.
     srp.py                        — Secure Remote Password (SRP-6a) primitives for web authentication.
     storage.py                    — JSON persistence for the auth stores — re-export of the shared implementation.
