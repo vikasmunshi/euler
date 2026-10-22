@@ -40,6 +40,11 @@ a profile on each channel.
 <!-- GEN:authorization-table -->
 | Module | Command | Reader | Contributor | Maintainer | Admin |
 |--------|---------|:------:|:-----------:|:----------:|:-----:|
+| `euler_webshell.msg.commands` | `msg` | ✓ | ✓ | ✓ | ✓ |
+| `euler_webshell.shell.keys` | `host-authorize` |  |  |  | ✓ |
+| `euler_webshell.shell.keys` | `key-split` |  |  | ✓ | ✓ |
+| `euler_webshell.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
+| `euler_webshell.users` | `users` |  |  |  | ✓ |
 | `solver.ai.api` | `claude-api` |  | ✓ | ✓ | ✓ |
 | `solver.ai.batch` | `claude-batch` |  |  | ✓ | ✓ |
 | `solver.ai.models` | `costs` |  | ✓ | ✓ | ✓ |
@@ -95,9 +100,4 @@ a profile on each channel.
 | `solver.utils.shell_utils` | `pause` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
-| `euler_webshell.users` | `users` |  |  |  | ✓ |
-| `euler_webshell.msg.commands` | `msg` | ✓ | ✓ | ✓ | ✓ |
-| `euler_webshell.shell.keys` | `host-authorize` |  |  |  | ✓ |
-| `euler_webshell.shell.keys` | `key-split` |  |  | ✓ | ✓ |
-| `euler_webshell.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
 <!-- /GEN:authorization-table -->

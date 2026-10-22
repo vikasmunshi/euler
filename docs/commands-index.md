@@ -919,7 +919,7 @@ Fails if any target is not one of the accepted scopes.
 
 ```
 git-publish
-[scripts|solutions|solver ...]
+[scripts|solutions|packages ...]
 [dry_run=true|--dry-run]
 [silent=true|--silent]
 ```
@@ -928,7 +928,7 @@ git-publish
 
 | argument | description |
 |----------|-------------|
-| `*targets` | Scopes of files to publish — one or more of 'scripts', 'solutions' or 'solver'. There is no `keys` scope: key material is not distributed by git any more. A holder's enc-key file is machine-local, and issuing one is `user-authorize` sending it through the message spool. Defaults to 'solutions'. |
+| `*targets` | Scopes of files to publish — one or more of 'scripts', 'solutions' or 'packages' (the code). There is no `keys` scope: key material is not distributed by git any more. A holder's enc-key file is machine-local, and issuing one is `user-authorize` sending it through the message spool. Defaults to 'solutions'. |
 | `dry_run` | Print the push and pull-request commands instead of running them. Defaults to False. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
@@ -1504,7 +1504,8 @@ Upgrade packages in the current venv for the given dependency groups.
 
 * ⚑ needs admin.
 
-Groups are defined in pyproject.toml:   'core' for project.dependencies,
+Groups are defined in packages/solver/pyproject.toml:
+                                        'core' for project.dependencies,
                                         'ai', 'dev', 'solutions', 'show' for optional-dependencies,
                                         'all' to upgrade everything.
                                         Defaults to 'all'.
