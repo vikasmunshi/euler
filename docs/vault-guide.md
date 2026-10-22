@@ -3,8 +3,8 @@
 This guide covers the **per-user vault**: the envelope-encryption scheme that keeps a
 collaborator's X25519 private key and project env encrypted at rest, how the key reaches the
 processes that need it, and how the terminal and the browser each unlock it. It is implemented
-in [`solver/crypto/vault.py`](../solver/crypto/vault.py), with every interactive part in
-[`solver/crypto/keys.py`](../solver/crypto/keys.py).
+in [`packages/solver/solver/crypto/vault.py`](../packages/solver/solver/crypto/vault.py), with every interactive part in
+[`packages/solver/solver/crypto/keys.py`](../packages/solver/solver/crypto/keys.py).
 
 Related: [SRP Guide](srp-guide.md) — where the salt and the browser-derived key come from;
 [Git Filter Guide](gitfilter-guide.md) — what the private key ultimately opens;
@@ -169,7 +169,7 @@ terminal. A vault it cannot open is simply **locked**, and recovery is the shell
 
 ## 5. Terminal usage
 
-The shell unlocks once at startup — `solver/main.py` calls
+The shell unlocks once at startup — `packages/solver/solver/main.py` calls
 `unlock_session(interactive=config.subject.channel == 'terminal')`, so a terminal is asked for
 the password and a web shell never is (it already has `VK` from the service, §6).
 
@@ -228,7 +228,7 @@ password itself never has to cross the wire to be useful.
 
 Because the per-user service **is** the collaborator's uid, `write_session_key` in that process
 exports `EULER_VAULT_KEY_FILE` into the service environment, and every PTY the service forks
-inherits it (`solver/web/ws/pty.py` passes `dict(os.environ)`). That is why a web shell is
+inherits it (`packages/webshell/euler_webshell/ws/pty.py` passes `dict(os.environ)`). That is why a web shell is
 already unlocked and is never asked for a vault password: asking would be a prompt nobody can
 see, in a shell attached over a WebSocket.
 
@@ -300,11 +300,11 @@ temporary secrets dir with the key locations rebound onto it:
 
 | file | role |
 | --- | --- |
-| [`solver/crypto/vault.py`](../solver/crypto/vault.py) | the whole scheme: KDF, wrap/unwrap, secret blobs, the vault file, session-key delivery |
-| [`solver/crypto/keys.py`](../solver/crypto/keys.py) | every interactive part: the `vault` command, `unlock_session`, key-file ownership |
-| [`solver/crypto/wire.py`](../solver/crypto/wire.py) | `VAULT_MAGIC`, the iteration count, the two env-var names — the format, none of it configurable |
-| [`solver/config/values.conf`](../solver/config/values.conf) | `[crypto]` — where `id`, `enc-key.json`, `vault` and `env` live |
-| [`solver/crypto/ciphers.py`](../solver/crypto/ciphers.py) | `load_private_key` — the main consumer, transparently decrypting the vault form |
-| [`solver/crypto/readenv.py`](../solver/crypto/readenv.py) | prints the authoring env as plaintext, for the setup scripts |
-| [`solver/web/user/vault_api.py`](../solver/web/user/vault_api.py) | `/vault/unlock`, `/vault/rewrap`, the account panel's secrets |
-| [`solver/web/content/assets/vault.js`](../solver/web/content/assets/vault.js) | browser-side `PK` derivation and the unlock calls |
+| [`packages/solver/solver/crypto/vault.py`](../packages/solver/solver/crypto/vault.py) | the whole scheme: KDF, wrap/unwrap, secret blobs, the vault file, session-key delivery |
+| [`packages/solver/solver/crypto/keys.py`](../packages/solver/solver/crypto/keys.py) | every interactive part: the `vault` command, `unlock_session`, key-file ownership |
+| [`packages/solver/solver/crypto/wire.py`](../packages/solver/solver/crypto/wire.py) | `VAULT_MAGIC`, the iteration count, the two env-var names — the format, none of it configurable |
+| [`packages/solver/solver/config/values.conf`](../packages/solver/solver/config/values.conf) | `[crypto]` — where `id`, `enc-key.json`, `vault` and `env` live |
+| [`packages/solver/solver/crypto/ciphers.py`](../packages/solver/solver/crypto/ciphers.py) | `load_private_key` — the main consumer, transparently decrypting the vault form |
+| [`packages/solver/solver/crypto/readenv.py`](../packages/solver/solver/crypto/readenv.py) | prints the authoring env as plaintext, for the setup scripts |
+| [`packages/webshell/euler_webshell/user/vault_api.py`](../packages/webshell/euler_webshell/user/vault_api.py) | `/vault/unlock`, `/vault/rewrap`, the account panel's secrets |
+| [`packages/site/euler_site/content/assets/vault.js`](../packages/site/euler_site/content/assets/vault.js) | browser-side `PK` derivation and the unlock calls |

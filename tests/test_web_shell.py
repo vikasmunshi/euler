@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Unit tests for the web shell (solver.web.shell): its overlay table against the real registry,
+"""Unit tests for the web shell (euler_webshell.shell): its overlay table against the real registry,
 the OSC nudges it sends, and the `show` / `edit` bodies that replace the solver shell's own."""
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from solver.core.problems import Problem
 from solver.shell.command import registry
 from solver.shell.extension import check_overlays
 from solver.utils.loader import load_commands
-from solver.web.shell import extension, host_extension, identity, osc, sync_at_start, viewer
+from euler_webshell.shell import extension, host_extension, identity, osc, sync_at_start, viewer
 from tests import silence
 
 silence()
@@ -62,7 +62,7 @@ class OverlayTableTests(unittest.TestCase):
 
     def test_both_bring_the_hosts_commands_and_the_spool(self) -> None:
         for ext in (extension(), host_extension()):
-            self.assertIn('solver.web.shell.keys', ext.modules)
+            self.assertIn('euler_webshell.shell.keys', ext.modules)
             self.assertIsNotNone(ext.notices)
         self.assertIn('header', extension().notices.key_hint())          # type: ignore[union-attr]
         self.assertIn('msg act', host_extension().notices.key_hint())    # type: ignore[union-attr]
@@ -126,7 +126,7 @@ class StartTests(unittest.TestCase):
             return rc
 
         with patch('solver.core.git.key_waiting_hint', return_value=''), \
-             patch.object(sys.modules['solver.web.shell'], 'console', Console(file=out)):
+             patch.object(sys.modules['euler_webshell.shell'], 'console', Console(file=out)):
             sync_at_start(dispatch)
         return ran, out.getvalue()
 

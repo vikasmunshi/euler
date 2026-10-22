@@ -402,7 +402,7 @@ const char *solve(int argc, char *argv[]) {
 <section class="slide" data-theme="dev">
   <h2>Benchmarks that don't lie</h2>
   <div class="dev-pair">
-    <div><p class="dev-label">solver/runners/runner.py, the timed loop</p><pre class="dev-code">for _ in range(runs):
+    <div><p class="dev-label">packages/solver/solver/runners/runner.py, the timed loop</p><pre class="dev-code">for _ in range(runs):
     _start, _result, _stop = perf_counter(), solve(*args), perf_counter()
     elapsed.append(_stop - _start)
     if result is not None and _result != result:
@@ -440,7 +440,7 @@ def solve(*args: str) -&gt; str:
 <section class="slide" data-theme="dev">
   <h2>One decorator per command</h2>
   <div class="dev-pair">
-    <div><p class="dev-label">solver/core/git.py</p><pre class="dev-code">@register(requires=&#x27;contributor&#x27;, aliases=(&#x27;commit&#x27;,),
+    <div><p class="dev-label">packages/solver/solver/core/git.py</p><pre class="dev-code">@register(requires=&#x27;contributor&#x27;, aliases=(&#x27;commit&#x27;,),
           quietable=True)
 def git_commit(
     problem: Problem,
@@ -477,7 +477,7 @@ git-commit
 [reset=true|--reset]
 [silent=true|--silent]</pre></div>
   </div>
-  <aside class="notes"><p>The signature is reformatted to fit the slide; the code is solver/core/git.py's git_commit. Functions stay plain Python: the decorator registers them, it doesn't transform them. Only one function in register.py knows about Annotated: it lifts the Ask out and hands everything else the plain type. Ask appears in 28 places in the codebase.</p><p>The problem parameter is the same current problem the {problem} variable holds on the previous slide, which is why eval alone re-runs the active problem. The docstring is the help text and the source of the generated docs; check-commands holds every docstring to one standard.</p></aside>
+  <aside class="notes"><p>The signature is reformatted to fit the slide; the code is packages/solver/solver/core/git.py's git_commit. Functions stay plain Python: the decorator registers them, it doesn't transform them. Only one function in register.py knows about Annotated: it lifts the Ask out and hands everything else the plain type. Ask appears in 28 places in the codebase.</p><p>The problem parameter is the same current problem the {problem} variable holds on the previous slide, which is why eval alone re-runs the active problem. The docstring is the help text and the source of the generated docs; check-commands holds every docstring to one standard.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
@@ -495,7 +495,7 @@ git-commit
     <span class="dev-then">gives</span>
     <span class="dev-key">AES-256 master key<small>which decrypts every file</small></span>
   </div>
-  <aside class="notes"><p>The filter is solver/crypto/gitfilter.py, run as a long-lived git filter process. Nothing is decrypted in git itself; plaintext exists only in the working tree once the master key is available.</p><p>The lesson: enc-key.json used to be one tracked file holding every machine's entry, which caused a long run of merge conflicts. It is now machine-local, and a new holder gets their sealed copy over the message spool.</p></aside>
+  <aside class="notes"><p>The filter is packages/solver/solver/crypto/gitfilter.py, run as a long-lived git filter process. Nothing is decrypted in git itself; plaintext exists only in the working tree once the master key is available.</p><p>The lesson: enc-key.json used to be one tracked file holding every machine's entry, which caused a long run of merge conflicts. It is now machine-local, and a new holder gets their sealed copy over the message spool.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
@@ -527,7 +527,7 @@ git-commit
     <div><p class="dev-label">Every commit</p><ul class="dev-points"><li>No whitespace errors or conflict markers</li><li>No build artifacts, no unencrypted private files</li><li>shellcheck on staged scripts; flake8 and mypy</li></ul></div>
     <div><p class="dev-label">Every push, and on demand</p><ul class="dev-points"><li>shellcheck over every tracked script</li><li><code>make audit</code>: the whole tree, private files encrypted at rest</li></ul></div>
   </div>
-  <aside class="notes"><p>solver/version.py is the one source of the version number, and only make release writes it. The deployed web stack is only as current as the last release baked into it.</p></aside>
+  <aside class="notes"><p>packages/solver/solver/version.py is the one source of the version number, and only make release writes it. The deployed web stack is only as current as the last release baked into it.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">

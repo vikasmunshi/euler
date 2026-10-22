@@ -98,7 +98,7 @@ class FilterCommandTests(unittest.TestCase):
     """The command git records for the filter must not be shadowed by the worktree.
 
     git runs a filter with the cwd at the **top of the worktree**, and a solver checkout has
-    a `solver/` package sitting right there — so `python -m solver.crypto.gitfilter` imports
+    a `packages/solver/solver/` package sitting right there — so `python -m solver.crypto.gitfilter` imports
     the *clone's* source instead of the venv's installed copy. That is not theoretical: three
     readers whose clones were behind ran an old filter against a current key file and could
     not decrypt, while their shell (a console script, sane sys.path) reported the key as

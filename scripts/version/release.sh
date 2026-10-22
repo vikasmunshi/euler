@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Derive the next SemVer release from Conventional Commits, then bump, tag, and push it.
 #
-# This script is the SINGLE writer of the version. `solver/version.py` (tracked)
+# This script is the SINGLE writer of the version. `packages/solver/solver/version.py` (tracked)
 # is the source of truth: pyproject.toml stamps it into the wheel at build time
 # and `config.version` / the `version` shell command report it at runtime. A
 # release rewrites that file, commits it, tags the commit `vX.Y.Z`, and pushes the
@@ -67,12 +67,17 @@ fi
 new="v${major}.${minor}.${patch}"
 number="${new#v}"
 root="$(git rev-parse --show-toplevel)"
-version_file="${root}/solver/version.py"
+# Lockstep (docs/package-split.md Q5): one number in every package's version.py, and in the
+# pins between them — euler-site and euler-webshell require exactly this euler-solver.
+version_files=("${root}/packages/solver/solver/version.py"
+               "${root}/packages/site/euler_site/version.py"
+               "${root}/packages/webshell/euler_webshell/version.py")
+pin_files=("${root}/packages/site/pyproject.toml" "${root}/packages/webshell/pyproject.toml")
 
 if (( dry_run )); then
     tail_action="commits, tags, then pushes to origin"
     (( no_push )) && tail_action="commits, then tags (no push)"
-    echo "[dry-run] $last -> $new (writes $number to solver/version.py, ${tail_action})"
+    echo "[dry-run] $last -> $new (writes $number to the three packages' version.py and pins, ${tail_action})"
     exit 0
 fi
 
@@ -85,18 +90,23 @@ if [[ -n "$(git status --porcelain)" ]]; then
     exit 1
 fi
 
-# Rewrite ONLY the number in the source of truth (leaving the docstring and the
-# `version = __version__` alias intact), commit it, then tag THAT commit — so the
-# tag, solver/version.py, and the wheel built from it all name $number.
-if ! grep -qE "^__version__ = '[^']*'" "$version_file"; then
-    echo "release: cannot find the __version__ line in $version_file" >&2
-    exit 1
-fi
-sed -i -E "s/^__version__ = '[^']*'/__version__ = '${number}'/" "$version_file"
-git add "$version_file"
+# Rewrite ONLY the numbers (leaving the docstrings and the `version = __version__` aliases
+# intact), commit them, then tag THAT commit — so the tag, every version.py, the pins, and the
+# wheels built from them all name $number.
+for version_file in "${version_files[@]}"; do
+    if ! grep -qE "^__version__ = '[^']*'" "$version_file"; then
+        echo "release: cannot find the __version__ line in $version_file" >&2
+        exit 1
+    fi
+    sed -i -E "s/^__version__ = '[^']*'/__version__ = '${number}'/" "$version_file"
+done
+for pin_file in "${pin_files[@]}"; do
+    sed -i -E "s/\"(euler-(solver|site))==[^\"]*\"/\"\1==${number}\"/" "$pin_file"
+done
+git add "${version_files[@]}" "${pin_files[@]}"
 git commit -q -m "chore(release): $new"
 git tag -a "$new" -m "release $new"
-echo "released $new — solver/version.py bumped, committed, and tagged"
+echo "released $new — every package's version.py and pins bumped, committed, and tagged"
 
 if (( no_push )); then
     echo "not pushed (--no-push); publish with: git push origin HEAD $new"

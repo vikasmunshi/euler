@@ -4,7 +4,7 @@
 #
 # Installs, updates, or removes the Claude Code CLI (`claude`) — Anthropic's
 # agentic coding tool. This project uses it for the `claude-solver` shell
-# command and the in-shell `claude-euler-solver` skill (see solver/ai/skill.py).
+# command and the in-shell `claude-euler-solver` skill (see packages/solver/solver/ai/skill.py).
 #
 # Installation uses Anthropic's native installer (https://claude.ai/install.sh),
 # which places a self-contained `claude` binary under ~/.local/bin — no Node.js
@@ -16,7 +16,7 @@
 # - Installs the latest stable version via the native installer (npm fallback)
 # - Updates an existing install in place
 # - Links the project-root `.claude/` and `CLAUDE.md` to the canonical copies
-#   under solver/ai/claude/ (idempotent; any pre-existing file is backed up,
+#   under packages/solver/solver/ai/claude/ (idempotent; any pre-existing file is backed up,
 #   never deleted)
 # - Uninstalls cleanly (binary, local install data, optional user config)
 # - Warns if ~/.local/bin is not on PATH
@@ -181,11 +181,11 @@ link_one() {
 
 # Expose the package's Claude Code config at the project root, where the `claude`
 # CLI and IDE integrations expect `.claude/` and `CLAUDE.md`. The canonical copies
-# are version-controlled under solver/ai/claude/; these are relative symlinks to
+# are version-controlled under packages/solver/solver/ai/claude/; these are relative symlinks to
 # them (recreated here in case a checkout did not preserve them).
 link_project_config() {
-    link_one ".claude" "solver/ai/claude"
-    link_one "CLAUDE.md" "solver/ai/claude/CLAUDE.md"
+    link_one ".claude" "packages/solver/solver/ai/claude"
+    link_one "CLAUDE.md" "packages/solver/solver/ai/claude/CLAUDE.md"
 }
 
 # Reports the state of one project-root symlink for `status`.
@@ -211,8 +211,8 @@ status_claude() {
         print_path_hint
     fi
     echo "Project config links:"
-    status_link ".claude" "solver/ai/claude"
-    status_link "CLAUDE.md" "solver/ai/claude/CLAUDE.md"
+    status_link ".claude" "packages/solver/solver/ai/claude"
+    status_link "CLAUDE.md" "packages/solver/solver/ai/claude/CLAUDE.md"
 }
 
 # Main execution — defaults to 'status' if no argument provided.

@@ -40,10 +40,10 @@ if [[ -f "${OUTPUT}" ]] && [[ "${OUTPUT}" -nt "${SOLUTION}" ]]; then
     fi
 fi
 
-# Make the runner framework header (solver/runners/runner.h) discoverable,
+# Make the runner framework header (packages/solver/solver/runners/runner.h) discoverable,
 # resolved relative to this script so it works regardless of the caller's cwd.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-RUNNER_INCLUDE="${SCRIPT_DIR}/../../solver/runners"
+RUNNER_INCLUDE="${SCRIPT_DIR}/../../packages/solver/solver/runners"
 
 # One array element per flag: the link line is built word by word, so it survives
 # quoting on expansion instead of relying on the shell to re-split a string.

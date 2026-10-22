@@ -12,8 +12,8 @@ from pathlib import Path
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.web.auth.app import AuthService, build_public_app
-from solver.web.auth.config import AuthConfig
+from euler_site.auth.app import AuthService, build_public_app
+from euler_site.auth.config import AuthConfig
 
 from tests import silence
 

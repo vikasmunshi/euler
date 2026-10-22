@@ -1,0 +1,54 @@
+{# The start page's left pane — the ONE source for both tiers (web-server-guide § The site).
+   The content service renders it for a signed-in visitor; the auth service renders
+   the very same partial behind its sign-in dialogue, which is what makes the
+   signed-out page the same page rather than a lookalike.
+
+   It is the five-page layout (§ The site): hero · section strip · divider · content. Its
+   content is the README summary — prose, not tiles — so it is the one page whose
+   divider carries no filter and no count.
+
+   `browsable` is the switch for the strip (live tiles vs locked) and for the count in the
+   lede. Signed out the auth service has no clone and no problems.json, so it cannot know
+   the count, and inventing a number that drifts from the truth is worse than not saying it.
+
+   Context: `browsable`, `sections` + `solved` + `total` (where there is content to count),
+   `readme_html` (content.readme_html(), pre-rendered and trusted — our own file). #}
+{% from "_divider.html" import divider with context %}
+<header class="hero">
+  {# Derived from the opening of Blake's "Auguries of Innocence" ("To see a World
+     in a Grain of Sand") — the same quatrain the crypto master-key verify text
+     uses (packages/solver/solver/crypto/wire.py). #}
+  <p class="kicker">to hold infinity in the folds of your mind, and eternity in an hour</p>
+  <h1>Project Euler Solver</h1>
+  {% if browsable and total %}
+  <p class="lede">{{ solved }} of {{ total }} problems down.
+     The remaining {{ total - solved }} are not going to solve themselves —
+     though once you drop into the shell, what you solve is solving you.</p>
+  {% else %}
+  <p class="lede">Sign in on the right to open the shell, read the notes, and edit the
+     solutions — or read on, the story is public.</p>
+  {% endif %}
+</header>
+
+{% include "_sections.html" %}
+
+{# The README *summary*, continuing the same page — the slice setup.py vendors
+   between the README's HOME markers, not the whole file. `readme_html` is our own
+   packaged file rendered by content.render_markdown — not user input — so it is
+   marked safe deliberately, exactly as the docs/topics pages mark their rendered
+   bodies. The "full README" link routes by tier: signed in it swaps the pane to
+   the docs viewer (this clone's README); signed out the auth service has no clone
+   and /docs is behind the login, so it leaves for the canonical copy on GitHub. #}
+{% if readme_html %}
+{{ divider('readme') }}
+<section class="readme">
+  <div class="doc-body">{{ readme_html | safe }}</div>
+  {% if browsable %}
+  <p class="readme-more"><a href="/docs/readme" hx-get="/docs/readme" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true">Read the full README &rarr;</a></p>
+  {% else %}
+  <p class="readme-more"><a href="https://github.com/vikasmunshi/euler/blob/master/README.md"
+     target="_blank" rel="noopener">Read the full README on GitHub &rarr;</a></p>
+  {% endif %}
+</section>
+{% endif %}

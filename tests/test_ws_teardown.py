@@ -21,10 +21,10 @@ from aiohttp import web
 from aiohttp.test_utils import TestClient, TestServer
 
 from solver.auth.identity import system_slug
-from solver.web.auth.app import AuthService, build_admin_app, build_public_app
-from solver.web.auth.config import AuthConfig
-from solver.web.auth.policy import SESSION_COOKIE
-from solver.web.auth.srp import compute_verifier
+from euler_site.auth.app import AuthService, build_admin_app, build_public_app
+from euler_site.auth.config import AuthConfig
+from euler_site.auth.policy import SESSION_COOKIE
+from euler_site.auth.srp import compute_verifier
 
 from tests import silence
 

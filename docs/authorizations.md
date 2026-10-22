@@ -95,9 +95,9 @@ a profile on each channel.
 | `solver.utils.shell_utils` | `pause` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
-| `solver.web.auth.commands` | `users` |  |  |  | ✓ |
-| `solver.web.msg.commands` | `msg` | ✓ | ✓ | ✓ | ✓ |
-| `solver.web.shell.keys` | `host-authorize` |  |  |  | ✓ |
-| `solver.web.shell.keys` | `key-split` |  |  | ✓ | ✓ |
-| `solver.web.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
+| `euler_webshell.users` | `users` |  |  |  | ✓ |
+| `euler_webshell.msg.commands` | `msg` | ✓ | ✓ | ✓ | ✓ |
+| `euler_webshell.shell.keys` | `host-authorize` |  |  |  | ✓ |
+| `euler_webshell.shell.keys` | `key-split` |  |  | ✓ | ✓ |
+| `euler_webshell.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
 <!-- /GEN:authorization-table -->

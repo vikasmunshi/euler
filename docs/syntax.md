@@ -105,7 +105,7 @@ Variable storage, the reserved names, and the two write channels are defined by
   subtraction `a-b`). It may not be a reserved name or a registered command name.
 * **Special (reserved) variables** — five seeded by `variables.py`, the rest registered
   with `@variable` by the module that computes them, so which exist depends on
-  `solver/modules.csv` exactly as the command set does. **None** may be assigned to.
+  `packages/solver/solver/modules.csv` exactly as the command set does. **None** may be assigned to.
 
 <!-- GEN:variable-table -->
 | name | type | meaning | written by |

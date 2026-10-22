@@ -9,7 +9,7 @@ Two surfaces on one application, sharing one per-user identity:
   request whose `X-User` maps to a slug other than this instance's `EULER_USER_SLUG`
   is refused (misrouting/bypass), and an `admin` profile is served **uncapped**.
 - **shell** — `/ws` attaches the browser terminal to this user's PTY shell against a
-  **fake auth service** (real :class:`~solver.web.auth.tickets.TicketStore` semantics),
+  **fake auth service** (real :class:`~euler_site.auth.tickets.TicketStore` semantics),
   with a stub echo shell so the suite stays fast; the child is pinned on the slug.
 """
 from __future__ import annotations
@@ -27,10 +27,10 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
 from solver.crypto import vault
-from solver.web.auth.tickets import TicketStore
-from solver.web.site import gitstate
-from solver.web.user.app import PTY_MANAGER, build_app
-from solver.web.user.config import UserConfig
+from euler_site.auth.tickets import TicketStore
+from euler_site.site import gitstate
+from euler_webshell.user.app import PTY_MANAGER, build_app
+from euler_webshell.user.config import UserConfig
 from tests import silence
 
 silence()   # filter aiohttp's request-key warning + quiet attach-refused logging
@@ -136,7 +136,7 @@ class _UserServiceCase(AioHTTPTestCase):
         await web.UnixSite(self._auth_runner, str(self.auth_socket)).start()
 
         config = UserConfig(
-            repo_root=_REPO_ROOT, static_dir=_REPO_ROOT / 'solver/web/content',
+            repo_root=_REPO_ROOT, static_dir=_REPO_ROOT / 'packages/site/euler_site/content',
             socket_path=scratch / 'user.sock', socket_group='', tcp_bind='',
             serve_static=False, slug=_SLUG, auth_socket=str(self.auth_socket),
             shell_argv=_STUB_ARGV, detached_ttl=0)
@@ -251,7 +251,7 @@ class VaultRouteTests(_UserServiceCase):
     async def get_application(self) -> web.Application:
         from solver.config import config as app_config
         from solver.crypto import wire
-        from solver.web.user import vault_api
+        from euler_webshell.user import vault_api
 
         secrets = Path(tempfile.mkdtemp(prefix='euler-vault-test-'))
         self.addCleanup(lambda: __import__('shutil').rmtree(secrets, True))

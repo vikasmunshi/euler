@@ -3,12 +3,12 @@
 """Tests for the web-shell service.
 
 Covers the attach path end-to-end against a **fake auth service** on a unix
-socket (real :class:`~solver.web.auth.tickets.TicketStore` semantics — mint
+socket (real :class:`~euler_site.auth.tickets.TicketStore` semantics — mint
 gated on the session cookie, redeem single-use): identity/pin refusals, the
 ticket-then-fork flow, the binary/resize wire protocol, replay + shared attach
 for a second tab, mint-refusal close, and the `/internal/logout` teardown
 push. The PTY child is a stub echo shell so the suite stays fast; one
-integration test forks the **real** `python -m solver.web.shell` and drives it over the
+integration test forks the **real** `python -m euler_webshell.shell` and drives it over the
 ticket plane (the child redeems against the fake socket via
 `EULER_AUTH_SOCKET`).
 """
@@ -29,11 +29,11 @@ import aiohttp
 from aiohttp import WSMsgType, web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.web.auth.tickets import TicketStore
-from solver.web.ws.app import PTY_MANAGER, build_app
-from solver.web.ws.config import WsConfig
-from solver.web.ws.manager import REPLAY_END
-from solver.web.ws.pty import PtySession
+from euler_site.auth.tickets import TicketStore
+from euler_webshell.ws.app import PTY_MANAGER, build_app
+from euler_webshell.ws.config import WsConfig
+from euler_webshell.ws.manager import REPLAY_END
+from euler_webshell.ws.pty import PtySession
 from tests import silence
 
 silence()   # quiet the attach-refused logging + filter aiohttp's request-key warning
@@ -359,18 +359,18 @@ class ReaperTests(_WsServiceCase):
 
 
 class RealShellTest(_WsServiceCase):
-    """Integration: fork the real `python -m solver.web.shell`; the child redeems the
+    """Integration: fork the real `python -m euler_webshell.shell`; the child redeems the
     ticket against the fake auth socket (`EULER_AUTH_SOCKET`) and starts as
     the web-channel subject; `exit` ends it and the service closes the socket."""
 
-    shell_argv: tuple[str, ...] = (sys.executable, '-m', 'solver.web.shell')
+    shell_argv: tuple[str, ...] = (sys.executable, '-m', 'euler_webshell.shell')
 
     @unittest_run_loop
     async def test_real_shell_attach_and_exit(self) -> None:
         os.environ['EULER_AUTH_SOCKET'] = str(self.auth_socket)   # inherited by the child
         self.addCleanup(os.environ.pop, 'EULER_AUTH_SOCKET', None)
         # …and point the child at a SCRATCH repo. A web-channel shell runs `git-sync` at
-        # startup (solver/shell/shell.py), so without this the forked shell syncs whatever
+        # startup (packages/solver/solver/shell/shell.py), so without this the forked shell syncs whatever
         # checkout the suite happens to run in: stash → merge → pop over the operator's live
         # working tree, and — since `git-sync` repairs a locally-modified keys/enc-key.json —
         # a `git checkout HEAD --` over their uncommitted key material. It silently reverted

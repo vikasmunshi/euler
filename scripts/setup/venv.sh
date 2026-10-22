@@ -11,7 +11,7 @@
 # The venv is deliberately **not** the operator's `.venv`: the services run as locked-down
 # euler-* uids that cannot read the operator's home, so the code lives in a
 # root-owned tree at /opt/euler, group-readable by euler-web, and the units run
-# `/opt/euler/venv/bin/python -m solver.web.<svc>`.
+# `/opt/euler/venv/bin/python -m euler_site.<svc>` / `-m euler_webshell.<svc>`.
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -29,10 +29,10 @@ PYTHON="${PYTHON:-python3.14}"          # the project floor; deadsnakes on 24.04
 # `solutions` so `eval`/`benchmark` can build the sieves/tables real solutions need;
 # `dev` because `new`/`lint` shell out to black/isort/autoflake/flake8. `show`
 # (matplotlib/PyQt5) is **excluded** — GUI plotting has no place on a headless server.
-VENV_EXTRAS="ai,dev,solutions,web"
+VENV_EXTRAS="ai,dev,solutions"          # the solver package's extras; site + webshell have none
 
 # Build/refresh the root-owned system venv and (re)install the repo into it so the
-# DEPLOYED package always matches the current source (the units run `-m solver.web.*`
+# DEPLOYED package always matches the current source (the units run `-m euler_site.*`
 # with cwd=/, so a stale venv fails even when the repo has the module). Idempotent —
 # every kit calls it, and installing again is a cheap refresh.
 #   $1 = the repo root to install from   $2 = the group that owns the venv (euler-web)
@@ -43,13 +43,18 @@ deploy_venv() {
         sudo mkdir -p "${OPT_DIR}"
         sudo "${PYTHON}" -m venv "${VENV_DIR}"
     fi
-    echo "Installing solver[${VENV_EXTRAS}] into ${VENV_DIR} (as root, from ${project_root})..."
+    echo "Installing euler-solver[${VENV_EXTRAS}], euler-site, euler-webshell into ${VENV_DIR} (as root, from ${project_root})..."
     sudo "${VENV_PY}" -m pip install --quiet --upgrade pip
-    # The version is read straight from the tracked `solver/version.py` at build time
-    # (setuptools `attr:`, see [tool.setuptools.dynamic] in pyproject.toml) — no git,
+    # Each version is read straight from the package's tracked version.py at build time
+    # (setuptools `attr:`, see [tool.setuptools.dynamic] in each pyproject.toml) — no git,
     # so this root build against the operator-owned checkout produces the SAME number
     # a developer's `pip install -e` does, with nothing to special-case here.
-    sudo "${VENV_PY}" -m pip install --quiet "${project_root}[${VENV_EXTRAS}]"
+    # Three packages (docs/package-split.md), installed together so their lockstep pins
+    # resolve against each other rather than an index. The single `solver` distribution
+    # they replace is removed first: it owns the same `solver/` files.
+    sudo "${VENV_PY}" -m pip uninstall --quiet --yes solver 2>/dev/null || true
+    sudo "${VENV_PY}" -m pip install --quiet "${project_root}/packages/solver[${VENV_EXTRAS}]" \
+        "${project_root}/packages/site" "${project_root}/packages/webshell"
     # The `solutions` extra installs the base `primesieve` wheel, which SKIPS the
     # numpy extension (its sdist ships NumPy-1.x-era C++ that won't build under 2.x).
     # `pip install` alone therefore leaves `primesieve.numpy` importable-but-broken in
@@ -96,7 +101,8 @@ deploy_content() {
 # egg-info. Remove under sudo to cover the root-owned egg-info; never fail the deploy on it.
 clean_build_artifacts() {
     local project_root="$1"
-    sudo rm -rf "${project_root}/build" "${project_root}"/*.egg-info 2>/dev/null || true
+    sudo rm -rf "${project_root}/build" "${project_root}"/*.egg-info \
+        "${project_root}"/packages/*/build "${project_root}"/packages/*/*.egg-info 2>/dev/null || true
 }
 
 # True when the deployed venv can import *module* (build-order gate). -P ignores cwd, so

@@ -9,10 +9,10 @@
 #      Inlined below (not sourced from a helper script) so the push gate stays
 #      self-contained.
 #   2. No compiled binaries (ELF blobs) anywhere in the tracked tree.
-#   3. flake8 on solver + solutions.
-#   4. mypy on solver + solutions.
+#   3. flake8 on packages + solutions.
+#   4. mypy on packages + solutions.
 #   5. shellcheck on every tracked shell script (scripts + hook templates).
-#   6. the unit tests — only when the push changes solver/, scripts/ or tests/.
+#   6. the unit tests — only when the push changes packages/, scripts/ or tests/.
 #
 # Output contract: every check announces itself, prints its own detail on
 # failure, and the hook always ends with a single PASS/FAIL verdict that
@@ -155,7 +155,7 @@ blob_head_hex() {
 # blob this push adds under solutions/private straight from the object store (so
 # NO smudge filter runs) and checks it begins with the gitfilter MAGIC. The magic
 # is read from config.gitfilter_magic, keeping it in lockstep with
-# solver/crypto/gitfilter.py; a blob lacking it is plaintext that slipped past
+# packages/solver/solver/crypto/gitfilter.py; a blob lacking it is plaintext that slipped past
 # the clean filter — block the push.
 section "Encryption-at-rest audit (solutions/private, blobs in this push)"
 magic_hex=$("$VENV/bin/python" -c 'from solver.crypto import wire; print(wire.MAGIC.hex())')
@@ -218,19 +218,19 @@ else
     fi
 fi
 
-# ── 3. flake8 on solver + solutions ──────────────────────────────────────
-section "flake8 (solutions, solver)"
-if "$VENV/bin/flake8" solutions solver; then
+# ── 3. flake8 on packages + solutions ──────────────────────────────────────
+section "flake8 (solutions, packages)"
+if "$VENV/bin/flake8" solutions packages; then
     pass "flake8 clean"
 else
     fail "flake8 reported issues"
 fi
 
-# ── 4. mypy on solver + solutions + scripts ──────────────────────────────
+# ── 4. mypy on packages + solutions + scripts ──────────────────────────────
 # `scripts` holds tracked Python that ships and runs (scripts/setup/euler-smtp.py is
 # installed to /usr/local/bin and run as a service), so it is checked with the rest.
-section "mypy (solutions, solver, scripts)"
-if "$VENV/bin/mypy" solutions solver scripts; then
+section "mypy (solutions, packages, scripts)"
+if "$VENV/bin/mypy" solutions packages scripts; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"
@@ -260,7 +260,7 @@ else
 fi
 
 # ── 6. unit tests, when this push touches the code they cover ────────────
-# The suite takes ~10s and covers solver/ + scripts/. A solutions-only push cannot
+# The suite takes ~10s and covers packages/ + scripts/. A solutions-only push cannot
 # break it, and the collaborator pushing their problem should not wait on it — so the
 # trigger is scoped to what this push changes, like the audits above.
 #
@@ -272,11 +272,11 @@ fi
 # so `PullRequestTest` sat red from 18f5da8b until a human happened to run them. flake8
 # and mypy could not have caught it — the code type-checked perfectly and simply did
 # something the tests said it should not.
-section "unit tests (only when solver/, scripts/ or tests/ change)"
+section "unit tests (only when packages/, scripts/ or tests/ change)"
 if (( ${#PUSH_REFS[@]} == 0 )); then
     skip "no refs offered by git — nothing to test"
-elif [[ -z "$(pushed_paths solver scripts tests)" ]]; then
-    skip "this push changes nothing under solver/, scripts/ or tests/"
+elif [[ -z "$(pushed_paths packages scripts tests)" ]]; then
+    skip "this push changes nothing under packages/, scripts/ or tests/"
 elif "$VENV/bin/python" -m unittest discover -s tests -q; then
     pass "unit tests pass"
 else

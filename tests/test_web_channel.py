@@ -131,7 +131,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
         `update-docs` and `update-models` stay admin-floored because they generate tracked
         source: `update-docs` from a registry that is itself profile-filtered (a lesser
         profile's registry is truncated, so regenerating from it would silently drop the
-        admin-floored commands), `update-models` into `solver/ai/models.py`, a module every
+        admin-floored commands), `update-models` into `packages/solver/solver/ai/models.py`, a module every
         AI command imports."""
         for admin_only in ('users', 'update-docs', 'update-models'):
             for rung in _WEB_RUNGS:
@@ -156,7 +156,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
         itself (it does not load the shell registry). A floor that drifted from the
         command's `requires` would either offer a verb the terminal then refuses — stopping
         every verb after it — or silently skip one the user may run."""
-        from solver.web.site.app import _PROGRESS_CHAIN
+        from euler_site.site.app import _PROGRESS_CHAIN
         floors = {cmd.name: cmd.requires for cmd in registry.all()}
         for verb, floor in _PROGRESS_CHAIN:
             self.assertEqual(floors.get(verb), floor, f'{verb}: chain floor drifted from the registry')

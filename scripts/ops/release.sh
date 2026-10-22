@@ -12,7 +12,7 @@
 #      `update-tags`, `update-docs`, `update-presentation-data`, in that order (see "Why
 #      that order" below);
 #   2. `make release`  — derive the SemVer bump from the Conventional Commits since the
-#      last tag, rewrite solver/version.py, commit, tag vX.Y.Z, push commit + tag.
+#      last tag, rewrite packages/solver/solver/version.py, commit, tag vX.Y.Z, push commit + tag.
 #      **Skipped, not fatal, when there is nothing to release**: an unchanged tree since
 #      the last tag has no bump to make, and `release.sh` exits 1 on it. That is not a
 #      reason to abandon the run — re-shipping the build that is already tagged is a
@@ -239,7 +239,7 @@ trap on_int INT
 # The tracked version number — the single source of truth, read the same way
 # `make check-version` reads it.
 read_version() {
-    sed -nE "s/^__version__ = '([^']*)'.*/\1/p" solver/version.py
+    sed -nE "s/^__version__ = '([^']*)'.*/\1/p" packages/solver/solver/version.py
 }
 
 # ── preflight ─────────────────────────────────────────────────────────────────────────
@@ -247,7 +247,7 @@ read_version() {
 ROOT="$(git rev-parse --show-toplevel 2> /dev/null)"
 [[ -n "${ROOT}" ]] || fail "not inside a git repository."
 cd "${ROOT}" || fail "cannot cd to ${ROOT}"
-[[ -f solver/version.py ]] || fail "${ROOT} is not the solver checkout (no solver/version.py)."
+[[ -f packages/solver/solver/version.py ]] || fail "${ROOT} is not the solver checkout (no packages/solver/solver/version.py)."
 
 command -v git  > /dev/null || fail "git is not on PATH."
 command -v make > /dev/null || fail "make is not on PATH."
@@ -271,7 +271,7 @@ fi
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo '(unknown)')"
 LAST_TAG="$(git describe --tags --abbrev=0 --match 'v*' 2> /dev/null || echo 'none')"
 CURRENT="$(read_version)"
-[[ -n "${CURRENT}" ]] || fail "cannot read __version__ from solver/version.py."
+[[ -n "${CURRENT}" ]] || fail "cannot read __version__ from packages/solver/solver/version.py."
 
 # The log is named before the tmux hand-off below, so both sides of it write to one file.
 if [[ ${DRY_RUN} -eq 0 ]]; then
@@ -371,7 +371,7 @@ say "══ new version ══════════════════�
 say "   repository      : ${ROOT}"
 say "   branch          : ${BRANCH}"
 say "   HEAD            : $(git log --oneline -1 2> /dev/null)"
-say "   last release    : ${LAST_TAG}   (solver/version.py: ${CURRENT})"
+say "   last release    : ${LAST_TAG}   (packages/solver/solver/version.py: ${CURRENT})"
 say "   unreleased      : $(git rev-list --count "$([[ ${LAST_TAG} == none ]] && echo HEAD || echo "${LAST_TAG}..HEAD")" 2> /dev/null || echo '?') commit(s)"
 [[ -n "${LOG}" ]] && say "   log             : ${LOG}"
 say ""
@@ -467,7 +467,7 @@ else
     if ! run_step make release; then
         fail "'make release' failed — see above. Nothing was deployed.
        If it bumped and tagged but the push failed, publish with:
-         git push origin HEAD v\$(sed -nE \"s/^__version__ = '([^']*)'.*/\\1/p\" solver/version.py)"
+         git push origin HEAD v\$(sed -nE \"s/^__version__ = '([^']*)'.*/\\1/p\" packages/solver/solver/version.py)"
     fi
 fi
 

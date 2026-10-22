@@ -40,14 +40,14 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
 from solver.shell import dialogue
-from solver.web.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
-                            PR_REVIEW_SUBJECT)
-from solver.web.msg.app import MessageService, build_admin_app, build_app
-from solver.web.msg.config import MsgConfig
-from solver.web.msg.identity import box_of
-from solver.web.msg.store import MAX_PER_AUTHOR, MessageStore
-from solver.web.site import gitstate
-from solver.web.unixhttp import request as unix_request
+from euler_webshell.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
+                                PR_REVIEW_SUBJECT)
+from euler_webshell.msg.app import MessageService, build_admin_app, build_app
+from euler_webshell.msg.config import MsgConfig
+from euler_webshell.msg.identity import box_of
+from euler_webshell.msg.store import MAX_PER_AUTHOR, MessageStore
+from euler_site.site import gitstate
+from euler_site.unixhttp import request as unix_request
 from tests import silence
 
 silence()
@@ -403,8 +403,8 @@ class UserMessageChipTests(AioHTTPTestCase):
 
     async def get_application(self) -> web.Application:
         # Deferred: importing the per-user app pulls aiohttp_jinja2 and the site tier.
-        from solver.web.user.app import build_app as build_user_app
-        from solver.web.user.config import UserConfig
+        from euler_webshell.user.app import build_app as build_user_app
+        from euler_webshell.user.config import UserConfig
 
         self.scratch = Path(tempfile.mkdtemp(prefix='euler-msg-user-'))
         self.addCleanup(shutil.rmtree, self.scratch, True)
@@ -437,7 +437,7 @@ class UserMessageChipTests(AioHTTPTestCase):
 
         repo_root = Path(__file__).resolve().parents[1]
         user_config = UserConfig(
-            repo_root=repo_root, static_dir=repo_root / 'solver/web/content',
+            repo_root=repo_root, static_dir=repo_root / 'packages/site/euler_site/content',
             socket_path=self.scratch / 'user.sock', socket_group='', tcp_bind='',
             serve_static=False, slug=system_slug(_ALICE), auth_socket='',
             shell_argv=(), detached_ttl=0)
@@ -711,7 +711,7 @@ class _MsgCommandCase(_SpoolCase):
         Only the OSC nudges land here — the console renders through rich's own stream, which
         `silence()` swallows — so this is a test of the *wire*, not of the prose.
         """
-        from solver.web.msg.commands import msg
+        from euler_webshell.msg.commands import msg
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             msg(*args, **kwargs)
@@ -719,7 +719,7 @@ class _MsgCommandCase(_SpoolCase):
 
     def _rc(self, *args: Any, **kwargs: Any) -> int:
         """The command's exit code — what a refusal is actually observable as."""
-        from solver.web.msg.commands import msg
+        from euler_webshell.msg.commands import msg
         with contextlib.redirect_stdout(io.StringIO()):
             return msg(*args, **kwargs)
 
@@ -794,8 +794,8 @@ class MsgActTests(_MsgCommandCase):
     def _dispatched(self) -> list[str]:
         """Record which act ran, without running either heavy one for real."""
         from solver.core import git as git_mod
-        from solver.web.msg import commands as msg_commands
-        from solver.web.shell import keys as keys_mod
+        from euler_webshell.msg import commands as msg_commands
+        from euler_webshell.shell import keys as keys_mod
         done: list[str] = []
         self.enterContext(patch.object(keys_mod, 'user_authorize',
                                        lambda thread_id: (done.append(f'authorize {thread_id}'), 0)[1]))
@@ -1000,7 +1000,7 @@ class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
         self.addAsyncCleanup(self.runner.cleanup)
 
     async def test_a_command_can_queue_a_message_for_staff(self) -> None:
-        from solver.web.msg.notify import notify_staff
+        from euler_webshell.msg.notify import notify_staff
         sent = await asyncio.to_thread(notify_staff, 'Key authorization request', 'public key: abc')
         self.assertTrue(sent)
         queue = self.spool.store.inbound()
@@ -1010,13 +1010,13 @@ class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_an_absent_spool_is_a_quiet_false_not_an_exception(self) -> None:
         """A command must not fail because the thing reporting it could not report."""
-        from solver.web.msg.notify import notify_staff
+        from euler_webshell.msg.notify import notify_staff
         os.environ['EULER_MSG_SOCKET'] = str(self.scratch / 'nothing-here.sock')
         sent = await asyncio.to_thread(notify_staff, 's', 'b')
         self.assertFalse(sent)
 
     async def test_a_refusal_is_reported_as_false(self) -> None:
-        from solver.web.msg.notify import notify_staff
+        from euler_webshell.msg.notify import notify_staff
         sent = await asyncio.to_thread(notify_staff, '', '')      # empty fields are refused
         self.assertFalse(sent)
 
@@ -1024,7 +1024,7 @@ class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
     async def test_a_notice_is_dismissed_by_its_exact_subject(self) -> None:
         """`gh-merge merge` walks GitHub's queue, not the spool's, so the subject
         `git-push` filed the notice under is the only handle it has."""
-        from solver.web.msg.notify import dismiss_by_subject, notify_staff
+        from euler_webshell.msg.notify import dismiss_by_subject, notify_staff
         subject = f'{PR_REVIEW_SUBJECT}user/alice'
         self.assertTrue(await asyncio.to_thread(notify_staff, subject, 'a PR is waiting'))
         self.assertEqual(await asyncio.to_thread(dismiss_by_subject, subject), 1)
@@ -1033,7 +1033,7 @@ class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
     async def test_only_the_branch_that_landed_is_dismissed(self) -> None:
         """An exact match, never the prefix: the prefix names a *kind* of message, and
         sweeping it would clear every waiting review the moment one of them merged."""
-        from solver.web.msg.notify import dismiss_by_subject, notify_staff
+        from euler_webshell.msg.notify import dismiss_by_subject, notify_staff
         for branch in ('user/alice', 'user/bob'):
             self.assertTrue(await asyncio.to_thread(
                 notify_staff, f'{PR_REVIEW_SUBJECT}{branch}', f'{branch} is waiting'))
@@ -1044,12 +1044,12 @@ class NotifyStaffTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_nothing_matching_is_a_quiet_zero(self) -> None:
         """The merge happened; a spool with nothing to close must not read as a failure."""
-        from solver.web.msg.notify import dismiss_by_subject
+        from euler_webshell.msg.notify import dismiss_by_subject
         self.assertEqual(await asyncio.to_thread(
             dismiss_by_subject, f'{PR_REVIEW_SUBJECT}user/nobody'), 0)
 
     async def test_an_absent_spool_dismisses_nothing_and_does_not_raise(self) -> None:
-        from solver.web.msg.notify import dismiss_by_subject
+        from euler_webshell.msg.notify import dismiss_by_subject
         os.environ['EULER_MSG_SOCKET'] = str(self.scratch / 'nothing-here.sock')
         os.environ['EULER_MSG_ENV'] = str(self.scratch / 'no-msg-env')
         os.environ['EULER_MSG_ADMIN_SOCKET'] = str(self.scratch / 'no-admin.sock')
@@ -1064,7 +1064,7 @@ class DeliveryNudgeTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_notify_all_sends_a_text_frame_to_attached_sockets(self) -> None:
         """The nudge must be a TEXT frame: a PTY byte would land in the replay buffer."""
-        from solver.web.ws.manager import PtyManager
+        from euler_webshell.ws.manager import PtyManager
 
         received: list[str] = []
 
@@ -1148,7 +1148,7 @@ class MailboxVariableTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        from solver.web.msg import commands
+        from euler_webshell.msg import commands
         self.commands = commands
         self.mailbox: object = {'threads': []}
         self._saved_call = commands._call

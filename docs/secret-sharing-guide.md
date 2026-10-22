@@ -2,7 +2,7 @@
 
 This guide covers **Shamir secret sharing**: the mathematics of `k`-of-`n` thresholds, and the
 2-of-2 split this project uses to deliver the master key without ever putting the whole of it
-in one place. It is implemented in [`solver/crypto/keys.py`](../solver/crypto/keys.py) (the
+in one place. It is implemented in [`packages/solver/solver/crypto/keys.py`](../packages/solver/solver/crypto/keys.py) (the
 section headed *2 of 2 secret sharing*), and driven by `user-authorize`, `key-split` and
 `key-reconstruct` — with `host-authorize` / `host-unlock` for the machines the split cannot
 reach.
@@ -434,10 +434,10 @@ nothing, because an off-host machine has no account to record it against.
 
 | file | role |
 | --- | --- |
-| [`solver/crypto/keys.py`](../solver/crypto/keys.py) | the field arithmetic, the sealing, `key-split`, `key-reconstruct`, `user-authorize`, `host-authorize`, `host-unlock` |
-| [`solver/config/paths.py`](../solver/config/paths.py) | `share_file()` — where the local half lives, and the order it is looked for in |
-| [`solver/crypto/ciphers.py`](../solver/crypto/ciphers.py) | `lock` / `unlock` — the X25519 envelope a sent half and a mailed key both ride in |
-| [`solver/auth/roster.py`](../solver/auth/roster.py) | the roster: public keys and the operator's dated acts, and no key material |
-| [`solver/web/auth/mail.py`](../solver/web/auth/mail.py) | `send_master_key` — the off-host delivery |
-| [`solver/web/msg/__init__.py`](../solver/web/msg/__init__.py) | `KEY_SHARE_SUBJECT` and `verb_for`, which make `msg act` on such a message *be* the reconstruction |
-| [`solver/web/msg/commands.py`](../solver/web/msg/commands.py) | `_reconstruct` — the receiving half of `msg act` |
+| [`packages/solver/solver/crypto/keys.py`](../packages/solver/solver/crypto/keys.py) | the field arithmetic, the sealing, `key-split`, `key-reconstruct`, `user-authorize`, `host-authorize`, `host-unlock` |
+| [`packages/solver/solver/config/paths.py`](../packages/solver/solver/config/paths.py) | `share_file()` — where the local half lives, and the order it is looked for in |
+| [`packages/solver/solver/crypto/ciphers.py`](../packages/solver/solver/crypto/ciphers.py) | `lock` / `unlock` — the X25519 envelope a sent half and a mailed key both ride in |
+| [`packages/webshell/euler_webshell/roster.py`](../packages/webshell/euler_webshell/roster.py) | the roster: public keys and the operator's dated acts, and no key material |
+| [`packages/site/euler_site/auth/mail.py`](../packages/site/euler_site/auth/mail.py) | `send_master_key` — the off-host delivery |
+| [`packages/webshell/euler_webshell/msg/__init__.py`](../packages/webshell/euler_webshell/msg/__init__.py) | `KEY_SHARE_SUBJECT` and `verb_for`, which make `msg act` on such a message *be* the reconstruction |
+| [`packages/webshell/euler_webshell/msg/commands.py`](../packages/webshell/euler_webshell/msg/commands.py) | `_reconstruct` — the receiving half of `msg act` |

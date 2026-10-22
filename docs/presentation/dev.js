@@ -1,5 +1,5 @@
 /* The developer section's one stepped slide: command blocks and the canonical form the real
-   lexer (solver/shell/lexer.py) turns them into, captured verbatim from `lex()`, then the
+   lexer (packages/solver/solver/shell/lexer.py) turns them into, captured verbatim from `lex()`, then the
    variables the shell provides (docs/user-guide.md, Variables).
    Registers itself on window.DECK_PARTS (data-viz="lang"). */
 (() => {

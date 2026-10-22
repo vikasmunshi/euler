@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Unit tests for the layering guard (scripts/linters/layers.py): the solver shell must not
-import the web tier, and the allowlist of known couplings only ratchets down."""
+"""Unit tests for the layering guard (scripts/linters/layers.py): euler_webshell → euler_site →
+solver, never upward, and the allowlist of known exceptions only ratchets down."""
 from __future__ import annotations
 
 import contextlib
@@ -49,36 +49,39 @@ class LayersTests(unittest.TestCase):
         return rc, out.getvalue()
 
     def test_finds_top_level_lazy_and_submodule_imports(self) -> None:
-        self.write('solver/core/a.py', 'from solver.web.msg import X\n')
-        self.write('solver/core/b.py', 'def f():\n    import solver.web.auth.client\n')
-        self.write('solver/core/c.py', 'from solver.auth import roster\n')
-        self.write('solver/core/d.py', 'from solver.core import problems\n')       # fine
+        self.write('packages/solver/solver/core/a.py', 'from euler_webshell.msg import X\n')
+        self.write('packages/solver/solver/core/b.py', 'def f():\n    import euler_site.auth.client\n')
+        self.write('packages/solver/solver/core/c.py', 'from euler_webshell import roster\n')
+        self.write('packages/solver/solver/core/d.py', 'from solver.core import problems\n')       # fine
         self.assertEqual(layers.violations(self.root), {
-            ('solver/core/a.py', 'solver.web.msg'),
-            ('solver/core/b.py', 'solver.web.auth.client'),
-            ('solver/core/c.py', 'solver.auth.roster'),
+            ('packages/solver/solver/core/a.py', 'euler_webshell.msg'),
+            ('packages/solver/solver/core/b.py', 'euler_site.auth.client'),
+            ('packages/solver/solver/core/c.py', 'euler_webshell'),
         })
 
-    def test_web_side_modules_may_import_anything(self) -> None:
-        self.write('solver/web/site/app.py', 'from solver.web.msg import X\n')
-        self.write('solver/auth/roster.py', 'from solver.web import csp\n')
-        self.assertEqual(layers.violations(self.root), set())
+    def test_the_site_may_import_the_solver_but_not_the_web_shell(self) -> None:
+        self.write('packages/site/euler_site/app.py', 'from solver.core import problems\nfrom euler_site import csp\n')
+        self.write('packages/site/euler_site/bad.py', 'from euler_webshell.msg import notify\n')
+        self.write('packages/webshell/euler_webshell/ok.py', 'from euler_site import csp\nimport solver.main\n')
+        self.assertEqual(layers.violations(self.root), {('packages/site/euler_site/bad.py', 'euler_webshell.msg')})
 
-    def test_the_manifest_may_not_load_web_command_modules(self) -> None:
-        self.write('solver/modules.csv', 'module,registers_commands\n'
-                                         'solver.web.msg.commands,True\nsolver.web.msg.app,\nsolver.core.git,True\n')
-        self.assertEqual(layers.violations(self.root), {('solver/modules.csv', 'solver.web.msg.commands')})
+    def test_the_manifest_may_load_only_the_solvers_command_modules(self) -> None:
+        self.write('packages/solver/solver/modules.csv', 'module,registers_commands\n'
+                                                         'euler_webshell.users,True\neuler_site.app,\n'
+                                                         'solver.core.git,True\n')
+        self.assertEqual(layers.violations(self.root),
+                         {('packages/solver/solver/modules.csv', 'euler_webshell.users')})
 
     def test_allowlist_admits_known_and_fails_new_and_stale(self) -> None:
-        self.write('solver/core/a.py', 'from solver.web.msg import X\n')
-        self.allow.write_text('# known\nsolver/core/a.py solver.web.msg\n', encoding='utf-8')
+        self.write('packages/solver/solver/core/a.py', 'from euler_webshell.msg import X\n')
+        self.allow.write_text('# known\npackages/solver/solver/core/a.py euler_webshell.msg\n', encoding='utf-8')
         self.assertEqual(self.check()[0], 0)
-        self.write('solver/core/b.py', 'import solver.web.msg\n')
+        self.write('packages/solver/solver/core/b.py', 'import euler_webshell.msg\n')
         rc, out = self.check()
         self.assertEqual(rc, 1)
-        self.assertIn('solver/core/b.py: imports web-side solver.web.msg', out)
-        self.write('solver/core/a.py', '\n')
-        self.write('solver/core/b.py', '\n')
+        self.assertIn('packages/solver/solver/core/b.py: imports euler_webshell.msg', out)
+        self.write('packages/solver/solver/core/a.py', '\n')
+        self.write('packages/solver/solver/core/b.py', '\n')
         rc, out = self.check()
         self.assertEqual(rc, 1)
         self.assertIn('stale entry', out)

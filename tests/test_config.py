@@ -60,7 +60,7 @@ class SingletonBindingTests(unittest.TestCase):
 
     def test_no_module_is_named_config_inside_the_package(self) -> None:
         """Enforce the defence rather than trusting it: the name must stay unclaimed."""
-        package = Path(__file__).resolve().parents[1] / 'solver' / 'config'
+        package = Path(__file__).resolve().parents[1] / 'packages' / 'solver' / 'solver' / 'config'
         self.assertFalse((package / 'config.py').exists(),
                          'a `config` submodule would shadow the singleton on the package')
 
@@ -134,7 +134,7 @@ class AnchorTests(unittest.TestCase):
 
     def test_repo_root_holds_the_checkout(self) -> None:
         root: Path = repo_root()
-        self.assertTrue((root / 'solver').is_dir())
+        self.assertTrue((root / 'packages' / 'solver' / 'solver').is_dir())
         self.assertTrue((root / 'solutions').is_dir())
 
 

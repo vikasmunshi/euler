@@ -1,5 +1,5 @@
-# Known solver → web couplings, burned down by phase (docs/package-split.md § 4).
-# Format: <repo-relative path> <imported web-side module>. Ratchets down only:
-# scripts/linters/layers.py fails on a new coupling AND on a line that no longer matches.
+# Known imports of a higher layer (docs/package-split.md § 3.1: euler_webshell → euler_site → solver).
+# Format: <repo-relative path> <imported module>. Ratchets down only:
+# scripts/linters/layers.py fails on a new violation AND on a line that no longer matches.
 #
-# Empty since phase 4: the solver shell imports no web code. Keep it that way.
+# Empty since phase 4. Keep it that way.

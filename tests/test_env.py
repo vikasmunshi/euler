@@ -30,11 +30,11 @@ from unittest import mock
 
 from solver.config.env import COMMON_SECTION, ENV_FILE, MissingSetting, load_spec
 from solver.config.paths import repo_root
-from solver.web.auth.config import AuthConfig
-from solver.web.msg.config import MsgConfig
-from solver.web.site.config import SiteConfig
-from solver.web.user.config import UserConfig
-from solver.web.ws.config import WsConfig
+from euler_site.auth.config import AuthConfig
+from euler_webshell.msg.config import MsgConfig
+from euler_site.site.config import SiteConfig
+from euler_webshell.user.config import UserConfig
+from euler_webshell.ws.config import WsConfig
 
 _ROOT: Path = repo_root()
 
@@ -194,7 +194,7 @@ class ServiceConfigTests(unittest.TestCase):
     def test_site(self) -> None:
         config = SiteConfig.from_env()
         self.assertEqual(config.repo_root, _ROOT)
-        self.assertEqual(config.static_dir, _ROOT / 'solver/web/content')
+        self.assertEqual(config.static_dir, _ROOT / 'packages/site/euler_site/content')
         self.assertEqual(config.github_url, 'https://github.com/vikasmunshi/euler')
         self.assertIs(config.serve_static, False)
 
@@ -203,7 +203,7 @@ class ServiceConfigTests(unittest.TestCase):
         self.assertEqual(config.socket_path, Path('/run/euler/ws.sock'))
         self.assertEqual(config.auth_socket, '/run/euler/auth.sock')
         self.assertEqual(config.detached_ttl, 86400)
-        self.assertEqual(config.shell_argv, (sys.executable, '-m', 'solver.web.shell'))
+        self.assertEqual(config.shell_argv, (sys.executable, '-m', 'euler_webshell.shell'))
 
     def test_user_names_its_socket_for_its_slug(self) -> None:
         with mock.patch.dict(os.environ, {'EULER_USER_SLUG': 'u0a68e0'}):

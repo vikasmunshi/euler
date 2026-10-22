@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The Cache-Control middleware (solver.web.cache): the two response classes, error
+"""The Cache-Control middleware (euler_site.cache): the two response classes, error
 responses, and the hands-off cases.
 
 What is being protected is the *absence* of a header: a response with no
@@ -16,7 +16,7 @@ from pathlib import Path
 from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.web.cache import NO_STORE, REVALIDATE, cache_middleware, directive_for
+from euler_site.cache import NO_STORE, REVALIDATE, cache_middleware, directive_for
 from tests import silence
 
 silence()

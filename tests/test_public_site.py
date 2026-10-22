@@ -15,8 +15,8 @@ from unittest.mock import patch
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.web.site.app import build_public_app
-from solver.web.site.config import SiteConfig
+from euler_site.site.app import build_public_app
+from euler_site.site.config import SiteConfig
 from tests import silence
 
 silence()
@@ -73,7 +73,7 @@ class PublicSiteTests(AioHTTPTestCase):
 
     async def get_application(self):  # type: ignore[no-untyped-def]
         return build_public_app(SiteConfig(
-            repo_root=self.tree, static_dir=self.tree / 'solver/web/content',
+            repo_root=self.tree, static_dir=self.tree / 'packages/site/euler_site/content',
             socket_path=Path('/tmp/unused.sock'), socket_group='', tcp_bind='',
             serve_static=False, profile='', public=True))
 

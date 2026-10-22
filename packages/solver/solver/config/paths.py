@@ -1,0 +1,171 @@
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
+"""The two anchors every other path hangs off — and the one deliberate side effect.
+
+`package_root` is where the code is, `repo_root()` is where the working tree is, and
+:func:`enter_repo` is the process-level move (chdir + `PATH`) that the *shell* wants and
+nothing else does.
+
+There were four derivations of `repo_root`: :mod:`solver.config` (env, then a `git rev-parse`
+anchored at the package dir, then hard failure), the crypto package (the same, plus
+a fallback), and the two web configs (a bare `parents[3]`). They drifted, and the drift
+cost real access: with the git filter correctly running under `-P`, `__file__` moved out
+of the checkout into `site-packages`, the package-anchored probe found no repository, and
+the fallback — guarded only by "does it contain `packages/solver/solver/`", which `site-packages` also
+does — adopted **site-packages itself** as the repo. The filter then reported the private key
+missing from `/opt/euler/venv/lib/python3.14/.site-packages/id`: a confident answer from a
+process that had no idea where the repo was.
+
+So the order is fixed here, once:
+
+1. **`EULER_REPO_ROOT`**, when set and a directory. The deployed tier points every service
+   at the real tree with it, and the filter must agree with the shell about which tree that
+   is. Nothing probes when this is set.
+2. **the process cwd**, via `git rev-parse`. git runs a filter with the cwd at the *top of
+   the worktree*, and the shell runs inside the checkout, so this is the authoritative answer
+   for both — and the only one that works when the code is an installed package.
+3. **this file's own directory**, via the same probe: an editable/dev checkout invoked from
+   somewhere else entirely.
+4. **this file two levels up**, but only if it *looks like the checkout* — `packages/solver/solver/` **and**
+   `solutions/`. That second test is the lesson above: a wrong root is worse than no root,
+   because it turns "I cannot tell where the repo is" into a plausible lie further downstream.
+
+Otherwise it raises, naming the env var that settles it.
+
+**`repo_root()` is pure**: it captures git's output and changes nothing — no chdir, no PATH
+edits, no caching. The chdir every earlier version of this did on the caller's behalf is
+:func:`enter_repo`, which the shell entry point calls **explicitly**; importing configuration
+moves no one's process.
+
+Stdlib-only and silent on stdout at import: this module sits under :mod:`solver.config`,
+which :mod:`solver.crypto` reaches from the git-filter path, where stdout carries file
+content.
+"""
+from __future__ import annotations
+
+__all__ = ['PACKAGE_DIR', 'REPO_ROOT_ENV', 'SHARE_FILE_ENV', 'enter_repo', 'package_root', 'repo_root',
+           'secrets_dir', 'share_file']
+
+import os
+import sys
+from pathlib import Path
+from subprocess import run
+
+#: Env var naming the working tree explicitly — the deployed web tier sets it per service.
+REPO_ROOT_ENV: str = 'EULER_REPO_ROOT'
+
+#: The solver package's place in the checkout (docs/package-split.md): the working tree's own
+#: copy of what `package_root` is in an install.
+PACKAGE_DIR: str = 'packages/solver/solver'
+
+#: Where the installed code is: the `solver` package directory (this file's parent's parent).
+#: Anchors what ships *inside* the wheel — `modules.csv`, `templates/`, `config/values.conf` —
+#: as against `repo_root()`, which anchors the working tree those are read alongside.
+package_root: Path = Path(__file__).resolve().parents[1]
+
+
+def _probe(cwd: Path) -> Path | None:
+    """Ask git for the worktree top from *cwd*, or None if it cannot say.
+
+    git's own environment is shed first. Inherited from a git-spawned parent (a hook, a
+    filter) `GIT_DIR` is set without `GIT_WORK_TREE`, and `rev-parse --show-toplevel`
+    then reports the *cwd* as the toplevel — which for a probe anchored at a package
+    directory yields `…/solver/crypto` as the repo root, and a secrets directory beside it
+    that holds none of the user's keys.
+    """
+    probe_env = {key: value for key, value in os.environ.items() if not key.startswith('GIT_')}
+    try:
+        result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
+                     cwd=cwd, env=probe_env)
+    except OSError:                       # git not installed at all, or cwd gone
+        return None
+    if result.returncode == 0 and (root := result.stdout.strip()):
+        return Path(root)
+    return None
+
+
+def repo_root() -> Path:
+    """Return the repository working-tree root (see the module docstring for the order).
+
+    Raises:
+        ValueError: if no candidate can be confirmed — which is the honest answer, and the
+            message names `EULER_REPO_ROOT` as the way to settle it.
+    """
+    override = os.environ.get(REPO_ROOT_ENV, '').strip()
+    if override and (from_env := Path(override)).is_dir():
+        return from_env
+    for candidate in (Path.cwd(), Path(__file__).parent):
+        if (found := _probe(candidate)) is not None:
+            return found
+    fallback = Path(__file__).resolve().parents[4]      # packages/solver/solver/config/paths.py
+    if (fallback / PACKAGE_DIR).is_dir() and (fallback / 'solutions').is_dir():
+        return fallback
+    raise ValueError(f'failed to locate the repository root (set {REPO_ROOT_ENV}, '
+                     'or run from inside the checkout)')
+
+
+def secrets_dir(root: Path) -> Path:
+    """The machine-local secrets directory for the checkout at *root*.
+
+    A sibling dot-directory named for the repo (repo `~/euler` → `~/.euler`), **outside**
+    the checkout, so key material and the project env file never sit in the work tree.
+    """
+    return root.parent / f'.{root.name}'
+
+
+#: Environment override for the share file (tests, and a machine that keeps it elsewhere).
+SHARE_FILE_ENV: str = 'EULER_SHARE_FILE'
+
+#: The deployed location: beside `authorizations.json`, root-owned and world-readable ON THE
+#: HOST. Readable is the point — `key-split` and `key-reconstruct` only ever read it, so a
+#: maintainer's web shell (which can never obtain sudo) keeps working; only the operator writes.
+_SYSTEM_SHARE: Path = Path('/etc/euler/share.json')
+
+
+def share_file(root: Path) -> Path:
+    """Where this machine's half of the master key lives, for the checkout at *root*.
+
+    Discovered rather than configured, which is why it sits here with `repo_root` and not
+    in `values.conf`: writing it down would be writing down an answer that depends on
+    whether this machine is a deployed host. Three candidates, in order, and the reason
+    for each:
+
+    1. **`$EULER_SHARE_FILE`** — the tests, and any machine that keeps it elsewhere.
+    2. **`/etc/euler/share.json`**, when that directory exists: a deployed host. It is
+       operational state, not repository content — committing it would publish the half to
+       everyone with a clone, and this repository is public, which would make "and a current
+       clone" no barrier at all to anybody.
+    3. **`<secrets_dir>/share.json`** otherwise — a plain checkout with no deployed tier,
+       where the secrets dir is already the machine-local home for key material.
+
+    The *directory* is probed rather than the file, so the first `key-split` on a deployed
+    host writes to the deployed location rather than inventing a second one in `~`.
+    """
+    override: str = os.environ.get(SHARE_FILE_ENV, '').strip()
+    if override:
+        return Path(override)
+    return _SYSTEM_SHARE if _SYSTEM_SHARE.parent.is_dir() else secrets_dir(root) / 'share.json'
+
+
+def enter_repo(root: Path) -> Path:
+    """chdir into *root* and normalise `PATH`, then return it.
+
+    The **shell's** move, made explicitly at startup by :func:`solver.main.main` — not a
+    side effect of importing configuration. It used to happen at import of
+    :mod:`solver.config`, which meant a git filter, a web service or a test that wanted one
+    path constant silently had its process relocated.
+
+    PATH gains the interpreter's own bin dir (the venv) and `~/.local/bin` — where
+    the per-user Claude Code install drops the `claude` binary: the web
+    shell's service unit starts from systemd's minimal PATH, which never includes
+    it, and without it `claude-solve` / the account page's status probe can't
+    find the CLI. The WSL `/mnt` entries are dropped, and duplicates collapsed.
+    """
+    os.chdir(root)
+    env_path: list[str] = ([Path(sys.executable).parent.as_posix(),
+                            (Path.home() / '.local' / 'bin').as_posix()]
+                           + os.getenv('PATH', '').split(':'))
+    env_path = [p for p in env_path if not p.startswith('/mnt')]
+    env_path = list(dict.fromkeys(env_path))
+    os.environ['PATH'] = ':'.join(env_path)
+    return root

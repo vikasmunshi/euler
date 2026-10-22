@@ -15,7 +15,7 @@ If you want to add commands to the framework, read the
 A solution file implements exactly **one** function, `solve()`. Everything else —
 parsing arguments, running the timed loop, checking the answer is stable across
 runs, and printing the line the test harness reads — is supplied by the **runner
-framework** (`solver/runners/`). You never write a `main()`, an argument parser,
+framework** (`packages/solver/solver/runners/`). You never write a `main()`, an argument parser,
 or a timing loop.
 
 - **Python:** decorate `solve(*args: str) -> str` with `@runner.main`.
@@ -134,7 +134,7 @@ if (show) {                           /* C; set by --show */
 }
 ```
 
-Graphical output needs the `show` dependency group (`pip install -e ".[show]"`).
+Graphical output needs the `show` dependency group (`pip install -e "packages/solver[show]"`).
 
 ---
 

@@ -382,7 +382,7 @@ class GhPrTest(_GitCommandCase):
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
-        self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'packages/solver/solver/utils/scripts.py']
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])  # refused before gh ran
 
@@ -539,7 +539,7 @@ class GhPrTest(_GitCommandCase):
 
     def test_a_refused_pr_leaves_the_notice_waiting(self) -> None:
         self.as_profile('maintainer')
-        self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'packages/solver/solver/utils/scripts.py']
         self.assertEqual(git.gh_merge('merge', 12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
         self.assertEqual(self.dismissed, [])
@@ -579,7 +579,7 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solutions/problems.json',
                       'docs/user-guide.md', 'topics/articles.json',
-                      'solutions/public/p0042/tags.json', 'README.md', 'solver/config/values.conf']
+                      'solutions/public/p0042/tags.json', 'README.md', 'packages/solver/solver/config/values.conf']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -589,7 +589,8 @@ class GhPrTest(_GitCommandCase):
         """A regeneration is no longer a separate verb: one queue, one gate."""
         self.as_profile('maintainer')
         self.files = ['docs/user-guide.md', 'topics/articles.json', 'README.md',
-                      'solver/modules.csv', 'solver/config/values.conf', 'solver/ai/claude/CLAUDE.md']
+                      'packages/solver/solver/modules.csv', 'packages/solver/solver/config/values.conf',
+                      'packages/solver/solver/ai/claude/CLAUDE.md']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -597,12 +598,12 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(self.dismissed, [f'{PR_REVIEW_SUBJECT}user/x'])
 
     def test_only_the_named_files_under_solver_are_admitted(self) -> None:
-        """`solver/config/values.conf` is in scope; the `solver/` tree around it is not."""
+        """`packages/solver/solver/config/values.conf` is in scope; the package tree around it is not."""
         self.as_profile('maintainer')
-        self.files = ['solver/config.py']
+        self.files = ['packages/solver/solver/config.py']
         self.assertEqual(git.gh_merge('merge', 12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
-        self.files = ['solver/config/values.conf']
+        self.files = ['packages/solver/solver/config/values.conf']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -785,9 +786,10 @@ class CommitTargetsTest(unittest.TestCase):
 
     def test_update_is_what_the_generators_write_outside_docs(self) -> None:
         self.assertEqual(git._commit_paths(self.problem, ('update',)),
-                         ['README.md', 'solver/modules.csv', 'solver/config/values.conf',
-                          'solver/ai/models.py', 'solver/ai/claude/CLAUDE.md',
-                          'solver/web/content/home-summary.md'])
+                         ['README.md', 'packages/solver/solver/modules.csv',
+                          'packages/solver/solver/config/values.conf',
+                          'packages/solver/solver/ai/models.py', 'packages/solver/solver/ai/claude/CLAUDE.md',
+                          'packages/site/euler_site/content/home-summary.md'])
 
     def test_targets_compose_in_the_order_named(self) -> None:
         self.assertEqual(git._commit_paths(self.problem, ('docs', 'solutions')),
@@ -860,8 +862,9 @@ class GitCommitTest(_GitCommandCase):
                                         message='regenerate'), 0)
         self.assertEqual(self.cmdlines, [
             "git add -A docs/ topics/ ':(glob)solutions/**/tags.json' README.md "
-            'solver/modules.csv solver/config/values.conf solver/ai/models.py '
-            'solver/ai/claude/CLAUDE.md solver/web/content/home-summary.md '
+            'packages/solver/solver/modules.csv packages/solver/solver/config/values.conf '
+            'packages/solver/solver/ai/models.py '
+            'packages/solver/solver/ai/claude/CLAUDE.md packages/site/euler_site/content/home-summary.md '
             "&& git commit --message regenerate"])
 
     def test_the_message_is_shell_quoted(self) -> None:
@@ -985,7 +988,7 @@ class CommitRegeneratedTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, [])
 
     def test_the_subject_is_a_chore_so_the_release_bump_stays_a_patch(self) -> None:
-        git.commit_regenerated('update-usd-rate', ('the euro moved',), ['solver/config/values.conf'])
+        git.commit_regenerated('update-usd-rate', ('the euro moved',), ['packages/solver/solver/config/values.conf'])
         self.assertIn("--message 'chore(update-usd-rate): the euro moved", self.cmdlines[0])
 
     def test_the_body_carries_the_facts(self) -> None:
@@ -998,9 +1001,9 @@ class CommitRegeneratedTest(_GitCommandCase):
         """The reason this is not the `update` git-commit target: that target spans every
         generated file on purpose, so `update-models` using it would carry off an
         uncommitted `values.conf` belonging to `update-usd-rate`."""
-        git.commit_regenerated('update-models', ('quip',), ['solver/ai/models.py'])
-        self.assertIn('solver/ai/models.py', self.cmdlines[0])
-        self.assertNotIn('solver/config/values.conf', self.cmdlines[0])
+        git.commit_regenerated('update-models', ('quip',), ['packages/solver/solver/ai/models.py'])
+        self.assertIn('packages/solver/solver/ai/models.py', self.cmdlines[0])
+        self.assertNotIn('packages/solver/solver/config/values.conf', self.cmdlines[0])
 
     def test_only_the_files_written_are_committed_not_the_whole_scope(self) -> None:
         """The guarantee the path table alone cannot give. `update-docs` owns `docs/`, which
@@ -1026,9 +1029,9 @@ class CommitRegeneratedTest(_GitCommandCase):
         """`GENERATED_PATHS` stays the envelope: a verb reporting a write beyond it has a bug,
         and the commit refuses to carry the file rather than quietly widening itself."""
         git.commit_regenerated('update-models', ('quip',),
-                               ['solver/ai/models.py', 'solver/core/git.py'])
-        self.assertIn('solver/ai/models.py', self.cmdlines[0])
-        self.assertNotIn('solver/core/git.py', self.cmdlines[0])
+                               ['packages/solver/solver/ai/models.py', 'packages/solver/solver/core/git.py'])
+        self.assertIn('packages/solver/solver/ai/models.py', self.cmdlines[0])
+        self.assertNotIn('packages/solver/solver/core/git.py', self.cmdlines[0])
 
     def test_a_path_naming_nothing_is_dropped(self) -> None:
         """A reported path that is neither on disk nor tracked is always a bug in the verb —

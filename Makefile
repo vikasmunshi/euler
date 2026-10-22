@@ -26,8 +26,9 @@ PIP    := $(VENV)/bin/pip
 ## Full developer install: system deps → venv → all dependency groups → git hooks → completions
 install-all: install-system install-chrome $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install --upgrade -e ".[ai,dev,show,solutions,web]"
-	rm -rf build solver.egg-info
+	$(PIP) uninstall -y -q solver 2>/dev/null || true   # the single-package dist before the split
+	$(PIP) install --upgrade -e "packages/solver[ai,dev,show,solutions]" -e packages/site -e packages/webshell
+	rm -rf build packages/*/build packages/*/*.egg-info
 	$(MAKE) install-primesieve-numpy
 	$(MAKE) install-hooks
 	$(MAKE) install-completions
@@ -38,8 +39,9 @@ install-all: install-system install-chrome $(VENV)
 ## Minimal install: base + solutions + show (no dev tools)
 install-minimal: install-system install-chrome $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install --upgrade -e ".[show,solutions,web]"
-	rm -rf build solver.egg-info
+	$(PIP) uninstall -y -q solver 2>/dev/null || true   # the single-package dist before the split
+	$(PIP) install --upgrade -e "packages/solver[show,solutions]" -e packages/site -e packages/webshell
+	rm -rf build packages/*/build packages/*/*.egg-info
 	$(MAKE) install-primesieve-numpy
 	@printf "✓ install-minimal complete: base environment ready\n"
 
@@ -121,20 +123,20 @@ run: $(VENV)
 version: $(VENV)
 	@$(VENV)/bin/solver version
 
-## Cut a release: bump solver/version.py from Conventional Commits, commit,
+## Cut a release: bump packages/solver/solver/version.py from Conventional Commits, commit,
 ## tag, and push the commit + tag to origin. ARGS=--dry-run previews; ARGS=--no-push
 ## stops before publishing.
 release:
 	@./scripts/version/release.sh $(ARGS)
 
-## Guard: the version redeploy-web would ship (solver/version.py) must have its
+## Guard: the version redeploy-web would ship (packages/solver/solver/version.py) must have its
 ## vX.Y.Z tag on origin, so a redeploy never runs a release collaborator clones
 ## cannot reach (a locally-tagged-but-unpushed release runs the venv ahead of every
 ## clone). Queries origin — needs network. A prerequisite of redeploy-web.
 check-version:
-	@ver=$$(sed -nE "s/^__version__ = '([^']*)'.*/\1/p" solver/version.py); \
+	@ver=$$(sed -nE "s/^__version__ = '([^']*)'.*/\1/p" packages/solver/solver/version.py); \
 	if [ -z "$$ver" ]; then \
-		printf "✗ check-version: could not read the version from solver/version.py\n" >&2; exit 1; \
+		printf "✗ check-version: could not read the version from packages/solver/solver/version.py\n" >&2; exit 1; \
 	fi; \
 	tag="v$$ver"; \
 	if git ls-remote --tags origin "$$tag" 2>/dev/null | grep -q "refs/tags/$$tag"; then \
@@ -317,7 +319,7 @@ redeploy-site:
 ## Deploy the per-user provisioning layer (MT-7): the euler-user group,
 ## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
 ## uids/homes/clones are created later by `users add <email>`
-## (solver.web.auth.commands → user.sh provision), which clones ~/euler straight
+## (euler_webshell.users → user.sh provision), which clones ~/euler straight
 ## from the public GitHub repo (ciphertext at rest, MT-13).
 deploy-user:
 	./scripts/setup/user.sh deploy

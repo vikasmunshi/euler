@@ -11,7 +11,7 @@ The goal is a **faithful port, not a redesign**. For reference, see the template
   the compiled `_c` is.
 - **Include the runner; write only `solve()`.** Begin the file with
   `/* Solution to Euler Problem <N>: <Title>. */` then `#include "runner.h"`. The header
-  (`solver/runners/runner.h`, found via the `-I` that `scripts/c/compile.sh` adds) supplies
+  (`packages/solver/solver/runners/runner.h`, found via the `-I` that `scripts/c/compile.sh` adds) supplies
   `main()`, the `--runs=N` / `--show` parsing, the timing loop, the cross-run consistency check,
   and the result printing — do **not** redefine `main()` or re-implement any of it. Write only
   `solve()` and its helpers.

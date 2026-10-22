@@ -15,7 +15,7 @@
 #     - the euler-user parent group (egress + traversal);
 #     - /etc/euler/user.env (scoped runtime config, no secrets);
 #     - the socket-activated euler-user@.service + euler-user@.socket template,
-#       deferred until solver.web.user lands in the /opt/euler venv (step 4).
+#       deferred until euler_webshell.user lands in the /opt/euler venv (step 4).
 #
 #   provision / deprovision <slug>  — ONE collaborator:
 #     provision   create the uid <slug> + home /home/<slug> (0700), clone ~/euler DIRECTLY from
@@ -76,7 +76,7 @@ usage() {
 Usage: $0 <action> [args]
 
   deploy                       Create the euler-user group, /etc/euler/user.env, and —
-                               when solver.web.user is in the /opt/euler venv — the
+                               when euler_webshell.user is in the /opt/euler venv — the
                                euler-user@.service/.socket template. Idempotent.
   remove                       Remove the template + user.env (prompted). Provisioned
                                users must be deprovisioned first.
@@ -162,14 +162,14 @@ ensure_shared_groups() {
 }
 
 # Deploy the shared /opt/euler venv (venv.sh); the per-user service module (step 4)
-# imports from it. solver.web.user is expected to be absent until step 4, and the
+# imports from it. euler_webshell.user is expected to be absent until step 4, and the
 # unit install is gated on it.
 deploy_user_venv() {
     deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
-    if sudo "${VENV_PY}" -P -c 'import solver.web.user' 2>/dev/null; then
-        echo "Deployed: ✓ solver.web.user importable from ${VENV_DIR}"
+    if sudo "${VENV_PY}" -P -c 'import euler_webshell.user' 2>/dev/null; then
+        echo "Deployed: ✓ euler_webshell.user importable from ${VENV_DIR}"
     else
-        echo "Deployed: … solver.web.user not in the venv yet (step 4) — unit deferred"
+        echo "Deployed: … euler_webshell.user not in the venv yet (step 4) — unit deferred"
     fi
 }
 
@@ -195,7 +195,7 @@ EOF
 }
 
 venv_has_user_service() {
-    [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c 'import solver.web.user' 2>/dev/null
+    [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c 'import euler_webshell.user' 2>/dev/null
 }
 
 # The socket-activated template: one euler-user@<slug> instance per collaborator, each
@@ -245,7 +245,7 @@ EnvironmentFile=${USER_ENV}
 EnvironmentFile=-${EGRESS_ENV}
 Environment=EULER_USER_SLUG=%i
 Environment=EULER_REPO_ROOT=${USER_HOME_BASE}/%i/euler
-ExecStart=${VENV_PY} -m solver.web.user
+ExecStart=${VENV_PY} -m euler_webshell.user
 Restart=on-failure
 RestartSec=5s
 
@@ -435,7 +435,7 @@ provision_hook_config() {
 # piece of per-clone setup they cannot receive: it waits for them to happen to save a key.
 #
 # -P is why that matters. git runs a filter with the cwd at the top of the worktree, and a
-# solver checkout has a `solver/` package sitting right there — without -P the filter imports
+# solver checkout has a `packages/solver/solver/` package sitting right there — without -P the filter imports
 # THE CLONE's source instead of the venv's, so a clone that falls behind runs an old filter
 # against a current key file and stops decrypting. Writing the command here needs no key
 # (only the re-checkout does, and their tree is already plaintext), so the operator can push
@@ -523,7 +523,7 @@ CLAUDE
 enable_socket() {
     local slug="$1"
     if [ ! -f "${SOCKET_DEST}" ]; then
-        echo "note: euler-user@.socket not installed yet (solver.web.user pending, step 4) —"
+        echo "note: euler-user@.socket not installed yet (euler_webshell.user pending, step 4) —"
         echo "      instance socket for ${slug} deferred; re-run '$0 upgrade' then provision."
         return 0
     fi
@@ -647,7 +647,7 @@ do_deploy() {
     if venv_has_user_service; then
         install_units
     else
-        echo "note: solver.web.user not yet in the deployed package — unit template deferred"
+        echo "note: euler_webshell.user not yet in the deployed package — unit template deferred"
         echo "      (re-run '$0 upgrade' once step 4 lands the service)."
     fi
     do_status
@@ -730,17 +730,17 @@ check_mark() {
 do_status() {
     if [ ! -x "${VENV_PY}" ]; then
         status_line "venv" "${BAD}" "${VENV_DIR} not deployed (run auth.sh / user.sh deploy)"
-    elif "${VENV_PY}" -P -c 'import solver.web.user' 2>/dev/null; then
-        status_line "venv" "${OK}" "solver.web.user importable from ${VENV_DIR}"
+    elif "${VENV_PY}" -P -c 'import euler_webshell.user' 2>/dev/null; then
+        status_line "venv" "${OK}" "euler_webshell.user importable from ${VENV_DIR}"
     else
-        status_line "venv" "${DEFER}" "solver.web.user not in the venv yet (step 4)"
+        status_line "venv" "${DEFER}" "euler_webshell.user not in the venv yet (step 4)"
     fi
     status_line "group" "$(check_mark getent group "${USER_GROUP}")" "${USER_GROUP}"
     status_line "config" "$(check_mark test -f "${USER_ENV}")" "${USER_ENV}"
     if [ -f "${SOCKET_DEST}" ]; then
         status_line "template" "${OK}" "${SOCKET_TEMPLATE} + ${SERVICE_TEMPLATE}"
     else
-        status_line "template" "${DEFER}" "deferred (solver.web.user not yet deployed)"
+        status_line "template" "${DEFER}" "deferred (euler_webshell.user not yet deployed)"
     fi
 
     # Per-user roster (or one slug's instance), each reported by unix name + e-mail alias.

@@ -35,14 +35,14 @@ from tempfile import TemporaryDirectory
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
-from solver.auth import roster
+from euler_webshell import roster
 from solver.config import config as app_config
 from solver.crypto import keys as keys_mod
-from solver.web.shell import keys as web_keys
+from euler_webshell.shell import keys as web_keys
 from solver.crypto.ciphers import (enc_key_payload, load_private_key, public_key_hex,
                                    read_enc_key_file, read_master_key, verify_master_key)
 from solver.shell import dialogue
-from solver.web.msg import KEY_SHARE_SUBJECT, verb_for
+from euler_webshell.msg import KEY_SHARE_SUBJECT, verb_for
 from tests import silence
 
 silence()   # these drive the console's refusal paths on purpose
@@ -251,7 +251,7 @@ class PublicKeyRegistryTests(unittest.TestCase):
         needs it — could not do it at all, and a grant made from a browser left the registry
         empty until somebody remembered to sweep. A tracked file needs no privilege, and the
         proof is that no sudo is spawned even when one could be."""
-        from solver.web.auth import commands as users_mod
+        from euler_webshell import users as users_mod
         calls: list[tuple[str, ...]] = []
         for name, stub in (('_sudo_admin', lambda *a: calls.append(a) or 0),
                            ('_sudo_admin_capture', lambda *a, **k: calls.append(a) or (0, ''))):

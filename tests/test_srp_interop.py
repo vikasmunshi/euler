@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""JS ↔ Python SRP-6a interop: the browser client (solver/web/content/assets/srp.js)
+"""JS ↔ Python SRP-6a interop: the browser client (packages/site/euler_site/content/assets/srp.js)
 against the service's srp.py, byte-for-byte (RFC 5054 2048-bit group, SHA-256,
 PAD to |N|). Skips when Node.js is absent — install it with `make install-nodejs`.
 """
@@ -13,10 +13,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from solver.web.auth.srp import SrpClient, SrpServer, SrpToken
+from euler_site.auth.srp import SrpClient, SrpServer, SrpToken
 
 REPO = Path(__file__).resolve().parent.parent
-SRP_JS = REPO / 'solver' / 'web' / 'content' / 'assets' / 'srp.js'
+SRP_JS = REPO / 'packages' / 'site' / 'euler_site' / 'content' / 'assets' / 'srp.js'
 
 _DRIVER = """\
 const SRP = require(process.argv[2]);

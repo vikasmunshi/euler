@@ -2,16 +2,16 @@
 
 This guide covers **configuration**: the two files you can edit, the rules that decide which
 one a setting belongs in, and the three categories of value that are deliberately not
-settings at all. It is implemented in [`solver/config/`](../solver/config/).
+settings at all. It is implemented in [`packages/solver/solver/config/`](../packages/solver/solver/config/).
 
 The short version, for when that is all you need:
 
 | I want to… | do this |
 | --- | --- |
 | see every setting | `{config}` in the shell (`{config.timeout_single}` for one) |
-| change one | edit [`solver/config/values.conf`](../solver/config/values.conf) |
+| change one | edit [`packages/solver/solver/config/values.conf`](../packages/solver/solver/config/values.conf) |
 | change what a deployed service reads | edit that service's `/etc/euler/*.env`, not this repo |
-| find which variable a service reads | [`solver/config/env.conf`](../solver/config/env.conf) |
+| find which variable a service reads | [`packages/solver/solver/config/env.conf`](../packages/solver/solver/config/env.conf) |
 
 There is no `manage-config` command and no `config.json`. Both existed; both are gone.
 Reading the settings needed a command and an `admin` floor to see three numbers, and the
@@ -22,7 +22,7 @@ file it wrote was JSON, so it could carry no explanation of what any of them mea
 ## 1. The shape
 
 ```
-solver/config/
+packages/solver/solver/config/
   __init__.py     the way in: `from solver.config import config`
   settings.py     every setting — its name, its type, its default
   values.conf     the editable half: what a person tunes
@@ -45,7 +45,7 @@ repo root drifted once, and the drift cost a collaborator their decryption (§5.
 
 They look similar and are not interchangeable.
 
-**[`values.conf`](../solver/config/values.conf)** is *what a person tunes*. Solution
+**[`values.conf`](../packages/solver/solver/config/values.conf)** is *what a person tunes*. Solution
 timeouts, the file names inside a problem directory, where the stack lives, the FX rate
 `costs` converts with. It is tracked, so an edit is a commit and every clone gets it. Values
 may name each other and the computed anchors:
@@ -58,7 +58,7 @@ env_file      = ${secrets_dir}/env
 
 Available anchors: `${root_dir}`, `${package_dir}`, `${secrets_dir}`, `${home_dir}`.
 
-**[`env.conf`](../solver/config/env.conf)** is *deployment wiring for the web services*.
+**[`env.conf`](../packages/solver/solver/config/env.conf)** is *deployment wiring for the web services*.
 Each runs as its own uid, from `/opt/euler`, with a scoped `EnvironmentFile=` under
 `/etc/euler`. What lives here is not the value — it is the **map** from a setting to the
 variable that carries it, and what it is worth when that variable is unset:
@@ -145,7 +145,7 @@ and that is load-bearing rather than tidy — see §5.3.
 Three categories, and the question that sorts them: **may I change this, and what happens if
 I do?**
 
-### 5.1 Protocol — [`solver/crypto/wire.py`](../solver/crypto/wire.py)
+### 5.1 Protocol — [`packages/solver/solver/crypto/wire.py`](../packages/solver/solver/crypto/wire.py)
 
 The magic bytes, the nonce length, the filter driver's name, the `.gitattributes` line, the
 vault's KDF iteration count, the verify plaintext. Each is part of a format something else
@@ -157,7 +157,7 @@ This used to sit in the same table as the key *locations*, which are ordinary se
 now live in `[crypto]` of `values.conf`. One table holding both could not answer the
 question above, which is exactly why they were separated.
 
-### 5.2 Discovered — [`solver/config/paths.py`](../solver/config/paths.py)
+### 5.2 Discovered — [`packages/solver/solver/config/paths.py`](../packages/solver/solver/config/paths.py)
 
 `root_dir` and `share_file` are not matters of opinion. The first is wherever the checkout
 actually is; the second depends on whether this machine is a deployed host (`/etc/euler`)
@@ -240,13 +240,13 @@ rather than chosen. Everything else in `values.conf` is somebody's decision.
 
 | file | role |
 | --- | --- |
-| [`solver/config/settings.py`](../solver/config/settings.py) | every setting: name, type, default — and the `Config` class |
-| [`solver/config/values.conf`](../solver/config/values.conf) | the editable half: what a person tunes |
-| [`solver/config/values.py`](../solver/config/values.py) | reading it, and the surgical single-line write |
-| [`solver/config/env.conf`](../solver/config/env.conf) | the web services' environment: variable name and default per setting |
-| [`solver/config/env.py`](../solver/config/env.py) | reading it — importable by a service with no clone |
-| [`solver/config/paths.py`](../solver/config/paths.py) | the anchors, and the shell's explicit `enter_repo()` |
-| [`solver/config/identity.py`](../solver/config/identity.py) | the resolved `Subject` and per-user state, reached only lazily |
-| [`solver/config/theme.py`](../solver/config/theme.py) | the one palette, in `rich` and `prompt_toolkit` dialects |
-| [`solver/crypto/wire.py`](../solver/crypto/wire.py) | the formats that are not configuration (§5.1) |
-| [`solver/web/*/config.py`](../solver/web/) | one class per service: the shape, and what a table cannot say |
+| [`packages/solver/solver/config/settings.py`](../packages/solver/solver/config/settings.py) | every setting: name, type, default — and the `Config` class |
+| [`packages/solver/solver/config/values.conf`](../packages/solver/solver/config/values.conf) | the editable half: what a person tunes |
+| [`packages/solver/solver/config/values.py`](../packages/solver/solver/config/values.py) | reading it, and the surgical single-line write |
+| [`packages/solver/solver/config/env.conf`](../packages/solver/solver/config/env.conf) | the web services' environment: variable name and default per setting |
+| [`packages/solver/solver/config/env.py`](../packages/solver/solver/config/env.py) | reading it — importable by a service with no clone |
+| [`packages/solver/solver/config/paths.py`](../packages/solver/solver/config/paths.py) | the anchors, and the shell's explicit `enter_repo()` |
+| [`packages/solver/solver/config/identity.py`](../packages/solver/solver/config/identity.py) | the resolved `Subject` and per-user state, reached only lazily |
+| [`packages/solver/solver/config/theme.py`](../packages/solver/solver/config/theme.py) | the one palette, in `rich` and `prompt_toolkit` dialects |
+| [`packages/solver/solver/crypto/wire.py`](../packages/solver/solver/crypto/wire.py) | the formats that are not configuration (§5.1) |
+| [`packages/site/euler_site/*/config.py`](../packages/site/euler_site/) | one class per service: the shape, and what a table cannot say |

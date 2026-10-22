@@ -3,7 +3,7 @@
 This guide covers the **transparent git encryption** for files under
 `solutions/private/`: how it works, how to set it up, day-to-day use, and how to
 prove the files are encrypted at rest. It is implemented in
-[`solver/crypto/gitfilter.py`](../solver/crypto/gitfilter.py).
+[`packages/solver/solver/crypto/gitfilter.py`](../packages/solver/solver/crypto/gitfilter.py).
 
 The key material it relies on (your identity and the master key) is described in
 [User Guide §7](user-guide.md#7-key-exchange). Encryption is opt-in per file via
@@ -64,7 +64,7 @@ already-encrypted blobs, are never double-processed.
 ### Why the filter command carries `-P`
 
 git runs a filter with the working directory at the **top of the worktree**, and a solver
-checkout has a `solver/` package sitting right there. Without `-P` (PYTHONSAFEPATH), Python
+checkout has a `packages/solver/solver/` package sitting right there. Without `-P` (PYTHONSAFEPATH), Python
 prepends that cwd to `sys.path`, so `python -m solver.crypto.gitfilter` imports **the clone's
 own source** rather than the installed copy in the venv the command names. A collaborator
 whose clone is behind then runs an *old* filter against a *current* key file.
@@ -142,16 +142,16 @@ only wrapped keys and a ciphertext, never a plaintext key.
 
 The wire-format and filter constants — `wire.MAGIC`, `wire.FILTER_NAME`,
 `wire.ATTR_LINE`, `wire.PKT_MAX`, `wire.VERIFY_TEXT`, … — live in
-[`solver/crypto/wire.py`](../solver/crypto/wire.py), so the filter and the audit script
+[`packages/solver/solver/crypto/wire.py`](../packages/solver/solver/crypto/wire.py), so the filter and the audit script
 share a single source of truth. None of them is configurable: each is part of a format
 something else already depends on — a blob in git, a file on another machine, a rule in
 the tracked `.gitattributes` — so changing one does not adjust behaviour, it makes
 existing data unreadable.
 
 Where the *files* are is the configurable part, and it is not kept here: the key
-locations are settings like any other, declared in `solver/config/settings.py` and
+locations are settings like any other, declared in `packages/solver/solver/config/settings.py` and
 editable in the `[crypto]` section of
-[`solver/config/values.conf`](../solver/config/values.conf) — see the
+[`packages/solver/solver/config/values.conf`](../packages/solver/solver/config/values.conf) — see the
 [Config Guide](config-guide.md) §5.1 for why the split falls where it does.
 
 ---

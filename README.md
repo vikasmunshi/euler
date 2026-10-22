@@ -1,4 +1,4 @@
-<!-- HOME:START — the web start page's summary; `update-docs` regenerates solver/web/content/home-summary.md from this slice. -->
+<!-- HOME:START — the web start page's summary; `update-docs` regenerates packages/site/euler_site/content/home-summary.md from this slice. -->
 ## Project Euler Solutions
 
 [![Python](docs/badges/python.svg)](https://www.python.org/downloads/)
@@ -125,7 +125,9 @@ cd euler
 ./scripts/setup/chrome.sh install
 python3.14 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[show,solutions]"   # add ai,dev groups for full install
+pip install -e "packages/solver[show,solutions]"   # add ai,dev groups for full install
+# the web tier, only on a host that serves it:
+#   pip install -e packages/site -e packages/webshell
 solver
 ```
 
@@ -228,7 +230,7 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 
 <!-- GEN:package-layout -->
 ```
-solver/
+packages/solver/solver/
   __main__.py          — Module entry point.
   main.py              — Entry point for the "solver shell" CLI.
   version.py           — The solver build version — the single source of truth.
@@ -318,7 +320,7 @@ solver/
     store.py           — Shared JSON persistence and untrusted-text hygiene for the service stores.
     unixhttp.py        — Minimal HTTP-over-unix-socket client, shared by the service tiers (stdlib only).
     auth/              — Web authentication: the auth service and its clients.
-      __main__.py      — Auth service entry point: `python -m solver.web.auth`.
+      __main__.py      — Auth service entry point: `python -m euler_site.auth`.
       admin.py         — The admin-plane CLI: run **under sudo** by the `users` shell command.
       app.py           — The auth service: public + admin aiohttp apps over unix sockets.
       client.py        — HTTP-over-unix-socket client for the auth service — re-export of the shared one.
@@ -337,7 +339,7 @@ solver/
       tickets.py       — One-time shell tickets: web identity for PTY children.
       users.py         — User store: the SRP verifier database at `<state>/users.json`.
     msg/               — The message spool: user↔staff threads, on its own uid (web-server-guide § Messaging).
-      __main__.py      — Message service entry point: `python -m solver.web.msg`.
+      __main__.py      — Message service entry point: `python -m euler_webshell.msg`.
       admin.py         — The message admin plane CLI: run **under sudo** by the `msg` shell command.
       app.py           — The message service: public + admin aiohttp apps over unix sockets.
       client.py        — The shell tier's client for the message spool: one call, whichever plane answers.
@@ -347,15 +349,15 @@ solver/
       notify.py        — Send a message **from a command** — the message layer's actual purpose.
       store.py         — The message spool at `<state>/messages.json` — messages and read-state.
     shell/             — The web shell: the solver shell, extended for a PTY framed by the browser.
-      __main__.py      — Web shell entry point: `python -m solver.web.shell` — what the per-user service's PTY runs.
-      host.py          — Host terminal entry point: `python -m solver.web.shell.host` — what `solver-host` runs.
+      __main__.py      — Web shell entry point: `python -m euler_webshell.shell` — what the per-user service's PTY runs.
+      host.py          — Host terminal entry point: `python -m euler_webshell.shell.host` — what `solver-host` runs.
       identity.py      — The web shell's identity: a one-time shell ticket, redeemed at the auth service.
       keys.py          — Key distribution: issuing the master key over the message spool and by mail.
       notices.py       — The message spool as the carrier of the solver shell's notices (:mod:`solver.core.notices`).
       osc.py           — The shell → browser control channel: `OSC 5379`.
       viewer.py        — The web shell's `show` and `edit`: swap the app shell's left pane instead of opening a tab.
     site/              — The content service — server-rendered pages + htmx fragments.
-      __main__.py      — Content service entry point: `python -m solver.web.site`.
+      __main__.py      — Content service entry point: `python -m euler_site.site`.
       app.py           — The content service aiohttp app: identity from forward_auth, routes, gating.
       config.py        — Content-service runtime configuration, read from the environment.
       content.py       — Config-free readers for the content trees the service renders.
@@ -363,13 +365,13 @@ solver/
       render.py        — The full-page-vs-block render contract (§4.5).
       validate.py      — The save gate: the checks every write passes.
     user/              — The per-user web service: one collaborator's content **and** web shell.
-      __main__.py      — Per-user service entry point: `python -m solver.web.user`.
+      __main__.py      — Per-user service entry point: `python -m euler_webshell.user`.
       app.py           — The per-user aiohttp app: one collaborator's content **and** web shell.
       config.py        — Per-user service runtime configuration, read from the environment.
       msg_api.py       — The header's message chip for the per-user service (web-server-guide § Messaging).
       vault_api.py     — Vault + account routes for the per-user service.
     ws/                — The web-shell service: the solver PTY terminal over WebSocket.
-      __main__.py      — Web-shell service entry point: `python -m solver.web.ws`.
+      __main__.py      — Web-shell service entry point: `python -m euler_webshell.ws`.
       app.py           — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
       config.py        — Web-shell service runtime configuration, read from the environment.
       manager.py       — Persistent per-user PTY shells: one long-lived solver shell per web user.
@@ -378,9 +380,9 @@ solver/
 <!-- /GEN:package-layout -->
 
 Every shell command is a plain Python function decorated with `@register(...)`
-(defined in `solver/shell/register.py`, re-exported from `solver.shell`). The decorator handles
+(defined in `packages/solver/solver/shell/register.py`, re-exported from `solver.shell`). The decorator handles
 `shlex` tokenisation, type coercion (`Literal` / `bool` / `int` / `Optional`), and tab-completion;
-commands are collected at import time, and `solver/modules.csv` lists the modules loaded
+commands are collected at import time, and `packages/solver/solver/modules.csv` lists the modules loaded
 on startup. Framework built-ins (`echo`, `clear`, `?`, `!`) are registered the same way
 from `shell/builtins.py` and `shell/bash.py`. The full contract is documented in
 the [Developer Guide](docs/developer-guide.md).
@@ -405,10 +407,10 @@ the optional groups summarised under [Requirements](#requirements) above (`solut
 `dev`, `web`) - install only what you need.
 
 The web front end bundles its JavaScript/CSS assets locally so it runs fully offline, with no CDN
-calls. These vendored assets live under `solver/web/content/vendor/` - xterm.js (MIT),
+calls. These vendored assets live under `packages/site/euler_site/content/vendor/` - xterm.js (MIT),
 highlight.js (BSD-3-Clause), CodeJar (MIT), MathJax (Apache-2.0), and Devicon (MIT). Each is
 redistributed under its permissive license; the full license texts and an inventory of every file
-are in the [vendor README](solver/web/content/vendor/README.md).
+are in the [vendor README](packages/site/euler_site/content/vendor/README.md).
 
 ### Authors
 

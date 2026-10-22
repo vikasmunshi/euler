@@ -166,24 +166,24 @@ else
     fail "shellcheck reported issues"
 fi
 
-# ── flake8: solver + solutions ───────────────────────────────────────────
+# ── flake8: packages + solutions ───────────────────────────────────────────
 # The whole solutions tree (public + decrypted private) is a proper package —
 # every directory carries an __init__.py — so module resolution is unambiguous
-# and the lint scope is simply `solutions solver`.
-section "flake8 (solutions, solver)"
-if "$VENV/bin/flake8" solutions solver; then
+# and the lint scope is simply `solutions packages`.
+section "flake8 (solutions, packages)"
+if "$VENV/bin/flake8" solutions packages; then
     pass "flake8 clean"
 else
     fail "flake8 reported issues"
 fi
 
-# ── mypy: solver + solutions + scripts ───────────────────────────────────
+# ── mypy: packages + solutions + scripts ───────────────────────────────────
 # `scripts` is in scope because it holds tracked Python that ships and runs:
 # scripts/setup/euler-smtp.py is installed to /usr/local/bin and run as a service.
 # Type-checking the shell half of the tree (shellcheck, above) while leaving that
 # unchecked was the gap.
-section "mypy (solutions, solver, scripts)"
-if "$VENV/bin/mypy" solutions solver scripts; then
+section "mypy (solutions, packages, scripts)"
+if "$VENV/bin/mypy" solutions packages scripts; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"
@@ -192,11 +192,11 @@ fi
 # ── layering: the solver shell must not import the web tier ──────────────
 # docs/package-split.md § 3.1. Known couplings sit in scripts/linters/layers.allow,
 # which only ratchets down: a new import fails, and so does a stale allowlist line.
-section "layering (solver ↛ web)"
+section "layering (webshell → site → solver)"
 if "$VENV/bin/python" scripts/linters/layers.py .; then
-    pass "no new solver → web imports"
+    pass "no import of a higher layer"
 else
-    fail "solver imports the web tier (or layers.allow has a stale line)"
+    fail "a package imports a layer above it (or layers.allow has a stale line)"
 fi
 
 # ── Verdict ──────────────────────────────────────────────────────────────

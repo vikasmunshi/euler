@@ -1,0 +1,82 @@
+# The web shell's overlays on the solver shell's commands (docs/package-split.md § 3.2).
+#
+# emit    — state-changed events sent after the command returns, whatever its exit code
+#           (euler_webshell.shell.osc.EVENTS): the page re-reads the chip or pane they name.
+#           List every command that can change that state, including through a helper —
+#           commit_regenerated's callers all commit, so they all move the git chip.
+# replace — a body to run instead of the command's own; same signature, same help.
+#
+# The shell refuses to start if an entry names no command, so this table cannot drift from
+# the registry silently; tests/test_web_shell.py checks it against every command.
+
+# ── the git chip ────────────────────────────────────────────────────────────────────────
+[git-commit]
+emit = ["git"]
+
+[git-push]
+emit = ["git"]
+
+[git-sync]
+emit = ["git"]
+
+[git-reset]
+emit = ["git"]
+
+[git-filter]
+emit = ["git"]
+
+[git-publish]
+emit = ["git"]
+
+[key-reconstruct]    # a reconstructed key re-checks-out solutions/private
+emit = ["git"]
+
+[host-unlock]        # likewise, for an issued key
+emit = ["git"]
+
+[gh-merge]           # master moved; a landed merge also dismisses its review notice
+emit = ["git", "msg"]
+
+# The regenerating verbs: each commits what it rewrote (commit_regenerated).
+[update-docs]
+emit = ["git"]
+
+[update-tags]
+emit = ["git"]
+
+[update-models]
+emit = ["git"]
+
+[update-usd-rate]
+emit = ["git"]
+
+[update-presentation-data]
+emit = ["git"]
+
+# ── the solutions grid ──────────────────────────────────────────────────────────────────
+[summary]            # re-writes problems.json, then commits it
+emit = ["progress", "git"]
+
+[mark]               # likewise, through summary
+emit = ["progress", "git"]
+
+# ── the account page ────────────────────────────────────────────────────────────────────
+[user]
+emit = ["account"]
+
+[git-identity]
+emit = ["account"]
+
+# ── the viewer pane ─────────────────────────────────────────────────────────────────────
+[show]
+replace = "euler_webshell.shell.viewer:show"
+
+[edit]
+replace = "euler_webshell.shell.viewer:edit"
+
+# ── key distribution ────────────────────────────────────────────────────────────────────
+# Rotation re-issues the new key to every registered holder over the spool (as in host.toml),
+# and commits the re-encrypted tree.
+[key-rekey]
+emit = ["git"]
+replace = "euler_webshell.shell.keys:key_rekey"

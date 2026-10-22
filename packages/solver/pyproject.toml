@@ -1,0 +1,75 @@
+# euler-solver: the solver shell — standalone, with no web code (docs/package-split.md).
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "euler-solver"
+# Read at build time from `solver/version.py` ([tool.setuptools.dynamic]). The packages
+# version in lockstep (Q5): scripts/version/release.sh is the single writer of every
+# package's version.py and of the pins between them — never hand-edit a number here.
+dynamic = ["version"]
+description = "Interactive shell for solving and managing Project Euler problems"
+authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
+license = "MIT"
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4",
+    "cryptography",
+    "flake8",
+    "mypy",
+    "prompt-toolkit",
+    "python-dotenv",
+    "requests",
+    "rich",
+    "types-requests",
+]
+
+[project.optional-dependencies]
+ai = [
+    "anthropic",
+]
+dev = [
+    "autoflake",
+    "autopep8",
+    "black",
+    "isort",
+]
+show = [
+    "matplotlib",
+    "PyQt5",
+]
+solutions = [
+    # NOTE: `pip install primesieve` builds only the base extension; its optional
+    # `primesieve.numpy` extension must be built from source against NumPy 2.x via
+    # ./scripts/setup/primesieve_numpy_extension.sh (see the root pyproject.toml).
+    # cython / numpy / setuptools below are the build deps that script relies on.
+    "cython",
+    "mpmath",
+    "numpy",
+    "primesieve",
+    "setuptools",
+]
+
+[project.scripts]
+solver = "solver.main:main"
+solver-gitfilter = "solver.crypto.gitfilter:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "solver.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["solver*"]
+
+[tool.setuptools.package-data]
+# modules.csv is the loader's startup manifest (config.modules_file, read by
+# utils/loader.py); it must ship so a deployed venv can import the command modules.
+solver = ["*.html", "modules.csv"]
+# values.conf carries every setting's shipped value (the fallback for a deployed venv whose
+# tree lacks it); env.conf maps the web services' settings to their variables.
+"solver.config" = ["*.conf"]
+# `config.templates_dir` is package-relative, so the whole template set must ship: the AI
+# prompts, the C solution template and the blogger's article.md.
+"solver.templates" = ["*.txt", "*.c", "*.md"]
+"solver.runners" = ["*.h"]

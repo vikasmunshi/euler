@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import unittest
 
-from solver.web.auth.tickets import TicketStore
+from euler_site.auth.tickets import TicketStore
 
 
 class TicketStoreTests(unittest.TestCase):

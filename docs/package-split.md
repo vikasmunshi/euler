@@ -58,7 +58,7 @@ is. What unlocking *grants* is the master key (private solutions) and the API ke
 
 ```
 packages/
-  solver/    euler-solver    import solver          shell, core, crypto, ai, runners, templates, utils, config, auth (login/role)
+  packages/solver/solver/    euler-solver    import solver          shell, core, crypto, ai, runners, templates, utils, config, auth (login/role)
   site/      euler-site      import euler_site      site app, auth service, cache/csp/store/unixhttp/envfile, env.conf, static assets
   webshell/  euler-webshell  import euler_webshell  ws, per-user service, msg, osc, overlays, ticket identity, roster, `users`, key distribution
 content/     euler-content   data-only wheel: docs, topics, README, public solutions, problems.json
@@ -71,7 +71,7 @@ checker (`scripts/linters/layers.py`) enforces it.
 ### 3.2 Extension: explicit composition
 
 `solver.main.main(argv, *, extension=None)`. The web shell's entry point passes an
-`Extension` (`solver/shell/extension.py`) carrying extra command modules, an overlay table
+`Extension` (`packages/solver/solver/shell/extension.py`) carrying extra command modules, an overlay table
 and a `notify` callback. Plugin discovery via `entry_points` is deliberately avoided: an
 editable dev venv with every package installed would load web commands into the terminal.
 
@@ -95,17 +95,17 @@ replace = "euler_webshell.viewer:show"      # body replaced; signature must matc
 
 ### 3.3 `login`
 
-`solver/shell/login.py`, run by `main()` at startup:
+`packages/solver/solver/shell/login.py`, run by `main()` at startup:
 
 1. **Who and role** — `identify()`, before any command module loads (each command's floor
    is checked as it registers). The solver shell's own is the OS login — the real uid's
-   account name, never `$USER` — with the Q4 chain (`solver/auth/identity.py`): the
+   account name, never `$USER` — with the Q4 chain (`packages/solver/solver/auth/identity.py`): the
    root-owned policy's entry for the login; else the e-mail whose `system_slug` *is* the
    login (a per-user web uid, so a `solver` run inside a web shell holds its owner's rung);
    else `reader`. No policy → the checkout owner is `admin`, anyone else `contributor`. A
    policy counts only if it and every directory above it are root-owned. An `Extension` may
    bring its own identity: the web shell redeems its one-time ticket
-   (`solver/web/shell/identity.py`).
+   (`packages/webshell/euler_webshell/shell/identity.py`).
 2. **Vault** — `unlock()`: `EULER_VAULT_KEY_FILE` → `EULER_VAULT_PASSWORD` → a terminal
    prompt, unless the extension says `prompt_vault=False` (the web shell: the browser
    unlocks). The vault's state is read where it matters (the key file), not copied onto the
@@ -129,16 +129,16 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
 | 3 | `login` + identity/role providers; ticket/instance planes out; `roles.json` | `solver.auth` imports no web code |
 | 4 | Key distribution and staff notices to the web side | Allowlist empty |
 | 5 | `ContentRoot`, `euler-content`, public `euler-site` unit, Caddy public route | Signed-out browsing works; private unreachable |
-| 6 | Physical move to `packages/`, three pyprojects, import renames, units, Makefile/hooks/tests, lockstep release | install, audit, pre-push, `redeploy-web` pass |
+| 6 | Physical move to `packages/`, three pyprojects, import renames, units, Makefile/hooks/tests, lockstep release | install, audit, pre-push, `upgrade-web` pass |
 | 7 | Resource-side enforcement for admin/maintainer commands; terminal vs web catalogues; docs | Audit table recorded |
 
 ## 5. Progress
 
 - **Phase 0–1** (`32066ade2`): this document; `scripts/linters/layers.py` + `layers.allow`;
-  `solver/shell/extension.py` and `main(extension=)`.
-- **Phase 2**: OSC lives in `solver/web/shell/` (the future `euler_webshell`): `osc.py`
-  (moved from `solver/core/`, plus `nudge`), `overlays.toml`, `viewer.py` (the pane-swapping
-  `show` / `edit`), and the entry point `python -m solver.web.shell`, which the per-user
+  `packages/solver/solver/shell/extension.py` and `main(extension=)`.
+- **Phase 2**: OSC lives in `packages/webshell/euler_webshell/shell/` (the future `euler_webshell`): `osc.py`
+  (moved from `packages/solver/solver/core/`, plus `nudge`), `overlays.toml`, `viewer.py` (the pane-swapping
+  `show` / `edit`), and the entry point `python -m euler_webshell.shell`, which the per-user
   service's PTY now runs. The solver's `show` / `edit` only open a browser tab, and
   `git` / `summary` / `keys` emit nothing. The message commands, web-side themselves, emit
   directly — including the git nudge after `msg act` saves a key or merges a request.
@@ -149,36 +149,36 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
     plain solver shell: it sends no OSC (previously it did, and Claude's captured output
     carried the escapes) and its `show` looks for a local browser.
 
-- **Phase 3**: `login` (`solver/shell/login.py`) settles identity before commands load and
+- **Phase 3**: `login` (`packages/solver/solver/shell/login.py`) settles identity before commands load and
   the vault after; `Extension` gained `identity`, `prompt_vault` and `on_start`. `solver.auth`
   is the OS login plus the Q4 role chain only; the ticket plane is
-  `solver/web/shell/identity.py`. The instance-identity plane (`EULER_USER_EMAIL` handed
+  `packages/webshell/euler_webshell/shell/identity.py`. The instance-identity plane (`EULER_USER_EMAIL` handed
   down to child `solver` processes) is gone: a child is a plain solver shell, and the policy
   maps its per-user uid back to its owner's e-mail and rung. The web shell's quiet start-up
   `git-sync` is its `on_start` hook.
   - *Tightened:* the login is read from the uid, not `$USER`; an `EULER_AUTHZ_FILE` the
     user can write is ignored; with a policy deployed, an unlisted checkout owner is
     `reader`, not `admin`; an infra `euler-*` uid gets `reader` instead of aborting.
-  - *Still in solver, for phase 4:* `solver/core/git.py` `key_waiting_hint` words its hint
+  - *Still in solver, for phase 4:* `packages/solver/solver/core/git.py` `key_waiting_hint` words its hint
     by channel.
 
 - **Phase 4**: `layers.allow` is empty — the solver shell imports no web code.
-  - *Notices:* `solver/core/notices.py` is the escape hatch § 3.2 kept for what an overlay
+  - *Notices:* `packages/solver/solver/core/notices.py` is the escape hatch § 3.2 kept for what an overlay
     cannot express — a notice whose text depends on what the command found (`git-push`'s
     pull request, `summary`'s unregistered answers, `user`'s key request, the merge that
     dismisses a review notice). Solver commands file through it; an `Extension` installs the
-    carrier (`solver/web/shell/notices.py`, the spool). With none, nothing is sent and each
-    caller says what to do by hand. The subjects live there too, and `solver.web.msg`
+    carrier (`packages/webshell/euler_webshell/shell/notices.py`, the spool). With none, nothing is sent and each
+    caller says what to do by hand. The subjects live there too, and `euler_webshell.msg`
     re-exports them. The waiting-key hint is the carrier's wording, so no channel check
     remains in solver.
   - *Key distribution (Q1):* `user-authorize`, `key-split` and `host-authorize` moved to
-    `solver/web/shell/keys.py`; `key-rekey`'s re-issue to the roster is an overlay `replace`
+    `packages/webshell/euler_webshell/shell/keys.py`; `key-rekey`'s re-issue to the roster is an overlay `replace`
     there. The solver keeps holding and receiving — `user`, `vault`, `key-reconstruct`,
     `host-unlock`, a local `key-rekey` — and gains `key-export`, which prints the sealed
     block `host-unlock` takes: the file-based issue Q1 promised.
   - *Command modules:* `msg`, `users` and the key commands load through the extension's
-    `modules`, not `modules.csv` (the loader marks `solver/web` rows non-registering until
-    phase 6 moves the tree out). Hence **`solver-host`** (`python -m solver.web.shell.host`):
+    `modules`, not `modules.csv` (the loader marks `packages/site/euler_site` rows non-registering until
+    phase 6 moves the tree out). Hence **`solver-host`** (`python -m euler_webshell.shell.host`):
     the solver shell plus those commands and the spool, with the OS login and a terminal
     vault prompt, for the operator on the host.
   - *Docs:* while the catalogue is one (phase 7 splits it), `update-docs` must see every
@@ -191,7 +191,7 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
   - *Content package:* `content/` is the `euler-content` source (`pyproject.toml`,
     `euler_content/__init__.py` with `root()`); `scripts/content/stage.py` stages it with
     the public tree — tracked files only, under fixed public roots, refusing
-    `solutions/private` — and the version stamped from `solver/version.py`. `venv.sh`
+    `solutions/private` — and the version stamped from `packages/solver/solver/version.py`. `venv.sh`
     installs it into `/opt/euler` on every venv deploy, so `redeploy-web` refreshes it.
   - *ContentRoot:* rather than a class, the two roots are the two ways the one app is
     built — `build_public_app` on the packaged tree (`SiteConfig.public`, read routes
@@ -207,3 +207,28 @@ lacks `solutions/private`. **Authenticated**: the per-user service mounts the sa
   - *Not done:* public responses are still `no-store` — positive caching needs versioned
     URLs (web-server-guide § Caching) — and the crawl found 20 broken links that the
     signed-in site has too (topics not yet written, statement-relative PE links).
+
+- **Phase 6**: the physical split.
+  - *Layout:* `packages/solver/solver` (euler-solver), `packages/site/euler_site` (euler-site:
+    the site app as `euler_site.site`, the auth service as `euler_site.auth`, the shared
+    `cache`/`csp`/`store`/`unixhttp`/`envfile`, the auth `templates/` and the static
+    `content/`), `packages/webshell/euler_webshell` (euler-webshell: `ws`, `user`, `msg`,
+    `shell`, `roster`, and `users` — the `users` command, formerly `solver.web.auth.commands`).
+    The old `solver.web.X` became `euler_site.X` or `euler_webshell.X` one for one, so every
+    `python -m` entry point keeps its shape.
+  - *Packaging:* one pyproject per package; the root `pyproject.toml` is no package any more
+    (it keeps the system-setup notes). euler-site pins `euler-solver==X.Y.Z` and
+    euler-webshell pins both; `scripts/version/release.sh` writes the three version.py and
+    the pins together. A dev venv and `/opt/euler` install all three at once
+    (`make install-all`, `venv.sh`), after removing the old single `solver` distribution.
+  - *Paths:* the checkout-relative paths the code reads (`values.conf`, the runner header,
+    the templates and skills the docs link, `home-summary.md`, the static tree Caddy deploys)
+    follow the move; `solver.config.paths.PACKAGE_DIR` names the solver's place in the tree.
+    The loader names modules from the package's parent, so `modules.csv` lists only `solver.*`.
+  - *Guards:* `layers.py` checks all three layers (`euler_webshell → euler_site → solver`);
+    the hooks and `check.sh` lint `packages`; `update-docs` renders one layout tree per
+    package; `git-publish`'s code scope is `packages`.
+  - *Deploying it:* the units name new modules (`-m euler_site.auth`, `-m euler_webshell.msg`,
+    …), so this release needs `make upgrade-web` (re-lays every unit), not `redeploy-web`.
+    Collaborators' clones pick up the layout at their next `git-sync`; until then, the few
+    pages that read the clone's `solver/` files (the AI doc, the template links) 404.

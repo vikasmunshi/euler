@@ -240,7 +240,7 @@ class RotationRehomeTests(unittest.TestCase):
         # message chip over the web, the spool verbs on the host's terminal, and the plain
         # receiving commands anywhere else.
         from solver.core import notices
-        from solver.web.shell.notices import HOST_KEY_HINT, WEB_KEY_HINT, Spool
+        from euler_webshell.shell.notices import HOST_KEY_HINT, WEB_KEY_HINT, Spool
         for delivery, expected in ((Spool(WEB_KEY_HINT), 'header'), (Spool(HOST_KEY_HINT), 'msg act'),
                                    (None, 'host-unlock')):
             notices.install(delivery)

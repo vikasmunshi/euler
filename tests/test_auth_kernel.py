@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Unit tests for the solver/auth kernel (re-simplified): the plain profile
+"""Unit tests for the packages/solver/solver/auth kernel (re-simplified): the plain profile
 ladder (rank comparison, fail-closed), the users map, and the OS-login identity with its role."""
 from __future__ import annotations
 

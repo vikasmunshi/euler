@@ -77,19 +77,19 @@ fi
 echo "interaction guard ${dir_to_check} -> ${seam_rc}"
 
 # command docstrings: the standard in docs/developer-guide.md §3.8, enforced by the
-# `check-commands` shell command. Only meaningful for the solver package — the command
+# `check-commands` shell command. Only meaningful for the packages — the command
 # registry is what it walks, and only an admin subject sees all of it (the command is
 # admin-floored, so a lesser profile finds no such command and this step is skipped).
 # Run from the host shell, which loads the web host's commands as well as the solver's.
 doclint_rc=0
 layers_rc=0
-if [[ "${dir_to_check}" == solver || "${dir_to_check}" == */solver ]]; then
+if [[ "${dir_to_check}" == packages || "${dir_to_check}" == */packages ]]; then
     echo "checking command docstrings ..."
-    python -m solver.web.shell.host "check-commands"
+    python -m euler_webshell.shell.host "check-commands"
     doclint_rc=$?
     echo "command docstrings -> ${doclint_rc}"
 
-    # layering: the solver shell must not import the web tier (docs/package-split.md § 3.1).
+    # layering: webshell → site → solver, never upward (docs/package-split.md § 3.1).
     echo "checking layering ..."
     python "$(dirname "$0")/layers.py" "$(dirname "${dir_to_check}")"
     layers_rc=$?

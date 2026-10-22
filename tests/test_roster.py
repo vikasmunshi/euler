@@ -31,10 +31,10 @@ from tempfile import TemporaryDirectory
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
-from solver.auth import roster
+from euler_webshell import roster
 from solver.auth.identity import system_slug
 from solver.crypto import keys as keys_mod
-from solver.web.shell import keys as web_keys
+from euler_webshell.shell import keys as web_keys
 from solver.crypto.ciphers import enc_key_payload, load_private_key, public_key_hex, read_master_key
 from solver.config import config as app_config
 from solver.shell import dialogue
@@ -295,7 +295,7 @@ class HostGrantTests(RosterFileTestCase):
         self.mailed: list[tuple[str, str]] = []
         self._wired: list[str] = []
         import solver.core.git as git_mod
-        import solver.web.auth.mail as mail_mod
+        import euler_site.auth.mail as mail_mod
         for module, name, stub in (
                 (mail_mod.Mailer, 'send_master_key',
                  lambda _self, rcpt, block: self.mailed.append((rcpt, block))),
@@ -368,7 +368,7 @@ class HostGrantTests(RosterFileTestCase):
     def test_an_unreachable_relay_prints_the_block_rather_than_losing_it(self) -> None:
         """The payload is already sealed, so showing it costs nothing — and a relay that is
         down, absent or firewalled off must not turn into a grant that never happened."""
-        import solver.web.auth.mail as mail_mod
+        import euler_site.auth.mail as mail_mod
 
         def refuse(_self: object, _rcpt: str, _block: str) -> None:
             raise OSError('connection refused')

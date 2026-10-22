@@ -2,7 +2,7 @@
 # Bring the local repository in sync with origin/master.
 #
 # Every failure is REPORTED, not fatal: this script returns a non-zero code and
-# leaves the decision to its caller — `git-sync` (solver/utils/scripts.py), which
+# leaves the decision to its caller — `git-sync` (packages/solver/solver/utils/scripts.py), which
 # gates the enc-key pull flow on it, and scripts/setup/user.sh, which treats a
 # refused sync as a note and carries on provisioning. `set -e` could not serve
 # either: it exited on the first failed git command, so the caller learned only

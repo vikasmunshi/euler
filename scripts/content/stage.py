@@ -5,7 +5,7 @@
     python scripts/content/stage.py OUT_DIR      # then: pip install OUT_DIR
 
 Copies `content/` to *OUT_DIR*, lays the public tree into `OUT_DIR/euler_content/tree/` and
-stamps `_version.py` from `solver/version.py` (docs/package-split.md Q3, Q5). Only **tracked**
+stamps `_version.py` from `packages/solver/solver/version.py` (docs/package-split.md Q3, Q5). Only **tracked**
 files under the public roots are copied — an untracked scratch file never ships — and the
 working-tree copy is what ships, as with the code the same deploy installs. Anything under
 `solutions/private` is refused outright: that tree is not public, and must not be in a package
@@ -27,9 +27,9 @@ PUBLIC: tuple[str, ...] = (
     'README.md', 'LICENSE',
     'docs/', 'topics/',
     'solutions/public/', 'solutions/problems.json',
-    'solver/templates/',                                  # linked from the docs (/docs/file/)
-    'solver/ai/claude/skills/',                           # composed into /docs/ai
-    'solver/web/content/home-summary.md', 'solver/web/content/vendor/README.md',
+    'packages/solver/solver/templates/',                                  # linked from the docs (/docs/file/)
+    'packages/solver/solver/ai/claude/skills/',                           # composed into /docs/ai
+    'packages/site/euler_site/content/home-summary.md', 'packages/site/euler_site/content/vendor/README.md',
 )
 PRIVATE: str = 'solutions/private/'
 
@@ -47,9 +47,10 @@ def public_files(root: Path = ROOT) -> list[str]:
 
 def version(root: Path = ROOT) -> str:
     """The code's version — the content's too (lockstep)."""
-    match = re.search(r"__version__\s*=\s*'([^']+)'", (root / 'solver' / 'version.py').read_text(encoding='utf-8'))
+    version_file = root / 'packages' / 'solver' / 'solver' / 'version.py'
+    match = re.search(r"__version__\s*=\s*'([^']+)'", version_file.read_text(encoding='utf-8'))
     if match is None:
-        raise SystemExit('stage: no __version__ in solver/version.py')
+        raise SystemExit('stage: no __version__ in packages/solver/solver/version.py')
     return match.group(1)
 
 

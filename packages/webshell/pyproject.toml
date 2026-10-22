@@ -1,0 +1,32 @@
+# euler-webshell: the web shell — the solver shell extended for the browser and the web
+# host (docs/package-split.md § 3.1): the PTY service, the per-user service, the message
+# spool, OSC, overlays, the ticket identity, the roster, `users` and key distribution.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "euler-webshell"
+dynamic = ["version"]
+description = "Project Euler Solver: the web shell, the per-user service and the message spool"
+authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
+license = "MIT"
+requires-python = ">=3.14"
+# Lockstep (Q5): the pins are rewritten by scripts/version/release.sh with every version.py.
+dependencies = [
+    "euler-solver==3.23.0",
+    "euler-site==3.23.0",
+]
+
+[project.scripts]
+solver-host = "euler_webshell.shell:host_main"   # the solver shell + the web host's commands
+
+[tool.setuptools.dynamic]
+version = { attr = "euler_webshell.version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["euler_webshell*"]
+
+[tool.setuptools.package-data]
+"euler_webshell.shell" = ["overlays.toml", "host.toml"]

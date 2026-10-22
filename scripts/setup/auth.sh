@@ -5,7 +5,7 @@
 # Deploys / removes / upgrades the runtime for the auth service: the service
 # identity (euler-auth) and wheel-gated admin plane, the root-owned /opt/euler
 # system venv the app services run from, the scoped /etc/euler/auth.env,
-# the /var/lib/euler-auth state dir, and — once the solver.web.auth module
+# the /var/lib/euler-auth state dir, and — once the euler_site.auth module
 # exists in the deployed venv — the root-owned euler-auth.service. Sibling to
 # frontend.sh / egress.sh / ddns.sh / firewall.sh / smtp.sh; see
 # docs/web-server-guide.md § Authentication.
@@ -28,7 +28,7 @@
 #     from ~/.euler/env (the authoring source); EULER_ADMIN_TOKEN is generated
 #     directly into auth.env (never ~/.euler/env) and preserved across upgrades.
 #     euler-auth never reads the full ~/.euler/env.
-#   - The systemd unit is installed only when solver.web.auth is importable from
+#   - The systemd unit is installed only when euler_site.auth is importable from
 #     the deployed venv (build-order step 4); until then deploy/upgrade report it
 #     as deferred. Unit carries the systemd egress filter (IPAddressDeny=any +
 #     IPAddressAllow=localhost): the auth service is loopback-only by design.
@@ -39,7 +39,7 @@
 #   /var/lib/euler-auth                    euler-auth:euler-auth 0700 (state)
 #   /etc/tmpfiles.d/euler.conf             root:root 0644       (/run/euler socket dir)
 #   /etc/systemd/system/euler-auth.service (root-owned, boot-enabled; deferred until
-#                                           solver.web.auth exists in the venv)
+#                                           euler_site.auth exists in the venv)
 #
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo.
@@ -97,7 +97,7 @@ Usage: $0 [deploy|remove|upgrade|redeploy|status|help]
   deploy     Create euler-auth, build the /opt/euler system venv (pip install
              <repo>[web] as root), deploy /etc/euler/auth.env (with a generated
              root-only EULER_ADMIN_TOKEN) and /var/lib/euler-auth, and — when
-             solver.web.auth exists in the venv — install the root-owned,
+             euler_site.auth exists in the venv — install the root-owned,
              boot-enabled euler-auth.service. Idempotent.
   remove     Remove the service + venv (prompts before removing auth.env, the
              state dir, and the users/groups).
@@ -344,7 +344,7 @@ ROSTER_PY
 
 # True when the deployed venv contains the auth service module (build-order step 4).
 venv_has_auth() {
-    [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c 'import solver.web.auth' 2>/dev/null
+    [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c 'import euler_site.auth' 2>/dev/null
 }
 
 # Install + enable the root-owned unit (only called when the module exists).
@@ -363,7 +363,7 @@ User=${AUTH_USER}
 Group=${AUTH_GROUP}
 SupplementaryGroups=${WEB_GROUP}
 EnvironmentFile=${AUTH_ENV}
-ExecStart=${VENV_PY} -m solver.web.auth
+ExecStart=${VENV_PY} -m euler_site.auth
 Restart=on-failure
 RestartSec=5s
 
@@ -419,7 +419,7 @@ do_deploy() {
     if venv_has_auth; then
         install_unit
     else
-        echo "note: solver.web.auth not yet in the deployed package — service unit deferred"
+        echo "note: euler_site.auth not yet in the deployed package — service unit deferred"
         echo "      (re-run '$0 upgrade' once build-order step 4 lands)."
     fi
 
@@ -486,7 +486,7 @@ do_status() {
         # the answer to "did redeploy-web actually ship it?". Read from the installed
         # dist-info rather than by importing, so it reports what pip put in the venv.
         local deployed
-        deployed="$("${VENV_PY}" -P -c 'from importlib.metadata import version; print(version("solver"))' 2>/dev/null)"
+        deployed="$("${VENV_PY}" -P -c 'from importlib.metadata import version; print(version("euler-solver"))' 2>/dev/null)"
         if [ -n "${deployed}" ]; then
             echo "solver:      ✓ v${deployed} deployed"
         else
@@ -536,7 +536,7 @@ do_status() {
     if [ -f "${SERVICE_DEST}" ]; then
         echo "${SERVICE_NAME}: $(systemctl is-active "${SERVICE_NAME}" 2>/dev/null)/$(systemctl is-enabled "${SERVICE_NAME}" 2>/dev/null)"
     else
-        echo "${SERVICE_NAME}: deferred (solver.web.auth not yet deployed)"
+        echo "${SERVICE_NAME}: deferred (euler_site.auth not yet deployed)"
     fi
 }
 

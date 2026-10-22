@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the shared interaction model: solver/shell/dialogue.py and the `Ask` binding.
+"""Tests for the shared interaction model: packages/solver/solver/shell/dialogue.py and the `Ask` binding.
 
 Two seams stand in for a terminal: `dialogue.interactive`, the one guard every prompt goes
 through, and the shared console's `input`. Scripting both lets a dialogue be driven exactly as
@@ -360,8 +360,8 @@ class MsgNoDeadEndTests(_DialogueCase):
     """
 
     def setUp(self) -> None:
-        from solver.web.auth import commands as auth_commands
-        from solver.web.msg import commands as msg_commands
+        from euler_webshell import users as auth_commands
+        from euler_webshell.msg import commands as msg_commands
         self.commands = msg_commands
         self.calls: list[tuple[str, Any]] = []
         # The spool is not reachable under test: every verb's own call is stubbed to succeed,

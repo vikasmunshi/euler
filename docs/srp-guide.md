@@ -2,8 +2,8 @@
 
 This guide covers **Secure Remote Password (SRP-6a)**, the protocol behind every web login:
 the mathematics it rests on, and exactly how this project uses it. It is implemented twice,
-deliberately — [`solver/web/auth/srp.py`](../solver/web/auth/srp.py) for the service and
-[`solver/web/content/assets/srp.js`](../solver/web/content/assets/srp.js) for the browser —
+deliberately — [`packages/site/euler_site/auth/srp.py`](../packages/site/euler_site/auth/srp.py) for the service and
+[`packages/site/euler_site/content/assets/srp.js`](../packages/site/euler_site/content/assets/srp.js) for the browser —
 and the two are held byte-for-byte compatible by
 [`tests/test_srp_interop.py`](../tests/test_srp_interop.py).
 
@@ -181,7 +181,7 @@ wrong password, and the two must not share a path.
 ```
 browser                     Caddy            euler-auth (unix socket)
 ────────                    ─────            ───────────────────────
-srp.js                                       solver/web/auth/
+srp.js                                       packages/site/euler_site/auth/
   computeVerifier()  ──register──▶ TLS ──▶     app.py     endpoints + challenge table
   startLogin()                                 srp.py     the protocol
     POST /auth/challenge {email}               users.py   salt + verifier at rest
@@ -249,7 +249,7 @@ Both ends are ordinary Python objects, so a handshake can be run in-process — 
 a local harness):
 
 ```python
-from solver.web.auth.srp import SrpClient, SrpServer, SrpToken, make_srp_token, verify_password
+from euler_site.auth.srp import SrpClient, SrpServer, SrpToken, make_srp_token, verify_password
 
 token = SrpToken.parse(make_srp_token('ada@example.com', 'correct horse battery staple'))
 
@@ -317,11 +317,11 @@ second execution.
 
 | file | role |
 | --- | --- |
-| [`solver/web/auth/srp.py`](../solver/web/auth/srp.py) | the protocol, both ends, plus `verify_password` and `decoy_token` |
-| [`solver/web/content/assets/srp.js`](../solver/web/content/assets/srp.js) | the browser client (plain script, CSP `'self'`, also loadable under Node) |
-| [`solver/web/auth/app.py`](../solver/web/auth/app.py) | `/auth/challenge`, `/auth/verify`, password change, the challenge table |
-| [`solver/web/auth/pages.py`](../solver/web/auth/pages.py) | the register / reset / forgot flows, and `/register/complete` |
-| [`solver/web/auth/users.py`](../solver/web/auth/users.py) | the service's own `users.json`: salt + verifier at rest, host-only |
-| [`solver/web/auth/policy.py`](../solver/web/auth/policy.py) | lifetimes, cookie names, password and OTP rules |
-| [`solver/web/auth/ratelimit.py`](../solver/web/auth/ratelimit.py) | sliding-window limiter on the unauthenticated endpoints |
+| [`packages/site/euler_site/auth/srp.py`](../packages/site/euler_site/auth/srp.py) | the protocol, both ends, plus `verify_password` and `decoy_token` |
+| [`packages/site/euler_site/content/assets/srp.js`](../packages/site/euler_site/content/assets/srp.js) | the browser client (plain script, CSP `'self'`, also loadable under Node) |
+| [`packages/site/euler_site/auth/app.py`](../packages/site/euler_site/auth/app.py) | `/auth/challenge`, `/auth/verify`, password change, the challenge table |
+| [`packages/site/euler_site/auth/pages.py`](../packages/site/euler_site/auth/pages.py) | the register / reset / forgot flows, and `/register/complete` |
+| [`packages/site/euler_site/auth/users.py`](../packages/site/euler_site/auth/users.py) | the service's own `users.json`: salt + verifier at rest, host-only |
+| [`packages/site/euler_site/auth/policy.py`](../packages/site/euler_site/auth/policy.py) | lifetimes, cookie names, password and OTP rules |
+| [`packages/site/euler_site/auth/ratelimit.py`](../packages/site/euler_site/auth/ratelimit.py) | sliding-window limiter on the unauthenticated endpoints |
 | [`tests/test_srp_interop.py`](../tests/test_srp_interop.py) | JS ↔ Python interop, byte-for-byte |

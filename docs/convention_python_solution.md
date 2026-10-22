@@ -20,7 +20,7 @@ Implement `solve()` in the canonical Python solution template; for reference, se
   `if __name__ == "__main__": raise SystemExit(solve())` block are the project's test harness —
   leave them exactly as the template provides. Implement `solve()`'s body and the module-level
   helpers above it.
-- **Output contract.** `@runner.main` (in `solver/runners/runner.py`) benchmarks `solve()` and
+- **Output contract.** `@runner.main` (in `packages/solver/solver/runners/runner.py`) benchmarks `solve()` and
   prints the final stdout line the harness reads — `<runs> <avg_seconds> <result>`. `solve()` only
   *returns* the answer string; it must never print that line itself. Gate any diagnostic output
   behind `runner.show` (the global set by `--show`), and never print *after* `solve()` returns.

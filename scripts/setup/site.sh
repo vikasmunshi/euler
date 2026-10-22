@@ -7,7 +7,7 @@
 # § 3.4; docs/web-server-guide.md § The public site). Sibling to msg.sh / auth.sh.
 #
 # Model:
-#   - The service (python -m solver.web.site, EULER_SITE_PUBLIC=1) runs as the dedicated
+#   - The service (python -m euler_site.site, EULER_SITE_PUBLIC=1) runs as the dedicated
 #     `euler-site` user from the shared root-owned /opt/euler venv, which **auth.sh owns**:
 #     its deploy also installs `euler-content`, the packaged public tree this serves. This
 #     kit never builds or reinstalls the venv; it only restarts the service against it.
@@ -88,8 +88,8 @@ require_venv() {
         echo "Error: ${VENV_DIR} is not deployed — run 'make deploy-auth' first (it owns the venv)." >&2
         return 1
     fi
-    if ! sudo "${VENV_PY}" -P -c 'import solver.web.site, euler_content' 2>/dev/null; then
-        echo "Error: solver.web.site or euler_content is not importable from ${VENV_DIR}." >&2
+    if ! sudo "${VENV_PY}" -P -c 'import euler_site.site, euler_content' 2>/dev/null; then
+        echo "Error: euler_site.site or euler_content is not importable from ${VENV_DIR}." >&2
         echo "       Run 'make redeploy-auth' to reinstall this checkout and its content." >&2
         return 1
     fi
@@ -142,7 +142,7 @@ Group=${SITE_GROUP}
 # euler-web: to chgrp its own socket at bind time, so Caddy can connect.
 SupplementaryGroups=${WEB_GROUP}
 EnvironmentFile=${SITE_ENV}
-ExecStart=${VENV_PY} -m solver.web.site
+ExecStart=${VENV_PY} -m euler_site.site
 Restart=on-failure
 RestartSec=5s
 

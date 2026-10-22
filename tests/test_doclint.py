@@ -289,7 +289,7 @@ class MarkerTests(unittest.TestCase):
 
 
 class HelpModelTests(unittest.TestCase):
-    """The model `?` renders and `update-docs` publishes (solver/shell/docstring)."""
+    """The model `?` renders and `update-docs` publishes (packages/solver/solver/shell/docstring)."""
 
     def _model(self, *, quietable: bool = False, uses_problem: bool = False) -> HelpModel:
         def cmd(ctx: Context, problem: Problem, runs: int = 1) -> int:
@@ -350,7 +350,7 @@ class ParsingTests(unittest.TestCase):
 
 
 class RenderTests(unittest.TestCase):
-    """The `?` renderer's docstring handling (solver/shell/builtins)."""
+    """The `?` renderer's docstring handling (packages/solver/solver/shell/builtins)."""
 
     def test_inline_code_survives_both_spellings(self) -> None:
         rendered = _prose('markdown `one` and rst ``two`` and **three**').plain

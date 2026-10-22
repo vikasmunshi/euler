@@ -1,76 +1,12 @@
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "solver"
-# The version is read at build time from `solver/version.py` (see
-# [tool.setuptools.dynamic] below) and frozen into the wheel metadata. That file
-# is the single source of truth and is written only by scripts/version/release.sh,
-# which bumps it and tags `vX.Y.Z` together — never hand-edit a number here.
-dynamic = ["version"]
-description = "Interactive shell for solving and managing Project Euler problems"
-authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
-license = "MIT"
-requires-python = ">=3.14"
-dependencies = [
-    "beautifulsoup4",
-    "cryptography",
-    "flake8",
-    "mypy",
-    "prompt-toolkit",
-    "python-dotenv",
-    "requests",
-    "rich",
-    "types-requests",
-]
-
-[project.optional-dependencies]
-ai = [
-    "anthropic",
-]
-dev = [
-    "autoflake",
-    "autopep8",
-    "black",
-    "isort",
-]
-show = [
-    "matplotlib",
-    "PyQt5",
-]
-web = [
-    # The app-service stack: aiohttp is the one framework across the app
-    # services; Jinja2 (via aiohttp-jinja2, autoescape on) replaces homegrown
-    # string templating. Deployed by scripts/setup/auth.sh into the root-owned
-    # /opt/euler system venv the euler-* services run from.
-    "aiohttp",
-    "aiohttp-jinja2",
-    "jinja2",
-    # The `.html` save gate (Phase 5c): sanitize-and-store-clean. The
-    # cp38-abi3 stable-ABI wheel installs on 3.14 with no Rust toolchain;
-    # content.sh's deploy/status checks verify the import in the system venv.
-    "nh3",
-    # Reading the ink of a cached problem diagram (content._image_ink): a
-    # projecteuler.net statement's images are transparent, so they take our dark
-    # ground, and their line art is drawn for a white one. Only the pixels say which
-    # images need a plate — `class="dark_img"` does not. The import is local to that
-    # one function and its absence degrades to "no plate" (today's rendering), so a
-    # venv without it serves statements, just without the fix.
-    "pillow",
-]
-solutions = [
-    # NOTE: `pip install primesieve` builds only the base extension; its optional
-    # `primesieve.numpy` extension must be built from source against NumPy 2.x via
-    # ./scripts/setup/primesieve_numpy_extension.sh (see [tool.setup.primesieve-numpy]).
-    # cython / numpy / setuptools below are the build deps that script relies on.
-    "cython",
-    "mpmath",
-    "numpy",
-    "primesieve",
-    "setuptools",
-]
-
+# The checkout is three packages and a content wheel (docs/package-split.md), each with its own
+# pyproject.toml:
+#
+#   packages/solver/pyproject.toml     euler-solver    import solver           the solver shell
+#   packages/site/pyproject.toml       euler-site      import euler_site       the content site + auth
+#   packages/webshell/pyproject.toml   euler-webshell  import euler_webshell   the web shell + spool
+#   content/pyproject.toml             euler-content   the published content (staged by scripts/content/stage.py)
+#
+# This file is no package. It records the system setup the packages need before `pip install`.
 
 # System-level dependencies (apt) required before `pip install`.
 # Install with: ./scripts/setup_dev_env.sh install python primesieve c
@@ -98,48 +34,3 @@ apt = [
 [tool.setup.primesieve-numpy]
 script = "./scripts/setup/primesieve_numpy_extension.sh"
 actions = ["install", "check", "uninstall"]
-
-[project.scripts]
-# NOTE: no solver-web script — the web services are systemd units run from the
-# /opt/euler system venv (python -m solver.web.<svc>), not a
-# detached-process CLI.
-solver = "solver.main:main"
-solver-host = "solver.web.shell:host_main"   # the solver shell + the web host's commands (docs/package-split.md)
-solver-gitfilter = "solver.crypto.gitfilter:main"
-
-[tool.setuptools.dynamic]
-# Read the version straight from the tracked `solver/version.py` (`__version__`,
-# a plain string literal setuptools parses without importing the package). No git
-# at build time — the deployed venv (/opt/euler/venv) builds identically to a dev
-# `pip install`, and `importlib.metadata.version("solver")` returns this number.
-version = { attr = "solver.version.__version__" }
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["solver*"]
-
-[tool.setuptools.package-data]
-# modules.csv is the loader's startup manifest (config.modules_file, read by
-# utils/loader.py); it must ship in the wheel so the deployed venv can import
-# the command modules.
-solver = ["*.html", "modules.csv"]
-# values.conf carries every setting's shipped value. The working tree's copy is what the
-# shell actually reads, so this is the fallback for a deployed venv whose tree somehow
-# lacks it — but without it, `pip install` would produce a package that cannot state its
-# own defaults, and the fallback would be the thing that is missing.
-"solver.config" = ["*.conf"]
-# `config.templates_dir` is package-relative, so the whole template set must ship:
-# the AI prompts (prompt_*.txt), the C solution template (new.c — new.py is a module
-# and ships anyway) and the blogger's article.md. Without these a deployed shell's
-# `new … c`, `claude-api` and `claude-blog` read a file that isn't there.
-"solver.templates" = ["*.txt", "*.c", "*.md"]
-"solver.web" = [
-    "templates/*.html",      # Jinja pages ship inside the deployed venv
-    # The start page's summary — a tracked, generated file (the `update-docs`
-    # command rebuilds it from the README's HOME slice; root README.md stays the
-    # source of truth). It ships because euler-auth renders the start page from
-    # /opt/euler with no clone to read.
-    "content/home-summary.md",
-]
-"solver.web.site" = ["templates/*.html"]  # content-service pages (Phase 5)
-"solver.web.shell" = ["overlays.toml", "host.toml"]   # the web shell's overlays (docs/package-split.md § 3.2)

@@ -21,7 +21,9 @@ from solver.shell.command import registry
 from solver.utils.loader import load_commands
 
 _ROOT = Path(__file__).resolve().parents[1]
-_SITE = _ROOT / 'solver' / 'web'
+_SITE = _ROOT / 'packages' / 'site' / 'euler_site'
+#: Every web tree a page or a handler can name a terminal verb from: the site and the web shell.
+_WEB_TREES: tuple[Path, ...] = (_SITE, _ROOT / 'packages' / 'webshell' / 'euler_webshell')
 
 #: A `data-term-cmd="git-sync"`, or the **static prefix** of an interpolated one
 #: (`data-term-cmd="user-authorize {{ item.id }}"` → `user-authorize`) — the same treatment
@@ -34,7 +36,7 @@ _VERB_RE = re.compile(r"verb\(\s*'[^']*'\s*,\s*'([^']+)'")
 #: An `Action(kind='term', command=f'claude-blog {name}')` — take the static prefix, which is
 #: the command and any literal flags before the first `{…}` interpolation.
 _ACTION_CMD_RE = re.compile(r"kind='term',\s*command=f?['\"]([^'\"{}]+)")
-#: A row verb built in Python: `'verb': f'msg act {thread_id}'` (solver/web/user/msg_api.py).
+#: A row verb built in Python: `'verb': f'msg act {thread_id}'` (packages/webshell/euler_webshell/user/msg_api.py).
 #: The chip builds its rows' command in code, not in the template, so the two regexes above
 #: stopped seeing it — silently dropping the row verbs out of this check. Anchored on a `verb`
 #: binding (`verb =`, `verb, label =`, or the `'verb':` dict key) rather than on f-strings
@@ -45,11 +47,11 @@ _VERB_ASSIGN_RE = re.compile(r"'?verb'?(?:,\s*\w+)?\s*[:=]\s*f'([^'{}]+)")
 
 def _emitted_commands() -> set[str]:
     commands: set[str] = set()
-    for path in _SITE.rglob('*.html'):
+    for path in (p for tree in _WEB_TREES for p in tree.rglob('*.html')):
         text = path.read_text(encoding='utf-8')
         commands.update(_TERM_CMD_RE.findall(text))
         commands.update(_VERB_RE.findall(text))
-    for path in _SITE.rglob('*.py'):
+    for path in (p for tree in _WEB_TREES for p in tree.rglob('*.py')):
         text = path.read_text(encoding='utf-8')
         commands.update(_ACTION_CMD_RE.findall(text))
         commands.update(_VERB_ASSIGN_RE.findall(text))

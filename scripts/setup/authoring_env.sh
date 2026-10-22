@@ -22,7 +22,7 @@
 # Licensed under the MIT License.
 
 # The authoring source: a sibling dot-dir of the checkout (~/euler -> ~/.euler), matching
-# solver/config/paths.py's own derivation. NOT $HOME-based: under sudo, $HOME is root's
+# packages/solver/solver/config/paths.py's own derivation. NOT $HOME-based: under sudo, $HOME is root's
 # while the vault is still the operator's.
 # shellcheck disable=SC2034  # read by the kits that source this file, not by it
 ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"
@@ -61,7 +61,7 @@ load_authoring_env() {
     [ -r "${file}" ] || return 1
 
     # Plaintext (a scoped runtime copy, or a pre-`vault init` authoring env): source it
-    # directly. The vault magic is 'VLT\x01' (solver/crypto/wire.py); test its three
+    # directly. The vault magic is 'VLT\x01' (packages/solver/solver/crypto/wire.py); test its three
     # printable bytes, because the version byte is not one command substitution will
     # survive intact — and a mis-detected ciphertext gets *sourced*, which is how a
     # binary blob ends up being executed as shell.

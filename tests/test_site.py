@@ -22,11 +22,11 @@ from pathlib import Path
 import jinja2
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.web.site import content, gitstate
-from solver.web.site.app import build_app
+from euler_site.site import content, gitstate
+from euler_site.site.app import build_app
 
-from solver.web.site.config import SiteConfig
-from solver.web.site.render import render_block
+from euler_site.site.config import SiteConfig
+from euler_site.site.render import render_block
 from tests import silence
 
 silence()   # filter aiohttp's request-key warning the handlers trip
@@ -40,7 +40,8 @@ _HTMX = {'HX-Request': 'true'}
 
 
 #: Every Claude Code skill in this checkout — the composed `ai` doc must carry them all.
-_REPO_SKILLS = sorted((Path(__file__).resolve().parents[1] / 'solver/ai/claude/skills').glob('*/SKILL.md'))
+_REPO_SKILLS = sorted((Path(__file__).resolve().parents[1]
+                       / 'packages/solver/solver/ai/claude/skills').glob('*/SKILL.md'))
 
 #: A deterministic policy for tests: the ladder plus an empty users map. Tests must
 #: point EULER_AUTHZ_FILE at this — a host with the real /etc/euler SoR deployed would
@@ -50,7 +51,7 @@ _AUTHZ_FIXTURE = Path(__file__).parent / 'fixtures' / 'authorizations.json'
 
 def _config(profile: str = '') -> SiteConfig:
     repo = Path(__file__).resolve().parents[1]
-    return SiteConfig(repo_root=repo, static_dir=repo / 'solver/web/content',
+    return SiteConfig(repo_root=repo, static_dir=repo / 'packages/site/euler_site/content',
                       socket_path=Path('/tmp/unused.sock'), socket_group='',
                       tcp_bind='', serve_static=False, profile=profile)
 
@@ -428,13 +429,13 @@ class ContentServiceTests(AioHTTPTestCase):
         resp = await self.client.get('/docs/authorizations', headers=_READER)
         page = await resp.text()
         self.assertIn('href="/docs/web-server-guide"', page)
-        # gitfilter-guide.md links ../solver/crypto/gitfilter.py. `/docs/file/` deliberately
-        # does not serve the wider solver/ source, so that link goes to GitHub — the repo is
+        # gitfilter-guide.md links ../packages/solver/solver/crypto/gitfilter.py. `/docs/file/` deliberately
+        # does not serve the wider packages/solver/solver/ source, so that link goes to GitHub — the repo is
         # public, and a live link to a 404 is worse than leaving the app.
         resp = await self.client.get('/docs/gitfilter-guide', headers=_READER)
         page = await resp.text()
-        self.assertIn(f'href="{content.README_REPO_BASE}solver/crypto/gitfilter.py"', page)
-        self.assertNotIn('href="/docs/file/solver/crypto/', page)
+        self.assertIn(f'href="{content.README_REPO_BASE}packages/solver/solver/crypto/gitfilter.py"', page)
+        self.assertNotIn('href="/docs/file/packages/solver/solver/crypto/', page)
         self.assertNotIn('href="../solver', page)            # no dangling repo-relative link
         # internal links are boosted (swap #content), externals are left alone
         self.assertRegex(page, r'href="/docs/[^"]+" hx-get="/docs/')
@@ -444,7 +445,7 @@ class ContentServiceTests(AioHTTPTestCase):
         """The invariant the rewrite exists for: a rendered guide never points at
         `/docs/file/<path>` unless that route will actually serve it.
 
-        It was broken for as long as the rewrite was unconditional — every `../solver/…`
+        It was broken for as long as the rewrite was unconditional — every `../packages/solver/solver/…`
         link in a guide rendered as a live link to a 404, and nothing caught it because the
         old assertion pinned the *rewrite* rather than the *resolution*."""
         docs_dir = Path(__file__).resolve().parents[1] / 'docs'
@@ -460,12 +461,12 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_doc_file_view_and_scope(self) -> None:
         # a doc-referenced template file renders in the viewer…
-        resp = await self.client.get('/docs/file/solver/templates/new.py', headers=_READER)
+        resp = await self.client.get('/docs/file/packages/solver/solver/templates/new.py', headers=_READER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertIn('runner', body)                        # the source (escaped) in a code block
         self.assertIn('solve', body)
-        self.assertIn('solver/templates/new.py', body)
+        self.assertIn('packages/solver/solver/templates/new.py', body)
         # …and a solution file (the solutions object tree — e.g. a topic linking
         # ../solutions/…) and an about file (README) view through the same route…
         for path in ('/docs/file/solutions/public/p0042/p0042_s0.py',
@@ -473,9 +474,9 @@ class ContentServiceTests(AioHTTPTestCase):
             resp = await self.client.get(path, headers=_READER)
             self.assertEqual(resp.status, 200, path)
         # …but nothing outside the declared-readable trees, and no traversal
-        for path in ('/docs/file/solver/config.py',          # solver source, not readable
-                     '/docs/file/solver/config/values.conf',        # not a declared-readable tree
-                     '/docs/file/solver/templates/../config.py',
+        for path in ('/docs/file/packages/solver/solver/config.py',          # solver source, not readable
+                     '/docs/file/packages/solver/solver/config/values.conf',        # not a declared-readable tree
+                     '/docs/file/packages/solver/solver/templates/../config.py',
                      '/docs/file/../README.md'):
             resp = await self.client.get(path, headers=_READER)
             self.assertEqual(resp.status, 404, path)
@@ -945,7 +946,7 @@ class TopicCardStatusTests(unittest.TestCase):
                 problems: int | None = None, total: int = 0) -> str:
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
-                                           / 'solver/web/site/templates'),
+                                           / 'packages/site/euler_site/site/templates'),
             autoescape=True)
         entry = content.DocEntry(name='number-theory/primes', heading='Primes',
                                  title='Generating and testing primes', status=status,
@@ -1129,7 +1130,7 @@ class GitStatusTests(unittest.TestCase):
 
     def test_states_and_degradation(self) -> None:
         import subprocess
-        from solver.web.site import content as site_content
+        from euler_site.site import content as site_content
         scratch = Path(tempfile.mkdtemp(prefix='euler-git-test-'))
         self.addCleanup(shutil.rmtree, scratch, True)
         pdir = scratch / 'solutions' / 'public' / 'p0009'

@@ -77,7 +77,7 @@ KEY_FILE="${TLS_DIR}/server.key"           # private key (readable by euler-web)
 # ── Static web content (maintenance page + assets) ────────────────────────────────
 # Authored in the repo, deployed under /etc/euler because euler-caddy cannot read the
 # repo owner's 0750 home dir (the config-location rationale).
-WEB_CONTENT_SRC="${PROJECT_ROOT}/solver/web/content"   # repo source of truth
+WEB_CONTENT_SRC="${PROJECT_ROOT}/packages/site/euler_site/content"   # repo source of truth
 WEB_CONTENT_DIR="${SYS_DIR}/web-content"               # deployed, readable by euler-caddy
 
 # ── Service identity ───────────────────────────────────────────────────────
@@ -523,7 +523,7 @@ ${DOMAIN} {
 	request_header -X-User-Slug
 
 	# Per-user routing: the matcher admits only a well-formed system
-	# slug (solver/auth system_slug emits ^[a-z][a-z0-9-]*$) set by forward_auth —
+	# slug (packages/solver/solver/auth system_slug emits ^[a-z][a-z0-9-]*$) set by forward_auth —
 	# defined at site scope, evaluated where referenced (after forward_auth has set
 	# the header). Content and /ws share the one per-user instance, so no path split.
 	@user header_regexp X-User-Slug ^[a-z][a-z0-9-]{1,30}$

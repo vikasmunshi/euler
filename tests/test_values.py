@@ -37,7 +37,7 @@ _NO_FILE: Path = Path('/nonexistent/values.conf')
 
 #: Enough of an anchor set to let the shipped file's `${...}` references resolve; what the
 #: anchors actually expand to is `build_config`'s business, not this reader's.
-_ANCHORS: dict[str, str] = {'root_dir': str(_ROOT), 'package_dir': str(_ROOT / 'solver'),
+_ANCHORS: dict[str, str] = {'root_dir': str(_ROOT), 'package_dir': str(_ROOT / 'packages' / 'solver' / 'solver'),
                             'secrets_dir': str(_ROOT.parent / '.euler'), 'home_dir': str(Path.home())}
 
 

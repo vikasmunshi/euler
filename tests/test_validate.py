@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the save gate (solver/web/site/validate.py):
+"""Tests for the save gate (packages/site/euler_site/site/validate.py):
 the per-suffix checks every 5d write passes — .py (auto-fix + flake8),
 .c (compile against the runner header), .json (reject-and-restore semantics),
 and the .html sanitize-and-store-clean via nh3."""
@@ -9,7 +9,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from solver.web.site.validate import validate
+from euler_site.site.validate import validate
 
 _REPO = Path(__file__).resolve().parents[1]
 

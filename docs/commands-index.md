@@ -273,7 +273,7 @@ non-zero when there is at least one — so the command gates a chain and serves 
 docstring lane of `scripts/linters/check.sh solver`.
 
 **Admin-floored on purpose, not out of caution.** Registration is itself
-profile-filtered (`solver/shell/command.py`): a command above your floor is never
+profile-filtered (`packages/solver/solver/shell/command.py`): a command above your floor is never
 registered, so `registry.all()` returns only what *you* may run. Checking from a lesser
 profile would pass by never looking at the commands it cannot see — the same reasoning
 that floors `update-docs`.
@@ -1121,7 +1121,7 @@ host-authorize
 | `public_key` | The 64-hex X25519 public key of the machine being authorized — what `user` prints there. |
 | `email` | Where to send it. Their address, or your own if you intend to forward it by another route. |
 
-*Defined in* `solver.web.shell.keys.host_authorize`.
+*Defined in* `euler_webshell.shell.keys.host_authorize`.
 
 ---
 
@@ -1284,7 +1284,7 @@ key-split
 | `identity` | Who to send the other half to. Not asked — and not used — on the run that writes the repository's share. |
 | `public_key` | The recipient's 64-hex public key, for somebody the roster has no key for yet — a first grant, before anyone has been authorised. Defaults to '', which reads it from the roster. |
 
-*Defined in* `solver.web.shell.keys.key_split`.
+*Defined in* `euler_webshell.shell.keys.key_split`.
 
 ---
 
@@ -1433,7 +1433,7 @@ msg
 | `body` | The message text, for `send`. |
 | `to` | Who a `send` goes to: `staff` (the default, and the only audience below the `maintainer` floor), `everyone`, or one or more identities, comma-separated. Staff are offered the known accounts as a menu where the roster can be read. |
 
-*Defined in* `solver.web.msg.commands.msg`.
+*Defined in* `euler_webshell.msg.commands.msg`.
 
 ---
 
@@ -1883,7 +1883,7 @@ in `docs/authorizations.md` (module / command / channels / requires / least
 profile), and the README package-layout tree (built from each module's
 docstring) — from the live command registry and the source tree, leaving all
 hand-written prose untouched. Also regenerates the web start page's summary
-(`solver/web/content/home-summary.md`) from the README's HOME slice. Run it
+(`packages/site/euler_site/content/home-summary.md`) from the README's HOME slice. Run it
 after changing any command's name, alias, help text, signature,
 `requires`/`channels`, a module's first docstring line, or the README's HOME
 region.
@@ -1892,7 +1892,7 @@ What it rewrote is committed — the guides, the README, the module registry, th
 start-page summary and the Claude guidance, and nothing beside them.
 
 **Admin-floored on purpose, not out of caution.** Registration is itself
-profile-filtered (`solver/shell/command.py`): a command above your floor is never
+profile-filtered (`packages/solver/solver/shell/command.py`): a command above your floor is never
 registered, so `registry.all()` returns only what *you* may run. Regenerating from a
 lesser profile's registry would drop every admin-floored command from the audit table
 and the command index — silently, and in exactly the documents whose worth is being
@@ -2001,7 +2001,7 @@ The glue for the double-entry tag graph.
 
 * ⚑ needs contributor or above.
 
-Order (maintainer beats solver/contributor): apply maintainer edits to the central
+Order (maintainer beats packages/solver/solver/contributor): apply maintainer edits to the central
 vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
 the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
 the topic articles' problem lists and rewrite the article index `topics/articles.json`
@@ -2135,7 +2135,7 @@ user-authorize
 | `target` | The 16-hex id of a key-authorization message, or a 64-hex public key. Offered as a menu of the waiting requests when omitted; not strict, so a bare key can still be pasted. |
 | `identity` | Who the key belongs to. Taken from the thread for the message form, so it is only asked for the bare-key form — where there is nobody to send it to otherwise. |
 
-*Defined in* `solver.web.shell.keys.user_authorize`.
+*Defined in* `euler_webshell.shell.keys.user_authorize`.
 
 ---
 
@@ -2174,7 +2174,7 @@ users
 | `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Offered as a menu of the roster for the verbs that act on an account that already exists — `change` / `enable` / `disable` / `remove` — and not asked for the others, since `add` names one that does not yet and `list` / `process-requests` / `redeploy` name none. |
 | `profile` | The profile to assign, for `add` / `change`. `admin` is valid only for a local os-login, never a web account. |
 
-*Defined in* `solver.web.auth.commands.users`.
+*Defined in* `euler_webshell.users.users`.
 
 ---
 
@@ -2220,7 +2220,7 @@ Print the installed build version, plus live git detail of the clone.
 * ⚑ needs reader or above.
 
 The first line is the running build: the number recorded in the tracked
-`solver/version.py` (`config.version`), written only by the release script and
+`packages/solver/solver/version.py` (`config.version`), written only by the release script and
 correct even in the deployed venv where there is no git. The second line is the
 live `git describe`
 of `config.root_dir` — the developer's checkout in a terminal, or the

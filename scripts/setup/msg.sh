@@ -6,7 +6,7 @@
 # docs/web-server-guide.md § Messaging. Sibling to auth.sh / smtp.sh / user.sh.
 #
 # Model:
-#   - The service (python -m solver.web.msg) runs as the dedicated `euler-msg` user
+#   - The service (python -m euler_webshell.msg) runs as the dedicated `euler-msg` user
 #     from the shared root-owned /opt/euler venv, which **auth.sh owns** — this kit
 #     never builds or reinstalls it, it only restarts the service against it.
 #   - Two unix sockets, no network at all:
@@ -106,8 +106,8 @@ require_venv() {
         echo "Error: ${VENV_DIR} is not deployed — run 'make deploy-auth' first (it owns the venv)." >&2
         return 1
     fi
-    if ! sudo "${VENV_PY}" -P -c 'import solver.web.msg' 2>/dev/null; then
-        echo "Error: solver.web.msg is not importable from ${VENV_DIR}." >&2
+    if ! sudo "${VENV_PY}" -P -c 'import euler_webshell.msg' 2>/dev/null; then
+        echo "Error: euler_webshell.msg is not importable from ${VENV_DIR}." >&2
         echo "       Run 'make redeploy-auth' to reinstall this checkout into the venv." >&2
         return 1
     fi
@@ -192,7 +192,7 @@ Group=${MSG_GROUP}
 # chgrp its own public socket at bind time.
 SupplementaryGroups=${WEB_GROUP}
 EnvironmentFile=${MSG_ENV}
-ExecStart=${VENV_PY} -m solver.web.msg
+ExecStart=${VENV_PY} -m euler_webshell.msg
 Restart=on-failure
 RestartSec=5s
 

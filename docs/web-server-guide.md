@@ -251,7 +251,7 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
    cookie if asked). On failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
 
-The browser client (`solver/web/content/assets/srp.js`) interoperates byte-for-byte with
+The browser client (`packages/site/euler_site/content/assets/srp.js`) interoperates byte-for-byte with
 `srp.py`: RFC 5054 2048-bit group, `g=2`, SHA-256, `PAD`-to-`|N|` on `A`/`B`/`S`.
 `tests/test_srp_interop.py` cross-tests them (needs `make install-nodejs`).
 
@@ -279,7 +279,7 @@ trust them.
 
 ### 4.5 Policy constants
 
-`solver/web/auth/policy.py`:
+`packages/site/euler_site/auth/policy.py`:
 
 | Constant | Value | Meaning |
 |---|---|---|
@@ -308,7 +308,7 @@ repo owner. The admin commands never touch these files; they call the service (�
 ## 5 · Identity
 
 A single **subject** is resolved once per process, at startup, with no anonymous
-fallback (`solver/shell/login.py`; docs/package-split.md § 3.3):
+fallback (`packages/solver/solver/shell/login.py`; docs/package-split.md § 3.3):
 
 ```
 Subject(user, slug, channel, auth_method, profile)
@@ -322,8 +322,8 @@ Two front ends, each with an explicit voucher:
 
 | Front end | Voucher | Mechanism |
 |---|---|---|
-| Web shell (`python -m solver.web.shell`) | auth service | `SOLVER_TICKET` — a one-time ticket redeemed over `auth.sock` (`solver/web/shell/identity.py`) |
-| Solver shell (`solver`) | the OS | the real uid's account name (`pwd`, never `$USER`), its role from the root-owned `authorizations.json` (`solver/auth/identity.py`) |
+| Web shell (`python -m euler_webshell.shell`) | auth service | `SOLVER_TICKET` — a one-time ticket redeemed over `auth.sock` (`packages/webshell/euler_webshell/shell/identity.py`) |
+| Solver shell (`solver`) | the OS | the real uid's account name (`pwd`, never `$USER`), its role from the root-owned `authorizations.json` (`packages/solver/solver/auth/identity.py`) |
 
 **The shell ticket.** Nothing carried in the environment can be a credential:
 `/proc/<pid>/environ` is same-uid-readable, so anything there is readable by any sibling
@@ -375,7 +375,7 @@ reader  <  contributor  <  maintainer  <  admin
 ```
 
 The ladder is **structural, not configuration** — code, templates, and the provisioning
-kits all branch on these names — so it lives in code (`solver/auth/subject.py::LADDER`).
+kits all branch on these names — so it lives in code (`packages/solver/solver/auth/subject.py::LADDER`).
 `authorizations.json`'s optional `ladder` field documents it and is validated on load; a
 mismatch fails loudly rather than silently reordering trust.
 
@@ -526,7 +526,7 @@ shell plus these commands), never in a plain `solver` (docs/package-split.md).
 
 `users` splits by verb. **`users list`** registers at the `reader` floor and
 self-scopes for non-admins. The **mutating verbs require `admin`** and go through the
-**wheel-gated admin plane**: the CLI (`solver.web.auth.admin`) re-executed under `sudo`,
+**wheel-gated admin plane**: the CLI (`euler_site.auth.admin`) re-executed under `sudo`,
 writing the root-owned policy file and reaching the euler-auth admin socket.
 
 Sudo rather than a bespoke admin group is deliberate. The operator is a sudoer anyway,
@@ -927,7 +927,7 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
 
 - **The operator's own terminal cannot reach the spool**, by design: `/run/euler/msg.sock` is
   `euler-web`-only and the operator's uid deliberately is not. Both directions therefore go
-  through the sudo plane (`solver.web.msg.client`), which is why a rotation or a grant may
+  through the sudo plane (`euler_webshell.msg.client`), which is why a rotation or a grant may
   prompt for a password and a collaborator's own commands never do.
 
 `user-authorize` and `key-rekey` never need a *user's* private key, so the vault never
@@ -1005,7 +1005,7 @@ prune and the old branch shadows the next push.
 
 ## 11 · The site
 
-**Importing this package must stay free.** `solver/web/site/__init__.py` re-exports nothing:
+**Importing this package must stay free.** `packages/site/euler_site/site/__init__.py` re-exports nothing:
 the content service's app, its `gitstate` reader and, through that, `solver.crypto.wire`
 are reached by naming the submodule, never by importing the package. The auth service reads
 exactly one module from here (`content`, for the start page's README), and it is the
@@ -1013,7 +1013,7 @@ untrusted-input surface that holds no key material — so it must not acquire th
 filter's configuration as a side effect of an import.
 
 That was not hypothetical. The package used to re-export `build_app` for convenience, which
-made `from solver.web.site import content` execute the whole content app. It stayed invisible
+made `from euler_site.site import content` execute the whole content app. It stayed invisible
 while the crypto package invented a repo root whenever it could not find one; the moment that
 started refusing (§ Git), the auth service — which has no `EULER_REPO_ROOT`, because it needs
 no working tree — raised at import, never signalled readiness under `Type=notify`, and sat in
@@ -1022,12 +1022,12 @@ Nothing had ever imported those names from the package.
 
 ### 11.0 Two content roots: the public site and your clone
 
-The content is served from one of two copies, by the same app (`solver/web/site/app.py`)
+The content is served from one of two copies, by the same app (`packages/site/euler_site/site/app.py`)
 with the same templates (docs/package-split.md § 3.4):
 
 | Visitor | Served by | Content | Surface |
 |---|---|---|---|
-| Not signed in | `euler-site` (`python -m solver.web.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json` and the few `solver/` files the pages link to | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
+| Not signed in | `euler-site` (`python -m euler_site.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json` and the few `packages/solver/solver/` files the pages link to | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
 | Signed in | their own `euler-user@<slug>` instance | their own `~/euler` clone | everything, by profile |
 
 The docs, topics and public solutions are published unencrypted on GitHub anyway, so asking
@@ -1209,7 +1209,7 @@ so the footer dims them signed out rather than offering links that bounce to `/l
 **A README summary** is rendered below the strip on the start page, in both tiers — an
 *extract*, not the whole README, closed by a "read the full README" link (in-app to
 `/docs/readme` signed in, out to GitHub signed out). It comes from the **packaged** copy
-`solver/web/content/home-summary.md`: a tracked, generated file that the `update-docs`
+`packages/site/euler_site/content/home-summary.md`: a tracked, generated file that the `update-docs`
 command rebuilds from the slice of the root `README.md` between its `<!-- HOME:START -->` /
 `<!-- HOME:END -->` markers (root stays the source of truth), shipped as package data via
 `pyproject.toml`. Both tiers read that copy, cached per process: `euler-auth` runs from
@@ -1262,7 +1262,7 @@ TeX extension for every macro outside the bundle's default packages —
 missing, it 404s and the `noundefined` package renders the macro as its own name in red —
 the "`\color` in red" a cached statement showed before the extensions were vendored. The
 set that ships is the set the cached statements actually use
-(`solver/web/content/vendor/README.md` lists it, and how to re-scan).
+(`packages/site/euler_site/content/vendor/README.md` lists it, and how to re-scan).
 
 **Those six are preloaded, and the swap re-typeset is chained.** Both halves are about the
 same failure, and it took two goes to see it whole. MathJax's `autoload` fetches a package
@@ -1353,7 +1353,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 GET returns a **301**, so each view has exactly one URL.
 
 The `/docs/file/` view may serve only the service's readable roots — `docs/`, `topics/`,
-`solver/templates/`, `solutions/`, `README.md`, `LICENSE`, and the vendor README.
+`packages/solver/solver/templates/`, `solutions/`, `README.md`, `LICENSE`, and the vendor README.
 
 **The story deck.** `/story/` serves the project presentation (`docs/presentation/`, "Eleven
 Years of Puzzles") from the collaborator's own clone as the static files it is — not
@@ -1521,7 +1521,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   `update-tags`, `update-presentation-data` — less any above the uploader's rung
   (`_PROGRESS_CHAIN`). `update-models`, `update-docs` and `update-usd-rate` are left out:
   there is no admin over the web shell, and they rewrite source and settings
-  (`solver/ai/models.py`, `docs/`, `solver/config/values.conf`) that an upload has no
+  (`packages/solver/solver/ai/models.py`, `docs/`, `packages/solver/solver/config/values.conf`) that an upload has no
   business moving. So the upload gets everything `summary` does and this tier must not: the
   solved-preserving merge into `problems.json`, the staff notice for unregistered answers,
   fetching new problems' statements, and the commit. When the shell has re-written
@@ -1591,7 +1591,7 @@ swaps the pane in place.
 
 ### 11.7 The save gate
 
-The checks every write passes, in `solver/web/site/validate.py`: `.py` (auto-fix, then
+The checks every write passes, in `packages/site/euler_site/site/validate.py`: `.py` (auto-fix, then
 flake8 over stdin), `.c` (scratch-dir compile against the runner header), `.json`
 re-indent, and `.html` through **nh3**.
 
@@ -1610,7 +1610,7 @@ stored-XSS hole; there is no hand-authored-raw-HTML hazard left for Markdown to 
 
 ### 11.8 Content-Security-Policy
 
-Every served page carries one, emitted by an app middleware (`solver/web/csp.py`, shared
+Every served page carries one, emitted by an app middleware (`packages/site/euler_site/csp.py`, shared
 by every rendering service) because a strict policy needs a **per-response nonce** — the
 app that renders the page mints it and stamps it into both header and template.
 
@@ -1655,7 +1655,7 @@ the user pill: one menu idiom in the header, not three.
 `--git-modified` **ring** for a dirty worktree — a ring, not a disc, so it cannot be read
 as the terminal's connect dot two controls to its right.
 
-**One read per navigation.** `solver/web/site/gitstate.py` reads the chip on each
+**One read per navigation.** `packages/site/euler_site/site/gitstate.py` reads the chip on each
 navigation; a middleware in `install_content` stashes it on the request (`render` is sync
 and cannot await), and `render._context` picks it up. Three commands, **staged by what each
 one needs**, so a partial failure costs only the part that failed:
@@ -1715,7 +1715,7 @@ not on the `<details>`, since an inner swap cannot reach the outer element's att
 Three triggers, no overlap:
 
 - **`euler:git-changed from:body`** — the shell moved the clone. Git commands run in the
-  *terminal*, which is not a navigation, so `solver/core/osc.py` says so over OSC 5379 and
+  *terminal*, which is not a navigation, so `packages/solver/solver/core/osc.py` says so over OSC 5379 and
   `site.js` turns it into the event (the vault's auto-unlock fires it too, to fill in a
   worktree the first paint could not scan).
 - **`toggle[this.open] throttle:1s`** — the user opened the menu. The push above can be
@@ -1811,7 +1811,7 @@ for the rare has-access-but-unwired case, unsurfaced where it would mislead.
 **The refresh: the shell says when it moved.** A git command runs in the terminal, which is
 *not* a navigation — so without a nudge the chip would be most wrong exactly after the user
 acted. The git commands emit `OSC 5379` `git;<token>` on their success paths
-(`solver/core/osc.py`, the one definition of that wire); `terminal.js` posts
+(`packages/solver/solver/core/osc.py`, the one definition of that wire); `terminal.js` posts
 `{euler: 'git-changed'}`; `site.js` dispatches `euler:git-changed` on `<body>`; the chip's
 own `hx-get="/git"` (`hx-trigger="… from:body"`, `hx-swap="outerHTML"`) replaces itself.
 One read, at the one moment the state changed. It fires for a **hand-typed** `git-sync`
@@ -1839,7 +1839,7 @@ server, it only bites the users who happen to hold the old copy, and its symptom
 worst kind of bug report: "works for me, they need a hard refresh".
 
 Every response therefore carries a directive, stamped by an app middleware
-(`solver/web/cache.py`, shared by every service — the same shape as the CSP one above)
+(`packages/site/euler_site/cache.py`, shared by every service — the same shape as the CSP one above)
 and by the edge for what Caddy serves itself. Two classes, split on what the response
 **is**, not on what it contains:
 
@@ -2073,7 +2073,7 @@ Two cheaper designs were also rejected, and for reasons worth keeping:
 
 So: a dedicated `euler-msg`, and the isolation is real rather than nominal because of one
 observation — **`system_slug()` is a pure SHA-1 of the normalised e-mail**
-(`solver/auth/identity.py`), and `authorizations.json` is world-readable. The service can
+(`packages/solver/solver/auth/identity.py`), and `authorizations.json` is world-readable. The service can
 therefore build its own `slug → e-mail → profile` map from the policy file every other
 service already reads. It follows that `euler-msg`:
 
@@ -2088,13 +2088,13 @@ service already reads. It follows that `euler-msg`:
 Its blast radius is message bodies and read-state. Nothing else is in the process.
 
 The package is a sibling of the other service packages, and imports **nothing** from
-`solver.web.auth` — loading auth's modules into this process would recouple the two at
+`euler_site.auth` — loading auth's modules into this process would recouple the two at
 review time and defeat the point:
 
 | Module | Role |
 |---|---|
 | `__main__.py` | Entry point: bind `msg.sock` (`0660 euler-web`) + `msg-admin.sock` (`0600`), serve until SIGTERM. |
-| `config.py` | `MsgConfig` from the environment — variable names and defaults in `[msg]` of `solver/config/env.conf`; every path overridable for a scratch-dir dev run. |
+| `config.py` | `MsgConfig` from the environment — variable names and defaults in `[msg]` of `packages/solver/solver/config/env.conf`; every path overridable for a scratch-dir dev run. |
 | `app.py` | The public and admin apps: endpoints, the peer-uid middleware, profile floors, the delivery push. |
 | `store.py` | The thread store — single-writer JSON, TTL sweep, caps, read-state. |
 | `identity.py` | Peer uid → login → e-mail → profile, over `authorizations.json`; re-read on mtime change. |
@@ -2107,9 +2107,9 @@ either importing the other:
 
 | Was | Now | Why it is shared |
 |---|---|---|
-| `auth/client.py` | `solver/web/unixhttp.py` | the unix-socket JSON client, wanted by both admin CLIs |
-| `auth/storage.py` + `requests.py::sanitize` | `solver/web/store.py` | atomic `0600` JSON writes, and control-char hygiene for the two stores that hold user-authored text |
-| `auth/admin.py::_env_file_values` | `solver/web/envfile.py` | reading a scoped `/etc/euler/*.env` for a root-only admin token |
+| `auth/client.py` | `packages/site/euler_site/unixhttp.py` | the unix-socket JSON client, wanted by both admin CLIs |
+| `auth/storage.py` + `requests.py::sanitize` | `packages/site/euler_site/store.py` | atomic `0600` JSON writes, and control-char hygiene for the two stores that hold user-authored text |
+| `auth/admin.py::_env_file_values` | `packages/site/euler_site/envfile.py` | reading a scoped `/etc/euler/*.env` for a root-only admin token |
 
 `auth/client.py` and `auth/storage.py` remain as re-exports, so nothing downstream changes.
 
@@ -2158,7 +2158,7 @@ It lives in the service's **own** runtime directory (systemd `RuntimeDirectory=e
 writable here. Each admin plane owning its own directory is the better shape anyway: root
 traverses either, and nothing else traverses both.
 
-The CLI behind it (`solver/web/msg/admin.py`) is a **thin authenticated proxy**, not a
+The CLI behind it (`packages/webshell/euler_webshell/msg/admin.py`) is a **thin authenticated proxy**, not a
 second command surface — it takes a method and an admin path, injects the invoking
 identity, and prints the reply as one JSON line, so a single renderer serves both channels
 and the terminal cannot drift from the web. Two details there are deliberate: the request
@@ -2301,7 +2301,7 @@ a convenience.
 
 ### 13.7 The `msg` command
 
-Verb-split like `users` (§6.5), registered from `solver/web/msg/commands.py`. Whichever
+Verb-split like `users` (§6.5), registered from `packages/webshell/euler_webshell/msg/commands.py`. Whichever
 plane answers is `client.py`'s problem: a web shell's uid is in `euler-web`, so the PTY
 child dials `msg.sock` directly; the operator's terminal uid deliberately is not, and falls
 back to `sudo` against the admin socket.
@@ -2334,7 +2334,7 @@ floor there is one possible answer (`staff`), and it is the default.
 
 **`act` is the message's own verb.** `save` used to be a verb for one message kind, so the
 reader had to know which of seven verbs their message wanted. A message knows what it is
-for: `verb_for(subject, is_staff=…, is_own=…)` in `solver/web/msg/__init__.py` maps it to
+for: `verb_for(subject, is_staff=…, is_own=…)` in `packages/webshell/euler_webshell/msg/__init__.py` maps it to
 **save** (take the key it carries), **reconstruct** (complete the *half* key it carries with
 the half committed in the clone — `key-split`'s message), **authorize** (grant the key it asks
 for — staff, and not your own request), **merge** (land the pull request it announces —
@@ -2350,11 +2350,11 @@ better — staff may drop anything, anyone else a message they are a party to �
 `maintainer` check meant the rung that most needs the tidying, a reader clearing a worked
 notice, was the one refused.
 
-**Commands send through `notify_staff`** (`solver/web/msg/notify.py`), not through the
+**Commands send through `notify_staff`** (`packages/webshell/euler_webshell/msg/notify.py`), not through the
 command layer:
 
 ```python
-from solver.web.msg.notify import notify_staff
+from euler_webshell.msg.notify import notify_staff
 notify_staff(subject, body)      # -> bool, best-effort, never raises
 ```
 
@@ -2370,7 +2370,7 @@ call it in a base install with no aiohttp.
 decrypts needs nothing, and a bare `user` status view is not a request.
 
 Two more callers, on the same terms — the act is the system of record, the message is a nudge
-on top, and each subject is a constant in `solver/web/msg/__init__.py` so the chip can offer
+on top, and each subject is a constant in `packages/webshell/euler_webshell/msg/__init__.py` so the chip can offer
 the right verb:
 
 - **`git-push`**, when it opens a pull request (`PR_REVIEW_SUBJECT`): a pushed branch with a
@@ -2425,7 +2425,7 @@ MemoryDenyWriteExecute=true
 
 There is no `After=`/`Wants=` on `euler-auth`: the spool never talks to it, so the two
 services have no ordering relationship to declare. `require_venv` refuses a deploy when
-`solver.web.msg` is not importable from `/opt/euler`, which is the one way this kit can
+`euler_webshell.msg` is not importable from `/opt/euler`, which is the one way this kit can
 fail confusingly — the venv belongs to `auth.sh`, and a checkout newer than the venv would
 otherwise install a unit that crash-loops on `ModuleNotFoundError`.
 
@@ -2495,7 +2495,7 @@ is the standing future hardening.
 Sound controls — invariants, not open work. Weakening any of these needs a matching
 decision recorded here.
 
-- **SRP-6a** (`solver/web/auth/srp.py`): the password never reaches the server or disk;
+- **SRP-6a** (`packages/site/euler_site/auth/srp.py`): the password never reaches the server or disk;
   correct `PAD`, `u≠0` / `A,B mod N≠0` checks, `secrets.compare_digest` throughout;
   cross-tested against the browser client.
 - **Anti-enumeration**: stable decoy salt/`B` for unknown emails at `/auth/challenge`;
@@ -2586,7 +2586,7 @@ firewall. `auth.sh redeploy` reinstalls the repo into the shared `/opt/euler` ve
 `user.sh redeploy` bounces running instances so their sockets re-activate them against
 the rebuilt venv and re-lays each clone's per-clone setup from the operator's checkout, and `frontend.sh redeploy` refreshes `/etc/euler/web-content` plus the
 Caddyfile and reloads the edge. It is **gated on `make check-version`** (its first
-prerequisite): the version `solver/version.py` names — the number this build bakes into
+prerequisite): the version `packages/solver/solver/version.py` names — the number this build bakes into
 the venv — must have its `vX.Y.Z` tag on origin, or the redeploy refuses. That stops a
 release that was bumped and tagged locally but never pushed from running the deployed venv
 ahead of what any collaborator clone can `git-sync` to.
@@ -2613,12 +2613,12 @@ command was recorded the day it was wired, and only `git-filter install` rewrite
 needs the master key, so it runs in their own session and nowhere else; writing the command,
 though, needs no key at all (only the re-checkout does), so the operator can push it. It has
 to carry **`-P`**: git runs a filter with the cwd at the top of the worktree, and a solver
-checkout has a `solver/` package sitting right there, so without it the filter imports the
+checkout has a `packages/solver/solver/` package sitting right there, so without it the filter imports the
 *clone's* source instead of the venv's — a clone that falls behind then runs an old filter
 against a current key file and stops decrypting. An unwired clone is left alone; wiring it is
 theirs to do when they are issued a key.
 
-**Cutting a release.** The version is one tracked file, `solver/version.py`, written only
+**Cutting a release.** The version is one tracked file, `packages/solver/solver/version.py`, written only
 by `scripts/version/release.sh` (`make release`): it derives the SemVer bump from
 Conventional Commits, rewrites the file, commits, tags `vX.Y.Z`, and **pushes the commit +
 tag to origin** (`ARGS=--dry-run` previews, `ARGS=--no-push` stops before publishing). The
