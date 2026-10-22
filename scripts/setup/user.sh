@@ -80,7 +80,7 @@ Usage: $0 <action> [args]
                                euler-user@.service/.socket template. Idempotent.
   remove                       Remove the template + user.env (prompted). Provisioned
                                users must be deprovisioned first.
-  upgrade                      Alias of deploy: re-assert the shared layer.
+  upgrade                      Deploy, then stop running instances so they restart on the new code.
   redeploy                     Refresh /etc/euler/user.env, re-lay every provisioned
                                user's git hooks (and the .gitignore / .shellcheckrc they
                                read) from this repo, and stop the running instances so
@@ -657,17 +657,23 @@ do_redeploy() {
     check_can_sudo || return 1
     deploy_user_env
     echo "Refreshed ${USER_ENV}."
-    # Pick up a freshly rebuilt /opt/euler venv (redeploy-auth): re-lay each user's hooks
-    # from this repo, then stop each running instance — this drops that user's live shell —
-    # and leave its socket listening, so the next request re-activates the service against
-    # the new code.
-    #
-    # The hooks belong in redeploy for the same reason the venv does: they are the
-    # operator's code running in the user's clone, they bake the deployed venv's path, and
-    # a clone cannot refresh them itself. This is the one sweep that reaches every
-    # provisioned user, so it is where a template change (a new gate) actually lands for
-    # everyone — otherwise a hook fix would only reach a user who happened to be
-    # reprovisioned.
+    bounce_instances
+    do_status
+}
+
+# Pick up a freshly rebuilt /opt/euler venv (redeploy-auth / upgrade-auth): re-lay each
+# user's hooks from this repo, then stop each running instance — this drops that user's live
+# shell — and leave its socket listening, so the next request re-activates the service
+# against the new code. Both redeploy and upgrade run it: an instance left running keeps
+# the code it started with, and once pip has replaced that code on disk (a template, a
+# moved package) every page it renders fails.
+#
+# The hooks belong here for the same reason the venv does: they are the operator's code
+# running in the user's clone, they bake the deployed venv's path, and a clone cannot
+# refresh them itself. This is the one sweep that reaches every provisioned user, so it is
+# where a template change (a new gate) actually lands for everyone — otherwise a hook fix
+# would only reach a user who happened to be reprovisioned.
+bounce_instances() {
     local users slug
     users="$(euler_user_names || true)"
     for slug in ${users}; do
@@ -677,7 +683,11 @@ do_redeploy() {
             sudo systemctl stop "euler-user@${slug}.service"
         fi
     done
-    do_status
+}
+
+do_upgrade() {
+    do_deploy || return 1
+    bounce_instances
 }
 
 do_remove() {
@@ -901,7 +911,7 @@ ACTION="${1:-status}"
 shift || true
 case "${ACTION}" in
     deploy)      do_deploy ;;
-    upgrade)     do_deploy ;;
+    upgrade)     do_upgrade ;;
     redeploy)    do_redeploy ;;
     remove)      do_remove ;;
     provision)   do_provision "$@" ;;
