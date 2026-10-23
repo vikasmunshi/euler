@@ -528,17 +528,17 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 /* ---- the story behind the solver: challenge → feature ---- */
 
 .ch-lede { margin-top: 8px; font-size: 26px; }
-.ch-list { list-style: none; margin: 20px 0 0; padding: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.ch-list { list-style: none; margin: 24px 0 0; padding: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
 .ch-list li {
   display: grid; grid-template-columns: 560px 1fr; gap: 0 56px; align-items: center;
-  padding: 8px 24px; border-left: 4px solid transparent; border-radius: 4px;
+  padding: 12px 24px; border-left: 4px solid transparent; border-radius: 4px;
   opacity: 0.4; transition: opacity 0.3s, background-color 0.3s, border-color 0.3s;
 }
 .ch-list li.done { opacity: 0.85; }
 .ch-list li.now { opacity: 1; background: #FFFFFF; border-left-color: var(--heat-2); box-shadow: 0 6px 18px #16233B14; }
-.ch-problem { font-family: var(--serif); font-size: 25px; line-height: 1.2; margin: 0; position: relative; }
+.ch-problem { font-family: var(--serif); font-size: 28px; line-height: 1.2; margin: 0; position: relative; }
 .ch-problem::after { content: "→"; position: absolute; right: -44px; top: 0; font-family: var(--sans); color: var(--heat-2); }
-.ch-feature { font-size: 19px; line-height: 1.35; color: var(--ink-soft); margin: 0; }
+.ch-feature { font-size: 21px; line-height: 1.35; color: var(--ink-soft); margin: 0; }
 .ch-feature code { color: var(--heat-2); font-size: 0.9em; white-space: nowrap; }
 .ch-gens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
 .ch-gen { position: relative; font-size: 18px; line-height: 1.2; color: var(--ink-soft); }

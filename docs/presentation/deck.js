@@ -306,8 +306,9 @@
   // ---------------------------------------------------------------- problem references
 
   /* Every example slide names its problems (data-problems="18 67"); each gets the same footer
-     link to its page at projecteuler.net, the source, which never shows an answer. A slide
-     whose problem changes as it runs (the demo) calls window.DECK_REF again. */
+     link, "Problem 18: Maximum Path Sum I", to that problem's page on this site, in a new tab.
+     Relative, since the deck is served at /story/. A slide whose problem changes as it runs
+     (the demo) calls window.DECK_REF again. */
   function problemRef(slide, numbers) {
     let ref = slide.querySelector(':scope > .ref');
     if (!ref) ref = slide.appendChild(document.createElement('p'));
@@ -316,10 +317,11 @@
     numbers.forEach((n, i) => {
       if (i) ref.append(' · ');
       const a = ref.appendChild(document.createElement('a'));
-      a.href = `https://projecteuler.net/problem=${n}`;
+      a.href = `../solutions/${n}/`;
       a.target = '_blank';
       a.rel = 'noopener';
-      a.textContent = `projecteuler.net/problem=${n}`;
+      const p = byNumber.get(Number(n));  // data-problems gives strings
+      a.textContent = p ? `Problem ${n}: ${p.title}` : `Problem ${n}`;
     });
     ref.hidden = !numbers.length;
   }
