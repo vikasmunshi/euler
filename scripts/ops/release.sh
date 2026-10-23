@@ -117,9 +117,14 @@ ORIG_ARGS=("$@")
 # gives `tmux attach -t euler-release` something to remember.
 TMUX_SESSION='euler-release'
 
-# The regenerating verbs, in the order step 1 runs them. Each is a solver command that
+# The regenerating verbs, in the order step 1 runs them. Each is a shell command that
 # commits its own output (`chore(<verb>): …`) and is a no-op on an already-current tree.
 UPDATE_VERBS=(update-models update-usd-rate update-tags update-docs update-presentation-data)
+# The shell they run in: `solver-host`, the solver shell plus the web host's commands
+# (docs/package-guide.md § 3.4). Not plain `solver` — `update-docs` regenerates the catalogue
+# from the live registry, and refuses in a shell that lacks the host's commands (`msg`,
+# `users`, …) rather than write docs that would lose them.
+UPDATE_SHELL='solver-host'
 
 usage() {
     cat <<USAGE
@@ -142,7 +147,7 @@ Usage: bash $0 [--dry-run] [--yes] [--skip-updates] [--no-deploy] [--no-follow] 
   --log FILE       append the run's output here (default: a timestamped file under
                    \${TMPDIR:-/tmp}).
 
-Runs, in order: solver ${UPDATE_VERBS[*]} -> make release -> make redeploy-web
+Runs, in order: ${UPDATE_SHELL} ${UPDATE_VERBS[*]} -> make release -> make redeploy-web
 -> make status-web. Needs a clean working tree, an unlocked vault, and sudo.
 
 With nothing to release (no commits since the last tag) the bump is skipped rather than
@@ -252,8 +257,8 @@ cd "${ROOT}" || fail "cannot cd to ${ROOT}"
 command -v git  > /dev/null || fail "git is not on PATH."
 command -v make > /dev/null || fail "make is not on PATH."
 if [[ ${SKIP_UPDATES} -eq 0 ]]; then
-    command -v solver > /dev/null \
-        || fail "solver is not on PATH — activate the venv (or 'make install-all'), or pass --skip-updates."
+    command -v "${UPDATE_SHELL}" > /dev/null \
+        || fail "${UPDATE_SHELL} is not on PATH — activate the venv (or 'make install-all'), or pass --skip-updates."
 fi
 
 # Clean tree, via status (see the header on why not `git diff`). The command's own
@@ -379,7 +384,7 @@ say "   will run:"
 if [[ ${SKIP_UPDATES} -eq 1 ]]; then
     say "     1. (skipped) the update-* verbs"
 else
-    say "     1. solver ${UPDATE_VERBS[*]}      <- each commits its own output"
+    say "     1. ${UPDATE_SHELL} ${UPDATE_VERBS[*]}      <- each commits its own output"
 fi
 if [[ "${LAST_TAG}" != 'none' && -z "$(git rev-list "${LAST_TAG}..HEAD" 2> /dev/null)" ]]; then
     say "     2. make release                             <- nothing new since ${LAST_TAG}: skipped unless step 1 commits"
@@ -412,9 +417,9 @@ if [[ ${SKIP_UPDATES} -eq 1 ]]; then
 else
     for verb in "${UPDATE_VERBS[@]}"; do
         head2 "1. ${verb}"
-        # One solver invocation per verb rather than one command block: the block would
+        # One shell invocation per verb rather than one command block: the block would
         # need '&&' to stop at a failure, and this way the failing verb names itself.
-        if ! run_step solver "${verb}"; then
+        if ! run_step "${UPDATE_SHELL}" "${verb}"; then
             fail "${verb} failed — nothing has been released. Fix it and re-run;
        the verbs already committed above are idempotent."
         fi
