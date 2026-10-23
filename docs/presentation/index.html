@@ -581,15 +581,19 @@ replace = "euler_webshell.shell.viewer:show"</pre>
     <div class="dev-box">Git objects<small>ciphertext, as pushed</small></div>
   </div>
   <pre class="dev-code dev-attr">solutions/private/** filter=solver-crypt -text -diff</pre>
-  <div class="dev-chain">
-    <span class="dev-key">~/.euler/id<small>this machine's X25519 key</small></span>
+  <div class="dev-chain dev-chain-5">
+    <span class="dev-key">your password<small>proven by SRP at sign-in, never sent</small></span>
+    <span class="dev-then">derives</span>
+    <span class="dev-key">PK<small>PBKDF2 with the SRP salt, in the browser; it opens the vault</small></span>
+    <span class="dev-then">unlocks</span>
+    <span class="dev-key">~/.euler/id<small>this machine's X25519 key, encrypted at rest</small></span>
     <span class="dev-then">unwraps</span>
     <span class="dev-key">enc-key.json<small>the master key, sealed to this machine</small></span>
     <span class="dev-then">gives</span>
     <span class="dev-key">AES-256 master key<small>which decrypts every file</small></span>
   </div>
   <p class="dev-foot">Deterministic: each file's nonce is an HMAC of its plaintext, so an unchanged file encrypts to the same bytes and git sees no change, while different text never reuses a nonce.</p>
-  <aside class="notes"><p>Without the deterministic nonce, every checkout would re-encrypt every private file with a fresh random nonce, and git would report hundreds of changed files that nobody touched. The filter is packages/solver/solver/crypto/gitfilter.py, run as a long-lived git filter process. Nothing is decrypted in git itself; plaintext exists only in the working tree once the master key is available.</p><p>The lesson: enc-key.json used to be one tracked file holding every machine's entry, which caused a long run of merge conflicts. It is now machine-local, and a new holder gets their sealed copy over the message spool.</p></aside>
+  <aside class="notes"><p>The chain starts at sign-in. SRP proves the password without sending it; the same password and the account's SRP salt also derive PK in the browser (PBKDF2, 600,000 rounds). PK goes only to the user's own service, where it unwraps the vault key, and the vault key decrypts ~/.euler/id. So the private key that opens everything rests encrypted, and the web shell starts already unlocked without ever asking for a password. In a terminal, the same PK is derived from the password typed there. The design is docs/vault-guide.md.</p><p>Without the deterministic nonce, every checkout would re-encrypt every private file with a fresh random nonce, and git would report hundreds of changed files that nobody touched. The filter is packages/solver/solver/crypto/gitfilter.py, run as a long-lived git filter process. Nothing is decrypted in git itself; plaintext exists only in the working tree once the master key is available.</p><p>The lesson: enc-key.json used to be one tracked file holding every machine's entry, which caused a long run of merge conflicts. It is now machine-local, and a new holder gets their sealed copy over the message spool.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">

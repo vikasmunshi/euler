@@ -642,6 +642,10 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   font: 600 21px var(--mono); color: var(--dev-text); }
 .dev-key small { font: 16px var(--sans); color: var(--dev-muted); }
 .dev-then { font: 18px var(--mono); color: var(--dev-muted); }
+.dev-chain-5 { gap: 12px; flex-wrap: nowrap; align-items: stretch; }
+.dev-chain-5 .dev-key { flex: 1 1 0; min-width: 0; padding: 12px 14px; font-size: 19px; }
+.dev-chain-5 .dev-key small { font-size: 15px; }
+.dev-chain-5 .dev-then { font-size: 16px; align-self: center; }
 
 .dev-web { display: flex; flex-direction: column; align-items: stretch; margin-top: 28px; gap: 6px; }
 .dev-wide { align-self: center; width: 760px; }
