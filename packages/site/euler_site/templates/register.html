@@ -83,10 +83,10 @@
 {% endblock %}
 {% block scripts %}
   {% if stage == 'terms' %}
-    <script src="/assets/terms.js" defer></script>
+    <script src="{{ asset('/assets/terms.js') }}" defer></script>
   {% elif stage == 'password' %}
-    <script src="/assets/srp.js" defer></script>
-    <script src="/assets/authform.js" defer></script>
-    <script src="/assets/register.js" defer></script>
+    <script src="{{ asset('/assets/srp.js') }}" defer></script>
+    <script src="{{ asset('/assets/authform.js') }}" defer></script>
+    <script src="{{ asset('/assets/register.js') }}" defer></script>
   {% endif %}
 {% endblock %}

@@ -108,6 +108,12 @@ class PublicSiteTests(AioHTTPTestCase):
         self.assertIn('href="/login?next=/"', body)          # …only the way to one, back to here
 
     @unittest_run_loop
+    async def test_a_page_names_its_assets_by_their_bytes(self) -> None:
+        body = await (await self.client.get('/')).text()
+        self.assertRegex(body, r'href="/assets/site\.css\?v=[0-9a-f]{12}"')
+        self.assertRegex(body, r'src="/vendor/htmx\.min\.js\?v=[0-9a-f]{12}"')
+
+    @unittest_run_loop
     async def test_a_public_solution_file_is_served(self) -> None:
         name = sorted(p.name for p in (self.tree / 'solutions/public/p0001').glob('p0001_s*.py'))[0]
         resp = await self.client.get(f'/solutions/0001/{name}')

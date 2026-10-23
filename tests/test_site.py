@@ -22,6 +22,7 @@ from pathlib import Path
 import jinja2
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
+from euler_site import assets
 from euler_site.site import content, gitstate
 from euler_site.site.app import build_app
 
@@ -948,6 +949,7 @@ class TopicCardStatusTests(unittest.TestCase):
             loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
                                            / 'packages/site/euler_site/site/templates'),
             autoescape=True)
+        assets.install(env)
         entry = content.DocEntry(name='number-theory/primes', heading='Primes',
                                  title='Generating and testing primes', status=status,
                                  solved=1, problems=problems)

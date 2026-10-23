@@ -116,15 +116,16 @@ The generated `/etc/euler/Caddyfile` (`0644`, non-secret) does four things:
    before any routing. These are identity, and identity may only ever reach the app tier
    as a copy of the `forward_auth` response.
 2. Serves `/healthz` natively and `/assets/*` + `/vendor/*` statically from
-   `/etc/euler/web-content`, so pages reference `'self'` assets and the CSP holds. Both
-   are served **`Cache-Control: no-cache`** — "keep it, but ask before using it". These
-   paths are unversioned and their contents change on every redeploy, while the pages
-   referencing them are rendered fresh on every load; with only Caddy's `ETag` /
-   `Last-Modified`, browsers fall back to *heuristic* freshness and a deploy silently
-   leaves new HTML being driven by old JS, for whichever users happen to hold a cached
-   copy. That is not a theoretical failure — it is what made a reworked user menu's
-   terminal toggle inert against the previous `site.js`. Revalidation costs one
-   conditional request that the ETag answers with a 304.
+   `/etc/euler/web-content`, so pages reference `'self'` assets and the CSP holds. The
+   templates name every asset by a hash of its bytes (`/assets/site.css?v=<hash>`), and a
+   request carrying `?v=` is served **`public, max-age=31536000, immutable`**: a redeploy
+   that changes the file changes the URL, so the old copy is never asked for again. A bare
+   path — what a script imports by itself, the maintenance page's stylesheet — is served
+   **`no-cache`**, "keep it, but ask before using it": it names different bytes after a
+   redeploy, and with only Caddy's `ETag` / `Last-Modified` browsers fall back to
+   *heuristic* freshness, silently leaving new HTML driven by old JS. That is not a
+   theoretical failure — it is what made a reworked user menu's terminal toggle inert
+   against the previous `site.js`. § 11.10 has the whole policy.
 3. Proxies the **public auth surface** — `/login`, `/register*`, `/reset*`, `/forgot`,
    `/password`, `/terms`, `/auth/*` — straight to `auth.sock`. The shell-ticket and
    admin endpoints are deliberately absent from this list; they are socket-peer only.
@@ -1860,7 +1861,8 @@ and by the edge for what Caddy serves itself. Two classes, split on what the res
 | class | directive | why |
 | --- | --- | --- |
 | rendered pages, htmx fragments, JSON | `no-store` | per-user, authenticated, and stale the moment the file behind it changes; there is no version worth keeping, and it stays off disk on shared machines |
-| `FileResponse` — served files, `/assets`, `/vendor` | `no-cache` | identical bytes for every user, already carrying `ETag`/`Last-Modified`: keep it, but **revalidate before every use** — an unchanged file costs one 304, a changed one is picked up at once |
+| `FileResponse` — served files, bare `/assets` and `/vendor` paths | `no-cache` | identical bytes for every user, already carrying `ETag`/`Last-Modified`: keep it, but **revalidate before every use** — an unchanged file costs one 304, a changed one is picked up at once |
+| `/assets` and `/vendor` with `?v=<hash>` (the edge) | `public, max-age=31536000, immutable` | the URL names its bytes, so there is nothing to ask: kept a year, never revalidated — see *Versioned asset URLs* below |
 
 `no-cache` is not "do not cache" (that is `no-store`); it is "ask first". That distinction
 is the whole design: the file classes stay cheap without ever being able to go stale.
@@ -1891,12 +1893,32 @@ carried its response's CSP nonce would be left untagged (a 304 brings a fresh no
 header; no template uses one today). Signed-in pages stay `no-store`: they are per-user and
 follow the clone.
 
-**No positive `max-age` anywhere, deliberately.** Nothing here is addressed by a versioned
-URL: `/assets/site.css` is the same path before and after a redeploy. Caching those hard
-would need content-stamped URLs (`site.css?v=<hash>`) generated into the templates and an
-edge rule marking versioned requests `immutable` — a real option if revalidation traffic
-ever matters, but until then "ask every time" is the honest setting, and one conditional
-request per asset is a rounding error against a page that also fetches MathJax.
+**Versioned asset URLs — the only positive `max-age`.** A bare `/assets/site.css` is the
+same path before and after a redeploy, so it can only be revalidated. The templates
+therefore never write one: they write `{{ asset('/assets/site.css') }}`, which
+`packages/site/euler_site/assets.py` turns into `/assets/site.css?v=<12 hex digits of the
+file's SHA-256>`, and the edge serves any request carrying `?v=` as `public,
+max-age=31536000, immutable` (the `asset_cache` snippet in the generated Caddyfile). A
+page load that used to cost one conditional request per script and stylesheet now costs
+none; a redeploy that changes `site.js` changes its URL, and the new page fetches it at
+once. `tests/test_assets.py` fails on a template that writes a bare `/assets` or
+`/vendor` URL.
+
+What makes the hash honest is where it is read: from the **installed** `euler-site`
+package, which ships its `content/assets` and `content/vendor` trees for exactly this —
+built from the same checkout that `frontend.sh redeploy` copies to the edge. And
+`redeploy-web` refreshes the edge **first**, before the services restart (§ 15.2): the
+bytes are in place before any page names them. The other order would let a restarted
+service hand out a new hash while the edge still served the old file, and a browser would
+keep that old file under the new URL for a year. (The order that remains is harmless: for
+a moment an old page asks for its old hash and gets the new file, under a URL no new page
+will name.) A file the package lacks gets its bare path, and with it the revalidated rule.
+
+Two things stay revalidated, because their URLs are written inside the files rather than
+the templates: what a script imports by itself (`site.js`'s `import('/assets/editor.js')`
+and the CodeMirror modules behind it), and the fonts and extensions MathJax fetches
+relative to its own script. The maintenance page is static HTML and names its stylesheet
+bare too.
 
 ## 12 · The web shell
 
@@ -2610,10 +2632,12 @@ Register the first admin account with `users add`.
 
 **`make redeploy-web`** is the everyday turnaround after a source change: it pushes new
 code, templates, and static assets without touching identities, units, certs, or the
-firewall. `auth.sh redeploy` reinstalls the repo into the shared `/opt/euler` venv,
-`user.sh redeploy` bounces running instances so their sockets re-activate them against
-the rebuilt venv and re-lays each clone's per-clone setup from the operator's checkout, and `frontend.sh redeploy` refreshes `/etc/euler/web-content` plus the
-Caddyfile and reloads the edge. It is **gated on `make check-version`** (its first
+firewall. `frontend.sh redeploy` goes first: it refreshes `/etc/euler/web-content` plus
+the Caddyfile and reloads the edge, so the new static files are in place before any
+restarted service names them by their hash (§ 11.10). Then `auth.sh redeploy` reinstalls
+the repo into the shared `/opt/euler` venv, and `user.sh redeploy` bounces running
+instances so their sockets re-activate them against the rebuilt venv and re-lays each
+clone's per-clone setup from the operator's checkout. It is **gated on `make check-version`** (its first
 prerequisite): the version `packages/solver/solver/version.py` names — the number this build bakes into
 the venv — must have its `vX.Y.Z` tag on origin, or the redeploy refuses. That stops a
 release that was bumped and tagged locally but never pushed from running the deployed venv

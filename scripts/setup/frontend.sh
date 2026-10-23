@@ -494,6 +494,16 @@ generate_caddyfile() {
 	}
 }
 
+# Cache-Control for the static trees: a request carrying ?v= names the bytes it gets
+# (the templates hash each file into its URL), so it is kept for a year unasked; a bare
+# path is revalidated before every use.
+(asset_cache) {
+	@versioned query v=*
+	header @versioned Cache-Control "public, max-age=31536000, immutable"
+	@unversioned not query v=*
+	header @unversioned Cache-Control "no-cache"
+}
+
 # Reusable holding page: serve the static maintenance HTML with 503 Service
 # Unavailable + Retry-After. Its stylesheet under /assets is served (200) by the
 # route below, so the page renders styled even while the site is "down".
@@ -549,28 +559,32 @@ ${DOMAIN} {
 	# Static assets (the auth pages' CSS/JS, srp.js, terms, maintenance styling),
 	# served same-origin so the CSP 'self' policy covers them.
 	#
-	# Cache-Control: no-cache — "you may keep it, but ask before you use it".
-	# These paths are UNVERSIONED and their contents change on every redeploy, while
-	# the pages that reference them are rendered fresh every load. Without this,
-	# Caddy sends only ETag/Last-Modified, browsers fall back to *heuristic*
-	# freshness, and a deploy leaves new HTML being driven by old JS — silently, and
-	# only for the users who happened to have it cached. Revalidation costs one
-	# conditional request answered by the ETag with a 304.
+	# Two rules, on whether the URL names its bytes. The templates write every asset
+	# as /assets/site.css?v=<hash of its contents> (euler_site/assets.py): a redeploy
+	# that changes the file changes the URL, so a versioned request is kept for a
+	# year and never re-asked — immutable.
+	#
+	# A bare path (a script's own import, the maintenance page's stylesheet) names
+	# different bytes after a redeploy: no-cache — "you may keep it, but ask before
+	# you use it". Without it Caddy sends only ETag/Last-Modified, browsers fall back
+	# to *heuristic* freshness, and a deploy leaves new HTML driven by old JS —
+	# silently, and only for the users who happened to have it cached.
 	handle /assets/* {
 		root * ${WEB_CONTENT_DIR}
-		header Cache-Control "no-cache"
+		import asset_cache
 		file_server
 	}
 
 	# Vendored front-end libraries (htmx, MathJax + its fonts and the TeX extensions
 	# its autoload fetches on first use) — Caddy-native,
-	# same-origin, per the web-server-guide path-ownership table. Same unversioned
-	# paths, same rule: revalidate rather than guess (an upgrade must not need every
-	# user to hard-refresh). The SRI hashes in the templates pin the *content*, so a
-	# stale vendor file is a blocked script rather than a subtle bug.
+	# same-origin, per the web-server-guide path-ownership table. Same two rules:
+	# immutable when versioned, revalidated when bare (the editor's CodeMirror
+	# modules, the fonts and extensions MathJax fetches). The SRI hashes in the
+	# templates pin the *content*, so a stale vendor file is a blocked script rather
+	# than a subtle bug.
 	handle /vendor/* {
 		root * ${WEB_CONTENT_DIR}
-		header Cache-Control "no-cache"
+		import asset_cache
 		file_server
 	}
 

@@ -68,6 +68,6 @@
     {% include "_password_form.html" %}
   </details>
 </section>
-<script src="/assets/srp.js" defer></script>
-<script src="/assets/password.js" defer></script>
+<script src="{{ asset('/assets/srp.js') }}" defer></script>
+<script src="{{ asset('/assets/password.js') }}" defer></script>
 {% endblock %}

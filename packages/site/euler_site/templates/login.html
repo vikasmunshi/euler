@@ -34,7 +34,7 @@
 {# vault.js is already in the shell's <head> (base.html). This page loads its own
    SRP handshake plus the shared reveal/caps-lock affordances. #}
 {% block scripts %}
-  <script src="/assets/srp.js" defer></script>
-  <script src="/assets/authform.js" defer></script>
-  <script src="/assets/login.js" defer></script>
+  <script src="{{ asset('/assets/srp.js') }}" defer></script>
+  <script src="{{ asset('/assets/authform.js') }}" defer></script>
+  <script src="{{ asset('/assets/login.js') }}" defer></script>
 {% endblock %}

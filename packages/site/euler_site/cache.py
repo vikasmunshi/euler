@@ -22,13 +22,13 @@ login.
 identical for every user, and already carrying `ETag`/`Last-Modified`.
 `no-cache` is not "do not cache" — it is "keep it, but revalidate before every
 use", so an unchanged file costs one conditional request answered by a 304 while
-a changed one is picked up immediately. Caddy applies the same rule to the
-`/assets` and `/vendor` trees it serves at the edge (scripts/setup/frontend.sh),
+a changed one is picked up immediately. Caddy applies the same rule to a bare
+`/assets` or `/vendor` path it serves at the edge (scripts/setup/frontend.sh),
 so a file behaves the same whichever tier hands it over.
 
-Deliberately absent: any positive `max-age`. Nothing this app serves is
-addressed by a versioned URL, so nothing may be reused without asking — see the
-guide for what would have to change first.
+No positive `max-age` here: nothing this app serves is addressed by a versioned
+URL. The edge's static trees are — the templates name each file by a hash of its
+bytes (:mod:`euler_site.assets`) — and the edge alone marks those `immutable`.
 
 **The public site's pages are the exception** (:func:`revalidated_middleware`). Signed out,
 a page is the same for everyone and changes only when a deploy replaces the content package

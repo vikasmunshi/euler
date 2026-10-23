@@ -37,6 +37,7 @@ import jinja2
 from aiohttp import web
 
 from solver.auth import LADDER, Authorizations, Subject, slugify
+from euler_site import assets
 from euler_site.cache import build_fingerprint, cache_middleware, revalidated_middleware
 from euler_site.csp import csp_middleware
 from euler_site.site import content, gitstate
@@ -1058,8 +1059,9 @@ def install_content(app: web.Application, config: SiteConfig, authz: Authorizati
     # rewriter has to make the same call: a link pointing at a path this route
     # refuses is a 404 that only shows up when somebody clicks it.
     app[READABLE_KEY] = list(content.VIEWABLE_ROOTS)
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
-                         autoescape=jinja2.select_autoescape(['html', 'xml']))
+    env = aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
+                               autoescape=jinja2.select_autoescape(['html', 'xml']))
+    assets.install(env)
     add_content_routes(app, public=public)
     if config.serve_static:
         # Dev only — in production Caddy serves these from /etc/euler/web-content.

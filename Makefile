@@ -361,13 +361,15 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
-## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → bounce the
-## per-user instances so their sockets re-activate them against it → refresh the
-## edge's static content + Caddyfile. Note the running instances are stopped, so
-## live terminals are dropped. The everyday "I changed Python/templates/CSS/JS,
-## push it" turnaround. Gated on check-version so the deployed build's tag is on
-## origin (run serially — the default — so the guard runs before any deploy step).
-redeploy-web: check-version redeploy-auth redeploy-msg redeploy-site redeploy-user redeploy-frontend
+## ACLs, units, certs, or the firewall: refresh the edge's static content + Caddyfile →
+## rebuild the shared venv (auth) → bounce the per-user instances so their sockets
+## re-activate them against it. The edge goes first: the restarted services name each
+## asset by a hash of its bytes (?v=, cached immutable), so those bytes must already be
+## there. Note the running instances are stopped, so live terminals are dropped. The
+## everyday "I changed Python/templates/CSS/JS, push it" turnaround. Gated on
+## check-version so the deployed build's tag is on origin (run serially — the default —
+## so the guard runs before any deploy step).
+redeploy-web: check-version redeploy-frontend redeploy-auth redeploy-msg redeploy-site redeploy-user
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 ## Report the whole web stack in one read-only sweep, in deploy order: the edge, the

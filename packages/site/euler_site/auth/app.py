@@ -41,6 +41,7 @@ from solver.auth import Authorizations, Subject
 from solver.auth.identity import system_slug
 from euler_site.auth import policy
 from euler_site.auth.returnto import return_path
+from euler_site import assets
 from euler_site.site import content
 from euler_site.cache import cache_middleware
 from euler_site.csp import csp_middleware
@@ -445,13 +446,14 @@ def build_public_app(service: AuthService) -> web.Application:
     # request_processor puts the live request in every template's context — the terms
     # page's footer needs its own path (?back=) to send its reader back here.
     web_dir = Path(__file__).resolve().parent.parent
-    aiohttp_jinja2.setup(
+    env = aiohttp_jinja2.setup(
         app,
         loader=jinja2.ChoiceLoader([
             jinja2.FileSystemLoader(str(web_dir / 'templates')),
             jinja2.FileSystemLoader(str(web_dir / 'site' / 'templates')),
         ]),
         context_processors=[aiohttp_jinja2.request_processor, shell_context])
+    assets.install(env)
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/auth/check', check),

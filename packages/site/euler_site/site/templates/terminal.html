@@ -18,19 +18,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>solver terminal</title>
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="/vendor/xterm/xterm.css"
+  <link rel="stylesheet" href="{{ asset('/vendor/xterm/xterm.css') }}"
         integrity="sha384-8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP"
         crossorigin="anonymous">
-  <link rel="stylesheet" href="/assets/site.css">
-  <script src="/assets/vault.js"></script>
-  <script src="/assets/site.js"></script>
-  <script src="/vendor/xterm/xterm.js"
+  <link rel="stylesheet" href="{{ asset('/assets/site.css') }}">
+  <script src="{{ asset('/assets/vault.js') }}"></script>
+  <script src="{{ asset('/assets/site.js') }}"></script>
+  <script src="{{ asset('/vendor/xterm/xterm.js') }}"
           integrity="sha384-M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/"
           crossorigin="anonymous" defer></script>
-  <script src="/vendor/xterm/xterm-addon-fit.js"
+  <script src="{{ asset('/vendor/xterm/xterm-addon-fit.js') }}"
           integrity="sha384-iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn"
           crossorigin="anonymous" defer></script>
-  <script src="/assets/terminal.js" defer></script>
+  <script src="{{ asset('/assets/terminal.js') }}" defer></script>
 </head>
 <body class="terminal-doc">
   <div id="term" class="term-host" role="application" aria-label="solver terminal"></div>
