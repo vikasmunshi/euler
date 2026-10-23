@@ -28,8 +28,8 @@ the [Key Exchange](docs/user-guide.md#7-key-exchange) section of the User Guide.
   `{name}` variables, and a `loop <list>: <block>` construct over problem lists.
 - **Web front end** - a browser **terminal** (xterm.js over a real `solver` PTY), a problem
   **viewer**, and an in-browser **editor**, served publicly over HTTPS.
-- **Transparent encryption** - solutions for #101+ are encrypted at rest with AES-256-GCM,
-  each file key wrapped by a per-user master key.
+- **Transparent encryption** - solutions for #101+ are encrypted at rest with AES-256-GCM
+  under one master key, which each holder keeps sealed to their own key pair.
 - **AI assistance** - a single-shot `claude-api` and agentic Claude Code, both aimed at
   deepening understanding rather than skipping it.
 - **Scraping &amp; benchmarking** - problems are fetched from projecteuler.net, then scaffolded,
