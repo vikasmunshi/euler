@@ -79,6 +79,9 @@ KEY_FILE="${TLS_DIR}/server.key"           # private key (readable by euler-web)
 # repo owner's 0750 home dir (the config-location rationale).
 WEB_CONTENT_SRC="${PROJECT_ROOT}/packages/site/euler_site/content"   # repo source of truth
 WEB_CONTENT_DIR="${SYS_DIR}/web-content"               # deployed, readable by euler-caddy
+# The content paths the public site serves (docs/package-guide.md § 4) — signed-out reads,
+# and stale-session reads, go there. One list for both Caddy matchers that name it.
+PUBLIC_PATHS="/ /solutions /solutions/* /docs /docs/* /topics /topics/* /about/* /shell /story /story/*"
 
 # ── Service identity ───────────────────────────────────────────────────────
 WEB_GROUP="euler-web"
@@ -620,12 +623,13 @@ ${DOMAIN} {
 	# of the content paths from a browser carrying NO session cookie goes to the public
 	# site (euler-site), which serves the packaged copy — no clone, no private tree, no
 	# identity, read routes only. A browser with a session cookie skips this and goes
-	# through forward_auth below, to its own instance; a stale cookie lands on the login
-	# page as before. Nothing here is a trust decision: the cookie only picks which copy
-	# of public content to show, and the public site reads no identity header at all.
+	# through forward_auth below, to its own instance — and if that cookie turns out to
+	# be stale, the 401 there comes back here (see @stale_read). Nothing here is a trust
+	# decision: the cookie only picks which copy of public content to show, and the
+	# public site reads no identity header at all.
 	@public_read {
 		method GET HEAD
-		path / /solutions /solutions/* /docs /docs/* /topics /topics/* /about/* /shell /story /story/*
+		path ${PUBLIC_PATHS}
 		not header_regexp Cookie (^|;\s*)solver_(session|remember)=
 	}
 	handle @public_read {
@@ -644,14 +648,32 @@ ${DOMAIN} {
 				copy_headers X-User X-Profile X-User-Slug
 				@unauthed status 401
 				handle_response @unauthed {
-					# "You are not signed in" is a statement about *this* moment.
-					# A stored copy would keep sending a signed-in browser to the
-					# login page; 302 is not heuristically cacheable, so this is
-					# belt-and-braces — but the belt costs one header.
-					header Cache-Control "no-store"
-					# Back to this page once signed in (?next=; the auth service
-					# validates it — euler_site/auth/returnto.py).
-					redir * /login?next={http.request.uri.path} 302
+					# A stale session cookie (expired, or dropped by an auth
+					# restart) on a read of public content: the reader is signed
+					# out, so they get what a signed-out reader gets — the public
+					# page, not a login form in its place — and the dead cookie is
+					# expired so the next request goes straight to the public site.
+					# A remember-me cookie is the exception: it may still sign them
+					# back in, which the login page tries first (login.js).
+					@stale_read {
+						method GET HEAD
+						path ${PUBLIC_PATHS}
+						not header_regexp Cookie (^|;\s*)solver_remember=
+					}
+					handle @stale_read {
+						header +Set-Cookie "solver_session=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Lax"
+						reverse_proxy unix//run/euler/site.sock
+					}
+					handle {
+						# "You are not signed in" is a statement about *this* moment.
+						# A stored copy would keep sending a signed-in browser to the
+						# login page; 302 is not heuristically cacheable, so this is
+						# belt-and-braces — but the belt costs one header.
+						header Cache-Control "no-store"
+						# Back to this page once signed in (?next=; the auth service
+						# validates it — euler_site/auth/returnto.py).
+						redir * /login?next={http.request.uri.path} 302
+					}
 				}
 			}
 

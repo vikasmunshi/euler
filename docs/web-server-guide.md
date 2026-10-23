@@ -285,13 +285,20 @@ The browser client (`packages/site/euler_site/content/assets/srp.js`) interopera
   session, `POST /auth/resume` verifies it in constant time, **rotates the validator**
   (one-time use), and opens a fresh session. A wrong validator revokes the selector —
   that is theft detection, not just hygiene. Logout clears both cookies and deletes the
-  server-side record.
+  server-side record. The login page is where it is used: the edge sends a browser holding
+  the cookie there when its session has lapsed (§ 11.0), the page marks its form
+  `data-resume` (the cookie is `HttpOnly`, so only the server can tell), and `login.js`
+  redeems it before asking for a password, then lands on `next`. A refused resume clears
+  both cookies, so a dead token sends the browser to the public site from then on rather
+  than to the login page every time. A resume derives no vault key — there is no password
+  to derive it from — so the vault is as a sign-in whose key derivation failed leaves it.
 
 ### 4.4 The `forward_auth` endpoint
 
 `GET /auth/check` is what Caddy calls on every gated request: a live session returns
 `200` with `X-User` (email), `X-Profile`, and `X-User-Slug`; no session returns `401`,
-which Caddy turns into a `302 /login` for browser navigations. Caddy copies those
+which Caddy turns into a `302 /login?next=<path>` for browser navigations — or, for a read
+of public content with no remember-me cookie, into the public page itself (§ 11.0). Caddy copies those
 headers onto the proxied request **after deleting any client-supplied copies**, and the
 app sockets are unreachable except through Caddy — which is why downstream services can
 trust them.
@@ -1060,8 +1067,14 @@ Caddy picks the copy by the **session cookie**: a GET/HEAD of a content path (`/
 `/solutions/…`, `/docs/…`, `/topics/…`, `/about/…`, `/shell`, `/story/…`) from a browser with
 no `solver_session` / `solver_remember` cookie goes to `site.sock`; everything else goes
 through `forward_auth` as before (§ The edge). That is not a trust decision — either copy is
-public content to whoever asks — so a forged or missing cookie gains nothing. A *stale* cookie
-lands on the login page, as before.
+public content to whoever asks — so a forged or missing cookie gains nothing. A *stale*
+session cookie (expired, or dropped when the auth service restarted) makes `forward_auth`
+answer 401, and on a read of those same paths the edge then serves the public page too — the
+reader is signed out, so they see what a signed-out reader sees, not a login form in its
+place — and expires the dead cookie, so the next request goes straight to the public site.
+The exception is a browser that also holds a remember-me cookie: that may still sign it back
+in, so it goes to the login page, which tries it first (§ 4.3). Anything other than a public
+read with a stale cookie — `/account`, a POST — goes to the login page as before.
 
 In the templates, `browsable` (navigation is live: a subject, or the public site) is separate
 from `subject` (what is *yours*: Actions, the terminal, the chips, the account). On the public

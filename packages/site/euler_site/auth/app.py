@@ -301,12 +301,16 @@ def build_public_app(service: AuthService) -> web.Application:
             return web.Response(status=429, text='rate limited')
         cookie = request.cookies.get(policy.REMEMBER_COOKIE, '')
         redeemed = service.remember.redeem(cookie) if cookie else None
-        if redeemed is None:
-            return web.Response(status=401, text=_GENERIC_401)
+        user = service.users.get(redeemed[0]) if redeemed else None
+        if redeemed is None or user is None or user.disabled:
+            # A dead token is cleared with the session it could not renew: until both are
+            # gone the edge keeps routing this browser to the login page instead of the
+            # public site (frontend.sh, @stale_read).
+            refused = web.Response(status=401, text=_GENERIC_401)
+            refused.del_cookie(policy.SESSION_COOKIE, path='/')
+            refused.del_cookie(policy.REMEMBER_COOKIE, path='/')
+            return refused
         email, new_cookie = redeemed
-        user = service.users.get(email)
-        if user is None or user.disabled:
-            return web.Response(status=401, text=_GENERIC_401)
         profile = service.profile_for(email)
         response = web.json_response({'email': email, 'profile': profile})
         token = service.sessions.create(email, profile)

@@ -33,6 +33,7 @@ from urllib.parse import quote, urlsplit, urlunsplit
 import aiohttp_jinja2
 from aiohttp import web
 
+from euler_site.auth import policy
 from euler_site.auth.app import AuthService, _client_key, utcnow_iso
 from euler_site.auth.pending import PendingRecord
 from euler_site.auth.requests import NAME_MAX, REMARKS_MAX, sanitize
@@ -146,13 +147,16 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
     # ── login ─────────────────────────────────────────────────────────────────────
 
     async def login_page(request: web.Request) -> web.Response:
-        context: dict[str, str] = {}
+        context: dict[str, str | bool] = {}
         if 'registered' in request.query:
             context['notice'] = 'Registration complete — sign in with your new password.'
         elif 'reset' in request.query:
             context['notice'] = 'Password updated — sign in with your new password.'
         # Where the reader was (returnto): login.js lands there once the handshake succeeds.
         context['next'] = return_path(request.query.get('next'), signed_in=True)
+        # A remember-me cookie may sign the reader back in with no password: login.js tries
+        # it first (POST /auth/resume). The cookie is HttpOnly, so only this page can tell.
+        context['resume'] = policy.REMEMBER_COOKIE in request.cookies
         return aiohttp_jinja2.render_template('login.html', request, context)
 
     # ── the shared invite/reset pipeline ───────────────────────────────────

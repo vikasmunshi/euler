@@ -46,6 +46,23 @@
     });
   }
 
+  // Remember me: the browser holds a token the server can redeem for a fresh session with no
+  // password (the page marks the form data-resume; the cookie itself is HttpOnly). Tried once,
+  // before the form is used; a refusal clears the dead cookie and leaves the form as it was.
+  // The vault key is not re-derived — there is no password here to derive it from — so a
+  // vault left locked is the case the sign-in below already allows for: the account panel
+  // can recover it.
+  async function resume() {
+    busy(true);
+    if (submitLabel) submitLabel.textContent = 'resuming…';
+    try {
+      const reply = await post('/auth/resume', {});
+      if (reply.ok) { window.location.replace(destination()); return; }
+    } catch (err) { /* fall through to the form */ }
+    busy(false);
+  }
+  if (form.hasAttribute('data-resume')) resume();
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     errorBox.hidden = true;

@@ -3,8 +3,9 @@
 """Logout contract of the auth service's public app: a browser form post (the
 site's user-menu Logout, Accept: text/html) is 303-redirected back to the page it came
 from when that page is public, else home, while a programmatic caller keeps the JSON
-reply — both clear the session cookies. Plus the `next` allowlist (auth/returnto.py) and
-the login page carrying it."""
+reply — both clear the session cookies. Plus the `next` allowlist (auth/returnto.py), the
+login page carrying it, and remember-me: the page offers a resume only when the browser holds
+the cookie, and a resume that fails clears both cookies."""
 from __future__ import annotations
 
 import shutil
@@ -12,8 +13,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from aiohttp import ClientResponse
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
+from euler_site.auth import policy
 from euler_site.auth.app import AuthService, build_public_app
 from euler_site.auth.config import AuthConfig
 from euler_site.auth.returnto import return_path
@@ -23,7 +26,9 @@ from tests import silence
 silence()   # quiet console + filter aiohttp's request-key warning (isolated-run cleanliness)
 
 
-class LogoutTests(AioHTTPTestCase):
+class _AuthAppCase(AioHTTPTestCase):
+    service: AuthService
+
     async def get_application(self):
         state = Path(tempfile.mkdtemp(prefix='euler-auth-test-'))
         self.addCleanup(shutil.rmtree, state, True)
@@ -32,7 +37,11 @@ class LogoutTests(AioHTTPTestCase):
                             admin_socket_group='', admin_token='t',
                             base_url='https://example.test', smtp_relay='127.0.0.1:25',
                             terms_version='test')
-        return build_public_app(AuthService(config))
+        self.service = AuthService(config)
+        return build_public_app(self.service)
+
+
+class LogoutTests(_AuthAppCase):
 
     @unittest_run_loop
     async def test_browser_form_post_redirects_home(self) -> None:
@@ -72,6 +81,34 @@ class LogoutTests(AioHTTPTestCase):
                                       headers={'Accept': 'application/json'})
         self.assertEqual(resp.status, 200)
         self.assertEqual(await resp.json(), {'ok': True})
+
+
+class ResumeTests(_AuthAppCase):
+    def cleared(self, resp: ClientResponse) -> set[str]:
+        return {c.split('=', 1)[0] for c in resp.headers.getall('Set-Cookie', []) if 'Max-Age=0' in c}
+
+    @unittest_run_loop
+    async def test_the_login_page_offers_a_resume_only_with_the_cookie(self) -> None:
+        self.assertNotIn('data-resume', await (await self.client.get('/login')).text())
+        self.client.session.cookie_jar.update_cookies({policy.REMEMBER_COOKIE: 'a:b'})
+        self.assertIn('data-resume', await (await self.client.get('/login')).text())
+
+    @unittest_run_loop
+    async def test_a_dead_token_is_cleared_with_its_session(self) -> None:
+        self.client.session.cookie_jar.update_cookies({policy.REMEMBER_COOKIE: 'nope:nope'})
+        resp = await self.client.post('/auth/resume', json={})
+        self.assertEqual(resp.status, 401)
+        self.assertEqual(self.cleared(resp), {policy.SESSION_COOKIE, policy.REMEMBER_COOKIE})
+
+    @unittest_run_loop
+    async def test_a_live_token_opens_a_session(self) -> None:
+        self.service.users.create('a@example.com', 'aa', 'bb', 'test', '2026-10-23T00:00:00Z')
+        self.client.session.cookie_jar.update_cookies(
+            {policy.REMEMBER_COOKIE: self.service.remember.issue('a@example.com')})
+        resp = await self.client.post('/auth/resume', json={})
+        self.assertEqual(resp.status, 200)
+        self.assertEqual((await resp.json())['email'], 'a@example.com')
+        self.assertFalse(self.cleared(resp))
 
 
 class ReturnPathTests(unittest.TestCase):

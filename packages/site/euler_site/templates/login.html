@@ -5,7 +5,7 @@
 {% block dialogue %}
   {% set note %}<b>SRP-6a</b> · password proven, never sent — the server has never seen it.{% endset %}
   {% call authwin('sign in', 'the shell, the notes and the editor are one handshake away.', note) %}
-    {{ login_form(next | default('/')) }}
+    {{ login_form(next | default('/'), resume=resume | default(false)) }}
   {% endcall %}
 {% endblock %}
 {% block scripts %}{{ login_scripts() }}{% endblock %}
