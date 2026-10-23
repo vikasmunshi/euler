@@ -403,7 +403,7 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('Project Euler', page)
         self.assertIn('href="/docs/user-guide#7-key-exchange"', page)   # docs/*.md → route
         self.assertIn('href="/docs/"', page)                            # docs/ → the index
-        self.assertIn('src="/docs/file/docs/screenshots/01-home-left.png"', page)  # readable tree → viewer
+        self.assertIn('src="/docs/file/docs/screenshots.gif"', page)     # readable tree → viewer
         for name in ('LICENSE', 'Makefile', 'pyproject.toml'):          # not readable → GitHub
             self.assertIn(f'href="https://github.com/vikasmunshi/euler/blob/master/{name}"', page)
         # no repo-relative link survives the rewrite (each would 404 in the pane)

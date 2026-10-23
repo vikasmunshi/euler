@@ -1,19 +1,19 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Capture the site's main pages for the README: a screenshot carousel you click through.
+"""Capture the site's main pages for the README, as one animated GIF that cycles through them.
 
 Captures, signed out, the five main pages (`/`, `/solutions`, `/docs`, `/topics`, `/shell`)
-and one random problem page below 100, with headless Chrome. GitHub runs no script in a
-README, so the carousel is made of links: each screenshot is stored as a left and a right
-half, shown side by side, and the left half links to the previous screenshot's page, the
-right half to the next. Each screenshot has such a page under `docs/screenshots/`, and the
-README shows the first between its `SCREENSHOTS` markers.
+and one random problem page below 100, with headless Chrome, and joins them into
+`docs/screenshots.gif`: a frame per page, looping. A GIF plays wherever an image shows (GitHub
+runs no script in a README) and the site's flat colours and text lose nothing to its 256
+colours: each frame gets its own palette, undithered, so text stays crisp. The README shows it
+between its `SCREENSHOTS` markers, which this script rewrites.
 
     python scripts/docs/screenshots.py                 # a random problem below 100
     python scripts/docs/screenshots.py --problem 2     # that one
     python scripts/docs/screenshots.py --base-url https://euler.example.com
 
-Run it from the repository root, then commit `docs/screenshots/` and `README.md`.
+Run it from the repository root, then commit `docs/screenshots.gif` and `README.md`.
 """
 from __future__ import annotations
 
@@ -30,14 +30,15 @@ from pathlib import Path
 from PIL import Image, ImageStat
 
 ROOT: Path = Path(__file__).resolve().parents[2]
-OUT_DIR: Path = ROOT / 'docs' / 'screenshots'
+GIF: Path = ROOT / 'docs' / 'screenshots.gif'
 README: Path = ROOT / 'README.md'
 BASE_URL: str = 'https://euler.vikasmunshi.com'
 
-#: The browser window (CSS pixels) and the device scale: 1600 × 980 at 1.45 makes images
-#: about 2320 × 1420, sharp on a high-density screen without being huge.
+#: The browser window, in CSS pixels, captured at 1×: wide enough for the two-pane layout,
+#: and text that stays sharp at the size a README shows it.
 WINDOW: tuple[int, int] = (1600, 980)
-SCALE: float = 1.45
+#: How long each page stays up, in milliseconds.
+FRAME_MS: int = 3000
 #: Virtual time Chrome gives a page to settle (fonts, htmx swaps, MathJax) before the shot.
 SETTLE_MS: int = 8000
 #: The site is dark: a capture brighter than this (mean luminance, 0–255) is not the page.
@@ -52,26 +53,21 @@ _BLOCK_RE = re.compile(rf'{re.escape(_START)}.*?{re.escape(_END)}', re.DOTALL)
 
 @dataclass(frozen=True)
 class Shot:
-    """One page to capture: its file stem, its path on the site, and what to call it."""
+    """One page to capture: its path on the site, and what to call it."""
 
-    stem: str
     path: str
     title: str
 
-    def half(self, side: str) -> str:
-        """The file name of this shot's *side* (`left` / `right`) half."""
-        return f'{self.stem}-{side}.png'
-
 
 def shots(problem: int) -> list[Shot]:
-    """The pages, in carousel order."""
+    """The pages, in the order the animation shows them."""
     return [
-        Shot('01-home', '/', 'Home'),
-        Shot('02-solutions', '/solutions/', 'Solutions'),
-        Shot('03-docs', '/docs/', 'Docs'),
-        Shot('04-topics', '/topics/', 'Topics'),
-        Shot('05-shell', '/shell', 'Terminal'),
-        Shot('06-problem', f'/solutions/{problem}/', f'Problem {problem}'),
+        Shot('/', 'Home'),
+        Shot('/solutions/', 'Solutions'),
+        Shot('/docs/', 'Docs'),
+        Shot('/topics/', 'Topics'),
+        Shot('/shell', 'Terminal'),
+        Shot(f'/solutions/{problem}/', f'Problem {problem}'),
     ]
 
 
@@ -93,7 +89,7 @@ def capture(browser: str, url: str, target: Path) -> None:
         with tempfile.TemporaryDirectory() as profile:
             subprocess.run([browser, '--headless=new', '--disable-gpu', '--hide-scrollbars',
                             f'--user-data-dir={profile}', f'--window-size={WINDOW[0]},{WINDOW[1]}',
-                            f'--force-device-scale-factor={SCALE}', f'--virtual-time-budget={SETTLE_MS}',
+                            '--force-device-scale-factor=1', f'--virtual-time-budget={SETTLE_MS}',
                             f'--screenshot={target}', url],
                            check=True, capture_output=True, timeout=120)
         if target.is_file():
@@ -104,62 +100,32 @@ def capture(browser: str, url: str, target: Path) -> None:
     raise SystemExit(f'screenshots: no good capture of {url} in {ATTEMPTS} attempts')
 
 
-def split(full: Path, shot: Shot) -> None:
-    """Save *full* as the shot's two halves in :data:`OUT_DIR`."""
-    with Image.open(full) as image:
-        middle = image.width // 2
-        for side, box in (('left', (0, 0, middle, image.height)),
-                          ('right', (middle, 0, image.width, image.height))):
-            image.crop(box).save(OUT_DIR / shot.half(side), optimize=True)
+def animate(frames: list[Path]) -> None:
+    """Join *frames* into :data:`GIF`, looping, each with its own undithered palette."""
+    images = [Image.open(f).convert('RGB').quantize(colors=256, method=Image.Quantize.MEDIANCUT,
+                                                    dither=Image.Dither.NONE)
+              for f in frames]
+    images[0].save(GIF, save_all=True, append_images=images[1:], duration=FRAME_MS, loop=0,
+                   optimize=True, disposal=1)
 
 
-def carousel(shot: Shot, prev: Shot, nxt: Shot, prefix: str, page: str) -> str:
-    """The two halves, linked: left → *prev*'s page, right → *nxt*'s.
-
-    *prefix* is the path from the including file to the images, *page* to the pages. No
-    whitespace between the tags, so the halves meet with no gap.
-    """
-    left = (f'<a href="{page}{prev.stem}.md" title="Previous: {prev.title}">'
-            f'<img src="{prefix}{shot.half("left")}" width="50%" alt="{shot.title}, left half"></a>')
-    right = (f'<a href="{page}{nxt.stem}.md" title="Next: {nxt.title}">'
-             f'<img src="{prefix}{shot.half("right")}" width="50%" alt="{shot.title}, right half"></a>')
-    return f'<p align="center">{left}{right}</p>'
-
-
-def caption(index: int, total: int, shot: Shot, base_url: str) -> str:
-    """The line under a screenshot: where it is in the carousel, and the page it shows."""
-    return (f'<p align="center"><b>{index} / {total} · {shot.title}</b> '
-            f'(<a href="{base_url}{shot.path}"><code>{shot.path}</code></a>), signed out. '
-            f'Click the left half for the previous page, the right half for the next.</p>')
-
-
-def write_pages(all_shots: list[Shot], base_url: str) -> None:
-    """One page per screenshot under :data:`OUT_DIR`, each linked to its neighbours."""
-    total = len(all_shots)
-    for i, shot in enumerate(all_shots):
-        prev, nxt = all_shots[i - 1], all_shots[(i + 1) % total]
-        (OUT_DIR / f'{shot.stem}.md').write_text(
-            f'## Screenshots: {shot.title}\n\n'
-            f'{carousel(shot, prev, nxt, "", "")}\n\n'
-            f'{caption(i + 1, total, shot, base_url)}\n\n'
-            f'[Back to the README](../../README.md)\n', encoding='utf-8')
-
-
-def write_readme(all_shots: list[Shot], base_url: str) -> None:
-    """Show the first screenshot in the README, between its SCREENSHOTS markers."""
+def write_readme(all_shots: list[Shot]) -> None:
+    """Show the animation in the README, between its SCREENSHOTS markers."""
     text = README.read_text(encoding='utf-8')
     if not _BLOCK_RE.search(text):
         raise SystemExit(f'screenshots: README.md has no {_START} … {_END} block')
-    first, total = all_shots[0], len(all_shots)
+    order = ' → '.join(f'<code>{s.path}</code>' for s in all_shots)
     block = (f'{_START}: written by scripts/docs/screenshots.py; edit the script, not this. -->\n'
-             f'{carousel(first, all_shots[-1], all_shots[1], "docs/screenshots/", "docs/screenshots/")}\n'
-             f'{caption(1, total, first, base_url)}\n'
+             f'<p align="center"><img src="docs/screenshots.gif" width="100%" '
+             f'alt="The web front end, signed out: {", ".join(s.title for s in all_shots)}"></p>\n'
+             f'<p align="center">The web front end, signed out: {order}, '
+             f'{FRAME_MS // 1000} seconds each.</p>\n'
              f'{_END}')
     README.write_text(_BLOCK_RE.sub(lambda _: block, text, count=1), encoding='utf-8')
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Capture every page, split it, and write the carousel's pages and the README block."""
+    """Capture every page, animate them, and write the README block."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0] if __doc__ else None)
     parser.add_argument('--problem', type=int, default=None,
                         help='the problem page to capture (default: a random one below 100)')
@@ -172,18 +138,17 @@ def main(argv: list[str] | None = None) -> int:
 
     browser = chrome()
     all_shots = shots(problem)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for old in OUT_DIR.glob('*'):           # a rerun replaces the set, never mixes two
-        old.unlink()
     with tempfile.TemporaryDirectory() as scratch:
-        for shot in all_shots:
-            full = Path(scratch) / f'{shot.stem}.png'
+        frames = []
+        for i, shot in enumerate(all_shots):
+            frame = Path(scratch) / f'{i}.png'
             print(f'capturing {base_url}{shot.path}')
-            capture(browser, f'{base_url}{shot.path}', full)
-            split(full, shot)
-    write_pages(all_shots, base_url)
-    write_readme(all_shots, base_url)
-    print(f'wrote {len(all_shots)} screenshots to {OUT_DIR.relative_to(ROOT)}/ and the README block')
+            capture(browser, f'{base_url}{shot.path}', frame)
+            frames.append(frame)
+        animate(frames)
+    write_readme(all_shots)
+    size = GIF.stat().st_size / 1e6
+    print(f'wrote {GIF.relative_to(ROOT)} ({len(all_shots)} frames, {size:.1f} MB) and the README block')
     return 0
 
 
