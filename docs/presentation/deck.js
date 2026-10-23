@@ -163,6 +163,10 @@
         text(svg, (x(a) + x(b)) / 2, M.t + 60, `${(days / 365.25).toFixed(1)} years`,
           { class: 'gap-label', 'text-anchor': 'middle' });
       }
+      if (x(b) - x(a) > 360) {  // the long pause: say when, too
+        text(svg, (x(a) + x(b)) / 2, M.t + 96, `without a solve, ${fmtMonth(solves[i].date)} to ${fmtMonth(solves[i + 1].date)}`,
+          { class: 'gap-sub', 'text-anchor': 'middle' });
+      }
     }
 
     // axes
@@ -210,9 +214,9 @@
 
   // ---------------------------------------------------------------- difficulty staircase
 
-  function staircase(slide) {
-    const W = 1360, H = 600, M = { l: 64, r: 24, t: 24, b: 64 };
-    const svg = svgRoot(slide.querySelector('[data-role="chart"]'), W, H);
+  function staircase(container) {
+    const W = 760, H = 600, M = { l: 64, r: 16, t: 24, b: 64 };
+    const svg = svgRoot(container, W, H);
     svg.setAttribute('aria-label', 'Problems solved at each difficulty level');
     const levels = problems.filter(p => p.level !== null).map(p => p.level);
     if (!levels.length) return;
@@ -249,8 +253,7 @@
 
   const RECENT = 52;
 
-  function rarity(slide) {
-    const container = slide.querySelector('[data-role="chart"]');
+  function rarity(container) {
     // The newest year of problems (about one a week) is rare only because it is new: leave it out.
     const newest = Math.max(...problems.map(p => p.n)) - RECENT;
     const counted = solves.filter(p => p.solvers !== null && p.n <= newest);
@@ -262,19 +265,47 @@
     const first = byNumber.get(1);
     const rarest = [...counted].sort((a, b) => a.solvers - b.solvers).slice(0, 4);
     const rows = [first, ...rarest].filter(p => p && p.solvers !== null);
-    const W = 1360, H = 600, labelW = 560, valueW = 150;
+    // Half a slide wide, so each row's label sits above its bar rather than beside it.
+    const W = 760, H = 520, valueW = 170;
     const svg = svgRoot(container, W, H);
     svg.setAttribute('aria-label', 'How many people have solved each problem');
     const lo = 10, hi = 1e6;
-    const bx = v => labelW + (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) * (W - labelW - valueW);
-    const rowH = Math.min(96, (H - 40) / rows.length);
+    const bx = v => (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) * (W - valueW);
+    const rowH = H / rows.length;
     rows.forEach((p, i) => {
-      const cy = 20 + i * rowH + rowH / 2;
-      text(svg, labelW - 24, cy + 8, `${p.n}  ${p.title}`, { class: 'bar-label', 'text-anchor': 'end' });
-      el('rect', { x: labelW, y: cy - 18, width: bx(p.solvers) - labelW, height: 36, rx: 3, class: `cell h${heat(p)}` }, svg);
-      text(svg, bx(p.solvers) + 14, cy + 8, `${fmtInt(p.solvers)} people`, { class: 'bar-value' });
+      const top = i * rowH + 8;
+      text(svg, 0, top + 24, `${p.n}  ${p.title}`, { class: 'bar-label' });
+      el('rect', { x: 0, y: top + 38, width: bx(p.solvers), height: 34, rx: 3, class: `cell h${heat(p)}` }, svg);
+      text(svg, bx(p.solvers) + 14, top + 64, `${fmtInt(p.solvers)} people`, { class: 'bar-value' });
     });
   }
+
+  function difficulty(slide) {
+    staircase(slide.querySelector('[data-role="staircase"]'));
+    rarity(slide.querySelector('[data-role="rarity"]'));
+  }
+
+  // ---------------------------------------------------------------- problem references
+
+  /* Every example slide names its problems (data-problems="18 67"); each gets the same footer
+     link to its page at projecteuler.net, the source, which never shows an answer. A slide
+     whose problem changes as it runs (the demo) calls window.DECK_REF again. */
+  function problemRef(slide, numbers) {
+    let ref = slide.querySelector(':scope > .ref');
+    if (!ref) ref = slide.appendChild(document.createElement('p'));
+    ref.className = 'ref';
+    ref.replaceChildren();
+    numbers.forEach((n, i) => {
+      if (i) ref.append(' · ');
+      const a = ref.appendChild(document.createElement('a'));
+      a.href = `https://projecteuler.net/problem=${n}`;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = `projecteuler.net/problem=${n}`;
+    });
+    ref.hidden = !numbers.length;
+  }
+  window.DECK_REF = problemRef;
 
   // ---------------------------------------------------------------- statement numbers
 
@@ -296,7 +327,7 @@
   const notes = document.getElementById('notes');
   let current = 0;
 
-  const RENDER = { 'title-grid': titleGrid, timeline: timelineFinal, cumulative, staircase, rarity };
+  const RENDER = { 'title-grid': titleGrid, timeline: timelineFinal, cumulative, difficulty };
   const ENTER = { timeline: timelinePlay };
   /* Stepped slides (window.DECK_PARTS, e.g. sieve.js): next/prev step within the slide first. */
   const controllers = new Map();
@@ -357,6 +388,9 @@
 
   fillStats();
   slides.forEach(s => { const render = RENDER[s.dataset.viz]; if (render) render(s); });
+  for (const s of slides) {
+    if (s.dataset.problems !== undefined) problemRef(s, s.dataset.problems.split(/\s+/).filter(Boolean));
+  }
   fit();
   // #12 opens slide 12; #12.3 also jumps a stepped slide to step 3
   const [slideNo, stepNo] = location.hash.slice(1).split('.').map(v => parseInt(v, 10));

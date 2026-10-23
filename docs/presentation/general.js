@@ -1,6 +1,6 @@
 /* The general-audience slides around the mini-stories: the opener (the obvious way breaks),
-   the Project Euler intro, the long pause, what changed, the vault, working with AI, and the
-   live-demo picker. Each registers a controller on window.DECK_PARTS, keyed by data-viz.
+   the Project Euler intro, what changed, the framework from problem to solution, the vault,
+   working with AI, and the live-demo picker. Each registers a controller on window.DECK_PARTS, keyed by data-viz.
    Public material only: no answers, nothing from solutions/private/. */
 (() => {
   'use strict';
@@ -136,57 +136,12 @@
     return stepped(0, () => {});
   }
 
-  // ======================================================== the long pause: a calendar of solves
-
-  function pause(slide) {
-    const box = slide.querySelector('[data-role="visual"]');
-    const months = new Map();
-    for (const p of problems) {
-      if (!p.solved || !p.date) continue;
-      const key = p.date.getFullYear() * 12 + p.date.getMonth();
-      months.set(key, (months.get(key) || 0) + 1);
-    }
-    const keys = [...months.keys()].sort((a, b) => a - b);
-    let gap = { from: 0, to: 0, len: 0 };
-    for (let i = 0; i + 1 < keys.length; i++) {
-      const len = keys[i + 1] - keys[i] - 1;
-      if (len > gap.len) gap = { from: keys[i] + 1, to: keys[i + 1] - 1, len };
-    }
-    const label = key => new Date(Math.floor(key / 12), key % 12, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-    fill(slide, 'gap-from', label(gap.from));
-    fill(slide, 'gap-to', label(gap.to + 1));
-    fill(slide, 'gap-months', String(gap.len));
-
-    const y0 = keys.length ? Math.floor(keys[0] / 12) : 2015, y1 = new Date().getFullYear();
-    const CELL = 50, PITCH = 56, LEFT = 90, TOP = 40;
-    const svg = el('svg', { viewBox: `0 0 ${LEFT + 12 * PITCH} ${TOP + (y1 - y0 + 1) * PITCH}`, role: 'img',
-      'aria-label': 'Problems solved in each month since 2015' }, box);
-    'JFMAMJJASOND'.split('').forEach((m, i) => {
-      const t = el('text', { x: LEFT + i * PITCH + CELL / 2, y: TOP - 14, 'text-anchor': 'middle', class: 'chart-label' }, svg);
-      t.textContent = m;
-    });
-    const peak = Math.max(1, ...months.values());
-    for (let y = y0; y <= y1; y++) {
-      const t = el('text', { x: LEFT - 16, y: TOP + (y - y0) * PITCH + CELL / 2 + 7, 'text-anchor': 'end', class: 'chart-label' }, svg);
-      t.textContent = String(y);
-      for (let m = 0; m < 12; m++) {
-        const key = y * 12 + m, count = months.get(key) || 0;
-        const cell = el('rect', { x: LEFT + m * PITCH, y: TOP + (y - y0) * PITCH, width: CELL, height: CELL, rx: 5,
-          class: count ? 'pc-cell solved' : (key >= gap.from && key <= gap.to ? 'pc-cell gap' : 'pc-cell') }, svg);
-        if (count) cell.style.opacity = String(0.35 + 0.65 * Math.sqrt(count / peak));
-        const tip = el('title', {}, cell);
-        tip.textContent = `${label(key)}: ${count} solved`;
-      }
-    }
-    return stepped(0, () => {});
-  }
-
-  // ======================================================== what changed: the workshop in numbers
+  // ======================================================== what changed: the framework in numbers
 
   function changed(slide) {
     const p = HISTORY.project || {};
     const ROWS = [
-      [p.commands, 'shell commands, in a workshop that remembers where I left off'],
+      [p.commands, 'shell commands, in a framework that remembers where I left off'],
       [p.python, `solutions in Python, and ${fmt(p.c || 0)} of them also in C`],
       [p.notes, 'written explanations, one beside each solved problem'],
       [p.articles, `topic articles linking problems by technique (${fmt(p.articles_final || 0)} finished so far)`],
@@ -199,6 +154,45 @@
       h('span', 'wc-text', row, text);
     }
     return stepped(0, () => {});
+  }
+
+  // ======================================================== the framework: from problem to solution
+
+  /* One problem through the six stages, a stage per step. Problem 7's worked example
+     (the 6th prime is 13) is from its statement; its answer is never shown. */
+  const STAGES = [
+    ['It fetches the problem.',
+     '`summary` reads my progress page from projecteuler.net. Each problem it has not seen gets a folder of its own, with the statement and its pictures saved inside.'],
+    ['It sets up the work.',
+     '`new 7` adds an empty solution, ready to fill in. The test cases come from the statement: AI drafts them with `claude-api`, and I check them. The first is the statement’s own example: the 6th prime is 13.'],
+    ['I write one function.',
+     'solve() takes the input and returns the answer. Everything around it (reading the input, timing, the output line) is the framework’s, the same for every problem, in Python or C.'],
+    ['It checks the answer.',
+     '`eval 7` runs the solution on every test case. The example must come out as 13 before the real question, the 10,001st prime, counts; and projecteuler.net has the last word on that.'],
+    ['It measures the time.',
+     '`benchmark 7` runs it again and again and records the average, so a faster idea shows up as a smaller number. The C translation runs under the same commands.'],
+    ['It keeps the result.',
+     'An explanation goes beside the code, and `git-commit 7` records it all. Past Problem 100, the code is encrypted before it leaves the machine; the website shows the rest.'],
+  ];
+
+  function framework(slide) {
+    const items = [...slide.querySelectorAll('[data-role="flow"] li')];
+    const stepEl = slide.querySelector('[data-role="step"]');
+    const detailEl = slide.querySelector('[data-role="detail"]');
+    const code = s => s.split('`').map((part, i) => {
+      if (!(i % 2)) return document.createTextNode(part);
+      const c = document.createElement('code');
+      c.textContent = part;
+      return c;
+    });
+    return stepped(STAGES.length - 1, s => {
+      items.forEach((li, i) => {
+        li.classList.toggle('done', i < s);
+        li.classList.toggle('now', i === s);
+      });
+      stepEl.textContent = STAGES[s][0];
+      detailEl.replaceChildren(...code(STAGES[s][1]));
+    });
   }
 
   // ======================================================== the vault
@@ -313,15 +307,19 @@ def solve(*args: str) -> str:
       }
       numEl.textContent = String(pick);
       describe(pick);
+      window.DECK_REF?.(slide, [pick]);
     }
     const show = (s, animate) => {
       const my = ++token;
       slide.classList.toggle('drawn', s === 1);
-      if (s === 0) { numEl.textContent = '?'; titleEl.textContent = ''; metaEl.textContent = ''; }
+      if (s === 0) {
+        numEl.textContent = '?'; titleEl.textContent = ''; metaEl.textContent = '';
+        window.DECK_REF?.(slide, []);
+      }
       else draw(my, animate);
     };
     return stepped(1, show, () => { token++; });
   }
 
-  window.DECK_PARTS = Object.assign(window.DECK_PARTS || {}, { opener, intro, pause, changed, vault, ai, demo });
+  window.DECK_PARTS = Object.assign(window.DECK_PARTS || {}, { opener, intro, changed, framework, vault, ai, demo });
 })();
