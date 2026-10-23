@@ -291,6 +291,7 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .notes-body { overflow: auto; padding: 14px 18px 16px; }
 .notes-body p { margin: 0 0 8px; }
 .notes-body p:last-child { margin-bottom: 0; }
+.notes-body p.pn { padding: 10px 12px; background: #16233B; border-left: 3px solid var(--heat-1); border-radius: 4px; }
 
 .nav {
   position: fixed;

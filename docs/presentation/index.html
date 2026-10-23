@@ -28,7 +28,7 @@
   </div>
   <p class="caption bottom">Vikas Munshi</p>
   <aside class="notes">
-    <p>The faint grid behind the title is every Project Euler problem, all 1,013 of them, coloured by how hard each one I solved was. We will watch it fill in shortly.</p>
+    <p>The faint grid behind the title is every Project Euler problem, over a thousand of them, coloured by how hard each one I solved was. We will watch it fill in shortly.</p>
   </aside>
 </section>
 
@@ -37,9 +37,9 @@
     <p class="statement">Add up every number below 1,000 that is a multiple of 3 or 5.</p>
     <p class="lede">Problem 1. Take thirty seconds.</p>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 1: Multiples of 3 or 5</strong> · answer <strong>233,168</strong><br><em>The problem:</em> Add up every natural number below 1,000 that is a multiple of 3 or of 5.<br><em>The solution:</em> Inclusion–exclusion: the multiples of 3, plus the multiples of 5, minus the multiples of 15 (counted twice). Each is an arithmetic series with a closed-form sum, k·m(m+1)/2, so it takes constant time at any size. Five versions are kept, from a plain scan of every number to the formula.</p>
     <p>Let the room think. Someone will say "just add them up", which is right, and that is the point: for Problem 1 the obvious way works.</p>
-    <p>Don't reveal the answer on a slide. Say it aloud if asked.</p>
+    <p>The answer stays off the slide; it's fine to say it if asked (the site allows sharing the first 100).</p>
   </aside>
 </section>
 
@@ -54,9 +54,8 @@
       <p class="caption" data-role="detail"></p>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 1: Multiples of 3 or 5</strong> · answer <strong>233,168</strong><br><em>The problem:</em> Add up every natural number below 1,000 that is a multiple of 3 or of 5.<br><em>The solution:</em> Inclusion–exclusion: the multiples of 3, plus the multiples of 5, minus the multiples of 15 (counted twice). Each is an arithmetic series with a closed-form sum, k·m(m+1)/2, so it takes constant time at any size. Five versions are kept, from a plain scan of every number to the formula.</p>
     <p>Space adds a row: 1,000, a million and a hundred million are timed live on this laptop; a trillion and a billion billion are estimated from the measured speed. The last step explains the formula. The sums themselves are never shown.</p>
-    <p>If someone asks for Problem 1's answer, it's fine to say it aloud (the site allows sharing the first 100), but it isn't on the slide.</p>
   </aside>
 </section>
 
@@ -75,7 +74,7 @@
       <li>Problem 1 has been solved by <span data-fill="first-solvers">853,325</span> people. Problem <span data-fill="fewest-n">0</span>, by <span data-fill="fewest-solvers">0</span>.</li>
     </ul>
   </div>
-  <aside class="notes"><p>Keep it to a minute. The card is Problem 1's statement as published. The sharing rule matters later, at the vault. The "fewest" problem leaves out the newest year, which few people have had time to try.</p></aside>
+  <aside class="notes"><p class="pn"><strong>Problem 1: Multiples of 3 or 5</strong> · answer <strong>233,168</strong><br><em>The problem:</em> Add up every natural number below 1,000 that is a multiple of 3 or of 5.<br><em>The solution:</em> Inclusion–exclusion: the multiples of 3, plus the multiples of 5, minus the multiples of 15 (counted twice). Each is an arithmetic series with a closed-form sum, k·m(m+1)/2, so it takes constant time at any size. Five versions are kept, from a plain scan of every number to the formula.</p><p>Keep it to a minute. The card is Problem 1's statement as published. The sharing rule matters later, at the vault. The "fewest" problem leaves out the newest year, which few people have had time to try.</p></aside>
 </section>
 
 <section class="slide">
@@ -197,9 +196,9 @@
     <p class="story-step" data-role="step"></p>
     <p class="caption" data-role="detail"></p>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 7: 10 001st Prime</strong> · answer <strong>104,743</strong><br><em>The problem:</em> Listing the primes 2, 3, 5, 7, 11, 13, the 6th is 13. What is the 10,001st?<br><em>The solution:</em> A Sieve of Sundaram: cross out every index of the form i + j + 2ij; each surviving index k stands for the odd prime 2k + 1. Sieving indices up to n·ln n covers numbers up to about 2n·ln n, safely past the n-th prime, and the (n − 1)-th odd prime is the answer.</p>
     <p>Space steps through the six stages for Problem 7, "What is the 10,001st prime number?". The framework is called solver: a shell of commands, plus the runner every solution plugs into.</p>
-    <p>The worked example (the 6th prime is 13) comes from the problem statement, so it's fine to show. The 10,001st prime is the answer: never on the slide.</p>
+    <p>The worked example (the 6th prime is 13) comes from the problem statement, so it's fine to show. The answer stays off the slide; it's in these notes if asked.</p>
     <p>The point for a general audience: I still solve each problem myself; the framework does the fetching, checking, timing and keeping, the same way every time.</p>
   </aside>
 </section>
@@ -227,7 +226,7 @@
       </div>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 10: Summation of Primes</strong> · answer <strong>142,913,828,922</strong><br><em>The problem:</em> Find the sum of all the primes below two million.<br><em>The solution:</em> A Sieve of Eratosthenes up to two million, then add up the survivors. Five versions are kept: Eratosthenes, Sundaram, an incremental sieve, trial division (the slow side of the race on the slide), and the primesieve library.</p>
     <p>Press Space for each step: 2, 3, 5 and 7 cross out their multiples, then the survivors light up. The last step races both methods below two million, live on this laptop. ← steps back; R replays the current step.</p>
     <p>Below two million: 4,347,776 cross-outs against 179,492,731 divisions, about 41× less work. In Python it's 0.3 s against 19 s.</p>
     <p>The point for a general audience: we found primes without ever dividing. Doing the work in a smarter order beats doing it faster.</p>
@@ -253,9 +252,9 @@
       </table>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 15: Lattice Paths</strong> · answer <strong>137,846,528,820</strong><br><em>The problem:</em> Starting at the top-left corner of a 20 × 20 grid and moving only right or down, how many routes reach the bottom-right corner?<br><em>The solution:</em> Every route is 40 moves, 20 of them to the right, so a route is just a choice of which 20 moves go right: the central binomial coefficient C(40, 20) = 40! / (20!)². A closed form, no search.</p>
     <p>Space steps through: the six routes on a 2 × 2 grid, the table showing listing explode, the edge corners, the fill (each corner is the sum of above and left; the highlighted 6 = 3 + 3), the tilt into Pascal's triangle, and Problem 15's 20 × 20 grid shaded by route count.</p>
-    <p>The corner of the 6 × 6 grid reads 924. Don't give Problem 15's own number; the last step says "over a hundred billion" on purpose.</p>
+    <p>The corner of the 6 × 6 grid reads 924. The last step says "over a hundred billion" on purpose; the exact number is in these notes if asked.</p>
     <p>For a general audience this is dynamic programming without the name: remember small answers and build bigger ones from them.</p>
   </aside>
 </section>
@@ -270,9 +269,9 @@
       <p class="story-tally" data-role="tally" aria-live="polite"></p>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 18: Maximum Path Sum I</strong> · answer <strong>1,074</strong><br><em>The problem:</em> Find the largest total from top to bottom of a 15-row triangle of numbers, stepping each time to one of the two numbers just below.<br><em>The solution:</em> Bottom-up dynamic programming: replace each number with itself plus the larger of the two below it, row by row from the bottom; the top then holds the answer. Each row is touched once.</p><p class="pn"><strong>Problem 67: Maximum Path Sum II</strong> · answer <strong>7,273</strong><br><em>The problem:</em> The same question for a 100-row triangle, which has 2⁹⁹ paths: far too many to try one by one.<br><em>The solution:</em> The same bottom-up fold as Problem 18, unchanged: one pass over 5,050 numbers.</p>
     <p>Space steps through: the puzzle, trying all 8 paths (the best, 23, stays highlighted), the 100-row scale of Problem 67, then folding the small triangle from the bottom one row at a time until the top reads 23, and finally the 100-row triangle folding in one sweep.</p>
-    <p>The worked example is the one printed in Problem 18's statement, so 23 is fine to show. Don't give Problem 18's or 67's own answers.</p>
+    <p>The worked example is the one printed in Problem 18's statement, so 23 is fine to show. Both answers stay off the slide; they're in these notes if asked.</p>
     <p>This is dynamic programming again, from the other direction: each row only needs the best results from the row below it.</p>
   </aside>
 </section>
@@ -287,9 +286,9 @@
       <p class="story-tally" data-role="tally"></p>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 14: Longest Collatz Sequence</strong> · answer <strong>837,799</strong><br><em>The problem:</em> Halve n if even, otherwise make it 3n + 1, until it reaches 1. Which starting number under one million gives the longest chain?<br><em>The solution:</em> Chain lengths are remembered as they are found, in a cache built fresh on every run, so a chain stops as soon as it meets a number already worked out. Only the upper half of the range needs scanning: any x in the lower half has 2x below the limit too, and 2x's chain is one step longer.</p>
     <p>Space steps through: the rule from 6, the wild ride from 27 (peak 9,232), the cloud of chain lengths up to 10,000, the open problem, what remembering saves (light bars are full chains, dark bars the part actually worked out), and the total below one million.</p>
-    <p>The scatter stops at 10,000 on purpose: Problem 14's own answer is below one million, and it isn't on the slide. Don't say it.</p>
+    <p>The scatter stops at 10,000 on purpose: Problem 14's answer is below one million and stays off the slide; it's in these notes if asked.</p>
     <p>Below one million: 131,434,272 steps one at a time against 5,226,259 with the memory, counted offline in Python.</p>
   </aside>
 </section>
@@ -304,9 +303,9 @@
       <p class="story-tally" data-role="tally" aria-live="polite"></p>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 16: Power Digit Sum</strong> · answer <strong>1,366</strong><br><em>The problem:</em> 2¹⁵ = 32,768, and its digits sum to 26. What is the sum of the digits of 2¹⁰⁰⁰?<br><em>The solution:</em> Python's integers have no size limit: compute 2**1000 exactly (302 digits) and add up its digits.</p>
     <p>Space steps through: the first ten doublings, what a calculator shows, all 302 digits growing as 2 doubles up to the 1,000th power, doubling 32,768 by hand with carries, and the comparison with the roughly 10⁸⁰ atoms in the universe.</p>
-    <p>Problem 16 asks for the sum of these digits. That sum isn't on the slide; don't work it out aloud.</p>
+    <p>Problem 16 asks for the sum of these digits. That sum isn't on the slide; it's in these notes if asked.</p>
     <p>A pure sense-of-scale moment. Let the digits fill the screen before talking.</p>
   </aside>
 </section>
@@ -335,7 +334,7 @@
       <p class="caption" data-role="detail"></p>
     </div>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 7: 10 001st Prime</strong> · answer <strong>104,743</strong><br><em>The problem:</em> Listing the primes 2, 3, 5, 7, 11, 13, the 6th is 13. What is the 10,001st?<br><em>The solution:</em> A Sieve of Sundaram: cross out every index of the form i + j + 2ij; each surviving index k stands for the odd prime 2k + 1. Sieving indices up to n·ln n covers numbers up to about 2n·ln n, safely past the n-th prime, and the (n − 1)-th odd prime is the answer.</p>
     <p>Space: the readable public code (Problem 7), the same code encrypted live with a fresh random key, the key-sharing picture, then the map of open and locked problems.</p>
     <p>Never show a real private solution here. The encrypted text is genuinely encrypted, but of public code.</p>
   </aside>
@@ -372,7 +371,7 @@ def solve(*args: str) -&gt; str:
                // math.factorial(lattice_size) ** 2)</pre>
     <p class="ai-notes">“The crucial observation is that the geometry of the grid is irrelevant to the count: any valid path consists of exactly 2n unit steps, of which n must go right and n must go down. A path is fully determined by the order in which we interleave these two kinds of moves.”</p>
   </div>
-  <aside class="notes">
+  <aside class="notes"><p class="pn"><strong>Problem 15: Lattice Paths</strong> · answer <strong>137,846,528,820</strong><br><em>The problem:</em> Starting at the top-left corner of a 20 × 20 grid and moving only right or down, how many routes reach the bottom-right corner?<br><em>The solution:</em> Every route is 40 moves, 20 of them to the right, so a route is just a choice of which 20 moves go right: the central binomial coefficient C(40, 20) = 40! / (20!)². A closed form, no search.</p>
     <p>Be candid: people are curious and a bit sceptical; own both.</p>
     <p>The example is Problem 15: the solution was written by hand in 2019, before AI tools existed; the explanation beside it (solutions/public/p0015/notes.html) was co-written with AI later. The method is the 2019 one; the @runner.main wrapper around it came later, when every solution moved onto the runner framework. The passage stops before the answer.</p>
   </aside>
@@ -392,7 +391,7 @@ def solve(*args: str) -&gt; str:
       </ol>
     </div>
   </div>
-  <aside class="notes"><p>Space draws a random problem from 1 to 100; R draws again. Keep the demo to about sixty seconds and visual: the website, not the terminal. Have a recording ready in case the network fails.</p></aside>
+  <aside class="notes"><p>Space draws a random problem from 1 to 100; R draws again. The link at the bottom right opens that problem's page on the site in a new tab: the statement, the solutions, their timings and the answer. Keep the demo to about sixty seconds and visual: the website, not the terminal. Have a recording ready in case the network fails.</p></aside>
 </section>
 
 <section class="slide slide-title" data-viz="title-grid">
@@ -453,7 +452,7 @@ const char *solve(int argc, char *argv[]) {
 }</pre></div>
   </div>
   <p class="dev-foot">The runner owns everything else: the arguments, <code>--runs=N</code> timing, a consistency check, and one output line, <code>&lt;runs&gt; &lt;seconds&gt; &lt;answer&gt;</code>. Python and C share the contract, so either runs under the same <code>eval</code> and <code>benchmark</code>.</p>
-  <aside class="notes"><p>Problem 7 is public, so its code can be shown. The C is trimmed where marked with an ellipsis. The algorithm is the same in both: C translations are held to algorithmic parity with the Python.</p></aside>
+  <aside class="notes"><p class="pn"><strong>Problem 7: 10 001st Prime</strong> · answer <strong>104,743</strong><br><em>The problem:</em> Listing the primes 2, 3, 5, 7, 11, 13, the 6th is 13. What is the 10,001st?<br><em>The solution:</em> A Sieve of Sundaram: cross out every index of the form i + j + 2ij; each surviving index k stands for the odd prime 2k + 1. Sieving indices up to n·ln n covers numbers up to about 2n·ln n, safely past the n-th prime, and the (n − 1)-th odd prime is the answer.</p><p>Problem 7 is public, so its code can be shown. The C is trimmed where marked with an ellipsis. The algorithm is the same in both: C translations are held to algorithmic parity with the Python.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
