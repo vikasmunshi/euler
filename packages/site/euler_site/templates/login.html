@@ -1,40 +1,11 @@
 {% extends "auth_base.html" %}
 {% from "_authwin.html" import authwin %}
+{% from "_loginform.html" import login_form, login_scripts with context %}
 {% block title %}euler — sign in{% endblock %}
 {% block dialogue %}
-  {# The IDs are the contract login.js drives — email / password / remember /
-     submit-btn / form-error — so the terminal chrome is skin-deep and the SRP
-     handshake is unchanged. #}
   {% set note %}<b>SRP-6a</b> · password proven, never sent — the server has never seen it.{% endset %}
   {% call authwin('sign in', 'the shell, the notes and the editor are one handshake away.', note) %}
-    <form id="login-form" class="auth-form authwin-form" method="post" action="#" novalidate
-          data-next="{{ next | default('/') }}">
-      <label for="email">email</label>
-      <input id="email" name="email" type="email" autocomplete="username" required autofocus>
-      <label for="password">passwd</label>
-      <div class="pw-wrap">
-        <input id="password" name="password" type="password" autocomplete="current-password" required>
-        <button type="button" class="pw-toggle" data-pw-toggle aria-controls="password"
-                aria-pressed="false">show</button>
-      </div>
-      <p id="caps-warn" class="caps-warn" role="status" hidden>Caps Lock is on</p>
-      <label class="check"><input id="remember" name="remember" type="checkbox"> remember me on this device</label>
-      <p id="form-error" class="flash flash-error" role="alert" hidden></p>
-      <button id="submit-btn" class="btn btn-primary" type="submit">
-        <span id="submit-label">sign in</span> <span class="kbd" aria-hidden="true">&#8629;</span>
-      </button>
-    </form>
-    <div class="auth-links spread">
-      <a class="auth-link" href="/forgot">forgot password</a>
-      <a class="auth-link" href="/request-invite">request invite</a>
-    </div>
-    <noscript><p class="flash flash-error">Signing in requires JavaScript (the SRP handshake runs in your browser).</p></noscript>
+    {{ login_form(next | default('/')) }}
   {% endcall %}
 {% endblock %}
-{# vault.js is already in the shell's <head> (base.html). This page loads its own
-   SRP handshake plus the shared reveal/caps-lock affordances. #}
-{% block scripts %}
-  <script src="{{ asset('/assets/srp.js') }}" defer></script>
-  <script src="{{ asset('/assets/authform.js') }}" defer></script>
-  <script src="{{ asset('/assets/login.js') }}" defer></script>
-{% endblock %}
+{% block scripts %}{{ login_scripts() }}{% endblock %}

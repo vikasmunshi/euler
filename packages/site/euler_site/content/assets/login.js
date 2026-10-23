@@ -26,6 +26,17 @@
   // The reveal toggle and caps-lock warning are wired by authform.js (shared
   // with the register page); this file owns only the SRP handshake.
 
+  // Where the reader lands. On /login: the page they came from — validated by the server
+  // (auth/returnto.py) before it was written into the form; anything else was already `/`.
+  // In the public site's right pane (data-next-here): the page the left pane shows now — the
+  // header is not re-rendered as it moves, so only the live location knows. Reloaded with a
+  // session, that same URL is served by the reader's own instance.
+  function destination() {
+    if (!form.hasAttribute('data-next-here')) return form.dataset.next || '/';
+    const here = window.location.pathname + window.location.search;
+    return here.charAt(0) === '/' && here.charAt(1) !== '/' ? here : '/';
+  }
+
   async function post(path, body) {
     return fetch(path, {
       method: 'POST',
@@ -59,9 +70,7 @@
       try {
         if (window.Vault) Vault.store(await Vault.derivePk(secret, salt), salt);
       } catch (err) { /* vault stays locked */ }
-      // Back to the page the reader came from — validated by the server (auth/returnto.py)
-      // before it was written into the form; anything else was already `/`.
-      window.location.replace(form.dataset.next || '/');
+      window.location.replace(destination());
     } catch (err) {
       fail('Sign-in failed: ' + (err && err.message ? err.message : 'unexpected error'));
     }

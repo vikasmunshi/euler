@@ -1,11 +1,17 @@
-{# The right pane on the public site (base.html `ws`): what a signed-in visitor has here — the
-   solver terminal — and the way to it. The left pane is fully navigable without signing in;
-   this is the one thing that needs an account. Plain links: the login page is the auth tier's,
-   a full navigation. #}
-<div class="signin-pane">
-  <h2>The solver terminal</h2>
-  <p>Signed in, this pane is a live shell on your own copy of the repository: run and benchmark
-     solutions, read the private notes, and edit the work in the pane beside it.</p>
-  <p><a class="btn btn-primary" href="/login{% if page_path %}?next={{ page_path | urlencode }}{% endif %}" data-login>Sign in</a></p>
-  <p class="muted">No account? <a href="/request-invite">Request an invite</a>.</p>
+{# The right pane on the public site (base.html `ws`): where a signed-in visitor has the solver
+   terminal, the sign-in that opens it — the /login page's own form (_loginform.html), so
+   signing in is no extra page. The left pane is fully navigable without signing in; the
+   terminal is the one thing that needs an account. A successful handshake reloads the page
+   the left pane shows, and the reload, now carrying a session, is served from the reader's
+   own instance. #}
+{% from "_authwin.html" import authwin %}
+{% from "_loginform.html" import login_form, login_scripts with context %}
+<div class="auth-pane">
+  <div class="auth-card">
+    {% set note %}<b>SRP-6a</b> · password proven, never sent — the server has never seen it.{% endset %}
+    {% call authwin('sign in', 'signed in, this pane is a live shell on your own copy of the repository.', note) %}
+      {{ login_form(here=True) }}
+    {% endcall %}
+  </div>
 </div>
+{{ login_scripts() }}

@@ -1554,12 +1554,3 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
   .tag-chip, .tcard { transition: none; }
   .tcard:hover { transform: none; }
 }
-
-/* The public site's right pane (_signin.html): where a signed-in visitor has the terminal,
-   the way to it. Centred in the pane's own box, in the body face. */
-.signin-pane {
-  margin: auto; max-width: 28rem; padding: 2rem 1.5rem;
-  display: flex; flex-direction: column; gap: 0.75rem;
-}
-.signin-pane h2 { margin: 0; color: var(--accent-ink); }
-.signin-pane p { margin: 0; line-height: 1.5; }

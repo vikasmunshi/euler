@@ -108,6 +108,14 @@ class PublicSiteTests(AioHTTPTestCase):
         self.assertIn('href="/login?next=/"', body)          # …only the way to one, back to here
 
     @unittest_run_loop
+    async def test_the_right_pane_is_the_sign_in_form(self) -> None:
+        body = await (await self.client.get('/topics/')).text()
+        self.assertIn('id="login-form"', body)                # the /login page's own form…
+        self.assertIn('data-next-here', body)                 # …returning to the live page
+        self.assertNotIn('autofocus', body)                   # …without taking the reader's focus
+        self.assertRegex(body, r'src="/assets/login\.js\?v=[0-9a-f]{12}"')
+
+    @unittest_run_loop
     async def test_a_page_names_its_assets_by_their_bytes(self) -> None:
         body = await (await self.client.get('/')).text()
         self.assertRegex(body, r'href="/assets/site\.css\?v=[0-9a-f]{12}"')

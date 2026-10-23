@@ -252,13 +252,17 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
    cookie if asked). On failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
 
-**Signing in and out keep your place.** Both are full-page trips through this service, so
-the page the left pane is on travels with them as `next`: the header's *Login* link and the
-public site's *Sign in* button carry `/login?next=<path>`, the *Logout* form a `next` field,
-and Caddy's redirect of an expired session `?next=` its path. `site.js` stamps the live path
-on the click (the header is not re-rendered as the pane moves). Signed in, `login.js` lands on
-it; signed out, the 303 goes back to it — served now by the public site — unless it is a page
-only a session can see (`/account`), which lands on `/`.
+**Signing in and out keep your place.** On the public site there is no trip to make: the
+right pane *is* the sign-in form — the `/login` page's own (`_loginform.html`), marked
+`data-next-here` — and once the handshake succeeds `login.js` reloads the page the left pane
+shows at that moment, which, now carrying a session, is served by the reader's own instance.
+The header's *Login* link there just focuses the form. Elsewhere sign-in and sign-out are
+full-page trips through this service, so the page the left pane is on travels with them as
+`next`: the header's *Login* link carries `/login?next=<path>`, the *Logout* form a `next`
+field, and Caddy's redirect of an expired session `?next=` its path. `site.js` stamps the live
+path on the click (the header is not re-rendered as the pane moves). Signed in, `login.js`
+lands on it; signed out, the 303 goes back to it — served now by the public site — unless it
+is a page only a session can see (`/account`), which lands on `/`.
 
 `next` is attacker-controlled, so it is an allowlist rather than a sanitiser
 (`packages/site/euler_site/auth/returnto.py`): `/` or a path under one of the left pane's
@@ -1061,7 +1065,9 @@ lands on the login page, as before.
 
 In the templates, `browsable` (navigation is live: a subject, or the public site) is separate
 from `subject` (what is *yours*: Actions, the terminal, the chips, the account). On the public
-site the right pane, where the terminal would be, is the way in (`_signin.html`). The public
+site the right pane, where the terminal would be, is the way in: the sign-in form itself
+(`_signin.html`, the `/login` page's form from `_loginform.html`), so signing in costs no
+extra page. The public
 copy is as current as the last `make redeploy-web` — it is versioned with the code (the
 release that installed it), where a signed-in visitor sees their clone as it is.
 

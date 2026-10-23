@@ -805,7 +805,12 @@
   function currentPage() { return location.pathname + location.search; }
   document.addEventListener('click', function (ev) {
     var link = ev.target.closest && ev.target.closest('a[data-login]');
-    if (link) { link.href = '/login?next=' + encodeURIComponent(currentPage()); }
+    if (!link) { return; }
+    // The public site carries the sign-in form in its right pane: the header's Login goes
+    // there, not to a page that holds the same form.
+    var email = document.querySelector('#login-form #email');
+    if (email) { ev.preventDefault(); email.focus(); return; }
+    link.href = '/login?next=' + encodeURIComponent(currentPage());
   }, true);
   document.addEventListener('submit', function (ev) {
     var form = ev.target;
