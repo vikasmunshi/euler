@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Stage the euler-content wheel source: `content/` plus the public tree, in a scratch directory.
+"""Stage the euler-content wheel source: `packages/content/` plus the public tree, in a scratch directory.
 
     python scripts/content/stage.py OUT_DIR      # then: pip install OUT_DIR
 
-Copies `content/` to *OUT_DIR*, lays the public tree into `OUT_DIR/euler_content/tree/` and
+Copies `packages/content/` to *OUT_DIR*, lays the public tree into `OUT_DIR/euler_content/tree/` and
 stamps `_version.py` from `packages/solver/solver/version.py` (docs/package-guide.md § 4.1, § 5.2). Only **tracked**
 files under the public roots are copied — an untracked scratch file never ships — and the
 working-tree copy is what ships, as with the code the same deploy installs. Anything under
@@ -58,7 +58,7 @@ def stage(out: Path, root: Path = ROOT) -> int:
     """Build the wheel source in *out* (replaced if present); the number of files laid down."""
     if out.exists():
         shutil.rmtree(out)
-    shutil.copytree(root / 'content', out, ignore=shutil.ignore_patterns('tree', '_version.py', '__pycache__',
+    shutil.copytree(root / 'packages' / 'content', out, ignore=shutil.ignore_patterns('tree', '_version.py', '__pycache__',
                                                                          '*.egg-info', 'build'))
     tree = out / 'euler_content' / 'tree'
     files = public_files(root)

@@ -3,7 +3,7 @@
 # Not built from here directly: `scripts/content/stage.py` copies this folder to a scratch
 # directory, lays the public tree into `euler_content/tree/` (tracked files only, never
 # `solutions/private`) and stamps `euler_content/_version.py` from `packages/solver/solver/version.py` —
-# lockstep with the code (Q5). The public site (`euler-site`) serves from the installed copy.
+# lockstep with the code (§ 5.2). The public site (`euler-site`) serves from the installed copy.
 [build-system]
 requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"

@@ -50,5 +50,5 @@ wheels/
 !.gitattributes
 !.gitignore
 !.shellcheckrc
-content/euler_content/tree/
-content/euler_content/_version.py
+packages/content/euler_content/tree/
+packages/content/euler_content/_version.py

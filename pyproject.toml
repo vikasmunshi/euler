@@ -4,7 +4,7 @@
 #   packages/solver/pyproject.toml     euler-solver    import solver           the solver shell
 #   packages/site/pyproject.toml       euler-site      import euler_site       the content site + auth
 #   packages/webshell/pyproject.toml   euler-webshell  import euler_webshell   the web shell + spool
-#   content/pyproject.toml             euler-content   the published content (staged by scripts/content/stage.py)
+#   packages/content/pyproject.toml    euler-content   import euler_content    the published content (staged by scripts/content/stage.py)
 #
 # This file is no package. It records the system setup the packages need before `pip install`.
 

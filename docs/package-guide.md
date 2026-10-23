@@ -4,7 +4,7 @@ This guide covers how the code is **packaged**: the three packages and which way
 depend on each other, how the web shell extends the solver shell without the solver shell
 knowing, who a session runs as, where the public and the signed-in content come from, and
 how the packages are versioned and deployed together. The packages live under
-[`packages/`](../packages/); the content wheel under [`content/`](../content/).
+[`packages/`](../packages/), the content wheel among them ([`packages/content/`](../packages/content/)).
 
 The short version, for when that is all you need:
 
@@ -27,7 +27,7 @@ packages/
   solver/    euler-solver    import solver           the solver shell: standalone, no web code
   site/      euler-site      import euler_site       the content site and the auth service
   webshell/  euler-webshell  import euler_webshell   the web shell, the per-user service, the spool
-content/     euler-content   import euler_content    the published content, as data
+  content/   euler-content   import euler_content    the published content, as data
 ```
 
 | Package | What it holds |
@@ -235,7 +235,7 @@ templates' `browsable` / `subject` split.
 ### 4.1 The content wheel
 
 [`scripts/content/stage.py`](../scripts/content/stage.py) builds the wheel's source in a scratch
-directory: a copy of [`content/`](../content/), the public tree laid into `euler_content/tree/`
+directory: a copy of [`packages/content/`](../packages/content/), the public tree laid into `euler_content/tree/`
 in the repository's own layout, and `_version.py` stamped from the solver's version. It copies
 **tracked** files under fixed public roots only — an untracked scratch file never ships — and
 refuses outright if anything under `solutions/private` would be included. `euler_content.root()`
