@@ -209,6 +209,7 @@ packages/solver/solver/
     update_doc.py                 — Regenerate the machine-maintained sections of the guides under `docs/`.
     version.py                    — The `version` command: report the running solver build's version.
 packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-guide.md § 1;
+  assets.py                       — Versioned asset URLs: `/assets/site.css?v=<hash>` — a URL that names its own bytes (shared).
   cache.py                        — Cache-Control middleware: what a browser may reuse, and for how long (shared).
   csp.py                          — Content-Security-Policy middleware with a per-response nonce (shared).
   envfile.py                      — Minimal `KEY=VALUE` reader for the scoped runtime env files under `/etc/euler`.
