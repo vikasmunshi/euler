@@ -119,7 +119,7 @@ test: $(VENV)
 run: $(VENV)
 	$(VENV)/bin/solver
 
-## Show the running build's version (git-derived, frozen into the wheel at build time)
+## Show the running build's version (packages/solver/solver/version.py, plus how far HEAD is past its tag)
 version: $(VENV)
 	@$(VENV)/bin/solver version
 
@@ -157,7 +157,7 @@ audit: $(VENV)
 
 ## Remove the venv (system deps must be removed separately)
 uninstall: uninstall-hooks uninstall-completions
-	rm -rf $(VENV) solver.egg-info
+	rm -rf $(VENV) build packages/*/build packages/*/*.egg-info
 	@printf "✓ uninstall complete: venv removed\n"
 	@printf "To remove system dependencies run:\n\t./scripts/setup/dev_env.sh uninstall python primesieve c\n"
 	@printf "To remove the Claude Code CLI run:\n\tmake uninstall-claude\n"

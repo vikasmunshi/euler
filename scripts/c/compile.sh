@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/c/build.sh — compile a C solution into an executable.
+# scripts/c/compile.sh — compile a C solution into an executable.
 #
 # Usage:
 #   scripts/c/compile.sh <solution.c> [--clean]
@@ -10,8 +10,8 @@
 # Each solution file is expected to define its own main().
 #
 # Example:
-#   scripts/c/build.sh .euler/p0001_s0.c
-#   # produces: .euler/p0001_s0_c  (executable)
+#   scripts/c/compile.sh solutions/public/p0001/p0001_s0.c
+#   # produces: solutions/public/p0001/p0001_s0_c  (executable)
 
 set -euo pipefail
 

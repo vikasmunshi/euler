@@ -90,7 +90,6 @@ else
 fi
 
 cd "$INSTALL_DIR"
-mkdir workspace || true
 make install-all
 
 echo ""
@@ -98,3 +97,4 @@ echo "Installation complete. To get started:"
 echo "  cd ${INSTALL_DIR}"
 echo "  source .venv/bin/activate"
 echo "  solver            # interactive terminal shell"
+echo "  solver-host       # the same, plus the web host's commands (for the operator)"

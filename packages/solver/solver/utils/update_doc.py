@@ -334,10 +334,15 @@ def gen_authorization_table() -> str:
 
 
 #: The packages whose module trees are rendered into the README package-layout block:
-#: (the package's folder in the checkout, its import name). Read as files, never imported —
-#: the solver shell does not import the other two.
+#: (the package's folder in the checkout, its import name) — the three code packages and the
+#: content wheel. Read as files, never imported — the solver shell imports none of the others.
 _PACKAGES: tuple[tuple[str, str], ...] = (('packages/solver', 'solver'), ('packages/site', 'euler_site'),
-                                          ('packages/webshell', 'euler_webshell'))
+                                          ('packages/webshell', 'euler_webshell'),
+                                          ('packages/content', 'euler_content'))
+#: Directories never walked: bytecode caches, and the content wheel's `tree/` — the public
+#: tree `scripts/content/stage.py` lays in when it stages (gitignored here), whose `.py` files
+#: are solutions, not modules of the package.
+_SKIP_DIRS: frozenset[str] = frozenset({'__pycache__', 'tree'})
 
 #: Source-file suffixes listed in the package layout.
 _SOURCE_SUFFIXES = ('.py', '.c', '.h')
@@ -378,7 +383,7 @@ def _layout_rows(directory: Path, depth: int, rows: list[tuple[str, str]]) -> No
     indent = '  ' * depth
     for f in sorted(p for p in directory.iterdir() if p.name != '__init__.py' and _is_source(p)):
         rows.append((f'{indent}{f.name}', _module_summary(f)))
-    for d in sorted(p for p in directory.iterdir() if p.is_dir() and p.name != '__pycache__'):
+    for d in sorted(p for p in directory.iterdir() if p.is_dir() and p.name not in _SKIP_DIRS):
         if not any(_is_source(p) for p in d.rglob('*')):
             continue  # skip directories with no source files (e.g. the claude/ config tree)
         init = d / '__init__.py'

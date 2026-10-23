@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The published content, packaged: what the public site serves to visitors who are not signed in.
+"""euler-content: the published content, packaged — what the public site serves to signed-out visitors.
 
 `tree/` mirrors the repository's own layout for the public paths — `README.md`, `docs/`,
 `topics/`, `solutions/public/`, `solutions/problems.json`, and the few package files the pages
