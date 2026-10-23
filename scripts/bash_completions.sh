@@ -2,18 +2,28 @@
 # Bash Completions Installer
 # ==========================
 #
-# Installs or removes bash tab-completions for all project development scripts.
+# Installs or removes bash tab-completions for every project script.
 #
-# Scripts covered:
-#   scripts/git/publish.sh            --dry-run, -h/--help, <dir>...
-#   scripts/git/status.sh             --summary
-#   scripts/git/sync.sh               --dry-run
-#   scripts/setup/frontend.sh         deploy, remove, upgrade, redeploy, status, renew, reload, help
-#   scripts/setup/egress.sh           deploy, remove, upgrade, status, reload, help
-#   scripts/setup/ddns.sh             deploy, update, status, remove, help
-#   scripts/setup/chrome.sh           install, install-script, uninstall, help
-#   scripts/setup/dev_env.sh          [--dry-run] [install|uninstall|status] [all|c|lua|primesieve|ruby|python]...
-#   scripts/setup/upgrade_service.sh  install, uninstall, --help
+#   scripts/bash_completions.sh [install|uninstall|render]
+#
+# Each script is completed with what it actually accepts — read off its own argument
+# parser, so keep the tables below in step when a script grows an action or a flag:
+#
+#   _EULER_ACTIONS   one action word, in first position (deploy | remove | status …)
+#   _EULER_FLAGS     --flags, anywhere on the line
+#   a function       when the arguments are not a fixed list: files, directories, or
+#                    collaborator slugs (the members of the euler-user group)
+#
+# A script with no arguments is registered with an empty list, so <Tab> offers nothing
+# rather than filenames. scripts/setup/authoring_env.sh is not registered: it is a
+# library the setup scripts source, never run.
+#
+# Every script is registered three ways — its absolute path, `scripts/…` and
+# `./scripts/…` — since `complete` matches the command word exactly. (`bash scripts/…`
+# runs bash, not the script, and so is not completed.)
+#
+# `install` (re)writes /etc/bash_completion.d/euler-scripts, so re-running it after a
+# change is how the change arrives. `render` prints that file instead — no sudo.
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2024. All rights reserved.
@@ -25,11 +35,48 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 PROJECT_ROOT="$(dirname "${SCRIPT_DIR}")"
 COMPLETION_FILE="/etc/bash_completion.d/euler-scripts"
 
+# Every script that gets a completion, repo-relative, paired with its completer.
+REGISTERED=(
+    "scripts/bash_completions.sh:_euler_words"
+    "scripts/c/compile.sh:_euler_compile"
+    "scripts/fixes/fix_pycharm_dimmed_issue.sh:_euler_words"
+    "scripts/git/audit.sh:_euler_words"
+    "scripts/git/configure-identity.sh:_euler_words"
+    "scripts/git/publish.sh:_euler_publish"
+    "scripts/git/status.sh:_euler_words"
+    "scripts/git/sync.sh:_euler_words"
+    "scripts/linters/check.sh:_euler_dirs"
+    "scripts/ops/release.sh:_euler_ops_release"
+    "scripts/ops/reset-user.sh:_euler_reset_user"
+    "scripts/pip/upgrade.sh:_euler_words"
+    "scripts/setup/auth.sh:_euler_words"
+    "scripts/setup/chrome.sh:_euler_words"
+    "scripts/setup/claude_code.sh:_euler_words"
+    "scripts/setup/ddns.sh:_euler_words"
+    "scripts/setup/dev_env.sh:_euler_dev_env"
+    "scripts/setup/egress.sh:_euler_words"
+    "scripts/setup/euler-ddns.sh:_euler_words"
+    "scripts/setup/firewall.sh:_euler_words"
+    "scripts/setup/frontend.sh:_euler_words"
+    "scripts/setup/githooks.sh:_euler_words"
+    "scripts/setup/msg.sh:_euler_words"
+    "scripts/setup/nodejs.sh:_euler_words"
+    "scripts/setup/primesieve_numpy_extension.sh:_euler_words"
+    "scripts/setup/pycharm_service.sh:_euler_words"
+    "scripts/setup/site.sh:_euler_words"
+    "scripts/setup/smtp.sh:_euler_words"
+    "scripts/setup/upgrade_service.sh:_euler_words"
+    "scripts/setup/user.sh:_euler_user"
+    "scripts/setup/venv.sh:_euler_words"
+    "scripts/version/release.sh:_euler_words"
+)
+
 usage() {
-    echo "Usage: $0 [install|uninstall]"
+    echo "Usage: $0 [install|uninstall|render]"
     echo
-    echo "  install    Install bash completions for all project scripts (default)"
+    echo "  install    Install (or refresh) bash completions for all project scripts (default)"
     echo "  uninstall  Remove bash completions"
+    echo "  render     Print the completion file instead of installing it (no sudo)"
 }
 
 check_can_sudo() {
@@ -43,22 +90,71 @@ check_can_sudo() {
     fi
 }
 
-install() {
-    check_can_sudo || return 1
-
-    if [ -f "${COMPLETION_FILE}" ]; then
-        echo "Bash completions are already installed at ${COMPLETION_FILE}"
-        return 0
-    fi
-
-    # Write static completion functions (single-quoted heredoc: no variable expansion needed)
-    sudo tee "${COMPLETION_FILE}" <<'STATIC_EOF' > /dev/null
+# render — the completion file, on stdout.
+render() {
+    # The completers themselves: single-quoted heredoc, nothing expanded here.
+    cat <<'STATIC_EOF'
 # Bash completions for euler project scripts
-# Generated by scripts/bash_completions.sh
+# Generated by scripts/bash_completions.sh — edit that, then re-run its `install`.
 
-_euler_publish_completions() {
-  local cur
+# One action word, offered in first position only. Keyed by the repo-relative path.
+declare -gA _EULER_ACTIONS=(
+  [scripts/bash_completions.sh]="install uninstall render help --help -h"
+  [scripts/setup/auth.sh]="deploy upgrade redeploy remove status help --help -h"
+  [scripts/setup/chrome.sh]="install install-script uninstall help --help -h"
+  [scripts/setup/claude_code.sh]="install update uninstall status help --help -h"
+  [scripts/setup/ddns.sh]="deploy update status remove help --help -h"
+  [scripts/setup/egress.sh]="deploy remove upgrade reload status help --help -h"
+  [scripts/setup/euler-ddns.sh]="update show help --help -h"
+  [scripts/setup/firewall.sh]="deploy remove reload render status help --help -h"
+  [scripts/setup/frontend.sh]="deploy remove upgrade redeploy renew reload status help --help -h"
+  [scripts/setup/msg.sh]="deploy upgrade redeploy remove status help --help -h"
+  [scripts/setup/nodejs.sh]="install uninstall status help --help -h"
+  [scripts/setup/primesieve_numpy_extension.sh]="install check uninstall help --help -h"
+  [scripts/setup/site.sh]="deploy upgrade redeploy remove status help --help -h"
+  [scripts/setup/smtp.sh]="deploy upgrade remove status test help --help -h"
+  [scripts/setup/upgrade_service.sh]="install uninstall --help -h"
+  [scripts/setup/venv.sh]="deploy remove redeploy clean status help --help -h"
+)
+
+# Flags, offered anywhere on the line (an action script may list some too).
+declare -gA _EULER_FLAGS=(
+  [scripts/git/audit.sh]="--summary"
+  [scripts/git/status.sh]="--summary"
+  [scripts/git/sync.sh]="--dry-run"
+  [scripts/setup/githooks.sh]="install uninstall status cleanup --force help --help -h"
+  [scripts/setup/pycharm_service.sh]="start service stop kill --no-color --help -h"
+  [scripts/version/release.sh]="--dry-run --no-push"
+  [scripts/fixes/fix_pycharm_dimmed_issue.sh]=""
+  [scripts/git/configure-identity.sh]=""
+)
+
+# The repo-relative key for the command word, however it was typed.
+_euler_key() { printf 'scripts/%s' "${1##*scripts/}"; }
+
+# Collaborator slugs: the members of euler-user (empty on a host without the web stack).
+_euler_slugs() { getent group euler-user 2>/dev/null | cut -d: -f4 | tr ',' ' '; }
+
+_euler_words() {
+  local cur key
   cur="${COMP_WORDS[COMP_CWORD]}"
+  key="$(_euler_key "$1")"
+  COMPREPLY=()
+  if [[ -n "${_EULER_ACTIONS[${key}]+set}" ]]; then
+    (( COMP_CWORD == 1 )) && COMPREPLY=($(compgen -W "${_EULER_ACTIONS[${key}]}" -- "${cur}"))
+  elif [[ -n "${_EULER_FLAGS[${key}]+set}" ]]; then
+    COMPREPLY=($(compgen -W "${_EULER_FLAGS[${key}]}" -- "${cur}"))
+  else
+    COMPREPLY=($(compgen -f -- "${cur}"))        # unlisted (pip/upgrade.sh): plain files
+  fi
+}
+
+_euler_dirs() {
+  COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+}
+
+_euler_publish() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
   if [[ "${cur}" == -* ]]; then
     COMPREPLY=($(compgen -W "--dry-run --help -h" -- "${cur}"))
   else
@@ -66,43 +162,51 @@ _euler_publish_completions() {
   fi
 }
 
-_euler_status_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "--summary" -- "${cur}"))
+_euler_compile() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  if [[ "${cur}" == -* ]]; then
+    COMPREPLY=($(compgen -W "--clean" -- "${cur}"))
+  elif (( COMP_CWORD == 1 )); then
+    COMPREPLY=($(compgen -d -S / -- "${cur}") $(compgen -f -X '!*.c' -- "${cur}"))
+    # A directory is a step on the way to the file: no space after it, so <Tab> goes on.
+    [[ ${#COMPREPLY[@]} -eq 1 && "${COMPREPLY[0]}" == */ ]] && compopt -o nospace 2>/dev/null
+  fi
 }
 
-_euler_sync_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "--dry-run" -- "${cur}"))
+_euler_ops_release() {
+  local cur="${COMP_WORDS[COMP_CWORD]}" prev="${COMP_WORDS[COMP_CWORD-1]}"
+  if [[ "${prev}" == "--log" ]]; then
+    COMPREPLY=($(compgen -f -- "${cur}"))
+  else
+    COMPREPLY=($(compgen -W "--dry-run --yes -y --skip-updates --no-deploy --no-follow --no-tmux --log --help -h" -- "${cur}"))
+  fi
 }
 
-_euler_chrome_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "install install-script uninstall help --help -h" -- "${cur}"))
+_euler_reset_user() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  if [[ "${cur}" == -* ]]; then
+    COMPREPLY=($(compgen -W "--dry-run --yes -y --no-filter --help -h" -- "${cur}"))
+  else
+    COMPREPLY=($(compgen -W "$(_euler_slugs)" -- "${cur}"))
+  fi
 }
 
-_euler_frontend_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "deploy remove upgrade redeploy status renew reload help --help -h" -- "${cur}"))
+_euler_user() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  if (( COMP_CWORD == 1 )); then
+    COMPREPLY=($(compgen -W "deploy upgrade redeploy remove provision deprovision purge-legacy status help --help -h" -- "${cur}"))
+    return
+  fi
+  case "${COMP_WORDS[1]}" in
+    status|deprovision)
+      (( COMP_CWORD == 2 )) && COMPREPLY=($(compgen -W "$(_euler_slugs)" -- "${cur}")) ;;
+    provision)                                 # provision <slug> <email> <profile>
+      (( COMP_CWORD == 4 )) && COMPREPLY=($(compgen -W "reader contributor maintainer admin" -- "${cur}")) ;;
+    *) COMPREPLY=() ;;
+  esac
 }
 
-_euler_egress_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "deploy remove upgrade status reload help --help -h" -- "${cur}"))
-}
-
-_euler_ddns_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "deploy update status remove help --help -h" -- "${cur}"))
-}
-
-_euler_dev_env_completions() {
+_euler_dev_env() {
   local cur prev
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
@@ -129,52 +233,26 @@ _euler_dev_env_completions() {
     COMPREPLY=($(compgen -W "${commands} ${options}" -- "${cur}"))
   fi
 }
-
-_euler_upgrade_service_completions() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "install uninstall --help -h" -- "${cur}"))
-}
 STATIC_EOF
 
-    # Append complete registrations with the actual project root embedded
-    {
+    # The registrations, with this checkout's root embedded: absolute, relative, ./relative.
+    local entry path fn prefix
+    for prefix in "${PROJECT_ROOT}/" "" "./"; do
         echo ""
-        echo "# Absolute paths (work from any directory)"
-        echo "complete -F _euler_publish_completions         '${PROJECT_ROOT}/scripts/git/publish.sh'"
-        echo "complete -F _euler_status_completions          '${PROJECT_ROOT}/scripts/git/status.sh'"
-        echo "complete -F _euler_sync_completions            '${PROJECT_ROOT}/scripts/git/sync.sh'"
-        echo "complete -F _euler_frontend_completions        '${PROJECT_ROOT}/scripts/setup/frontend.sh'"
-        echo "complete -F _euler_egress_completions          '${PROJECT_ROOT}/scripts/setup/egress.sh'"
-        echo "complete -F _euler_ddns_completions            '${PROJECT_ROOT}/scripts/setup/ddns.sh'"
-        echo "complete -F _euler_chrome_completions          '${PROJECT_ROOT}/scripts/setup/chrome.sh'"
-        echo "complete -F _euler_dev_env_completions         '${PROJECT_ROOT}/scripts/setup/dev_env.sh'"
-        echo "complete -F _euler_upgrade_service_completions '${PROJECT_ROOT}/scripts/setup/upgrade_service.sh'"
-        echo ""
-        echo "# Relative paths (work when run from the project root)"
-        echo "complete -F _euler_publish_completions         'scripts/git/publish.sh'"
-        echo "complete -F _euler_status_completions          'scripts/git/status.sh'"
-        echo "complete -F _euler_sync_completions            'scripts/git/sync.sh'"
-        echo "complete -F _euler_frontend_completions        'scripts/setup/frontend.sh'"
-        echo "complete -F _euler_egress_completions          'scripts/setup/egress.sh'"
-        echo "complete -F _euler_ddns_completions            'scripts/setup/ddns.sh'"
-        echo "complete -F _euler_chrome_completions          'scripts/setup/chrome.sh'"
-        echo "complete -F _euler_dev_env_completions         'scripts/setup/dev_env.sh'"
-        echo "complete -F _euler_upgrade_service_completions 'scripts/setup/upgrade_service.sh'"
-        echo ""
-        echo "# ./-prefixed relative paths"
-        echo "complete -F _euler_publish_completions         './scripts/git/publish.sh'"
-        echo "complete -F _euler_status_completions          './scripts/git/status.sh'"
-        echo "complete -F _euler_sync_completions            './scripts/git/sync.sh'"
-        echo "complete -F _euler_frontend_completions        './scripts/setup/frontend.sh'"
-        echo "complete -F _euler_egress_completions          './scripts/setup/egress.sh'"
-        echo "complete -F _euler_ddns_completions            './scripts/setup/ddns.sh'"
-        echo "complete -F _euler_chrome_completions          './scripts/setup/chrome.sh'"
-        echo "complete -F _euler_dev_env_completions         './scripts/setup/dev_env.sh'"
-        echo "complete -F _euler_upgrade_service_completions './scripts/setup/upgrade_service.sh'"
-    } | sudo tee -a "${COMPLETION_FILE}" > /dev/null
+        for entry in "${REGISTERED[@]}"; do
+            path="${entry%%:*}"
+            fn="${entry##*:}"
+            printf "complete -F %-20s '%s%s'\n" "${fn}" "${prefix}" "${path}"
+        done
+    done
+}
 
-    echo "Bash completions installed at ${COMPLETION_FILE}"
+install() {
+    check_can_sudo || return 1
+    local verb='installed'
+    [[ -f "${COMPLETION_FILE}" ]] && verb='refreshed'
+    render | sudo tee "${COMPLETION_FILE}" > /dev/null
+    echo "Bash completions ${verb} at ${COMPLETION_FILE} (${#REGISTERED[@]} scripts)"
     echo "Run 'source ${COMPLETION_FILE}' to activate in the current shell"
 }
 
@@ -197,6 +275,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             ;;
         uninstall)
             uninstall
+            ;;
+        render)
+            render
             ;;
         -h|--help|help)
             usage
