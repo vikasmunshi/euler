@@ -264,7 +264,7 @@ class RotationRehomeTests(unittest.TestCase):
             commands.append(cmdline)
             return real(cmdline)
 
-        git.run_cmdline = recording                      # type: ignore[assignment]
+        git.run_cmdline = recording
         self.addCleanup(setattr, git, 'run_cmdline', real)
         before = self._git('rev-parse', 'HEAD').stdout.strip()
         self.assertNotEqual(git.git_sync(), 0, 'a refusal, and a non-zero one')

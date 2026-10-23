@@ -23,7 +23,8 @@ from solver.core.notices import PR_REVIEW_SUBJECT
 from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import dialogue
-from solver.shell.command import registry
+from solver.shell import console
+from solver.shell.command import Context, registry
 from solver.shell.dialogue import Ask
 from solver.shell.register import _declared_choices
 from solver.shell.variables import variables
@@ -104,7 +105,7 @@ class _GitCommandCase(unittest.TestCase):
         self._saved_branch = git._current_branch
         self._saved_pr = git._ensure_pull_request
         self._saved_subject = config.subject
-        git.run_cmdline = fake_run_cmdline  # type: ignore[assignment]
+        git.run_cmdline = fake_run_cmdline
         # `git-sync`'s tail asks git for the recorded filter command (enc_key_arrived).
         # Unstubbed it reads the REAL checkout — which is how this fixture noticed the
         # operator's own clone still carried a pre-`-P` command. These tests are about the
@@ -112,11 +113,11 @@ class _GitCommandCase(unittest.TestCase):
         self._saved_run_proc_base = git.run
         current = filter_settings(wire.FILTER_NAME)[
             f"filter.{wire.FILTER_NAME}.process"]
-        git.run = lambda *a, **k: MagicMock(returncode=0, stdout=current)  # type: ignore[assignment]
-        git._current_branch = lambda: self.branch  # type: ignore[assignment]
+        git.run = lambda *a, **k: MagicMock(returncode=0, stdout=current)
+        git._current_branch = lambda: self.branch
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
         # like run_cmdline, so no test can touch a real remote (module docstring).
-        git._ensure_pull_request = fake_ensure_pr  # type: ignore[assignment]
+        git._ensure_pull_request = fake_ensure_pr
 
     def tearDown(self) -> None:
         # Every subclass that stubs `git.run` further leaves the restore to here, and must:
@@ -124,10 +125,10 @@ class _GitCommandCase(unittest.TestCase):
         # saved value re-installs the stub on the way out and leaks it into whatever module
         # runs next. That is not hypothetical — it made tests/test_rekey_rehome.py, which
         # drives a real repo through `git.run`, fail only under `discover`.
-        git.run = self._saved_run_proc_base  # type: ignore[assignment]
-        git.run_cmdline = self._saved_run  # type: ignore[assignment]
-        git._current_branch = self._saved_branch  # type: ignore[assignment]
-        git._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
+        git.run = self._saved_run_proc_base
+        git.run_cmdline = self._saved_run
+        git._current_branch = self._saved_branch
+        git._ensure_pull_request = self._saved_pr
         config.subject = self._saved_subject
 
     def as_profile(self, profile: str) -> None:
@@ -322,21 +323,21 @@ class GhPrTest(_GitCommandCase):
         self.dismiss_count: int = 1     # what the fake spool reports dismissing
         self._saved_pr_files = git._pr_files
         self._saved_open_prs = git.open_prs
-        self._saved_input = git.console.input
-        git._pr_files = lambda number: self.files  # type: ignore[assignment]
+        self._saved_input = console.input
+        git._pr_files = lambda number: self.files
         # `open_prs` is stubbed in **both** its bindings: the module attribute the command
         # paths call, and the registry entry `Ask(choices='open_prs')` resolves — registration
         # captured the function object, so patching the module alone would leave the menu
         # reaching the real `gh`. None means "gh could not tell us", which the real reader
         # signals by raising.
-        git.open_prs = self._fake_open_prs  # type: ignore[assignment]
+        git.open_prs = self._fake_open_prs
         variables.define('open_prs', self._fake_open_prs, 'the open pull requests (test)')
         # Each prompt consumes the next queued keypress; an empty queue quits the walk.
-        git.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
+        console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[method-assign]
         # `dialogue.interactive()` is the one seam every prompt goes through, and it is False
         # under the runner (stdin is not a tty) — so a walk under test declares itself asked.
         self._saved_interactive = dialogue.interactive
-        dialogue.interactive = lambda: True  # type: ignore[assignment]
+        dialogue.interactive = lambda: True
         # A landed merge closes the notice `git-push` filed for that branch. Recorded by a
         # stand-in carrier (`solver.core.notices`), never dialled.
         self.dismissed: list[str] = []
@@ -359,11 +360,11 @@ class GhPrTest(_GitCommandCase):
         return ''
 
     def tearDown(self) -> None:
-        git._pr_files = self._saved_pr_files  # type: ignore[assignment]
-        git.open_prs = self._saved_open_prs  # type: ignore[assignment]
+        git._pr_files = self._saved_pr_files
+        git.open_prs = self._saved_open_prs
         variables.define('open_prs', self._saved_open_prs, 'the open pull requests')
-        git.console.input = self._saved_input  # type: ignore[assignment]
-        dialogue.interactive = self._saved_interactive  # type: ignore[assignment]
+        console.input = self._saved_input  # type: ignore[method-assign]
+        dialogue.interactive = self._saved_interactive
         notices.install(None)
         super().tearDown()
 
@@ -468,7 +469,7 @@ class GhPrTest(_GitCommandCase):
         covers the declaration `gh-merge` actually carries, not a function beside it.
         """
         self.open_prs = [_pr(12, 'Publish user/x', 'user/x'), _pr(13, 'Articles', 'user/y')]
-        choices = _declared_choices(Ask(choices='open_prs'), None, {})
+        choices = _declared_choices(Ask(choices='open_prs'), Context(), {})
         self.assertEqual([c.value for c in choices], ['12', '13'])
         self.assertEqual(choices[0].label, '#12  Publish user/x')
         self.assertEqual(choices[0].description, 'user/x')
@@ -482,7 +483,7 @@ class GhPrTest(_GitCommandCase):
         """
         self.open_prs = None
         with self.assertRaises(dialogue.Abort) as caught:
-            _declared_choices(Ask(choices='open_prs'), None, {})
+            _declared_choices(Ask(choices='open_prs'), Context(), {})
         self.assertIn('signed in', caught.exception.message)
 
     def test_the_same_declaration_feeds_a_loop(self) -> None:
@@ -621,10 +622,10 @@ class GitFilterCommandTest(_GitCommandCase):
         def fake_run(*_a: Any, **_k: Any) -> Any:
             return MagicMock(returncode=0, stdout=self.dirty)
 
-        git.run = fake_run  # type: ignore[assignment]
+        git.run = fake_run
 
     def tearDown(self) -> None:
-        git.run = self._saved_run_proc  # type: ignore[assignment]
+        git.run = self._saved_run_proc
         super().tearDown()
 
     def test_status_is_a_passthrough(self) -> None:
@@ -672,11 +673,11 @@ class EncKeyPullFlowTest(_GitCommandCase):
         self._saved_run_proc = git.run
         self.master = MagicMock(return_value=b'\x00' * 32)
         self.master.cache_clear = MagicMock()
-        git.read_master_key = self.master  # type: ignore[assignment]
+        git.read_master_key = self.master
 
     def tearDown(self) -> None:
-        git.read_master_key = self._saved_master  # type: ignore[assignment]
-        git.run = self._saved_run_proc  # type: ignore[assignment]
+        git.read_master_key = self._saved_master
+        git.run = self._saved_run_proc
         super().tearDown()
 
     def _wire_state(self, wired: bool, recorded: str | None = None) -> None:
@@ -913,13 +914,13 @@ class GitCommitAmendTest(_GitCommandCase):
 
         git.run = fake_run  # type: ignore[assignment]
         self._saved_remotes = git._remotes_containing_head
-        git._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
+        git._remotes_containing_head = lambda: self.pushed
         self.as_profile('contributor')
         self.problem: Any = MagicMock(number=218,
                                       solution_dir=config.root_dir / 'solutions/public/p0218')
 
     def tearDown(self) -> None:
-        git._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
+        git._remotes_containing_head = self._saved_remotes
         super().tearDown()
 
     def test_it_folds_the_staged_paths_into_head(self) -> None:
@@ -966,7 +967,7 @@ class CommitRegeneratedTest(_GitCommandCase):
     def setUp(self) -> None:
         super().setUp()
         self.dirty: str = ' M docs/user-guide.md'
-        git.run = lambda *a, **k: MagicMock(returncode=0, stdout=self.dirty)  # type: ignore[assignment]
+        git.run = lambda *a, **k: MagicMock(returncode=0, stdout=self.dirty)
 
     def test_every_update_verb_has_a_path_set(self) -> None:
         """A fifth `update-*` verb must declare what it commits, or `GENERATED_PATHS[verb]`
@@ -1037,7 +1038,7 @@ class CommitRegeneratedTest(_GitCommandCase):
         """A reported path that is neither on disk nor tracked is always a bug in the verb —
         and `git commit -- <spec>` fails outright on a pathspec matching nothing, so leaving
         it in would turn every one of that verb's commits into a failure."""
-        git.run = lambda *a, **k: MagicMock(  # type: ignore[assignment]
+        git.run = lambda *a, **k: MagicMock(
             returncode=0 if a and 'status' in a[0] else 1, stdout=self.dirty)
         git.commit_regenerated('update-docs', ('quip',),
                                ['docs/user-guide.md', 'docs/no-such-file.md'])

@@ -177,13 +177,14 @@ else
     fail "flake8 reported issues"
 fi
 
-# ── mypy: packages + solutions + scripts ───────────────────────────────────
+# ── mypy: packages + solutions + scripts + tests ───────────────────────────
 # `scripts` is in scope because it holds tracked Python that ships and runs:
 # scripts/setup/euler-smtp.py is installed to /usr/local/bin and run as a service.
 # Type-checking the shell half of the tree (shellcheck, above) while leaving that
-# unchecked was the gap.
-section "mypy (solutions, packages, scripts)"
-if "$VENV/bin/mypy" solutions packages scripts; then
+# unchecked was the gap. `tests` is in scope so a refactor that changes a signature is
+# caught in the tests that still call the old one, before the suite has to run.
+section "mypy (solutions, packages, scripts, tests)"
+if "$VENV/bin/mypy" solutions packages scripts tests; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"

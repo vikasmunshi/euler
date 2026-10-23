@@ -26,7 +26,7 @@ scripts/linters/check.sh packages # runs mypy + flake8 on the three packages
 scripts/linters/check.sh scripts  # the same for the shell half: shellcheck
 
 # Individually
-mypy solutions packages scripts   # the standard targets, as the git hooks run them
+mypy solutions packages scripts tests  # the standard targets, as the git hooks run them
 flake8 packages                   # max-line-length 120
 shellcheck scripts/**/*.sh        # shell scripts; options in .shellcheckrc
 
@@ -84,7 +84,7 @@ underlying script in `scripts/setup/` takes:
 
 The hooks are rendered from the templates in `scripts/setup/hooks/` (`pre-commit.template`, `pre-push.template`) into the **default** location `.git/hooks/` by `scripts/setup/githooks.sh install`. This runs via `make install-hooks` (and is part of `make install-all`), which also resets `core.hooksPath` to the default; `make uninstall-hooks` removes them. Edit the templates, not the installed copies, then re-run the installer.
 
-Pre-commit hook (`.git/hooks/pre-commit`) checks staged changes for trailing whitespace / conflict markers, staged build artifacts, gitignored and unencrypted-private files, runs `shellcheck` over the **staged** shell scripts, `flake8` over `solutions` and `packages`, `mypy` over `solutions`, `packages` and `scripts`, and the layering check (`scripts/linters/layers.py`). All checks must pass for the commit to proceed.
+Pre-commit hook (`.git/hooks/pre-commit`) checks staged changes for trailing whitespace / conflict markers, staged build artifacts, gitignored and unencrypted-private files, runs `shellcheck` over the **staged** shell scripts, `flake8` over `solutions` and `packages`, `mypy` over `solutions`, `packages`, `scripts` and `tests`, and the layering check (`scripts/linters/layers.py`). All checks must pass for the commit to proceed.
 
 Pre-push hook (`.git/hooks/pre-push`) runs additional checks before pushing to remote — among them `shellcheck` over **every tracked** shell script, the whole-tree backstop to the commit hook's staged-only lane.
 

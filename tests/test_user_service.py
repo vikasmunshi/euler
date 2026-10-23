@@ -281,8 +281,8 @@ class VaultRouteTests(_UserServiceCase):
         vault.clear_session_key()
         # The gh / Claude Code probes shell out; keep the suite hermetic.
         self._saved_probes = (vault_api._tool_status, vault_api._claude_status)  # noqa: SLF001
-        vault_api._tool_status = lambda *a, **k: 'not installed'  # type: ignore[assignment]
-        vault_api._claude_status = lambda: 'not installed'        # type: ignore[assignment]
+        vault_api._tool_status = lambda *a, **k: 'not installed'
+        vault_api._claude_status = lambda: 'not installed'
         self.addCleanup(lambda: (setattr(vault_api, '_tool_status', self._saved_probes[0]),
                                  setattr(vault_api, '_claude_status', self._saved_probes[1])))
         self.env_file = secrets / 'env'

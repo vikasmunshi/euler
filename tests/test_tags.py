@@ -19,6 +19,7 @@ from unittest.mock import MagicMock, patch
 from solver.config import config
 from solver.core import tags
 from solver.shell import dialogue
+from solver.shell import console
 from solver.shell.command import Context, registry
 from tests import silence
 
@@ -280,7 +281,7 @@ class TagSelectionTests(_TopicCase):
         it = iter(script)
         command = registry.resolve('create-topic')
         assert command is not None
-        with (patch.object(tags.console, 'input', lambda *a, **k: next(it)),
+        with (patch.object(console, 'input', lambda *a, **k: next(it)),
               patch.object(dialogue, 'interactive', lambda: True)):
             command.invoke(Context(argv=[path]))
 
@@ -317,7 +318,7 @@ class TagSelectionTests(_TopicCase):
 
     def test_a_path_that_could_not_be_created_is_never_asked_about(self) -> None:
         """Searching the vocabulary and *then* being told the path is malformed is backwards."""
-        with (patch.object(tags.console, 'input',
+        with (patch.object(console, 'input',
                            lambda *a, **k: self.fail('must not ask about a bad path')),
               patch.object(dialogue, 'interactive', lambda: True)):
             command = registry.resolve('create-topic')
@@ -328,7 +329,7 @@ class TagSelectionTests(_TopicCase):
     def test_an_existing_page_is_never_asked_about_either(self) -> None:
         (self.topics / 'number-theory').mkdir(parents=True, exist_ok=True)
         (self.topics / 'number-theory' / 'primes.md').write_text('<!-- tags: [prime-number] -->\n')
-        with (patch.object(tags.console, 'input',
+        with (patch.object(console, 'input',
                            lambda *a, **k: self.fail('must not ask about a taken path')),
               patch.object(dialogue, 'interactive', lambda: True)):
             command = registry.resolve('create-topic')

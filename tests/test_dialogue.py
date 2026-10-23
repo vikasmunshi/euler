@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 from solver.config import ExitCodes
 from solver.shell import dialogue
-from solver.shell.command import Context, registry
+from solver.shell.command import Command, Context, registry
 from solver.shell.dialogue import SKIP, Abort, Action, Ask, Choice
 from solver.shell.register import register
 from solver.shell.tty import console
@@ -265,6 +265,10 @@ def _colours(_: Context, bound: dict[str, Any]) -> list[Choice]:
 class AskTests(_DialogueCase):
     """`Annotated[T, Ask(...)]` — declared on the parameter, served by the adapter."""
 
+    #: The demo command, as registered; and what each run of it was called with.
+    command: Command | None
+    calls: list[dict[str, Any]]
+
     @classmethod
     def setUpClass(cls) -> None:
         @register(requires='reader')
@@ -285,7 +289,7 @@ class AskTests(_DialogueCase):
             return ExitCodes.EXIT_OK
 
         cls.command = registry.resolve('ask-demo')
-        cls.calls: list[dict[str, Any]] = []
+        cls.calls = []
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -342,7 +346,7 @@ class AskTests(_DialogueCase):
         """One declaration, both surfaces — the menu and the tab-completion."""
         assert self.command is not None and self.command.completer is not None
         offered = self.command.completer(Context(argv=['colour=b']), 'colour=b')
-        self.assertEqual(['colour=blue'], [str(c.text) for c in offered])  # type: ignore[union-attr]
+        self.assertEqual(['colour=blue'], [c if isinstance(c, str) else str(c.text) for c in offered])
 
 
 class MsgNoDeadEndTests(_DialogueCase):

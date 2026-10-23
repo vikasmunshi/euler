@@ -31,6 +31,7 @@ import unittest
 from pathlib import Path
 from secrets import token_bytes
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
@@ -127,12 +128,11 @@ class SaveIssuedKeyTests(EncKeyTestCase):
         super().setUp()
         self._wired: list[str] = []
         import solver.core.git as git_mod
-        saved = git_mod.enc_key_arrived
         # It now takes the local edits `save_issued_key` collected before the write, so the
         # stub has to accept them — see tests/test_rekey_rehome.py for what they are for.
-        git_mod.enc_key_arrived = (          # type: ignore[assignment]
-            lambda edits=None: self._wired.append('wired'))
-        self.addCleanup(setattr, git_mod, 'enc_key_arrived', saved)
+        patcher = patch.object(git_mod, 'enc_key_arrived', lambda edits=None: self._wired.append('wired'))
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def _message(self, payload: dict[str, str]) -> str:
         return web_keys._issue_body(payload)
@@ -196,7 +196,7 @@ class RegenTests(EncKeyTestCase):
         super().setUp()
         self.requests: list[tuple[str, str]] = []
         saved_request = keys_mod._request_authorization
-        keys_mod._request_authorization = (                              # type: ignore[assignment]
+        keys_mod._request_authorization = (
             lambda identity, public_key: self.requests.append((identity, public_key)))
         self.addCleanup(setattr, keys_mod, '_request_authorization', saved_request)
         for name, stub in (('sure', lambda _q, *, phrase='': True),):
@@ -237,7 +237,7 @@ class RegenTests(EncKeyTestCase):
         def refuse() -> x25519.X25519PrivateKey:
             raise PermissionError('vault locked')
 
-        keys_mod._create_user_key = refuse                               # type: ignore[assignment]
+        keys_mod._create_user_key = refuse
         self.addCleanup(setattr, keys_mod, '_create_user_key', saved)
         self.assertEqual(keys_mod.user(regen=True), 1)
         self.assertEqual(self.requests, [], 'a locked vault must not look like missing access')

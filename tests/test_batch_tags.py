@@ -17,6 +17,7 @@ from typing import Any
 from unittest.mock import patch
 
 from solver.ai import docs
+from solver.core.problems import Problem
 
 #: A miniature vocabulary spanning all three facets.
 _FACETS = {
@@ -127,12 +128,12 @@ class ExplicitSelectorTests(unittest.TestCase):
 
     def test_parses_a_comma_separated_list(self) -> None:
         from solver.ai import batch
-        with patch.object(batch.Problem, 'from_number', side_effect=lambda n: n):
+        with patch.object(Problem, 'from_number', side_effect=lambda n: n):
             self.assertEqual(batch._explicit('26,39,146'), [26, 39, 146])
 
     def test_tolerates_spaces_and_a_p_prefix(self) -> None:
         from solver.ai import batch
-        with patch.object(batch.Problem, 'from_number', side_effect=lambda n: n):
+        with patch.object(Problem, 'from_number', side_effect=lambda n: n):
             self.assertEqual(batch._explicit('p26, 39 , P146'), [26, 39, 146])
 
     def test_empty_selects_nothing(self) -> None:

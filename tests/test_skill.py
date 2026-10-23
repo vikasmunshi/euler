@@ -18,6 +18,7 @@ from prompt_toolkit.completion import Completion
 from solver.ai import skill
 from solver.config import ExitCodes, config
 from solver.shell import dialogue
+from solver.shell import console
 from solver.shell.command import Context, registry
 from tests import silence
 
@@ -124,7 +125,7 @@ class BlogPromptTests(unittest.TestCase):
         command = registry.resolve('claude-blog')
         assert command is not None, 'claude-blog is not registered for this subject'
         with patch.object(dialogue, 'interactive', lambda: tty), \
-             patch.object(skill.console, 'input', lambda *a, **k: typed):
+             patch.object(console, 'input', lambda *a, **k: typed):
             command.invoke(Context(argv=list(argv)))
 
     def test_interactive_and_empty_prompts_and_appends(self) -> None:
@@ -137,13 +138,13 @@ class BlogPromptTests(unittest.TestCase):
 
     def test_non_interactive_never_prompts(self) -> None:
         # console.input would raise if called; a command block must not block on a read.
-        with patch.object(skill.console, 'input',
+        with patch.object(console, 'input',
                           lambda *a, **k: self.fail('must not prompt without a tty')):
             self._blog('technique/gamma', tty=False)
         self.assertEqual(self.launched, ['/claude-euler-blogger technique/gamma'])
 
     def test_a_given_prompt_is_not_overridden(self) -> None:
-        with patch.object(skill.console, 'input',
+        with patch.object(console, 'input',
                           lambda *a, **k: self.fail('must not prompt when one was given')):
             self._blog('technique/gamma', 'keep it short', tty=True)
         self.assertEqual(self.launched, ['/claude-euler-blogger technique/gamma keep it short'])

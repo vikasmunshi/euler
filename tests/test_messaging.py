@@ -40,6 +40,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.identity import system_slug
 from solver.shell import dialogue
+from solver.shell.command import Context
 from euler_webshell.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
                                 PR_REVIEW_SUBJECT)
 from euler_webshell.msg.app import MessageService, build_admin_app, build_app
@@ -1151,9 +1152,13 @@ class MailboxVariableTests(unittest.TestCase):
         from euler_webshell.msg import commands
         self.commands = commands
         self.mailbox: object = {'threads': []}
-        self._saved_call = commands._call
-        commands._call = lambda action, **kw: (200, self.mailbox) if self.mailbox is not None else None
-        self.addCleanup(setattr, commands, '_call', self._saved_call)
+
+        def fake_call(action: str, **kw: object) -> tuple[int, object] | None:
+            return (200, self.mailbox) if self.mailbox is not None else None
+
+        patcher = patch.object(commands, '_call', fake_call)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def _rows(self, subject: str = 'a question', verb: str = 'read') -> None:
         self.mailbox = {'threads': [{'id': 'm1', 'subject': subject, 'author_name': 'someone',
@@ -1176,7 +1181,7 @@ class MailboxVariableTests(unittest.TestCase):
 
     def test_the_menu_is_the_same_read(self) -> None:
         self._rows()
-        choice, = self.commands._thread_choices(None, {'action': 'read'})
+        choice, = self.commands._thread_choices(Context(), {'action': 'read'})
         self.assertEqual(choice.value, 'm1')
         self.assertEqual(choice.label, 'a question')
         self.assertIn('unread', choice.description)
@@ -1185,8 +1190,8 @@ class MailboxVariableTests(unittest.TestCase):
         """The one thing a variable cannot do: the label depends on an answer already bound."""
         self.mailbox = {'threads': [{'id': 'm1', 'subject': KEY_ISSUE_SUBJECT, 'author_name': 'staff',
                                      'updated': '', 'unread': False}]}
-        plain, = self.commands._thread_choices(None, {'action': 'read'})
-        labelled, = self.commands._thread_choices(None, {'action': 'act'})
+        plain, = self.commands._thread_choices(Context(), {'action': 'read'})
+        labelled, = self.commands._thread_choices(Context(), {'action': 'act'})
         verb = self.commands.threads()[0].verb
         self.assertNotEqual(verb, 'read', 'a key issue is something other than reading')
         self.assertIn(verb, labelled.description)
@@ -1194,7 +1199,7 @@ class MailboxVariableTests(unittest.TestCase):
 
     def test_an_empty_mailbox_names_the_action_it_cannot_serve(self) -> None:
         with self.assertRaises(dialogue.Abort) as caught:
-            self.commands._thread_choices(None, {'action': 'dismiss'})
+            self.commands._thread_choices(Context(), {'action': 'dismiss'})
         self.assertIn('dismiss', caught.exception.message)
 
 

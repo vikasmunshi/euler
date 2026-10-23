@@ -40,7 +40,9 @@ from collections.abc import Sequence
 from datetime import datetime
 from functools import lru_cache
 from pathlib import PurePosixPath
-from subprocess import run
+# `run`, `read_master_key` and `run_cmdline` are imported as themselves, the explicit re-export
+# form: they are this module's seams, which the tests replace here (tests/test_git_commands.py).
+from subprocess import run as run
 from typing import Annotated, Any, Literal, NamedTuple
 
 from cryptography.exceptions import InvalidTag
@@ -49,13 +51,15 @@ from solver.config import ExitCodes, config
 from solver.core import notices
 from solver.core.notices import PR_REVIEW_SUBJECT
 from solver.core.problems import Problem
-from solver.crypto.ciphers import decrypt_blob, is_encrypted, read_master_key
+from solver.crypto.ciphers import decrypt_blob, is_encrypted
+from solver.crypto.ciphers import read_master_key as read_master_key
 from solver.crypto import wire
 from solver.crypto.gitfilter import filter_settings
 from solver.shell import console, register
 from solver.shell.dialogue import Abort, Ask, Choice, sure
 from solver.shell.variables import variable
-from solver.utils.shell_utils import run_cmdline, run_command
+from solver.utils.shell_utils import run_cmdline as run_cmdline
+from solver.utils.shell_utils import run_command
 
 
 # ── GitHub identity (gh) ────────────────────────────────────────────────────────────────

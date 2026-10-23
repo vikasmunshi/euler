@@ -83,7 +83,7 @@ class PublicSiteTests(AioHTTPTestCase):
         shutil.rmtree(cls._tmp.name, ignore_errors=True)
         super().tearDownClass()
 
-    async def get_application(self):  # type: ignore[no-untyped-def]
+    async def get_application(self):
         return build_public_app(SiteConfig(
             repo_root=self.tree, static_dir=self.tree / 'packages/site/euler_site/content',
             socket_path=Path('/tmp/unused.sock'), socket_group='', tcp_bind='',

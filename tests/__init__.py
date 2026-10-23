@@ -40,7 +40,7 @@ def _patch_aiohttp_test_case() -> None:
         _filter_request_key_warning()
         original(self)
 
-    AioHTTPTestCase.setUp = setUp       # type: ignore[method-assign]
+    AioHTTPTestCase.setUp = setUp       # type: ignore[method-assign, assignment]
     _aiohttp_patched = True
 
 

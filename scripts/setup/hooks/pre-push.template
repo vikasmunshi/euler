@@ -226,11 +226,12 @@ else
     fail "flake8 reported issues"
 fi
 
-# ── 4. mypy on packages + solutions + scripts ──────────────────────────────
+# ── 4. mypy on packages + solutions + scripts + tests ──────────────────────
 # `scripts` holds tracked Python that ships and runs (scripts/setup/euler-smtp.py is
-# installed to /usr/local/bin and run as a service), so it is checked with the rest.
-section "mypy (solutions, packages, scripts)"
-if "$VENV/bin/mypy" solutions packages scripts; then
+# installed to /usr/local/bin and run as a service), so it is checked with the rest; so is
+# `tests`, whose calls into the packages go stale when a signature changes.
+section "mypy (solutions, packages, scripts, tests)"
+if "$VENV/bin/mypy" solutions packages scripts tests; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"

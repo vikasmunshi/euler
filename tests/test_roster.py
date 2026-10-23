@@ -38,6 +38,7 @@ from euler_webshell.shell import keys as web_keys
 from solver.crypto.ciphers import enc_key_payload, load_private_key, public_key_hex, read_master_key
 from solver.config import config as app_config
 from solver.shell import dialogue
+from solver.shell import console
 from tests import silence
 
 silence()   # these drive the console's refusal paths on purpose
@@ -182,7 +183,7 @@ class StoreTests(RosterFileTestCase):
         recognise would quietly delete a colleague's work on the way past."""
         roster.upsert(_THEM, scope='web', mystery='keep me')
         entry = roster.read_roster()['users'][system_slug(_THEM)]
-        self.assertEqual(entry.get('mystery'), 'keep me')       # type: ignore[typeddict-item]
+        self.assertEqual(entry.get('mystery'), 'keep me')
         self.assertEqual(list(entry)[-1], 'mystery', 'and after the fields we do know')
 
     def test_no_key_material_is_ever_written_here(self) -> None:
@@ -331,7 +332,7 @@ class HostGrantTests(RosterFileTestCase):
     def test_an_exported_block_unlocks_the_machine_it_was_sealed_to(self) -> None:
         """`key-export`: the same block with no mail — printed, for the operator to carry."""
         printed: list[str] = []
-        with patch.object(keys_mod.console, 'print', lambda text='', **_: printed.append(str(text))):
+        with patch.object(console, 'print', lambda text='', **_: printed.append(str(text))):
             self.assertEqual(keys_mod.key_export(public_key_hex(self.mine.public_key())), 0)
         block = '\n'.join(printed)
         self.assertIn(keys_mod._BLOCK_BEGIN, block)
@@ -373,9 +374,9 @@ class HostGrantTests(RosterFileTestCase):
         def refuse(_self: object, _rcpt: str, _block: str) -> None:
             raise OSError('connection refused')
 
-        saved = mail_mod.Mailer.send_master_key
-        mail_mod.Mailer.send_master_key = refuse                 # type: ignore[method-assign]
-        self.addCleanup(setattr, mail_mod.Mailer, 'send_master_key', saved)
+        patcher = patch.object(mail_mod.Mailer, 'send_master_key', refuse)
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.assertEqual(web_keys.host_authorize(public_key_hex(self.mine.public_key()),
                                                  'me@example.com'), 1)
 

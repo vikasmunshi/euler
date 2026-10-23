@@ -124,7 +124,7 @@ class AccessorAgreementTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             config['no_such_setting']
         with self.assertRaises(AttributeError):
-            config.no_such_setting
+            config.no_such_setting  # type: ignore[attr-defined]  # the miss is the point
 
 
 class AnchorTests(unittest.TestCase):

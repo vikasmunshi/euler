@@ -16,6 +16,7 @@ from __future__ import annotations
 import unittest
 from typing import Any
 
+from solver.shell.command import Context
 from solver.shell.dialogue import Ask, Choice, as_choice
 from solver.shell.variables import Variables, variable, variables
 
@@ -154,7 +155,7 @@ class NamedChoicesTests(unittest.TestCase):
         self._resolve = _declared_choices
 
     def _choices(self, ask: Ask) -> list[Choice]:
-        return self._resolve(ask, None, {})
+        return self._resolve(ask, Context(), {})
 
     def test_a_named_variable_is_read_when_the_question_is_put(self) -> None:
         reads: list[int] = []
