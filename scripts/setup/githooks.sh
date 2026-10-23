@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Git Hooks Setup Script
-# ======================
+# Render the git hooks from scripts/setup/hooks/ into .git/hooks/, or remove them.
+# ================================================================================
 #
 # Installs/uninstalls the project's git hooks by rendering templates from
 # scripts/setup/hooks/ into .git/hooks/.

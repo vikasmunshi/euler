@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Public site service (euler-site)
-# ================================================================================
+# Public site kit (euler-site): what signed-out visitors read, served from the euler-content wheel.
+# =================================================================================================
 #
 # Deploys / removes the public site — the published content (guides, topics, the public
 # solutions, the progress grid) for visitors who are not signed in (docs/package-guide.md

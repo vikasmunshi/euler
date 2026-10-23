@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Show how this clone stands against origin/master: divergence, committed and uncommitted changes.
+
 set -e  # Exit on error
 
 declare summary=0

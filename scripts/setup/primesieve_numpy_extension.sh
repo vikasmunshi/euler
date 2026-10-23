@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# primesieve NumPy Extension Setup Script
-# =======================================
+# Build and install the optional primesieve.numpy extension from source (NumPy 2.x).
+# ==================================================================================
 #
 # Builds and installs the optional `primesieve.numpy` extension into the
 # project's virtual environment.

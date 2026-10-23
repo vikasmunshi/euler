@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Claude Code CLI Setup Script
-# ============================
+# Install, update or remove the Claude Code CLI (`claude`) the AI commands drive.
+# ===============================================================================
 #
 # Installs, updates, or removes the Claude Code CLI (`claude`) — Anthropic's
 # agentic coding tool. This project uses it for the `claude-solver` shell

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Frontend (web edge) Setup Script — server redesign edge orchestrator
-# ====================================================================
+# Web edge kit (euler-caddy): Caddy, acme.sh, the Caddyfile router and the static web content.
+# ============================================================================================
 #
 # Single orchestrator for the solver web edge: deploys / removes / upgrades
 # Caddy (TLS + reverse-proxy edge) and the acme.sh cert client, creates the

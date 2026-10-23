@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Upgrade pip and the named packages in the active virtualenv.
+
 set -e  # Exit on error
 
 upgrade() {

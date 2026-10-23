@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Egress (forward proxy) Setup Script
-# ====================================================================
+# Egress proxy kit (euler-proxy): Squid with a domain allowlist, the only way out to the internet.
+# ================================================================================================
 #
 # Deploys / removes / upgrades the Squid forward proxy that is the *only* path
 # out to the internet for the shell, AI features, the problem scraper, and `gh`. It

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Kernel egress firewall (nftables)
-# =================================================================================
+# Kernel egress firewall kit (nftables): per-uid rules for where each service may connect.
+# ========================================================================================
 #
 # Deploys / removes the host nftables ruleset that makes "egress only via Squid"
 # a *kernel* property instead of an environment-variable convention: scoped to the

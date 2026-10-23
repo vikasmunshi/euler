@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Lint one directory: whitespace, mypy, flake8, shellcheck, plus docstrings and layering for packages.
+
 dir_to_check=$1
 if [[ -z "${dir_to_check}" ]]; then
     echo "Error: Directory to check must be provided as first argument" >&2

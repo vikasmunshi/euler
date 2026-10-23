@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# scripts/c/compile.sh — compile a C solution into an executable.
+# Compile a C solution into an executable, linked against the runner harness.
 #
 # Usage:
 #   scripts/c/compile.sh <solution.c> [--clean]

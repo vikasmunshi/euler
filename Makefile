@@ -23,6 +23,8 @@ VENV   := .venv
 PYTHON := $(VENV)/bin/python
 PIP    := $(VENV)/bin/pip
 
+# ── The terminal solver: install / uninstall (local) ───────────────────────────────
+
 ## Full developer install: system deps → venv → all dependency groups → git hooks → completions
 install-all: install-system install-chrome $(VENV)
 	$(PIP) install --upgrade pip
@@ -86,7 +88,7 @@ install-credentials:
 	./scripts/git/configure-identity.sh
 	@printf "✓ install-credentials complete: gh configured as git credential helper, git identity set\n"
 
-## Install the Claude Code CLI (used by the AI features: claude-solver / make)
+## Install the Claude Code CLI (driven by the AI commands claude-solve / claude-blog)
 install-claude:
 	./scripts/setup/claude_code.sh install
 	@printf "✓ install-claude complete: Claude Code CLI installed\n"
@@ -110,6 +112,15 @@ uninstall-nodejs:
 $(VENV):
 	python3.14 -m venv $(VENV)
 	@printf "✓ venv created at $(VENV)\n"
+
+## Remove the venv (system deps must be removed separately)
+uninstall: uninstall-hooks uninstall-completions
+	rm -rf $(VENV) build packages/*/build packages/*/*.egg-info
+	@printf "✓ uninstall complete: venv removed\n"
+	@printf "To remove system dependencies run:\n\t./scripts/setup/dev_env.sh uninstall python primesieve c\n"
+	@printf "To remove the Claude Code CLI run:\n\tmake uninstall-claude\n"
+
+# ── Day to day: tests, the shell, versions, the audit ──────────────────────────────
 
 ## Run the unit test suite (tests/)
 test: $(VENV)
@@ -154,13 +165,6 @@ check-version:
 ## Counts only; offenders are always listed. Per-file detail: scripts/git/audit.sh
 audit: $(VENV)
 	@PYTHON=$(PYTHON) ./scripts/git/audit.sh --summary
-
-## Remove the venv (system deps must be removed separately)
-uninstall: uninstall-hooks uninstall-completions
-	rm -rf $(VENV) build packages/*/build packages/*/*.egg-info
-	@printf "✓ uninstall complete: venv removed\n"
-	@printf "To remove system dependencies run:\n\t./scripts/setup/dev_env.sh uninstall python primesieve c\n"
-	@printf "To remove the Claude Code CLI run:\n\tmake uninstall-claude\n"
 
 # ── The web stack: deploy / remove / redeploy (sudo + systemd) ─────────────────────
 
@@ -342,10 +346,10 @@ redeploy-user:
 	@printf "✓ redeploy-user complete: per-user config refreshed, instances bounced\n"
 
 ## Deploy the full web stack, in dependency order: edge (Caddy+ACME+web-content),
-## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service, and the
-## per-user provisioning layer (MT-4 — the retired per-profile content/ws kits are
-## no longer deployed). Each kit stays independently operable; the later kits
-## reload the firewall as their service users appear. (sudo required)
+## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service (and the
+## shared /opt/euler venv), message spool, public site, and the per-user provisioning
+## layer. Each kit stays independently operable; the later kits reload the firewall as
+## their service users appear. (sudo required)
 deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smtp deploy-auth deploy-msg deploy-site deploy-user
 	@printf "✓ deploy-web complete: full web stack deployed\n"
 
@@ -362,8 +366,8 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
 ## ACLs, units, certs, or the firewall: refresh the edge's static content + Caddyfile →
-## rebuild the shared venv (auth) → bounce the per-user instances so their sockets
-## re-activate them against it. The edge goes first: the restarted services name each
+## rebuild the shared venv (auth) → restart the message spool and the public site on it →
+## bounce the per-user instances so their sockets re-activate them against it. The edge goes first: the restarted services name each
 ## asset by a hash of its bytes (?v=, cached immutable), so those bytes must already be
 ## there. Note the running instances are stopped, so live terminals are dropped. The
 ## everyday "I changed Python/templates/CSS/JS, push it" turnaround. Gated on

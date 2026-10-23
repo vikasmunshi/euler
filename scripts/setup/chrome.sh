@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Chrome Setup Script
-# ==================
+# Install or remove Google Chrome, plus the /usr/local/bin/browser control script.
+# ================================================================================
 #
 # This script automates the installation or removal of Google Chrome browser on
 # Debian-based Linux systems (Ubuntu, Debian, etc.). It checks if Chrome

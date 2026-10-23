@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# System Upgrade Service Setup Script (Revised v5)
+# Install a systemd timer that runs an unattended apt upgrade every day.
 # -----------------------------------------------------------------------------
 # This script automates the installation and configuration of a systemd-based
 # automatic system upgrade service. It creates necessary system files and

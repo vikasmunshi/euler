@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Shared system-venv helpers — the root-owned /opt/euler venv every euler-*
-# app service runs from
-# ==========================================================================================
+# Shared system-venv helpers: the root-owned /opt/euler venv every euler-* service runs from.
+# ===========================================================================================
 #
 # Sourced by the app-service kits (auth.sh / user.sh) so the venv location, the
 # installed dependency set, and the deploy/clean logic have **one** definition

@@ -84,7 +84,7 @@ underlying script in `scripts/setup/` takes:
 
 The hooks are rendered from the templates in `scripts/setup/hooks/` (`pre-commit.template`, `pre-push.template`) into the **default** location `.git/hooks/` by `scripts/setup/githooks.sh install`. This runs via `make install-hooks` (and is part of `make install-all`), which also resets `core.hooksPath` to the default; `make uninstall-hooks` removes them. Edit the templates, not the installed copies, then re-run the installer.
 
-Pre-commit hook (`.git/hooks/pre-commit`) checks staged changes for trailing whitespace / conflict markers, staged build artifacts, gitignored and unencrypted-private files, runs `shellcheck` over the **staged** shell scripts, and `flake8` + `mypy` over the `solutions` and `solver` directories. All checks must pass for the commit to proceed.
+Pre-commit hook (`.git/hooks/pre-commit`) checks staged changes for trailing whitespace / conflict markers, staged build artifacts, gitignored and unencrypted-private files, runs `shellcheck` over the **staged** shell scripts, `flake8` over `solutions` and `packages`, `mypy` over `solutions`, `packages` and `scripts`, and the layering check (`scripts/linters/layers.py`). All checks must pass for the commit to proceed.
 
 Pre-push hook (`.git/hooks/pre-push`) runs additional checks before pushing to remote — among them `shellcheck` over **every tracked** shell script, the whole-tree backstop to the commit hook's staged-only lane.
 
@@ -112,13 +112,17 @@ User- and developer-facing docs live under `docs/`:
   The web host's commands load through an `Extension`: the web shell
   (`python -m euler_webshell.shell`) and `solver-host` (`python -m euler_webshell.shell.host`)
   for the operator's terminal.
+- `docs/tooling-reference.md` — every `make` target and every script under `scripts/`, one line
+  each, generated from the Makefile's `## ` comments and each script's summary line.
 
 The command catalogue (in `user-guide.md`) and `commands-index.md` are **generated** from the live
 registry by the `update-docs` command (`packages/solver/solver/utils/update_doc.py`). After changing any command's
 name, alias, docstring, or signature, run `update-docs` from the host shell, which loads every
 command: `python -m euler_webshell.shell.host "update-docs"` (`… "update-docs --check"` verifies they
 are current). A plain `solver` refuses, since it lacks the web host's commands (`msg`, `users`,
-`user-authorize`, `key-split`, `host-authorize`).
+`user-authorize`, `key-split`, `host-authorize`). The same goes for `tooling-reference.md` after
+adding or changing a `make` target (its `## ` comment) or a script (its summary line, the first
+header comment under the shebang); `tests/test_update_doc.py` fails on one without a summary.
 
 ## Architecture
 

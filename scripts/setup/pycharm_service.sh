@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Install the PyCharm wrapper script and its systemd user service.
 ###############################################################################
 # Script Name:    pycharm_service.sh
 # Description:    Install the PyCharm wrapper script and systemd user service.

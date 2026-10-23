@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Bash Completions Installer
-# ==========================
+# Bash completions for every project script: install, uninstall or render the completion file.
+# ============================================================================================
 #
 # Installs or removes bash tab-completions for every project script.
 #

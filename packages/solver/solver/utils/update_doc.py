@@ -4,9 +4,10 @@
 
 Some parts of the documentation mirror the live command registry (the command
 table in the user guide, the per-command reference in `commands-index.md`, and
-the authorization audit table in `authorizations.md`). Rather than hand-edit them
-whenever a command's name, alias, help text, or usage changes, those sections are
-delimited with HTML marker comments and rebuilt from the registry::
+the authorization audit table in `authorizations.md`), and `tooling-reference.md`
+mirrors the Makefile's `## ` comments and the scripts' header lines. Rather than hand-edit
+them whenever a command's name, alias, help text, or usage changes, those sections are
+delimited with HTML marker comments and rebuilt from the source::
 
     <!-- GEN:command-table -->
     ...generated content (do not edit by hand)...
@@ -405,6 +406,92 @@ def gen_package_layout() -> str:
     return '```\n' + '\n'.join(lines) + '\n```'
 
 
+#: The Makefile whose targets `docs/tooling-reference.md` lists: each is documented by the
+#: `## ` comment line(s) right above it, and grouped by the `# ── <title> ──` line it follows.
+MAKEFILE: Path = ROOT / 'Makefile'
+_MAKE_SECTION = re.compile(r'^# ── (.+?) ─+$')
+_MAKE_TARGET = re.compile(r'^([a-z][a-z0-9-]*)\s*:(?!=)')
+
+#: The scripts tree that reference lists: every `.sh` / `.py` file except the hook templates'
+#: directory (rendered into `.git/hooks`, never run from here).
+SCRIPTS_DIR: Path = ROOT / 'scripts'
+_SCRIPT_SUFFIXES = ('.sh', '.py')
+
+
+def _cell(text: str) -> str:
+    """*text* made safe for a Markdown table cell."""
+    return text.replace('|', '\\|')
+
+
+def make_targets() -> list[tuple[str, list[tuple[str, str]]]]:
+    """The Makefile's targets as *(section title, [(target, summary)])*, in file order.
+
+    A target with no `## ` comment gets an empty summary — `tests/test_update_doc.py`
+    holds every target to having one.
+    """
+    sections: list[tuple[str, list[tuple[str, str]]]] = []
+    doc: list[str] = []
+    for line in MAKEFILE.read_text().splitlines():
+        if line.startswith('## '):
+            doc.append(line[3:].strip())
+            continue
+        if match := _MAKE_SECTION.match(line):
+            sections.append((match.group(1), []))
+        elif (match := _MAKE_TARGET.match(line)) and sections:
+            sections[-1][1].append((match.group(1), ' '.join(doc)))
+        doc = []
+    return sections
+
+
+def script_summary(path: Path) -> str:
+    """A script's one-line summary: a `.py` file's docstring line, a shell script's first header comment.
+
+    The header is the comment block under the shebang; its first line with words in it is the
+    summary, as a module docstring's first line is (docs/tooling-reference.md).
+    """
+    if path.suffix == '.py':
+        return _module_summary(path)
+    for line in path.read_text().splitlines()[1:]:
+        if not line.startswith('#'):
+            break
+        if text := line.lstrip('#').strip():
+            return text
+    return ''
+
+
+def scripts() -> list[Path]:
+    """Every script under `scripts/`, sorted by path."""
+    return sorted(p for p in SCRIPTS_DIR.rglob('*')
+                  if p.suffix in _SCRIPT_SUFFIXES and p.is_file()
+                  and 'hooks' not in p.parts and '__pycache__' not in p.parts)
+
+
+def gen_make_targets() -> str:
+    """One table per Makefile section: each target and what its `## ` comment says it does."""
+    lines: list[str] = []
+    for title, targets in make_targets():
+        lines += [f'**{title}**', '', '| target | what it does |', '| --- | --- |']
+        lines += [f'| `make {name}` | {_cell(summary)} |' for name, summary in targets]
+        lines.append('')
+    return '\n'.join(lines).rstrip()
+
+
+def gen_script_table() -> str:
+    """One table per directory under `scripts/`: each script, linked, and its summary line."""
+    lines: list[str] = []
+    folder = None
+    for path in scripts():
+        rel = path.relative_to(ROOT).as_posix()
+        if path.parent != folder:
+            folder = path.parent
+            if lines:
+                lines.append('')
+            lines += [f'**`{folder.relative_to(ROOT).as_posix()}/`**', '', '| script | what it does |',
+                      '| --- | --- |']
+        lines.append(f'| [`{path.name}`](../{rel}) | {_cell(script_summary(path))} |')
+    return '\n'.join(lines)
+
+
 #: Marker name → generator producing the block body (no surrounding markers).
 GENERATORS: dict[str, Callable[[], str]] = {
     'command-table': gen_command_table,
@@ -415,6 +502,8 @@ GENERATORS: dict[str, Callable[[], str]] = {
     'variable-table': gen_variable_table,
     'package-layout': gen_package_layout,
     'web-overlays': gen_web_overlays,
+    'make-targets': gen_make_targets,
+    'script-table': gen_script_table,
 }
 
 

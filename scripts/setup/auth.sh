@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Auth service kit (euler-auth)
-# ====================================================================================
+# Auth service kit (euler-auth): the sign-in service, and the shared /opt/euler venv it builds.
+# =============================================================================================
 #
 # Deploys / removes / upgrades the runtime for the auth service: the service
 # identity (euler-auth) and wheel-gated admin plane, the root-owned /opt/euler

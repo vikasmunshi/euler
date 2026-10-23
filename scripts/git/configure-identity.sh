@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Configure gh as the git credential helper and set the git identity from the GitHub login.
+
 set -e  # Exit on error
 
 configure_identity() {

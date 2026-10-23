@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Loopback SMTP relay (euler-smtp)
-# ================================================================================
+# Loopback SMTP relay kit (euler-smtp): outbound mail, with its credentials scoped to the relay.
+# ==============================================================================================
 #
 # Deploys / removes the small loopback submission relay through which the app
 # tier (first euler-auth: OTP + invite mail) sends email — so no app service needs

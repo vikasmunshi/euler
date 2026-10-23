@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+# Whole-tree audit of what git stores: private files encrypted, no compiled binaries.
 #
-# Whole-tree audit of what git actually stores. Two independent checks:
+# Two independent checks:
 #   audit_private  — every tracked file under solutions/private is ciphertext.
 #   audit_binaries — no tracked file anywhere is a compiled binary.
 #

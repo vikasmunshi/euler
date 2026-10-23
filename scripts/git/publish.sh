@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Publish directories to origin/master: pushed directly by the owner, otherwise as a pull request.
+
 set -e  # Exit on error
 
 declare gh_user_email gh_user_name repo_owner_email repo_owner_name

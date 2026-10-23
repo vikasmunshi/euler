@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Per-user provisioning kit (euler-user) — step 3 of the multi-tenant redesign
-# ==============================================================================
+# Per-user tier kit (euler-user): the shared layer, and provisioning one collaborator at a time.
+# ==============================================================================================
 #
 # Deploys / removes the OS layer for the **per-user** web tier, and provisions
 # or tears down one collaborator at a time. This replaces the per-*profile*

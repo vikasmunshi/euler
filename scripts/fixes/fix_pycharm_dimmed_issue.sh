@@ -1,5 +1,5 @@
 #!/bin/bash
-# Fix for PyCharm translucent overlay issue on WSL2
+# Fix PyCharm's translucent-overlay rendering on WSL2 by forcing X11.
 # This script disables problematic graphics backends (Metal and Compose rendering)
 # and forces X11 rendering, which is more stable on WSL2.
 

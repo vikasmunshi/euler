@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Development Environment Installation Script
-# ============================================
+# Install, uninstall or report the apt toolchains: C, Lua, Python and Ruby.
+# =========================================================================
 # Manages C/C++, Lua, Python, and Ruby development environments on Ubuntu/Debian.
 #
 # Usage:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Dynamic DNS Updater (name.com A record) — host-scripted, for public edge access
-# ================================================================================
+# Dynamic DNS kit (euler-ddns): keep the edge's A record on the host's public IP.
+# ===============================================================================
 #
 # Keeps the edge's A record (e.g. euler.vikasmunshi.com) pointed at the host's current
 # public IP, so the Caddy edge (scripts/setup/frontend.sh) stays reachable behind a

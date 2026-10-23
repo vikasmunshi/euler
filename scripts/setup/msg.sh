@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Message spool service (euler-msg)
-# ================================================================================
+# Message spool kit (euler-msg): the user↔staff threads service.
+# ==============================================================
 #
 # Deploys / removes the message spool — the user↔staff messaging tier described in
 # docs/web-server-guide.md § Messaging. Sibling to auth.sh / smtp.sh / user.sh.

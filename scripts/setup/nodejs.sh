@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Standalone Node.js (dev tooling) — no sudo, no apt
-# ==================================================
+# Install or remove a standalone Node.js under ~/.local (dev tooling; no sudo, no apt).
+# =====================================================================================
 #
 # Installs / uninstalls a pinned standalone Node.js under ~/.local, used only by
 # developer tooling — currently the JS↔Python SRP interop test

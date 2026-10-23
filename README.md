@@ -54,6 +54,7 @@ authoritative command-language spec:
 | [Language reference](docs/syntax.md)       | the command language    | surface syntax, canonical form, semantics                                        |
 | [Config Guide](docs/config-guide.md)       | configuration           | the two conf files, precedence, and what is deliberately not a setting           |
 | [Package Guide](docs/package-guide.md)     | the code's packaging    | the three packages, extensions and overlays, login and role, versions, deploying |
+| [Tooling Reference](docs/tooling-reference.md) | make and scripts   | every make target and every script, one line each (generated)                    |
 
 The cryptography has a guide per scheme — the mathematics, and how this project uses it:
 
