@@ -126,7 +126,7 @@ are current). A plain `solver` refuses, since it lacks the web host's commands (
 
 <!-- GEN:package-layout -->
 ```
-packages/solver/solver/
+packages/solver/solver/           — euler-solver: the solver shell — standalone, no web code (docs/package-guide.md § 1).
   __main__.py                     — Module entry point.
   main.py                         — Entry point for the "solver shell" CLI.
   version.py                      — The solver build version — the single source of truth.
@@ -208,7 +208,7 @@ packages/solver/solver/
     shell_utils.py                — Utility for running shell commands and capturing their output.
     update_doc.py                 — Regenerate the machine-maintained sections of the guides under `docs/`.
     version.py                    — The `version` command: report the running solver build's version.
-packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-guide.md § 1;
+packages/site/euler_site/         — euler-site: the content site and the auth service (docs/package-guide.md § 1, docs/web-server-guide.md).
   assets.py                       — Versioned asset URLs: `/assets/site.css?v=<hash>` — a URL that names its own bytes (shared).
   cache.py                        — Cache-Control middleware: what a browser may reuse, and for how long (shared).
   csp.py                          — Content-Security-Policy middleware with a per-response nonce (shared).
@@ -277,6 +277,7 @@ packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended
     config.py                     — Web-shell service runtime configuration, read from the environment.
     manager.py                    — Persistent per-user PTY shells: one long-lived solver shell per web user.
     pty.py                        — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
+packages/content/euler_content/   — euler-content: the published content, packaged — what the public site serves to signed-out visitors.
 ```
 <!-- /GEN:package-layout -->
 
