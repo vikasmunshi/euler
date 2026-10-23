@@ -251,32 +251,50 @@
 
   // ---------------------------------------------------------------- rarity
 
-  const RECENT = 52;
-
+  /* Every problem with a difficulty rating, one dot each: its level across, how many people
+     have solved it up (log scale). Mine in the staircase's colours, the rest grey; Problem 1
+     and the rarest I've solved are named. The newest problems have no rating yet, so they
+     are left out by that rule, not by a cut-off. */
   function rarity(container) {
-    // The newest year of problems (about one a week) is rare only because it is new: leave it out.
-    const newest = Math.max(...problems.map(p => p.n)) - RECENT;
-    const counted = solves.filter(p => p.solvers !== null && p.n <= newest);
-    if (!counted.length) {
+    const rated = problems.filter(p => p.level !== null && p.solvers !== null);
+    if (!rated.length) {
       container.innerHTML = '<div class="empty-state"><p>Solver counts appear after the next progress refresh.<br>'
         + 'Save the progress page, run <code>summary</code>, then <code>update-presentation-data</code>.</p></div>';
       return;
     }
-    const first = byNumber.get(1);
-    const rarest = [...counted].sort((a, b) => a.solvers - b.solvers).slice(0, 4);
-    const rows = [first, ...rarest].filter(p => p && p.solvers !== null);
-    // Half a slide wide, so each row's label sits above its bar rather than beside it.
-    const W = 760, H = 520, valueW = 170;
+    const W = 760, H = 600, M = { l: 92, r: 16, t: 44, b: 64 };
     const svg = svgRoot(container, W, H);
-    svg.setAttribute('aria-label', 'How many people have solved each problem');
+    svg.setAttribute('aria-label', `How many people have solved each of the ${rated.length} rated problems`);
+    const maxLevel = Math.max(...rated.map(p => p.level));
+    const slot = (W - M.l - M.r) / (maxLevel + 1);
     const lo = 10, hi = 1e6;
-    const bx = v => (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) * (W - valueW);
-    const rowH = H / rows.length;
-    rows.forEach((p, i) => {
-      const top = i * rowH + 8;
-      text(svg, 0, top + 24, `${p.n}  ${p.title}`, { class: 'bar-label' });
-      el('rect', { x: 0, y: top + 38, width: bx(p.solvers), height: 34, rx: 3, class: `cell h${heat(p)}` }, svg);
-      text(svg, bx(p.solvers) + 14, top + 64, `${fmtInt(p.solvers)} people`, { class: 'bar-value' });
+    const y = v => H - M.b - (Math.log10(Math.min(Math.max(v, lo), hi)) - 1) / 5 * (H - M.t - M.b);
+    // a fixed jitter per problem, so the dots of one level spread across its column
+    const x = p => M.l + (p.level + 0.15 + 0.7 * ((p.n * 0.618034) % 1)) * slot;
+    const axis = el('g', { class: 'axis' }, svg);
+    for (let e = 1; e <= 6; e++) {
+      const v = 10 ** e;
+      text(axis, M.l - 14, y(v) + 6, v >= 1e6 ? '1M' : v >= 1e3 ? `${v / 1e3}k` : String(v), { 'text-anchor': 'end' });
+      el('line', { x1: M.l, x2: W - M.r, y1: y(v), y2: y(v), opacity: e === 1 ? 1 : 0.35 }, axis);
+    }
+    for (let lv = 0; lv <= maxLevel; lv += 5) text(axis, M.l + (lv + 0.5) * slot, y(lo) + 30, String(lv), { 'text-anchor': 'middle' });
+    text(svg, W - M.r, y(lo) + 56, 'Difficulty level', { class: 'chart-label', 'text-anchor': 'end' });
+    text(svg, M.l - 14, 14, 'people', { class: 'chart-label', 'text-anchor': 'end' });
+    const bucket = p => 1 + Math.min(Math.floor((p.level / (maxLevel + 1)) * 5), 4);
+    // unsolved first, so mine sit on top
+    for (const p of [...rated].sort((a, b) => a.solved - b.solved)) {
+      const dot = el('circle', { cx: x(p), cy: y(p.solvers), r: p.solved ? 5 : 4,
+        class: p.solved ? `cell h${bucket(p)}` : 'dot-other' }, svg);
+      el('title', {}, dot).textContent = `${p.n} ${p.title}: ${fmtInt(p.solvers)} people, level ${p.level}`;
+    }
+    const mine = rated.filter(p => p.solved);
+    const named = [byNumber.get(1), [...mine].sort((a, b) => a.solvers - b.solvers)[0]].filter(Boolean);
+    named.forEach((p, i) => {
+      const cx = x(p), cy = y(p.solvers);
+      el('circle', { cx, cy, r: 10, class: 'dot-ring' }, svg);
+      const right = cx < W / 2;
+      text(svg, cx + (right ? 18 : -18), cy + (i ? -16 : 22), `${p.n}  ${p.title}, ${fmtInt(p.solvers)}`,
+        { class: 'dot-label', 'text-anchor': right ? 'start' : 'end' });
     });
   }
 

@@ -191,6 +191,9 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .bar-total { fill: var(--cell-empty); }
 .bar-label { font-size: 22px; fill: var(--ink); }
 .bar-value { font-size: 22px; fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.dot-other { fill: #C3CBD5; opacity: 0.7; }
+.dot-ring { fill: none; stroke: var(--ink); stroke-width: 2.5; }
+.dot-label { font-size: 19px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 5px; stroke-linejoin: round; }
 
 .empty-state {
   height: 100%;
@@ -521,6 +524,30 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .pair-head { font-family: var(--serif); font-size: 30px; line-height: 1.2; margin: 0; }
 .pair .viz { margin-top: 20px; }
 .pair .caption { margin: 12px 0 0; font-size: 19px; }
+
+/* ---- the story behind the solver: challenge → feature ---- */
+
+.ch-lede { margin-top: 12px; font-size: 28px; }
+.ch-list { list-style: none; margin: 32px 0 0; padding: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.ch-list li {
+  display: grid; grid-template-columns: 560px 1fr; gap: 0 56px; align-items: center;
+  padding: 14px 24px; border-left: 4px solid transparent; border-radius: 4px;
+  opacity: 0.4; transition: opacity 0.3s, background-color 0.3s, border-color 0.3s;
+}
+.ch-list li.done { opacity: 0.85; }
+.ch-list li.now { opacity: 1; background: #FFFFFF; border-left-color: var(--heat-2); box-shadow: 0 6px 18px #16233B14; }
+.ch-problem { font-family: var(--serif); font-size: 30px; line-height: 1.2; margin: 0; position: relative; }
+.ch-problem::after { content: "→"; position: absolute; right: -44px; top: 0; font-family: var(--sans); color: var(--heat-2); }
+.ch-feature { font-size: 23px; line-height: 1.4; color: var(--ink-soft); margin: 0; }
+.ch-feature code { color: var(--heat-2); font-size: 0.9em; }
+.ch-gens { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+.ch-gen { position: relative; font-size: 20px; line-height: 1.25; color: var(--ink-soft); }
+.ch-gen s { text-decoration-color: #9AA6B6; }
+.ch-gen small { display: block; margin-top: 4px; font-size: 16px; }
+.ch-gen + .ch-gen::before { content: "→"; position: absolute; left: -22px; top: 0; color: #9AA6B6; }
+.ch-gen-now { color: var(--ink); text-decoration: none; font-weight: 700; }
+.ch-gen-now small { font-weight: 400; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { .ch-list li { transition: none; } }
 
 /* ---- the framework: from problem to solution ---- */
 

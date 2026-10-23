@@ -1,5 +1,6 @@
 /* The general-audience slides around the mini-stories: the opener (the obvious way breaks),
-   the Project Euler intro, what changed, the framework from problem to solution, the vault,
+   the Project Euler intro, what changed, the story behind the solver, the framework from problem
+   to solution, the vault,
    working with AI, and the live-demo picker. Each registers a controller on window.DECK_PARTS, keyed by data-viz.
    Public material only: no answers, nothing from solutions/private/. */
 (() => {
@@ -154,6 +155,17 @@
       h('span', 'wc-text', row, text);
     }
     return stepped(0, () => {});
+  }
+
+  // ======================================================== the story behind the solver
+
+  /* Challenge → feature, a row per step: the current row stands out, those before it stay. */
+  function challenges(slide) {
+    const rows = [...slide.querySelectorAll('[data-role="list"] > li')];
+    return stepped(rows.length - 1, s => rows.forEach((li, i) => {
+      li.classList.toggle('done', i < s);
+      li.classList.toggle('now', i === s);
+    }));
   }
 
   // ======================================================== the framework: from problem to solution
@@ -321,5 +333,5 @@ def solve(*args: str) -> str:
     return stepped(1, show, () => { token++; });
   }
 
-  window.DECK_PARTS = Object.assign(window.DECK_PARTS || {}, { opener, intro, changed, framework, vault, ai, demo });
+  window.DECK_PARTS = Object.assign(window.DECK_PARTS || {}, { opener, intro, changed, challenges, framework, vault, ai, demo });
 })();
