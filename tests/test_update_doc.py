@@ -12,7 +12,8 @@ from pathlib import Path
 
 from solver.auth import Authorizations, LADDER, Subject
 from solver.config import config
-from solver.shell.command import registry
+from solver.shell import command as command_module
+from solver.shell.command import CommandRegistry, command, registry
 from solver.utils.loader import load_commands
 from solver.utils.update_doc import (GENERATORS, MAKEFILE, _least_profile, _module_of,
                                      gen_authorization_table, gen_make_targets, gen_script_table,
@@ -21,9 +22,13 @@ from solver.utils.update_doc import (GENERATORS, MAKEFILE, _least_profile, _modu
 _AUTHZ = Authorizations.load()
 
 
-def _admin_subject() -> Subject:
+def _subject(profile: str) -> Subject:
     return Subject(user='t', slug='t-000000', channel='terminal', auth_method='test',
-                   profile='admin')
+                   profile=profile)
+
+
+def _admin_subject() -> Subject:
+    return _subject('admin')
 
 
 class AuthorizationTableTests(unittest.TestCase):
@@ -83,23 +88,42 @@ class RegistryCompletenessTests(unittest.TestCase):
 
     Registration is profile-filtered, so generating the audit table from a maintainer's
     registry would quietly delete every admin-floored row — from the one document whose
-    worth is being complete. This pins the mechanism the floor exists to defend against."""
+    worth is being complete. This pins the mechanism the floor exists to defend against.
 
-    def setUp(self) -> None:
-        self._saved_subject = config.subject
-        self.addCleanup(self._restore)
+    The filter runs once, when the decorator does: a module already imported keeps the
+    registry its first subject gave it, so switching `config.subject` and reloading proves
+    nothing. Each test decorates a probe into a fresh registry under the profile it names."""
 
-    def _restore(self) -> None:
-        config.subject = self._saved_subject
-        load_commands(refresh_modules=True)
+    @staticmethod
+    def _register_as(profile: str) -> CommandRegistry:
+        """The registry an admin-floored command lands in, decorated while *profile* is the subject."""
+        fresh = CommandRegistry()
+        with (unittest.mock.patch.object(command_module, 'registry', fresh),
+              unittest.mock.patch.object(config, 'subject', _subject(profile))):
+            @command(requires='admin')
+            def probe_admin(ctx: object) -> int:
+                """An admin-floored probe."""
+                return 0
+        return fresh
 
     def test_a_maintainers_registry_cannot_see_the_admin_commands(self) -> None:
-        config.subject = _admin_subject()
-        load_commands(refresh_modules=True)
-        admin_floored = {cmd.name for cmd in registry.all() if cmd.requires == 'admin'}
-        self.assertIn('users', admin_floored)  # the set is non-empty…
-        self.assertIn('key-rekey', admin_floored)  # …and these are in it
-        self.assertTrue(admin_floored <= {cmd.name for cmd in registry.all()})
+        commands = self._register_as('maintainer')
+        self.assertIsNone(commands.resolve('probe-admin'))
+        self.assertEqual(commands.withheld, {'probe-admin'})  # withheld, not unknown
+
+    def test_an_admins_registry_holds_them(self) -> None:
+        commands = self._register_as('admin')
+        probe = commands.resolve('probe-admin')
+        assert probe is not None
+        self.assertEqual(probe.requires, 'admin')
+        self.assertEqual(commands.withheld, set())
+
+    def test_the_suites_registry_is_an_admins(self) -> None:
+        """The other tables here are generated from the live registry; it must be whole."""
+        load_commands()
+        rekey = registry.resolve('key-rekey')
+        assert rekey is not None, 'the test run registered commands below the admin floor'
+        self.assertEqual(rekey.requires, 'admin')
 
 
 class ToolingReferenceTests(unittest.TestCase):
