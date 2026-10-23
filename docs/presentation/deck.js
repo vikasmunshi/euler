@@ -345,6 +345,13 @@
   const slides = [...stage.querySelectorAll('.slide')];
   const counter = document.getElementById('counter');
   const notes = document.getElementById('notes');
+  const notesBody = document.getElementById('notes-body');
+  const notesTitle = document.getElementById('notes-title');
+  const notesButton = document.getElementById('toggle-notes');
+  const showNotes = on => {
+    notes.hidden = !on;
+    notesButton.setAttribute('aria-pressed', String(on));
+  };
   let current = 0;
 
   const RENDER = { 'title-grid': titleGrid, timeline: timelineFinal, cumulative, difficulty };
@@ -370,7 +377,8 @@
     stage.dataset.theme = slide.dataset.theme || '';
     counter.textContent = `${current + 1} / ${slides.length}`;
     const n = slide.querySelector('.notes');
-    notes.innerHTML = n ? n.innerHTML : '';
+    notesBody.innerHTML = n ? n.innerHTML : '<p>No notes for this slide.</p>';
+    notesTitle.textContent = `Speaker notes · slide ${current + 1} of ${slides.length}`;
     history.replaceState(null, '', `#${current + 1}`);
     const enter = ENTER[slide.dataset.viz];
     if (enter) enter(slide);
@@ -391,7 +399,8 @@
       case 'ArrowLeft': case 'ArrowUp': case 'PageUp': back(); break;
       case 'Home': show(0); break;
       case 'End': show(slides.length - 1); break;
-      case 'n': case 'N': notes.classList.toggle('show'); break;
+      case 'n': case 'N': showNotes(notes.hidden); break;
+      case 'Escape': if (notes.hidden) return; showNotes(false); break;
       case 'r': case 'R': replay(); break;
       case 'f': case 'F':
         if (document.fullscreenElement) document.exitFullscreen();
@@ -403,7 +412,8 @@
   });
   document.getElementById('prev').addEventListener('click', back);
   document.getElementById('next').addEventListener('click', forward);
-  document.getElementById('toggle-notes').addEventListener('click', () => notes.classList.toggle('show'));
+  notesButton.addEventListener('click', () => showNotes(notes.hidden));
+  document.getElementById('notes-close').addEventListener('click', () => showNotes(false));
   window.addEventListener('resize', fit);
 
   fillStats();

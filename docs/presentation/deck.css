@@ -259,23 +259,38 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 
 .notes { display: none; }
 
+/* The speaker notes: a pop-up card at the bottom right, raised clear of the nav buttons
+   (bottom-left, 12px + one button high) so neither ever covers the other. */
 .notes-panel {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-height: 34vh;
-  overflow: auto;
-  padding: 16px 24px 20px;
-  background: #0F1726F2;
+  right: 16px;
+  bottom: 64px;
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(60vh, calc(100vh - 96px));
+  display: flex;
+  flex-direction: column;
+  background: #0F1726F7;
   color: #E8ECF2;
   font: 17px/1.5 var(--sans);
-  border-top: 1px solid #2C3A52;
-  display: none;
+  border: 1px solid #2C3A52;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px #0008;
   z-index: 10;
 }
-.notes-panel.show { display: block; }
-.notes-panel p { margin: 0 0 8px; max-width: 90ch; }
+.notes-panel[hidden] { display: none; }
+.notes-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 10px 8px 18px; border-bottom: 1px solid #2C3A52;
+  font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; color: #9FB0C8;
+}
+.notes-head button {
+  font: 22px/1 var(--sans); width: 32px; height: 32px; border-radius: 6px;
+  border: 1px solid transparent; background: transparent; color: #E8ECF2; cursor: pointer;
+}
+.notes-head button:hover, .notes-head button:focus-visible { border-color: #2C3A52; background: #16233B; }
+.notes-body { overflow: auto; padding: 14px 18px 16px; }
+.notes-body p { margin: 0 0 8px; }
+.notes-body p:last-child { margin-bottom: 0; }
 
 .nav {
   position: fixed;
@@ -298,6 +313,7 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   cursor: pointer;
 }
 .nav button:focus-visible { outline: 3px solid var(--heat-1); outline-offset: 2px; }
+.nav button[aria-pressed="true"] { border-color: var(--heat-1); }
 
 @media (prefers-reduced-motion: reduce) {
   .cell.lit { animation: none; }
