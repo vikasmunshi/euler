@@ -14,8 +14,8 @@ license = "MIT"
 requires-python = ">=3.14"
 # Lockstep (Q5): the pins are rewritten by scripts/version/release.sh with every version.py.
 dependencies = [
-    "euler-solver==4.4.3",
-    "euler-site==4.4.3",
+    "euler-solver==4.5.0",
+    "euler-site==4.5.0",
 ]
 
 [project.scripts]
