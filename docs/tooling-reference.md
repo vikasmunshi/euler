@@ -148,6 +148,12 @@ script's tables, too.
 | --- | --- |
 | [`stage.py`](../scripts/content/stage.py) | Stage the euler-content wheel source: `packages/content/` plus the public tree, in a scratch directory. |
 
+**`scripts/docs/`**
+
+| script | what it does |
+| --- | --- |
+| [`screenshots.py`](../scripts/docs/screenshots.py) | Capture the site's main pages for the README: a screenshot carousel you click through. |
+
 **`scripts/fixes/`**
 
 | script | what it does |
