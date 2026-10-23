@@ -648,6 +648,10 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .dev-down { text-align: center; font: 18px var(--mono); color: var(--dev-accent); }
 .dev-users { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 20px; }
 .dev-side-box { border-style: dashed; color: var(--dev-blue); }
+.dev-users-4 { grid-template-columns: 1fr 1fr 1fr 0.9fr; }
+.dev-stack { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.dev-stack .dev-down { font-size: 16px; }
+.dev-layers { grid-template-columns: 220px 1fr; gap: 18px 40px; margin-top: 32px; }
 
 .dev-gates { margin-top: 48px; }
 .dev-thrown { display: grid; grid-template-columns: 300px 1fr; gap: 22px 40px; margin: 40px 0 0; }

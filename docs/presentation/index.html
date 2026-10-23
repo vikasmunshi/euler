@@ -165,7 +165,7 @@
     </li>
     <li>
       <p class="ch-problem">Code that stays right, and can be rewritten</p>
-      <p class="ch-feature">mypy and flake8 on every commit, autoflake to tidy; and when the framework changed (the runner, the decorators, solve()'s signature), code transformers rewrote every solution.</p>
+      <p class="ch-feature">mypy and flake8 on every commit, docs generated from the code; each time the framework changed shape, code transformers rewrote every solution.</p>
     </li>
     <li>
       <p class="ch-problem">Turn solutions into knowledge</p>
@@ -178,7 +178,7 @@
     <p>The key: I lost it more than once. Now each machine keeps its own copy, sealed to that machine's key; any holder can issue it to another machine (key-export, or over the message spool), or split it in two halves (key-split, key-reconstruct) so no single message carries all of it.</p>
     <p>Old solutions: every solution has test cases with recorded answers, so after a package upgrade one loop re-runs them all. The runner gives every solution the same contract, which is what makes that loop possible.</p>
     <p>A new machine: a one-line install script clones the repository and runs make install-all, which sets up the system packages, the Python environment, git hooks, tab completion, Chrome and Claude Code. Secrets stay outside the repository, in ~/.euler.</p>
-    <p>Code quality: every commit passes mypy and flake8 (the git hooks refuse otherwise), and autoflake, isort and black tidy each new solution. Transformability: the framework changed shape more than once (the runner, the decorators, the signature of solve()), and each time I wrote code transformers that rewrote every existing solution rather than editing hundreds by hand. Consistent code is what makes that possible.</p>
+    <p>Code quality: every commit passes mypy and flake8 (the git hooks refuse otherwise), and autoflake, isort and black tidy each new solution. Transformability: the framework changed shape more than once (the runner, the decorators, the signature of solve()), and each time I wrote code transformers that rewrote every existing solution rather than editing hundreds by hand. Consistent code is what makes that possible. And the reference docs (the command index, the package layout, the tooling reference) are generated from the code by update-docs, so they say what the code does, not what it once did.</p>
     <p>Knowledge: the explanations, tags and articles are counted on the previous slide.</p>
   </aside>
 </section>
@@ -532,9 +532,45 @@ git-commit
 [message=&lt;str&gt;] (asked)
 [amend=true|--amend]
 [reset=true|--reset]
-[silent=true|--silent]</pre></div>
+[silent=true|--silent]</pre>
+      <ul class="dev-points dev-points-tight">
+        <li>Generated, never written: <code>update-docs</code> builds this index, the command catalogue, the package layout and the tooling reference from the live code.</li>
+        <li>Every full release reruns it, so the reference says what the code does now.</li>
+      </ul></div>
   </div>
-  <aside class="notes"><p>The signature is reformatted to fit the slide; the code is packages/solver/solver/core/git.py's git_commit. Functions stay plain Python: the decorator registers them, it doesn't transform them. Only one function in register.py knows about Annotated: it lifts the Ask out and hands everything else the plain type. Ask appears in 28 places in the codebase.</p><p>The problem parameter is the same current problem the {problem} variable holds on the previous slide, which is why eval alone re-runs the active problem. The docstring is the help text and the source of the generated docs; check-commands holds every docstring to one standard.</p></aside>
+  <aside class="notes"><p>The signature is reformatted to fit the slide; the code is packages/solver/solver/core/git.py's git_commit. Functions stay plain Python: the decorator registers them, it doesn't transform them. Only one function in register.py knows about Annotated: it lifts the Ask out and hands everything else the plain type. Ask appears in 28 places in the codebase.</p><p>The problem parameter is the same current problem the {problem} variable holds on the previous slide, which is why eval alone re-runs the active problem. The docstring is the help text and the source of the generated docs; check-commands holds every docstring to one standard.</p><p>update-docs fills the marked blocks in the guides from the code itself: the registry (this index, the user guide's catalogue, the authorization table), the package tree (the README's layout), the Makefile's comments and each script's summary line (the tooling reference). scripts/ops/release.sh runs it on every full release, and update-docs --check reports anything stale.</p></aside>
+</section>
+
+<section class="slide" data-theme="dev">
+  <h2>One shell, three packages</h2>
+  <div class="dev-pair">
+    <div>
+      <div class="dev-stack">
+        <div class="dev-box">euler_webshell<small>the web shell, the per-user service, the PTY, the message spool, <code>solver-host</code></small></div>
+        <div class="dev-down">↓ imports</div>
+        <div class="dev-box">euler_site<small>the content site and the auth service</small></div>
+        <div class="dev-down">↓ imports</div>
+        <div class="dev-box">solver<small>the solver shell: standalone, no web code at all</small></div>
+      </div>
+      <ul class="dev-points dev-points-tight">
+        <li>Dependencies point one way. <code>layers.py</code> fails any import that points up, on every commit.</li>
+        <li>A fourth package, <code>euler_content</code>, is data: the public tree the signed-out site serves.</li>
+      </ul>
+    </div>
+    <div><p class="dev-label">packages/webshell/euler_webshell/shell/overlays.toml</p><pre class="dev-code">[git-sync]          # after it returns, nudge the page:
+emit = ["git"]      # OSC 5379 → the header's git chip
+
+[summary]           # problems.json changed
+emit = ["progress", "git"]
+
+[show]              # swap the left pane, not a browser tab
+replace = "euler_webshell.shell.viewer:show"</pre>
+      <ul class="dev-points dev-points-tight">
+        <li>The web shell is the solver shell plus an <code>Extension</code>: more commands, a ticket for identity, and these overlays.</li>
+        <li>The solver shell never imports it, and never knows it is in a browser.</li>
+      </ul></div>
+  </div>
+  <aside class="notes"><p>Until October this was one package, with the web tier under solver/web. The split made the solver shell installable on its own, with nothing of the web in it, and made the direction of every dependency a checked rule instead of a habit. The guide is docs/package-guide.md.</p><p>An overlay either emits events after a command returns (the web shell turns each into an OSC 5379 escape sequence on the PTY, which the page reads to refresh the right part of itself) or replaces the command's body: show and edit swap the app's left pane instead of opening a browser tab. solver-host is the same extension without the browser parts, for the operator's own terminal on the web host.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
@@ -552,7 +588,8 @@ git-commit
     <span class="dev-then">gives</span>
     <span class="dev-key">AES-256 master key<small>which decrypts every file</small></span>
   </div>
-  <aside class="notes"><p>The filter is packages/solver/solver/crypto/gitfilter.py, run as a long-lived git filter process. Nothing is decrypted in git itself; plaintext exists only in the working tree once the master key is available.</p><p>The lesson: enc-key.json used to be one tracked file holding every machine's entry, which caused a long run of merge conflicts. It is now machine-local, and a new holder gets their sealed copy over the message spool.</p></aside>
+  <p class="dev-foot">Deterministic: each file's nonce is an HMAC of its plaintext, so an unchanged file encrypts to the same bytes and git sees no change, while different text never reuses a nonce.</p>
+  <aside class="notes"><p>Without the deterministic nonce, every checkout would re-encrypt every private file with a fresh random nonce, and git would report hundreds of changed files that nobody touched. The filter is packages/solver/solver/crypto/gitfilter.py, run as a long-lived git filter process. Nothing is decrypted in git itself; plaintext exists only in the working tree once the master key is available.</p><p>The lesson: enc-key.json used to be one tracked file holding every machine's entry, which caused a long run of merge conflicts. It is now machine-local, and a new holder gets their sealed copy over the message spool.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
@@ -560,15 +597,31 @@ git-commit
   <div class="dev-web">
     <div class="dev-box dev-wide">Browser<small>SRP-6a login: the password never leaves it</small></div>
     <div class="dev-down">↓ TLS</div>
-    <div class="dev-box dev-wide">Caddy<small>strips identity headers, asks the auth service about every request, routes by X-User-Slug</small></div>
+    <div class="dev-box dev-wide">Caddy<small>strips identity headers; signed-out reads go to the public site, everything else asks the auth service, then routes by X-User-Slug</small></div>
     <div class="dev-down">↓ unix sockets under /run/euler</div>
-    <div class="dev-users">
+    <div class="dev-users dev-users-4">
+      <div class="dev-box">euler-site<small>the public site: the packaged public tree, read-only, nothing private</small></div>
       <div class="dev-box">euler-user@alice<small>own uid, home, clone, branch and vault; pages and the /ws terminal</small></div>
       <div class="dev-box">euler-user@bob<small>same shape, fully separate</small></div>
-      <div class="dev-box dev-side-box">auth · messages<small>their own uids</small></div>
+      <div class="dev-box dev-side-box">auth · messages · mail<small>each on its own uid</small></div>
     </div>
+    <div class="dev-down">↓ the only way out</div>
+    <div class="dev-box dev-wide dev-side-box">Squid domain allowlist + per-uid nftables<small>each service reaches only what it needs</small></div>
   </div>
-  <aside class="notes"><p>The design of record is docs/web-server-guide.md. Alice and Bob are placeholders. Each collaborator's keys are exposed only to their own code: separate uid, separate clone, separate encrypted vault. The terminal in the browser is the same solver shell, run on a PTY and carried over a WebSocket.</p></aside>
+  <aside class="notes"><p>The design of record is docs/web-server-guide.md. Alice and Bob are placeholders. A visitor who isn't signed in reads the public site: the same content app over a packaged copy of the public tree, with no private files to leak. Everyone else is checked by the auth service on every request and routed to their own service.</p><p>Each collaborator's keys are exposed only to their own code: separate uid, separate clone, separate encrypted vault. Their terminal is the web shell, the solver shell plus its web extension, run on a PTY and carried over a WebSocket. Outbound traffic goes through a domain allowlist and a per-uid firewall, which is where "the plaintext never leaves" is enforced on the network.</p></aside>
+</section>
+
+<section class="slide" data-theme="dev">
+  <h2>Defence in depth</h2>
+  <dl class="dev-thrown dev-layers">
+    <dt>Login</dt><dd>SRP-6a: the password never crosses the wire, and the server keeps only a verifier.</dd>
+    <dt>Identity</dt><dd>The edge strips client identity headers; only the auth service sets them. A web shell starts from a single-use ticket.</dd>
+    <dt>Isolation</dt><dd>One uid, home, clone and branch per collaborator; each admin plane on its own 0600 socket.</dd>
+    <dt>Secrets</dt><dd>Each user's keys in a password-derived vault (PBKDF2, AES-GCM); private solutions ciphertext in git.</dd>
+    <dt>The way out</dt><dd>A domain allowlist and per-uid firewall rules; mail through a loopback relay holding its own credentials.</dd>
+    <dt>The page</dt><dd>A Content-Security-Policy with a fresh nonce per response: no inline script, nothing from a CDN.</dd>
+  </dl>
+  <aside class="notes"><p>No single layer is trusted to hold alone. A stolen session reaches one collaborator's service, not anyone else's; a compromised service can't read another's files or reach an arbitrary host; a leaked database holds verifiers, not passwords.</p><p>The guides: docs/srp-guide.md for the login, docs/vault-guide.md for the vault, docs/web-server-guide.md for the edge, egress and firewall.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
@@ -581,10 +634,10 @@ git-commit
     <div class="dev-box">make redeploy-web<small>refuses unless the tag is on origin</small></div>
   </div>
   <div class="dev-pair dev-gates">
-    <div><p class="dev-label">Every commit</p><ul class="dev-points"><li>No whitespace errors or conflict markers</li><li>No build artifacts, no unencrypted private files</li><li>shellcheck on staged scripts; flake8 and mypy</li></ul></div>
-    <div><p class="dev-label">Every push, and on demand</p><ul class="dev-points"><li>shellcheck over every tracked script</li><li><code>make audit</code>: the whole tree, private files encrypted at rest</li></ul></div>
+    <div><p class="dev-label">Every commit</p><ul class="dev-points"><li>No whitespace errors or conflict markers</li><li>No build artifacts, gitignored or unencrypted private files</li><li>shellcheck on staged scripts; flake8; mypy, tests included</li><li>The layering check: no import points up</li></ul></div>
+    <div><p class="dev-label">Every push, and on demand</p><ul class="dev-points"><li>The encryption and binary audits, on exactly the blobs pushed</li><li>flake8, mypy, and shellcheck over every tracked script</li><li>The full unit test suite, when code, scripts or tests change</li><li><code>make audit</code>: the whole tree, on demand</li></ul></div>
   </div>
-  <aside class="notes"><p>packages/solver/solver/version.py is the one source of the version number, and only make release writes it. The deployed web stack is only as current as the last release baked into it.</p></aside>
+  <aside class="notes"><p>packages/solver/solver/version.py is the one source of the version number, and only make release writes it. The deployed web stack is only as current as the last release baked into it.</p><p>The test suite is about 900 tests, run in around twenty seconds; the push skips it when only docs or solutions changed.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">
