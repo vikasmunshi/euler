@@ -152,7 +152,7 @@ script's tables, too.
 
 | script | what it does |
 | --- | --- |
-| [`screenshots.py`](../scripts/docs/screenshots.py) | Capture the site's main pages for the README: a screenshot carousel you click through. |
+| [`screenshots.py`](../scripts/docs/screenshots.py) | Capture the site's main pages for the README, as one animated GIF that cycles through them. |
 
 **`scripts/fixes/`**
 
