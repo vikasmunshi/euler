@@ -277,7 +277,7 @@ Report every command docstring that breaks the documented standard.
 The standard is `docs/developer-guide.md` §3.8; the rules are listed in this module's
 docstring. Findings print as `command | rule | detail` rows, and the exit code is
 non-zero when there is at least one — so the command gates a chain and serves as the
-docstring lane of `scripts/linters/check.sh solver`.
+docstring lane of `scripts/linters/check.sh packages`.
 
 **Admin-floored on purpose, not out of caution.** Registration is itself
 profile-filtered (`packages/solver/solver/shell/command.py`): a command above your floor is never
@@ -2009,7 +2009,7 @@ The glue for the double-entry tag graph.
 
 * ⚑ needs contributor or above.
 
-Order (maintainer beats packages/solver/solver/contributor): apply maintainer edits to the central
+Order (maintainer beats contributor): apply maintainer edits to the central
 vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
 the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
 the topic articles' problem lists and rewrite the article index `topics/articles.json`
