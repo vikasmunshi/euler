@@ -1749,7 +1749,7 @@ not on the `<details>`, since an inner swap cannot reach the outer element's att
 Three triggers, no overlap:
 
 - **`euler:git-changed from:body`** — the shell moved the clone. Git commands run in the
-  *terminal*, which is not a navigation, so `packages/solver/solver/core/osc.py` says so over OSC 5379 and
+  *terminal*, which is not a navigation, so the web shell says so over OSC 5379 and
   `site.js` turns it into the event (the vault's auto-unlock fires it too, to fill in a
   worktree the first paint could not scan).
 - **`toggle[this.open] throttle:1s`** — the user opened the menu. The push above can be
@@ -1844,8 +1844,9 @@ for the rare has-access-but-unwired case, unsurfaced where it would mislead.
 
 **The refresh: the shell says when it moved.** A git command runs in the terminal, which is
 *not* a navigation — so without a nudge the chip would be most wrong exactly after the user
-acted. The git commands emit `OSC 5379` `git;<token>` on their success paths
-(`packages/solver/solver/core/osc.py`, the one definition of that wire); `terminal.js` posts
+acted. Once a git command returns, the web shell emits `OSC 5379` `git;<token>`: the
+commands are named in `overlays.toml` (docs/package-guide.md § 3.2), and
+`euler_webshell/shell/osc.py` is the one definition of that wire. `terminal.js` posts
 `{euler: 'git-changed'}`; `site.js` dispatches `euler:git-changed` on `<body>`; the chip's
 own `hx-get="/git"` (`hx-trigger="… from:body"`, `hx-swap="outerHTML"`) replaces itself.
 One read, at the one moment the state changed. It fires for a **hand-typed** `git-sync`
@@ -2654,7 +2655,8 @@ code, templates, and static assets without touching identities, units, certs, or
 firewall. `frontend.sh redeploy` goes first: it refreshes `/etc/euler/web-content` plus
 the Caddyfile and reloads the edge, so the new static files are in place before any
 restarted service names them by their hash (§ 11.10). Then `auth.sh redeploy` reinstalls
-the repo into the shared `/opt/euler` venv, and `user.sh redeploy` bounces running
+the repo into the shared `/opt/euler` venv (the content wheel with it), `msg.sh redeploy`
+and `site.sh redeploy` restart the spool and the public site against it, and `user.sh redeploy` bounces running
 instances so their sockets re-activate them against the rebuilt venv and re-lays each
 clone's per-clone setup from the operator's checkout. It is **gated on `make check-version`** (its first
 prerequisite): the version `packages/solver/solver/version.py` names — the number this build bakes into
@@ -2709,7 +2711,7 @@ it to do that `deploy` does not already do:
 | kit | `upgrade` |
 |---|---|
 | `frontend.sh`, `egress.sh` | Genuinely distinct: upgrades the Caddy / acme.sh / Squid **packages** and regenerates config + unit, without issuing a cert. |
-| `auth.sh`, `smtp.sh`, `msg.sh`, `user.sh` | An alias of `deploy` — the deploy path is already the re-assert path. |
+| `auth.sh`, `smtp.sh`, `msg.sh`, `site.sh`, `user.sh` | An alias of `deploy` — the deploy path is already the re-assert path. |
 | `ddns.sh`, `firewall.sh` | No `upgrade` action at all; their `deploy` is idempotent and doubles as one, which is why `upgrade-web` calls `deploy-ddns` and ends on a `firewall.sh reload`. |
 
 `make remove-web` tears the stack down in reverse; the kits prompt before deleting

@@ -161,7 +161,7 @@
   window.addEventListener('resize', refit);
   new ResizeObserver(refit).observe(host);
 
-  // ── OSC 5379: the shell drives the chrome (packages/solver/solver/core/osc.py) ────────────
+  // ── OSC 5379: the shell drives the chrome (euler_webshell/shell/osc.py) ──────────────
   // A web shell emits ESC ] 5379 ; <payload> BEL on the PTY. The action is always
   // the first field; the token's position is per-action, because `edit` must keep
   // its relpath last (a path may contain ';', so only the last field can absorb it):

@@ -464,7 +464,7 @@ def _delete_slug_everywhere(ptags: dict[int, dict[str, Any]], slug: str) -> int:
 
 def _maintainer_diff(current: dict[str, Any], ptags: dict[int, dict[str, Any]]) -> int:
     """Apply maintainer edits to the central vocabulary (vs HEAD) into the per-problem files first,
-    so the maintainer wins over packages/solver/solver/contributor on the subsequent reconcile. Two edits: a tag
+    so the maintainer wins over contributor on the subsequent reconcile. Two edits: a tag
     deleted from the vocabulary cascades to remove that slug everywhere; a ref added to / removed
     from a surviving tag's `refs` adds / removes that tag on the implied problem's file."""
     head = _head_central()
@@ -774,7 +774,7 @@ def _load_index() -> dict[str, Any] | None:
 def update_tags(check: bool = False) -> int:
     """The glue for the double-entry tag graph.
 
-    Order (maintainer beats packages/solver/solver/contributor): apply maintainer edits to the central
+    Order (maintainer beats contributor): apply maintainer edits to the central
     vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
     the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
     the topic articles' problem lists and rewrite the article index `topics/articles.json`

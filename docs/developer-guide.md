@@ -328,7 +328,7 @@ it. Write the docstring once and both are right.
 
 `check-commands` walks the live registry and reports every docstring that breaks
 §3.8, as `command | rule | detail` rows. It is part of
-`scripts/linters/check.sh solver`, so it runs with `mypy`, `flake8` and `shellcheck`.
+`scripts/linters/check.sh packages`, so it runs with `mypy`, `flake8` and the layering check.
 
 ```bash
 check-commands              # the whole registry

@@ -256,7 +256,7 @@ def _markdown_help(cmd: Command) -> str:
     """One command's reference section: the `?` panel, rendered as markdown.
 
     Same model, same order, same words as the panel `? <command>` prints
-    (`packages/solver/solver/shell/docstring.help_model`) — summary, the glyph facts, prose, usage,
+    (`solver.shell.docstring.help_model`) — summary, the glyph facts, prose, usage,
     arguments, then any free sections. Two renderings of one model is the point: a reader
     of the guide and a reader at the prompt are told the same thing, and neither can go
     stale against the other.

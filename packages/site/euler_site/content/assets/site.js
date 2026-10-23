@@ -514,7 +514,7 @@
   // ── the git chip's refresh (OSC 5379 `git`) ────────────────────────────────
   // The header reads its git state once per navigation and never polls — but the
   // git commands run in the TERMINAL, and that is not a navigation. So the shell
-  // says when it moved (packages/solver/solver/core/osc.py → terminal.js → here) and the chip
+  // says when it moved (euler_webshell/shell/osc.py → terminal.js → here) and the chip
   // re-reads itself: one `git status`, at the one moment the state changed.
   //
   // The event is dispatched on <body> because the chip listens for it `from:body`

@@ -1,5 +1,5 @@
 /* CodeMirror 6 editor for the content shell's edit page — adopted from the
- * old-web-server editor (packages/solver/solver/web-content/code-mirror-6/code.js) and fitted to
+ * old-web-server editor (the removed solver/web-content/code-mirror-6/code.js) and fitted to
  * the new site as **progressive enhancement**: it upgrades the edit form's plain
  * <textarea name="content"> in place, syncing the buffer back to the textarea so
  * the existing htmx POST → 5c validation gate flow is untouched (no-JS still

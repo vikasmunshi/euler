@@ -245,7 +245,7 @@ def check_commands(name: str = '') -> int:
     The standard is `docs/developer-guide.md` §3.8; the rules are listed in this module's
     docstring. Findings print as `command | rule | detail` rows, and the exit code is
     non-zero when there is at least one — so the command gates a chain and serves as the
-    docstring lane of `scripts/linters/check.sh solver`.
+    docstring lane of `scripts/linters/check.sh packages`.
 
     **Admin-floored on purpose, not out of caution.** Registration is itself
     profile-filtered (`packages/solver/solver/shell/command.py`): a command above your floor is never
