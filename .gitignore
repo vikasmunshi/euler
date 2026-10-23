@@ -1,54 +1,34 @@
-**/*_c
-**/.*
-*.cover
-*.egg-info/
-*.log
-*.manifest
-*.mo
-*.pot
-*.py.class
-*.py[cod]
-*.sage.py
-*.so
-*.spec
-/CLAUDE.md
-/tmp/
-Caddyfile
-ENV/
-__pycache__/
-build/
-celerybeat-schedule
-coverage.xml
-db.sqlite3
-db.sqlite3-journal
-develop-eggs/
-dist/
-docs/_build/
-downloads/
-eggs/
-euler.iml
-euler.ipr
-euler.iws
-htmlcov/
-lib/
-lib64/
-local_settings.py
-nosetests.xml
-pip-delete-this-directory.txt
-pip-log.txt
-pip-wheel-metadata/
-profile_default/
-sdist/
-solver.egg-info/
-target/
-var/
-venv/
-wheels/
+# What never enters git, grouped by what produces it.
+#
+# This file is a verdict, not a convenience: the pre-commit hook refuses any staged path
+# it matches, and `redeploy-web` lays it into every collaborator's clone (scripts/setup/user.sh).
+# A pattern with no slash matches at any depth.
 
-# Overrides: re-include these tracked dotfiles. The negations must come after
-# the broad **/.* rule above, since the last matching pattern wins.
+# Dotfiles: machine-local state, never shared (.venv, .state, .cache, .idea, .mypy_cache,
+# .claude, .mcp.json, solutions/.progress.html). The tracked ones are re-included at the end.
+.*
+
+# The root CLAUDE.md: a symlink onto the tracked packages/solver/solver/ai/claude/CLAUDE.md.
+/CLAUDE.md
+
+# Python: bytecode, and what `pip install -e` and wheel builds leave beside the sources.
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Compiled solutions: scripts/c/compile.sh writes pNNNN_sK_c beside its source, and any
+# shared object is a binary all the same. The git hooks and `make audit` refuse binaries too.
+*_c
+*.so
+
+# The content wheel's generated parts. scripts/content/stage.py makes them in its scratch copy,
+# never here; ignored so a staging run pointed at the checkout cannot commit a second public tree.
+packages/content/euler_content/tree/
+packages/content/euler_content/_version.py
+
+# Re-include the tracked dotfiles. These must stay last: the last matching pattern wins.
 !.gitattributes
 !.gitignore
 !.shellcheckrc
-packages/content/euler_content/tree/
-packages/content/euler_content/_version.py
