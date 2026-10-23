@@ -596,7 +596,7 @@ replace = "euler_webshell.shell.viewer:show"</pre>
   <h2>One service per collaborator</h2>
   <div class="dev-web">
     <div class="dev-box dev-wide">Browser<small>SRP-6a login: the password never leaves it</small></div>
-    <div class="dev-down">↓ TLS</div>
+    <div class="dev-down">↓ TLS: a Let's Encrypt certificate over DNS-01, renewed daily · dynamic DNS every 5 minutes</div>
     <div class="dev-box dev-wide">Caddy<small>strips identity headers; signed-out reads go to the public site, everything else asks the auth service, then routes by X-User-Slug</small></div>
     <div class="dev-down">↓ unix sockets under /run/euler</div>
     <div class="dev-users dev-users-4">
@@ -608,7 +608,7 @@ replace = "euler_webshell.shell.viewer:show"</pre>
     <div class="dev-down">↓ the only way out</div>
     <div class="dev-box dev-wide dev-side-box">Squid domain allowlist + per-uid nftables<small>each service reaches only what it needs</small></div>
   </div>
-  <aside class="notes"><p>The design of record is docs/web-server-guide.md. Alice and Bob are placeholders. A visitor who isn't signed in reads the public site: the same content app over a packaged copy of the public tree, with no private files to leak. Everyone else is checked by the auth service on every request and routed to their own service.</p><p>Each collaborator's keys are exposed only to their own code: separate uid, separate clone, separate encrypted vault. Their terminal is the web shell, the solver shell plus its web extension, run on a PTY and carried over a WebSocket. Outbound traffic goes through a domain allowlist and a per-uid firewall, which is where "the plaintext never leaves" is enforced on the network.</p></aside>
+  <aside class="notes"><p>The design of record is docs/web-server-guide.md. Alice and Bob are placeholders. A visitor who isn't signed in reads the public site: the same content app over a packaged copy of the public tree, with no private files to leak. Everyone else is checked by the auth service on every request and routed to their own service.</p><p>Each collaborator's keys are exposed only to their own code: separate uid, separate clone, separate encrypted vault. Their terminal is the web shell, the solver shell plus its web extension, run on a PTY and carried over a WebSocket. Outbound traffic goes through a domain allowlist and a per-uid firewall, which is where "the plaintext never leaves" is enforced on the network.</p><p>Reaching it at all: the host sits on a home connection, so a timer checks the public IP every five minutes and updates the DNS record when it changes. acme.sh, as its own non-root user, issues and renews the certificate through a DNS-01 challenge, so no inbound port 80 is ever opened; only 443 is forwarded.</p></aside>
 </section>
 
 <section class="slide" data-theme="dev">

@@ -29,8 +29,8 @@ the [Key Exchange](docs/user-guide.md#7-key-exchange) section of the User Guide.
   `{name}` variables, and a `loop <list>: <block>` construct over problem lists.
 - **Web front end** - a browser **terminal** (xterm.js over a real `solver` PTY), a problem
   **viewer**, and an in-browser **editor**, served publicly over HTTPS.
-- **Transparent encryption** - solutions for #101+ are encrypted at rest with AES-256-GCM,
-  each file key wrapped by a per-user master key.
+- **Transparent encryption** - solutions for #101+ are encrypted at rest with AES-256-GCM
+  under one master key, which each holder keeps sealed to their own key pair.
 - **AI assistance** - a single-shot `claude-api` and agentic Claude Code, both aimed at
   deepening understanding rather than skipping it.
 - **Scraping &amp; benchmarking** - problems are fetched from projecteuler.net, then scaffolded,
@@ -79,10 +79,11 @@ design notes.
 
 > **Prefer not to install?** A live instance of the web front end runs at
 > **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** - the same `solver` shell,
-> documentation viewer, and editor, all in the browser and served over HTTPS. Access is gated by a
-> login (see the [web server guide](docs/web-server-guide.md)); if you'd like an account to explore
-> or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your own copy, see the
-> installation steps below.
+> documentation viewer, and editor, all in the browser and served over HTTPS. Signed out, you can
+> read the first 100 solutions, the docs and the topic articles; the terminal, the editor and the
+> encrypted solutions need an account (see the [web server guide](docs/web-server-guide.md)). If
+> you'd like one to explore or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your
+> own copy, see the installation steps below.
 
 Clone the repository and install system dependencies via [make](Makefile) or the bash [scripts](scripts);
 the framework itself is installed with `pip`. Solutions can be written in any language – anything that runs as a
@@ -189,7 +190,8 @@ the [Command Index](docs/commands-index.md) lists every command.
 A note on the AI assistance: two complementary paths are wired into the shell, both
 aimed at deepening understanding rather than skipping it - the single-shot
 **`claude-api`** (generate a solution, notes, or test cases) and the agentic
-**`claude-skill`** / `! claude` (Claude Code working directly on a problem's solution files). Both need
+**`claude-solve`** / `claude-blog` / `! claude` (Claude Code working directly on a problem's solution
+files, or on a topic article). Both need
 the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 [User Guide](docs/user-guide.md#5-ai-assistance) for the trade-offs.
 
@@ -212,21 +214,26 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 - **Hosted over HTTPS** - the web front end is served publicly at
   [euler.vikasmunshi.com](https://euler.vikasmunshi.com). **Caddy** terminates TLS and reverse-proxies to the
   app tier over unix sockets, loading a Let's Encrypt certificate that **acme.sh** issues and auto-renews through a
-  name.com **DNS-01** challenge (no inbound port 80). Every request is gated at the edge by browser-side
-  **SRP-6a** login (the password never crosses the wire), and each collaborator gets their own system user,
+  name.com **DNS-01** challenge (no inbound port 80), and a dynamic-DNS timer keeps the name pointed at the
+  host's current address. Signed-out visitors read a public, read-only site served from a packaged copy of the
+  public content; everything else is gated at the edge by browser-side **SRP-6a** login (the password never
+  crosses the wire), and each collaborator gets their own system user,
   home, repo clone, and encrypted vault, with a **profile** (reader / contributor / maintainer / admin)
   deciding which commands and routes they may use. See the
   [web server guide](docs/web-server-guide.md) for the full design and `make deploy-web` to deploy it.
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.
-- **Transparent encryption** - solutions for #101+ are encrypted at rest with AES-256-GCM; each file-encryption key is
-  itself wrapped by a per-user master key, delivered via X25519 ECDH + HKDF-SHA256 + ChaCha20-Poly1305, with
-  n-of-m secret sharing for master-key recovery.
+- **Transparent encryption** - solutions for #101+ are encrypted at rest with AES-256-GCM by a git clean/smudge
+  filter, under one master key; each file's nonce is an HMAC of its plaintext, so an unchanged file encrypts to
+  the same bytes and git sees no churn. Each holder keeps the master key sealed to their own X25519 key (ephemeral
+  ECDH + HKDF-SHA256 + ChaCha20-Poly1305), and it is delivered whole or as a 2-of-2 Shamir split, so no single
+  message carries all of it.
 - **AI Agents** - two paths to an agentic assistant:
     - the single-shot Claude **API** (`claude-api py|c|notes|test-cases`) for solutions and documentation,
     - and full **Claude Code** driven from the shell both interactively (`! claude`)
-      and headless (`claude-skill <action>`, via the `claude-euler-solver` skill);
+      and headless: `claude-solve <problem> solve|review` (the `claude-euler-solver` skill) and
+      `claude-blog <topic>` (the `claude-euler-blogger` skill), each stopping at a local commit;
     - API token costs per `solver` session are tracked, use the command `costs` to show.
 - **Performance dashboard** - benchmarks solutions and records execution times, building a personal history of the
   journey through the problems.
