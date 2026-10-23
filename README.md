@@ -156,7 +156,10 @@ Dependencies are split into optional groups - install only what you need:
 
 ### Quick start
 
-[![Screenshot](docs/screenshot.png)](docs/screenshot.png)
+<!-- SCREENSHOTS:START: written by scripts/docs/screenshots.py; edit the script, not this. -->
+<p align="center"><a href="docs/screenshots/06-problem.md" title="Previous: Problem 8"><img src="docs/screenshots/01-home-left.png" width="50%" alt="Home, left half"></a><a href="docs/screenshots/02-solutions.md" title="Next: Solutions"><img src="docs/screenshots/01-home-right.png" width="50%" alt="Home, right half"></a></p>
+<p align="center"><b>1 / 6 · Home</b> (<a href="https://euler.vikasmunshi.com/"><code>/</code></a>), signed out. Click the left half for the previous page, the right half for the next.</p>
+<!-- SCREENSHOTS:END -->
 
 ```
 $ solver
