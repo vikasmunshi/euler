@@ -29,9 +29,9 @@ def solve(*args: str) -> str:
 
     A fresh per-call cache (rebuilt every run, so each benchmarked run pays the
     full cost) records each chain length once, letting shared tails be reused.
-    Only the upper half of the range is scanned: any x above the largest power of
-    two below the limit dominates 2x in the lower half, whose chain is just x's
-    with one extra step prepended.
+    Only the upper half of the range is scanned: for any x <= limit // 2, 2x is
+    still within the limit and its chain is x's with one extra step prepended, so
+    2x dominates x and no x in the lower half can hold the record.
     """
     max_number = runner.parse_int(args[0])
 
@@ -45,8 +45,7 @@ def solve(*args: str) -> str:
         return 1 + collatz_length(3 * number + 1)
 
     max_length, starting_number = (0, 0)
-    power_of_two: int = 2 ** (max_number.bit_length() - 1)
-    for x in range(max_number, power_of_two, -1):
+    for x in range(max_number, max_number // 2, -1):
         length = collatz_length(x)
         if length > max_length:
             max_length, starting_number = (length, x)
