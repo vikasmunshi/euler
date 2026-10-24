@@ -552,7 +552,7 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
     repo_base = content.README_REPO_BASE if name.startswith('readme') else ''
     return render(request, 'doc.html', {
         'name': name,
-        'body': content.render_markdown(text, repo_base=repo_base),
+        'body': content.render_markdown(text, repo_base=repo_base, image_dir='' if repo_base else 'docs'),
         'crumbs': [_HOME, ('docs', '/docs/'), (name, None)],
     }, block='content')
 

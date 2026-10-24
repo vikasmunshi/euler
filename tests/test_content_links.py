@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Links the content pages rewrite: a statement's links to other projecteuler.net pages, and a
-nested topic's relative links to its neighbours (euler_site.site.content)."""
+"""Links the content pages rewrite: a statement's links to other projecteuler.net pages, a
+nested topic's relative links to its neighbours, and a guide's images (euler_site.site.content)."""
 from __future__ import annotations
 
 import unittest
@@ -43,6 +43,19 @@ class NestedTopicLinkTests(unittest.TestCase):
     def test_a_flat_tree_is_unchanged(self) -> None:
         html = content.render_markdown('[g](user-guide.md)', route_base='/docs/')
         self.assertIn('href="/docs/user-guide"', html)
+
+
+class GuideImageTests(unittest.TestCase):
+    def test_a_guides_image_resolves_against_its_folder(self) -> None:
+        html = content.render_markdown('![web](diagrams/web.png)', image_dir='docs')
+        self.assertIn('src="/docs/file/docs/diagrams/web.png"', html)
+
+    def test_an_image_outside_the_viewable_trees_goes_to_github(self) -> None:
+        html = content.render_markdown('![x](../packages/solver/solver/x.png)', image_dir='docs')
+        self.assertIn(f'src="{content.README_REPO_BASE}packages/solver/solver/x.png"', html)
+
+    def test_without_an_image_dir_a_relative_image_is_untouched(self) -> None:
+        self.assertIn('src="diagrams/web.png"', content.render_markdown('![web](diagrams/web.png)'))
 
 
 if __name__ == '__main__':

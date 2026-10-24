@@ -152,6 +152,7 @@ script's tables, too.
 
 | script | what it does |
 | --- | --- |
+| [`diagrams.py`](../scripts/docs/diagrams.py) | Capture the presentation's architecture diagrams as images for the guides and the README. |
 | [`screenshots.py`](../scripts/docs/screenshots.py) | Capture the site's main pages for the README, as one animated GIF that cycles through them. |
 
 **`scripts/fixes/`**

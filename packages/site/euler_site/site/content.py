@@ -651,7 +651,8 @@ def _unmask_math(text: str, spans: list[str], *, raw: bool = False) -> str:
 _PULL_RE = re.compile(r'<p>(<strong>(?:(?!</strong>).)*</strong>)</p>', re.DOTALL)
 
 
-def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '', page_dir: str = '') -> str:
+def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '', page_dir: str = '',
+                    image_dir: str = '') -> str:
     """Render Markdown to HTML: slugged heading ids + links rewired for the shell.
 
     Math spans (`$…$`, `$$…$$`) ride around the parser untouched — see
@@ -679,6 +680,11 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
       declared-readable tree, and *repo_base* (GitHub) otherwise. `LICENSE`,
       `Makefile`, `pyproject.toml` are outside the content ACLs — the viewer
       would 404 on them, so they leave for the source of truth instead;
+    - with *image_dir* set (a guide, rendered at `/docs/<name>` rather than where it sits in the
+      repo): a relative image, which GitHub resolves against the guide's folder, → resolved
+      against *image_dir* the same way, then the `/docs/file/` viewer (`diagrams/web.png` from a
+      guide is `/docs/file/docs/diagrams/web.png`). Left alone, the browser would resolve it
+      against the route and miss;
     - every **internal, absolute** `/…` link gets `hx-*` attributes so it
       swaps the content pane in place (the shell + terminal persist) instead of
       a full reload. External (`http…`) and `#anchor` links are untouched,
@@ -705,6 +711,11 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
     if repo_base:
         rendered = re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
                           lambda m: f'{m.group(1)}{_repo_link(m.group(2), repo_base)}"',
+                          rendered)
+    if image_dir:
+        rendered = re.sub(r'(<img\b[^>]*?\bsrc=")(?!\w+:|/|#)([^"]+)"',
+                          lambda m: f'{m.group(1)}'
+                                    f'{_repo_link(posixpath.normpath(f"{image_dir}/{m.group(2)}"), README_REPO_BASE)}"',
                           rendered)
     rendered = re.sub(
         r'<a href="(/[^"]*)"',
