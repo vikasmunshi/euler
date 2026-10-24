@@ -184,6 +184,7 @@ script's tables, too.
 | --- | --- |
 | [`release.sh`](../scripts/ops/release.sh) | Cut a new version and ship it — the whole release turnaround, in one command. |
 | [`reset-user.sh`](../scripts/ops/reset-user.sh) | Reset one collaborator's clone to origin/master — the operator's repair of last resort. |
+| [`verify-solutions.sh`](../scripts/ops/verify-solutions.sh) | Re-check every solved problem against its test cases, with a live progress line. |
 
 **`scripts/pip/`**
 
