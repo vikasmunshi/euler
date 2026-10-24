@@ -3487,7 +3487,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit-length",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0872_s0", "p0882_s0", "p0899_s0"]
+      "refs": ["p0872_s0", "p0882_s0", "p0899_s0"]
     },
     {
       "slug": "bit-manipulation",
@@ -5350,7 +5350,7 @@
       "reference": "https://en.wikipedia.org/wiki/Power_of_two",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0"]
+      "refs": []
     },
     {
       "slug": "power-set",
