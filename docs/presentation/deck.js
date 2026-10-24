@@ -422,6 +422,21 @@
     if (s.dataset.problems !== undefined) problemRef(s, s.dataset.problems.split(/\s+/).filter(Boolean));
   }
   fit();
+  // ?figure=web shows only the element marked data-figure="web", on its own slide: the
+  // diagrams the guides and the README embed, as scripts/docs/diagrams.py captures them
+  const figure = new URLSearchParams(location.search).get('figure');
+  const part = figure && stage.querySelector(`[data-figure="${CSS.escape(figure)}"]`);
+  if (part) {
+    document.documentElement.classList.add('figure');
+    const slide = part.closest('.slide');
+    show(slides.indexOf(slide));
+    const path = new Set();
+    for (let n = part; n !== slide; n = n.parentElement) path.add(n);
+    slide.querySelectorAll('*').forEach(n => {
+      if (!path.has(n) && !part.contains(n)) n.style.visibility = 'hidden';
+    });
+    return;
+  }
   // #12 opens slide 12; #12.3 also jumps a stepped slide to step 3
   const [slideNo, stepNo] = location.hash.slice(1).split('.').map(v => parseInt(v, 10));
   show((slideNo || 1) - 1);

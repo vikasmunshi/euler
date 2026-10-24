@@ -23,6 +23,9 @@ in commits, on the remote) but appear as **plaintext in your working tree**. You
 edit and run them normally; git encrypts on the way in and decrypts on the way
 out. You can work on many problems at once.
 
+![The working tree holds plaintext, git holds ciphertext: clean encrypts, smudge
+decrypts](diagrams/gitfilter.png)
+
 ```
    working tree                git object store / remote
    (what you edit)             (what is committed & pushed)

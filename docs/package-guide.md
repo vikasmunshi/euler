@@ -22,6 +22,8 @@ The short version, for when that is all you need:
 
 ## 1. The shape
 
+![Three packages, one way: euler_webshell imports euler_site, which imports solver; never the other way](diagrams/packages.png)
+
 ```
 packages/
   solver/    euler-solver    import solver           the solver shell: standalone, no web code
@@ -275,6 +277,9 @@ The packages version in **lockstep**: one number, one tag. `scripts/version/rele
 every package's `version.py` and the `euler-solver==X.Y.Z` / `euler-site==X.Y.Z` pins in the
 site's and web shell's `pyproject.toml`, commits, tags and pushes. The content wheel takes the
 solver's number at staging time. Never hand-edit a number.
+
+![Conventional Commits → make release → make redeploy-web, with the checks every commit and
+every push pass](diagrams/release.png)
 
 ### 5.3 Redeploy versus upgrade
 

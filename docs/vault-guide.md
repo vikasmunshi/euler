@@ -52,6 +52,11 @@ password ──PBKDF2-HMAC-SHA256(salt, 600 000)──▶ PK ──AES-256-GCM�
 - **`VK`** — the vault key: 32 random bytes that encrypt the secrets themselves.
 - **`PK`** — the password key: 32 bytes derived from the password, used only to wrap `VK`.
 
+Where the vault sits in the whole chain, from sign-in to a decrypted solution (`VK` is the step
+inside "unlocks"):
+
+![password → PK → ~/.euler/id → enc-key.json → the AES-256 master key](diagrams/keychain.png)
+
 Encrypting the secrets directly under `PK` would be simpler and worse, for a reason that shows
 up every time somebody changes a password: it would mean **re-encrypting every secret**. With
 the envelope, a password change rewrites one 32-byte blob (`rewrap_vault`) and touches nothing

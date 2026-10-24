@@ -34,6 +34,10 @@ because each user pushes as themselves.
 
 ## 1 · Shape
 
+![Browser → Caddy → one service per collaborator, beside the public site and the auth, message and mail services, all leaving through one allowlisted way out](diagrams/web.png)
+
+In detail:
+
 ```
                          :443
  browser ───TLS──▶  ┌───────────┐  edge: TLS, security headers

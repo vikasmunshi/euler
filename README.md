@@ -221,6 +221,9 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   home, repo clone, and encrypted vault, with a **profile** (reader / contributor / maintainer / admin)
   deciding which commands and routes they may use. See the
   [web server guide](docs/web-server-guide.md) for the full design and `make deploy-web` to deploy it.
+
+  ![Browser → Caddy → one service per collaborator, beside the public site and the auth, message and mail
+  services, all leaving through one allowlisted way out](docs/diagrams/web.png)
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.
@@ -229,6 +232,8 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   the same bytes and git sees no churn. Each holder keeps the master key sealed to their own X25519 key (ephemeral
   ECDH + HKDF-SHA256 + ChaCha20-Poly1305), and it is delivered whole or as a 2-of-2 Shamir split, so no single
   message carries all of it.
+
+  ![password → PK → ~/.euler/id → enc-key.json → the AES-256 master key](docs/diagrams/keychain.png)
 - **AI Agents** - two paths to an agentic assistant:
     - the single-shot Claude **API** (`claude-api py|c|notes|test-cases`) for solutions and documentation,
     - and full **Claude Code** driven from the shell both interactively (`! claude`)
@@ -240,6 +245,9 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 
 <details>
 <summary>architecture &amp; package layout</summary>
+
+<p align="center"><img src="docs/diagrams/packages.png" width="60%"
+alt="Three packages, one way: euler_webshell imports euler_site, which imports solver; never the other way"></p>
 
 <!-- GEN:package-layout -->
 ```

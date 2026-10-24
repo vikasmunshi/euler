@@ -304,6 +304,7 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   transition: opacity 150ms;
 }
 .nav:hover, .nav:focus-within { opacity: 1; }
+.figure .nav, .figure .counter, .figure .notes-panel { display: none; }
 .nav button {
   font: 15px var(--sans);
   padding: 8px 14px;
