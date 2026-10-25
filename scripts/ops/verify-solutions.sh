@@ -83,7 +83,7 @@ report() {
 
 # The log's end block, on every exit once the lock is held.
 # shellcheck disable=SC2329  # invoked by the EXIT trap
-finish() {
+on_exit() {
     local rc=$?
     {
         printf '## end    %s  (elapsed %s, exit %d%s)\n' "$(now)" "$(clock)" "$rc" \
@@ -105,7 +105,7 @@ echo $$ >"$LOCK"
 
 SUMMARY="$(mktemp)"
 interrupted=''
-trap finish EXIT
+trap on_exit EXIT
 trap 'interrupted=1; exit 130' INT TERM
 
 SECONDS=0
