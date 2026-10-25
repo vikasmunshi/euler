@@ -415,6 +415,21 @@
   notesButton.addEventListener('click', () => showNotes(notes.hidden));
   document.getElementById('notes-close').addEventListener('click', () => showNotes(false));
   window.addEventListener('resize', fit);
+  // A phone has no keys: a horizontal swipe across the slide steps like → and ←. A mostly
+  // vertical or short drag is left alone (a scroll, a tap on a control).
+  let touchStart = null;
+  const viewport = stage.parentElement;
+  viewport.addEventListener('touchstart', e => {
+    touchStart = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+  }, { passive: true });
+  viewport.addEventListener('touchend', e => {
+    if (!touchStart) return;
+    const dx = e.changedTouches[0].clientX - touchStart.x;
+    const dy = e.changedTouches[0].clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) forward(); else back();
+  }, { passive: true });
 
   fillStats();
   slides.forEach(s => { const render = RENDER[s.dataset.viz]; if (render) render(s); });
