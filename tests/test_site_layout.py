@@ -120,6 +120,11 @@ class NarrowLayoutTests(unittest.TestCase):
         handler = self.site_js.split("closest('a[data-login]')")[1].split('}, true);')[0]
         self.assertIn('email.getClientRects().length', handler)
 
+    def test_the_section_strip_gives_way_to_the_header_nav(self) -> None:
+        """On a phone the strip is four stacked tiles repeating the header nav's links."""
+        narrow = self.css.split('@media (max-width: 820px)')[1]
+        self.assertIn('.cards.sections { display: none; }', narrow)
+
     def test_each_page_kind_says_which_pane_leads(self) -> None:
         """Signed out, the right pane is either the way in (hidden: the pill offers it) or,
         on the auth pages, the page itself (shown instead of the content)."""

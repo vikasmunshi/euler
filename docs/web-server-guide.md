@@ -1381,7 +1381,8 @@ page, a document, takes `is-signin`). The header keeps one control surface but s
 a phone cannot spare — the separators, the breadcrumbs, the formula beside the glyph, the
 controls that are locked anyway — and breaks onto two rows at a fixed place: where to go
 (brand, nav, Actions) above, where you are and who you are (back, refresh, bookmarks; the
-chips, the theme toggle, the pill) below.
+chips, the theme toggle, the pill) below. The section strip (`_sections.html`) is hidden
+there too: on a phone it is four stacked tiles repeating the header nav's four links.
 
 ### 11.3 Writing style
 

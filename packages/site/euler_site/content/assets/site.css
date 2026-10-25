@@ -1641,7 +1641,11 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
    anyway. What is left goes on two rows, broken at a fixed place rather than wherever the
    width runs out: where to go (the brand, the nav, Actions) above, and where you are and
    who you are (back, refresh, bookmarks · the chips, the theme, the pill) below. The
-   break is a zero-height pseudo-element ordered between the two groups. */
+   break is a zero-height pseudo-element ordered between the two groups.
+
+   The section strip (_sections.html: Solutions · Docs · Topics · Terminal) goes too. On a
+   wide screen it is the pages' own way across, with counts; on a phone it is four stacked
+   tiles above the content, repeating the four links the header's nav already holds. */
 @media (max-width: 820px) {
   body { height: 100dvh; }
 
@@ -1653,6 +1657,7 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
   .app-nav a { padding: 0.3rem 0.45rem; }
   .app-who { gap: 0.4rem; }
   .git-branch { max-width: 5.5rem; }
+  .cards.sections { display: none; }
 
   .app-panes {
     grid-template-columns: minmax(0, 1fr);
