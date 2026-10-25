@@ -499,8 +499,8 @@
   // visible terminal is layout-wise a no-op but still focuses — that is what the
   // header's Terminal item does beyond swapping /shell into the pane.
   //
-  // A narrow screen (site.css § The narrow layout: the panes stack, the terminal below
-  // the content) keeps its own flag, and starts every document HIDDEN: on a phone the
+  // A narrow screen (site.css § The narrow layout: one pane at a time, the terminal
+  // over the content) keeps its own flag, and starts every document HIDDEN: on a phone the
   // content is what you came for and the terminal is a tap away in the footer. That flag
   // lives for the document only and is never written to storage, so showing the terminal
   // on a phone neither persists nor changes what a wide screen remembers — and the wide
@@ -530,6 +530,27 @@
   }
   document.addEventListener('DOMContentLoaded', paintWsHidden);
   if (narrow && narrow.addEventListener) { narrow.addEventListener('change', paintWsHidden); }
+
+  // On a narrow screen the terminal covers the content, so a pane that moves to another
+  // page hides it: the header's nav, the back arrow, the shell's `show` — each asked to
+  // see a page, and the page is under the terminal. Not a re-render of the same page (the
+  // refresh arrow, a nudge from the shell after a command): that would pull the terminal
+  // away mid-typing. And not a control that asks for the terminal too ([data-term-show],
+  // the nav's Terminal item, which swaps /shell into the pane and shows the shell).
+  var landedPath = window.location.pathname;
+  document.addEventListener('htmx:afterSwap', function (ev) {
+    if (!ev.detail || !ev.detail.target || ev.detail.target.id !== 'content') { return; }
+    var cfg = ev.detail.requestConfig;
+    if (!cfg || String(cfg.verb).toLowerCase() !== 'get') { return; }
+    var info = ev.detail.pathInfo || {};
+    var path = String(info.responsePath || info.finalRequestPath || '').split(/[?#]/)[0];
+    var moved = path && path !== landedPath;
+    if (path) { landedPath = path; }
+    var asked = cfg.elt && cfg.elt.closest && cfg.elt.closest('[data-term-show]');
+    if (!moved || asked || !isNarrow() || wsHidden()) { return; }
+    setWsHidden(true);
+    paintWsHidden();
+  });
 
   document.addEventListener('click', function (ev) {
     if (!ev.target.closest) { return; }

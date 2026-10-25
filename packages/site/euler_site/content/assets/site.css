@@ -1625,11 +1625,14 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 }
 
 /* ── The narrow layout (≤ 820px: a phone, a narrowed window) ─────────────────────────
-   The two panes stack instead of sitting side by side: the content on top, the terminal
-   below it, sharing the height between them — and the terminal starts hidden on a narrow
-   screen (site.js § hide the terminal), so a phone opens on the content alone, with the
-   terminal's window waiting in the footer. The shell still fills exactly one viewport;
-   `dvh` is the one a phone's collapsing toolbars do not overflow.
+   One pane at a time. Split, neither half of a phone is big enough to use — a terminal
+   a dozen rows tall least of all — so the terminal, when shown, takes the whole pane area
+   over the content, and hiding it (its titlebar's handle, the header's chip) is how back
+   to the content. It starts hidden on a narrow screen (site.js § hide the terminal), so a
+   phone opens on the content, with the terminal's window waiting in the footer; and a
+   pane that moves to another page hides it again, since that page is what was asked for.
+   The shell still fills exactly one viewport; `dvh` is the one a phone's collapsing
+   toolbars do not overflow.
 
    The body's class says which pane a page leads with (base.html § body_class): signed
    out, `is-signin` shows the content alone (the header's pill is the way in) and
@@ -1661,18 +1664,30 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 
   .app-panes {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0.5rem;
+    grid-template-rows: minmax(0, 1fr);
     padding: 0.5rem 0.6rem;
   }
-  body.ws-hidden .app-panes,
-  body.is-signin .app-panes,
-  body.is-dialogue .app-panes { grid-template-rows: minmax(0, 1fr); }
+  /* Signed in, the terminal (when not hidden) is the one pane; signed out, the body class
+     says which (base.html § body_class). */
+  body:not(.ws-hidden):not(.is-signin):not(.is-dialogue) .pane-content { display: none; }
   body.is-signin .pane-ws { display: none; }
   body.is-dialogue .pane-content { display: none; }
   /* A dialogue taller than the pane scrolls from its top: centred, an overflowing form
      would lose its heading above the scroll box's start. */
   .auth-pane { align-items: flex-start; padding: 1rem; }
 
+  /* The hide handle is the way back to the content, so it is sized for a thumb. */
+  .ws-hide { width: 2.4rem; height: 2.4rem; }
+  .ws-hide svg { width: 1.3rem; height: 1.3rem; }
+
   .app-footer { flex-wrap: wrap; justify-content: center; row-gap: 0.3rem; padding: 0.45rem 0.6rem; }
+
+  /* iOS zooms the page into any text field set below 16px when it takes focus, and does
+     not zoom back out — the site's 13px root puts every field there. 16px at this width
+     keeps the page still. The selector out-ranks each field's own rule (.authwin-form
+     input:not(…) is the strongest), and takes in the editor's contenteditable buffer and
+     xterm's hidden input textarea, which the same zoom catches. */
+  body :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select, [contenteditable="true"]) {
+    font-size: 16px;
+  }
 }

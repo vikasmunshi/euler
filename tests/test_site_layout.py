@@ -96,12 +96,33 @@ class NarrowLayoutTests(unittest.TestCase):
         self.assertIn('@media (max-width: 820px)', self.css)
         self.assertIn("matchMedia('(max-width: 820px)')", self.site_js)
 
-    def test_the_panes_stack_content_first(self) -> None:
+    def test_one_pane_at_a_time_the_terminal_over_the_content(self) -> None:
+        """Split, neither half of a phone is usable — a terminal a dozen rows tall least of
+        all — so a shown terminal takes the whole pane area, and hiding it is the way back."""
         narrow = self.css.split('@media (max-width: 820px)')[1]
-        self.assertIn('grid-template-columns: minmax(0, 1fr);', narrow)
-        self.assertIn('grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);', narrow)
-        self.assertNotIn('order', narrow.split('.app-panes')[1].split('}')[0],
-                         'the content pane comes first in the markup, and must stay first')
+        self.assertIn('grid-template-rows: minmax(0, 1fr);', narrow)
+        self.assertNotIn('minmax(0, 1fr) minmax(0, 1fr)', narrow)
+        self.assertIn('body:not(.ws-hidden):not(.is-signin):not(.is-dialogue) .pane-content '
+                      '{ display: none; }', narrow)
+
+    def test_a_pane_that_moves_hides_the_narrow_terminal(self) -> None:
+        """The page asked for is under the terminal. Only a move, though: a re-render of the
+        same page (a refresh, a nudge from the shell) must not pull the terminal away, nor
+        may a control that asks for the terminal as well as a page."""
+        hook = self.site_js.split('var landedPath')[1].split('\n  });')[0]
+        self.assertIn('path !== landedPath', hook)
+        self.assertIn("closest('[data-term-show]')", hook)
+        self.assertIn('isNarrow()', hook)
+        self.assertIn('setWsHidden(true)', hook)
+
+    def test_fields_are_large_enough_that_ios_does_not_zoom(self) -> None:
+        """iOS zooms into a focused field under 16px and stays zoomed; the 13px root puts
+        every field there."""
+        narrow = self.css.split('@media (max-width: 820px)')[1]
+        rule = re.search(r'body :is\(([^{]*)\) \{\s*font-size: 16px;', narrow)
+        assert rule is not None, 'no 16px rule for form fields at narrow width'
+        for kind in ('input', 'textarea', 'select', 'contenteditable'):
+            self.assertIn(kind, rule.group(1))
 
     def test_the_narrow_terminal_flag_is_never_stored(self) -> None:
         """A phone starts every document with the terminal hidden; showing it there must not

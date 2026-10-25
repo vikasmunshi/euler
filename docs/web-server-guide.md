@@ -1364,14 +1364,25 @@ foreground short of that against its cell's background, keeping the shell's hues
 making them legible. The dark theme sets it to 1, leaving the shell's colours exactly as
 chosen.
 
-**The narrow layout (≤ 820px).** A phone, or a narrowed window. The panes stack instead
-of sitting side by side, content above terminal, sharing the viewport height (`100dvh`,
-which a phone's collapsing toolbars do not overflow). The terminal **starts hidden** on a
-narrow screen, waiting in the footer, so a phone opens on the content alone. That state
-is the document's own: never written to storage, so showing the terminal on a phone does
-not change what a wide screen remembers, and the wide flag never opens a terminal under a
-phone's reader. Crossing the breakpoint repaints from whichever flag now rules. The CSS
-and `site.js` share the one breakpoint (`tests/test_site_layout.py` holds them together).
+**The narrow layout (≤ 820px).** A phone, or a narrowed window. **One pane at a time**,
+filling the viewport (`100dvh`, which a phone's collapsing toolbars do not overflow): split,
+neither half of a phone is usable, a terminal a dozen rows tall least of all. So the
+terminal, when shown, covers the content, and hiding it (the titlebar's handle, sized for a
+thumb at this width, or the header's chip) is the way back. It **starts hidden** on a narrow
+screen, waiting in the footer, so a phone opens on the content. A pane that *moves* to
+another page hides it again — the header's nav, the back arrow, the shell's `show` each
+asked to see a page — but a re-render of the same page (the refresh arrow, a nudge from
+the shell after a command) does not, or the terminal would vanish mid-typing, and neither
+does a control that asks for the terminal too (`[data-term-show]`: the nav's Terminal item).
+The narrow state is the document's own: never written to storage, so showing the terminal
+on a phone does not change what a wide screen remembers, and the wide flag never opens a
+terminal under a phone's reader. Crossing the breakpoint repaints from whichever flag now
+rules. The CSS and `site.js` share the one breakpoint (`tests/test_site_layout.py` holds
+them together).
+
+Form fields are 16px at this width. iOS zooms the page into any focused field set smaller
+and does not zoom back out, and the site's 13px root put every field there — the sign-in
+form, the filters, the editor's buffer and xterm's hidden input alike.
 
 Signed out, the body's class says which pane leads (`base.html` § `body_class`):
 `is-signin` on the content pages shows the content alone, since the right pane is only the
