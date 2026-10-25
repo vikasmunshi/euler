@@ -874,9 +874,11 @@
     var link = ev.target.closest && ev.target.closest('a[data-login]');
     if (!link) { return; }
     // The public site carries the sign-in form in its right pane: the header's Login goes
-    // there, not to a page that holds the same form.
+    // there, not to a page that holds the same form — while that pane is on screen. The
+    // narrow layout hides it (site.css § The narrow layout), and focusing a hidden field
+    // does nothing at all, so there the link goes to /login like everywhere else.
     var email = document.querySelector('#login-form #email');
-    if (email) { ev.preventDefault(); email.focus(); return; }
+    if (email && email.getClientRects().length) { ev.preventDefault(); email.focus(); return; }
     link.href = '/login?next=' + encodeURIComponent(currentPage());
   }, true);
   document.addEventListener('submit', function (ev) {

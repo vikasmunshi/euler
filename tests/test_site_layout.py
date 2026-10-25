@@ -113,6 +113,13 @@ class NarrowLayoutTests(unittest.TestCase):
         self.assertIn('localStorage', wide_branch)
         self.assertIn('var narrowHidden = true;', self.site_js)
 
+    def test_login_goes_to_the_form_only_while_it_is_on_screen(self) -> None:
+        """The header's Login focuses the right pane's sign-in form instead of navigating.
+        The narrow layout hides that pane, and focusing a hidden field does nothing — which
+        left a phone with a Login that went nowhere. It must navigate to /login there."""
+        handler = self.site_js.split("closest('a[data-login]')")[1].split('}, true);')[0]
+        self.assertIn('email.getClientRects().length', handler)
+
     def test_each_page_kind_says_which_pane_leads(self) -> None:
         """Signed out, the right pane is either the way in (hidden: the pill offers it) or,
         on the auth pages, the page itself (shown instead of the content)."""
