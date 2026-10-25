@@ -168,7 +168,8 @@ audit: $(VENV)
 
 ## Re-check every solved problem against its test cases (eval in a loop), with a live
 ## progress line; the full output goes to .verify-solutions.log. LIST='{solved}[0:10]'
-## checks part of the list. Takes a while: it runs every solution on its main case.
+## checks part of the list, LIST='14 76 478' just those problems. Takes a while: it runs
+## every solution on its main case.
 verify-solutions: $(VENV)
 	@PATH="$(VENV)/bin:$$PATH" ./scripts/ops/verify-solutions.sh $(if $(LIST),'$(LIST)')
 

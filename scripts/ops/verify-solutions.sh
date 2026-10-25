@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Re-check every solved problem against its test cases, with a live progress line.
 #
-#   bash scripts/ops/verify-solutions.sh [LIST]
+#   bash scripts/ops/verify-solutions.sh [LIST | N...]
 #   make verify-solutions [LIST=...]
 #
-#   LIST   the solver list to check (default: {solved}); any list expression the
+#   LIST   the solver list to check (default: {solved}); any list of problems the
 #          shell's `loop` takes, e.g. '{solved}[0:10]' for a quick trial run.
+#   N...   problem numbers instead, as separate arguments or one argument separated by
+#          spaces or commas: `14 76 478`, '14,76,478' (so `make … LIST='14 76'` works too).
 #
 # The checks run in ONE solver process, fed a command block on stdin (a heredoc): a loop
 # over LIST that runs `eval` on each problem and echoes a marker line around it —
@@ -36,7 +38,16 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LOG="$ROOT/.verify-solutions.log"
 LOCK="$ROOT/.verify-solutions.lock"
-LIST="${1:-{solved\}}"
+# A list of Problem objects is looped by {loop.number}; a list of bare numbers by {loop}.
+if [[ "$*" =~ ^[0-9][0-9,[:space:]]*$ ]]; then
+    read -ra numbers <<<"${*//,/ }"
+    LIST="[$(IFS=,; echo "${numbers[*]}")]"
+    LIST="${LIST//,/, }"
+    ITEM='{loop}'
+else
+    LIST="${1:-{solved\}}"
+    ITEM='{loop.number}'
+fi
 COMMAND="$0${1+ ${*@Q}}"
 
 # The live line redraws in place on a terminal, and prints one line per problem otherwise.
@@ -121,8 +132,8 @@ SECONDS=0
 total = len($LIST)
 echo "@@ total {total}"
 loop $LIST: {
-    echo "@@ start {loop.number}"
-    eval {loop.number} && echo "@@ pass {loop.number}" || echo "@@ fail {loop.number}"
+    echo "@@ start $ITEM"
+    eval $ITEM && echo "@@ pass $ITEM" || echo "@@ fail $ITEM"
 }
 EOF
 } 9>&- | tee "$LOG" 9>&- | report 9>&-
