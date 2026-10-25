@@ -82,7 +82,7 @@ report() {
 }
 
 # The log's end block, on every exit once the lock is held.
-# shellcheck disable=SC2329  # invoked by the EXIT trap
+# shellcheck disable=SC2317,SC2329  # invoked by the EXIT trap (SC2317 before ShellCheck 0.11)
 on_exit() {
     local rc=$?
     {

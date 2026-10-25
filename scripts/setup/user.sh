@@ -580,6 +580,7 @@ do_deprovision() {
     read -r -p "Remove the account ${user} and its home ${home}? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then
         sudo userdel --remove "${user}" 2>/dev/null || sudo userdel "${user}" 2>/dev/null || true
+        # shellcheck disable=SC2015  # `|| true` only swallows a failed groupdel (flagged before ShellCheck 0.11)
         getent group "${user}" > /dev/null && sudo groupdel "${user}" 2>/dev/null || true
         sudo rm -rf "${home}"
         echo "Removed ${user} and ${home}."
@@ -624,6 +625,7 @@ do_purge_legacy() {
         sudo systemctl disable --now "euler-user@${instance}.service" 2>/dev/null || true
         sudo rm -f "$(sock_of "${instance}")"
         sudo userdel --remove "${name}" 2>/dev/null || sudo userdel "${name}" 2>/dev/null || true
+        # shellcheck disable=SC2015  # `|| true` only swallows a failed groupdel (flagged before ShellCheck 0.11)
         getent group "${name}" > /dev/null && sudo groupdel "${name}" 2>/dev/null || true
         sudo rm -rf "${USER_HOME_BASE:?}/${name}"
         echo "Removed ${name} and ${USER_HOME_BASE}/${name}."
@@ -710,6 +712,7 @@ do_remove() {
 
     local reply
     read -r -p "Remove the ${USER_GROUP} group? [y/N] " reply
+    # shellcheck disable=SC2015  # `|| true` only swallows a failed groupdel (flagged before ShellCheck 0.11)
     [[ "${reply}" =~ ^[Yy]$ ]] && { getent group "${USER_GROUP}" > /dev/null && sudo groupdel "${USER_GROUP}" 2>/dev/null || true; }
     echo "Per-user provisioning uninstall complete."
 }
