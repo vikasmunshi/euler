@@ -80,6 +80,7 @@ script's tables, too.
 | `make release` | Cut a release: bump packages/solver/solver/version.py from Conventional Commits, commit, tag, and push the commit + tag to origin. ARGS=--dry-run previews; ARGS=--no-push stops before publishing. |
 | `make check-version` | Guard: the version redeploy-web would ship (packages/solver/solver/version.py) must have its vX.Y.Z tag on origin, so a redeploy never runs a release collaborator clones cannot reach (a locally-tagged-but-unpushed release runs the venv ahead of every clone). Queries origin — needs network. A prerequisite of redeploy-web. |
 | `make audit` | Audit what git stores across the WHOLE tracked tree (~25s): every file under solutions/private is encrypted at rest, and no file anywhere is a compiled binary. The git hooks only audit what you actually stage or push, so this is the periodic sweep that also covers blobs committed before the hooks were in place. Counts only; offenders are always listed. Per-file detail: scripts/git/audit.sh |
+| `make verify-solutions` | Re-check every solved problem against its test cases (eval in a loop), with a live progress line; the full output goes to .verify-solutions.log. LIST='{solved}[0:10]' checks part of the list. Takes a while: it runs every solution on its main case. |
 
 **The web stack: deploy / remove / redeploy (sudo + systemd)**
 
