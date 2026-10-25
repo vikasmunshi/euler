@@ -22,7 +22,7 @@
 #
 # One run at a time: the run holds an flock on .verify-solutions.lock for its whole length,
 # and a second run refuses to start, before touching the log, rather than truncating the
-# log under the first.
+# log under the first. The run removes the lock file on exit.
 #
 # eval's own verdict lines stay in the log: `overflow` there is a naive solution refusing
 # an input above its safe size, not a failure — eval passes a problem when no solution
@@ -101,17 +101,25 @@ on_exit() {
             "${interrupted:+, interrupted}"
         [[ -s "$SUMMARY" ]] && sed 's/^/##   /' "$SUMMARY"
     } >>"$LOG"
-    rm -f "$SUMMARY"
+    rm -f "$SUMMARY" "$LOCK"   # the lock file goes while the lock is still held
 }
 
 cd "$ROOT" || exit 1
 
 # One run at a time. Opened for append, so a refused run leaves the holder's pid intact.
-exec 9>>"$LOCK"
-if ! flock -n 9; then
-    echo "verify-solutions: another run is in progress (pid $(<"$LOCK")); not starting" >&2
-    exit 1
-fi
+# The holder removes the file on exit, so a lock can land on a file a finishing run has
+# just unlinked, while the next run locks a new one at the path: that lock is no lock, so
+# take it again on whatever file the path names now.
+for _ in 1 2 3; do
+    exec 9>>"$LOCK"
+    if ! flock -n 9; then
+        echo "verify-solutions: another run is in progress (pid $(cat "$LOCK" 2>/dev/null)); not starting" >&2
+        exit 1
+    fi
+    [[ /dev/fd/9 -ef "$LOCK" ]] && break
+    exec 9>&-
+done
+[[ /dev/fd/9 -ef "$LOCK" ]] || { echo "verify-solutions: could not take the lock; not starting" >&2; exit 1; }
 echo $$ >"$LOCK"
 
 SUMMARY="$(mktemp)"
