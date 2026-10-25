@@ -17,7 +17,7 @@
         deploy-site remove-site upgrade-site redeploy-site \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web status-web \
-        test run audit uninstall version release check-version
+        test run audit verify-solutions uninstall version release check-version
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -165,6 +165,12 @@ check-version:
 ## Counts only; offenders are always listed. Per-file detail: scripts/git/audit.sh
 audit: $(VENV)
 	@PYTHON=$(PYTHON) ./scripts/git/audit.sh --summary
+
+## Re-check every solved problem against its test cases (eval in a loop), with a live
+## progress line; the full output goes to .verify-solutions.log. LIST='{solved}[0:10]'
+## checks part of the list. Takes a while: it runs every solution on its main case.
+verify-solutions: $(VENV)
+	@PATH="$(VENV)/bin:$$PATH" ./scripts/ops/verify-solutions.sh $(if $(LIST),'$(LIST)')
 
 # ── The web stack: deploy / remove / redeploy (sudo + systemd) ─────────────────────
 

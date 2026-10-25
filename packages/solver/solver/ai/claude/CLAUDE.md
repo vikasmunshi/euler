@@ -37,6 +37,10 @@ make run
 # The git hooks run the same checks scoped to what you stage/push; this sweeps settled history.
 make audit                        # also: the `git-audit` shell command
 
+# Re-check every solved problem against its test cases, with a live progress line
+# (output in .verify-solutions.log; LIST='{solved}[0:10]' for part of the list).
+make verify-solutions
+
 # Run shell commands non-interactively (a command block; exits with its status)
 solver "eval 42; benchmark 42"
 

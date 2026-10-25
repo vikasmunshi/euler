@@ -2,6 +2,7 @@
 # Re-check every solved problem against its test cases, with a live progress line.
 #
 #   bash scripts/ops/verify-solutions.sh [LIST]
+#   make verify-solutions [LIST=...]
 #
 #   LIST   the solver list to check (default: {solved}); any list expression the
 #          shell's `loop` takes, e.g. '{solved}[0:10]' for a quick trial run.
