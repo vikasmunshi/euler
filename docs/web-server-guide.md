@@ -1057,7 +1057,7 @@ with the same templates (docs/package-guide.md § 4):
 
 | Visitor | Served by | Content | Surface |
 |---|---|---|---|
-| Not signed in | `euler-site` (`python -m euler_site.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json` and the few `packages/solver/solver/` files the pages link to | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
+| Not signed in | `euler-site` (`python -m euler_site.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json`, and the code the code viewer shows (`packages/`, `scripts/`, the root config files) | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
 | Signed in | their own `euler-user@<slug>` instance | their own `~/euler` clone | everything, by profile |
 
 The docs, topics and public solutions are published unencrypted on GitHub anyway, so asking
@@ -1071,7 +1071,9 @@ Caddy picks the copy by the **session cookie**: a GET/HEAD of a content path (`/
 `/solutions/…`, `/docs/…`, `/topics/…`, `/about/…`, `/shell`, `/story/…`) from a browser with
 no `solver_session` / `solver_remember` cookie goes to `site.sock`; everything else goes
 through `forward_auth` as before (§ The edge). That is not a trust decision — either copy is
-public content to whoever asks — so a forged or missing cookie gains nothing. A *stale*
+public content to whoever asks — so a forged or missing cookie gains nothing. The code viewer
+(`/code/…`, § The code viewer) is the exception that ignores the cookie: it exists on the public
+site alone, so every `/code` read goes to `site.sock`, signed in or not. A *stale*
 session cookie (expired, or dropped when the auth service restarted) makes `forward_auth`
 answer 401, and on a read of those same paths the edge then serves the public page too — the
 reader is signed out, so they see what a signed-out reader sees, not a login form in its
@@ -1131,10 +1133,10 @@ pane scrolls its own overflow.
   everything in it opens in a tab of its own. Almost all of it is the places the work
   refers to that this app does not host — Project Euler (site, archive, your progress),
   the repository and its pull requests, and the three references a solver actually opens
-  mid-problem (OEIS, MathWorld, the Python docs). The one same-origin entry is **The Euler
-  story**, the presentation deck at `/story/` (§ 11.5, The story deck): this app serves it,
-  but as a fullscreen page of its own rather than a pane view, so it belongs with the links
-  that leave. They are a menu rather than nav items because the nav names pages this app
+  mid-problem (OEIS, MathWorld, the Python docs). The two same-origin entries are **The Euler
+  story**, the presentation deck at `/story/` (§ 11.5, The story deck), and **The source
+  code**, the code viewer at `/code/` (§ 11.5, The code viewer): this host serves both, but
+  as pages of their own rather than pane views, so they belong with the links that leave. They are a menu rather than nav items because the nav names pages this app
   renders into the left pane. The list is static chrome, so it is markup in the partial,
   not context — which is also what lets the auth tier render it without a clone or a
   `config`. Every entry wears the `.ext` ↗ marker and opens in a new tab — `site.js`'s
@@ -1379,6 +1381,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/topics/` · `/topics/{name}` | topics index · a topic page (`{name}` may be a nested `folder/page` path) | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/story/` · `/story/{path}` | the presentation deck's own files, raw: `docs/presentation/` (§ The story deck below) | reader |
+| GET | `/code/` · `/code/{path}` | the code viewer, **public site only**: a folder's contents or one file, highlighted; `?raw` the file itself (§ The code viewer below) | none |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET | `/git` | the header git chip's contents — the refresh the shell, the menu-open and the poll ask for (§11.9) | reader |
 | GET | `/messages` | the header's message chip alone — count, rows, verbs (§13) | reader |
@@ -1407,6 +1410,43 @@ stylesheet; `test_story_deck_fits_the_csp` holds it there. The git middleware sk
 `/story/` like the static trees: a deck load is a dozen files, none of them wearing the chip.
 The data it shows (`data/history.js`) is what `update-presentation-data` last generated and committed —
 public metadata only, never an answer.
+
+**The code viewer.** `/code/` shows the project's own source — `packages/`, `scripts/`, and
+the root files that configure them (`content.CODE_ROOTS`: `.gitattributes`, `.gitignore`,
+`.shellcheckrc`, `install.sh`, `LICENSE`, `Makefile`, `mypy.ini`, `pyproject.toml`,
+`tox.ini`) — as one standalone page: the file on the left, the tree on the right, where the app
+shell keeps the terminal. It is the **public site's alone** (`add_content_routes(public=True)`,
+handler `code_page`, reads in `euler_site/site/code.py`): `scripts/content/stage.py` ships the
+scope in the content wheel, and the edge sends every `/code` read to `site.sock` whatever the
+cookie, so every reader — signed in or not — sees the code of the last deploy, one copy, no
+clone involved. The repository is public on GitHub, so the page shows nothing that was not
+already public; `tests/test_public_site.py` holds the wheel's roots and `CODE_ROOTS` together.
+
+- **Paths** resolve through the viewer's index of the scope, never the filesystem, so a
+  traversal or a name outside the scope is a 404. A folder is canonical with its slash
+  (`/code/scripts` → 301 `/code/scripts/`); `/code/` is the top.
+- **The headline** is the file's **summary**: the first sentence of what it says about itself —
+  a module docstring, a Markdown heading, a `pyproject.toml` `description`, or the leading
+  comment block after any shebang, encoding line or template `{% extends %}` — cut at the
+  first sentence end (or a `:` that opens a list), without the `(docs/….md § n)` references it
+  cites. A folder speaks through its `__init__.py`, `pyproject.toml` or `README.md`. With
+  nothing to say, the headline is the name. The tree offers each summary on hover, and the
+  filter matches it.
+- **The code** is highlighted server-side by Pygments into numbered lines, each its own
+  `#L<n>` anchor; the `:target` line is marked, so a line link needs no script. A file over
+  160 KB or with a line over 1000 characters (the minified vendor bundles) is shown
+  uncoloured; one over 512 KB, or not text, is offered `?raw` only. `?raw` answers
+  `text/plain` with `nosniff`, so a template or script is read, never run.
+- **The page** is the story deck's family: its bundled fonts (from `/story/fonts/`, which the
+  CSP allows as same-origin), its paper-and-ink palette in light and its developer palette in
+  dark — the system's choice, or the header toggle's, kept in `localStorage`. `code.css` and
+  `code.js` are versioned assets like the site's own. Below 820 px the tree is a drawer
+  behind a **Files** button. Without script the page still works: the tree follows the file,
+  and only the filter, the toggle and the drawer are missing.
+- **Links in.** The bookmarks menu's **The source code**, and every guide or topic link into
+  the scope that `/docs/file/` cannot serve (`content._repo_link`): those become `/code/…`
+  with `target="_blank"` and the `.ext` marker instead of a pane swap. What neither viewer
+  shows still goes to GitHub.
 
 **Page chrome via out-of-band swaps.** Breadcrumbs, Actions and the git chip live in the
 fixed header, which htmx never re-renders — so every fragment response carries them as

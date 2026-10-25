@@ -22,6 +22,9 @@ dependencies = [
     "jinja2",
     # The guides' and topics' Markdown.
     "markdown-it-py",
+    # The code viewer's highlighting (/code/, euler_site.site.code). Already in every venv
+    # through rich (euler-solver); named here because this package imports it.
+    "pygments",
     # The `.html` save gate: sanitize-and-store-clean (abi3 wheel, no Rust toolchain).
     "nh3",
     # Reading the ink of a cached problem diagram (content._image_ink); its absence

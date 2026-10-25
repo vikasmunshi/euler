@@ -395,8 +395,8 @@ class ContentServiceTests(AioHTTPTestCase):
     async def test_readme_page_links_resolve(self) -> None:
         """The README lives at the repo root and links its neighbours with no `../`
         to mark them: guides route into the pane, readable trees reach the viewer,
-        and what the viewer may not serve (LICENSE, Makefile) leaves for GitHub —
-        nothing stays a bare relative link, which in the pane would 404."""
+        and the code the viewer may not serve (LICENSE, Makefile) opens in the code viewer,
+        in a tab of its own — nothing stays a bare relative link, which in the pane would 404."""
         resp = await self.client.get('/docs/readme', headers=_READER)
         self.assertEqual(resp.status, 200)
         page = await resp.text()
@@ -404,8 +404,9 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('href="/docs/user-guide#7-key-exchange"', page)   # docs/*.md → route
         self.assertIn('href="/docs/"', page)                            # docs/ → the index
         self.assertIn('src="/docs/file/docs/screenshots.gif"', page)     # readable tree → viewer
-        for name in ('LICENSE', 'Makefile', 'pyproject.toml'):          # not readable → GitHub
-            self.assertIn(f'href="https://github.com/vikasmunshi/euler/blob/master/{name}"', page)
+        for name in ('LICENSE', 'Makefile', 'pyproject.toml'):          # code → the code viewer, a new tab
+            self.assertIn(f'<a class="ext" href="/code/{name}" target="_blank" rel="noopener"', page)
+            self.assertNotIn(f'hx-get="/code/{name}"', page)
         # no repo-relative link survives the rewrite (each would 404 in the pane)
         self.assertNotRegex(page, r'(?:href|src)="(?!\w+:|/|#)')
 
@@ -431,11 +432,11 @@ class ContentServiceTests(AioHTTPTestCase):
         page = await resp.text()
         self.assertIn('href="/docs/web-server-guide"', page)
         # gitfilter-guide.md links ../packages/solver/solver/crypto/gitfilter.py. `/docs/file/` deliberately
-        # does not serve the wider packages/solver/solver/ source, so that link goes to GitHub — the repo is
-        # public, and a live link to a 404 is worse than leaving the app.
+        # does not serve the wider packages/solver/solver/ source, so that link goes to the code viewer
+        # instead — a page of its own, so a new tab rather than a pane swap.
         resp = await self.client.get('/docs/gitfilter-guide', headers=_READER)
         page = await resp.text()
-        self.assertIn(f'href="{content.README_REPO_BASE}packages/solver/solver/crypto/gitfilter.py"', page)
+        self.assertIn('<a class="ext" href="/code/packages/solver/solver/crypto/gitfilter.py" target="_blank"', page)
         self.assertNotIn('href="/docs/file/packages/solver/solver/crypto/', page)
         self.assertNotIn('href="../solver', page)            # no dangling repo-relative link
         # internal links are boosted (swap #content), externals are left alone

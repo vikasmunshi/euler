@@ -40,10 +40,11 @@ from solver.auth import LADDER, Authorizations, Subject, slugify
 from euler_site import assets
 from euler_site.cache import build_fingerprint, cache_middleware, revalidated_middleware
 from euler_site.csp import csp_middleware
-from euler_site.site import content, gitstate
+from euler_site.site import code, content, gitstate
 from euler_site.site.config import SiteConfig
 from euler_site.site.render import GIT_KEY, PUBLIC_KEY, SUBJECT_KEY, is_htmx, render
 from euler_site.site.validate import EDITABLE_SUFFIXES, validate, validate_article
+from euler_site.version import __version__
 
 log = logging.getLogger('euler-content')
 
@@ -68,6 +69,10 @@ READABLE_KEY = web.AppKey('readable_roots', list)
 #: else in the folder is not served.
 STORY_ROOT: str = 'docs/presentation'
 STORY_SUFFIXES: frozenset[str] = frozenset({'.html', '.css', '.js', '.woff2', '.txt'})
+
+#: Where the code viewer's "Open on GitHub" goes: the same file or folder at the source of truth.
+_GITHUB_BLOB = content.README_REPO_BASE
+_GITHUB_TREE = 'https://github.com/vikasmunshi/euler/tree/master/'
 
 #: Ceiling on a request body: the progress-page source (~600 KB today) + headroom;
 #: solution files are tiny. aiohttp's 1 MB default is already too close.
@@ -541,6 +546,50 @@ async def story_file(request: web.Request) -> web.StreamResponse:
 
 
 @requires('reader')
+async def code_page(request: web.Request) -> web.StreamResponse:
+    """`GET /code/{path}` — the code viewer: one file or folder of the project's own source.
+
+    docs/web-server-guide.md § The code viewer. Served by the **public** site only, which
+    the edge sends every `/code` request to, signed in or not: the code is the deployed
+    release's, the same for every reader, so there is one copy to show (:mod:`.code`). A
+    standalone page rather than a pane view — the bookmarks menu and the guides open it in
+    a tab of its own — so it renders its own template, not the app shell.
+
+    *path* resolves through the viewer's index, never the filesystem: a name the scope does
+    not hold (a traversal, a private path, a dotfile outside the list) is simply not found.
+    A folder is canonical with its trailing slash. `?raw` hands a file out as it is — text as
+    `text/plain`, so a template or script is read rather than run.
+    """
+    rel = request.match_info.get('path', '')
+    root = request.app[CONFIG_KEY].repo_root
+    chain = code.find(root, rel)
+    if chain is None:
+        raise web.HTTPNotFound(text=f'{html.escape(rel)} is not part of the code viewer')
+    node = chain[-1]
+    if node.is_dir and rel and not rel.endswith('/'):
+        raise web.HTTPMovedPermanently(f'/code/{node.path}')
+    listing = None
+    if not node.is_dir:
+        target = root / node.path
+        listing = code.highlight(target)
+        if 'raw' in request.query:
+            kind = 'text/plain; charset=utf-8' if listing.text else \
+                (mimetypes.guess_type(target.name)[0] or 'application/octet-stream')
+            return web.FileResponse(target, headers={'Content-Type': kind, 'X-Content-Type-Options': 'nosniff'})
+    return aiohttp_jinja2.render_template('code.html', request, {
+        'top': code.index(root),
+        'node': node,
+        'current': node.path,
+        'chain': chain,
+        'open': {step.path for step in chain},
+        'listing': listing,
+        'max_shown': code.MAX_SHOWN,
+        'github': f'{_GITHUB_TREE if node.is_dir else _GITHUB_BLOB}{node.path}',
+        'version': __version__,
+    })
+
+
+@requires('reader')
 async def doc_page(request: web.Request) -> web.StreamResponse:
     """`GET /docs/{name}` — one rendered guide (the file may live outside docs/)."""
     name = request.match_info['name']
@@ -981,10 +1030,17 @@ def add_content_routes(app: web.Application, *, public: bool = False) -> None:
     Shared by :func:`build_app`, the per-user service (:mod:`euler_webshell.user`), which folds
     these routes together with `/ws` — so the one route table has a single definition and the
     tiers cannot drift — and, *public*, by :func:`build_public_app`, which gets the read
-    surface alone: no terminal, no git chip, no account, no writes.
+    surface alone — no terminal, no git chip, no account, no writes — plus the one route
+    that is its alone, the code viewer (`/code/`, :func:`code_page`).
     """
     app.add_routes(_read_routes())
     if public:
+        # The code viewer is the public site's alone: the edge sends it every /code request.
+        app.add_routes([
+            web.get('/code', redirect_slash),
+            web.get('/code/', code_page),
+            web.get(r'/code/{path:.+}', code_page),
+        ])
         return
     app.add_routes([
         web.get('/git', git_chip),
@@ -1062,6 +1118,8 @@ def install_content(app: web.Application, config: SiteConfig, authz: Authorizati
     env = aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                                autoescape=jinja2.select_autoescape(['html', 'xml']))
     assets.install(env)
+    env.filters['ticks'] = code.ticks
+    env.filters['plain'] = code.plain
     add_content_routes(app, public=public)
     if config.serve_static:
         # Dev only — in production Caddy serves these from /etc/euler/web-content.

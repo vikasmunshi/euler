@@ -60,3 +60,23 @@ class GuideImageTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CodeLinkTests(unittest.TestCase):
+    def test_a_link_to_code_opens_the_code_viewer_in_a_tab(self) -> None:
+        html = content.render_markdown('[k](../packages/solver/solver/crypto/keys.py)', route_base='/docs/')
+        self.assertIn('<a class="ext" href="/code/packages/solver/solver/crypto/keys.py" '
+                      'target="_blank" rel="noopener"', html)
+        self.assertNotIn('hx-get', html)
+
+    def test_a_folder_of_code_opens_its_listing(self) -> None:
+        html = content.render_markdown('[s](../scripts/setup/)', route_base='/docs/')
+        self.assertIn('href="/code/scripts/setup/"', html)
+
+    def test_what_the_file_viewer_serves_stays_in_the_pane(self) -> None:
+        html = content.render_markdown('[t](../packages/solver/solver/templates/new.py)', route_base='/docs/')
+        self.assertIn('href="/docs/file/packages/solver/solver/templates/new.py" hx-get=', html)
+
+    def test_what_neither_viewer_shows_goes_to_github(self) -> None:
+        html = content.render_markdown('[t](../tests/test_site.py)', route_base='/docs/')
+        self.assertIn(f'href="{content.README_REPO_BASE}tests/test_site.py"', html)

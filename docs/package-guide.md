@@ -242,6 +242,9 @@ in the repository's own layout, and `_version.py` stamped from the solver's vers
 **tracked** files under fixed public roots only — an untracked scratch file never ships — and
 refuses outright if anything under `solutions/private` would be included. `euler_content.root()`
 returns the installed tree, and the content readers take it exactly as they take a clone.
+Besides the docs, topics and public solutions, the roots take in the code the public site's code
+viewer shows (`/code/`: `packages/`, `scripts/` and the root config files — web server guide
+§ 11.5, The code viewer), so the wheel is also the one copy of the code that page reads.
 
 The public copy is as current as the last deploy: every venv deploy re-stages and reinstalls
 it, so `make redeploy-web` refreshes it with the code. That is also what lets its pages be

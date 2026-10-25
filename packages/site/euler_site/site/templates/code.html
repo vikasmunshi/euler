@@ -1,0 +1,117 @@
+{# The code viewer (web-server-guide § The code viewer): a standalone page, not the app
+   shell — it opens in a tab of its own from the bookmarks menu and the guides, like the
+   story deck, and borrows the deck's type (its bundled fonts, served at /story/fonts/).
+
+   Two columns: the file (or a folder's contents) on the left, the tree on the right — the
+   app shell's split, with the tree where the terminal sits. Below the drawer breakpoint
+   the tree becomes a drawer behind the Files button (code.js); without script it simply
+   follows the file. Every file is a link of its own, every line an anchor (#L<n>), and the
+   current line is the :target — so a deep link needs no script either. #}
+{%- macro tree(branch) -%}
+  <ul>
+  {%- for child in branch.children %}
+    {%- if child.is_dir %}
+    <li><details{% if child.path in open %} open{% endif %}>
+      <summary title="{{ child.summary|plain }}" data-path="{{ child.path }}">{{ child.name }}</summary>
+      {{ tree(child) }}
+    </details></li>
+    {%- else %}
+    <li><a href="/code/{{ child.path }}" data-path="{{ child.path }}"
+           {%- if child.summary %} title="{{ child.summary|plain }}"{% endif %}
+           {%- if child.path == current %} aria-current="page"{% endif %}>{{ child.name }}</a></li>
+    {%- endif %}
+  {%- endfor %}
+  </ul>
+{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if node.path %}{{ node.name }} · {% endif %}Euler source</title>
+  <meta name="robots" content="noindex">
+  <meta name="description" content="{{ node.summary|plain or 'The source of the Euler solver shell and its web site.' }}">
+  <link rel="stylesheet" href="{{ asset('/assets/code.css') }}">
+  {# Not deferred: it sets the theme before the first paint, then wires the page once
+     the DOM is there. #}
+  <script src="{{ asset('/assets/code.js') }}"></script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='-1.3%20-1.35%202.6%201.75'%3E%3Cpath%20d='M%201%200%20A%201%201%200%200%200%20-1%200%20M%20-1%200%20H%200'%20fill='none'%20stroke='%23f97316'%20stroke-width='0.16'%20stroke-linecap='round'/%3E%3Ccircle%20cx='0'%20cy='0'%20r='0.1'%20fill='%23f97316'/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/code/">Euler source</a>
+  <span class="tagline">The code that runs the solver shell and this site, version {{ version }}</span>
+  <span class="grow"></span>
+  <a class="github" href="https://github.com/vikasmunshi/euler">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+    Repository on GitHub</a>
+  <button type="button" class="icon theme-toggle" aria-label="Switch theme">
+    <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+  <button type="button" class="files-toggle" aria-controls="files" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    Files</button>
+</header>
+
+<div class="body">
+  <main>
+    {%- if node.path %}
+    <nav class="crumbs" aria-label="Path">
+      {%- for step in chain[1:] %}
+        {%- if loop.last %}<span aria-current="page">{{ step.name }}</span>
+        {%- else %}<a href="/code/{{ step.path }}">{{ step.name }}</a><span class="sep" aria-hidden="true">/</span>{% endif %}
+      {%- endfor %}
+    </nav>
+    {%- endif %}
+    <h1>{% if node.summary %}{{ node.summary|ticks }}{% elif node.path %}{{ node.name }}{% else %}The source of the solver shell and its web site, as deployed.{% endif %}</h1>
+
+    {%- if node.is_dir %}
+    <p class="meta">{{ node.files }} file{{ '' if node.files == 1 else 's' }}{% if node.path %}<span class="grow"></span><a class="button" href="{{ github }}">Open on GitHub</a>{% endif %}</p>
+    <ul class="contents">
+      {%- for child in node.children %}
+      <li><a href="/code/{{ child.path }}">{{ child.name }}{% if child.is_dir %}/{% endif %}</a>
+        {%- if child.summary %}<p>{{ child.summary|ticks }}</p>{% endif %}</li>
+      {%- endfor %}
+    </ul>
+    {%- else %}
+    <p class="meta">
+      {%- if listing.text %}
+      <span>{{ '{:,}'.format(listing.lines|length) }} line{{ '' if listing.lines|length == 1 else 's' }}{% if listing.language and listing.language != 'text' %} of {{ listing.language }}{% endif %}</span>
+      {%- else %}
+      <span>{{ '{:,}'.format(listing.size) }} bytes</span>
+      {%- endif %}
+      <span class="grow"></span>
+      <a class="button" href="/code/{{ node.path }}?raw">Raw file</a>
+      <a class="button" href="{{ github }}">Open on GitHub</a>
+    </p>
+    {%- if not listing.text %}
+    <p class="notice">{% if listing.size > max_shown %}This file is too large to show here. Open the raw file to read it.{% else %}This is not a text file. Open the raw file to download it.{% endif %}</p>
+    {%- else %}
+    {%- if not listing.coloured %}
+    <p class="notice">Shown without highlighting: the file is minified or too large to colour.</p>
+    {%- endif %}
+    <pre class="code"><code>
+      {%- for line in listing.lines %}<span class="line" id="L{{ loop.index }}"><a class="ln" href="#L{{ loop.index }}" data-n="{{ loop.index }}" aria-label="Line {{ loop.index }}"></a><span class="src">{{ line|safe }}</span>
+</span>{% endfor -%}
+    </code></pre>
+    {%- endif %}
+    {%- endif %}
+  </main>
+
+  <aside id="files" class="files" aria-label="Files">
+    <div class="files-head">
+      <label for="filter">Files</label>
+      <button type="button" class="icon files-close" aria-label="Close files">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <input id="filter" type="search" placeholder="Filter by name or summary" autocomplete="off" spellcheck="false">
+    <p class="filter-count" aria-live="polite" hidden></p>
+    <nav class="tree">{{ tree(top) }}</nav>
+    <p class="files-foot">{{ '{:,}'.format(top.files) }} files, version {{ version }}</p>
+  </aside>
+</div>
+<div class="scrim"></div>
+</body>
+</html>

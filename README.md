@@ -363,6 +363,7 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
   site/                           — The content service — server-rendered pages + htmx fragments.
     __main__.py                   — Content service entry point: `python -m euler_site.site`.
     app.py                        — The content service aiohttp app: identity from forward_auth, routes, gating.
+    code.py                       — The code viewer: the project's own source, browsable on the public site at `/code/`.
     config.py                     — Content-service runtime configuration, read from the environment.
     content.py                    — Config-free readers for the content trees the service renders.
     gitstate.py                   — The header chip's git state: three reads of this user's clone, by need.

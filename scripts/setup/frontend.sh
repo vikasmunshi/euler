@@ -627,6 +627,17 @@ ${DOMAIN} {
 	# be stale, the 401 there comes back here (see @stale_read). Nothing here is a trust
 	# decision: the cookie only picks which copy of public content to show, and the
 	# public site reads no identity header at all.
+	# The code viewer (web-server-guide § The code viewer) is the public site's alone, for
+	# every reader, signed in or not: it shows the deployed release's code, which is the
+	# same for everyone, so there is one copy of it and no per-user instance serves it.
+	@code_read {
+		method GET HEAD
+		path /code /code/*
+	}
+	handle @code_read {
+		reverse_proxy unix//run/euler/site.sock
+	}
+
 	@public_read {
 		method GET HEAD
 		path ${PUBLIC_PATHS}

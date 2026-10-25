@@ -52,6 +52,10 @@ class StageTests(unittest.TestCase):
         from solver.version import __version__
         self.assertEqual(stage.version(), __version__)
 
+    def test_the_wheel_ships_everything_the_code_viewer_shows(self) -> None:
+        from euler_site.site.content import CODE_ROOTS
+        self.assertFalse([root for root in CODE_ROOTS if root not in stage.PUBLIC])
+
 
 class FingerprintTests(unittest.TestCase):
     def test_any_change_to_the_build_changes_the_fingerprint(self) -> None:
@@ -168,6 +172,52 @@ class PublicSiteTests(AioHTTPTestCase):
         self.assertEqual(resp.status, 404)
         self.assertEqual(resp.headers['Cache-Control'], 'no-store')
         self.assertNotIn('ETag', resp.headers)
+
+    @unittest_run_loop
+    async def test_the_code_viewer_shows_a_file(self) -> None:
+        resp = await self.client.get('/code/packages/site/euler_site/site/app.py')
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('The content service aiohttp app: identity from forward_auth, routes, gating.</h1>', body)
+        self.assertIn('<span class="line" id="L1">', body)                     # every line an anchor
+        self.assertIn('href="#L9" data-n="9"', body)
+        self.assertIn('<span class="kn">from</span>', body)                     # Pygments' classes
+        self.assertIn('aria-current="page">app.py</a>', body)                   # the tree marks it
+        self.assertRegex(body, r'href="/assets/code\.css\?v=[0-9a-f]{12}"')
+
+    @unittest_run_loop
+    async def test_the_code_viewer_lists_a_folder_and_its_top(self) -> None:
+        for path in ('/code/', '/code/scripts/', '/code/packages/site/'):
+            with self.subTest(path=path):
+                resp = await self.client.get(path)
+                self.assertEqual(resp.status, 200, path)
+                self.assertIn('class="contents"', await resp.text())
+        for path, to in (('/code', '/code/'), ('/code/scripts', '/code/scripts/')):
+            with self.subTest(path=path):
+                resp = await self.client.get(path, allow_redirects=False)
+                self.assertEqual((resp.status, resp.headers['Location']), (301, to))
+
+    @unittest_run_loop
+    async def test_the_code_viewer_shows_only_its_scope(self) -> None:
+        for path in ('/code/README.md', '/code/docs/user-guide.md', '/code/solutions/problems.json',
+                     '/code/solutions/private/p0100_0199/p0101/p0101_s0.py', '/code/packages/../README.md',
+                     '/code/packages/%2e%2e/README.md', '/code/Makefile/', '/code/nothing.py'):
+            with self.subTest(path=path):
+                self.assertEqual((await self.client.get(path)).status, 404, path)
+
+    @unittest_run_loop
+    async def test_a_raw_file_is_text_never_a_page(self) -> None:
+        resp = await self.client.get('/code/packages/site/euler_site/site/templates/base.html?raw')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.headers['Content-Type'], 'text/plain; charset=utf-8')
+        self.assertEqual(resp.headers['X-Content-Type-Options'], 'nosniff')
+
+    @unittest_run_loop
+    async def test_a_bundle_too_large_to_show_is_offered_raw(self) -> None:
+        bundle = '/code/packages/site/euler_site/content/vendor/mathjax/tex-mml-chtml.js'
+        body = await (await self.client.get(bundle)).text()
+        self.assertIn('too large to show here', body)
+        self.assertNotIn('class="line"', body)
 
     @unittest_run_loop
     async def test_identity_headers_are_ignored(self) -> None:

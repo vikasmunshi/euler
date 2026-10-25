@@ -3,8 +3,9 @@
 """euler-content: the published content, packaged — what the public site serves to signed-out visitors.
 
 `tree/` mirrors the repository's own layout for the public paths — `README.md`, `docs/`,
-`topics/`, `solutions/public/`, `solutions/problems.json`, and the few package files the pages
-link to — so the site reads it exactly as it reads a clone. It holds no
+`topics/`, `solutions/public/`, `solutions/problems.json`, and the code the code viewer shows
+(`packages/`, `scripts/` and the root files that configure them) — so the site reads it
+exactly as it reads a clone. It holds no
 `solutions/private`: the private solutions are not in this package at all
 (`scripts/content/stage.py` builds it from tracked files and refuses one).
 """

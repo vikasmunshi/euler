@@ -14,7 +14,7 @@ not read them.
 from __future__ import annotations
 
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
-           'TEXT_SUFFIXES', 'ABOUT_PAGES', 'SHELL_DOCS', 'CATALOGUE_DOC',
+           'TEXT_SUFFIXES', 'CODE_ROOTS', 'in_code_scope', 'ABOUT_PAGES', 'SHELL_DOCS', 'CATALOGUE_DOC',
            'solution_dir', 'load_problems', 'centuries', 'problem_files', 'section_state',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'recolour_statement', 'plate_statement_images',
@@ -668,18 +668,19 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
       `/topics/technique/memoization`;
     - a repo-relative `../<path>` link (docs/topics sit one level under the
       repo root, so `../` reaches it) → the `/docs/file/<path>` view route when
-      that route can serve it (:data:`VIEWABLE_ROOTS`), and **GitHub otherwise**.
-      This used to be unconditional, on the assumption that a link resolving
+      that route can serve it (:data:`VIEWABLE_ROOTS`), the **code viewer** (`/code/<path>`,
+      in a tab of its own) when the path is in its scope (:data:`CODE_ROOTS`), and **GitHub
+      otherwise**. This used to be unconditional, on the assumption that a link resolving
       natively on GitHub also resolved in the viewer — but `/docs/file/` serves
       only the declared trees and deliberately not the wider `packages/solver/solver/` source, so
       every `../packages/solver/solver/…` link in a guide rendered as a live link to a 404. The
-      repository is public, so the honest destination for those is GitHub;
+      code viewer now shows that source, and GitHub keeps what neither viewer does;
     - with *repo_base* set (the README, which sits **at** the repo root and so
       links its neighbours with no `../` to give them away): every remaining
       relative link and image → the `/docs/file/` viewer when it names a
-      declared-readable tree, and *repo_base* (GitHub) otherwise. `LICENSE`,
-      `Makefile`, `pyproject.toml` are outside the content ACLs — the viewer
-      would 404 on them, so they leave for the source of truth instead;
+      declared-readable tree, the code viewer for a link in its scope (`LICENSE`,
+      `Makefile`, `pyproject.toml`), and *repo_base* (GitHub) otherwise — an image always
+      goes to GitHub rather than to a page about it;
     - with *image_dir* set (a guide, rendered at `/docs/<name>` rather than where it sits in the
       repo): a relative image, which GitHub resolves against the guide's folder, → resolved
       against *image_dir* the same way, then the `/docs/file/` viewer (`diagrams/web.png` from a
@@ -687,8 +688,9 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
       against the route and miss;
     - every **internal, absolute** `/…` link gets `hx-*` attributes so it
       swaps the content pane in place (the shell + terminal persist) instead of
-      a full reload. External (`http…`) and `#anchor` links are untouched,
-      so they navigate/scroll normally.
+      a full reload — except a `/code/` link, which gets `target="_blank"` and the `.ext`
+      marker instead, like the bookmarks menu's entry for the same page. External (`http…`)
+      and `#anchor` links are untouched, so they navigate/scroll normally.
     """
     masked, spans = _mask_math(text)
     tokens = _MD.parse(masked)
@@ -710,15 +712,19 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
                       rendered)
     if repo_base:
         rendered = re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
-                          lambda m: f'{m.group(1)}{_repo_link(m.group(2), repo_base)}"',
+                          lambda m: f'{m.group(1)}'
+                                    f'{_repo_link(m.group(2), repo_base, code=m.group(1).startswith("<a"))}"',
                           rendered)
     if image_dir:
         rendered = re.sub(r'(<img\b[^>]*?\bsrc=")(?!\w+:|/|#)([^"]+)"',
                           lambda m: f'{m.group(1)}'
-                                    f'{_repo_link(posixpath.normpath(f"{image_dir}/{m.group(2)}"), README_REPO_BASE)}"',
+                                    f'{_repo_link(posixpath.normpath(f"{image_dir}/{m.group(2)}"),
+                                                  README_REPO_BASE, code=False)}"',
                           rendered)
+    rendered = re.sub(r'<a href="(/code/[^"]*)"', r'<a class="ext" href="\1" target="_blank" rel="noopener"',
+                      rendered)
     rendered = re.sub(
-        r'<a href="(/[^"]*)"',
+        r'<a href="(/(?!code/)[^"]*)"',
         r'<a href="\1" hx-get="\1" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"',
         rendered)
     return _unmask_math(rendered, spans)   # last: no link rewrite may reach inside a formula
@@ -784,15 +790,22 @@ def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None)
     return _RENDERED_PROBLEMS_RE.sub(_wrap, html)
 
 
-def _repo_link(path: str, repo_base: str) -> str:
-    """One repo-relative link: the file viewer when it can serve the path, else GitHub.
+def _repo_link(path: str, repo_base: str, *, code: bool = True) -> str:
+    """One repo-relative link: the file viewer when it can serve the path, the code viewer
+    when *that* can (*code*: a link, not an image), else GitHub.
 
     The bare `docs/` link is the exception — the guides have an index route of
-    their own, and the file viewer serves files, not directories.
+    their own, and the file viewer serves files, not directories. A `/code/` link opens in a
+    tab of its own (:func:`render_markdown` marks it), since the code viewer is a page of
+    its own rather than a pane view.
     """
     if path.rstrip('/') == 'docs':
         return '/docs/'
-    return f'/docs/file/{path}' if _viewable(path) else f'{repo_base}{path}'
+    if _viewable(path):
+        return f'/docs/file/{path}'
+    if code and in_code_scope(path):
+        return f'/code/{path}'
+    return f'{repo_base}{path}'
 
 
 def _page_title(text: str, fallback: str) -> str:
@@ -859,9 +872,22 @@ VIEWABLE_ROOTS: tuple[str, ...] = ('docs/', 'topics/', 'packages/solver/solver/t
 README_REPO_BASE = 'https://github.com/vikasmunshi/euler/blob/master/'
 
 
+#: What the code viewer (`/code/`, :mod:`euler_site.site.code`) shows: the packages, the
+#: scripts, and the root files that configure them — a folder ends `/`, a file is named
+#: whole. `scripts/content/stage.py` ships every one of them in the content wheel, which is
+#: what the viewer reads; `tests/test_public_site.py` holds the two lists together.
+CODE_ROOTS: tuple[str, ...] = ('packages/', 'scripts/', '.gitattributes', '.gitignore', '.shellcheckrc',
+                               'install.sh', 'LICENSE', 'Makefile', 'mypy.ini', 'pyproject.toml', 'tox.ini')
+
+
 def _viewable(path: str) -> bool:
     """Whether `/docs/file/<path>` can actually serve this — i.e. whether to link it there."""
     return any(path == root or path.startswith(root) for root in VIEWABLE_ROOTS)
+
+
+def in_code_scope(path: str) -> bool:
+    """Whether the code viewer shows *path* (a file, or a folder with or without its `/`)."""
+    return any(path == root or path.startswith(root) or f'{path}/' == root for root in CODE_ROOTS)
 
 
 #: The packaged start-page **summary** — a tracked, generated file (the

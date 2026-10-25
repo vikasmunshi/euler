@@ -27,9 +27,11 @@ PUBLIC: tuple[str, ...] = (
     'README.md', 'LICENSE',
     'docs/', 'topics/',
     'solutions/public/', 'solutions/problems.json',
-    'packages/solver/solver/templates/',                                  # linked from the docs (/docs/file/)
-    'packages/solver/solver/ai/claude/skills/',                           # composed into /docs/ai
-    'packages/site/euler_site/content/home-summary.md', 'packages/site/euler_site/content/vendor/README.md',
+    # The code viewer's scope (/code/, euler_site.site.content.CODE_ROOTS — the two lists are
+    # held together by tests/test_public_site.py). `packages/` takes in what the pages read
+    # from it too: the solution templates (/docs/file/), the skills (/docs/ai), the home summary.
+    'packages/', 'scripts/',
+    '.gitattributes', '.gitignore', '.shellcheckrc', 'install.sh', 'Makefile', 'mypy.ini', 'pyproject.toml', 'tox.ini',
 )
 PRIVATE: str = 'solutions/private/'
 
