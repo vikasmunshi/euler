@@ -102,7 +102,7 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('e<sup>iπ</sup>', body)               # the identity wordmark
         self.assertIn('id="crumbs"', body)                  # chrome placed in the header
         self.assertIn('id="actions"', body)
-        self.assertNotIn('theme-toggle', body)              # dark-only: there is no slider
+        self.assertIn('data-theme-toggle', body)            # light/dark, beside the pill
         self.assertIn('data-term-toggle', body)             # the terminal control, on its titlebar
         self.assertIn('data-term-status', body)             # …and its readout, in the header
         self.assertIn('data-term-hide', body)               # the titlebar's hide handle
@@ -1182,9 +1182,9 @@ class StatementForDarkGroundTests(unittest.TestCase):
     """A cached statement is projecteuler.net's own markup, written for their light page.
 
     Two things in it assume that ground — emphasis colours and transparent diagrams — and
-    both are met without giving the statement a light panel of its own, because the dark
-    ground is the design. These pin the two transforms and, more importantly, what each
-    deliberately leaves alone.
+    both are met without giving the statement a panel of its own: the colours become the
+    site's per-theme tokens, and the diagrams are marked by ink for the sheet to plate.
+    These pin the two transforms and, more importantly, what each deliberately leaves alone.
 
     Read from the real cache: the point of the plate is what is *in* the pictures, and a
     fixture image would only ever assert that the arithmetic runs.
@@ -1196,9 +1196,21 @@ class StatementForDarkGroundTests(unittest.TestCase):
         """The reported case (p0238): the colour is LaTeX inside MathJax, so no stylesheet
         can reach it — by the time CSS applies it is already a fill."""
         out = content.recolour_statement(r'$\color{blue}{14025}$ and $\color{red}{7}$')
-        self.assertIn(r'\color[RGB]{124,192,255}', out)
-        self.assertIn(r'\color[RGB]{255,135,129}', out)
+        self.assertIn(r'\color{var(--st-blue)}', out)       # MathJax passes an unknown name
+        self.assertIn(r'\color{var(--st-red)}', out)        # …through as the CSS colour
         self.assertNotIn(r'\color{blue}', out)
+
+    def test_every_colour_token_is_defined_in_both_themes(self) -> None:
+        """A `var()` naming a token the sheet lacks renders as inherited ink — the
+        emphasis silently gone, in one theme or both."""
+        css = (self.root / 'packages/site/euler_site/content/assets/site.css').read_text()
+        dark = ''.join(re.findall(r':root \{([^}]*)\}', css))
+        light = ''.join(re.findall(r':root\[data-theme="light"\] \{([^}]*)\}', css))
+        tokens = set(re.findall(r'var\((--st-[a-z]+)\)', ' '.join(content.STATEMENT_COLOURS.values())))
+        self.assertTrue(tokens)
+        for token in sorted(tokens):
+            self.assertIn(f'{token}:', dark, f'{token} has no dark value')
+            self.assertIn(f'{token}:', light, f'{token} has no light value')
 
     def test_no_hash_ever_reaches_the_tex(self) -> None:
         """The regression this replaced, and the one rule that matters here.
@@ -1211,16 +1223,16 @@ class StatementForDarkGroundTests(unittest.TestCase):
         while a plain refresh had the extension cached and rendered perfectly.
         `\\color{blue}` never showed it, because `{blue}` is valid math.
 
-        So the emitted form names a model instead — `[RGB]{r,g,b}`, which carries nothing
-        math mode objects to, verified in a headless render both with the extension loaded
-        and with it removed entirely.
+        So the emitted form is a `var(--st-…)` name, which carries nothing math mode objects
+        to: MathJax's `color` extension passes an unknown name through as the CSS colour,
+        verified in a headless render in both themes.
         """
         for source in (r'$\color{blue}1, 14, \dots$', r'$\color{red}{7}$',
                        r'$x = {\color{blue}14025\cdots}$'):
             out = content.recolour_statement(source)
             tex = ''.join(re.findall(r'\\color[^$]*', out))
             self.assertNotIn('#', tex, f'a # reached the TeX from {source!r}')
-            self.assertIn('[RGB]{', tex)
+            self.assertIn('{var(--st-', tex)
 
     def test_a_directive_that_already_names_a_model_is_untouched(self) -> None:
         """Whoever wrote `\\color[rgb]{…}` said exactly what they meant."""

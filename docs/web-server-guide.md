@@ -1265,24 +1265,55 @@ geometric reading on the unit circle: the upper semicircle from `1` to `−1` (t
 by `π`) plus the unit segment from `−1` back to `0`, a two-stroke SVG in accent orange.
 The wordmark is the formula itself, not the word "euler".
 
-**Dark only.** There is no light palette and no theme control: the dark ground is the
-design, not a preference. (There was a remembered slider; it was removed with the
-signed-out redesign, along with `auth.css`.)
+**Two themes, dark by design.** Dark is the default and the palette of record; light is
+the same set of tokens re-chosen for a pale ground, under `:root[data-theme="light"]`. The
+header's toggle (beside the user pill, live in both tiers) switches between them. `site.js`
+loads from `<head>` without `defer` and sets `data-theme` on `<html>` as its first act, so
+the page never paints the wrong ground first: the reader's stored choice, or with none
+made, the system's `prefers-color-scheme`, followed live. The choice is kept in
+`localStorage` under `euler-theme`, the key the code viewer (`/code/`) shares, so one
+choice holds on both. Without JS there is no `data-theme`, the page is dark, and the
+toggle is not shown.
 
-| token | value |
-|---|---|
-| `--bg` | `#0f1115` |
-| `--surface` | `#171a21` |
-| `--surface-hi` | `#1f2430` |
-| `--border` | `#2a2f3a` |
-| `--text` | `#e5e7eb` |
-| `--muted` | `#9ca3af` |
-| `--accent` | `#f97316` |
-| `--accent-ink` | `#fed7aa` |
+| token | dark | light |
+|---|---|---|
+| `--bg` | `#0f1115` | `#f4f5f7` |
+| `--surface` | `#171a21` | `#ffffff` |
+| `--surface-hi` | `#1f2430` | `#eceef2` |
+| `--border` | `#2a2f3a` | `#d6dae2` |
+| `--text` | `#e5e7eb` | `#1a1d24` |
+| `--muted` | `#9ca3af` | `#5d6472` |
+| `--accent` | `#f97316` | `#c2410c` |
+| `--accent-ink` | `#fed7aa` | `#9a3412` |
 
-Detail colours are tokens too: grid heat (`--heat-1…5`), file git status, and a semantic
-set kept separate from the accent — `--ok` / `--danger` for state pills and destructive
-verbs, `--error-*` / `--notice-*` for the auth flashes.
+The light accent is orange-700, not the brand orange: `#f97316` on white is under 3:1, too
+faint to read as link text. The state colours deepen with it for the same reason.
+
+Detail colours are tokens too: grid heat (`--heat-1…5`, mixed from the accent and the
+ground, so they follow the theme without light values of their own), file git status, and
+a semantic set kept separate from the accent — `--ok` / `--danger` for state pills and
+destructive verbs, `--error-*` / `--notice-*` for the auth flashes. So are the few values
+that used to be literals: `--on-accent` (ink on the primary button), `--shadow` /
+`--shadow-deep`, `--chrome` (the sign-in window's titlebar), and `--plate`.
+
+**Everything that is not CSS follows the theme by event.** Each change is announced as
+`euler:theme` on `window`. The terminal's iframe is its own document, so it loads
+`site.js` too and themes itself the same way; a toggle in the page reaches it as a
+`storage` event (fired in every *other* same-origin document when the key changes), which
+also keeps other open tabs in step. `terminal.js` re-reads the tokens into xterm's options;
+the editor (`editor.js`) holds its theme in a CodeMirror `Compartment` and reconfigures
+every mounted view in place, buffer and history intact — oneDark's syntax colours on the
+dark ground, CodeMirror's default (light-page) highlight style on the light.
+
+**Statements follow it too.** projecteuler.net's emphasis colours — `class="red"`, inline
+`style="color:…"` and the LaTeX `\color{…}` — all map onto the `--st-red/blue/green/orange`
+tokens (`content.STATEMENT_COLOURS`): lifted and softened on the dark ground, deepened on
+the light. The LaTeX form becomes `\color{var(--st-red)}`: MathJax's `color` extension
+passes a name it does not know through verbatim as the element's CSS colour, and the
+replacement carries no `#` into the TeX (§ the `\color` race below). Transparent diagrams
+are classified by their ink (`ink-dark`, `ink-light`), and each theme plates the kind its
+ground would hide: dark line art on a light `--plate` in the dark theme, light line art on
+a dark one in the light theme.
 
 **`site.css` is the site's only stylesheet**, loaded by both tiers, and Caddy serves it
 from `/assets` *ahead of* `forward_auth` (`frontend.sh`) — so a signed-out page needs no
@@ -1324,13 +1355,33 @@ one document are unsupported, and it is the *rapid* sequence (`show 238`, `show 
 in headless Chrome against the real vendored bundle, failing before the change and clean
 after, and pinned by `tests/test_web_verbs.py::MathJaxWiringTests`.
 
-**The terminal pins its own dark**, in literal hex rather than the tokens. It renders the
-*shell's own* output, and the shell paints with absolute xterm-256 indices chosen for a
-dark terminal (near-whites like 254/247, 238 for rules). Its darkness is the shell's
-constraint, not the site's choice — the site being dark-only means the two agree today,
-but the pane must not start following a palette the shell's ANSI indices know nothing
-about. The values are the dark tokens, so it reads as an embedded console, not a foreign
-surface.
+**The terminal follows the theme, with a contrast floor.** Its ground, text and cursor are
+the tokens. The shell's own output is not: it paints with colours chosen for a dark
+terminal (`solver.config.theme` — near-white `#e5e7eb` body text, amber command names),
+and it knows nothing about the page. On the light ground that would be near-white on
+white, so the light theme sets xterm's `minimumContrastRatio` to 4.5: xterm darkens any
+foreground short of that against its cell's background, keeping the shell's hues and
+making them legible. The dark theme sets it to 1, leaving the shell's colours exactly as
+chosen.
+
+**The narrow layout (≤ 820px).** A phone, or a narrowed window. The panes stack instead
+of sitting side by side, content above terminal, sharing the viewport height (`100dvh`,
+which a phone's collapsing toolbars do not overflow). The terminal **starts hidden** on a
+narrow screen, waiting in the footer, so a phone opens on the content alone. That state
+is the document's own: never written to storage, so showing the terminal on a phone does
+not change what a wide screen remembers, and the wide flag never opens a terminal under a
+phone's reader. Crossing the breakpoint repaints from whichever flag now rules. The CSS
+and `site.js` share the one breakpoint (`tests/test_site_layout.py` holds them together).
+
+Signed out, the body's class says which pane leads (`base.html` § `body_class`):
+`is-signin` on the content pages shows the content alone, since the right pane is only the
+way in and the header's pill offers the same; `is-dialogue` on the auth pages
+(`auth_base.html`) shows the dialogue alone, because there it *is* the page (the terms
+page, a document, takes `is-signin`). The header keeps one control surface but sheds what
+a phone cannot spare — the separators, the breadcrumbs, the formula beside the glyph, the
+controls that are locked anyway — and breaks onto two rows at a fixed place: where to go
+(brand, nav, Actions) above, where you are and who you are (back, refresh, bookmarks; the
+chips, the theme toggle, the pill) below.
 
 ### 11.3 Writing style
 

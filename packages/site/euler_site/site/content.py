@@ -374,56 +374,31 @@ def _pe_page_link(match: re.Match[str]) -> str:
     return f'<a{attrs}href="{_PE_SITE}{key}={value}"'
 
 
-#: projecteuler.net's emphasis colours, remapped for a dark ground. Their markup is
-#: written for a light page, where a saturated primary reads as emphasis; on ours the
-#: same value is a dark mark on a dark field — `#3333ff` on `#0f1115` is the case that
-#: started this. Each entry is the same hue, lifted in luminance and desaturated enough
-#: to sit on `--bg` without glowing: the author's *intent* (this bit is marked) survives,
-#: which is the thing worth keeping. Their exact byte was never the point.
+#: projecteuler.net's emphasis colours, remapped to the site's palette. Their markup is
+#: written for a light page, where a saturated primary reads as emphasis; on our dark one
+#: the same value is a dark mark on a dark field — `#3333ff` on `#0f1115` is the case that
+#: started this. So each is replaced by a stylesheet token (`--st-red` …) that site.css
+#: sets per theme: the same hue, lifted and softened on the dark ground, deepened on the
+#: light. The author's *intent* (this bit is marked) survives either way, which is the
+#: thing worth keeping. Their exact byte was never the point.
 #:
 #: Keyed by the token as it appears in the source, and matched case-insensitively, so one
 #: table serves all three ways a statement asks for a colour (below).
 STATEMENT_COLOURS: dict[str, str] = {
-    'red': '#ff8781', 'blue': '#7cc0ff', 'green': '#7ee787', 'orange': '#ffb26b',
-    '#ff0000': '#ff8781', '#3333ff': '#7cc0ff', '#00ff00': '#7ee787',
+    'red': 'var(--st-red)', 'blue': 'var(--st-blue)', 'green': 'var(--st-green)',
+    'orange': 'var(--st-orange)',
+    '#ff0000': 'var(--st-red)', '#3333ff': 'var(--st-blue)', '#00ff00': 'var(--st-green)',
 }
 
 #: `\color{red}` / `\color{#FF0000}` inside the LaTeX MathJax renders. This is where the
-#: reported case lived: the colour is not HTML at all, so no stylesheet can reach it —
-#: MathJax has already turned it into a fill by the time CSS applies. Rewriting the source
-#: before it reaches the browser is the only hook, and it is the same hook for both forms.
+#: reported case lived: the colour is not HTML at all, so no stylesheet can reach it by
+#: class. What does reach it is the value: MathJax's `color` extension passes a name it
+#: does not know through verbatim as the element's CSS `color`, so `\color{var(--st-red)}`
+#: renders as `color: var(--st-red)` and follows the theme like the rest of the page.
 #:
 #: A form that already names a model (`\color[rgb]{…}`) does not match, and is left alone:
 #: whoever wrote that said exactly what they meant.
 _TEX_COLOUR_RE = re.compile(r'\\color\s*\{\s*([A-Za-z]+|#[0-9A-Fa-f]{3,6})\s*\}')
-
-
-def _tex_colour(hex_colour: str) -> str:
-    r"""A `\color` directive for *hex_colour* — as `[RGB]{r,g,b}`, never as a `#` literal.
-
-    **`#` must never reach the TeX.** It is the macro-parameter character, and whether it
-    is fatal depends on a race: `\color` arrives from an autoloaded extension, so on the
-    first statement to use it MathJax parses the argument as ordinary math while the
-    extension is still in flight — and there `#` is "You can't use 'macro parameter
-    character #' in math mode", which is a rendered error, not a retry.
-
-    That is exactly what a `#7cc0ff` rewrite did to p0238, and it hid well: reaching the
-    page by htmx swap hit the window and failed, while a plain refresh had the extension
-    cached and rendered perfectly. `\color{blue}` never showed it because `{blue}` is
-    valid math — four italic letters — so the same race was invisible for every colour
-    projecteuler.net actually writes.
-
-    `[RGB]{r,g,b}` is the LaTeX-standard model form (the vendored `color.js` implements
-    `rgb`, `RGB`, `gray` and `named` — there is no `HTML` model), and it carries no
-    character that math mode objects to. Tested both ways: with the extension loaded it
-    colours, and with it missing entirely it still raises no error.
-    """
-    digits = hex_colour.lstrip('#')
-    if len(digits) == 3:
-        digits = ''.join(c * 2 for c in digits)
-    red, green, blue = (int(digits[i:i + 2], 16) for i in (0, 2, 4))
-    return f'\\color[RGB]{{{red},{green},{blue}}}'
-
 
 #: An inline `style="color:#FF0000"`. CSS could only beat this with `!important`, and a
 #: sheet that has to shout at its own content is a sheet that will lose the next round.
@@ -431,20 +406,24 @@ _CSS_COLOUR_RE = re.compile(r'(color\s*:\s*)(#[0-9A-Fa-f]{3,6}|[A-Za-z]+)')
 
 
 def recolour_statement(html: str) -> str:
-    """Remap a cached statement's emphasis colours for the dark ground.
+    """Remap a cached statement's emphasis colours to the site's palette tokens.
 
     Three ways projecteuler.net colours a statement, and this reaches all three: the LaTeX
-    `\\color{…}` MathJax renders, an inline `style="color:…"`, and — via
-    :data:`STATEMENT_COLOURS` and the stylesheet's `.statement .red` rules — their
-    `class="red"` spans. Only the tokens in the table are touched; anything else is left
-    exactly as written, so an unrecognised colour renders as it always did rather than as
-    whatever this guessed.
+    `\\color{…}` MathJax renders, an inline `style="color:…"`, and — via the stylesheet's
+    `.statement .red` rules, which use the same tokens — their `class="red"` spans. Only
+    the tokens in :data:`STATEMENT_COLOURS` are touched; anything else is left exactly as
+    written, so an unrecognised colour renders as it always did rather than as whatever
+    this guessed.
+
+    **`#` must never reach the TeX**, and the replacement carries none. It is the
+    macro-parameter character: a `#7cc0ff` rewrite once rendered p0238 as "You can't use
+    'macro parameter character #' in math mode" whenever the `color` extension was still in
+    flight. A `var(--…)` name is letters, dashes and parentheses — valid math even with the
+    extension missing.
     """
     def tex(match: re.Match[str]) -> str:
         mapped = STATEMENT_COLOURS.get(match.group(1).lower())
-        # The whole directive is replaced, not just the value: the replacement names a
-        # colour *model* (`[RGB]`), which is what keeps `#` out of the math (:func:`_tex_colour`).
-        return _tex_colour(mapped) if mapped else match.group(0)
+        return f'\\color{{{mapped}}}' if mapped else match.group(0)
 
     def css(match: re.Match[str]) -> str:
         mapped = STATEMENT_COLOURS.get(match.group(2).lower())
@@ -458,7 +437,8 @@ def recolour_statement(html: str) -> str:
 #: and is readable on any page, so it is left alone.
 _TRANSPARENT_AT: float = 0.15
 #: Mean luminance (0–255) of the visible pixels, above which the ink is light. Light ink is
-#: what a dark page wants, so those are the images that must NOT be plated.
+#: what the dark theme wants and dark ink what the light one does, so which kind gets a
+#: plate is the stylesheet's call, made per theme.
 _LIGHT_INK_AT: float = 140.0
 #: Sampling stride. These are diagrams a few hundred pixels square, so every fourth pixel
 #: fixes the mean at a quarter of the work. Measured against a full scan of all 254 cached
@@ -476,7 +456,7 @@ def _image_ink(path: Path, stamp: tuple[int, int]) -> str:
     them and the ink has to contrast with *our* ground. It does not always: 44 of the
     cached images are dark line art on nothing, which on `--bg` is a black diagram on a
     near-black field — invisible, on problems as ordinary as 15 and 86. Another 28 are the
-    opposite, light ink that a dark page suits exactly. `class="dark_img"`, which
+    opposite, light ink that a dark page suits exactly and a light one loses. `class="dark_img"`, which
     projecteuler puts on the ones it serves to dark themes, does not tell them apart in our
     cache (37 of the dark-ink images carry it), so the pixels are the only honest source.
 
@@ -515,7 +495,7 @@ def _image_ink(path: Path, stamp: tuple[int, int]) -> str:
 
 
 def plate_statement_images(html: str, number: int, sdir: Path) -> str:
-    """Mark each statement image with the ground it needs: `ink-dark` gets a plate.
+    """Mark each statement image with its ink: the theme whose ground hides it plates it.
 
     Adds a class the stylesheet acts on, rather than a style: what a plated image should
     look like — how much padding, how round, how white — is the sheet's business, and this
@@ -554,7 +534,7 @@ def plate_statement_images(html: str, number: int, sdir: Path) -> str:
 
 
 def prepare_statement(html: str, number: int, sdir: Path) -> str:
-    """A cached statement, ready for a dark page: links rooted, colours and ink remapped.
+    """A cached statement, ready for the site: links rooted, colours and ink remapped.
 
     The three passes in the order they depend on each other — links first, because the
     plate step reads the rooted `src` to find the file on disk. Composed here so the one

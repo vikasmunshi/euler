@@ -9,7 +9,7 @@
  * ES module, same-origin ('self'); CodeMirror injects its stylesheet at runtime
  * (covered by the CSP style-src 'unsafe-inline', §4.7). No eval. */
 import {
-  EditorView, basicSetup, indentUnit, keymap, indentWithTab, placeholder,
+  EditorView, Compartment, basicSetup, indentUnit, keymap, indentWithTab, placeholder,
   python, cpp, json, oneDark,
 } from '/vendor/codemirror/cm6.js';
 
@@ -20,10 +20,11 @@ const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 
 /* The buffer's chrome is the shell's own: every surface comes from the site.css
    palette tokens, so the editor is the same shade as the panel around it.
-   The selectors carry `&.cm-editor` rather than a bare `&`: this stacks on top of
-   the vendored oneDark (kept for its syntax colours alone), and the extra class is
-   what outranks oneDark's own background and gutters. */
-function chrome() {
+   The selectors carry `&.cm-editor` rather than a bare `&`: in the dark theme this
+   stacks on top of the vendored oneDark (kept for its syntax colours alone), and the
+   extra class is what outranks oneDark's own background and gutters. *dark* tells
+   CodeMirror which ground the chrome is, for the defaults it derives from that. */
+function chrome(dark) {
   return EditorView.theme({
     '&.cm-editor': {
       height: '100%',
@@ -43,13 +44,17 @@ function chrome() {
     '&.cm-editor .cm-activeLine': { background: 'var(--surface-hi)' },
     '&.cm-editor .cm-activeLineGutter': { background: 'var(--surface-hi)', color: 'var(--text)' },
     '&.cm-editor .cm-cursor, &.cm-editor .cm-dropCursor': { borderLeftColor: 'var(--text)' },
-  }, { dark: true });
+  }, { dark });
 }
 
-//: oneDark's syntax palette under the shell's chrome. The site is dark-only
-//: (site.css), so this is a fixed extension: there is no toggle to follow, and
-//: nothing to reconfigure after a view has mounted.
-const theme = [oneDark, chrome()];
+//: The theme follows the site's (site.js § theme): oneDark's syntax palette under the
+//: chrome on the dark ground; on the light one the chrome alone, which leaves
+//: basicSetup's default highlight style — drawn for a light page — to colour the code.
+//: In a Compartment, so a toggle reconfigures every mounted view in place, buffer,
+//: cursor and undo history intact.
+const themeSlot = new Compartment();
+function isDark() { return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function theme() { return isDark() ? [oneDark, chrome(true)] : [chrome(false)]; }
 
 /* Every live view. The Set is a strong reference, so a view stays reachable until
    `reap` drops it — which is the point: an editor whose pane has been swapped away
@@ -81,7 +86,7 @@ function enhance(textarea) {
     doc: textarea.value,
     extensions: [
       basicSetup,                                       // gutter, history, brackets, search, folding…
-      theme,
+      themeSlot.of(theme()),
       langExt,
       ...(textarea.placeholder ? [placeholder(textarea.placeholder)] : []),
       indentUnit.of('    '),                            // 4-space indent (project style)
@@ -104,6 +109,11 @@ function enhance(textarea) {
   requestAnimationFrame(() => view.requestMeasure());
   return view;
 }
+
+window.addEventListener('euler:theme', () => {
+  reap();
+  views.forEach((view) => view.dispatch({ effects: themeSlot.reconfigure(theme()) }));
+});
 
 //: (Re)mount CodeMirror on every enhanceable textarea under *root* (the swapped
 //: #content, or the document on first load). Idempotent per textarea.

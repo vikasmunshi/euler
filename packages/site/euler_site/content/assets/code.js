@@ -11,9 +11,10 @@
   root.classList.add('js');
 
   // ── theme ────────────────────────────────────────────────────────────────────────
-  // localStorage may be absent or throw (a private window, blocked site data): then the
-  // toggle still works, it just is not remembered.
-  var KEY = 'euler-code-theme';
+  // The key is the main site's (site.js), so one choice holds on both. localStorage may
+  // be absent or throw (a private window, blocked site data): then the toggle still
+  // works, it just is not remembered.
+  var KEY = 'euler-theme';
   function stored() { try { return window.localStorage.getItem(KEY); } catch (e) { return null; } }
   function store(value) { try { window.localStorage.setItem(KEY, value); } catch (e) { /* not kept */ } }
   var dark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;

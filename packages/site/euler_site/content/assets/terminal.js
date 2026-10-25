@@ -26,12 +26,35 @@
   if (!host || typeof window.Terminal !== 'function') { return; }
 
   // ── theme ────────────────────────────────────────────────────────────────
-  // Literal hex, not the site's CSS tokens: what renders here is the *shell's own*
-  // output, and the shell paints with absolute xterm-256 indices chosen for a dark
-  // terminal (near-whites like 254/247 for body text, 238 for rules). Its darkness
-  // is the shell's constraint, not the site's choice — the site being dark-only
-  // means the two agree today, but this must not start following a palette the
-  // shell's ANSI indices know nothing about. The values are the dark tokens.
+  // The site's palette, read from its CSS tokens (this document loads site.css, and
+  // site.js has already set `data-theme` on it), and read again on every `euler:theme`
+  // — a toggle in the page reaches this frame as a `storage` event, which site.js turns
+  // into that. xterm's colours are options, not CSS, hence the re-read.
+  //
+  // The shell paints with colours chosen for a dark terminal (solver.config.theme: near-
+  // whites like #e5e7eb for body text, amber for command names), and it knows nothing
+  // about this page's theme. On the light ground that output would be near-white on
+  // white, so the light theme sets xterm's `minimumContrastRatio`: xterm then darkens any
+  // foreground that falls short of it against the cell's background, which keeps the
+  // shell's hues and makes them legible. The dark theme leaves the shell's colours
+  // exactly as it chose them (1 = no adjustment).
+  function token(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function palette() {
+    var light = document.documentElement.getAttribute('data-theme') === 'light';
+    return {
+      theme: {
+        background: token('--surface'),
+        foreground: token('--text'),
+        cursor: token('--accent'),
+        cursorAccent: token('--surface'),
+        selectionBackground: light ? 'rgba(194,65,12,0.22)' : 'rgba(249,115,22,0.35)'
+      },
+      minimumContrastRatio: light ? 4.5 : 1
+    };
+  }
+  var initial = palette();
   var term = new window.Terminal({
     cursorBlink: true,
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
@@ -40,13 +63,13 @@
     // '_' is clipped to the cell's bottom pixel row and renders blank).
     lineHeight: 1.15,
     scrollback: 5000,
-    theme: {
-      background: '#171a21',            // --surface (dark)
-      foreground: '#e5e7eb',            // --text (dark)
-      cursor: '#f97316',                // --accent
-      cursorAccent: '#171a21',
-      selectionBackground: 'rgba(249,115,22,0.35)'
-    }
+    theme: initial.theme,
+    minimumContrastRatio: initial.minimumContrastRatio
+  });
+  window.addEventListener('euler:theme', function () {
+    var next = palette();
+    term.options.theme = next.theme;
+    term.options.minimumContrastRatio = next.minimumContrastRatio;
   });
   var fit = new window.FitAddon.FitAddon();
   term.loadAddon(fit);

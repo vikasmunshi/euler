@@ -33,6 +33,10 @@
 <a href="/terms?back={{ request.path_qs|urlencode }}">terms of use</a>
 {% endblock %}
 
+{# On a narrow screen the dialogue is the page, so it is the pane that shows (base.html
+   § body_class). Signed in, the shell's own layout: content over terminal. #}
+{% block body_class %}{% if not subject %}is-dialogue{% endif %}{% endblock %}
+
 {% block content %}{% include "_home.html" %}{% endblock %}
 
 {% block ws_label %}{% if subject %}solver terminal{% else %}sign in{% endif %}{% endblock %}

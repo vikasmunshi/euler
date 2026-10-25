@@ -48,7 +48,13 @@
   {% endblock %}
   {% block head %}{% endblock %}
 </head>
-<body>
+{# The body's class says which pane a NARROW screen leads with (site.css § The narrow
+   layout), where the two panes stack instead of sitting side by side. Signed in, nothing:
+   the content leads and the terminal sits below it. Signed out, `is-signin`: the right
+   pane is only the way in, which the header's pill also offers, so a phone shows the
+   content alone. The auth pages override it (auth_base.html), because there the right
+   pane IS the page. #}
+<body class="{% block body_class %}{% if not subject %}is-signin{% endif %}{% endblock %}">
   {% include "_nav.html" %}
   {# The two equal middle panes (web-server-guide § The site): together with header + footer
      they fill the viewport exactly — the page never scrolls, each pane does.

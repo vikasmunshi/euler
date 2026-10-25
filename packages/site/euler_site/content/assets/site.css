@@ -2,9 +2,13 @@
    no @import, no external fonts — CSP-clean. This is the site's only stylesheet:
    the auth pages load it too, so the signed-out and signed-in layouts are the same
    layout. Caddy serves it from /assets before forward_auth, so it needs no session.
-   Dark only: there is no light palette and no theme toggle — the dark ground is the
-   design, not a preference.
-   The four regions fill the viewport exactly; only the panes scroll. */
+   Two palettes, one set of tokens: dark is the default and the design of record; light
+   is `:root[data-theme="light"]`, which site.js sets before the first paint from the
+   reader's choice (the header's theme toggle) or, with none made, from the system's.
+   Every colour below the token blocks is a token or derives from one, so a rule
+   written once reads on both grounds.
+   The four regions fill the viewport exactly; only the panes scroll. On a narrow
+   screen (≤ 820px) they stack instead (§ The narrow layout, at the end). */
 
 :root {
   --bg: #0f1115;
@@ -39,6 +43,43 @@
   --error-fg: #fca5a5;
   --notice-bg: color-mix(in srgb, var(--accent) 14%, transparent);
   --notice-fg: var(--accent-ink);
+  /* Ink on an accent fill (the primary button), the shadow under a floating panel, and
+     the titlebar of the sign-in window — the three places a literal used to stand. */
+  --on-accent: #1f2937;
+  --shadow: rgba(0, 0, 0, 0.35);
+  --shadow-deep: rgba(0, 0, 0, 0.8);
+  --chrome: color-mix(in srgb, var(--surface) 70%, #000);
+  /* The ground a transparent statement diagram is plated on, when its ink would vanish
+     into the page's (§ TRANSPARENT DIAGRAMS). */
+  --plate: #fbfbfb;
+  color-scheme: dark;
+}
+/* The light palette. The same roles as above, re-chosen for a pale ground rather than
+   inverted: the accent darkens to orange-700 so it still reads as text (#f97316 on white
+   is under 3:1), and the state colours darken with it for the same reason. */
+:root[data-theme="light"] {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-hi: #eceef2;
+  --border: #d6dae2;
+  --text: #1a1d24;
+  --muted: #5d6472;
+  --accent: #c2410c;
+  --accent-ink: #9a3412;
+  --heat-ink: #1f2937;
+  --git-modified: #b45309;
+  --git-staged: #047857;
+  --git-untracked: #7c3aed;
+  --f-technique: #0369a1;
+  --danger: #b91c1c;
+  --error-bg: #fdecec;
+  --error-fg: #991b1b;
+  --on-accent: #ffffff;
+  --shadow: rgba(16, 24, 40, 0.14);
+  --shadow-deep: rgba(16, 24, 40, 0.28);
+  --chrome: color-mix(in srgb, var(--surface-hi) 80%, var(--border));
+  --plate: #1f2430;
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -172,7 +213,7 @@ details.menu > summary:hover { color: var(--text); background: color-mix(in srgb
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px var(--shadow);
 }
 .menu-right { left: auto; right: 0; }
 .menu-list li { margin: 0; }
@@ -223,6 +264,21 @@ summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
    read as disabled — but it must read as empty: dashed ring, muted ink. */
 summary.user-glyph.is-anon { border-style: dashed; background: none; color: var(--muted); }
 summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--accent); }
+
+/* The theme toggle (_nav.html), beside the pill and the same size as the header's other
+   icon marks. Its glyph is the theme a click goes to. `data-theme` is set only by
+   site.js, so without it there is nothing to toggle and the button is not shown. */
+.theme-toggle {
+  width: 2rem; height: 2rem; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 8px; background: none; color: var(--muted); cursor: pointer;
+}
+.theme-toggle:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.theme-toggle svg { width: 1.1rem; height: 1.1rem; display: block; }
+.theme-toggle .theme-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .theme-moon { display: block; }
+:root[data-theme="light"] .theme-toggle .theme-sun { display: none; }
+:root:not([data-theme]) .theme-toggle { display: none; }
 
 /* ── the terminal chip (_nav.html) ───────────────────────────────────────────
    A readout, not a control: the acts live on the terminal's own titlebar, and this
@@ -810,7 +866,7 @@ body.terminal-doc {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted);
 }
-/* The filter, styled to the shell in the other pane: mono, dark ground, sized to sit on
+/* The filter, styled to the shell in the other pane: mono, the page's ground, sized to sit on
    the rule rather than to fill it. It shrinks before the hairline does on a narrow pane. */
 .pane-filter {
   flex: 0 1 16rem; min-width: 5rem;
@@ -921,34 +977,49 @@ a.cell:hover { border-color: var(--accent); color: var(--text); }
 
 /* The statement is foreign content: projecteuler.net's own markup, written for their
    light page. Two things in it assume that ground, and both are met here rather than by
-   giving the statement a light panel of its own — the dark ground is the design, and a
-   bright block in the middle of the page would be the more visible bug.
+   giving the statement a panel of its own — a block in a different ground in the middle
+   of the page would be the more visible bug.
 
-   1 · EMPHASIS COLOURS. Their `class="red"` spans get the same values
-   `content.STATEMENT_COLOURS` maps the LaTeX `\color{…}` and inline `style="color:…"`
-   forms onto, so a statement reads the same however it asked. Scoped to `.statement`:
-   these are generic words, and a `.red` loose in the sheet would eventually collide. */
-.statement .red { color: #ff8781; }
-.statement .blue { color: #7cc0ff; }
-.statement .green { color: #7ee787; }
-.statement .orange { color: #ffb26b; }
+   1 · EMPHASIS COLOURS. `content.recolour_statement` maps the LaTeX `\color{…}` and the
+   inline `style="color:…"` forms onto these tokens, and their `class="red"` spans get the
+   same ones here, so a statement reads the same however it asked. Per theme: lifted and
+   softened on the dark ground, deepened on the light. Scoped to `.statement`: these are
+   generic words, and a `.red` loose in the sheet would eventually collide. */
+:root {
+  --st-red: #ff8781;
+  --st-blue: #7cc0ff;
+  --st-green: #7ee787;
+  --st-orange: #ffb26b;
+}
+:root[data-theme="light"] {
+  --st-red: #c62828;
+  --st-blue: #1d4ed8;
+  --st-green: #15803d;
+  --st-orange: #c2410c;
+}
+.statement .red { color: var(--st-red); }
+.statement .blue { color: var(--st-blue); }
+.statement .green { color: var(--st-green); }
+.statement .orange { color: var(--st-orange); }
 
-/* 2 · TRANSPARENT DIAGRAMS. A see-through image takes the page's ground, and theirs is
-   drawn for a white one: dark line art on `--bg` is a black diagram on a near-black
-   field. `content.plate_statement_images` reads the pixels and marks the ones that need
-   a ground of their own; this gives them one. Not a bare white box — a plate with the
-   page's own radius, inset so the art is not flush to the edge, so it reads as a figure
-   rather than as a rendering accident.
+/* 2 · TRANSPARENT DIAGRAMS. A see-through image takes the page's ground, and its ink may
+   not contrast with it. `content.plate_statement_images` reads the pixels and marks each
+   one `ink-dark` (line art drawn for a white page — 44 of the cached diagrams) or
+   `ink-light` (drawn for a dark one — 28); this gives the one that would vanish a ground
+   of its own. Not a bare box — a plate with the page's own radius, inset so the art is
+   not flush to the edge, so it reads as a figure rather than as a rendering accident.
 
-   Only `ink-dark` is plated. Light ink is what a dark page wants (28 of the cached
-   diagrams are drawn that way), and opaque images bring their own background — both are
-   left exactly as they were. */
-.statement img.ink-dark {
-  background: #fbfbfb;
+   On the dark ground the dark ink is plated (light, --plate); on the light ground the
+   light ink is (dark, the light theme's --plate). The other kind is left exactly as it
+   is, as are opaque images, which bring their own background. */
+.statement img.ink-dark,
+:root[data-theme="light"] .statement img.ink-light {
+  background: var(--plate);
   padding: 0.6rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
+:root[data-theme="light"] .statement img.ink-dark { background: none; padding: 0; border: 0; }
 
 /* The reading document: statement, then notes, as one flow. The rule marks where
    the problem ends and the analysis begins — the notes carry their own headings,
@@ -1092,7 +1163,7 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   cursor: pointer;
 }
 .btn:hover { border-color: var(--accent); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #1f2937; font-weight: 600; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .btn-primary:hover { filter: brightness(1.08); }
 /* A public key is nothing to guard — copying it is always the safe, right act — so
    the Copy button wears the ok green, not the neutral border. */
@@ -1177,12 +1248,12 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   border-radius: 12px;
   overflow: hidden;
   background: var(--surface-hi);
-  box-shadow: 0 22px 60px -26px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 22px 60px -26px var(--shadow-deep);
 }
 .authwin-bar {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.55rem 0.8rem;
-  background: color-mix(in srgb, var(--surface) 70%, #000);
+  background: var(--chrome);
   border-bottom: 1px solid var(--border);
 }
 .authwin-dots { display: flex; gap: 0.35rem; }
@@ -1235,7 +1306,7 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 }
 .authwin-form .kbd {
   font-size: 0.82em; opacity: 0.7; line-height: 1.3;
-  border: 1px solid rgba(31, 18, 6, 0.4); border-radius: 4px; padding: 0 0.28rem;
+  border: 1px solid color-mix(in srgb, var(--on-accent) 40%, transparent); border-radius: 4px; padding: 0 0.28rem;
 }
 .authwin-form .btn.busy {
   background: color-mix(in srgb, var(--accent) 55%, var(--surface));
@@ -1308,7 +1379,7 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .diagnostics { list-style: none; padding: 0; margin: 0 0 0.8rem; font-size: 0.86rem; }
 .diagnostics li { padding: 0.15rem 0; }
 .diag-sev { font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.04em; }
-.diag-error .diag-sev { color: #f87171; }
+.diag-error .diag-sev { color: var(--danger); }
 .diag-warning .diag-sev { color: var(--accent); }
 
 /* ── Account ─────────────────────────────────────────────────────────────── */
@@ -1360,7 +1431,7 @@ dl.account dd { margin: 0; min-width: 0; }
   border: 1px solid var(--border);
   /* A <button> defaults to the UA's black `color`, and `font: inherit` below does
      not touch color — so an UNTONED action pill (Create identity, Sync) would sit
-     black on the dark card. This readable default is overridden by .ok / .warn where
+     black on a dark card. This readable default is overridden by .ok / .warn where
      a tone applies. */
   color: var(--text);
 }
@@ -1433,17 +1504,15 @@ dl.account dd { margin: 0; min-width: 0; }
 .tool-row .state-action { margin-left: auto; }
 
 /* ── The terminal (right pane) ───────────────────────────────────────────── */
-/* xterm renders into #term. The host is pinned to the literal dark --surface
-   rather than the token: it shows the shell's own output, and the shell paints
-   with absolute xterm-256 indices picked for a dark terminal (see terminal.js).
-   The site is dark-only now, so the two agree — but the terminal's darkness is
-   the shell's constraint, not the site's choice, and it must not drift if the
-   palette ever moves. The small pad keeps the first glyph column off the pane
-   border. */
+/* xterm renders into #term, on the pane's own --surface in either theme: the terminal
+   follows the site's palette, and terminal.js re-reads these tokens whenever the theme
+   changes (its own colours, and the contrast floor that keeps the shell's dark-tuned
+   output readable on the light ground). The small pad keeps the first glyph column off
+   the pane border. */
 .term-host {
   height: 100%;
   padding: 0.35rem 0.2rem 0.2rem 0.45rem;
-  background: #171a21;
+  background: var(--surface);
 }
 .term-host .xterm { height: 100%; }
 .term-host .xterm-viewport { background: transparent !important; }
@@ -1553,4 +1622,52 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 @media (prefers-reduced-motion: reduce) {
   .tag-chip, .tcard { transition: none; }
   .tcard:hover { transform: none; }
+}
+
+/* ── The narrow layout (≤ 820px: a phone, a narrowed window) ─────────────────────────
+   The two panes stack instead of sitting side by side: the content on top, the terminal
+   below it, sharing the height between them — and the terminal starts hidden on a narrow
+   screen (site.js § hide the terminal), so a phone opens on the content alone, with the
+   terminal's window waiting in the footer. The shell still fills exactly one viewport;
+   `dvh` is the one a phone's collapsing toolbars do not overflow.
+
+   The body's class says which pane a page leads with (base.html § body_class): signed
+   out, `is-signin` shows the content alone (the header's pill is the way in) and
+   `is-dialogue` — the auth pages — shows the dialogue alone, because there it is the page.
+
+   The header keeps one control surface but sheds what a phone cannot spare: the
+   separators, the breadcrumbs (the pane's back arrow and the page's own heading carry
+   the same), the formula beside the brand glyph, and the controls that are locked
+   anyway. What is left goes on two rows, broken at a fixed place rather than wherever the
+   width runs out: where to go (the brand, the nav, Actions) above, and where you are and
+   who you are (back, refresh, bookmarks · the chips, the theme, the pill) below. The
+   break is a zero-height pseudo-element ordered between the two groups. */
+@media (max-width: 820px) {
+  body { height: 100dvh; }
+
+  .app-header { flex-wrap: wrap; gap: 0.35rem 0.5rem; padding: 0.4rem 0.6rem; }
+  .app-header::before { content: ""; order: 1; flex-basis: 100%; height: 0; }
+  .app-header > .nav-back, .app-header > .nav-refresh, .app-header > .bookmarks-menu,
+  .app-header > .app-who { order: 2; }
+  .app-header .hsep, .app-header .crumbs, .app-header .is-locked, .brand-name { display: none; }
+  .app-nav a { padding: 0.3rem 0.45rem; }
+  .app-who { gap: 0.4rem; }
+  .git-branch { max-width: 5.5rem; }
+
+  .app-panes {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+  }
+  body.ws-hidden .app-panes,
+  body.is-signin .app-panes,
+  body.is-dialogue .app-panes { grid-template-rows: minmax(0, 1fr); }
+  body.is-signin .pane-ws { display: none; }
+  body.is-dialogue .pane-content { display: none; }
+  /* A dialogue taller than the pane scrolls from its top: centred, an overflowing form
+     would lose its heading above the scroll box's start. */
+  .auth-pane { align-items: flex-start; padding: 1rem; }
+
+  .app-footer { flex-wrap: wrap; justify-content: center; row-gap: 0.3rem; padding: 0.45rem 0.6rem; }
 }

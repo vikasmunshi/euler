@@ -385,10 +385,10 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'info': info,
         'euler_url': f'https://projecteuler.net/problem={number}',
         'github_url': github,
-        # The cached projecteuler.net markup, made to work on a dark page: resource links
+        # The cached projecteuler.net markup, made to work on either theme: resource links
         # rooted at this problem's canonical path (so they resolve after an htmx swap, not
-        # just a full load), emphasis colours remapped, and transparent dark-ink diagrams
-        # marked for a plate. See content.prepare_statement.
+        # just a full load), emphasis colours remapped to the palette tokens, and transparent
+        # diagrams marked by ink for the sheet to plate. See content.prepare_statement.
         'statement': content.prepare_statement(read_html('statement.html'), number, sdir),
         'notes': read_html('notes.html'),
         'tags': content.problem_tag_view(repo_root, number),

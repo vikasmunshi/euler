@@ -9,7 +9,8 @@
    tier's own pages) the header is *present and inert*: the brand, the bookmarks and the
    user pill stay live — home, off-site, and the way in — so none of them is dimmed.
 
-   There is no theme control: the site is dark-only (site.css). #}
+   The theme toggle sits just before the user pill, live in both tiers: the palette is the
+   reader's, not the account's (site.js § theme). #}
 <header class="app-header">
   <a class="brand" href="/" {% if browsable %}hx-get="/" hx-target="#content" hx-swap="innerHTML"
      hx-push-url="true"{% endif %} title="euler — home">
@@ -160,6 +161,17 @@
        placed on it; the chip now swaps its contents and the element survives, so the
        timer runs uninterrupted where it belongs — and it no longer fires on a tier that
        has no clone and no `/git` route to answer it. #}
+    {# Light or dark. The glyph shows the theme the click goes TO — a moon on the light
+       ground, a sun on the dark — and site.js writes the act into its title and
+       accessible name. With no JS there is no theme to switch (CSS hides it). #}
+    <button type="button" class="theme-toggle" data-theme-toggle
+            title="Switch theme" aria-label="Switch theme">
+      <svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
+        d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+      <svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path
+        d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>
+    </button>
     {# The user pill is live in both tiers — signed out it is the way in, so it
        reads as *empty* (dashed ring, muted ink), never as disabled. #}
     <details class="menu user-menu">

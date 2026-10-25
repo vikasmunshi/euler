@@ -8,6 +8,59 @@
 (function () {
   'use strict';
 
+  // ── theme ────────────────────────────────────────────────────────────────────────
+  // First, before anything paints: this file loads from <head> without defer, so the
+  // `data-theme` it sets is on <html> before the body renders, and the page never
+  // flashes the wrong ground. The reader's choice (the header's toggle) is kept in
+  // localStorage under the key the code viewer (/code/) shares, so one choice holds
+  // across both; with none made, the system's preference decides, and follows it live.
+  // Storage may be absent or throw (a private window, blocked site data): the toggle
+  // still works for the page, it just is not remembered.
+  //
+  // The terminal's iframe loads this file too, so it themes itself the same way, and the
+  // `storage` event — which fires in every OTHER same-origin document when the key
+  // changes — carries a toggle into it (and into other tabs) without a message of its
+  // own. Every apply announces itself as `euler:theme` on window, which terminal.js
+  // listens for to repaint xterm, whose colours are not CSS.
+  var THEME_KEY = 'euler-theme';
+  var themeRoot = document.documentElement;
+  var prefersDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function storedTheme() {
+    var value = null;
+    try { value = window.localStorage.getItem(THEME_KEY); } catch (e) { /* not kept */ }
+    return value === 'light' || value === 'dark' ? value : null;
+  }
+  function systemTheme() { return prefersDark && !prefersDark.matches ? 'light' : 'dark'; }
+  function applyTheme(theme) {
+    themeRoot.setAttribute('data-theme', theme);
+    paintThemeToggles();
+    window.dispatchEvent(new CustomEvent('euler:theme', { detail: theme }));
+  }
+  //: The toggle names the act it offers, not the state: the state is on screen already.
+  function paintThemeToggles() {
+    var dark = themeRoot.getAttribute('data-theme') !== 'light';
+    var act = dark ? 'Switch to the light theme' : 'Switch to the dark theme';
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+      button.title = act;
+      button.setAttribute('aria-label', act);
+    });
+  }
+  applyTheme(storedTheme() || systemTheme());
+  if (prefersDark && prefersDark.addEventListener) {
+    prefersDark.addEventListener('change', function () { if (!storedTheme()) { applyTheme(systemTheme()); } });
+  }
+  window.addEventListener('storage', function (ev) {
+    if (ev.key === THEME_KEY || ev.key === null) { applyTheme(storedTheme() || systemTheme()); }
+  });
+  document.addEventListener('DOMContentLoaded', paintThemeToggles);
+  document.addEventListener('click', function (ev) {
+    var button = ev.target.closest && ev.target.closest('[data-theme-toggle]');
+    if (!button) { return; }
+    var next = themeRoot.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    try { window.localStorage.setItem(THEME_KEY, next); } catch (e) { /* not kept */ }
+    applyTheme(next);
+  });
+
   // MathJax v3 config — this file loads before the deferred /vendor/mathjax
   // bundle, so the loader reads it on init. Statements and notes carry TeX as
   // $…$ / $$…$$ text (convention_documentation.md); \$ escapes a literal dollar.
@@ -445,16 +498,29 @@
   // textarea across the boundary), so it is asked for by message. Showing an already-
   // visible terminal is layout-wise a no-op but still focuses — that is what the
   // header's Terminal item does beyond swapping /shell into the pane.
+  //
+  // A narrow screen (site.css § The narrow layout: the panes stack, the terminal below
+  // the content) keeps its own flag, and starts every document HIDDEN: on a phone the
+  // content is what you came for and the terminal is a tap away in the footer. That flag
+  // lives for the document only and is never written to storage, so showing the terminal
+  // on a phone neither persists nor changes what a wide screen remembers — and the wide
+  // flag never pops a terminal open under a phone's reader. Crossing the breakpoint
+  // (a window narrowed past it, a tablet rotated) repaints from whichever flag now rules.
   var WS_HIDDEN_KEY = 'euler:ws-hidden';
+  var narrow = window.matchMedia ? window.matchMedia('(max-width: 820px)') : null;
+  var narrowHidden = true;
 
+  function isNarrow() { return !!(narrow && narrow.matches); }
   function wsHidden() {
     // Only where there is a terminal to hide — the signed-out shell holds a sign-in box
     // in the right pane, not a session, so a stale flag never collapses it (and the chip
     // never reports "hidden" about a terminal that is not there).
     if (!document.getElementById('terminal')) { return false; }
+    if (isNarrow()) { return narrowHidden; }
     try { return localStorage.getItem(WS_HIDDEN_KEY) === '1'; } catch (e) { return false; }
   }
   function setWsHidden(on) {
+    if (isNarrow()) { narrowHidden = on; return; }
     try { localStorage.setItem(WS_HIDDEN_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
   }
   function paintWsHidden() {
@@ -463,6 +529,7 @@
     paintTerminalControls();
   }
   document.addEventListener('DOMContentLoaded', paintWsHidden);
+  if (narrow && narrow.addEventListener) { narrow.addEventListener('change', paintWsHidden); }
 
   document.addEventListener('click', function (ev) {
     if (!ev.target.closest) { return; }
