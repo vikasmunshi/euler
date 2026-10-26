@@ -467,11 +467,13 @@ issue_cert() {
 #
 # The reload command, re-run by euler-acme on every renewal: keep the key group-readable
 # (the setgid dir gives the euler-tls group) and reload Caddy through its admin socket — no
-# root, no systemctl. Best effort: on first issue the edge is not up yet.
+# root, no systemctl. --force because a renewal changes only the files the Caddyfile names, never
+# the Caddyfile itself, and Caddy skips a reload whose config text is unchanged — without it the
+# new certificate is written but never served. Best effort: on first issue the edge is not up yet.
 install_cert_hook() {
     local caddy reload_cmd
     caddy="$(caddy_bin)"
-    reload_cmd="chmod 0640 ${KEY_FILE}; chmod 0644 ${CERT_FILE}; ${caddy} reload --config ${CADDYFILE} --address '${ADMIN_ADDR}' 2>/dev/null || true"
+    reload_cmd="chmod 0640 ${KEY_FILE}; chmod 0644 ${CERT_FILE}; ${caddy} reload --config ${CADDYFILE} --address '${ADMIN_ADDR}' --force 2>/dev/null || true"
     echo "Deploying certificate to ${TLS_DIR}..."
     acme_run --install-cert -d "${DOMAIN}" \
         --fullchain-file "${CERT_FILE}" \
