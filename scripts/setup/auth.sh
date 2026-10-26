@@ -13,7 +13,7 @@
 # Model:
 #   - The app services run from a root-owned system venv at /opt/euler, NOT the
 #     repo checkout: the service users cannot traverse the repo owner's 0750 home
-#     deploy/upgrade does `pip install <repo>[ai,dev,solutions,web]` into it
+#     deploy/upgrade does `pip install` of euler-solver[ai,dev,solutions] + euler-site + euler-webshell into it
 #     as root (the shared venv.sh helper — one definition for all app-service kits).
 #   - euler-auth: own primary group (state files are euler-auth:euler-auth 0600),
 #     supplementary member of euler-web (binds its public socket group euler-web
@@ -102,7 +102,7 @@ usage() {
 Usage: $0 [deploy|remove|upgrade|redeploy|status|help]
 
   deploy     Create euler-auth, build the /opt/euler system venv (pip install
-             <repo>[web] as root), deploy /etc/euler/auth.env (with a generated
+             the three packages as root), deploy /etc/euler/auth.env (with a generated
              root-only EULER_ADMIN_TOKEN) and /var/lib/euler-auth, and — when
              euler_site.auth exists in the venv — install the root-owned,
              boot-enabled euler-auth.service. Idempotent.

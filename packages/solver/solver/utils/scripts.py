@@ -8,39 +8,56 @@ The venv dependency upgrade (`pip-upgrade`) and the system-resource installer
 """
 from __future__ import annotations
 
+from importlib.util import find_spec
 from tomllib import load
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from solver.config import config
-from solver.config.paths import PACKAGE_DIR
 from solver.shell import console, register
 from solver.shell.dialogue import Abort, Ask, confirm
 from solver.utils.shell_utils import run_cmdline
 
 
+#: The web tier's packages: their dependencies make up the `web` group of `pip-upgrade`.
+_WEB_PACKAGES: tuple[str, ...] = ('site', 'webshell')
+
+
+def _dependency_groups() -> dict[str, list[str]]:
+    """Every package's dependencies by group, the lockstep `euler-*` pins left out."""
+    def read(package: str) -> dict[str, Any]:
+        with open(config.root_dir / 'packages' / package / 'pyproject.toml', 'rb') as f:
+            project: dict[str, Any] = load(f)['project']
+        return project
+
+    solver = read('solver')
+    groups: dict[str, list[str]] = {'core': solver['dependencies'], **solver.get('optional-dependencies', {})}
+    groups['web'] = [d for package in _WEB_PACKAGES for d in read(package).get('dependencies', [])
+                     if not d.startswith('euler-')]
+    return groups
+
+
 @register(requires='admin', aliases=('upgrade',))
-def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show']) -> int:
+def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show', 'web']) -> int:
     """Upgrade packages in the current venv for the given dependency groups.
 
-    Groups are defined in packages/solver/pyproject.toml:
-                                            'core' for project.dependencies,
-                                            'ai', 'dev', 'solutions', 'show' for optional-dependencies,
-                                            'all' to upgrade everything.
-                                            Defaults to 'all'.
+    Groups are read from the packages' pyproject.toml files:
+        'core' for euler-solver's project.dependencies,
+        'ai', 'dev', 'solutions', 'show' for its optional-dependencies,
+        'web' for euler-site's and euler-webshell's dependencies,
+        'all' to upgrade everything ('web' only when the web tier is installed in this venv).
+        Defaults to 'all'.
 
     Args:
         *groups: One or more dependency group names, or 'all'.
     """
     if not groups:
         groups = ('all',)
-    with open(config.root_dir / PACKAGE_DIR / '..' / 'pyproject.toml', 'rb') as f:
-        data = load(f)
-    available: dict[str, list[str]] = {'core': data['project']['dependencies']}
-    available.update(data['project'].get('optional-dependencies', {}))
+    available = _dependency_groups()
     if 'all' in groups:
-        packages: list[str] = [p for pkgs in available.values() for p in pkgs]
+        names = [name for name in available if name != 'web' or find_spec('euler_site') is not None]
     else:
-        packages = [p for name in groups for p in available[name]]
+        names = list(groups)
+    packages: list[str] = list(dict.fromkeys(p for name in names for p in available[name]))
     console.print(f'[muted]{" ".join(packages)}[/muted]')
     if not confirm(f'Upgrade {len(packages)} package(s)?', default=True):
         raise Abort('upgrade cancelled')

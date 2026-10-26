@@ -141,17 +141,28 @@ solver
 <details>
 <summary><b>Requirements</b> - Python 3.14+ and optional dependency groups</summary>
 
-Python 3.14+ and the dependencies listed in [`pyproject.toml`](pyproject.toml).
-Dependencies are split into optional groups - install only what you need:
+Python 3.14+ and the dependencies declared in
+[`packages/solver/pyproject.toml`](packages/solver/pyproject.toml), split into optional groups -
+install only what you need:
 
-| Group       | Contents                                                                                                                 | When you need it                          |
-|-------------|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
-| *(base)*    | `beautifulsoup4`, `cryptography`, `flake8`, `jsonschema`, `mypy`, `prompt-toolkit`, `requests`, `rich`, `types-requests` | using the solver framework                |
-| `solutions` | `cython`, `mpmath`, `numpy`, `primesieve`, `setuptools`                                                                  | running some solutions                    |
-| `show`      | `matplotlib`, `PyQt5`                                                                                                    | graphical output (`--show`)               |
-| `ai`        | `anthropic`, `python-dotenv`                                                                                             | only when running `claude-api`            |
-| `dev`       | `autoflake`, `autopep8`, `black`, `isort`                                                                                | `lint --auto-fix` and solution formatting |
-| `web`       | `aiohttp`, `aiohttp-jinja2`, `jinja2`, `nh3`                                                                              | the web front end's services              |
+| Group       | Contents                                                                                                                                         | When you need it                                 |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+| *(base)*    | `argon2-cffi`, `beautifulsoup4`, `cryptography`, `flake8`, `mypy`, `prompt-toolkit`, `python-dotenv`, `requests`, `rich`, `types-requests` | using the solver framework                       |
+| `solutions` | `cython`, `mpmath`, `numpy`, `primesieve`, `setuptools`                                                                                          | running some solutions                           |
+| `show`      | `matplotlib`, `PyQt5`                                                                                                                            | graphical output (`--show`)                      |
+| `ai`        | `anthropic`                                                                                                                                      | the Claude API commands (`claude-api`, `claude-batch`) |
+| `dev`       | `autoflake`, `autopep8`, `black`, `isort`                                                                                                        | `lint --auto-fix` and solution formatting        |
+
+The web front end is not a group but two further packages, installed only on a host that serves
+it (see the [Package Guide](docs/package-guide.md)):
+
+| Package                                                     | Adds                                                                                                     |
+|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| [`euler-site`](packages/site/pyproject.toml)                | `aiohttp`, `aiohttp-jinja2`, `jinja2`, `markdown-it-py`, `nh3`, `pillow`, `pygments` (+ `euler-solver`) |
+| [`euler-webshell`](packages/webshell/pyproject.toml)        | nothing beyond `euler-solver` and `euler-site`, pinned in lockstep                                       |
+
+System packages (`apt`: Python 3.14, `primesieve`, the C toolchain) are recorded in the root
+[`pyproject.toml`](pyproject.toml) and installed by `scripts/setup/dev_env.sh`.
 
 </details>
 
@@ -191,8 +202,8 @@ A note on the AI assistance: two complementary paths are wired into the shell, b
 aimed at deepening understanding rather than skipping it - the single-shot
 **`claude-api`** (generate a solution, notes, or test cases) and the agentic
 **`claude-solve`** / `claude-blog` / `! claude` (Claude Code working directly on a problem's solution
-files, or on a topic article). Both need
-the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
+files, or on a topic article). The API path needs the `ai` dependency group and an
+`ANTHROPIC_API_KEY`; Claude Code needs only the signed-in `claude` CLI; see the
 [User Guide](docs/user-guide.md#5-ai-assistance) for the trade-offs.
 
 ### For the nerds
@@ -431,9 +442,9 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ### Third-party dependencies
 
-The framework's Python dependencies are declared in [`pyproject.toml`](pyproject.toml), split into
-the optional groups summarised under [Requirements](#requirements) above (`solutions`, `show`, `ai`,
-`dev`, `web`) - install only what you need.
+The framework's Python dependencies are declared per package (`packages/*/pyproject.toml`): the
+solver's optional groups (`solutions`, `show`, `ai`, `dev`) and the web tier's two packages are
+summarised under [Requirements](#requirements) above - install only what you need.
 
 The web front end bundles its JavaScript/CSS assets locally so it runs fully offline, with no CDN
 calls. These vendored assets live under `packages/site/euler_site/content/vendor/` - xterm.js (MIT),

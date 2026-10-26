@@ -362,10 +362,9 @@ EOF
 
 ## 5. AI assistance
 
-Two complementary AI paths are wired into the shell (both require the `ai`
-dependency group;
-API requires `ANTHROPIC_API_KEY` in `~/.euler/env`;
-Claude Code requires authentication in the CLI `claude /login`):
+Two complementary AI paths are wired into the shell, with different requirements: the API
+path needs the `ai` dependency group and `ANTHROPIC_API_KEY` in `~/.euler/env`; the Claude Code
+path needs only the `claude` CLI (`make install-claude`), signed in with `claude /login`:
 
 - **`claude-api <target>`** — a single templated Claude API call that writes one
   artifact: `py` / `c` (a solution), `notes` (the write-up), or `test-cases`. It
