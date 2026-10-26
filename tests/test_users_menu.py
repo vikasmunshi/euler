@@ -26,8 +26,8 @@ class AccountChoicesTest(unittest.TestCase):
         with mock.patch.object(users, '_roster', return_value=_ROWS):
             choices = users._account_choices(None, {})
         self.assertEqual([c.value for c in choices], ['alice@example.com', 'vikas'])
-        self.assertEqual(choices[0].description, 'uff8d9819fc0e12bf · reader · web')
-        self.assertEqual(choices[1].description, 'admin · local')
+        self.assertEqual(choices[0].description, 'uff8d9819fc0e12bf  reader  web')
+        self.assertEqual(choices[1].description, '                   admin   local')
 
     def test_an_unreadable_host_offers_nothing(self) -> None:
         with mock.patch.object(users, '_roster', return_value=None):

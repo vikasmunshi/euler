@@ -93,10 +93,15 @@ def _account_choices(_: Any, __: dict[str, Any]) -> list[Choice]:
     Empty when the host cannot be read; the question is not strict, so a typed identity still
     goes through and the admin CLI decides.
     """
+    rows = [row for row in _roster() or [] if row.get('user')]
+    # Columns, not a ` · ` list: a local login has no slug, and its profile has to land under
+    # the web rows' profiles rather than where their slugs are.
+    slug_width = max([len(str(row.get('slug') or '')) for row in rows] + [0])
+    profile_width = max([len(str(row.get('profile') or '')) for row in rows] + [0])
     return [Choice(str(row['user']), str(row['user']),
-                   ' · '.join(part for part in (str(row.get('slug') or ''), str(row.get('profile') or ''),
-                                                str(row.get('scope') or '')) if part))
-            for row in _roster() or [] if row.get('user')]
+                   f'{row.get("slug") or "":{slug_width}}  {row.get("profile") or "":{profile_width}}  '
+                   f'{row.get("scope") or ""}'.rstrip())
+            for row in rows]
 
 
 def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
