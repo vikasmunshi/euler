@@ -81,6 +81,24 @@ def _names_an_account(bound: dict[str, Any]) -> bool:
     return str(bound.get('action') or '') in _ACCOUNT_VERBS
 
 
+def _account_choices(_: Any, __: dict[str, Any]) -> list[Choice]:
+    """The accounts an account verb can name: each web e-mail and each local login.
+
+    A callable over the admin plane rather than `{accounts}`: the roster is slug-keyed and
+    world-readable, deliberately with no e-mail in it, but the verbs here take the e-mail (or
+    the os-login) — a slug picked off that menu named no account the admin CLI knew. Every
+    verb that asks is `sudo`'d anyway, so reading the host map first costs one prompt this
+    command was about to show. The slug stays in the row, since it is the name the host uses.
+
+    Empty when the host cannot be read; the question is not strict, so a typed identity still
+    goes through and the admin CLI decides.
+    """
+    return [Choice(str(row['user']), str(row['user']),
+                   ' · '.join(part for part in (str(row.get('slug') or ''), str(row.get('profile') or ''),
+                                                str(row.get('scope') or '')) if part))
+            for row in _roster() or [] if row.get('user')]
+
+
 def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
     """Re-execute the admin CLI under sudo (writes the SoR + reaches euler-auth)."""
     argv = ['sudo', sys.executable, '-m', 'euler_site.auth.admin', action]
@@ -351,7 +369,7 @@ def _report_drift() -> None:
 @register(requires='admin')
 def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable', 'disable',
                           'remove', 'redeploy'] = 'list',
-          identity: Annotated[str, Ask('Which account?', choices='accounts', strict=False,
+          identity: Annotated[str, Ask('Which account?', choices=_account_choices, strict=False,
                                        when=_names_an_account, empty='no accounts yet')] = '',
           profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
@@ -376,10 +394,11 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
             `redeploy` re-asserts the per-user host layer and re-lays every collaborator's
             git hooks, dropping live shells. Defaults to `list`.
         identity: [asked] Whose account to act on: a web email (with `@`) or a local OS
-            login. Offered as a menu of the roster for the verbs that act on an account
-            that already exists — `change` / `enable` / `disable` / `remove` — and not
-            asked for the others, since `add` names one that does not yet and `list` /
-            `process-requests` / `redeploy` name none.
+            login. Offered as a menu of the host's accounts (e-mail or login, with slug and
+            profile) for the verbs that act on an account that already exists — `change` /
+            `enable` / `disable` / `remove` — and not asked for the others, since `add`
+            names one that does not yet and `list` / `process-requests` / `redeploy` name
+            none.
         profile: The profile to assign, for `add` / `change`. `admin` is valid only for a
             local os-login, never a web account.
     """
