@@ -62,12 +62,25 @@ In detail:
                 └────────▶│  euler-msg  │  SO_PEERCRED identity, AF_UNIX only,
                           └─────────────┘  never routed by Caddy
                           ▲
-        policy: /etc/euler/authorizations.json — read by the shell and every service
+        policy: /etc/euler/authorizations.json — read by auth, msg and the operator
 ```
 
 Only Caddy is network-bound. Every application service listens on a unix domain socket
-under `/run/euler/`, which makes filesystem permissions the access control: the socket
-is `0660 euler-<svc>:euler-web`, so only group members can `connect()`. There is no port
+under `/run/euler/`, which makes filesystem permissions the access control: each socket
+is `0660`, and its group decides who can `connect()`. Two groups, because the per-user
+uids run their owner's code and must reach some sockets but never others:
+
+- **`euler-web`** — `auth.sock` and `msg.sock`: the services, and the per-user uids (a
+  web shell redeems its ticket at auth and talks to the spool).
+- **`euler-edge`** — `site.sock` and every `user-<slug>.sock`: Caddy, `euler-auth`,
+  `euler-msg`, `euler-site`. **No per-user uid**, so one collaborator's code cannot dial
+  another's instance. `/run/euler` itself is `root:euler-edge 1771`: the services create
+  their sockets there, the sticky bit keeps each from unlinking another's, and everyone
+  else may only traverse it.
+
+Each per-user instance also checks its caller with `SO_PEERCRED` (Caddy for pages and
+`/ws`, `euler-auth` and `euler-msg` for their pushes, root for the status sweep), so the
+identity headers it trusts can only have come through the edge. There is no port
 registry to maintain and no `0.0.0.0` mis-bind one typo away. Isolation is only real
 across distinct uids, so each service gets a dedicated nologin system user, and **none
 runs as root**.
@@ -106,10 +119,15 @@ absolute path from `/etc/euler/tls/`. It performs no ACME of its own.
 DNS-01 needs no inbound port, so nothing listens on `:80`. Caddy's own ACME is not used
 because the `caddy-dns/namedotcom` plugin is unmaintained and no longer builds against
 current Caddy; delegating issuance to acme.sh keeps the DNS-01 benefit with stock Caddy.
-Renewal re-applies the key mode and reloads through **Caddy's admin API** on loopback
-`:2019` rather than `systemctl`, so the non-root `euler-acme` can trigger it. The cert
-directory is `euler-acme:euler-web` setgid `2750`, so acme.sh's writes inherit the group
-and `euler-caddy` reads the key at `0640` — no chown, no root.
+Renewal re-applies the key mode and reloads through **Caddy's admin API** rather than
+`systemctl`, so the non-root `euler-acme` can trigger it. The admin API is a **unix
+socket**, `/run/euler-caddy/admin.sock` (`0660 euler-caddy:euler-caddy`), never TCP:
+Caddy's primary group is its own, and `euler-acme` is its only other member. The reload
+is `--force`d, since a renewal changes the files the Caddyfile names and not the Caddyfile.
+The cert directory is `euler-acme:euler-tls` setgid `2750`, so acme.sh's writes inherit
+the group and `euler-caddy` — the only member of `euler-tls` — reads the key at `0640`:
+no chown, no root. `frontend.sh rekey` renews with a fresh private key, and acme.sh keeps
+rotating the key on every renewal after that.
 
 The same name.com token drives DNS-01 and the `euler-ddns` timer, which PUTs the A
 record only when the public IP changes.
@@ -165,8 +183,9 @@ service units, so AI features, the problem scraper, and `gh` egress only through
 allowlist lives in `/etc/euler-proxy/squid.allowlist` — edit and reload.
 
 **nftables** (`scripts/setup/firewall.sh` → `euler-firewall.service`) makes that
-structural. A `table inet euler` with an egress-only (`hook output`) chain permits
-loopback and only the specific `(uid, port)` each service needs, then drops the rest:
+structural. A `table inet euler` with an egress-only (`hook output`) chain permits only
+the specific `(uid, port)` each service needs — on loopback as much as off-host — then
+drops the rest:
 
 | uid | Permitted egress |
 |---|---|
@@ -175,7 +194,13 @@ loopback and only the specific `(uid, port)` each service needs, then drops the 
 | `euler-ddns` | `tcp dport 443` (name.com, ipify) |
 | `euler-smtp` | `tcp dport 587` (Gmail submission) |
 | infra uids | `udp/tcp dport 53` |
-| every `euler-*` | loopback; **everything else dropped** |
+| every `euler-*` | loopback `:3128` (Squid) and `:53` (the resolver) |
+| `euler-auth` | loopback `:8025` (the mail relay — its only client) |
+| every `euler-*` | **everything else dropped**, loopback included |
+
+Loopback is an allowlist, not the service fabric: the services talk over unix sockets, so
+nothing else listening on `127.0.0.1` — on a shared host, an IDE or `sshd` — is in reach
+of a per-user web shell.
 
 Two details matter and are easy to get wrong:
 
@@ -416,7 +441,7 @@ to get wrong.
 
 ### 6.1 The policy file
 
-`/etc/euler/authorizations.json` (`root:root 0644`) is the system of record, and it
+`/etc/euler/authorizations.json` (`root:euler-authz 0640`) is the system of record, and it
 carries exactly one decision — **who has which profile**:
 
 ```json
@@ -430,8 +455,11 @@ carries exactly one decision — **who has which profile**:
 ```
 
 The `users` map is keyed by **web email or OS-login name**, one map for both channels.
-It is world-readable because it is not secret, and **root-write only** because every
-mutation goes through the sudo-gated `users` path. It lives outside the repo so that a
+It names every collaborator, so it is readable only by `euler-authz` — `euler-auth`,
+`euler-msg` and the operator — and **root-write only** because every mutation goes through
+the sudo-gated `users` path (which keeps the file's group and mode). The per-user tier
+needs only the ladder, which is code; a process that may not read the file loads it as a
+policy with no names in it, never as no policy at all. It lives outside the repo so that a
 repo write cannot change policy. There is **no policy file in the repo**: absent a
 deployed one the built-in default maps nobody, so the checkout owner floors to `admin`
 by uid and everyone else is `contributor`. The installer seeds the real file.
@@ -2250,9 +2278,8 @@ Two cheaper designs were also rejected, and for reasons worth keeping:
 
 So: a dedicated `euler-msg`, and the isolation is real rather than nominal because of one
 observation — **`system_slug()` is a pure SHA-1 of the normalised e-mail**
-(`packages/solver/solver/auth/identity.py`), and `authorizations.json` is world-readable. The service can
-therefore build its own `slug → e-mail → profile` map from the policy file every other
-service already reads. It follows that `euler-msg`:
+(`packages/solver/solver/auth/identity.py`), and `euler-msg` is in `euler-authz`. The service can
+therefore build its own `slug → e-mail → profile` map from the policy file. It follows that `euler-msg`:
 
 - is **never routed by Caddy** — the per-user instance is its only web-facing consumer, and
   `/messages` already routes there through `forward_auth` like any other content path, so
@@ -2634,8 +2661,9 @@ operator key-authorizes that person** (§9). Private-plaintext visibility is per
 revocable, orthogonal to the ladder. **What remains accepted:** compromising an
 *authorized* user's session reads the private plaintext in *that user's* worktree — the
 deliberate cost of a shared solver over an invited set. Per-user uids keep one
-compromise out of every other tree, and the egress lock leaves no arbitrary off-host
-exfiltration path.
+compromise out of every other tree. The egress lock narrows, but does not close, the way
+off the host: the Squid allowlist includes general-purpose services (GitHub), so a
+compromised session can still send what it reads somewhere.
 
 **`admin` is web-reachable.** With the channel axis gone, an `admin` account signed in
 over the web could run the highest-privilege operations. In practice the admin API will
@@ -2675,17 +2703,29 @@ decision recorded here.
 - **SRP-6a** (`packages/site/euler_site/auth/srp.py`): the password never reaches the server or disk;
   correct `PAD`, `u≠0` / `A,B mod N≠0` checks, `secrets.compare_digest` throughout;
   cross-tested against the browser client.
-- **Anti-enumeration**: stable decoy salt/`B` for unknown emails at `/auth/challenge`;
-  generic responses from `/forgot` and every invalid-token page.
+- **Anti-enumeration**: stable decoy salt/`B` for unknown emails at `/auth/challenge`
+  (its secret persists, so decoys survive a restart as real salts do); generic responses —
+  and response times: `/forgot` sends in the background — from `/forgot` and every
+  invalid-token page.
+- **Resets cannot be blocked, or used to spend the mail**: a new `/forgot` never replaces a
+  link already sent (cooldown + daily cap per account); a completed reset revokes the
+  rest; mail an unauthenticated request triggers is budgeted per recipient and per day.
+- **A login proves today's password**: a pending SRP challenge is bound to the verifier it
+  was built from, so one begun before a reset or change cannot finish after it.
 - **Invite-only registration**: single-use, **hashed**, time-boxed link tokens plus a
   live-mailbox OTP; the account written is the invite's bound email, never
   client-supplied.
 - **Remember-me**: selector\:validator with rotation-on-use, theft detection, and
   `HMAC(validator)` at rest.
 - **Identity is unforgeable**: Caddy strips client `X-User`/`X-Profile`/`X-User-Slug` and
-  routes on the slug `forward_auth` returns; the per-user instance refuses a request whose
-  `X-User` maps to another slug; web shells prove identity by a single-use ticket, not
-  env; the local admin fallback requires the checkout-owner uid.
+  routes on the slug `forward_auth` returns; the per-user sockets are `euler-edge`, which no
+  per-user uid joins, and each instance admits only its expected peers by `SO_PEERCRED`
+  (§ 1); it refuses a request whose `X-User` maps to another slug, and a `/ws` upgrade from
+  another origin; web shells prove identity by a single-use ticket, not env; the local admin
+  fallback requires the checkout-owner uid, and an unreadable policy file never counts as
+  an absent one.
+- **Key messages come from staff**: `msg act` saves or reconstructs a key only from a
+  `notice` thread, which only staff can create; anything written *to* staff is prose.
 - **Wheel-gated admin plane**: the admin socket is `0600` euler-auth-private; the token
   lives only in root-readable `auth.env`; `users` mutations run under sudo.
 - **Secret hygiene**: auth state `0600`, euler-auth-only, off the operator uid; a user's
@@ -2706,8 +2746,12 @@ decision recorded here.
   The two legs are independent — a profile check on `git-push`, a GitHub-identity check in
   the publish script — so weakening either alone still leaves `master` closed.
 - **Network posture**: only Caddy is network-bound; the app tier is loopback-only
-  (systemd `IPAddressDeny` + host nftables); all egress — including every dynamic
-  per-user uid, enumerated by the `euler-user` group — via the Squid allowlist.
+  (systemd `IPAddressDeny` + host nftables), and loopback itself is an allowlist (Squid,
+  the resolver, the relay for `euler-auth`); Caddy's admin API is a unix socket; all
+  egress — including every dynamic per-user uid, enumerated by the `euler-user` group — via
+  the Squid allowlist.
+- **Secrets stay with their one reader**: the TLS key is `euler-tls` (Caddy alone), the
+  authorization map `euler-authz` (auth, msg, the operator).
 - **Cookies**: `Secure; HttpOnly; SameSite=Lax`, site-wide.
 - **The message spool is off the auth process** (§13.1): attacker-authored free text lives in
   `euler-msg`, which holds no verifiers, sessions or tickets, is unreachable from the edge,
@@ -2882,7 +2926,8 @@ Only needed for access beyond the LAN.
 ### 15.4 Renewal
 
 acme.sh runs as non-root `euler-acme` on a daily timer; its `--reloadcmd` fixes the key
-mode and reloads via Caddy's admin API. Renewal needs no DNS credentials re-supplied —
+mode and force-reloads via Caddy's admin socket (§ 2). `frontend.sh upgrade` re-registers
+that command, which acme.sh stores per domain. Renewal needs no DNS credentials re-supplied —
 acme.sh saved the token in the cert `.conf` at issue time. Force one with `frontend.sh
 renew`. Each kit's `status` reports unit + health; `frontend.sh status` also shows cert
 expiry and `/healthz`.
@@ -2892,14 +2937,14 @@ expiry and `/healthz`.
 | Layer | Key config |
 |---|---|
 | Authoring source | `~/.euler/env` (repo owner reads; installer deploys scoped copies) |
-| Edge | `/etc/euler/Caddyfile` (`0644`), `/etc/euler/tls/server.{crt,key}` (setgid, key `0640`), `/etc/euler/web-content` |
+| Edge | `/etc/euler/Caddyfile` (`0644`), `/etc/euler/tls/server.{crt,key}` (`euler-acme:euler-tls`, setgid, key `0640`), `/etc/euler/web-content`, `/run/euler-caddy/admin.sock` (`0660`) |
 | Egress | `/etc/euler-proxy/{squid.conf,squid.allowlist}`; client `HTTPS_PROXY` in `/etc/euler/egress.env` |
 | Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
 | Auth | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
 | Messaging | `/etc/euler/msg.env` (`root:euler-msg 0640`); `/var/lib/euler-msg` (`0700`) |
-| Policy | `/etc/euler/authorizations.json` (`root:root 0644`) |
+| Policy | `/etc/euler/authorizations.json` (`root:euler-authz 0640`) |
 | Per-user tier | `/etc/euler/user.env` (no secrets); `/home/<slug>/` (`0700`) |
-| Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` and `/run/euler-msg/admin.sock` (`0600`, one per admin plane) |
+| Sockets | `/run/euler` (`root:euler-edge 1771`); `auth.sock`, `msg.sock` (`0660 …:euler-web`); `site.sock`, `user-<slug>.sock` (`0660 …:euler-edge`); `/run/euler-adm/auth-admin.sock` and `/run/euler-msg/admin.sock` (`0600`, one per admin plane) |
 
 ### 15.6 Verify
 
