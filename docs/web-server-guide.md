@@ -277,12 +277,10 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
 
 1. `POST /auth/challenge {email}` → the service loads `{salt, v}`, computes `B = k·v +
    gᵇ`, and replies `{salt, B, id, kdf}` — the handshake is held under that random `id`, so
-   another one started for the same address cannot cancel it, and `kdf` names how the
-   account's `x` was derived (Argon2id, or the legacy SHA-256 until its next sign-in moves
-   it — docs/srp-guide.md § 3). **Unknown or disabled
+   another one started for the same address cannot cancel it, and `kdf` names the Argon2id
+   parameters the account's `x` was derived with (docs/srp-guide.md § 3). **Unknown or disabled
    accounts get a stable decoy** `salt`/`B` (never stored), so the response reveals nothing.
-2. `POST /auth/verify {email, A, M1, id, remember, upgrade?}` → the server checks `M1`; on
-   success it stores `upgrade` (a legacy account's Argon2id verifier, same salt), and
+2. `POST /auth/verify {email, A, M1, id, remember}` → the server checks `M1`; on success it
    replies `{M2, email, profile}` and sets the session cookie (plus the remember-me
    cookie if asked). On failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
@@ -370,7 +368,7 @@ repo owner. The admin commands never touch these files; they call the service (�
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, kdf, terms_version, terms_accepted_at, created, disabled}` per email. `kdf` names how the verifier's `x` was derived (Argon2id; a record without it is the legacy SHA-256, upgraded at its next sign-in — docs/srp-guide.md § 3). **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with `/etc/euler/roster/users.json` (§6.3): this one holds the login secrets and is euler-auth's alone; that one holds public keys, is world-readable, and carries no address at all. |
+| `users.json` | SRP verifier DB: `{salt, verifier, kdf, terms_version, terms_accepted_at, created, disabled}` per email. `kdf` names the Argon2id parameters the verifier's `x` was derived with (docs/srp-guide.md § 3). **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with `/etc/euler/roster/users.json` (§6.3): this one holds the login secrets and is euler-auth's alone; that one holds public keys, is world-readable, and carries no address at all. |
 | `pending.json` | in-flight invites and resets, keyed by `hash(link-token)`. |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |
@@ -820,9 +818,7 @@ operator at rest rather than protected by file permissions alone.
 
 The browser derives the identical `PK` from the password it already holds and the salt already
 in the SRP challenge, with the same vendored Argon2id it uses for the SRP key — no extra
-round-trip, and the label keeps the two derivations apart. A vault made before Argon2 (PBKDF2,
-600 000 rounds) still opens and is re-wrapped under Argon2id at its next unlock (docs/vault-guide.md
-§ 2). The cost is paid once per session.
+round-trip, and the label keeps the two derivations apart. The cost is paid once per session.
 
 ### 8.1 Delivering the key
 
@@ -2742,8 +2738,7 @@ decision recorded here.
 - **SRP-6a** (`packages/site/euler_site/auth/srp.py`): the password never reaches the server or disk;
   correct `PAD`, `u≠0` / `A,B mod N≠0` checks, `secrets.compare_digest` throughout;
   cross-tested against the browser client. `x` comes from Argon2id (64 MiB, 3 passes), so a
-  stolen `users.json` is a slow offline attack; a new verifier is never minted on the legacy
-  SHA-256 by current pages, and a legacy one is replaced only inside a proven sign-in.
+  stolen `users.json` is a slow offline attack, and a verifier at any other cost is refused.
 - **Anti-enumeration**: stable decoy salt/`B` for unknown emails at `/auth/challenge`
   (its secret persists, so decoys survive a restart as real salts do); generic responses —
   and response times: `/forgot` sends in the background — from `/forgot` and every

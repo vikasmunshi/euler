@@ -12,7 +12,6 @@ so no real `~/.euler` is touched and the suite is host-independent.
 """
 from __future__ import annotations
 
-import json
 import os
 import unittest
 from pathlib import Path
@@ -50,9 +49,7 @@ class VaultTestCase(unittest.TestCase):
         app_config.env_file = self.env_file
         app_config.vault_file = self.secrets / 'vault'
         # A cheap KDF so the suite is fast; the primitive is unchanged.
-        self._saved_iters = wire.VAULT_KDF_ITERATIONS
         self._saved_kdf = wire.VAULT_KDF
-        wire.VAULT_KDF_ITERATIONS = 1000
         wire.VAULT_KDF = _CHEAP_KDF
         self._saved_key_env = os.environ.pop(wire.VAULT_KEY_ENV, None)
         # write_session_key() writes into $XDG_RUNTIME_DIR — an environment variable, not
@@ -66,7 +63,6 @@ class VaultTestCase(unittest.TestCase):
     def tearDown(self) -> None:
         for k, v in self._saved_crypto.items():
             setattr(app_config, k, v)
-        wire.VAULT_KDF_ITERATIONS = self._saved_iters
         wire.VAULT_KDF = self._saved_kdf
         os.environ.pop(wire.VAULT_KEY_ENV, None)
         if self._saved_key_env is not None:
@@ -418,49 +414,20 @@ class VaultFailureIsNeverANewIdentityTest(VaultTestCase):
         self.assertIn('does not decrypt', str(ctx.exception))
 
 
-class LegacyVaultTest(VaultTestCase):
-    """A vault made before Argon2 (PBKDF2) still opens, and moves to the current KDF — same `VK`,
-    same salt — the first time its unlock has the means."""
+class VaultKdfTest(VaultTestCase):
+    """The vault key is Argon2id under its own label, never the SRP derivation."""
 
     _SALT = b'\x05' * 16
-
-    def _legacy_vault(self, password: str = 'old-pw') -> bytes:
-        vault_key = vault.new_vault_key()
-        pk = vault.derive_password_key(password, self._SALT, wire.VAULT_KDF_LEGACY, 1000)
-        app_config.vault_file.write_text(json.dumps({
-            'kdf': wire.VAULT_KDF_LEGACY, 'iterations': 1000, 'salt': self._SALT.hex(),
-            'wrapped_vk': vault.wrap_vault_key(pk, vault_key)}))
-        return vault_key
-
-    def _record(self) -> vault.VaultData:
-        record = vault.read_vault()
-        assert record is not None
-        return record
-
-    def test_a_password_unlock_moves_it(self) -> None:
-        vault_key = self._legacy_vault()
-        self.assertEqual(vault.unlock_vault('old-pw'), vault_key)
-        record = self._record()
-        self.assertEqual((record['kdf'], record['salt']), (wire.VAULT_KDF, self._SALT.hex()))
-        self.assertNotIn('iterations', record)
-        self.assertEqual(vault.unlock_vault('old-pw'), vault_key, 'and opens under Argon2id')
-
-    def test_a_browser_unlock_moves_it_with_both_keys(self) -> None:
-        vault_key = self._legacy_vault()
-        legacy_pk = vault.derive_password_key('old-pw', self._SALT, wire.VAULT_KDF_LEGACY, 1000)
-        with self.assertRaises(InvalidTag):
-            vault.upgrade_vault_with_pk(b'\x00' * 32, vault.derive_password_key('old-pw', self._SALT))
-        self.assertEqual(self._record()['kdf'], wire.VAULT_KDF_LEGACY, 'a wrong key moves nothing')
-        pk = vault.derive_password_key('old-pw', self._SALT)
-        self.assertEqual(vault.upgrade_vault_with_pk(legacy_pk, pk), vault_key)
-        self.assertEqual(vault.unlock_vault_with_pk(pk), vault_key)
-        self.assertFalse(vault.is_legacy(self._record()))
 
     def test_the_vault_key_is_not_the_srp_derivation(self) -> None:
         """Same password, same salt, same Argon2id cost — different labels, different keys."""
         from argon2.low_level import Type, hash_secret_raw
         srp_inner = hash_secret_raw(b'pw', b'euler-srp-x:' + self._SALT, 1, 8, 1, 32, Type.ID)
         self.assertNotEqual(vault.derive_password_key('pw', self._SALT), srp_inner)
+
+    def test_only_argon2id_is_understood(self) -> None:
+        with self.assertRaises(ValueError):
+            vault.derive_password_key('pw', self._SALT, 'pbkdf2-sha256')
 
 
 if __name__ == '__main__':

@@ -94,15 +94,10 @@ Argon2id over the same password and salt, under its own label (`euler-vault-pk:`
 holds `users.json` can guess a password, derive `x`, and compare `g^x` with `v` — one hash and
 one exponentiation per guess. With `x` from two SHA-256 calls (RFC 5054 as written, and this
 service until v4.14) that is a fast offline attack. Argon2id makes every guess cost 64 MiB and
-three passes, which is what limits a stolen database to the weak passwords.
-
-**Accounts made before Argon2** carry `kdf = "sha256"` — `x = H(s ‖ H(email ":" password))` —
-and say so in their challenge. Their next sign-in moves them: the browser, which has the
-password in hand, also sends `upgrade`, the Argon2id verifier for the *same* salt, and
-`finish_challenge` stores it only after the proof succeeds, in the same call. The salt stays so
-the vault key, derived from it, stays too. Until every account has signed in once, a legacy
-challenge is distinguishable from an unknown address's decoy (which names Argon2id) — an
-existence leak that closes as the accounts move.
+three passes, which is what limits a stolen database to the weak passwords. Every account was
+moved across at its next sign-in after v4.14, and the SHA-256 path is gone: a submitted verifier
+must name the current parameters (`submitted_kdf`), and each challenge names the account's own,
+so the cost can rise later the same way.
 
 The policy against weak passwords is **length and classes**, enforced in the browser because
 the server cannot see the password to check it — so it is advisory: a client that skips
@@ -209,7 +204,7 @@ srp.js                                       packages/site/euler_site/auth/
 | endpoint | body in | body out | notes |
 | --- | --- | --- | --- |
 | `POST /auth/challenge` | `{email}` | `{salt, B, id, kdf}` | `AuthService.start_challenge`; each handshake is held under its own random `id`, so starting one for an address never cancels another in flight |
-| `POST /auth/verify` | `{email, A, M1, id, upgrade?}` | `{M2}` + session cookie | `finish_challenge`; the challenge is consumed whether or not it succeeds, and only for the address it was started for; `upgrade` (a legacy account's Argon2id verifier) is stored only on success |
+| `POST /auth/verify` | `{email, A, M1, id}` | `{M2}` + session cookie | `finish_challenge`; the challenge is consumed whether or not it succeeds, and only for the address it was started for |
 | `POST /register/complete` | form `{token, salt, verifier, kdf}` | redirect to `/login` | `pages.py`; the invite+OTP gate above, single-use token |
 | `POST /auth/password` | `{A, M1, id, salt, verifier, kdf}` | `{M2}` | signed-in change: the **same handshake** re-used as proof of the current password, in one atomic exchange with the new verifier |
 

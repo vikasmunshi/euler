@@ -10,11 +10,9 @@
  * CSP 'self'); exposes a single global `SRP`. Also loadable under Node for the
  * repo's interop tests.
  *
- * The password hash inside x is per account and named by the challenge (`kdf`):
- * KDF below (Argon2id, from the vendored hash-wasm, loaded before this script) or
- * the legacy SHA-256. New verifiers always use KDF; a sign-in on a legacy account
- * also sends a KDF verifier for the same salt, which the server stores once the
- * proof succeeds (srp.py § the password hash).
+ * The password hash inside x is Argon2id, from the vendored hash-wasm (loaded before
+ * this script); its parameters are per account and named by the challenge (`kdf`), and
+ * a new verifier always uses KDF below (srp.py § the password hash).
  */
 'use strict';
 
@@ -37,9 +35,8 @@ globalThis.SRP = globalThis.SRP || (() => {
   const g = 2n;
   const N_BYTES = 256;
   const SALT_BYTES = 16;
-  // Must equal srp.py's KDF / KDF_LEGACY (tests/test_srp_interop.py pins them).
+  // Must equal srp.py's KDF (tests/test_srp_interop.py pins it).
   const KDF = 'argon2id$m=65536,t=3,p=1';
-  const KDF_LEGACY = 'sha256';
   const ARGON2_LABEL = 'euler-srp-x:';
   // The vendored hash-wasm global in a page; its file beside this one under Node. Looked up
   // at use, not here: this object outlives htmx swaps, and the bundle may land after it.
@@ -105,11 +102,10 @@ globalThis.SRP = globalThis.SRP || (() => {
 
   function normalizeEmail(email) { return email.trim().toLowerCase(); }
 
-  // x = H(salt | inner): inner = H(email ":" password) for the legacy KDF (RFC 5054), or
-  // Argon2id(email ":" password, "euler-srp-x:" | salt) for KDF.
+  // x = H(salt | Argon2id(email ":" password, "euler-srp-x:" | salt)), with the Argon2id
+  // parameters the account's kdf names.
   async function deriveX(saltBytes, email, password, kdf) {
     const secret = `${email}:${password}`;
-    if ((kdf || KDF_LEGACY) === KDF_LEGACY) return hashInt(saltBytes, await hash(te.encode(secret)));
     const params = /^argon2id\$m=(\d+),t=(\d+),p=(\d+)$/.exec(kdf);
     if (!params) throw new Error('SRP: unsupported password hash ' + kdf);
     const lib = argon2();
@@ -122,23 +118,12 @@ globalThis.SRP = globalThis.SRP || (() => {
     return hashInt(saltBytes, inner);
   }
 
-  async function verifierFor(saltBytes, email, password) {
-    const x = await deriveX(saltBytes, normalizeEmail(email), password, KDF);
-    return modPow(g, x, N).toString(16);
-  }
-
   // ── registration: derive {salt, verifier, kdf} locally ──────────────────────
   async function computeVerifier(email, password) {
     const salt = new Uint8Array(SALT_BYTES);
     globalThis.crypto.getRandomValues(salt);
-    return { salt: bytesToHex(salt), verifier: await verifierFor(salt, email, password), kdf: KDF };
-  }
-
-  // The current-KDF verifier for an existing salt: what a legacy account's sign-in sends
-  // along (`upgrade`) so the server can move it to KDF without changing the salt — the vault
-  // key is derived from that salt too, and stays as it is.
-  async function upgradeVerifier(email, password, saltHex) {
-    return verifierFor(hexToBytes(saltHex), email, password);
+    const x = await deriveX(salt, normalizeEmail(email), password, KDF);
+    return { salt: bytesToHex(salt), verifier: modPow(g, x, N).toString(16), kdf: KDF };
   }
 
   // ── login: the zero-knowledge handshake ──────────────────────────────────────
@@ -182,7 +167,7 @@ globalThis.SRP = globalThis.SRP || (() => {
     return { email: norm, respond };
   }
 
-  return { computeVerifier, upgradeVerifier, startLogin, normalizeEmail, KDF, KDF_LEGACY };
+  return { computeVerifier, startLogin, normalizeEmail, KDF };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = globalThis.SRP;  // node (tests)

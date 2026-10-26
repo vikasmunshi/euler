@@ -33,7 +33,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from euler_site.auth.srp import KDF, KDF_LEGACY, VERSION, SrpToken
+from euler_site.auth.srp import KDF, VERSION, SrpToken
 from euler_site.auth.storage import load_json, save_json
 
 
@@ -57,9 +57,8 @@ class UserRecord(NamedTuple):
     terms_accepted_at: str
     created: str
     disabled: bool
-    #: How the verifier's `x` was derived (`srp.KDF`); a record from before it was stored is
-    #: `srp.KDF_LEGACY`, and moves to the current one at its next sign-in.
-    kdf: str = KDF_LEGACY
+    #: The Argon2id parameters the verifier's `x` was derived with (`srp.KDF` when it was made).
+    kdf: str = KDF
 
     @property
     def srp_token(self) -> SrpToken:
@@ -97,7 +96,7 @@ class UserStore:
             terms_version=str(raw.get('terms_version', '')),
             terms_accepted_at=str(raw.get('terms_accepted_at', '')),
             created=str(raw.get('created', '')), disabled=bool(raw.get('disabled', True)),
-            kdf=str(raw.get('kdf', KDF_LEGACY)))
+            kdf=str(raw.get('kdf', KDF)))
 
     def create(self, email: str, salt: str, verifier: str,
                terms_version: str, terms_accepted_at: str, *, kdf: str = KDF) -> UserRecord:
@@ -114,7 +113,7 @@ class UserStore:
         return record
 
     def set_credentials(self, email: str, salt: str, verifier: str, *, kdf: str = KDF) -> bool:
-        """Replace the SRP material (a reset, a change, a KDF upgrade); False if the user is unknown."""
+        """Replace the SRP material (a reset or a change); False if the user is unknown."""
         users = self._load()
         key = normalize_email(email)
         if key not in users:

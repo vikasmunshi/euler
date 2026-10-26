@@ -40,19 +40,18 @@ later. Integer values fed to the hash (`A`, `B`, `S`) are left-padded to
 the byte length of `N` (`PAD`), which a browser-side client must match
 byte-for-byte to interoperate.
 
-**The password hash in `x` is versioned per account** (:data:`KDF`). An account's `kdf` is
-either :data:`KDF_LEGACY` — `x = H(salt | H(email ":" password))`, RFC 5054 as written, fast
-enough that a stolen verifier could be guessed at GPU speed — or the current Argon2id string,
-`x = H(salt | Argon2id(email ":" password, "euler-srp-x:" | salt))`. The Argon2 salt carries a
-label so this derivation never coincides with the vault's PBKDF2 key from the same password and
-salt. The browser does the work (`hash-wasm`); the service never derives `x` for a sign-in, only
-here, for :func:`verify_password` and the tests. An account moves to the current KDF on its next
-sign-in: the browser sends a new verifier under the same salt alongside its proof (auth/app.py).
+**The password hash in `x` is Argon2id**, `x = H(salt | Argon2id(email ":" password,
+"euler-srp-x:" | salt))` — not RFC 5054's `H(salt | H(email ":" password))`, which is fast enough
+that a stolen verifier could be guessed at GPU speed. Its parameters (:data:`KDF`) are stored per
+account and named in each challenge, so the cost can rise later without stranding anybody. The
+Argon2 salt carries a label so this derivation never coincides with the vault's key from the same
+password and salt (`euler-vault-pk:`). The browser does the work (`hash-wasm`); the service never
+derives `x` for a sign-in, only here, for :func:`verify_password` and the tests.
 """
 from __future__ import annotations
 
 __all__ = ['SrpClient', 'SrpServer', 'SrpToken', 'make_srp_token', 'compute_verifier',
-           'verify_password', 'decoy_token', 'VERSION', 'KDF', 'KDF_LEGACY', 'KDFS']
+           'verify_password', 'decoy_token', 'VERSION', 'KDF']
 
 import hmac
 import secrets
@@ -81,10 +80,6 @@ _SALT_BYTES: int = 16
 #: string is stored per account and sent with each challenge, so the browser derives `x` the
 #: way that account's verifier was made; `srp.js` carries the same constant.
 KDF: str = 'argon2id$m=65536,t=3,p=1'
-#: The original derivation, `H(salt | H(email ":" password))` — accounts not yet upgraded.
-KDF_LEGACY: str = 'sha256'
-#: Every derivation a stored or submitted verifier may name.
-KDFS: frozenset[str] = frozenset({KDF, KDF_LEGACY})
 #: Prefixed to the salt for Argon2, so `x` never shares a derivation with the vault key.
 _ARGON2_LABEL: bytes = b'euler-srp-x:'
 
@@ -127,14 +122,13 @@ def _argon2_params(kdf: str) -> tuple[int, int, int]:
 
 
 def _derive_x(salt: bytes, email: str, password: str, kdf: str = KDF) -> int:
-    """Derive the private exponent `x = H(salt | inner)`, *inner* per the account's *kdf*.
+    """Derive the private exponent `x = H(salt | Argon2id(email ":" password, "euler-srp-x:" | salt))`,
+    with the Argon2id parameters the account's *kdf* names.
 
-    Legacy: `inner = H(email ":" password)` (RFC 5054). Current: `inner =
-    Argon2id(email ":" password, "euler-srp-x:" | salt)`.
+    Raises:
+        ValueError: If *kdf* is not an `argon2id$m=…,t=…,p=…` string.
     """
     secret = f'{email}:{password}'.encode()
-    if kdf == KDF_LEGACY:
-        return _hash_int(salt, _hash(secret))
     from argon2.low_level import Type, hash_secret_raw   # only local derivations need it
     memory, passes, lanes = _argon2_params(kdf)
     inner = hash_secret_raw(secret, _ARGON2_LABEL + salt, passes, memory, lanes, 32, Type.ID)
@@ -183,7 +177,7 @@ class SrpToken(NamedTuple):
 
     salt: bytes
     verifier: int
-    #: How `x` was derived for this verifier (:data:`KDF` or :data:`KDF_LEGACY`).
+    #: The Argon2id parameters `x` was derived with for this verifier (:data:`KDF` when new).
     kdf: str = KDF
 
     @classmethod
@@ -196,17 +190,15 @@ class SrpToken(NamedTuple):
     def parse(cls, token: str) -> SrpToken:
         """Parse a serialised token, raising ValueError if it is malformed or a foreign version.
 
-        Three fields are a legacy token; a fourth (which may itself contain `$`) names the KDF.
+        The fourth field (which itself contains `$`) names the KDF.
         """
         parts = token.split('$', 3)
-        if len(parts) not in (3, 4):
+        if len(parts) != 4:
             raise ValueError('malformed srp token')
-        version, salt_hex, verifier_hex = parts[:3]
-        kdf = parts[3] if len(parts) == 4 else KDF_LEGACY
+        version, salt_hex, verifier_hex, kdf = parts
         if version != VERSION:
             raise ValueError(f'unsupported srp token version: {version!r}')
-        if kdf not in KDFS:
-            raise ValueError(f'unsupported srp kdf: {kdf!r}')
+        _argon2_params(kdf)                       # raises for anything but argon2id parameters
         return cls(salt=bytes.fromhex(salt_hex), verifier=int(verifier_hex, 16), kdf=kdf)
 
     def serialize(self) -> str:
@@ -231,7 +223,7 @@ def decoy_token(email: str, secret: bytes) -> SrpToken:
     unknown one by watching the salt (the subsequent proof still fails for any
     password). Derived from a per-process `secret` and the email via HMAC-SHA256,
     so it is consistent within a run yet reveals nothing about real users. It names the
-    current :data:`KDF`, as an upgraded account does.
+    current :data:`KDF`, as a real account's challenge does.
     """
     salt: bytes = hmac.new(secret, b'srp-decoy-salt:' + email.encode(), sha256).digest()[:_SALT_BYTES]
     x: int = _hash_int(hmac.new(secret, b'srp-decoy-x:' + email.encode(), sha256).digest())

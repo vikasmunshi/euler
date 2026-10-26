@@ -30,8 +30,7 @@ construction).
 """
 from __future__ import annotations
 
-__all__ = ['resolve_subject', 'subject_for', 'deployed_policy', 'os_login', 'slugify', 'system_slug',
-           'legacy_system_slug']
+__all__ = ['resolve_subject', 'subject_for', 'deployed_policy', 'os_login', 'slugify', 'system_slug']
 
 import hashlib
 import os
@@ -51,9 +50,6 @@ _SLUG_KEEP = re.compile(r'[^a-z0-9._-]+')
 #: their instance and run as their uid, and at 24 bits such an address is found in under a
 #: second. Provisioning also refuses a slug owned by another address (user.sh, owners.json).
 _SYSTEM_SLUG_HEX: int = 16
-#: The retired width and digest (`u` + 6 hex of SHA-1), kept only so the slug migration can
-#: name each account's old uid (:func:`legacy_system_slug`).
-_LEGACY_SLUG_HEX: int = 6
 
 
 def slugify(identity: str) -> str:
@@ -81,16 +77,6 @@ def system_slug(identity: str) -> str:
     """
     digest = hashlib.sha256(identity.strip().lower().encode('utf-8')).hexdigest()
     return f'u{digest[:_SYSTEM_SLUG_HEX]}'
-
-
-def legacy_system_slug(identity: str) -> str:
-    """The slug :func:`system_slug` returned before the widening — for the migration only.
-
-    `u` + 6 hex of SHA-1: what every account provisioned before it is named. Nothing routes
-    or provisions by it; `user.sh migrate-slugs` uses it to find each old uid's new name.
-    """
-    digest = hashlib.sha1(identity.strip().lower().encode('utf-8')).hexdigest()
-    return f'u{digest[:_LEGACY_SLUG_HEX]}'
 
 
 def os_login() -> str:

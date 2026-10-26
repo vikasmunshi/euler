@@ -15,7 +15,6 @@ Two surfaces on one application, sharing one per-user identity:
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 import sys
 import tempfile
@@ -257,11 +256,10 @@ class VaultRouteTests(_UserServiceCase):
         self.addCleanup(lambda: __import__('shutil').rmtree(secrets, True))
         self._saved = {k: getattr(app_config, k) for k in
                        ('private_key_file', 'env_file', 'vault_file')}
-        saved_iterations, saved_kdf = wire.VAULT_KDF_ITERATIONS, wire.VAULT_KDF
+        saved_kdf = wire.VAULT_KDF
         app_config.private_key_file = secrets / 'id'
         app_config.env_file = secrets / 'env'
         app_config.vault_file = secrets / 'vault'
-        wire.VAULT_KDF_ITERATIONS = 1000
         wire.VAULT_KDF = 'argon2id$m=8,t=1,p=1'       # cheap; the same primitive
         # The unlock routes below write a session key, and write_session_key() takes its
         # directory from $XDG_RUNTIME_DIR — an env var the config rebinding above cannot
@@ -272,7 +270,7 @@ class VaultRouteTests(_UserServiceCase):
         def _restore() -> None:
             for name, value in self._saved.items():
                 setattr(app_config, name, value)
-            wire.VAULT_KDF_ITERATIONS, wire.VAULT_KDF = saved_iterations, saved_kdf
+            wire.VAULT_KDF = saved_kdf
             os.environ.pop('XDG_RUNTIME_DIR', None)
             if saved_runtime is not None:
                 os.environ['XDG_RUNTIME_DIR'] = saved_runtime
@@ -336,42 +334,6 @@ class VaultRouteTests(_UserServiceCase):
         self.assertEqual(vault.unlock_vault_with_pk(bytes.fromhex(self._pk('new', new_salt))), vk)
         with self.assertRaises(Exception):                  # the old wrap is gone
             vault.unlock_vault_with_pk(bytes.fromhex(self._pk('old')))
-
-    def _legacy_vault(self, password: str = 'pw') -> bytes:
-        """A vault made before Argon2: PBKDF2, with its rounds recorded."""
-        from solver.config import config as app_config
-        vault_key = vault.new_vault_key()
-        pk = vault.derive_password_key(password, self._SALT, wire.VAULT_KDF_LEGACY, 1000)
-        app_config.vault_file.write_text(json.dumps({
-            'kdf': wire.VAULT_KDF_LEGACY, 'iterations': 1000, 'salt': self._SALT.hex(),
-            'wrapped_vk': vault.wrap_vault_key(pk, vault_key)}))
-        return vault_key
-
-    @unittest_run_loop
-    async def test_a_legacy_vault_reports_its_kdf_and_moves_on_unlock(self) -> None:
-        vault_key = self._legacy_vault()
-        status = await (await self.client.get('/vault/status', headers=_OWN)).json()
-        self.assertEqual((status['kdf'], status['iterations']), (wire.VAULT_KDF_LEGACY, 1000))
-        self.assertEqual((await self._unlock()).status, 409, 'without its own key it stays shut')
-        legacy_pk = vault.derive_password_key('pw', self._SALT, wire.VAULT_KDF_LEGACY, 1000).hex()
-        resp = await self.client.post('/vault/unlock', headers=_OWN, json={
-            'pk': self._pk('pw'), 'salt': self._SALT.hex(), 'legacy_pk': legacy_pk})
-        self.assertEqual(resp.status, 200)
-        status = await (await self.client.get('/vault/status', headers=_OWN)).json()
-        self.assertEqual(status['kdf'], wire.VAULT_KDF)
-        self.assertNotIn('iterations', status)
-        self.assertEqual(vault.unlock_vault_with_pk(bytes.fromhex(self._pk('pw'))), vault_key)
-
-    @unittest_run_loop
-    async def test_a_password_change_moves_a_legacy_vault(self) -> None:
-        vault_key = self._legacy_vault('old')
-        new_salt = bytes(range(16, 32))
-        resp = await self.client.post('/vault/rewrap', headers=_OWN, json={
-            'old_pk': vault.derive_password_key('old', self._SALT, wire.VAULT_KDF_LEGACY, 1000).hex(),
-            'new_pk': self._pk('new', new_salt), 'new_salt': new_salt.hex()})
-        self.assertEqual(resp.status, 200)
-        self.assertEqual(vault.unlock_vault_with_pk(bytes.fromhex(self._pk('new', new_salt))), vault_key)
-        self.assertFalse(vault.is_legacy(vault.read_vault() or {}))
 
     @unittest_run_loop
     async def test_secret_upsert_and_delete_are_write_only(self) -> None:

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """JS ↔ Python SRP-6a interop: the browser client (packages/site/euler_site/content/assets/srp.js)
 against the service's srp.py, byte-for-byte (RFC 5054 2048-bit group, SHA-256,
-PAD to |N|), for both password hashes inside `x` — Argon2id (the vendored hash-wasm in the
-browser, argon2-cffi here) and the legacy SHA-256 — and for the upgrade from one to the other.
+PAD to |N|), with the Argon2id password hash inside `x` (the vendored hash-wasm in the browser,
+argon2-cffi here) — and the vault's password key (vault.js against solver.crypto.vault).
 Skips when Node.js is absent — install it with `make install-nodejs`.
 """
 from __future__ import annotations
@@ -15,7 +15,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from euler_site.auth.srp import KDF, KDF_LEGACY, SrpClient, SrpServer, SrpToken, compute_verifier
+from euler_site.auth.srp import KDF, SrpClient, SrpServer, SrpToken
 from solver.crypto import vault, wire
 
 REPO = Path(__file__).resolve().parent.parent
@@ -24,12 +24,12 @@ VAULT_JS = SRP_JS.with_name('vault.js')
 
 _VAULT_DRIVER = """\
 const Vault = require(process.argv[2]);
-const [mode, password, salt, kdf, iterations] = process.argv.slice(3);
+const [mode, password, salt, kdf] = process.argv.slice(3);
 (async () => {
   if (mode === 'constants') {
-    console.log(JSON.stringify({ KDF: Vault.KDF, KDF_LEGACY: Vault.KDF_LEGACY, ITERATIONS: Vault.ITERATIONS }));
+    console.log(JSON.stringify({ KDF: Vault.KDF }));
   } else {
-    console.log(JSON.stringify({ pk: await Vault.derivePk(password, salt, kdf, Number(iterations) || undefined) }));
+    console.log(JSON.stringify({ pk: await Vault.derivePk(password, salt, kdf) }));
   }
 })().catch(e => { console.error(e); process.exit(1); });
 """
@@ -41,11 +41,8 @@ const [mode, ...args] = process.argv.slice(3);
   if (mode === 'register') {
     const [email, password] = args;
     console.log(JSON.stringify(await SRP.computeVerifier(email, password)));
-  } else if (mode === 'upgrade') {
-    const [email, password, salt] = args;
-    console.log(JSON.stringify({ verifier: await SRP.upgradeVerifier(email, password, salt) }));
   } else if (mode === 'constants') {
-    console.log(JSON.stringify({ KDF: SRP.KDF, KDF_LEGACY: SRP.KDF_LEGACY }));
+    console.log(JSON.stringify({ KDF: SRP.KDF }));
   } else {
     const [email, password, salt, B, kdf] = args;
     const c = await SRP.startLogin(email, password);
@@ -119,24 +116,8 @@ class SrpInteropTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             server.verify(int(bad['A'], 16), bytes.fromhex(bad['M1']))
 
-    def test_a_legacy_account_signs_in_and_upgrades(self) -> None:
-        """An account minted before Argon2 still signs in from the browser, and the verifier
-        the browser sends to upgrade it is the one Python derives for the same salt."""
-        legacy = SrpToken.create(NORM, PASSWORD)._replace(kdf=KDF_LEGACY)
-        legacy = legacy._replace(verifier=compute_verifier(legacy.salt, NORM, PASSWORD, KDF_LEGACY))
-        server = SrpServer(NORM, legacy)
-        js = self._node('login', EMAIL, PASSWORD, server.salt.hex(), f'{server.public:x}', KDF_LEGACY)
-        self.assertEqual(server.verify(int(js['A'], 16), bytes.fromhex(js['M1'])).hex(), js['M2'])
-
-        upgraded = self._node('upgrade', EMAIL, PASSWORD, legacy.salt.hex())
-        self.assertEqual(int(upgraded['verifier'], 16), compute_verifier(legacy.salt, NORM, PASSWORD, KDF))
-        token = SrpToken(salt=legacy.salt, verifier=int(upgraded['verifier'], 16), kdf=KDF)
-        server = SrpServer(NORM, token)
-        js = self._node('login', EMAIL, PASSWORD, server.salt.hex(), f'{server.public:x}', KDF)
-        self.assertEqual(server.verify(int(js['A'], 16), bytes.fromhex(js['M1'])).hex(), js['M2'])
-
     def test_both_ends_name_the_same_password_hashes(self) -> None:
-        self.assertEqual(self._node('constants'), {'KDF': KDF, 'KDF_LEGACY': KDF_LEGACY})
+        self.assertEqual(self._node('constants'), {'KDF': KDF})
 
     def _vault(self, *args: str) -> dict[str, object]:
         driver = Path(tempfile.mkstemp(suffix='.js')[1])
@@ -148,14 +129,11 @@ class SrpInteropTest(unittest.TestCase):
         return result
 
     def test_the_vault_key_matches_both_ways(self) -> None:
-        """vault.js and solver.crypto.vault derive the same PK, for the current KDF and the legacy."""
-        self.assertEqual(self._vault('constants'), {'KDF': wire.VAULT_KDF, 'KDF_LEGACY': wire.VAULT_KDF_LEGACY,
-                                                    'ITERATIONS': wire.VAULT_KDF_ITERATIONS})
+        """vault.js and solver.crypto.vault derive the same PK."""
+        self.assertEqual(self._vault('constants'), {'KDF': wire.VAULT_KDF})
         salt = bytes(range(16))
-        for kdf, rounds in ((wire.VAULT_KDF, None), (wire.VAULT_KDF_LEGACY, 1000)):
-            with self.subTest(kdf=kdf):
-                js = self._vault('derive', PASSWORD, salt.hex(), kdf, str(rounds or ''))
-                self.assertEqual(js['pk'], vault.derive_password_key(PASSWORD, salt, kdf, rounds).hex())
+        js = self._vault('derive', PASSWORD, salt.hex(), wire.VAULT_KDF)
+        self.assertEqual(js['pk'], vault.derive_password_key(PASSWORD, salt, wire.VAULT_KDF).hex())
 
 
 if __name__ == '__main__':

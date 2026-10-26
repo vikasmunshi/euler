@@ -53,7 +53,7 @@ from euler_site.auth.ratelimit import RateLimiter
 from euler_site.auth.requests import RequestStore
 from euler_site.auth.remember import RememberStore, load_or_create_secret
 from euler_site.auth.sessions import SessionStore
-from euler_site.auth.srp import KDF, KDF_LEGACY, KDFS, SrpServer, SrpToken, decoy_token
+from euler_site.auth.srp import KDF, SrpServer, SrpToken, decoy_token
 from euler_site.auth.tickets import TicketStore
 from euler_site.auth.users import UserStore, normalize_email
 
@@ -69,12 +69,12 @@ def _client_key(request: web.Request) -> str:
 
 
 def submitted_kdf(value: object) -> str | None:
-    """The KDF a browser says it derived a new verifier with, or None if it names none we know.
+    """The KDF a browser says it derived a new verifier with — the current :data:`KDF` — or None.
 
-    Absent means a page from before the field existed, whose verifier is the legacy kind.
+    A new verifier is always made at the current cost; anything else (a missing field from a page
+    older than it, or other parameters) is refused rather than stored.
     """
-    kdf = str(value or KDF_LEGACY)
-    return kdf if kdf in KDFS else None
+    return KDF if value == KDF else None
 
 
 async def _json_body(request: web.Request) -> dict[str, Any]:
@@ -150,8 +150,7 @@ class AuthService:
 
         Unknown or disabled accounts get a stable **decoy** challenge (same shape, an id
         included, the current KDF named, never stored), so the response does not reveal whether
-        the account exists. The one exception is an account still on the legacy KDF, which says
-        so until its owner's next sign-in upgrades it.
+        the account exists.
         """
         key = normalize_email(email)
         now = time.time()
@@ -170,13 +169,8 @@ class AuthService:
         return server.salt.hex(), f'{server.public:x}', cid, token.kdf
 
     def finish_challenge(self, email: str, client_public_hex: str, client_proof_hex: str,
-                         challenge_id: str, upgrade_hex: str = '') -> tuple[str, str] | None:
-        """Verify the client proof; return `(M2_hex, profile)` or None (generic failure).
-
-        *upgrade_hex* is the verifier for the same salt under the current :data:`KDF`, which the
-        browser sends when the challenge named an older one. It is stored only after the proof
-        succeeds — in this same call, so nothing but a proven password can replace a verifier.
-        """
+                         challenge_id: str) -> tuple[str, str] | None:
+        """Verify the client proof; return `(M2_hex, profile)` or None (generic failure)."""
         key = normalize_email(email)
         entry = self._challenges.pop(challenge_id, None)
         if entry is None or entry[0] != key or entry[3] <= time.time():
@@ -192,20 +186,7 @@ class AuthService:
         # since, the old password must not open a session now.
         if user is None or user.disabled or user.srp_token != token:
             return None
-        if token.kdf != KDF and upgrade_hex:
-            self._upgrade_kdf(key, token, upgrade_hex)
         return proof.hex(), self.profile_for(key)
-
-    def _upgrade_kdf(self, email: str, token: SrpToken, verifier_hex: str) -> None:
-        """Move *email* to the current KDF: same salt, the browser's new verifier."""
-        verifier = verifier_hex.lower()
-        try:
-            if not (0 < len(verifier) <= 512 and int(verifier, 16) > 0):
-                return
-        except ValueError:
-            return
-        self.users.set_credentials(email, token.salt.hex(), verifier, kdf=KDF)
-        log.info('password hash upgraded for %s', email)
 
     def forget_challenge(self, email: str) -> None:
         """Drop *email*'s in-flight handshakes (after its credentials change)."""
@@ -371,8 +352,7 @@ def build_public_app(service: AuthService) -> web.Application:
         body = await _json_body(request)
         try:
             result = service.finish_challenge(str(body.get('email', '')), str(body.get('A', '')),
-                                              str(body.get('M1', '')), str(body.get('id', '')),
-                                              str(body.get('upgrade', '') or ''))
+                                              str(body.get('M1', '')), str(body.get('id', '')))
         except ValueError:
             result = None
         if result is None:

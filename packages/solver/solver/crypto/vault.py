@@ -16,11 +16,8 @@ Both the X25519 private key (`~/.euler/id`) and the project env (`~/.euler/env`)
 `PK` is derived with **Argon2id** (:data:`~solver.crypto.wire.VAULT_KDF`: 64 MiB, 3 passes), over
 the password and the vault's salt prefixed with `euler-vault-pk:` -- the browser derives the same
 key from the password it already holds and the salt it gets in the SRP challenge, with the vendored
-hash-wasm it also uses for the SRP key, whose label differs so the two never coincide. A vault made
-before Argon2 records `pbkdf2-sha256` and its rounds (WebCrypto PBKDF2); it still unlocks, and is
-re-wrapped under Argon2id -- same `VK`, same salt -- whenever its unlock has the means: the
-password in a terminal (:func:`unlock_vault`), or both keys from a browser
-(:func:`upgrade_vault_with_pk`).
+hash-wasm it also uses for the SRP key, whose label differs so the two never coincide. The vault
+records its parameters, so the cost can rise later without stranding anybody.
 
 **Key delivery.** The code that needs `VK` -- :func:`~solver.crypto.ciphers.load_private_key` and
 the git clean/smudge filter -- runs as *subprocesses*, so `VK` cannot live only in the interactive
@@ -81,8 +78,6 @@ from typing import TypedDict, cast
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives.hashes import SHA256
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from solver.config import config
 from solver.crypto import wire
@@ -92,11 +87,10 @@ _SALT_LEN: int = 16  # matches the SRP salt width (euler_site.auth.srp)
 _NONCE_LEN: int = 12  # AES-GCM nonce
 
 
-class VaultData(TypedDict, total=False):
+class VaultData(TypedDict):
     """The on-disk `~/.euler/vault` body: the wrapped vault key and how its wrapping key is derived."""
 
-    kdf: str  # wire.VAULT_KDF (`argon2id$m=…,t=…,p=…`) or wire.VAULT_KDF_LEGACY
-    iterations: int  # PBKDF2 rounds — a legacy vault only
+    kdf: str  # the Argon2id parameters, `argon2id$m=…,t=…,p=…` (wire.VAULT_KDF when made)
     salt: str  # hex; the KDF salt (the SRP salt, so the browser derives the same PK)
     wrapped_vk: str  # hex (nonce | AES-GCM ciphertext of VK under PK)
 
@@ -104,22 +98,18 @@ class VaultData(TypedDict, total=False):
 # ==================================================================================================================== #
 #                                       password key + vault-key wrap/unwrap
 # ==================================================================================================================== #
-def derive_password_key(password: str, salt: bytes, kdf: str | None = None, iterations: int | None = None) -> bytes:
-    """Derive the 32-byte password key `PK` from the password and salt, by *kdf*.
+def derive_password_key(password: str, salt: bytes, kdf: str | None = None) -> bytes:
+    """Derive the 32-byte password key `PK`: Argon2id over the password and the labelled salt.
 
-    *kdf* defaults to the current :data:`~solver.crypto.wire.VAULT_KDF` (Argon2id over the labelled
-    salt); :data:`~solver.crypto.wire.VAULT_KDF_LEGACY` is PBKDF2-HMAC-SHA256 over *iterations*
-    rounds. The browser derives the identical key either way (`vault.js`), so the web path can
-    supply `PK` without shipping the password to the server.
+    *kdf* names the parameters (`argon2id$m=…,t=…,p=…`), defaulting to the current
+    :data:`~solver.crypto.wire.VAULT_KDF`. The browser derives the identical key (`vault.js`), so
+    the web path can supply `PK` without shipping the password to the server.
 
     Raises:
-        ValueError: If *kdf* names a derivation this module does not know.
+        ValueError: If *kdf* is not an Argon2id parameter string.
     """
     kdf = wire.VAULT_KDF if kdf is None else kdf
     secret: bytes = password.encode('utf-8')
-    if kdf == wire.VAULT_KDF_LEGACY:
-        rounds: int = wire.VAULT_KDF_ITERATIONS if iterations is None else iterations
-        return PBKDF2HMAC(SHA256(), _KEY_LEN, salt, rounds).derive(secret)
     name, _, params = kdf.partition('$')
     try:
         values = dict(pair.split('=', 1) for pair in params.split(','))
@@ -134,8 +124,7 @@ def derive_password_key(password: str, salt: bytes, kdf: str | None = None, iter
 
 def _vault_password_key(password: str, vault: VaultData) -> bytes:
     """`PK` for *vault*, derived the way that vault was made."""
-    return derive_password_key(password, bytes.fromhex(vault['salt']),
-                               vault.get('kdf', wire.VAULT_KDF_LEGACY), vault.get('iterations'))
+    return derive_password_key(password, bytes.fromhex(vault['salt']), vault['kdf'])
 
 
 def new_vault_key() -> bytes:
@@ -220,11 +209,6 @@ def write_vault(salt: bytes, wrapped_vk: str) -> None:
     vault_file.chmod(0o600)
 
 
-def is_legacy(vault: VaultData) -> bool:
-    """Whether *vault*'s key is still derived the pre-Argon2 way (and is due a re-wrap)."""
-    return vault.get('kdf', wire.VAULT_KDF_LEGACY) != wire.VAULT_KDF
-
-
 def init_vault(password: str, salt: bytes | None = None) -> bytes:
     """Create a fresh vault: mint `VK`, wrap it under `PK = KDF(password, salt)`, persist it.
 
@@ -241,9 +225,6 @@ def init_vault(password: str, salt: bytes | None = None) -> bytes:
 def unlock_vault(password: str) -> bytes:
     """Derive `PK` from `password` and the stored salt, then unwrap and return `VK`.
 
-    A legacy vault is re-wrapped under the current KDF on the way (same `VK`, same salt): the
-    password is in hand, so this is the moment it costs nothing extra to move it.
-
     Raises:
         FileNotFoundError:                  If no vault has been initialised.
         cryptography.exceptions.InvalidTag: If the password is wrong.
@@ -251,11 +232,7 @@ def unlock_vault(password: str) -> bytes:
     vault: VaultData | None = read_vault()
     if vault is None:
         raise FileNotFoundError(f'no vault at {config.vault_file}; run `vault --init`')
-    vault_key: bytes = unwrap_vault_key(_vault_password_key(password, vault), vault['wrapped_vk'])
-    if is_legacy(vault):
-        salt: bytes = bytes.fromhex(vault['salt'])
-        write_vault(salt, wrap_vault_key(derive_password_key(password, salt), vault_key))
-    return vault_key
+    return unwrap_vault_key(_vault_password_key(password, vault), vault['wrapped_vk'])
 
 
 def encrypt_secret_files(vault_key: bytes) -> list[str]:
@@ -294,8 +271,8 @@ def rewrap_vault(old_password: str, new_password: str) -> None:
 # ==================================================================================================================== #
 #                                       web path: PK-based vault operations
 # ==================================================================================================================== #
-# The browser derives `PK` itself (Argon2id, or PBKDF2 for a legacy vault, over the password it
-# already holds and the SRP salt) and sends only `PK` to the user's own service -- the password
+# The browser derives `PK` itself (Argon2id over the password it already holds and the SRP
+# salt) and sends only `PK` to the user's own service -- the password
 # never reaches any server, and the auth service never sees either. These are the `PK`-taking
 # twins of the password functions above.
 
@@ -326,30 +303,12 @@ def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
     return vault_key
 
 
-def upgrade_vault_with_pk(legacy_password_key: bytes, password_key: bytes) -> bytes:
-    """Unlock a legacy vault with its own `PK` and re-wrap `VK` under the current-KDF *password_key*.
-
-    The salt stays, so every later session derives the same key. Returns the plaintext `VK`.
-
-    Raises:
-        FileNotFoundError:                  If no vault has been initialised.
-        cryptography.exceptions.InvalidTag: If *legacy_password_key* does not unwrap it.
-    """
-    vault: VaultData | None = read_vault()
-    if vault is None:
-        raise FileNotFoundError(f'no vault at {config.vault_file}')
-    vault_key: bytes = unwrap_vault_key(legacy_password_key, vault['wrapped_vk'])
-    write_vault(bytes.fromhex(vault['salt']), wrap_vault_key(password_key, vault_key))
-    return vault_key
-
-
 def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_salt: bytes) -> None:
     """Re-wrap `VK` under a new browser-derived `PK` (a password change: the vault survives).
 
     Only the small `VK` blob is rewritten; the `VK`-encrypted secrets are untouched. `new_salt`
     is the account's new SRP salt (the browser derived `new_password_key` from it, under the
-    current KDF); `old_password_key` is derived the way the vault was made, so this also moves
-    a legacy vault.
+    current KDF); `old_password_key` is derived with the vault's own recorded parameters.
 
     Raises:
         FileNotFoundError:                  If no vault has been initialised.
@@ -428,7 +387,7 @@ def _resolve_session_key() -> bytes | None:
         data: bytes = path.read_bytes()
         if len(data) == _KEY_LEN:
             return data
-    # The env password: a non-interactive unlock for a script or an automated run. Expensive (PBKDF2)
+    # The env password: a non-interactive unlock for a script or an automated run. Expensive (Argon2id)
     # per process, so a shell calls ensure_session_key() once at startup to materialise the tmpfs file
     # and let its children take the fast path above.
     password: str = os.environ.get(wire.VAULT_PASSWORD_ENV, '')
@@ -466,7 +425,7 @@ def ensure_session_key() -> bytes | None:
 
     Idempotent: if `EULER_VAULT_KEY_FILE` already points at a valid key file, reuse it; otherwise
     derive `VK` from `$EULER_VAULT_PASSWORD` and materialise the tmpfs file so subprocesses (the
-    git filter) skip the PBKDF2 cost. Non-interactive: a locked vault stays locked here and returns
+    git filter) skip the Argon2id cost. Non-interactive: a locked vault stays locked here and returns
     None -- asking the operator is :func:`solver.crypto.keys.unlock_session`, which is what a shell
     calls at startup.
     """

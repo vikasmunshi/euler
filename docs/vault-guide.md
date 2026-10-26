@@ -76,13 +76,9 @@ for the SRP key (base.html); the terminal uses `argon2-cffi`. Every guess at a s
 `~/.euler/vault` — readable only by its owner's uid and root — costs 64 MiB of Argon2id, the same
 as a guess at a stolen `users.json`.
 
-**Vaults made before Argon2** record `pbkdf2-sha256` and their rounds (600 000, the OWASP floor
-for PBKDF2-SHA256, WebCrypto-native — which is why it was the first choice: no implementation to
-ship into the page, until the SRP key needed one anyway). They still open, and each moves to
-Argon2id — same `VK`, same salt, only the wrap rewritten — the first time its unlock has the
-means: a terminal unlock with the password (`unlock_vault`), a browser sign-in, which derives
-both keys while legacy vaults exist and sends the PBKDF2 one as `legacy_pk` (`/vault/unlock` →
-`upgrade_vault_with_pk`), or a password change (`/vault/rewrap` always writes Argon2id).
+Vaults were PBKDF2-SHA256 (600 000 rounds) until v4.15: WebCrypto-native, so there was no
+implementation to ship into the page — until the SRP key needed one anyway. Every vault was
+re-wrapped under Argon2id at its next unlock (same `VK`, same salt), and the PBKDF2 path is gone.
 
 The salt is 16 bytes — and on the web path it is *the account's SRP salt*, which the browser
 already has from the login challenge ([SRP Guide §8](srp-guide.md#8-what-srp-does-not-do-here)).
@@ -224,10 +220,9 @@ never to the auth service, and never as a password:
 
 ```
 sign-in (auth service, SRP)                  per-user service (runs as the collaborator's uid)
-  password stays in the page                   POST /vault/unlock  {pk, salt, legacy_pk?}
+  password stays in the page                   POST /vault/unlock  {pk, salt}
   PK = Argon2id(password, SRP salt)              → unlock_vault_with_pk(pk)         (returning user)
   sessionStorage: euler.vault.pk                 → init_vault_from_pk(pk, salt)     (first login)
-  (+ the PBKDF2 key while legacy vaults exist)   → upgrade_vault_with_pk(legacy, pk) (a legacy vault)
                                                  → write_session_key(VK)
                                                POST /vault/rewrap {old_pk, new_pk, new_salt}
                                                  → the vault survives a password change

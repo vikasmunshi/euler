@@ -830,10 +830,9 @@
   // The recovery form (#vault-recover, in the /account/vault fragment): the user
   // types a password; its PK is derived the VAULT's own way — its salt and kdf
   // (/vault/status). If that password is simply the current one (the instance
-  // restarted since sign-in) the unlock succeeds directly — moving a vault made before
-  // Argon2 across as it goes; if it is the OLD password after a change made elsewhere,
-  // re-wrap VK across to the current sign-in's PK when we hold one. Delegated: the
-  // fragment is htmx-swapped.
+  // restarted since sign-in) the unlock succeeds directly; if it is the OLD
+  // password after a change made elsewhere, re-wrap VK across to the current
+  // sign-in's PK when we hold one. Delegated: the fragment is htmx-swapped.
   document.addEventListener('submit', function (ev) {
     var form = ev.target.closest && ev.target.closest('#vault-recover');
     if (!form || !window.Vault) { return; }
@@ -847,18 +846,15 @@
         if (!status.ok) { return fail('vault status unavailable'); }
         var info = await status.json();
         if (!info.vault) { return fail('no vault to unlock'); }
-        var vaultPk = await Vault.derivePkFor(password, info);
-        var legacy = info.kdf !== Vault.KDF;
-        var pk = legacy ? await Vault.derivePk(password, info.salt) : vaultPk;
+        var pk = await Vault.derivePkFor(password, info);
         var creds = Vault.stored();
         var resp;
         if (creds && creds.pk !== pk) {
           // an old password: carry the vault forward to the current sign-in's PK
           resp = await Vault.postJson('/vault/rewrap',
-            { old_pk: vaultPk, new_pk: creds.pk, new_salt: creds.salt });
+            { old_pk: pk, new_pk: creds.pk, new_salt: creds.salt });
         } else {
-          resp = await Vault.postJson('/vault/unlock',
-            { pk: pk, salt: info.salt, legacy_pk: legacy ? vaultPk : undefined });
+          resp = await Vault.postJson('/vault/unlock', { pk: pk, salt: info.salt });
         }
         if (resp.status === 409) { return fail('that password does not unlock this vault'); }
         if (!resp.ok) { return fail('unlock failed — try again'); }
