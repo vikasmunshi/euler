@@ -209,6 +209,13 @@ access_log stdio:/var/log/euler-proxy/access.log
 cache_log /var/log/euler-proxy/cache.log
 coredump_dir /var/cache/euler-proxy
 shutdown_lifetime 5 seconds
+
+# No ICMP pinger. It cannot open raw ICMP sockets as an unprivileged uid anyway, and it talks
+# to the main process over a loopback UDP socket, which the euler firewall drops (loopback is
+# an allowlist — firewall.sh). Left on, Squid stalls at startup on that IPC ("hello write test
+# failed") and never opens its port. The netdb it feeds goes with it.
+pinger_enable off
+netdb_filename none
 EOF
     sudo chown root:"${PROXY_GROUP}" "${SQUID_CONF}"
     sudo chmod 0640 "${SQUID_CONF}"
