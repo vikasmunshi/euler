@@ -183,6 +183,9 @@ script's tables, too.
 
 | script | what it does |
 | --- | --- |
+| [`capture-evidence.sh`](../scripts/ops/capture-evidence.sh) | Snapshot the evidence a change to the web host would destroy, before making it. |
+| [`capture-host.sh`](../scripts/ops/capture-host.sh) | Capture the web host's security posture, read-only, into one 0600 file you own. |
+| [`capture-run.sh`](../scripts/ops/capture-run.sh) | Run make targets (or one command) in order, with the whole session captured to audit/logs/. |
 | [`release.sh`](../scripts/ops/release.sh) | Cut a new version and ship it — the whole release turnaround, in one command. |
 | [`reset-user.sh`](../scripts/ops/reset-user.sh) | Reset one collaborator's clone to origin/master — the operator's repair of last resort. |
 | [`verify-solutions.sh`](../scripts/ops/verify-solutions.sh) | Re-check every solved problem against its test cases, with a live progress line. |
