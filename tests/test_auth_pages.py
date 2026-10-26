@@ -20,6 +20,8 @@ import shutil
 import tempfile
 import time
 import unittest
+import unittest.mock
+from hashlib import sha256
 from pathlib import Path
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
@@ -27,6 +29,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from euler_site.auth import policy
 from euler_site.auth.app import AuthService, build_public_app
 from euler_site.auth.config import AuthConfig
+from euler_site.auth.pow import ProofOfWork, leading_zero_bits
 
 from tests import silence
 
@@ -53,6 +56,15 @@ def _back_link(body: str) -> tuple[str, str] | None:
     return (match.group(1), match.group(2).strip()) if match else None
 
 
+def _solved(pow_: ProofOfWork) -> dict[str, str]:
+    """A fresh stamp and a nonce that solves it — what pow.js posts."""
+    stamp = pow_.stamp()
+    nonce = 0
+    while leading_zero_bits(sha256(f'{stamp}:{nonce}'.encode()).digest()) < pow_.bits:
+        nonce += 1
+    return {'pow': stamp, 'pow_nonce': str(nonce)}
+
+
 class AuthPageTests(AioHTTPTestCase):
     async def get_application(self):
         state = Path(tempfile.mkdtemp(prefix='euler-auth-pages-'))
@@ -63,6 +75,7 @@ class AuthPageTests(AioHTTPTestCase):
                             base_url='https://example.test', smtp_relay='127.0.0.1:25',
                             terms_version='test')
         self.service = AuthService(config)
+        self.service.pow.bits = 8                     # the real difficulty is the browser's second
         return build_public_app(self.service)
 
     async def _get(self, path: str, **kwargs) -> tuple[int, str]:
@@ -178,12 +191,8 @@ class AuthPageTests(AioHTTPTestCase):
         self.assertIn('No actions here', body)
 
 
-class ForgotPasswordTests(AuthPageTests):
-    """`POST /forgot` cannot be used to keep an owner from resetting, or to spend the mail.
-
-    The mailer is replaced by a recorder (no relay is involved); the account exists unless
-    a test says otherwise.
-    """
+class _MailRecordingTests(AuthPageTests):
+    """The mailer replaced by a recorder (no relay is involved), and one account that exists."""
 
     async def get_application(self):
         app = await super().get_application()
@@ -195,8 +204,12 @@ class ForgotPasswordTests(AuthPageTests):
         self.service.mailer.send_invite = record                  # type: ignore[method-assign]
         return app
 
+
+class ForgotPasswordTests(_MailRecordingTests):
+    """`POST /forgot` cannot be used to keep an owner from resetting, or to spend the mail."""
+
     async def _forgot(self, email: str = _EMAIL) -> int:
-        resp = await self.client.post('/forgot', data={'email': email})
+        resp = await self.client.post('/forgot', data={'email': email, **_solved(self.service.pow)})
         await asyncio.sleep(0.05)                          # let the background send run
         return resp.status
 
@@ -222,8 +235,10 @@ class ForgotPasswordTests(AuthPageTests):
 
     @unittest_run_loop
     async def test_unknown_address_sends_nothing_and_looks_the_same(self) -> None:
-        known = await (await self.client.post('/forgot', data={'email': _EMAIL})).text()
-        unknown = await (await self.client.post('/forgot', data={'email': 'nobody@example.test'})).text()
+        known = await (await self.client.post(
+            '/forgot', data={'email': _EMAIL, **_solved(self.service.pow)})).text()
+        unknown = await (await self.client.post(
+            '/forgot', data={'email': 'nobody@example.test', **_solved(self.service.pow)})).text()
         await asyncio.sleep(0.05)
         self.assertEqual(known, unknown)
         self.assertEqual([email for email, _ in self.sent], [_EMAIL])
@@ -233,8 +248,9 @@ class ForgotPasswordTests(AuthPageTests):
         def slow_send(rcpt: str, token: str, kind: str) -> None:
             time.sleep(1.0)
         self.service.mailer.send_invite = slow_send          # type: ignore[method-assign]
+        work = _solved(self.service.pow)
         started = time.monotonic()
-        await self.client.post('/forgot', data={'email': _EMAIL})
+        await self.client.post('/forgot', data={'email': _EMAIL, **work})
         self.assertLess(time.monotonic() - started, 0.5)
 
     def test_the_mail_budget_per_recipient(self) -> None:
@@ -242,6 +258,54 @@ class ForgotPasswordTests(AuthPageTests):
                    for _ in range(policy.MAIL_PER_RECIPIENT_MAX + 3)]
         self.assertEqual(allowed.count(True), policy.MAIL_PER_RECIPIENT_MAX)
         self.assertTrue(self.service.mail_allowed('b@example.test'), 'another recipient is unaffected')
+
+
+class ProofOfWorkTests(_MailRecordingTests):
+    """The forms that make the service send mail cost the sender a solve, once per request."""
+
+    @unittest_run_loop
+    async def test_the_pages_carry_a_stamp_and_the_solver(self) -> None:
+        for path in ('/forgot', '/request-invite'):
+            status, body = await self._get(path)
+            self.assertEqual(status, 200)
+            self.assertRegex(body, r'name="pow" value="\d+\.[0-9a-f]{16}\.[0-9a-f]{32}"', path)
+            self.assertIn('data-pow-bits="8"', body)
+            self.assertIn('/assets/pow.js', body)
+
+    @unittest_run_loop
+    async def test_no_work_no_mail(self) -> None:
+        resp = await self.client.post('/forgot', data={'email': _EMAIL})
+        await asyncio.sleep(0.05)
+        self.assertEqual(resp.status, 400)
+        self.assertEqual(self.sent, [])
+        resp = await self.client.post('/request-invite', data={'name': 'n', 'email': 'x@example.test'})
+        self.assertEqual(resp.status, 400)
+        self.assertEqual(self.service.requests.all(), [])
+
+    @unittest_run_loop
+    async def test_one_solve_buys_one_request(self) -> None:
+        work = _solved(self.service.pow)
+        first = await self.client.post('/request-invite', data={'name': 'n', 'email': 'x@example.test', **work})
+        again = await self.client.post('/request-invite', data={'name': 'n', 'email': 'y@example.test', **work})
+        self.assertEqual((first.status, again.status), (200, 400))
+
+    def test_a_stamp_cannot_be_forged_or_kept(self) -> None:
+        pow_ = self.service.pow
+        work = _solved(pow_)
+        issued, rnd, _sig = work['pow'].split('.')
+        forged = f'{issued}.{rnd}.{"0" * 32}'
+        self.assertFalse(pow_.check(forged, work['pow_nonce']))
+        other = ProofOfWork(b'another secret', pow_.bits, policy.POW_TTL_SECONDS)
+        self.assertFalse(other.check(work['pow'], work['pow_nonce']), "another server's stamp")
+        with unittest.mock.patch('euler_site.auth.pow.time.time',
+                                 return_value=time.time() + policy.POW_TTL_SECONDS + 1):
+            self.assertFalse(pow_.check(work['pow'], work['pow_nonce']), 'expired')
+        self.assertTrue(pow_.check(work['pow'], work['pow_nonce']))
+
+    def test_leading_zero_bits(self) -> None:
+        self.assertEqual(leading_zero_bits(bytes([0, 0, 0x10, 0xff])), 19)
+        self.assertEqual(leading_zero_bits(bytes([0x80])), 0)
+        self.assertEqual(leading_zero_bits(bytes(4)), 32)
 
 
 if __name__ == '__main__':

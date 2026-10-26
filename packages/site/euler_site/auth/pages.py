@@ -267,13 +267,25 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
 
     # ── forgot (self-service reset entry) ───────────────────────────────────
 
+    def pow_fields() -> dict[str, object]:
+        """What a form behind the proof of work renders: a fresh stamp and its difficulty."""
+        return {'pow': service.pow.stamp(), 'pow_bits': service.pow.bits}
+
+    def pow_refused(request: web.Request) -> web.Response:
+        """The answer to a post without a valid proof of work — a stale page, or no JS."""
+        return aiohttp_jinja2.render_template('message.html', request, {
+            'heading': 'Please try again',
+            'message': 'That request could not be checked. Reload the page and send it again '
+                       '(it needs JavaScript).',
+            'show_login': True}, status=400)
+
     async def forgot_page(request: web.Request) -> web.Response:
-        return aiohttp_jinja2.render_template('forgot.html', request, {})
+        return aiohttp_jinja2.render_template('forgot.html', request, pow_fields())
 
     # ── request an invite (unauthenticated intake) ────────────────────────────────
 
     async def request_invite_page(request: web.Request) -> web.Response:
-        return aiohttp_jinja2.render_template('request_invite.html', request, {})
+        return aiohttp_jinja2.render_template('request_invite.html', request, pow_fields())
 
     async def request_invite_submit(request: web.Request) -> web.Response:
         """Queue a prospective collaborator's request; answer generically either way.
@@ -286,6 +298,8 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         if not service.rate.allow(_client_key(request)):
             return web.Response(status=429, text='rate limited')
         form = await request.post()
+        if not service.pow.check(str(form.get('pow', '')), str(form.get('pow_nonce', ''))):
+            return pow_refused(request)
         name = sanitize(str(form.get('name', '')), NAME_MAX)
         email = normalize_email(str(form.get('email', '')))
         remarks = sanitize(str(form.get('remarks', '')), REMARKS_MAX, allow_newlines=True)
@@ -320,6 +334,8 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         if not service.rate.allow(_client_key(request)):
             return web.Response(status=429, text='rate limited')
         form = await request.post()
+        if not service.pow.check(str(form.get('pow', '')), str(form.get('pow_nonce', ''))):
+            return pow_refused(request)
         email = normalize_email(str(form.get('email', '')))
         user = service.users.get(email) if '@' in email else None
         if user is not None and not user.disabled:

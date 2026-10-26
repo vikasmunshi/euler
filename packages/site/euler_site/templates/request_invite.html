@@ -2,11 +2,14 @@
 {% from "_authwin.html" import authwin %}
 {% block title %}euler — request an invite{% endblock %}
 {% block dialogue %}
-  {# Plain POST form — no JS, no SRP: nothing secret is entered here, so this page
-     needs none of the login handshake. #}
+  {# A POST form with no SRP: nothing secret is entered here, so this page needs none of
+     the login handshake. Its one script is the proof of work (pow.js), because each
+     request queues an entry and mails the operator. #}
   {% set note %}<b>No account is created yet</b> · this only forwards your details to the operator. If they approve, an invitation link is emailed to the address you gave — that link is where you choose a password.{% endset %}
   {% call authwin('request invite', 'no account yet? tell the operator who you are and they decide.', note) %}
-    <form class="auth-form authwin-form" method="post" action="/request-invite">
+    <form class="auth-form authwin-form" method="post" action="/request-invite" data-pow-bits="{{ pow_bits }}">
+      <input type="hidden" name="pow" value="{{ pow }}">
+      <input type="hidden" name="pow_nonce" value="">
       <label for="name">your name</label>
       <input id="name" name="name" type="text" autocomplete="name" required autofocus maxlength="100">
       <label for="email">email</label>
@@ -19,3 +22,4 @@
     <div class="auth-links"><a class="auth-link" href="/login">&#8592; back to sign in</a></div>
   {% endcall %}
 {% endblock %}
+{% block scripts %}<script src="{{ asset('/assets/pow.js') }}" defer></script>{% endblock %}

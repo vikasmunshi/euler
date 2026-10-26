@@ -48,6 +48,7 @@ from euler_site.csp import csp_middleware
 from euler_site.auth.config import AuthConfig
 from euler_site.auth.mail import Mailer
 from euler_site.auth.pending import PendingStore
+from euler_site.auth.pow import ProofOfWork
 from euler_site.auth.ratelimit import RateLimiter
 from euler_site.auth.requests import RequestStore
 from euler_site.auth.remember import RememberStore, load_or_create_secret
@@ -89,6 +90,9 @@ class AuthService:
         self.remember = RememberStore(state / 'remember.json',
                                       load_or_create_secret(state / 'session-secret'))
         self.sessions = SessionStore(policy.SESSION_TTL_SECONDS)
+        #: The work a browser does before `/forgot` or `/request-invite` is accepted.
+        self.pow = ProofOfWork(load_or_create_secret(state / 'pow-secret'),
+                               policy.POW_BITS, policy.POW_TTL_SECONDS)
         self.tickets = TicketStore()
         self.mailer = Mailer(config.smtp_relay, config.base_url)
         self.rate = RateLimiter(policy.AUTH_RATE_MAX, policy.AUTH_RATE_WINDOW_SECONDS)

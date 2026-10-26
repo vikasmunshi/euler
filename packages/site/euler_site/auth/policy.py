@@ -12,7 +12,8 @@ __all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MA
            'OTP_DIGITS', 'OTP_TTL_SECONDS', 'OTP_MAX_ATTEMPTS', 'OTP_MAX_SENDS',
            'REMEMBER_COOKIE', 'REMEMBER_TTL_SECONDS', 'AUTH_RATE_MAX', 'AUTH_RATE_WINDOW_SECONDS',
            'TICKET_TTL_SECONDS', 'PROFILES', 'RESET_COOLDOWN_SECONDS', 'RESET_DAILY_MAX',
-           'MAIL_PER_RECIPIENT_MAX', 'MAIL_PER_RECIPIENT_WINDOW_SECONDS', 'MAIL_DAILY_MAX']
+           'MAIL_PER_RECIPIENT_MAX', 'MAIL_PER_RECIPIENT_WINDOW_SECONDS', 'MAIL_DAILY_MAX', 'POW_BITS',
+           'POW_TTL_SECONDS']
 
 #: Web-assignable profiles: `admin` is assignable only to a local os-login. The
 #: authoritative policy is authorizations.json (see docs/web-server-guide.md
@@ -73,6 +74,10 @@ RESET_DAILY_MAX: int = 4
 MAIL_PER_RECIPIENT_MAX: int = 6
 MAIL_PER_RECIPIENT_WINDOW_SECONDS: int = 3600
 MAIL_DAILY_MAX: int = 150
+#: Proof of work in front of the same forms (`auth/pow.py`): zero bits the browser must find —
+#: 2^18 hashes on average, about a second — and how long a page's stamp stays solvable.
+POW_BITS: int = 18
+POW_TTL_SECONDS: int = 10 * 60
 #: One-time shell ticket lifetime: minted against a live session at WS
 #: attach, redeemed by the PTY child at startup — 60 seconds covers the fork.
 TICKET_TTL_SECONDS: int = 60

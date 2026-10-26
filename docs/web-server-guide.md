@@ -2730,8 +2730,14 @@ decision recorded here.
 - **Resets cannot be blocked, or used to spend the mail**: a new `/forgot` never replaces a
   link already sent (cooldown + daily cap per account); a completed reset revokes the
   rest; mail an unauthenticated request triggers is budgeted per recipient and per day.
+- **Mail-sending forms cost the sender first**: `/forgot` and `/request-invite` carry a
+  signed, ten-minute stamp, and `assets/pow.js` must find a nonce giving `SHA-256(stamp:nonce)`
+  `POW_BITS` (18) leading zero bits before the post is accepted — about a second in a
+  browser, once per request (`auth/pow.py`; spent stamps are refused). The budgets above
+  still cap what a patient script can do; this makes it pay per request.
 - **A login proves today's password**: a pending SRP challenge is bound to the verifier it
-  was built from, so one begun before a reset or change cannot finish after it.
+  was built from, so one begun before a reset or change cannot finish after it; it is held
+  under its own random id, so a handshake someone else starts for the address cannot cancel it.
 - **Invite-only registration**: single-use, **hashed**, time-boxed link tokens plus a
   live-mailbox OTP; the account written is the invite's bound email, never
   client-supplied.
