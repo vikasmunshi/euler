@@ -137,6 +137,39 @@ class ChangePasswordTests(AioHTTPTestCase):
         self.assertIsNotNone(self.service.sessions.get(mine))              # nobody logged out
         self.assertIsNotNone(self.service.sessions.get(other))
 
+    @unittest_run_loop
+    async def test_a_handshake_begun_before_a_reset_cannot_finish_after_it(self) -> None:
+        """The old password must not open a session once the verifier has been replaced.
+
+        The challenge holds a server built from the verifier of its moment; a reset that
+        lands inside the challenge's lifetime replaces the stored verifier, and the
+        handshake must then fail even though its proof is right for the old password.
+        """
+        resp = await self.client.post('/auth/challenge', json={'email': _EMAIL})
+        challenge = await resp.json()
+        new_salt = secrets.token_bytes(16)                          # the reset completes…
+        self.service.users.set_credentials(
+            _EMAIL, new_salt.hex(), f'{compute_verifier(new_salt, _EMAIL, _NEW):x}')
+        client = SrpClient(_EMAIL, _OLD)                            # …and the old password tries
+        proof = client.process_challenge(bytes.fromhex(challenge['salt']), int(challenge['B'], 16))
+        resp = await self.client.post('/auth/verify', json={
+            'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex(), 'remember': True})
+        self.assertEqual(resp.status, 401)
+        self.assertNotIn(policy.SESSION_COOKIE, resp.cookies)
+        self.assertNotIn(policy.REMEMBER_COOKIE, resp.cookies)
+
+    @unittest_run_loop
+    async def test_the_new_password_still_signs_in_after_a_change(self) -> None:
+        status, _client, _body = await self._change(self._session(), _OLD)
+        self.assertEqual(status, 200)
+        resp = await self.client.post('/auth/challenge', json={'email': _EMAIL})
+        challenge = await resp.json()
+        client = SrpClient(_EMAIL, _NEW)
+        proof = client.process_challenge(bytes.fromhex(challenge['salt']), int(challenge['B'], 16))
+        resp = await self.client.post('/auth/verify', json={
+            'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex()})
+        self.assertEqual(resp.status, 200)
+
 
 if __name__ == '__main__':
     unittest.main()

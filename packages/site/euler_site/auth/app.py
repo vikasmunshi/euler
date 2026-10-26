@@ -52,7 +52,7 @@ from euler_site.auth.ratelimit import RateLimiter
 from euler_site.auth.requests import RequestStore
 from euler_site.auth.remember import RememberStore, load_or_create_secret
 from euler_site.auth.sessions import SessionStore
-from euler_site.auth.srp import SrpServer, decoy_token
+from euler_site.auth.srp import SrpServer, SrpToken, decoy_token
 from euler_site.auth.tickets import TicketStore
 from euler_site.auth.users import UserStore, normalize_email
 
@@ -92,8 +92,10 @@ class AuthService:
         self.tickets = TicketStore()
         self.mailer = Mailer(config.smtp_relay, config.base_url)
         self.rate = RateLimiter(policy.AUTH_RATE_MAX, policy.AUTH_RATE_WINDOW_SECONDS)
-        #: In-flight SRP handshakes: email → (server, expiry). One per email at a time.
-        self._challenges: dict[str, tuple[SrpServer, float]] = {}
+        #: In-flight SRP handshakes: email → (server, the verifier it was built from, expiry).
+        #: One per email at a time. The verifier is kept so a handshake begun before the
+        #: credentials changed (a reset, a password change) cannot finish after it.
+        self._challenges: dict[str, tuple[SrpServer, SrpToken, float]] = {}
         #: Per-process secret for stable decoy salts (unknown-email challenges).
         self._decoy_secret = secrets.token_bytes(32)
 
@@ -127,13 +129,14 @@ class AuthService:
         """
         key = normalize_email(email)
         now = time.time()
-        self._challenges = {k: v for k, v in self._challenges.items() if v[1] > now}
+        self._challenges = {k: v for k, v in self._challenges.items() if v[2] > now}
         user = self.users.get(key)
         if user is None or user.disabled or not user.verifier:
             server = SrpServer(key, decoy_token(key, self._decoy_secret))
             return server.salt.hex(), f'{server.public:x}'
-        server = SrpServer(key, user.srp_token)
-        self._challenges[key] = (server, now + policy.CHALLENGE_TTL_SECONDS)
+        token = user.srp_token
+        server = SrpServer(key, token)
+        self._challenges[key] = (server, token, now + policy.CHALLENGE_TTL_SECONDS)
         return server.salt.hex(), f'{server.public:x}'
 
     def finish_challenge(self, email: str, client_public_hex: str,
@@ -141,17 +144,24 @@ class AuthService:
         """Verify the client proof; return `(M2_hex, profile)` or None (generic failure)."""
         key = normalize_email(email)
         entry = self._challenges.pop(key, None)
-        if entry is None or entry[1] <= time.time():
+        if entry is None or entry[2] <= time.time():
             return None
-        server = entry[0]
+        server, token, _expiry = entry
         try:
             proof = server.verify(int(client_public_hex, 16), bytes.fromhex(client_proof_hex))
         except ValueError:
             return None
         user = self.users.get(key)
-        if user is None or user.disabled:      # re-check: state may have moved under us
+        # Re-check: state may have moved under us. A handshake proves the password the
+        # verifier held when it began — if a reset or a change has replaced that verifier
+        # since, the old password must not open a session now.
+        if user is None or user.disabled or user.srp_token != token:
             return None
         return proof.hex(), self.profile_for(key)
+
+    def forget_challenge(self, email: str) -> None:
+        """Drop *email*'s in-flight handshake (after its credentials change)."""
+        self._challenges.pop(normalize_email(email), None)
 
     def profile_for(self, email: str) -> str:
         """The web profile for *email* from `authorizations.json`, defaulting to
@@ -355,6 +365,7 @@ def build_public_app(service: AuthService) -> web.Application:
             return web.Response(status=400, text='malformed credentials')
         if not service.users.set_credentials(email, salt, verifier):
             return web.Response(status=401, text=_GENERIC_401)
+        service.forget_challenge(email)
         current = request.cookies.get(policy.SESSION_COOKIE)
         service.sessions.revoke_email(email, keep=current)   # other devices out;
         service.remember.revoke_email(email)                 # persistent tokens die
