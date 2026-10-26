@@ -74,10 +74,10 @@
       const client = await SRP.startLogin(email, secret);
       const challenge = await post('/auth/challenge', { email: client.email });
       if (!challenge.ok) return fail('Sign-in failed. Check your email and password.');
-      const { salt, B } = await challenge.json();
+      const { salt, B, id } = await challenge.json();
       const proof = await client.respond(salt, B);
       const verify = await post('/auth/verify',
-                                { email: client.email, A: proof.A, M1: proof.M1, remember });
+                                { email: client.email, A: proof.A, M1: proof.M1, id, remember });
       if (!verify.ok) return fail('Sign-in failed. Check your email and password.');
       const { M2 } = await verify.json();
       if (!proof.check(M2)) return fail('Server failed mutual authentication — not signing in.');

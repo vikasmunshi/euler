@@ -57,7 +57,7 @@ class ChangePasswordTests(AioHTTPTestCase):
         new_salt = secrets.token_bytes(16)
         new_verifier = compute_verifier(new_salt, _EMAIL, _NEW)
         resp = await self.client.post('/auth/password', cookies=cookies, json={
-            'A': f'{client.public:x}', 'M1': proof.hex(),
+            'A': f'{client.public:x}', 'M1': proof.hex(), 'id': challenge['id'],
             'salt': new_salt.hex(), 'verifier': f'{new_verifier:x}',
         })
         body = await resp.json() if resp.status == 200 else {}
@@ -118,11 +118,11 @@ class ChangePasswordTests(AioHTTPTestCase):
         self.assertIsNotNone(self.service.sessions.get(mine))              # I stay signed in
         self.assertIsNone(self.service.sessions.get(other))                # other devices out
         # …and the new password signs in (full handshake against the new verifier)
-        salt_hex, public_hex = self.service.start_challenge(_EMAIL)
+        salt_hex, public_hex, cid = self.service.start_challenge(_EMAIL)
         fresh = SrpClient(_EMAIL, _NEW)
         proof = fresh.process_challenge(bytes.fromhex(salt_hex), int(public_hex, 16))
         self.assertIsNotNone(
-            self.service.finish_challenge(_EMAIL, f'{fresh.public:x}', proof.hex()))
+            self.service.finish_challenge(_EMAIL, f'{fresh.public:x}', proof.hex(), cid))
 
     @unittest_run_loop
     async def test_wrong_current_password_changes_nothing(self) -> None:
@@ -153,7 +153,8 @@ class ChangePasswordTests(AioHTTPTestCase):
         client = SrpClient(_EMAIL, _OLD)                            # …and the old password tries
         proof = client.process_challenge(bytes.fromhex(challenge['salt']), int(challenge['B'], 16))
         resp = await self.client.post('/auth/verify', json={
-            'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex(), 'remember': True})
+            'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex(), 'id': challenge['id'],
+            'remember': True})
         self.assertEqual(resp.status, 401)
         self.assertNotIn(policy.SESSION_COOKIE, resp.cookies)
         self.assertNotIn(policy.REMEMBER_COOKIE, resp.cookies)
@@ -174,8 +175,33 @@ class ChangePasswordTests(AioHTTPTestCase):
         client = SrpClient(_EMAIL, _NEW)
         proof = client.process_challenge(bytes.fromhex(challenge['salt']), int(challenge['B'], 16))
         resp = await self.client.post('/auth/verify', json={
-            'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex()})
+            'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex(), 'id': challenge['id']})
         self.assertEqual(resp.status, 200)
+
+    def _proof(self, challenge: tuple[str, str, str], password: str = _OLD) -> tuple[str, str]:
+        client = SrpClient(_EMAIL, password)
+        proof = client.process_challenge(bytes.fromhex(challenge[0]), int(challenge[1], 16))
+        return f'{client.public:x}', proof.hex()
+
+    def test_a_second_handshake_does_not_cancel_the_first(self) -> None:
+        """Anyone may start a handshake for an address; that must not end its owner's."""
+        mine = self.service.start_challenge(_EMAIL)
+        self.service.start_challenge(_EMAIL)                       # someone else's, same address
+        self.assertIsNotNone(self.service.finish_challenge(_EMAIL, *self._proof(mine), mine[2]))
+
+    def test_a_handshake_finishes_once_and_only_for_its_own_address(self) -> None:
+        challenge = self.service.start_challenge(_EMAIL)
+        a, m1 = self._proof(challenge)
+        self.assertIsNone(self.service.finish_challenge('other@example.com', a, m1, challenge[2]))
+        self.assertIsNone(self.service.finish_challenge(_EMAIL, a, m1, challenge[2]),
+                          'a failed attempt spends the id')
+        replay = self.service.start_challenge(_EMAIL)
+        a, m1 = self._proof(replay)
+        self.assertIsNotNone(self.service.finish_challenge(_EMAIL, a, m1, replay[2]))
+        self.assertIsNone(self.service.finish_challenge(_EMAIL, a, m1, replay[2]), 'no replay')
+
+    def test_a_decoy_challenge_carries_an_id_too(self) -> None:
+        self.assertEqual(len(self.service.start_challenge('nobody@example.test')), 3)
 
 
 if __name__ == '__main__':

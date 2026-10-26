@@ -275,9 +275,10 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
 ### 4.2 The login handshake
 
 1. `POST /auth/challenge {email}` → the service loads `{salt, v}`, computes `B = k·v +
-   gᵇ`, and replies `{salt, B}`. **Unknown or disabled accounts get a stable decoy**
-   `salt`/`B` (never stored), so the response reveals nothing.
-2. `POST /auth/verify {email, A, M1, remember}` → the server checks `M1`; on success it
+   gᵇ`, and replies `{salt, B, id}` — the handshake is held under that random `id`, so
+   another one started for the same address cannot cancel it. **Unknown or disabled
+   accounts get a stable decoy** `salt`/`B` (never stored), so the response reveals nothing.
+2. `POST /auth/verify {email, A, M1, id, remember}` → the server checks `M1`; on success it
    replies `{M2, email, profile}` and sets the session cookie (plus the remember-me
    cookie if asked). On failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
@@ -342,6 +343,7 @@ trust them.
 | `SESSION_TTL_SECONDS` | 12 h | session lifetime (in-memory) |
 | `REMEMBER_TTL_SECONDS` | 30 d | remember-me lifetime (rotated on use) |
 | `CHALLENGE_TTL_SECONDS` | 120 s | pending SRP challenge hold |
+| `MAX_PENDING_CHALLENGES` | 4096 | handshakes held at once (oldest dropped first) |
 | `MIN_PASSWORD_LENGTH` / classes | 16 / lower+upper+digit+special | password policy (client-enforced) |
 | `INVITE_TTL_SECONDS` / `LINK_TOKEN_BYTES` | 7 d / 32 | emailed link validity / entropy |
 | `OTP_DIGITS` / `OTP_TTL_SECONDS` / `OTP_MAX_ATTEMPTS` / `OTP_MAX_SENDS` | 6 / 10 min / 5 / 5 | one-time code |

@@ -7,8 +7,8 @@ The model these values implement is in docs/web-server-guide.md § Authenticatio
 """
 from __future__ import annotations
 
-__all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MIN_PASSWORD_LENGTH',
-           'PASSWORD_REQUIRE_CLASSES', 'INVITE_TTL_SECONDS', 'LINK_TOKEN_BYTES',
+__all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MAX_PENDING_CHALLENGES',
+           'MIN_PASSWORD_LENGTH', 'PASSWORD_REQUIRE_CLASSES', 'INVITE_TTL_SECONDS', 'LINK_TOKEN_BYTES',
            'OTP_DIGITS', 'OTP_TTL_SECONDS', 'OTP_MAX_ATTEMPTS', 'OTP_MAX_SENDS',
            'REMEMBER_COOKIE', 'REMEMBER_TTL_SECONDS', 'AUTH_RATE_MAX', 'AUTH_RATE_WINDOW_SECONDS',
            'TICKET_TTL_SECONDS', 'PROFILES', 'RESET_COOLDOWN_SECONDS', 'RESET_DAILY_MAX',
@@ -26,6 +26,9 @@ SESSION_TTL_SECONDS: int = 12 * 3600
 #: How long a pending SRP challenge (server ephemeral B) is held between the
 #: challenge and verify steps.
 CHALLENGE_TTL_SECONDS: int = 120
+#: Ceiling on handshakes held at once, across all accounts. Each is keyed by its own id, so
+#: starting one never evicts another; this only bounds memory under a flood (oldest go first).
+MAX_PENDING_CHALLENGES: int = 4096
 #: Minimum password length. The user chooses their password in the browser during
 #: registration, so the browser enforces this; the server never sees the password.
 MIN_PASSWORD_LENGTH: int = 16

@@ -107,9 +107,9 @@ globalThis.SRP = globalThis.SRP || (() => {
 
   // ── login: the zero-knowledge handshake ──────────────────────────────────────
   // Usage: const c = await SRP.startLogin(email, password);
-  //        POST /auth/challenge {email} -> {salt, B}
+  //        POST /auth/challenge {email} -> {salt, B, id}
   //        const {A, M1, check} = await c.respond(salt, B);
-  //        POST /auth/verify {email, A, M1} -> {M2}; await check(M2) must be true.
+  //        POST /auth/verify {email, A, M1, id} -> {M2}; await check(M2) must be true.
   async function startLogin(email, password) {
     const norm = normalizeEmail(email);
     let a = 0n;

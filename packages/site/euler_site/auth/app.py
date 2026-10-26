@@ -26,6 +26,7 @@ __all__ = ['AuthService', 'build_public_app', 'build_admin_app']
 import asyncio
 import hmac
 import logging
+import secrets
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -98,10 +99,12 @@ class AuthService:
         #: Mail sends in flight in the background (:meth:`send_later`), held so none is
         #: garbage-collected half-way.
         self._mail_tasks: set[asyncio.Task[None]] = set()
-        #: In-flight SRP handshakes: email → (server, the verifier it was built from, expiry).
-        #: One per email at a time. The verifier is kept so a handshake begun before the
-        #: credentials changed (a reset, a password change) cannot finish after it.
-        self._challenges: dict[str, tuple[SrpServer, SrpToken, float]] = {}
+        #: In-flight SRP handshakes: challenge id → (email, server, the verifier it was built
+        #: from, expiry). Keyed by a random id the browser carries back, not by the e-mail, so
+        #: anyone starting a handshake for an address cannot cancel its owner's. The verifier
+        #: is kept so a handshake begun before the credentials changed (a reset, a password
+        #: change) cannot finish after it.
+        self._challenges: dict[str, tuple[str, SrpServer, SrpToken, float]] = {}
         #: Secret for stable decoy salts (unknown-email challenges). Kept in the state dir:
         #: a real account's salt survives a restart, so a decoy's must too, or comparing the
         #: salt before and after one would tell the two apart.
@@ -129,32 +132,35 @@ class AuthService:
 
     # ── SRP handshake ─────────────────────────────────────────────────────────────
 
-    def start_challenge(self, email: str) -> tuple[str, str]:
-        """Begin a handshake for *email*; return `(salt_hex, B_hex)`.
+    def start_challenge(self, email: str) -> tuple[str, str, str]:
+        """Begin a handshake for *email*; return `(salt_hex, B_hex, challenge_id)`.
 
-        Unknown or disabled accounts get a stable **decoy** challenge (same shape,
-        never stored), so the response does not reveal whether the account exists.
+        Unknown or disabled accounts get a stable **decoy** challenge (same shape, an id
+        included, never stored), so the response does not reveal whether the account exists.
         """
         key = normalize_email(email)
         now = time.time()
-        self._challenges = {k: v for k, v in self._challenges.items() if v[2] > now}
+        self._challenges = {k: v for k, v in self._challenges.items() if v[3] > now}
+        cid = secrets.token_urlsafe(16)
         user = self.users.get(key)
         if user is None or user.disabled or not user.verifier:
             server = SrpServer(key, decoy_token(key, self._decoy_secret))
-            return server.salt.hex(), f'{server.public:x}'
+            return server.salt.hex(), f'{server.public:x}', cid
         token = user.srp_token
         server = SrpServer(key, token)
-        self._challenges[key] = (server, token, now + policy.CHALLENGE_TTL_SECONDS)
-        return server.salt.hex(), f'{server.public:x}'
+        while len(self._challenges) >= policy.MAX_PENDING_CHALLENGES:   # insertion order: oldest first
+            del self._challenges[next(iter(self._challenges))]
+        self._challenges[cid] = (key, server, token, now + policy.CHALLENGE_TTL_SECONDS)
+        return server.salt.hex(), f'{server.public:x}', cid
 
-    def finish_challenge(self, email: str, client_public_hex: str,
-                         client_proof_hex: str) -> tuple[str, str] | None:
+    def finish_challenge(self, email: str, client_public_hex: str, client_proof_hex: str,
+                         challenge_id: str) -> tuple[str, str] | None:
         """Verify the client proof; return `(M2_hex, profile)` or None (generic failure)."""
         key = normalize_email(email)
-        entry = self._challenges.pop(key, None)
-        if entry is None or entry[2] <= time.time():
+        entry = self._challenges.pop(challenge_id, None)
+        if entry is None or entry[0] != key or entry[3] <= time.time():
             return None
-        server, token, _expiry = entry
+        _email, server, token, _expiry = entry
         try:
             proof = server.verify(int(client_public_hex, 16), bytes.fromhex(client_proof_hex))
         except ValueError:
@@ -168,8 +174,9 @@ class AuthService:
         return proof.hex(), self.profile_for(key)
 
     def forget_challenge(self, email: str) -> None:
-        """Drop *email*'s in-flight handshake (after its credentials change)."""
-        self._challenges.pop(normalize_email(email), None)
+        """Drop *email*'s in-flight handshakes (after its credentials change)."""
+        key = normalize_email(email)
+        self._challenges = {k: v for k, v in self._challenges.items() if v[0] != key}
 
     def profile_for(self, email: str) -> str:
         """The web profile for *email* from `authorizations.json`, defaulting to
@@ -321,16 +328,16 @@ def build_public_app(service: AuthService) -> web.Application:
         email = str(body.get('email', ''))
         if '@' not in email:
             return web.Response(status=400, text='email required')
-        salt_hex, public_hex = service.start_challenge(email)
-        return web.json_response({'salt': salt_hex, 'B': public_hex})
+        salt_hex, public_hex, challenge_id = service.start_challenge(email)
+        return web.json_response({'salt': salt_hex, 'B': public_hex, 'id': challenge_id})
 
     async def verify(request: web.Request) -> web.Response:
         if not service.rate.allow(_client_key(request)):
             return web.Response(status=429, text='rate limited')
         body = await _json_body(request)
         try:
-            result = service.finish_challenge(str(body.get('email', '')),
-                                              str(body.get('A', '')), str(body.get('M1', '')))
+            result = service.finish_challenge(str(body.get('email', '')), str(body.get('A', '')),
+                                              str(body.get('M1', '')), str(body.get('id', '')))
         except ValueError:
             result = None
         if result is None:
@@ -387,7 +394,7 @@ def build_public_app(service: AuthService) -> web.Application:
         body = await _json_body(request)
         try:
             result = service.finish_challenge(email, str(body.get('A', '')),
-                                              str(body.get('M1', '')))
+                                              str(body.get('M1', '')), str(body.get('id', '')))
         except ValueError:
             result = None
         if result is None:

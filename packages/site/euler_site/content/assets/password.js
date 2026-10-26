@@ -67,12 +67,12 @@
         const client = await SRP.startLogin(email, current);
         const challenge = await post('/auth/challenge', { email: client.email });
         if (!challenge.ok) return fail('Could not start the change. Try again.');
-        const { salt, B } = await challenge.json();
+        const { salt, B, id } = await challenge.json();
         const proof = await client.respond(salt, B);
         // 2 · derive the new credentials and swap them in one atomic exchange
         const derived = await SRP.computeVerifier(email, next);
         const change = await post('/auth/password', {
-          A: proof.A, M1: proof.M1, salt: derived.salt, verifier: derived.verifier,
+          A: proof.A, M1: proof.M1, id, salt: derived.salt, verifier: derived.verifier,
         });
         if (change.status === 401) return fail('The current password is incorrect.');
         if (!change.ok) return fail('The change was refused. Try again.');

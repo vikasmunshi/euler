@@ -185,17 +185,17 @@ srp.js                                       packages/site/euler_site/auth/
   computeVerifier()  ──register──▶ TLS ──▶     app.py     endpoints + challenge table
   startLogin()                                 srp.py     the protocol
     POST /auth/challenge {email}               users.py   salt + verifier at rest
-    ◀── {salt, B}                              policy.py  lifetimes and rules
-    POST /auth/verify {email, A, M1}           ratelimit.py
+    ◀── {salt, B, id}                          policy.py  lifetimes and rules
+    POST /auth/verify {email, A, M1, id}       ratelimit.py
     ◀── {M2}, session cookie set
 ```
 
 | endpoint | body in | body out | notes |
 | --- | --- | --- | --- |
-| `POST /auth/challenge` | `{email}` | `{salt, B}` | `AuthService.start_challenge`; one in-flight handshake per email |
-| `POST /auth/verify` | `{email, A, M1}` | `{M2}` + session cookie | `finish_challenge`; the challenge is consumed whether or not it succeeds |
+| `POST /auth/challenge` | `{email}` | `{salt, B, id}` | `AuthService.start_challenge`; each handshake is held under its own random `id`, so starting one for an address never cancels another in flight |
+| `POST /auth/verify` | `{email, A, M1, id}` | `{M2}` + session cookie | `finish_challenge`; the challenge is consumed whether or not it succeeds, and only for the address it was started for |
 | `POST /register/complete` | form `{token, salt, verifier}` | redirect to `/login` | `pages.py`; the invite+OTP gate above, single-use token |
-| `POST /auth/password` | `{A, M1, salt, verifier}` | `{M2}` | signed-in change: the **same handshake** re-used as proof of the current password, in one atomic exchange with the new verifier |
+| `POST /auth/password` | `{A, M1, id, salt, verifier}` | `{M2}` | signed-in change: the **same handshake** re-used as proof of the current password, in one atomic exchange with the new verifier |
 
 That last row is worth noticing as a pattern: SRP is not only a login here. Where the server
 needs to know that the person at the keyboard knows the *current* password, it runs the
