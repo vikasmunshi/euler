@@ -17,7 +17,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from euler_site.auth import policy
 from euler_site.auth.app import AuthService, build_public_app
 from euler_site.auth.config import AuthConfig
-from euler_site.auth.srp import SrpClient, compute_verifier
+from euler_site.auth.srp import KDF, KDF_LEGACY, SrpClient, compute_verifier
 
 from tests import silence
 
@@ -28,7 +28,9 @@ _OLD = 'Correct-Horse-Battery-1!'
 _NEW = 'Staple-Gun-Overdrive-2?'
 
 
-class ChangePasswordTests(AioHTTPTestCase):
+class _AuthCase(AioHTTPTestCase):
+    """The public app over a fresh state dir, with one registered account (`_EMAIL`, `_OLD`)."""
+
     async def get_application(self):
         state = Path(tempfile.mkdtemp(prefix='euler-auth-test-'))
         self.addCleanup(shutil.rmtree, state, True)
@@ -46,6 +48,8 @@ class ChangePasswordTests(AioHTTPTestCase):
     def _session(self) -> str:
         return self.service.sessions.create(_EMAIL, 'reader')
 
+
+class ChangePasswordTests(_AuthCase):
     async def _change(self, session: str, current_password: str) -> tuple[int, SrpClient, dict]:
         """Drive the browser's two steps: challenge, then the atomic change POST."""
         cookies = {policy.SESSION_COOKIE: session}
@@ -118,7 +122,7 @@ class ChangePasswordTests(AioHTTPTestCase):
         self.assertIsNotNone(self.service.sessions.get(mine))              # I stay signed in
         self.assertIsNone(self.service.sessions.get(other))                # other devices out
         # …and the new password signs in (full handshake against the new verifier)
-        salt_hex, public_hex, cid = self.service.start_challenge(_EMAIL)
+        salt_hex, public_hex, cid, _kdf = self.service.start_challenge(_EMAIL)
         fresh = SrpClient(_EMAIL, _NEW)
         proof = fresh.process_challenge(bytes.fromhex(salt_hex), int(public_hex, 16))
         self.assertIsNotNone(
@@ -178,7 +182,7 @@ class ChangePasswordTests(AioHTTPTestCase):
             'email': _EMAIL, 'A': f'{client.public:x}', 'M1': proof.hex(), 'id': challenge['id']})
         self.assertEqual(resp.status, 200)
 
-    def _proof(self, challenge: tuple[str, str, str], password: str = _OLD) -> tuple[str, str]:
+    def _proof(self, challenge: tuple[str, str, str, str], password: str = _OLD) -> tuple[str, str]:
         client = SrpClient(_EMAIL, password)
         proof = client.process_challenge(bytes.fromhex(challenge[0]), int(challenge[1], 16))
         return f'{client.public:x}', proof.hex()
@@ -200,8 +204,74 @@ class ChangePasswordTests(AioHTTPTestCase):
         self.assertIsNotNone(self.service.finish_challenge(_EMAIL, a, m1, replay[2]))
         self.assertIsNone(self.service.finish_challenge(_EMAIL, a, m1, replay[2]), 'no replay')
 
-    def test_a_decoy_challenge_carries_an_id_too(self) -> None:
-        self.assertEqual(len(self.service.start_challenge('nobody@example.test')), 3)
+    def test_a_decoy_challenge_looks_like_an_upgraded_account(self) -> None:
+        """An id, and the current KDF named — the shape a real, upgraded account answers with."""
+        _salt, _b, cid, kdf = self.service.start_challenge('nobody@example.test')
+        self.assertTrue(cid)
+        self.assertEqual(kdf, KDF)
+
+
+class PasswordHashUpgradeTests(_AuthCase):
+    """An account on the legacy password hash moves to Argon2id at its next sign-in — only then,
+    only with a valid proof, and keeping its salt (the vault key is derived from it)."""
+
+    def _make_legacy(self) -> str:
+        salt = secrets.token_bytes(16)
+        self.service.users.set_credentials(
+            _EMAIL, salt.hex(), f'{compute_verifier(salt, _EMAIL, _OLD, KDF_LEGACY):x}', kdf=KDF_LEGACY)
+        return salt.hex()
+
+    def _sign_in(self, password: str, upgrade: bool) -> bool:
+        salt_hex, b_hex, cid, kdf = self.service.start_challenge(_EMAIL)
+        client = SrpClient(_EMAIL, password, kdf)
+        proof = client.process_challenge(bytes.fromhex(salt_hex), int(b_hex, 16))
+        new = f'{compute_verifier(bytes.fromhex(salt_hex), _EMAIL, password, KDF):x}' if upgrade else ''
+        return self.service.finish_challenge(_EMAIL, f'{client.public:x}', proof.hex(), cid, new) is not None
+
+    def test_a_legacy_challenge_says_so(self) -> None:
+        self._make_legacy()
+        self.assertEqual(self.service.start_challenge(_EMAIL)[3], KDF_LEGACY)
+
+    def test_a_sign_in_upgrades_and_keeps_the_salt(self) -> None:
+        salt = self._make_legacy()
+        self.assertTrue(self._sign_in(_OLD, upgrade=True))
+        record = self.service.users.get(_EMAIL)
+        assert record is not None
+        self.assertEqual((record.kdf, record.salt), (KDF, salt))
+        self.assertTrue(self._sign_in(_OLD, upgrade=False), 'the same password, now under Argon2id')
+
+    def test_a_failed_proof_upgrades_nothing(self) -> None:
+        self._make_legacy()
+        self.assertFalse(self._sign_in('Not-The-Password-9#', upgrade=True))
+        record = self.service.users.get(_EMAIL)
+        assert record is not None
+        self.assertEqual(record.kdf, KDF_LEGACY)
+
+    def test_a_current_account_ignores_an_upgrade(self) -> None:
+        before = self.service.users.get(_EMAIL)
+        self.assertTrue(self._sign_in(_OLD, upgrade=False))
+        salt_hex, b_hex, cid, kdf = self.service.start_challenge(_EMAIL)
+        client = SrpClient(_EMAIL, _OLD, kdf)
+        proof = client.process_challenge(bytes.fromhex(salt_hex), int(b_hex, 16))
+        self.assertIsNotNone(self.service.finish_challenge(_EMAIL, f'{client.public:x}', proof.hex(), cid, 'ab'))
+        self.assertEqual(self.service.users.get(_EMAIL), before, 'nothing to upgrade, nothing written')
+
+    @unittest_run_loop
+    async def test_a_change_records_its_kdf_and_refuses_an_unknown_one(self) -> None:
+        cookies = {policy.SESSION_COOKIE: self._session()}
+        for kdf, status in (('argon2id$m=8,t=1,p=1', 400), (KDF, 200)):
+            resp = await self.client.post('/auth/challenge', json={'email': _EMAIL}, cookies=cookies)
+            challenge = await resp.json()
+            client = SrpClient(_EMAIL, _OLD, challenge['kdf'])
+            proof = client.process_challenge(bytes.fromhex(challenge['salt']), int(challenge['B'], 16))
+            salt = secrets.token_bytes(16)
+            resp = await self.client.post('/auth/password', cookies=cookies, json={
+                'A': f'{client.public:x}', 'M1': proof.hex(), 'id': challenge['id'], 'kdf': kdf,
+                'salt': salt.hex(), 'verifier': f'{compute_verifier(salt, _EMAIL, _NEW, KDF):x}'})
+            self.assertEqual(resp.status, status, kdf)
+        record = self.service.users.get(_EMAIL)
+        assert record is not None
+        self.assertEqual(record.kdf, KDF)
 
 
 if __name__ == '__main__':

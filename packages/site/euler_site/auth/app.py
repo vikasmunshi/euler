@@ -53,7 +53,7 @@ from euler_site.auth.ratelimit import RateLimiter
 from euler_site.auth.requests import RequestStore
 from euler_site.auth.remember import RememberStore, load_or_create_secret
 from euler_site.auth.sessions import SessionStore
-from euler_site.auth.srp import SrpServer, SrpToken, decoy_token
+from euler_site.auth.srp import KDF, KDF_LEGACY, KDFS, SrpServer, SrpToken, decoy_token
 from euler_site.auth.tickets import TicketStore
 from euler_site.auth.users import UserStore, normalize_email
 
@@ -66,6 +66,15 @@ def _client_key(request: web.Request) -> str:
     """The rate-limit key: the first X-Forwarded-For hop (Caddy sets it), else 'local'."""
     forwarded = request.headers.get('X-Forwarded-For', '')
     return forwarded.split(',')[0].strip() or 'local'
+
+
+def submitted_kdf(value: object) -> str | None:
+    """The KDF a browser says it derived a new verifier with, or None if it names none we know.
+
+    Absent means a page from before the field existed, whose verifier is the legacy kind.
+    """
+    kdf = str(value or KDF_LEGACY)
+    return kdf if kdf in KDFS else None
 
 
 async def _json_body(request: web.Request) -> dict[str, Any]:
@@ -136,11 +145,13 @@ class AuthService:
 
     # ── SRP handshake ─────────────────────────────────────────────────────────────
 
-    def start_challenge(self, email: str) -> tuple[str, str, str]:
-        """Begin a handshake for *email*; return `(salt_hex, B_hex, challenge_id)`.
+    def start_challenge(self, email: str) -> tuple[str, str, str, str]:
+        """Begin a handshake for *email*; return `(salt_hex, B_hex, challenge_id, kdf)`.
 
         Unknown or disabled accounts get a stable **decoy** challenge (same shape, an id
-        included, never stored), so the response does not reveal whether the account exists.
+        included, the current KDF named, never stored), so the response does not reveal whether
+        the account exists. The one exception is an account still on the legacy KDF, which says
+        so until its owner's next sign-in upgrades it.
         """
         key = normalize_email(email)
         now = time.time()
@@ -148,18 +159,24 @@ class AuthService:
         cid = secrets.token_urlsafe(16)
         user = self.users.get(key)
         if user is None or user.disabled or not user.verifier:
-            server = SrpServer(key, decoy_token(key, self._decoy_secret))
-            return server.salt.hex(), f'{server.public:x}', cid
+            decoy = decoy_token(key, self._decoy_secret)
+            server = SrpServer(key, decoy)
+            return server.salt.hex(), f'{server.public:x}', cid, decoy.kdf
         token = user.srp_token
         server = SrpServer(key, token)
         while len(self._challenges) >= policy.MAX_PENDING_CHALLENGES:   # insertion order: oldest first
             del self._challenges[next(iter(self._challenges))]
         self._challenges[cid] = (key, server, token, now + policy.CHALLENGE_TTL_SECONDS)
-        return server.salt.hex(), f'{server.public:x}', cid
+        return server.salt.hex(), f'{server.public:x}', cid, token.kdf
 
     def finish_challenge(self, email: str, client_public_hex: str, client_proof_hex: str,
-                         challenge_id: str) -> tuple[str, str] | None:
-        """Verify the client proof; return `(M2_hex, profile)` or None (generic failure)."""
+                         challenge_id: str, upgrade_hex: str = '') -> tuple[str, str] | None:
+        """Verify the client proof; return `(M2_hex, profile)` or None (generic failure).
+
+        *upgrade_hex* is the verifier for the same salt under the current :data:`KDF`, which the
+        browser sends when the challenge named an older one. It is stored only after the proof
+        succeeds — in this same call, so nothing but a proven password can replace a verifier.
+        """
         key = normalize_email(email)
         entry = self._challenges.pop(challenge_id, None)
         if entry is None or entry[0] != key or entry[3] <= time.time():
@@ -175,7 +192,20 @@ class AuthService:
         # since, the old password must not open a session now.
         if user is None or user.disabled or user.srp_token != token:
             return None
+        if token.kdf != KDF and upgrade_hex:
+            self._upgrade_kdf(key, token, upgrade_hex)
         return proof.hex(), self.profile_for(key)
+
+    def _upgrade_kdf(self, email: str, token: SrpToken, verifier_hex: str) -> None:
+        """Move *email* to the current KDF: same salt, the browser's new verifier."""
+        verifier = verifier_hex.lower()
+        try:
+            if not (0 < len(verifier) <= 512 and int(verifier, 16) > 0):
+                return
+        except ValueError:
+            return
+        self.users.set_credentials(email, token.salt.hex(), verifier, kdf=KDF)
+        log.info('password hash upgraded for %s', email)
 
     def forget_challenge(self, email: str) -> None:
         """Drop *email*'s in-flight handshakes (after its credentials change)."""
@@ -332,8 +362,8 @@ def build_public_app(service: AuthService) -> web.Application:
         email = str(body.get('email', ''))
         if '@' not in email:
             return web.Response(status=400, text='email required')
-        salt_hex, public_hex, challenge_id = service.start_challenge(email)
-        return web.json_response({'salt': salt_hex, 'B': public_hex, 'id': challenge_id})
+        salt_hex, public_hex, challenge_id, kdf = service.start_challenge(email)
+        return web.json_response({'salt': salt_hex, 'B': public_hex, 'id': challenge_id, 'kdf': kdf})
 
     async def verify(request: web.Request) -> web.Response:
         if not service.rate.allow(_client_key(request)):
@@ -341,7 +371,8 @@ def build_public_app(service: AuthService) -> web.Application:
         body = await _json_body(request)
         try:
             result = service.finish_challenge(str(body.get('email', '')), str(body.get('A', '')),
-                                              str(body.get('M1', '')), str(body.get('id', '')))
+                                              str(body.get('M1', '')), str(body.get('id', '')),
+                                              str(body.get('upgrade', '') or ''))
         except ValueError:
             result = None
         if result is None:
@@ -406,13 +437,14 @@ def build_public_app(service: AuthService) -> web.Application:
             return web.Response(status=401, text='current password incorrect')
         salt = str(body.get('salt', '')).lower()
         verifier = str(body.get('verifier', '')).lower()
+        kdf = submitted_kdf(body.get('kdf'))
         try:                                    # sanity: well-formed hex of sane size
-            if not (len(salt) == 32 and 0 < len(verifier) <= 512 and int(verifier, 16) > 0):
+            if not (kdf and len(salt) == 32 and 0 < len(verifier) <= 512 and int(verifier, 16) > 0):
                 raise ValueError
             bytes.fromhex(salt)
         except ValueError:
             return web.Response(status=400, text='malformed credentials')
-        if not service.users.set_credentials(email, salt, verifier):
+        if not service.users.set_credentials(email, salt, verifier, kdf=kdf):
             return web.Response(status=401, text=_GENERIC_401)
         service.forget_challenge(email)
         current = request.cookies.get(policy.SESSION_COOKIE)

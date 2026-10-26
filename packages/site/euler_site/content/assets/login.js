@@ -74,10 +74,14 @@
       const client = await SRP.startLogin(email, secret);
       const challenge = await post('/auth/challenge', { email: client.email });
       if (!challenge.ok) return fail('Sign-in failed. Check your email and password.');
-      const { salt, B, id } = await challenge.json();
-      const proof = await client.respond(salt, B);
+      const { salt, B, id, kdf } = await challenge.json();
+      const proof = await client.respond(salt, B, kdf);
+      // An account on an older password hash moves to the current one with this sign-in: the
+      // new verifier (same salt) rides along, and the server keeps it only if the proof holds.
+      const upgrade = kdf && kdf !== SRP.KDF
+        ? await SRP.upgradeVerifier(client.email, secret, salt) : undefined;
       const verify = await post('/auth/verify',
-                                { email: client.email, A: proof.A, M1: proof.M1, id, remember });
+                                { email: client.email, A: proof.A, M1: proof.M1, id, remember, upgrade });
       if (!verify.ok) return fail('Sign-in failed. Check your email and password.');
       const { M2 } = await verify.json();
       if (!proof.check(M2)) return fail('Server failed mutual authentication — not signing in.');

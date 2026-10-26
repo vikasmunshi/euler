@@ -34,8 +34,13 @@ NONCE_KEY: str = 'csp_nonce'
 #: `frame-ancestors 'self'` (not `'none'`): the app shell frames its own
 #: `/terminal` document — cross-origin embedding stays blocked. See
 #: docs/web-server-guide.md § Content-Security-Policy for the recorded trade-offs.
+#: `'wasm-unsafe-eval'` lets a page compile WebAssembly — the Argon2id in the vendored
+#: hash-wasm that `srp.js` derives the password key with — and nothing else: JavaScript
+#: `eval` stays blocked. It is on every page, not the sign-in ones alone, because the sign-in
+#: form sits in the public site's right pane and the password change swaps into the signed-in
+#: shell, whose policy is the one its document loaded with.
 _POLICY = ("default-src 'self'; "
-           "script-src 'self' 'nonce-{nonce}'; "
+           "script-src 'self' 'nonce-{nonce}' 'wasm-unsafe-eval'; "
            "style-src 'self' 'unsafe-inline'; "
            "img-src 'self' data:; "
            "connect-src 'self'; "

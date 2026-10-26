@@ -39,11 +39,20 @@ SHA-256 throughout; :data:`VERSION` records this so the parameters can evolve
 later. Integer values fed to the hash (`A`, `B`, `S`) are left-padded to
 the byte length of `N` (`PAD`), which a browser-side client must match
 byte-for-byte to interoperate.
+
+**The password hash in `x` is versioned per account** (:data:`KDF`). An account's `kdf` is
+either :data:`KDF_LEGACY` — `x = H(salt | H(email ":" password))`, RFC 5054 as written, fast
+enough that a stolen verifier could be guessed at GPU speed — or the current Argon2id string,
+`x = H(salt | Argon2id(email ":" password, "euler-srp-x:" | salt))`. The Argon2 salt carries a
+label so this derivation never coincides with the vault's PBKDF2 key from the same password and
+salt. The browser does the work (`hash-wasm`); the service never derives `x` for a sign-in, only
+here, for :func:`verify_password` and the tests. An account moves to the current KDF on its next
+sign-in: the browser sends a new verifier under the same salt alongside its proof (auth/app.py).
 """
 from __future__ import annotations
 
 __all__ = ['SrpClient', 'SrpServer', 'SrpToken', 'make_srp_token', 'compute_verifier',
-           'verify_password', 'decoy_token', 'VERSION']
+           'verify_password', 'decoy_token', 'VERSION', 'KDF', 'KDF_LEGACY', 'KDFS']
 
 import hmac
 import secrets
@@ -67,6 +76,17 @@ _N_BYTES: int = (_N.bit_length() + 7) // 8
 VERSION: str = 'srp6a-sha256-2048'
 #: Random salt length in bytes used when minting a fresh verifier.
 _SALT_BYTES: int = 16
+
+#: The password hash inside `x` for a new verifier: Argon2id, 64 MiB, 3 passes, 1 lane. The
+#: string is stored per account and sent with each challenge, so the browser derives `x` the
+#: way that account's verifier was made; `srp.js` carries the same constant.
+KDF: str = 'argon2id$m=65536,t=3,p=1'
+#: The original derivation, `H(salt | H(email ":" password))` — accounts not yet upgraded.
+KDF_LEGACY: str = 'sha256'
+#: Every derivation a stored or submitted verifier may name.
+KDFS: frozenset[str] = frozenset({KDF, KDF_LEGACY})
+#: Prefixed to the salt for Argon2, so `x` never shares a derivation with the vault key.
+_ARGON2_LABEL: bytes = b'euler-srp-x:'
 
 
 def _hash(*parts: bytes) -> bytes:
@@ -96,9 +116,28 @@ def _random_exponent() -> int:
     return 1 + secrets.randbelow(_N - 1)
 
 
-def _derive_x(salt: bytes, email: str, password: str) -> int:
-    """Derive the private exponent `x = H(salt | H(email ":" password))` (RFC 5054)."""
-    inner: bytes = _hash(f'{email}:{password}'.encode())
+def _argon2_params(kdf: str) -> tuple[int, int, int]:
+    """`(memory KiB, passes, lanes)` from an `argon2id$m=…,t=…,p=…` string."""
+    name, _, params = kdf.partition('$')
+    values = dict(pair.split('=', 1) for pair in params.split(',')) if name == 'argon2id' else {}
+    try:
+        return int(values['m']), int(values['t']), int(values['p'])
+    except (KeyError, ValueError) as exc:
+        raise ValueError(f'unsupported srp kdf: {kdf!r}') from exc
+
+
+def _derive_x(salt: bytes, email: str, password: str, kdf: str = KDF) -> int:
+    """Derive the private exponent `x = H(salt | inner)`, *inner* per the account's *kdf*.
+
+    Legacy: `inner = H(email ":" password)` (RFC 5054). Current: `inner =
+    Argon2id(email ":" password, "euler-srp-x:" | salt)`.
+    """
+    secret = f'{email}:{password}'.encode()
+    if kdf == KDF_LEGACY:
+        return _hash_int(salt, _hash(secret))
+    from argon2.low_level import Type, hash_secret_raw   # only local derivations need it
+    memory, passes, lanes = _argon2_params(kdf)
+    inner = hash_secret_raw(secret, _ARGON2_LABEL + salt, passes, memory, lanes, 32, Type.ID)
     return _hash_int(salt, inner)
 
 
@@ -129,9 +168,9 @@ def _server_proof(client_public: int, client_proof: bytes, session_key: bytes) -
     return _hash(_pad(client_public), client_proof, session_key)
 
 
-def compute_verifier(salt: bytes, email: str, password: str) -> int:
+def compute_verifier(salt: bytes, email: str, password: str, kdf: str = KDF) -> int:
     """Compute the SRP verifier `v = g**x mod N` for the given salt and credentials."""
-    return pow(_g, _derive_x(salt, email, password), _N)
+    return pow(_g, _derive_x(salt, email, password, kdf), _N)
 
 
 class SrpToken(NamedTuple):
@@ -144,6 +183,8 @@ class SrpToken(NamedTuple):
 
     salt: bytes
     verifier: int
+    #: How `x` was derived for this verifier (:data:`KDF` or :data:`KDF_LEGACY`).
+    kdf: str = KDF
 
     @classmethod
     def create(cls, email: str, password: str, *, salt: bytes | None = None) -> SrpToken:
@@ -153,18 +194,24 @@ class SrpToken(NamedTuple):
 
     @classmethod
     def parse(cls, token: str) -> SrpToken:
-        """Parse a serialised token, raising ValueError if it is malformed or a foreign version."""
-        try:
-            version, salt_hex, verifier_hex = token.split('$')
-        except ValueError as exc:
-            raise ValueError('malformed srp token') from exc
+        """Parse a serialised token, raising ValueError if it is malformed or a foreign version.
+
+        Three fields are a legacy token; a fourth (which may itself contain `$`) names the KDF.
+        """
+        parts = token.split('$', 3)
+        if len(parts) not in (3, 4):
+            raise ValueError('malformed srp token')
+        version, salt_hex, verifier_hex = parts[:3]
+        kdf = parts[3] if len(parts) == 4 else KDF_LEGACY
         if version != VERSION:
             raise ValueError(f'unsupported srp token version: {version!r}')
-        return cls(salt=bytes.fromhex(salt_hex), verifier=int(verifier_hex, 16))
+        if kdf not in KDFS:
+            raise ValueError(f'unsupported srp kdf: {kdf!r}')
+        return cls(salt=bytes.fromhex(salt_hex), verifier=int(verifier_hex, 16), kdf=kdf)
 
     def serialize(self) -> str:
-        """Serialise to the `<version>$<salt-hex>$<verifier-hex>` storage form."""
-        return f'{VERSION}${self.salt.hex()}${self.verifier:x}'
+        """Serialise to the `<version>$<salt-hex>$<verifier-hex>$<kdf>` storage form."""
+        return f'{VERSION}${self.salt.hex()}${self.verifier:x}${self.kdf}'
 
     def __str__(self) -> str:
         """Return a truncated, non-secret-leaking summary."""
@@ -183,7 +230,8 @@ def decoy_token(email: str, secret: bytes) -> SrpToken:
     plausible verifier, so a caller cannot distinguish a real account from an
     unknown one by watching the salt (the subsequent proof still fails for any
     password). Derived from a per-process `secret` and the email via HMAC-SHA256,
-    so it is consistent within a run yet reveals nothing about real users.
+    so it is consistent within a run yet reveals nothing about real users. It names the
+    current :data:`KDF`, as an upgraded account does.
     """
     salt: bytes = hmac.new(secret, b'srp-decoy-salt:' + email.encode(), sha256).digest()[:_SALT_BYTES]
     x: int = _hash_int(hmac.new(secret, b'srp-decoy-x:' + email.encode(), sha256).digest())
@@ -193,9 +241,10 @@ def decoy_token(email: str, secret: bytes) -> SrpToken:
 class SrpClient:
     """The client side of an SRP-6a handshake: knows the password, proves it to the server."""
 
-    def __init__(self, email: str, password: str) -> None:
+    def __init__(self, email: str, password: str, kdf: str = KDF) -> None:
         self.email: str = email
         self._password: str = password
+        self._kdf: str = kdf
         self._a: int = _random_exponent()
         #: The client's ephemeral public value `A = g**a mod N` (sent to the server).
         self.public: int = pow(_g, self._a, _N)
@@ -210,7 +259,7 @@ class SrpClient:
         """
         if server_public % _N == 0:
             raise ValueError('SRP handshake failed: server public value B is invalid')
-        x: int = _derive_x(salt, self.email, self._password)
+        x: int = _derive_x(salt, self.email, self._password, self._kdf)
         u: int = _compute_u(self.public, server_public)
         # S = (B - k * g**x) ** (a + u * x) mod N
         shared: int = pow(server_public - _k * pow(_g, x, _N), self._a + u * x, _N)
@@ -292,7 +341,7 @@ def verify_password(email: str, password: str, token: SrpToken) -> bool:
     wrong password) yields False rather than raising.
     """
     server: SrpServer = SrpServer(email, token)
-    client: SrpClient = SrpClient(email, password)
+    client: SrpClient = SrpClient(email, password, token.kdf)
     try:
         client_proof: bytes = client.process_challenge(server.salt, server.public)
         server.verify(client.public, client_proof)

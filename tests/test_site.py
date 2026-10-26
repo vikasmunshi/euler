@@ -203,8 +203,10 @@ class ContentServiceTests(AioHTTPTestCase):
         # recorded 'unsafe-inline' exception for MathJax/htmx runtime styles (§4.7).
         self.assertRegex(csp, r"script-src 'self' 'nonce-[^']+'")
         self.assertNotIn("script-src 'self' 'unsafe-inline'", csp)
+        # WebAssembly may compile (Argon2id for the password key); JavaScript eval may not.
+        self.assertIn("'wasm-unsafe-eval'", csp)
+        self.assertNotIn("'unsafe-eval'", csp.replace("'wasm-unsafe-eval'", ''))
         self.assertIn("style-src 'self' 'unsafe-inline'", csp)
-        self.assertNotIn('unsafe-eval', csp)
 
     @unittest_run_loop
     async def test_cache_control_by_response_class(self) -> None:

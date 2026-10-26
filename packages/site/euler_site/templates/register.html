@@ -56,6 +56,7 @@
       <input type="hidden" name="token" value="{{ token }}">
       <input type="hidden" name="salt" value="">
       <input type="hidden" name="verifier" value="">
+      <input type="hidden" name="kdf" value="">
       <label for="password">new password</label>
       <div class="pw-wrap">
         <input id="password" type="password" autocomplete="new-password" required autofocus>
@@ -85,6 +86,9 @@
   {% if stage == 'terms' %}
     <script src="{{ asset('/assets/terms.js') }}" defer></script>
   {% elif stage == 'password' %}
+    <script src="{{ asset('/vendor/hash-wasm/argon2.umd.min.js') }}"
+            integrity="sha384-tP0Wy54CKmng7i9EoTlPySD0hBx6Octj0VS6MfwlnUu111MPa+JLm0CCbep6XJ1W"
+            crossorigin="anonymous" defer></script>
     <script src="{{ asset('/assets/srp.js') }}" defer></script>
     <script src="{{ asset('/assets/authform.js') }}" defer></script>
     <script src="{{ asset('/assets/register.js') }}" defer></script>

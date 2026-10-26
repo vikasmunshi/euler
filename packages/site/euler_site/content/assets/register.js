@@ -35,9 +35,10 @@
     const problem = policyError(password);
     if (problem) return fail(problem);
     try {
-      const { salt, verifier } = await SRP.computeVerifier(form.dataset.email, password);
+      const { salt, verifier, kdf } = await SRP.computeVerifier(form.dataset.email, password);
       form.elements.salt.value = salt;
       form.elements.verifier.value = verifier;
+      form.elements.kdf.value = kdf;
       document.getElementById('password').value = '';
       document.getElementById('confirm').value = '';
       // Prototype call: immune to named form controls shadowing .submit().

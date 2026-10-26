@@ -34,7 +34,7 @@ import aiohttp_jinja2
 from aiohttp import web
 
 from euler_site.auth import policy
-from euler_site.auth.app import AuthService, _client_key, utcnow_iso
+from euler_site.auth.app import AuthService, _client_key, submitted_kdf, utcnow_iso
 from euler_site.auth.pending import PendingRecord
 from euler_site.auth.requests import NAME_MAX, REMARKS_MAX, sanitize
 from euler_site.auth.returnto import return_path
@@ -219,8 +219,9 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         token = str(form.get('token', ''))
         salt = str(form.get('salt', '')).lower()
         verifier = str(form.get('verifier', '')).lower()
+        kdf = submitted_kdf(form.get('kdf'))
         try:                                    # sanity: well-formed hex of sane size
-            if not (len(salt) == 32 and 0 < len(verifier) <= 512 and int(verifier, 16) > 0):
+            if not (kdf and len(salt) == 32 and 0 < len(verifier) <= 512 and int(verifier, 16) > 0):
                 raise ValueError
             bytes.fromhex(salt)
         except ValueError:
@@ -232,10 +233,10 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
             # The profile is not stored on the SRP record — it lives in
             # authorizations.json, assigned by the admin `users add/change` path.
             service.users.create(record.email, salt, verifier,
-                                 record.terms_version, record.terms_accepted_at)
+                                 record.terms_version, record.terms_accepted_at, kdf=kdf)
             log.info('registration completed for %s (profile from authorizations.json)', record.email)
             raise web.HTTPSeeOther(location='/login?registered=1')
-        if not service.users.set_credentials(record.email, salt, verifier):
+        if not service.users.set_credentials(record.email, salt, verifier, kdf=kdf):
             return _bad_link(request)          # account vanished mid-flow
         service.forget_challenge(record.email)          # no pre-reset handshake may finish
         service.pending.revoke_email(record.email)      # nor any other reset link still out

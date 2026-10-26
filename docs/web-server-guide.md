@@ -276,10 +276,13 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
 ### 4.2 The login handshake
 
 1. `POST /auth/challenge {email}` → the service loads `{salt, v}`, computes `B = k·v +
-   gᵇ`, and replies `{salt, B, id}` — the handshake is held under that random `id`, so
-   another one started for the same address cannot cancel it. **Unknown or disabled
+   gᵇ`, and replies `{salt, B, id, kdf}` — the handshake is held under that random `id`, so
+   another one started for the same address cannot cancel it, and `kdf` names how the
+   account's `x` was derived (Argon2id, or the legacy SHA-256 until its next sign-in moves
+   it — docs/srp-guide.md § 3). **Unknown or disabled
    accounts get a stable decoy** `salt`/`B` (never stored), so the response reveals nothing.
-2. `POST /auth/verify {email, A, M1, id, remember}` → the server checks `M1`; on success it
+2. `POST /auth/verify {email, A, M1, id, remember, upgrade?}` → the server checks `M1`; on
+   success it stores `upgrade` (a legacy account's Argon2id verifier, same salt), and
    replies `{M2, email, profile}` and sets the session cookie (plus the remember-me
    cookie if asked). On failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
@@ -1791,14 +1794,21 @@ by every rendering service) because a strict policy needs a **per-response nonce
 app that renders the page mints it and stamps it into both header and template.
 
 ```
-default-src 'self'; script-src 'self' 'nonce-<per-response>';
+default-src 'self'; script-src 'self' 'nonce-<per-response>' 'wasm-unsafe-eval';
 style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';
 frame-ancestors 'self'; base-uri 'none'; object-src 'none'
 ```
 
 **Scripts allow no `unsafe-inline` and no `unsafe-eval`, ever.**
 
-Two entries are recorded exceptions rather than oversights:
+Three entries are recorded exceptions rather than oversights:
+
+- **`script-src 'wasm-unsafe-eval'`** — the password key `x` is Argon2id (`srp.js`, §4), from
+  the vendored hash-wasm, whose WebAssembly a page may compile only with this keyword. It
+  admits `WebAssembly.compile`/`instantiate` and nothing else; JavaScript `eval` and
+  `new Function` stay blocked, and the module itself is a pinned, SRI-checked `'self'` file.
+  It is on every page because the sign-in form is in the public site's right pane, and the
+  password change swaps into the signed-in shell, whose policy is fixed when it loads.
 
 - **`style-src 'unsafe-inline'`** — MathJax v3, CodeMirror 6, and htmx's indicator rules
   all inject stylesheets at runtime with **no nonce hook** (verified empirically: headless

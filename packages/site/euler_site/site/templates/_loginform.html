@@ -40,6 +40,9 @@
 {# What the form needs, after it: the SRP handshake, the shared reveal/caps-lock affordances,
    and the handshake driver. vault.js is already in the shell's <head> (base.html). #}
 {% macro login_scripts() %}
+<script src="{{ asset('/vendor/hash-wasm/argon2.umd.min.js') }}"
+        integrity="sha384-tP0Wy54CKmng7i9EoTlPySD0hBx6Octj0VS6MfwlnUu111MPa+JLm0CCbep6XJ1W"
+        crossorigin="anonymous" defer></script>
 <script src="{{ asset('/assets/srp.js') }}" defer></script>
 <script src="{{ asset('/assets/authform.js') }}" defer></script>
 <script src="{{ asset('/assets/login.js') }}" defer></script>

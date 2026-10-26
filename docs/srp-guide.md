@@ -74,23 +74,39 @@ existing verifiers.
 The browser picks a random 16-byte salt `s` and derives
 
 ```
-x = H( s ‖ H(email ":" password) )          (RFC 5054 §2.6)
+x = H( s ‖ Argon2id(email ":" password, "euler-srp-x:" ‖ s) )     m = 64 MiB, t = 3, p = 1
 v = g^x mod N
 ```
 
-then sends **`{salt, verifier}`** to the server, which stores exactly that and nothing else
-(`UserRecord.salt`, `UserRecord.verifier`, both hex, in the auth service's own `users.json`).
-The password and `x` never exist outside the browser.
+then sends **`{salt, verifier, kdf}`** to the server, which stores exactly that and nothing else
+(`UserRecord.salt`, `UserRecord.verifier`, both hex, and `UserRecord.kdf`, the string
+`argon2id$m=65536,t=3,p=1`, in the auth service's own `users.json`). The password and `x` never
+exist outside the browser. Argon2id runs in the page from the vendored hash-wasm (WebAssembly —
+the reason for `'wasm-unsafe-eval'` in the CSP); the service has `argon2-cffi` only to derive a
+verifier locally (`verify_password`, the tests), never for a sign-in.
 
-The inner `H(email ":" password)` binds the verifier to the account name, so the same password
-under two addresses yields unrelated verifiers. The outer hash with the salt is what stops one
-precomputed table covering every user.
+Hashing `email ":" password` binds the verifier to the account name, so the same password
+under two addresses yields unrelated verifiers; the salt stops one precomputed table covering
+every user; the `"euler-srp-x:"` label keeps this derivation apart from the vault key, which is
+PBKDF2 over the same password and salt.
 
-`x` is deliberately cheap to compute — two SHA-256 calls. SRP's security against a stolen
-verifier database is the discrete log, not the KDF: `v = g^x mod N` cannot be inverted, and an
-attacker guessing passwords must run a modular exponentiation per guess. The defence in depth
-against weak passwords is a **length and class policy**, enforced in the browser because the
-server cannot see the password to check it:
+**Why a slow hash.** `v = g^x mod N` cannot be inverted, but it does not have to be: whoever
+holds `users.json` can guess a password, derive `x`, and compare `g^x` with `v` — one hash and
+one exponentiation per guess. With `x` from two SHA-256 calls (RFC 5054 as written, and this
+service until v4.14) that is a fast offline attack. Argon2id makes every guess cost 64 MiB and
+three passes, which is what limits a stolen database to the weak passwords.
+
+**Accounts made before Argon2** carry `kdf = "sha256"` — `x = H(s ‖ H(email ":" password))` —
+and say so in their challenge. Their next sign-in moves them: the browser, which has the
+password in hand, also sends `upgrade`, the Argon2id verifier for the *same* salt, and
+`finish_challenge` stores it only after the proof succeeds, in the same call. The salt stays so
+the vault key, derived from it, stays too. Until every account has signed in once, a legacy
+challenge is distinguishable from an unknown address's decoy (which names Argon2id) — an
+existence leak that closes as the accounts move.
+
+The policy against weak passwords is **length and classes**, enforced in the browser because
+the server cannot see the password to check it — so it is advisory: a client that skips
+`password.js` can register a weak password for its own account:
 
 | policy | value | source |
 | --- | --- | --- |
@@ -98,8 +114,8 @@ server cannot see the password to check it:
 | required classes | lower + upper + digit + special (all four) | `policy.PASSWORD_REQUIRE_CLASSES` |
 
 Server-side, registration validates only *shape* — a 32-hex-character salt and a non-zero
-verifier of at most 512 hex digits (`pages.py:flow_complete`, and identically in
-`app.py:password_change`). It cannot do more, and pretending otherwise would be theatre.
+verifier of at most 512 hex digits, and a `kdf` it knows (`pages.py:flow_complete`, and
+identically in `app.py:password_change`). It cannot do more, and pretending otherwise would be theatre.
 
 **What gates registration is therefore not the password but the mailbox.** `POST
 /register/complete` accepts `{token, salt, verifier}` only for a pending record already in the
@@ -117,7 +133,7 @@ client (knows password)                             server (knows salt, v)
 a ← random, A = g^a mod N        ──── email ───▶
                                  ◀── salt, B ───    b ← random, B = (k·v + g^b) mod N
 u = H(PAD(A) ‖ PAD(B))                              u = H(PAD(A) ‖ PAD(B))
-x = H(salt ‖ H(email:password))
+x = H(salt ‖ Argon2id(email:password, …))   (per the challenge's kdf)
 S = (B − k·g^x)^(a + u·x) mod N                     S = (A · v^u)^b mod N
 K = H(PAD(S))                                       K = H(PAD(S))
 M1 = H(H(N)⊕H(g) ‖ H(email) ‖ salt
@@ -192,10 +208,10 @@ srp.js                                       packages/site/euler_site/auth/
 
 | endpoint | body in | body out | notes |
 | --- | --- | --- | --- |
-| `POST /auth/challenge` | `{email}` | `{salt, B, id}` | `AuthService.start_challenge`; each handshake is held under its own random `id`, so starting one for an address never cancels another in flight |
-| `POST /auth/verify` | `{email, A, M1, id}` | `{M2}` + session cookie | `finish_challenge`; the challenge is consumed whether or not it succeeds, and only for the address it was started for |
-| `POST /register/complete` | form `{token, salt, verifier}` | redirect to `/login` | `pages.py`; the invite+OTP gate above, single-use token |
-| `POST /auth/password` | `{A, M1, id, salt, verifier}` | `{M2}` | signed-in change: the **same handshake** re-used as proof of the current password, in one atomic exchange with the new verifier |
+| `POST /auth/challenge` | `{email}` | `{salt, B, id, kdf}` | `AuthService.start_challenge`; each handshake is held under its own random `id`, so starting one for an address never cancels another in flight |
+| `POST /auth/verify` | `{email, A, M1, id, upgrade?}` | `{M2}` + session cookie | `finish_challenge`; the challenge is consumed whether or not it succeeds, and only for the address it was started for; `upgrade` (a legacy account's Argon2id verifier) is stored only on success |
+| `POST /register/complete` | form `{token, salt, verifier, kdf}` | redirect to `/login` | `pages.py`; the invite+OTP gate above, single-use token |
+| `POST /auth/password` | `{A, M1, id, salt, verifier, kdf}` | `{M2}` | signed-in change: the **same handshake** re-used as proof of the current password, in one atomic exchange with the new verifier |
 
 That last row is worth noticing as a pattern: SRP is not only a login here. Where the server
 needs to know that the person at the keyboard knows the *current* password, it runs the

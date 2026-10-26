@@ -17,9 +17,18 @@ update the `<script integrity="…">` in the templates that load it.
 | `xterm/xterm.js` | [xterm.js](https://xtermjs.org) (`@xterm/xterm`) | 5.5.0 | MIT | `M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/` |
 | `xterm/xterm-addon-fit.js` | [`@xterm/addon-fit`](https://github.com/xtermjs/xterm.js) | 0.10.0 | MIT | `iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn` |
 | `xterm/xterm.css` | `@xterm/xterm` (stylesheet) | 5.5.0 | MIT | `8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP` |
+| `hash-wasm/argon2.umd.min.js` | [hash-wasm](https://github.com/Daninet/hash-wasm) (Argon2id build) | 4.12.0 | MIT | `tP0Wy54CKmng7i9EoTlPySD0hBx6Octj0VS6MfwlnUu111MPa+JLm0CCbep6XJ1W` |
 | `docs/presentation/fonts/newsreader.woff2`, `newsreader-italic.woff2` | [Newsreader](https://github.com/productiontype/Newsreader) (Production Type) | Google Fonts v26, Latin | OFL-1.1 | font, `'self'` (no SRI) |
 | `docs/presentation/fonts/atkinson-hyperlegible-{400,700}.woff2` | [Atkinson Hyperlegible](https://brailleinstitute.org/freefont) (Braille Institute) | Google Fonts v12, Latin | OFL-1.1 | font, `'self'` (no SRI) |
 | `docs/presentation/fonts/jetbrains-mono.woff2` | [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono) | Google Fonts v24, Latin | OFL-1.1 | font, `'self'` (no SRI) |
+
+hash-wasm's Argon2id derives the SRP private key `x` in the browser (`/assets/srp.js`; the
+service checks against `argon2-cffi`, `tests/test_srp_interop.py` pins the two together). It
+is the npm tarball's `dist/argon2.umd.min.js` — tarball integrity
+`sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==`
+as published — with its WebAssembly embedded, which is why the pages that load it carry
+`'wasm-unsafe-eval'` in `script-src` (docs/web-server-guide.md § Content-Security-Policy).
+License at `hash-wasm/LICENSE`.
 
 MathJax typesets the `$…$` TeX in statements/notes (config + re-typeset-on-swap
 in `/assets/site.js`); the woff fonts are loaded by the bundle relative to its

@@ -30,6 +30,9 @@ dependencies = [
     # Reading the ink of a cached problem diagram (content._image_ink); its absence
     # degrades to "no plate".
     "pillow",
+    # Argon2id for the SRP private key x (auth/srp.py). The browser derives x for a sign-in,
+    # so the service needs it only to mint or check a verifier locally (verify_password, tests).
+    "argon2-cffi",
 ]
 
 [tool.setuptools.dynamic]
