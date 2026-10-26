@@ -122,7 +122,8 @@ def _rows(threads: list[Any], me: str, *, is_staff: bool) -> list[dict[str, Any]
     for thread in ordered[:_ROWS]:
         thread_id, subject = str(thread.get('id', '')), str(thread.get('subject', ''))
         author = str(thread.get('author_name', ''))
-        verb = verb_for(subject, is_staff=is_staff, is_own=author == me)
+        verb = verb_for(subject, is_staff=is_staff, is_own=author == me,
+                        from_staff=thread.get('kind') == 'notice')
         rows.append({'id': thread_id, 'author_name': author, 'subject': subject,
                      'unread': bool(thread.get('unread')), 'verb': f'msg act {thread_id}',
                      'verb_label': '' if verb == 'read' else verb,

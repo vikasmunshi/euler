@@ -35,7 +35,7 @@ from solver.core.notices import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHA
                                  PR_REVIEW_SUBJECT, UNREGISTERED_SUBJECT)
 
 
-def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
+def verb_for(subject: str, *, is_staff: bool, is_own: bool, from_staff: bool) -> str:
     """What a message is asking to have done: `save` | `reconstruct` | `authorize` | `merge` | `read`.
 
     **The one rule, in one place.** `msg act <id>` runs it and the header's message chip
@@ -48,7 +48,10 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
 
     - a **key issued to you** is `save`: the thing to do with a key is take it;
     - **half a key** is `reconstruct`: the same thing to do, one step longer — it is completed
-      with the half your clone already carries before there is a key to take;
+      with the half your clone already carries before there is a key to take.
+      Both only for a message **staff** sent (a `notice` — the spool lets nobody below the
+      staff floor create one). Anyone may write to staff, and the subject is theirs to
+      choose, so an inbound "key" is prose: taking it would install a key its sender holds;
     - somebody else's **key request**, seen by staff, is `authorize` — the grant they are
       waiting for. Not your own: what you await on that one is the reply, not a self-grant;
     - a **pull request**, seen by staff, is `merge`. No `is_own` exclusion here, unlike a key
@@ -61,13 +64,14 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool) -> str:
         subject: The message's subject line, as the spool stored it.
         is_staff: Whether the caller is at :data:`~euler_webshell.msg.identity.STAFF_FLOOR`.
         is_own: Whether the caller wrote this message.
+        from_staff: Whether staff sent it — a `notice` thread, as the spool records it.
     """
     # The share subject first: it is not a prefix of the issue one, but the two read alike,
     # and the order says which is which without anybody having to check that.
     if subject.startswith(KEY_SHARE_SUBJECT):
-        return 'reconstruct'
+        return 'reconstruct' if from_staff else 'read'
     if subject.startswith(KEY_ISSUE_SUBJECT):
-        return 'save'
+        return 'save' if from_staff else 'read'
     if subject.startswith(KEY_REQUEST_SUBJECT) and is_staff and not is_own:
         return 'authorize'
     if subject.startswith(PR_REVIEW_SUBJECT) and is_staff:

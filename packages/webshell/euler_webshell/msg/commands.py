@@ -224,7 +224,8 @@ def _is_staff() -> bool:
 def _verb_of(thread: dict[str, Any]) -> str:
     """What `act` would do to *thread*, for this caller — the menu's hint and the dispatch."""
     return verb_for(str(thread.get('subject', '')), is_staff=_is_staff(),
-                    is_own=str(thread.get('author_name', '')) == config.subject.user)
+                    is_own=str(thread.get('author_name', '')) == config.subject.user,
+                    from_staff=thread.get('kind') == 'notice')
 
 
 # ── rendering ───────────────────────────────────────────────────────────────────────

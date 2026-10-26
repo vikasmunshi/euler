@@ -348,7 +348,7 @@ class KeySplitTests(KeySplitTestCase):
         identity, subject, _ = self.sent[-1]
         self.assertEqual(identity, 'them@example.com')
         self.assertTrue(subject.startswith(KEY_SHARE_SUBJECT), subject)
-        self.assertEqual(verb_for(subject, is_staff=False, is_own=False), 'reconstruct')
+        self.assertEqual(verb_for(subject, is_staff=False, is_own=False, from_staff=True), 'reconstruct')
         self.assertNotEqual(self._open(wrapped), self._local_half(), 'the two halves must differ')
 
     def test_the_message_carries_no_share_in_the_clear(self) -> None:

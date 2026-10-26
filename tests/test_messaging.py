@@ -827,10 +827,16 @@ class MsgActTests(_MsgCommandCase):
         _status, after = await self.call('GET', '/messages')
         self.assertEqual(after['unread'], 0)
 
+    def _from_staff(self, subject: str, body: str) -> str:
+        """A staff notice to me — the only way a key may arrive (`verb_for`'s `from_staff`)."""
+        thread_id = self.service.store.notice(box_of(_BOB), subject, body, [box_of(_ME)])
+        assert thread_id is not None
+        return thread_id
+
     @unittest_run_loop
     async def test_a_key_message_is_taken(self) -> None:
         done = self._dispatched()
-        thread_id = await self._from_alice(f'{KEY_ISSUE_SUBJECT}{_ME}', '{"verify": "x"}')
+        thread_id = self._from_staff(f'{KEY_ISSUE_SUBJECT}{_ME}', '{"verify": "x"}')
         await asyncio.to_thread(self._run, 'act', thread_id)
         self.assertEqual(done, [f'save {thread_id}'])
 
@@ -840,9 +846,19 @@ class MsgActTests(_MsgCommandCase):
         a share, worth nothing until the clone's half completes it — so the act is
         `key-reconstruct`, and the two subjects must never be read as one another."""
         done = self._dispatched()
-        thread_id = await self._from_alice(f'{KEY_SHARE_SUBJECT}{_ME}', f'share: {"ab" * 131}')
+        thread_id = self._from_staff(f'{KEY_SHARE_SUBJECT}{_ME}', f'share: {"ab" * 131}')
         await asyncio.to_thread(self._run, 'act', thread_id)
         self.assertEqual(done, [f'reconstruct {thread_id}'])
+
+    @unittest_run_loop
+    async def test_a_key_written_to_staff_is_only_read(self) -> None:
+        """Anyone may write to staff and choose the subject. A "key" filed that way would be
+        one its sender holds, so neither key act may run on it — it is prose."""
+        done = self._dispatched()
+        for subject in (f'{KEY_ISSUE_SUBJECT}{_ME}', f'{KEY_SHARE_SUBJECT}{_ME}'):
+            thread_id = await self._from_alice(subject, '{"verify": "x"}')
+            await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [])
 
     @unittest_run_loop
     async def test_a_key_request_is_granted_by_staff(self) -> None:
@@ -899,6 +915,11 @@ class MsgActBelowStaffTests(MsgActTests):
         thread_id = self.service.store.notice(_ALICE_BOX, subject, body, [_ME])
         assert thread_id is not None
         return thread_id
+
+    def test_a_key_written_to_staff_is_only_read(self) -> None:
+        """Not this rung's case: below the staff floor nothing inbound is visible, and the
+        notices here are filed straight into the store, past the floor the spool enforces."""
+        self.skipTest('staff-queue case; covered by MsgActTests')
 
     @unittest_run_loop
     async def test_a_key_request_is_granted_by_staff(self) -> None:
@@ -1189,7 +1210,7 @@ class MailboxVariableTests(unittest.TestCase):
     def test_act_labels_each_row_with_what_it_would_do(self) -> None:
         """The one thing a variable cannot do: the label depends on an answer already bound."""
         self.mailbox = {'threads': [{'id': 'm1', 'subject': KEY_ISSUE_SUBJECT, 'author_name': 'staff',
-                                     'updated': '', 'unread': False}]}
+                                     'kind': 'notice', 'updated': '', 'unread': False}]}
         plain, = self.commands._thread_choices(Context(), {'action': 'read'})
         labelled, = self.commands._thread_choices(Context(), {'action': 'act'})
         verb = self.commands.threads()[0].verb
