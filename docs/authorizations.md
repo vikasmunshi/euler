@@ -18,8 +18,8 @@ Only an admin's registry holds the whole command set, so the audit is never
 truncated.
 
 This is the **audit view** — who holds which profile is decided in the deployed
-system of record at `/etc/euler/authorizations.json` (root-owned, outside the
-repo, mutated only through the sudo-gated `users` command). There is no policy
+system of record at `/etc/euler/authorizations.json` (`root:euler-authz 0640`, outside
+the repo, mutated only through the sudo-gated `users` command). There is no policy
 file in the repo: absent a deployed one, the built-in default maps nobody and the
 checkout owner floors to `admin` by uid. See the
 [web server guide](web-server-guide.md) for the model and how identity resolves to

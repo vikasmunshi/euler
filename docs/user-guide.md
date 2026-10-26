@@ -449,6 +449,8 @@ msg list                 # the reply is there
 msg act <message-id>     # writes ~/.euler/enc-key.json, verified before anything is written
 ```
 
+Only a key message **from staff** is acted on; one from anybody else is shown, never applied.
+
 `solver "user"` then reports `✓ can encrypt/decrypt`, and the private solutions decrypt in
 place. **Rotating your own key needs nobody**: `solver "user --regen"` re-wraps the master key
 to your new key itself. Only a machine that cannot load the master key at all files a request.

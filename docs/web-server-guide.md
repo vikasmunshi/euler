@@ -336,7 +336,12 @@ which Caddy turns into a `302 /login?next=<path>` for browser navigations — or
 of public content with no remember-me cookie, into the public page itself (§ 11.0). Caddy copies those
 headers onto the proxied request **after deleting any client-supplied copies**, and the
 app sockets are unreachable except through Caddy — which is why downstream services can
-trust them.
+trust them. That rests on two things, not one: the per-user and site sockets are group
+`euler-edge`, whose members are Caddy, auth, msg and site and never a collaborator's uid
+(§ 1), and each per-user instance also checks its caller's uid on every request
+(`SO_PEERCRED`: Caddy for the routes, auth for logout and vault reset, msg for delivery,
+root for status) — so a tenant who reached a socket anyway still could not speak for
+someone else.
 
 ### 4.5 Policy constants
 
@@ -353,6 +358,9 @@ trust them.
 | `OTP_DIGITS` / `OTP_TTL_SECONDS` / `OTP_MAX_ATTEMPTS` / `OTP_MAX_SENDS` | 6 / 10 min / 5 / 5 | one-time code |
 | `TICKET_TTL_SECONDS` | 60 s | one-time shell ticket |
 | `AUTH_RATE_MAX` / `AUTH_RATE_WINDOW_SECONDS` | 30 / 60 s | per-client rate limit on unauthenticated endpoints |
+| `RESET_COOLDOWN_SECONDS` / `RESET_DAILY_MAX` | 15 min / 4 | per-account reset mails; a new `/forgot` never replaces a link already sent |
+| `MAIL_PER_RECIPIENT_MAX` / `MAIL_PER_RECIPIENT_WINDOW_SECONDS` / `MAIL_DAILY_MAX` | 6 / 1 h / 150 | budget for mail an unauthenticated request can cause |
+| `POW_BITS` / `POW_TTL_SECONDS` | 18 / 10 min | proof of work on `/forgot` and `/request-invite` (`auth/pow.py`) |
 | `PROFILES` | `reader`, `contributor`, `maintainer` | web-assignable profiles for the admin API |
 
 ### 4.6 State
@@ -362,7 +370,7 @@ repo owner. The admin commands never touch these files; they call the service (�
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, name, terms_version, terms_accepted_at, created, disabled}` per email. `name` is the display name, used for git authorship. **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with `/etc/euler/roster/users.json` (§6.3): this one holds the login secrets and is euler-auth's alone; that one holds public keys, is world-readable, and carries no address at all. |
+| `users.json` | SRP verifier DB: `{salt, verifier, kdf, terms_version, terms_accepted_at, created, disabled}` per email. `kdf` names how the verifier's `x` was derived (Argon2id; a record without it is the legacy SHA-256, upgraded at its next sign-in — docs/srp-guide.md § 3). **No profile** — that lives in `authorizations.json`, resolved fresh at each login. Not to be confused with `/etc/euler/roster/users.json` (§6.3): this one holds the login secrets and is euler-auth's alone; that one holds public keys, is world-readable, and carries no address at all. |
 | `pending.json` | in-flight invites and resets, keyed by `hash(link-token)`. |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |
@@ -416,7 +424,7 @@ assume-an-identity path: `SOLVER_USER` is display-only.
 The slug scheme is worth one note. `slugify` emits a `.`-bearing form
 (`mercanther_gmail.com-3f9e97`) that **fails `useradd`'s `NAME_REGEX`**, so the system
 slug used for uids, homes, sockets, and `X-User-Slug` is a stricter derivation:
-`u` + a six-hex-digit hash of the normalised e-mail (`u0a68e0`), matching
+`u` + sixteen hex digits of SHA-256 of the normalised e-mail (`uff8d9819fc0e12bf`), matching
 `^u[0-9a-f]{6,16}$`. It **is** the unix account name — the uid, `/home/<slug>`, the
 socket, the unit instance, and the `user/<slug>` branch all read the same, with no
 `euler-user-` prefix in front of it. Two consequences are deliberate: the name is short
@@ -511,7 +519,7 @@ whole master key, which is why the group must be people who already have it.
 {
   "version": 1,
   "users": {
-    "u3f9a2c": {
+    "uff8d9819fc0e12bf": {
       "public_key": "…", "scope": "web", "profile": "contributor",
       "invited": "…", "provisioned": "…", "key_issued": "…", "removed": null
     }
@@ -2541,7 +2549,7 @@ msg list                                       # everything waiting for you, new
 msg read <id>                                  # one message, and mark it read
 msg act <id>                                   # do what it asks (see below)
 msg send subject="…" body="…"                  # → staff, the default audience
-msg send to=u3f9a2c,u81b0de subject="…" body="…"           # STAFF-only recipients
+msg send to=uff8d9819fc0e12bf,u5ff860bf1190596c subject="…" body="…"   # STAFF-only recipients
 msg send to=everyone subject="…" body="…"      # STAFF: broadcast
 msg dismiss <id>                               # drop a message you are done with
 ```
@@ -2732,7 +2740,9 @@ decision recorded here.
 
 - **SRP-6a** (`packages/site/euler_site/auth/srp.py`): the password never reaches the server or disk;
   correct `PAD`, `u≠0` / `A,B mod N≠0` checks, `secrets.compare_digest` throughout;
-  cross-tested against the browser client.
+  cross-tested against the browser client. `x` comes from Argon2id (64 MiB, 3 passes), so a
+  stolen `users.json` is a slow offline attack; a new verifier is never minted on the legacy
+  SHA-256 by current pages, and a legacy one is replaced only inside a proven sign-in.
 - **Anti-enumeration**: stable decoy salt/`B` for unknown emails at `/auth/challenge`
   (its secret persists, so decoys survive a restart as real salts do); generic responses —
   and response times: `/forgot` sends in the background — from `/forgot` and every
@@ -2760,6 +2770,15 @@ decision recorded here.
   another origin; web shells prove identity by a single-use ticket, not env; the local admin
   fallback requires the checkout-owner uid, and an unreadable policy file never counts as
   an absent one.
+- **Slugs cannot be shared**: `system_slug` is 64 bits of SHA-256, and `/etc/euler/owners.json`
+  (`root 0600`) records which address owns each one; provisioning refuses a slug owned by
+  another address or an existing account with no record, so an account is never adopted.
+- **The editor stays in its problem**: a file name reaching `/edit` or a delete names one file
+  directly inside that problem's directory — no separator, no `.`/`..` — resolved through the
+  same helper the readers use.
+- **Only the shell drives the pane**: every OSC 5379 sequence carries the shell's own key,
+  handed over by the service and popped from its environment, and given to the page on a text
+  frame; printed text that contains the sequence is ignored.
 - **Key messages come from staff**: `msg act` saves or reconstructs a key only from a
   `notice` thread, which only staff can create; anything written *to* staff is prose.
 - **Wheel-gated admin plane**: the admin socket is `0600` euler-auth-private; the token
@@ -2786,6 +2805,9 @@ decision recorded here.
   the resolver, the relay for `euler-auth`); Caddy's admin API is a unix socket; all
   egress — including every dynamic per-user uid, enumerated by the `euler-user` group — via
   the Squid allowlist.
+- **Infra units are sandboxed** like the app tier: Caddy, acme, ddns, the firewall and Squid
+  run with a read-only system, private `/tmp` and devices, a `@system-service` syscall filter,
+  and only the address families and capabilities each uses.
 - **Secrets stay with their one reader**: the TLS key is `euler-tls` (Caddy alone), the
   authorization map `euler-authz` (auth, msg, the operator).
 - **Cookies**: `Secure; HttpOnly; SameSite=Lax`, site-wide.
@@ -2919,10 +2941,10 @@ recomputes `system_slug` over every identity in `/etc/euler/authorizations.json`
 indexes by the result. A slug with no alias is an account the policy no longer maps.
 
 ```
-  u3c9a0f1e2b7d4a68  vikas.munshi@gmail.com (admin)
+  u331cecba2f07a3da  vikas.munshi@gmail.com (maintainer)
              uid ✓ · clone ✓ · hooks ✓ · socket ✓ listening · service ✓ running
              web shell ✓ live · connected (1 terminal(s)) · pid 41207
-  ufc2398    alice@example.com (contributor)
+  uff8d9819fc0e12bf  alice@example.com (contributor)
              uid ✓ · clone ✓ · hooks ✓ · socket ✓ listening · service … idle (socket-activated on demand)
              web shell … none (instance idle)
 ```

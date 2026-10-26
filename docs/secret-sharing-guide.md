@@ -294,7 +294,9 @@ msg list                    # the message is there, labelled `reconstruct`
 msg act <message-id>        # unwraps your half, completes it, verifies, writes the enc-key file
 ```
 
-`msg act` re-checks the subject, reads exactly one share-shaped token from the body, and calls
+`msg act` re-checks the subject **and that the message came from staff** (a maintainer or
+admin — anyone else's key message is only read, never acted on), reads exactly one
+share-shaped token from the body, and calls
 `key-reconstruct` — which opens the envelope with **your private key**, reads the local half from
 **this machine**, reconstructs, proves the result (§3), writes `~/.euler/enc-key.json`, and wires
 the git filter so the private solutions decrypt in place. The message is dismissed once it
@@ -439,5 +441,5 @@ nothing, because an off-host machine has no account to record it against.
 | [`packages/solver/solver/crypto/ciphers.py`](../packages/solver/solver/crypto/ciphers.py) | `lock` / `unlock` — the X25519 envelope a sent half and a mailed key both ride in |
 | [`packages/webshell/euler_webshell/roster.py`](../packages/webshell/euler_webshell/roster.py) | the roster: public keys and the operator's dated acts, and no key material |
 | [`packages/site/euler_site/auth/mail.py`](../packages/site/euler_site/auth/mail.py) | `send_master_key` — the off-host delivery |
-| [`packages/webshell/euler_webshell/msg/__init__.py`](../packages/webshell/euler_webshell/msg/__init__.py) | `KEY_SHARE_SUBJECT` and `verb_for`, which make `msg act` on such a message *be* the reconstruction |
+| [`packages/webshell/euler_webshell/msg/__init__.py`](../packages/webshell/euler_webshell/msg/__init__.py) | `KEY_SHARE_SUBJECT` and `verb_for`, which make `msg act` on such a message *be* the reconstruction — when it is from staff |
 | [`packages/webshell/euler_webshell/msg/commands.py`](../packages/webshell/euler_webshell/msg/commands.py) | `_reconstruct` — the receiving half of `msg act` |

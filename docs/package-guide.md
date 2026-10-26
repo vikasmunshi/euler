@@ -83,13 +83,15 @@ per-user account. §2.2 is what gives it that collaborator's identity and rung.
 ### 2.2 Role: a guardrail, not a boundary
 
 The role comes from a policy the user cannot rewrite — `/etc/euler/authorizations.json`,
-root-owned, keyed by e-mail or OS login:
+`root:euler-authz 0640`, keyed by e-mail or OS login. Its readers are the auth and message
+services and the operator; a collaborator's per-user uid is not one of them:
 
 | Policy deployed? | Login | Role |
 | --- | --- | --- |
 | yes | listed | its entry |
 | yes | the `system_slug` of a listed e-mail (a per-user web account) | that e-mail's entry, with the e-mail as the identity |
 | yes | anything else | `reader` |
+| yes, but unreadable to this uid | any | `reader` — a policy nobody is visible in, never "no policy" |
 | no (a collaborator's own machine) | owns the checkout | `admin` |
 | no | anything else | `contributor` |
 
@@ -104,6 +106,11 @@ group- or world-writable. That rules out the two shortcuts that look tamper-proo
   *signature* instead).
 
 The same rule applies to an `EULER_AUTHZ_FILE` override: one the user can write is ignored.
+
+An unreadable policy is still a deployed one. Reading it as absent would hand every checkout
+owner on the host — each collaborator owns their clone — `admin`. The operator reads it through
+`euler-authz` membership; a terminal opened before that membership was granted resolves as
+`reader` until a new login session (or `newgrp euler-authz`).
 
 Even so, the role is a **guardrail**. Inside one uid — where the user can edit their clone, run
 `!`, or call Python directly — no in-process check can stop them. The role prevents accidents

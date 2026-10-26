@@ -76,13 +76,20 @@ stored in its file and honoured on unlock, so the number can rise without strand
 PBKDF2 is not the strongest KDF available — scrypt and Argon2 resist hardware parallelism
 better. It is chosen anyway because **WebCrypto exposes PBKDF2 natively**: the browser derives
 a byte-identical `PK` from the password it already holds, with no bundled KDF, no WASM, and no
-extra round-trip. A memory-hard KDF here would mean shipping an implementation into the page
-and trusting it, which is a worse trade than the one it would improve.
+extra round-trip.
+
+That trade has since moved: the page now ships Argon2id anyway (the vendored hash-wasm), for
+the SRP key `x` ([SRP Guide §3](srp-guide.md#3-registration-the-verifier)). So a stolen
+`users.json` costs an attacker 64 MiB of Argon2id per guess, and a stolen `~/.euler/vault` —
+readable only by its owner's uid and root — costs 600 000 PBKDF2 rounds. Moving `PK` to Argon2id
+as well is now a matter of a versioned vault and a re-wrap at the next sign-in, the way SRP
+accounts moved, not of shipping a new implementation.
 
 The salt is 16 bytes — and on the web path it is *the account's SRP salt*, which the browser
 already has from the login challenge ([SRP Guide §8](srp-guide.md#8-what-srp-does-not-do-here)).
 The salt is public by construction in both systems; sharing it couples nothing but the input to
-two independent derivations.
+two independent derivations — and the SRP side labels its Argon2 salt (`"euler-srp-x:"`), so the
+two never compute the same function of the password even where both are slow.
 
 ### The ciphers
 
