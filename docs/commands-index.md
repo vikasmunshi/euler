@@ -1511,17 +1511,18 @@ Upgrade packages in the current venv for the given dependency groups.
 
 * ⚑ needs admin.
 
-Groups are defined in packages/solver/pyproject.toml:
-                                        'core' for project.dependencies,
-                                        'ai', 'dev', 'solutions', 'show' for optional-dependencies,
-                                        'all' to upgrade everything.
-                                        Defaults to 'all'.
+Groups are read from the packages' pyproject.toml files:
+    'core' for euler-solver's project.dependencies,
+    'ai', 'dev', 'solutions', 'show' for its optional-dependencies,
+    'web' for euler-site's and euler-webshell's dependencies,
+    'all' to upgrade everything ('web' only when the web tier is installed in this venv).
+    Defaults to 'all'.
 
 **usage**
 
 ```
 pip-upgrade
-[all|ai|core|dev|solutions|show ...]
+[all|ai|core|dev|solutions|show|web ...]
 ```
 
 **arguments**
