@@ -351,6 +351,7 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     pages.py                      — The auth service's HTML pages: login, registration, reset, forgot.
     pending.py                    — Pending invite / reset store at `<state>/pending.json`.
     policy.py                     — Auth policy constants (lifetimes, cookie names, password and OTP rules).
+    pow.py                        — Proof of work for the unauthenticated forms that make the service send mail.
     ratelimit.py                  — A small in-memory sliding-window rate limiter for the auth endpoints.
     remember.py                   — Persistent "remember me" tokens at `<state>/remember.json`.
     requests.py                   — Prospective-collaborator invite requests at `<state>/requests.json`.
