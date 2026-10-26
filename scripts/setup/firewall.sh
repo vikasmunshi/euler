@@ -315,7 +315,11 @@ ExecStop=/usr/sbin/nft delete table inet euler
 WantedBy=multi-user.target
 EOF
     sudo systemctl daemon-reload
-    sudo systemctl enable --now "${SERVICE_NAME}"
+    sudo systemctl enable "${SERVICE_NAME}"
+    # Load what was just written. `enable --now` starts the unit only when it is inactive, and
+    # this oneshot stays active (RemainAfterExit) — so a re-deploy would leave the previous
+    # table loaded while the new one sat on disk.
+    sudo systemctl reload-or-restart "${SERVICE_NAME}"
     do_status
 }
 
