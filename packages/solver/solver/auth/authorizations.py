@@ -79,9 +79,17 @@ class Authorizations:
 
     @classmethod
     def read(cls, path: Path) -> Authorizations | None:
-        """The policy in *path*, or None if it is missing or not a JSON object."""
+        """The policy in *path*, or None if it is missing or not a JSON object.
+
+        A file that exists but this process may not read is a **deployed policy with no names
+        visible**, not a missing one: the map is `root:euler-authz 0640`, so a per-user uid sees
+        the ladder (a code constant) and no one's address. Answering None there would read as
+        "no deployment", and the identity chain would then hand the checkout owner `admin`.
+        """
         try:
             data = json.loads(path.read_text(encoding='utf-8'))
+        except PermissionError:
+            return cls({})
         except (OSError, json.JSONDecodeError):
             return None
         return cls(data) if isinstance(data, dict) else None

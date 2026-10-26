@@ -53,6 +53,7 @@ MSG_USER="euler-msg"
 MSG_GROUP="euler-msg"
 WEB_GROUP="euler-web"
 EDGE_GROUP="euler-edge"     # reaches the per-user sockets; may create sockets in /run/euler
+AUTHZ_GROUP="euler-authz"   # reads authorizations.json — the spool maps peer uids through it
 
 MSG_SOCKET="/run/euler/msg.sock"
 ADMIN_RUNTIME_DIR="/run/euler-msg"
@@ -131,15 +132,15 @@ resolve_token() {
 # public socket to that group at bind time (the per-user shells connect to it).
 ensure_msg_user() {
     local group
-    for group in "${MSG_GROUP}" "${WEB_GROUP}" "${EDGE_GROUP}"; do
+    for group in "${MSG_GROUP}" "${WEB_GROUP}" "${EDGE_GROUP}" "${AUTHZ_GROUP}"; do
         getent group "${group}" > /dev/null || sudo groupadd --system "${group}"
     done
     if ! getent passwd "${MSG_USER}" > /dev/null; then
         echo "Creating system user ${MSG_USER}..."
         sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
-            -g "${MSG_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP}" "${MSG_USER}"
+            -g "${MSG_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP},${AUTHZ_GROUP}" "${MSG_USER}"
     else
-        sudo usermod -a -G "${WEB_GROUP},${EDGE_GROUP}" "${MSG_USER}"
+        sudo usermod -a -G "${WEB_GROUP},${EDGE_GROUP},${AUTHZ_GROUP}" "${MSG_USER}"
     fi
 }
 
@@ -189,7 +190,7 @@ User=${MSG_USER}
 Group=${MSG_GROUP}
 # euler-edge: to create its socket in /run/euler and reach the per-user instance sockets
 # for the delivery nudge; euler-web: to chgrp its own public socket at bind time.
-SupplementaryGroups=${WEB_GROUP} ${EDGE_GROUP}
+SupplementaryGroups=${WEB_GROUP} ${EDGE_GROUP} ${AUTHZ_GROUP}
 EnvironmentFile=${MSG_ENV}
 ExecStart=${VENV_PY} -m euler_webshell.msg
 Restart=on-failure

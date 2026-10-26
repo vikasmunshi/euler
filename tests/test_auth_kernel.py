@@ -59,6 +59,21 @@ class AuthorizationsTest(unittest.TestCase):
                 loaded = Authorizations.load()
             self.assertEqual(loaded.profile_for('bob'), 'contributor')
 
+    def test_an_unreadable_policy_is_deployed_with_no_names(self) -> None:
+        """A per-user uid may not read the map (root:euler-authz 0640). That must read as a
+        deployed policy with nobody in it — never as no policy, which would make the owner of
+        any checkout `admin`."""
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / 'authz.json'
+            f.write_text(json.dumps(_POLICY))
+            with mock.patch.object(Path, 'read_text', side_effect=PermissionError):
+                policy = Authorizations.read(f)
+        self.assertIsNotNone(policy)
+        assert policy is not None
+        self.assertEqual(policy.all_users(), {}, 'no names leak through')
+        subj = subject_for(system_slug('alice@example.com'), owner=True, policy=policy)
+        self.assertEqual(subj.profile, 'reader', 'the checkout owner gains nothing')
+
     def test_load_falls_back_to_builtin_default(self) -> None:
         # No env, no /etc/euler file in the test env → the bundled template ladder.
         with mock.patch.dict(os.environ, {}, clear=False):

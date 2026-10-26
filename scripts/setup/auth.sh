@@ -35,7 +35,7 @@
 #
 #   /opt/euler/venv                        root:euler-web 0755  (deployed venv)
 #   /etc/euler/auth.env                    root:euler-auth 0640 (generated here)
-#   /etc/euler/authorizations.json         root:root 0644       (authorization SoR; seeded + migrated)
+#   /etc/euler/authorizations.json         root:euler-authz 0640 (authorization SoR; seeded + migrated)
 #   /var/lib/euler-auth                    euler-auth:euler-auth 0700 (state)
 #   /etc/tmpfiles.d/euler.conf             root:root 0644       (/run/euler 1771 root:euler-edge)
 #   /etc/systemd/system/euler-auth.service (root-owned, boot-enabled; deferred until
@@ -61,7 +61,10 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
-AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # authorization SoR (root:root 0644)
+AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # authorization SoR (root:euler-authz 0640)
+# May read the authorization map — it names every collaborator, so no per-user uid does: the
+# auth service, the message spool (msg.sh adds itself) and the operator. Everyone else sees
+# the ladder alone, which is code (solver.auth.authorizations.Authorizations.read).
 ROSTER_DIR="${SYS_DIR}/roster"                  # collaborator roster (root:euler-maint 2775)
 ROSTER_FILE="${ROSTER_DIR}/users.json"          # the roster itself (0664, group-writable)
 MAINT_GROUP="euler-maint"                       # may write the roster; kept by `users add/change`
@@ -72,6 +75,7 @@ WEB_GROUP="euler-web"
 # Owns /run/euler and reaches the per-user sockets (frontend.sh creates it too): the auth
 # service creates auth.sock there and pushes teardowns to the per-user instances.
 EDGE_GROUP="euler-edge"
+AUTHZ_GROUP="euler-authz"
 
 # The system venv — OPT_DIR / VENV_DIR / VENV_PY / PYTHON / deploy_venv, shared
 # by every app-service kit so the location + dependency set have one definition.
@@ -196,7 +200,7 @@ ensure_admin_token() {
 # installs is dismantled.
 ensure_identities() {
     local group
-    for group in "${WEB_GROUP}" "${EDGE_GROUP}"; do
+    for group in "${WEB_GROUP}" "${EDGE_GROUP}" "${AUTHZ_GROUP}"; do
         getent group "${group}" > /dev/null || sudo groupadd --system "${group}"
     done
     if ! getent group "${AUTH_GROUP}" > /dev/null; then
@@ -205,10 +209,13 @@ ensure_identities() {
     if ! getent passwd "${AUTH_USER}" > /dev/null; then
         echo "Creating system user ${AUTH_USER} (group ${AUTH_GROUP}, +${WEB_GROUP} +${EDGE_GROUP})..."
         sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
-            -g "${AUTH_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP}" "${AUTH_USER}"
+            -g "${AUTH_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP},${AUTHZ_GROUP}" "${AUTH_USER}"
     else
-        sudo usermod -aG "${WEB_GROUP},${EDGE_GROUP}" "${AUTH_USER}"
+        sudo usermod -aG "${WEB_GROUP},${EDGE_GROUP},${AUTHZ_GROUP}" "${AUTH_USER}"
     fi
+    # The operator — the checkout's owner — reads the map in their own terminal (their rung
+    # comes from it). A new group takes effect at their next login, not in a running shell.
+    sudo usermod -aG "${AUTHZ_GROUP}" "$(stat -c '%U' "${PROJECT_ROOT}")"
     # Migration: drop the legacy admin group (the admin plane is sudo-gated now).
     if getent group "${LEGACY_ADM_GROUP}" > /dev/null; then
         echo "Removing legacy ${LEGACY_ADM_GROUP} group (admin plane is sudo-gated now)..."
@@ -308,8 +315,8 @@ new = {'ladder': list(LADDER), 'users': dict(sorted(users.items()))}
 pathlib.Path(authz_path).write_text(json.dumps(new, indent=2) + '\n')
 print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
 PY
-    sudo chown root:root "${AUTHZ_FILE}"
-    sudo chmod 0644 "${AUTHZ_FILE}"
+    sudo chown root:"${AUTHZ_GROUP}" "${AUTHZ_FILE}"
+    sudo chmod 0640 "${AUTHZ_FILE}"
 }
 
 # Deploy the collaborator roster: /etc/euler/roster/users.json — who exists, the X25519
@@ -371,7 +378,7 @@ Wants=euler-smtp.service
 Type=simple
 User=${AUTH_USER}
 Group=${AUTH_GROUP}
-SupplementaryGroups=${WEB_GROUP} ${EDGE_GROUP}
+SupplementaryGroups=${WEB_GROUP} ${EDGE_GROUP} ${AUTHZ_GROUP}
 EnvironmentFile=${AUTH_ENV}
 ExecStart=${VENV_PY} -m euler_site.auth
 Restart=on-failure
@@ -529,7 +536,7 @@ do_status() {
         echo "config:      ✗ ${AUTH_ENV} missing"
     fi
     if [ -f "${AUTHZ_FILE}" ]; then
-        echo "authz:       ✓ ${AUTHZ_FILE} ($(python3 -c "import json;print(len(json.load(open('${AUTHZ_FILE}')).get('users',{})))" 2>/dev/null || echo '?') users)"
+        echo "authz:       ✓ ${AUTHZ_FILE} ($(sudo python3 -c "import json;print(len(json.load(open('${AUTHZ_FILE}')).get('users',{})))" 2>/dev/null || echo '?') users, $(sudo stat -c '%U:%G %a' "${AUTHZ_FILE}"))"
     else
         echo "authz:       ✗ ${AUTHZ_FILE} missing (local shell uses the repo template)"
     fi

@@ -64,14 +64,26 @@ def _fail(message: str, code: int = 1) -> int:
 # ── authorizations.json (the SoR — root-write) ──────────────────────────────────────
 
 def _authz_save(data: dict[str, Any]) -> None:
-    """Write the policy back atomically at 0644 (root-owned, world-readable)."""
+    """Write the policy back atomically, keeping the file's group and mode.
+
+    The map names every collaborator, so it is `root:euler-authz 0640` (auth.sh) — readable by
+    the services that need it and the operator, by no per-user uid. A rewrite through a temp
+    file would otherwise land with the temp file's own owner and mode, so both are carried
+    over from the file being replaced (`0640` if there is none yet).
+    """
     path = Path(_AUTHZ_PATH)
+    try:
+        current = path.stat()
+        gid, mode = current.st_gid, current.st_mode & 0o777
+    except OSError:
+        gid, mode = -1, 0o640
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f'.{path.name}.')
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as handle:
             json.dump(data, handle, indent=2, sort_keys=True)
             handle.write('\n')
-        os.chmod(tmp, 0o644)
+        os.chown(tmp, -1, gid)
+        os.chmod(tmp, mode)
         os.replace(tmp, path)
     except BaseException:
         os.unlink(tmp)
