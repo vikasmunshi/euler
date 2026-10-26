@@ -428,5 +428,54 @@ class VaultRouteTests(_UserServiceCase):
         self.assertEqual(resp.status, 400)
 
 
+class PeerGateTests(_UserServiceCase):
+    """Over the unix socket, only the PEERS accounts may call the instance.
+
+    The suite's own uid is none of them (Caddy, euler-auth, euler-msg, root), so a request
+    from it on the unix socket stands for another collaborator's code connecting directly —
+    the case the gate exists for. The TCP test client carries no peer credentials and is
+    let through, which is what every other test in this file relies on.
+    """
+
+    async def _unix_request(self, method: str, path: str, **kwargs: object) -> int:
+        sock_path = Path(tempfile.mkdtemp(prefix='euler-peer-test-')) / 'user.sock'
+        self.addCleanup(lambda: __import__('shutil').rmtree(sock_path.parent, True))
+        runner = self.server.runner
+        assert runner is not None              # the test server is started by now
+        site = web.UnixSite(runner, str(sock_path))
+        await site.start()                    # stopped with the runner at teardown
+        async with aiohttp.ClientSession(connector=aiohttp.UnixConnector(path=str(sock_path))) as http:
+            async with http.request(method, f'http://user{path}', **kwargs) as resp:  # type: ignore[arg-type]
+                return resp.status
+
+    @unittest.skipIf(os.geteuid() == 0, 'root is always an allowed peer')
+    @unittest_run_loop
+    async def test_an_unlisted_peer_is_refused_content(self) -> None:
+        self.assertEqual(await self._unix_request('GET', '/', headers=_OWN), 403)
+
+    @unittest.skipIf(os.geteuid() == 0, 'root is always an allowed peer')
+    @unittest_run_loop
+    async def test_an_unlisted_peer_cannot_reset_the_vault(self) -> None:
+        self.assertEqual(await self._unix_request('POST', '/internal/vault-reset', json={}), 403)
+
+    @unittest.skipIf(os.geteuid() == 0, 'root is always an allowed peer')
+    @unittest_run_loop
+    async def test_an_unlisted_peer_cannot_push_a_logout(self) -> None:
+        self.assertEqual(
+            await self._unix_request('POST', '/internal/logout', json={'email': _EMAIL}), 403)
+
+    @unittest_run_loop
+    async def test_a_peer_without_credentials_is_let_through(self) -> None:
+        self.assertEqual((await self.client.get('/healthz')).status, 200)
+
+    def test_the_rules(self) -> None:
+        from euler_webshell.user.app import _peer_allowed
+        self.assertTrue(_peer_allowed(0, '/internal/vault-reset'), 'root may call anything')
+        self.assertFalse(_peer_allowed(2 ** 31 - 2, '/'), 'a uid with no account is refused')
+        if os.geteuid() != 0:
+            self.assertFalse(_peer_allowed(os.geteuid(), '/'))
+            self.assertFalse(_peer_allowed(os.geteuid(), '/internal/status'))
+
+
 if __name__ == '__main__':
     unittest.main()

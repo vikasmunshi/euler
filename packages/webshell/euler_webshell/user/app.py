@@ -29,6 +29,8 @@ __all__ = ['build_app', 'PTY_MANAGER']
 import asyncio
 import json
 import logging
+import pwd
+import socket
 from typing import Any, Awaitable, Callable
 
 from aiohttp import WSCloseCode, WSMsgType, web
@@ -41,6 +43,7 @@ from euler_site.cache import cache_middleware
 from euler_site.csp import csp_middleware
 from euler_site.site.app import _MAX_BODY, install_content
 from euler_site.site.render import SUBJECT_KEY
+from euler_webshell.msg.identity import peer_uid
 from euler_webshell.user.config import UserConfig
 from euler_webshell.user.msg_api import add_message_routes
 from euler_webshell.user.vault_api import add_vault_routes
@@ -53,6 +56,33 @@ _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 #: The attach gate: the reader-floor "may run the solver at all" grant.
 ATTACH_REQUIRES: str = 'reader'
+
+#: Who may connect, by path: the account names whose uid the kernel must report for the
+#: peer (`SO_PEERCRED`). Caddy carries every browser request; the auth service pushes the
+#: teardown and the vault reset; the message spool pushes deliveries; root runs the operator's
+#: status sweep and may call anything. A path not listed takes the `*` entry. Socket
+#: permissions are the first gate (only `euler-edge` may connect); this is the second, and
+#: the one that keeps the identity headers and the `/internal/*` pushes trustworthy should
+#: the socket's group ever be widened.
+PEERS: dict[str, frozenset[str]] = {
+    '*': frozenset({'euler-caddy'}),
+    '/internal/logout': frozenset({'euler-auth'}),
+    '/internal/vault-reset': frozenset({'euler-auth'}),
+    '/internal/message': frozenset({'euler-msg'}),
+    '/internal/status': frozenset(),
+}
+
+
+def _peer_allowed(uid: int, path: str) -> bool:
+    """Whether the account behind *uid* may call *path* (root always may)."""
+    if uid == 0:
+        return True
+    try:
+        name = pwd.getpwuid(uid).pw_name
+    except KeyError:
+        return False
+    return name in PEERS.get(path, PEERS['*'])
+
 
 #: Per-app PtyManager, for tests and the lifecycle hooks.
 PTY_MANAGER: web.AppKey[PtyManager] = web.AppKey('pty_manager', PtyManager)
@@ -103,12 +133,28 @@ def build_app(config: UserConfig) -> web.Application:
     manager = PtyManager()
 
     @web.middleware
+    async def peer_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
+        """Refuse a connecting process that is not one of :data:`PEERS` for this path.
+
+        Production serves only the systemd-passed unix socket, where the kernel reports the
+        peer. A transport with no peer credentials — the TCP bind of a dev run, the test
+        client — has no uid to check and is let through; that bind is a developer setting.
+        """
+        sock = request.transport.get_extra_info('socket') if request.transport else None
+        uid = peer_uid(sock) if sock is not None and sock.family == socket.AF_UNIX else None
+        if uid is not None and not _peer_allowed(uid, request.path):
+            log.warning('refused peer uid %d on %s', uid, request.path)
+            return web.Response(status=403, text='peer not allowed')
+        return await handler(request)
+
+    @web.middleware
     async def identity_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
         request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin_slug)
         return await handler(request)
 
-    app = web.Application(middlewares=[cache_middleware, csp_middleware, identity_middleware],
-                          client_max_size=_MAX_BODY)
+    app = web.Application(
+        middlewares=[peer_middleware, cache_middleware, csp_middleware, identity_middleware],
+        client_max_size=_MAX_BODY)
     # The content surface (routes + jinja + static + /healthz) — reused verbatim.
     install_content(app, config.site_config(), authz)
     # The vault + account surface — this instance IS the user's uid.
