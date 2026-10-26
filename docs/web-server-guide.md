@@ -2806,9 +2806,13 @@ decision recorded here.
   the resolver, the relay for `euler-auth`); Caddy's admin API is a unix socket; all
   egress — including every dynamic per-user uid, enumerated by the `euler-user` group — via
   the Squid allowlist.
-- **Infra units are sandboxed** like the app tier: Caddy, acme, ddns, the firewall and Squid
-  run with a read-only system, private `/tmp` and devices, a `@system-service` syscall filter,
-  and only the address families and capabilities each uses.
+- **Every unit is sandboxed**: Caddy, acme, ddns, the firewall, Squid, smtp, auth, msg and
+  site run with a read-only system, private `/tmp` and devices, the kernel, clock, hostname and
+  cgroups out of reach, other processes hidden in `/proc`, no new namespaces, a
+  `@system-service` syscall filter, and only the address families and capabilities each uses;
+  msg and site, unix-socket-only, have no network at all (`PrivateNetwork`). The per-user unit
+  takes all of that except the syscall filter, the namespace ban, `MemoryDenyWriteExecute` and
+  `ProcSubset`, because it runs the collaborator's own tools (gcc, Node for Claude Code).
 - **Secrets stay with their one reader**: the TLS key is `euler-tls` (Caddy alone), the
   authorization map `euler-authz` (auth, msg, the operator).
 - **Cookies**: `Secure; HttpOnly; SameSite=Lax`, site-wide.

@@ -290,6 +290,20 @@ CapabilityBoundingSet=
 LockPersonality=true
 RestrictRealtime=true
 SystemCallArchitectures=native
+# The kernel, the clock, the hostname and cgroups are not a collaborator's to touch, and
+# their shell sees only its own processes in /proc. Deliberately NOT here, because this
+# unit runs the collaborator's own tools (Python, gcc, git, gh, Claude Code on Node): a
+# syscall filter or a namespace ban (Claude Code's sandbox can use user namespaces),
+# MemoryDenyWriteExecute (Node's JIT) and ProcSubset=pid (tools read /proc/cpuinfo).
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+RestrictSUIDSGID=true
+RemoveIPC=true
 UMask=0007
 
 # One PTY child per attached tab; the cgroup kill collects them all on stop.
