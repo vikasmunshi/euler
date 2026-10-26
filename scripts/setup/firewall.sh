@@ -36,6 +36,9 @@
 #   (infra uids)  udp/tcp 53    — DNS, for resolvers off-loopback
 #   all euler-*   loopback 3128 — Squid; and loopback 53 — the local resolver
 #   euler-auth    loopback 8025 — the mail relay (its only client)
+#   maintainer    loopback 22   — sshd, for per-user uids in euler-maint (an operator's own web
+#     per-user uid  shell reaching `ssh <operator>@localhost` to run a redeploy); sshd is
+#                   loopback-only and key-only, so this opens no password guessing
 #
 # Actions: deploy | remove | reload | render | status | help
 #
@@ -68,6 +71,12 @@ DNS_USERS=(euler-proxy euler-acme euler-ddns euler-smtp)
 RELAY_CLIENT="euler-auth"
 # Squid's loopback port (must match egress.sh): the one loopback TCP port the app tier needs.
 PROXY_PORT="3128"
+# Maintainers' per-user uids may reach the local sshd: `ssh <operator>@localhost` from a web
+# shell is how an operator signed in over the web runs a redeploy. euler-maint is the group
+# the `users` command keeps in step with the maintainer+ rungs (admin.py); `users` reloads
+# this ruleset after it changes, since the rules hold numeric uids.
+MAINT_GROUP="euler-maint"
+SSH_PORT="22"
 
 usage() {
     cat <<USAGE
@@ -150,15 +159,23 @@ euler_user_names() {
     getent group "${USER_GROUP}" 2>/dev/null | awk -F: '{print $4}' | tr ',' '\n' | sed '/^$/d'
 }
 
+# The per-user uids that hold a maintainer+ rung: members of both euler-user and euler-maint.
+maint_user_names() {
+    getent group "${MAINT_GROUP}" 2>/dev/null | awk -F: '{print $4}' | tr ',' '\n' | sed '/^$/d' \
+        | grep -Fxf <(euler_user_names) || true
+}
+
 # Generate the ruleset to stdout. Uses the declare-then-flush pattern so re-applying
 # with `nft -f` is idempotent.
 render_conf() {
-    local all_uids dns_uids per_user
+    local all_uids dns_uids ssh_uids per_user maint
     # Read the dynamic per-user uids (the euler-user group) once; they join the egress drop
     # alongside the fixed service uids.
     mapfile -t per_user < <(euler_user_names)
+    mapfile -t maint < <(maint_user_names)
     all_uids="$(resolve_uids "${ALL_USERS[@]}" "${per_user[@]}")"
     dns_uids="$(resolve_uids "${DNS_USERS[@]}")"
+    ssh_uids="$(resolve_uids "${maint[@]}")"
     if [ -z "${all_uids}" ]; then
         echo "Error: no euler-* service users exist yet — nothing to scope the firewall to." >&2
         return 1
@@ -208,6 +225,13 @@ EOF
     if [ -n "${smtp_uid}" ] && [ -n "${relay_uid}" ]; then
         cat <<EOF
         meta skuid ${relay_uid} ip daddr 127.0.0.0/8 tcp dport ${SMTP_RELAY_PORT} accept
+EOF
+    fi
+    if [ -n "${ssh_uids}" ]; then
+        cat <<EOF
+        # Maintainers' per-user uids → the local sshd (loopback-only, key-only).
+        meta skuid { ${ssh_uids} } ip daddr 127.0.0.0/8 tcp dport ${SSH_PORT} accept
+        meta skuid { ${ssh_uids} } ip6 daddr ::1 tcp dport ${SSH_PORT} accept
 EOF
     fi
     if [ -n "${proxy_uid}" ]; then
@@ -385,6 +409,12 @@ do_status() {
         probe_tcp "${tenant}"  "${SMTP_RELAY_PORT}" dropped || ok=1
     fi
     probe_tcp "${RELAY_CLIENT}" "${SMTP_RELAY_PORT}" allowed || ok=1
+    # sshd: a maintainer's per-user uid reaches it; any other per-user uid does not.
+    local maint_tenant other_tenant
+    maint_tenant="$(maint_user_names | head -1)"
+    other_tenant="$(euler_user_names | grep -Fvxf <(maint_user_names; echo '-') | head -1)"
+    [ -n "${maint_tenant}" ] && { probe_tcp "${maint_tenant}" "${SSH_PORT}" allowed || ok=1; }
+    [ -n "${other_tenant}" ] && { probe_tcp "${other_tenant}" "${SSH_PORT}" dropped || ok=1; }
     return "${ok}"
 }
 

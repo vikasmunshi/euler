@@ -139,6 +139,25 @@ def _provision_kit(action: str, *args: str) -> int:
         return 1
 
 
+def _reload_firewall() -> None:
+    """Regenerate the egress firewall after a rung changed (`scripts/setup/firewall.sh reload`).
+
+    Its rules name numeric uids, and some follow the rungs: a maintainer's per-user uid may
+    reach the local sshd (`ssh <operator>@localhost` from a web shell). `admin.py` moves the
+    account in or out of `euler-maint`; this makes the rules follow. Best-effort like
+    :func:`_provision_kit` — a host without the kit has no firewall to reload.
+    """
+    script = Path(config.root_dir) / 'scripts' / 'setup' / 'firewall.sh'
+    if not script.exists():
+        return
+    try:
+        subprocess.run(['sudo', 'bash', str(script), 'reload'], check=False,
+                       stdout=subprocess.DEVNULL)
+    except (OSError, KeyboardInterrupt) as exc:
+        console.print(f'[error]error:[/error] could not reload the firewall ({exc}) — '
+                      'run scripts/setup/firewall.sh reload')
+
+
 def _add_account(identity: str, profile: str) -> int:
     """Add an account: a web `@`-address provisions its instance then mints an invite;
     a bare os-login is a direct map entry only.
@@ -160,6 +179,8 @@ def _add_account(identity: str, profile: str) -> int:
             return rc
     if (rc := _sudo_admin('add', identity, profile)) != 0:
         return rc
+    if web:
+        _reload_firewall()                     # after admin.py has set euler-maint membership
     _record_act(identity, profile, 'web' if web else 'local',
                 **({'invited': roster.stamp(), 'provisioned': roster.stamp()} if web else {}))
     return 0
@@ -394,6 +415,7 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
         rc = _sudo_admin('remove', identity, profile)
         if rc == 0 and '@' in identity:
             _provision_kit('deprovision', system_slug(identity))  # teardown is advisory — the account is already gone
+            _reload_firewall()
         if rc == 0:
             # Marked removed, never deleted: the record says a key was once issued to that
             # public key, and a rotation reads `removed` to know not to re-issue. Dropping the
@@ -404,6 +426,8 @@ def users(action: Literal['list', 'process-requests', 'add', 'change', 'enable',
 
     rc = _sudo_admin(action, identity, profile)  # change | enable | disable
     if rc == 0 and action == 'change':
+        if '@' in identity:
+            _reload_firewall()                 # the rung may have moved across maintainer
         # The mirror follows the SoR that just moved. Only `change` touches a profile:
         # enable/disable are SRP state, which deliberately has no copy here.
         _record_act(identity, profile, 'web' if '@' in identity else 'local')

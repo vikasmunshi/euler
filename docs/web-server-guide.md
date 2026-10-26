@@ -196,6 +196,7 @@ drops the rest:
 | infra uids | `udp/tcp dport 53` |
 | every `euler-*` | loopback `:3128` (Squid) and `:53` (the resolver) |
 | `euler-auth` | loopback `:8025` (the mail relay — its only client) |
+| maintainers' per-user uids (`euler-maint`) | loopback `:22` — the local sshd (loopback- and key-only), so an operator signed in over the web can `ssh <operator>@localhost` to run a redeploy; `users` reloads the ruleset when a rung changes |
 | every `euler-*` | **everything else dropped**, loopback included |
 
 Loopback is an allowlist, not the service fabric: the services talk over unix sockets, so
