@@ -13,7 +13,7 @@ it into the same `(identity, profile)` pair every other enforcement point uses:
 3. `authorizations.json` → the **identity** behind that name, and its **profile**.
 
 Step 3 needs no help from the auth service, and that is what keeps this service
-independent of it: :func:`~solver.auth.identity.system_slug` is a pure SHA-1 of the
+independent of it: :func:`~solver.auth.identity.system_slug` is a pure SHA-256 of the
 normalised e-mail, so recomputing it over every identity in the policy file (which this
 service may read: it is in `euler-authz`) yields the `slug → e-mail` map — the same trick `status-web` uses to label the
 collaborator roster. A bare login name (the operator) is looked up directly.

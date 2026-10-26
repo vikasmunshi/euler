@@ -40,7 +40,7 @@
 # requires sudo.
 #
 # Actions: deploy | remove | upgrade | redeploy | provision | deprovision | purge-legacy |
-#          status | help
+#          migrate-slugs | migrate-slug | record-owner | status | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -65,6 +65,12 @@ EDGE_GROUP="euler-edge"
 # and this root-owned membership is what identifies them here and in firewall.sh.
 USER_GROUP="euler-user"
 USER_HOME_BASE="/home"                                 # per-user homes: /home/<slug>
+# Who owns each slug: slug → sha256(normalised e-mail), root:root 0600. The slug is the uid and
+# the routing key, so provisioning must never hand an existing account to a different address
+# whose digest happens to share it — require_owner checks this record first.
+OWNERS_FILE="/etc/euler/owners.json"
+ROSTER_FILE="/etc/euler/roster/users.json"
+SPOOL_FILE="/var/lib/euler-msg/messages.json"
 
 SERVICE_TEMPLATE="euler-user@.service"
 SOCKET_TEMPLATE="euler-user@.socket"
@@ -106,6 +112,14 @@ Usage: $0 <action> [args]
   purge-legacy                 One-shot migration sweep: remove any euler-user account
                                left from the retired euler-user-<slug> naming scheme
                                (prompted — accounts, homes and units all go).
+  migrate-slugs                Rename every account still on its old 6-hex slug to its
+                               16-hex one (prompted): uid kept; group, home, unit, socket,
+                               branch, state dir, roster, spool and GitHub branch renamed.
+                               Run after the release that widens the slug is deployed.
+  migrate-slug <old> <new> <email>
+                               The same for one account (no roster/spool/GitHub step).
+  record-owner <slug> <email>  Record an existing account's owner (owners.json), so
+                               provision will accept it for that address.
   status [<slug>]              Show the shared layer, or one user's instance health,
                                including whether their web shell is live and connected.
 
@@ -537,11 +551,64 @@ enable_socket() {
     sudo systemctl enable --now "euler-user@${slug}.socket"
 }
 
+# ── slug ownership ────────────────────────────────────────────────────────────────────
+
+# Check (and on success record) that <slug> belongs to <email>. Refused: a slug recorded for a
+# different address, or an existing account with no record at all — provisioning must never
+# adopt an account whose owner it cannot show. stdlib python, so it needs no venv.
+require_owner() {
+    local slug="$1" email="$2" exists=0
+    getent passwd "${slug}" > /dev/null && exists=1
+    sudo python3 - "${OWNERS_FILE}" "${slug}" "${email}" "${exists}" <<'PY'
+import hashlib, json, os, sys
+path, slug, email, exists = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4] == '1'
+digest = hashlib.sha256(email.strip().lower().encode()).hexdigest()
+try:
+    owners = json.load(open(path))
+except FileNotFoundError:
+    owners = {}
+recorded = owners.get(slug)
+if recorded is not None and recorded != digest:
+    sys.exit(f'Error: {slug} belongs to a different address — refusing to provision it for {email}.')
+if recorded is None and exists:
+    sys.exit(f'Error: account {slug} exists with no ownership record — refusing to adopt it.\n'
+             f'       If it is {email}\'s, record it: user.sh record-owner {slug} {email}')
+owners[slug] = digest
+fd = os.open(path + '.tmp', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, 'w') as handle:
+    json.dump(owners, handle, indent=2, sort_keys=True)
+os.replace(path + '.tmp', path)
+PY
+}
+
+# Record <slug> as <email>'s outright (an operator's assertion, for an existing account).
+record_owner() {
+    local slug="$1" email="$2"
+    sudo python3 - "${OWNERS_FILE}" "${slug}" "${email}" <<'PY'
+import hashlib, json, os, sys
+path, slug, email = sys.argv[1:4]
+try:
+    owners = json.load(open(path))
+except FileNotFoundError:
+    owners = {}
+owners[slug] = hashlib.sha256(email.strip().lower().encode()).hexdigest()
+fd = os.open(path + '.tmp', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, 'w') as handle:
+    json.dump(owners, handle, indent=2, sort_keys=True)
+os.replace(path + '.tmp', path)
+PY
+}
+
 do_provision() {
     local slug="${1:-}" email="${2:-}" profile="${3:-reader}"
     require_slug "${slug}" || return 1
+    if [[ "${email}" != *@* ]]; then
+        echo "Error: provision needs the collaborator's e-mail (the slug's owner)." >&2
+        return 1
+    fi
     check_can_sudo || return 1
     require_python || return 1
+    require_owner "${slug}" "${email}" || return 1
     ensure_shared_groups
     ensure_user_identity "${slug}"
     provision_clone "${slug}"
@@ -797,6 +864,184 @@ do_status() {
     done
 }
 
+# ── slug migration (6-hex SHA-1 → 16-hex SHA-256) ──────────────────────────────────────
+#
+# Renames one account in place. `usermod -l -d -m` keeps the uid number, so ownership of every
+# file, the firewall's uid set and the user's vault and keys carry over untouched; what is
+# keyed by the NAME is renamed alongside: the group, the home, the unit instance and socket,
+# the clone's branch and per-user state dir, Claude Code's per-project dir, and the ownership
+# record. The roster, the message spool and GitHub are re-keyed once for all accounts by
+# do_migrate_slugs, which is the entry point.
+
+do_migrate_slug() {
+    local old="${1:-}" new="${2:-}" email="${3:-}" home clone
+    require_slug "${old}" || return 1
+    require_slug "${new}" || return 1
+    if ! is_euler_user "${old}"; then
+        echo "Error: ${old} is not a provisioned per-user account." >&2
+        return 1
+    fi
+    if getent passwd "${new}" > /dev/null; then
+        echo "Error: ${new} already exists — refusing to merge two accounts." >&2
+        return 1
+    fi
+    echo "── ${old} → ${new}"
+    sudo systemctl disable --now "euler-user@${old}.socket"  2>/dev/null || true
+    sudo systemctl disable --now "euler-user@${old}.service" 2>/dev/null || true
+    sudo systemctl stop "euler-user@${old}.service" 2>/dev/null || true
+    sudo rm -f "$(sock_of "${old}")"
+
+    sudo usermod -l "${new}" -d "$(home_of "${new}")" -m "${old}" || return 1
+    sudo groupmod -n "${new}" "${old}" || return 1
+    home="$(home_of "${new}")"
+    clone="${home}/euler"
+
+    # The clone: its branch (git carries the branch's own config section across the rename)
+    # and the per-user state dir, which is named for the slug.
+    if sudo test -d "${clone}/.git"; then
+        if sudo -Hu "${new}" git -C "${clone}" show-ref --verify --quiet "refs/heads/user/${old}"; then
+            sudo -Hu "${new}" git -C "${clone}" branch -m "user/${old}" "user/${new}"
+            if [ "$(sudo -Hu "${new}" git -C "${clone}" config --get "branch.user/${new}.merge" || true)" \
+                    = "refs/heads/user/${old}" ]; then
+                sudo -Hu "${new}" git -C "${clone}" config "branch.user/${new}.merge" "refs/heads/user/${new}"
+            fi
+        fi
+        if sudo test -d "${clone}/.state/${old}"; then
+            sudo -Hu "${new}" mv "${clone}/.state/${old}" "${clone}/.state/${new}"
+        fi
+    fi
+    # Claude Code keys its per-project history by the project's path. Best effort.
+    if sudo test -d "${home}/.claude/projects/-home-${old}-euler"; then
+        sudo -Hu "${new}" mv "${home}/.claude/projects/-home-${old}-euler" \
+                             "${home}/.claude/projects/-home-${new}-euler" || true
+    fi
+    if sudo test -f "${home}/.claude.json"; then
+        sudo -Hu "${new}" sed -i "s#/home/${old}/#/home/${new}/#g; s#/home/${old}\"#/home/${new}\"#g" \
+            "${home}/.claude.json" || true
+    fi
+
+    record_owner "${new}" "${email}"
+    sudo python3 - "${OWNERS_FILE}" "${old}" <<'PY'
+import json, os, sys
+path, old = sys.argv[1:3]
+owners = json.load(open(path))
+owners.pop(old, None)
+fd = os.open(path + '.tmp', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, 'w') as handle:
+    json.dump(owners, handle, indent=2, sort_keys=True)
+os.replace(path + '.tmp', path)
+PY
+    provision_hooks "${new}"
+    enable_socket "${new}"
+    echo "   groups: $(id -nG "${new}")"
+}
+
+# Every account still on its old slug: "<old> <new> <email>", from the deployed policy. Needs
+# the deployed venv to carry legacy_system_slug — run after the release is deployed.
+_MIGRATION_PY='
+import json, sys
+from solver.auth.identity import legacy_system_slug, system_slug
+users = json.load(open(sys.argv[1])).get("users", {})
+for email in sorted(users):
+    if "@" in email and legacy_system_slug(email) != system_slug(email):
+        print(legacy_system_slug(email), system_slug(email), email)
+'
+
+do_migrate_slugs() {
+    check_can_sudo || return 1
+    local old new email reply pair
+    # pairs: the accounts still to rename. rekey: every old→new the policy implies, renamed
+    # here or earlier (a canary done with migrate-slug), so the roster, spool and GitHub
+    # re-keying below is complete either way — a key already moved is simply not found.
+    local -a pairs=() rekey=()
+    while read -r old new email; do
+        [ -n "${old}" ] || continue
+        rekey+=("${old}" "${new}")
+        is_euler_user "${old}" && pairs+=("${old} ${new} ${email}")
+    done < <(sudo "${VENV_PY}" -P -c "${_MIGRATION_PY}" "${AUTHZ_FILE}")
+    if [ "${#rekey[@]}" -eq 0 ]; then
+        echo "Nothing to migrate: the policy names no account on an old slug."
+        return 0
+    fi
+    if [ "${#pairs[@]}" -eq 0 ]; then
+        echo "Every account is already renamed; re-keying the roster, spool and branches only."
+        reply=y
+    fi
+    if [ "${#pairs[@]}" -gt 0 ]; then
+        echo "Accounts to rename (each instance stops; their web shells drop):"
+        for pair in "${pairs[@]}"; do
+            read -r old new email <<< "${pair}"
+            printf '  %s → %s  (%s)\n' "${old}" "${new}" "${email}"
+        done
+        read -r -p "Proceed? [y/N] " reply
+    fi
+    [[ "${reply}" =~ ^[Yy]$ ]] || { echo "Nothing done."; return 0; }
+
+    for pair in "${pairs[@]}"; do
+        read -r old new email <<< "${pair}"
+        do_migrate_slug "${old}" "${new}" "${email}" || {
+            echo "Error: migrating ${old} failed — stopping; the accounts above are done." >&2
+            return 1
+        }
+    done
+    local -a mapping=("${rekey[@]}")
+
+    # The roster and the spool are keyed by slug: re-key both once. The spool's service is
+    # stopped around the rewrite so it cannot write a stale copy back.
+    sudo python3 - "${ROSTER_FILE}" "${mapping[@]}" <<'PY'
+import json, sys
+path, flat = sys.argv[1], sys.argv[2:]
+rename = dict(zip(flat[0::2], flat[1::2]))
+try:
+    data = json.load(open(path))
+except FileNotFoundError:
+    sys.exit(0)
+users = data.get('users', {})
+moved = sum(1 for k in users if k in rename)
+data['users'] = {rename.get(k, k): v for k, v in users.items()}
+with open(path, 'w') as handle:            # in place: keeps the file's owner, group and mode
+    json.dump(data, handle, indent=2)
+    handle.write('\n')
+print(f'roster: re-keyed {moved} slug(s)')
+PY
+    sudo systemctl stop euler-msg.service 2>/dev/null || true
+    sudo python3 - "${SPOOL_FILE}" "${mapping[@]}" <<'PY'
+import json, sys
+path, flat = sys.argv[1], sys.argv[2:]
+rename = dict(zip(flat[0::2], flat[1::2]))
+try:
+    threads = json.load(open(path))
+except FileNotFoundError:
+    sys.exit(0)
+for raw in threads.values():
+    if isinstance(raw, dict):
+        raw['author'] = rename.get(raw.get('author'), raw.get('author'))
+        raw['recipients'] = {rename.get(k, k): v for k, v in (raw.get('recipients') or {}).items()}
+with open(path, 'w') as handle:
+    json.dump(threads, handle, indent=2)
+print(f'spool: re-keyed {len(threads)} thread(s)')
+PY
+    sudo systemctl start euler-msg.service 2>/dev/null || true
+
+    # A branch already pushed to GitHub is renamed there too (open pull requests follow it).
+    # As the operator, whose gh session owns the repo — never as root.
+    local repo i
+    repo="$(origin_url | sed -E 's#^(https://github.com/|git@github.com:)##; s#\.git$##')"
+    for ((i = 0; i < ${#mapping[@]}; i += 2)); do
+        old="${mapping[i]}"; new="${mapping[i + 1]}"
+        if git -C "${PROJECT_ROOT}" ls-remote --exit-code origin "refs/heads/user/${old}" > /dev/null 2>&1; then
+            gh api -X POST "repos/${repo}/branches/user%2F${old}/rename" -f "new_name=user/${new}" > /dev/null \
+                && echo "GitHub: user/${old} → user/${new}" \
+                || echo "warn: rename user/${old} on GitHub by hand (gh api …/branches/…/rename)" >&2
+        fi
+    done
+
+    if [ -f /etc/systemd/system/euler-firewall.service ]; then
+        "${SCRIPT_DIR}/firewall.sh" reload > /dev/null || echo "warn: firewall reload failed — run 'make deploy-firewall'" >&2
+    fi
+    echo "Migrated ${#pairs[@]} account(s). Sessions route to the new slugs from the next request."
+}
+
 # ── the per-user report ───────────────────────────────────────────────────────────────
 #
 # A collaborator is reported BY UNIX NAME (the slug — that is what the uid, the home, the
@@ -941,6 +1186,9 @@ case "${ACTION}" in
     provision)   do_provision "$@" ;;
     deprovision) do_deprovision "$@" ;;
     purge-legacy) do_purge_legacy ;;
+    migrate-slugs) do_migrate_slugs ;;
+    migrate-slug) do_migrate_slug "$@" ;;
+    record-owner) require_slug "${1:-}" && [[ "${2:-}" == *@* ]] && record_owner "$1" "$2" ;;
     status)      do_status "$@" ;;
     -h | --help | help) usage ;;
     *) echo "Unknown action: ${ACTION}"; usage; exit 1 ;;

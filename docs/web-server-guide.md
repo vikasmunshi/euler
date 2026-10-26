@@ -89,7 +89,7 @@ runs as root**.
 |---|---|---|---|
 | edge | `euler-caddy` | `:443` (public) | TLS, header stripping, `forward_auth`, routing |
 | auth | `euler-auth` | `/run/euler/auth.sock` | SRP login, sessions, invites, shell tickets |
-| per-user app | `<slug>` (e.g. `ue0f4a1`) | `/run/euler/user-<slug>.sock` | one collaborator's content routes + `/ws` |
+| per-user app | `<slug>` (e.g. `u3c9a0f1e2b7d4a68`) | `/run/euler/user-<slug>.sock` | one collaborator's content routes + `/ws` |
 | admin plane | `euler-auth` | `/run/euler-adm/auth-admin.sock` (`0600`) | account mutations; never routed by Caddy |
 | message spool | `euler-msg` | `/run/euler/msg.sock` | user↔staff message threads (§13) |
 | msg admin plane | `euler-msg` | `/run/euler-msg/admin.sock` (`0600`) | staff verbs from the operator's terminal |
@@ -745,8 +745,11 @@ Account creation is an admin act, from a terminal, under sudo, and **it handles 
 secrets at all**. `users add <email> <profile>` drives `scripts/setup/user.sh`:
 
 1. create the system user `<slug>` (in the `euler-user` parent group) and its `0700`
-   home at `/home/<slug>` — an existing account of that name is **never adopted**, since
-   the slug is a bare name in the shared login namespace;
+   home at `/home/<slug>`. The slug is `u` + 16 hex of SHA-256 of the e-mail — 64 bits,
+   because it is both the uid and the edge's routing key, so a second address sharing it
+   must be infeasible to find. It is recorded as that address's in `/etc/euler/owners.json`
+   (`root 0600`, slug → SHA-256 of the e-mail), and provisioning refuses a slug recorded for
+   another address, or an existing account with no record — **never adopted**;
 2. clone `~/euler` **directly from the public GitHub repo** — anonymous read, no
    credentials — with the crypt filter **disabled**, checked out on a fresh branch
    `user/<slug>`. Origin stays the GitHub URL, so the user pushes as themselves later;
@@ -2278,7 +2281,7 @@ Two cheaper designs were also rejected, and for reasons worth keeping:
   so the staff inbox would have nowhere to live.
 
 So: a dedicated `euler-msg`, and the isolation is real rather than nominal because of one
-observation — **`system_slug()` is a pure SHA-1 of the normalised e-mail**
+observation — **`system_slug()` is a pure hash (SHA-256) of the normalised e-mail**
 (`packages/solver/solver/auth/identity.py`), and `euler-msg` is in `euler-authz`. The service can
 therefore build its own `slug → e-mail → profile` map from the policy file. It follows that `euler-msg`:
 
@@ -2884,7 +2887,7 @@ recomputes `system_slug` over every identity in `/etc/euler/authorizations.json`
 indexes by the result. A slug with no alias is an account the policy no longer maps.
 
 ```
-  ue0f4a1    vikas.munshi@gmail.com (admin)
+  u3c9a0f1e2b7d4a68  vikas.munshi@gmail.com (admin)
              uid ✓ · clone ✓ · hooks ✓ · socket ✓ listening · service ✓ running
              web shell ✓ live · connected (1 terminal(s)) · pid 41207
   ufc2398    alice@example.com (contributor)

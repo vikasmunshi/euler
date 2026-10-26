@@ -3,7 +3,7 @@
 """Per-user service entry point: `python -m euler_webshell.user`.
 
 Run by `euler-user@<slug>.service` as that collaborator's own uid — named for the
-slug itself (`ue0f4a1`) — from the `/opt/euler` system venv, configured entirely by
+slug itself (`u3c9a0f1e2b7d4a68`) — from the `/opt/euler` system venv, configured entirely by
 the environment (`EULER_USER_SLUG`, `EULER_REPO_ROOT` → their `~/euler` clone).
 
 Three ways to get a listener, in order:
