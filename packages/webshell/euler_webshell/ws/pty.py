@@ -37,12 +37,16 @@ __all__ = ['PtySession']
 import fcntl
 import os
 import pty
+import secrets
 import struct
 import subprocess
 import sys
 import termios
 
 from solver.config.env import load_spec
+
+#: The environment variable that hands the shell its OSC key (:mod:`euler_webshell.shell.osc`).
+OSC_KEY_ENV: str = 'EULER_OSC_KEY'
 
 #: How many bytes to pull off the master fd per read.
 _READ_CHUNK: int = 65536
@@ -74,6 +78,10 @@ class PtySession:
         env = dict(os.environ)
         env['TERM'] = 'xterm-256color'  # prompt-toolkit/rich render styled output
         env['SOLVER_TICKET'] = ticket   # single-use; consumed at redemption
+        #: The key this shell's OSC 5379 sequences carry; the page learns it on attach and
+        #: ignores any sequence without it (manager.py, terminal.js).
+        self.osc_key: str = secrets.token_hex(16)
+        env[OSC_KEY_ENV] = self.osc_key
         if slug:
             env['EULER_USER_SLUG'] = slug        # per-user instance pin
         if profile:

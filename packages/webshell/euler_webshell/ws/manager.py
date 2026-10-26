@@ -20,7 +20,7 @@ recent scrollback and live prompt instead of a blank screen.
 """
 from __future__ import annotations
 
-__all__ = ['PersistentPty', 'PtyManager', 'REPLAY_END']
+__all__ = ['PersistentPty', 'PtyManager', 'replay_end']
 
 import asyncio
 import json
@@ -34,11 +34,17 @@ from euler_webshell.ws.pty import PtySession
 #: Cap (bytes) on the per-shell replay buffer sent to a (re)attaching terminal.
 _REPLAY_CAP: int = 256 * 1024
 
-#: Text frame closing the replay on attach: everything before it is scrollback,
-#: everything after is live. The client must not act on control sequences carried
-#: by the replay (an already-run `show` would re-navigate the pane on every
-#: load) — see :meth:`PersistentPty.attach`.
-REPLAY_END: str = json.dumps({'replay': 'end'})
+
+def replay_end(osc_key: str) -> str:
+    """The text frame closing the replay on attach, carrying the shell's OSC key.
+
+    Everything before it is scrollback, everything after is live. The client must not act
+    on control sequences carried by the replay (an already-run `show` would re-navigate the
+    pane on every load) — see :meth:`PersistentPty.attach`. And a text frame never enters
+    the replay buffer and cannot be written by the PTY, so the key reaches the page by a
+    path no printed text can imitate.
+    """
+    return json.dumps({'replay': 'end', 'osc': osc_key})
 
 
 class PersistentPty:
@@ -126,7 +132,7 @@ class PersistentPty:
     async def attach(self, ws: web.WebSocketResponse) -> None:
         """Register *ws* and replay the recent output so it redraws immediately.
 
-        The replay is followed by the :data:`REPLAY_END` marker — a text frame,
+        The replay is followed by the :func:`replay_end` marker — a text frame,
         so it cannot collide with the raw PTY byte stream. The client needs it:
         the buffer may contain the *control sequences* of commands already run
         (`show`/`edit` emit OSC 5379), and a terminal that acted on those
@@ -140,7 +146,7 @@ class PersistentPty:
         try:
             if self._buffer:
                 await ws.send_bytes(bytes(self._buffer))
-            await ws.send_str(REPLAY_END)
+            await ws.send_str(replay_end(getattr(self.session, 'osc_key', '')))
         except (ConnectionError, RuntimeError):
             self.detach(ws)
 

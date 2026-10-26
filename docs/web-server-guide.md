@@ -2194,6 +2194,15 @@ after it — sequenced *through* xterm's write queue, since `write()` is asynchr
 the bytes are still being parsed when the marker arrives. A monotonic token remains the
 within-session guard.
 
+**Only the shell's own sequences are obeyed.** Text that merely *contains* `ESC ] 5379` — a
+file being printed, `eval` output, a merged commit message — would otherwise drive the pane
+just as `show` does. So every sequence starts with a per-shell key: `ESC ] 5379 ; <key> ;
+<action> ; …`. The per-user service draws it (`PtySession.osc_key`) when it forks the shell
+and hands it over as `EULER_OSC_KEY`, which `osc.py` pops at import so no command the shell
+runs inherits it; the page learns it from the replay-end frame, `{"replay":"end","osc":
+"<key>"}` — a text frame, which no PTY output can imitate — and swallows any sequence that
+does not lead with it.
+
 **Enter carries its modifiers — when the application asked for them.** xterm.js sends Enter
 as a bare CR whatever else is held down (its keyboard knows only Alt, as ESC CR), so
 Shift-Enter used to reach the PTY indistinguishable from Enter, and the tools that read that

@@ -727,7 +727,7 @@ class _MsgCommandCase(_SpoolCase):
     @staticmethod
     def _nudges(output: str) -> int:
         """How many `msg` nudges the output carries (the token varies per emission)."""
-        return len(re.findall(r'\x1b\]5379;msg;\d+\x07', output))
+        return len(re.findall(r'\x1b\]5379;[0-9a-f]*;msg;\d+\x07', output))
 
     async def _thread_from_alice(self) -> str:
         status, data = await self.as_identity('POST', '/admin/messages', _ALICE,

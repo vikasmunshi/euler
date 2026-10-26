@@ -6,6 +6,7 @@ from __future__ import annotations
 from solver.main import main
 from solver.shell.extension import ExtensionError
 from euler_webshell.shell import extension
+from euler_webshell.shell import osc  # noqa: F401 — imported first: takes its key out of the environment
 
 if __name__ == '__main__':  # pragma: no cover — the PTY's process entry
     try:

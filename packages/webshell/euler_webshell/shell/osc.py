@@ -9,7 +9,14 @@ The counterpart is `packages/site/euler_site/content/assets/terminal.js`'s
 `registerOscHandler(5379, …)`, which parses the payload and asks its parent page
 to act — the shell drives the chrome, never the other way round.
 
-The payloads, one per action — the first field is always the action, and every
+Every payload starts with this shell's **key**, then the action: `<key>;<action>;…`. The
+per-user service draws the key when it forks the shell, hands it over in the environment
+(`EULER_OSC_KEY`, taken back out at import so nothing the shell runs inherits it) and gives
+it to the page on attach. The page ignores a sequence without it, so text that merely
+*contains* `ESC ] 5379` — a file being printed, `eval` output, a merged commit message —
+cannot drive the chrome.
+
+The payloads after the key, one per action — the first field is always the action, and every
 payload carries a *token* (:func:`token`):
 
 - `open;<NNNN>;<token>` — show problem *NNNN* in the left pane.
@@ -39,17 +46,23 @@ shell's `notify` — `overlays.toml` names the commands after which each one fir
 """
 from __future__ import annotations
 
-__all__ = ['EVENTS', 'OSC_CODE', 'account_changed', 'emit', 'git_changed', 'messages_changed', 'nudge',
-           'progress_changed', 'token']
+__all__ = ['EVENTS', 'OSC_CODE', 'OSC_KEY_ENV', 'account_changed', 'emit', 'git_changed', 'messages_changed',
+           'nudge', 'progress_changed', 'token']
 
+import os
 import sys
 import time
 from typing import Callable
 
+from euler_webshell.ws.pty import OSC_KEY_ENV
 from solver.config import config
 
 #: The OSC identifier shared with `terminal.js`'s `registerOscHandler`.
 OSC_CODE: int = 5379
+
+#: This shell's key, popped from the environment on import so the commands the shell runs
+#: (`eval`, `!`) never inherit it. Empty off the web channel, where nothing is listening.
+_KEY: str = os.environ.pop(OSC_KEY_ENV, '')
 
 
 def token() -> int:
@@ -72,7 +85,7 @@ def emit(action: str, *fields: str) -> None:
     """
     if config.subject.channel != 'web':
         return
-    sys.stdout.write(f'\x1b]{OSC_CODE};{";".join((action, *fields))}\x07')
+    sys.stdout.write(f'\x1b]{OSC_CODE};{";".join((_KEY, action, *fields))}\x07')
     sys.stdout.flush()
 
 

@@ -98,6 +98,10 @@
   //: drawn, but the commands in it already ran, so their control sequences must
   //: not fire again (§ the OSC handler below).
   var live = false;
+  //: This shell's OSC key, from the replay-end frame (euler_webshell/ws/manager.py). Every
+  //: sequence the shell itself emits starts with it; anything else that prints ESC ] 5379
+  //: (a file, eval output, a commit message) does not know it, and is ignored.
+  var oscKey = '';
 
   function connect() {
     if (socket) { return; }             // already connected / connecting
@@ -131,6 +135,7 @@
         return;
       }
       if (msg.replay !== 'end') { return; }
+      oscKey = typeof msg.osc === 'string' ? msg.osc : '';
       // term.write() is asynchronous — the replayed bytes are queued for parsing,
       // so flipping the flag here would still let the queue's OSC sequences through.
       // Queue the flip *behind* them instead: a write's callback runs once that
@@ -185,8 +190,10 @@
   new ResizeObserver(refit).observe(host);
 
   // ── OSC 5379: the shell drives the chrome (euler_webshell/shell/osc.py) ──────────────
-  // A web shell emits ESC ] 5379 ; <payload> BEL on the PTY. The action is always
-  // the first field; the token's position is per-action, because `edit` must keep
+  // A web shell emits ESC ] 5379 ; <key> ; <payload> BEL on the PTY. The key is this
+  // shell's (oscKey above): a sequence without it was printed, not emitted, and is
+  // ignored. In the payload the action is always the first field; the token's
+  // position is per-action, because `edit` must keep
   // its relpath last (a path may contain ';', so only the last field can absorb it):
   //   open;<NNNN>;<token>              → swap the pane to /solutions/NNNN/
   //   edit;<NNNN>;<token>;<relpath>    → swap the pane to /edit/solutions/NNNN/<relpath>
@@ -253,6 +260,8 @@
 
   term.parser.registerOscHandler(5379, function (payload) {
     var parts = payload.split(';');
+    if (!oscKey || parts[0] !== oscKey) { return true; }   // not this shell's: swallow it
+    parts = parts.slice(1);
     var token = oscToken(parts);
     if (!live || token <= lastToken) { return true; }
     var message = oscMessage(parts);

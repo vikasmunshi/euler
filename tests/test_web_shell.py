@@ -8,6 +8,7 @@ import contextlib
 import importlib
 import io
 import os
+import subprocess
 import sys
 import unittest
 from typing import Iterator
@@ -43,8 +44,9 @@ def channel(name: str) -> Iterator[io.StringIO]:
 
 
 def _sequences(text: str) -> list[list[str]]:
-    """The OSC 5379 payloads in *text*, each split into its fields."""
-    return [chunk.split('\x07', 1)[0].split(';') for chunk in text.split('\x1b]5379;')[1:]]
+    """The OSC 5379 payloads in *text*, each split into its fields — after the shell's key,
+    which leads every one (empty here: no service handed this process one)."""
+    return [chunk.split('\x07', 1)[0].split(';')[1:] for chunk in text.split('\x1b]5379;')[1:]]
 
 
 class OverlayTableTests(unittest.TestCase):
@@ -152,6 +154,19 @@ class NudgeTests(unittest.TestCase):
         with channel('terminal') as out:
             osc.nudge('git')
         self.assertEqual(out.getvalue(), '')
+
+    def test_the_key_leads_and_leaves_the_environment(self) -> None:
+        """The shell's key prefixes every sequence, and nothing the shell runs inherits it."""
+        code = ('import os, sys\n'
+                'from euler_webshell.shell import osc\n'
+                "print(osc._KEY, os.environ.get('EULER_OSC_KEY', 'gone'))\n")
+        env = {**os.environ, 'EULER_OSC_KEY': 'k' * 32}
+        out = subprocess.run([sys.executable, '-c', code], env=env, capture_output=True, text=True,
+                             check=True).stdout.split()
+        self.assertEqual(out, ['k' * 32, 'gone'])
+        with patch.object(osc, '_KEY', 'abc'), channel('web') as stdout:
+            osc.nudge('git')
+        self.assertTrue(stdout.getvalue().startswith('\x1b]5379;abc;git;'))
 
 
 class ViewerTests(unittest.TestCase):

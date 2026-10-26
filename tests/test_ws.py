@@ -15,6 +15,7 @@ ticket plane (the child redeems against the fake socket via
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import select
 import subprocess
@@ -32,7 +33,6 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from euler_site.auth.tickets import TicketStore
 from euler_webshell.ws.app import PTY_MANAGER, build_app
 from euler_webshell.ws.config import WsConfig
-from euler_webshell.ws.manager import REPLAY_END
 from euler_webshell.ws.pty import PtySession
 from tests import silence
 
@@ -213,7 +213,9 @@ class WsAttachTests(_WsServiceCase):
         of commands that already ran (`show` → OSC 5379), and a terminal that obeyed
         them again would re-navigate the pane on every page load."""
         first = await self.client.ws_connect('/ws', headers=_HEADERS)
-        self.assertEqual(await _read_text(first), REPLAY_END)   # even with no scrollback
+        opening = json.loads(await _read_text(first))   # even with no scrollback
+        self.assertEqual(opening['replay'], 'end')
+        self.assertRegex(opening['osc'], r'^[0-9a-f]{32}$', 'the shell\'s OSC key rides the marker')
         await _read_until(first, b'BANNER')
 
         second = await self.client.ws_connect('/ws', headers=_HEADERS)   # replays
@@ -225,7 +227,7 @@ class WsAttachTests(_WsServiceCase):
             elif msg.type == WSMsgType.TEXT:
                 marker = msg.data
         self.assertIn(b'BANNER', seen)                   # scrollback came first…
-        self.assertEqual(marker, REPLAY_END)             # …then the boundary
+        self.assertEqual(json.loads(marker), opening)    # …then the boundary, same shell, same key
         await first.close()
         await second.close()
 
@@ -321,6 +323,17 @@ class PtySignalTest(unittest.TestCase):
         finally:
             session.close()
         self.assertFalse(session.is_alive())
+
+    def test_the_shell_is_handed_its_osc_key(self) -> None:
+        """The key the page will be given on attach is the one the shell's sequences carry."""
+        code = "import os; print('KEY=' + os.environ.get('EULER_OSC_KEY', '') + '.', flush=True)"
+        session = PtySession(ticket='unused', profile='', argv=(sys.executable, '-u', '-c', code))
+        try:
+            buffer = self._read_until(session, b'', b'.')
+        finally:
+            session.close()
+        self.assertIn(f'KEY={session.osc_key}.'.encode(), buffer)
+        self.assertRegex(session.osc_key, r'^[0-9a-f]{32}$')
 
 
 class ReaperTests(_WsServiceCase):
