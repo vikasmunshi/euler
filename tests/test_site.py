@@ -709,6 +709,29 @@ class EditRouteTests(AioHTTPTestCase):
             self.assertEqual(resp.status, 404, path)
 
     @unittest_run_loop
+    async def test_editor_stays_inside_the_problem_directory(self) -> None:
+        """`match_info` is percent-decoded, so `%2F` turns one route segment into a path.
+
+        Every way out of the problem's directory — an encoded `../` to a real file, an
+        encoded separator, a symlink that points out — must answer 404 to the editor, the
+        save and the delete alike, and leave the file it aimed at untouched.
+        """
+        outside = self.scratch / 'outside.py'
+        outside.write_text('KEEP = 1\n')
+        (self.pdir / 'link.py').symlink_to(outside)
+        names = ('..%2F..%2F..%2Foutside.py', '%2e%2e%2f%2e%2e%2f%2e%2e%2foutside.py',
+                 '..%5C..%5C..%5Coutside.py', 'link.py')
+        for name in names:
+            path = f'/edit/solutions/0009/{name}'
+            resp = await self.client.get(path, headers=_CONTRIBUTOR)
+            self.assertEqual(resp.status, 404, f'GET {name}')
+            resp = await self.client.post(path, data={'content': _PY_OK}, headers=_CONTRIBUTOR)
+            self.assertEqual(resp.status, 404, f'POST {name}')
+            resp = await self.client.delete(path, headers=_MAINTAINER)
+            self.assertIn(resp.status, (400, 404), f'DELETE {name}')
+            self.assertEqual(outside.read_text(), 'KEEP = 1\n', name)
+
+    @unittest_run_loop
     async def test_save_writes_canonical_content(self) -> None:
         resp = await self.client.post('/edit/solutions/0009/p0009_s0.py',
                                       data={'content': _PY_FIXABLE}, headers=_CONTRIBUTOR)

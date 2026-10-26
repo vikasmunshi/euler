@@ -722,18 +722,31 @@ async def about_page(request: web.Request) -> web.StreamResponse:
 
 # ── handlers: edit — every write passes the save gate, every response is a fragment ──
 
+def _solution_file(sdir: Path, filename: str) -> Path | None:
+    """*filename* as an existing file directly inside *sdir*, or None.
+
+    The route pattern `[^/]+` is matched against the URL as sent, but `match_info` is
+    percent-*decoded*, so `..%2F..%2Fx.py` arrives here as `../../x.py`. A name must
+    therefore be checked after decoding: one path segment, no separator of either kind,
+    and resolving (symlinks included) to a file inside the problem's own directory.
+    """
+    if not filename or '/' in filename or '\\' in filename or filename in ('.', '..'):
+        return None
+    return content.resolve_file(sdir, filename)
+
+
 def _editor_target(request: web.Request) -> tuple[int, str, Path]:
     """Resolve an `/edit/solutions/{n}/{filename}` route to its on-disk file.
 
-    The route pattern keeps *filename* bare (no `/`); here it must also carry
-    an editable suffix and already exist — the editor edits, `new` creates.
+    *filename* must be a bare name of an existing file in the problem's directory
+    (:func:`_solution_file`) with an editable suffix — the editor edits, `new` creates.
     """
     number = _problem_number(request)
     filename = request.match_info['filename']
     sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
-    target = sdir / filename
-    if Path(filename).suffix not in EDITABLE_SUFFIXES or not target.is_file():
-        raise web.HTTPNotFound(text=f'{filename} is not an editable file of problem {number}')
+    target = _solution_file(sdir, filename)
+    if Path(filename).suffix not in EDITABLE_SUFFIXES or target is None:
+        raise web.HTTPNotFound(text=f'{html.escape(filename)} is not an editable file of problem {number}')
     return number, filename, target
 
 
@@ -901,8 +914,11 @@ async def file_delete(request: web.Request) -> web.StreamResponse:
     filename = request.match_info['filename']
     sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
     if Path(filename).suffix not in _DELETABLE_SUFFIXES:
-        raise web.HTTPBadRequest(text=f'{filename} is not a deletable solution file')
-    (sdir / filename).unlink(missing_ok=True)
+        raise web.HTTPBadRequest(text=f'{html.escape(filename)} is not a deletable solution file')
+    target = _solution_file(sdir, filename)
+    if target is None:
+        raise web.HTTPNotFound(text=f'{html.escape(filename)} is not a file of problem {number}')
+    target.unlink(missing_ok=True)
     ctx = _problem_context(request, number)
     ctx['status'] = f'deleted {filename}'
     response = render(request, 'problem.html', ctx, block='content', fragment=True)
