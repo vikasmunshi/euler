@@ -278,6 +278,9 @@ def _print_listing(data: dict[str, Any]) -> None:
     with no roster entry — an invite whose map entry has since gone — stands alone.
     """
     roster = data.get('roster', [])
+    # Wide enough for the longest unix name present (a slug is 17 characters today), so a
+    # blank one — a local login has none — still pads the columns after it into line.
+    slug_width = max([len(str(entry.get('slug') or '')) for entry in roster] + [1])
     pending: dict[str, list[dict[str, Any]]] = {}
     for record in data.get('pending', []):
         pending.setdefault(str(record.get('email')), []).append(record)
@@ -286,13 +289,13 @@ def _print_listing(data: dict[str, Any]) -> None:
         # OS login has no per-user instance, so its column is blank.
         notes = [_pending_note(record) for record in pending.pop(str(entry.get('user')), [])]
         state = ' — '.join([str(entry.get('state')), *notes])
-        print(f'  {entry.get("user"):40} {entry.get("slug") or "":10} {entry.get("profile"):18} '
+        print(f'  {entry.get("user"):40} {entry.get("slug") or "":{slug_width}} {entry.get("profile"):18} '
               f'{entry.get("scope"):6} {state}')
     for email, records in pending.items():                       # orphans: no account, no map entry
         for record in records:
             # No account exists — hence no unix name — so the slug column is a placeholder,
             # keeping the fields aligned with the roster rows above.
-            print(f'  {email:40} {"—":10} {record.get("profile"):18} '
+            print(f'  {email:40} {"—":{slug_width}} {record.get("profile"):18} '
                   f'web    {_pending_note(record)}')
     if not roster and not data.get('pending'):
         print('no accounts or pending invites')
