@@ -15,7 +15,7 @@ from unittest import mock
 
 from solver.auth import Authorizations, Subject, identity, resolve_subject
 from solver.auth.authorizations import AUTHZ_FILE_ENV
-from solver.auth.identity import deployed_policy, subject_for, system_slug
+from solver.auth.identity import deployed_policy, legacy_system_slug, subject_for, system_slug
 
 _POLICY = {
     'ladder': ['reader', 'contributor', 'maintainer', 'admin'],
@@ -167,6 +167,18 @@ class SystemSlugTest(unittest.TestCase):
 
     def test_digit_leading_localpart_still_starts_with_a_letter(self) -> None:
         self.assertTrue(system_slug('42@host.com').startswith('u'))
+
+    def test_the_slug_is_wide(self) -> None:
+        """The slug is the routing key and the uid: an address that hashed to someone else's
+        would be their instance. 64 bits puts finding one out of reach (24 took under a second)."""
+        self.assertEqual(system_slug('alice@example.com'), 'uff8d9819fc0e12bf')
+        self.assertEqual(len(system_slug('x@y.z')), 17)
+
+    def test_the_legacy_slug_names_the_old_accounts(self) -> None:
+        """Pinned: the migration finds each pre-widening uid by this exact value."""
+        self.assertEqual(legacy_system_slug('alice@example.com'), 'ufc2398')
+        self.assertEqual(legacy_system_slug('  Alice@Example.COM '), 'ufc2398')
+        self.assertRegex(legacy_system_slug('x@y.z'), self._SLUG_SHAPE)
 
 
 if __name__ == '__main__':

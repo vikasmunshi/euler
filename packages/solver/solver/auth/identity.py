@@ -30,7 +30,8 @@ construction).
 """
 from __future__ import annotations
 
-__all__ = ['resolve_subject', 'subject_for', 'deployed_policy', 'os_login', 'slugify', 'system_slug']
+__all__ = ['resolve_subject', 'subject_for', 'deployed_policy', 'os_login', 'slugify', 'system_slug',
+           'legacy_system_slug']
 
 import hashlib
 import os
@@ -44,11 +45,15 @@ from solver.auth.subject import LADDER, Subject
 
 _SLUG_KEEP = re.compile(r'[^a-z0-9._-]+')
 #: Hex digits of the identity digest that *are* the system slug. The whole name is
-#: `u` + this (`ue0f4a1`): a uid, a home directory, a socket name and a git branch,
-#: so it is kept short and carries no e-mail local-part. 24 bits is ample separation for
-#: a collaborator roster, and provisioning refuses to adopt a pre-existing account name,
-#: so a hypothetical collision fails loudly rather than merging two people onto one uid.
-_SYSTEM_SLUG_HEX: int = 6
+#: `u` + this (`u3c9a…`, 17 characters): a uid, a home directory, a socket name and a git
+#: branch, so it carries no e-mail local-part. 64 bits, because the slug is also the routing
+#: key and the account: an address that hashed to someone else's slug would be routed to
+#: their instance and run as their uid, and at 24 bits such an address is found in under a
+#: second. Provisioning also refuses a slug owned by another address (user.sh, owners.json).
+_SYSTEM_SLUG_HEX: int = 16
+#: The retired width and digest (`u` + 6 hex of SHA-1), kept only so the slug migration can
+#: name each account's old uid (:func:`legacy_system_slug`).
+_LEGACY_SLUG_HEX: int = 6
 
 
 def slugify(identity: str) -> str:
@@ -67,15 +72,25 @@ def slugify(identity: str) -> str:
 def system_slug(identity: str) -> str:
     """Return a **system-account** slug for *identity* — the per-user uid/home/socket name.
 
-    Stricter and shorter than :func:`slugify`: `u` + a :data:`_SYSTEM_SLUG_HEX`-digit hash of
-    the normalised identity (e.g. `ue0f4a1`), matching `^[a-z][a-z0-9]*$` so `useradd`'s
-    `NAME_REGEX` accepts it bare — the uid *is* the slug, with no prefix and no home-grown
-    length problem. The e-mail local-part is deliberately absent: this name shows up in
-    `/home`, in the process table, and in a git branch, none of which need to publish who a
+    Stricter than :func:`slugify`: `u` + a :data:`_SYSTEM_SLUG_HEX`-digit SHA-256 of the
+    normalised identity, matching `^[a-z][a-z0-9]*$` so `useradd`'s `NAME_REGEX` accepts it
+    bare — the uid *is* the slug, with no prefix, and 17 characters is well inside the
+    32-character name limit. The e-mail local-part is deliberately absent: this name shows up
+    in `/home`, in the process table, and in a git branch, none of which need to publish who a
     collaborator is. The e-mail remains the login identity; this is only its derived system name.
     """
-    digest = hashlib.sha1(identity.strip().lower().encode('utf-8')).hexdigest()
+    digest = hashlib.sha256(identity.strip().lower().encode('utf-8')).hexdigest()
     return f'u{digest[:_SYSTEM_SLUG_HEX]}'
+
+
+def legacy_system_slug(identity: str) -> str:
+    """The slug :func:`system_slug` returned before the widening — for the migration only.
+
+    `u` + 6 hex of SHA-1: what every account provisioned before it is named. Nothing routes
+    or provisions by it; `user.sh migrate-slugs` uses it to find each old uid's new name.
+    """
+    digest = hashlib.sha1(identity.strip().lower().encode('utf-8')).hexdigest()
+    return f'u{digest[:_LEGACY_SLUG_HEX]}'
 
 
 def os_login() -> str:
