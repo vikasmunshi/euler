@@ -11,7 +11,8 @@ __all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MI
            'PASSWORD_REQUIRE_CLASSES', 'INVITE_TTL_SECONDS', 'LINK_TOKEN_BYTES',
            'OTP_DIGITS', 'OTP_TTL_SECONDS', 'OTP_MAX_ATTEMPTS', 'OTP_MAX_SENDS',
            'REMEMBER_COOKIE', 'REMEMBER_TTL_SECONDS', 'AUTH_RATE_MAX', 'AUTH_RATE_WINDOW_SECONDS',
-           'TICKET_TTL_SECONDS', 'PROFILES']
+           'TICKET_TTL_SECONDS', 'PROFILES', 'RESET_COOLDOWN_SECONDS', 'RESET_DAILY_MAX',
+           'MAIL_PER_RECIPIENT_MAX', 'MAIL_PER_RECIPIENT_WINDOW_SECONDS', 'MAIL_DAILY_MAX']
 
 #: Web-assignable profiles: `admin` is assignable only to a local os-login. The
 #: authoritative policy is authorizations.json (see docs/web-server-guide.md
@@ -56,6 +57,19 @@ REMEMBER_TTL_SECONDS: int = 30 * 24 * 3600
 AUTH_RATE_MAX: int = 30
 AUTH_RATE_WINDOW_SECONDS: int = 60
 
+#: Password-reset requests (`/forgot`) per account: after one, another is refused (silently —
+#: the page is the same) for this long, and no more than RESET_DAILY_MAX in a day. A new
+#: request never invalidates a link already sent, so repeating `/forgot` cannot keep an
+#: account's owner from completing a reset.
+RESET_COOLDOWN_SECONDS: int = 15 * 60
+RESET_DAILY_MAX: int = 4
+#: The budget for mail that an unauthenticated request can cause (reset links, OTPs, the
+#: invite-request notice): per recipient, and for the whole service per day — well under the
+#: relay account's own sending quota, so abuse cannot exhaust it and stop every other mail.
+#: Admin invites are not counted.
+MAIL_PER_RECIPIENT_MAX: int = 6
+MAIL_PER_RECIPIENT_WINDOW_SECONDS: int = 3600
+MAIL_DAILY_MAX: int = 150
 #: One-time shell ticket lifetime: minted against a live session at WS
 #: attach, redeemed by the PTY child at startup — 60 seconds covers the fork.
 TICKET_TTL_SECONDS: int = 60

@@ -92,6 +92,13 @@ class AuthService:
         self.tickets = TicketStore()
         self.mailer = Mailer(config.smtp_relay, config.base_url)
         self.rate = RateLimiter(policy.AUTH_RATE_MAX, policy.AUTH_RATE_WINDOW_SECONDS)
+        #: The budget for mail an unauthenticated request can cause (:meth:`mail_allowed`).
+        self._mail_per_recipient = RateLimiter(policy.MAIL_PER_RECIPIENT_MAX,
+                                               policy.MAIL_PER_RECIPIENT_WINDOW_SECONDS)
+        self._mail_daily = RateLimiter(policy.MAIL_DAILY_MAX, 86400)
+        #: Mail sends in flight in the background (:meth:`send_later`), held so none is
+        #: garbage-collected half-way.
+        self._mail_tasks: set[asyncio.Task[None]] = set()
         #: In-flight SRP handshakes: email → (server, the verifier it was built from, expiry).
         #: One per email at a time. The verifier is kept so a handshake begun before the
         #: credentials changed (a reset, a password change) cannot finish after it.
@@ -182,6 +189,36 @@ class AuthService:
         self.mailer.send_invite(email, token, 'register')
         return url
 
+    def mail_allowed(self, recipient: str) -> bool:
+        """Spend one unit of the mail budget for *recipient*; False if it is exhausted.
+
+        For mail an unauthenticated request triggers — reset links, OTPs, the invite-request
+        notice. Per recipient so one address cannot be flooded, and per day for the whole
+        service so the relay account's own quota is never reached and every other mail with
+        it. A refusal is logged and otherwise silent: callers answer exactly as if it sent.
+        """
+        key = normalize_email(recipient)
+        if not self._mail_per_recipient.allow(key) or not self._mail_daily.allow('*'):
+            log.warning('mail budget exhausted — not sending to %s', key)
+            return False
+        return True
+
+    def send_later(self, send: Any, *args: Any, what: str) -> None:
+        """Run a blocking mail *send* in the background; failures are logged, never raised.
+
+        So a response can go out at once whether or not a mail was sent — the time it takes
+        to answer must not say which.
+        """
+        async def run() -> None:
+            try:
+                await asyncio.to_thread(send, *args)
+            except OSError as exc:
+                log.warning('%s failed: %s', what, exc)
+
+        task = asyncio.get_running_loop().create_task(run())
+        self._mail_tasks.add(task)
+        task.add_done_callback(self._mail_tasks.discard)
+
     def notify_invite_request(self, name: str, email: str, remarks: str) -> None:
         """Best-effort: email the operator that an invite request landed. Never raises.
 
@@ -191,7 +228,7 @@ class AuthService:
         event loop.
         """
         owner = self.config.owner_email
-        if not owner:
+        if not owner or not self.mail_allowed(owner):
             return
         try:
             self.mailer.send_invite_request(owner, name, email, remarks)

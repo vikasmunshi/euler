@@ -184,7 +184,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
                 return render_stage(request, kind, token, record)
             service.pending.accept_terms(token, service.config.terms_version, utcnow_iso())
         otp = service.pending.issue_otp(token)
-        if otp is None:                        # send cap reached (or already verified)
+        if otp is None or not service.mail_allowed(record.email):   # send cap / mail budget
             raise redirect(kind, token, 'capped')
         try:
             await asyncio.to_thread(service.mailer.send_otp, record.email, otp)
@@ -238,6 +238,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         if not service.users.set_credentials(record.email, salt, verifier):
             return _bad_link(request)          # account vanished mid-flow
         service.forget_challenge(record.email)          # no pre-reset handshake may finish
+        service.pending.revoke_email(record.email)      # nor any other reset link still out
         service.sessions.revoke_email(record.email)     # a password change logs
         service.remember.revoke_email(record.email)     # every device out
         await service.push_shell_teardown(record.email)  # …and any live shell
@@ -323,13 +324,15 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         user = service.users.get(email) if '@' in email else None
         if user is not None and not user.disabled:
             # Reset does not change the profile (authorizations.json is authoritative);
-            # the pending record's profile is informational only.
-            token = service.pending.mint(email, service.profile_for(email), 'reset')
-            try:
-                await asyncio.to_thread(service.mailer.send_invite, email, token, 'reset')
-                log.info('reset link sent for %s', email)
-            except OSError as exc:             # generic response regardless
-                log.warning('reset mail to %s failed: %s', email, exc)
+            # the pending record's profile is informational only. mint_reset never replaces
+            # a link already sent, and refuses inside the cooldown / daily cap. The mail goes
+            # in the background, so the answer takes the same time whether or not the account
+            # exists — the page is generic, and so is its timing.
+            token = service.pending.mint_reset(email, service.profile_for(email))
+            if token is not None and service.mail_allowed(email):
+                service.send_later(service.mailer.send_invite, email, token, 'reset',
+                                   what=f'reset mail to {email}')
+                log.info('reset link queued for %s', email)
         return aiohttp_jinja2.render_template('message.html', request, {
             'heading': 'Check your mailbox',
             'message': 'If that account exists and is enabled, a reset link is on its way.',

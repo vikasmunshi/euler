@@ -14,9 +14,11 @@ no-referrer, so the linking page names itself in `?back=`): it must return a
 reader to our own pages only, and never anywhere else."""
 from __future__ import annotations
 
+import asyncio
 import re
 import shutil
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -174,6 +176,72 @@ class AuthPageTests(AioHTTPTestCase):
         self.assertIn('<div id="actions" class="actions" hx-swap-oob="true">', body)
         self.assertIn('<summary>Actions</summary>', body)
         self.assertIn('No actions here', body)
+
+
+class ForgotPasswordTests(AuthPageTests):
+    """`POST /forgot` cannot be used to keep an owner from resetting, or to spend the mail.
+
+    The mailer is replaced by a recorder (no relay is involved); the account exists unless
+    a test says otherwise.
+    """
+
+    async def get_application(self):
+        app = await super().get_application()
+        self.service.users.create(_EMAIL, '00' * 16, 'ab', 'test', 'now')
+        self.sent: list[tuple[str, str]] = []
+
+        def record(rcpt: str, token: str, kind: str) -> None:
+            self.sent.append((rcpt, token))
+        self.service.mailer.send_invite = record                  # type: ignore[method-assign]
+        return app
+
+    async def _forgot(self, email: str = _EMAIL) -> int:
+        resp = await self.client.post('/forgot', data={'email': email})
+        await asyncio.sleep(0.05)                          # let the background send run
+        return resp.status
+
+    @unittest_run_loop
+    async def test_a_second_request_does_not_kill_the_first_link(self) -> None:
+        self.assertEqual(await self._forgot(), 200)
+        self.assertEqual(len(self.sent), 1)
+        first = self.sent[0][1]
+        self.assertEqual(await self._forgot(), 200)        # same page either way…
+        self.assertEqual(len(self.sent), 1, 'no second mail inside the cooldown')
+        self.assertIsNotNone(self.service.pending.get(first), 'the first link still works')
+
+    @unittest_run_loop
+    async def test_daily_cap(self) -> None:
+        for _ in range(policy.RESET_DAILY_MAX + 2):
+            await self._forgot()
+            # step past the cooldown by ageing every record's mint time
+            records = self.service.pending._load()
+            for rec in records.values():
+                rec['minted'] = float(rec['minted']) - policy.RESET_COOLDOWN_SECONDS - 1
+            self.service.pending._save(records)
+        self.assertEqual(len(self.sent), policy.RESET_DAILY_MAX)
+
+    @unittest_run_loop
+    async def test_unknown_address_sends_nothing_and_looks_the_same(self) -> None:
+        known = await (await self.client.post('/forgot', data={'email': _EMAIL})).text()
+        unknown = await (await self.client.post('/forgot', data={'email': 'nobody@example.test'})).text()
+        await asyncio.sleep(0.05)
+        self.assertEqual(known, unknown)
+        self.assertEqual([email for email, _ in self.sent], [_EMAIL])
+
+    @unittest_run_loop
+    async def test_the_answer_does_not_wait_for_the_mail(self) -> None:
+        def slow_send(rcpt: str, token: str, kind: str) -> None:
+            time.sleep(1.0)
+        self.service.mailer.send_invite = slow_send          # type: ignore[method-assign]
+        started = time.monotonic()
+        await self.client.post('/forgot', data={'email': _EMAIL})
+        self.assertLess(time.monotonic() - started, 0.5)
+
+    def test_the_mail_budget_per_recipient(self) -> None:
+        allowed = [self.service.mail_allowed('a@example.test')
+                   for _ in range(policy.MAIL_PER_RECIPIENT_MAX + 3)]
+        self.assertEqual(allowed.count(True), policy.MAIL_PER_RECIPIENT_MAX)
+        self.assertTrue(self.service.mail_allowed('b@example.test'), 'another recipient is unaffected')
 
 
 if __name__ == '__main__':

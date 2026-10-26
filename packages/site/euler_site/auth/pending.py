@@ -94,10 +94,37 @@ class PendingStore:
         records = {key: rec for key, rec in records.items()
                    if not (rec.get('email') == key_email and rec.get('kind') == kind)}
         token = generate_token()
-        records[hash_token(token)] = {
-            'email': key_email, 'profile': profile, 'kind': kind, 'state': 'invited',
-            'expiry': time.time() + policy.INVITE_TTL_SECONDS,
-            'terms_version': '', 'terms_accepted_at': '', 'otp_sends': 0}
+        records[hash_token(token)] = self._new_record(key_email, profile, kind)
+        self._save(records)
+        return token
+
+    @staticmethod
+    def _new_record(email: str, profile: str, kind: str) -> dict[str, Any]:
+        now = time.time()
+        return {'email': email, 'profile': profile, 'kind': kind, 'state': 'invited',
+                'minted': now, 'expiry': now + policy.INVITE_TTL_SECONDS,
+                'terms_version': '', 'terms_accepted_at': '', 'otp_sends': 0}
+
+    def mint_reset(self, email: str, profile: str) -> str | None:
+        """Mint a password-reset link for *email* alongside any already live; None if refused.
+
+        Unlike :meth:`mint`, this never replaces a live record: `/forgot` is unauthenticated,
+        and replacing would let anyone who knows an address keep killing the link its owner
+        was sent. Refused (None) within :data:`~policy.RESET_COOLDOWN_SECONDS` of the last
+        one, or past :data:`~policy.RESET_DAILY_MAX` in a day. A completed reset revokes the
+        rest (:meth:`revoke_email`).
+        """
+        records = self._load()
+        key_email = normalize_email(email)
+        now = time.time()
+        minted = [float(rec.get('minted', 0)) for rec in records.values()
+                  if rec.get('email') == key_email and rec.get('kind') == 'reset']
+        if any(now - when < policy.RESET_COOLDOWN_SECONDS for when in minted):
+            return None
+        if sum(1 for when in minted if now - when < 86400) >= policy.RESET_DAILY_MAX:
+            return None
+        token = generate_token()
+        records[hash_token(token)] = self._new_record(key_email, profile, 'reset')
         self._save(records)
         return token
 
