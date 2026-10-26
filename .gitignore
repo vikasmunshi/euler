@@ -28,6 +28,10 @@ dist/
 packages/content/euler_content/tree/
 packages/content/euler_content/_version.py
 
+# Security-review working material: findings, host captures, probes, test credentials. Local and
+# confidential by design — the repo is public, and docs/ is published on the site.
+/audit/
+
 # Re-include the tracked dotfiles. These must stay last: the last matching pattern wins.
 !.gitattributes
 !.gitignore
