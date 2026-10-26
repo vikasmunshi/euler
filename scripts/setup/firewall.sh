@@ -311,6 +311,30 @@ ExecStart=/usr/sbin/nft -f ${NFT_CONF}
 ExecReload=/usr/sbin/nft -f ${NFT_CONF}
 ExecStop=/usr/sbin/nft delete table inet euler
 
+# Hardening. Root, but all nft needs is netlink and CAP_NET_ADMIN; it reads one file and
+# opens no IP socket. Module loading is left alone: the kernel may autoload nf_tables here.
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_NET_ADMIN
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+RestrictAddressFamilies=AF_NETLINK AF_UNIX
+IPAddressDeny=any
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
 [Install]
 WantedBy=multi-user.target
 EOF

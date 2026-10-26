@@ -204,6 +204,29 @@ Type=oneshot
 User=${DDNS_USER}
 Group=${DDNS_GROUP}
 ExecStart=${DDNS_BIN} update
+
+# Hardening. The updater reads its env and calls two HTTPS APIs with curl; it writes nothing.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelModules=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
 EOF
     sudo tee "${TIMER_DEST}" > /dev/null <<EOF
 [Unit]

@@ -798,11 +798,28 @@ StateDirectory=euler-caddy
 Environment=XDG_DATA_HOME=/var/lib/euler-caddy
 Environment=XDG_CONFIG_HOME=/var/lib/euler-caddy
 
-# Hardening.
+# Hardening. Every write lands in the runtime and state dirs above, so the rest of the
+# filesystem is read-only; it dials sockets (unix, and :443 over TCP/UDP) and nothing else.
 NoNewPrivileges=true
 ProtectHome=true
-ProtectSystem=full
+ProtectSystem=strict
 PrivateTmp=$(private_tmp_mode)
+PrivateDevices=true
+ProtectKernelModules=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
 
 [Install]
 WantedBy=multi-user.target
@@ -850,6 +867,31 @@ Group=${ACME_GROUP}
 Environment=HOME=${ACME_HOME}
 Environment=LE_CONFIG_HOME=${ACME_HOME}
 ExecStart=${ACME_BIN} --cron --home ${ACME_HOME} --config-home ${ACME_HOME}
+
+# Hardening. acme.sh writes its own home and installs the renewed pair into the TLS dir;
+# the reload hook only dials Caddy's admin socket. Everything else is read-only.
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=${ACME_HOME} ${TLS_DIR}
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelModules=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
 EOF
     sudo tee "${ACME_TIMER_DEST}" > /dev/null <<EOF
 [Unit]

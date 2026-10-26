@@ -273,11 +273,29 @@ RuntimeDirectory=euler-proxy
 LogsDirectory=euler-proxy
 CacheDirectory=euler-proxy
 
-# Hardening (loopback listener on :3128 needs no privileged port).
+# Hardening (loopback listener on :3128 needs no privileged port). Its writes all go to
+# the three managed dirs above, so the rest of the filesystem is read-only.
 NoNewPrivileges=true
 ProtectHome=true
-ProtectSystem=full
+ProtectSystem=strict
 PrivateTmp=true
+PrivateDevices=true
+ProtectKernelModules=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
 
 [Install]
 WantedBy=multi-user.target
