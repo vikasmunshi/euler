@@ -158,6 +158,13 @@ class ChangePasswordTests(AioHTTPTestCase):
         self.assertNotIn(policy.SESSION_COOKIE, resp.cookies)
         self.assertNotIn(policy.REMEMBER_COOKIE, resp.cookies)
 
+    def test_a_decoy_salt_survives_a_restart(self) -> None:
+        """A real account's salt is stable across restarts, so an unknown address's decoy must
+        be too — otherwise comparing the two across a restart tells them apart."""
+        before = self.service.start_challenge('nobody@example.test')[0]
+        restarted = AuthService(self.service.config)
+        self.assertEqual(restarted.start_challenge('nobody@example.test')[0], before)
+
     @unittest_run_loop
     async def test_the_new_password_still_signs_in_after_a_change(self) -> None:
         status, _client, _body = await self._change(self._session(), _OLD)

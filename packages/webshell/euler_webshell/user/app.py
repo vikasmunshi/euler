@@ -32,6 +32,7 @@ import logging
 import pwd
 import socket
 from typing import Any, Awaitable, Callable
+from urllib.parse import urlsplit
 
 from aiohttp import WSCloseCode, WSMsgType, web
 
@@ -188,6 +189,13 @@ def build_app(config: UserConfig) -> web.Application:
         if subject is None:
             return web.Response(status=401, text='unauthenticated')
         if not subject.has(ATTACH_REQUIRES):
+            return web.Response(status=403, text='forbidden')
+        # A browser sends Origin on every WebSocket upgrade. The session cookie is
+        # SameSite=Lax, which keeps it off a cross-site page's upgrade — but not off one from
+        # a sibling subdomain, so the terminal also checks the page it is attaching to is ours.
+        origin = request.headers.get('Origin')
+        if origin is not None and urlsplit(origin).netloc != request.host:
+            log.warning('attach refused for %s: foreign origin %s', subject.user, origin)
             return web.Response(status=403, text='forbidden')
 
         ws = web.WebSocketResponse(heartbeat=30.0)

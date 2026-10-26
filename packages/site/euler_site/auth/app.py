@@ -26,7 +26,6 @@ __all__ = ['AuthService', 'build_public_app', 'build_admin_app']
 import asyncio
 import hmac
 import logging
-import secrets
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -103,8 +102,10 @@ class AuthService:
         #: One per email at a time. The verifier is kept so a handshake begun before the
         #: credentials changed (a reset, a password change) cannot finish after it.
         self._challenges: dict[str, tuple[SrpServer, SrpToken, float]] = {}
-        #: Per-process secret for stable decoy salts (unknown-email challenges).
-        self._decoy_secret = secrets.token_bytes(32)
+        #: Secret for stable decoy salts (unknown-email challenges). Kept in the state dir:
+        #: a real account's salt survives a restart, so a decoy's must too, or comparing the
+        #: salt before and after one would tell the two apart.
+        self._decoy_secret = load_or_create_secret(state / 'decoy-secret')
 
     # ── sessions & cookies ────────────────────────────────────────────────────────
 

@@ -428,6 +428,22 @@ class VaultRouteTests(_UserServiceCase):
         self.assertEqual(resp.status, 400)
 
 
+class AttachOriginTests(_UserServiceCase):
+    """`/ws` attaches only a page served from this host (cross-site WebSocket hijacking)."""
+
+    @unittest_run_loop
+    async def test_a_foreign_origin_is_refused(self) -> None:
+        with self.assertRaises(aiohttp.WSServerHandshakeError) as caught:
+            await self.client.ws_connect('/ws', headers={**_OWN_WS, 'Origin': 'https://evil.example'})
+        self.assertEqual(caught.exception.status, 403)
+
+    @unittest_run_loop
+    async def test_the_own_origin_attaches(self) -> None:
+        origin = f'http://{self.server.host}:{self.server.port}'
+        ws = await self.client.ws_connect('/ws', headers={**_OWN_WS, 'Origin': origin})
+        await ws.close()
+
+
 class PeerGateTests(_UserServiceCase):
     """Over the unix socket, only the PEERS accounts may call the instance.
 
