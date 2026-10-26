@@ -41,7 +41,9 @@ SYS_DIR="/etc/euler"
 SITE_ENV="${SYS_DIR}/site.env"                  # scoped runtime config (root:euler-site 0640)
 SITE_USER="euler-site"
 SITE_GROUP="euler-site"
-WEB_GROUP="euler-web"
+# The group site.sock is chgrp'd to: Caddy is its only client, so euler-edge (no per-user
+# uid), not euler-web. Membership also lets the service create the socket in /run/euler.
+EDGE_GROUP="euler-edge"
 SITE_SOCKET="/run/euler/site.sock"
 
 SERVICE_NAME="euler-site.service"
@@ -95,20 +97,19 @@ require_venv() {
     fi
 }
 
-# The dedicated euler-site user. In euler-web only to chgrp its own socket at bind time.
+# The dedicated euler-site user. In euler-edge only, to create its socket in /run/euler and
+# chgrp it at bind time; it leaves euler-web, which it no longer needs.
 ensure_site_user() {
-    if ! getent group "${SITE_GROUP}" > /dev/null; then
-        sudo groupadd --system "${SITE_GROUP}"
-    fi
-    if ! getent group "${WEB_GROUP}" > /dev/null; then
-        sudo groupadd --system "${WEB_GROUP}"
-    fi
+    local group
+    for group in "${SITE_GROUP}" "${EDGE_GROUP}"; do
+        getent group "${group}" > /dev/null || sudo groupadd --system "${group}"
+    done
     if ! getent passwd "${SITE_USER}" > /dev/null; then
         echo "Creating system user ${SITE_USER}..."
         sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
-            -g "${SITE_GROUP}" -G "${WEB_GROUP}" "${SITE_USER}"
+            -g "${SITE_GROUP}" -G "${EDGE_GROUP}" "${SITE_USER}"
     else
-        sudo usermod -a -G "${WEB_GROUP}" "${SITE_USER}"
+        sudo usermod -G "${EDGE_GROUP}" "${SITE_USER}"
     fi
 }
 
@@ -120,7 +121,8 @@ deploy_site_env() {
 # The public site: the packaged content, read routes only, no identity, no secrets.
 EULER_SITE_PUBLIC=1
 EULER_CONTENT_SOCKET=${SITE_SOCKET}
-EULER_WEB_GROUP=${WEB_GROUP}
+# The group site.sock is chgrp'd to (the setting keeps its historical name).
+EULER_WEB_GROUP=${EDGE_GROUP}
 EOF
     sudo chown root:"${SITE_GROUP}" "${SITE_ENV}"
     sudo chmod 0640 "${SITE_ENV}"
@@ -139,8 +141,8 @@ After=network.target
 Type=simple
 User=${SITE_USER}
 Group=${SITE_GROUP}
-# euler-web: to chgrp its own socket at bind time, so Caddy can connect.
-SupplementaryGroups=${WEB_GROUP}
+# euler-edge: to create its socket in /run/euler and chgrp it, so Caddy can connect.
+SupplementaryGroups=${EDGE_GROUP}
 EnvironmentFile=${SITE_ENV}
 ExecStart=${VENV_PY} -m euler_site.site
 Restart=on-failure

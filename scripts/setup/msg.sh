@@ -52,6 +52,7 @@ STATE_DIR="/var/lib/euler-msg"                  # euler-msg-only spool
 MSG_USER="euler-msg"
 MSG_GROUP="euler-msg"
 WEB_GROUP="euler-web"
+EDGE_GROUP="euler-edge"     # reaches the per-user sockets; may create sockets in /run/euler
 
 MSG_SOCKET="/run/euler/msg.sock"
 ADMIN_RUNTIME_DIR="/run/euler-msg"
@@ -125,22 +126,20 @@ resolve_token() {
     fi
 }
 
-# The dedicated euler-msg user. In euler-web so it can (a) connect to the per-user
-# instance sockets for the delivery nudge and (b) chgrp its own public socket to that
-# group at bind time.
+# The dedicated euler-msg user. In euler-edge so it can create its socket in /run/euler and
+# connect to the per-user instance sockets for the delivery nudge; in euler-web to chgrp its
+# public socket to that group at bind time (the per-user shells connect to it).
 ensure_msg_user() {
-    if ! getent group "${MSG_GROUP}" > /dev/null; then
-        sudo groupadd --system "${MSG_GROUP}"
-    fi
-    if ! getent group "${WEB_GROUP}" > /dev/null; then
-        sudo groupadd --system "${WEB_GROUP}"
-    fi
+    local group
+    for group in "${MSG_GROUP}" "${WEB_GROUP}" "${EDGE_GROUP}"; do
+        getent group "${group}" > /dev/null || sudo groupadd --system "${group}"
+    done
     if ! getent passwd "${MSG_USER}" > /dev/null; then
         echo "Creating system user ${MSG_USER}..."
         sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
-            -g "${MSG_GROUP}" -G "${WEB_GROUP}" "${MSG_USER}"
+            -g "${MSG_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP}" "${MSG_USER}"
     else
-        sudo usermod -a -G "${WEB_GROUP}" "${MSG_USER}"
+        sudo usermod -a -G "${WEB_GROUP},${EDGE_GROUP}" "${MSG_USER}"
     fi
 }
 
@@ -188,9 +187,9 @@ After=network.target
 Type=simple
 User=${MSG_USER}
 Group=${MSG_GROUP}
-# euler-web: to reach the per-user instance sockets for the delivery nudge, and to
-# chgrp its own public socket at bind time.
-SupplementaryGroups=${WEB_GROUP}
+# euler-edge: to create its socket in /run/euler and reach the per-user instance sockets
+# for the delivery nudge; euler-web: to chgrp its own public socket at bind time.
+SupplementaryGroups=${WEB_GROUP} ${EDGE_GROUP}
 EnvironmentFile=${MSG_ENV}
 ExecStart=${VENV_PY} -m euler_webshell.msg
 Restart=on-failure

@@ -56,6 +56,10 @@ USER_ENV="${SYS_DIR}/user.env"                         # scoped runtime config (
 EGRESS_ENV="${SYS_DIR}/egress.env"                     # HTTPS_PROXY (egress.sh)
 
 WEB_GROUP="euler-web"
+# The group of the per-user instance sockets: Caddy, auth and msg (frontend.sh creates it
+# too), never a per-user uid — so one collaborator's code cannot connect to another's
+# instance. The per-user uids keep euler-web, which reaches only auth.sock and msg.sock.
+EDGE_GROUP="euler-edge"
 # Parent group: every per-user uid joins it. It is also the ROSTER — the per-user uids are
 # named for the slug alone (ue0f4a1), so there is no name prefix left to enumerate them by,
 # and this root-owned membership is what identifies them here and in firewall.sh.
@@ -158,6 +162,7 @@ require_slug() {
 
 ensure_shared_groups() {
     getent group "${WEB_GROUP}"  > /dev/null || sudo groupadd --system "${WEB_GROUP}"
+    getent group "${EDGE_GROUP}" > /dev/null || sudo groupadd --system "${EDGE_GROUP}"
     getent group "${USER_GROUP}" > /dev/null || sudo groupadd --system "${USER_GROUP}"
 }
 
@@ -213,8 +218,9 @@ Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-g
 ListenStream=/run/euler/user-%i.sock
 SocketMode=0660
 SocketUser=%i
-SocketGroup=${WEB_GROUP}
-# Caddy (euler-caddy, in ${WEB_GROUP}) connects; the instance is spawned on demand.
+SocketGroup=${EDGE_GROUP}
+# Caddy, euler-auth and euler-msg (in ${EDGE_GROUP}) connect; no per-user uid can. The
+# instance is spawned on demand.
 
 [Install]
 WantedBy=sockets.target
@@ -261,7 +267,8 @@ IPAddressAllow=localhost
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=false
-ReadWritePaths=/run/euler ${USER_HOME_BASE}/%i
+# Its own home only. The instance connects to sockets in /run/euler but never writes there.
+ReadWritePaths=${USER_HOME_BASE}/%i
 PrivateTmp=true
 PrivateDevices=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
@@ -687,9 +694,23 @@ bounce_instances() {
     done
 }
 
+# Re-create each provisioned user's socket so a changed template (its group, its mode)
+# applies to the socket itself, not just the unit file. The service must be down first
+# (bounce_instances), since it Requires= the socket.
+relay_sockets() {
+    local users slug
+    users="$(euler_user_names || true)"
+    for slug in ${users}; do
+        if systemctl is-enabled --quiet "euler-user@${slug}.socket" 2>/dev/null; then
+            sudo systemctl restart "euler-user@${slug}.socket"
+        fi
+    done
+}
+
 do_upgrade() {
     do_deploy || return 1
     bounce_instances
+    relay_sockets
 }
 
 do_remove() {

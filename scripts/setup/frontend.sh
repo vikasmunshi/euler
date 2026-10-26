@@ -27,25 +27,33 @@
 #   - The cert is issued out-of-band by acme.sh via DNS-01 (Caddy performs no ACME).
 #
 # Service identity:
-#   - group  `euler-web` — the shared group whose members may reach the app sockets.
-#   - user   `euler-caddy` — runs the edge; member of `euler-web`; binds :443 via
-#     CAP_NET_BIND_SERVICE. (euler-auth / the per-user uids / euler-proxy are
-#     created by their own phases.)
+#   - group  `euler-web` — reaches auth.sock and msg.sock: the services, and the per-user
+#     uids, whose shells need them.
+#   - group  `euler-edge` — reaches the per-user instance sockets and site.sock, and owns
+#     /run/euler: Caddy and the services that create or call those sockets, never a
+#     per-user uid (docs/web-server-guide.md § 1).
+#   - group  `euler-tls` — reads the TLS private key: Caddy alone.
+#   - user   `euler-caddy` — runs the edge; primary group `euler-caddy` (which holds only
+#     euler-acme, so the admin socket reaches no one else), plus euler-web, euler-edge and
+#     euler-tls; binds :443 via CAP_NET_BIND_SERVICE. (euler-auth / the per-user uids /
+#     euler-proxy are created by their own phases.)
 #
 # Config + secrets live under /etc/euler, NOT in the repo: the dedicated service users
 # cannot traverse the repo owner's 0750 home dir, so the edge is decoupled from the
 # checkout. No service runs as root: Caddy runs as euler-caddy, and acme.sh runs as
 # euler-acme (home /usr/local/share/euler-acme), deploying the cert into a setgid
-# /etc/euler/tls and reloading Caddy via its admin API (`caddy reload`). Renewal runs on
+# /etc/euler/tls and reloading Caddy via its admin API (`caddy reload`) — a unix socket
+# (/run/euler-caddy/admin.sock, 0660 euler-caddy:euler-caddy), never TCP. Renewal runs on
 # euler-acme.timer. ~/.euler/env is the authoring source; the installer deploys scoped runtime
 # config into /etc/euler.
 #
 #   /etc/euler/Caddyfile          root:euler-web       0644   (generated; non-secret)
 #   /etc/euler/edge.env           root:euler-web       0644   (FQDN + email; runtime config)
 #   /etc/euler/web-content/       root:euler-web       0755   (deployed static maintenance page)
-#   /etc/euler/tls/               euler-acme:euler-web 2750   (setgid)
-#   /etc/euler/tls/server.crt     euler-acme:euler-web 0644
-#   /etc/euler/tls/server.key     euler-acme:euler-web 0640   (readable by euler-caddy via group)
+#   /etc/euler/tls/               euler-acme:euler-tls 2750   (setgid)
+#   /etc/euler/tls/server.crt     euler-acme:euler-tls 0644
+#   /etc/euler/tls/server.key     euler-acme:euler-tls 0640   (readable by euler-caddy via group)
+#   /run/euler-caddy/admin.sock   euler-caddy:euler-caddy 0660 (Caddy admin; euler-acme reloads)
 #   euler-caddy.service · euler-acme.service + .timer   (root-owned, boot-enabled)
 #
 # The deployment FQDN is the single source of truth in the project env file ~/.euler/env
@@ -55,7 +63,7 @@
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo.
 #
-# Actions: deploy | remove | upgrade | redeploy | status | renew | reload | help
+# Actions: deploy | remove | upgrade | redeploy | status | renew | rekey | reload | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -72,7 +80,7 @@ SYS_DIR="/etc/euler"
 CADDYFILE="${SYS_DIR}/Caddyfile"
 TLS_DIR="${SYS_DIR}/tls"
 CERT_FILE="${TLS_DIR}/server.crt"          # full chain
-KEY_FILE="${TLS_DIR}/server.key"           # private key (readable by euler-web)
+KEY_FILE="${TLS_DIR}/server.key"           # private key (readable by euler-tls: Caddy)
 
 # ── Static web content (maintenance page + assets) ────────────────────────────────
 # Authored in the repo, deployed under /etc/euler because euler-caddy cannot read the
@@ -85,7 +93,14 @@ PUBLIC_PATHS="/ /solutions /solutions/* /docs /docs/* /topics /topics/* /about/*
 
 # ── Service identity ───────────────────────────────────────────────────────
 WEB_GROUP="euler-web"
+EDGE_GROUP="euler-edge"                    # per-user + site sockets, /run/euler (no tenant)
+TLS_GROUP="euler-tls"                      # the private key (Caddy only)
 CADDY_USER="euler-caddy"
+CADDY_GROUP="euler-caddy"                  # Caddy's primary group: Caddy + euler-acme
+# Caddy's admin API, on a unix socket in Caddy's own runtime dir. The |0660 sets the socket's
+# mode; its group is Caddy's primary group, so only euler-acme (a member) can reload.
+ADMIN_DIR="/run/euler-caddy"
+ADMIN_ADDR="unix/${ADMIN_DIR}/admin.sock|0660"
 SERVICE_NAME="euler-caddy.service"
 SERVICE_DEST="/etc/systemd/system/${SERVICE_NAME}"
 
@@ -118,7 +133,7 @@ DNS_PROVIDER="${EULER_TLS_DNS_PROVIDER:-namecom}"
 
 usage() {
     cat <<USAGE
-Usage: $0 [deploy|remove|upgrade|redeploy|status|renew|reload|help]
+Usage: $0 [deploy|remove|upgrade|redeploy|status|renew|rekey|reload|help]
 
   deploy     Full edge setup: create euler-web group + euler-caddy user, install
              Caddy + acme.sh, generate /etc/euler/Caddyfile for the FQDN from ~/.euler/env
@@ -127,13 +142,15 @@ Usage: $0 [deploy|remove|upgrade|redeploy|status|renew|reload|help]
   remove     Remove the unit and Caddy; prompt before deleting /etc/euler, acme.sh,
              and the service users/group.
   upgrade    Upgrade the Caddy + acme.sh packages themselves and regenerate the
-             Caddyfile + unit (no cert issuance) — unlike the other kits, this is
-             NOT an alias of deploy.
+             Caddyfile + unit, and re-register acme.sh's deploy/reload hook (no cert
+             issuance) — unlike the other kits, this is NOT an alias of deploy.
   redeploy   Fast path: re-copy the static web-content (assets + vendor), regenerate
              the Caddyfile (picking up route changes), validate, and reload — no
              package upgrade, cert, or unit changes.
   status     Show deploy state, cert expiry, unit state, and a /healthz ping.
   renew      Force-renew the certificate now (as root; creds cached by acme.sh).
+  rekey      Force-renew with a NEW private key, and keep rotating the key on every later
+             renewal — for when the old key may have been read.
   reload     Reload the running edge (sudo systemctl reload; restarts it instead if
              the running unit's namespace can no longer be re-entered).
 
@@ -257,18 +274,23 @@ install_caddy_pkg() {
 # ── Service identity + system dirs ─────────────────────────────────────────
 
 ensure_group_and_users() {
-    if ! getent group "${WEB_GROUP}" > /dev/null; then
-        echo "Creating group ${WEB_GROUP}..."
-        sudo groupadd --system "${WEB_GROUP}"
-    fi
-    # euler-caddy — the edge, in euler-web. (euler-auth / the per-user uids /
-    # euler-proxy are created by their own phases.)
+    local group
+    for group in "${WEB_GROUP}" "${EDGE_GROUP}" "${TLS_GROUP}" "${CADDY_GROUP}"; do
+        if ! getent group "${group}" > /dev/null; then
+            echo "Creating group ${group}..."
+            sudo groupadd --system "${group}"
+        fi
+    done
+    # euler-caddy — the edge. Its primary group is its own, so what it creates (the admin
+    # socket) reaches only that group's members; euler-web / euler-edge / euler-tls are
+    # supplementary. (euler-auth / the per-user uids / euler-proxy are created by their
+    # own phases.)
     if ! getent passwd "${CADDY_USER}" > /dev/null; then
-        echo "Creating system user ${CADDY_USER} (group ${WEB_GROUP})..."
+        echo "Creating system user ${CADDY_USER} (group ${CADDY_GROUP})..."
         sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
-            -g "${WEB_GROUP}" "${CADDY_USER}"
+            -g "${CADDY_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP},${TLS_GROUP}" "${CADDY_USER}"
     else
-        sudo usermod -g "${WEB_GROUP}" "${CADDY_USER}" || true
+        sudo usermod -g "${CADDY_GROUP}" -G "${WEB_GROUP},${EDGE_GROUP},${TLS_GROUP}" "${CADDY_USER}"
     fi
     # euler-acme — runs acme.sh, own group, home in /usr/local/share (not root).
     if ! getent group "${ACME_GROUP}" > /dev/null; then
@@ -279,14 +301,18 @@ ensure_group_and_users() {
         sudo useradd --system --home-dir "${ACME_HOME}" --shell /usr/sbin/nologin \
             -g "${ACME_GROUP}" "${ACME_USER}"
     fi
+    # euler-acme reloads Caddy after a renewal, over the admin socket — Caddy's group.
+    sudo usermod -aG "${CADDY_GROUP}" "${ACME_USER}"
 }
 
 ensure_sys_dirs() {
     # /etc/euler is 0755 so euler-acme (outside euler-web) can traverse to its tls dir;
-    # the sensitive files inside carry their own perms. tls/ is setgid euler-web (2750),
-    # so certs euler-acme writes there inherit group euler-web for euler-caddy to read.
+    # the sensitive files inside carry their own perms. tls/ is setgid euler-tls (2750),
+    # so certs euler-acme writes there inherit group euler-tls — Caddy's alone, never a
+    # per-user uid's. The chgrp moves files a previous deploy left in the old group.
     sudo install -d -o root -g "${WEB_GROUP}" -m 0755 "${SYS_DIR}"
-    sudo install -d -o "${ACME_USER}" -g "${WEB_GROUP}" -m 2750 "${TLS_DIR}"
+    sudo install -d -o "${ACME_USER}" -g "${TLS_GROUP}" -m 2750 "${TLS_DIR}"
+    sudo find "${TLS_DIR}" -mindepth 1 -exec chgrp "${TLS_GROUP}" {} +
     sudo install -d -o "${ACME_USER}" -g "${ACME_GROUP}" -m 0750 "${ACME_HOME}"
 }
 
@@ -419,13 +445,6 @@ issue_cert() {
     local -a cred_env=() var
     for var in "${REQUIRED[@]}"; do cred_env+=("${var}=${!var}"); done
 
-    # Reload command re-run by euler-acme on every renewal: ensure the key stays
-    # group-readable (setgid gives the euler-web group) and reload Caddy via its admin
-    # API — no root, no systemctl. Best effort: on first issue the edge is not up yet.
-    local caddy reload_cmd
-    caddy="$(caddy_bin)"
-    reload_cmd="chmod 0640 ${KEY_FILE}; chmod 0644 ${CERT_FILE}; ${caddy} reload --config ${CADDYFILE} 2>/dev/null || true"
-
     echo "Issuing certificate for ${DOMAIN} via ${DNS_PROVIDER} DNS-01 (${DNS_HOOK})..."
     local rc=0
     acme_run_with_creds --issue --dns "${DNS_HOOK}" -d "${DOMAIN}" --server letsencrypt || rc=$?
@@ -438,6 +457,21 @@ issue_cert() {
     # Clear any stale cert from a prior (root) deploy so euler-acme can write fresh files:
     # it owns the dir (can create/delete) but cannot overwrite root-owned files in place.
     sudo rm -f "${CERT_FILE}" "${KEY_FILE}"
+    install_cert_hook
+}
+
+# Register (or re-register) how acme.sh deploys the cert into /etc/euler/tls and what it
+# runs afterwards, and deploy the current cert now. acme.sh STORES this per domain, so it
+# must be re-run whenever the reload path changes — `upgrade` does — or renewals keep
+# running the old command.
+#
+# The reload command, re-run by euler-acme on every renewal: keep the key group-readable
+# (the setgid dir gives the euler-tls group) and reload Caddy through its admin socket — no
+# root, no systemctl. Best effort: on first issue the edge is not up yet.
+install_cert_hook() {
+    local caddy reload_cmd
+    caddy="$(caddy_bin)"
+    reload_cmd="chmod 0640 ${KEY_FILE}; chmod 0644 ${CERT_FILE}; ${caddy} reload --config ${CADDYFILE} --address '${ADMIN_ADDR}' 2>/dev/null || true"
     echo "Deploying certificate to ${TLS_DIR}..."
     acme_run --install-cert -d "${DOMAIN}" \
         --fullchain-file "${CERT_FILE}" \
@@ -447,11 +481,11 @@ issue_cert() {
         echo "Error: cert/key were not installed" >&2
         return 1
     fi
-    # euler-acme owns them and the setgid dir gave them group euler-web; just fix modes.
+    # euler-acme owns them and the setgid dir gave them group euler-tls; just fix modes.
     sudo chmod 0644 "${CERT_FILE}"
     sudo chmod 0640 "${KEY_FILE}"
-    echo "Deployed cert -> ${CERT_FILE} (${ACME_USER}:${WEB_GROUP} 0644)"
-    echo "Deployed key  -> ${KEY_FILE} (${ACME_USER}:${WEB_GROUP} 0640)"
+    echo "Deployed cert -> ${CERT_FILE} (${ACME_USER}:${TLS_GROUP} 0644)"
+    echo "Deployed key  -> ${KEY_FILE} (${ACME_USER}:${TLS_GROUP} 0640)"
 }
 
 # ── Caddyfile router ──────────────────────────────────────────────────────────────
@@ -477,6 +511,9 @@ generate_caddyfile() {
 {
 	# DNS-01 needs no inbound :80, so keep Caddy off :80 (no HTTP->HTTPS redirect).
 	auto_https disable_redirects
+	# The admin API on a unix socket, never TCP: on loopback TCP any local process could
+	# reconfigure the edge. Only Caddy's own group (euler-acme, for renewals) can connect.
+	admin ${ADMIN_ADDR}
 }
 
 # Transport-level security headers + edge fallback CSP, shared by the live routes and
@@ -728,7 +765,7 @@ install_service() {
     local caddy
     caddy="$(caddy_bin)"
 
-    echo "Installing ${SERVICE_NAME} (User=${CADDY_USER}, Group=${WEB_GROUP})..."
+    echo "Installing ${SERVICE_NAME} (User=${CADDY_USER}, Group=${CADDY_GROUP})..."
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler web edge (Caddy)
@@ -739,9 +776,10 @@ Wants=network-online.target
 [Service]
 Type=notify
 User=${CADDY_USER}
-Group=${WEB_GROUP}
+Group=${CADDY_GROUP}
+SupplementaryGroups=${WEB_GROUP} ${EDGE_GROUP} ${TLS_GROUP}
 ExecStart=${caddy} run --config ${CADDYFILE}
-ExecReload=${caddy} reload --config ${CADDYFILE} --force
+ExecReload=${caddy} reload --config ${CADDYFILE} --address '${ADMIN_ADDR}' --force
 Restart=on-failure
 RestartSec=5s
 WorkingDirectory=${SYS_DIR}
@@ -750,10 +788,10 @@ WorkingDirectory=${SYS_DIR}
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
-# Writable runtime (future /run/euler sockets) + state (euler-caddy has no home).
-RuntimeDirectory=euler
-RuntimeDirectoryMode=0770
-RuntimeDirectoryPreserve=yes
+# The admin socket's dir (Caddy's own; euler-acme traverses it as a group member) + state
+# (euler-caddy has no home). /run/euler itself is a tmpfiles.d dir (auth.sh), not Caddy's.
+RuntimeDirectory=euler-caddy
+RuntimeDirectoryMode=0750
 StateDirectory=euler-caddy
 Environment=XDG_DATA_HOME=/var/lib/euler-caddy
 Environment=XDG_CONFIG_HOME=/var/lib/euler-caddy
@@ -883,8 +921,32 @@ do_upgrade() {
     deploy_web_content                 # refresh the static maintenance page + assets
     generate_caddyfile                 # regenerate from the FQDN
     install_service                    # re-lay the unit and reload
+    install_cert_hook                  # re-register the reload path acme.sh stores per domain
     install_acme_timer
     echo "Frontend upgrade complete: $(caddy_version)"
+}
+
+# Replace the TLS private key, not just the certificate: a forced renewal with a freshly
+# generated domain key, deployed by the stored hook. acme.sh keeps the flag for this domain,
+# so every later renewal rotates the key too — no key outlives its certificate.
+do_rekey() {
+    check_can_sudo || return 1
+    load_fqdn || return 1
+    if ! acme_is_installed; then
+        echo "Error: acme.sh is not installed; run '$0 deploy' first." >&2
+        return 1
+    fi
+    local before after
+    before="$(sudo openssl pkey -in "${KEY_FILE}" -pubout 2>/dev/null | sha256sum | cut -c1-16)"
+    echo "Renewing ${DOMAIN} with a new private key (force)..."
+    acme_run --renew -d "${DOMAIN}" --force --always-force-new-domain-key
+    after="$(sudo openssl pkey -in "${KEY_FILE}" -pubout 2>/dev/null | sha256sum | cut -c1-16)"
+    echo "Public key fingerprint: ${before:-?} → ${after:-?}"
+    if [ -z "${after}" ] || [ "${before}" = "${after}" ]; then
+        echo "Error: the deployed key did not change" >&2
+        return 1
+    fi
+    echo "Rekey complete for ${DOMAIN}"
 }
 
 do_renew() {
@@ -958,14 +1020,15 @@ do_remove() {
     read -r -p "Remove the acme.sh client (${ACME_HOME})? [y/N] " reply
     [[ "${reply}" =~ ^[Yy]$ ]] && sudo rm -rf "${ACME_HOME}"
 
-    read -r -p "Remove service users (${CADDY_USER}, ${ACME_USER}) and group ${WEB_GROUP}? [y/N] " reply
+    read -r -p "Remove service users (${CADDY_USER}, ${ACME_USER}) and their groups? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then
-        local u
+        local u g
         for u in "${CADDY_USER}" "${ACME_USER}"; do
             if getent passwd "${u}" > /dev/null; then sudo userdel "${u}" 2>/dev/null || true; fi
         done
-        if getent group "${ACME_GROUP}" > /dev/null; then sudo groupdel "${ACME_GROUP}" 2>/dev/null || true; fi
-        if getent group "${WEB_GROUP}" > /dev/null; then sudo groupdel "${WEB_GROUP}" 2>/dev/null || true; fi
+        for g in "${ACME_GROUP}" "${CADDY_GROUP}" "${TLS_GROUP}" "${EDGE_GROUP}" "${WEB_GROUP}"; do
+            if getent group "${g}" > /dev/null; then sudo groupdel "${g}" 2>/dev/null || true; fi
+        done
         sudo rm -rf /var/lib/euler-caddy
     fi
     echo "Frontend uninstall complete."
@@ -1007,6 +1070,15 @@ do_status() {
     else
         echo "${SERVICE_NAME}: ✗ not installed"
     fi
+    # The admin API must be the unix socket alone: a TCP listener on :2019 is reachable by
+    # every local process, the per-user web shells included.
+    if ss -Htln 'sport = :2019' 2>/dev/null | grep -q .; then
+        echo "admin API:  ✗ listening on TCP :2019 — expected only ${ADMIN_DIR}/admin.sock" >&2
+    elif sudo test -S "${ADMIN_DIR}/admin.sock"; then
+        echo "admin API:  ✓ unix socket only ($(sudo stat -c '%a %U:%G' "${ADMIN_DIR}/admin.sock"))"
+    else
+        echo "admin API:  … no socket at ${ADMIN_DIR}/admin.sock (edge down?)"
+    fi
     # Health ping (resolve the domain to loopback so it works without public DNS).
     # curl's -w prints 000 on failure; capture it (|| true) instead of appending another.
     local code
@@ -1023,6 +1095,7 @@ case "${ACTION}" in
     upgrade)   do_upgrade ;;
     redeploy)  do_redeploy ;;
     renew)     do_renew ;;
+    rekey)     do_rekey ;;
     reload)    do_reload ;;
     status)    do_status ;;
     -h | --help | help) usage ;;
