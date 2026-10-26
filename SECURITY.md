@@ -3,7 +3,12 @@
 ## Reporting a problem
 
 Please report security issues **privately**, not in a public issue or pull request:
-e-mail [vikas.munshi@gmail.com](mailto:vikas.munshi@gmail.com) with "security" in the subject.
+
+- on GitHub, [**Report a vulnerability**](https://github.com/vikasmunshi/euler/security/advisories/new)
+  (the repository's Security tab) — preferred, since the report, the discussion and any fix stay
+  together in one private advisory;
+- or by e-mail to [vikas.munshi@gmail.com](mailto:vikas.munshi@gmail.com), with "security" in
+  the subject.
 
 Helpful to include: what you found, where (a file and line, or a URL and request), how to
 reproduce it, and what you think it allows. Reports are read by one person, so expect an
