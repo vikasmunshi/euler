@@ -2179,7 +2179,7 @@ users
 | argument | description |
 |----------|-------------|
 | `action` | What to do — `list` the roster, pending invites and the invite-request queue; `process-requests` walks that queue interactively (accept / ignore / dismiss each); `add` a map entry (`@email` also provisions the account and mints an invite, a bare os-login is local-only); `change` reassigns a profile; `enable` / `disable` the web SRP state; `remove` drops the account or entry; `redeploy` re-asserts the per-user host layer and re-lays every collaborator's git hooks, dropping live shells. Defaults to `list`. |
-| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Offered as a menu of the roster for the verbs that act on an account that already exists — `change` / `enable` / `disable` / `remove` — and not asked for the others, since `add` names one that does not yet and `list` / `process-requests` / `redeploy` name none. |
+| `identity` | Whose account to act on: a web email (with `@`) or a local OS login. Offered as a menu of the host's accounts (e-mail or login, with slug and profile) for the verbs that act on an account that already exists — `change` / `enable` / `disable` / `remove` — and not asked for the others, since `add` names one that does not yet and `list` / `process-requests` / `redeploy` name none. |
 | `profile` | The profile to assign, for `add` / `change`. `admin` is valid only for a local os-login, never a web account. |
 
 *Defined in* `euler_webshell.users.users` — on the web host only (the web shell and `solver-host`).
