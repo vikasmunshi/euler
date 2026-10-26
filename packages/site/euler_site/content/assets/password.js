@@ -79,15 +79,23 @@
         const { M2 } = await change.json();
         if (!proof.check(M2)) return fail('Server failed mutual authentication — password unchanged? Sign in to verify.');
         // 3 · the vault survives a password change: re-wrap VK under the
-        // new password's PK. Best-effort — 404 means no vault yet; 409 means the
-        // vault was wrapped under something else (the account panel can recover).
+        // new password's PK. The old PK is derived the way the vault was made (its kdf
+        // and salt, from /vault/status), so a vault from before Argon2 moves across too.
+        // Best-effort — no vault yet just keeps the new PK; 409 means the vault was
+        // wrapped under something else (the account panel can recover).
         try {
           if (window.Vault) {
-            const oldPk = await Vault.derivePk(current, salt);
             const newPk = await Vault.derivePk(next, derived.salt);
-            const rewrap = await Vault.postJson('/vault/rewrap',
-              { old_pk: oldPk, new_pk: newPk, new_salt: derived.salt });
-            if (rewrap.ok || rewrap.status === 404) Vault.store(newPk, derived.salt);
+            const status = await fetch('/vault/status', { credentials: 'same-origin' });
+            const info = status.ok ? await status.json() : { vault: false };
+            if (!info.vault) {
+              Vault.store(newPk, derived.salt);
+            } else {
+              const oldPk = await Vault.derivePkFor(current, info);
+              const rewrap = await Vault.postJson('/vault/rewrap',
+                { old_pk: oldPk, new_pk: newPk, new_salt: derived.salt });
+              if (rewrap.ok) Vault.store(newPk, derived.salt);
+            }
           }
         } catch (err) { /* recovery stays available on the account panel */ }
         succeed();

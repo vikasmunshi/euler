@@ -43,7 +43,7 @@ same thing in the same words — this is not "zero-knowledge", and should never 
 Two keys, not one:
 
 ```
-password ──PBKDF2-HMAC-SHA256(salt, 600 000)──▶ PK ──AES-256-GCM──▶ wrapped VK   (~/.euler/vault)
+password ──Argon2id("euler-vault-pk:" ‖ salt)──▶ PK ──AES-256-GCM──▶ wrapped VK   (~/.euler/vault)
                                                                         │
                                                                         ▼ unwrap
                                                                        VK ──AES-256-GCM──▶ id, env
@@ -63,33 +63,33 @@ the envelope, a password change rewrites one 32-byte blob (`rewrap_vault`) and t
 else — atomic, instant, and incapable of half-failing across a set of files. It is also what
 lets the browser hold `PK` without ever holding the key to the file contents.
 
-### The KDF, and why PBKDF2
+### The KDF: Argon2id
 
 ```
-PK = PBKDF2-HMAC-SHA256(password, salt, iterations = 600 000, dkLen = 32)
+PK = Argon2id(password, "euler-vault-pk:" ‖ salt, m = 64 MiB, t = 3, p = 1, len = 32)
 ```
 
-600 000 rounds is the OWASP floor for PBKDF2-SHA256, recorded once in
-`config['vault_kdf_iterations']` and mirrored in `vault.js`; an existing vault's own count is
-stored in its file and honoured on unlock, so the number can rise without stranding anybody.
+The parameters are one string, `argon2id$m=65536,t=3,p=1` (`wire.VAULT_KDF`, mirrored in
+`vault.js`), and the vault records it in its own file, so the cost can rise later without
+stranding anybody. The browser derives the same `PK` with the vendored hash-wasm it already loads
+for the SRP key (base.html); the terminal uses `argon2-cffi`. Every guess at a stolen
+`~/.euler/vault` — readable only by its owner's uid and root — costs 64 MiB of Argon2id, the same
+as a guess at a stolen `users.json`.
 
-PBKDF2 is not the strongest KDF available — scrypt and Argon2 resist hardware parallelism
-better. It is chosen anyway because **WebCrypto exposes PBKDF2 natively**: the browser derives
-a byte-identical `PK` from the password it already holds, with no bundled KDF, no WASM, and no
-extra round-trip.
-
-That trade has since moved: the page now ships Argon2id anyway (the vendored hash-wasm), for
-the SRP key `x` ([SRP Guide §3](srp-guide.md#3-registration-the-verifier)). So a stolen
-`users.json` costs an attacker 64 MiB of Argon2id per guess, and a stolen `~/.euler/vault` —
-readable only by its owner's uid and root — costs 600 000 PBKDF2 rounds. Moving `PK` to Argon2id
-as well is now a matter of a versioned vault and a re-wrap at the next sign-in, the way SRP
-accounts moved, not of shipping a new implementation.
+**Vaults made before Argon2** record `pbkdf2-sha256` and their rounds (600 000, the OWASP floor
+for PBKDF2-SHA256, WebCrypto-native — which is why it was the first choice: no implementation to
+ship into the page, until the SRP key needed one anyway). They still open, and each moves to
+Argon2id — same `VK`, same salt, only the wrap rewritten — the first time its unlock has the
+means: a terminal unlock with the password (`unlock_vault`), a browser sign-in, which derives
+both keys while legacy vaults exist and sends the PBKDF2 one as `legacy_pk` (`/vault/unlock` →
+`upgrade_vault_with_pk`), or a password change (`/vault/rewrap` always writes Argon2id).
 
 The salt is 16 bytes — and on the web path it is *the account's SRP salt*, which the browser
 already has from the login challenge ([SRP Guide §8](srp-guide.md#8-what-srp-does-not-do-here)).
 The salt is public by construction in both systems; sharing it couples nothing but the input to
-two independent derivations — and the SRP side labels its Argon2 salt (`"euler-srp-x:"`), so the
-two never compute the same function of the password even where both are slow.
+two independent derivations — both Argon2id at the same cost, but each labels its salt
+(`"euler-vault-pk:"` here, `"euler-srp-x:"` for SRP), so they never compute the same function of
+the password.
 
 ### The ciphers
 
@@ -161,7 +161,7 @@ only by the uid.
 
 1. the key file named by `$EULER_VAULT_KEY_FILE`, when it exists and is exactly 32 bytes;
 2. `$EULER_VAULT_PASSWORD`, unwrapping the vault directly — the non-interactive path for a
-   script, CI, or a setup run. It costs a full PBKDF2 per process, which is why a shell calls
+   script, CI, or a setup run. It costs a full Argon2id per process, which is why a shell calls
    `ensure_session_key()` at startup to materialise the file and let its children take path 1.
 
 There is no password *file*, and that absence is a decision: a password stored beside the
@@ -224,9 +224,10 @@ never to the auth service, and never as a password:
 
 ```
 sign-in (auth service, SRP)                  per-user service (runs as the collaborator's uid)
-  password stays in the page                   POST /vault/unlock  {pk, salt}
-  PK = PBKDF2(password, SRP salt, 600k)          → unlock_vault_with_pk(pk)         (returning user)
+  password stays in the page                   POST /vault/unlock  {pk, salt, legacy_pk?}
+  PK = Argon2id(password, SRP salt)              → unlock_vault_with_pk(pk)         (returning user)
   sessionStorage: euler.vault.pk                 → init_vault_from_pk(pk, salt)     (first login)
+  (+ the PBKDF2 key while legacy vaults exist)   → upgrade_vault_with_pk(legacy, pk) (a legacy vault)
                                                  → write_session_key(VK)
                                                POST /vault/rewrap {old_pk, new_pk, new_salt}
                                                  → the vault survives a password change

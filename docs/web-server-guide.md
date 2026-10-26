@@ -812,16 +812,17 @@ operator at rest rather than protected by file permissions alone.
 - A random per-user **vault key `VK`** (32 bytes) encrypts the secrets with AES-256-GCM,
   a fresh nonce per blob. A magic header marks a file as vault ciphertext, so plaintext
   and encrypted forms both load transparently.
-- `VK` is stored **wrapped** under `PK = PBKDF2-HMAC-SHA256(password, salt, 600 000)`,
-  reusing the SRP salt, in `~/.euler/vault` — which also records the salt and iteration
-  count, so the terminal path is self-contained.
+- `VK` is stored **wrapped** under `PK = Argon2id(password, "euler-vault-pk:" ‖ salt)`
+  (64 MiB, 3 passes), reusing the SRP salt, in `~/.euler/vault` — which also records the salt
+  and the KDF, so the terminal path is self-contained.
 - Use: derive `PK` → unwrap `VK` → decrypt. A password change **re-wraps only the small
   `VK` blob**; the secrets are never re-encrypted.
 
-PBKDF2 rather than scrypt because it is **WebCrypto-native**: the browser derives the
-identical `PK` from the password it already holds and the salt already in the SRP
-challenge — no bundled KDF, no extra round-trip. 600 000 rounds is the OWASP floor for
-PBKDF2-SHA256. The cost is paid once per session.
+The browser derives the identical `PK` from the password it already holds and the salt already
+in the SRP challenge, with the same vendored Argon2id it uses for the SRP key — no extra
+round-trip, and the label keeps the two derivations apart. A vault made before Argon2 (PBKDF2,
+600 000 rounds) still opens and is re-wrapped under Argon2id at its next unlock (docs/vault-guide.md
+§ 2). The cost is paid once per session.
 
 ### 8.1 Delivering the key
 

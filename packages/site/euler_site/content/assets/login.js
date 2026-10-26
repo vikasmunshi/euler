@@ -86,10 +86,15 @@
       const { M2 } = await verify.json();
       if (!proof.check(M2)) return fail('Server failed mutual authentication — not signing in.');
       // Vault: derive PK from the password we still hold and the SRP
-      // salt, for the per-user service to unlock the vault with. Best-effort — a
-      // failure only means the vault stays locked (the account panel can recover).
+      // salt, for the per-user service to unlock the vault with — and the PBKDF2 key
+      // too, which a vault made before Argon2 opens with once while the service moves
+      // it across. Best-effort — a failure only means the vault stays locked (the
+      // account panel can recover).
       try {
-        if (window.Vault) Vault.store(await Vault.derivePk(secret, salt), salt);
+        if (window.Vault) {
+          Vault.store(await Vault.derivePk(secret, salt), salt,
+                      await Vault.derivePk(secret, salt, Vault.KDF_LEGACY));
+        }
       } catch (err) { /* vault stays locked */ }
       window.location.replace(destination());
     } catch (err) {

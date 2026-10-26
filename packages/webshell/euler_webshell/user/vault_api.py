@@ -39,7 +39,7 @@ from typing import Any
 from aiohttp import web
 from cryptography.exceptions import InvalidTag
 
-from solver.crypto import vault
+from solver.crypto import vault, wire
 from solver.crypto.ciphers import load_private_key, public_key_hex, read_master_key
 from solver.config import config
 from euler_site.site import gitstate
@@ -192,24 +192,29 @@ def add_vault_routes(app: web.Application) -> None:
     async def vault_status(_request: web.Request) -> web.Response:
         """`GET /vault/status` — existence, lock state, and the KDF parameters.
 
-        The salt + iterations are not secret (they are useless without the password) and
-        let the browser derive the *old* `PK` for the stale-vault recovery path.
+        The salt, `kdf` and (for a legacy vault) iterations are not secret — they are useless
+        without the password — and let the browser derive the vault's *own* `PK` for a password
+        change and for the stale-vault recovery path.
         """
         data = vault.read_vault()
         body: dict[str, Any] = {'vault': data is not None, 'unlocked': _unlocked()}
         if data is not None:
             body['salt'] = data['salt']
-            body['iterations'] = data['iterations']
+            body['kdf'] = data.get('kdf', wire.VAULT_KDF_LEGACY)
+            if 'iterations' in data:
+                body['iterations'] = data['iterations']
         return web.json_response(body)
 
     @requires(_VAULT_REQUIRES)
     async def vault_unlock(request: web.Request) -> web.Response:
-        """`POST /vault/unlock` `{pk, salt}` — unlock, or initialise on first login.
+        """`POST /vault/unlock` `{pk, salt, legacy_pk?}` — unlock, or initialise on first login.
 
-        No vault yet → mint one wrapped under this `PK` (recording the SRP `salt` so
-        every future session derives the same key) and encrypt any plaintext secrets.
-        A `PK` that does not match → 409 `stale` (a password reset orphaned the
-        vault, or an old tab holds a dead key) — never destructive.
+        `pk` is always derived with the current KDF. No vault yet → mint one wrapped under it
+        (recording the SRP `salt` so every future session derives the same key) and encrypt any
+        plaintext secrets. A vault still on the legacy KDF is opened with `legacy_pk` — the same
+        password through PBKDF2 — and re-wrapped under `pk` there and then. A key that does not
+        match → 409 `stale` (a password reset orphaned the vault, or an old tab holds a dead
+        key) — never destructive.
         """
         try:
             body: Any = await request.json()
@@ -228,8 +233,15 @@ def add_vault_routes(app: web.Application) -> None:
             return web.json_response({'unlocked': True, 'initialized': True})
         if _unlocked():
             return web.json_response({'unlocked': True, 'initialized': False})
+        data = vault.read_vault()
         try:
-            vault_key = vault.unlock_vault_with_pk(pk)
+            if data is not None and vault.is_legacy(data):
+                legacy_pk = _hex_bytes(body.get('legacy_pk'), _PK_LEN)
+                if legacy_pk is None:
+                    return web.json_response({'unlocked': False, 'stale': True}, status=409)
+                vault_key = vault.upgrade_vault_with_pk(legacy_pk, pk)
+            else:
+                vault_key = vault.unlock_vault_with_pk(pk)
         except InvalidTag:
             return web.json_response({'unlocked': False, 'stale': True}, status=409)
         vault.write_session_key(vault_key)
@@ -241,8 +253,10 @@ def add_vault_routes(app: web.Application) -> None:
         """`POST /vault/rewrap` `{old_pk, new_pk, new_salt}` — the vault survives a password change.
 
         Re-wraps only the small `VK` blob under the new `PK`; the secrets are never
-        re-encrypted. Also serves the stale-vault recovery: the browser derives the old
-        `PK` from the *previous* password and the vault's stored salt (`/vault/status`).
+        re-encrypted. `old_pk` is derived the way the vault was made (its `kdf` from
+        `/vault/status`), `new_pk` with the current KDF — so a change also moves a legacy
+        vault. Also serves the stale-vault recovery: the browser derives the old `PK` from
+        the *previous* password and the vault's stored salt (`/vault/status`).
         """
         try:
             body = await request.json()

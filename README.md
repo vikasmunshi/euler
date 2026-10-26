@@ -61,7 +61,7 @@ The cryptography has a guide per scheme — the mathematics, and how this projec
 | Guide                                                  | Covers                                                                               |
 |--------------------------------------------------------|--------------------------------------------------------------------------------------|
 | [Git Filter Guide](docs/gitfilter-guide.md)            | transparent encryption of `solutions/private/` — clean/smudge, the master key         |
-| [Vault Guide](docs/vault-guide.md)                     | envelope encryption of `~/.euler` — PBKDF2, AES-GCM, session-key delivery             |
+| [Vault Guide](docs/vault-guide.md)                     | envelope encryption of `~/.euler` — Argon2id, AES-GCM, session-key delivery           |
 | [SRP Guide](docs/srp-guide.md)                         | SRP-6a web login — the verifier, the handshake, mutual proof                          |
 | [Secret Sharing Guide](docs/secret-sharing-guide.md)   | Shamir thresholds and the 2-of-2 master-key split (`key-split` / `key-reconstruct`)   |
 

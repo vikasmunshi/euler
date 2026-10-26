@@ -13,7 +13,7 @@ They were one table until the split, which read naturally enough until you neede
 "may I change this?" — and the table had no opinion.
 
 Import the module, not the names (`from solver.crypto import wire`, then
-`wire.VAULT_KDF_ITERATIONS`): the tests lower the KDF cost to keep the vault suite fast,
+`wire.VAULT_KDF`): the tests lower the KDF cost to keep the vault suite fast,
 and a from-import would bind the expensive value past their reach.
 
 Stdlib-only and silent on stdout at import: this is on the git-filter path, where stdout
@@ -22,7 +22,8 @@ carries file content.
 from __future__ import annotations
 
 __all__ = ['ATTR_LINE', 'ATTR_PATH', 'ENC_KEY_VERIFY', 'FILTER_NAME', 'HEADER_LEN', 'MAGIC',
-           'NONCE_LEN', 'PKT_MAX', 'VAULT_KDF_ITERATIONS', 'VAULT_KEY_ENV', 'VAULT_MAGIC',
+           'NONCE_LEN', 'PKT_MAX', 'VAULT_ARGON2_LABEL', 'VAULT_KDF', 'VAULT_KDF_ITERATIONS',
+           'VAULT_KDF_LEGACY', 'VAULT_KEY_ENV', 'VAULT_MAGIC',
            'VAULT_PASSWORD_ENV', 'VERIFY_TEXT']
 
 # -- the git clean/smudge blob format ---------------------------------------------------
@@ -64,8 +65,17 @@ VERIFY_TEXT: bytes = (
 #: 3-byte tag + 1-byte format version; marks a secret as vault-encrypted rather than
 #: plaintext at rest.
 VAULT_MAGIC: bytes = b'VLT\x01'
-#: PBKDF2-HMAC-SHA256 rounds deriving the password key. WebCrypto-native, and matched by
-#: the browser deriving the same key — which is why it is protocol and not a knob.
+#: How a new vault's password key is derived: Argon2id, 64 MiB, 3 passes, 1 lane — the same
+#: cost as the SRP key, from the same vendored implementation in the browser (`vault.js`). Stored
+#: in the vault, so the browser and the terminal derive each vault's key the way it was made.
+VAULT_KDF: str = 'argon2id$m=65536,t=3,p=1'
+#: Prefixed to the salt for Argon2, so the vault key never equals the SRP derivation over the
+#: same password and salt (`euler-srp-x:` there).
+VAULT_ARGON2_LABEL: bytes = b'euler-vault-pk:'
+#: The original derivation, PBKDF2-HMAC-SHA256 over :data:`VAULT_KDF_ITERATIONS` rounds — vaults
+#: made before Argon2. Still unlocked, and re-wrapped under :data:`VAULT_KDF` when they are.
+VAULT_KDF_LEGACY: str = 'pbkdf2-sha256'
+#: PBKDF2 rounds for a legacy vault (the OWASP floor; WebCrypto-native in the browser).
 VAULT_KDF_ITERATIONS: int = 600_000
 #: Env var naming the uid-private tmpfs file that holds the session vault key.
 VAULT_KEY_ENV: str = 'EULER_VAULT_KEY_FILE'

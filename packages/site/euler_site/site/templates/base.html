@@ -27,6 +27,12 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='-1.3%20-1.35%202.6%201.75'%3E%3Cpath%20d='M%201%200%20A%201%201%200%200%200%20-1%200%20M%20-1%200%20H%200'%20fill='none'%20stroke='%23f97316'%20stroke-width='0.16'%20stroke-linecap='round'/%3E%3Ccircle%20cx='0'%20cy='0'%20r='0.1'%20fill='%23f97316'/%3E%3C/svg%3E">
   {# Wires menu closing, the pane's back stack, the terminal controls, and the
      Actions Save hook. Its shell-only hooks no-op on the signed-out pages. #}
+  {# Argon2id (hash-wasm, vendored): the password keys — SRP's x in srp.js, the vault's PK in
+     vault.js — on every page that signs in, changes a password or recovers a vault, which is
+     every page this base frames: the sign-in form is in the public site's right pane. #}
+  <script src="{{ asset('/vendor/hash-wasm/argon2.umd.min.js') }}"
+          integrity="sha384-tP0Wy54CKmng7i9EoTlPySD0hBx6Octj0VS6MfwlnUu111MPa+JLm0CCbep6XJ1W"
+          crossorigin="anonymous"></script>
   <script src="{{ asset('/assets/vault.js') }}"></script>
   <script src="{{ asset('/assets/site.js') }}"></script>
   {# The shell's heavy assets, for content only the signed-in panes render: htmx

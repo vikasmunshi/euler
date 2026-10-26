@@ -88,7 +88,7 @@ verifier locally (`verify_password`, the tests), never for a sign-in.
 Hashing `email ":" password` binds the verifier to the account name, so the same password
 under two addresses yields unrelated verifiers; the salt stops one precomputed table covering
 every user; the `"euler-srp-x:"` label keeps this derivation apart from the vault key, which is
-PBKDF2 over the same password and salt.
+Argon2id over the same password and salt, under its own label (`euler-vault-pk:`).
 
 **Why a slow hash.** `v = g^x mod N` cannot be inverted, but it does not have to be: whoever
 holds `users.json` can guess a password, derive `x`, and compare `g^x` with `v` — one hash and
@@ -319,10 +319,11 @@ second execution.
   it cannot stop the code that holds it from being changed. That boundary is the same one the
   [Vault Guide](vault-guide.md#1-what-it-is-and-what-it-is-not) states.
 - **It is not a KDF for anything** — except in one deliberate reuse: the account's **SRP salt is
-  also the vault's PBKDF2 salt**, so the browser can derive the vault password key `PK` from a
+  also the vault's KDF salt**, so the browser can derive the vault password key `PK` from a
   password it already holds and a salt it already received in the challenge, with no second
   round-trip and no second secret. The two systems still share nothing else — the salt is public
-  by construction, and `x` (SRP) and `PK` (vault) are separate derivations from it.
+  by construction, and `x` (SRP) and `PK` (vault) are separate derivations from it — both
+  Argon2id, under different labels (`euler-srp-x:`, `euler-vault-pk:`).
 - **It cannot recover a forgotten password.** A reset mints a new verifier and, because the old
   `PK` is gone with the old password, deliberately destroys the vault
   ([Vault Guide §7](vault-guide.md#7-password-reset-destroys-the-vault)).

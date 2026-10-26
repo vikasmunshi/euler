@@ -14,6 +14,9 @@ authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
 license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
+    # Argon2id for the vault's password key (solver.crypto.vault); the browser derives the
+    # same key with the vendored hash-wasm.
+    "argon2-cffi",
     "beautifulsoup4",
     "cryptography",
     "flake8",

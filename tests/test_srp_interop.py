@@ -16,9 +16,23 @@ import unittest
 from pathlib import Path
 
 from euler_site.auth.srp import KDF, KDF_LEGACY, SrpClient, SrpServer, SrpToken, compute_verifier
+from solver.crypto import vault, wire
 
 REPO = Path(__file__).resolve().parent.parent
 SRP_JS = REPO / 'packages' / 'site' / 'euler_site' / 'content' / 'assets' / 'srp.js'
+VAULT_JS = SRP_JS.with_name('vault.js')
+
+_VAULT_DRIVER = """\
+const Vault = require(process.argv[2]);
+const [mode, password, salt, kdf, iterations] = process.argv.slice(3);
+(async () => {
+  if (mode === 'constants') {
+    console.log(JSON.stringify({ KDF: Vault.KDF, KDF_LEGACY: Vault.KDF_LEGACY, ITERATIONS: Vault.ITERATIONS }));
+  } else {
+    console.log(JSON.stringify({ pk: await Vault.derivePk(password, salt, kdf, Number(iterations) || undefined) }));
+  }
+})().catch(e => { console.error(e); process.exit(1); });
+"""
 
 _DRIVER = """\
 const SRP = require(process.argv[2]);
@@ -123,6 +137,25 @@ class SrpInteropTest(unittest.TestCase):
 
     def test_both_ends_name_the_same_password_hashes(self) -> None:
         self.assertEqual(self._node('constants'), {'KDF': KDF, 'KDF_LEGACY': KDF_LEGACY})
+
+    def _vault(self, *args: str) -> dict[str, object]:
+        driver = Path(tempfile.mkstemp(suffix='.js')[1])
+        self.addCleanup(driver.unlink, missing_ok=True)
+        driver.write_text(_VAULT_DRIVER, encoding='utf-8')
+        out = subprocess.run([self.node, str(driver), str(VAULT_JS), *args],
+                             capture_output=True, text=True, check=True)
+        result: dict[str, object] = json.loads(out.stdout.strip())
+        return result
+
+    def test_the_vault_key_matches_both_ways(self) -> None:
+        """vault.js and solver.crypto.vault derive the same PK, for the current KDF and the legacy."""
+        self.assertEqual(self._vault('constants'), {'KDF': wire.VAULT_KDF, 'KDF_LEGACY': wire.VAULT_KDF_LEGACY,
+                                                    'ITERATIONS': wire.VAULT_KDF_ITERATIONS})
+        salt = bytes(range(16))
+        for kdf, rounds in ((wire.VAULT_KDF, None), (wire.VAULT_KDF_LEGACY, 1000)):
+            with self.subTest(kdf=kdf):
+                js = self._vault('derive', PASSWORD, salt.hex(), kdf, str(rounds or ''))
+                self.assertEqual(js['pk'], vault.derive_password_key(PASSWORD, salt, kdf, rounds).hex())
 
 
 if __name__ == '__main__':
