@@ -139,13 +139,13 @@ class ResolveSubjectTest(unittest.TestCase):
 class SystemSlugTest(unittest.TestCase):
     """The system slug: the `useradd`-safe uid name derived from an e-mail identity.
 
-    It IS the unix account name now (no `euler-user-` prefix), so the shape it must
-    hold to is the one `scripts/setup/user.sh` validates: `u` + a hex digest.
+    It IS the unix account name, so the shape it must hold to is the one
+    `scripts/setup/user.sh` validates: `u` + 16 hex digits.
     """
 
     #: What user.sh's valid_slug accepts — and, being letter-led [a-z0-9], also what
     #: `useradd`'s NAME_REGEX accepts.
-    _SLUG_SHAPE = re.compile(r'^u[0-9a-f]{6,16}$')
+    _SLUG_SHAPE = re.compile(r'^u[0-9a-f]{16}$')
 
     def test_slug_is_useradd_safe(self) -> None:
         for email in ('MercAnther@gmail.com', 'a.b+tag@x.co', '123@host', 'x@y.z',

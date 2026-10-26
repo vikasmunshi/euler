@@ -423,7 +423,7 @@ The slug scheme is worth one note. `slugify` emits a `.`-bearing form
 (`mercanther_gmail.com-3f9e97`) that **fails `useradd`'s `NAME_REGEX`**, so the system
 slug used for uids, homes, sockets, and `X-User-Slug` is a stricter derivation:
 `u` + sixteen hex digits of SHA-256 of the normalised e-mail (`uff8d9819fc0e12bf`), matching
-`^u[0-9a-f]{6,16}$`. It **is** the unix account name — the uid, `/home/<slug>`, the
+`^u[0-9a-f]{16}$`. It **is** the unix account name — the uid, `/home/<slug>`, the
 socket, the unit instance, and the `user/<slug>` branch all read the same, with no
 `euler-user-` prefix in front of it. Two consequences are deliberate: the name is short
 enough to stay well inside the system limit whatever the address, and it publishes

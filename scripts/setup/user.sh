@@ -39,8 +39,8 @@
 # Because the units live in root's systemd and run as locked-down users, lifecycle
 # requires sudo.
 #
-# Actions: deploy | remove | upgrade | redeploy | provision | deprovision | purge-legacy |
-#          record-owner | status | help
+# Actions: deploy | remove | upgrade | redeploy | provision | deprovision | record-owner |
+#          status | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -107,9 +107,6 @@ Usage: $0 <action> [args]
   deprovision <slug>           Tear one collaborator down: stop/disable the instance,
                                then (prompted) userdel + remove the home. Reports the
                                required 'key-rekey' to drop master-key access.
-  purge-legacy                 One-shot migration sweep: remove any euler-user account
-                               left from the retired euler-user-<slug> naming scheme
-                               (prompted — accounts, homes and units all go).
   record-owner <slug> <email>  Record an existing account's owner (owners.json), so
                                provision will accept it for that address.
   status [<slug>]              Show the shared layer, or one user's instance health,
@@ -147,18 +144,18 @@ require_python() {
     fi
 }
 
-# A slug is exactly what solver.auth.identity.system_slug emits: 'u' + a hex digest of the
-# e-mail. Matching that shape exactly matters more now than it did behind the retired
-# euler-user- prefix: the slug IS the uid, so it is a bare name in the shared account
-# namespace, and a loose pattern would let a typo'd call provision (or, worse, adopt) an
-# ordinary login name. It also becomes a home path, a socket name, and a git branch.
+# A slug is exactly what solver.auth.identity.system_slug emits: 'u' + 16 hex digits of the
+# e-mail's SHA-256. Matching that shape exactly matters: the slug IS the uid, a bare name in
+# the shared account namespace, so a loose pattern would let a typo'd call provision (or,
+# worse, adopt) an ordinary login name. It also becomes a home path, a socket name, and a
+# git branch.
 valid_slug() {
-    [[ "$1" =~ ^u[0-9a-f]{6,16}$ ]]
+    [[ "$1" =~ ^u[0-9a-f]{16}$ ]]
 }
 
 require_slug() {
     if ! valid_slug "${1:-}"; then
-        echo "Error: '${1:-}' is not a valid system slug (expected ^u[0-9a-f]{6,16}\$)." >&2
+        echo "Error: '${1:-}' is not a valid system slug (expected ^u[0-9a-f]{16}\$)." >&2
         echo "       The slug comes from solver.auth.identity.system_slug(email)." >&2
         return 1
     fi
@@ -672,49 +669,6 @@ do_deprovision() {
     fi
 }
 
-# Sweep out accounts from the RETIRED naming scheme — the `euler-user-<slug>` uids
-# provisioned before the uid became the slug itself. They are still euler-user group
-# members, so they still hold an egress-locked uid and a home full of a collaborator's
-# clone, but nothing else lines up any more: `deprovision` rejects their name (it is not
-# a valid slug), their unit instance is named for the suffix, and Caddy would dial a
-# socket named for the NEW slug of the same e-mail. Rather than teach every path two
-# naming schemes for a handful of accounts, this removes them wholesale; the affected
-# collaborators are re-invited and re-onboarded under their new uid.
-do_purge_legacy() {
-    check_can_sudo || return 1
-    local legacy=() name reply instance
-    while read -r name; do
-        [ -n "${name}" ] && ! valid_slug "${name}" && legacy+=("${name}")
-    done < <(euler_user_names || true)
-    if [ ${#legacy[@]} -eq 0 ]; then
-        echo "No legacy per-user accounts found — every ${USER_GROUP} member is a valid slug."
-        return 0
-    fi
-    echo "Legacy per-user accounts (retired naming scheme):"
-    printf '  %s\n' "${legacy[@]}"
-    echo
-    echo "IMPORTANT: removing an account does NOT revoke its master-key access. For any of"
-    echo "           these whose key was user-authorized, run \`key-rekey\` in the shell"
-    echo "           afterwards to rotate the master key onto the remaining users."
-    echo
-    read -r -p "Remove these accounts and their homes? [y/N] " reply
-    [[ "${reply}" =~ ^[Yy]$ ]] || { echo "Left in place."; return 0; }
-    for name in "${legacy[@]}"; do
-        instance="${name#euler-user-}"                   # how the old unit was instantiated
-        sudo systemctl disable --now "euler-user@${instance}.socket"  2>/dev/null || true
-        sudo systemctl disable --now "euler-user@${instance}.service" 2>/dev/null || true
-        sudo rm -f "$(sock_of "${instance}")"
-        sudo userdel --remove "${name}" 2>/dev/null || sudo userdel "${name}" 2>/dev/null || true
-        # shellcheck disable=SC2015  # `|| true` only swallows a failed groupdel (flagged before ShellCheck 0.11)
-        getent group "${name}" > /dev/null && sudo groupdel "${name}" 2>/dev/null || true
-        sudo rm -rf "${USER_HOME_BASE:?}/${name}"
-        echo "Removed ${name} and ${USER_HOME_BASE}/${name}."
-    done
-    if [ -f /etc/systemd/system/euler-firewall.service ]; then
-        "${SCRIPT_DIR}/firewall.sh" reload 2>/dev/null || true
-    fi
-}
-
 # ── install / uninstall / status ──────────────────────────────────────────────────────
 
 do_deploy() {
@@ -1013,7 +967,6 @@ case "${ACTION}" in
     remove)      do_remove ;;
     provision)   do_provision "$@" ;;
     deprovision) do_deprovision "$@" ;;
-    purge-legacy) do_purge_legacy ;;
     record-owner) require_slug "${1:-}" && [[ "${2:-}" == *@* ]] && record_owner "$1" "$2" ;;
     status)      do_status "$@" ;;
     -h | --help | help) usage ;;
