@@ -177,7 +177,8 @@ compromised process can simply ignore. Two layers.
 
 **Squid** runs on loopback `127.0.0.1:3128` as `euler-proxy` with a default-deny domain
 allowlist (`api.anthropic.com`, `.projecteuler.net`, `.github.com`,
-`.githubusercontent.com`, `.claude.ai`, `.claude.com`, `.anthropic.com`). Client-side
+`.githubusercontent.com`, `.claude.ai`, `.claude.com`, `.anthropic.com`, `www.ecb.europa.eu`
+for `update-usd-rate`). Client-side
 `HTTPS_PROXY`/`HTTP_PROXY` is written to `/etc/euler/egress.env` and loaded by the
 service units, so AI features, the problem scraper, and `gh` egress only through it. The
 allowlist lives in `/etc/euler-proxy/squid.allowlist` — edit and reload.
@@ -2678,7 +2679,11 @@ revocable, orthogonal to the ladder. **What remains accepted:** compromising an
 deliberate cost of a shared solver over an invited set. Per-user uids keep one
 compromise out of every other tree. The egress lock narrows, but does not close, the way
 off the host: the Squid allowlist includes general-purpose services (GitHub), so a
-compromised session can still send what it reads somewhere.
+compromised session can still send what it reads somewhere — and so can a `contributor`+
+acting on their own, since pushing their branch is their workflow and a domain allowlist
+cannot tell a push to this repository from a gist. The control for that is who is
+key-authorized, not the proxy: narrowing GitHub per uid would break `git-push`, and pinning
+it to one repository would mean intercepting TLS.
 
 **`admin` is web-reachable.** With the channel axis gone, an `admin` account signed in
 over the web could run the highest-privilege operations. In practice the admin API will
