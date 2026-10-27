@@ -37,6 +37,14 @@ The site is invite-only. Test only against an account you were invited to and da
 yours; do not try to read or change another collaborator's files, keys or messages, and stop and
 report as soon as you can show a problem exists.
 
+## Acknowledgements
+
+Thank you to those who have reported problems:
+
+- **2026-10** — [Perch](https://github.com/lakeday-org/perch), the open-source code scanner, found
+  that a sign-in begun before a password reset could still complete with the old password. Fixed
+  in v4.11.2.
+
 ## How it is built
 
 The design, the controls it relies on and the risks it accepts are documented in the open:
