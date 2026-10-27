@@ -6572,8 +6572,8 @@
     "level": 10,
     "pct": 26,
     "solvers": 1196,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 15:00"
   },
   "823": {
     "title": "Factor Shuffle",
