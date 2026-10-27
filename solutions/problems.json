@@ -7092,8 +7092,8 @@
     "level": 13,
     "pct": 33,
     "solvers": 393,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 14:49"
   },
   "888": {
     "title": "1249 Nim",
