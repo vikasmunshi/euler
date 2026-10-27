@@ -111,6 +111,7 @@ algorithm, not the language, was what made it tractable.
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0686](/solutions/0686/) — Powers of Two
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
 - ● [0834](/solutions/0834/) — Add and Divide

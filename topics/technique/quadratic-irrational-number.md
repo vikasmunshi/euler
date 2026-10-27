@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_irra
 
 - ● [0066](/solutions/0066/) — Diophantine Equation
 - ● [0473](/solutions/0473/) — Phigital Number Base
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 
 <!-- /problems -->

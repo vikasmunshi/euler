@@ -15,7 +15,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Irrational_num
 - ○ [0576](/solutions/0576/) — Irrational Jumps
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0656](/solutions/0656/) — Palindromic Sequences
-- ○ [0721](/solutions/0721/) — High Powers of Irrational Numbers
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ○ [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0911](/solutions/0911/) — Khinchin Exceptions
 - ● [0950](/solutions/0950/) — Pirate Treasure

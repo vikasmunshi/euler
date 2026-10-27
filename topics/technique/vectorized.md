@@ -219,6 +219,7 @@ unrolled across the array, with a boolean mask selecting which lanes act.
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0944](/solutions/0944/) — Sum of Elevisors

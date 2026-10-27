@@ -173,6 +173,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
