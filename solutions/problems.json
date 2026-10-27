@@ -6220,8 +6220,8 @@
     "level": 9,
     "pct": 24,
     "solvers": 635,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 14:51"
   },
   "779": {
     "title": "Prime Factor and Exponent",
