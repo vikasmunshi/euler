@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Floor_and_ceil
 
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0372](/solutions/0372/) — Pencils of Rays
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->

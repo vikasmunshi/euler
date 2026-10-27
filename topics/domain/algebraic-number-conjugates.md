@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Conjugate_elem
 ## Problems
 
 - ○ [0318](/solutions/0318/) — 2011 Nines
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 
 <!-- /problems -->

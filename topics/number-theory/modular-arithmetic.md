@@ -429,7 +429,7 @@ handful of operations on small numbers.
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
-- ○ [0721](/solutions/0721/) — High Powers of Irrational Numbers
+- ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ○ [0728](/solutions/0728/) — Circle of Coins
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls

@@ -85,7 +85,7 @@
       "reference": "https://en.wikipedia.org/wiki/Conjugate_element_(field_theory)",
       "additional-references": [],
       "summary": "Pairing an algebraic number with its conjugate so their powers sum to an integer, forcing the fractional part toward 0 or 1.",
-      "refs": ["p0318"]
+      "refs": ["p0318", "p0721"]
     },
     {
       "slug": "amicable-numbers",
@@ -1138,7 +1138,7 @@
       "reference": "https://en.wikipedia.org/wiki/Floor_and_ceiling_functions",
       "additional-references": [],
       "summary": "Rounding down to the nearest integer, central to counting lattice points satisfying a floor-based parity condition.",
-      "refs": ["p0319", "p0372", "p0950"]
+      "refs": ["p0319", "p0372", "p0721", "p0950"]
     },
     {
       "slug": "fortunate-number",
@@ -4144,7 +4144,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation_by_squaring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0768_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
+      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0721_s0", "p0768_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
     },
     {
       "slug": "extended-euclidean-algorithm",
@@ -4630,7 +4630,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_square_root",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0331_s0", "p0348_s0", "p0501_s0", "p0668_s0", "p0808_s0", "p0932_s0", "p0950_s0"]
+      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0331_s0", "p0348_s0", "p0501_s0", "p0668_s0", "p0721_s0", "p0808_s0", "p0932_s0", "p0950_s0"]
     },
     {
       "slug": "integral",
@@ -5269,7 +5269,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0668_s0", "p0720_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0668_s0", "p0720_s0", "p0721_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5467,7 +5467,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_irrational_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0066_s0", "p0473_s0"]
+      "refs": ["p0066_s0", "p0473_s0", "p0721_s0"]
     },
     {
       "slug": "quadratic-residue",
@@ -5935,7 +5935,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0401_s0", "p0407_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0668_s0", "p0757_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0401_s0", "p0407_s0", "p0429_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0668_s0", "p0721_s0", "p0757_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0"]
     },
     {
       "slug": "walrus-operator",
@@ -5971,7 +5971,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "A better asymptotic class in a slow language beats a worse one in a fast language.",
-      "refs": ["p0010", "p0067", "p0073", "p0075", "p0076", "p0078", "p0083", "p0108", "p0112", "p0129", "p0146", "p0150", "p0174", "p0191", "p0214", "p0345", "p0429", "p0461", "p0516", "p0686", "p0788", "p0816", "p0834", "p0934"]
+      "refs": ["p0010", "p0067", "p0073", "p0075", "p0076", "p0078", "p0083", "p0108", "p0112", "p0129", "p0146", "p0150", "p0174", "p0191", "p0214", "p0345", "p0429", "p0461", "p0516", "p0686", "p0721", "p0788", "p0816", "p0834", "p0934"]
     },
     {
       "slug": "bracket-truncation-error",
@@ -6017,6 +6017,15 @@
       "additional-references": [],
       "summary": "Replace an O(n) accumulation with an O(1) formula when the data is structured.",
       "refs": ["p0001", "p0006", "p0015", "p0024", "p0028", "p0039", "p0040", "p0042", "p0045", "p0053", "p0070", "p0071", "p0081", "p0082", "p0085", "p0086", "p0092", "p0094", "p0099", "p0100", "p0101", "p0106", "p0113", "p0120", "p0123", "p0134", "p0137", "p0139", "p0141", "p0145", "p0147", "p0148", "p0156", "p0158", "p0159", "p0160", "p0167", "p0168", "p0173", "p0175", "p0177", "p0183", "p0190", "p0193", "p0194", "p0197", "p0198", "p0207", "p0219", "p0226", "p0228", "p0231", "p0232", "p0234", "p0235", "p0239", "p0242", "p0274", "p0276", "p0288", "p0305", "p0313", "p0319", "p0359", "p0381", "p0587", "p0692", "p0704", "p0757", "p0800", "p0868", "p0872", "p0899", "p0918", "p0932", "p0944", "p0965", "p1000"]
+    },
+    {
+      "slug": "conjugate-cancels-irrational-part",
+      "facet": "takeaway",
+      "name": "Add the conjugate to cancel the irrational part",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When the conjugate of an irrational base lies in (0, 1), its power is a vanishing correction, so the floor of the power is an exact integer power sum minus one.",
+      "refs": ["p0721"]
     },
     {
       "slug": "count-the-complement",
