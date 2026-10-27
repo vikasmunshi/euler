@@ -639,8 +639,8 @@ def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'stat
       unlock the current session. Prompts for a new password.
     - `unlock`: unlock a locked session (the shell asks at startup; this is the retry — after a
       typo, or once you have the password to hand).
-    - `change-password`: re-wrap the vault key under a new password (the secrets are not
-      re-encrypted).
+    - `change-password`: set a new password and re-key the vault: a fresh vault key, with
+      the secrets re-encrypted under it. Other open shells must be restarted.
 
     The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock
     (a script, CI), otherwise you are asked once per shell.
@@ -700,8 +700,14 @@ def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'stat
     new_password: str | None = _prompt_new_password('New vault password')
     if new_password is None:
         return 1
-    vault_mod.rewrap_vault(current, new_password)
-    console.print('[success]Vault password changed.[/success]')
+    # A new password re-keys the vault: a fresh VK, the secrets re-encrypted under it. This
+    # shell keeps working (its key file now holds the new VK); any OTHER shell still holds the
+    # old one in memory and must be restarted.
+    vault_mod.replace_session_key(vault_mod.rekey_vault(current, new_password))
+    load_private_key.cache_clear()
+    read_master_key.cache_clear()
+    console.print('[success]Vault password changed and the vault re-keyed.[/success] '
+                  '[muted]Restart any other open shell: it still holds the old vault key.[/muted]')
     if os.environ.get(wire.VAULT_PASSWORD_ENV):
         console.print('[warning]note:[/warning] [accent]$'
                       f'{wire.VAULT_PASSWORD_ENV}[/accent] still holds the OLD password — '

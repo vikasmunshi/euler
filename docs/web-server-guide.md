@@ -813,8 +813,8 @@ operator at rest rather than protected by file permissions alone.
 - `VK` is stored **wrapped** under `PK = Argon2id(password, "euler-vault-pk:" ‖ salt)`
   (64 MiB, 3 passes), reusing the SRP salt, in `~/.euler/vault` — which also records the salt
   and the KDF, so the terminal path is self-contained.
-- Use: derive `PK` → unwrap `VK` → decrypt. A password change **re-wraps only the small
-  `VK` blob**; the secrets are never re-encrypted.
+- Use: derive `PK` → unwrap `VK` → decrypt. A password change **re-keys the vault**: a
+  fresh `VK`, the few secret files re-encrypted under it (crash-safe, `docs/vault-guide.md`).
 
 The browser derives the identical `PK` from the password it already holds and the salt already
 in the SRP challenge, with the same vendored Argon2id it uses for the SRP key — no extra
@@ -883,7 +883,7 @@ Where `VK` comes from:
 
 The routes are on the user's own service: `GET /vault/status`, `POST /vault/unlock`
 (unlock, or initialise on first login with the SRP salt; a mismatched `PK` returns 409
-`stale`, never destructive), `POST /vault/rewrap`, and the socket-peer
+`stale`, never destructive), `POST /vault/rekey`, and the socket-peer
 `POST /internal/vault-reset`. The browser keeps `PK` in `sessionStorage` and auto-unlocks
 on page load. Logout locks the vault and removes the key file.
 
@@ -891,8 +891,11 @@ on page load. Logout locks the vault and removes the key file.
 
 These differ fundamentally, and the difference is a feature.
 
-- **Change (current password known): the vault survives.** `PK` is derivable from the old
-  password, so `VK` is simply re-wrapped under the new one. Cheap and lossless.
+- **Change (current password known): the secrets survive, under a new key.** `PK` is
+  derivable from the old password, so the old `VK` opens the secrets, which are re-encrypted
+  under a fresh `VK` wrapped by the new `PK`. Every session still holding the old `VK` ends:
+  the auth service drops the other sessions and the web shell, and the changing page signs
+  itself out.
 - **Reset (password forgotten): the vault does not survive — by design.** `VK` is
   recoverable *only* from the password. An SRP reset re-mints the login verifier and
   shares nothing with the vault, so the new password's `PK` cannot unwrap the old `VK`.

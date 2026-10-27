@@ -671,6 +671,15 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .dev-chain-5 .dev-key { flex: 1 1 0; min-width: 0; padding: 12px 14px; font-size: 19px; }
 .dev-chain-5 .dev-key small { font-size: 15px; }
 .dev-chain-5 .dev-then { font-size: 16px; align-self: center; }
+/* Who changes each secret in the chain above: quieter than the chain (a thin, muted
+   border), so it reads as a footnote to it rather than a fifth step. */
+.dev-rotate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
+.dev-turn { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px;
+  border: 1px solid var(--dev-border); border-radius: 10px; }
+.dev-turn b { font: 600 18px var(--mono); }
+.dev-turn i { font: italic 15px var(--sans); color: var(--dev-accent); }
+.dev-turn small { font: 15px/1.4 var(--sans); color: var(--dev-muted); }
+.dev-turn code { font-size: 0.9em; }
 
 .dev-web { display: flex; flex-direction: column; align-items: stretch; margin-top: 28px; gap: 6px; }
 .dev-wide { align-self: center; width: 760px; }

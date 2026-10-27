@@ -244,7 +244,7 @@ class ShellAttachTests(_UserServiceCase):
 
 
 class VaultRouteTests(_UserServiceCase):
-    """The vault + account surface: unlock/init, rewrap, secrets, reset."""
+    """The vault + account surface: unlock/init, rekey, secrets, reset."""
 
     _SALT = bytes(range(16))
 
@@ -297,7 +297,7 @@ class VaultRouteTests(_UserServiceCase):
     @unittest_run_loop
     async def test_vault_routes_require_identity(self) -> None:
         for method, path in (('GET', '/vault/status'), ('POST', '/vault/unlock'),
-                             ('POST', '/vault/rewrap'), ('GET', '/account/vault'),
+                             ('POST', '/vault/rekey'), ('GET', '/account/vault'),
                              ('POST', '/account/secret')):
             resp = await self.client.request(method, path)
             self.assertEqual(resp.status, 401, path)
@@ -324,16 +324,26 @@ class VaultRouteTests(_UserServiceCase):
         self.assertEqual((await self._unlock('right')).status, 200)
 
     @unittest_run_loop
-    async def test_rewrap_carries_the_vault_across_a_password_change(self) -> None:
+    async def test_rekey_carries_the_vault_across_a_password_change(self) -> None:
         vk = vault.init_vault_from_pk(bytes.fromhex(self._pk('old')), self._SALT)
         new_salt = bytes(range(16, 32))
-        resp = await self.client.post('/vault/rewrap', headers=_OWN, json={
+        resp = await self.client.post('/vault/rekey', headers=_OWN, json={
             'old_pk': self._pk('old'), 'new_pk': self._pk('new', new_salt),
             'new_salt': new_salt.hex()})
         self.assertEqual(resp.status, 200)
-        self.assertEqual(vault.unlock_vault_with_pk(bytes.fromhex(self._pk('new', new_salt))), vk)
+        new_vk = vault.unlock_vault_with_pk(bytes.fromhex(self._pk('new', new_salt)))
+        self.assertNotEqual(new_vk, vk)                     # re-keyed, not re-wrapped
+        self.assertEqual(vault.session_vault_key(), new_vk)  # the session holds the new key
         with self.assertRaises(Exception):                  # the old wrap is gone
             vault.unlock_vault_with_pk(bytes.fromhex(self._pk('old')))
+
+    @unittest_run_loop
+    async def test_rekey_with_a_wrong_old_pk_is_stale(self) -> None:
+        vault.init_vault_from_pk(bytes.fromhex(self._pk('old')), self._SALT)
+        resp = await self.client.post('/vault/rekey', headers=_OWN, json={
+            'old_pk': self._pk('wrong'), 'new_pk': self._pk('new'), 'new_salt': self._SALT.hex()})
+        self.assertEqual(resp.status, 409)
+        self.assertTrue((await resp.json())['stale'])
 
     @unittest_run_loop
     async def test_secret_upsert_and_delete_are_write_only(self) -> None:

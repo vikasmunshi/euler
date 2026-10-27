@@ -5,8 +5,9 @@
  * Wires on both the standalone auth page (DOMContentLoaded) and the content
  * shell's left pane (htmx:afterSwap, when this script is re-injected with the
  * fragment). Idempotent: a form is wired once (dataset guard). On success it
- * navigates the shell's pane to /account when it is in one, else replaces the
- * standalone page. */
+ * re-keys the vault and then signs this session out too: the change already ended
+ * every other session, and this one still holds the old vault key in its shell.
+ * The next sign-in, with the new password, opens the re-keyed vault. */
 'use strict';
 
 (() => {
@@ -30,17 +31,18 @@
     });
   }
 
-  function succeed() {
-    // In the content shell, stay in the pane (go to the account view) and move
-    // the address bar with it; as a standalone auth page, replace it with the
-    // workspace.
-    const pane = document.getElementById('content');
-    if (pane && window.htmx) {
-      window.htmx.ajax('GET', '/account', { target: '#content' })
-        .then(() => window.history.pushState(null, '', '/account'));
-    } else {
-      window.location.replace('/');
+  async function succeed() {
+    // Sign out here as well, the same way the user menu does (forget PK, disarm the
+    // terminal's leave-page guard), then land on the sign-in page, which returns to
+    // /account. The sign-out is best-effort: the session is already the only one left,
+    // and a failed POST still leaves the browser on the sign-in page.
+    if (window.Vault) window.Vault.clear();
+    const terminal = document.getElementById('terminal');
+    if (terminal && terminal.contentWindow) {
+      terminal.contentWindow.postMessage({ euler: 'disarm' }, window.location.origin);
     }
+    try { await post('/auth/logout', {}); } catch (err) { /* landing on sign-in either way */ }
+    window.location.replace('/login?next=' + encodeURIComponent('/account'));
   }
 
   function wire(form) {
@@ -78,27 +80,24 @@
         if (!change.ok) return fail('The change was refused. Try again.');
         const { M2 } = await change.json();
         if (!proof.check(M2)) return fail('Server failed mutual authentication — password unchanged? Sign in to verify.');
-        // 3 · the vault survives a password change: re-wrap VK under the
-        // new password's PK. The old PK is derived the way the vault was made (its kdf
-        // and salt, from /vault/status), so a vault from before Argon2 moves across too.
-        // Best-effort — no vault yet just keeps the new PK; 409 means the vault was
-        // wrapped under something else (the account panel can recover).
+        // 3 · the secrets survive a password change, under a fresh vault key: re-key
+        // the vault to the new password's PK. The old PK is derived the way the vault
+        // was made (its kdf and salt, from /vault/status), so a vault from before Argon2
+        // moves across too. Best-effort — no vault yet is made at the next sign-in; 409
+        // means the vault was wrapped under something else (the account panel recovers).
         try {
           if (window.Vault) {
-            const newPk = await Vault.derivePk(next, derived.salt);
             const status = await fetch('/vault/status', { credentials: 'same-origin' });
             const info = status.ok ? await status.json() : { vault: false };
-            if (!info.vault) {
-              Vault.store(newPk, derived.salt);
-            } else {
+            if (info.vault) {
+              const newPk = await Vault.derivePk(next, derived.salt);
               const oldPk = await Vault.derivePkFor(current, info);
-              const rewrap = await Vault.postJson('/vault/rewrap',
+              await Vault.postJson('/vault/rekey',
                 { old_pk: oldPk, new_pk: newPk, new_salt: derived.salt });
-              if (rewrap.ok) Vault.store(newPk, derived.salt);
             }
           }
         } catch (err) { /* recovery stays available on the account panel */ }
-        succeed();
+        await succeed();
       } catch (err) {
         fail('Change failed: ' + (err && err.message ? err.message : 'unexpected error'));
       }

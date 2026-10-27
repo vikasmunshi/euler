@@ -55,13 +55,26 @@ password ──Argon2id("euler-vault-pk:" ‖ salt)──▶ PK ──AES-256-GC
 Where the vault sits in the whole chain, from sign-in to a decrypted solution (`VK` is the step
 inside "unlocks"):
 
-![password → PK → ~/.euler/id → enc-key.json → the AES-256 master key](diagrams/keychain.png)
+![password → PK → ~/.euler/id → enc-key.json → the AES-256 master key, and who changes each secret](diagrams/keychain.png)
 
-Encrypting the secrets directly under `PK` would be simpler and worse, for a reason that shows
-up every time somebody changes a password: it would mean **re-encrypting every secret**. With
-the envelope, a password change rewrites one 32-byte blob (`rewrap_vault`) and touches nothing
-else — atomic, instant, and incapable of half-failing across a set of files. It is also what
+Encrypting the secrets directly under `PK` would be simpler and worse: the envelope is what
 lets the browser hold `PK` without ever holding the key to the file contents.
+
+**A password change re-keys the vault** (`rekey_vault`, `rekey_vault_with_pk`): a fresh `VK`,
+every vault-encrypted file (`id`, its rolling backups, `env`) re-encrypted under it, and the new
+`VK` wrapped under the new `PK`. Merely re-wrapping the old `VK` would leave a `VK` that leaked
+before the change — out of a session key file, say — opening everything after it. The set of
+files is small, and the change is crash-safe by one commit point: each file is first staged
+beside its original as `<name>.rekey`, the vault file is replaced atomically, and only then are
+the staged files renamed into place. A crash before the commit leaves the old vault intact; a
+crash after it leaves staged files the new `VK` opens, which the next unlock moves into place
+(`_settle_rekey`), dropping any it cannot open.
+
+The change then ends every session that still holds the old `VK`. The auth service already
+ends every *other* web session on a password change and closes the live web shell; the page that
+made the change signs itself out too, and the next sign-in opens the re-keyed vault. In a
+terminal, `vault change-password` writes the new `VK` into the shell's key file in place
+(`replace_session_key`), so that shell keeps working; any other open shell must be restarted.
 
 ### The KDF: Argon2id
 
@@ -185,7 +198,7 @@ the password and a web shell never is (it already has `VK` from the service, §6
 vault                    # status (the default): does a vault exist, what is encrypted, can this session decrypt
 vault init               # create it and migrate the existing plaintext id/env into it, in place
 vault unlock             # retry after a typo, or once you have the password to hand
-vault change-password    # re-wrap the vault key under a new password; the secrets are untouched
+vault change-password    # new password, new vault key: the secrets are re-encrypted under it
 ```
 
 `vault status` answers three separate questions and distinguishes states that look alike:
@@ -224,14 +237,15 @@ sign-in (auth service, SRP)                  per-user service (runs as the colla
   PK = Argon2id(password, SRP salt)              → unlock_vault_with_pk(pk)         (returning user)
   sessionStorage: euler.vault.pk                 → init_vault_from_pk(pk, salt)     (first login)
                                                  → write_session_key(VK)
-                                               POST /vault/rewrap {old_pk, new_pk, new_salt}
-                                                 → the vault survives a password change
+                                               POST /vault/rekey {old_pk, new_pk, new_salt}
+                                                 → a password change re-keys the vault
+                                                   (then the page signs out)
 ```
 
 `vault.js` keeps `PK` in `sessionStorage` — this tab only, gone when the tab closes — because
 `PK` can unwrap `VK` and is handled as a secret: never logged, never sent anywhere but the
 user's own origin. The service-side twins of the password functions
-(`unlock_vault_with_pk`, `init_vault_from_pk`, `rewrap_vault_with_pk`) exist precisely so the
+(`unlock_vault_with_pk`, `init_vault_from_pk`, `rekey_vault_with_pk`) exist precisely so the
 password itself never has to cross the wire to be useful.
 
 Because the per-user service **is** the collaborator's uid, `write_session_key` in that process
@@ -314,5 +328,5 @@ temporary secrets dir with the key locations rebound onto it:
 | [`packages/solver/solver/config/values.conf`](../packages/solver/solver/config/values.conf) | `[crypto]` — where `id`, `enc-key.json`, `vault` and `env` live |
 | [`packages/solver/solver/crypto/ciphers.py`](../packages/solver/solver/crypto/ciphers.py) | `load_private_key` — the main consumer, transparently decrypting the vault form |
 | [`packages/solver/solver/crypto/readenv.py`](../packages/solver/solver/crypto/readenv.py) | prints the authoring env as plaintext, for the setup scripts |
-| [`packages/webshell/euler_webshell/user/vault_api.py`](../packages/webshell/euler_webshell/user/vault_api.py) | `/vault/unlock`, `/vault/rewrap`, the account panel's secrets |
+| [`packages/webshell/euler_webshell/user/vault_api.py`](../packages/webshell/euler_webshell/user/vault_api.py) | `/vault/unlock`, `/vault/rekey`, the account panel's secrets |
 | [`packages/site/euler_site/content/assets/vault.js`](../packages/site/euler_site/content/assets/vault.js) | browser-side `PK` derivation and the unlock calls |

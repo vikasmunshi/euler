@@ -244,7 +244,7 @@ files, or on a topic article). The API path needs the `ai` dependency group and 
   ECDH + HKDF-SHA256 + ChaCha20-Poly1305), and it is delivered whole or as a 2-of-2 Shamir split, so no single
   message carries all of it.
 
-  ![password → PK → ~/.euler/id → enc-key.json → the AES-256 master key](docs/diagrams/keychain.png)
+  ![password → PK → ~/.euler/id → enc-key.json → the AES-256 master key, and who changes each secret](docs/diagrams/keychain.png)
 - **AI Agents** - two paths to an agentic assistant:
     - the single-shot Claude **API** (`claude-api py|c|notes|test-cases`) for solutions and documentation,
     - and full **Claude Code** driven from the shell both interactively (`! claude`)

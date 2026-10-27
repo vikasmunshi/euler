@@ -10,8 +10,9 @@ Both the X25519 private key (`~/.euler/id`) and the project env (`~/.euler/env`)
 - a random 32-byte **vault key** `VK` encrypts the secrets (AES-256-GCM, random nonce per blob);
 - `VK` is stored **wrapped** under `PK = KDF(password, salt)` in `~/.euler/vault` -- so at
   rest the operator holds only `{salt, wrap(PK, VK)}` and the `VK`-ciphertext, and can decrypt
-  none of it without the password. Changing the password re-wraps only the tiny `VK` blob; the
-  secrets are never re-encrypted.
+  none of it without the password. Changing the password **re-keys** the vault: a fresh `VK`, the
+  few secret files re-encrypted under it, and the new `VK` wrapped under the new `PK` -- so a `VK`
+  that leaked before the change opens nothing written after it (:func:`rekey_vault`).
 
 `PK` is derived with **Argon2id** (:data:`~solver.crypto.wire.VAULT_KDF`: 64 MiB, 3 passes), over
 the password and the vault's salt prefixed with `euler-vault-pk:` -- the browser derives the same
@@ -56,9 +57,10 @@ __all__ = [
     'is_vault_encrypted',
     'new_vault_key',
     'read_vault',
+    'rekey_vault',
+    'rekey_vault_with_pk',
+    'replace_session_key',
     'reset_vault',
-    'rewrap_vault',
-    'rewrap_vault_with_pk',
     'session_vault_key',
     'unlock_vault_with_pk',
     'unwrap_vault_key',
@@ -69,6 +71,7 @@ __all__ = [
 ]
 
 import os
+from collections.abc import Callable
 from functools import lru_cache
 from json import dumps, loads
 from pathlib import Path
@@ -85,6 +88,7 @@ from solver.crypto import wire
 _KEY_LEN: int = 32  # AES-256 / VK length
 _SALT_LEN: int = 16  # matches the SRP salt width (euler_site.auth.srp)
 _NONCE_LEN: int = 12  # AES-GCM nonce
+_STAGED: str = '.rekey'  # suffix of a secret file re-encrypted under a new VK, not yet in place
 
 
 class VaultData(TypedDict):
@@ -205,8 +209,25 @@ def write_vault(salt: bytes, wrapped_vk: str) -> None:
     vault_file.parent.mkdir(parents=True, exist_ok=True)
     vault_file.parent.chmod(0o700)
     body: VaultData = {'kdf': wire.VAULT_KDF, 'salt': salt.hex(), 'wrapped_vk': wrapped_vk}
-    vault_file.write_text(dumps(body, indent=2))
-    vault_file.chmod(0o600)
+    _write_atomic(vault_file, dumps(body, indent=2).encode('utf-8'))
+
+
+def _write_atomic(path: Path, data: bytes) -> None:
+    """Write *path* (0600) through a sibling temp file and a rename: readers see old or new, never half."""
+    fd, name = mkstemp(prefix=f'.{path.name}-', dir=path.parent)
+    try:
+        os.fchmod(fd, 0o600)
+        os.write(fd, data)
+    finally:
+        os.close(fd)
+    os.replace(name, path)
+
+
+def _secret_files() -> list[Path]:
+    """Every file the vault key may encrypt: `id`, its rolling backups, and `env`."""
+    key_file: Path = config.private_key_file
+    return [key_file, config.env_file] + [key_file.with_suffix(f'.{i}')
+                                          for i in range(1, config.private_key_backups + 1)]
 
 
 def init_vault(password: str, salt: bytes | None = None) -> bytes:
@@ -232,7 +253,9 @@ def unlock_vault(password: str) -> bytes:
     vault: VaultData | None = read_vault()
     if vault is None:
         raise FileNotFoundError(f'no vault at {config.vault_file}; run `vault --init`')
-    return unwrap_vault_key(_vault_password_key(password, vault), vault['wrapped_vk'])
+    vault_key: bytes = unwrap_vault_key(_vault_password_key(password, vault), vault['wrapped_vk'])
+    _settle_rekey(vault_key)
+    return vault_key
 
 
 def encrypt_secret_files(vault_key: bytes) -> list[str]:
@@ -255,17 +278,62 @@ def encrypt_secret_files(vault_key: bytes) -> list[str]:
     return encrypted
 
 
-def rewrap_vault(old_password: str, new_password: str) -> None:
-    """Change the vault password: unwrap `VK` with the old password, re-wrap under the new one.
+def rekey_vault(old_password: str, new_password: str) -> bytes:
+    """Change the vault password **and** its key: a fresh `VK`, wrapped under the new password.
 
-    Only the small `VK` blob is rewritten; the `VK`-encrypted secrets are untouched.
+    Every vault-encrypted secret file is re-encrypted under the new `VK` (:func:`_rekey`). Returns
+    the new `VK`; the caller replaces the session key with it (:func:`replace_session_key`).
 
     Raises:
         cryptography.exceptions.InvalidTag: If `old_password` is wrong.
     """
-    vault_key: bytes = unlock_vault(old_password)
+    old_key: bytes = unlock_vault(old_password)
     salt: bytes = token_bytes(_SALT_LEN)
-    write_vault(salt, wrap_vault_key(derive_password_key(new_password, salt), vault_key))
+    return _rekey(old_key, salt, lambda new_key: wrap_vault_key(derive_password_key(new_password, salt), new_key))
+
+
+def _rekey(old_key: bytes, salt: bytes, wrap: Callable[[bytes], str]) -> bytes:
+    """Replace `VK`: re-encrypt the secret files under a fresh key, then commit the new wrapping.
+
+    Crash-safe by one commit point. Each re-encrypted file is first **staged** beside its original
+    (`<name>.rekey`); the vault file is then replaced atomically -- the commit -- and only after it
+    are the staged files renamed over the originals. A crash before the commit leaves the old vault
+    and files intact (the strays are dropped later); a crash after it leaves staged files that the
+    new `VK` opens, and :func:`_settle_rekey` (run at every unlock) finishes the renames.
+    """
+    new_key: bytes = new_vault_key()
+    staged: list[tuple[Path, Path]] = []
+    for path in _secret_files():
+        if not path.exists():
+            continue
+        blob: bytes = path.read_bytes()
+        if not is_vault_encrypted(blob):
+            continue
+        target: Path = path.with_name(path.name + _STAGED)
+        _write_atomic(target, encrypt_secret(new_key, decrypt_secret(old_key, blob)))
+        staged.append((target, path))
+    write_vault(salt, wrap(new_key))                      # the commit point
+    for target, path in staged:
+        os.replace(target, path)
+    return new_key
+
+
+def _settle_rekey(vault_key: bytes) -> None:
+    """Finish or discard a re-key a crash interrupted: the vault's own `VK` decides.
+
+    A staged file this `VK` opens belongs to the committed vault -- move it into place. One it does
+    not open is from a re-key that never committed -- drop it. Cheap when there is nothing to do.
+    """
+    for path in _secret_files():
+        target: Path = path.with_name(path.name + _STAGED)
+        if not target.exists():
+            continue
+        try:
+            decrypt_secret(vault_key, target.read_bytes())
+        except InvalidTag:
+            target.unlink(missing_ok=True)
+        else:
+            os.replace(target, path)
 
 
 # ==================================================================================================================== #
@@ -287,7 +355,9 @@ def unlock_vault_with_pk(password_key: bytes) -> bytes:
     vault: VaultData | None = read_vault()
     if vault is None:
         raise FileNotFoundError(f'no vault at {config.vault_file}')
-    return unwrap_vault_key(password_key, vault['wrapped_vk'])
+    vault_key: bytes = unwrap_vault_key(password_key, vault['wrapped_vk'])
+    _settle_rekey(vault_key)
+    return vault_key
 
 
 def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
@@ -303,19 +373,20 @@ def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
     return vault_key
 
 
-def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_salt: bytes) -> None:
-    """Re-wrap `VK` under a new browser-derived `PK` (a password change: the vault survives).
+def rekey_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_salt: bytes) -> bytes:
+    """Re-key the vault under a new browser-derived `PK` (a password change: the secrets survive).
 
-    Only the small `VK` blob is rewritten; the `VK`-encrypted secrets are untouched. `new_salt`
-    is the account's new SRP salt (the browser derived `new_password_key` from it, under the
-    current KDF); `old_password_key` is derived with the vault's own recorded parameters.
+    The `PK` twin of :func:`rekey_vault`: a fresh `VK`, the secret files re-encrypted under it, and
+    the new `VK` wrapped under `new_password_key`. `new_salt` is the account's new SRP salt (the
+    browser derived `new_password_key` from it, under the current KDF); `old_password_key` is derived
+    with the vault's own recorded parameters. Returns the new `VK`.
 
     Raises:
         FileNotFoundError:                  If no vault has been initialised.
         cryptography.exceptions.InvalidTag: If `old_password_key` is wrong.
     """
-    vault_key: bytes = unlock_vault_with_pk(old_password_key)
-    write_vault(new_salt, wrap_vault_key(new_password_key, vault_key))
+    old_key: bytes = unlock_vault_with_pk(old_password_key)
+    return _rekey(old_key, new_salt, lambda new_key: wrap_vault_key(new_password_key, new_key))
 
 
 def reset_vault() -> list[str]:
@@ -332,13 +403,11 @@ def reset_vault() -> list[str]:
     if vault_file.exists():
         vault_file.unlink()
         removed.append(vault_file.name)
-    key_file: Path = config.private_key_file
-    candidates: list[Path] = [key_file, config.env_file]
-    candidates += [key_file.with_suffix(f'.{i}') for i in range(1, config.private_key_backups + 1)]
-    for path in candidates:
-        if path.exists() and is_vault_encrypted(path.read_bytes()):
-            path.unlink()
-            removed.append(path.name)
+    for path in _secret_files():
+        for candidate in (path, path.with_name(path.name + _STAGED)):
+            if candidate.exists() and is_vault_encrypted(candidate.read_bytes()):
+                candidate.unlink()
+                removed.append(candidate.name)
     clear_session_key()
     return removed
 
@@ -406,6 +475,21 @@ def session_vault_key() -> bytes | None:
     :func:`~solver.ai.models.get_api_key` to decrypt vault secrets. Never emits to stdout.
     """
     return _resolve_session_key()
+
+
+def replace_session_key(vault_key: bytes) -> Path:
+    """Put a re-keyed `VK` into this session's key file **in place**, or write a fresh one.
+
+    In place, at the same path, because other processes of this uid were handed that path (a
+    web shell inherits it from its service), and a new file would strand them on a deleted one.
+    They still hold the old `VK` in memory, which is why a re-key ends the session it ran in.
+    """
+    key_path: str = os.environ.get(wire.VAULT_KEY_ENV, '').strip()
+    if not key_path or not Path(key_path).exists():
+        return write_session_key(vault_key)
+    _write_atomic(Path(key_path), vault_key)
+    _resolve_session_key.cache_clear()
+    return Path(key_path)
 
 
 def clear_session_key() -> None:

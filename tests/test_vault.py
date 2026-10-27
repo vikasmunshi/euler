@@ -133,12 +133,18 @@ class VaultFileTest(VaultTestCase):
         with self.assertRaises(FileNotFoundError):
             vault.unlock_vault('anything')
 
-    def test_change_password_preserves_vault_key(self) -> None:
+    def test_change_password_rekeys_the_vault(self) -> None:
         vk = vault.init_vault('old-pw')
-        vault.rewrap_vault('old-pw', 'new-pw')
-        self.assertEqual(vault.unlock_vault('new-pw'), vk)
+        self.env_file.write_bytes(vault.encrypt_secret(vk, b'KEY=sk-1\n'))
+        new_vk = vault.rekey_vault('old-pw', 'new-pw')
+        self.assertNotEqual(new_vk, vk)                        # a fresh VK, not a re-wrap
+        self.assertEqual(vault.unlock_vault('new-pw'), new_vk)
         with self.assertRaises(InvalidTag):
             vault.unlock_vault('old-pw')
+        # The secrets survive, readable only under the new key.
+        self.assertEqual(vault.decrypt_secret(new_vk, self.env_file.read_bytes()), b'KEY=sk-1\n')
+        with self.assertRaises(InvalidTag):
+            vault.decrypt_secret(vk, self.env_file.read_bytes())
 
     def test_vault_file_is_0600(self) -> None:
         vault.init_vault('pw')
@@ -291,22 +297,70 @@ class PkVaultTest(VaultTestCase):
             self.assertTrue(vault.is_vault_encrypted(path.read_bytes()))
         self.assertIn(b'sk-plain', vault.decrypt_secret(vk, self.env_file.read_bytes()))
 
-    def test_rewrap_with_pk_survives_a_password_change(self) -> None:
+    def test_rekey_with_pk_survives_a_password_change(self) -> None:
         new_salt = b'\x0b' * 16
         old_pk, new_pk = self._pk('old-pw'), self._pk('new-pw', new_salt)
         vk = vault.init_vault_from_pk(old_pk, self._SALT)
-        vault.rewrap_vault_with_pk(old_pk, new_pk, new_salt)
-        self.assertEqual(vault.unlock_vault_with_pk(new_pk), vk)   # same VK: secrets untouched
+        backup = self.id_file.with_suffix('.1')
+        self.id_file.write_bytes(vault.encrypt_secret(vk, b'PEM'))
+        backup.write_bytes(vault.encrypt_secret(vk, b'OLD-PEM'))
+        self.env_file.write_text('PLAIN=never-this-vaults\n')
+        new_vk = vault.rekey_vault_with_pk(old_pk, new_pk, new_salt)
+        self.assertNotEqual(new_vk, vk)
+        self.assertEqual(vault.unlock_vault_with_pk(new_pk), new_vk)
         with self.assertRaises(InvalidTag):
             vault.unlock_vault_with_pk(old_pk)
         data = vault.read_vault()
         assert data is not None
         self.assertEqual(data['salt'], new_salt.hex())
+        # Every vault-encrypted file moved to the new key, backups included; plaintext is left be.
+        self.assertEqual(vault.decrypt_secret(new_vk, self.id_file.read_bytes()), b'PEM')
+        self.assertEqual(vault.decrypt_secret(new_vk, backup.read_bytes()), b'OLD-PEM')
+        self.assertEqual(self.env_file.read_text(), 'PLAIN=never-this-vaults\n')
+        self.assertEqual(list(self.secrets.glob('*.rekey')), [])
 
-    def test_rewrap_with_wrong_old_pk_fails(self) -> None:
-        vault.init_vault_from_pk(self._pk('pw'), self._SALT)
+    def test_rekey_with_wrong_old_pk_fails_and_changes_nothing(self) -> None:
+        vk = vault.init_vault_from_pk(self._pk('pw'), self._SALT)
+        self.id_file.write_bytes(vault.encrypt_secret(vk, b'PEM'))
+        before = (app_config.vault_file.read_bytes(), self.id_file.read_bytes())
         with self.assertRaises(InvalidTag):
-            vault.rewrap_vault_with_pk(self._pk('wrong'), self._pk('new'), self._SALT)
+            vault.rekey_vault_with_pk(self._pk('wrong'), self._pk('new'), self._SALT)
+        self.assertEqual((app_config.vault_file.read_bytes(), self.id_file.read_bytes()), before)
+
+    def test_unlock_finishes_a_rekey_interrupted_after_its_commit(self) -> None:
+        # Crash after the vault file was replaced, before the staged files were renamed:
+        # the new VK opens the staged file, so the next unlock moves it into place.
+        old_pk, new_pk = self._pk('old'), self._pk('new')
+        vk = vault.init_vault_from_pk(old_pk, self._SALT)
+        self.id_file.write_bytes(vault.encrypt_secret(vk, b'PEM'))
+        new_vk = vault.new_vault_key()
+        staged = self.id_file.with_name('id.rekey')
+        staged.write_bytes(vault.encrypt_secret(new_vk, b'PEM'))
+        vault.write_vault(self._SALT, vault.wrap_vault_key(new_pk, new_vk))
+        self.assertEqual(vault.unlock_vault_with_pk(new_pk), new_vk)
+        self.assertFalse(staged.exists())
+        self.assertEqual(vault.decrypt_secret(new_vk, self.id_file.read_bytes()), b'PEM')
+
+    def test_unlock_drops_a_rekey_that_never_committed(self) -> None:
+        # Crash before the commit: the vault is the old one, and a staged file it cannot
+        # open is a stray from the attempt — dropped, the original kept.
+        pk = self._pk('pw')
+        vk = vault.init_vault_from_pk(pk, self._SALT)
+        self.id_file.write_bytes(vault.encrypt_secret(vk, b'PEM'))
+        staged = self.id_file.with_name('id.rekey')
+        staged.write_bytes(vault.encrypt_secret(vault.new_vault_key(), b'PEM'))
+        self.assertEqual(vault.unlock_vault_with_pk(pk), vk)
+        self.assertFalse(staged.exists())
+        self.assertEqual(vault.decrypt_secret(vk, self.id_file.read_bytes()), b'PEM')
+
+    def test_replace_session_key_rewrites_the_file_in_place(self) -> None:
+        # Other processes were handed this path: it must keep naming the live key.
+        path = vault.write_session_key(vault.new_vault_key())
+        new_vk = vault.new_vault_key()
+        self.assertEqual(vault.replace_session_key(new_vk), path)
+        self.assertEqual(path.read_bytes(), new_vk)
+        self.assertEqual(vault.session_vault_key(), new_vk)
+        self.assertEqual(path.stat().st_mode & 0o777, 0o600)
 
     def test_reset_removes_vault_and_ciphertext_only(self) -> None:
         vk = vault.init_vault_from_pk(self._pk('pw'), self._SALT)

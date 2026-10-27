@@ -831,7 +831,7 @@
   // types a password; its PK is derived the VAULT's own way — its salt and kdf
   // (/vault/status). If that password is simply the current one (the instance
   // restarted since sign-in) the unlock succeeds directly; if it is the OLD
-  // password after a change made elsewhere, re-wrap VK across to the current
+  // password after a change made elsewhere, re-key the vault to the current
   // sign-in's PK when we hold one. Delegated: the fragment is htmx-swapped.
   document.addEventListener('submit', function (ev) {
     var form = ev.target.closest && ev.target.closest('#vault-recover');
@@ -850,8 +850,8 @@
         var creds = Vault.stored();
         var resp;
         if (creds && creds.pk !== pk) {
-          // an old password: carry the vault forward to the current sign-in's PK
-          resp = await Vault.postJson('/vault/rewrap',
+          // an old password: carry the vault forward (re-keyed) to the current sign-in's PK
+          resp = await Vault.postJson('/vault/rekey',
             { old_pk: pk, new_pk: creds.pk, new_salt: creds.salt });
         } else {
           resp = await Vault.postJson('/vault/unlock', { pk: pk, salt: info.salt });

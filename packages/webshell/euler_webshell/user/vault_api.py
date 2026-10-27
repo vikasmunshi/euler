@@ -22,7 +22,7 @@ Claude Code sign-in state (the actual logins run in the web shell).
 service when a password *reset* completes — destroys the vault: an SRP reset shares
 nothing with the vault, so the old `VK` is unrecoverable *by design* and leaving the
 blobs around would only misrepresent the state. A password *change* instead rides
-`POST /vault/rewrap` and the vault survives.
+`POST /vault/rekey`: the secrets survive, under a fresh `VK`.
 """
 from __future__ import annotations
 
@@ -258,14 +258,15 @@ def add_vault_routes(app: web.Application) -> None:
         return web.json_response({'unlocked': True, 'initialized': False})
 
     @requires(_VAULT_REQUIRES)
-    async def vault_rewrap(request: web.Request) -> web.Response:
-        """`POST /vault/rewrap` `{old_pk, new_pk, new_salt}` — the vault survives a password change.
+    async def vault_rekey(request: web.Request) -> web.Response:
+        """`POST /vault/rekey` `{old_pk, new_pk, new_salt}` — a password change re-keys the vault.
 
-        Re-wraps only the small `VK` blob under the new `PK`; the secrets are never
-        re-encrypted. `old_pk` is derived with the vault's own parameters (its `kdf` from
-        `/vault/status`), `new_pk` with the current ones. Also serves the stale-vault recovery:
-        the browser derives the old `PK` from the *previous* password and the vault's stored
-        salt (`/vault/status`).
+        A fresh `VK`, every secret file re-encrypted under it, wrapped under the new `PK`: a `VK`
+        that leaked before the change opens nothing after it. `old_pk` is derived with the vault's
+        own parameters (its `kdf` from `/vault/status`), `new_pk` with the current ones. Also serves
+        the stale-vault recovery: the browser derives the old `PK` from the *previous* password and
+        the vault's stored salt (`/vault/status`). The page that changed the password signs out
+        afterwards, which ends the last session still holding the old `VK`.
         """
         try:
             body = await request.json()
@@ -280,14 +281,14 @@ def add_vault_routes(app: web.Application) -> None:
             return web.json_response({'error': 'old_pk, new_pk, new_salt required'}, status=400)
         if not vault.vault_exists():
             return web.json_response({'error': 'no vault'}, status=404)
+        loop = asyncio.get_running_loop()
         try:
-            vault.rewrap_vault_with_pk(old_pk, new_pk, new_salt)
+            vault_key = await loop.run_in_executor(None, vault.rekey_vault_with_pk, old_pk, new_pk, new_salt)
         except InvalidTag:
-            return web.json_response({'rewrapped': False, 'stale': True}, status=409)
-        vault_key = vault.unlock_vault_with_pk(new_pk)
-        vault.write_session_key(vault_key)          # the rewrapping session is unlocked too
+            return web.json_response({'rekeyed': False, 'stale': True}, status=409)
+        vault.replace_session_key(vault_key)        # the rekeying session holds the new VK
         _drop_key_caches()
-        return web.json_response({'rewrapped': True})
+        return web.json_response({'rekeyed': True})
 
     async def _account_fragment(request: web.Request, status: int = 200) -> web.Response:
         """Render the vault panel (htmx fragment) reflecting the current vault state."""
@@ -371,7 +372,7 @@ def add_vault_routes(app: web.Application) -> None:
     app.add_routes([
         web.get('/vault/status', vault_status),
         web.post('/vault/unlock', vault_unlock),
-        web.post('/vault/rewrap', vault_rewrap),
+        web.post('/vault/rekey', vault_rekey),
         web.get('/account/vault', account_vault),
         web.post('/account/secret', secret_upsert),
         web.post('/account/secret/delete', secret_delete),
