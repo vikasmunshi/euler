@@ -254,6 +254,9 @@ EnvironmentFile=${USER_ENV}
 EnvironmentFile=-${EGRESS_ENV}
 Environment=EULER_USER_SLUG=%i
 Environment=EULER_REPO_ROOT=${USER_HOME_BASE}/%i/euler
+# The web shell's PTY inherits this PATH, and the uid's nologin shell never reads a
+# ~/.profile — so the per-user installs (claude, in ~/.local/bin) are put on it here.
+Environment=PATH=${USER_HOME_BASE}/%i/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=${VENV_PY} -m euler_webshell.user
 Restart=on-failure
 RestartSec=5s
@@ -535,6 +538,7 @@ provision_claude() {
     if ! as_user "${user}" <<'CLAUDE'
 set -euo pipefail
 [ -f "${EGRESS_ENV}" ] && { set -a; . "${EGRESS_ENV}"; set +a; }
+export PATH="${HOME}/.local/bin:${PATH}"   # as the instance's unit has it
 bash "${HOME}/euler/scripts/setup/claude_code.sh" install
 CLAUDE
     then
