@@ -153,6 +153,7 @@ The win comes from what the generator can *prove* about its candidates before th
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0357](/solutions/0357/) — Prime Generating Integers
+- ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0694](/solutions/0694/) — Cube-full Divisors

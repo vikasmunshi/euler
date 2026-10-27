@@ -293,7 +293,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0350](/solutions/0350/) — Constraining the Least Greatest and the Greatest Least
 - ○ [0354](/solutions/0354/) — Distances in a Bee's Honeycomb
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
-- ○ [0359](/solutions/0359/) — Hilbert's New Hotel
+- ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ○ [0360](/solutions/0360/) — Scary Sphere
 - ○ [0370](/solutions/0370/) — Geometric Triangles
 - ○ [0372](/solutions/0372/) — Pencils of Rays

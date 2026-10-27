@@ -145,6 +145,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0963](/solutions/0963/) — Removing Trits

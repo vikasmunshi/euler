@@ -103,6 +103,7 @@ what makes that root a positive integer of the right parity.
 - ● [0085](/solutions/0085/) — Counting Rectangles
 - ● [0196](/solutions/0196/) — Prime Triplets
 - ● [0321](/solutions/0321/) — Swapping Counters
+- ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ○ [0378](/solutions/0378/) — Triangle Triples
 - ○ [0459](/solutions/0459/) — Flipping Game
 - ○ [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
