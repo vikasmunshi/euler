@@ -128,7 +128,7 @@ identity — inverse test, difference of squares, the odd-number gap — has alr
 - ○ [0310](/solutions/0310/) — Nim Square
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
-- ○ [0359](/solutions/0359/) — Hilbert's New Hotel
+- ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ○ [0408](/solutions/0408/) — Admissible Paths Through a Grid
 - ○ [0431](/solutions/0431/) — Square Space Silo
 - ○ [0459](/solutions/0459/) — Flipping Game

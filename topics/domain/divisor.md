@@ -148,7 +148,7 @@ signature shortcut does not apply.
 - ○ [0268](/solutions/0268/) — At Least Four Distinct Prime Factors Less Than 100
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ● [0357](/solutions/0357/) — Prime Generating Integers
-- ○ [0359](/solutions/0359/) — Hilbert's New Hotel
+- ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ○ [0386](/solutions/0386/) — Maximum Length of an Antichain
 - ○ [0417](/solutions/0417/) — Reciprocal Cycles II
 - ○ [0418](/solutions/0418/) — Factorisation Triples
