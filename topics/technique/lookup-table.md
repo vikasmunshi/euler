@@ -214,6 +214,7 @@ guessed bound never is.
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0407](/solutions/0407/) — Idempotents
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 

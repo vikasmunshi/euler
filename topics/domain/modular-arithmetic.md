@@ -227,7 +227,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0405](/solutions/0405/) — A Rectangular Tiling
-- ○ [0407](/solutions/0407/) — Idempotents
+- ● [0407](/solutions/0407/) — Idempotents
 - ○ [0408](/solutions/0408/) — Admissible Paths Through a Grid
 - ○ [0409](/solutions/0409/) — Nim Extreme
 - ○ [0411](/solutions/0411/) — Uphill Paths

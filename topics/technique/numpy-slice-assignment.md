@@ -167,6 +167,7 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
+- ● [0407](/solutions/0407/) — Idempotents
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers

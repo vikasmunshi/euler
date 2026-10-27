@@ -182,6 +182,7 @@ memo.
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0407](/solutions/0407/) — Idempotents
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 

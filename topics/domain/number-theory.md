@@ -299,7 +299,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0372](/solutions/0372/) — Pencils of Rays
 - ○ [0379](/solutions/0379/) — Least Common Multiple Count
 - ○ [0388](/solutions/0388/) — Distinct Lines
-- ○ [0407](/solutions/0407/) — Idempotents
+- ● [0407](/solutions/0407/) — Idempotents
 - ○ [0410](/solutions/0410/) — Circle and Tangent Line
 - ○ [0417](/solutions/0417/) — Reciprocal Cycles II
 - ○ [0432](/solutions/0432/) — Totient Sum

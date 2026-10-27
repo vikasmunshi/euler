@@ -159,6 +159,7 @@ factorisation beyond its disjointness from the other's.
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
 - ○ [0388](/solutions/0388/) — Distinct Lines
+- ● [0407](/solutions/0407/) — Idempotents
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ○ [0441](/solutions/0441/) — The Inverse Summation of Coprime Couples
 - ○ [0451](/solutions/0451/) — Modular Inverses

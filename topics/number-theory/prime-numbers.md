@@ -510,6 +510,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ○ [0388](/solutions/0388/) — Distinct Lines
 - ○ [0399](/solutions/0399/) — Squarefree Fibonacci Numbers
+- ● [0407](/solutions/0407/) — Idempotents
 - ○ [0418](/solutions/0418/) — Factorisation Triples
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
