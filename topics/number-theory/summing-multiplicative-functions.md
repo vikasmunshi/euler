@@ -176,7 +176,7 @@ lattice points, and after a symmetry argument it reduces to a single $\Phi(10^8)
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
-- ○ [0401](/solutions/0401/) — Sum of Squares of Divisors
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ○ [0452](/solutions/0452/) — Long Products
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals

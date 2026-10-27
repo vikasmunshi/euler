@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisor_summat
 ## Problems
 
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
-- ○ [0401](/solutions/0401/) — Sum of Squares of Divisors
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ○ [0452](/solutions/0452/) — Long Products
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ○ [0608](/solutions/0608/) — Divisor Sums

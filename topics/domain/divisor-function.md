@@ -145,7 +145,7 @@ impossible and instant at $N = 10^{15}$.
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ○ [0378](/solutions/0378/) — Triangle Triples
 - ○ [0379](/solutions/0379/) — Least Common Multiple Count
-- ○ [0401](/solutions/0401/) — Sum of Squares of Divisors
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ○ [0439](/solutions/0439/) — Sum of Sum of Divisors
 - ○ [0452](/solutions/0452/) — Long Products

@@ -262,6 +262,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0387](/solutions/0387/) — Harshad Numbers
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
