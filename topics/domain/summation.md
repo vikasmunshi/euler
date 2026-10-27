@@ -255,7 +255,6 @@ problems are where the collection makes the point most bluntly.
 - ○ [0375](/solutions/0375/) — Minimum of Subsequences
 - ○ [0384](/solutions/0384/) — Rudin-Shapiro Sequence
 - ○ [0390](/solutions/0390/) — Triangles with Non Rational Sides and Integral Area
-- ○ [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ○ [0427](/solutions/0427/) — $n$-sequences
 - ○ [0432](/solutions/0432/) — Totient Sum
 - ○ [0433](/solutions/0433/) — Steps in Euclid's Algorithm

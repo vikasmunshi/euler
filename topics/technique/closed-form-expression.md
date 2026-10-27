@@ -333,6 +333,7 @@ loop was never needed.
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0493](/solutions/0493/) — Under the Rainbow

@@ -211,6 +211,7 @@ unrolled across the array, with a boolean mask selecting which lanes act.
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals

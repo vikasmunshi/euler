@@ -202,6 +202,7 @@ ceiling pays for itself many times over.
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative

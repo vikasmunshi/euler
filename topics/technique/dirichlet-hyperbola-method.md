@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Dirichlet_hype
 ## Problems
 
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 
 <!-- /problems -->

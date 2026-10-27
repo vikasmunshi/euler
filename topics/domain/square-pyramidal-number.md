@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Square_pyramid
 ## Problems
 
 - ● [0006](/solutions/0006/) — Sum Square Difference
+- ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 
 <!-- /problems -->
