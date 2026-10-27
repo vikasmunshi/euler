@@ -15,6 +15,11 @@ a policy the user cannot rewrite (docs/package-guide.md § 2.2):
      `solver "…"`) holds its owner's rung, and the entry's e-mail is its identity;
    - else the weakest rung — fail closed low.
 
+   The map names every collaborator, so it is `root:euler-authz 0640` and a per-user uid may
+   not read it. Such a uid reads its **own row** instead — the rung file the admin plane
+   publishes beside the map (:func:`~solver.auth.authorizations.rung_file`, `root:<uid> 0640`)
+   — so it still holds its owner's rung; with no rung file it sees a policy with nobody in it.
+
    With no policy deployed (a collaborator's own machine) the **checkout owner is `admin`**
    and any other login is `contributor`.
 
@@ -39,7 +44,7 @@ import re
 import stat
 from pathlib import Path
 
-from solver.auth.authorizations import AUTHZ_FILE_ENV, DEFAULT_AUTHZ_FILE, Authorizations
+from solver.auth.authorizations import AUTHZ_FILE_ENV, DEFAULT_AUTHZ_FILE, Authorizations, rung_file
 from solver.auth.subject import LADDER, Subject
 
 _SLUG_KEEP = re.compile(r'[^a-z0-9._-]+')
@@ -107,10 +112,25 @@ def deployed_policy() -> Authorizations | None:
         path = Path(candidate).absolute()
         if not _root_owned(path):
             continue
+        if path.exists() and not os.access(path, os.R_OK):
+            return _own_rung(path)
         policy = Authorizations.read(path)
         if policy is not None:
             return policy
     return None
+
+
+def _own_rung(policy_path: Path) -> Authorizations:
+    """The policy as this uid may see it: its own published row, else nobody — never None.
+
+    The rung file is trusted on the same terms as the map (root-owned all the way up). Its
+    absence — an account not yet provisioned, or a map this uid was never in — is a deployed
+    policy with no names, which the chain resolves to the weakest rung.
+    """
+    path = rung_file(policy_path, os_login())
+    if _root_owned(path) and (policy := Authorizations.read(path)) is not None:
+        return policy
+    return Authorizations({})
 
 
 def _owns_checkout(root_dir: Path) -> bool:

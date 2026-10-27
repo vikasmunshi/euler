@@ -130,6 +130,50 @@ class ResolveSubjectTest(unittest.TestCase):
                  mock.patch('solver.auth.identity.DEFAULT_AUTHZ_FILE', str(Path(tmp) / 'absent.json')):
                 self.assertIsNone(deployed_policy())
 
+    def _unreadable_map(self, tmp: str, rung: dict[str, object] | None,
+                        trusted: bool = True) -> Authorizations | None:
+        """deployed_policy() as uid *alice's slug* sees it: the map is there, root's and
+        unreadable; *rung* is that uid's published row (None: none published); *trusted* says
+        whether that row is root-owned all the way up."""
+        policy = Path(tmp) / 'authz.json'
+        policy.write_text(json.dumps(_POLICY))
+        slug = system_slug('alice@example.com')
+        own = Path(tmp) / 'profiles' / slug
+        if rung is not None:
+            own.parent.mkdir()
+            own.write_text(json.dumps(rung))
+        with mock.patch.dict(os.environ, {AUTHZ_FILE_ENV: str(policy)}), \
+             mock.patch('solver.auth.identity.DEFAULT_AUTHZ_FILE', str(policy)), \
+             mock.patch('solver.auth.identity.os_login', return_value=slug), \
+             mock.patch('solver.auth.identity._root_owned', side_effect=lambda p: trusted or p != own), \
+             mock.patch('solver.auth.identity.os.access', side_effect=lambda p, m: Path(p) != policy):
+            return deployed_policy()
+
+    def test_a_per_user_account_reads_its_rung_from_its_own_row(self) -> None:
+        """The map is closed to a per-user uid (root:euler-authz 0640); its own published row is
+        what lets a `solver` it runs — claude-solve's headless Claude — hold its owner's rung."""
+        with tempfile.TemporaryDirectory() as tmp:
+            policy = self._unreadable_map(tmp, {'users': {'alice@example.com': 'maintainer'}})
+        assert policy is not None
+        self.assertEqual(policy.all_users(), {'alice@example.com': 'maintainer'}, 'its own row, no one else')
+        subj = subject_for(system_slug('alice@example.com'), owner=True, policy=policy)
+        self.assertEqual((subj.user, subj.profile, subj.auth_method),
+                         ('alice@example.com', 'maintainer', 'policy-account'))
+
+    def test_without_its_row_a_per_user_account_is_a_reader(self) -> None:
+        """No row published (not provisioned yet): still a deployed policy, with nobody in it."""
+        with tempfile.TemporaryDirectory() as tmp:
+            policy = self._unreadable_map(tmp, None)
+        assert policy is not None
+        self.assertEqual(subject_for(system_slug('alice@example.com'), owner=True, policy=policy).profile,
+                         'reader')
+
+    def test_a_row_the_user_can_write_is_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            policy = self._unreadable_map(tmp, {'users': {'alice@example.com': 'maintainer'}}, trusted=False)
+        assert policy is not None
+        self.assertEqual(policy.all_users(), {})
+
     def test_root_ownership_runs_all_the_way_up(self) -> None:
         self.assertTrue(identity._root_owned(Path('/etc')))
         with tempfile.TemporaryDirectory() as tmp:

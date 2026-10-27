@@ -470,9 +470,11 @@ carries exactly one decision — **who has which profile**:
 The `users` map is keyed by **web email or OS-login name**, one map for both channels.
 It names every collaborator, so it is readable only by `euler-authz` — `euler-auth`,
 `euler-msg` and the operator — and **root-write only** because every mutation goes through
-the sudo-gated `users` path (which keeps the file's group and mode). The per-user tier
-needs only the ladder, which is code; a process that may not read the file loads it as a
-policy with no names in it, never as no policy at all. It lives outside the repo so that a
+the sudo-gated `users` path (which keeps the file's group and mode). A per-user uid reads
+its **own row** instead — `/etc/euler/profiles/<account>` (`root:<account> 0640`), which every
+writer of the map re-publishes — because a `solver` it runs (claude-solve's headless Claude, a
+nested `solver "…"`) takes its rung from the policy, not from the web shell's ticket. A process
+that may read neither loads the policy as one with no names in it, never as no policy at all. It lives outside the repo so that a
 repo write cannot change policy. There is **no policy file in the repo**: absent a
 deployed one the built-in default maps nobody, so the checkout owner floors to `admin`
 by uid and everyone else is `contributor`. The installer seeds the real file.
@@ -3004,7 +3006,7 @@ expiry and `/healthz`.
 | Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
 | Auth | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
 | Messaging | `/etc/euler/msg.env` (`root:euler-msg 0640`); `/var/lib/euler-msg` (`0700`) |
-| Policy | `/etc/euler/authorizations.json` (`root:euler-authz 0640`) |
+| Policy | `/etc/euler/authorizations.json` (`root:euler-authz 0640`); `/etc/euler/profiles/<account>` (`root:<account> 0640`, that account's own row) |
 | Per-user tier | `/etc/euler/user.env` (no secrets); `/home/<slug>/` (`0700`) |
 | Sockets | `/run/euler` (`root:euler-edge 1771`); `auth.sock`, `msg.sock` (`0660 …:euler-web`); `site.sock`, `user-<slug>.sock` (`0660 …:euler-edge`); `/run/euler-adm/auth-admin.sock` and `/run/euler-msg/admin.sock` (`0600`, one per admin plane) |
 

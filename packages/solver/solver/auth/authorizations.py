@@ -33,7 +33,7 @@ imports the resolver during its own construction.
 """
 from __future__ import annotations
 
-__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE']
+__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'RUNG_DIR', 'rung_file']
 
 import json
 import os
@@ -46,8 +46,17 @@ from solver.auth.subject import LADDER
 AUTHZ_FILE_ENV: str = 'EULER_AUTHZ_FILE'
 #: The deployed system-of-record location.
 DEFAULT_AUTHZ_FILE: str = '/etc/euler/authorizations.json'
+#: Beside the policy file: one file per mapped account, named for it, holding that account's
+#: own row in the policy's own shape (`{"users": {identity: profile}}`) — `root:<account> 0640`,
+#: so each uid reads its own rung and no one else's (the map itself names everyone).
+RUNG_DIR: str = 'profiles'
 #: The built-in default: nobody is mapped, so only the checkout-owner uid floor applies.
 _DEFAULT_POLICY: dict[str, Any] = {'users': {}}
+
+
+def rung_file(policy_path: Path, account: str) -> Path:
+    """Where *account*'s own row of the policy at *policy_path* is published (:data:`RUNG_DIR`)."""
+    return policy_path.parent / RUNG_DIR / account
 
 
 def _normalise(identity: str) -> str:

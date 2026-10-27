@@ -6,8 +6,9 @@ The admin plane is gated by **wheel/sudo**, not a bespoke group. Running as root
 (via `sudo`) this CLI does two things the operator's ordinary uid cannot:
 
 - **writes the authorization system of record** — `/etc/euler/authorizations.json`
-  (`root:root 0644`) — for profile assignment (`add` / `change` / the map side
-  of `remove`);
+  (`root:euler-authz 0640`) — for profile assignment (`add` / `change` / the map side
+  of `remove`), and with it each account's own row under `/etc/euler/profiles/`
+  (`sync-rungs` re-publishes those alone, for the setup kits);
 - **reaches the euler-auth admin socket** (`0600`, token in root-readable
   `/etc/euler/auth.env`) for SRP operations — minting invites, enable / disable /
   remove, session revocation, and the full roster listing.
@@ -19,7 +20,7 @@ that OS user); an email additionally mints an emailed invite / drives SRP state.
 Invocation (see :mod:`euler_webshell.users` for the shell wrapper)::
 
     sudo <venv-python> -m euler_site.auth.admin \
-        <list|add|change|enable|disable|remove|requests-json|dismiss> [identity] [profile]
+        <list|add|change|enable|disable|remove|requests-json|dismiss|sync-rungs> [identity] [profile]
 
 `list` now folds in the invite-request queue (the login page's "Request an
 invite" form). `requests-json` dumps that queue as JSON for the interactive
@@ -34,20 +35,22 @@ __all__ = ['main']
 import grp
 import json
 import os
+import pwd
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
+from solver.auth.authorizations import RUNG_DIR
 from solver.auth.identity import system_slug
 from solver.config.env import load_spec
 from euler_site.auth.client import request
 from euler_site.envfile import env_file_values
 
 _ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove',
-            'roster-json', 'requests-json', 'dismiss')
-_NO_IDENTITY = ('list', 'roster-json', 'requests-json')       # the views take no identity
+            'roster-json', 'requests-json', 'dismiss', 'sync-rungs')
+_NO_IDENTITY = ('list', 'roster-json', 'requests-json', 'sync-rungs')   # these take no identity
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
 _AUTHZ_PATH = os.environ.get('EULER_AUTHZ_FILE', '/etc/euler/authorizations.json')
@@ -77,6 +80,12 @@ def _authz_save(data: dict[str, Any]) -> None:
         gid, mode = current.st_gid, current.st_mode & 0o777
     except OSError:
         gid, mode = -1, 0o640
+    _write_json(path, data, gid, mode)
+    _rungs_sync(data)
+
+
+def _write_json(path: Path, data: dict[str, Any], gid: int, mode: int) -> None:
+    """Replace *path* with *data* atomically, born with group *gid* and *mode*."""
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f'.{path.name}.')
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as handle:
@@ -88,6 +97,34 @@ def _authz_save(data: dict[str, Any]) -> None:
     except BaseException:
         os.unlink(tmp)
         raise
+
+
+def _rungs_sync(data: dict[str, Any]) -> None:
+    """Publish each mapped account's own row beside the map, and drop every row that is stale.
+
+    A per-user uid may not read the map, yet a `solver` it runs — claude-solve's headless
+    Claude, a nested `solver "…"` — resolves its rung from it (solver.auth.identity). So every
+    account gets `profiles/<account>`: its row in the map's own shape, `root:<account> 0640`,
+    readable by that uid alone. The account is the e-mail's system slug, or a bare login as
+    is; only one that exists with its own private group gets a file — an account not yet
+    provisioned is skipped, and `user.sh provision` runs `sync-rungs` once it exists.
+    """
+    directory = Path(_AUTHZ_PATH).parent / RUNG_DIR
+    directory.mkdir(mode=0o755, exist_ok=True)
+    published: set[str] = set()
+    for identity, profile in (data.get('users') or {}).items():
+        account = system_slug(identity) if '@' in identity else identity
+        try:
+            gid = grp.getgrnam(account).gr_gid
+            if pwd.getpwnam(account).pw_gid != gid:
+                continue                                  # a shared group would show it to others
+        except KeyError:
+            continue
+        _write_json(directory / account, {'users': {identity: profile}}, gid, 0o640)
+        published.add(account)
+    for stale in directory.iterdir():
+        if stale.name not in published:
+            stale.unlink()
 
 
 def _authz_set(identity: str, profile: str) -> None:
@@ -169,6 +206,9 @@ def main(argv: list[str]) -> int:
     profile = argv[2] if len(argv) > 2 else 'reader'
     is_web = '@' in identity
 
+    if action == 'sync-rungs':
+        _rungs_sync(json.loads(Path(_AUTHZ_PATH).read_text(encoding='utf-8')))
+        return 0
     if action not in _NO_IDENTITY and not identity:
         return _fail(f'users {action} requires an email or os-login')
     if action in ('enable', 'disable') and not is_web:

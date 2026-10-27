@@ -36,6 +36,7 @@
 #   /opt/euler/venv                        root:euler-web 0755  (deployed venv)
 #   /etc/euler/auth.env                    root:euler-auth 0640 (generated here)
 #   /etc/euler/authorizations.json         root:euler-authz 0640 (authorization SoR; seeded + migrated)
+#   /etc/euler/profiles/<account>          root:<account> 0640 (that account's own row of the SoR)
 #   /var/lib/euler-auth                    euler-auth:euler-auth 0700 (state)
 #   /etc/tmpfiles.d/euler.conf             root:root 0644       (/run/euler 1771 root:euler-edge)
 #   /etc/systemd/system/euler-auth.service (root-owned, boot-enabled; deferred until
@@ -317,6 +318,9 @@ print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
 PY
     sudo chown root:"${AUTHZ_GROUP}" "${AUTHZ_FILE}"
     sudo chmod 0640 "${AUTHZ_FILE}"
+    # Each account's own row, beside the map (root:<account> 0640): a per-user uid may not
+    # read the map, and a `solver` it runs takes its rung from here (solver.auth.identity).
+    sudo "${VENV_PY}" -P -m euler_site.auth.admin sync-rungs
 }
 
 # Deploy the collaborator roster: /etc/euler/roster/users.json — who exists, the X25519

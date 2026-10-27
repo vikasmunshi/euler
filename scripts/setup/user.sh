@@ -353,6 +353,15 @@ ensure_user_identity() {
     sudo install -d -m 0700 -o "${user}" -g "${user}" "${home}/.euler"
 }
 
+# Re-publish every account's own row of the policy (/etc/euler/profiles/<account>,
+# root:<account> 0640). The map is not readable by a per-user uid, so a `solver` it runs —
+# claude-solve's headless Claude above all — takes its rung from that file; `users add` wrote
+# the map before this uid existed to own one. Deprovision runs it too, to drop the row.
+publish_rungs() {
+    sudo "${VENV_PY}" -P -m euler_site.auth.admin sync-rungs \
+        || echo "warn: could not publish the policy rows — run 'make redeploy-auth'"
+}
+
 # Run a provisioning step AS the collaborator's own uid (never root): a heredoc
 # script under `sudo -Hu`, so every file it creates is born with the right owner —
 # no chown sweep, and no window where root-owned files sit in a user's home. The
@@ -618,6 +627,7 @@ do_provision() {
     require_owner "${slug}" "${email}" || return 1
     ensure_shared_groups
     ensure_user_identity "${slug}"
+    publish_rungs
     provision_clone "${slug}"
     provision_hooks "${slug}"
     provision_claude "${slug}"
@@ -668,6 +678,7 @@ do_deprovision() {
     else
         echo "Left ${user} in place (instance stopped/disabled). Home: ${home}."
     fi
+    publish_rungs
     if [ -f /etc/systemd/system/euler-firewall.service ]; then
         "${SCRIPT_DIR}/firewall.sh" reload 2>/dev/null || true
     fi

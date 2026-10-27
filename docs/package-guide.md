@@ -84,14 +84,18 @@ per-user account. §2.2 is what gives it that collaborator's identity and rung.
 
 The role comes from a policy the user cannot rewrite — `/etc/euler/authorizations.json`,
 `root:euler-authz 0640`, keyed by e-mail or OS login. Its readers are the auth and message
-services and the operator; a collaborator's per-user uid is not one of them:
+services and the operator; a collaborator's per-user uid is not one of them. That uid reads its
+**own row** instead: the admin plane publishes each mapped account's entry beside the map as
+`/etc/euler/profiles/<account>` (`root:<account> 0640`, the map's own shape), so a `solver` it
+runs — claude-solve's headless Claude, a nested `solver "…"` — still holds its owner's rung:
 
 | Policy deployed? | Login | Role |
 | --- | --- | --- |
 | yes | listed | its entry |
 | yes | the `system_slug` of a listed e-mail (a per-user web account) | that e-mail's entry, with the e-mail as the identity |
 | yes | anything else | `reader` |
-| yes, but unreadable to this uid | any | `reader` — a policy nobody is visible in, never "no policy" |
+| yes, but unreadable to this uid | any | its own row (`profiles/<login>`), resolved as above |
+| yes, unreadable, and no own row | any | `reader` — a policy nobody is visible in, never "no policy" |
 | no (a collaborator's own machine) | owns the checkout | `admin` |
 | no | anything else | `contributor` |
 
@@ -105,12 +109,18 @@ group- or world-writable. That rules out the two shortcuts that look tamper-proo
   verifying process, and whoever holds the secret can mint one (a token would need a
   *signature* instead).
 
-The same rule applies to an `EULER_AUTHZ_FILE` override: one the user can write is ignored.
+The same rule applies to an `EULER_AUTHZ_FILE` override, and to a row under `profiles/`: one
+the user can write is ignored.
 
 An unreadable policy is still a deployed one. Reading it as absent would hand every checkout
 owner on the host — each collaborator owns their clone — `admin`. The operator reads it through
-`euler-authz` membership; a terminal opened before that membership was granted resolves as
-`reader` until a new login session (or `newgrp euler-authz`).
+`euler-authz` membership, and has a row of their own besides, so a terminal opened before that
+membership was granted still resolves to their rung.
+
+The rows are kept in step with the map by everything that writes it: the admin plane's
+`users add` / `change` / `remove`, `auth.sh` (deploy and redeploy), and `user.sh provision` /
+`deprovision` — a row needs its account's private group to exist, and `users add` writes the
+map before provisioning creates the uid. An account without its own private group gets no row.
 
 Even so, the role is a **guardrail**. Inside one uid — where the user can edit their clone, run
 `!`, or call Python directly — no in-process check can stop them. The role prevents accidents
