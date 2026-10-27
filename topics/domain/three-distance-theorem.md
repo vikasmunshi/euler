@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Three-distance
 ## Problems
 
 - ○ [0576](/solutions/0576/) — Irrational Jumps
+- ● [0700](/solutions/0700/) — Eulercoin
 
 <!-- /problems -->

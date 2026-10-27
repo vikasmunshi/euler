@@ -268,7 +268,6 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0672](/solutions/0672/) — One More One
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0698](/solutions/0698/) — 123 Numbers
-- ○ [0700](/solutions/0700/) — Eulercoin
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ○ [0729](/solutions/0729/) — Range of Periodic Sequence
 - ○ [0736](/solutions/0736/) — Paths to Equality

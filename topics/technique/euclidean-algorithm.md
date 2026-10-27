@@ -201,6 +201,7 @@ Euclidean quotient, because the quotient sequence is the answer's structure rath
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0694](/solutions/0694/) — Cube-full Divisors
+- ● [0700](/solutions/0700/) — Eulercoin
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 
 <!-- /problems -->

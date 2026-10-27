@@ -338,6 +338,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0694](/solutions/0694/) — Cube-full Divisors
+- ● [0700](/solutions/0700/) — Eulercoin
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0743](/solutions/0743/) — Window into a Matrix

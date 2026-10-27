@@ -355,7 +355,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0699](/solutions/0699/) — Triffle Numbers
-- ○ [0700](/solutions/0700/) — Eulercoin
+- ● [0700](/solutions/0700/) — Eulercoin
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ○ [0712](/solutions/0712/) — Exponent Difference
 - ○ [0714](/solutions/0714/) — Duodigits
