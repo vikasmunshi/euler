@@ -283,7 +283,7 @@ weighting each winning mask by how many integers wear it.
 - ○ [0848](/solutions/0848/) — Guessing with Sets
 - ○ [0855](/solutions/0855/) — Delphi Paper
 - ○ [0859](/solutions/0859/) — Cookie Game
-- ○ [0860](/solutions/0860/) — Gold and Silver Coin Game
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ○ [0870](/solutions/0870/) — Stone Game IV
 - ● [0882](/solutions/0882/) — Removing Bits
 - ○ [0888](/solutions/0888/) — 1249 Nim

@@ -177,6 +177,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0822](/solutions/0822/) — Square the Smallest
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0980](/solutions/0980/) — The Quaternion Group I

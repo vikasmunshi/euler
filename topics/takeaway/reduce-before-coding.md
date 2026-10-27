@@ -350,6 +350,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0834](/solutions/0834/) — Add and Divide
 - ● [0853](/solutions/0853/) — Pisano Periods 1
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0882](/solutions/0882/) — Removing Bits

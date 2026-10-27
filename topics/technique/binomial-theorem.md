@@ -140,5 +140,6 @@ other.
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0250](/solutions/0250/) — $250250$
 - ● [0788](/solutions/0788/) — Dominating Numbers
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 
 <!-- /problems -->
