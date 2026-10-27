@@ -155,14 +155,28 @@ uninstall_claude() {
 link_one() {
     local name="$1" target="$2"
     local link="${PROJECT_ROOT}/${name}"
+    local abs_target="${PROJECT_ROOT}/${target}"
 
-    if [ ! -e "${PROJECT_ROOT}/${target}" ]; then
+    if [ ! -e "${abs_target}" ]; then
         echo "Warning: link target ${target} is missing; skipping ${name}" >&2
         return 0
     fi
 
+    # The link's text: the target relative to the link's own directory, so the
+    # checkout still resolves after it is moved, copied or mounted elsewhere.
+    local rel_target
+    rel_target="$(realpath -m --relative-to="$(dirname "${link}")" "${abs_target}")"
+
     # Already the symlink we want — nothing to do.
-    if [ -L "${link}" ] && [ "$(readlink "${link}")" = "${target}" ]; then
+    if [ -L "${link}" ] && [ "$(readlink "${link}")" = "${rel_target}" ]; then
+        return 0
+    fi
+
+    # A symlink to the right place, spelled absolutely: rewrite it in place —
+    # there is nothing to preserve.
+    if [ -L "${link}" ] && [ "$(realpath -m "${link}")" = "$(realpath -m "${abs_target}")" ]; then
+        ln -sfn "${rel_target}" "${link}"
+        echo "Relinked ${name} -> ${rel_target}"
         return 0
     fi
 
@@ -175,17 +189,39 @@ link_one() {
         mv "${link}" "${backup}"
     fi
 
-    ln -s "${target}" "${link}"
-    echo "Linked ${name} -> ${target}"
+    ln -s "${rel_target}" "${link}"
+    echo "Linked ${name} -> ${rel_target}"
+}
+
+# Rewrite an absolute symlink as the same link spelled relative to its own
+# directory. The native installer points ${CLAUDE_BIN} at an absolute
+# /home/<user>/... path, which dangles once the user id (and so the home
+# directory) is renamed; the relative form survives it. Anything other than an
+# absolute symlink is left alone. `claude update` writes the absolute form back,
+# so this runs after every install and update.
+relativize_link() {
+    local link="$1" dest rel
+    [ -L "${link}" ] || return 0
+    dest="$(readlink "${link}")"
+    case "${dest}" in
+        /*) ;;
+        *) return 0 ;;
+    esac
+    # -s: keep the logical path — resolving symlinks would bake in today's layout.
+    rel="$(realpath -ms --relative-to="$(dirname "${link}")" "${dest}")"
+    ln -sfn "${rel}" "${link}"
+    echo "Relinked ${link} -> ${rel}"
 }
 
 # Expose the package's Claude Code config at the project root, where the `claude`
 # CLI and IDE integrations expect `.claude/` and `CLAUDE.md`. The canonical copies
 # are version-controlled under packages/solver/solver/ai/claude/; these are relative symlinks to
-# them (recreated here in case a checkout did not preserve them).
+# them (recreated here in case a checkout did not preserve them). The installer's
+# ${CLAUDE_BIN} link is made relative too, so a user id rename does not break it.
 link_project_config() {
     link_one ".claude" "packages/solver/solver/ai/claude"
     link_one "CLAUDE.md" "packages/solver/solver/ai/claude/CLAUDE.md"
+    relativize_link "${CLAUDE_BIN}"
 }
 
 # Reports the state of one project-root symlink for `status`.
