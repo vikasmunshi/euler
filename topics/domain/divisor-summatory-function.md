@@ -15,7 +15,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Divisor_summat
 - ○ [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0625](/solutions/0625/) — Gcd Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
-- ○ [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 
 <!-- /problems -->

@@ -170,6 +170,7 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 
 <!-- /problems -->

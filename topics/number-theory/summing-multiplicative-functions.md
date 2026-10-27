@@ -189,7 +189,7 @@ lattice points, and after a symmetry argument it reduces to a single $\Phi(10^8)
 - ○ [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0625](/solutions/0625/) — Gcd Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
-- ○ [0641](/solutions/0641/) — A Long Row of Dice
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0694](/solutions/0694/) — Cube-full Divisors

@@ -345,7 +345,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
 - ○ [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
-- ○ [0641](/solutions/0641/) — A Long Row of Dice
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ○ [0643](/solutions/0643/) — $2$-Friendly
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0655](/solutions/0655/) — Divisible Palindromes

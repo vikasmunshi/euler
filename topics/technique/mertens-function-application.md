@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Mertens_functi
 ## Problems
 
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 
 <!-- /problems -->

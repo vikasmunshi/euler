@@ -160,7 +160,7 @@ impossible and instant at $N = 10^{15}$.
 - ○ [0608](/solutions/0608/) — Divisor Sums
 - ○ [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
-- ○ [0641](/solutions/0641/) — A Long Row of Dice
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ○ [0646](/solutions/0646/) — Bounded Divisors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0675](/solutions/0675/) — $2^{\omega(n)}$
