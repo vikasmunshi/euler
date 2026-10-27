@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Greedy_algorit
 ## Problems
 
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0822](/solutions/0822/) — Square the Smallest
 
 <!-- /problems -->

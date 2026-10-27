@@ -467,7 +467,7 @@ handful of operations on small numbers.
 - ○ [0814](/solutions/0814/) — Mezzo-forte
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
-- ○ [0822](/solutions/0822/) — Square the Smallest
+- ● [0822](/solutions/0822/) — Square the Smallest
 - ○ [0823](/solutions/0823/) — Factor Shuffle
 - ○ [0824](/solutions/0824/) — Chess Sliders
 - ○ [0830](/solutions/0830/) — Binomials and Powers
