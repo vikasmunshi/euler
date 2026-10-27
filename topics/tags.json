@@ -1372,7 +1372,7 @@
       "reference": "https://en.wikipedia.org/wiki/Greedy_algorithm",
       "additional-references": [],
       "summary": "A process where a fixed, suboptimal step-by-step strategy is simulated and compared against optimal behaviour.",
-      "refs": ["p0336"]
+      "refs": ["p0336", "p0822"]
     },
     {
       "slug": "hamiltonian-cycle",
@@ -2560,7 +2560,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002", "p0057", "p0065", "p0076", "p0078", "p0092", "p0094", "p0114", "p0115", "p0116", "p0117", "p0140", "p0169", "p0197", "p0214", "p0225", "p0226", "p0227", "p0230", "p0232", "p0237", "p0258", "p0282", "p0287", "p0312", "p0324", "p0326", "p0327", "p0330", "p0334", "p0335", "p0337", "p0339", "p0340", "p0341", "p0343", "p0356", "p0364", "p0366", "p0375", "p0382", "p0384", "p0396", "p0405", "p0416", "p0419", "p0422", "p0423", "p0440", "p0443", "p0458", "p0463", "p0469", "p0472", "p0477", "p0490", "p0492", "p0497", "p0505", "p0515", "p0517", "p0523", "p0527", "p0532", "p0535", "p0539", "p0546", "p0551", "p0555", "p0558", "p0570", "p0605", "p0609", "p0617", "p0623", "p0624", "p0645", "p0654", "p0664", "p0666", "p0670", "p0671", "p0672", "p0693", "p0698", "p0721", "p0729", "p0736", "p0737", "p0739", "p0751", "p0752", "p0759", "p0770", "p0774", "p0809", "p0811", "p0812", "p0822", "p0825", "p0832", "p0839", "p0843", "p0844", "p0848", "p0872", "p0887", "p0909", "p0910", "p0912", "p0915", "p0917", "p0918", "p0921", "p0924", "p0927", "p0935", "p0938", "p0940", "p0943", "p0955", "p0968", "p0969", "p0985", "p0993", "p0999", "p1000", "p1003"]
+      "refs": ["p0002", "p0057", "p0065", "p0076", "p0078", "p0092", "p0094", "p0114", "p0115", "p0116", "p0117", "p0140", "p0169", "p0197", "p0214", "p0225", "p0226", "p0227", "p0230", "p0232", "p0237", "p0258", "p0282", "p0287", "p0312", "p0324", "p0326", "p0327", "p0330", "p0334", "p0335", "p0337", "p0339", "p0340", "p0341", "p0343", "p0356", "p0364", "p0366", "p0375", "p0382", "p0384", "p0396", "p0405", "p0416", "p0419", "p0422", "p0423", "p0440", "p0443", "p0458", "p0463", "p0469", "p0472", "p0477", "p0490", "p0492", "p0497", "p0505", "p0515", "p0517", "p0523", "p0527", "p0532", "p0535", "p0539", "p0546", "p0551", "p0555", "p0558", "p0570", "p0605", "p0609", "p0617", "p0623", "p0624", "p0645", "p0654", "p0664", "p0666", "p0670", "p0671", "p0672", "p0693", "p0698", "p0721", "p0729", "p0736", "p0737", "p0739", "p0751", "p0752", "p0759", "p0770", "p0774", "p0809", "p0811", "p0812", "p0825", "p0832", "p0839", "p0843", "p0844", "p0848", "p0872", "p0887", "p0909", "p0910", "p0912", "p0915", "p0917", "p0918", "p0921", "p0924", "p0927", "p0935", "p0938", "p0940", "p0943", "p0955", "p0968", "p0969", "p0985", "p0993", "p0999", "p1000", "p1003"]
     },
     {
       "slug": "reflection-physics",
@@ -4198,7 +4198,7 @@
       "reference": "https://en.wikipedia.org/wiki/Fermat%27s_little_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0133_s0", "p0421_s0", "p0650_s0", "p0743_s0", "p0926_s0"]
+      "refs": ["p0133_s0", "p0421_s0", "p0650_s0", "p0743_s0", "p0822_s0", "p0926_s0"]
     },
     {
       "slug": "fibonacci-fast-doubling",
@@ -4855,7 +4855,7 @@
       "reference": "https://en.wikipedia.org/wiki/Logarithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0957_s0"]
+      "refs": ["p0030_s0", "p0822_s0", "p0957_s0"]
     },
     {
       "slug": "long-division",
@@ -5125,7 +5125,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0516_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0516_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0822_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "modular-multiplicative-inverse-application",
@@ -5423,6 +5423,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0069_s0", "p0146_s0", "p0243_s0", "p0293_s0"]
+    },
+    {
+      "slug": "priority-queue",
+      "facet": "technique",
+      "name": "Priority queue",
+      "reference": "https://en.wikipedia.org/wiki/Priority_queue",
+      "additional-references": [],
+      "summary": "A container that always yields its smallest (or largest) element next, typically backed by a binary heap.",
+      "refs": ["p0822_s0"]
     },
     {
       "slug": "projective-transformation",
@@ -6161,6 +6170,15 @@
       "additional-references": [],
       "summary": "When the answer's size is unknown, scan ranges that are fully resolved once processed, in increasing order, and stop at the first that suffices instead of guessing a bound.",
       "refs": ["p0348"]
+    },
+    {
+      "slug": "simulate-transient-then-extrapolate",
+      "facet": "takeaway",
+      "name": "Simulate the transient, extrapolate the steady state",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Run a process directly only until it settles into a regular pattern, then jump the remaining steps in closed form.",
+      "refs": ["p0822"]
     },
     {
       "slug": "size-work-to-the-input",

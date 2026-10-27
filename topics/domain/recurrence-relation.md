@@ -281,7 +281,6 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0809](/solutions/0809/) — Rational Recurrence Relation
 - ○ [0811](/solutions/0811/) — Bitwise Recursion
 - ○ [0812](/solutions/0812/) — Dynamical Polynomials
-- ○ [0822](/solutions/0822/) — Square the Smallest
 - ○ [0825](/solutions/0825/) — Chasing Game
 - ○ [0832](/solutions/0832/) — Mex Sequence
 - ○ [0839](/solutions/0839/) — Beans in Bowls

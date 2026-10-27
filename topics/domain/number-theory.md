@@ -380,7 +380,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ○ [0812](/solutions/0812/) — Dynamical Polynomials
 - ○ [0821](/solutions/0821/) — 123-Separable
-- ○ [0822](/solutions/0822/) — Square the Smallest
+- ● [0822](/solutions/0822/) — Square the Smallest
 - ○ [0823](/solutions/0823/) — Factor Shuffle
 - ○ [0827](/solutions/0827/) — Pythagorean Triple Occurrence
 - ○ [0832](/solutions/0832/) — Mex Sequence
