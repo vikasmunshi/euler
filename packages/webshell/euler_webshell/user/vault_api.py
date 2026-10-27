@@ -132,11 +132,13 @@ def _home() -> Path:
 def _which(binary: str) -> str | None:
     """*binary* on PATH, or in this user's `~/.local/bin`.
 
-    `shutil.which` searches the PATH this **service** was started with, which is
-    systemd's (`/usr/bin:/bin`, per the unit) — not the login PATH the user's shell
-    builds. Per-user installs land in `~/.local/bin` (`claude` does), so a tool the
-    user has, and can run in their web shell, reads as `not installed` here. The
-    shell's PATH is the truth this panel is reporting on, so look where it looks.
+    `shutil.which` searches the PATH this **service** was started with. The unit
+    (`user.sh`) puts `~/.local/bin` — where per-user installs land, `claude` among
+    them — first on it, and the web shell's PTY inherits the same PATH, so the
+    lookup normally finds what the shell would. The explicit `~/.local/bin` check
+    is the fallback for an instance whose unit predates that PATH (re-laid only by
+    `user.sh upgrade`): without it a tool the user has, and can run in their web
+    shell, would read as `not installed` here.
     """
     found = shutil.which(binary)
     if found is not None:
