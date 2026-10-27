@@ -144,6 +144,7 @@ interval, never per `n`.
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0926](/solutions/0926/) — Total Roundness
 
 <!-- /problems -->

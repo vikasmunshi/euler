@@ -212,6 +212,7 @@ count"*. The heap is for the things that genuinely do not fit.
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0934](/solutions/0934/) — Unlucky Primes

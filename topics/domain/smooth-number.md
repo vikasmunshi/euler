@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Smooth_number>
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ○ [0627](/solutions/0627/) — Counting Products
-- ○ [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
 
 <!-- /problems -->

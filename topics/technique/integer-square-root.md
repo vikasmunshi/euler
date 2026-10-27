@@ -203,6 +203,7 @@ the same idea, implemented once, in C.
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0950](/solutions/0950/) — Pirate Treasure
