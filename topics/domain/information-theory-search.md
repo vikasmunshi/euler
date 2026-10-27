@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Twenty_questio
 ## Problems
 
 - ○ [0847](/solutions/0847/) — Jack's Bean
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 
 <!-- /problems -->

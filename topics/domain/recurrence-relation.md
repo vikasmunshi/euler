@@ -290,7 +290,7 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0848](/solutions/0848/) — Guessing with Sets
 - ● [0872](/solutions/0872/) — Recursive Tree
-- ○ [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [0909](/solutions/0909/) — L-expressions I
 - ○ [0910](/solutions/0910/) — L-expressions II
 - ○ [0912](/solutions/0912/) — Where are the Odds?

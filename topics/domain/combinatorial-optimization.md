@@ -228,7 +228,7 @@ optimisation inside the loop.
 - ○ [0871](/solutions/0871/) — Drifting Subsets
 - ○ [0874](/solutions/0874/) — Maximal Prime Score
 - ○ [0886](/solutions/0886/) — Coprime Permutations
-- ○ [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [0893](/solutions/0893/) — Matchsticks
 - ○ [0966](/solutions/0966/) — Triangle Circle Intersection
 - ○ [1002](/solutions/1002/) — Connections II
