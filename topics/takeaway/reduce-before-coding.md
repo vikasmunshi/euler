@@ -333,6 +333,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0694](/solutions/0694/) — Cube-full Divisors

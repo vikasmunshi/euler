@@ -109,5 +109,6 @@ its siblings (GCC and Clang) compute the operation and report whether it overflo
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 
 <!-- /problems -->

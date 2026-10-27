@@ -281,6 +281,7 @@ kept warm between them flatters the measurement.
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 
 <!-- /problems -->

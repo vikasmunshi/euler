@@ -169,6 +169,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0743](/solutions/0743/) — Window into a Matrix
