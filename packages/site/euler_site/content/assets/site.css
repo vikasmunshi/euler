@@ -1500,6 +1500,10 @@ dl.account dd { margin: 0; min-width: 0; }
 }
 .tool-row:first-of-type { border-top: 0; }
 .tool-name { font-weight: 600; }
+.tool-version { font-size: 0.85rem; }
+/* The Credentials heading's Regen button: the same right-hand column as the tool rows. */
+.cred-head { display: flex; align-items: center; gap: 0.7rem; }
+.cred-head .state-action { margin-left: auto; }
 /* The tool names the row; its state — and the act that changes it — sits opposite. */
 .tool-row .state-action { margin-left: auto; }
 

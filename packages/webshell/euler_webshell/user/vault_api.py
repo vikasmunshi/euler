@@ -53,6 +53,9 @@ _VAULT_REQUIRES: str = 'reader'
 _NAME_RE = re.compile(r'^[A-Z][A-Z0-9_]{0,63}$')
 _VALUE_MAX: int = 4096
 
+#: A CLI's version number, as its `--version` line leads with it.
+_VERSION_RE = re.compile(r'\d+\.\d+(?:\.\d+)?')
+
 _PK_LEN: int = 32   # PBKDF2-derived password key
 _SALT_LEN: int = 16  # the SRP salt width
 
@@ -154,11 +157,28 @@ def _tool_status(binary: str, args: list[str], timeout: float = 8.0) -> str:
     return 'signed in' if proc.returncode == 0 else 'not signed in'
 
 
+def _tool_version(binary: str, timeout: float = 8.0) -> str | None:
+    """*binary*'s version number from `--version` (its first `N.N[.N]`), or None if absent or unreadable.
+
+    The CLIs word it differently (`2.1.304 (Claude Code)`, `gh version 2.63.0 (…)`), but
+    each leads with the one number this panel shows.
+    """
+    path = _which(binary)
+    if path is None:
+        return None
+    try:
+        proc = subprocess.run([path, '--version'], capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    found = _VERSION_RE.search(proc.stdout) if proc.returncode == 0 else None
+    return found.group(0) if found else None
+
+
 def _claude_status() -> str:
-    """Claude Code sign-in state: the CLI plus its stored credentials (the login runs in the shell)."""
+    """Claude Code setup state: the CLI plus its stored credentials (the login runs in the shell)."""
     if _which('claude') is None:
         return 'not installed'
-    return 'signed in' if (_home() / '.claude' / '.credentials.json').exists() else 'not signed in'
+    return 'set up' if (_home() / '.claude' / '.credentials.json').exists() else 'not set up'
 
 
 def _can_decrypt() -> bool:
@@ -276,6 +296,8 @@ def add_vault_routes(app: web.Application) -> None:
         loop = asyncio.get_running_loop()
         gh = await loop.run_in_executor(None, _tool_status, 'gh', ['auth', 'status'])
         claude = await loop.run_in_executor(None, _claude_status)
+        gh_version = await loop.run_in_executor(None, _tool_version, 'gh')
+        claude_version = await loop.run_in_executor(None, _tool_version, 'claude')
         # The same reader the header's chip uses (one small file read), so the row
         # and the chip cannot disagree about the same clone.
         wired = gitstate.filter_wired(config.root_dir)
@@ -291,7 +313,9 @@ def add_vault_routes(app: web.Application) -> None:
             'can_decrypt': can_decrypt,
             'secret_names': _secret_names(vault_key) if vault_key is not None else [],
             'gh_status': gh,
+            'gh_version': gh_version,
             'claude_status': claude,
+            'claude_version': claude_version,
             'filter_wired': wired,
         }, status=status)
 

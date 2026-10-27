@@ -2183,15 +2183,16 @@ decrypt access too — so those emit only `git;` and the panel picks it up, rath
 command emitting both. The refresh is **scoped by presence**: `#vault-panel` is in the DOM
 only while `/account` is the visible pane, so the body events reach a listener — and cost a
 fetch — only then, and are inert otherwise. `! claude /login` is a bash passthrough and
-cannot emit the nudge itself, so its row chains `&& git-sync`: the shell's `&&` runs the
-nudging command the instant the interactive login succeeds (and skips it if the login is
-cancelled), and `git-sync`'s `git;` refresh reaches the panel too. It is safe to chain —
-`git-sync` stashes a dirty tree and rolls back on failure, never leaving a half-synced repo.
+cannot emit the nudge itself, so the Claude Code row (`set up` / `not set up`, the same
+command either way) chains `; user`: `user` emits `account;`, so the panel refreshes the
+moment claude exits — cancelled or not, since `;` runs it either way. The heading's **Regen** button types `user --regen` the same way; `user`
+nudges, so the new key shows as soon as the confirmation is answered.
 
 Reporting on those tools means finding them the way the *shell* does: the service's PATH
 is systemd's, not a login PATH, so `vault_api._which` also looks in `~/.local/bin` — where
 per-user installs land (`claude` does). A tool the user can run in their web shell must
-not read as `not installed` on their account page.
+not read as `not installed` on their account page. The same lookup feeds the version
+beside each CLI's name (`vault_api._tool_version`: the first `N.N[.N]` of its `--version`).
 
 **The refresh guard.** A *full* page load (F5, address-bar entry, tab close) is the only
 thing that can reach the terminal, and the iframe guards it with a `beforeunload`

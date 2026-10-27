@@ -24,7 +24,7 @@
 {% set _ = steps.extend([
      {'label': 'Sign in to the GitHub CLI', 'done': gh_status == 'signed in',
       'hint': 'Run <code>git-identity</code> in your terminal, or click the <b>GitHub CLI</b> tool button below.'},
-     {'label': 'Sign in to Claude Code', 'done': claude_status == 'signed in',
+     {'label': 'Set up Claude Code', 'done': claude_status == 'set up',
       'hint': 'Sign in from your terminal, or click the <b>Claude Code</b> tool button below.'},
      {'label': 'Store your ANTHROPIC_API_KEY', 'done': 'ANTHROPIC_API_KEY' in secret_names,
       'hint': 'Add it under <b>Secrets</b> below.'}
@@ -53,7 +53,15 @@
 </section>
 {% endif %}
 
-<h2>Credentials</h2>
+{# The heading carries the one act on the identity itself: `user --regen` replaces the
+   key pair (after a typed confirmation in the shell) and re-wraps the master key to it.
+   It sits in the same right-hand button column as the tool rows below. Disabled while
+   the vault is locked: the new private key is written into the vault, and the shell
+   refuses to write it beside a vault it cannot open. #}
+<h2 class="cred-head">Credentials
+  <button type="button" class="state-pill state-action" data-term-cmd="user --regen"
+          {% if vault_exists and not unlocked %}disabled title="unlock the vault to replace your key pair"{% else %}title="run `user --regen` in your terminal"{% endif %}>Regen</button>
+</h2>
 <section class="vault" id="vault-state"
          data-vault="{{ 'yes' if vault_exists else 'no' }}"
          data-unlocked="{{ 'yes' if unlocked else 'no' }}">
@@ -173,7 +181,9 @@
      The tone is passed rather than derived from the status text: the rows do not
      share one vocabulary (a CLI is `signed in`, a clone is `decrypted`), and a macro
      that pattern-matched every row's words would have to learn each new one. #}
-  {% macro tool(name, status, command, tone, floor) %}
+  {# `version` is the CLI's own `--version` number, shown beside its name — None for a
+     row that is not a CLI, or one not installed here. #}
+  {% macro tool(name, status, command, tone, floor, version=None) %}
   {# Two reasons the button is dead, each with its own title: the tool is not on this
      instance (no tone), or this profile may not run the command the row would type
      (`floor`). The shell that receives the command already resolved this subject and
@@ -189,6 +199,7 @@
   {% set label = status if permitted else 'not available' %}
   <div class="tool-row">
     <span class="tool-name">{{ name }}</span>
+    {% if version %}<span class="tool-version muted">{{ version }}</span>{% endif %}
     <button type="button" data-term-cmd="{{ command }}"
             class="state-pill state-action{% if shown_tone %} {{ shown_tone }}{% endif %}"
             {% if not permitted or not tone %}disabled{% endif %}
@@ -213,15 +224,13 @@
           'ok' if filter_wired else 'warn', 'reader') }}
   {{ tool('GitHub CLI', gh_status, 'git-identity',
           'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else ''),
-          'contributor') }}
-  {# `! claude /login` is a bash passthrough — it cannot emit the account nudge the
-     Python commands do. But the shell's `&&` gives us "on success" for free: chain a
-     command that DOES nudge, and it runs the moment the interactive login completes
-     (and only then — a cancelled login returns non-zero and short-circuits). git-sync
-     is that command: it emits git-changed, which #vault-panel also refreshes on, and
-     it is safe to chain (it stashes a dirty tree and rolls back on failure, never
-     leaving a half-synced repo). #}
-  {{ tool('Claude Code', claude_status, '! claude /login && git-sync',
-          'ok' if claude_status == 'signed in' else ('warn' if claude_status == 'not signed in' else ''),
-          'contributor') }}
+          'contributor', gh_version) }}
+  {# One command whatever the state: `/login` both sets Claude Code up and re-does it.
+     It is a bash passthrough, so it cannot emit the account nudge itself; the chained
+     `user` does (overlays.toml), refreshing this panel the moment claude exits. `;`, not
+     `&&`: a cancelled login still re-reads the row, and `user` only reports — it mints a
+     key solely when none exists, which is the panel's first step anyway. #}
+  {{ tool('Claude Code', claude_status, '! claude /login; user',
+          'ok' if claude_status == 'set up' else ('warn' if claude_status == 'not set up' else ''),
+          'contributor', claude_version) }}
 </section>
