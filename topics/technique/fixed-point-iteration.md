@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fixed-point_it
 ## Problems
 
 - ● [0214](/solutions/0214/) — Totient Chains
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 
 <!-- /problems -->

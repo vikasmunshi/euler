@@ -247,7 +247,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0446](/solutions/0446/) — Retractions B
 - ○ [0447](/solutions/0447/) — Retractions C
 - ○ [0451](/solutions/0451/) — Modular Inverses
-- ○ [0455](/solutions/0455/) — Powers with Trailing Digits
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ○ [0456](/solutions/0456/) — Triangles Containing the Origin II
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ○ [0463](/solutions/0463/) — A Weird Recurrence Relation
