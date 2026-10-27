@@ -3204,8 +3204,8 @@
     "level": 6,
     "pct": 17,
     "solvers": 3479,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 14:24"
   },
   "402": {
     "title": "Integer-valued Polynomials",
