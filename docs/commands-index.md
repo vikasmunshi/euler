@@ -2199,8 +2199,8 @@ Encrypt this user's `id` + `env` at rest under a password-derived vault key.
   unlock the current session. Prompts for a new password.
 - `unlock`: unlock a locked session (the shell asks at startup; this is the retry — after a
   typo, or once you have the password to hand).
-- `change-password`: re-wrap the vault key under a new password (the secrets are not
-  re-encrypted).
+- `change-password`: set a new password and re-key the vault: a fresh vault key, with
+  the secrets re-encrypted under it. Other open shells must be restarted.
 
 The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock
 (a script, CI), otherwise you are asked once per shell.
