@@ -322,7 +322,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
 - ○ [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0513](/solutions/0513/) — Integral Median
-- ○ [0516](/solutions/0516/) — $5$-smooth Totients
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples

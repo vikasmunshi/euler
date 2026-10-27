@@ -177,6 +177,7 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ○ [0548](/solutions/0548/) — Gozinta Chains
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors

@@ -167,6 +167,7 @@ not a faster test.
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 
 <!-- /problems -->

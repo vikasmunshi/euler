@@ -109,6 +109,7 @@ algorithm, not the language, was what made it tractable.
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0461](/solutions/0461/) — Almost Pi
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points

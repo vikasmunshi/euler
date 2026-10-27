@@ -124,6 +124,7 @@ one it is, as both C files do. Then a reader can check it against the Python cal
 
 - ● [0134](/solutions/0134/) — Prime Pair Connection
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 
 <!-- /problems -->

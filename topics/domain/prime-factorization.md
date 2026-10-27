@@ -244,7 +244,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
 - ○ [0495](/solutions/0495/) — Writing $n$ as the Product of $k$ Distinct Positive Integers
 - ○ [0500](/solutions/0500/) — Problem 500!!!
-- ○ [0516](/solutions/0516/) — $5$-smooth Totients
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0536](/solutions/0536/) — Modulo Power Identity
 - ○ [0548](/solutions/0548/) — Gozinta Chains

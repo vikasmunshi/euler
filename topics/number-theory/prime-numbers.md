@@ -532,7 +532,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0500](/solutions/0500/) — Problem 500!!!
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
-- ○ [0516](/solutions/0516/) — $5$-smooth Totients
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0517](/solutions/0517/) — A Real Recursion
 - ○ [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0521](/solutions/0521/) — Smallest Prime Factor

@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Smooth_number>
 - ● [0108](/solutions/0108/) — Diophantine Reciprocals I
 - ● [0204](/solutions/0204/) — Generalised Hamming Numbers
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
-- ○ [0516](/solutions/0516/) — $5$-smooth Totients
+- ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ○ [0627](/solutions/0627/) — Counting Products
 - ○ [0668](/solutions/0668/) — Square Root Smooth Numbers
