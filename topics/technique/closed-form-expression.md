@@ -344,6 +344,7 @@ loop was never needed.
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0944](/solutions/0944/) — Sum of Elevisors

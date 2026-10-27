@@ -130,6 +130,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0882](/solutions/0882/) — Removing Bits
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 

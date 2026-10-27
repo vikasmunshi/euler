@@ -154,5 +154,6 @@ to `unsigned __int128` (printed by hand, since `printf` has no format for it). S
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 
 <!-- /problems -->

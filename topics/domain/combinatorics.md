@@ -435,7 +435,6 @@ of crossing it.
 - ○ [0879](/solutions/0879/) — Touch-screen Password
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ○ [0886](/solutions/0886/) — Coprime Permutations
-- ○ [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
 - ○ [0892](/solutions/0892/) — Zebra Circles

@@ -14,7 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binary_tree>._
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
 - ○ [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ○ [0829](/solutions/0829/) — Integral Fusion
-- ○ [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

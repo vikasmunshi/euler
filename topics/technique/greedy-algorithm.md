@@ -185,5 +185,6 @@ logic. They differ in the big-integer arithmetic underneath (`math.lcm` against 
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0692](/solutions/0692/) — Siegbert and Jo
+- ● [0887](/solutions/0887/) — Bounded Binary Search
 
 <!-- /problems -->
