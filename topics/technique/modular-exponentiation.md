@@ -167,6 +167,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0516](/solutions/0516/) — $5$-smooth Totients

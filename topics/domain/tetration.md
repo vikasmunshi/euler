@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tetration>._
 
 - ● [0188](/solutions/0188/) — Hyperexponentiation
 - ○ [0282](/solutions/0282/) — The Ackermann Function
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ○ [0909](/solutions/0909/) — L-expressions I
 
 <!-- /problems -->

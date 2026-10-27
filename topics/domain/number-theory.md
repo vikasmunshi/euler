@@ -313,7 +313,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0451](/solutions/0451/) — Modular Inverses
 - ○ [0452](/solutions/0452/) — Long Products
 - ○ [0454](/solutions/0454/) — Diophantine Reciprocals III
-- ○ [0455](/solutions/0455/) — Powers with Trailing Digits
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ○ [0462](/solutions/0462/) — Permutation of 3-smooth Numbers
 - ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table

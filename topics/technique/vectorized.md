@@ -214,6 +214,7 @@ unrolled across the array, with a boolean mask selecting which lanes act.
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures

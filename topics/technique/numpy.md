@@ -239,6 +239,7 @@ both slower and harder to read.
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures

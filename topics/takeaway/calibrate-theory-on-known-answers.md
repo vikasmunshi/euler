@@ -128,6 +128,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 
 - ● [0265](/solutions/0265/) — Binary Circles
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0887](/solutions/0887/) — Bounded Binary Search
