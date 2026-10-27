@@ -142,6 +142,7 @@ way to answer "how many of these have total ≡ 0 mod *n*" without an *n*-slot t
 ## Problems
 
 - ● [0208](/solutions/0208/) — Robot Walks
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0768](/solutions/0768/) — Chandelier
 

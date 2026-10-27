@@ -107,5 +107,6 @@ materialised. Enumerating the terms does not mean recomputing each from scratch.
 ## Problems
 
 - ● [0244](/solutions/0244/) — Sliders
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 
 <!-- /problems -->

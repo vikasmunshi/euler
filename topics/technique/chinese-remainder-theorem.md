@@ -179,6 +179,7 @@ memo.
 
 - ● [0160](/solutions/0160/) — Factorial Trailing Digits
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0932](/solutions/0932/) — $2025$

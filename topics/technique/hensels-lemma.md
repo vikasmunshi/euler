@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hensel%27s_lem
 ## Problems
 
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 
 <!-- /problems -->

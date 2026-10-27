@@ -191,6 +191,7 @@ Trial division is the default until one of three things is true.
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0251](/solutions/0251/) — Cardano Triplets
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0478](/solutions/0478/) — Mixtures
