@@ -162,6 +162,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0250](/solutions/0250/) — $250250$
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient

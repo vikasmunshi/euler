@@ -2614,7 +2614,7 @@
       "reference": "https://en.wikipedia.org/wiki/Root_of_unity",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0208", "p0421", "p0768"]
+      "refs": ["p0208", "p0271", "p0421", "p0768"]
     },
     {
       "slug": "roulette-curve",
@@ -3658,7 +3658,7 @@
       "reference": "https://en.wikipedia.org/wiki/Chinese_remainder_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0160_s0", "p0245_s0", "p0272_s0", "p0365_s0", "p0932_s0", "p0934_s0"]
+      "refs": ["p0160_s0", "p0245_s0", "p0271_s0", "p0272_s0", "p0365_s0", "p0932_s0", "p0934_s0"]
     },
     {
       "slug": "circular-buffer",
@@ -4144,7 +4144,7 @@
       "reference": "https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134_s0", "p0160_s0", "p0198_s0", "p0236_s0", "p0250_s0", "p0251_s0", "p0932_s0", "p0934_s0"]
+      "refs": ["p0134_s0", "p0160_s0", "p0198_s0", "p0236_s0", "p0250_s0", "p0251_s0", "p0271_s0", "p0932_s0", "p0934_s0"]
     },
     {
       "slug": "extended-slice",
@@ -4513,7 +4513,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hensel%27s_lemma",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0245_s0", "p0277_s0"]
+      "refs": ["p0245_s0", "p0271_s0", "p0277_s0"]
     },
     {
       "slug": "hockey-stick-identity",
@@ -4585,7 +4585,7 @@
       "reference": "https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0293_s0", "p0297_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0387_s0", "p0487_s0", "p0493_s0", "p0545_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0686_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
+      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0293_s0", "p0297_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0387_s0", "p0487_s0", "p0493_s0", "p0545_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0686_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
     },
     {
       "slug": "int64",
@@ -4603,7 +4603,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0088_s0", "p0251_s0", "p0357_s0"]
+      "refs": ["p0088_s0", "p0251_s0", "p0271_s0", "p0357_s0"]
     },
     {
       "slug": "integer-overflow",
@@ -5062,7 +5062,7 @@
       "reference": "https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0111_s0", "p0131_s0", "p0146_s0", "p0200_s0", "p0241_s0", "p0245_s0", "p0248_s0", "p0293_s0", "p0387_s0", "p0487_s0", "p0545_s0"]
+      "refs": ["p0111_s0", "p0131_s0", "p0146_s0", "p0200_s0", "p0241_s0", "p0245_s0", "p0248_s0", "p0271_s0", "p0293_s0", "p0387_s0", "p0487_s0", "p0545_s0"]
     },
     {
       "slug": "min-25-sieve",
@@ -5116,7 +5116,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0478_s1", "p0487_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0478_s1", "p0487_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "modular-multiplicative-inverse-application",
@@ -5333,6 +5333,15 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Pivot_element#Partial_and_complete_pivoting"],
       "summary": "",
       "refs": ["p0227_s0"]
+    },
+    {
+      "slug": "pollards-rho-algorithm",
+      "facet": "technique",
+      "name": "Pollard's rho algorithm",
+      "reference": "https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm",
+      "additional-references": [],
+      "summary": "Finding a non-trivial factor of a composite by detecting a cycle in a pseudo-random polynomial sequence modulo n.",
+      "refs": ["p0271_s0"]
     },
     {
       "slug": "power-iteration",
@@ -5854,7 +5863,7 @@
       "reference": "https://en.wikipedia.org/wiki/Trial_division",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003_s0", "p0010_s3", "p0012_s0", "p0012_s1", "p0021_s0", "p0023_s1", "p0027_s0", "p0029_s0", "p0029_s1", "p0041_s0", "p0046_s0", "p0047_s0", "p0051_s0", "p0058_s0", "p0060_s0", "p0069_s0", "p0108_s0", "p0118_s0", "p0128_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0152_s0", "p0157_s0", "p0170_s0", "p0176_s0", "p0188_s0", "p0202_s0", "p0221_s0", "p0234_s0", "p0243_s0", "p0248_s0", "p0251_s0", "p0293_s0", "p0357_s0", "p0478_s0", "p0545_s0", "p0694_s0", "p0853_s0", "p0926_s0", "p0932_s0"]
+      "refs": ["p0003_s0", "p0010_s3", "p0012_s0", "p0012_s1", "p0021_s0", "p0023_s1", "p0027_s0", "p0029_s0", "p0029_s1", "p0041_s0", "p0046_s0", "p0047_s0", "p0051_s0", "p0058_s0", "p0060_s0", "p0069_s0", "p0108_s0", "p0118_s0", "p0128_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0152_s0", "p0157_s0", "p0170_s0", "p0176_s0", "p0188_s0", "p0202_s0", "p0221_s0", "p0234_s0", "p0243_s0", "p0248_s0", "p0251_s0", "p0271_s0", "p0293_s0", "p0357_s0", "p0478_s0", "p0545_s0", "p0694_s0", "p0853_s0", "p0926_s0", "p0932_s0"]
     },
     {
       "slug": "triangle-inequality",
@@ -6016,7 +6025,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When each term is already reduced modulo m, aggregating them inside the same modulus recovers only the total modulo m, so an exact sum forces the terms to be produced individually.",
-      "refs": ["p0244"]
+      "refs": ["p0244", "p0271"]
     },
     {
       "slug": "exploit-symmetry",

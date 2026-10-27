@@ -130,6 +130,7 @@ calls, and a table built once at import is free on every run but the first.
 
 - ● [0088](/solutions/0088/) — Product-sum Numbers
 - ● [0251](/solutions/0251/) — Cardano Triplets
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 
 <!-- /problems -->

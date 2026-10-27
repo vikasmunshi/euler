@@ -163,7 +163,7 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
-- ○ [0271](/solutions/0271/) — Modular Cubes, Part 1
+- ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ○ [0362](/solutions/0362/) — Squarefree Factors
 - ○ [0379](/solutions/0379/) — Least Common Multiple Count
