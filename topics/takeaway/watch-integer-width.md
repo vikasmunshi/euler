@@ -265,6 +265,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0686](/solutions/0686/) — Powers of Two

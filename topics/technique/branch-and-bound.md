@@ -156,6 +156,7 @@ about 81 times faster on a loop that is pure integer arithmetic.
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 
 <!-- /problems -->

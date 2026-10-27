@@ -229,7 +229,7 @@ about*: when the output is a digit property, base-10 storage is the right trade.
 - ○ [0425](/solutions/0425/) — Prime Connection
 - ○ [0442](/solutions/0442/) — Eleven-free Integers
 - ○ [0467](/solutions/0467/) — Superinteger
-- ○ [0473](/solutions/0473/) — Phigital Number Base
+- ● [0473](/solutions/0473/) — Phigital Number Base
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
 - ○ [0506](/solutions/0506/) — Clock Sequence
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$

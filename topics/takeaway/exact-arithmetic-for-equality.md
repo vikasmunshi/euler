@@ -188,6 +188,7 @@ decision.
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 - ● [0768](/solutions/0768/) — Chandelier
