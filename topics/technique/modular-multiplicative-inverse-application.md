@@ -170,6 +170,7 @@ the repetition.
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0407](/solutions/0407/) — Idempotents
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0743](/solutions/0743/) — Window into a Matrix

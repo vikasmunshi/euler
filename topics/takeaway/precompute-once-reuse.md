@@ -177,6 +177,7 @@ let every later query pay a lookup instead of the full price.
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0407](/solutions/0407/) — Idempotents
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
