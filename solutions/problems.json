@@ -5124,8 +5124,8 @@
     "level": 18,
     "pct": 46,
     "solvers": 704,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 15:07"
   },
   "642": {
     "title": "Sum of Largest Prime Factors",
