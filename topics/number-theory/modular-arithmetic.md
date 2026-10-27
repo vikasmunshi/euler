@@ -419,7 +419,7 @@ handful of operations on small numbers.
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0696](/solutions/0696/) — Mahjong
-- ○ [0700](/solutions/0700/) — Eulercoin
+- ● [0700](/solutions/0700/) — Eulercoin
 - ○ [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0707](/solutions/0707/) — Lights Out
 - ○ [0709](/solutions/0709/) — Even Stevens
