@@ -206,6 +206,7 @@ pass.
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0301](/solutions/0301/) — Nim
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0943](/solutions/0943/) — Self Describing Sequences

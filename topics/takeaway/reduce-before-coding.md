@@ -336,6 +336,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0700](/solutions/0700/) — Eulercoin

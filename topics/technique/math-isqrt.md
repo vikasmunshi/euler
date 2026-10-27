@@ -206,6 +206,7 @@ ceiling pays for itself many times over.
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0950](/solutions/0950/) — Pirate Treasure
 

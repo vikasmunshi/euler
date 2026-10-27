@@ -153,6 +153,7 @@ The algorithms match one for one. The differences come from what each language m
 - ○ [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ○ [0864](/solutions/0864/) — Square + 1 = Squarefree

@@ -403,7 +403,7 @@ handful of operations on small numbers.
 - ○ [0631](/solutions/0631/) — Constrained Permutations
 - ○ [0635](/solutions/0635/) — Subset Sums
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
-- ○ [0641](/solutions/0641/) — A Long Row of Dice
+- ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0653](/solutions/0653/) — Frictionless Tube
