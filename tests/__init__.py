@@ -8,12 +8,47 @@
 # and never runs this __init__ — so each noisy module calls `silence()` itself, which
 # imports this package (cwd is on the path under `python -m`) under either discovery
 # style. Idempotent.
+#
+# The one deliberate import-time effect is `_pin_subject()`, below: the suite runs as a
+# fixed identity, never the host's. Commands register at import against `config.subject`
+# (`@register` drops one the subject may not run), so the identity current when the first
+# command module is imported decides the whole registry. Left to resolve itself it reads
+# /etc/euler/authorizations.json, and a terminal without the `euler-authz` group sees that
+# policy with no names in it — the operator becomes a reader, every contributor+ command
+# goes missing, and a suite that passes in one terminal fails in the next. The pin must
+# precede every test module, so the suite runs with `-t .` (`make test`, the pre-push
+# hook), which imports this package first; `test_config` fails loudly when it did not.
 import logging
 import warnings
 
 from aiohttp.web import NotAppKeyWarning
 
+from solver.auth.identity import os_login, subject_for
+from solver.config import config
+from solver.shell.command import registry
+
 _aiohttp_patched = False
+
+#: How the pinned subject authenticated — the mark `test_config` checks for.
+PINNED_AUTH = 'test-pinned'
+
+#: Whether the pin came before any command registered (or was withheld) — False means some
+#: test module imported commands under the host's identity first.
+pinned_first = False
+
+
+def _pin_subject() -> None:
+    """Fix the suite's identity: the checkout owner with no deployed policy (`admin`).
+
+    That is the identity a fresh clone resolves to, and the one that registers the whole
+    catalogue. The login is kept, so per-user state (`.state/<slug>`) lands where it did.
+    """
+    global pinned_first
+    pinned_first = not registry.all() and not registry.withheld
+    config.subject = subject_for(os_login(), owner=True, policy=None)._replace(auth_method=PINNED_AUTH)
+
+
+_pin_subject()
 
 
 def _filter_request_key_warning() -> None:

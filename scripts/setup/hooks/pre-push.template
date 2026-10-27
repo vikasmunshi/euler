@@ -278,7 +278,9 @@ if (( ${#PUSH_REFS[@]} == 0 )); then
     skip "no refs offered by git — nothing to test"
 elif [[ -z "$(pushed_paths packages scripts tests)" ]]; then
     skip "this push changes nothing under packages/, scripts/ or tests/"
-elif "$VENV/bin/python" -m unittest discover -s tests -q; then
+# `-t .` imports the tests package first, so its pinned identity is in place before any
+# command registers (tests/__init__.py): the result must not depend on this terminal's groups.
+elif "$VENV/bin/python" -m unittest discover -s tests -t . -q; then
     pass "unit tests pass"
 else
     fail "unit tests failed"

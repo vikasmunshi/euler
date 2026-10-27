@@ -28,6 +28,7 @@ from pathlib import Path
 
 from solver.config import Config, config
 from solver.config.paths import package_root, repo_root
+import tests
 
 #: Run from the repo root so the child resolves the same tree this process did.
 _ROOT = repo_root()
@@ -109,6 +110,21 @@ class ImportPurityTests(unittest.TestCase):
         """The git filter's stdout carries file content; a stray print corrupts a solution."""
         out = _probe('import solver.crypto.gitfilter')
         self.assertEqual(out, '')
+
+
+class SuiteIdentityTests(unittest.TestCase):
+    def test_the_suite_runs_as_its_pinned_identity_not_the_hosts(self) -> None:
+        """The registry was built for the pinned admin, whatever this terminal may read.
+
+        Fails when the suite ran without `-t .`: then the tests package was imported only
+        after some command module had already registered against the host's identity —
+        in whatever terminal, so the mistake shows here rather than on a host without the
+        `euler-authz` group.
+        """
+        self.assertTrue(tests.pinned_first,
+                        'run the suite with `-t .` (make test), so tests/__init__.py pins '
+                        'the identity before any command registers')
+        self.assertEqual(config.subject.auth_method, tests.PINNED_AUTH)
 
 
 class AccessorAgreementTests(unittest.TestCase):
