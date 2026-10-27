@@ -581,7 +581,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0659](/solutions/0659/) — Largest Prime
-- ○ [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ○ [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0687](/solutions/0687/) — Shuffling Cards

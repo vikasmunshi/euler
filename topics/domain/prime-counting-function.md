@@ -149,6 +149,7 @@ The two languages agree on the algorithm everywhere; they diverge on where the i
 - ○ [0537](/solutions/0537/) — Counting Tuples
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ○ [0801](/solutions/0801/) — $x^y \equiv y^x$
 - ○ [0869](/solutions/0869/) — Prime Guessing
 

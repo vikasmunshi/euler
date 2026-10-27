@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Meissel%E2%80%
 
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
+- ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 
 <!-- /problems -->
