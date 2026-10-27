@@ -342,6 +342,7 @@ loop was never needed.
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
+- ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0887](/solutions/0887/) — Bounded Binary Search

@@ -175,6 +175,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0768](/solutions/0768/) — Chandelier
+- ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0926](/solutions/0926/) — Total Roundness

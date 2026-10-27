@@ -259,7 +259,7 @@ about*: when the output is a digit property, base-10 storage is the right trade.
 - ○ [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0749](/solutions/0749/) — Near Power Sums
 - ○ [0776](/solutions/0776/) — Digit Sum Division
-- ○ [0778](/solutions/0778/) — Freshman's Product
+- ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ○ [0805](/solutions/0805/) — Shifted Multiples
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
