@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Zeckendorf%27s
 ## Problems
 
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
-- ○ [0473](/solutions/0473/) — Phigital Number Base
+- ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 
 <!-- /problems -->

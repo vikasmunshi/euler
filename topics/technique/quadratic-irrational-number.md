@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_irra
 ## Problems
 
 - ● [0066](/solutions/0066/) — Diophantine Equation
+- ● [0473](/solutions/0473/) — Phigital Number Base
 
 <!-- /problems -->
