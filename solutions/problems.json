@@ -4124,8 +4124,8 @@
     "level": 8,
     "pct": 23,
     "solvers": 2050,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 14:27"
   },
   "517": {
     "title": "A Real Recursion",
