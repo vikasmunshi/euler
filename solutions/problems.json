@@ -3636,8 +3636,8 @@
     "level": 11,
     "pct": 29,
     "solvers": 1062,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 14:57"
   },
   "456": {
     "title": "Triangles Containing the Origin II",
