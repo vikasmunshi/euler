@@ -133,7 +133,6 @@ the history into the state before you look for a value.
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
 - ○ [0832](/solutions/0832/) — Mex Sequence
 - ○ [0859](/solutions/0859/) — Cookie Game
-- ○ [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ○ [0870](/solutions/0870/) — Stone Game IV
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ● [0899](/solutions/0899/) — DistribuNim I

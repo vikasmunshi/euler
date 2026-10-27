@@ -161,6 +161,7 @@ factorials that every formula above is built from.
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ○ [0830](/solutions/0830/) — Binomials and Powers
 - ○ [0831](/solutions/0831/) — Triple Product
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0885](/solutions/0885/) — Sorted Digits
 

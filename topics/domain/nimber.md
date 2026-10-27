@@ -21,7 +21,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Nimber>._
 - ○ [0665](/solutions/0665/) — Proportionate Nim
 - ○ [0798](/solutions/0798/) — Card Stacking Game
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
-- ○ [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ○ [0900](/solutions/0900/) — DistribuNim II
 - ○ [0933](/solutions/0933/) — Paper Cutting

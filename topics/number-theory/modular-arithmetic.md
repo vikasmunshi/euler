@@ -482,6 +482,7 @@ handful of operations on small numbers.
 - ○ [0851](/solutions/0851/) — SOP and POS
 - ○ [0854](/solutions/0854/) — Pisano Periods 2
 - ○ [0858](/solutions/0858/) — LCM
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
 - ○ [0866](/solutions/0866/) — Tidying Up B
 - ○ [0871](/solutions/0871/) — Drifting Subsets

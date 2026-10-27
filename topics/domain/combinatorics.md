@@ -425,7 +425,6 @@ of crossing it.
 - ○ [0856](/solutions/0856/) — Waiting for a Pair
 - ○ [0857](/solutions/0857/) — Beautiful Graphs
 - ○ [0858](/solutions/0858/) — LCM
-- ○ [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
 - ○ [0866](/solutions/0866/) — Tidying Up B

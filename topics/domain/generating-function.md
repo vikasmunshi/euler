@@ -199,6 +199,7 @@ ask which coefficient you actually need.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0768](/solutions/0768/) — Chandelier
 - ○ [0851](/solutions/0851/) — SOP and POS
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
 - ○ [0881](/solutions/0881/) — Divisor Graph Width
 - ○ [0890](/solutions/0890/) — Binary Partitions

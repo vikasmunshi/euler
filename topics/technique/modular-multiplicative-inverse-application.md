@@ -174,6 +174,7 @@ the repetition.
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0743](/solutions/0743/) — Window into a Matrix
+- ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
