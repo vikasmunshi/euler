@@ -451,7 +451,7 @@ handful of operations on small numbers.
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ○ [0773](/solutions/0773/) — Ruff Numbers
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
-- ○ [0778](/solutions/0778/) — Freshman's Product
+- ● [0778](/solutions/0778/) — Freshman's Product
 - ○ [0784](/solutions/0784/) — Reciprocal Pairs
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ○ [0789](/solutions/0789/) — Minimal Pairing Modulo $p$

@@ -192,7 +192,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0749](/solutions/0749/) — Near Power Sums
 - ○ [0776](/solutions/0776/) — Digit Sum Division
-- ○ [0778](/solutions/0778/) — Freshman's Product
+- ● [0778](/solutions/0778/) — Freshman's Product
 - ○ [0805](/solutions/0805/) — Shifted Multiples
 - ○ [0817](/solutions/0817/) — Digits in Squares
 - ○ [0831](/solutions/0831/) — Triple Product

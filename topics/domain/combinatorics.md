@@ -399,7 +399,7 @@ of crossing it.
 - ○ [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0768](/solutions/0768/) — Chandelier
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
-- ○ [0778](/solutions/0778/) — Freshman's Product
+- ● [0778](/solutions/0778/) — Freshman's Product
 - ○ [0780](/solutions/0780/) — Toriangulations
 - ○ [0781](/solutions/0781/) — Feynman Diagrams
 - ○ [0782](/solutions/0782/) — Distinct Rows and Columns
