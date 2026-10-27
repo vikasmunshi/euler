@@ -5596,8 +5596,8 @@
     "level": 11,
     "pct": 29,
     "solvers": 4738,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 27 Oct 2026, 14:54"
   },
   "701": {
     "title": "Random Connected Area",
