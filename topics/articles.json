@@ -993,8 +993,8 @@
     {
       "path": "domain/diophantine-approximation",
       "title": "Diophantine approximation",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T09:32Z",
       "solved": 3,
       "problems": 10,
       "tags": ["diophantine-approximation"],
