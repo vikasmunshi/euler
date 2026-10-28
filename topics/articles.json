@@ -4007,8 +4007,8 @@
     {
       "path": "domain/zeckendorfs-theorem",
       "title": "Zeckendorf's theorem",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:07Z",
       "solved": 3,
       "problems": 3,
       "tags": ["zeckendorfs-theorem"],

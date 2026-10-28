@@ -1,5 +1,5 @@
 <!-- tags: [zeckendorfs-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:07Z -->
 # Zeckendorf's theorem
 
 [Zeckendorf's theorem](https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem) says that every
