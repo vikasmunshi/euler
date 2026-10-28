@@ -300,8 +300,8 @@
     {
       "path": "domain/binary-tree",
       "title": "Binary tree",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:09Z",
       "solved": 3,
       "problems": 9,
       "tags": ["binary-tree"],
