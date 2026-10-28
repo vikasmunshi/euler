@@ -272,6 +272,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0694](/solutions/0694/) — Cube-full Divisors
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0751](/solutions/0751/) — Concatenation Coincidence

@@ -187,7 +187,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
 - ○ [0676](/solutions/0676/) — Matching Digit Sums
-- ○ [0698](/solutions/0698/) — 123 Numbers
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ○ [0714](/solutions/0714/) — Duodigits
 - ○ [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0749](/solutions/0749/) — Near Power Sums

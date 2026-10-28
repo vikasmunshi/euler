@@ -9,6 +9,7 @@ _TODO: write this page. No reference on the tag._
 
 - ● [0452](/solutions/0452/) — Long Products
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0778](/solutions/0778/) — Freshman's Product
 
 <!-- /problems -->
