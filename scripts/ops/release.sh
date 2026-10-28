@@ -75,6 +75,10 @@
 # The whole run — this script's own output and the detached steps' — is appended to one
 # log file, printed at the start and named again at the end. While the terminal lives the
 # detached output is also followed on screen, so an attended run looks like an ordinary one.
+# By default it lands where scripts/ops/capture-run.sh puts its sessions: audit/logs/
+# <timestamp>-release.log (0600, in a 0700 folder ignored by git — the log names
+# collaborators and the host's layout), with audit/logs/latest.log linked to it as the run
+# starts, so `tail -f audit/logs/latest.log` follows a release in flight.
 #
 # Preconditions this script insists on, up front, before it changes anything:
 #
@@ -144,8 +148,8 @@ Usage: bash $0 [--dry-run] [--yes] [--skip-updates] [--no-deploy] [--no-follow] 
   --no-tmux        run in this terminal instead of re-running inside a tmux session.
                    The deploy then dies with the terminal's pty, taking the sudo
                    ticket with it — see the header.
-  --log FILE       append the run's output here (default: a timestamped file under
-                   \${TMPDIR:-/tmp}).
+  --log FILE       append the run's output here (default: audit/logs/<timestamp>-release.log,
+                   linked from audit/logs/latest.log — as scripts/ops/capture-run.sh logs).
 
 Runs, in order: ${UPDATE_SHELL} ${UPDATE_VERBS[*]} -> make release -> make redeploy-web
 -> make status-web. Needs a clean working tree, an unlocked vault, and sudo.
@@ -278,11 +282,23 @@ LAST_TAG="$(git describe --tags --abbrev=0 --match 'v*' 2> /dev/null || echo 'no
 CURRENT="$(read_version)"
 [[ -n "${CURRENT}" ]] || fail "cannot read __version__ from packages/solver/solver/version.py."
 
-# The log is named before the tmux hand-off below, so both sides of it write to one file.
+# The log is named before the tmux hand-off below, so both sides of it write to one file
+# (the re-run is handed it with --log, so only this side picks the name and moves the link).
+# The default follows capture-run.sh: audit/logs/, private to this user. The 077 umask is
+# scoped to creating the folder and the file — the steps keep the ordinary one, or a venv
+# rebuilt as root would come out unreadable to the service users.
 if [[ ${DRY_RUN} -eq 0 ]]; then
-    [[ -n "${LOG}" ]] || LOG="${TMPDIR:-/tmp}/euler-new-version-$(date -u +%Y%m%d-%H%M%S).log"
-    mkdir -p "$(dirname "${LOG}")" 2> /dev/null
-    : >> "${LOG}" || fail "cannot write the log file ${LOG}"
+    if [[ -z "${LOG}" ]]; then
+        LOGS="${ROOT}/audit/logs"
+        LOG="${LOGS}/$(date +%Y%m%d-%H%M%S)-release.log"
+        (umask 077 && mkdir -p "${LOGS}") || fail "cannot create the log folder ${LOGS}"
+        chmod 0700 "${ROOT}/audit" "${LOGS}"
+        (umask 077 && : >> "${LOG}") || fail "cannot write the log file ${LOG}"
+        ln -sfn "$(basename "${LOG}")" "${LOGS}/latest.log"
+    else
+        mkdir -p "$(dirname "${LOG}")" 2> /dev/null
+        : >> "${LOG}" || fail "cannot write the log file ${LOG}"
+    fi
 fi
 
 # ── run the whole thing inside tmux ───────────────────────────────────────────────────
