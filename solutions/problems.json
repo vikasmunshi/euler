@@ -51,7 +51,7 @@
     "title": "10 001st Prime",
     "level": 0,
     "pct": 1,
-    "solvers": 387685,
+    "solvers": 387686,
     "solved": true,
     "date": "Fri, 27 Sep 2019, 13:56"
   },
@@ -4093,7 +4093,7 @@
     "pct": 19,
     "solvers": 2020,
     "solved": true,
-    "date": "Wed, 28 Oct 2026, 09:52"
+    "date": "Wed, 28 Oct 2026, 10:43"
   },
   "513": {
     "title": "Integral Median",
