@@ -1,5 +1,5 @@
 <!-- tags: [smooth-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:08Z -->
 # Smooth number
 
 A number is [`y`-smooth](https://en.wikipedia.org/wiki/Smooth_number) when none of its prime
