@@ -1,10 +1,10 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final 2026-10-15T10:27Z -->
+<!-- status: final -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
 arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
-collection under some rule. It is the largest domain in this archive — 278 problems carry the tag,
+collection under some rule. It is the largest domain in this archive — 276 problems carry the tag,
 more than any other — and that is not an accident of tagging. Project Euler's favourite question
 shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
 discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
@@ -68,6 +68,20 @@ a [multinomial](/topics/technique/multinomial-theorem) for which positions hold 
 $(v-1)^{\ell}$ for the free dice below. Pick the statistic that classifies, and the overlaps you
 would otherwise subtract never arise.
 
+That product is the [rule of product](https://en.wikipedia.org/wiki/Rule_of_product), and the
+modelling question behind it is **which parts of a configuration do not interact**. Find them and
+the count factorises. Problem 452 counts ordered $n$-tuples with product at most $m$; for a fixed
+product the tuple splits prime by prime, each exponent $e$ distributed over the $n$ slots
+independently, so the per-prime count is [stars and bars](https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics)),
+$\binom{n+e-1}{e}$, and the whole count is a
+[multiplicative function](https://en.wikipedia.org/wiki/Multiplicative_function) that a sublinear
+prime-sum sieve can total. Problem 778's "freshman's product" multiplies numbers digit by digit
+with no carries, so each decimal position is its own sub-problem: replace the integers by a
+ten-entry histogram of their digit at that place, and the product's distribution is that histogram
+convolved with itself $R$ times over the digits under multiplication mod 10 — a power taken by
+squaring, because the convolution is associative. Independence is a property of the model, not
+the code; a carry, or a prime shared between slots, would break it.
+
 ## The four shapes an answer takes
 
 Across these problems the resolution nearly always falls into one of four moves.
@@ -79,7 +93,13 @@ a grid holds $\binom{m+1}{2}\binom{n+1}{2}$ of them — problem 85's brute-force
 collapses to that. [Catalan numbers](/topics/domain/catalan-number) count balanced structures;
 [necklace counting](/topics/domain/necklace-counting) handles arrangements up to rotation. Problem
 24's rank-to-permutation unranking is a closed form in disguise: repeated `divmod` by $(n-1)!$ picks
-each digit directly, never touching the million permutations it skips. Sometimes the formula only
+each digit directly, never touching the million permutations it skips. The general form of that
+move is *count, then descend*: to find the $n$-th object, try each next symbol in order, count the
+objects that start with the extended prefix, and either keep the symbol or subtract the block and
+move on. Problem 698 unranks numbers whose digit counts must themselves be members of the set; the
+membership test only sees the multiset of digits, so the completions of a prefix are a short sum of
+multinomials over admissible count triples, and an index near $10^{17}$ is reached in a few dozen
+digit choices. Unranking is only ever as hard as counting. Sometimes the formula only
 appears once you notice how little the question asks: problem 242 wants pairs $(n, k)$ for which the
 number of odd-sum $k$-subsets of $\{1..n\}$ is odd, over $n \le 10^{12}$. Only *parity* matters,
 and modulo 2 [Lucas' theorem](/topics/domain/lucass-theorem) makes binomials rigid — the subset
@@ -140,13 +160,21 @@ generate every rotation and deduplicate, it searches only strings starting at th
 a [canonical form](/topics/technique/canonical-form) that names each circle exactly once. Problem 244
 is a 15 puzzle with tiles that are only coloured, seven red and eight blue; treating same-colour
 tiles as interchangeable cuts $16!/2$ states to $16 \cdot \binom{15}{7} \approx 10^5$, and a plain
-[breadth-first search](/topics/technique/breadth-first-search) finishes the job. See
+[breadth-first search](/topics/technique/breadth-first-search) finishes the job.
+
+The same quotient shrinks a DP *state*. Problem 670 colours a tiled $2 \times n$ strip with four
+colours, adjacent tiles distinct, for $n = 10^{16}$ — a [transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method)
+raised to a huge power, so the state count is cubed in every multiplication. Remembering each
+boundary's actual colours gives over a hundred states; but the two tiles at a boundary always touch
+and so always differ, and every such colour pair is equivalent under permuting the colours. Only
+*how many* choices each new tile has matters, so the colours fold into the matrix weights and ten
+states remain. See
 [exploit symmetry](/topics/takeaway/exploit-symmetry).
 
 ## The counts themselves are the other hazard
 
 Combinatorial answers grow explosively, and this domain's most common companion tag is
-[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 278 problems carry it. That
+[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 276 problems carry it. That
 pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
 the deliverable and you work in the ring from line one), or it wants the honest integer and you
 need [arbitrary precision](/topics/technique/arbitrary-precision-arithmetic). Python gives you the
@@ -164,6 +192,13 @@ nothing to divide. Problem 244 looks similar and is not: its answer is the plain
 checksums that were each reduced on their own, so a DP carrying (count, sum of checksums) modulo
 $100\,000\,007$ would lose track of how many of them wrapped. There the paths must be walked one by one — affordable
 only because the BFS shows how few shortest paths there are.
+
+Expected counts carry their own version of the trap. Problem 523's odd sorting procedure is
+insertion sort in disguise, each insertion costing $2^s$ moves, and
+[linearity of expectation](https://en.wikipedia.org/wiki/Expected_value#Properties) turns the
+average into a single short sum of fractions. The answer is wanted to two decimals, and the
+statement's own $E(10) = 115.725$ sits exactly on a half — so the sum is kept as exact rationals
+and rounded once, in integers, rather than trusting floating point to land on the right side.
 
 ## How to reason about it
 
