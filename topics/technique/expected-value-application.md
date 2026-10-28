@@ -1,5 +1,5 @@
 <!-- tags: [expected-value-application] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T16:35Z -->
 # Expected value (application)
 
 This page is about the *mechanics*: what it looks like, in code, to actually turn "expected value
