@@ -5396,8 +5396,8 @@
     "level": 9,
     "pct": 23,
     "solvers": 1107,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 09:38"
   },
   "676": {
     "title": "Matching Digit Sums",
