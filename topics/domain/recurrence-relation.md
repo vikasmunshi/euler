@@ -263,7 +263,7 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0654](/solutions/0654/) — Neighbourly Constraints
 - ○ [0664](/solutions/0664/) — An Infinite Game
 - ○ [0666](/solutions/0666/) — Polymorphic Bacteria
-- ○ [0670](/solutions/0670/) — Colouring a Strip
+- ● [0670](/solutions/0670/) — Colouring a Strip
 - ○ [0671](/solutions/0671/) — Colouring a Loop
 - ○ [0672](/solutions/0672/) — One More One
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator

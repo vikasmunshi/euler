@@ -360,7 +360,7 @@ of crossing it.
 - ○ [0658](/solutions/0658/) — Incomplete Words II
 - ○ [0662](/solutions/0662/) — Fibonacci Paths
 - ○ [0669](/solutions/0669/) — The King's Banquet
-- ○ [0670](/solutions/0670/) — Colouring a Strip
+- ● [0670](/solutions/0670/) — Colouring a Strip
 - ○ [0671](/solutions/0671/) — Colouring a Loop
 - ○ [0677](/solutions/0677/) — Coloured Graphs
 - ● [0679](/solutions/0679/) — Freefarea

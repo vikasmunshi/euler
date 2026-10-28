@@ -3100,7 +3100,7 @@
       "reference": "https://en.wikipedia.org/wiki/Transfer_matrix_method",
       "additional-references": ["https://en.wikipedia.org/wiki/Transfer-matrix_method"],
       "summary": "",
-      "refs": ["p0189", "p0194", "p0237", "p0458", "p0544", "p0654", "p0767"]
+      "refs": ["p0189", "p0194", "p0237", "p0458", "p0544", "p0654", "p0670", "p0767"]
     },
     {
       "slug": "tree-graph-theory",
@@ -4153,7 +4153,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation_by_squaring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0721_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
+      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0670_s0", "p0721_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
     },
     {
       "slug": "extended-euclidean-algorithm",
@@ -4981,7 +4981,7 @@
       "reference": "https://en.wikipedia.org/wiki/Matrix_exponential",
       "additional-references": [],
       "summary": "Representing a linear recurrence as repeated multiplication by a fixed transfer matrix, computed via fast exponentiation.",
-      "refs": ["p0237_s0", "p0918_s0", "p0940_s0"]
+      "refs": ["p0237_s0", "p0670_s0", "p0918_s0", "p0940_s0"]
     },
     {
       "slug": "maximum-subarray-problem",
@@ -5809,7 +5809,7 @@
       "reference": "https://en.wikipedia.org/wiki/Symmetry",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0", "p0761_s0", "p0983_s0"]
+      "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0", "p0670_s0", "p0761_s0", "p0983_s0"]
     },
     {
       "slug": "system-of-linear-equations",
@@ -6016,7 +6016,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the analysis is subtle, demand that it reproduce every given value exactly before trusting it on the unknown case.",
-      "refs": ["p0265", "p0336", "p0455", "p0761", "p0860", "p0882", "p0887", "p0963", "p0983"]
+      "refs": ["p0265", "p0336", "p0455", "p0670", "p0761", "p0860", "p0882", "p0887", "p0963", "p0983"]
     },
     {
       "slug": "cancel-divisors-before-reducing",
@@ -6097,7 +6097,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
-      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
+      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0670", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
     },
     {
       "slug": "invert-cost-to-capacity",
