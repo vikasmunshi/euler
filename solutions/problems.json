@@ -2716,8 +2716,8 @@
     "level": 8,
     "pct": 21,
     "solvers": 1594,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 17:03"
   },
   "341": {
     "title": "Golomb's Self-describing Sequence",
