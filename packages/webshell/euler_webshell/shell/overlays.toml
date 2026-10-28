@@ -70,6 +70,9 @@ emit = ["account"]
 [claude]             # a first run, a /login, an `auth status`: the Claude Code row re-reads
 emit = ["account"]
 
+[tool-setup]         # an install or removal moves the Claude Code row too
+emit = ["account"]
+
 # ── the viewer pane ─────────────────────────────────────────────────────────────────────
 [show]
 replace = "euler_webshell.shell.viewer:show"

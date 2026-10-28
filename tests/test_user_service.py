@@ -401,7 +401,7 @@ class VaultRouteTests(_UserServiceCase):
         contributor floor every state reads `not available`, disabled."""
         from euler_webshell.user import vault_api
         expected = {
-            'not installed': 'msg send to=staff subject=&#34;Please install Claude Code&#34;',
+            'not installed': 'data-term-cmd="tool-setup claude"',
             'not set up': 'data-term-cmd="claude"',
             'not signed in': 'data-term-cmd="claude /login; claude auth status"',
             'signed in': 'data-term-cmd="claude auth status"',

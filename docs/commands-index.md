@@ -97,6 +97,7 @@ a parameter that accepts repetition.
 | [`sys-setup`](#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
 | [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
 | [`test-cases`](#command-test-cases) | — | `reader` | List a problem's test cases. |
+| [`tool-setup`](#command-tool-setup) | — | `contributor` | Install, uninstall or reinstall a per-user tool in your own home. |
 | [`topic`](#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
 | [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
@@ -1848,6 +1849,37 @@ test-cases
 | `*categories` | Test-case categories to include: 'dev', 'main', 'extra', or 'all' (which expands to all three). Defaults to all three. |
 
 *Defined in* `solver.core.test_cases.test_cases`.
+
+---
+
+#### Command: `tool-setup`
+
+Install, uninstall or reinstall a per-user tool in your own home.
+
+* ⚑ needs contributor or above.
+* ✎ asks for anything you leave out.
+
+Runs the tool's setup script as you — no sudo: the tool lands under your home
+(`~/.local/bin`), with your own login and config, so the floor is `contributor`, not
+`admin` like `sys-setup`. On the web host the download goes through the egress proxy.
+An install of a tool already there is a no-op; uninstall and reinstall ask first.
+
+**usage**
+
+```
+tool-setup
+[tool=claude] (asked)
+[action=install|uninstall|reinstall] (default install)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `tool` | Which tool: 'claude' (Claude Code). Offered as a menu when omitted. |
+| `action` | 'install', 'uninstall', or 'reinstall' (uninstall, then install). Defaults to 'install'. |
+
+*Defined in* `solver.utils.scripts.tool_setup`.
 
 ---
 

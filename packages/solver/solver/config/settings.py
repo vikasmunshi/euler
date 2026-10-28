@@ -97,6 +97,7 @@ class Scripts(NamedTuple):
     compile_c: str = 'scripts/c/compile.sh'
     configure_identity: str = 'scripts/git/configure-identity.sh'
     install_chrome: str = 'scripts/setup/chrome.sh'
+    install_claude: str = 'scripts/setup/claude_code.sh'
     install_dev_env: str = 'scripts/setup/dev_env.sh'
     install_upgrade_service: str = 'scripts/setup/upgrade_service.sh'
     linter: str = 'scripts/linters/check.sh'

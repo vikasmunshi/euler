@@ -97,6 +97,7 @@ a profile on each channel.
 | `solver.utils.presentation` | `update-presentation-data` |  |  | ✓ | ✓ |
 | `solver.utils.scripts` | `pip-upgrade` |  |  |  | ✓ |
 | `solver.utils.scripts` | `sys-setup` |  |  |  | ✓ |
+| `solver.utils.scripts` | `tool-setup` |  | ✓ | ✓ | ✓ |
 | `solver.utils.search` | `search` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.shell_utils` | `pause` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |

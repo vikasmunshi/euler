@@ -212,7 +212,7 @@ packages/solver/solver/           — euler-solver: the solver shell — standal
     path_utils.py                 — Utility functions for file and directory operations.
     presentation.py               — The `update-presentation-data` command: refresh the presentation deck's data file.
     quips.py                      — The regenerating verbs' commit subjects — one pool per verb, in one place.
-    scripts.py                    — Dependency and system-resource setup commands.
+    scripts.py                    — Dependency, system-resource and per-user tool setup commands.
     search.py                     — 'find' command: grep the solution stack for a regular expression.
     shell_utils.py                — Utility for running shell commands and capturing their output.
     update_doc.py                 — Regenerate the machine-maintained sections of the guides under `docs/`.

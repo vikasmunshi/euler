@@ -68,6 +68,7 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
 | [`tags`](commands-index.md#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
 | [`test-cases`](commands-index.md#command-test-cases) | — | `reader` | List a problem's test cases. |
+| [`tool-setup`](commands-index.md#command-tool-setup) | — | `contributor` | Install, uninstall or reinstall a per-user tool in your own home. |
 | [`topic`](commands-index.md#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
 | [`topics`](commands-index.md#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
@@ -120,6 +121,7 @@ Generated from that table by `update-docs`.
 | `user` | then refreshes the account page |
 | `git-identity` | then refreshes the account page |
 | `claude` | then refreshes the account page |
+| `tool-setup` | then refreshes the account page |
 | `show` | runs `euler_webshell.shell.viewer.show` instead |
 | `edit` | runs `euler_webshell.shell.viewer.edit` instead |
 | `key-rekey` | runs `euler_webshell.shell.keys.key_rekey` instead; then refreshes the git chip |
