@@ -4180,8 +4180,8 @@
     "level": 7,
     "pct": 18,
     "solvers": 1424,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 17:07"
   },
   "524": {
     "title": "First Sort II",
