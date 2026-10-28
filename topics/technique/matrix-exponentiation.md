@@ -91,6 +91,7 @@ at $M$:
 ## Problems
 
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
+- ● [0670](/solutions/0670/) — Colouring a Strip
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 

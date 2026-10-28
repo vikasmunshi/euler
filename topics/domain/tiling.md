@@ -139,7 +139,7 @@ state still works, but deciding what the frontier *is* gets much harder.
 - ○ [0405](/solutions/0405/) — A Rectangular Tiling
 - ○ [0440](/solutions/0440/) — GCD and Tiling
 - ○ [0594](/solutions/0594/) — Rhombus Tilings
-- ○ [0670](/solutions/0670/) — Colouring a Strip
+- ● [0670](/solutions/0670/) — Colouring a Strip
 - ○ [0671](/solutions/0671/) — Colouring a Loop
 - ○ [0766](/solutions/0766/) — Sliding Block Puzzle
 - ○ [0780](/solutions/0780/) — Toriangulations

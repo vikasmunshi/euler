@@ -12,7 +12,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Graph_coloring
 - ○ [0519](/solutions/0519/) — Tricoloured Coin Fountains
 - ○ [0544](/solutions/0544/) — Chromatic Conundrum
 - ○ [0554](/solutions/0554/) — Centaurs on a Chess Board
-- ○ [0670](/solutions/0670/) — Colouring a Strip
+- ● [0670](/solutions/0670/) — Colouring a Strip
 - ○ [0671](/solutions/0671/) — Colouring a Loop
 - ○ [0677](/solutions/0677/) — Coloured Graphs
 - ○ [0857](/solutions/0857/) — Beautiful Graphs
