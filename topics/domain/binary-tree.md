@@ -1,5 +1,5 @@
 <!-- tags: [binary-tree] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:09Z -->
 # Binary tree
 
 A [binary tree](https://en.wikipedia.org/wiki/Binary_tree) is a rooted structure in which every
