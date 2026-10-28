@@ -4129,12 +4129,12 @@
       "path": "number-theory/summing-multiplicative-functions",
       "title": "Summing multiplicative functions fast",
       "status": "final",
-      "written": "2026-10-14T07:42Z",
+      "written": "2026-10-28T21:35Z",
       "solved": 24,
       "problems": 29,
       "tags": ["quotient-blocking", "mobius-inversion-formula", "mobius-function-application", "dirichlet-convolution", "divisor-summatory-function", "totient-summatory-recursion"],
       "refs": ["p0073_s2", "p0153", "p0153_s0", "p0193_s0", "p0202_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0401", "p0429_s0", "p0452", "p0452_s0", "p0464_s0", "p0478_s0", "p0478_s1", "p0484", "p0501_s0", "p0512_s0", "p0530", "p0565_s1", "p0608", "p0615", "p0625", "p0639", "p0641_s0", "p0642_s0", "p0668_s0", "p0694", "p0745", "p0745_s0", "p0926_s0"],
-      "solved_after": ["p0401", "p0452", "p0512", "p0641", "p0668"]
+      "solved_after": []
     },
     {
       "path": "probability/markov-chains-and-expectation",
