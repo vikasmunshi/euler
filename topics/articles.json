@@ -2874,8 +2874,8 @@
     {
       "path": "domain/prime-factor",
       "title": "Prime factor",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:03Z",
       "solved": 3,
       "problems": 10,
       "tags": ["prime-factor"],

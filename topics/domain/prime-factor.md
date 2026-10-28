@@ -1,5 +1,5 @@
 <!-- tags: [prime-factor] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:03Z -->
 # Prime factor
 
 The [prime factorization](/topics/domain/prime-factorization) page is about the whole exponent
