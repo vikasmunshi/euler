@@ -1,11 +1,11 @@
 <!-- tags: [closed-form-expression] -->
-<!-- status: final 2026-10-15T10:51Z -->
+<!-- status: final -->
 # Closed-form expression
 
 A [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression) computes a
 quantity with a bounded formula — a finite chain of arithmetic, powers, roots, binomials and a few
 named functions — instead of a loop that walks every case. It is the most common single lever in
-this problem set: the seventy problems below each hide a formula behind a process, a grid, a game
+this problem set: the nearly eighty problems below each hide a formula behind a process, a grid, a game
 or a recurrence. In every one, the obvious program enumerates something astronomically large while
 the real program evaluates an expression whose size does not grow with the input. The bounds
 Project Euler chooses — $10^{12}$, $10^{16}$, a googol — are often the setter's way of saying
@@ -49,7 +49,10 @@ polynomials. The rest of this family is about *getting a problem into that shape
   sums. Problem 918's trillion-term partial sum of a binary recurrence telescopes to *one* term of
   the sequence. Problem 235's
   [arithmetico-geometric](https://en.wikipedia.org/wiki/Arithmetico-geometric_sequence) partial
-  sum becomes one exponentiation inside a root-finder.
+  sum becomes one exponentiation inside a root-finder. In Problem 359 each floor of the hotel is
+  defined by neighbouring rooms summing to consecutive squares, so two rooms apart the squares
+  cancel to $2s - 1$. That difference is linear in the room index, so every occupant is a
+  quadratic, and the requested sum is one formula evaluation per divisor of $N$.
 - **Separable sums.** When a per-item count factors as $f(m)\,g(n)$, its sum over all sub-grids is
   the product of two one-dimensional sums. This turns Problem 147's axis-aligned rectangles into a
   product of [tetrahedral numbers](https://en.wikipedia.org/wiki/Tetrahedral_number). Problem 234
@@ -89,13 +92,21 @@ constraint forces the column sums to be periodic, so the count becomes a coeffic
 trinomial power. Problem 194 runs the
 [transfer-matrix method](https://en.wikipedia.org/wiki/Transfer-matrix_method) once on a single
 unit and finds that the colouring count for the whole chain is a binomial times two powers.
+Problem 739's repeated prefix-sum operation is linear, so the final term is a weighted sum of the
+starting terms. Each weight counts the monotone paths from one start position to the apex that
+never cross a diagonal. That is the [ballot problem](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem),
+so each weight is a single binomial times $k/(n-1)$. The statement's tell is its all-ones example,
+which ends on a Catalan number.
 
 Probability is counting with weights, and the same trick applies.
 [Linearity of expectation](https://en.wikipedia.org/wiki/Expected_value#Linearity) turns Problem
 493's expected number of colours into seven copies of one ratio of binomials. Problem 253 shows
 that the gap widths of a random fill form a uniform random
 [composition](https://en.wikipedia.org/wiki/Composition_(combinatorics)). Its marginals have closed
-forms, so the gaps drop out of the state entirely.
+forms, so the gaps drop out of the state entirely. Problem 523's odd sort is insertion sort in
+disguise. An element with $s$ smaller elements ahead of it costs $T(s) = 1 + \sum_{i<s} T(i)$
+moves, which solves to $2^s$. Its rank is uniform, so the expected total is one short sum of
+$(2^k - 1)/(k+1)$.
 
 Smaller counting formulas often sit *inside* a search as its $O(1)$ kernel:
 
@@ -112,6 +123,14 @@ Smaller counting formulas often sit *inside* a search as its $O(1)$ kernel:
   [Möbius inversion](https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula) peels off the
   non-primitive ones in $O(N^{3/4})$ total. Without the closed form, every quotient would cost a
   sum of its own and the inversion would be no faster than a sieve.
+- Problem 401 has the same shape. The
+  [Dirichlet hyperbola method](https://en.wikipedia.org/wiki/Dirichlet_hyperbola_method) splits
+  $\sum_d d^2 \lfloor n/d \rfloor$ at $\sqrt n$. Each row of the far strip then weighs a
+  [square pyramidal number](https://en.wikipedia.org/wiki/Square_pyramidal_number), so
+  $10^{15}$ terms become $2\sqrt n$.
+- Problem 778 counts how many integers in $[0, M]$ have digit $d$ at place $10^i$ from one
+  division, $M + 1 = q \cdot 10u + r$. The histogram therefore costs nothing per integer, and the
+  rest is a convolution power over the digit monoid.
 
 ### 3. A theorem collapses the statement
 
@@ -127,6 +146,7 @@ Many problems look computational until one classical theorem reduces them to a f
 | [Digital root](https://en.wikipedia.org/wiki/Digital_root) congruence | $\operatorname{dr}(k) = 1 + (k-1) \bmod 9$ | 159 |
 | [Cayley–Hamilton](https://en.wikipedia.org/wiki/Cayley%E2%80%93Hamilton_theorem) | a $2\times2$ square root to two scalars, trace and determinant | 420 |
 | [Divisor function](https://en.wikipedia.org/wiki/Divisor_function) | counting the right triangles on a leg to $\tau(M^2)$ | 176 |
+| [Conjugate](https://en.wikipedia.org/wiki/Conjugate_(square_roots)) pairs | $x^{2n} + y^{2n}$ to an integer, so $\{x^{2n}\} = 1 - y^{2n}$ | 318 |
 | [Fermat's Last Theorem](https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem) | an exponent search to $\lvert n\rvert \le 2$, once the expression is factored | 180 |
 
 The step before the theorem is usually **algebra on the statement itself**:
@@ -168,6 +188,12 @@ gives the count as a polynomial in $4^n$, $2^n$, $(-2)^n$ and $(-1)^n$ over 864.
 
 Non-linear and bitwise recurrences have closed forms more often than one expects:
 
+- Problem 340's "crazy function" generalises the
+  [McCarthy 91 function](https://en.wikipedia.org/wiki/McCarthy_91_function). It is a four-deep
+  nested recursion with a threshold near $5.6 \times 10^{17}$. Cut $[0, b]$ into blocks of width
+  $a$ counted down from $b$, and $F(n)$ is $n$ plus a constant plus a constant per block. Proving
+  that takes an induction on the block index. After that the sum over all $b+1$ arguments is two
+  triangular numbers and a partial block.
 - In Problem 872, the parent of node $k$ is $k$ plus the largest power of two not exceeding the
   gap, so a root path takes one step per set bit.
 - Problem 167's Ulam sequences obey an XOR rule, a
@@ -223,6 +249,14 @@ that a binary search can drive:
 Here the formula is no longer the answer. It is the fast inner step that makes an outer search
 affordable.
 
+Sometimes the search disappears too, if you invert the *question* as well as the formula. Problem
+887 wants the least decision-tree height $Q(N)$ for each of $2.8 \times 10^8$ values of $N$.
+Fix the height instead and compute the largest $N$ it can serve, a capacity $F(h)$ given by a
+small recurrence. Then the tail-sum identity, which counts each $N$ once for every height
+$h < Q(N)$, does the rest:
+$\sum_{N \le M} Q(N) = \sum_h \max(0, M - F(h))$. The capacity grows exponentially, so that sum has
+only $O(\log M)$ terms.
+
 ## How to reason about it
 
 Reach for a closed form when the naive program is a sum, a count of arrangements, a recurrence or
@@ -235,7 +269,10 @@ derivation effort and it brings some standing hazards.
   a direct sieve) ran on small cases and the pattern was read off. Problem 957 makes the reading
   off mechanical with Berlekamp–Massey. That is legitimate and often fastest. But the brute force
   stays on as the referee, and the pattern has to be checked well past the cases it was read
-  from: Problem 957's recurrence is fixed by ten terms and confirmed by three more.
+  from: Problem 957's recurrence is fixed by ten terms and confirmed by three more. Problem 359's
+  occupant formula was read off forty thousand simulated guests and then checked against every
+  one of them. Problem 340's block formula was spotted on a memoised brute force, proved by
+  induction, and then tested on 400 random small parameter sets.
 - **Keep the slow method behind a flag.** Several solutions keep the obvious $O(N^2)$ version,
   such as Problem 28's spiral walk, behind `--show`. It runs on small inputs purely to confirm the
   formula, because a sign slip is invisible once the loop is gone.
@@ -253,14 +290,26 @@ derivation effort and it brings some standing hazards.
   - a floor of an irrational quotient can still be exact: Problem 950 evaluates
     $\lfloor x/\sqrt m \rfloor$ as $\lfloor \sqrt{\lfloor x^2/m \rfloor} \rfloor$ with `isqrt`;
   - when a float is unavoidable, as with Binet for leading digits in Problem 104, use it only for
-    the digits that floating point can actually resolve.
+    the digits that floating point can actually resolve;
+  - rearrange so the float never subtracts near-equal values. Problem 318's per-pair count is a
+    ceiling of $d / (-2\log_{10}(\sqrt q - \sqrt p))$. With $\sqrt q - \sqrt p$ close to 1, the
+    direct difference loses most of its digits to
+    [catastrophic cancellation](https://en.wikipedia.org/wiki/Catastrophic_cancellation).
+    Instead, the gap $1 - y$ is written with an exact integer numerator over a positive
+    denominator and fed to `log1p`. Any quotient that lands near an integer is recomputed in high
+    precision;
+  - a formula that yields a rational should be summed as one. Problem 523's expectation is summed
+    in `Fraction`s, because a value like $115.725$ sits exactly on a rounding half.
 - **Size the intermediates, not just the answer.** A closed form multiplies large factors before
   it divides. Problem 276's answer fits in 64 bits but its $k(k+1)(2k+1)$ does not, so the C port
   works in `__int128`; Problem 957's dominant term grows like $11 \cdot 16^n$, so its C port
   refuses $n > 30$ while Python's unbounded integers take any $n$.
 - **Work in the modulus from the start.** When the answer is wanted mod $m$, evaluate the closed
-  form with modular inverses and modular powers (Problems 381, 487, 944, 1000). The formula only
-  helps if no intermediate is ever formed at full size.
+  form with modular inverses and modular powers (Problems 381, 487, 739, 944, 1000). The formula
+  only helps if no intermediate is ever formed at full size. Watch for a composite modulus.
+  Modulo $10^9$, neither 2 nor 6 has an inverse, so a triangular or pyramidal number cannot be
+  "reduced, then divided". Problems 340 and 401 instead divide the even factor (and the multiple
+  of 3) exactly *first*, then reduce each factor before multiplying.
 - **Know when to stop.** Some problems have *no* full closed form. Problem 232's race needs a table
   because optimal play trades off variance state by state, and Problem 210's circle count is a
   Gauss circle sum. There the closed form bounds the search instead (Problem 232 caps the useful
