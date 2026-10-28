@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: final 2026-10-16T07:36Z -->
+<!-- status: final -->
 # Recurrence relation
 
 A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a
@@ -40,11 +40,19 @@ them, because recognising the shape is what tells you which one to write down.
   with no index arithmetic in it at all. Read it backwards, though, and every element is the
   *parent* of the run it describes. The prefix is then the leaf level of a derivation tree only
   logarithmically tall, and a prefix sum becomes one root-to-leaf descent that banks every whole
-  subtree to its left. This is 230's digit chase again, with the tree made explicit.
+  subtree to its left. This is 230's digit chase again, with the tree made explicit. Problem 698
+  is the shallow end of the same pool: a 123-number is one whose digit *counts* are 0 or
+  themselves 123-numbers, and since a count never exceeds the length, membership at length $L$
+  depends only on the members below $L$. The set grows bottom-up and is tiny, so the
+  self-reference costs nothing.
 - **An algebraic ladder.** Solutions to a [Pell equation](/topics/technique/pells-equation), or
   convergents of a [continued fraction](/topics/domain/continued-fraction), advance by a fixed
   linear update. Problems 94, 140 and 65 all turn a search over candidates into a walk along the
-  answers.
+  answers. The same algebra produces a recurrence where none was asked for. If $x$ and $y$ are
+  the two roots of an integer quadratic, the power sums $S_n = x^n + y^n$ are integers obeying
+  $S_n = (x+y)S_{n-1} - xy\,S_{n-2}$. Problem 721 wants $\lfloor x^n \rfloor$ for a quadratic
+  irrational $x$ whose conjugate lies in $[0, 1)$, so the floor is just $S_n - 1$. A real number
+  with trillions of digits becomes an integer recurrence that can be reduced mod $p$.
 
 Sometimes you cannot see the decomposition at all, and the counts still obey a recurrence for
 structural reasons. That case has its own page —
@@ -91,7 +99,13 @@ This is the standard escape when the index is $10^{12}$ or worse, and it compose
 two-variable $A(m,n)$ is a product of *two* transfer matrices, one advancing rows and one advancing
 columns, which additionally lets a double sum factor into a product of two accumulated sums instead
 of an $O(k^2)$ pairing. See [matrix exponentiation](/topics/technique/matrix-exponentiation) for the
-mechanics.
+mechanics. The cost is cubic in the state count, so shrink the state before you exponentiate.
+Problem 670's coloured $2 \times n$ strip naively needs over a hundred boundary states (a colour
+and an overhang per row). Its counts are symmetric under permuting the four colours, though, so
+only *how many* colours a new tile may take matters. Fold that number into the matrix weights and
+ten states remain, which makes each multiply roughly a thousand times cheaper. Problem 721's quadratic
+ring $\mathbb{Z}_p[\sqrt a]$ is the $2 \times 2$ case of the same thing in disguise: squaring
+$u + v\sqrt a$ is one step of the companion matrix, written as a pair.
 
 **Descend the binary representation.** A recurrence whose arguments are $2n$ and $2n+1$ rather than
 $n-1$ and $n-2$ is not slow at all — it is $O(\log n)$, because each step halves the index. The
@@ -122,6 +136,14 @@ The invertibility argument is the one to internalise, because it buys $O(1)$ mem
 is a permutation you can detect the period by waiting for the *seed* to come back, instead of
 storing every state you have visited.
 
+**Skip the dull stretches.** A nonlinear recurrence often does something trivial on almost every
+step. In that case, compute where the next *interesting* step falls and jump straight to it.
+Problem 443's $g(n) = g(n-1) + \gcd(n, g(n-1))$ adds 1 on nearly every step, and along such a run
+the offset $d = g(k) - k$ is frozen. The gcd then reduces to $\gcd(j, d-1)$, so the run ends at
+the first multiple above $k$ of some prime factor of $d - 1$. One factorisation per event (Pollard
+rho, at these sizes) replaces up to $10^{15}$ steps with a few hundred. The state is
+$(k, d)$, not $g$. The general question to ask is what stays constant between events.
+
 **Telescope it away.** Occasionally a sum of terms collapses to one term. Splitting $S(N)$ by index
 parity and substituting the recurrence can make almost everything cancel
 ([telescoping](/topics/technique/telescoping-series)), leaving a
@@ -131,6 +153,21 @@ trillion-term sum into one evaluation. The same collapse in the other direction 
 partition function computable: the reciprocal of its
 [generating function](/topics/domain/generating-function) is almost all zeros, so $p(n)$ obeys a
 recurrence with only $O(\sqrt n)$ terms (problems 76 and 78).
+
+**Solve it outright.** Some recurrences have a closed form that a few small cases make obvious and
+induction then confirms. Problem 523's insertion cost obeys the full-history recurrence
+$T(s) = 1 + \sum_{i<s} T(i)$. Subtract consecutive cases and it becomes $T(s) = 2T(s-1)$, so
+$T(s) = 2^s$. Problem 340's function nests four calls deep, a generalised
+[McCarthy 91](https://en.wikipedia.org/wiki/McCarthy_91_function), and read literally it would
+recurse a quintillion times. Brute force on small parameters shows that it is the identity plus
+a constant per block of width $a$, and that pattern is easy to prove by induction on the block.
+The sum over $b + 1$ arguments then becomes $O(1)$ arithmetic. When the recurrence is **linear in
+its input sequence**, there is a third route. Problem 739 repeatedly replaces a sequence by its
+prefix sums, so the final value is $\sum_k w_k a_k$ for fixed weights. Feeding in unit vectors
+exposes the weights, and with all-ones input the statement's example ends at 429, a
+[Catalan number](https://en.wikipedia.org/wiki/Catalan_number). That points to
+[ballot numbers](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem), and the $n$ rows of
+iteration collapse to one weighted sum.
 
 ## How to reason about it
 
@@ -164,6 +201,15 @@ recurrence with only $O(\sqrt n)$ terms (problems 76 and 78).
   million distinct shapes. The siblings' masks then form a deterministic chain over a finite
   set, so a run of 200-odd identical children is a short tail plus a cycle, which is the
   finite-state trick above in miniature.
+- **If the quantity has no recurrence, try its inverse.** Problem 887 asks for the least height
+  of a search tree that serves $N$ leaves under a per-leaf depth bound. That is an optimisation
+  over trees for each of hundreds of millions of values of $N$, and it has no useful recurrence. Fix the height
+  instead and ask for the largest $N$ it can serve. That *capacity* splits cleanly at the root:
+  fill the left subtree greedily, and each leaf placed there loosens the right subtree's bound.
+  The result is a memoised two-argument recurrence over $O(\log N)$ heights. A
+  [tail-sum identity](https://en.wikipedia.org/wiki/Expected_value#Properties) turns
+  $\sum_N Q(N)$ into a handful of terms, one per height. Monotonicity is what licenses the swap:
+  if a height can serve $N$, it can serve every smaller $N$.
 - **Watch the memory, not just the time.** A two-dimensional recurrence rarely needs its whole
   grid. If every cell depends only on cells one step back along some direction, sweep along that
   direction with two rolling buffers: problem 938's grid has both predecessors on the previous
@@ -178,7 +224,8 @@ recurrence with only $O(\sqrt n)$ terms (problems 76 and 78).
 The tell for this whole topic is a problem that describes a process — one more tile, one more turn,
 one more level — and then asks about it at an index you could never walk to. Write the recurrence
 first, in the most literal form you can defend. Then look at its *shape*: constant coefficients,
-halving arguments, a finite state, a telescoping sum. The shape picks the method.
+halving arguments, a finite state, long trivial stretches, a telescoping sum, a pattern that
+induction will confirm. The shape picks the method.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
