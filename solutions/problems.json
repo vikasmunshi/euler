@@ -2540,8 +2540,8 @@
     "level": 14,
     "pct": 36,
     "solvers": 1353,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 09:57"
   },
   "319": {
     "title": "Bounded Sequences",
