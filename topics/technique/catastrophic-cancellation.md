@@ -1,5 +1,5 @@
 <!-- tags: [catastrophic-cancellation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T09:34Z -->
 # Catastrophic cancellation
 
 When you subtract two floating-point numbers that agree in their leading digits, those digits
