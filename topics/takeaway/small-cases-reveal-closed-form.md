@@ -1,10 +1,11 @@
 <!-- tags: [small-cases-reveal-closed-form] -->
-<!-- status: final 2026-10-15T11:02Z -->
+<!-- status: final -->
 # Small cases reveal a closed form
 
 Some problems hide a simple rule behind a definition that is expensive to evaluate even once.
 Deciding whether one room can be tiled is a search. Settling one pirate vote needs the whole game
-below it. Valuing one ternary game needs a canonical-form engine. Growing one geometric
+below it. Seating one hotel guest needs every guest before them. Valuing one ternary game needs a
+canonical-form engine. Growing one geometric
 configuration to day 16 needs about $4^{16}$ cells. Deriving the rule from first principles can
 take far longer than the problem is worth. The faster route is to solve the small instances
 *exhaustively*, lay the results out so the pattern can show itself, read a closed-form
@@ -22,7 +23,10 @@ The method has four parts, and each one matters:
    arithmetic. Problem 256's checker is a row-by-row
    [transfer-matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method) search over half-mat
    labels that throws away any row creating a four-mat corner. Problem 950 simulates the pirate
-   vote move by move. Problem 336 replays the turntable rule on every permutation. Problem 963
+   vote move by move. Problem 336 replays the turntable rule on every permutation, and 523 runs its
+   odd restart-from-the-front sort on all $n!$ permutations, averaging in exact rationals. Problem
+   340 evaluates its McCarthy-style nested recursion literally, with memoisation, and 359 seats
+   the first forty thousand guests greedily, one at a time. Problem 963
    runs a small [canonical-form](/topics/technique/canonical-form) engine that removes dominated
    options and bypasses reversible ones, so equal games come out identical. Problem 957 shows the
    reformulated kind. A projective map and a logarithm turn its three pencils of lines into three
@@ -37,9 +41,16 @@ The method has four parts, and each one matters:
    proposal passes from a later one where successes are separated by runs of failures. Problem 963
    writes each game value as a number plus a combination of infinitesimals. Once those
    coefficients are tabulated against the number's ternary digits, each one depends on a simple
-   feature of the digit string. Sometimes the right axis is a *residual*. In 957 the raw counts
-   grow like $16^n$ and show nothing. Split into a pencil size and a triple count, and with the
-   known leading term subtracted from the triple count, the remainder is small and regular.
+   feature of the digit string. In 340, $F(n) - n$ looks erratic against $n$, but indexed by
+   blocks of width $a$ counted *down* from the threshold it is constant within each block and
+   grows by a fixed step from one block to the next. Sometimes the right axis is a *residual*. In
+   957 the raw counts grow like $16^n$ and show nothing. Split into a pencil size and a triple
+   count, and with the known leading term subtracted from the triple count, the remainder is small
+   and regular. Sometimes it is a *derived* quantity. 359's occupants look irregular, but the sums
+   of neighbouring rooms on a floor run through consecutive squares. And when the map is
+   [linear](https://en.wikipedia.org/wiki/Linear_map), the right input is a unit vector. 739's
+   repeated prefix-sum operation sends the starting sequence to a fixed weighted sum of its terms,
+   so feeding it one unit at a time tabulates the weights directly, with the sequence factored out.
 3. **A rule stated as code.** Write the guess as a function, such as `is_tatami_free(a, b)`, the
    closed form for the early phase, `game_key(x)`, or a constructor that builds every member. A
    pattern only becomes testable once it is a function you can call.
@@ -48,8 +59,11 @@ The method has four parts, and each one matters:
    width up to $16$ and every length up to $90$. 963's decomposition was checked against the
    engine for every number up to $10^6$. 950's full method was compared with direct simulation on
    300 random small instances and the statement's three values. 336's construction produced
-   exactly the same sets as the filter for $n = 3, \dots, 9$. 957's recurrence was fixed by ten
-   simulated terms, and three more confirmed it.
+   exactly the same sets as the filter for $n = 3, \dots, 9$. 340's formula was compared with the
+   recursion on 400 random small parameter triples, 523's with the permutation brute force for
+   every $n \le 8$, exactly as rationals, and 359's with every one of the roughly 40 000 rooms the
+   simulation seated. 957's recurrence was fixed by ten simulated terms, and three more confirmed
+   it.
 
 ## Where the rule comes from
 
@@ -76,6 +90,13 @@ them in order of cost:
   maximix counts for $n = 3, \dots, 9$ come out as $1, 2, 6, 24, \dots$, which is $(n-2)!$. A
   factorial is a strong hint that a sequence of independent choices lies underneath. Here it is
   the turntable rule run backwards: each placement can be undone in $n-2-i$ distinct ways.
+  739's tell is the statement's own example: with every starting term $1$ the process ends at
+  $429$, a [Catalan number](https://en.wikipedia.org/wiki/Catalan_number). Catalan totals point to
+  [ballot numbers](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem) as the individual
+  weights, and the unit-vector table confirms it, because a unit can only reach the apex along a
+  lattice path that never crosses a diagonal. In 523 the per-insertion costs come out
+  $1, 2, 4, 8, \dots$, and the recurrence behind them, $T(s) = 1 + \sum_{i<s} T(i)$, is the
+  explanation of why they double.
 
 ## What the closed form buys
 
@@ -92,6 +113,12 @@ rule lets you **change algorithms**:
   filtering $n!$ permutations through a simulation, the solution builds the $(n-2)!$ maximix
   arrangements directly, one splice per level, and sorts them. When the count explains itself,
   the explanation usually gives you an enumeration as well.
+- In **359**, an $O(1)$ occupant formula (two rooms apart the squares telescope, leaving a
+  difference that is linear in the room number, so odd rooms are quadratic) turns a simulation of
+  $10^{27}$-sized guests into a loop over the divisors of $N$: a few hundred evaluations.
+- In **739**, closed-form weights turn an $n$-round triangle of prefix sums into one sum of $n$
+  terms. The closed form also shapes how that sum is computed: rewriting each binomial as a
+  running prefix product times a suffix product leaves a single modular inverse at the end.
 - In **950**, the early phase is a closed form, and the later phase's runs of failures have a
   length that can be computed. So the backward induction jumps a whole run per step instead of a
   pirate per step, and reaches $n = 10^{16}$ in a few dozen jumps.
@@ -101,7 +128,9 @@ rule lets you **change algorithms**:
 - In **957** the closed form *is* the solution: a handful of big-integer operations, where the
   simulation it replaces grows fourfold per day. The divisibility of the numerator by the
   formula's denominator is asserted at run time, a cheap check that the formula is still
-  consistent.
+  consistent. **340** is the same: per-block constants summed over whole blocks plus one partial
+  block give an $O(1)$ answer for a threshold near $6 \times 10^{17}$, where the recursion could
+  not finish a single call. **523**'s formula is a sum of thirty terms.
 
 ## How to reason about it
 
@@ -120,7 +149,17 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - **Strip what you already know.** Divide out or subtract the dominant term before you look for a
   pattern. 957's triple count is asymptotically $\tfrac{7}{12}$ of the squared pencil size, and
   its residual reveals the recurrence where the raw numbers would not. In the same way, 276's
-  rounding is easiest to handle as an exact quadratic plus a bounded periodic correction.
+  rounding is easiest to handle as an exact quadratic plus a bounded periodic correction, and
+  340's values only line up once the identity $n$ is subtracted. If the process is linear, factor
+  the input out entirely, as 739 does, and look for a pattern in the weights alone.
+- **Only read the table where the oracle is finished.** A truncated simulation has a frontier
+  whose values are not final yet. 359's last room on each floor is still open when the simulation
+  stops, so its current occupant may not be the final one. The check skips those rooms. Counting
+  them would make a correct formula look wrong, or fit a wrong one.
+- **Keep the oracle's arithmetic exact.** A rule checked against floating-point output is only
+  checked to within the rounding. 523 compares rationals, and that matters at the end as well:
+  $E(10) = 115.725$ lies exactly on a rounding half, so the shipped solution sums exact fractions
+  and rounds in integers.
 - **Expect regimes and periods.** Closed forms often hold piecewise: below a threshold, inside a
   band, in an early phase, or modulo a small period (276's 12, 957's $(-1)^n$ and $(-2)^n$
   terms). Find the boundary from the data and make the code branch on it explicitly. Don't extend
@@ -130,14 +169,15 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
   be determined, so only the terms after those count as evidence. Keep generating until the
   pattern is boring.
 - **Explain it if you can, but test it regardless.** Problem 950's phases and 336's bijection come
-  with an argument for why they look the way they do. Problem 256's bands are, here, an
-  experimental fact. All of them are equally safe *only because* they were checked against the
+  with an argument for why they look the way they do. 340's block formula was spotted first and
+  then proved by induction on the block index, and 523's was derived (the sort is insertion sort
+  in disguise) and still checked. Problem 256's bands are, here, an experimental fact. All of them are equally safe *only because* they were checked against the
   oracle. That's
   [calibrating theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers) with
   answers you made yourself.
 - **Keep the oracle in the solution directory.** The scratch checker is the evidence for the
-  rule. Leave it beside the solution (276's and 336's `brute_force.py`, 957's `simulate.py` and
-  `pencils.py`), so a later reader can re-run it rather than take the pattern on trust.
+  rule. Leave it beside the solution (276's, 336's, 359's and 523's `brute_force.py`, 340's and
+  739's `brute.py`, 957's `simulate.py` and `pencils.py`), so a later reader can re-run it rather than take the pattern on trust.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
