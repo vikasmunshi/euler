@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-10-15T10:35Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -29,7 +29,14 @@ in one C loop. The Python-level loop that remains runs only $\pi(\sqrt{n})$ time
 the interpreter is touched $O(\sqrt{n}/\log n)$ times to do $O(n \log \log n)$ work.
 The same shape carries a divisor-sum sieve, and a
 [Möbius](https://en.wikipedia.org/wiki/M%C3%B6bius_function) sieve where the strided
-slices are `mu[p::p] *= -1` followed by `mu[p*p::p] = 0`.
+slices are `mu[p::p] *= -1` followed by `mu[p*p::p] = 0`. A strided slice also works as
+a *target*: [407](/solutions/0407/) takes `view = best[s*(s+1)::s]` (every multiple of
+the small factor $s$) and folds a whole array of candidates into it with
+`np.maximum(view, cand, out=view)`, so one Python iteration per $s \le \sqrt{N}$
+updates every modulus that $s$ divides. [668](/solutions/0668/) runs the
+Lucy_Hedgehog [prime count](https://en.wikipedia.org/wiki/Prime-counting_function) the same
+way — a Python loop over the primes up to $\sqrt{n}$, each step a couple of strided
+slice subtractions over the table of $\pi(\lfloor n/k \rfloor)$.
 
 **A comparison is a mask, and a mask is an index.** `div_sums > np.arange(limit + 1)`
 yields a boolean array;
@@ -85,7 +92,27 @@ array of primes, each entry reduced by its *own* prime: `np.where(odd, r * f % p
 is the conditional multiply, and the exponent array shifts right until it is zero.
 Even a retry loop vectorises — searching for a base whose power is not 1, it keeps a
 `pending` index array of the primes still unsatisfied and shrinks it each round, so
-the work per round is only the stragglers.
+the work per round is only the stragglers. The exponent can differ per element too:
+[455](/solutions/0455/) iterates $x \leftarrow n^x \bmod 10^9$ for every $n$ up to a
+million *at once*, each element raised to its own current $x$, and stops when
+`np.array_equal` says the whole array has reached its fixed point — a dozen rounds,
+not a million separate iterations. The element need not even be a number:
+[721](/solutions/0721/) exponentiates $c + \sqrt{a}$ in the ring
+$\mathbb{Z}_p[\sqrt{a}]$, holding each ring element as *two* arrays $(u, v)$ — a
+struct of arrays — with a ring multiply written once over whole arrays and each $a$'s
+own exponent bit applied as a mask.
+
+**A scan with no ufunc folds into a grid.** A running product mod $p$ has no
+vectorised form: `np.multiply.accumulate` cannot reduce between steps, so it overflows
+`uint64` after a couple of terms. [739](/solutions/0739/) needs exactly such prefix and
+suffix products over a range of $n$ factors, and gets them by reshaping each
+chunk into a $k \times k$ grid: a Python loop over the $k$ *columns* advances all $k$
+rows' scans together, then a $k$-step scalar carry stitches the rows into one
+sequence. The Python loop count drops from $k^2$ to $2k$. A plain product reduces as a
+pairwise tree, `arr = arr[0::2] * arr[1::2] % p`, in $\log_2$ of the length steps, and
+even a linear recurrence fills the grid row-wise: an index-shift identity jumps the
+recurrence by a whole row, so each row's start is one scalar step and its contents one
+broadcast.
 
 **Broadcasting builds the pairwise table.** `xs[None, :] - xs[:, None]` is every
 difference vector between $n$ points as one $n \times n$ array. [252](/solutions/0252/)
@@ -142,21 +169,27 @@ job: it *refuses* inputs past $2^{32}$, where a product of two residues would le
 `uint64`, rather than wrap; and since its final sum can pass $2^{64}$ even though no
 term does, it sums the high and low 32-bit halves separately and rejoins them as
 Python ints. [348](/solutions/0348/) caps its digit bands at the length whose sums
-still fit. If you cannot state the bound, you do not have a correct program — you
+still fit. [401](/solutions/0401/) needs $x(x+1)(2x+1)/6 \bmod m$ for $x$ up to
+$10^{15}$, where the raw product is far past $2^{63}$; rather than reach for a modular
+inverse of 6, it divides the 2 and the 3 out of whichever factor they divide — chosen
+per element by masks on `x & 1` and `x % 3` — and only then reduces and multiplies. If you cannot state the bound, you do not have a correct program — you
 have one that happens to work on the test case.
 
 **Floats estimate; integers decide.** `np.sqrt` on an `int64` array goes through
 `float64`, which has 53 bits of mantissa, so past $2^{53}$ the truncated root can be
 off by one either way. [331](/solutions/0331/) takes the float root as a guess and
 corrects it with exact integer comparisons — `root -= root * root > v`, then the
-mirror step up — a vectorised [integer square root](/topics/technique/integer-square-root).
+mirror step up — a vectorised [integer square root](/topics/technique/integer-square-root);
+[721](/solutions/0721/) uses the identical two lines to decide which $a$ are perfect squares.
 [252](/solutions/0252/) applies the same division of labour to angles: `arctan2`
 sorts directions, but equality is decided on gcd-reduced integers.
 
 **The dtype is also the memory budget.** A Möbius array only ever holds $-1, 0, +1$,
 so `int8` costs one byte per entry and a sieve to $2^{25}$ fits in 32 MB instead of
 256 MB. When the range genuinely does not fit, chunk it: build `arange` a few million
-at a time and accumulate, which keeps the vectorisation and bounds the footprint.
+at a time and accumulate, which keeps the vectorisation and bounds the footprint —
+[401](/solutions/0401/) walks its $\sqrt{n} \approx 3 \times 10^7$ hyperbola terms in
+chunks of $2^{20}$.
 
 **Vectorising means *no Python per element*, not *NumPy somewhere*.**
 [`np.vectorize`](https://numpy.org/doc/stable/reference/generated/numpy.vectorize.html)
