@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-10-15T10:31Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -35,7 +35,11 @@ $28433 \times 2^{7830457} + 1$, a number with over two million digits; working m
 throughout, nothing bigger than $10^{20}$ is ever formed. Problem 48 (public,
 `solutions/public/p0048/`) sums $1^1 + 2^2 + \dots + 1000^{1000}$ and asks the same "last ten
 digits", and the private problem 104 (Fibonacci terminal digits) is the same instinct dressed
-differently.
+differently. Problem 778 takes the idea to the limit. Its carry-free "freshman's product"
+multiplies numbers digit by digit, keeping each column's product mod $10$. With no carries,
+every decimal place is its own copy of $\mathbb{Z}/10\mathbb{Z}$. One column is a ten-entry
+histogram of digits, and combining $R$ factors is a convolution of histograms under
+multiplication mod $10$. That convolution can be raised to the $R$th power by squaring.
 
 **"Is this divisible by …?"** is a residue-is-zero question. Problem 78 (public,
 `solutions/public/p0078/`) asks for the first $n$ whose partition count $p(n)$ is divisible by one
@@ -65,7 +69,18 @@ not a shortcut you discover but a contract you are handed: every count, product,
 [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient) is computed in the ring
 from the start. This is the register a large fraction of the combinatorial problems past 300 are
 written in — and, as the section after the disguises shows, the *kind* of modulus you are handed
-matters.
+matters. The contract can even be attached to a question that looks real-valued. Problem 721 wants
+$\lfloor(\lceil\sqrt a\rceil + \sqrt a)^{a^2}\rfloor$. Its conjugate $\lceil\sqrt a\rceil - \sqrt a$
+lies in $[0, 1)$, so the floor is the integer $x^n + y^n$ minus one. That integer is computed
+in the ring $\mathbb{Z}_p[\sqrt a]$, whose elements are pairs of residues, and no real number ever
+appears.
+
+**"… modulo $n + 1$" written into the definition.** A modulus that is part of the *object*,
+rather than of the deliverable, is often there to simplify it. Problem 512 defines
+$f(n) = \sum_{i=1}^{n} \varphi(n^i) \bmod (n + 1)$. Modulo $n + 1$ we have $n \equiv -1$, and
+$\varphi(n^i) = n^{i-1}\varphi(n)$, so the terms alternate in sign and cancel in pairs. That leaves
+$\varphi(n)$ for odd $n$ and $0$ for even $n$. Substitute the residue of the base before you compute
+anything.
 
 **"How many of these sum to a multiple of $m$?"** When the question counts objects by the residue
 of a total, put the residue in the exponent. Problem 250 counts the subsets of
@@ -95,6 +110,20 @@ factor — a quarter-million exponentiations become one block of five hundred. W
 you the period, detect it: problem 943 walks deterministic sequences of parity masks only until
 one repeats, then answers "the first $k$ terms" by counting whole periods.
 
+The cycle can also hide in a physical process. In problem 641 each die face cycles with period $6$,
+so a die ends showing 1 exactly when its turn count, $d(k) - 1$, is a multiple of 6. That is
+$d(k) \equiv 1 \pmod 6$. It splits into "$d(k)$ odd", which forces $k$ to be a square, and a
+condition mod $3$ on the prime exponents. A row of $10^{36}$ dice becomes a count of integers
+with a particular factorisation shape. Iteration can also *stop* moving. In problem 455, iterating
+$x \mapsto n^x \bmod 10^9$ builds the power tower $n, n^n, n^{n^n}, \dots$, and because the chain $m, \lambda(m), \lambda(\lambda(m)),
+\dots$ of Carmichael values shrinks to $1$ quickly, the tower goes constant within a dozen rounds. That
+constant is the fixed point the problem asks for, and the search never touches the $10^9$
+candidates. Problem 700 turns the cycle into a different algorithm. Its sequence $na \bmod m$
+sets successive record lows, and the records come from repeatedly subtracting the smaller of
+"current minimum" and "gap below $m$" from the larger. That is Euclid's algorithm on $(a, m)$,
+and it ends at $1$ when $n = a^{-1} \bmod m$. A walk over quadrillions of terms costs one step
+per record.
+
 **Congruences as the object of study.** Sometimes the residues are not a tool but the thing being
 counted. Problems 271 and 272 (Modular Cubes) ask for the solutions of $x^3 \equiv 1 \pmod n$;
 problem 451 hunts *self-inverse* residues with $m^2 \equiv 1 \pmod n$; problem 801 studies pairs
@@ -110,7 +139,12 @@ $n^{15} + 1$ for $10^{11}$ values of $n$, which is hopeless; swap the order of s
 each prime $p$ instead "for which residues $n$ does $p \mid n^{15} + 1$?" The answer is the
 negatives of the $15$th roots of unity mod $p$ — exactly $\gcd(15, p - 1)$ of them — and each
 residue class contributes its count of $n \le N$ by a single division. Factorisation turned into
-counting residues.
+counting residues. Problem 407 makes the decomposition itself the answer. An idempotent,
+$a^2 \equiv a \pmod n$, must be $0$ or $1$ modulo each prime power of $n$, because $a$ and $a - 1$
+are coprime. So the idempotents correspond to the ways of splitting $n$ into a coprime pair
+$d \cdot e$, and there are $2^{\omega(n)}$ of them. Finding the largest one for every $n \le 10^7$
+means enumerating coprime factor pairs and solving two congruences by CRT, rather than testing
+residues.
 
 ## What the modulus allows
 
@@ -123,7 +157,12 @@ modulus, so read it before you write the first line:
   [Berlekamp–Massey algorithm](https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm),
   which divides by discrepancies and so needs a field; problems 996 and 1010 divide by $n!$ and by
   products of hook lengths, legal only because the prime exceeds every factor involved — check that
-  inequality too, since a prime *smaller* than your factorials makes them vanish.
+  inequality too, since a prime *smaller* than your factorials makes them vanish. A field also
+  shrinks exponents. By Fermat, $a^{p-1} \equiv 1$, so problem 822 reduces the exponent $2^k$ of a
+  number squared $k \approx 10^{12}$ times modulo $p - 1$, which is one modular exponentiation inside
+  another. Division is legal but not free: each inverse is an exponentiation. Problem 739 needs
+  about $10^8$ binomials, so it multiplies the whole sum through by a factorial until every term is a
+  prefix product times a suffix product, and takes a single inverse at the end.
 - **A composite modulus is a product of smaller problems.** By the [Chinese Remainder
   Theorem](/topics/technique/chinese-remainder-theorem) a squarefree $m = pqr$ splits into three
   prime fields, so you solve in each and glue. Problem 365 wants $\binom{10^{18}}{10^9}$ — over nine
@@ -135,7 +174,18 @@ modulus, so read it before you write the first line:
   numbers that share factors with $10$ — no inverse exists. The two escapes are the two
   implementations: carry the coefficient as an exact big integer and reduce only when storing it
   (Python), or strip the powers of $2$ and $5$ into exponents and invert only the unit that remains
-  (C). Reach for the second shape whenever a recurrence divides and the modulus is not prime.
+  (C). Reach for the second shape whenever a recurrence divides and the modulus is not prime. The
+  commonest case is easy to miss: "the last nine digits" means mod $10^9$, and $10^9$ is even.
+  Problem 401's closed form $x(x+1)(2x+1)/6$, with $x$ up to $10^{15}$, has no inverse of $2$ or $3$
+  to lean on. The cure is to **divide before reducing**: one of $x, x+1$ is even and one of the three
+  factors is a multiple of 3, so divide those exactly, then reduce and multiply.
+- **A residue forgets size.** Once a value is reduced you can no longer compare it with another
+  or count how often a sum wrapped. Problem 822 must repeatedly pick the *smallest* of numbers
+  squared a trillion times. It decides the order with the real-valued key
+  $\log_2\log_2 x^{2^k} = k + \log_2\log_2 x$ and uses residues only for the final sum. Problem 271
+  sums the cube roots of unity mod a primorial *as integers*, and that total is many times the
+  modulus. Adding the CRT combinations mod $n$ would return a plausible wrong number. Reduce exactly
+  what the statement reduces.
 - **Mind the width.** A modulus near $10^{16}$ means the product of two residues no longer fits in
   64 bits, and a sum that is *not* reduced — problem 421's lands just under $2^{63}$ — leaves no
   headroom at all; estimate the magnitude before choosing the type. The fixes (`__int128`, a split
@@ -156,6 +206,12 @@ far too large to form directly. When you catch it:
   reduce after each $+$ and $\times$ so operands stay in $[0, m)$. The classic mistake is to
   materialise the million-digit power or the true factorial first; the whole point is that you
   never have to.
+- **Substitute the modulus into the definition.** When the modulus is $n + 1$ and the base is
+  $n$, the base is $-1$. When the modulus is prime, exponents live mod $p - 1$. Simplify the object
+  before you compute it.
+- **Keep size outside the ring.** Orderings, comparisons and unreduced totals need the real
+  magnitude, through logarithms or plain integers. Residues are only for the quantity the
+  statement reduces.
 - **Collapse inputs to their residues.** If only the residue of a total matters, a quarter-million
   elements are a census over $m$ buckets, and their generating function can live in
   $\mathbb{Z}[x]/(x^m - 1)$.
