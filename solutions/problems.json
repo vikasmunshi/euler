@@ -5356,8 +5356,8 @@
     "level": 16,
     "pct": 42,
     "solvers": 528,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 09:41"
   },
   "671": {
     "title": "Colouring a Loop",
