@@ -119,6 +119,7 @@ Generated from that table by `update-docs`.
 | `mark` | then refreshes the solutions grid, the git chip |
 | `user` | then refreshes the account page |
 | `git-identity` | then refreshes the account page |
+| `claude` | then refreshes the account page |
 | `show` | runs `euler_webshell.shell.viewer.show` instead |
 | `edit` | runs `euler_webshell.shell.viewer.edit` instead |
 | `key-rekey` | runs `euler_webshell.shell.keys.key_rekey` instead; then refreshes the git chip |
