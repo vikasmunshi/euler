@@ -333,6 +333,7 @@ loop was never needed.
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0318](/solutions/0318/) — 2011 Nines
 - ● [0321](/solutions/0321/) — Swapping Counters
+- ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
