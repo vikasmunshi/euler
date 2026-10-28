@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Insertion_sort
 ## Problems
 
 - ● [0061](/solutions/0061/) — Cyclical Figurate Numbers
+- ● [0523](/solutions/0523/) — First Sort I
 - ● [0868](/solutions/0868/) — Belfry Maths
 
 <!-- /problems -->

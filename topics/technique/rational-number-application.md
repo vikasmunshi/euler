@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Rational_numbe
 
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0259](/solutions/0259/) — Reachable Numbers
+- ● [0523](/solutions/0523/) — First Sort I
 
 <!-- /problems -->

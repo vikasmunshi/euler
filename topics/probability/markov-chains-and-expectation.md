@@ -164,6 +164,7 @@ If the state space is still in the millions, the model is usually wrong, not the
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ○ [0497](/solutions/0497/) — Drunken Tower of Hanoi
 - ○ [0499](/solutions/0499/) — St. Petersburg Lottery
+- ● [0523](/solutions/0523/) — First Sort I
 - ○ [0575](/solutions/0575/) — Wandering Robots
 - ○ [0589](/solutions/0589/) — Poohsticks Marathon
 - ○ [0595](/solutions/0595/) — Incremental Random Sort

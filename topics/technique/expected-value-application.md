@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Expected_value
 
 - ● [0253](/solutions/0253/) — Tidying Up A
 - ● [0493](/solutions/0493/) — Under the Rainbow
+- ● [0523](/solutions/0523/) — First Sort I
 
 <!-- /problems -->
