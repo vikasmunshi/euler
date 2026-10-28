@@ -5250,8 +5250,8 @@
     {
       "path": "technique/dirichlet-hyperbola-method",
       "title": "Dirichlet hyperbola method",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T07:56Z",
       "solved": 4,
       "problems": 4,
       "tags": ["dirichlet-hyperbola-method"],
