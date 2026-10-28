@@ -6372,8 +6372,8 @@
     {
       "path": "technique/logarithm",
       "title": "Logarithm",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:30Z",
       "solved": 3,
       "problems": 3,
       "tags": ["logarithm"],

@@ -1,5 +1,5 @@
 <!-- tags: [logarithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:30Z -->
 # Logarithm
 
 The [logarithm](https://en.wikipedia.org/wiki/Logarithm) is the inverse of exponentiation:
