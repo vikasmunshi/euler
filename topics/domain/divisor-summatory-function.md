@@ -1,5 +1,5 @@
 <!-- tags: [divisor-summatory-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T07:57Z -->
 # Divisor summatory function
 
 The [divisor summatory function](https://en.wikipedia.org/wiki/Divisor_summatory_function)

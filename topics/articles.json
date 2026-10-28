@@ -1081,8 +1081,8 @@
     {
       "path": "domain/divisor-summatory-function",
       "title": "Divisor summatory function",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T07:57Z",
       "solved": 3,
       "problems": 9,
       "tags": ["divisor-summatory-function"],
