@@ -4437,12 +4437,12 @@
       "path": "takeaway/small-cases-reveal-closed-form",
       "title": "Small cases reveal a closed form",
       "status": "final",
-      "written": "2026-10-15T11:02Z",
+      "written": "2026-10-28T21:42Z",
       "solved": 10,
       "problems": 10,
       "tags": ["small-cases-reveal-closed-form"],
       "refs": ["p0256", "p0276", "p0336", "p0340", "p0359", "p0523", "p0739", "p0950", "p0957", "p0963"],
-      "solved_after": ["p0340", "p0359", "p0523", "p0739"]
+      "solved_after": []
     },
     {
       "path": "takeaway/small-cases-reveal-recurrence",
