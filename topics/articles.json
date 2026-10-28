@@ -3391,8 +3391,8 @@
     {
       "path": "domain/smooth-number",
       "title": "Smooth number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:08Z",
       "solved": 4,
       "problems": 8,
       "tags": ["smooth-number"],
