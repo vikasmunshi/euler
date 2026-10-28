@@ -3,7 +3,7 @@
 """The `version` command: report the running solver build's version."""
 from __future__ import annotations
 
-__all__ = ['version']
+__all__ = ['git_describe', 'version']
 
 import subprocess
 
@@ -11,7 +11,7 @@ from solver.config import config
 from solver.shell import console, register
 
 
-def _git_detail() -> str | None:
+def git_describe(timeout: float = 2) -> str | None:
     """Live `git describe` of `config.root_dir`, or `None` when it has no git.
 
     Describes the clone the shell operates on (`config.root_dir`), which is the
@@ -21,12 +21,13 @@ def _git_detail() -> str | None:
     number that `config.version` reports. Returns `None` only when `root_dir`
     is not a git repo (or git is unavailable). Run live on every call — the clone's
     commit moves under a long-lived web shell (a git-sync, a commit), so a cached
-    value would go stale.
+    value would go stale. *timeout* bounds the wait: the start-up banner passes a
+    shorter one than this command, since nobody asked it a question.
     """
     try:
         proc = subprocess.run(
             ['git', '-C', str(config.root_dir), 'describe', '--tags', '--always', '--dirty', '--match', 'v*'],
-            capture_output=True, text=True, timeout=2, check=False, cwd=config.root_dir,
+            capture_output=True, text=True, timeout=timeout, check=False, cwd=config.root_dir,
         )
     except (OSError, subprocess.SubprocessError):
         return None
@@ -52,7 +53,7 @@ def version() -> int:
     run in every collaborator's long-lived web shell.
     """
     console.print(f'[accent]solver {config.version}[/accent]')
-    detail = _git_detail()
+    detail = git_describe()
     if detail:
         console.print(f'[accent.dim]git {detail}[/accent.dim]')
     return 0

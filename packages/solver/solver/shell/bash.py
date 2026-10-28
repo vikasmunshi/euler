@@ -10,7 +10,7 @@ directly; every other command streams its combined output through
 """
 from __future__ import annotations
 
-__all__ = []
+__all__ = ['run_interactive']
 
 import os
 import shlex
@@ -124,7 +124,7 @@ class Runner(Protocol):
     def __call__(self, ctx: Context, cmdline: str, cwd: Path) -> int: ...
 
 
-def _run_interactive(ctx: Context, cmdline: str, cwd: Path) -> int:
+def run_interactive(ctx: Context, cmdline: str, cwd: Path) -> int:
     """Run *cmdline* with the child inheriting the terminal directly.
 
     Used for interactive subshells (a bash/python REPL, a bare `claude`
@@ -169,7 +169,7 @@ def _bash(ctx: Context, *args: str) -> int:
 
         `! sh` / `! bash`       an interactive bash subshell, in the solution dir
         `! py` / `! python`     an interactive Python interpreter, in the repo root
-        `! claude [prompt]`     Claude Code, in the repo root
+        `! claude [prompt]`     Claude Code, in the repo root (also plain `claude`)
         `! ssh <host> [...]`    an ssh session (or remote command), in the solution dir
 
     Any other command (`! ls`, `! git diff`, …) runs non-interactively in the
@@ -195,17 +195,17 @@ def _bash(ctx: Context, *args: str) -> int:
     if cmdline in ('sh', 'bash'):
         cmdline = '/usr/bin/bash'
         cwd: Path = ctx.variables.problem.solution_dir
-        runner = _run_interactive
+        runner = run_interactive
     elif cmdline in ('py', 'python'):
         cmdline = sys.executable
         cwd = config.root_dir
-        runner = _run_interactive
+        runner = run_interactive
     elif cmdline == 'claude' or cmdline.startswith('claude '):
         cwd = config.root_dir
-        runner = _run_interactive
+        runner = run_interactive
     elif cmdline == 'ssh' or cmdline.startswith('ssh '):
         cwd = ctx.variables.problem.solution_dir
-        runner = _run_interactive
+        runner = run_interactive
     else:
         cwd = ctx.variables.problem.solution_dir
         runner = _run_streamed

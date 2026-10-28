@@ -17,12 +17,13 @@ import shlex
 import sys
 from contextlib import contextmanager
 from time import time
-from typing import Any, Callable, Iterable, Iterator
+from typing import Any, Callable, Iterable, Iterator, Sequence
 
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.shortcuts import clear_title, set_title
+from rich.console import Group
 from rich.panel import Panel
 from rich.text import Text
 
@@ -277,9 +278,12 @@ class SolverShell:
                 self._persist_last_problem(last_problem)
             return rc
 
-    def run_interactive(self, intro: bool = True, intro_message: str = '',
+    def run_interactive(self, intro: bool = True, intro_message: str = '', status: Sequence[str] = (),
                         on_start: Callable[[Callable[[str], int]], None] | None = None) -> int:
         """Run the interactive prompt loop until `exit` / EOF; return the status.
+
+        *status*, if given, is the markup segments of a line the banner carries under its
+        tagline — the caller's report of who the session is (:func:`solver.shell.login.status_line`).
 
         *on_start*, if given, runs once before the first prompt with :meth:`dispatch`
         (an extension's start-up step — :class:`~solver.shell.extension.Extension`).
@@ -291,7 +295,7 @@ class SolverShell:
                 return self._run_piped()
             if intro:
                 self.console.clear()
-                self._print_banner()
+                self._print_banner(status)
             if intro_message:
                 self.console.print(intro_message)
             trim_history(config.history_file)
@@ -406,14 +410,29 @@ class SolverShell:
         """Build the bottom toolbar showing the command count and exit hint."""
         n = len(self.registry.all())
         return FormattedText([
-            ('class:bottom-toolbar', f' solver v2 · {n} commands · Ctrl-D to exit '),
+            ('class:bottom-toolbar', f' solver {config.version} · {n} commands · Ctrl-D to exit '),
         ])
 
-    def _print_banner(self) -> None:
-        """Print the welcome banner shown when the interactive shell starts."""
-        body = Text.from_markup(
-            '[accent]SOLVER[/accent]  [muted]v2[/muted]\n'
-            '[primary]  Your Euler problem solving companion in the terminal[/primary]\n'
+    def _status_lines(self, segments: Sequence[str]) -> list[Text]:
+        """Lay the banner's status *segments* out in lines that fit the panel, filling each
+        line greedily so a narrow terminal breaks between segments, never inside one."""
+        width: int = self.console.width - 6  # inside the panel's border and padding
+        lines: list[Text] = []
+        for segment in map(Text.from_markup, segments):
+            if lines and lines[-1].cell_len + 3 + segment.cell_len <= width:
+                lines[-1].append('   ').append_text(segment)
+            else:
+                lines.append(Text('  ').append_text(segment))
+        return lines
+
+    def _print_banner(self, status: Sequence[str] = ()) -> None:
+        """Print the welcome banner shown when the interactive shell starts, with the *status*
+        segments (markup) under the tagline when there are any."""
+        head = Text.from_markup(
+            f'[accent]SOLVER[/accent]  [muted]{config.version}[/muted]\n'
+            '[primary]  Your Euler problem solving companion in the terminal[/primary]'
+        )
+        rest = Text.from_markup(
             '[muted]  Powered by [accent.dim]claude.ai[/accent.dim]'
             ' · [accent.dim]prompt-toolkit[/accent.dim]'
             ' · [accent.dim]rich[/accent.dim]\n\n'
@@ -422,7 +441,7 @@ class SolverShell:
             '[accent]  ?[/accent] help[/muted]'
         )
         self.console.print(Panel(
-            body,
+            Group(head, *self._status_lines(status), rest),
             border_style='panel.border',
             title='[accent]▎[/accent] [primary]solver[/primary]',
             subtitle='[muted]type [/muted][accent]exit[/accent][muted] or [/muted]'

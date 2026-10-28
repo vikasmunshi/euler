@@ -15,7 +15,7 @@ import contextlib
 import io
 import sys
 import unittest
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from solver.main import main
 
@@ -51,7 +51,7 @@ class MainArgvTests(unittest.TestCase):
     def test_empty_argv_runs_interactive(self) -> None:
         """No positional block → the interactive shell, not a command block."""
         rc = main([])
-        self.instance.run_interactive.assert_called_once_with(intro_message='', on_start=None)
+        self.instance.run_interactive.assert_called_once_with(intro_message='', status=ANY, on_start=None)
         self.instance.run_command.assert_not_called()
         self.assertEqual(rc, 0)
 
@@ -65,7 +65,7 @@ class MainArgvTests(unittest.TestCase):
         """`-s` with no block → an interactive session with save enabled."""
         main(['-s'])
         self.MockShell.assert_called_once_with(save=True)
-        self.instance.run_interactive.assert_called_once_with(intro_message='', on_start=None)
+        self.instance.run_interactive.assert_called_once_with(intro_message='', status=ANY, on_start=None)
 
     def test_save_flag_ignored_with_cmdline(self) -> None:
         """`-s` alongside a block → save is suppressed (only interactive sessions log)."""

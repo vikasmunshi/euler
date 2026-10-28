@@ -17,13 +17,19 @@ docs/package-guide.md § 2. Two steps, both run by :func:`solver.main.main`:
    answer. A declined or wrong password is not fatal — the shell runs locked, and the private
    solutions and `claude-api` are what stay unavailable. The vault is a capability, not an
    identity proof (§ 2.2): the uid already said who this is.
+
+What the two steps settled, :func:`status_line` reports — the start-up banner's line.
 """
 from __future__ import annotations
 
-__all__ = ['identify', 'unlock']
+__all__ = ['identify', 'status_line', 'unlock']
+
+from rich.markup import escape
 
 from solver.auth import Subject
 from solver.config import config
+from solver.crypto import vault
+from solver.crypto.ciphers import read_master_key
 from solver.crypto.keys import unlock_session
 from solver.shell.extension import Extension
 
@@ -38,3 +44,49 @@ def identify(extension: Extension | None = None) -> Subject:
 def unlock(extension: Extension | None = None) -> None:
     """Open the vault for this session and its children — prompting only if the front end allows."""
     unlock_session(interactive=extension is None or extension.prompt_vault)
+
+
+def status_line() -> tuple[str, ...]:
+    """The banner's status line, as markup segments: who, what it can decrypt, what it runs.
+
+    `<user> · <profile> · <channel>`, then the vault and master-key state, then the clone's
+    `git describe` — the build number is the banner's own first line. Segments, so a
+    narrow terminal wraps between them rather than inside one. Read-only and quiet: every
+    probe degrades to a word rather than raising, never prompts and never writes — a broken
+    key file must not stop the shell starting, and this is not the place to mend one (that
+    is `user` / `vault`).
+    """
+    # Imported here: the module registers the `version` command, and login loads before them.
+    from solver.utils.version import git_describe
+
+    subject = config.subject
+    segments: list[str] = [f'[primary]{escape(subject.user)}[/primary] · {subject.profile} · {subject.channel}',
+                           f'{_vault_state()} · {_master_key_state()}']
+    if detail := git_describe(timeout=1):
+        segments.append(f'git {detail}')
+    return tuple(segments)
+
+
+def _vault_state() -> str:
+    """The vault, in a word or two: absent, locked or unlocked for this session."""
+    if not vault.vault_exists():
+        return '[warning]no vault[/warning]'
+    if vault.session_vault_key() is None:
+        return '[error]vault locked[/error]'
+    return '[success]vault unlocked[/success]'
+
+
+def _master_key_state() -> str:
+    """Whether this session holds the master key — and, if not, which step is missing."""
+    if vault.vault_exists() and vault.session_vault_key() is None:
+        return 'master key [muted]locked[/muted]'  # the id cannot be read; nothing to probe
+    try:
+        read_master_key()
+    except FileNotFoundError:
+        missing = 'no identity' if not config.private_key_file.exists() else 'not issued'
+        return f'master key [warning]{missing}[/warning]'
+    except KeyError:
+        return 'master key [warning]not authorized[/warning]'
+    except Exception:  # noqa: BLE001 — a malformed key file is reported, never raised at start-up
+        return 'master key [error]invalid[/error]'
+    return 'master key [success]✓[/success]'

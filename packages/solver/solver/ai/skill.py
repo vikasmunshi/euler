@@ -1,9 +1,9 @@
 #! /usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `claude-solve` / `claude-blog` commands: run Claude Code in-shell via a skill."""
+"""The `claude`, `claude-solve` and `claude-blog` commands: run Claude Code in-shell, bare or via a skill."""
 from __future__ import annotations
 
-__all__ = ['claude_solve', 'claude_blog']
+__all__ = ['claude', 'claude_solve', 'claude_blog']
 
 import json
 import shlex
@@ -19,7 +19,8 @@ from rich.text import Text
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
-from solver.shell.command import Context
+from solver.shell.bash import run_interactive
+from solver.shell.command import Context, command
 from solver.shell.dialogue import Ask, Choice
 from solver.shell.variables import variable
 
@@ -29,6 +30,46 @@ _SOLVE_ACTIONS: dict[str, str] = {
     'solve': 'write and verify a solution, translate it to C, then document it',
     'review': 'audit an existing solution for parity, documentation and notes',
 }
+
+
+#: What `claude` completes: Claude Code's subcommands and its common options. Static — the CLI
+#: is not asked, so completion costs nothing; anything else still passes through untouched.
+_CLAUDE_WORDS: tuple[str, ...] = (
+    'agents', 'auth', 'doctor', 'mcp', 'plugin', 'update',
+    '--add-dir', '--continue', '--effort', '--model', '--permission-mode', '--print',
+    '--resume', '--settings', '--verbose', '--version', '--worktree',
+)
+
+
+def _claude_completer(_ctx: Context, incomplete: str) -> Iterable[str]:
+    """Completer for `claude`: the subcommands and options in :data:`_CLAUDE_WORDS`."""
+    return [word for word in _CLAUDE_WORDS if word.startswith(incomplete)]
+
+
+@command(requires='contributor', name='claude',
+         usage='\tclaude [options] [command] [prompt]',
+         completer=_claude_completer)
+def claude(ctx: Context, *args: str) -> int:
+    """Run Claude Code interactively in the repository root, returning its exit code.
+
+    Shorthand for `! claude …`, with the same behaviour: Claude Code takes over the
+    terminal, starts in the repo root (so it reads `CLAUDE.md` and the project skills),
+    and its exit code is this command's. Every argument passes through to the `claude`
+    CLI untouched — `claude -c`, `claude --resume <id>`, `claude -p "…"`, `claude mcp list`
+    — none is read by the shell. Unlike `claude-solve`, no problem or skill is implied.
+    Needs the `claude` CLI on PATH.
+
+    Args:
+        ctx: [injected] The live shell context; the decorator supplies it.
+        *args: Claude Code's own options, subcommand and prompt, token by token — quoted
+            before they reach the CLI. With none, an interactive session starts.
+    """
+    cmdline = ' '.join(['claude', *(shlex.quote(a) for a in args)])
+    try:
+        return run_interactive(ctx, cmdline, config.root_dir)
+    except OSError as exc:
+        console.print(f'[error]exec error:[/error] {exc}')
+        return ExitCodes.EXIT_ERROR
 
 
 @register(requires='contributor', pass_ctx=True)

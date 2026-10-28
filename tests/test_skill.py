@@ -152,3 +152,39 @@ class BlogPromptTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ClaudeCommandTests(unittest.TestCase):
+    """The bare `claude` command: every argument passes through, quoted, run in the repo root."""
+
+    def setUp(self) -> None:
+        self.calls: list[tuple[str, Any]] = []
+
+        def _record(_ctx: Any, cmdline: str, cwd: Any) -> int:
+            self.calls.append((cmdline, cwd))
+            return 0
+
+        self.enterContext(patch.object(skill, 'run_interactive', _record))
+
+    def test_registered_at_contributor(self) -> None:
+        """A command of its own, at the same floor as `! claude` — a higher one would gate nothing."""
+        command = registry.resolve('claude')
+        self.assertIsNotNone(command)
+        self.assertEqual(cast(Any, command).requires, 'contributor')
+
+    def test_arguments_pass_through_quoted_in_the_repo_root(self) -> None:
+        """Claude's own flags are not read by the shell, and a prompt with spaces stays one token."""
+        rc = skill.claude(cast(Any, None), '--resume', 'abc', '-p', 'two words')
+        self.assertEqual(rc, 0)
+        self.assertEqual(self.calls, [("claude --resume abc -p 'two words'", config.root_dir)])
+
+    def test_bare_claude_starts_a_session(self) -> None:
+        skill.claude(cast(Any, None))
+        self.assertEqual(self.calls, [('claude', config.root_dir)])
+
+    def test_exit_code_is_forwarded(self) -> None:
+        self.enterContext(patch.object(skill, 'run_interactive', lambda *_: 3))
+        self.assertEqual(skill.claude(cast(Any, None)), 3)
+
+    def test_completion_offers_its_options(self) -> None:
+        self.assertEqual(list(skill._claude_completer(cast(Any, None), '--re')), ['--resume'])
