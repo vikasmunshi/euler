@@ -1,5 +1,5 @@
 <!-- tags: [number-theory] -->
-<!-- status: final 2026-10-16T07:13Z -->
+<!-- status: final -->
 # Number theory
 
 [Number theory](https://en.wikipedia.org/wiki/Number_theory) is the study of the integers on their
@@ -9,7 +9,7 @@ With 141 problems it is the third-largest domain tag in the archive, behind only
 [modular arithmetic](/topics/domain/modular-arithmetic), and it is the one most often paired with
 something sharper: 35 of these problems also carry `modular-arithmetic`, 24
 [prime factorization](/topics/domain/prime-factorization), 21
-[Diophantine equation](/topics/domain/diophantine-equation), 19
+[Diophantine equation](/topics/domain/diophantine-equation), 21
 [multiplicative function](/topics/domain/multiplicative-function), 16
 [divisor function](/topics/domain/divisor-function). Those pages describe the *objects*. This one
 is about what all 141 have in common — the shape the question takes, and the small set of moves
@@ -52,6 +52,17 @@ $n$, plus one if $9 \mid n$. The statement's $C(91) = 8$ checks it: $91 = 7 \cdo
 "242 roots" therefore means $k = 5$, a condition on *which primes* divide $n$ and on nothing else.
 Move 5 below is what you do with a condition like that.
 
+The same CRT split works for any polynomial congruence modulo a composite. Its companion, problem
+271, fixes a single $n$ — the primorial up to 43 — and asks for the *sum* of the cube roots rather
+than their count. A count is multiplicative, but a sum is not, so this time the roots have to be
+built. Find each prime power's roots ([Hensel's lemma](/topics/technique/hensels-lemma) lifts a root mod $p$ to mod $p^k$ whenever the derivative is a unit), then recombine every tuple by
+CRT. Problem 407 asks the same question of $a^2 \equiv a$. Since $a$ and $a - 1$ are coprime, each
+prime power of $n$ divides one of them completely, so the
+[idempotents](/topics/domain/idempotent-ring-element) of $\mathbb{Z}/n$ correspond one-to-one with
+the coprime splits $n = d \cdot e$. There are $2^{\omega(n)}$ of them, and the search for the
+largest becomes a sweep over coprime pairs. In all three problems the question is about $n$ but the
+work is done one prime power at a time.
+
 ## Move 1 — build the whole table in one pass
 
 $\varphi(d)$ for a single $d$ costs a factorization. $\varphi(d)$ for *every* $d \le N$ costs one
@@ -80,7 +91,12 @@ $O(N \log \log N)$ against the $O(N \sqrt{N})$ of factoring each $d$ separately.
 The pattern recurs with a different payload each time. Problem 124 sieves radicals by multiplying
 each cell by each prime once. Problem 179 sieves divisor counts, and pairs divisors $(a, n/a)$ so
 the outer loop only runs to $\sqrt{N}$. Problem 834 does the algebra first (below) and then sieves
-divisor sums. The rule of thumb is blunt: **if you find yourself factoring inside a loop over a
+divisor sums. Problem 675 adds a twist. It needs a multiplicative function of every factorial
+$i!$ up to $10^7$, and consecutive factorials differ only in the primes dividing $i$. So the sieve
+records, for each $i$, the ratio by which the running product changes. A prime $p$ updates only its
+$n/p$ multiples, and one prefix product yields every value; nothing is ever refactored
+([update only what changes](/topics/takeaway/update-only-what-changes)). The rule of
+thumb is blunt: **if you find yourself factoring inside a loop over a
 range, you have the loop inside out.** Invert it — iterate over primes or divisors and push into an
 array. See [sieve of Eratosthenes](/topics/technique/sieve-of-eratosthenes) and
 [precompute once, reuse](/topics/takeaway/precompute-once-reuse).
@@ -155,7 +171,25 @@ where sieving $\mu$ up to $N$ would be linear. Fill the values bottom-up, with o
 by small $v$ and one by $k$ for $v = \lfloor N/k \rfloor$, and no dictionary or call stack is
 needed. This is the same skeleton as the
 [Mertens function](https://en.wikipedia.org/wiki/Mertens_function) recursion, and it applies
-whenever "all of them" is a formula and "the primitive ones" is the question.
+whenever "all of them" is a formula and "the primitive ones" is the question. Problem 512 uses it
+directly. Counting pairs $a \le b \le v$ by their gcd gives
+$\sum_{d} \Phi(\lfloor v/d \rfloor) = v(v+1)/2$ for the summatory totient $\Phi$, which is the same
+inversion ([totient summatory recursion](/topics/technique/totient-summatory-recursion)). Sieving
+$\varphi$ up to $N^{2/3}$ and recursing above that brings the cost to
+$O(N^{2/3})$.
+
+The floor-quotient set is also where prime counting lives. The Lucy–Hedgehog sieve computes $\pi(v)$ for
+*every* $v = \lfloor N/i \rfloor$ at once. It stores them in two $\sqrt{N}$-sized arrays, one for
+small $v$ and one indexed by $i$, and removes one prime's multiples per pass. Problem 452 builds on
+it. Its tuple count is the summatory function of the $n$-fold divisor function $d_n$, which is
+multiplicative and *constant on primes* ($d_n(p) = n$). The primes therefore contribute
+$n \cdot \pi(m)$, and the composites come from a recursion over smallest prime factors. That pair
+is the [Min_25 sieve](/topics/technique/min-25-sieve), and it runs in about $O(N^{3/4} / \log N)$.
+Problem 641 lands on a two-variable floor count, the pairs $(c, q)$ with $c^3 q^2 \le X$. It splits
+the region the way the [hyperbola method](/topics/technique/dirichlet-hyperbola-method) does: loop
+over $q$ when $q$ is small, and over $c$ when $q$ is large. The large side needs
+$\#\{q \le x : \mu(q) = +1\}$, which is half the sum of the squarefree count $Q(x)$ and the Mertens
+function $M(x)$. Both are the sublinear sums from moves 2 and 3.
 
 ## Move 4 — reduce the algebra before you write the loop
 
@@ -183,6 +217,15 @@ ones. The candidates collapse to multiples of a
 checks. Three problems, three different things reduced: the formula, the comparison, the candidate
 set.
 
+Sometimes the reduction is a congruence that makes most of the problem disappear. Problem 512 sums
+$\varphi(n^i) \bmod (n+1)$ over $i \le n$. But $\varphi(n^i) = n^{i-1}\varphi(n)$, and
+$n \equiv -1 \pmod{n+1}$. The terms alternate and cancel in pairs, leaving $\varphi(n)$ for odd $n$
+and $0$ for even $n$, so a double sum becomes a summatory totient restricted to odd arguments.
+Problem 641 starts with dice and ends with a divisor count. A die finishes on 1 exactly when
+$\tau(k) \equiv 1 \pmod 6$. That forces $k$ to be a square $m^2$ with $\prod (2a_i + 1) \equiv 1
+\pmod 3$, and the qualifying $m$ factor uniquely as $c^3 q^2$ with $q$ squarefree and $\mu(q) = +1$.
+None of that is code. All of it is what makes the code possible.
+
 ## Move 5 — when only the prime set matters, enumerate the shape
 
 A condition that depends only on which primes divide $n$, like problem 272's "exactly five
@@ -208,6 +251,45 @@ blocking applies, but the blocks are over primes rather than consecutive integer
 ("at least four distinct prime factors below 100") and the other $\omega(n)$-shaped problems have
 the same structure.
 
+Problem 516 is the same split arrived at from a multiplicative function. It asks for the $n$ whose
+$\varphi(n)$ is [5-smooth](/topics/domain/smooth-number). Since $\varphi(p^e) = p^{e-1}(p-1)$, the
+primes 2, 3 and 5 may appear to any power. Any larger prime must appear exactly once, and $p - 1$
+must itself be 5-smooth. So $n = h \cdot m$, where $h$ is a Hamming number and $m$ is a squarefree
+product of "good" primes. A few thousand Hamming numbers, with a prefix sum over them, take the
+place of the cofactor sieve. A depth-first search over the good primes builds the $m$. A search
+over $10^{12}$ integers becomes a search over two sets you can list.
+
+## Move 6 — when the question is a process, find its structure
+
+A minority of these problems are not sums at all. They describe a process — a recurrence, a greedy
+rule, an orbit — and ask where it stands after $10^{15}$ steps. Simulating it is hopeless, but the
+process almost always has much less going on than its step count. The move is to find what
+actually changes and [jump to the next event](/topics/takeaway/jump-to-the-next-event).
+
+Problem 443's recurrence $g(n) = g(n-1) + \gcd(n, g(n-1))$ adds 1 at almost every step. Write
+$g(k) = k + d$. Then the gcd at step $j$ is $\gcd(j, d - 1)$, so the run of $+1$ steps ends at the
+first multiple of a prime factor of $d - 1$. One factorization per jump replaces every step in
+between, and there are only a few hundred jumps up to $10^{15}$. Problem 700 looks for the record
+lows of $na \bmod m$. Keep two records, the smallest residue and the smallest gap below $m$. The
+next candidate is always their difference, which is the subtractive
+[Euclidean algorithm](/topics/technique/euclidean-algorithm) under another name, so each record
+costs $O(1)$ amortised. Its geometry is the
+[three-distance theorem](/topics/domain/three-distance-theorem). Problem 822 repeatedly squares the
+smallest of a list of numbers. After a short transient it settles into a fixed rotation, and the
+remaining $10^{16}$ rounds reduce to a division
+([simulate the transient, then extrapolate](/topics/takeaway/simulate-transient-then-extrapolate)).
+Problem 455's self-referential $n^x \equiv x \pmod{10^9}$ is solved by iterating the
+[power tower](/topics/domain/tetration) to its [fixed point](/topics/technique/fixed-point-iteration).
+The tower stabilises because the exponent only matters modulo $\lambda(m)$, then
+$\lambda(\lambda(m))$, down a [Carmichael](/topics/technique/carmichael-function) chain that reaches
+1 within a dozen steps.
+
+When no structure is visible, generate it. Problem 359's hotel has no obvious formula. Simulating
+the first forty thousand guests shows that the sums of neighbouring rooms run through consecutive
+squares, so the occupant of a room telescopes to a quadratic. The sum then runs over the 364
+divisors of $N$
+([small cases reveal the closed form](/topics/takeaway/small-cases-reveal-closed-form)).
+
 ## Exactness is the discipline
 
 Number theory asks questions whose answers are exact integers, and the characteristic bug in this
@@ -226,10 +308,19 @@ $k^2 \bmod 12$ only takes the values $0, 1, 4, 9$, the rounding becomes an exact
 correction with period 12. That makes the sum of the sequence a square-pyramidal number plus a
 linear term, with no float involved. See
 [use exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
+Problem 822 is the opposite case, where floats are safe and exact values are impossible. Its
+numbers have $2^{10^{12}}$-sized exponents, so it orders them by $\log_2 \log_2 x^{2^k} =
+k + \log_2 \log_2 x$. Distinct values differ in that key by far more than rounding error, and equal
+values can be ordered either way without changing the sum.
+
+Modular reduction has its own exactness trap. In problem 271 the roots are combined modulo $n$, but
+the question asks for their sum as integers. That sum is hundreds of times larger than $n$, so
+reducing it would discard most of the answer
+([exact sums resist modular shortcuts](/topics/takeaway/exact-sums-resist-modular-shortcuts)).
 
 The second trap is width, and it is language-shaped. Python's integers are arbitrary-precision, so
 a solution that works in Python can overflow silently the moment it is ported to C. Problems 241,
-251, 272 and 276 all need `__int128` or a reduction that keeps intermediates small. In 276 the
+251, 271, 272, 276, 359 and 641 all need `__int128` or a reduction that keeps intermediates small. In 276 the
 answer itself still fits in 64 bits, but the intermediate $k(k+1)(2k+1)$ does not. Problems 168 and
 321 need [GMP](https://gmplib.org/) outright. The Python version gives no warning that the C
 version is about to be wrong. See [watch integer width](/topics/takeaway/watch-integer-width).
@@ -246,6 +337,9 @@ The tells are reasonably reliable:
 | $\lfloor N/d \rfloor$ anywhere in the derived sum | quotient blocking (move 3) |
 | the total is a formula, the question asks for the gcd-1 part | invert over floor quotients, $O(N^{3/4})$ (moves 2–3) |
 | the condition only sees which primes divide $n$ | enumerate the prime part, prefix-sum the cofactors (move 5) |
+| a congruence modulo a composite $n$ | solve per prime power, recombine by CRT |
+| $\pi(v)$, or a function constant on primes, summed to $10^9$+ | Lucy / Min_25 over the floor quotients (move 3) |
+| a recurrence or greedy process run $10^{15}$ times | find the events or the steady state; jump (move 6) |
 | $f$ is multiplicative | build $f$ from prime powers; a sieve exists |
 | the number is too large to write down | work in logs, or modulo whatever the question actually asks for |
 | a ratio, a root, or an equality test | integers only — cross-multiply, `isqrt`, check the width |
