@@ -6086,8 +6086,8 @@
     {
       "path": "technique/insertion-sort",
       "title": "Insertion sort",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T16:38Z",
       "solved": 3,
       "problems": 3,
       "tags": ["insertion-sort"],
