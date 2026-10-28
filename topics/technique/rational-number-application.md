@@ -1,5 +1,5 @@
 <!-- tags: [rational-number-application] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T16:36Z -->
 # Rational number (application)
 
 This page is about one working habit: when the true answer is a

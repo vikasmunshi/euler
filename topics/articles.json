@@ -7241,8 +7241,8 @@
     {
       "path": "technique/rational-number-application",
       "title": "Rational number (application)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T16:36Z",
       "solved": 3,
       "problems": 3,
       "tags": ["rational-number-application"],
