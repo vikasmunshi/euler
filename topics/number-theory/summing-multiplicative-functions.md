@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking, mobius-inversion-formula, mobius-function-application, dirichlet-convolution, divisor-summatory-function, totient-summatory-recursion] -->
-<!-- status: final 2026-10-14T07:42Z -->
+<!-- status: final -->
 # Summing multiplicative functions fast
 
 A whole family of Project Euler problems asks for $\sum_{n \le N} f(n)$, where $f$ is a
@@ -29,7 +29,10 @@ constant function, whose summatory is $H(y) = y$. This gives the "swap the order
 behind the [divisor summatory function](/topics/domain/divisor-summatory-function):
 $\sum_{n \le x} \sigma(n) = \sum_{d \le x} d \lfloor x/d \rfloor$. Problem 694 uses the same move
 with $g$ equal to the indicator of cube-full numbers: the number of cube-full divisors, summed to
-$x$, is $\sum_{d \text{ cube-full}} \lfloor x/d \rfloor$.
+$x$, is $\sum_{d \text{ cube-full}} \lfloor x/d \rfloor$. Convolutions also stack. Problem 452
+counts ordered $n$-tuples with product at most $m$, which is the summatory function of the $n$-fold
+divisor function $d_n = \mathbf 1 * \cdots * \mathbf 1$. Grouping the tuples by their product is
+the same swap, applied $n - 1$ times.
 
 The identity turns the problem into two questions:
 
@@ -46,7 +49,8 @@ contiguous run of $a$. So group the terms by run, and each run costs one evaluat
 difference of $G$ (the summatory function of $g$). This takes $O(\sqrt x)$ time, provided both
 summatory functions are $O(1)$, as triangular numbers and power sums are. The divisor summatory
 $\sum_k k \lfloor x/k \rfloor$ is the standard example. The sum of squares of divisors (Problem 401)
-is the same with $k^2$ as the weight. The
+is the same with $k^2$ as the weight, although its solution walks the hyperbola differently (see
+below). The
 [technique page](/topics/technique/quotient-blocking) covers the loop itself.
 
 **Möbius inversion: when you know $f * \mathbf 1$ and want $f$.** Many problems hand you a count
@@ -81,14 +85,24 @@ $$F(x) = \sum_{a \le y} g(a)\, H\!\left(\tfrac{x}{a}\right) + \sum_{b \le x/y} h
 
 With $y = \sqrt x$ and $g = h = \mathbf 1$ this gives the divisor-count sum
 $2\sum_{k \le \sqrt x} \lfloor x/k \rfloor - \lfloor \sqrt x \rfloor^2$. That is the textbook
-case. The more useful form for Project Euler is the *lopsided* split, where $g$ is supported on a
+case. Problem 401 is the weighted version, with $g = \mathrm{id}^2$ and $h = \mathbf 1$. One pass over
+$k \le \sqrt n$ adds both $k^2 \lfloor n/k \rfloor$ and the square-pyramidal closed form at
+$\lfloor n/k \rfloor$, because both terms need the same quotient. Then the $s \times s$ square is
+subtracted once. With no blocking bookkeeping, the loop is a plain range that vectorises cleanly in
+NumPy. The more useful form for Project Euler is the *lopsided* split, where $g$ is supported on a
 sparse set, so the sum over $a$ is short even though it runs all the way to $x$:
 
 - **Square-supported $g$.** Squarefreeness is $\sum_{d^2 \mid n} \mu(d)$, so the count of squarefree
   numbers is $\sum_{d \le \sqrt M} \mu(d) \lfloor M/d^2 \rfloor$. That is Problem 193, done in
   $O(\sqrt M)$. Problem 745 has the same shape. To sum the largest square divisor, write it as
   $\sum_{m \le \sqrt N} (\mu * \mathrm{id}^2)(m)\, \lfloor N/m^2 \rfloor$, sieving the convolution
-  with a [linear sieve](/topics/technique/linear-sieve) up to $\sqrt N$.
+  with a [linear sieve](/topics/technique/linear-sieve) up to $\sqrt N$. Problem 641 goes a step
+  further. Its numbers factor uniquely as $c^3 q^2$, with $q$ squarefree and $\mu(q) = +1$, so the
+  count is a lattice count under the curve $c^3 q^2 \le X$, split at a bound $L$. Small $q$ are
+  summed one at a time. Above $L$ only a few dozen $c$ survive, and each needs the number of
+  squarefree $q$ with an even number of prime factors. Because $\mu = \pm 1$ on squarefree numbers,
+  that count is $\tfrac12\bigl(Q(x) + M(x)\bigr)$: the squarefree count plus the Mertens function,
+  which are two of this page's summatory functions used together.
 - **Powerful-supported $g$.** If $f$ agrees with a function you can sum easily on every prime,
   then $f = \mathbf 1 * h$, where $h(p) = 0$. A multiplicative function that vanishes on primes
   is nonzero only on [powerful numbers](https://en.wikipedia.org/wiki/Powerful_number), and there
@@ -135,6 +149,14 @@ Without a sieve this costs $O(x^{3/4})$. If you sieve $f$ directly up to about $
 recursion only above that, the cost falls to $O(x^{2/3})$. Problem 351 counts visible hexagonal
 lattice points, and after a symmetry argument it reduces to a single $\Phi(10^8)$ evaluated this way.
 
+Problem 512 shows why the closed key set matters. It needs $\varphi$ summed over *odd* $n$ only.
+Since $\varphi(2m)$ is $\varphi(m)$ or $2\varphi(m)$ depending on the parity of $m$, the even part
+unrolls to $\Phi(N) - \sum_{k \ge 1} \Phi(\lfloor N/2^k \rfloor)$. Every $\lfloor N/2^k \rfloor$ is
+already a key, so the restriction costs only $\log_2 N$ extra lookups. The same closure removes the
+memo dictionary. Store $\Phi(\lfloor N/k \rfloor)$ in an array indexed by $k$ and fill it for
+decreasing $k$. Every large value the recursion at $k$ reads lives at index $kd > k$, so it has
+already been computed.
+
 ## How to reason about it
 
 - **Look for the convolution first.** Write $f$ on prime powers, then look for a simple function
@@ -147,7 +169,12 @@ lattice points, and after a symmetry argument it reduces to a single $\Phi(10^8)
   size of its support. If the unknown summatory function sits on both sides, use the recursion,
   $O(x^{2/3})$ with a sieve. If you need sums over primes at every $\lfloor x/k \rfloor$ (Problems
   501, 565, 642), use the Lucy/[Min_25](/topics/technique/min-25-sieve) DP over the same set
-  of key values.
+  of key values. That DP is also the general fallback when $f$ has no sparse quotient but takes
+  a simple value on primes. Problem 452's $d_n$ is the constant $n$ on primes, so Lucy's
+  $\pi(v)$ table plus a recursion over smallest prime factors sums it in about
+  $O(m^{3/4}/\log m)$. Problem 668 uses only the first half. After a complement argument its
+  count is $\sum_{p > \sqrt N} \lfloor N/p \rfloor$, which regroups by quotient into differences
+  $\pi(\lfloor N/k \rfloor) - \pi(\sqrt N)$, all read from the same table.
 - **The key set is the shared data structure.** $V(x) = \{\lfloor x/k \rfloor\}$ is closed under
   further division. Every technique here reads and writes the same $2\sqrt x$ values, so store
   them in a small/large pair of arrays indexed by $v$ below $\sqrt x$ and by $x/v$ above it,
@@ -157,7 +184,9 @@ lattice points, and after a symmetry argument it reduces to a single $\Phi(10^8)
   Below it a [linear sieve](/topics/technique/linear-sieve) is faster than any recursion.
 - **Watch the arithmetic.** Under a modulus, closed forms like $x(x+1)/2$ need a
   [modular inverse](/topics/technique/modular-multiplicative-inverse-application) or a reduction
-  done before dividing. Products such as $\lfloor x/k \rfloor \cdot G(\cdot)$ overflow 64 bits long
+  done before dividing. When the modulus shares a factor with the divisor, there is no inverse.
+  Problem 401 asks for $x(x+1)(2x+1)/6 \bmod 10^9$, so it divides the even factor by 2 and the
+  multiple of 3 by 3 exactly, and only then reduces. Products such as $\lfloor x/k \rfloor \cdot G(\cdot)$ overflow 64 bits long
   before $x$ does. Use `math.isqrt` for the split, never a float square root. Check "below $N$"
   against "at most $N$" too: Problem 193 needs $Q(2^{50} - 1)$, not $Q(2^{50})$.
 - **Sanity-check against brute force.** For small $x$, sieve $f$ directly and compare the summatory
