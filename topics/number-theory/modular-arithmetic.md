@@ -370,7 +370,7 @@ handful of operations on small numbers.
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
 - ○ [0506](/solutions/0506/) — Clock Sequence
 - ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
-- ○ [0512](/solutions/0512/) — Sums of Totients of Powers
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0517](/solutions/0517/) — A Real Recursion

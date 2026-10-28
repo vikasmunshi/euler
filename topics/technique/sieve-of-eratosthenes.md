@@ -212,6 +212,7 @@ patterns recur.
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

@@ -183,6 +183,7 @@ lattice points, and after a symmetry argument it reduces to a single $\Phi(10^8)
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ○ [0608](/solutions/0608/) — Divisor Sums

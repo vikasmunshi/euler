@@ -320,7 +320,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0485](/solutions/0485/) — Maximum Number of Divisors
 - ○ [0489](/solutions/0489/) — Common Factors Between Two Sequences
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
-- ○ [0512](/solutions/0512/) — Sums of Totients of Powers
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0513](/solutions/0513/) — Integral Median
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0531](/solutions/0531/) — Chinese Leftovers
