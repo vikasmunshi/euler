@@ -5548,12 +5548,12 @@
       "path": "technique/exponentiation-by-squaring",
       "title": "Exponentiation by squaring",
       "status": "final",
-      "written": "2026-08-12T06:25Z",
+      "written": "2026-10-28T21:36Z",
       "solved": 22,
       "problems": 22,
       "tags": ["exponentiation-by-squaring"],
       "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0670_s0", "p0721_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"],
-      "solved_after": ["p0407", "p0455", "p0670", "p0721", "p0778"]
+      "solved_after": []
     },
     {
       "path": "technique/extended-euclidean-algorithm",
