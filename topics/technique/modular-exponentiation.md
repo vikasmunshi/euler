@@ -173,6 +173,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals

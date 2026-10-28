@@ -132,6 +132,7 @@ building $N$.
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0926](/solutions/0926/) — Total Roundness
 

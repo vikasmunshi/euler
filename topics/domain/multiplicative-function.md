@@ -184,7 +184,7 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
-- ○ [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0699](/solutions/0699/) — Triffle Numbers
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ● [0745](/solutions/0745/) — Sum of Squares II

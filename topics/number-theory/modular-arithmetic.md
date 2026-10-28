@@ -413,6 +413,7 @@ handful of operations on small numbers.
 - ○ [0666](/solutions/0666/) — Polymorphic Bacteria
 - ○ [0672](/solutions/0672/) — One More One
 - ○ [0673](/solutions/0673/) — Beds and Desks
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever
 - ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0684](/solutions/0684/) — Inverse Digit Sum

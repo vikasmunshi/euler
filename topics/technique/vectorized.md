@@ -221,6 +221,7 @@ unrolled across the array, with a boolean mask selecting which lanes act.
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0938](/solutions/0938/) — Exhausting a Colour

@@ -206,6 +206,7 @@ Things that bite:
 - ○ [0608](/solutions/0608/) — Divisor Sums
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
 - ○ [0646](/solutions/0646/) — Bounded Divisors
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0829](/solutions/0829/) — Integral Fusion
 - ○ [0851](/solutions/0851/) — SOP and POS
 - ● [0926](/solutions/0926/) — Total Roundness
