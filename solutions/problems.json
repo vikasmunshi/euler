@@ -5580,8 +5580,8 @@
     "level": 13,
     "pct": 35,
     "solvers": 661,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 17:05"
   },
   "699": {
     "title": "Triffle Numbers",
