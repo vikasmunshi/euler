@@ -132,5 +132,6 @@ calls, and a table built once at import is free on every run but the first.
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0357](/solutions/0357/) — Prime Generating Integers
+- ● [0443](/solutions/0443/) — GCD Sequence
 
 <!-- /problems -->

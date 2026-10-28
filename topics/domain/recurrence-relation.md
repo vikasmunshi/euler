@@ -232,7 +232,7 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0422](/solutions/0422/) — Sequence of Points on a Hyperbola
 - ○ [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0440](/solutions/0440/) — GCD and Tiling
-- ○ [0443](/solutions/0443/) — GCD Sequence
+- ● [0443](/solutions/0443/) — GCD Sequence
 - ○ [0458](/solutions/0458/) — Permutations of Project
 - ○ [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0469](/solutions/0469/) — Empty Chairs
