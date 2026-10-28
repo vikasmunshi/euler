@@ -173,6 +173,7 @@ the repetition.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0926](/solutions/0926/) — Total Roundness

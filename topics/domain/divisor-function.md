@@ -163,7 +163,7 @@ impossible and instant at $N = 10^{15}$.
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ○ [0646](/solutions/0646/) — Bounded Divisors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
-- ○ [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0699](/solutions/0699/) — Triffle Numbers
 - ○ [0722](/solutions/0722/) — Slowly Converging Series
 - ○ [0723](/solutions/0723/) — Pythagorean Quadrilaterals

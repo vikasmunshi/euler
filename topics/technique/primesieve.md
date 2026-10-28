@@ -146,6 +146,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 
 <!-- /problems -->
