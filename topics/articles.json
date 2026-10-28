@@ -6691,8 +6691,8 @@
     {
       "path": "technique/min-25-sieve",
       "title": "Min_25 sieve",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T16:34Z",
       "solved": 3,
       "problems": 3,
       "tags": ["min-25-sieve"],
