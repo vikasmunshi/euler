@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T09:32Z -->
 # Diophantine approximation
 
 [Diophantine approximation](https://en.wikipedia.org/wiki/Diophantine_approximation) asks how
