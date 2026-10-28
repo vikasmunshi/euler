@@ -1,5 +1,5 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final 2026-10-16T15:23Z -->
+<!-- status: final -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes
@@ -55,11 +55,11 @@ is the primitive that other number-theoretic machinery is built from. Seven recu
 | Role | Shape | Seen in |
 | --- | --- | --- |
 | Direct residue | `pow(b, e, m)` | 48, 97, 194, 820 |
-| [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 487, 545, 650, 743, 926 |
-| Primality witness | `pow(a, d, n)` then repeated squaring — [Miller–Rabin](/topics/technique/miller-rabin-primality-test) | 111, 146, 216, 293 |
+| [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 487, 545, 650, 675, 743, 860, 926 |
+| Primality witness | `pow(a, d, n)` then repeated squaring — [Miller–Rabin](/topics/technique/miller-rabin-primality-test) | 111, 146, 216, 271, 293, 516 |
 | [Multiplicative order](/topics/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133 |
-| Modular square root | `pow(a, (p+1)//4, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 745 |
-| Period argument | no code — `λ(m)` bounds the exponent | 188, 250 |
+| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 745 |
+| Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 822 |
 | Product by multiplicity | `∏ pow(b, count[b], m)` | 1010 |
 
 The inverse row deserves a note, because it is the most common use by volume. By [Fermat's little
@@ -70,6 +70,20 @@ once per division. Python's `pow(a, -1, m)` (3.8+) does the same job for a gener
 [extended Euclidean algorithm](/topics/technique/extended-euclidean-algorithm), and is both faster
 and honest about failure: it raises when `a` is not invertible, where `pow(a, m-2, m)` silently
 returns garbage if `m` is composite.
+
+Volume is also where the inverse row gets expensive, and the cure is to invert less. Problem 860
+needs every `k!⁻¹` for `k ≤ n` to evaluate binomials; it makes exactly one `pow` call, for
+`(n!)⁻¹`, and walks the table down with `(k-1)!⁻¹ = k · k!⁻¹` — `n` multiplications in place of
+`n` exponentiations. Problem 675 has no such telescoping structure: it needs the inverse of every
+odd `2k+1` up to `2·10^7`, so it pays for all of them, but as one vectorised exponentiation over the
+whole array (see below) rather than ten million interpreted calls.
+
+The root row is the same power map read the other way. In a cyclic group of order `p - 1`,
+raising to `(p-1)/k` lands in the subgroup of `k`-th roots of unity, so problem 271 — cube roots of
+`1` modulo a primorial — gets a primitive cube root modulo each prime from `pow(g, (p-1)//3, p)`
+for any `g` that is not a cubic residue, then lifts it to higher prime powers with a
+[Hensel](https://en.wikipedia.org/wiki/Hensel%27s_lemma) step whose division is, again, a modular
+inverse.
 
 The last row is the newest, and it turns the usual relationship around: the exponent is not given,
 it is *counted*. Problem 1010 asks for a product of tableau counts over every partition of `300`
@@ -98,6 +112,20 @@ a shorter tower, whose exponent reduces modulo `φ(φ(10^8))`, and so on. The to
 two dozen levels no matter how tall the tower is. Problem 250 uses the same fact statically: it
 proves `k^k mod 250` is periodic in `k` with period `500` by noting the base repeats mod `250` and
 the exponent repeats mod `λ(125)`, collapsing a `250250`-term sum to a `500`-term one.
+
+The simplest instance is a prime modulus, where every base below `p` is coprime to it and the
+exponent lives mod `p - 1` by Fermat alone. Problem 822 repeatedly squares the smallest of a list of
+numbers, about `10^12` squarings each; a number squared `k` times is `x^(2^k)`, and `2^k` is
+itself far too large to hold. So the exponent is computed first, as a residue mod `p - 1`, and fed
+to the outer power — two nested `pow` calls per term, and the only hard part of the problem is
+deciding *which* `k` each number ends with.
+
+Problem 455 runs the chain in the other direction: it wants `x` with `n^x ≡ x (mod 10^9)`, a
+fixed point of `x ↦ n^x`. Iterating that map from `x = 1` builds the tower `n, n^n, n^(n^n), …`
+mod `10^9`, and the `λ`-chain argument is exactly why such a tower stops changing after a few
+levels: each level only matters modulo a strictly shorter modulus, until the modulus is `1`. The
+iteration never reduces an exponent explicitly; the theory is what guarantees it terminates — in
+about a dozen rounds for every base up to `10^6`.
 
 The catch is coprimality. When `a` shares a factor with `m`, `a^e ≡ a^(e mod φ(m))` is **false**,
 and this is the single most common bug in the technique. The generalized form, valid for any `a`
@@ -130,6 +158,12 @@ the bare reduction gives a wrong answer that looks plausible.
   keeps every product under `2^64`, and an `unsigned long long` needs no widening. Python has no
   such trap, which is exactly why the C translation of a working Python solution is where this bug
   appears.
+- **Vectorise the loop, not the call.** When you need a million powers at once — every base
+  with its own exponent in problem 455, every odd denominator's inverse in problem 675 — `pow` in
+  a Python loop is the bottleneck. Square-and-multiply ports directly to NumPy: one pass per
+  exponent bit, squaring a base *array* and using `np.where` to fold it into a result array where
+  that bit is set. Thirty array operations replace a million interpreted calls. The width rule
+  above applies here too: operands under `2^31` keep every product inside `int64`.
 - **Reduce the base before the loop, not after.** `base %= mod` on entry costs one division and
   bounds every subsequent operand; skipping it is how a "correct" `mod_pow` overflows on its first
   squaring.
