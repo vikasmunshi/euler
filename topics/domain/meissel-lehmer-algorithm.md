@@ -1,5 +1,5 @@
 <!-- tags: [meissel-lehmer-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:01Z -->
 # Meissel–Lehmer algorithm
 
 The [Meissel–Lehmer algorithm](https://en.wikipedia.org/wiki/Meissel%E2%80%93Lehmer_algorithm)
