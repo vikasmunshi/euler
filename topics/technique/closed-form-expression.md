@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-expression] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T21:05Z -->
 # Closed-form expression
 
 A [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression) computes a
