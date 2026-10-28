@@ -157,7 +157,7 @@ the web package is installed in — a developer's terminal included.
 | `overlays` + `notify` | events after a command, or a replacement body (§3.2) | `overlays.toml`, and `osc.nudge` |
 | `identity` | who the session is, instead of the OS login (§2.1) | the shell ticket |
 | `prompt_vault` | whether a locked vault may be unlocked by prompting (§2.3) | no |
-| `on_start` | a step before the first prompt | a quiet `git-sync`, with one line if it failed |
+| `on_start` | a step before the banner, which reports the state it leaves; returns a line for under the banner | a quiet `git-sync`, with one line if it failed |
 | `notices` | the carrier for staff notices (§3.3) | the message spool |
 | `handoff` | told when an interactive child (`! sh`, `! py`, `claude`) takes the terminal and gives it back | `osc.handoff`: `busy` / `ready`, which disable the page's command-typing controls |
 

@@ -9,8 +9,8 @@ an :class:`~solver.shell.extension.Extension` (docs/package-guide.md § 3.2): th
 shell's left pane (:mod:`euler_webshell.shell.viewer`); a subshell lent the terminal tells the
 page so too, which disables its command-typing controls until the shell is back. The session's
 identity is a one-time ticket (:mod:`euler_webshell.shell.identity`), the vault is never prompted
-for (the browser unlocks it), and the shell syncs the clone with origin before its first prompt.
-The PTY runs `python -m euler_webshell.shell`.
+for (the browser unlocks it), and the shell syncs the clone with origin before its banner, so
+the banner reports the synced clone. The PTY runs `python -m euler_webshell.shell`.
 
 Both extensions here add the host's own commands — `msg`, `users` and key distribution
 (:mod:`euler_webshell.shell.keys`) — and carry the solver shell's notices on the message spool
@@ -66,21 +66,27 @@ def host_main() -> int:  # pragma: no cover — the `solver-host` console script
     return main(extension=ext)
 
 
-def sync_at_start(dispatch: Callable[[str], int]) -> None:
-    """Bring the clone up to date before the first prompt — quietly, unless it did not happen.
+def sync_at_start(dispatch: Callable[[str], int]) -> str:
+    """Bring the clone up to date before the banner — quietly; return what to say if it did not.
+
+    Before the banner, so its status line (`git describe`, the master-key state) describes the
+    clone after the sync — which may have pulled a release or a key grant — not before. While it
+    runs, one muted line says what the wait is; the banner's screen clear takes it away.
 
     Silence would open the shell on a stale clone with no hint — a diverged branch, a locked
-    vault, no network — so a failed sync prints one line naming what to do. After a key
-    rotation `git-sync` is the very thing that cannot work and the fix is a message waiting in
-    the spool, so that is asked first.
+    vault, no network — so a failed sync returns one line naming what to do, which the shell
+    prints under the banner. After a key rotation `git-sync` is the very thing that cannot work
+    and the fix is a message waiting in the spool, so that is asked first.
     """
+    console.print('[muted]syncing with origin…[/muted]')
     prev_quiet, console.quiet = console.quiet, True
     try:
         rc = dispatch('git-sync')
     finally:
         console.quiet = prev_quiet
-    if rc != 0:
-        from solver.core.git import key_waiting_hint
-        hint = key_waiting_hint() or ('could not sync with origin/master — this clone may be '
-                                      'stale; run [accent]git-sync[/accent] to see why.')
-        console.print(f'[warning]{hint}[/warning]')
+    if rc == 0:
+        return ''
+    from solver.core.git import key_waiting_hint
+    hint = key_waiting_hint() or ('could not sync with origin/master — this clone may be '
+                                  'stale; run [accent]git-sync[/accent] to see why.')
+    return f'[warning]{hint}[/warning]'

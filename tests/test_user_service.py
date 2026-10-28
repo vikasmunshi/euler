@@ -402,8 +402,8 @@ class VaultRouteTests(_UserServiceCase):
         from euler_webshell.user import vault_api
         expected = {
             'not installed': 'data-term-cmd="tool-setup claude"',
-            'not set up': 'data-term-cmd="claude"',
-            'not signed in': 'data-term-cmd="claude /login; claude auth status"',
+            'not set up': 'data-term-cmd="claude-login"',
+            'not signed in': 'data-term-cmd="claude-login"',
             'signed in': 'data-term-cmd="claude auth status"',
         }
         reader = {'X-User': _EMAIL, 'X-Profile': 'reader'}

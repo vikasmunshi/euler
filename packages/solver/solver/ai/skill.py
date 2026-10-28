@@ -1,9 +1,9 @@
 #! /usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `claude`, `claude-solve` and `claude-blog` commands: run Claude Code in-shell, bare or via a skill."""
+"""The `claude`, `claude-login`, `claude-solve` and `claude-blog` commands: run Claude Code in-shell."""
 from __future__ import annotations
 
-__all__ = ['claude', 'claude_solve', 'claude_blog']
+__all__ = ['claude', 'claude_login', 'claude_solve', 'claude_blog']
 
 import json
 import shlex
@@ -67,6 +67,27 @@ def claude(ctx: Context, *args: str) -> int:
     cmdline = ' '.join(['claude', *(shlex.quote(a) for a in args)])
     try:
         return run_interactive(ctx, cmdline, config.root_dir)
+    except OSError as exc:
+        console.print(f'[error]exec error:[/error] {exc}')
+        return ExitCodes.EXIT_ERROR
+
+
+@register(requires='contributor', pass_ctx=True)
+def claude_login(ctx: Context) -> int:
+    """Sign Claude Code in, then report whether it is, returning 0 only when signed in.
+
+    Shorthand for `! claude /login` followed by `claude auth status`: Claude Code takes
+    over the terminal for its login (and, on a first run, its onboarding), then reports
+    its own sign-in state. The report runs whether or not the login was cancelled, and
+    its status is this command's — the question it answers is "is Claude Code signed in
+    now?". Needs the `claude` CLI on PATH (`tool-setup claude` installs it).
+
+    Args:
+        ctx: [injected] The live shell context; the decorator supplies it.
+    """
+    try:
+        run_interactive(ctx, 'claude /login', config.root_dir)
+        return run_interactive(ctx, 'claude auth status', config.root_dir)
     except OSError as exc:
         console.print(f'[error]exec error:[/error] {exc}')
         return ExitCodes.EXIT_ERROR

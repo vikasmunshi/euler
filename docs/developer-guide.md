@@ -620,7 +620,7 @@ loads through an extension.
 | `overlays` + `notify` | an overlay table: events to `notify` after a command, and/or a replacement body with the same signature (`overlays.toml`) |
 | `identity` | who the session runs as, instead of the OS login (the web shell: its one-time ticket) |
 | `prompt_vault` | whether a locked vault may be unlocked by prompting (the web shell: no — the browser unlocks) |
-| `on_start` | a step before the first prompt (the web shell: a quiet `git-sync`) |
+| `on_start` | a step before the banner, so the banner's status reflects it; may return one line to print under the banner (the web shell: a quiet `git-sync`) |
 | `notices` | the carrier for `solver.core.notices` — staff notices and the waiting-key hint (the spool) |
 | `handoff` | told `True` as `run_interactive` lends the terminal to a child (`! sh`, `! py`, `claude`) and `False` once it is back (the web shell: OSC `busy` / `ready`) |
 

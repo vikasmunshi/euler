@@ -57,7 +57,7 @@ def main(argv: list[str] | None = None, *, extension: Extension | None = None) -
     shell = SolverShell(save=args.save and not args.cmdline)
     if args.cmdline:
         return shell.run_command(args.cmdline)
-    return shell.run_interactive(intro_message='', status=status_line(),
+    return shell.run_interactive(intro_message='', status=status_line,
                                  on_start=extension.on_start if extension is not None else None)
 
 

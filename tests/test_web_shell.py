@@ -119,7 +119,7 @@ class IdentityTests(unittest.TestCase):
 
 
 class StartTests(unittest.TestCase):
-    def run_start(self, rc: int) -> tuple[list[str], str]:
+    def run_start(self, rc: int) -> tuple[list[str], str, str]:
         ran: list[str] = []
         out = io.StringIO()
 
@@ -129,16 +129,19 @@ class StartTests(unittest.TestCase):
 
         with patch('solver.core.git.key_waiting_hint', return_value=''), \
              patch.object(sys.modules['euler_webshell.shell'], 'console', Console(file=out)):
-            sync_at_start(dispatch)
-        return ran, out.getvalue()
+            notice = sync_at_start(dispatch)
+        return ran, out.getvalue(), notice
 
-    def test_a_good_sync_is_silent(self) -> None:
-        self.assertEqual(self.run_start(0), (['git-sync'], ''))
+    def test_a_good_sync_leaves_nothing_to_say(self) -> None:
+        ran, out, notice = self.run_start(0)
+        self.assertEqual((ran, notice), (['git-sync'], ''))
+        self.assertEqual(out.strip(), 'syncing with origin…', 'only the wait line, which the banner clears')
 
-    def test_a_failed_sync_says_so(self) -> None:
-        ran, out = self.run_start(1)
+    def test_a_failed_sync_returns_its_hint_for_under_the_banner(self) -> None:
+        ran, out, notice = self.run_start(1)
         self.assertEqual(ran, ['git-sync'])
-        self.assertIn('could not sync', out)
+        self.assertIn('could not sync', notice)
+        self.assertNotIn('could not sync', out, 'printed before the banner, the clear would take it')
 
 
 class NudgeTests(unittest.TestCase):

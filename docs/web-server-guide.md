@@ -2150,14 +2150,20 @@ that, at its source, rather than having the shell tier poll for something it can
 observe.
 
 **A web shell syncs its clone as it starts.** `run_interactive` dispatches `git-sync`
-before the first prompt, on the **web channel only** (`config.subject.channel`) — a
-terminal user drives their own clone and did not ask for a fetch. Without it a
+**before the banner**, on the **web channel only** (the web shell's `Extension.on_start`,
+`sync_at_start`; `solver` and `solver-host` have none) — a terminal user drives their own
+clone and did not ask for a fetch. Before the banner, not after it, because the banner's
+status line (`git describe`, the master-key state) is read once the sync is done: a sync
+that pulls a release or a key grant is reported, not contradicted, by the screen above the
+first prompt. It stays in the shell's own process — a separate `solver git-sync` ahead of the
+PTY's shell would have no identity, since the web shell's is a one-time ticket. Without it a
 collaborator opened onto whatever their clone held when they last used it, and the
 enc-key pull flow (§9) that wires their filter waited on them remembering to type the
 command. It runs with the shared console quiet, which also routes the sync script's own
-output to `DEVNULL` (`run_cmdline`), so the banner is followed by a prompt rather than a
-wall of git; a **failed** sync still prints one line, because a stale clone with no hint
-is the one outcome silence must not cover. An interrupt during the fetch is absorbed by
+output to `DEVNULL` (`run_cmdline`), so the wait shows one muted `syncing with origin…` line
+(the banner's clear takes it) rather than a wall of git; a **failed** sync still prints one
+line, under the banner, because a stale clone with no hint is the one outcome silence must
+not cover. An interrupt during the fetch is absorbed by
 the register adapter, so a Ctrl-C at startup still lands at a prompt.
 
 Note what "at startup" means against the persistence above: this is once per **shell**,
@@ -2189,12 +2195,14 @@ command emitting both. The refresh is **scoped by presence**: `#vault-panel` is 
 only while `/account` is the visible pane, so the body events reach a listener — and cost a
 fetch — only then, and are inert otherwise. The Claude Code row has one command per
 state, and the state's sign-in half is Claude Code's own `claude auth status` (`loggedIn`):
-`not available` (below `contributor`: disabled), `not installed` (`msg send to=staff …`
-asking for the install), `not set up` (no first interactive run — `hasCompletedOnboarding`
-unset in `~/.claude.json`: bare `claude`), `not signed in` (`claude /login; claude auth
-status`) and `signed in` (`claude auth status`). Each runs the shell's `claude` command, not
-a `!` passthrough, because `claude` emits `account;` (`overlays.toml`): the panel re-reads
-the moment claude exits — cancelled or not, since `;` runs the report either way. The heading's **Regen** button types `user --regen` the same way; `user`
+`not available` (below `contributor`: disabled), `not installed` (`tool-setup claude`: the
+user's own install, into `~/.local/bin` through Squid), `not set up` (no first interactive
+run — `hasCompletedOnboarding` unset in `~/.claude.json`) and `not signed in` (both
+`claude-login`: `claude /login`, whose first run onboards first, then `claude auth status`),
+and `signed in` (`claude auth status`). Each is a shell command, not a `!` passthrough, because
+`tool-setup` and `claude-login` emit `account;` (`overlays.toml`): the panel re-reads the
+moment they exit — a cancelled login included, since `claude-login` reports either way. The
+bare `claude` command no longer emits: a session changes nothing the row shows. The heading's **Regen** button types `user --regen` the same way; `user`
 nudges, so the new key shows as soon as the confirmation is answered.
 
 Reporting on those tools means finding them the way the *shell* does: the service's PATH

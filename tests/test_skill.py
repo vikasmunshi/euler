@@ -188,3 +188,17 @@ class ClaudeCommandTests(unittest.TestCase):
 
     def test_completion_offers_its_options(self) -> None:
         self.assertEqual(list(skill._claude_completer(cast(Any, None), '--re')), ['--resume'])
+
+    def test_login_signs_in_then_reports_and_returns_the_report(self) -> None:
+        """`claude-login` runs the login, then `auth status` even after a failed login; the status
+        it returns is the report's — whether Claude Code is signed in now."""
+        rcs = iter((1, 0))
+
+        def _record(_ctx: Any, cmdline: str, cwd: Any) -> int:
+            self.calls.append((cmdline, cwd))
+            return next(rcs)
+
+        self.enterContext(patch.object(skill, 'run_interactive', _record))
+        self.assertEqual(skill.claude_login(cast(Any, None)), 0)
+        self.assertEqual(self.calls, [('claude /login', config.root_dir), ('claude auth status', config.root_dir)])
+        self.assertEqual(cast(Any, registry.resolve('claude-login')).requires, 'contributor')

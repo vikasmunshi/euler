@@ -227,16 +227,16 @@
           'contributor', gh_version) }}
   {# One command per state, each the step that moves the row on: not installed installs it
      (`tool-setup claude`: into the user's own home, through the egress proxy, no sudo — the
-     same install provisioning runs); not set up runs `claude` bare for its
-     first-run onboarding; not signed in logs in, then reports; signed in just reports.
-     These are shell commands, not a `!` passthrough: `claude` and `tool-setup` emit the
-     account nudge (overlays.toml), so the panel re-reads `claude auth status` the moment
-     they exit. `;`, not `&&`: a cancelled login still reports, and still refreshes.
-     Below the contributor floor the macro shows `not available`, disabled. #}
+     same install provisioning runs); not set up and not signed in both run `claude-login`
+     (Claude Code's first-run onboarding comes ahead of its login, then it reports); signed
+     in just reports. These are shell commands, not a `!` passthrough: `tool-setup` and
+     `claude-login` emit the account nudge (overlays.toml), so the panel re-reads
+     `claude auth status` the moment they exit — a cancelled login still reports, and still
+     refreshes. Below the contributor floor the macro shows `not available`, disabled. #}
   {% set claude_cmds = {
        'not installed': 'tool-setup claude',
-       'not set up': 'claude',
-       'not signed in': 'claude /login; claude auth status',
+       'not set up': 'claude-login',
+       'not signed in': 'claude-login',
        'signed in': 'claude auth status'} %}
   {{ tool('Claude Code', claude_status, claude_cmds.get(claude_status, 'claude auth status'),
           'ok' if claude_status == 'signed in' else 'warn',

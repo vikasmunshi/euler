@@ -278,24 +278,31 @@ class SolverShell:
                 self._persist_last_problem(last_problem)
             return rc
 
-    def run_interactive(self, intro: bool = True, intro_message: str = '', status: Sequence[str] = (),
-                        on_start: Callable[[Callable[[str], int]], None] | None = None) -> int:
+    def run_interactive(self, intro: bool = True, intro_message: str = '',
+                        status: Callable[[], Sequence[str]] | None = None,
+                        on_start: Callable[[Callable[[str], int]], str] | None = None) -> int:
         """Run the interactive prompt loop until `exit` / EOF; return the status.
 
-        *status*, if given, is the markup segments of a line the banner carries under its
-        tagline — the caller's report of who the session is (:func:`solver.shell.login.status_line`).
+        *on_start*, if given, runs once with :meth:`dispatch` before the banner (an extension's
+        start-up step — :class:`~solver.shell.extension.Extension`), so the banner reports the
+        state it leaves behind; the markup line it returns, if any, is printed under the banner
+        (before it, the screen clear would take it).
 
-        *on_start*, if given, runs once before the first prompt with :meth:`dispatch`
-        (an extension's start-up step — :class:`~solver.shell.extension.Extension`).
+        *status*, if given, is read after *on_start*: the markup segments of a line the banner
+        carries under its tagline — the caller's report of who the session is
+        (:func:`solver.shell.login.status_line`).
         """
         with self._runtime():
             # Piped/redirected stdin: read blocks without the interactive chrome
             # (no banner, no history, no prompt) so scripted output stays clean.
             if not sys.stdin.isatty():
                 return self._run_piped()
+            notice = on_start(self.dispatch) if on_start is not None else ''
             if intro:
                 self.console.clear()
-                self._print_banner(status)
+                self._print_banner(status() if status is not None else ())
+            if notice:
+                self.console.print(notice)
             if intro_message:
                 self.console.print(intro_message)
             trim_history(config.history_file)
@@ -307,8 +314,6 @@ class SolverShell:
                 bottom_toolbar=self._bottom_toolbar,
             )
             try:
-                if on_start is not None:
-                    on_start(self.dispatch)
                 previous_eof: float = 0.0
                 while True:
                     try:
