@@ -1620,8 +1620,8 @@
     {
       "path": "domain/graph-coloring",
       "title": "Graph coloring",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T09:36Z",
       "solved": 3,
       "problems": 11,
       "tags": ["graph-coloring"],
