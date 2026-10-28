@@ -272,7 +272,7 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0729](/solutions/0729/) — Range of Periodic Sequence
 - ○ [0736](/solutions/0736/) — Paths to Equality
 - ○ [0737](/solutions/0737/) — Coin Loops
-- ○ [0739](/solutions/0739/) — Summation of Summations
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 - ○ [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation

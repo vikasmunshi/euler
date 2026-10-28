@@ -436,7 +436,7 @@ handful of operations on small numbers.
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls
 - ○ [0733](/solutions/0733/) — Ascending Subsequences
 - ○ [0734](/solutions/0734/) — A Bit of Prime
-- ○ [0739](/solutions/0739/) — Summation of Summations
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ○ [0746](/solutions/0746/) — A Messy Dinner

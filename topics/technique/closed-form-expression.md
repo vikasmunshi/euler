@@ -340,6 +340,7 @@ loop was never needed.
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0778](/solutions/0778/) — Freshman's Product

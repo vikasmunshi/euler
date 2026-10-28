@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fibonacci_sequ
 ## Problems
 
 - ● [0304](/solutions/0304/) — Primonacci
+- ● [0739](/solutions/0739/) — Summation of Summations
 
 <!-- /problems -->

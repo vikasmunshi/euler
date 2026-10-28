@@ -156,7 +156,7 @@ factorials that every formula above is built from.
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
-- ○ [0739](/solutions/0739/) — Summation of Summations
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ○ [0830](/solutions/0830/) — Binomials and Powers
