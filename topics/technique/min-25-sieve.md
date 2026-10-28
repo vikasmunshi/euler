@@ -1,5 +1,5 @@
 <!-- tags: [min-25-sieve] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T16:34Z -->
 # Min_25 sieve
 
 The [Min_25 sieve](https://codeforces.com/blog/entry/117635) computes `F(n) = Σ_{k ≤ n} f(k)`
