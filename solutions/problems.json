@@ -3612,8 +3612,8 @@
     "level": 20,
     "pct": 51,
     "solvers": 882,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 16:58"
   },
   "453": {
     "title": "Lattice Quadrilaterals",
