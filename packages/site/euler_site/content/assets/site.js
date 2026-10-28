@@ -570,7 +570,7 @@
   });
 
   // The account page's tool rows: a click types the command that fixes the row into
-  // the shell (`git-identity`, `! claude /login`). The web shell is the front door
+  // the shell (`git-identity`, `claude /login; claude auth status`). The web shell is the front door
   // for these — the logins are interactive and belong in a terminal, not in a form
   // that would have to handle a credential — so the button carries the user there
   // rather than pretending to do it for them.

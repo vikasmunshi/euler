@@ -24,7 +24,7 @@
 {% set _ = steps.extend([
      {'label': 'Sign in to the GitHub CLI', 'done': gh_status == 'signed in',
       'hint': 'Run <code>git-identity</code> in your terminal, or click the <b>GitHub CLI</b> tool button below.'},
-     {'label': 'Set up Claude Code', 'done': claude_status == 'set up',
+     {'label': 'Set up Claude Code', 'done': claude_status == 'signed in',
       'hint': 'Sign in from your terminal, or click the <b>Claude Code</b> tool button below.'},
      {'label': 'Store your ANTHROPIC_API_KEY', 'done': 'ANTHROPIC_API_KEY' in secret_names,
       'hint': 'Add it under <b>Secrets</b> below.'}
@@ -225,12 +225,19 @@
   {{ tool('GitHub CLI', gh_status, 'git-identity',
           'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else ''),
           'contributor', gh_version) }}
-  {# One command whatever the state: `/login` both sets Claude Code up and re-does it.
-     It is a bash passthrough, so it cannot emit the account nudge itself; the chained
-     `user` does (overlays.toml), refreshing this panel the moment claude exits. `;`, not
-     `&&`: a cancelled login still re-reads the row, and `user` only reports — it mints a
-     key solely when none exists, which is the panel's first step anyway. #}
-  {{ tool('Claude Code', claude_status, '! claude /login; user',
-          'ok' if claude_status == 'set up' else ('warn' if claude_status == 'not set up' else ''),
+  {# One command per state, each the step that moves the row on: not installed asks staff
+     for it (an install is theirs, not the user's); not set up runs `claude` bare for its
+     first-run onboarding; not signed in logs in, then reports; signed in just reports.
+     These are the shell's `claude` command, not a `!` passthrough: `claude` emits the
+     account nudge (overlays.toml), so the panel re-reads `claude auth status` the moment
+     it exits. `;`, not `&&`: a cancelled login still reports, and still refreshes.
+     Below the contributor floor the macro shows `not available`, disabled. #}
+  {% set claude_cmds = {
+       'not installed': 'msg send to=staff subject="Please install Claude Code" body="Please install Claude Code on my instance."',
+       'not set up': 'claude',
+       'not signed in': 'claude /login; claude auth status',
+       'signed in': 'claude auth status'} %}
+  {{ tool('Claude Code', claude_status, claude_cmds.get(claude_status, 'claude auth status'),
+          'ok' if claude_status == 'signed in' else 'warn',
           'contributor', claude_version) }}
 </section>

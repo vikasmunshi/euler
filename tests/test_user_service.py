@@ -281,7 +281,7 @@ class VaultRouteTests(_UserServiceCase):
         # The gh / Claude Code probes shell out; keep the suite hermetic.
         self._saved_probes = (vault_api._tool_status, vault_api._claude_status)  # noqa: SLF001
         vault_api._tool_status = lambda *a, **k: 'not installed'
-        vault_api._claude_status = lambda: 'not installed'
+        vault_api._claude_status = lambda *a, **k: 'not installed'
         self.addCleanup(lambda: (setattr(vault_api, '_tool_status', self._saved_probes[0]),
                                  setattr(vault_api, '_claude_status', self._saved_probes[1])))
         self.env_file = secrets / 'env'
@@ -396,6 +396,30 @@ class VaultRouteTests(_UserServiceCase):
         self.assertNotIn('not signed in', gh_tool)
 
     @unittest_run_loop
+    async def test_account_vault_claude_row_offers_the_step_its_state_needs(self) -> None:
+        """Each Claude Code state types the one command that moves it on, enabled; below the
+        contributor floor every state reads `not available`, disabled."""
+        from euler_webshell.user import vault_api
+        expected = {
+            'not installed': 'msg send to=staff subject=&#34;Please install Claude Code&#34;',
+            'not set up': 'data-term-cmd="claude"',
+            'not signed in': 'data-term-cmd="claude /login; claude auth status"',
+            'signed in': 'data-term-cmd="claude auth status"',
+        }
+        reader = {'X-User': _EMAIL, 'X-Profile': 'reader'}
+        for state, command in expected.items():
+            vault_api._claude_status = lambda *a, s=state, **k: s  # noqa: SLF001
+            row = (await (await self.client.get('/account/vault', headers=_OWN)).text()
+                   ).split('<span class="tool-name">Claude Code</span>', 1)[1]
+            self.assertIn(command, row, state)
+            self.assertIn(state, row)
+            self.assertNotIn('disabled', row, state)
+            row = (await (await self.client.get('/account/vault', headers=reader)).text()
+                   ).split('<span class="tool-name">Claude Code</span>', 1)[1]
+            self.assertIn('not available', row, state)
+            self.assertIn('disabled', row, state)
+
+    @unittest_run_loop
     async def test_secret_upsert_locked_is_409_and_bad_name_400(self) -> None:
         resp = await self.client.post('/account/secret', headers=_OWN,
                                       data={'name': 'X_KEY', 'value': 'v'})
@@ -500,6 +524,44 @@ class PeerGateTests(_UserServiceCase):
         if os.geteuid() != 0:
             self.assertFalse(_peer_allowed(os.geteuid(), '/'))
             self.assertFalse(_peer_allowed(os.geteuid(), '/internal/status'))
+
+
+class ClaudeProbeTests(unittest.TestCase):
+    """`_claude_status` against a stub `claude` CLI: onboarding first, then `auth status`."""
+
+    def setUp(self) -> None:
+        from euler_webshell.user import vault_api
+        self.vault_api = vault_api
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.home = Path(tmp.name)
+        (self.home / '.local' / 'bin').mkdir(parents=True)
+        saved = {k: os.environ.get(k) for k in ('HOME', 'PATH')}
+        os.environ['HOME'] = str(self.home)
+        os.environ['PATH'] = '/usr/bin:/bin'
+        self.addCleanup(lambda: [os.environ.__setitem__(k, v) if v is not None else os.environ.pop(k, None)
+                                 for k, v in saved.items()])
+
+    def _stub(self, logged_in: bool) -> None:
+        stub = self.home / '.local' / 'bin' / 'claude'
+        flag = 'true' if logged_in else 'false'
+        stub.write_text(f'#!/bin/sh\necho \'{{"loggedIn": {flag}}}\'\nexit {0 if logged_in else 1}\n')
+        stub.chmod(0o755)
+
+    def _onboard(self, done: bool) -> None:
+        (self.home / '.claude.json').write_text(f'{{"hasCompletedOnboarding": {str(done).lower()}}}')
+
+    def test_states(self) -> None:
+        status = self.vault_api._claude_status  # noqa: SLF001
+        self.assertEqual(status(), 'not installed')
+        self._stub(logged_in=False)
+        self.assertEqual(status(), 'not set up')        # no ~/.claude.json at all
+        self._onboard(False)
+        self.assertEqual(status(), 'not set up')        # the file alone is not a first run
+        self._onboard(True)
+        self.assertEqual(status(), 'not signed in')
+        self._stub(logged_in=True)
+        self.assertEqual(status(), 'signed in')
 
 
 if __name__ == '__main__':

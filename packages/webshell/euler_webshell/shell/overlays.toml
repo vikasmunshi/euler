@@ -67,6 +67,9 @@ emit = ["account"]
 [git-identity]
 emit = ["account"]
 
+[claude]             # a first run, a /login, an `auth status`: the Claude Code row re-reads
+emit = ["account"]
+
 # ── the viewer pane ─────────────────────────────────────────────────────────────────────
 [show]
 replace = "euler_webshell.shell.viewer:show"

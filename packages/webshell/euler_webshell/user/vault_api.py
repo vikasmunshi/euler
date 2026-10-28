@@ -29,6 +29,7 @@ from __future__ import annotations
 __all__ = ['add_vault_routes', 'reset_vault_and_lock']
 
 import asyncio
+import json
 import os
 import re
 import shutil
@@ -176,11 +177,41 @@ def _tool_version(binary: str, timeout: float = 8.0) -> str | None:
     return found.group(0) if found else None
 
 
-def _claude_status() -> str:
-    """Claude Code setup state: the CLI plus its stored credentials (the login runs in the shell)."""
-    if _which('claude') is None:
+def _claude_onboarded() -> bool:
+    """Whether Claude Code has had its first interactive run here.
+
+    The first run's onboarding sets `hasCompletedOnboarding` in `~/.claude.json`. The file's
+    mere existence says nothing: any `claude` invocation — `claude auth status` included —
+    creates it.
+    """
+    try:
+        data = json.loads((_home() / '.claude.json').read_text())
+    except (OSError, ValueError):
+        return False
+    return isinstance(data, dict) and bool(data.get('hasCompletedOnboarding'))
+
+
+def _claude_status(timeout: float = 8.0) -> str:
+    """Claude Code's state: `not installed` / `not set up` / `not signed in` / `signed in`.
+
+    Sign-in is Claude Code's own answer — `claude auth status` (JSON, `loggedIn`; its exit
+    code is the fallback) — never a guess from which credential files exist.
+    """
+    path = _which('claude')
+    if path is None:
         return 'not installed'
-    return 'set up' if (_home() / '.claude' / '.credentials.json').exists() else 'not set up'
+    if not _claude_onboarded():
+        return 'not set up'
+    try:
+        proc = subprocess.run([path, 'auth', 'status'], capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired):
+        return 'not signed in'
+    try:
+        status = json.loads(proc.stdout)
+        logged_in = bool(status.get('loggedIn')) if isinstance(status, dict) else proc.returncode == 0
+    except ValueError:
+        logged_in = proc.returncode == 0
+    return 'signed in' if logged_in else 'not signed in'
 
 
 def _can_decrypt() -> bool:

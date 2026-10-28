@@ -2171,7 +2171,7 @@ long-running shell's *view* current in between.
 **The shell is the front door for interactive logins.** The account page's tool rows
 (GitHub CLI, Claude Code) make the *status* the button: clicking posts
 `{euler: 'run', command}` to the iframe, which types the command and a return into the
-PTY — `git-identity` and `! claude /login` respectively. Nothing there is privileged: it
+PTY — `git-identity`, and for Claude Code the step its state calls for (below). Nothing there is privileged: it
 is the same PTY the keyboard writes to, the command is echoed, and it is the user's to
 edit or interrupt. These logins are interactive device flows that belong in a terminal,
 and a web form that "did it for you" would have to handle a credential it has no business
@@ -2187,10 +2187,14 @@ which `site.js` turns into an `euler:account-changed` body event; `#vault-panel`
 decrypt access too — so those emit only `git;` and the panel picks it up, rather than any
 command emitting both. The refresh is **scoped by presence**: `#vault-panel` is in the DOM
 only while `/account` is the visible pane, so the body events reach a listener — and cost a
-fetch — only then, and are inert otherwise. `! claude /login` is a bash passthrough and
-cannot emit the nudge itself, so the Claude Code row (`set up` / `not set up`, the same
-command either way) chains `; user`: `user` emits `account;`, so the panel refreshes the
-moment claude exits — cancelled or not, since `;` runs it either way. The heading's **Regen** button types `user --regen` the same way; `user`
+fetch — only then, and are inert otherwise. The Claude Code row has one command per
+state, and the state's sign-in half is Claude Code's own `claude auth status` (`loggedIn`):
+`not available` (below `contributor`: disabled), `not installed` (`msg send to=staff …`
+asking for the install), `not set up` (no first interactive run — `hasCompletedOnboarding`
+unset in `~/.claude.json`: bare `claude`), `not signed in` (`claude /login; claude auth
+status`) and `signed in` (`claude auth status`). Each runs the shell's `claude` command, not
+a `!` passthrough, because `claude` emits `account;` (`overlays.toml`): the panel re-reads
+the moment claude exits — cancelled or not, since `;` runs the report either way. The heading's **Regen** button types `user --regen` the same way; `user`
 nudges, so the new key shows as soon as the confirmation is answered.
 
 Reporting on those tools means finding them the way the *shell* does: the service's PATH
