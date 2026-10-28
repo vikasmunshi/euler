@@ -1,5 +1,5 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: final 2026-10-15T10:17Z -->
+<!-- status: final -->
 # Watch integer width
 
 Almost every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
@@ -65,6 +65,12 @@ result = (__int128)result * base % mod;
 Where `__int128` isn't available, the same job is done by a `mulmod` built from repeated
 doubling, or by splitting the operands into high and low halves.
 
+The modulus decides the tier, so read it first. Problem 455 iterates $x \leftarrow n^x \bmod 10^9$
+for a million bases at once: residues stay below $10^9$, every product below $10^{18} < 2^{63}$,
+and plain `int64` square-and-multiply is safe — in C and in the vectorised NumPy alike, with no
+wider type anywhere. Move the modulus from $10^9$ to $10^{10}$, as problem 48 does, and the same
+loop needs the widened multiply above.
+
 The single most common Tier 2 site in this collection is the modular squaring inside
 [Miller–Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test): a candidate near
 $3 \times 10^9$ already squares past $2^{63}$ (problem 248), so problems 241, 245 and 248 all route
@@ -76,7 +82,10 @@ $2 \times 10^{10}$.
 The other half of Tier 2 is the **accumulator**. A running total of many 64-bit terms can clear
 $2^{64}$ even when no single term comes close: problem 421's total grows as $4N\pi(M)$ and passes
 $2^{64}$ by a quarter, and 272, 276, 297, 882 and 963 all have sums that outgrow 64 bits while the
-per-step values fit comfortably. The fix is an `unsigned __int128` total — and then a small printer,
+per-step values fit comfortably. Problem 473 shows how a representation choice spends headroom: it
+works in $\mathbb{Z}[\varphi]$ with every term *doubled* ($2\varphi^k = L_k + F_k\sqrt5$) so the
+Lucas and Fibonacci coefficients stay integers, which pushes a single rational part to about
+$4 \times 10^{18}$ — still a `long long`, barely — and leaves the running total to `__int128`. The fix is an `unsigned __int128` total — and then a small printer,
 because `printf` has no conversion for it:
 
 ```c
@@ -92,6 +101,13 @@ static const char *format_u128(unsigned __int128 value) {
 Even 128 bits is a box with walls. Problem 241 carries exact fractions in `unsigned __int128` and
 needs two guards to keep every product under $2^{128}$, one of them capping a product of primes at
 the largest primorial that fits — a cap the Python mirrors so both run the identical algorithm.
+Problem 698 hits the wall from the other side. Its counts of digit strings pass 64 bits (one input
+is $10^{30}$, which `parse_int` cannot even read), so the C counts in `unsigned __int128` — but the
+Python's multinomial $L!/(a!\,b!\,c!)$ has a numerator that overflows even that. The port rewrites
+it as a product of two binomials from a Pascal table, $\binom{r}{x}\binom{r-x}{y}$, whose every
+intermediate is at most $3^r$; and since $3^{80} < 2^{128}$, it caps the string length at 80 and
+says so in a `#define`. The answer is the same number either way — what changed is the order the
+arithmetic runs in, so that no step is ever larger than the result it builds.
 
 **Tier 3 — no fixed width is enough; you must build the bignum yourself.** Problem 16 wants the
 digit sum of $2^{1000}$ — a 302-digit number — and problem 25 hunts the first 1000-digit
@@ -167,11 +183,17 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
   batching cut the Python run time by more than half.
 - **Make the width limit an explicit input limit.** Where a representation caps the input, say so
   up front instead of letting it wrap later. Problem 421's modular multiply needs $p^2 < 2^{64}$,
-  so both versions reject a prime bound $M \ge 2^{32}$ on entry; problem 963 packs a shape into an
-  `unsigned long long`, which caps it at 13 trits.
+  so both versions reject a prime bound $M \ge 2^{32}$ on entry; problem 401 likewise asserts its
+  modulus is below $2^{31}$, so residue products fit its NumPy `int64` chunks; problem 963 packs a
+  shape into an `unsigned long long`, which caps it at 13 trits.
 - **Mind the order and exactness of mixed operations.** `(2*n+1)*(n+1)*n / 6` (problem 6) must
   keep the product exact before the division; reorder or widen so no partial product overflows and
-  the final divide stays whole.
+  the final divide stays whole. Under a modulus this gets sharper. Problem 401 needs
+  $x(x+1)(2x+1)/6 \bmod 10^9$ with $x$ up to $10^{15}$: the exact product is near
+  $2 \times 10^{45}$, and 6 has no inverse modulo $10^9$, so "reduce, then divide" is not an option.
+  The fix is to divide *the factors* — 2 goes into $x$ or $x+1$, 3 into exactly one of the three,
+  chosen by $x \bmod 3$ — leaving three integers that each fit in 64 bits and can be reduced before
+  they are multiplied.
 - **Signed overflow is undefined, so it hides.** Unlike Python, a C overflow throws no error and
   may pass small tests. When a C port disagrees with a verified Python solution only on the large
   input, an overflowed intermediate is the first suspect — reach for `long long`, then `__int128`,
@@ -180,8 +202,8 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - **Let the Python version be the oracle — where it is pure Python.** Python's own integers can't
   overflow, so arithmetic done in them is trustworthy by construction. Port to C for speed, but keep
   the Python solution as the reference the C output must match. That guarantee stops at the NumPy
-  boundary: a vectorised solution needs the same width audit as its C port (problems 249, 421,
-  1010), and a brute force in plain Python ints is the better oracle for both.
+  boundary: a vectorised solution needs the same width audit as its C port (problems 249, 401, 421,
+  455, 1010), and a brute force in plain Python ints is the better oracle for both.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
