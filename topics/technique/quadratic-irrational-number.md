@@ -1,5 +1,5 @@
 <!-- tags: [quadratic-irrational-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:26Z -->
 # Quadratic irrational number
 
 A [quadratic irrational](https://en.wikipedia.org/wiki/Quadratic_irrational_number) is an
