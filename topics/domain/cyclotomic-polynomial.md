@@ -1,5 +1,5 @@
 <!-- tags: [cyclotomic-polynomial] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T07:58Z -->
 # Cyclotomic polynomial
 
 The $n$-th [cyclotomic polynomial](https://en.wikipedia.org/wiki/Cyclotomic_polynomial)
