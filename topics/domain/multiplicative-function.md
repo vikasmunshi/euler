@@ -1,12 +1,12 @@
 <!-- tags: [multiplicative-function] -->
-<!-- status: final 2026-10-14T07:13Z -->
+<!-- status: final -->
 # Multiplicative function
 
 An arithmetic function $f$ is [multiplicative](https://en.wikipedia.org/wiki/Multiplicative_function)
 when $f(1) = 1$ and $f(mn) = f(m)\,f(n)$ whenever $\gcd(m, n) = 1$. That one rule is the most
 useful structural fact in computational number theory, because it says the function has no global
 behaviour at all: $f(n)$ is the product of what it does on each prime power of $n$ separately. The
-thirty-eight problems below ask about divisor counts, totients, radicals, Möbius signs, unitary
+forty problems below ask about divisor counts, totients, radicals, Möbius signs, unitary
 divisors and stranger things built just for the problem, but they share one move. Find the local
 rule $f(p^a)$, and the rest is bookkeeping in one of a handful of shapes.
 
@@ -23,11 +23,13 @@ Writing down $f(p^a)$ is the whole specification. The functions that recur here:
 | function | $f(p^a)$ | where it shows up |
 | --- | --- | --- |
 | number of divisors $d(n)$ | $a + 1$ | 12, 108, 110, 501 |
+| $n$-fold divisor function $d_k(n)$ | $\binom{k+a-1}{a}$ | 452 |
 | divisor sum $\sigma_k(n)$ | $1 + p^k + \dots + p^{ak}$ | 211, 241, 565 |
-| [Euler's totient](/topics/domain/eulers-totient-function) $\varphi(n)$ | $p^{a-1}(p - 1)$ | 72, 243, 248, 342, 432 |
+| [Euler's totient](/topics/domain/eulers-totient-function) $\varphi(n)$ | $p^{a-1}(p - 1)$ | 72, 243, 248, 342, 432, 516 |
 | [Möbius](/topics/domain/mobius-function) $\mu(n)$ | $-1$ if $a = 1$, else $0$ | 464, 633, 745 |
 | [radical](/topics/domain/radical-of-an-integer) $\operatorname{rad}(n)$ | $p$ | 124, 127 |
 | $2^{\omega(n)}$ (squarefree divisors) | $2$ | 675 |
+| $\sum_{d \mid n} 2^{\omega(d)} = d(n^2)$ | $2a + 1$ | 675 |
 | [unitary](/topics/domain/unitary-divisor) square sum | $1 + p^{2a}$ | 429 |
 
 Two cautions belong right next to the definition. First, the coprimality condition is not
@@ -40,7 +42,11 @@ that it is multiplicative. Problem 484's $\gcd(k, k')$, the gcd of $k$ and its
 time, shows that each prime contributes $p^{a-1}$, or $p^a$ when $p \mid a$. Once you have shown that,
 the problem is the same kind as the others. Problem 429's unitary divisors are the same story: a
 unitary divisor takes each prime power whole or not at all, so the sum of their squares is
-$\prod(1 + p^{2a})$.
+$\prod(1 + p^{2a})$. Problem 452 counts ordered $k$-tuples with product at most $m$. Grouping them by
+their product turns the count into $\sum_{n \le m} d_k(n)$, and $d_k$ is multiplicative because the
+tuple distributes each prime's exponent over the $k$ slots on its own. That is
+[stars and bars](https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics)), which gives the
+binomial in the table.
 
 ## Three shapes of computation
 
@@ -59,7 +65,13 @@ d_T = num_factors(i // 2) * num_factors(i + 1) if i % 2 == 0 else num_factors(i)
 
 Problem 429 never factors anything. The exponents of a factorial come from
 [Legendre's formula](/topics/domain/legendres-formula), so $\prod_p (1 + p^{2e_p})$ over the primes up
-to $10^8$ is a sieve plus one modular power per prime.
+to $10^8$ is a sieve plus one modular power per prime. Problem 675 needs a whole sequence of these:
+$\sum_{d \mid n} 2^{\omega(d)}$ for every factorial $i!$ up to $10^7$. That function is $1 * 2^{\omega}$, so
+its local rule is $2a + 1$. Rebuilding the product for each $i$ would cost $\pi(i)$ factors per term.
+The faster way uses the fact that $i!$ differs from $(i-1)!$ only at the primes dividing $i$. Each of
+those primes swaps one local factor for another, and the update is the ratio of the two. With a prime
+modulus, the division is a precomputed modular inverse, so the whole sequence comes from one running
+product.
 
 **Every value up to $N$: sieve it.** When the problem needs $f(1), \dots, f(N)$, put the local rule
 into a sieve. The [Eratosthenes](/topics/technique/sieve-of-eratosthenes)-style form lets each prime
@@ -101,7 +113,12 @@ $\sqrt N$, and
 [Möbius inversion](/topics/technique/mobius-inversion-formula) with a
 [totient summatory recursion](/topics/technique/totient-summatory-recursion) gets $\sum \varphi$ in
 about $O(N^{2/3})$ (problems 432 and 448). The fully general tool is the
-[Min_25 sieve](/topics/technique/min-25-sieve), which is what problem 639 is named for.
+[Min_25 sieve](/topics/technique/min-25-sieve), which is what problem 639 is named for. It needs two
+things: the sum of $f$ over the primes, and the local rule for everything else. Problem 452 shows the
+simplest case. Since $d_k(p) = k$ is constant on primes, the prime part is just $k \cdot \pi(v)$, and a
+[Lucy–Hedgehog](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80(x))
+prime count supplies $\pi(v)$ at the $O(\sqrt m)$ floor values $\lfloor m/i \rfloor$. A recursion over
+smallest prime factors then adds the composites, and both phases cost about $O(m^{3/4}/\log m)$.
 
 ## Running it backwards: search over exponent signatures
 
@@ -118,13 +135,27 @@ Problem 248 inverts the totient: $\varphi(n) = 13!$ means each prime power $p^a 
 $p^{a-1}(p-1)$, which must divide what is left of the target. So the candidate primes are exactly the
 $p$ with $p - 1 \mid 13!$, and the DFS divides the remaining target down as it goes.
 
+The same reasoning works when the target is a *property* of $f(n)$ instead of a value. Problem 516
+asks for every $n \le 10^{12}$ whose totient is 5-smooth. A product is 5-smooth exactly when each
+factor is, so the condition holds one prime at a time. For $p \in \{2, 3, 5\}$ any exponent passes.
+For $p > 5$, the factor $p^{a-1}$ forces $a = 1$, and $p - 1$ must itself be a
+[Hamming number](https://en.wikipedia.org/wiki/Regular_number). So every admissible $n$ is a Hamming
+number times a squarefree product of these "good" primes. The search space drops from $10^{12}$
+integers to a few thousand Hamming numbers and a few million prime subsets.
+
 ## Local to global beyond arithmetic functions
 
 The same idea applies to counts modulo $n$. By the
 [Chinese remainder theorem](/topics/technique/chinese-remainder-theorem), $\mathbb{Z}/n$ splits into
 the product of $\mathbb{Z}/p^a$. So the number of solutions of a polynomial congruence mod $n$ is
 multiplicative in $n$: count the cube roots of unity mod each prime power and multiply (problem 271),
-or the solutions of a four-variable congruence (problem 875). The
+or the solutions of a four-variable congruence (problem 875). The local count still needs care.
+In 271 there are three roots modulo $p$ when $3 \mid p - 1$ and one otherwise, and
+[Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma) lifts each root uniquely to $p^k$.
+The exception is $p = 3$, where the derivative $3x^2$ vanishes: there is one root mod $3$ but three
+mod $9$. A rule derived from the primes alone misses that case. Also, once the roots are combined
+through CRT, the *sum* of the solutions is not multiplicative even though their *count* is, so 271
+enumerates the combinations themselves. The
 [Pisano period](/topics/domain/pisano-period) of problem 853 combines the same way, except the prime-power
 periods meet in an $\operatorname{lcm}$ instead of a product.
 
