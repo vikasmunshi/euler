@@ -2402,12 +2402,12 @@
       "path": "domain/multiplicative-function",
       "title": "Multiplicative function",
       "status": "final",
-      "written": "2026-10-14T07:13Z",
+      "written": "2026-10-28T21:39Z",
       "solved": 22,
       "problems": 40,
       "tags": ["multiplicative-function"],
       "refs": ["p0012", "p0072", "p0108", "p0110", "p0124", "p0127", "p0211", "p0241", "p0243", "p0248", "p0271", "p0342", "p0362", "p0379", "p0429", "p0432", "p0445", "p0446", "p0447", "p0448", "p0452", "p0464", "p0466", "p0484", "p0501", "p0516", "p0530", "p0548", "p0565", "p0633", "p0639", "p0650", "p0675", "p0699", "p0708", "p0745", "p0754", "p0795", "p0853", "p0875"],
-      "solved_after": ["p0271", "p0452", "p0516", "p0675"]
+      "solved_after": []
     },
     {
       "path": "domain/multiplicative-order",
