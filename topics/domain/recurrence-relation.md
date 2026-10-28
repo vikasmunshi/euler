@@ -216,7 +216,7 @@ halving arguments, a finite state, a telescoping sum. The shape picks the method
 - ○ [0335](/solutions/0335/) — Gathering the Beans
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
 - ○ [0339](/solutions/0339/) — Peredur Fab Efrawg
-- ○ [0340](/solutions/0340/) — Crazy Function
+- ● [0340](/solutions/0340/) — Crazy Function
 - ○ [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ○ [0343](/solutions/0343/) — Fractional Sequences
 - ○ [0356](/solutions/0356/) — Largest Roots of Cubic Polynomials

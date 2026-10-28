@@ -90,5 +90,6 @@ to $\sqrt{\text{limit}}$; the bands themselves, about $10^{12}$ numbers in all, 
 - ● [0006](/solutions/0006/) — Sum Square Difference
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
+- ● [0340](/solutions/0340/) — Crazy Function
 
 <!-- /problems -->
