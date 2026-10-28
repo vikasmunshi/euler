@@ -273,7 +273,7 @@ packages/solver/solver/           — euler-solver: the solver shell — standal
     docs.py                       — Module to generate notes for solver solutions, leveraging AI.
     facts.py                      — Utility function for gathering problem inputs for AI
     models.py                     — Available models and their pricing, plus a utility function to calculate costs.
-    skill.py                      — The `claude-solve` / `claude-blog` commands: run Claude Code in-shell via a skill.
+    skill.py                      — The `claude`, `claude-solve` and `claude-blog` commands: run Claude Code in-shell, bare or via a skill.
     update_models.py              — The `update-models` command: refresh the `Model` enum and its pricing.
     update_usd_rate.py            — The `update-usd-rate` command: refresh the USD→EUR reference rate.
   auth/                           — The authorization kernel — identity, profiles, and the ladder.

@@ -26,6 +26,7 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`?`](commands-index.md#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
 | [`benchmark`](commands-index.md#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. |
 | [`check-commands`](commands-index.md#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. |
+| [`claude`](commands-index.md#command-claude) | — | `contributor` | Run Claude Code interactively in the repository root, returning its exit code. |
 | [`claude-api`](commands-index.md#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](commands-index.md#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
 | [`claude-blog`](commands-index.md#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |

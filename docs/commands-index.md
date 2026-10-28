@@ -55,6 +55,7 @@ a parameter that accepts repetition.
 | [`?`](#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
 | [`benchmark`](#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. |
 | [`check-commands`](#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. |
+| [`claude`](#command-claude) | — | `contributor` | Run Claude Code interactively in the repository root, returning its exit code. |
 | [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
 | [`claude-blog`](#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
@@ -133,7 +134,7 @@ Four forms escape into an *interactive* session that takes over the terminal:
 
     `! sh` / `! bash`       an interactive bash subshell, in the solution dir
     `! py` / `! python`     an interactive Python interpreter, in the repo root
-    `! claude [prompt]`     Claude Code, in the repo root
+    `! claude [prompt]`     Claude Code, in the repo root (also plain `claude`)
     `! ssh <host> [...]`    an ssh session (or remote command), in the solution dir
 
 Any other command (`! ls`, `! git diff`, …) runs non-interactively in the
@@ -301,6 +302,35 @@ check-commands
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.utils.doclint.check_commands`.
+
+---
+
+#### Command: `claude`
+
+Run Claude Code interactively in the repository root, returning its exit code.
+
+* ⚑ needs contributor or above.
+
+Shorthand for `! claude …`, with the same behaviour: Claude Code takes over the
+terminal, starts in the repo root (so it reads `CLAUDE.md` and the project skills),
+and its exit code is this command's. Every argument passes through to the `claude`
+CLI untouched — `claude -c`, `claude --resume <id>`, `claude -p "…"`, `claude mcp list`
+— none is read by the shell. Unlike `claude-solve`, no problem or skill is implied.
+Needs the `claude` CLI on PATH.
+
+**usage**
+
+```
+claude [options] [command] [prompt]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `*args` | Claude Code's own options, subcommand and prompt, token by token — quoted before they reach the CLI. With none, an interactive session starts. |
+
+*Defined in* `solver.ai.skill.claude`.
 
 ---
 
