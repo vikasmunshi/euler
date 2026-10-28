@@ -173,6 +173,7 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ○ [0446](/solutions/0446/) — Retractions B
 - ○ [0447](/solutions/0447/) — Retractions C
 - ○ [0448](/solutions/0448/) — Average Least Common Multiple
+- ● [0452](/solutions/0452/) — Long Products
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table
 - ● [0484](/solutions/0484/) — Arithmetic Derivative

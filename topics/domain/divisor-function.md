@@ -148,7 +148,7 @@ impossible and instant at $N = 10^{15}$.
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ○ [0439](/solutions/0439/) — Sum of Sum of Divisors
-- ○ [0452](/solutions/0452/) — Long Products
+- ● [0452](/solutions/0452/) — Long Products
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
 - ○ [0485](/solutions/0485/) — Maximum Number of Divisors
 - ○ [0500](/solutions/0500/) — Problem 500!!!
