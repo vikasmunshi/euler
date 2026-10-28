@@ -1,5 +1,5 @@
 <!-- tags: [insertion-sort] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T16:38Z -->
 # Insertion sort
 
 [Insertion sort](https://en.wikipedia.org/wiki/Insertion_sort) is the sort everyone writes
