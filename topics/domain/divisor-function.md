@@ -1,5 +1,5 @@
 <!-- tags: [divisor-function] -->
-<!-- status: final 2026-10-14T07:14Z -->
+<!-- status: final -->
 # Divisor function
 
 The [divisor function](https://en.wikipedia.org/wiki/Divisor_function)
@@ -54,7 +54,14 @@ $\prod (a_i + 1) = 8$, and the factorisations $8 = 4 \cdot 2 = 2 \cdot 2 \cdot 2
 disjoint shapes, $p^7$, $p^3 q$ and $pqr$. That decomposition is the whole combinatorial content of
 problem 501; what is left is prime counting at scale. Problem 500 runs the same inversion the
 other way: the smallest number with $2^{500500}$ divisors is built greedily from factors
-$p^{2^j}$, each of which doubles the count, always taking the smallest one available.
+$p^{2^j}$, each of which doubles the count, always taking the smallest one available. The
+inversion also works on a *congruence* rather than an exact count. Problem 641 asks for which $k$
+the count $d(k) \equiv 1 \pmod 6$. Oddness forces $k = m^2$ (divisors pair up as $e, k/e$, and only
+a square has an unpaired one), so $d(k) = \prod (2a_i + 1)$ again. Each factor is $0$, $1$ or $-1$
+modulo 3 according to $a_i \bmod 3$, so the condition becomes a rule on exponent residues. That
+rule describes the numbers $m = c^3 q^2$ with $q$ square-free and having an even number of prime
+factors, and from there the problem is a lattice count over $(c, q)$ using the
+[Möbius function](/topics/domain/mobius-function).
 
 **4. Reason about $\sigma$ one prime power at a time.** Divisibility and ratio conditions on
 $\sigma$ factor too. A prime $q$ divides $\sigma(n)$ exactly when it divides some
@@ -65,7 +72,12 @@ of factors each strictly greater than 1, so problem 241 searches factorisations 
 prunes as soon as the running ratio can no longer reach its target. Problem 650 never builds its
 astronomically large product of binomials: it tracks the prime-exponent vector with
 [Legendre's formula](/topics/domain/legendres-formula) and evaluates $\sigma$ as one geometric
-series per prime.
+series per prime. Problem 675 combines that with an incremental update. Its function
+$\sum_{d \mid n} 2^{\omega(d)}$ is $2e + 1$ on $p^e$, so it is $d(n^2)$ in disguise, and it is wanted
+for every factorial $i!$ up to $10^7$. Going from $(i-1)!$ to $i!$ changes only the exponents of
+the primes dividing $i$. The product is therefore carried forward: divide out each old factor
+$2e' + 1$ (by a modular inverse) and multiply in the new $2e + 1$. That is at most $\omega(i)$
+ratios per step, rather than one factor for every prime up to $i$.
 
 ## Computing it for every $n$ at once
 
@@ -105,8 +117,23 @@ blocks of constant quotient, each block's $\sum d^k$ given by a closed form (see
 [floor function](/topics/domain/floor-function) and the
 [divisor summatory function](/topics/domain/divisor-summatory-function)). The
 [Dirichlet hyperbola method](/topics/technique/dirichlet-hyperbola-method) is the general version
-of this trick. The cost drops from $O(N \log N)$ to $O(\sqrt N)$, which is the difference between
-impossible and instant at $N = 10^{15}$.
+of this trick. The terms $(d, q)$ with $dq \le N$ are lattice points under a hyperbola. Each one
+has $d \le \sqrt N$ or $q \le \sqrt N$, so you sum the column strip, add the row strip, and subtract
+the $\sqrt N \times \sqrt N$ square that both strips counted. Problem 401 does exactly this for
+$\sigma_2$, where a row's weight is the [square pyramidal number](/topics/domain/square-pyramidal-number) $x(x+1)(2x+1)/6$. The cost drops
+from $O(N \log N)$ to $O(\sqrt N)$, which is the difference between impossible and instant at
+$N = 10^{15}$.
+
+The swap works because $\sigma_k$ is a convolution of two functions with easy prefix sums. When the
+function is only known to be multiplicative, sum it with a
+[Min_25 sieve](/topics/technique/min-25-sieve) instead. Problem 452 counts ordered $n$-tuples with
+product at most $m$, which is $\sum_{k \le m} d_n(k)$ for the
+[$n$-fold divisor function](https://en.wikipedia.org/wiki/Divisor_function#Generalizations) $d_n$.
+The per-prime formula still holds. Distributing an exponent $e$ over $n$ slots is
+[stars and bars](/topics/technique/stars-and-bars-combinatorics), so
+$d_n(p^e) = \binom{n+e-1}{e}$, and $d_n(p) = n$ is constant on primes. That is enough for the sieve:
+it takes prime counts at the $O(\sqrt m)$ floor values $\lfloor m/i \rfloor$ and builds up the
+composites one smallest prime factor at a time, in roughly $O(m^{3/4})$ total.
 
 ## How to reason about it
 
@@ -118,6 +145,9 @@ impossible and instant at $N = 10^{15}$.
   hold these records). $\sigma(n)$, by contrast, is about $n$ on average and never much more than a
   small multiple of it ($\sigma_2(n) < \zeta(2)\,n^2$), so check whether your 64-bit integers
   survive before you pick a type.
+- **Divide before you reduce.** Closed-form block sums carry denominators like 2 and 6. If the
+  modulus shares a factor with them (problem 401 works modulo $10^9$), there is no modular inverse.
+  Divide the factors that are exact multiples first, then reduce each factor and multiply.
 - **One number, many numbers, or a sum?** Trial division to $\sqrt n$ is fine for a handful of
   values. Use a sieve for every value up to $N$. For an aggregate over a range too large to sieve,
   use the swapped sum. Picking the wrong one of these three costs orders of magnitude.
