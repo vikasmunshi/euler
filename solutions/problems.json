@@ -4092,8 +4092,8 @@
     "level": 7,
     "pct": 20,
     "solvers": 2019,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 09:52"
   },
   "513": {
     "title": "Integral Median",
