@@ -158,7 +158,7 @@ That shift comes up again and again on this page.
 - ○ [0388](/solutions/0388/) — Distinct Lines
 - ○ [0433](/solutions/0433/) — Steps in Euclid's Algorithm
 - ○ [0440](/solutions/0440/) — GCD and Tiling
-- ○ [0443](/solutions/0443/) — GCD Sequence
+- ● [0443](/solutions/0443/) — GCD Sequence
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ○ [0489](/solutions/0489/) — Common Factors Between Two Sequences
 - ● [0504](/solutions/0504/) — Square on the Inside

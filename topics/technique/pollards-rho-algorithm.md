@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pollard%27s_rh
 ## Problems
 
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
+- ● [0443](/solutions/0443/) — GCD Sequence
 
 <!-- /problems -->

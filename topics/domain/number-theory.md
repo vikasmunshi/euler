@@ -305,7 +305,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0432](/solutions/0432/) — Totient Sum
 - ○ [0433](/solutions/0433/) — Steps in Euclid's Algorithm
 - ○ [0439](/solutions/0439/) — Sum of Sum of Divisors
-- ○ [0443](/solutions/0443/) — GCD Sequence
+- ● [0443](/solutions/0443/) — GCD Sequence
 - ○ [0445](/solutions/0445/) — Retractions A
 - ○ [0446](/solutions/0446/) — Retractions B
 - ○ [0447](/solutions/0447/) — Retractions C
