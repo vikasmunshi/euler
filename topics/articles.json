@@ -4920,8 +4920,8 @@
     {
       "path": "technique/catastrophic-cancellation",
       "title": "Catastrophic cancellation",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T09:34Z",
       "solved": 3,
       "problems": 3,
       "tags": ["catastrophic-cancellation"],
