@@ -14,8 +14,10 @@
      through the parent (this document never touches the parent's DOM);
      {euler: 'git-changed'} when a git command reports it moved this clone, so the
      header's chip re-reads itself;
-     {euler: 'term-state', connected} whenever the socket opens or closes, so the
-     titlebar's toggle can name the act it offers.
+     {euler: 'term-state', connected, busy} whenever the socket opens or closes, or
+     the shell lends the terminal to an interactive child and takes it back (busy),
+     so the titlebar's toggle can name the act it offers and the command-typing
+     controls know whether a command would reach the shell.
 
    Wire protocol (packages/webshell/euler_webshell/ws/app.py): binary frames are raw PTY bytes both
    ways; a text frame {"resize": [cols, rows]} carries the geometry. */
@@ -91,8 +93,19 @@
   //: to tell.
   function report(connected) {
     if (window.parent !== window) {
-      window.parent.postMessage({ euler: 'term-state', connected: connected }, location.origin);
+      window.parent.postMessage({ euler: 'term-state', connected: connected, busy: handedOff },
+        location.origin);
     }
+  }
+  //: True while the shell has lent the PTY to an interactive child (`! sh`, `! py`,
+  //: `claude`): what the keyboard types reaches that program, not the solver shell,
+  //: so the OSC channel is shut and the parent's command-typing controls go dark
+  //: (§ the OSC handler: `busy` / `ready`). Never true without a socket.
+  var handedOff = false;
+  function setHandedOff(on) {
+    if (on === handedOff) { return; }
+    handedOff = on;
+    report(!!socket);
   }
   //: False while the server's replay is still being parsed: the scrollback is
   //: drawn, but the commands in it already ran, so their control sequences must
@@ -112,6 +125,7 @@
 
     socket.onopen = function () {
       live = false;                     // a fresh attach replays before it streams
+      handedOff = false;                // …and the replay says whether a child holds the PTY
       arm();
       report(true);
       sendSize();                       // the server's PTY starts at 80x24
@@ -147,6 +161,7 @@
     socket.onclose = function (ev) {
       disarm();
       socket = null;
+      handedOff = false;
       report(false);
       if (closedByUs) {
         term.write('\r\n\x1b[33mdisconnected — your shell keeps running; '
@@ -202,6 +217,12 @@
   //   msg;<token>                      → the header's message chip re-reads itself
   //   account;<token>                  → the account pane re-reads itself (if visible)
   //   progress;<token>                 → the solutions grid re-reads itself (if visible)
+  //   busy;<token> / ready;<token>     → an interactive child holds the PTY / gave it back
+  //
+  // `busy` / `ready` are a STATE, not an act, so — like the key modes below — they are
+  // rebuilt from the replay as well: a reattach while `! sh` still runs must come back
+  // with the channel shut, and the later of the pair in the stream wins. While busy,
+  // every other action is dropped: the shell is not the one speaking.
   //
   // Two guards, for two different re-runs of the same sequence:
   //   · `live` — the attach replay redraws commands that already ran. Acting on
@@ -262,6 +283,11 @@
     var parts = payload.split(';');
     if (!oscKey || parts[0] !== oscKey) { return true; }   // not this shell's: swallow it
     parts = parts.slice(1);
+    if (parts[0] === 'busy' || parts[0] === 'ready') {
+      setHandedOff(parts[0] === 'busy');
+      return true;
+    }
+    if (handedOff) { return true; }           // the channel is shut while a child holds the PTY
     var token = oscToken(parts);
     if (!live || token <= lastToken) { return true; }
     var message = oscMessage(parts);
@@ -442,6 +468,13 @@
         // With no session there is nothing to type into, and silently dropping it
         // would read as a dead button, so say so where the answer would have gone.
         if (typeof ev.data.command !== 'string' || !ev.data.command) { break; }
+        // The parent greys its controls out while a child holds the PTY; this is the
+        // backstop, because typing `git-sync` at a bash or Python prompt runs it THERE.
+        if (handedOff) {
+          term.write('\r\n\x1b[33mthe shell has handed this terminal to another program — '
+                     + 'exit it first, then try again.\x1b[0m\r\n');
+          break;
+        }
         if (socket && socket.readyState === WebSocket.OPEN) {
           term.focus();
           send(new TextEncoder().encode(ev.data.command + '\r'));

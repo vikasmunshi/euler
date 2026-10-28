@@ -150,6 +150,16 @@ class NudgeTests(unittest.TestCase):
             self.assertEqual(fields[0], event)
             self.assertTrue(fields[1].isdigit(), 'the token')
 
+    def test_a_handoff_sends_busy_then_ready(self) -> None:
+        self.assertIs(extension().handoff, osc.handoff)
+        with channel('web') as out:
+            osc.handoff(True)
+            osc.handoff(False)
+        (busy, ready) = _sequences(out.getvalue())
+        self.assertEqual([busy[0], ready[0]], ['busy', 'ready'])
+        self.assertLessEqual(int(busy[1]), int(ready[1]), 'the token')
+        self.assertIsNone(host_extension().handoff, 'the host terminal has no page to tell')
+
     def test_a_terminal_hears_nothing(self) -> None:
         with channel('terminal') as out:
             osc.nudge('git')

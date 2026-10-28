@@ -38,7 +38,7 @@ solver                                 # launch the interactive shell
 ```
 
 Inside the shell: `?` lists commands, `? <cmd>` shows usage, `exit` or `Ctrl-D`
-quits. Tab completes commands, problem numbers, flags, and `Literal` values.
+twice (within a second) quits. Tab completes commands, problem numbers, flags, and `Literal` values.
 
 **2. Piped** — when standard input is not a terminal, the shell reads command
 blocks from stdin, runs them in order, and exits with the last block's status.

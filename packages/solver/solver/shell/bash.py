@@ -16,13 +16,15 @@ import os
 import shlex
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable, Protocol
+from typing import Iterable, Iterator, Protocol
 
 from prompt_toolkit.completion import Completion
 
 from solver.config import ExitCodes, config
 from solver.shell.command import Context, command
+from solver.shell.extension import active
 
 
 def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
@@ -124,15 +126,32 @@ class Runner(Protocol):
     def __call__(self, ctx: Context, cmdline: str, cwd: Path) -> int: ...
 
 
+@contextmanager
+def _handed_off() -> Iterator[None]:
+    """Tell the active extension the terminal is lent out for the block, and back after it."""
+    ext = active()
+    if ext is None or ext.handoff is None:
+        yield
+        return
+    ext.handoff(True)
+    try:
+        yield
+    finally:
+        ext.handoff(False)
+
+
 def run_interactive(ctx: Context, cmdline: str, cwd: Path) -> int:
     """Run *cmdline* with the child inheriting the terminal directly.
 
     Used for interactive subshells (a bash/python REPL, a bare `claude`
     session) where the process needs the real TTY for its prompt and colours.
-    Sacrifice: input/output is not captured in the session log.
+    Sacrifice: input/output is not captured in the session log. While the child
+    runs, the active extension's `handoff` knows the terminal is not the shell's
+    (the web shell disables the page's command-typing controls).
     Returns the process exit code.
     """
-    rc = subprocess.run(cmdline, shell=True, cwd=cwd, check=False).returncode
+    with _handed_off():
+        rc = subprocess.run(cmdline, shell=True, cwd=cwd, check=False).returncode
     if rc != 0:
         ctx.console.print(f'[error]exec error:[/error] {cmdline}')
     return rc

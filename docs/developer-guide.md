@@ -622,6 +622,7 @@ loads through an extension.
 | `prompt_vault` | whether a locked vault may be unlocked by prompting (the web shell: no — the browser unlocks) |
 | `on_start` | a step before the first prompt (the web shell: a quiet `git-sync`) |
 | `notices` | the carrier for `solver.core.notices` — staff notices and the waiting-key hint (the spool) |
+| `handoff` | told `True` as `run_interactive` lends the terminal to a child (`! sh`, `! py`, `claude`) and `False` once it is back (the web shell: OSC `busy` / `ready`) |
 
 An overlay that names no command, or a replacement whose signature differs, stops the shell
 from starting rather than drifting silently; `tests/test_web_shell.py` checks the real tables

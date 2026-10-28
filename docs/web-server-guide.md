@@ -2229,6 +2229,16 @@ runs inherits it; the page learns it from the replay-end frame, `{"replay":"end"
 "<key>"}` — a text frame, which no PTY output can imitate — and swallows any sequence that
 does not lead with it.
 
+**A subshell shuts the channel.** `! sh`, `! py`, `claude` and `! ssh` hand the PTY to an
+interactive child (`run_interactive`), and a header verb clicked meanwhile would type
+`git-sync` at a bash prompt or into a Python REPL. So the shell brackets the child with
+`busy;<token>` and `ready;<token>` (the extension's `handoff`, `osc.handoff`). While busy,
+`terminal.js` obeys no other OSC action and refuses the parent's `run`, and reports
+`busy` with its `term-state`; `site.js` paints `body.term-busy`, which greys out every
+`[data-term-cmd]` control — the chips' panels say why — until `ready`. Unlike the acts, the
+pair is a *state*, rebuilt from the attach replay (the later one wins), so a reconnect
+mid-subshell comes back disabled. The child cannot forge `ready`: it never had the key.
+
 **Enter carries its modifiers — when the application asked for them.** xterm.js sends Enter
 as a bare CR whatever else is held down (its keyboard knows only Alt, as ESC CR), so
 Shift-Enter used to reach the PTY indistinguishable from Enter, and the tools that read that

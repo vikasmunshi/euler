@@ -6,10 +6,11 @@ The solver shell runs standalone and knows nothing of the web. This package comp
 an :class:`~solver.shell.extension.Extension` (docs/package-guide.md § 3.2): the overlay table
 `overlays.toml` makes the state-changing commands nudge the page over `OSC 5379`
 (:mod:`euler_webshell.shell.osc`) and replaces `show` / `edit` with bodies that swap the app
-shell's left pane (:mod:`euler_webshell.shell.viewer`). The session's identity is a one-time ticket
-(:mod:`euler_webshell.shell.identity`), the vault is never prompted for (the browser unlocks it), and
-the shell syncs the clone with origin before its first prompt. The PTY runs
-`python -m euler_webshell.shell`.
+shell's left pane (:mod:`euler_webshell.shell.viewer`); a subshell lent the terminal tells the
+page so too, which disables its command-typing controls until the shell is back. The session's
+identity is a one-time ticket (:mod:`euler_webshell.shell.identity`), the vault is never prompted
+for (the browser unlocks it), and the shell syncs the clone with origin before its first prompt.
+The PTY runs `python -m euler_webshell.shell`.
 
 Both extensions here add the host's own commands — `msg`, `users` and key distribution
 (:mod:`euler_webshell.shell.keys`) — and carry the solver shell's notices on the message spool
@@ -45,7 +46,8 @@ def extension() -> Extension:
     if unknown:
         raise ExtensionError(f'{OVERLAYS_FILE.name}: unknown event(s) {unknown}; known: {sorted(osc.EVENTS)}')
     return Extension(modules=HOST_COMMANDS, overlays=overlays, notify=osc.nudge, identity=ticket_subject,
-                     prompt_vault=False, on_start=sync_at_start, notices=Spool(WEB_KEY_HINT))
+                     prompt_vault=False, on_start=sync_at_start, notices=Spool(WEB_KEY_HINT),
+                     handoff=osc.handoff)
 
 
 def host_extension() -> Extension:

@@ -410,7 +410,7 @@ class SolverShell:
         """Build the bottom toolbar showing the command count and exit hint."""
         n = len(self.registry.all())
         return FormattedText([
-            ('class:bottom-toolbar', f' solver {config.version} · {n} commands · Ctrl-D to exit '),
+            ('class:bottom-toolbar', f' solver {config.version} · {n} commands · Ctrl-D twice to exit '),
         ])
 
     def _status_lines(self, segments: Sequence[str]) -> list[Text]:
@@ -445,7 +445,7 @@ class SolverShell:
             border_style='panel.border',
             title='[accent]▎[/accent] [primary]solver[/primary]',
             subtitle='[muted]type [/muted][accent]exit[/accent][muted] or [/muted]'
-                     '[accent]Ctrl-D[/accent][muted] to quit[/muted]',
+                     '[accent]Ctrl-D[/accent][muted] twice to quit[/muted]',
             title_align='left',
             subtitle_align='right',
             padding=(1, 2),

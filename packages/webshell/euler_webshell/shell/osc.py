@@ -32,22 +32,29 @@ payload carries a *token* (:func:`token`):
   sign-in); re-read the account page — *if it is the visible pane*.
 - `progress;<token>` — `problems.json` changed (`summary`, `mark`); re-read the
   solutions grid — *if it is the visible pane*.
+- `busy;<token>` / `ready;<token>` — the shell has lent the terminal to an interactive child
+  (`! sh`, `! py`, `claude`, …) / taken it back (:func:`handoff`). Unlike the rest these are a
+  **state**, not an act: while busy the page obeys no other action and disables every control
+  that types a command, since the keystrokes would land in the child, not the shell.
 
 The token is a server-side millisecond clock, strictly increasing per command. On
 attach the service replays the scrollback, which redraws the sequences of commands
 that already ran; the token lets the browser tell a replay from a fresh act and obey
-only the latter (`terminal.js`, § the OSC handler).
+only the latter (`terminal.js`, § the OSC handler). `busy` / `ready` are the exception:
+a reattach mid-subshell must come back disabled, so the page rebuilds that state from
+the replay too, the last of the pair winning.
 
 This module is the one definition of that wire, and it lives on the web side: the solver
 shell knows nothing of it. The *state-changed* payloads are sent by :func:`nudge`, the web
 shell's `notify` — `overlays.toml` names the commands after which each one fires
 (docs/package-guide.md § 3.2) — and the pane-swapping ones by the web shell's `show` / `edit`
-(:mod:`euler_webshell.shell.viewer`). The message commands, web-side themselves, emit directly.
+(:mod:`euler_webshell.shell.viewer`). The message commands, web-side themselves, emit directly;
+`busy` / `ready` are the web shell's `handoff` (:class:`~solver.shell.extension.Extension`).
 """
 from __future__ import annotations
 
-__all__ = ['EVENTS', 'OSC_CODE', 'OSC_KEY_ENV', 'account_changed', 'emit', 'git_changed', 'messages_changed',
-           'nudge', 'progress_changed', 'token']
+__all__ = ['EVENTS', 'OSC_CODE', 'OSC_KEY_ENV', 'account_changed', 'emit', 'git_changed', 'handoff',
+           'messages_changed', 'nudge', 'progress_changed', 'token']
 
 import os
 import sys
@@ -167,3 +174,14 @@ EVENTS: dict[str, Callable[[], None]] = {
 def nudge(event: str) -> None:
     """The web shell's `notify`: send the *event* named in an overlay (:data:`EVENTS`)."""
     EVENTS[event]()
+
+
+def handoff(taken: bool) -> None:
+    """The web shell's `handoff`: `busy` as an interactive child takes the terminal, `ready` after.
+
+    While a subshell, Python or Claude Code owns the PTY, a header verb would type its command
+    into *that* program — `git-sync` at a bash prompt, or into a Python REPL. So the page is told,
+    and greys those verbs out until the shell has the terminal back. The child cannot fake the
+    `ready`: the key left the environment at import, so nothing the shell runs knows it.
+    """
+    emit('busy' if taken else 'ready', str(token()))

@@ -5,10 +5,12 @@ after a command and replace a command's body, and the refusals that keep the two
 from __future__ import annotations
 
 import contextlib
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 from typing import Iterator
+from unittest.mock import patch
 
 from solver.auth import Subject
 from solver.config import config
@@ -150,6 +152,34 @@ class ExtensionTests(unittest.TestCase):
     def test_an_unimportable_module_is_refused(self) -> None:
         with self.assertRaisesRegex(ExtensionError, 'module'):
             load_extension(Extension(modules=('solver.no_such_module',)))
+
+    def test_an_interactive_child_is_bracketed_by_handoff(self) -> None:
+        """`run_interactive` tells the extension the terminal is lent out, and back — even when
+        the child is interrupted."""
+        from solver.shell import bash
+        told: list[bool] = []
+        seen: list[list[bool]] = []
+
+        def child(*_: object, **__: object) -> subprocess.CompletedProcess[str]:
+            seen.append(list(told))
+            return subprocess.CompletedProcess('x', 0)
+
+        def interrupted(*_: object, **__: object) -> subprocess.CompletedProcess[str]:
+            raise KeyboardInterrupt
+
+        extension_mod._active = Extension(handoff=told.append)
+        try:
+            with patch('solver.shell.bash.subprocess.run', child):
+                self.assertEqual(bash.run_interactive(Context(argv=[]), 'true', Path('.')), 0)
+            self.assertEqual((seen, told), ([[True]], [True, False]))
+            told.clear()
+            with patch('solver.shell.bash.subprocess.run', interrupted), self.assertRaises(KeyboardInterrupt):
+                bash.run_interactive(Context(argv=[]), 'true', Path('.'))
+            self.assertEqual(told, [True, False])
+        finally:
+            extension_mod._active = None
+        with patch('solver.shell.bash.subprocess.run', child):
+            bash.run_interactive(Context(argv=[]), 'true', Path('.'))   # no extension: nothing to tell
 
 
 class ReadOverlaysTests(unittest.TestCase):

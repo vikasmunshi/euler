@@ -402,6 +402,13 @@
   // claims a live session before the iframe has reported one is a lie we would
   // have no way to correct. The first report (the page-load connect) flips it.
   var termConnected = false;
+  //: The shell has lent the terminal to an interactive child (`! sh`, `! py`, `claude`):
+  //: connected, but a command typed now would land in that program, not the solver shell.
+  //: Reported by the iframe with the connection (terminal.js § `busy` / `ready`), and
+  //: painted as `body.term-busy`, so every [data-term-cmd] control — the account page's
+  //: rows and the Actions menu as well as the chips' panels — is disabled, including
+  //: one an htmx swap brings in while the child is still running.
+  var termBusy = false;
 
   function paintTerminalControls() {
     // The act on offer, in the title and the accessible name — the same words the git
@@ -435,7 +442,8 @@
     var hidden = wsHidden();
     document.querySelectorAll('[data-term-status]').forEach(function (chip) {
       chip.title = 'terminal — ' + (termConnected ? 'connected' : 'disconnected')
-        + ', ' + (hidden ? 'hidden' : 'visible');
+        + ', ' + (hidden ? 'hidden' : 'visible')
+        + (termBusy ? ', running another program' : '');
       chip.classList.toggle('is-on', termConnected);
       chip.classList.toggle('is-hidden', hidden);
     });
@@ -461,6 +469,7 @@
     document.querySelectorAll('.term-menu').forEach(function (menu) {
       menu.classList.toggle('term-offline', !termConnected);
     });
+    document.body.classList.toggle('term-busy', termBusy);
   }
   // Not registered on DOMContentLoaded itself: paintWsHidden() below calls this after
   // toggling the layout class, so the two readouts are always painted from one pass.
@@ -581,7 +590,7 @@
     // menu paints itself offline and says so rather than letting a click do nothing
     // silently. Honour that here: the panel's own note is the answer, not a command
     // shouted into a closed socket.
-    if (button.closest('.term-offline')) { return; }
+    if (button.closest('.term-offline') || termBusy) { return; }
     postToTerminal({ euler: 'run', command: button.getAttribute('data-term-cmd') });
     // The verb's answer belongs in the terminal, so close the menu that is now
     // covering it. The chip itself refreshes when the shell says so (§ git-changed).
@@ -596,6 +605,7 @@
   window.addEventListener('message', function (ev) {
     if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'term-state') { return; }
     termConnected = !!ev.data.connected;
+    termBusy = termConnected && !!ev.data.busy;
     paintTerminalControls();
   });
 
@@ -646,11 +656,12 @@
   // way, the same `run` message the git
   // menu's [data-term-cmd] buttons post. The pane is revealed first: the command's
   // output (warnings, the commit) is the answer, and a hidden terminal would swallow
-  // it. A disconnected terminal would drop the frame, so nothing is sent — the
-  // response's status line tells the user to run it themselves.
+  // it. A disconnected terminal would drop the frame, and a busy one would hand the
+  // command to whatever program holds it, so nothing is sent — the response's status
+  // line tells the user to run it themselves.
   document.addEventListener('euler-term-run', function (ev) {
     var command = ev.detail && ev.detail.value;
-    if (!command || !termConnected) { return; }
+    if (!command || !termConnected || termBusy) { return; }
     setWsHidden(false);
     paintWsHidden();
     postToTerminal({ euler: 'run', command: String(command) });

@@ -159,6 +159,7 @@ the web package is installed in — a developer's terminal included.
 | `prompt_vault` | whether a locked vault may be unlocked by prompting (§2.3) | no |
 | `on_start` | a step before the first prompt | a quiet `git-sync`, with one line if it failed |
 | `notices` | the carrier for staff notices (§3.3) | the message spool |
+| `handoff` | told when an interactive child (`! sh`, `! py`, `claude`) takes the terminal and gives it back | `osc.handoff`: `busy` / `ready`, which disable the page's command-typing controls |
 
 ### 3.2 Overlays
 

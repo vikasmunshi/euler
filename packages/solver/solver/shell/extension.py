@@ -8,8 +8,9 @@ discovered. Composition is explicit on purpose: plugin discovery (`entry_points`
 an extension into *every* shell of a venv it is installed in, the terminal one included.
 
 An extension may bring its own **identity** (who the session runs as, in place of the OS
-login), say whether the vault may be unlocked by prompting, and run a step before the first
-prompt, and carry the notices commands file (:mod:`solver.core.notices`). It contributes extra
+login), say whether the vault may be unlocked by prompting, run a step before the first
+prompt, hear when the shell lends the terminal to an interactive child, and carry the notices
+commands file (:mod:`solver.core.notices`). It contributes extra
 command modules and an **overlay table**, one overlay per command it changes:
 
 - `emit` — events passed to the extension's `notify` after the command returns, whatever its
@@ -83,6 +84,10 @@ class Extension:
     on_start: Callable[[Callable[[str], int]], None] | None = None
     #: Carries the notices commands file (:mod:`solver.core.notices`); None sends nothing.
     notices: Delivery | None = None
+    #: Told True as an interactive child takes the terminal over
+    #: (:func:`solver.shell.bash.run_interactive`: a subshell, Python, Claude Code) and False
+    #: once it hands it back — whatever the child's exit, an interrupt included.
+    handoff: Callable[[bool], None] | None = None
 
 
 def read_overlays(path: Path) -> tuple[Overlay, ...]:

@@ -476,6 +476,16 @@ body.ws-hidden .term-only-visible { display: none; }
 .term-need button:hover { background: none; color: var(--accent-ink); }
 .term-offline .verb button { color: var(--muted); cursor: default; }
 .term-offline .verb button:hover { background: none; }
+/* Terminal lent out: connected, but the shell has handed the PTY to an interactive
+   child (`! sh`, `! py`, `claude`), so a verb would type into THAT program. site.js
+   paints body.term-busy from the iframe's report — on <body>, not on each menu, so the
+   account page's rows and the Actions menu go dark too, and a control an htmx swap
+   brings in meanwhile arrives dark. The menus say why in their .term-busy-note. */
+.term-busy-note { display: none; margin: 0.25rem 0.35rem 0.1rem; padding: 0.45rem 0.55rem;
+  border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-size: 0.82rem; }
+body.term-busy .term-busy-note { display: block; }
+body.term-busy [data-term-cmd] { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+body.term-busy [data-term-cmd]:hover { background: none; }
 
 /* Terminal state, read at a glance inside the user menu. The dot is the state;
    the verb on the item is the act it offers (§ user pill). */
