@@ -1,5 +1,5 @@
 <!-- tags: [fixed-point-iteration] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:29Z -->
 # Fixed-point iteration
 
 Some problems define their answer in terms of itself. A number has to equal its own last nine

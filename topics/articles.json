@@ -5624,8 +5624,8 @@
     {
       "path": "technique/fixed-point-iteration",
       "title": "Fixed-point iteration",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:29Z",
       "solved": 3,
       "problems": 3,
       "tags": ["fixed-point-iteration"],
