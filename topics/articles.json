@@ -6460,8 +6460,8 @@
     {
       "path": "technique/lucas-number",
       "title": "Lucas number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T09:38Z",
       "solved": 3,
       "problems": 3,
       "tags": ["lucas-number"],
