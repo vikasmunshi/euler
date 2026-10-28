@@ -1,5 +1,5 @@
 <!-- tags: [numpy-slice-assignment] -->
-<!-- status: final 2026-10-16T15:58Z -->
+<!-- status: final -->
 # NumPy slice assignment
 
 Most sieves in these solutions do one thing over and over: *update every $k$-th entry of
@@ -45,16 +45,32 @@ $2p$, the same halving the C loop gets from `j += 2 * p`.
 **Accumulate: divisor and multiplicative sieves.** Swap `=` for `+=`, `-=`, `*=` or
 `//=` and the strided loop gathers arithmetic instead of marking. With `tau[i::i] += 1`
 every multiple of $i$ counts $i$ as a divisor, which is how [420](/solutions/0420/)
-builds its divisor-count table. In [351](/solutions/0351/),
+builds its divisor-count table. In [351](/solutions/0351/) and [512](/solutions/0512/),
 `phi[p::p] -= phi[p::p] // p` applies the factor $(1 - 1/p)$ of Euler's
 [totient](https://en.wikipedia.org/wiki/Euler%27s_totient_function) to every multiple
-of $p$ in one statement. The [Möbius](https://en.wikipedia.org/wiki/M%C3%B6bius_function)
-sieves in [319](/solutions/0319/) and [464](/solutions/0464/) take two strides per
-prime: they flip the sign at step $p$, then zero the entries at step $p^2$. 319 also
-runs `cofactor[q::q] //= p` for each prime power $q$, removing the small primes from
-every index so that what is left over shows which numbers still have a large prime
+of $p$ in one statement; 512 doesn't even keep a separate prime table, since an entry
+still equal to its index is one no earlier prime has touched. The
+[Möbius](https://en.wikipedia.org/wiki/M%C3%B6bius_function) sieves in
+[319](/solutions/0319/), [464](/solutions/0464/) and [641](/solutions/0641/) take two
+strides per prime: they flip the sign at step $p$, then zero the entries at step $p^2$.
+319 also runs `cofactor[q::q] //= p` for each prime power $q$, removing the small primes
+from every index so that what is left over shows which numbers still have a large prime
 factor. Each of these keeps the same `m += step` header in its C version, and only the
 loop body changes.
+
+The value on the right need not be a scalar. Any array of the slice's length lines up
+with it entry by entry, so the loop body can depend on *which* multiple it is visiting.
+[675](/solutions/0675/) maintains a running product modulo a prime, and the factor each
+multiple $kp$ contributes depends on $v_p(kp)$ and on the exponent of $p$ in $(kp)!$. It
+builds that per-multiple factor as an array of length $n/p$ — itself by strided
+`+= 1` passes at steps $p, p^2, \dots$ followed by a `cumsum`, which is
+[Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) in two lines —
+and then applies it as `mult[p::p] = mult[p::p] * ratio % MOD`. Nor is the operator
+limited to the arithmetic ones Python has syntax for. [407](/solutions/0407/) keeps a
+running *maximum* per index: it takes the view `best[s*(s+1)::s]` (trimmed by a second
+slice, which is still a view) and hands it to a ufunc as both input and output,
+`np.maximum(view, candidates, out=view)`. Any binary ufunc with `out=` set to a slice is
+a compound assignment; `+=` is just the one with an operator spelling.
 
 **Pair: the half-length divisor count.** Looping $i$ up to $n$ costs $n$ Python-level
 statements, and each one has a fixed overhead whatever its length. Past $i \approx n/2$
@@ -108,6 +124,24 @@ needs the upward behaviour, where each entry reads its already-updated neighbour
 unbounded knapsack, a running total), it is a sequential dependency, and one slice
 statement cannot express it. That needs `np.cumsum`, or a Python loop.
 
+The copy semantics carry over when the source is gathered rather than shifted.
+[452](/solutions/0452/) and [668](/solutions/0668/) both count primes with
+[Lucy_Hedgehog's method](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80%28x%29), which keeps
+$\pi$-style counts at every value $\lfloor n/k \rfloor$ and, for each prime $p$, updates
+them by
+
+```python
+small[p2:r+1] -= small[v // p] - sp      # v = p*p .. r; sp = primes below p
+```
+
+The source index $v/p$ can itself be $\ge p^2$, an entry this same pass updates. The
+scalar algorithm handles that by walking $v$ downwards so every read sees the
+pre-update value — the same reason 249's C loop runs downwards — and the NumPy line
+gets it for free, because the gather `small[v // p]` is a fresh array, evaluated in full
+before anything is written. The comment in 452 says exactly that. The `large` half of
+the table uses the stride on the *source* side instead: `large[p:split*p+1:p]` reads
+every $p$-th entry and feeds a contiguous target.
+
 The same alignment gives cheap comparisons between neighbours. In
 [179](/solutions/0179/), `div_count[2:n] == div_count[3:n+1]` lines up $d(m)$ with
 $d(m+1)$ for every $m$ at once. In [464](/solutions/0464/), `key[1:] != key[:-1]` finds
@@ -134,7 +168,12 @@ result back to `a`'s dtype under the `same_kind` rule. An `int8` Möbius table t
 gets `+= 300` wraps without any warning. That is safe for $\mu \in \{-1, 0, 1\}$ and for
 256's `uint16` counts, whose values stay tiny. It is a problem for a knapsack count
 that doubles every pass, which is why 249 reduces modulo its bound before a
-`uint64` could overflow. The table's dtype is part of the correctness argument; see
+`uint64` could overflow, and why 675 keeps every operand of `mult[p::p] * ratio % MOD`
+below $2^{30}$, so the product fits `int64` before the reduction. Reductions are the
+other way round: `sum` and `cumsum` promote small integer types to the platform integer,
+so 641's Mertens prefix over an `int8` Möbius table does not wrap — it spells
+`dtype=np.int64` anyway, which costs nothing and survives a later change of the
+table's type. The table's dtype is part of the correctness argument; see
 [watch the integer width](/topics/takeaway/watch-integer-width).
 
 **Basic slices update every entry; fancy indices may not.** A stride touches each
@@ -144,7 +183,10 @@ Use [`np.add.at`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.a
 or `np.bincount` when indices can repeat. 304 mixes the two kinds safely. For small
 primes it uses one strided slice per prime. For large primes, which hit the segment at
 most once, it uses a single fancy assignment `seg[offsets] = False`. Duplicates in that
-array cannot matter because the value assigned is constant.
+array cannot matter because the value assigned is constant. 675's large-prime pass,
+`mult[large * k] = mult[large * k] * ratio_k[k] % MOD`, is a fancy *update*, and it is
+exact for a different reason: for a fixed $k$, distinct primes give distinct indices
+$pk$, so no index repeats within one statement.
 
 **The count of statements is the cost model.** A slice statement costs a fixed overhead
 plus a C loop over its entries. Total work is the usual sieve bound,
@@ -153,7 +195,12 @@ NumPy wins when the *number of statements* is much smaller than the work, as wit
 $\pi(\sqrt n)$ marking passes or 179's $\sqrt n$ pair passes. When most slices are a
 handful of entries long, the fixed overhead dominates and the Python can fall behind a
 plain list loop. In that case either restructure (pair the divisors, sieve only to
-$\sqrt n$ as 319's Möbius table does) or accept that the problem belongs in C. When
+$\sqrt n$ as 319's Möbius table does) or accept that the problem belongs in C. 675
+shows the restructuring in its general form: primes above $\sqrt n$ with only a few
+multiples each would mean one short slice per prime, so it transposes the loop — the
+Python loop runs over the multiplier $k$, and each statement touches the $k$-th
+multiple of *every* large prime at once. The work is unchanged; the statement count
+drops from $\pi(n)$ to a small constant. When
 the work genuinely fits the strided shape, a slice assignment keeps a sieve readable
 and close to C speed: one line per loop, matching the C file line for line.
 
