@@ -1,5 +1,5 @@
 <!-- tags: [dirichlet-hyperbola-method] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T07:56Z -->
 # Dirichlet hyperbola method
 
 The [Dirichlet hyperbola method](https://en.wikipedia.org/wiki/Dirichlet_hyperbola_method) sums a
