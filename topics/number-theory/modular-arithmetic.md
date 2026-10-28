@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-15T10:23Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -82,6 +82,31 @@ base ($500 \equiv 0$) nor the exponent ($\lambda(125) = 100$ divides $500$) chan
 $k \mapsto k + 500$. So $k^k \bmod 250$ is periodic with period 500 (from $k = 3$ on), and one block
 of 500 powers stands in for all quarter-million.
 
+Iterate the Carmichael function and the chain $m, \lambda(m), \lambda(\lambda(m)), \dots$ shrinks to 1
+within a handful of steps, which is why a power tower reduced modulo $m$ eventually stops changing.
+Problem 455 makes that the whole solution: it wants the $x$ with $n^x \equiv x \pmod{10^9}$, a
+fixed point of $x \mapsto n^x \bmod 10^9$. Iterating the map from $x = 1$ builds the tower
+$n, n^n, n^{n^n}, \dots$ modulo $10^9$. Once it is constant, its value *is* the fixed point. For
+$10^6$ bases every tower settles within about a dozen rounds, so nothing searches the $10^9$
+candidates. Problem 822 has the
+same move in its simplest form: a number squared $k$ times is $x^{2^k}$ with $k$ near $10^{12}$, and
+because the modulus is prime the exponent $2^k$ is itself reduced modulo $p - 1$ first. That makes
+two modular exponentiations, one inside the other.
+
+### Square-and-multiply works in any monoid
+
+Square-and-multiply needs nothing from the integers except an **associative** multiplication, so
+it computes powers in any [monoid](https://en.wikipedia.org/wiki/Monoid). Problem 721 needs
+$\lfloor(\lceil\sqrt a\rceil + \sqrt a)^{a^2}\rfloor$. The conjugate $\lceil\sqrt a\rceil - \sqrt a$
+lies in $[0, 1)$, so the floor is the integer $x^n + y^n$ less one, and that integer is computed in
+the ring $\mathbb{Z}_p[\sqrt a]$. Its elements are pairs $(u, v)$ standing for $u + v\sqrt a$, multiplied
+by a two-line rule and raised to the power by the usual loop. Problem 778 uses an even stranger
+monoid. The carry-free "freshman's product" acts on each decimal place separately, so one place's
+distribution of digit products is a ten-entry histogram. Combining $R$ independent factors is
+then a convolution over the digits under multiplication mod 10, and the $R$-fold convolution power
+takes $O(\log R)$ convolutions. Once you have spotted an associative step, the exponent can be as
+large as the problem likes.
+
 ## Division: the modular inverse
 
 You cannot divide by $a$ modulo $m$ directly, but you can multiply by its
@@ -108,6 +133,12 @@ Because the number being inverted is the fixed 10, it even has a closed form key
 digit — $(kp + 1)/10$ with $k = 9, 3, 7, 1$ for $p \equiv 1, 3, 7, 9 \pmod{10}$ — which vectorises
 over a NumPy array of primes where a per-prime `pow` call could not. Inverses also appear as the
 object of study — problem 451 hunts for *self-inverse* residues ($m$ with $m^2 \equiv 1 \pmod n$).
+Problem 700 shows the inverse's algorithm instead of its value. Its sequence $n a \bmod m$, with
+$m$ prime, reaches its final record low of 1 at $n = a^{-1} \bmod m$. The records on the way are
+found by keeping the smallest term and the smallest gap below $m$ and subtracting the smaller from
+the larger. That is the subtractive Euclidean algorithm on $(a, m)$. Once runs of repeated
+subtractions are collapsed, a walk over quadrillions of terms costs one step per record plus
+$O(\log m)$.
 
 ### Check the modulus before you divide
 
@@ -120,6 +151,16 @@ of it — and the binomial coefficients of problem 996, each a falling product t
 also licenses whole algorithms: [Berlekamp–Massey](https://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm),
 which problem 529 uses to recover a linear recurrence of order 2772 from a digit automaton's counts,
 divides by a discrepancy at every step and so only works over a field — there, modulo $10^9 + 7$.
+Problem 860 is the same licence at its most ordinary. It reduces to a sum of products of binomials,
+read off a factorial table modulo a prime larger than $n$.
+
+Even over a field an inverse costs a modular exponentiation, so how many you take is worth
+planning. Problem 739 needs about $10^8$ binomial coefficients modulo $10^9 + 7$. It multiplies
+the sum through by $(n-1)(n-2)!$, which turns every $1/j!$ into a suffix product, so each term
+becomes a prefix product times a suffix product and the sum needs only **one** inversion, taken at
+the end. Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
+$2 \cdot 10^7 + 1$. It computes all of them at once, as $a^{p-2}$ by one vectorised
+square-and-multiply over a NumPy array, about thirty array multiplications for ten million inverses.
 
 A **composite** modulus is the opposite case. Problem 250 needs binomial coefficients modulo
 $10^{16}$, and the natural row recurrence $\binom{c}{i+1} = \binom{c}{i} \cdot \frac{c-i}{i+1}$
@@ -130,6 +171,14 @@ $2^{e_2} \cdot 5^{e_5} \cdot u$ — the primes of the modulus tracked as exponen
 $u$ coprime to 10 and therefore safely invertible. That factor-out-the-modulus's-primes move is the
 general repair; the general lesson is that with a composite modulus, every division in your
 derivation is a bug waiting for an input that shares a factor with it.
+
+The commonest version is also the easiest to miss: "the last nine digits" means modulo $10^9$, and
+$10^9$ is even. Both problems 340 and 401 end in closed forms with a small fixed denominator.
+Problem 340 has the triangular numbers $b(b+1)/2$, and problem 401 has the square pyramidal numbers
+$x(x+1)(2x+1)/6$ with $x$ up to $10^{15}$. Since $2$ has no inverse modulo $10^9$, the cure is to
+**divide before reducing**. One of $x, x+1$ is even, and exactly one of $x, x+1, 2x+1$ is a
+multiple of 3. Dividing those factors exactly leaves integers that each fit in 64 bits; only then
+are they reduced and multiplied.
 
 ### Counting the solutions of a congruence
 
@@ -191,8 +240,22 @@ Second, it lets you *decompose* a hard modulus: answer the question modulo each 
 structure is simple, and glue the answers back together. The number of solutions of a polynomial
 congruence is therefore **multiplicative** across the factors — which is why $x^3 \equiv 1 \pmod{91}$
 has $3 \times 3 = 9$ solutions (8 besides $x = 1$) in problems 271 and 272, and why the $3^k$ count
-above works at all. Problem 250 uses the same split for a proof rather than a computation: the
-period of $k^k \bmod 250$ was established modulo 2 and modulo 125 separately.
+above works at all. Problem 271 also needs the roots themselves, not only their count. The modulus
+is the primorial $2 \cdot 3 \cdots 43$, so the roots are found modulo each prime, and a non-squarefree
+modulus would add one more step: [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma)
+lifts a root mod $p$ uniquely to $p^k$ whenever the derivative is a unit. The prime 3 is the
+exception, since $3x^2$ vanishes mod 3. CRT then assembles the $3^6$ combinations. Problem 250
+uses the same split for a proof rather than a computation: the period of $k^k \bmod 250$ was
+established modulo 2 and modulo 125 separately.
+
+The decomposition can also *be* the object. A residue with $a^2 \equiv a \pmod n$ (an
+[idempotent](https://en.wikipedia.org/wiki/Idempotent_(ring_theory))) is $0$ or $1$ modulo each
+prime power of $n$, because $a$ and $a - 1$ are coprime. So the idempotents correspond one-to-one
+with the ways to split $n$ into a coprime pair $d \cdot e$, and there are $2^{\omega(n)}$ of them.
+Problem 407 wants the largest for every $n \le 10^7$. It therefore enumerates coprime pairs instead
+of residues, solving each pair's two congruences by CRT. Because the smaller factor $s$ of a pair
+is at most $\sqrt N$, it always inverts modulo $s$, and one table of inverses mod $s$ serves every
+partner.
 
 ## Reduce what the problem reduces — and nothing else
 
@@ -202,8 +265,16 @@ is the **plain, unreduced** sum of those checksums. The tempting dynamic program
 $(\text{count}, \text{sum of hashes})$ through the search layers — but that sum would be known only
 modulo $100\,000\,007$, because once the individual hashes have wrapped, modular arithmetic cannot
 tell how many of them did. The correct route is to produce each shortest path and add its reduced
-hash as an ordinary integer. Read the statement for exactly where the modulus applies; a `% m` one
-level too high gives a plausible, wrong number.
+hash as an ordinary integer. Problem 271 has the same trap in a quieter form: it sums the cube
+roots of unity as integers in $[0, n)$. That sum is hundreds of times $n$, so adding the CRT
+combinations modulo $n$ would give only its residue. Read the statement for exactly where the
+modulus applies; a `% m` one level too high gives a plausible, wrong number.
+
+The converse is a gift: a modulus written into a *definition* is often there to simplify it. Problem
+512 sums $\varphi(n^i)$ for $i = 1, \dots, n$, taken modulo $n + 1$. Modulo $n + 1$, $n \equiv -1$,
+and $\varphi(n^i) = n^{i-1}\varphi(n)$, so the terms alternate in sign and cancel in pairs. Each
+$f(n)$ is just $\varphi(n)$ for odd $n$ and $0$ for even $n$, and the problem becomes a sum of
+totients before any code is written.
 
 ## The overflow trap
 
@@ -230,7 +301,10 @@ Three variations on the same budget:
   one `%` per output coefficient instead of one per term.
 - **Know which operations multiply.** Problem 996's polynomial DP only shifts, adds and doubles —
   never multiplies two residues — so NumPy `int64` arrays stay exact modulo its $1.2 \times 10^9$
-  prime, where a product of two residue vectors would not.
+  prime, where a product of two residue vectors would not. When the vectors *do* multiply, a prime
+  below $2^{30}$ buys the headroom. Problems 675 and 721 run square-and-multiply over whole NumPy
+  arrays because each product of two residues stays below $2^{60}$, and NumPy has no `__int128`
+  to fall back on.
 
 ## How to reason about it
 
@@ -241,10 +315,12 @@ directly. When you see it:
 - Reduce **early and often** — counts, and where the question allows, elements and exponents too —
   but only the quantity the statement actually reduces.
 - Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
-  Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic.
+  Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic. Any
+  associative product (a ring extension, a convolution) can be powered the same way.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
-  under a composite one, audit every division.
+  under a composite one, audit every division — including the $/2$ and $/6$ of a closed form
+  modulo $10^9$. Where you can, defer all the divisions to a single inverse at the end.
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
   the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
