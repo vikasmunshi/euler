@@ -93,7 +93,7 @@
       "title": "Algebraic conjugate",
       "status": "draft",
       "written": null,
-      "solved": 1,
+      "solved": 2,
       "problems": 2,
       "tags": ["algebraic-number-conjugates"],
       "refs": ["p0318", "p0721"],
@@ -995,7 +995,7 @@
       "title": "Diophantine approximation",
       "status": "draft",
       "written": null,
-      "solved": 2,
+      "solved": 3,
       "problems": 10,
       "tags": ["diophantine-approximation"],
       "refs": ["p0192", "p0198", "p0318", "p0542", "p0566", "p0576", "p0591", "p0771", "p0889", "p0904"],
@@ -1963,11 +1963,11 @@
       "title": "Irrational number",
       "status": "final",
       "written": "2026-10-28T08:25Z",
-      "solved": 3,
+      "solved": 4,
       "problems": 12,
       "tags": ["irrational-number"],
       "refs": ["p0080", "p0318", "p0517", "p0558", "p0566", "p0576", "p0585", "p0656", "p0721", "p0731", "p0911", "p0950"],
-      "solved_after": []
+      "solved_after": ["p0318"]
     },
     {
       "path": "domain/isoperimetric-inequality",
@@ -3041,11 +3041,11 @@
       "title": "Quadratic equation",
       "status": "final",
       "written": "2026-10-17T06:35Z",
-      "solved": 8,
+      "solved": 9,
       "problems": 14,
       "tags": ["quadratic-equation"],
       "refs": ["p0042", "p0044", "p0045", "p0137", "p0144", "p0261", "p0317", "p0318", "p0356", "p0457", "p0587", "p0757", "p0932", "p0935"],
-      "solved_after": []
+      "solved_after": ["p0318"]
     },
     {
       "path": "domain/quadratic-form",
@@ -4031,11 +4031,11 @@
       "title": "Diophantine Equations",
       "status": "final",
       "written": "2026-10-15T10:57Z",
-      "solved": 28,
+      "solved": 29,
       "problems": 94,
       "tags": ["diophantine-approximation", "diophantine-equation"],
       "refs": ["p0009", "p0066", "p0094", "p0100", "p0108", "p0110", "p0131", "p0135", "p0136", "p0137", "p0138", "p0140", "p0142", "p0157", "p0168", "p0180", "p0192", "p0198", "p0221", "p0223", "p0236", "p0251", "p0257", "p0261", "p0278", "p0279", "p0283", "p0291", "p0296", "p0299", "p0309", "p0311", "p0313", "p0318", "p0348", "p0360", "p0390", "p0397", "p0404", "p0410", "p0418", "p0428", "p0438", "p0454", "p0455", "p0482", "p0496", "p0510", "p0513", "p0518", "p0528", "p0542", "p0557", "p0566", "p0576", "p0581", "p0582", "p0583", "p0585", "p0591", "p0620", "p0621", "p0647", "p0660", "p0674", "p0678", "p0681", "p0718", "p0730", "p0748", "p0753", "p0757", "p0764", "p0769", "p0771", "p0784", "p0785", "p0791", "p0799", "p0833", "p0835", "p0844", "p0876", "p0877", "p0880", "p0889", "p0904", "p0919", "p0932", "p0945", "p0962", "p0988", "p0991", "p0998"],
-      "solved_after": ["p0455"]
+      "solved_after": ["p0318", "p0455"]
     },
     {
       "path": "number-theory/euler",
@@ -4229,10 +4229,10 @@
       "title": "Add the conjugate to cancel the irrational part",
       "status": "draft",
       "written": null,
-      "solved": 1,
-      "problems": 1,
+      "solved": 2,
+      "problems": 2,
       "tags": ["conjugate-cancels-irrational-part"],
-      "refs": ["p0721"],
+      "refs": ["p0318", "p0721"],
       "solved_after": []
     },
     {
@@ -4339,11 +4339,11 @@
       "title": "Rearrange a formula to avoid cancellation",
       "status": "final",
       "written": "2026-08-06T22:09Z",
-      "solved": 1,
-      "problems": 1,
+      "solved": 2,
+      "problems": 2,
       "tags": ["rearrange-to-avoid-cancellation"],
-      "refs": ["p0247"],
-      "solved_after": []
+      "refs": ["p0247", "p0318"],
+      "solved_after": ["p0318"]
     },
     {
       "path": "takeaway/reduce-before-coding",
@@ -4570,11 +4570,11 @@
       "title": "Arbitrary-precision arithmetic",
       "status": "final",
       "written": "2026-10-15T10:47Z",
-      "solved": 66,
-      "problems": 66,
+      "solved": 67,
+      "problems": 67,
       "tags": ["arbitrary-precision-arithmetic"],
-      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0050_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0097_s0", "p0113_s0", "p0114_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0147_s0", "p0152_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0184_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0205_s0", "p0208_s0", "p0209_s0", "p0211_s0", "p0216_s0", "p0221_s0", "p0238_s0", "p0239_s0", "p0250_s0", "p0259_s0", "p0277_s0", "p0321_s0", "p0387_s0", "p0493_s0", "p0686_s0", "p0686_s1", "p0751_s0", "p0768_s0", "p0788_s0", "p0800_s0", "p0862_s0", "p0872_s0", "p0932_s0", "p0934_s0", "p0957_s0", "p0974_s0"],
-      "solved_after": []
+      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0050_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0097_s0", "p0113_s0", "p0114_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0147_s0", "p0152_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0184_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0205_s0", "p0208_s0", "p0209_s0", "p0211_s0", "p0216_s0", "p0221_s0", "p0238_s0", "p0239_s0", "p0250_s0", "p0259_s0", "p0277_s0", "p0318_s0", "p0321_s0", "p0387_s0", "p0493_s0", "p0686_s0", "p0686_s1", "p0751_s0", "p0768_s0", "p0788_s0", "p0800_s0", "p0862_s0", "p0872_s0", "p0932_s0", "p0934_s0", "p0957_s0", "p0974_s0"],
+      "solved_after": ["p0318"]
     },
     {
       "path": "technique/arg-max",
@@ -4922,10 +4922,10 @@
       "title": "Catastrophic cancellation",
       "status": "draft",
       "written": null,
-      "solved": 2,
-      "problems": 2,
+      "solved": 3,
+      "problems": 3,
       "tags": ["catastrophic-cancellation"],
-      "refs": ["p0247_s0", "p0461_s0"],
+      "refs": ["p0247_s0", "p0318_s0", "p0461_s0"],
       "solved_after": []
     },
     {
@@ -4966,11 +4966,11 @@
       "title": "Closed-form expression",
       "status": "final",
       "written": "2026-10-15T10:51Z",
-      "solved": 75,
-      "problems": 75,
+      "solved": 76,
+      "problems": 76,
       "tags": ["closed-form-expression"],
-      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0321_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"],
-      "solved_after": ["p0359", "p0401", "p0739", "p0778", "p0887"]
+      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0318_s0", "p0321_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"],
+      "solved_after": ["p0318", "p0359", "p0401", "p0739", "p0778", "p0887"]
     },
     {
       "path": "technique/closure-computer-programming",
@@ -5659,11 +5659,11 @@
       "title": "Floating-point arithmetic",
       "status": "final",
       "written": "2026-10-14T12:15Z",
-      "solved": 9,
-      "problems": 9,
+      "solved": 10,
+      "problems": 10,
       "tags": ["floating-point-arithmetic"],
-      "refs": ["p0042_s0", "p0044_s0", "p0063_s0", "p0093_s0", "p0190_s0", "p0235_s0", "p0247_s0", "p0395_s0", "p0800_s0"],
-      "solved_after": []
+      "refs": ["p0042_s0", "p0044_s0", "p0063_s0", "p0093_s0", "p0190_s0", "p0235_s0", "p0247_s0", "p0318_s0", "p0395_s0", "p0800_s0"],
+      "solved_after": ["p0318"]
     },
     {
       "path": "technique/floor-and-ceiling-functions",
@@ -6396,11 +6396,11 @@
       "title": "Logarithm",
       "status": "final",
       "written": "2026-10-28T08:30Z",
-      "solved": 3,
-      "problems": 3,
+      "solved": 4,
+      "problems": 4,
       "tags": ["logarithm"],
-      "refs": ["p0030_s0", "p0822_s0", "p0957_s0"],
-      "solved_after": []
+      "refs": ["p0030_s0", "p0318_s0", "p0822_s0", "p0957_s0"],
+      "solved_after": ["p0318"]
     },
     {
       "path": "technique/long-division",

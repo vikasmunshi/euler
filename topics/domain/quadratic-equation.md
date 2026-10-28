@@ -150,7 +150,7 @@ bound that becomes an interval between two roots.
 - ● [0144](/solutions/0144/) — Laser Beam Reflections
 - ○ [0261](/solutions/0261/) — Pivotal Square Sums
 - ○ [0317](/solutions/0317/) — Firecracker
-- ○ [0318](/solutions/0318/) — 2011 Nines
+- ● [0318](/solutions/0318/) — 2011 Nines
 - ○ [0356](/solutions/0356/) — Largest Roots of Cubic Polynomials
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0587](/solutions/0587/) — Concave Triangle
