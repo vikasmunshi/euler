@@ -26,8 +26,8 @@
       'hint': 'Run <code>git-identity</code> in your terminal, or click the <b>GitHub CLI</b> tool button below.'},
      {'label': 'Set up Claude Code', 'done': claude_status == 'signed in',
       'hint': 'Sign in from your terminal, or click the <b>Claude Code</b> tool button below.'},
-     {'label': 'Store your ANTHROPIC_API_KEY', 'done': 'ANTHROPIC_API_KEY' in secret_names,
-      'hint': 'Add it under <b>Secrets</b> below.'}
+     {'label': 'Store your ANTHROPIC_API_KEY for claude-api', 'done': 'ANTHROPIC_API_KEY' in secret_names,
+      'hint': 'Only <code>claude-api</code> reads it; Claude Code needs just its sign-in. Add it under <b>Secrets</b> below.'}
    ]) %}
 {% endif %}
 {% set done = steps | selectattr('done') | list | length %}

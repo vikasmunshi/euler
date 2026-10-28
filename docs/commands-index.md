@@ -426,8 +426,8 @@ Write (or flesh out) a topic article via the claude-euler-blogger skill.
 (`number-theory/primes`). Tab-completion offers every topic in the article index
 (`topics/articles.json`), unwritten and most-referenced first.
 Launches Claude Code headless to research the covering problems and write the article
-under `topics/`, then streams a live Markdown summary. Needs the `claude` CLI and an
-`ANTHROPIC_API_KEY`.
+under `topics/`, then streams a live Markdown summary. Needs the `claude` CLI, signed in
+(`claude-login`).
 
 A topic whose article the index reports as `final` is left alone — the skill marks a page
 final when it is done writing it, and rewriting one is an explicit `--force`.
@@ -488,7 +488,7 @@ runs the requested action, and streams a
 live-updating Markdown summary back into the shell, ending with a footer of
 turns / duration / cost. Heavier and slower than `claude-api` — it actually
 runs `solver` commands, edits files, evaluates, and iterates. Needs the
-`claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
+`claude` CLI on PATH, signed in (`claude-login`).
 
 **usage**
 
