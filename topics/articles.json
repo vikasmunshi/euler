@@ -4195,12 +4195,12 @@
       "path": "takeaway/calibrate-theory-on-known-answers",
       "title": "Calibrate a theory on the known answers",
       "status": "final",
-      "written": "2026-10-16T07:20Z",
+      "written": "2026-10-28T21:41Z",
       "solved": 10,
       "problems": 10,
       "tags": ["calibrate-theory-on-known-answers"],
       "refs": ["p0265", "p0336", "p0455", "p0670", "p0761", "p0860", "p0882", "p0887", "p0963", "p0983"],
-      "solved_after": ["p0455", "p0670", "p0860", "p0887"]
+      "solved_after": []
     },
     {
       "path": "takeaway/cancel-divisors-before-reducing",
