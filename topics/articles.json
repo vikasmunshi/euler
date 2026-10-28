@@ -7131,8 +7131,8 @@
     {
       "path": "technique/quadratic-irrational-number",
       "title": "Quadratic irrational number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:26Z",
       "solved": 3,
       "problems": 3,
       "tags": ["quadratic-irrational-number"],
