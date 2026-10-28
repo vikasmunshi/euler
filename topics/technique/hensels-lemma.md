@@ -1,5 +1,5 @@
 <!-- tags: [hensels-lemma] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:00Z -->
 # Hensel's lemma
 
 [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma) lets me solve a congruence
