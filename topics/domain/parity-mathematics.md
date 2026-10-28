@@ -149,6 +149,7 @@ is the natural lever: it lets the exponent be taken apart one binary digit at a 
 - ● [0331](/solutions/0331/) — Cross Flips
 - ○ [0430](/solutions/0430/) — Range Flips
 - ○ [0502](/solutions/0502/) — Counting Castles
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0520](/solutions/0520/) — Simbers
 - ○ [0539](/solutions/0539/) — Odd Elimination
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients

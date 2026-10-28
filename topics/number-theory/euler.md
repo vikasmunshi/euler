@@ -210,7 +210,7 @@ the loop.
 - ○ [0441](/solutions/0441/) — The Inverse Summation of Coprime Couples
 - ○ [0448](/solutions/0448/) — Average Least Common Multiple
 - ● [0478](/solutions/0478/) — Mixtures
-- ○ [0512](/solutions/0512/) — Sums of Totients of Powers
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function

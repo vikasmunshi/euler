@@ -532,6 +532,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0495](/solutions/0495/) — Writing $n$ as the Product of $k$ Distinct Positive Integers
 - ○ [0500](/solutions/0500/) — Problem 500!!!
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ○ [0517](/solutions/0517/) — A Real Recursion
