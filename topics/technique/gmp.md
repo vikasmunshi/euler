@@ -152,5 +152,6 @@ constant factor.
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0387](/solutions/0387/) — Harshad Numbers
+- ● [0523](/solutions/0523/) — First Sort I
 
 <!-- /problems -->

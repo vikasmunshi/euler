@@ -184,7 +184,7 @@ that read the same thing contribute the same amount, and can be counted together
 - ○ [0497](/solutions/0497/) — Drunken Tower of Hanoi
 - ○ [0503](/solutions/0503/) — Compromise or Persist
 - ○ [0514](/solutions/0514/) — Geoboard Shapes
-- ○ [0523](/solutions/0523/) — First Sort I
+- ● [0523](/solutions/0523/) — First Sort I
 - ○ [0527](/solutions/0527/) — Randomized Binary Search
 - ○ [0547](/solutions/0547/) — Distance of Random Points Within Hollow Square Laminae
 - ○ [0564](/solutions/0564/) — Maximal Polygons

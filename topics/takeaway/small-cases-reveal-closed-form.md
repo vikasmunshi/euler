@@ -147,6 +147,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
+- ● [0523](/solutions/0523/) — First Sort I
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis

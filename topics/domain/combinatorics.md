@@ -319,7 +319,7 @@ of crossing it.
 - ○ [0519](/solutions/0519/) — Tricoloured Coin Fountains
 - ○ [0520](/solutions/0520/) — Simbers
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
-- ○ [0523](/solutions/0523/) — First Sort I
+- ● [0523](/solutions/0523/) — First Sort I
 - ○ [0524](/solutions/0524/) — First Sort II
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ○ [0534](/solutions/0534/) — Weak Queens

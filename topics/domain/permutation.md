@@ -177,7 +177,7 @@ tell is a problem that counts permutations
 - ○ [0491](/solutions/0491/) — Double Pandigital Number Divisible by $11$
 - ○ [0494](/solutions/0494/) — Collatz Prefix Families
 - ○ [0503](/solutions/0503/) — Compromise or Persist
-- ○ [0523](/solutions/0523/) — First Sort I
+- ● [0523](/solutions/0523/) — First Sort I
 - ○ [0524](/solutions/0524/) — First Sort II
 - ○ [0559](/solutions/0559/) — Permuted Matrices
 - ○ [0595](/solutions/0595/) — Incremental Random Sort
