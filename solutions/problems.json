@@ -5908,8 +5908,8 @@
     "level": 10,
     "pct": 26,
     "solvers": 774,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 28 Oct 2026, 09:49"
   },
   "740": {
     "title": "Secret Santa",
