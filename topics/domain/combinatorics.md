@@ -297,7 +297,7 @@ of crossing it.
 - ○ [0430](/solutions/0430/) — Range Flips
 - ○ [0434](/solutions/0434/) — Rigid Graphs
 - ○ [0438](/solutions/0438/) — Integer Part of Polynomial Equation's Solutions
-- ○ [0452](/solutions/0452/) — Long Products
+- ● [0452](/solutions/0452/) — Long Products
 - ○ [0453](/solutions/0453/) — Lattice Quadrilaterals
 - ○ [0456](/solutions/0456/) — Triangles Containing the Origin II
 - ○ [0458](/solutions/0458/) — Permutations of Project

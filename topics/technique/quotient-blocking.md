@@ -140,6 +140,7 @@ interval, never per `n`.
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0452](/solutions/0452/) — Long Products
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers

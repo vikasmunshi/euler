@@ -311,7 +311,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0447](/solutions/0447/) — Retractions C
 - ○ [0448](/solutions/0448/) — Average Least Common Multiple
 - ○ [0451](/solutions/0451/) — Modular Inverses
-- ○ [0452](/solutions/0452/) — Long Products
+- ● [0452](/solutions/0452/) — Long Products
 - ○ [0454](/solutions/0454/) — Diophantine Reciprocals III
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime

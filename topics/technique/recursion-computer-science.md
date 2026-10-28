@@ -223,6 +223,7 @@ benchmark reflects the real cost.
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0301](/solutions/0301/) — Nim
+- ● [0452](/solutions/0452/) — Long Products
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0755](/solutions/0755/) — Not Zeckendorf

@@ -145,6 +145,7 @@ The two languages agree on the algorithm everywhere; they diverge on where the i
 - ○ [0308](/solutions/0308/) — An Amazing Prime-generating Automaton
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ○ [0423](/solutions/0423/) — Consecutive Die Throws
+- ● [0452](/solutions/0452/) — Long Products
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ○ [0537](/solutions/0537/) — Counting Tuples
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences
