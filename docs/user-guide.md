@@ -224,6 +224,7 @@ its index entry, one click along its name.
 | [`claude-api`](commands-index.md#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](commands-index.md#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
 | [`claude-blog`](commands-index.md#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
+| [`claude-login`](commands-index.md#command-claude-login) | — | `contributor` | Sign Claude Code in, then report whether it is, returning 0 only when signed in. |
 | [`claude-solve`](commands-index.md#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
 | [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. |
@@ -314,7 +315,7 @@ Generated from that table by `update-docs`.
 | `mark` | then refreshes the solutions grid, the git chip |
 | `user` | then refreshes the account page |
 | `git-identity` | then refreshes the account page |
-| `claude` | then refreshes the account page |
+| `claude-login` | then refreshes the account page |
 | `tool-setup` | then refreshes the account page |
 | `show` | runs `euler_webshell.shell.viewer.show` instead |
 | `edit` | runs `euler_webshell.shell.viewer.edit` instead |
@@ -368,7 +369,7 @@ EOF
 
 Two complementary AI paths are wired into the shell, with different requirements: the API
 path needs the `ai` dependency group and `ANTHROPIC_API_KEY` in `~/.euler/env`; the Claude Code
-path needs only the `claude` CLI (`make install-claude`), signed in with `claude /login`:
+path needs only the `claude` CLI (`make install-claude`, or `tool-setup claude`), signed in with `claude-login`:
 
 - **`claude-api <target>`** — a single templated Claude API call that writes one
   artifact: `py` / `c` (a solution), `notes` (the write-up), or `test-cases`. It

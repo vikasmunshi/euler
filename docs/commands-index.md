@@ -59,6 +59,7 @@ a parameter that accepts repetition.
 | [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
 | [`claude-blog`](#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
+| [`claude-login`](#command-claude-login) | — | `contributor` | Sign Claude Code in, then report whether it is, returning 0 only when signed in. |
 | [`claude-solve`](#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. |
 | [`clear`](#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
 | [`compile-c`](#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. |
@@ -449,6 +450,28 @@ claude-blog
 | `force` | Rewrite the article even when it is already final. Defaults to False. |
 
 *Defined in* `solver.ai.skill.claude_blog`.
+
+---
+
+#### Command: `claude-login`
+
+Sign Claude Code in, then report whether it is, returning 0 only when signed in.
+
+* ⚑ needs contributor or above.
+
+Shorthand for `! claude /login` followed by `claude auth status`: Claude Code takes
+over the terminal for its login (and, on a first run, its onboarding), then reports
+its own sign-in state. The report runs whether or not the login was cancelled, and
+its status is this command's — the question it answers is "is Claude Code signed in
+now?". Needs the `claude` CLI on PATH (`tool-setup claude` installs it).
+
+**usage**
+
+```
+claude-login
+```
+
+*Defined in* `solver.ai.skill.claude_login`.
 
 ---
 
