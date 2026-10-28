@@ -1,5 +1,5 @@
 <!-- tags: [aggregate-by-value] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T16:32Z -->
 # Aggregate by value, not by instance
 
 When a problem says "for every tuple", "for every sequence" or "for every string", the

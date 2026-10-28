@@ -4161,8 +4161,8 @@
     {
       "path": "takeaway/aggregate-by-value",
       "title": "Aggregate by value, not by instance",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T16:32Z",
       "solved": 4,
       "problems": 4,
       "tags": ["aggregate-by-value"],
