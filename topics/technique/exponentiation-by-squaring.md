@@ -1,5 +1,5 @@
 <!-- tags: [exponentiation-by-squaring] -->
-<!-- status: final 2026-08-12T06:25Z -->
+<!-- status: final -->
 # Exponentiation by squaring
 
 [Exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) computes
@@ -46,9 +46,11 @@ in unrelated solutions.
 | What you square | Identity | What the power means | Seen in |
 | --- | --- | --- | --- |
 | A residue mod $m$ | `1` | $b^e \bmod m$ | 48, 97, 217, 820, 926 |
-| A $d \times d$ matrix | $I$ | $e$ steps of a linear recurrence | 237, 940 |
+| A $d \times d$ matrix | $I$ | $e$ steps of a linear recurrence | 237, 670, 940 |
 | A polynomial truncated at degree $m$ | $1$ | an $e$-fold convolution, low terms only | 768 |
-| A whole array of residues | `ones` | many independent powers at once | 421, 429, 944 |
+| An element $u + v\sqrt{a}$ of $\mathbb{Z}_p[\sqrt{a}]$ | $(1, 0)$ | an irrational power, kept exact | 721 |
+| A distribution over digits under $\times \bmod 10$ | all mass on digit 1 | the digit of an $e$-fold product | 778 |
+| A whole array of residues | `ones` | many independent powers at once | 407, 421, 429, 455, 721, 944 |
 
 **Matrices — a recurrence in logarithmic time.** Problem 237 counts Hamiltonian tours on a
 $4 \times n$ board; the counts obey $T(n) = 2T(n-1) + 2T(n-2) - 2T(n-3) + T(n-4)$, and a fourth-order
@@ -64,6 +66,14 @@ the [transfer-matrix method](/topics/domain/transfer-matrix-method); note that m
 is not commutative, which the loop never assumed — keep `result` on the same side of every product
 and it stays correct.
 
+Problem 670 shows that the accumulator does not even have to live in the monoid. Its
+[transfer matrix](/topics/domain/transfer-matrix-method) has 10 states (each row's tile overhang,
+with colours factored out by symmetry), and what it wants is the start vector times $M^{n-1}$, not
+$M^{n-1}$ itself. So `result` starts as that row vector and each set bit folds in with a
+vector–matrix product, $O(S^2)$, while only the base pays the $O(S^3)$ squaring. Nothing changes in
+the bit loop — associativity guarantees $(vA)B = v(AB)$, which is all it needs — and every fold
+becomes a factor $S$ cheaper.
+
 **Truncated polynomials.** Problem 768 raises a generating polynomial to a power, keeping only the
 terms up to degree $m$ because nothing above that can influence the answer. Truncated multiplication
 is associative and has the identity $1$, so the loop applies unchanged — but here a single "multiply"
@@ -71,6 +81,21 @@ is an $O(m^2)$ convolution rather than one machine instruction. That inverts the
 saving one operation is now worth a line of code, which is why its loop guards the final squaring
 (`if exponent:` before squaring the base) instead of computing a square it will never use. Cheap
 when a multiply is a `mul` instruction, genuinely worth it when a multiply is a convolution.
+
+**Rings you invent for the occasion.** Problem 721 needs $\lfloor (c + \sqrt{a})^{n} \rfloor$ for
+exponents in the trillions. Floating point is useless at that size, but the conjugate $c - \sqrt{a}$
+lies in $[0, 1)$, so $x^n + y^n$ is an integer just above the floor. Write
+$(c + \sqrt{a})^n = u + v\sqrt{a}$ and the pair $(u, v)$ multiplies by
+$(u_1u_2 + a\,v_1v_2,\; u_1v_2 + v_1u_2)$ — the [quadratic integer](https://en.wikipedia.org/wiki/Quadratic_integer)
+ring, reduced mod $p$. That product is associative with identity $(1, 0)$, so the loop
+exponentiates an irrational number exactly, and the answer is $2u$ (less one when $a$ is not a
+square). Problem 778 goes more abstract still: its "freshman's product" multiplies digit by digit
+mod 10, so the count of $R$-tuples whose product has digit $d$ in one position is the $R$-th power
+of that position's digit histogram under convolution over the multiplicative monoid
+$(\mathbb{Z}/10, \times)$ — a 10-by-10 `out[x*y % 10] += a[x]*b[y]`. Its identity is the
+distribution with all its mass on digit **1**; seeding the accumulator with mass on digit 0, the
+natural-looking "empty" choice, makes every product zero. That is the identity pitfall from above,
+in a setting where it is easy to miss.
 
 **Arrays.** Python's `pow` is scalar and [NumPy](/topics/technique/numpy) has no three-argument
 `pow`, so a sweep that needs a power for each of a million elements is a million interpreter round
@@ -83,6 +108,18 @@ the [vectorised](/topics/technique/vectorized) Python of 421, 429 and 944 runs a
 9.3 s against C siblings at 0.99 s, 0.70 s and 7.4 s — a factor of 1.3–2.2 — while the scalar
 matrix-power solutions of 237 and 940 sit 40–45× behind their C versions. Same algorithm; the
 difference is whether the interpreter is entered once per bit or once per element.
+
+The newer array solutions show the two shapes this takes. When every lane shares one exponent, the
+loop is the scalar one verbatim: problem 407 builds a table of inverses modulo $s$ for all residues
+at once as $r^{\varphi(s)-1}$ ([Euler's theorem](https://en.wikipedia.org/wiki/Euler%27s_theorem)),
+one exponent for the whole `arange`. When each lane has its own exponent, there is no single
+`while exponent:` to test, so the loop runs a fixed number of bits — the width of the largest
+exponent — and folds under a mask: `result = np.where(bit_set, result * square % m, result)`.
+Problem 455 does this inside a fixed-point iteration, re-evaluating $x \leftarrow n^x \bmod 10^9$
+for every $n$ at once until the power tower stops changing, and 721 does it with its ring elements,
+one $(u, v)$ pair per lane. The masked form pays for every multiply in every lane whether the bit is
+set or not, and the price grows with the multiply: 407 and 455 stay within 1.4× and 3.1× of C, but
+721's ring product makes a dozen array temporaries per step and lands at 8×.
 
 ## Twenty-three steps instead of eight million
 
@@ -146,7 +183,11 @@ with it much of public-key cryptography, affordable at all.
   logarithmic power exists — for matrices, permutations, polynomials, function composition, min-plus
   products, whatever you are iterating.
 - **Then ask what the identity is,** and seed the accumulator with it. This is where the
-  generalisation actually breaks in practice.
+  generalisation actually breaks in practice — $(1, 0)$ in a quadratic ring, mass on digit 1 in a
+  monoid algebra, never the "empty" value.
+- **The accumulator may be smaller than the base.** If you only need $v \cdot M^e$, start `result`
+  at $v$ and fold with vector–matrix products, as problem 670 does; only the squarings pay full
+  matrix cost.
 - **Cost is $\log e$ multiplied by the cost of one squaring.** For a $d \times d$ matrix that is
   $O(d^3 \log e)$, so the win comes from shrinking the *state*, not just the exponent: problem 237's
   companion matrix is $4 \times 4$ because the recurrence has order 4, and no larger.
