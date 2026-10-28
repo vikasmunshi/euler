@@ -1961,8 +1961,8 @@
     {
       "path": "domain/irrational-number",
       "title": "Irrational number",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:25Z",
       "solved": 3,
       "problems": 12,
       "tags": ["irrational-number"],
