@@ -1378,8 +1378,8 @@
     {
       "path": "domain/floor-function",
       "title": "Floor function",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:28Z",
       "solved": 3,
       "problems": 4,
       "tags": ["floor-function"],
