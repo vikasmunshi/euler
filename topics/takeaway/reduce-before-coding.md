@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final 2026-10-15T10:15Z -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the
@@ -41,7 +41,12 @@ never tests a single term for evenness: the parities of the
 odd, even, odd with period three forever, so every third term is even, and
 expanding the recurrence three times gives a direct rule
 $E(k+1) = 4E(k) + E(k-1)$ that walks the even terms alone. The divisibility test
-is not optimised — it is *derived away*.
+is not optimised — it is *derived away*. The same move carries
+[GCD Sequence](/solutions/0443/) to $10^{15}$: writing $g(k) = k + d$ turns
+each step's $\gcd(j, g(j-1))$ into $\gcd(j, d-1)$ with $d$ fixed, so the long
+runs of $+1$ steps end exactly at the next multiple of a prime factor of $d-1$.
+The program jumps from event to event — a few hundred factorisations in place of
+a quadrillion gcds.
 
 **Close the form.** At the far end, the structure is regular enough that the loop
 disappears into a single expression. [Counting Rectangles](/solutions/0085/)
@@ -52,6 +57,10 @@ $T(H)\cdot T(W)$ with $T(n) = \tfrac{n(n+1)}{2}$ — two independent
 a two-dimensional enumeration. [Number Spiral Diagonals](/solutions/0028/) sums
 each ring's four corners in closed form to
 $\tfrac{N(N(4N+3)+8)-9}{6}$, an $O(N^2)$ grid replaced by one arithmetic line.
+[Sums of Totients of Powers](/solutions/0512/) defines $f(n)$ as a sum of $n$
+totients of powers modulo $n+1$; with $\varphi(n^i) = n^{i-1}\varphi(n)$ and
+$n \equiv -1$, the terms alternate in sign and cancel, leaving $\varphi(n)$ for
+odd $n$ and $0$ for even — the defining sum is never evaluated at all.
 The same move scales a long way: [Odd Triplets](/solutions/0242/) asks about
 roughly $10^{24}$ pairs $(n, k)$, but only about the *parity* of a subset count,
 and two applications of
@@ -81,7 +90,14 @@ construction. [A Game of Chance](/solutions/0951/) asks whether a deck is fair;
 that is a statement about the parity of the turn count, the parity factors over
 the deck's single-colour runs, and the run bias obeys a small recurrence that
 is zero at exactly one length — so "fair" becomes a pattern-avoidance count with
-no probability left in it. Each restatement is a line of algebra, and each one
+no probability left in it. [A Long Row of Dice](/solutions/0641/) asks which
+dice end on face 1; that is $d(k) \equiv 1 \pmod 6$, which forces $k = m^2$,
+and the residue of $\prod(2a_i + 1)$ modulo 3 forces $m = c^3 q^2$ with
+$\mu(q) = +1$ — a dice simulation becomes a lattice count under a hyperbola.
+[Idempotents](/solutions/0407/) asks for the largest $a$ with
+$a^2 \equiv a \pmod n$; since $a$ and $a-1$ are coprime, every prime power of
+$n$ divides one or the other, so the idempotents are exactly the coprime splits
+$n = d \cdot e$, and a per-$n$ search becomes a sweep over pairs. Each restatement is a line of algebra, and each one
 is where the problem actually gets solved.
 
 **Translate into a known object.** Sometimes the restated problem is one that
@@ -99,7 +115,20 @@ by the [hook length formula](https://en.wikipedia.org/wiki/Hook_length_formula) 
 so about $10^{16}$ partitions collapse to $n$ hook-length exponents.
 [Removing Bits](/solutions/0882/) is a partisan game whose positions are
 [surreal numbers](https://en.wikipedia.org/wiki/Surreal_number) that simply
-add. Once the object has a name, its theory comes with it, and the code
+add — and [Gold and Silver Coin Game](/solutions/0860/) is the same theory in
+disguise, blue-red Hackenbush on stalks, where "fair" means total value zero
+and the generating function $x^4 + x + x^{-1} + x^{-4}$ factors as
+$x^{-4}(1+x^3)(1+x^5)$, leaving a single binomial sum.
+[Long Products](/solutions/0452/) counts $n$-tuples by product, which is the
+summatory function of the multiplicative $d_n$ — constant on primes, and so
+exactly what a Min_25 sieve sums in sublinear time.
+[Eulercoin](/solutions/0700/)'s record lows of $na \bmod m$ are the subtractive
+[Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm) run on
+two records, so the coins arrive in logarithmically many steps.
+[Summation of Summations](/solutions/0739/) applies a linear operator, so the
+answer is a weighted sum of the inputs; the statement's 429 is a
+[Catalan number](https://en.wikipedia.org/wiki/Catalan_number), the tell that
+the weights are ballot numbers. Once the object has a name, its theory comes with it, and the code
 implements a theorem rather than a search.
 
 **Keep only what the answer reads.** Most inputs carry far more information
@@ -114,7 +143,11 @@ into prime fields, where Lucas' theorem answers digit by digit.
 on the last two digits and the digit sum, so two small tables replace any
 simulation. [Rounded Square Roots](/solutions/0255/) reads $n$ only through
 $\lceil n/x \rceil$, so whole intervals of $n$ share a path and are processed
-as one. The question to ask is: *what is this result actually a function of?*
+as one. [Freshman's Product](/solutions/0778/) has more sequences than a
+number with a million digits, but its carry-free product reads each decimal
+place independently and each input only through its digit there — a ten-entry
+histogram per place, raised to the $R$-th power under multiplication modulo 10.
+The question to ask is: *what is this result actually a function of?*
 The answer is the real state space.
 
 **Search the answer's structure, not the input range.** When the inputs are too
@@ -131,7 +164,11 @@ factors the condition demands, and
 [Sums of Digit Factorials](/solutions/0254/) inverts a chain of digit functions
 through the
 [factorial number system](https://en.wikipedia.org/wiki/Factorial_number_system)
-rather than iterating it. Construction beats filtering whenever the answers are
+rather than iterating it. [$5$-smooth Totients](/solutions/0516/) reads the
+totient's product formula backwards: $\varphi(n)$ is 5-smooth only when $n$ is a
+Hamming number times distinct primes $q$ with $q - 1$ Hamming, so $10^{12}$
+candidates become a few thousand Hamming numbers and the square-free products of
+a few hundred primes. Construction beats filtering whenever the answers are
 sparse and the space is not.
 
 ## How to reason about it
@@ -171,7 +208,10 @@ Three cautions keep the habit honest:
   balanced 6-subsets against 495 polygon unions. [Overtakes](/solutions/0996/)
   shows the honest version: its characterisation was conjectured, then checked
   against a breadth-first brute force for every $n \le 7$ before any fast code
-  was trusted. And small edge cases hide in correct derivations too: in
+  was trusted. [Summation of Summations](/solutions/0739/) found its ballot-number
+weights by simulating unit vectors, and
+[Gold and Silver Coin Game](/solutions/0860/) checked its surreal values by
+playing every arrangement out for $n \le 7$. And small edge cases hide in correct derivations too: in
   [Euler's Totient Function Equals 13!](/solutions/0248/) the factor contributed
   by the prime 2 at exponent 1 is $1$, so a search that stops when the residual
   target reaches 1 silently drops half the solutions.
