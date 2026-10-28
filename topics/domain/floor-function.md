@@ -1,5 +1,5 @@
 <!-- tags: [floor-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:28Z -->
 # Floor function
 
 The [floor function](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions) `⌊x⌋` is the
