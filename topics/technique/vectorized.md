@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-10-15T10:42Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -40,6 +40,18 @@ abundant_numbers = np.flatnonzero(div_sums > np.arange(limit + 1))
 [Problem 179](/solutions/0179/) sieves the divisor *count* with the same shape, but pairs
 divisors so the interpreter loop runs only `√N` times instead of `N` times; the arithmetic
 still costs `O(N log √N)`, but almost none of it is interpreted.
+A strided slice is also a *view*, so it can be written through: [problem 407](/solutions/0407/)
+takes `best[s*(s+1)::s]` — every multiple of the small factor `s` — and folds a whole array of
+candidates into it with `np.maximum(view, candidates, out=view)`, one call per `s`.
+[Problem 675](/solutions/0675/) runs one strided pass per small prime, building that prime's
+valuations at its multiples with nested slices for `p²`, `p³`, … and then a `cumsum` that
+turns them into the prime's exponent in every factorial at once; the many large primes, which
+each have valuation 1 at every multiple, are batched *across* primes by multiple index instead,
+so the Python loop runs a few hundred times rather than once per prime.
+[Problem 668](/solutions/0668/)'s
+[Lucy_Hedgehog prime count](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80(x))
+is the same shape on the `√N` table of `π(N // k)`: each sieving prime updates the whole
+table in two slice expressions.
 
 **Invert the loop nest.** When you have nested loops, vectorize the *inner* one and leave the
 outer in Python. This is the single most common shape across these problems, because it needs
@@ -116,6 +128,16 @@ running [square-and-multiply](https://en.wikipedia.org/wiki/Exponentiation_by_sq
 the exponent *bits*, masking the odd-bit lanes at each step — 64 array operations instead of a
 per-element `pow`. The pattern generalises: any bounded, data-independent iteration can be
 unrolled across the array, with a boolean mask selecting which lanes act.
+[Problem 455](/solutions/0455/) gives every lane its own exponent and iterates a power tower
+to its fixed point modulo `10**9`, for a million bases at once, stopping when
+`np.array_equal` says no lane moved. [Problem 721](/solutions/0721/) lifts the same loop into
+the ring `ℤ_p[√a]`: each element `u + v√a` is *two* arrays, the ring product is a few lines of
+array arithmetic, and the square-and-multiply sweep raises every `c + √a` to its own power
+`a²` in about 45 steps. The other modular staple vectorizes as well: problem 675 gets the
+[Fermat inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Using_Euler's_theorem)
+of every odd number up to `2n + 1` from one array-wide `pow(·, p − 2)`, and problem 407 builds
+a table of inverses modulo `s` the same way with exponent `φ(s) − 1`, then applies it with
+fancy indexing as `inv[large % s]` — a lookup table, as above.
 
 ## How to reason about it
 
@@ -134,7 +156,11 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   code: problem 348 scans palindromes by digit count and raises `OverflowError` past 18
   digits, the last length whose sums still fit, instead of letting a 19th band wrap silently.
   Packed keys need the same accounting, since each field must fit its share of the 64 bits,
-  sums included. Choosing the *smallest*
+  sums included. Masks help with the accounting too. [Problem 401](/solutions/0401/) needs
+  `x(x+1)(2x+1)/6 mod m` for `x` up to `10**15`, where the raw product would overflow and `6`
+  has no inverse modulo the composite `m`. So it divides the `2` and the `3` out of whichever factor
+  they divide, using masks such as `a[x % 3 == 0] //= 3`, and reduces only after that.
+  Choosing the *smallest*
   sufficient dtype is also a speed decision: an `int8` Möbius table
   ([problem 193](/solutions/0193/)) is eight times more cache-friendly than `int64`, and
   bandwidth is what these loops are limited by.
@@ -162,6 +188,12 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   [problem 980](/solutions/0980/) generates its stream in bulk with a baby-step/giant-step
   outer product of power tables — the serial recurrence becomes one broadcast multiply.
   Whenever the recurrence is linear, the dependence chain can usually be broken.
+  A scan NumPy cannot run directly can still be split. A *modular* prefix product has no
+  ufunc (`np.multiply.accumulate` would overflow long before it reduced), so
+  [problem 739](/solutions/0739/) reshapes each chunk into a `rows × cols` grid, scans it one
+  column at a time across all rows, then multiplies each row by the carried product of the rows
+  before it. That costs about `2√chunk` Python steps per chunk instead of one per element; a
+  plain product is a pairwise tree, `a[0::2] * a[1::2] % m`, halving each step.
 - **`np.vectorize` is not vectorization.** It is a convenience wrapper that calls your Python
   function once per element — the documentation says as much. It buys broadcasting semantics,
   not speed. [Problem 56](/solutions/0056/) uses it only inside a diagnostic path, which is the
@@ -173,6 +205,9 @@ unrolled across the array, with a boolean mask selecting which lanes act.
   integers can also split the work. Problem 252 sorts direction vectors with `np.arctan2`,
   but decides which directions are *equal* by comparing the integer vectors reduced by
   `np.gcd`, so the float only ever has to order directions that it can safely tell apart.
+  [Problem 641](/solutions/0641/) uses the same split for roots: `np.cbrt` makes a guess for
+  every `⌊∛x⌋` at once, and two masked integer corrections (`cs -= cs**3 > x`,
+  `cs += (cs+1)**3 <= x`) make each one exact.
   When the answer depends on exact equality, keep integers — see
   [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
 - **In C, this problem does not exist.** Every one of these solutions has a C counterpart that
