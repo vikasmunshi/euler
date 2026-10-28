@@ -172,5 +172,6 @@ size later.
 ## Problems
 
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0318](/solutions/0318/) — 2011 Nines
 
 <!-- /problems -->

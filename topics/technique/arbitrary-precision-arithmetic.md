@@ -213,6 +213,7 @@ conversion altogether, and is usually faster besides.
 - ● [0250](/solutions/0250/) — $250250$
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
+- ● [0318](/solutions/0318/) — 2011 Nines
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0493](/solutions/0493/) — Under the Rainbow

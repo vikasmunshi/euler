@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Catastrophic_c
 ## Problems
 
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0318](/solutions/0318/) — 2011 Nines
 - ● [0461](/solutions/0461/) — Almost Pi
 
 <!-- /problems -->

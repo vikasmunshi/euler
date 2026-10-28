@@ -166,6 +166,7 @@ its own.
 - ● [0190](/solutions/0190/) — Maximising a Weighted Product
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0318](/solutions/0318/) — 2011 Nines
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0800](/solutions/0800/) — Hybrid Integers
 

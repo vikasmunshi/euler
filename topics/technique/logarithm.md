@@ -102,6 +102,7 @@ was additive all along.
 ## Problems
 
 - ● [0030](/solutions/0030/) — Digit Fifth Powers
+- ● [0318](/solutions/0318/) — 2011 Nines
 - ● [0822](/solutions/0822/) — Square the Smallest
 - ● [0957](/solutions/0957/) — Point Genesis
 

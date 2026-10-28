@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Diophantine_ap
 
 - ● [0192](/solutions/0192/) — Best Approximations
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
-- ○ [0318](/solutions/0318/) — 2011 Nines
+- ● [0318](/solutions/0318/) — 2011 Nines
 - ○ [0542](/solutions/0542/) — Geometric Progression with Maximum Sum
 - ○ [0566](/solutions/0566/) — Cake Icing Puzzle
 - ○ [0576](/solutions/0576/) — Irrational Jumps

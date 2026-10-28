@@ -3379,7 +3379,7 @@
       "reference": "https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic",
       "additional-references": ["https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex"],
       "summary": "",
-      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0050_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0097_s0", "p0113_s0", "p0114_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0147_s0", "p0152_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0184_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0205_s0", "p0208_s0", "p0209_s0", "p0211_s0", "p0216_s0", "p0221_s0", "p0238_s0", "p0239_s0", "p0250_s0", "p0259_s0", "p0277_s0", "p0321_s0", "p0387_s0", "p0493_s0", "p0686_s0", "p0686_s1", "p0751_s0", "p0768_s0", "p0788_s0", "p0800_s0", "p0862_s0", "p0872_s0", "p0932_s0", "p0934_s0", "p0957_s0", "p0974_s0"]
+      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0050_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0097_s0", "p0113_s0", "p0114_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0147_s0", "p0152_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0184_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0205_s0", "p0208_s0", "p0209_s0", "p0211_s0", "p0216_s0", "p0221_s0", "p0238_s0", "p0239_s0", "p0250_s0", "p0259_s0", "p0277_s0", "p0318_s0", "p0321_s0", "p0387_s0", "p0493_s0", "p0686_s0", "p0686_s1", "p0751_s0", "p0768_s0", "p0788_s0", "p0800_s0", "p0862_s0", "p0872_s0", "p0932_s0", "p0934_s0", "p0957_s0", "p0974_s0"]
     },
     {
       "slug": "arg-max",
@@ -3667,7 +3667,7 @@
       "reference": "https://en.wikipedia.org/wiki/Catastrophic_cancellation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0247_s0", "p0461_s0"]
+      "refs": ["p0247_s0", "p0318_s0", "p0461_s0"]
     },
     {
       "slug": "cayley-table",
@@ -3703,7 +3703,7 @@
       "reference": "https://en.wikipedia.org/wiki/Closed-form_expression",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0321_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"]
+      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0318_s0", "p0321_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"]
     },
     {
       "slug": "closure-computer-programming",
@@ -4270,7 +4270,7 @@
       "reference": "https://en.wikipedia.org/wiki/Floating-point_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0042_s0", "p0044_s0", "p0063_s0", "p0093_s0", "p0190_s0", "p0235_s0", "p0247_s0", "p0395_s0", "p0800_s0"]
+      "refs": ["p0042_s0", "p0044_s0", "p0063_s0", "p0093_s0", "p0190_s0", "p0235_s0", "p0247_s0", "p0318_s0", "p0395_s0", "p0800_s0"]
     },
     {
       "slug": "floor-and-ceiling-functions",
@@ -4873,7 +4873,7 @@
       "reference": "https://en.wikipedia.org/wiki/Logarithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0822_s0", "p0957_s0"]
+      "refs": ["p0030_s0", "p0318_s0", "p0822_s0", "p0957_s0"]
     },
     {
       "slug": "long-division",
@@ -6061,7 +6061,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the conjugate of an irrational base lies in (0, 1), its power is a vanishing correction, so the floor of the power is an exact integer power sum minus one.",
-      "refs": ["p0721"]
+      "refs": ["p0318", "p0721"]
     },
     {
       "slug": "count-the-complement",
@@ -6151,7 +6151,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When two nearly equal floating-point quantities must be subtracted, rewrite the expression so the same value is produced by an addition instead.",
-      "refs": ["p0247"]
+      "refs": ["p0247", "p0318"]
     },
     {
       "slug": "reduce-before-coding",
