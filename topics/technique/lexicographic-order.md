@@ -109,6 +109,7 @@ order total, so the k-th element is the same on every run.
 - ● [0124](/solutions/0124/) — Ordered Radicals
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 

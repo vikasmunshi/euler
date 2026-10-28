@@ -370,7 +370,7 @@ of crossing it.
 - ○ [0688](/solutions/0688/) — Piles of Plates
 - ○ [0690](/solutions/0690/) — Tom and Jerry
 - ○ [0696](/solutions/0696/) — Mahjong
-- ○ [0698](/solutions/0698/) — 123 Numbers
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ○ [0701](/solutions/0701/) — Random Connected Area
 - ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ○ [0706](/solutions/0706/) — $3$-Like Numbers

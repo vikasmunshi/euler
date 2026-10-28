@@ -127,6 +127,7 @@ integers make the twelfth decimal certain.
 - ○ [0657](/solutions/0657/) — Incomplete Words
 - ○ [0658](/solutions/0658/) — Incomplete Words II
 - ○ [0696](/solutions/0696/) — Mahjong
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ○ [0709](/solutions/0709/) — Even Stevens
 - ○ [0762](/solutions/0762/) — Amoebas in a 2D Grid
 - ○ [0763](/solutions/0763/) — Amoebas in a 3D Grid

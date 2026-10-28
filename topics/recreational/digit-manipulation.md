@@ -249,7 +249,7 @@ about*: when the output is a digit property, base-10 storage is the right trade.
 - ○ [0676](/solutions/0676/) — Matching Digit Sums
 - ○ [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
-- ○ [0698](/solutions/0698/) — 123 Numbers
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ○ [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0711](/solutions/0711/) — Binary Blackboard

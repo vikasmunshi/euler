@@ -122,6 +122,7 @@ saving is real.
 
 - ● [0154](/solutions/0154/) — Exploring Pascal's Pyramid
 - ● [0240](/solutions/0240/) — Top Dice
+- ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0885](/solutions/0885/) — Sorted Digits
 
