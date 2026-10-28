@@ -1,5 +1,5 @@
 <!-- tags: [numpy-slice-assignment] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T21:32Z -->
 # NumPy slice assignment
 
 Most sieves in these solutions do one thing over and over: *update every $k$-th entry of

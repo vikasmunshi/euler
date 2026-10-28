@@ -6945,12 +6945,12 @@
       "path": "technique/numpy-slice-assignment",
       "title": "NumPy slice assignment",
       "status": "final",
-      "written": "2026-10-16T15:58Z",
+      "written": "2026-10-28T21:32Z",
       "solved": 15,
       "problems": 15,
       "tags": ["numpy-slice-assignment"],
       "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0512_s0", "p0641_s0", "p0668_s0", "p0675_s0"],
-      "solved_after": ["p0407", "p0452", "p0512", "p0641", "p0668", "p0675"]
+      "solved_after": []
     },
     {
       "path": "technique/open-addressing",
