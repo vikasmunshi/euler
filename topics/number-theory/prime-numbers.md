@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-10-15T10:20Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -80,7 +80,11 @@ Together those prune a $10^{18}$ range down to about a million partial factorisa
 derives structure before it searches at all. If $p^2 \mid n$ then $p$ would divide both $n - \varphi(n)$
 and $n - 1$, so every candidate is squarefree. Fixing all but the largest prime then makes the
 condition *linear* in that prime, so the program solves for it and tests it rather than looping over
-it.
+it. Problem 516 constrains a *property* of $\varphi(n)$ rather than its value: it must be 5-smooth.
+Factor by factor, $p^{a-1}(p-1)$ must be smooth. So a prime above $5$ may appear only once, and only
+when $p - 1$ is itself a [Hamming number](https://en.wikipedia.org/wiki/Regular_number). There are
+$3429$ Hamming numbers below $10^{12}$, and $543$ of them sit just below a prime. A trillion candidates
+collapse to Hamming numbers times squarefree products of those primes.
 
 [Coprimality](https://en.wikipedia.org/wiki/Coprime_integers) is the same lens with the exponents
 reduced to "shares a prime or not". Problem 351 counts the lattice points visible from the centre of a
@@ -89,6 +93,15 @@ $\gcd(a, b) = \gcd(a, a + b)$, the visible points on ring $s$ number $\varphi(s)
 reduces to one totient sum. Problems 251 and 257 use the same move as a parametrisation tool: split
 off $d = \gcd$, or reduce a ratio to lowest terms $p/q$, and the leftover coprime parts satisfy a
 divisibility condition clean enough to count whole families with a single floor division.
+
+Factorials are where the exponent vector is cheapest to know.
+[Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) gives the exponent of $p$ in
+$n!$ as $\sum_k \lfloor n/p^k \rfloor$ without ever forming $n!$. Problem 675 needs a multiplicative
+function with value $2e + 1$ on $p^e$, evaluated at *every* factorial up to $10^7!$. A fresh product
+over all primes for each factorial would cost about $10^{13}$ steps. But $i!$ differs from $(i-1)!$
+only at the primes dividing $i$. So each step multiplies in a ratio for at most $\omega(i)$ primes,
+and the whole table costs $\sum_p n/p = O(n \log \log n)$, the same bound as the sieve that lists
+those primes.
 
 Unique factorisation also explains the exotic *shapes* the problems name. A
 [truncatable prime](https://en.wikipedia.org/wiki/Truncatable_prime) (problem 37) stays prime as you
@@ -265,7 +278,26 @@ Solved for the $d = 1$ term, each identity becomes a recursion that only ever ev
 the $O(\sqrt v)$ distinct quotients $\lfloor v/d \rfloor$. Sieve directly up to $v^{2/3}$, recurse
 above that, and the cost balances at $O(v^{2/3})$. Problem 351 uses this for the totient sum at
 $10^8$. Problem 319 uses it for Mertens at $10^{10}$: it counts distinct real roots $m^{1/i}$, and
-the Möbius function is just inclusion–exclusion over the primes dividing the exponent.
+the Möbius function is just inclusion–exclusion over the primes dividing the exponent. Problem 512
+shows what the quotient set buys beyond the one total. It needs $\sum \varphi(n)$ over *odd*
+$n \le 5 \times 10^8$ only. Because $\varphi(2m)$ is $\varphi(m)$ or $2\varphi(m)$ by the parity of
+$m$, the odd sum unrolls to $\Phi(N) - \sum_{k \ge 1} \Phi(\lfloor N/2^k \rfloor)$. Every one of
+those arguments is already in the quotient set, so the restriction costs $\log_2 N$ lookups.
+
+The same quotient set counts the primes themselves. The Lucy_Hedgehog sieve, a lightweight cousin of
+the [Meissel–Lehmer algorithm](https://en.wikipedia.org/wiki/Meissel%E2%80%93Lehmer_algorithm),
+starts with $S(v) = v - 1$ at each of the roughly $2\sqrt N$ stored values. Then, for each prime
+$p \le \sqrt N$, it removes the numbers whose smallest prime factor is $p$:
+$S(v) \mathrel{-}= S(\lfloor v/p \rfloor) - S(p - 1)$ for every $v \ge p^2$. After the last prime,
+$S(v) = \pi(v)$ at every stored point, in $O(N^{3/4})$ time and $O(\sqrt N)$ memory. That is
+$\pi(10^{10})$ without a ten-billion-cell sieve. Problem 668 needs exactly that. A number fails
+square-root smoothness when it is $p \cdot m$ with $p$ its largest prime and $m \le p$. So the failures
+number $\sum_{p \le \sqrt N} p + \sum_{p > \sqrt N} \lfloor N/p \rfloor$, and the second sum regroups
+into differences of $\pi$ at the quotients. The [Min_25 sieve](https://codeforces.com/blog/entry/117635)
+generalises the idea to any multiplicative function whose value on primes is a low-degree polynomial
+in $p$. Problem 452 counts ordered tuples with product at most $10^9$, which is the summatory function
+of the $n$-fold divisor function $d_n$. That function equals the constant $n$ on every prime, so the
+primes contribute $n \cdot \pi(m)$. A recursion over smallest prime factors adds the composites.
 
 **Factor or test a single number — [trial division](https://en.wikipedia.org/wiki/Trial_division).**
 When you have one number, not a range, sieving the whole space below it is wasteful. To factor $n$,
@@ -289,12 +321,14 @@ $n - 1 = 2^s \cdot d$ and check, for a chosen base $a$, whether the repeated squ
 multiplies your confidence — and for $n$ below fixed thresholds a *specific small set of bases* makes
 the test **deterministic**, exactly correct with no probability left. Its cost is $O(k \log^3 n)$ for
 $k$ bases: effectively instant even for numbers with dozens of digits, which is why the
-higher-numbered primality problems (and RSA key generation) reach for it rather than a sieve. It is
+higher-numbered primality problems (and RSA key generation) reach for it rather than a sieve.
+
 The most common pattern in the problems is a **hybrid**: sieve the small primes, and run
 Miller–Rabin on the large candidates a search *constructs*. Problem 245 sieves only to $\sqrt N$, then
 tests each solved-for largest prime $q$, which can reach $N/3$. Problem 248 tests $d + 1$ for each
-divisor $d$ of its target, with candidates beyond $3 \times 10^9$. Sieving that far to check a
-thousand numbers would be the single-number mistake on a large scale.
+divisor $d$ of its target, with candidates beyond $3 \times 10^9$. Problem 516 tests $h + 1$ for each
+of its few thousand Hamming numbers $h$, up to $10^{12}$. Sieving that far to check a few thousand
+numbers would be the single-number mistake on a large scale.
 
 ## Arithmetic modulo a prime
 
@@ -313,6 +347,12 @@ $p - 1$, and that one structural fact answers a whole class of counting question
   Chinese Remainder Theorem the count is multiplicative. Each prime $p \equiv 1 \pmod 3$ contributes a
   factor $3$, and so does the prime $3$ when $9 \mid n$; every other prime contributes $1$. So "exactly $242$ roots besides $1$"
   becomes "exactly five such factors", and the rest is a pruned enumeration.
+- **Consecutive integers split the prime powers.** Problem 407 wants the largest $a < n$ with
+  $a^2 \equiv a \pmod n$. That means $n \mid a(a - 1)$, and $a$ and $a - 1$ are coprime, so each
+  prime power of $n$ divides one side entirely. Every [unitary](https://en.wikipedia.org/wiki/Unitary_divisor)
+  split $n = d e$ yields one idempotent by CRT, $2^{\omega(n)}$ in all. The search over $a$ for every
+  $n \le 10^7$ becomes a sweep over coprime pairs $(d, e)$ with $de \le N$. The smaller factor is at
+  most $\sqrt N$, so inverting modulo it lets one table of inverses serve every partner.
 - **Binomials and inverses.** Modulo a prime, [Lucas's theorem](https://en.wikipedia.org/wiki/Lucas%27s_theorem)
   computes $\binom{n}{k}$ digit by digit in base $p$. Problem 365 reduces a coefficient with nine
   billion digits to one residue per prime, then recombines triples of primes by CRT. Every inverse it
@@ -376,12 +416,16 @@ that makes some larger quantity computable:
 - **See a multiplicative quantity** — a divisor count, a totient, a coprimality condition, a "product
   of two primes" — and reach for the factorisation. The exponent vector is the object you actually
   manipulate; the answer is a product over the primes dividing $n$. When the *value* is given and $n$
-  is wanted, search the factorisations of the target (problems 241, 248), not the integers.
+  is wanted, search the factorisations of the target (problems 241, 248, 516), not the integers. Over
+  a run of factorials, update the exponents incrementally rather than refactoring (problem 675).
 - **See a congruence summed over a huge range** — and consider reordering the sum to run over the
   primes. The cyclic group modulo $p$ answers "how many residues" in $O(1)$ (problem 421). CRT
-  multiplies those counts across prime powers (problem 272).
-- **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$ — and a sieve will not reach.
-  Use the quotient-set recursion at $O(n^{2/3})$ (problems 319, 351).
+  multiplies those counts across prime powers (problem 272) and builds one solution per coprime split
+  (problem 407).
+- **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$, $\pi(x)$ — and a sieve will
+  not reach. Work on the quotient set: the recursion at $O(n^{2/3})$ for $\Phi$ and $M$ (problems 319,
+  351, 512), Lucy_Hedgehog at $O(n^{3/4})$ for $\pi$ (problem 668), and Min_25 for a multiplicative
+  function that is simple on primes (problem 452).
 - **Need a bound or a density** — how many primes below $N$, how large the $n$-th prime, how many
   semiprimes in a range — and the prime number theorem ($\pi(x) \sim x/\ln x$, $p_n \sim n \ln n$) is
   your estimate. Use it to *size* a sieve, not to replace an exact count.
