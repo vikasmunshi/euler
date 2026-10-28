@@ -1071,12 +1071,12 @@
       "path": "domain/divisor-function",
       "title": "Divisor function",
       "status": "final",
-      "written": "2026-10-14T07:14Z",
+      "written": "2026-10-28T21:38Z",
       "solved": 20,
       "problems": 43,
       "tags": ["divisor-function"],
       "refs": ["p0012", "p0021", "p0023", "p0095", "p0108", "p0110", "p0153", "p0157", "p0176", "p0179", "p0211", "p0241", "p0378", "p0379", "p0401", "p0420", "p0439", "p0452", "p0474", "p0485", "p0500", "p0501", "p0548", "p0561", "p0565", "p0598", "p0608", "p0632", "p0636", "p0641", "p0646", "p0650", "p0675", "p0699", "p0722", "p0723", "p0735", "p0738", "p0827", "p0840", "p0861", "p0920", "p0956"],
-      "solved_after": ["p0401", "p0452", "p0641", "p0675"]
+      "solved_after": []
     },
     {
       "path": "domain/divisor-summatory-function",
