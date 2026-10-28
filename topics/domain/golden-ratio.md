@@ -1,5 +1,5 @@
 <!-- tags: [golden-ratio] -->
-<!-- status: final -->
+<!-- status: final 2026-10-28T08:05Z -->
 # Golden ratio
 
 The [golden ratio](https://en.wikipedia.org/wiki/Golden_ratio) $\varphi = (1 + \sqrt5)/2 \approx

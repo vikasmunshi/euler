@@ -1598,8 +1598,8 @@
     {
       "path": "domain/golden-ratio",
       "title": "Golden ratio",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:05Z",
       "solved": 3,
       "problems": 8,
       "tags": ["golden-ratio"],
