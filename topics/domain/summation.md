@@ -296,7 +296,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0733](/solutions/0733/) — Ascending Subsequences
 - ○ [0735](/solutions/0735/) — Divisors of $2n^2$
 - ○ [0737](/solutions/0737/) — Coin Loops
-- ○ [0739](/solutions/0739/) — Summation of Summations
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ○ [0747](/solutions/0747/) — Triangular Pizza
 - ○ [0756](/solutions/0756/) — Approximating a Sum
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation

@@ -125,6 +125,7 @@ the order discovered at run time by a priority queue instead of fixed by the geo
 - ○ [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ○ [0662](/solutions/0662/) — Fibonacci Paths
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ○ [1005](/solutions/1005/) — Median Prime List
 
 <!-- /problems -->

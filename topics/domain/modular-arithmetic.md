@@ -323,7 +323,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls
 - ○ [0733](/solutions/0733/) — Ascending Subsequences
 - ○ [0734](/solutions/0734/) — A Bit of Prime
-- ○ [0739](/solutions/0739/) — Summation of Summations
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ○ [0746](/solutions/0746/) — A Messy Dinner
 - ○ [0747](/solutions/0747/) — Triangular Pizza
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking

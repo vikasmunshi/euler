@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lucas_number>.
 
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0473](/solutions/0473/) — Phigital Number Base
+- ● [0739](/solutions/0739/) — Summation of Summations
 
 <!-- /problems -->

@@ -251,6 +251,7 @@ both slower and harder to read.
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour

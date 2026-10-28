@@ -342,6 +342,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0700](/solutions/0700/) — Eulercoin
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
+- ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0757](/solutions/0757/) — Stealthy Numbers
