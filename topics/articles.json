@@ -2313,8 +2313,8 @@
     {
       "path": "domain/meissel-lehmer-algorithm",
       "title": "Meissel\u2013Lehmer algorithm",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-28T08:01Z",
       "solved": 3,
       "problems": 3,
       "tags": ["meissel-lehmer-algorithm"],
