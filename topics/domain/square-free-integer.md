@@ -1,5 +1,5 @@
 <!-- tags: [square-free-integer] -->
-<!-- status: final 2026-10-17T07:05Z -->
+<!-- status: final -->
 # Square-free integer
 
 A [square-free integer](https://en.wikipedia.org/wiki/Square-free_integer) is one that no prime
@@ -75,6 +75,25 @@ enumerating [powerful numbers](https://en.wikipedia.org/wiki/Powerful_number) ($
 square-free) and their relatives: **pin the leftover exponents to $\{0,1\}$ by demanding a
 square-free factor, and the parametrisation becomes a bijection you can loop over.**
 
+Problem 641 takes the device one step further and makes the square-free factor carry a *sign*.
+Die $k$ in a row of $n$ dice ends on 1 when its [divisor count](/topics/domain/divisor-function)
+satisfies $d(k) \equiv 1 \pmod 6$. Oddness forces $k = m^2$, and $d(m^2) = \prod (2a_i + 1)$ is
+$\equiv 1 \pmod 3$ exactly when no exponent $a_i$ is $\equiv 1 \pmod 3$ and an even number are
+$\equiv 2$. Such $m$ factor uniquely as $c^3 q^2$ with $q$ square-free. The primes of $q$ are the
+ones whose exponents are $\equiv 2$, and "an even number of them" is just $\mu(q) = +1$. The count
+becomes a lattice count of pairs $(c, q)$ under $c^3 q^2 \le \sqrt n$, and the long tail in $q$
+needs the number of square-free $q \le x$ *of a given parity*. That is one line once you notice
+that $\mu$ is $\pm 1$ on square-free numbers and $0$ elsewhere:
+
+$$\#\{q \le x : \mu(q) = \pm 1\} \;=\; \tfrac12\big(Q(x) \pm M(x)\big),$$
+
+with $M$ the [Mertens function](/topics/technique/mertens-function-application). $Q$ comes from
+the identity above, $M$ from its own sub-linear recursion, and the two share one $\mu$ sieve. The
+split between "small $q$, loop over them" and "small $c$, count the $q$" is the
+[hyperbola method](/topics/technique/dirichlet-hyperbola-method). Whenever a condition reads "an
+even (or odd) number of distinct primes", rewrite it as $\mu = \pm 1$ and count it as half of
+$Q \pm M$.
+
 ## As a filter
 
 Problem 357 asks for $n$ such that $d + n/d$ is prime for every divisor $d$. If $p^2 \mid n$, take
@@ -107,7 +126,9 @@ The algorithms match one for one. The differences come from what each language m
 - **The square root.** Python has `math.isqrt`, which is exact. C takes `sqrt`/`sqrtl` and then
   nudges the result up and down with integer checks (193, 745). Near $2^{50}$ a floating-point
   root can be off by one, and an off-by-one at $\sqrt x$ silently drops or double-counts the last
-  $\mu(d)$ term.
+  $\mu(d)$ term. In 641 the input $10^{36}$ does not fit in 64 bits at all, so C parses it into an
+  `unsigned __int128` and takes the root there. Everything after $\sqrt n = 10^{18}$ fits in a
+  `uint64_t` again.
 - **Dedup without a set.** 203 sums *distinct* square-free entries, since $\binom{n}{k}$ repeats
   across rows. Python drops them into a `set[int]`. C has no hash set, so it collects the values
   as GMP `mpz_t`s, sorts them, and sums each run of equal values once. Sort-then-unique is the
