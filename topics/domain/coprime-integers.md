@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers] -->
-<!-- status: final 2026-10-15T10:55Z -->
+<!-- status: final -->
 # Coprime integers
 
 Two integers are [coprime](https://en.wikipedia.org/wiki/Coprime_integers) when
@@ -39,7 +39,17 @@ same condition. The underlying fact is local at each prime: a prime power dividi
 coprime factors lies wholly inside one factor — it can never straddle both. Problem 932 is that
 sentence made into an algorithm: it needs $m \mid s(s-1)$, and because consecutive integers are
 coprime, each prime power of $m$ independently chooses which of $s$ and $s-1$ absorbs it, giving
-$2^k$ residue classes reassembled by CRT instead of a search over $s$. Problem 834 factors $n$ and
+$2^k$ residue classes reassembled by CRT instead of a search over $s$. Problem 407 is the same
+condition in its general form: $a^2 \equiv a \pmod n$ reads $n \mid a(a-1)$, so the
+[idempotents](https://en.wikipedia.org/wiki/Idempotent_(ring_theory)) of $\mathbb{Z}/n\mathbb{Z}$
+correspond one-to-one with the coprime splits $n = de$ — the
+[unitary divisors](https://en.wikipedia.org/wiki/Unitary_divisor) — and there are
+$2^{\omega(n)}$ of them. Wanting the largest idempotent for *every* $n \le N$, it turns the loop
+inside out: rather than factor each $n$, it enumerates the coprime pairs $(d,e)$ with $de \le N$
+and solves each by CRT. One factor of every pair is below $\sqrt N$, so inverting modulo the small
+one lets a single inverse table serve all its partners — and storing $0$ as the "inverse" of a
+non-unit makes a non-coprime pair collapse to the trivial idempotents $0$ and $1$, so the
+coprimality test is never written at all. Problem 834 factors $n$ and
 $n-1$ separately for the same reason; problem 127 uses it on the radical
 ($\operatorname{rad}(abc) = \operatorname{rad}(a)\operatorname{rad}(b)\operatorname{rad}(c)$ once
 the triple is pairwise coprime), and problem 694 uses it to give every cube-full number the unique
