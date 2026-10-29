@@ -1,5 +1,5 @@
 <!-- tags: [irrational-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:50Z -->
 # Irrational number
 
 An [irrational number](https://en.wikipedia.org/wiki/Irrational_number) is a real number that

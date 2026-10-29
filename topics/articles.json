@@ -1962,12 +1962,12 @@
       "path": "domain/irrational-number",
       "title": "Irrational number",
       "status": "final",
-      "written": "2026-10-28T08:25Z",
+      "written": "2026-10-29T07:50Z",
       "solved": 4,
       "problems": 12,
       "tags": ["irrational-number"],
       "refs": ["p0080", "p0318", "p0517", "p0558", "p0566", "p0576", "p0585", "p0656", "p0721", "p0731", "p0911", "p0950"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "domain/isoperimetric-inequality",
