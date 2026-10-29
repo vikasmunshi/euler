@@ -1,5 +1,5 @@
 <!-- tags: [square-number] -->
-<!-- status: final 2026-10-14T07:11Z -->
+<!-- status: final -->
 # Square number
 
 A [square number](https://en.wikipedia.org/wiki/Square_number) is $k^2$ for some integer $k$ — the
@@ -80,7 +80,14 @@ page come from one of four identities.
   by $2k + 1$. That gap is why the corners of problem 28's and problem 58's number spirals are
   quadratics in the ring index: ring $k$ ends at $(2k + 1)^2$, and the other three corners sit
   $2k$, $4k$ and $6k$ below it. It also bounds the search in problem 46: for $n = p + 2k^2$ only
-  $k \le \sqrt{n/2}$ are worth trying.
+  $k \le \sqrt{n/2}$ are worth trying. The gap is also how a recurrence defined by squares gets
+  solved. In problem 359 each new guest on a hotel floor is the number that brings the sum with
+  the previous guest up to the next square: $P_r + P_{r+1} = (s + r)^2$. Subtract two consecutive
+  instances and the squares nearly cancel, $P_{r+2} - P_r = 2(s + r) + 1$, a step that is linear
+  in $r$. Summing those steps gives every room's occupant in closed form, so a greedy process that
+  could never be simulated at the problem's scale becomes a single formula. Floor 1 is the
+  smallest example of the same pattern: it fills with the triangular numbers, because
+  $T_{k-1} + T_k = k^2$.
 - **Sums of two squares.** $a^2 + b^2 = c^2$ is the [Pythagorean](/topics/domain/pythagorean-triple)
   triple (problems 86 and 218), and which $n$ are $a^2 + b^2$ at all is decided by their prime
   factorisation ([sum of two squares theorem](/topics/domain/sum-of-two-squares-theorem)). Problem 86
