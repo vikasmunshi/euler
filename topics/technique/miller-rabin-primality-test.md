@@ -1,5 +1,5 @@
 <!-- tags: [miller-rabin-primality-test] -->
-<!-- status: final 2026-10-16T15:21Z -->
+<!-- status: final -->
 # Miller–Rabin primality test
 
 The [Miller–Rabin primality test](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test)
@@ -9,7 +9,7 @@ appearing below. The [Sieve of Eratosthenes](/topics/technique/sieve-of-eratosth
 tool when you want *every* prime under a bound you can afford to allocate; Miller–Rabin is what you
 reach for when the candidates are too large to sieve to, or too scattered to be worth sieving
 through — a handful of digit patterns, one cofactor left after trial division, six offsets around
-`n²`, the `d + 1` for each divisor `d` of a target.
+`n²`, the `d + 1` for each divisor `d` of a target, the pieces a factoring routine has split off.
 
 ## The idea
 
@@ -64,6 +64,7 @@ test a proof rather than a bet:
 | Witness set | Proven correct for all `n <` |
 | --- | --- |
 | `2, 3, 5, 7` | 3 215 031 751 (≈3.2·10⁹) |
+| `2, 3, 5, 7, 11, 13, 17` | 341 550 071 728 321 (≈3.4·10¹⁴) |
 | `2, 3, 5, 7, 11, 13, 17, 19, 23` | 3 825 123 056 546 413 051 (≈3.8·10¹⁸) |
 | `2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37` | 318 665 857 834 031 151 167 461 (≈3.2·10²³) |
 | `2, 325, 9375, 28178, 450775, 9780504, 1795265022` | 2⁶⁴ |
@@ -75,7 +76,8 @@ pseudoprime to the first `k` prime bases; each threshold above is one of those n
 
 The engineering decision, then, is: **bound your candidates, pick the smallest set that covers
 them, and stop there.** Problem 293 and problem 487 both cap out near 3.2·10⁹ and use four bases;
-problem 245 tests cofactors that can approach 2⁶⁴ and uses Sinclair's seven; the digit-pattern
+problem 516 tests candidates just above 10¹² and takes the seven-prime row, the smallest that
+covers them; problem 245 tests cofactors that can approach 2⁶⁴ and uses Sinclair's seven; the digit-pattern
 problems (111, 200, 387) go wider and take the twelve small primes. Using twelve bases where four
 suffice is a 3× tax on the hottest loop in the program.
 
@@ -114,10 +116,45 @@ first:
    3·10⁹, so a sieve would allocate billions of entries just to answer about fifteen hundred
    questions. This is the case where Miller–Rabin clearly beats sieving: the candidates are few,
    large, and come from the problem's algebra rather than from an interval.
+   Problem 516 has the same shape at a larger scale. A prime `q > 5` can divide an `n` whose totient
+   is 5-smooth only if `q − 1` is itself 5-smooth, so the candidates are `h + 1` for the
+   [Hamming numbers](https://en.wikipedia.org/wiki/Regular_number) `h ≤ 10¹²`. There are only 3429
+   of those, and 543 of the `h + 1` are prime. A sieve to 10¹² is out of the question, while 3429
+   tests take a few milliseconds.
 
 The general shape is a funnel: cheap arithmetic filters at the top, the modular exponentiation only
 at the bottom. If your profile shows Miller–Rabin dominating, the fix is usually a better filter,
 not a faster test.
+
+## The stopping rule for factoring
+
+Miller–Rabin never hands you a factor, but it is half of the standard way to get one. The other
+half is [Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm). Rho finds *some*
+non-trivial divisor of a composite in about `O(n^¼)` steps. It gives no guarantee that the divisor
+is prime, and run on a prime it never finishes. So the factoring loop keeps a stack of unresolved
+pieces. For each piece, Miller–Rabin decides what happens next: a prime goes into the
+factorisation, and a composite goes to rho and is split into two more pieces:
+
+```python
+while stack:
+    m = stack.pop()
+    if is_prime(m):
+        factors.add(m)
+    else:
+        d = pollard_rho(m)
+        stack += [d, m // d]
+```
+
+Problems 271 and 443 both use this loop, each for its own reason. Problem 271 has to factor one
+17-digit modulus (`13082761331670030`, given in the statement). Its cube roots of unity are then
+built prime power by prime power and recombined through the CRT. Trial division up to 1000
+removes the small primes, and the rho-plus-Miller–Rabin loop handles the cofactor. Problem 443
+needs a fresh factorisation of `d − 1` at each of the sequence's gcd jumps. The jumps grow
+geometrically, so there are only `O(log n)` of them, but the numbers being factored grow too, and
+trial division to their square roots would dominate the run. In both problems the test is cheap
+compared with rho, so its cost hardly matters. What matters is that it is *deterministic*. A
+false "prime" would put a composite into the factorisation without any error, and a false
+"composite" would send rho into a loop that never ends.
 
 ## Details that bite
 
@@ -132,22 +169,23 @@ not a faster test.
   for a 64-bit `n` overflows once `n` passes √2⁶³ ≈ 3.04·10⁹, which is a modulus that easily fits
   in an `int64_t`. Problem 248's largest candidate is about 3.11·10⁹, only just over that line. Its
   C port therefore does every modular multiply through an `__int128` product,
-  `(long long)((__int128)a * b % m)`. So do the C solutions here for problems 111, 131, 293 and 487,
+  `(long long)((__int128)a * b % m)`. So do the C solutions here for problems 111, 131, 293, 487 and 516,
   among others. Going unsigned only raises the limit to 2³². The test gives no sign of the overflow: it just
   returns the wrong verdict. Whenever a candidate can exceed about 3·10⁹, widen the multiply.
 - **Read the witness table one row at a time.** The thresholds in
   [A014233](https://oeis.org/A014233) are indexed by how many prime bases you use. Twelve primes
   (up to 37) are proven correct below about 3.2·10²³. The bound of about 3.3·10²⁴ belongs to
-  thirteen primes, which adds 41. The two are easy to swap in a docstring. That costs nothing while
-  the candidates stay below 10⁹ or 10¹⁰. It matters a great deal when the claim is what tells you
+  thirteen primes, which adds 41. The two are easy to swap in a docstring: the Python solutions to
+  problems 271 and 443 both claim the larger bound for twelve bases. That costs nothing while
+  the candidates stay well inside 64 bits, as theirs do. It matters a great deal when the claim is what tells you
   the test is safe for larger candidates.
 - **Build tables inside `solve()`.** A wheel or a small sieve belongs in the function, sized to the
   inputs — not at module level. With `--runs=N` the harness times repeated `solve()` calls, and
   anything built at import is free from the second run onward, which flatters the benchmark.
 - **`is_prime` is not `factor`.** Miller–Rabin says composite without saying *why*; it hands you no
-  factor. When a problem needs the factorisation rather than the verdict, this is the wrong tool —
-  reach for [Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm) or a
-  smallest-prime-factor sieve.
+  factor. When a problem needs the factorisation rather than the verdict, the test alone is the
+  wrong tool. Reach for a smallest-prime-factor sieve when the range is small, or for Pollard's rho
+  with Miller–Rabin as its stopping rule (above) when it is not.
 - **The determinism has a ceiling.** The fixed witness sets are verified up to their stated bound
   and nowhere beyond it. If a candidate can exceed the bound you designed for, either widen the set
   or accept the probabilistic reading — silently running four bases against a 10³⁰ candidate is a
