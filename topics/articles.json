@@ -4107,12 +4107,12 @@
       "path": "number-theory/primes-in-pascals-triangle",
       "title": "Primes in Pascal\u2019s triangle",
       "status": "final",
-      "written": "2026-10-14T07:42Z",
+      "written": "2026-10-29T08:06Z",
       "solved": 16,
       "problems": 20,
       "tags": ["lucass-theorem", "kummers-theorem", "legendres-formula", "p-adic-valuation"],
       "refs": ["p0148", "p0154", "p0160", "p0203", "p0231", "p0242", "p0288", "p0365", "p0383", "p0429", "p0484", "p0549", "p0650", "p0675", "p0704", "p0712", "p0779", "p0792", "p0834", "p0926"],
-      "solved_after": ["p0675"]
+      "solved_after": []
     },
     {
       "path": "number-theory/repunits-and-multiplicative-order",

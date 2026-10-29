@@ -1,5 +1,5 @@
 <!-- tags: [lucass-theorem, kummers-theorem, legendres-formula, p-adic-valuation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T08:06Z -->
 # Primes in Pascal’s triangle
 
 A surprising number of problems ask something about a [binomial
