@@ -1,5 +1,5 @@
 <!-- tags: [prime-factorization] -->
-<!-- status: final 2026-10-16T07:16Z -->
+<!-- status: final -->
 # Prime factorization
 
 [Prime factorization](https://en.wikipedia.org/wiki/Integer_factorization) is what an integer
@@ -64,12 +64,18 @@ once you have the vector the function is a product over $k$ terms rather than a 
 | divisor sum $\sigma(n)$ | $\prod \frac{p_i^{e_i+1} - 1}{p_i - 1}$ | 650 |
 | [totient](/topics/domain/eulers-totient-function) $\varphi(n)$ | $n \prod \left(1 - \frac{1}{p_i}\right)$ | 69, 248, 342 |
 | [radical](/topics/domain/radical-of-an-integer) $\mathrm{rad}(n)$ | $\prod p_i$ | 124 |
+| $\sum_{d \mid n} 2^{\omega(d)}$ | $\prod (2e_i + 1)$ | 675 |
 | solutions of $x^3 \equiv 1 \pmod n$ | $3^{\#\{p_i \equiv 1 \ (3)\}}$, times $3$ if $9 \mid n$ | 272 |
 
 Two habits follow from that table. The first is that "count the divisors of $n$" is never a
 divisor-counting loop; it is a factorization and a product. Problem 108 goes one step further and
 never forms its number at all — the question is $\tau(n^2)$, and squaring $n$ means doubling every
-exponent, so $\tau(n^2) = \prod (2e_i + 1)$ falls out of $n$'s own vector.
+exponent, so $\tau(n^2) = \prod (2e_i + 1)$ falls out of $n$'s own vector. That same product turns
+up in problem 675 under a different name: $\sum_{d \mid n} 2^{\omega(d)}$ is a
+[Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution) of two multiplicative
+functions, and on a prime power $p^e$ it is $1 + 2e$. Written as sums the two look unrelated;
+written on the vector they are visibly one function, $\tau(n^2)$ — and recognising that is the kind
+of identity the vector hands you for free.
 
 The second is that multiplicative is *not* completely multiplicative: the identity needs the
 arguments coprime, and getting that coprimality is often the design move. Problem 12 wants
@@ -126,6 +132,14 @@ never assembling $N$. Problem 549 asks for the least $m$ with $n \mid m!$, and b
 constraint $v_p(m!) \ge e_p$ is independent for each prime power, the answer is a maximum over
 prime powers — reducing $10^8$ separate questions to a table indexed by $p^e$.
 
+When the question runs over a whole *sequence* of factorials, even Legendre per term is too much:
+problem 675 needs $\prod_p (2 e_p(i!) + 1)$ for every $i$ up to $10^7$, and re-evaluating it costs
+$\pi(i)$ factors each time. But $i!$ and $(i-1)!$ have vectors that differ only at the primes
+dividing $i$, so the product changes by at most $\omega(i)$ ratios — replace the factor
+$2(e - v) + 1$ by $2e + 1$ wherever $p^v \parallel i$. Under a prime modulus those ratios are
+modular inverses, and the whole sequence becomes one running product. Maintain the vector
+incrementally, and update the function only on the coordinates that moved.
+
 If a problem's numbers are factorials, binomials, or products of them, do not reach for
 [bignums](/topics/technique/arbitrary-precision-arithmetic). Reach for valuations.
 
@@ -164,7 +178,7 @@ them, and each one you build already satisfies the condition.
   filtering $10^9$ even numbers, it generates the few thousand numbers of the form
   $2^{a_1} 3^{a_2} 5^{a_3} \cdots$ directly. Problem 347 fixes the support at exactly two primes,
   and uniqueness of factorization then guarantees the resulting values are distinct with no
-  deduplication needed. Problems 516, 668 and 682 constrain the support by smoothness.
+  deduplication needed. Problems 668 and 682 constrain the support by smoothness.
 - **Split the vector into a constrained part and a free part.** In problem 272 only the primes
   $\equiv 1 \pmod 3$ (and $9$) are constrained — exactly five of them — while the rest of $n$ is a
   cofactor drawn from the remaining primes. So $n = A \cdot m$ uniquely, a depth-first search
@@ -175,7 +189,14 @@ them, and each one you build already satisfies the condition.
   $\varphi(n) = 13!$. Since $\varphi(n) = \prod p_i^{e_i - 1}(p_i - 1)$, each factor divides the
   target, so a prime may appear in $n$ only when $p - 1$ divides $13!$ — a small candidate
   alphabet, and the search becomes an enumeration of factorizations of the target rather than of
-  values of $n$. Problems 342 and 533 reason backwards from a condition on $\varphi$ and on the
+  values of $n$. Problem 516 combines this with the split above: it wants every $n \le 10^{12}$
+  whose $\varphi(n)$ is [5-smooth](/topics/domain/smooth-number), and reading the condition factor
+  by factor says that $2, 3, 5$ may appear to any power, while any larger prime $q$ must appear
+  exactly once (else $q \mid \varphi(n)$) with $q - 1$ itself 5-smooth. So
+  $n = h \cdot q_1 \cdots q_k$ — a [Hamming number](https://en.wikipedia.org/wiki/Regular_number)
+  times a square-free product of a few hundred
+  "good" primes — and the search walks those products, answering the free Hamming part with a
+  prefix sum. Problems 342 and 533 reason backwards from a condition on $\varphi$ and on the
   Carmichael function in the same spirit — the condition constrains the factorization, and the
   factorization is what you enumerate.
 - **Use exponent parity as an argument.** A prime above $\sqrt{B}$ can appear at most once among
