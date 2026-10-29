@@ -1,5 +1,5 @@
 <!-- tags: [trial-division] -->
-<!-- status: final 2026-10-16T15:25Z -->
+<!-- status: final -->
 # Trial division
 
 [Trial division](https://en.wikipedia.org/wiki/Trial_division) is the oldest factoring
@@ -80,7 +80,11 @@ the loop exits almost immediately. Trial division is cheap exactly when the numb
 small factors and expensive exactly when it does not — which is why it survives inside
 otherwise sophisticated solutions whenever the numbers being factored are known to be
 small or smooth. Problem 248 factorises `13!` this way without apology; problems 545 and
-932 use it for a target and a step and nothing else.
+932 use it for a target and a step and nothing else. Problem 359 is the extreme case. Its
+input is around `7·10¹³`, so the worst-case bound is over eight million divisions, but the
+number is `2²⁷ · 3¹²`. Once the 2s and 3s are peeled off the remainder is 1, the
+`d * d <= n` test fails at `d = 5`, and the whole factorisation takes a few dozen
+divisions.
 
 ## What you get beyond the verdict
 
@@ -108,7 +112,9 @@ want the prime structure.
 
 The two combine, too. If you peel first, you can build the full divisor list from the
 exponent vector: start from `[1]`, and for each `pᵉ` you strip, multiply every divisor so
-far by `1, p, …, pᵉ`. Problem 251 does exactly this, dividing only by sieved primes. Pairing
+far by `1, p, …, pᵉ`. Problem 251 does exactly this, dividing only by sieved primes, and
+problem 359 does it to list the 364 floor/room splits of its smooth input, where pairing
+would have swept millions of candidates to find them. Pairing
 always costs `√n` steps, even when `n` is smooth. Peel-and-expand costs the factorisation
 plus `τ(n)` multiplications, and against a prime list the factorisation stops as soon as
 `p² > remainder`. When you need the divisors of many unrelated large numbers, that
@@ -138,7 +144,14 @@ Trial division is the default until one of three things is true.
   most composites before any expensive test runs.
 - **You need the factors of a large number.** Trial division cannot reach a 60-bit
   semiprime. That is [Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm)
-  territory, or a proper sieve method.
+  territory, or a proper sieve method. Even there trial division keeps a job, as a front
+  end with a **fixed bound** rather than `√n`. Problem 271 divides by every `d` below
+  1000, and only then passes whatever cofactor is left to Miller–Rabin and Pollard's rho.
+  Rho has a hard time with tiny factors and repeated factors. A thousand cheap divisions
+  remove both, so rho only ever sees a cofactor whose prime factors are all large. Capping
+  the loop also means its cost no longer depends on `n`. The main input there is a
+  primorial, so the front end factors it completely and rho never runs. The harder test
+  case, `63` times two nine-digit primes, is the one that reaches rho.
 
 ## Details that bite
 
