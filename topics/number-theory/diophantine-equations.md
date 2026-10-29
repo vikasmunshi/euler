@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation, diophantine-equation] -->
-<!-- status: final 2026-10-15T10:57Z -->
+<!-- status: final -->
 # Diophantine Equations
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a polynomial
@@ -92,6 +92,20 @@ quadratic irrational the terms are eventually periodic, which is exactly what ma
 finite. One specific convergent — chosen by the parity of the period length — is the fundamental
 solution, so you generate one periodic block rather than testing values.
 
+**Read a self-referential equation as a fixed point.** Some equations put the unknown on both
+sides in incompatible roles, so no algebra isolates it. Problem 455 asks, for each base $n$, for the
+$x < 10^9$ whose power $n^x$ ends in the digits of $x$ itself. That is the exponential congruence
+$n^x \equiv x \pmod{10^9}$, and scanning a billion candidates per base is hopeless. Read it instead
+as $x = T_n(x)$ with $T_n(x) = n^x \bmod 10^9$. Iterating $T_n$ from $x = 1$ builds the
+[power tower](https://en.wikipedia.org/wiki/Tetration) $n, n^n, n^{n^n}, \dots$ modulo $10^9$.
+Such towers become eventually constant, because each level only matters modulo the
+[Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function) of the level below, and
+the chain $\lambda(m), \lambda(\lambda(m)), \dots$ shrinks to $1$ in a few steps. The limit is a
+solution by construction, and a dozen rounds settle every base. The cheap case analysis still comes
+first: a valuation argument rules out every multiple of ten before any iteration. Unlike Pell, this
+is not a structure the textbooks hand you. Verify on scaled-down moduli that the limit really is the
+solution the problem wants before trusting it at full size.
+
 ## The sibling: Diophantine approximation
 
 Diophantine approximation is the same subject read the other way. Instead of asking which integers
@@ -105,6 +119,19 @@ on best and ambiguous approximations, for instance) are built on exactly this co
 often with the [Stern–Brocot tree](https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree) or
 [mediants](https://en.wikipedia.org/wiki/Mediant_(mathematics)) as the concrete way to walk between
 approximations of increasing denominator.
+
+The same conjugate pairs explain why some powers of irrationals land almost exactly on integers.
+Problem 318 looks at $(\sqrt p + \sqrt q)^{2n}$ and asks how soon its fractional part starts with
+2011 nines. Let $x = \sqrt p + \sqrt q$ and $y = \sqrt q - \sqrt p$. Then $x^2$ and $y^2$ are
+[conjugates](https://en.wikipedia.org/wiki/Conjugate_(square_roots)) $(p+q) \pm 2\sqrt{pq}$, so
+$x^{2n} + y^{2n}$ is an integer, just as Pell solutions come from $(x_1 + y_1\sqrt D)^k$ and its
+conjugate. When $0 < y < 1$ the fractional part of $x^{2n}$ is exactly $1 - y^{2n}$, so the count of
+nines has a closed form in $\log y$. The algebra is short, and the hard part is numerical. Near the
+top of the range $y$ sits just under $1$. Computing $\sqrt q - \sqrt p$ and then taking its logarithm
+cancels away most of the significant digits. The solution rewrites $1 - y$ as a fraction with an
+exact integer numerator and a denominator of positive terms, feeds it to `log1p`, and keeps the
+qualifying test $\sqrt q < \sqrt p + 1$ in pure integers as $(q - p - 1)^2 < 4p$. A ceiling that
+lands within a hair of an integer is recomputed in arbitrary precision.
 
 ## When nothing reduces
 
@@ -138,7 +165,10 @@ stop searching and look for structure:
   pairs. Count each family with $\lfloor N/L \rfloor$ or a residue-class count, and never list its
   members (problems 251, 257).
 - Is the question really about **best rational approximation**? Reach for continued-fraction
-  convergents.
+  convergents. If it is about powers drifting toward integers, pair each irrational with its
+  conjugate so the sum is an integer (problem 318).
+- Does the unknown appear as **both exponent and residue**? Treat the equation as a fixed point and
+  iterate, and check on small moduli that the limit is the solution you want (problem 455).
 - **Nothing reduces?** Then it is a search, so choose its direction by constant factors as well as
   exponent. Generating candidates and filtering them can beat testing targets when it avoids roots
   and vectorises (problem 348).
@@ -146,6 +176,9 @@ stop searching and look for structure:
   unbounded, but a C port is not. The C port of problem 251 silently wrapped a product used only in a
   bound test, and its count came out too high. Compare against a precomputed integer-square-root cap
   instead of forming the product, and keep equality tests exact rather than within a tolerance.
+  Floating point has the same failure when two close quantities are subtracted. Square inequalities
+  into integer tests, and rearrange near-cancelling differences before taking logarithms (problem
+  318).
 
 The recurring mistake is to treat these as search problems by default, looping over candidate $x$ up
 to some bound and testing the equation. For a genuine Diophantine problem that bound is
