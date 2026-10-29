@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation] -->
-<!-- status: final 2026-10-28T09:32Z -->
+<!-- status: final -->
 # Diophantine approximation
 
 [Diophantine approximation](https://en.wikipedia.org/wiki/Diophantine_approximation) asks how
@@ -91,9 +91,19 @@ this is a [Pisot–Vijayaraghavan number](https://en.wikipedia.org/wiki/Pisot%E2
 an algebraic integer greater than 1 whose conjugates all lie inside the unit circle. Almost every
 other real number has powers spread evenly mod 1
 ([Koksma](https://en.wikipedia.org/wiki/Equidistributed_sequence#Metric_theorems)). The problem is
-designed around the exceptions. Which pairs qualify, $\sqrt q - \sqrt p < 1$, squares down to an
-integer test. How many nines a power has is the exponent at which $y^{2n}$ drops below a power of
-ten, so it is a ratio of logarithms, not a big-number expansion.
+designed around the exceptions. Which pairs qualify, $\sqrt q - \sqrt p < 1$, squares down to the
+integer test $(q - p - 1)^2 < 4p$. The degenerate case looks after itself: if $pq$ is a perfect
+square then $p = ka^2$, $q = kb^2$ and $y = \sqrt k\,(b - a) \ge 1$, so no rational $x^2$ slips
+through. The test also says how many pairs there are. For each $p$ only about $2\sqrt p$ values of
+$q$ pass, so the qualifying pairs up to $p + q \le L$ number $\Theta(L^{3/2})$, and each gets a
+closed form. How many nines a power has is the exponent at which $y^{2n}$ drops below a power of
+ten, so it is a ratio of logarithms, not a big-number expansion:
+
+$$N = \left\lceil \frac{d}{-2\log_{10} y} \right\rceil.$$
+
+The ceiling is never ambiguous in exact arithmetic, because $y^{2n}$ is an irrational algebraic
+number and never exactly $10^{-d}$. Whether it is ambiguous in floating point is a separate
+question, and the answer is below.
 
 The link with fractions is direct when $x^2$ is a unit. For $\sqrt 2 + \sqrt 3$, $x^2 = 5 + 2\sqrt 6$
 has norm $25 - 24 = 1$. Its powers are $a_n + b_n\sqrt 6$ with $a_n^2 - 6b_n^2 = 1$, which is
