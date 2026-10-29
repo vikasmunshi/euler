@@ -1,5 +1,5 @@
 <!-- tags: [irrational-number] -->
-<!-- status: final 2026-10-28T08:25Z -->
+<!-- status: final -->
 # Irrational number
 
 An [irrational number](https://en.wikipedia.org/wiki/Irrational_number) is a real number that
@@ -62,6 +62,15 @@ an integer you can compute *modulo a prime*, by exponentiation by squaring in th
 `u + v√a`. The irrational number never appears in the arithmetic, only its integer coordinates.
 The perfect-square case (`y = 0`, no `−1`) is the edge case to watch.
 
+[Problem 318](/solutions/0318/) asks about the other end of the same identity. Its powers
+`(√p + √q)^{2n}` have fractional parts that run `…9.99999…`, and it wants the first `n` at which
+2011 nines appear. With `x² = (p+q) + 2√(pq)` and conjugate `y² = (√q − √p)²`, the fractional part
+of `x^{2n}` is exactly `1 − y^{2n}`. So the count of nines has nothing to do with the digits of
+`x`. It depends only on how fast `y^{2n}` shrinks, and `y^{2n} ≤ 10^{-d}` gives `N` in closed form
+as a ceiling of `d / (−2 log₁₀ y)`. The condition "the fractional part tends to 1" is just
+`0 < y < 1`, i.e. `√q < √p + 1`. Squaring twice turns it into the integer test
+`(q − p − 1)² < 4p`, so the qualifying pairs are found without a single square root.
+
 ### Square both sides and compare integers
 
 Sometimes the irrational number is a **parameter**, not the thing you are asked about. In
@@ -90,6 +99,14 @@ holds exactly with no `≤`-versus-`<` worries.
   quotient that falls just below an integer can round up and change the floor.
   `math.isqrt` (or a float estimate corrected by an exact integer check, as the C ports do) is the
   safe default.
+- **When a float is the right tool, keep the cancellation out of it.** Problem 318 needs a
+  logarithm, so it cannot stay in integers. But `y = √q − √p` sits just below `1` for the hardest
+  pairs, and `log(√q − √p)` computed naively loses most of its digits to
+  [catastrophic cancellation](https://en.wikipedia.org/wiki/Catastrophic_cancellation). The fix is
+  the conjugate again: rationalize `1 − y` so that its numerator is the exact integer
+  `4p − (q − p − 1)²` and its denominator is a sum of positive terms, then take `log1p(−ε)`.
+  Irrationality also says the ceiling's argument is never an integer, so the remaining risk is a
+  quotient that lands *near* one; recomputing just those few pairs at high precision closes it.
 - **Irrationality is a guarantee you can use.** "Never an integer" means `⌊α⌋ = ⌈α⌉ − 1`,
   `y^n` is never exactly `0` or `1`, and two expressions `a + b√m` agree only when their parts
   agree. Problems use this to rule out ties and boundary cases. Notice when they do, and drop the
