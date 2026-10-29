@@ -1,5 +1,5 @@
 <!-- tags: [permutation] -->
-<!-- status: final 2026-10-16T07:14Z -->
+<!-- status: final -->
 # Permutation
 
 A [permutation](https://en.wikipedia.org/wiki/Permutation) is a rearrangement of a set: an
@@ -108,11 +108,32 @@ Finally, read `σ(1), σ(2), …, σ(n)` as a sequence and count its local featu
 patterns. These **statistics** have their own well-studied counting numbers. Permutations with
 exactly one ascent are counted by the [Eulerian number](https://en.wikipedia.org/wiki/Eulerian_number)
 `A(n, 1) = 2ⁿ − n − 1`, which is all [Problem 158](/solutions/0158/) needs once the choice of
-letters (a binomial) is split from the choice of their order. Out-of-order adjacent pairs are
-what the move-to-front sort of [Problems 523](/solutions/0523/) and [524](/solutions/0524/)
-reacts to, so its expected cost over all `n!` inputs becomes a question about how such pairs
-appear as the sort proceeds, not a simulation; a forbidden three-term arithmetic pattern defines the "unpredictable"
-permutations of [Problem 720](/solutions/0720/).
+letters (a binomial) is split from the choice of their order. A forbidden three-term arithmetic
+pattern defines the "unpredictable" permutations of [Problem 720](/solutions/0720/).
+
+The sequence view pays off most when it meets the rank view. Record, for each position, how many
+earlier elements are larger than the one there: that
+[inversion table](https://en.wikipedia.org/wiki/Inversion_(discrete_mathematics)#Inversion_related_vectors)
+(a [Lehmer code](https://en.wikipedia.org/wiki/Lehmer_code) read the other way round) is a
+factorial-base numeral again, and a bijection with the permutations. So a *uniformly random*
+permutation is a uniformly random factorial-base number, and its digits are **independent**:
+the relative rank of the `(k+1)`-th element among the first `k+1` is uniform on `k+1` values,
+whatever came before. That turns averages over `n!` inputs into sums over `n` positions.
+[Problem 523](/solutions/0523/) is the clean example. Its sort scans from the front and moves the
+first out-of-order element to the start of the list; it looks like a bubble-sort variant, but it
+is really [insertion sort](https://en.wikipedia.org/wiki/Insertion_sort) in disguise — the list is
+always a sorted prefix plus an untouched tail, and the tail is not inspected until the prefix is
+clean again. The total cost therefore splits into one insertion per element, and each insertion's
+cost depends only on how many prefix elements are smaller than the newcomer, through a short
+recurrence in that one number. That count is exactly one inversion-table digit, so by
+[linearity of expectation](https://en.wikipedia.org/wiki/Expected_value#Properties) the expected
+cost over all `n!` inputs is a single sum over `k`, each term an average of the recurrence over a
+uniform digit — `O(n)` work for `n = 30`, where simulation could not reach past ten or so. Two
+habits from that solution are worth keeping: the derived formula was checked as exact rationals
+against a brute force over every permutation up to `n = 8`, and the sum was kept exact to the end,
+because the answer is asked to two decimals and a value can land exactly on a half.
+[Problem 524](/solutions/0524/) runs the same sort and asks about individual permutations by their
+cost, where the per-insertion decomposition is the natural place to start.
 
 Inversions are also the right lens on a permutation *built up* from adjacent swaps, because an
 [adjacent transposition](https://en.wikipedia.org/wiki/Transposition_(mathematics)) flips the
@@ -145,6 +166,9 @@ tell is a problem that counts permutations
   output to generate exactly those permutations, rather than filtering all `n!` of them.
 - **Separate "which" from "in what order".** Choosing a set (binomial, multiset) and arranging it
   (factorial, multinomial, Eulerian) are independent factors far more often than not.
+- **Average through the inversion table.** An expectation over all `n!` inputs is an expectation
+  over `n` independent uniform digits. If a process's cost splits per element and each part sees
+  only that element's relative rank so far, linearity of expectation finishes the job.
 - **Mind duplicates.** Digit problems permute a *multiset*: repeated digits collapse arrangements,
   and leading zeros remove some. By symmetry exactly the fraction `(k − c₀)/k` of a class's
   arrangements start with a non-zero digit — a cleaner correction than subtracting a second count.
