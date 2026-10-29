@@ -13,6 +13,7 @@
 #   4. mypy on packages + solutions.
 #   5. shellcheck on every tracked shell script (scripts + hook templates).
 #   6. the unit tests — only when the push changes packages/, scripts/ or tests/.
+#   7. audit/ (sensitive run logs) is gitignored whenever it exists.
 #
 # Output contract: every check announces itself, prints its own detail on
 # failure, and the hook always ends with a single PASS/FAIL verdict that
@@ -273,7 +274,7 @@ fi
 # so `PullRequestTest` sat red from 18f5da8b until a human happened to run them. flake8
 # and mypy could not have caught it — the code type-checked perfectly and simply did
 # something the tests said it should not.
-section "unit tests (only when packages/, scripts/ or tests/ change)"
+section "unit tests (only when anything changes under packages/, scripts/, or tests/)"
 if (( ${#PUSH_REFS[@]} == 0 )); then
     skip "no refs offered by git — nothing to test"
 elif [[ -z "$(pushed_paths packages scripts tests)" ]]; then
@@ -284,6 +285,20 @@ elif "$VENV/bin/python" -m unittest discover -s tests -t . -q; then
     pass "unit tests pass"
 else
     fail "unit tests failed"
+fi
+
+# ── 7. audit/ is gitignored whenever it exists ───────────────────────────
+# The push-side twin of pre-commit's check: audit/ holds run logs that name
+# collaborators and the host's layout, safe only while .gitignore covers it.
+section "audit/ folder (gitignored)"
+if [[ ! -e audit ]]; then
+    pass "no audit/ folder in this checkout"
+elif ! git check-ignore --no-index -q audit/; then
+    fail "audit/ exists but is not gitignored — restore '/audit/' in .gitignore"
+elif [[ -n "$(git ls-files -- audit)" ]]; then
+    fail "files under audit/ are tracked — 'git rm -r --cached audit' before pushing"
+else
+    pass "audit/ is gitignored"
 fi
 
 # ── Verdict ──────────────────────────────────────────────────────────────

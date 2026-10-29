@@ -99,6 +99,22 @@ else
     fail "gitignored files are staged — unstage them (or commit deliberately)"
 fi
 
+# ── audit/: gitignored whenever it exists ─────────────────────────────────
+# audit/ holds the run logs (scripts/ops/capture-run.sh, release.sh) and review material
+# that name collaborators and the host's layout. It is safe only while .gitignore covers
+# it, so check the rule itself (--no-index), not just what happens to be staged — and
+# that nothing under it is already tracked.
+section "audit/ folder (gitignored)"
+if [[ ! -e audit ]]; then
+    pass "no audit/ folder in this checkout"
+elif ! git check-ignore --no-index -q audit/; then
+    fail "audit/ exists but is not gitignored — restore '/audit/' in .gitignore"
+elif [[ -n "$(git ls-files -- audit)" ]]; then
+    fail "files under audit/ are tracked — 'git rm -r --cached audit' before committing"
+else
+    pass "audit/ is gitignored"
+fi
+
 # ── encryption filter: staged private blobs must be ciphertext ───────────
 # The commit-side twin of pre-push's encryption-at-rest audit: every STAGED
 # blob under solutions/private must begin with the gitfilter MAGIC. With the
