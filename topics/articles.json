@@ -4283,12 +4283,12 @@
       "path": "takeaway/exact-sums-resist-modular-shortcuts",
       "title": "Exact sums resist modular shortcuts",
       "status": "final",
-      "written": "2026-08-06T21:29Z",
+      "written": "2026-10-29T12:04Z",
       "solved": 2,
       "problems": 2,
       "tags": ["exact-sums-resist-modular-shortcuts"],
       "refs": ["p0244", "p0271"],
-      "solved_after": ["p0271"]
+      "solved_after": []
     },
     {
       "path": "takeaway/exploit-symmetry",
