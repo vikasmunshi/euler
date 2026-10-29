@@ -1,14 +1,15 @@
 <!-- tags: [integer-factorization] -->
-<!-- status: final 2026-08-03T11:56Z -->
+<!-- status: final -->
 # Integer factorization
 
 [Integer factorization](https://en.wikipedia.org/wiki/Integer_factorization) is the decomposition
 of a positive integer into the product of its [prime factors](/topics/domain/prime-factor) — the
 one operation that number theory leans on constantly and that nobody knows how to do quickly. Its
-presumed hardness is what RSA is built on. At Project Euler's scale the cryptographic algorithms
-never come out; what matters instead is a much more practical question, and it is the one this page
-is about: *how do I arrange the computation so that I factor as few numbers as possible, and each
-of those as cheaply as possible?*
+presumed hardness is what RSA is built on. At Project Euler's scale the number-field sieve never
+comes out; what matters instead is a much more practical question, and it is the one this page is
+about: *how do I arrange the computation so that I factor as few numbers as possible, and each of
+those as cheaply as possible?* The answer depends on whether you are factoring many numbers or a few,
+and on whether they are small enough to sieve.
 
 ## The idea — factoring one number versus factoring many
 
@@ -45,6 +46,43 @@ for p in primes:
 Problem 357 does exactly this, and it is why factoring a hundred-million-scale survivor there takes
 a single step rather than ten thousand. The trick costs nothing but the sieve you already built,
 and it turns the worst case into the best one.
+
+## When there is no sieve — a few huge numbers
+
+Both adjustments assume the numbers are small enough that a prime list to $\sqrt{n}$ is cheap. At
+$n \approx 10^{18}$ that list runs to $10^9$, and trial division would need about fifty million
+divisions for each number. That is too many even for a single number. In this case there are only
+a few numbers to factor, and the standard pairing for word-sized integers takes over:
+
+- a deterministic [Miller–Rabin test](/topics/technique/miller-rabin-primality-test). With the first
+  twelve primes as bases it is exact well beyond $2^{64}$, so "is this cofactor prime?" costs a
+  dozen modular exponentiations and needs no table;
+- [Pollard's rho](/topics/technique/pollards-rho-algorithm), which splits a composite cofactor in
+  about $O(n^{1/4})$ steps. It iterates $x \mapsto x^2 + c \bmod n$ and waits for two values to
+  collide modulo an unknown prime factor; a gcd with $n$ then exposes that factor. Brent's variant
+  multiplies a batch of differences together before each gcd, so the gcds become rare.
+
+Trial division by a handful of small primes still goes first, because it removes the factors that
+rho is worst at finding. The other two then recurse on what remains. The cofactor-primality exit
+from the sieve version is still here: Miller–Rabin answers the question the sieve used to answer.
+
+Problem 443 shows why this matters. Its recurrence $g(n) = g(n-1) + \gcd(n, g(n-1))$ looks like it
+needs one gcd per step up to $10^{15}$. But along a run of $+1$ steps, the gcd reduces to
+$\gcd(j, c)$ for a constant $c$, so the run ends at the smallest multiple above $k$ of some prime
+dividing $c$. The whole sequence therefore becomes a chain of a few hundred jumps. Each jump needs
+the *distinct* prime factors of a number near $2k$, and that can be as large as $10^{18}$. Factoring
+replaces $10^{15}$ steps of simulation with a few hundred rho calls, which take milliseconds in total.
+
+Problem 271 needs only one factorization, of its modulus. It counts the cube roots of unity modulo
+$n$. By the [Chinese remainder theorem](/topics/technique/chinese-remainder-theorem), a solution
+modulo $n$ is the same as one solution modulo each prime power dividing $n$. The roots for each prime
+come from a [primitive root](/topics/domain/primitive-root) and are lifted to the prime power by
+[Hensel's lemma](/topics/technique/hensels-lemma). Each prime contributes either one root or three,
+so the factorization determines both the number of combinations and how to build them. The given
+modulus happens to be a primorial, which trial division alone takes apart. The solution still adds
+rho behind trial division so that it works for any modulus, including a product of two nine-digit
+primes. The work divides cleanly: factoring is what makes the problem feasible, and the CRT
+combination is where the answer is built.
 
 ## Not every factorization has to be recovered
 
@@ -113,15 +151,19 @@ When factorization shows up in a problem, work down this list in order:
    *sieve* — a smallest-prime-factor table, or a
    [divisor-sum sieve](/topics/technique/divisor-sum-sieve) if the aggregate is all you need —
    which amortises to near-constant time per number at the price of $O(N)$ memory. A scattered few
-   wants trial division against a precomputed prime list, which costs nothing to set up.
+   wants trial division against a precomputed prime list, which costs almost nothing to set up. A
+   scattered few that are too large for any prime list wants Miller–Rabin plus Pollard's rho.
 4. **Does the sieve already cover your numbers?** Then use the cofactor-primality exit; it is the
    single highest-value line in a trial-division loop.
 5. **How much of the factorization do you need?** Stop at the first repeated prime, at the first
-   factor above a bound, at the largest prime factor — whatever the predicate decides on.
+   factor above a bound, at the largest prime factor — whatever the predicate decides on. Often
+   only the set of *distinct* primes matters, as in problem 443's jump rule. In that case return a
+   set and skip tracking exponents.
 
 The floor on all of this is memory. A byte-per-entry sieve to $10^8$ is a hundred megabytes, which
-is affordable; to $10^{10}$ it is not, and the shape of the solution has to change — segment the
-sieve, or find the parametrisation that removes the need for it. And, as everywhere in this
+is affordable; to $10^{10}$ it is not, and the shape of the solution has to change. Segment the
+sieve, find the parametrisation that removes the need for it, or, if only a few numbers need
+factoring, drop the sieve and use rho. And, as everywhere in this
 repository, build the sieve *inside* `solve()`, sized to the input: the harness times repeated
 calls, and a table built once at import is free on every run but the first.
 
