@@ -1,5 +1,5 @@
 <!-- tags: [graph-coloring] -->
-<!-- status: final 2026-10-28T09:36Z -->
+<!-- status: final -->
 # Graph coloring
 
 A [proper colouring](https://en.wikipedia.org/wiki/Graph_coloring) gives every vertex of a graph a
@@ -72,12 +72,21 @@ by its size.
 pattern of the cut (a [set partition](https://en.wikipedia.org/wiki/Partition_of_a_set)), and the
 transfer weights become counts of admissible fresh colours ($q - k$ where $k$ colours are already
 forbidden). Problem 670 shows the payoff. Its $2 \times n$ strip is tiled by horizontal tiles of
-length 1–3 and vertical dominoes, four-coloured with edge-adjacent tiles differing. The naive
-boundary state — each row's tile colour plus how far it still overhangs — runs to over a hundred
-values; but the two tiles at a boundary always touch, so their colours are always distinct and
-all such pairs are equivalent. Drop the colours, keep the overhangs: ten states, colour choices
-folded into the weights as small integers (2, 3, 6), and a $10 \times 10$ matrix raised to the
-power $10^{16}$ in about fifty squarings.
+length 1–3 and vertical dominoes, four-coloured with edge-adjacent tiles differing — and with a
+second, purely geometric rule: tile boundaries in the two rows may not line up at the same interior
+column unless a vertical domino sits beside them ("no four corners"). The naive boundary state —
+each row's tile colour, how far it still overhangs, and whether the last column was a domino — runs
+to over a hundred values; but the two tiles at a boundary always touch, so their colours are always
+distinct and all such pairs are equivalent. Drop the colours, keep the overhangs: nine overhang
+pairs plus one "just placed a domino" state, ten in all, with colour choices folded into the
+weights as small integers. Each weight is read off by counting forbidden neighbours: a new tile in
+one row avoids its left neighbour and the tile beside it ($4 - 2 = 2$); a domino after a domino
+avoids one colour ($3$); two fresh tiles after a domino avoid it and each other ($3 \cdot 2 = 6$).
+The geometric rule costs nothing extra — where both rows end together, the only legal next column
+is a domino, so that row of $T$ has a single entry, weight $2$. The lesson generalises: a
+colouring state can carry the *tiling's* frontier as well, and a constraint on the shape becomes
+a zero in the matrix rather than a second pass. Then a $10 \times 10$ matrix is raised to the power
+$10^{16}$ in about fifty-four squarings.
 
 ## When the cut is wide: contract it a cell at a time
 
@@ -108,9 +117,11 @@ rather than row by row.
   whether a gadget's bottom edge exists, whether the first and last columns wrap around. Problem
   671 is 670 on a loop with $k$ colours: closing the strip turns the end-to-end product into a
   *trace* $\operatorname{tr} T^{\,n}$ — but a colour-quotiented state has forgotten *which* colours
-  meet at the seam, so the quotient must keep enough of them to check the wrap-around. Every solution here was checked against a brute-force enumerator on small
-  sizes — for the triangular grid, $3, 24, 528$ colourings for $n = 1, 2, 3$ — before the fast
-  method was trusted.
+  meet at the seam, so the quotient must keep enough of them to check the wrap-around. Every
+  solution here was checked against a brute-force enumerator on small sizes — for the triangular
+  grid, $3, 24, 528$ colourings for $n = 1, 2, 3$; for 670's strip, every tiling and colouring up
+  to $n = 7$, matching the statement's $F(2) = 120$ and $F(5) = 45876$ — before the fast method
+  was trusted.
 - **Quotienting changes the boundary vectors.** Once states are equality patterns, the start vector
   must count how many concrete colourings each pattern stands for (670 starts its two-row states at
   $4 \cdot 3 = 12$, its single-domino state at $4$), or the totals come out scaled wrong.
