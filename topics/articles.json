@@ -2358,12 +2358,12 @@
       "path": "domain/mobius-function",
       "title": "M\u00f6bius function",
       "status": "final",
-      "written": "2026-07-28T09:33Z",
+      "written": "2026-10-29T07:52Z",
       "solved": 3,
       "problems": 3,
       "tags": ["mobius-function"],
       "refs": ["p0319", "p0464", "p0641"],
-      "solved_after": ["p0641"]
+      "solved_after": []
     },
     {
       "path": "domain/modular-arithmetic",

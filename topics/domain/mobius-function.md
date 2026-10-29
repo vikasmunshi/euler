@@ -1,5 +1,5 @@
 <!-- tags: [mobius-function] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:52Z -->
 # Möbius function
 
 The [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) $\mu(n)$ is
