@@ -312,12 +312,12 @@
       "path": "domain/binomial-coefficient",
       "title": "Binomial coefficient",
       "status": "final",
-      "written": "2026-10-14T07:09Z",
+      "written": "2026-10-29T02:05Z",
       "solved": 24,
       "problems": 36,
       "tags": ["binomial-coefficient"],
       "refs": ["p0015", "p0053", "p0085", "p0090", "p0101", "p0106", "p0113", "p0147", "p0148", "p0158", "p0172", "p0194", "p0203", "p0231", "p0242", "p0267", "p0322", "p0365", "p0408", "p0445", "p0468", "p0493", "p0498", "p0567", "p0568", "p0588", "p0650", "p0704", "p0739", "p0788", "p0792", "p0830", "p0831", "p0860", "p0862", "p0885"],
-      "solved_after": ["p0739", "p0860"]
+      "solved_after": []
     },
     {
       "path": "domain/bisection-method",

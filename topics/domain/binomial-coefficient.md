@@ -1,5 +1,5 @@
 <!-- tags: [binomial-coefficient] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T02:05Z -->
 # Binomial coefficient
 
 The [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient)
