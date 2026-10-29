@@ -1,5 +1,5 @@
 <!-- tags: [factorial] -->
-<!-- status: final 2026-08-11T03:02Z -->
+<!-- status: final -->
 # Factorial
 
 The [factorial](https://en.wikipedia.org/wiki/Factorial) $n! = 1 \cdot 2 \cdots n$ is the first
@@ -83,7 +83,8 @@ A large fraction of the factorial problems are really problems about a
 squares of its [unitary divisors](/topics/domain/unitary-divisor) (problem 429), its divisors with a
 given last digit (474), pairs of complementary divisors with equal divisor counts (598), a
 Liouville-weighted divisor sum in a range (646), divisor-sum sums (608), restricted factorisations
-(636), or the divisors of a superfactorial-of-superfactorials filtered by $\Omega$ (956).
+(636), the divisor sum of $2^{\omega(d)}$ summed over every factorial up to $10^7$ (675), or the
+divisors of a superfactorial-of-superfactorials filtered by $\Omega$ (956).
 
 The shape is always the same and worth naming, because recognising it converts a hopeless problem
 into a routine one:
@@ -98,6 +99,20 @@ into a routine one:
 
 So the data structure for $n!$ is never the number. It is the exponent vector $(v_p(n!))_{p \le n}$,
 usually compressed to (exponent, count-of-primes) pairs.
+
+When the problem sums $f(i!)$ over *every* $i \le n$ rather than evaluating one factorial, that
+vector stops being a snapshot and becomes something you walk. Going from $(i-1)!$ to $i!$ changes
+only the exponents of the primes dividing $i$ — at most $\omega(i)$ of them, never more than eight
+below $10^7$ — so $f(i!) = f((i-1)!) \cdot \prod_{p^v \parallel i} f(p^{e})/f(p^{e-v})$, where
+$e = v_p(i!)$. Problem 675 is the clean case: there $f(p^e) = 2e+1$, so each step multiplies by a
+handful of ratios $(2e+1)/(2(e-v)+1)$, and a prime modulus turns every division into a precomputed
+[modular inverse](/topics/domain/modular-multiplicative-inverse). Building all the step multipliers
+prime by prime costs $\sum_{p \le n} n/p = O(n \log\log n)$, and one running product then yields
+all $n$ terms. The square-root split pays off here too: a prime $p > \sqrt n$ has valuation $1$ at
+each of its multiples, so its ratio at the $k$-th multiple is $(2k+1)/(2k-1)$ regardless of $p$,
+and all those primes can be updated together, one $k$ at a time. The general lesson is that a
+local factor with an inverse makes the exponent vector an *incremental* structure — the same trick
+as a prefix product, carried out prime by prime.
 
 ## Factorials under a modulus
 
