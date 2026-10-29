@@ -1,5 +1,5 @@
 <!-- tags: [factorial] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:17Z -->
 # Factorial
 
 The [factorial](https://en.wikipedia.org/wiki/Factorial) $n! = 1 \cdot 2 \cdots n$ is the first

@@ -1258,12 +1258,12 @@
       "path": "domain/factorial",
       "title": "Factorial",
       "status": "final",
-      "written": "2026-08-11T03:02Z",
+      "written": "2026-10-29T07:17Z",
       "solved": 14,
       "problems": 30,
       "tags": ["factorial"],
       "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0248", "p0254", "p0288", "p0320", "p0330", "p0381", "p0383", "p0418", "p0429", "p0474", "p0495", "p0549", "p0592", "p0598", "p0608", "p0636", "p0646", "p0675", "p0829", "p0851", "p0926", "p0937", "p0952", "p0956"],
-      "solved_after": ["p0675"]
+      "solved_after": []
     },
     {
       "path": "domain/factorial-number-system",
