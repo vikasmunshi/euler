@@ -1,5 +1,5 @@
 <!-- tags: [divisor-summatory-function] -->
-<!-- status: final 2026-10-28T07:57Z -->
+<!-- status: final -->
 # Divisor summatory function
 
 The [divisor summatory function](https://en.wikipedia.org/wiki/Divisor_summatory_function)
@@ -79,10 +79,25 @@ nested blocking loops that call $\sum \sigma$ again and again. The calls are che
 their arguments are all quotients of $N$, so the memo hits. Here the summatory function is not the
 answer. It is a building block that the answer needs at many arguments.
 
+**Problem 452** is where the swap stops paying. It counts $n$-tuples of positive integers with
+product at most $m$, for $m = n = 10^9$. Grouping the tuples by their product $k$ gives
+$\sum_{k \le m} d_n(k)$, the summatory function of the
+[$n$-fold divisor function](https://en.wikipedia.org/wiki/Divisor_function#Generalizations)
+($d_2 = d$). The swap still holds, since $d_n = d_{n-1} * 1$ gives
+$D_n(x) = \sum_{d \le x} D_{n-1}(\lfloor x/d \rfloor)$, but applying it means nesting it
+$n - 1$ deep, and $n$ is a billion. So the solution uses a different fact: $d_n$ is
+[multiplicative](/topics/domain/multiplicative-function), with
+$d_n(p^e) = \binom{n+e-1}{e}$ by [stars and bars](/topics/technique/stars-and-bars-combinatorics).
+On primes it is the constant $n$, so the primes up to $x$ contribute $n \cdot \pi(x)$, and the
+[Min_25 sieve](/topics/technique/min-25-sieve) builds the rest from
+[prime counts](/topics/domain/prime-counting-function) at the $O(\sqrt m)$ quotients of $m$. It
+recurses over smallest prime factors and costs about $O(m^{3/4}/\log m)$. The quotient set from
+the bullets above is still the skeleton. What sits on it is now $\pi$, not $D$.
+
 Several of the unsolved problems tagged here have the same shape with harder ingredients. Products
 or gcds over divisors and summatory sums of other multiplicative functions all start with the same
-swap. They differ in what $f$ is and whether its prefix sum has a closed form or needs its own
-sub-linear recursion (see
+swap. They differ in what $f$ is and whether its prefix sum has a closed form or, as in 452, needs
+its own sub-linear recursion (see
 [summing multiplicative functions](/topics/number-theory/summing-multiplicative-functions)).
 
 ## How to reason about it
@@ -94,6 +109,9 @@ sub-linear recursion (see
   $O(\sqrt N)$. A sparse, structured set (squares, cubes, $k$-full numbers) means enumerating it,
   ideally through a unique factorisation so nothing is counted twice. A set that is neither (primes,
   squarefree numbers) needs its own counting function evaluated at every quotient.
+- **When the divisor sum nests, go multiplicative.** A $k$-fold convolution like $d_n$ makes the
+  swap recurse $k$ levels deep. If the summand is multiplicative with a simple value on primes,
+  sum it from its prime values instead (Min_25 or Lucy), and $k$ drops out of the cost.
 - **Know the growth.** $D(x) = x \ln x + (2\gamma - 1)x + O(\sqrt x)$ (the error term is the
   [Dirichlet divisor problem](https://en.wikipedia.org/wiki/Dirichlet_divisor_problem)), and
   $\sum_{n \le x} \sigma(n) \approx \tfrac{\pi^2}{12} x^2$. These give an instant sanity check on a
