@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-equation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:12Z -->
 # Diophantine equation
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a
