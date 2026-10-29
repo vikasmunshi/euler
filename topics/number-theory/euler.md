@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function, partition-number-theory, pentagonal-number-theorem, continued-fraction, amicable-numbers, eulerian-path, eulerian-number, linear-sieve] -->
-<!-- status: final 2026-10-15T10:48Z -->
+<!-- status: final -->
 # Euler
 
 More of the mathematics behind these problems traces to one man than to any other. [Leonhard
@@ -57,13 +57,26 @@ needs a different tool:
   reduced form, which gives `Σ_d Φ(⌊v/d⌋) = v(v+1)/2`. That identity mentions `Φ` only at the
   `O(√n)` distinct quotients `⌊n/k⌋`, so a sieve up to `n^(2/3)` plus quotient blocking for the
   larger values brings the cost down to `O(n^(2/3))`. The sieve becomes the bottom tier of the
-  algorithm instead of the whole of it.
+  algorithm instead of the whole of it. Problem 512 (Sums of Totients of Powers) reaches the same
+  machinery from an unpromising-looking start. Because `n^i` has the same primes as `n`,
+  `φ(n^i) = n^(i-1)·φ(n)`, and modulo `n+1` the factor `n` is just `-1`. The alternating sum then
+  collapses to `φ(n)` for odd `n` and `0` for even `n`, so the task is `Φ` restricted to odd
+  arguments. The restriction is also free. From `φ(2m) = φ(m)` for odd `m` and `2φ(m)` for even
+  `m`, the odd-only sum is `Φ(N) - Σ_k Φ(⌊N/2^k⌋)`, and every `⌊N/2^k⌋` is a quotient the recursion
+  has already computed.
 - **Backwards.** Problem 248 asks for every `n` with `φ(n) = 13!`. The product form
   `φ(n) = ∏ p^(a-1)(p-1)` turns this inversion into a factorisation of the *target*: a prime can
   occur in `n` only if `p-1` divides it, so the alphabet is "divisors plus one that are prime" (a
   few hundred numbers), and a depth-first descent over that alphabet emits every solution exactly
   once. One subtlety catches people: `φ(2) = 1`, so `φ(2m) = φ(m)` for odd `m`. A descent that
-  stops the moment the residual reaches 1 loses half the answers.
+  stops the moment the residual reaches 1 loses half the answers. Problem 516 runs the same
+  inversion against a *set* of targets: it sums the `n ≤ 10¹²` whose `φ(n)` is 5-smooth. Read factor
+  by factor, the product form decides membership. Powers of 2, 3 and 5 are always allowed. Any
+  other prime `q` must appear to the first power only, and `q-1` must itself be 5-smooth. The
+  alphabet is "Hamming numbers plus one that are prime", a few hundred of them, and each admissible
+  `n` splits uniquely as a Hamming number times a squarefree product from that alphabet. A
+  depth-first walk over the products plus a prefix sum over the Hamming numbers replaces a scan of
+  10¹² integers.
 - **As a constraint.** Problem 245 (Coresilience) asks when `(n - φ(n)) / (n - 1)` is a unit
   fraction, with `n` up to `2·10¹¹`, which is far beyond any sieve. Here the product form is used
   for *proofs*. If `p² | n`, then `p` divides both `n` and `n - φ(n)`, so qualifying `n` are
@@ -161,7 +174,7 @@ The lesson is not "memorise Euler's results" but recognising the shape that invi
 - A **sum of a multiplicative function** to a bound too large to sieve — look for an identity over
   the quotients `⌊n/d⌋` and evaluate it sublinearly.
 - A multiplicative function **run backwards** or used as a **constraint** — enumerate factorisations
-  of the target, or derive the structural facts (squarefree, parity, a ratio bound) that let you
+  of the target (or of a whole family of targets, such as the smooth numbers), or derive the structural facts (squarefree, parity, a ratio bound) that let you
   build candidates instead of scanning for them.
 
 The pitfall in every case is doing the brute-force version first. These identities exist precisely
