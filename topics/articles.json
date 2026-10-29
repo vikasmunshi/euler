@@ -3788,12 +3788,12 @@
       "path": "domain/transfer-matrix-method",
       "title": "Transfer matrix method",
       "status": "final",
-      "written": "2026-10-18T12:38Z",
+      "written": "2026-10-29T08:05Z",
       "solved": 4,
       "problems": 8,
       "tags": ["transfer-matrix-method"],
       "refs": ["p0189", "p0194", "p0237", "p0458", "p0544", "p0654", "p0670", "p0767"],
-      "solved_after": ["p0670"]
+      "solved_after": []
     },
     {
       "path": "domain/tree-graph-theory",
