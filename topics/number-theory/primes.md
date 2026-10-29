@@ -1,5 +1,5 @@
 <!-- tags: [trial-division] -->
-<!-- status: final 2026-10-12T14:50Z -->
+<!-- status: final -->
 # Primes
 
 Most of the problems below are not *about* primes in the way problem 7 is. Nobody asks for the
@@ -94,6 +94,26 @@ smallest. Problem 118 uses ordering for a different goal: it requires each chose
 the previous one, so every unordered partition is produced by exactly one path and needs no
 deduplication. In all three cases the order of generation does work that would otherwise need a
 sort, a max over the results, or a set.
+
+## When the input's primes are the generator
+
+Some problems turn the shape around. There is no stream of candidates to filter, just one huge
+modulus or product, and its prime factorisation *is* the generator. Problem 271 asks for the cube
+roots of unity modulo $13082761331670030$, which is the primorial $2 \cdot 3 \cdot 5 \cdots 43$. By
+the [Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem), a root
+modulo $n$ is one root modulo each prime power, chosen independently. A prime $p$ gives three roots
+when $3 \mid p - 1$ and only the root 1 otherwise. That leaves a few hundred combinations to
+enumerate, where testing every $x$ below $n$ would take $10^{16}$ steps. Problem 359 asks for a sum
+over every way to write $71328803586048$ as floor × room. That number is $2^{27} \cdot 3^{12}$, so the
+"search" is a loop over its $28 \cdot 13 = 364$ divisors, with a closed-form occupant for each pair.
+
+The lesson from the earlier sections still holds: settle the arithmetic before you loop. Here that
+means factoring first, because the factorisation decides how much work is left. It also decides how
+you factor. Both inputs come apart under trial division by small primes almost at once, and 359
+needs nothing more. Problem 271's solution is written for any $n$, so it follows trial division with
+[Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm) for any large cofactor, and
+uses Miller–Rabin to recognise when a cofactor is prime. The rule is the same as for a candidate
+stream: pick the test to fit the numbers you actually have.
 
 ## Details that bite
 
