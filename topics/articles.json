@@ -4173,12 +4173,12 @@
       "path": "takeaway/algorithm-beats-language",
       "title": "Algorithm beats language",
       "status": "final",
-      "written": "2026-07-23T12:21Z",
+      "written": "2026-10-29T02:12Z",
       "solved": 25,
       "problems": 25,
       "tags": ["algorithm-beats-language"],
       "refs": ["p0010", "p0067", "p0073", "p0075", "p0076", "p0078", "p0083", "p0108", "p0112", "p0129", "p0146", "p0150", "p0174", "p0191", "p0214", "p0345", "p0429", "p0461", "p0516", "p0686", "p0721", "p0788", "p0816", "p0834", "p0934"],
-      "solved_after": ["p0516", "p0721"]
+      "solved_after": []
     },
     {
       "path": "takeaway/bracket-truncation-error",
