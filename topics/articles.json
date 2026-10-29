@@ -5097,12 +5097,12 @@
       "path": "technique/convolution",
       "title": "Convolution",
       "status": "final",
-      "written": "2026-10-15T11:05Z",
+      "written": "2026-10-29T12:15Z",
       "solved": 9,
       "problems": 9,
       "tags": ["convolution"],
       "refs": ["p0092_s0", "p0205_s0", "p0240_s0", "p0250_s0", "p0743_s0", "p0768_s0", "p0778_s0", "p0980_s0", "p1010_s0"],
-      "solved_after": ["p0778"]
+      "solved_after": []
     },
     {
       "path": "technique/counting-sort",
