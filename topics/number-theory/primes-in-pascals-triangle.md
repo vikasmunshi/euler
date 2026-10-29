@@ -1,5 +1,5 @@
 <!-- tags: [lucass-theorem, kummers-theorem, legendres-formula, p-adic-valuation] -->
-<!-- status: final 2026-10-14T07:42Z -->
+<!-- status: final -->
 # Primes in Pascal’s triangle
 
 A surprising number of problems ask something about a [binomial
@@ -75,6 +75,17 @@ Legendre applied to every prime up to $n$. Problem 650 needs the full factorisat
 a whole row of binomials, and the same exponent bookkeeping, accumulated across rows, delivers it.
 In both, the work is $\pi(n)$ primes times $\log_p n$ digits, with the primes coming from one
 [sieve](/topics/technique/sieve-of-eratosthenes).
+
+**Across a run of factorials, update the exponents, don't recompute them.** When the question asks
+about *every* $i!$ for $i$ up to $n$, running Legendre afresh for each one costs $\pi(i)$ primes per
+term, which is far too slow. Going from $(i-1)!$ to $i!$ changes $v_p$ only for the primes dividing
+$i$, and only by $v_p(i)$, so the whole exponent vector moves forward a few entries per step. Problem
+675 needs a multiplicative function of every factorial up to $10^7$, a product over $p$ of a factor
+in $v_p(i!)$. It keeps that product running and divides out each prime's old factor and multiplies in
+the new one, at most $\omega(i)$ updates per step and $O(n \log\log n)$ in total. For primes above
+$\sqrt n$ the update is especially clean: they divide each multiple $kp \le n$ exactly once, so the
+exponent at $kp$ is simply $k$ and its update depends on $k$ alone. That lets all such primes be
+handled together as a batch.
 
 **Split a composite modulus into primes.** The theorems are about one prime at a time, so a
 composite target is first broken apart. Divisibility by $10^{12} = 2^{12} \cdot 5^{12}$ (problem
