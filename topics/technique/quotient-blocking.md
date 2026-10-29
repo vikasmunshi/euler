@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking] -->
-<!-- status: final 2026-10-16T07:27Z -->
+<!-- status: final -->
 # quotient blocking
 
 Quotient blocking is the observation that `⌊n/k⌋`, as `k` runs from `1` to `n`, takes only about
@@ -74,7 +74,10 @@ Problem 0351 counts hidden points in a hexagonal orchard; the visible ones total
 `1 ≤ a ≤ b ≤ v` reduces to exactly one coprime pair, `S(v) = v(v+1)/2`. The two problems are the
 same recursion with different `S`. Both fill a `small`/`large` table bottom-up — small quotients in
 ascending order, then `large[k]` from the largest `k` down — so that every `P(⌊v/g⌋)` a step reads
-is already stored, with no call stack and no memo dictionary.
+is already stored, with no call stack and no memo dictionary. Problem 0512 shows what such a table
+buys beyond its headline value: it needs `φ` summed over *odd* `n` only, and since `φ(2m)` is `φ(m)`
+or `2φ(m)` by the parity of `m`, the even part unrolls to `Σ_{k≥1} Φ(⌊N/2ᵏ⌋)`. Every one of those
+arguments is already in `V(N)`, so the restriction costs `log₂ N` table reads and nothing else.
 
 **Sieving at the key values only.** The Lucy_Hedgehog prime-counting DP — a cousin of the
 [Meissel–Lehmer algorithm](https://en.wikipedia.org/wiki/Meissel%E2%80%93Lehmer_algorithm) and the
@@ -83,12 +86,20 @@ engine of the [Min_25 sieve](/topics/technique/min-25-sieve) — computes the
 completely multiplicative weight over primes) at *every* `v ∈ V(n)` at once, by running Eratosthenes'
 strike-out as a recurrence on `2√n` running counts rather than on `n` cells. Problems 0501, 0565 and
 0642 all need prime counts or prime sums at arguments like `⌊n/(pq)⌋`, and that is precisely the set
-the DP has already filled. The closure property is what makes this work.
+the DP has already filled. Problem 0452 runs the full Min_25 pipeline: it sums the `n`-fold divisor
+function `dₙ`, which is multiplicative and equals the constant `n` on every prime, so the primes
+contribute `n·π(x)` and the composites come from a recursion over smallest prime factors whose
+arguments `⌊x/pᵉ⌋` never leave `V(m)` — each `π` it asks for is a single lookup. The closure
+property is what makes this work.
 
 **Iterate over the quotient, not the index.** When the outer loop is over large primes `p > √T` that
 each appear once, the interesting quantity `⌊T/p⌋` again takes few values. Problem 0272 flips the
 loop: for each quotient `q` it multiplies a cofactor sum `S(q)` by the sum of qualifying primes in
-the band `(⌊T/(q+1)⌋, ⌊T/q⌋]`, read from a prefix-sum array. Problems 0429 and 0926 do the same to
+the band `(⌊T/(q+1)⌋, ⌊T/q⌋]`, read from a prefix-sum array. Problem 0668 reaches the same place
+by a layer-cake count: the numbers that fail its smoothness test are pairs `(p, m)` with `m ≤ p`,
+and above `√N` that leaves `Σ_{p>√N} ⌊N/p⌋`. Each such prime contributes one for every `k` with
+`p ≤ N/k`, so the sum is `Σ_k (π(⌊N/k⌋) − π(√N))` over the `k` whose quotient exceeds `√N` — one
+pass over the `large` half of a Lucy table, no band boundaries at all. Problems 0429 and 0926 do the same to
 [Legendre's formula](/topics/domain/legendres-formula): every prime above `√n` has exponent exactly
 `⌊n/p⌋` in `n!`, so millions of primes collapse into a few thousand exponent classes, each handled
 once. 0926 then blocks a second time — as a function of `k`, the product `Π (⌊e/k⌋ + 1)` is a step
@@ -110,9 +121,11 @@ interval, never per `n`.
   numbers and power sums are closed forms; `M(x)`, `Φ(x)` and `π(x)` are not, and computing them at
   all of `V(n)` is usually the real work. Blocking every step of the recursion costs `Σ_{v∈V(n)} √v
   = O(n^{3/4})`; 0276 runs that pure form, and its timings grow by about 35× from `N = 10⁷` to
-  `10⁹`, close to the predicted `100^{3/4} ≈ 32`. Sieving every argument below a cutoff `L` and
-  recursing only above it costs `O(L + n/√L)`, which balances at `L = n^{2/3}` — 0351's choice for
-  `Φ(10⁸)`. Budget for that, not for the `O(√n)` outer loop.
+  `10⁹`, close to the predicted `100^{3/4} ≈ 32`; 0452's Min_25 tracks the same bound, about 5–6×
+  per tenfold step in `m`. Sieving every argument below a cutoff `L` and recursing only above it
+  costs `O(L + n/√L)`, which balances at `L = n^{2/3}` — 0351's and 0512's choice, and 0512's
+  timings rise by about the predicted `4^{2/3} ≈ 2.5` when `N` quadruples. Budget for that, not for
+  the `O(√n)` outer loop.
 - **Recognise the inversion from the counting story.** "All objects" versus "primitive objects",
   with scaling by `g` mapping one to the other, is a Dirichlet convolution with `1`; it inverts by
   the recursion above whether the objects are triangles, lattice directions or fractions. If `S`
@@ -126,7 +139,7 @@ interval, never per `n`.
   itself falls, and the lookup `large[n / v]` is valid only because `v` came from `V(n)`. Use an
   exact integer square root (`math.isqrt`), never `int(n ** 0.5)`.
 - **It composes.** A blocked sum inside a blocked sum (0153, 0926) or inside a DFS over factorisation
-  shapes (0272, 0501, 0642) stays cheap as long as each layer's arguments stay inside some `V(m)`.
+  shapes (0272, 0452, 0501, 0642) stays cheap as long as each layer's arguments stay inside some `V(m)`.
   Problems that look like they need `O(n)` work often need `O(√n)` work at `O(√n)` points — and the
   question to ask is how much of that work is shared.
 
