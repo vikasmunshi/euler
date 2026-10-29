@@ -1,5 +1,5 @@
 <!-- tags: [partizan-game] -->
-<!-- status: final 2026-10-12T14:22Z -->
+<!-- status: final -->
 # Partizan game
 
 A [partizan game](https://en.wikipedia.org/wiki/Partizan_game) is a two-player game of perfect
@@ -8,10 +8,10 @@ delete a $1$ and the other a $0$, or one cuts blue edges and the other red. That
 removes the main shortcut of the
 [impartial](/topics/domain/impartial-game) theory, the Nim heap. In its place comes a richer
 algebra of game values, where one component can be worth $\tfrac12$, $-3$, $*$ or $\uparrow$. The
-problems below are digit-deletion games played on a sum of many numbers. Each asks a question that
-no search could answer at full size: how many free passes one player needs, or how many starting
-positions are exactly balanced. The work is to translate the question into a statement about game
-values, and then make those values cheap.
+problems below are all sums of many small games: stacks of coins, or numbers whose digits are
+deleted one at a time. Each asks a question that no search could answer at full size: how many
+starting arrangements are exactly balanced, or how many free passes one player needs. The work is
+to translate the question into a statement about game values, and then make those values cheap.
 
 ## The idea: Left, Right, and four outcomes
 
@@ -58,12 +58,24 @@ advantage. So values have to live in a partially ordered group, not in the nim-n
 
 ## How the problems use it
 
-Both problems reach the values by the same route. The position is a sum over independent numbers,
-so the board's value is a weighted sum of single-number values. Each single-number value is a
-[dynamic program](/topics/technique/dynamic-programming) over its shorter digit strings, because
-every move removes one digit. What differs is *what kind* of value turns up, and so what question
-the sum can answer.
+All three problems reach the values by the same route. The position is a sum over independent
+pieces, so the board's value is a sum of piece values. Each piece value comes from its own small
+recursion, because every move shrinks one piece. What differs is *what kind* of value turns up, and
+so what question the sum can answer.
 
+- **Problem 860** is the cleanest case. Two players remove gold or silver coins from stacks of two,
+  taking everything above the chosen coin. That is
+  [blue-red Hackenbush](/topics/domain/hackenbush) on stalks, and every stalk is a
+  surreal number. There are only four stacks, so their values can be worked by hand. Two of a
+  colour are worth $\pm 2$. A gold coin under a silver one gives Gary one move, which empties the
+  stack, and gives Sally one move, which leaves a lone gold coin worth $1$: the value is
+  $\{0 \mid 1\} = \tfrac12$, and the reverse stack is $-\tfrac12$. "Fair" means whoever moves
+  first loses, which is value $0$. So the game disappears, and what is left is a count of ordered
+  sequences of $\pm 2, \pm\tfrac12$ that sum to zero. That count is the constant term of a power
+  of a four-term [generating function](/topics/domain/generating-function), and that Laurent
+  polynomial happens to factor, which collapses the count to a single sum of binomial products.
+  The game theory does one paragraph of work, and the rest is combinatorics, a clear case of
+  [reducing before coding](/topics/takeaway/reduce-before-coding).
 - **Problem 882** asks how many passes Right needs to win. A pass is a free move for Right, so
   $k$ passes add the integer game $-k$. The question becomes the smallest $k$ that makes the total
   a Right win with Left to move. That is a sign condition on $V - k$. It is tractable only because
@@ -73,7 +85,7 @@ the sum can answer.
   value is $0$. Each player holds two numbers, and a number on the opponent's paper is the same
   game with the roles swapped, so the setting's value is $G(a_1) + G(a_2) - G(b_1) - G(b_2)$.
   Fairness is then an *equality of pair sums*, and the count becomes a collision count over a
-  table of values. The catch is that one digit can be
+  table of values. It is 860's question again, but over a far larger table of values. The catch is that one digit can be
   removed by either player. That shared move produces infinitesimals such as
   [star](https://en.wikipedia.org/wiki/Star_(game_theory)) and
   [up](https://en.wikipedia.org/wiki/Up_(game_theory)), so values are no longer plain numbers.
@@ -89,11 +101,16 @@ the sum can answer.
 - **Look for the sum.** If each move touches exactly one part of the position, you never need the
   joint state. Compute one component's value, then add. A board of thousands of numbers turns
   into one table plus one sum.
+- **"Fair" means zero, and zero turns a game into a count.** Once each piece has a value, "the
+  first player loses whoever it is" is a sum equal to $0$. Counting such positions is counting
+  zero-sum sequences (860) or colliding pair sums (963). Both are combinatorics problems with no
+  game left in them.
 - **Use negation for mirrored roles.** A component that belongs to the other player, or where the
   colours are swapped, is the same game negated. In 963 that is why the opponent's numbers enter
   with a minus sign. It also reuses 882's table with the colours swapped.
 - **Expect numbers when moves are private, and trouble when they are shared.** If each move uses
-  up something only the mover owns, values tend to be numbers and nobody wants to move. A move
+  up something only the mover owns, values tend to be numbers and nobody wants to move. That is
+  why 860 and 882 stay inside the surreals. A move
   either player can make is where $*$, $\uparrow$ and hot games come from.
 - **Build a small engine before you build on a pattern.** Exact values with a few lines of
   [`Fraction`](https://docs.python.org/3/library/fractions.html) code, or a canonical-form engine
