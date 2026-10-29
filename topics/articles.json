@@ -1148,12 +1148,12 @@
       "path": "domain/enumerative-combinatorics",
       "title": "Enumerative combinatorics",
       "status": "final",
-      "written": "2026-10-18T12:42Z",
+      "written": "2026-10-29T07:16Z",
       "solved": 4,
       "problems": 21,
       "tags": ["enumerative-combinatorics"],
       "refs": ["p0114", "p0126", "p0239", "p0480", "p0502", "p0626", "p0631", "p0657", "p0658", "p0696", "p0698", "p0709", "p0762", "p0763", "p0781", "p0818", "p0849", "p0873", "p0907", "p0936", "p0987"],
-      "solved_after": ["p0698"]
+      "solved_after": []
     },
     {
       "path": "domain/epistemic-logic",

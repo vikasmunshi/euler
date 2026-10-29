@@ -1,5 +1,5 @@
 <!-- tags: [enumerative-combinatorics] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:16Z -->
 # Enumerative combinatorics
 
 [Enumerative combinatorics](https://en.wikipedia.org/wiki/Enumerative_combinatorics) is the part of
