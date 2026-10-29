@@ -1,5 +1,5 @@
 <!-- tags: [algorithm-beats-language] -->
-<!-- status: final 2026-07-23T12:21Z -->
+<!-- status: final -->
 # Algorithm beats language
 
 Reach for a faster language and you win a constant factor — a program that runs
@@ -60,6 +60,33 @@ about 5,000 operations and finishes instantly in either language. When the naive
 class is exponential, the language is not a variable in the equation — only the
 algorithm is.
 
+The same wall appears when the input is simply too large to touch.
+[$5$-smooth Totients](/solutions/0516/) sums every $n \le 10^{12}$ whose
+[totient](https://en.wikipedia.org/wiki/Euler%27s_totient_function) is a
+[Hamming number](https://en.wikipedia.org/wiki/Regular_number). A loop over
+$10^{12}$ integers is hours of work even in C. The product formula for $\phi$
+turns the question around: an admissible $n$ is a Hamming number times a product
+of *distinct* primes $q$ with $q - 1$ Hamming. There are a few thousand Hamming
+numbers below the limit and a few million such products, so the search shrinks
+from a trillion candidates to a few million. After that change Python finishes in
+about a second. [High Powers of Irrational Numbers](/solutions/0721/) goes
+further. Each term is the floor of a number with trillions of digits, which no
+language could even write down. The
+[conjugate](https://en.wikipedia.org/wiki/Conjugate_(square_roots)) $c - \sqrt a$
+lies in $[0, 1)$, and that turns the floor into an integer power sum. The power
+sum can be computed modulo a prime by
+[square-and-multiply](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) in
+$\mathbb{Z}_p[\sqrt a]$, at a cost of $O(\log n)$ per term. In both problems the
+mathematics produces the algorithm, and no choice of language could have stood in
+for it.
+
+Those two problems also show the constant factor behaving exactly as advertised
+once the class is fixed. Problem 721's timings at $n = 5 \times 10^6$ and
+$n = 10^7$ double in *both* languages, Python from ~18 s to ~38 s and C from
+~2.2 s to ~4.4 s. The ratio between them stays at roughly 8×. The algorithm
+decides how the time grows, and the language only shifts the whole curve up or
+down.
+
 ## How to reason about it
 
 - **Fix the complexity class before you touch the language.** When a solution is
@@ -72,7 +99,14 @@ algorithm is.
   is worth chasing once the algorithm is right and you need the last 10× — which
   is exactly why several problems here carry a C sibling of a Python solution that
   already runs. C earns its place *below* the crossover, polishing a good
-  algorithm; it cannot lift a bad one over the line.
+  algorithm; it cannot lift a bad one over the line. Problem 516's C port is about
+  24× faster than its Python, which is worth having, but only after the
+  restructuring had already removed a factor in the hundreds of thousands. The
+  constant can also be reduced without leaving Python. Problem 721 runs every
+  exponentiation at once as
+  [vectorised](https://en.wikipedia.org/wiki/Array_programming)
+  [NumPy](https://numpy.org/) array operations, which moves the inner loop into
+  compiled code. That is the same lever C pulls.
 - **Beware the fast-language trap.** The danger is a poor algorithm that a fast
   language keeps *just* fast enough to look acceptable on the small example, then
   falls off a cliff on the real input. The C trial division above is exactly that:
