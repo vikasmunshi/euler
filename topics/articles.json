@@ -4800,12 +4800,12 @@
       "path": "technique/branch-and-bound",
       "title": "Branch and bound",
       "status": "final",
-      "written": "2026-10-17T06:41Z",
+      "written": "2026-10-29T12:13Z",
       "solved": 8,
       "problems": 8,
       "tags": ["branch-and-bound"],
       "refs": ["p0088_s0", "p0110_s0", "p0139_s1", "p0170_s0", "p0241_s0", "p0254_s0", "p0473_s0", "p0755_s0"],
-      "solved_after": ["p0473"]
+      "solved_after": []
     },
     {
       "path": "technique/branch-and-bound-search",
