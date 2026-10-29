@@ -6120,12 +6120,12 @@
       "path": "technique/integer-factorization",
       "title": "Integer factorization",
       "status": "final",
-      "written": "2026-08-03T11:56Z",
+      "written": "2026-10-29T07:01Z",
       "solved": 5,
       "problems": 5,
       "tags": ["integer-factorization"],
       "refs": ["p0088_s0", "p0251_s0", "p0271_s0", "p0357_s0", "p0443_s0"],
-      "solved_after": ["p0271", "p0443"]
+      "solved_after": []
     },
     {
       "path": "technique/integer-overflow",
