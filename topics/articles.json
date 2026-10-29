@@ -4052,12 +4052,12 @@
       "path": "number-theory/euler",
       "title": "Euler",
       "status": "final",
-      "written": "2026-10-15T10:48Z",
+      "written": "2026-10-29T02:10Z",
       "solved": 35,
       "problems": 67,
       "tags": ["eulers-totient-function", "partition-number-theory", "pentagonal-number-theorem", "continued-fraction", "amicable-numbers", "eulerian-path", "eulerian-number", "linear-sieve"],
       "refs": ["p0021", "p0031", "p0045", "p0057", "p0064", "p0065", "p0066", "p0069", "p0070", "p0072", "p0076", "p0077", "p0078", "p0095", "p0153_s0", "p0158_s0", "p0175", "p0180", "p0181", "p0182", "p0188", "p0192", "p0214", "p0228", "p0243", "p0245", "p0248", "p0289", "p0302", "p0325", "p0333", "p0337", "p0342", "p0351", "p0374", "p0432", "p0441", "p0448", "p0478", "p0512", "p0516", "p0531", "p0533", "p0549_s0", "p0591", "p0614", "p0618", "p0625", "p0629", "p0652", "p0656", "p0688", "p0715", "p0745_s0", "p0756", "p0772", "p0799", "p0840", "p0859", "p0890", "p0911", "p0922", "p0931", "p0939", "p0946", "p0958", "p1010"],
-      "solved_after": ["p0512", "p0516"]
+      "solved_after": []
     },
     {
       "path": "number-theory/modular-arithmetic",
