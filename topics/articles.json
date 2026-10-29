@@ -6626,12 +6626,12 @@
       "path": "technique/memoization",
       "title": "Memoization",
       "status": "final",
-      "written": "2026-10-16T15:20Z",
+      "written": "2026-10-29T07:05Z",
       "solved": 21,
       "problems": 21,
       "tags": ["memoization"],
       "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0060_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0092_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0153_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0549_s0", "p0641_s0", "p0755_s0", "p0887_s0", "p0943_s0", "p1000_s0"],
-      "solved_after": ["p0641", "p0887"]
+      "solved_after": []
     },
     {
       "path": "technique/mersenne-twister",
