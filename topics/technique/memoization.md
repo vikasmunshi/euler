@@ -1,5 +1,5 @@
 <!-- tags: [memoization] -->
-<!-- status: final 2026-10-16T15:20Z -->
+<!-- status: final -->
 # Memoization
 
 [Memoization](https://en.wikipedia.org/wiki/Memoization) is the substitution of a table lookup for a
@@ -35,9 +35,9 @@ that collapse.
 **Overlapping subproblems in a recurrence.** The dominant source, and the reason this tag and
 [dynamic programming](/topics/technique/dynamic-programming) overlap so heavily. `F(n)` calls
 `F(n-1)` and `F(n-k-1)`; the call tree is exponential, the set of distinct arguments is $O(n)$.
-Problems 76, 77, 115, 161, 259, 301, 755 and 1000 are all this shape, differing only in what the
-state is — a remaining amount and a largest allowed part, a cell and a frontier mask, a position and
-a digit-DP carry.
+Problems 76, 77, 115, 161, 259, 301, 755, 887 and 1000 are all this shape, differing only in what
+the state is — a remaining amount and a largest allowed part, a cell and a frontier mask, a position
+and a digit-DP carry, a tree height and a slack.
 
 **A functional graph.** When every value has exactly one successor, chains merge and then share a
 tail. Problems 14 ([Collatz](/topics/domain/collatz-conjecture)), 74 (digit factorials) and 92
@@ -48,7 +48,11 @@ modest set of distinct nodes. Cache per node and each start costs amortised $O(1
 **Repeated arguments in a sweep.** Sometimes the repetition is a theorem rather than a recursion.
 Problem 153 memoises the divisor-sum summatory $D(x)$ in a plain dict because the nested
 [quotient blocking](/topics/technique/quotient-blocking) only ever evaluates it at values of the
-form $\lfloor N/k \rfloor$, of which there are $O(\sqrt N)$ however large $N$ is. Problem 549 keeps a
+form $\lfloor N/k \rfloor$, of which there are $O(\sqrt N)$ however large $N$ is. Problem 641 leans
+on the same fact for the [Mertens function](https://en.wikipedia.org/wiki/Mertens_function): the
+recursion $M(x) = 1 - \sum_{k \ge 2} M(\lfloor x/k \rfloor)$ only ever recurses on quotients of $x$,
+and a quotient of a quotient is again a quotient, so evaluating $M$ near $10^9$ fills only a few
+hundred memo entries before it bottoms out. Problem 549 keeps a
 per-prime list of $s(p^e)$, extended on demand as larger exponents appear, because the same prime
 powers recur all the way up a linear sieve. Neither cache is a dynamic program; both convert a
 quadratic-looking sweep into a linear one.
@@ -81,13 +85,18 @@ covers key construction, `cache_info()`, and the hazards specific to the decorat
 **An explicit dict.** What problem 153 does for $D(x)$: a `dict` in the enclosing scope, probed with
 `.get` and filled on a miss. Worth the four lines when the cache is not merely an accelerator but
 part of the algorithm's story — you can size it, inspect it, seed it, or clear it at a boundary the
-decorator does not know about.
+decorator does not know about. Seeding can mean a whole second tier. Problem 641's `mertens_at` reads
+any argument up to the sieve bound $L$ straight from a prefix-sum array of the Möbius sieve, and
+uses the dict only above $L$. The array is the recursion's base case, and choosing $L$ above
+$x^{2/3}$ is what keeps the dict tier down to a few hundred keys.
 
 **An array — direct addressing.** When the key is a small integer, skip hashing entirely and index.
 Problem 74's C sibling caches chain lengths in a flat `calloc`'d array of 3,000,000 `int`s (every
 reachable digit-factorial value stays below $7 \times 9! = 2540160$), using `0` as the "absent"
 marker; problem 115's C sibling keeps a `cache[]` alongside a parallel `cache_valid[]` flag array,
-which is what you need when `0` is a legitimate stored value. This is
+which is what you need when `0` is a legitimate stored value. Problem 887's C port is the in-between
+case: a fixed $64 \times 64$ table where `0` can safely mean "empty", because every capacity it
+stores is at least 1. This is
 [direct addressing](/topics/technique/direct-addressing), and it is the reason the C solutions here
 are typically an order of magnitude faster than the Python ones rather than merely twice as fast —
 no hashing, no boxing, perfect
@@ -161,7 +170,11 @@ memo is valid for one pair only, and the Python solution rebuilds it inside the 
 roughly fifty thousand times per call. The C port does not free and reallocate fifty thousand
 tables. It stamps every slot with a generation counter and bumps the counter between pairs, so a
 slot from an earlier pair reads as empty. That invalidates the whole cache in $O(1)$ with no clearing
-pass.
+pass. Problem 887 is the opposite case, and the same rule explains it. It sums over every bound $d$
+with a single memo, created in `solve()` and shared across the whole loop over $d$. That is sound
+because $d$ never hides in the function: it enters only as the starting slack, which is part of
+the key. A table can outlive a loop iteration exactly when everything that iteration changes is
+in the key.
 
 ## How to reason about it
 
@@ -173,6 +186,13 @@ pass.
   entries that should have merged. To find the key, ask what *fixes* the result, not what
   describes it. Problem 943's subtrees look like they depend on (value, height), but they actually
   depend on a parity mask as well.
+- **Let the base cases bound the key space.** An argument that can grow without limit does not have
+  to make the table grow too. Problem 887's tree capacity $F(h, c)$ recurses with a right-hand slack
+  of $c - 1 + F(h-1, c-1)$, which grows exponentially. But once $c \ge h$ the constraint stops
+  binding and $F = 2^h$, so that base case returns before touching the table. Only states with
+  $0 < c < h$ are ever stored, $O(H^2)$ of them for $H = O(\log N)$, and the whole computation
+  uses a few hundred entries. Look for the point where an argument saturates and stop there, so
+  the saturated values never become keys.
 - **Prefer an array when the keys are small integers.** A `dict` is the general answer; an indexed
   array is the fast one, and in C it is usually the only one you get without writing a hash table
   yourself.
