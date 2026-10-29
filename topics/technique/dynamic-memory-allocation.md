@@ -1,5 +1,5 @@
 <!-- tags: [dynamic-memory-allocation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T12:16Z -->
 # Dynamic memory allocation
 
 [Dynamic memory allocation](https://en.wikipedia.org/wiki/Dynamic_memory_allocation) is what the C
