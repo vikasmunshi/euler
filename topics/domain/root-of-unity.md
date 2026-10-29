@@ -1,5 +1,5 @@
 <!-- tags: [root-of-unity] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T08:01Z -->
 # Root of unity
 
 An *n*th [root of unity](https://en.wikipedia.org/wiki/Root_of_unity) is a solution of `zⁿ = 1`:

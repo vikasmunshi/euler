@@ -3216,12 +3216,12 @@
       "path": "domain/root-of-unity",
       "title": "Root of unity",
       "status": "final",
-      "written": "2026-08-04T08:47Z",
+      "written": "2026-10-29T08:01Z",
       "solved": 4,
       "problems": 4,
       "tags": ["root-of-unity"],
       "refs": ["p0208", "p0271", "p0421", "p0768"],
-      "solved_after": ["p0271"]
+      "solved_after": []
     },
     {
       "path": "domain/roulette-curve",
