@@ -4734,12 +4734,12 @@
       "path": "technique/bisect",
       "title": "bisect",
       "status": "final",
-      "written": "2026-10-18T12:31Z",
+      "written": "2026-10-29T12:12Z",
       "solved": 4,
       "problems": 4,
       "tags": ["bisect"],
       "refs": ["p0134_s0", "p0272_s0", "p0516_s0", "p0943_s0"],
-      "solved_after": ["p0516"]
+      "solved_after": []
     },
     {
       "path": "technique/bit-array",
