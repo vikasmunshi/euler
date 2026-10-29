@@ -1,5 +1,5 @@
 <!-- tags: [trial-division] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T02:12Z -->
 # Primes
 
 Most of the problems below are not *about* primes in the way problem 7 is. Nobody asks for the

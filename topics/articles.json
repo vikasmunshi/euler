@@ -4096,12 +4096,12 @@
       "path": "number-theory/primes",
       "title": "Primes",
       "status": "final",
-      "written": "2026-10-12T14:50Z",
+      "written": "2026-10-29T02:12Z",
       "solved": 41,
       "problems": 41,
       "tags": ["trial-division"],
       "refs": ["p0003_s0", "p0010_s3", "p0012_s0", "p0012_s1", "p0021_s0", "p0023_s1", "p0027_s0", "p0029_s0", "p0029_s1", "p0041_s0", "p0046_s0", "p0047_s0", "p0051_s0", "p0058_s0", "p0060_s0", "p0069_s0", "p0108_s0", "p0118_s0", "p0128_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0152_s0", "p0157_s0", "p0170_s0", "p0176_s0", "p0188_s0", "p0202_s0", "p0221_s0", "p0234_s0", "p0243_s0", "p0248_s0", "p0251_s0", "p0271_s0", "p0293_s0", "p0357_s0", "p0359_s0", "p0478_s0", "p0545_s0", "p0694_s0", "p0853_s0", "p0926_s0", "p0932_s0"],
-      "solved_after": ["p0271", "p0359"]
+      "solved_after": []
     },
     {
       "path": "number-theory/primes-in-pascals-triangle",
