@@ -1,5 +1,5 @@
 <!-- tags: [summation] -->
-<!-- status: final 2026-10-16T07:18Z -->
+<!-- status: final -->
 # Summation
 
 [Summation](https://en.wikipedia.org/wiki/Summation) is the most deceptive domain tag in the
@@ -55,6 +55,15 @@ purest form, and both are found by
 [reducing algebraically before coding](/topics/takeaway/reduce-before-coding) rather than by
 optimising a loop that already exists.
 
+The closed form is not always hiding in the statement's algebra. Problem 340 defines a
+McCarthy-91-style function by four nested self-calls and asks for its sum over some $10^{17}$
+arguments; read literally it is a recursion you cannot even evaluate once. A memoised brute force on
+small parameters shows the shape instead: cut the range into blocks of width $a$ counted down from
+the threshold, and $F$ is the identity plus a constant plus a fixed step per block. Once that is
+proved by induction on the block, the sum is Gauss's triangular number twice over — once for the
+identity, once for the block indices — plus a correction for the one partial block. Tabulate
+small cases, guess the piecewise-linear shape, prove it, then sum the shape.
+
 Watch the integer arithmetic when you do it. `//2` and `//6` in those formulas are exact only
 because the numerator is provably divisible; under a modulus they are not divisions at all but
 multiplications by a [modular inverse](/topics/technique/modular-multiplicative-inverse-application),
@@ -99,11 +108,31 @@ seconds. Recursing on the same identity (a summatory function of a
 [multiplicative function](/topics/domain/multiplicative-function) expressed in terms of itself at
 $N/d$) takes it further still.
 
+Problem 512 shows both halves earning their keep. Its $f(n)$ is an alternating sum of
+$\varphi(n^i)$ modulo $n+1$, and it is a sum only in appearance: $\varphi(n^i) = n^{i-1}\varphi(n)$
+and $n \equiv -1$, so the terms cancel in pairs and $f(n)$ is $\varphi(n)$ for odd $n$, zero for
+even. What remains is the summatory totient restricted to odd arguments. The unrestricted
+$\Phi(N)$ falls to the recursion above,
+$\Phi(v) = v(v+1)/2 - \sum_{d \ge 2} \Phi(\lfloor v/d \rfloor)$, blocked on quotients and seeded
+by a sieve below $N^{2/3}$. The odd restriction then
+costs almost nothing: how $\varphi$ treats a factor of two peels the even terms off as
+$\sum_k \Phi(\lfloor N/2^k \rfloor)$, and every one of those arguments is a floor quotient the
+recursion has already computed. Choose restrictions that land on values you already have.
+
 The same reflex has a non-arithmetic form: **count contributions instead of objects**. Problem 760
 sums a bitwise expression over a triangular range to $10^{18}$; you do not sum over pairs, you sum
 over *bit positions*, counting how many pairs set each bit. Problems 684, 685 and 776 do it with
 decimal digits. Whenever the terms decompose into independent small pieces, invert the loop so the
 outer index runs over pieces — there are sixty of those and $10^{18}$ of the other.
+
+Problem 739 counts contributions through a whole *process*. It applies "drop the first term, take
+prefix sums" to a sequence until one term is left. That operation is linear, so the survivor is
+a fixed weighted sum of the starting terms, and each weight counts the paths a unit can take from
+its starting position to the apex. The paths are monotone lattice paths that may not cross a
+diagonal, so the weights are ballot numbers (the all-ones example ending on a Catalan number gives
+it away). An $n^2$ triangle of repeated summations becomes a single $O(n)$ sum of binomial-weighted
+terms. Under a prime modulus, writing those binomials as running prefix and suffix products means
+only one modular inverse is needed, at the very end.
 
 ### Prefix sums
 
@@ -159,8 +188,7 @@ identical children, the sequence of their masks repeats after a short prefix, so
 counting whole periods instead of walking them.
 
 Problems 884 and 672 sum a step-count that is constant on long blocks and recurse on the sub-range
-each block leaves behind; problem 739 iterates partial summation until a binomial identity in the
-triangle falls out. The general instruction is the same one that governs
+each block leaves behind. The general instruction is the same one that governs
 [recurrence relations](/topics/domain/recurrence-relation): recur on the cheap shadow of the
 structure — a block, a bit, a subtree shape — never on the elements themselves.
 
@@ -182,7 +210,9 @@ and mind what it changes:
 - **Division becomes inversion.** `n * (n + 1) // 2` is invalid under a modulus. Multiply by the
   [modular inverse](/topics/technique/modular-multiplicative-inverse-application) of 2, and note
   that this needs the modulus to be coprime to the divisor — which is why some statements name a
-  prime modulus and others (problem 830's $83^3 89^3 97^3$) deliberately do not.
+  prime modulus and others (problem 830's $83^3 89^3 97^3$) deliberately do not. A
+  "last nine digits" modulus is $10^9$, which is even, so 2 has no inverse at all; problem 340's
+  triangular numbers survive by halving whichever factor is even *before* reducing.
 - **Products overflow before sums do.** Two residues below $10^9$ multiply to nearly $10^{18}$,
   which fits `int64` — barely. Add anything, or use a larger modulus, and it does not.
   [Watch the integer width](/topics/takeaway/watch-integer-width): in C this is what
