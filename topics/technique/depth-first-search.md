@@ -1,5 +1,5 @@
 <!-- tags: [depth-first-search] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T02:15Z -->
 # Depth-first search
 
 [Depth-first search](https://en.wikipedia.org/wiki/Depth-first_search) (DFS) explores a

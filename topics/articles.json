@@ -5207,12 +5207,12 @@
       "path": "technique/depth-first-search",
       "title": "Depth-first search",
       "status": "final",
-      "written": "2026-10-15T10:41Z",
+      "written": "2026-10-29T02:15Z",
       "solved": 26,
       "problems": 26,
       "tags": ["depth-first-search"],
       "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0642_s0"],
-      "solved_after": ["p0473", "p0516"]
+      "solved_after": []
     },
     {
       "path": "technique/descartes-circle-theorem",
