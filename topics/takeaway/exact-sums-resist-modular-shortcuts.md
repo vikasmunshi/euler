@@ -1,13 +1,15 @@
 <!-- tags: [exact-sums-resist-modular-shortcuts] -->
-<!-- status: final 2026-08-06T21:29Z -->
+<!-- status: final -->
 # Exact sums resist modular shortcuts
 
-A per-item checksum, hash or score is defined "modulo $10^9+7$", and the question asks for the
-**sum** of them. It reads like a modular problem, and the standard modular move is right there:
-carry a $(\text{count},\ \text{running total})$ pair through the search or the dynamic program and
-reduce as you go. That computation is correct, cheap, and answers a different question. Once each
-term has been reduced individually, the total you want lives *outside* the modulus, and no amount
-of arithmetic inside it will reach it.
+A per-item checksum, hash or score is defined "modulo $10^9+7$" — or the items simply *are*
+residues, the solutions of some congruence counted as integers in $[0, n)$ — and the question asks
+for the **sum** of them. It reads like a modular problem, and the standard modular move is right
+there: carry a $(\text{count},\ \text{running total})$ pair through the search or the dynamic
+program, or factor the sum through the structure of the residues, and reduce as you go. That
+computation is correct, cheap, and answers a different question. Once each term has been reduced
+individually, the total you want lives *outside* the modulus, and no amount of arithmetic inside
+it will reach it.
 
 ## The idea
 
@@ -52,6 +54,31 @@ paths have to be produced individually, which here is affordable: shortest-path 
 graph stay in the thousands, so the second phase walks a handful of branches while the first phase
 touches all hundred thousand states.
 
+## The same trap, without a hash
+
+Problem 271 arrives at the trap from pure number theory. $S(n)$ is the sum of the $x$ in
+$(1, n)$ with $x^3 \equiv 1 \pmod n$, for an $n$ that turns out to be the primorial of the first
+fourteen primes. The [Chinese remainder theorem](/topics/technique/chinese-remainder-theorem)
+splits the congruence across the prime factors: every solution is $x = \sum_i r_i e_i \bmod n$,
+one cube root of unity $r_i$ chosen modulo each prime $q_i$, glued by the CRT idempotents $e_i$
+($\equiv 1 \bmod q_i$, $\equiv 0$ modulo the rest). Primes $\equiv 1 \pmod 3$ contribute three
+roots, the others only $1$, so six productive primes give $3^6 = 729$ solutions.
+
+Here the shortcut is not a DP but an algebraic identity, and it is even more seductive. Summed over
+every combination, $\sum_i r_i e_i$ separates: each $e_i$ is multiplied by the sum of its own
+roots times the number of choices at the other primes, and the
+[cyclotomic](/topics/domain/cyclotomic-polynomial) fact $1 + \omega + \omega^2 \equiv 0$ kills
+the productive terms outright. That is a closed form in $O(t)$ — for $S(n) \bmod n$. But each
+$x$ is the *lift* of its CRT combination to $[0, n)$, the reduction happens per solution, and the
+true $S(n)$ is hundreds of times larger than $n$. The 729 wrap counts are exactly what the closed
+form cannot see, so the solution builds the residues one combination at a time — a list of partial
+sums grown prime by prime, each reduced mod $n$ as it branches, then added up as plain integers.
+
+The two problems fail the same way for different reasons. In 244 the per-term reduction is a rule
+of the hash; in 271 it is the definition of "the integers $x$ with $1 < x < n$". Either way the
+quantity summed is a representative, not a residue class, and representatives do not add like
+classes.
+
 ## The escapes that do not work
 
 - **A wider modulus, or 128-bit, or Python's unbounded integers.** These help you hold the *sum*
@@ -94,12 +121,13 @@ materialised. Enumerating the terms does not mean recomputing each from scratch.
   x_i \rfloor$, sum of rounded scores. Any per-term *presentation* step — mod, floor, round,
   truncate, format — breaks the algebra that made the aggregate cheap.
 - **If the answer is exact, the term count is part of your complexity.** Before designing anything,
-  bound how many terms there are. A few thousand paths is a loop; $10^{12}$ paths means you need
-  the residue-multiplicity merge, or the problem intends something else entirely.
+  bound how many terms there are. A few thousand paths, or $3^t$ CRT combinations for small $t$,
+  is a loop; $10^{12}$ terms means you need the residue-multiplicity merge, or the problem intends
+  something else entirely.
 - **Size the accumulator for $N \cdot m$, not $m$.** The whole point is that the total is not
-  reduced. In C that is `unsigned long long` or `__int128`; Python hides the issue and a port will
-  not.
-- **Keep the modular DP as a cross-check.** It is cheap, it is easy to get right, and it gives you
+  reduced. In C that is `unsigned long long` or `__int128` — 271's modulus alone needs 54 bits,
+  and its C port sums in 128 bits because some test inputs push the total past $2^{64}$; Python hides the issue and a port will not.
+- **Keep the modular shortcut as a cross-check** — the DP in 244, the closed form in 271. It is cheap, it is easy to get right, and it gives you
   the exact answer modulo $m$ by an independent route. If your enumerated total disagrees with it
   mod $m$, the enumeration is wrong; if they agree, you have checked everything but the wrap count.
 
