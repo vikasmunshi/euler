@@ -4360,12 +4360,12 @@
       "path": "takeaway/rearrange-to-avoid-cancellation",
       "title": "Rearrange a formula to avoid cancellation",
       "status": "final",
-      "written": "2026-08-06T22:09Z",
+      "written": "2026-10-29T12:07Z",
       "solved": 2,
       "problems": 2,
       "tags": ["rearrange-to-avoid-cancellation"],
       "refs": ["p0247", "p0318"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "takeaway/reduce-before-coding",
