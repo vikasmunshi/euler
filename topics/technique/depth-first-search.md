@@ -1,5 +1,5 @@
 <!-- tags: [depth-first-search] -->
-<!-- status: final 2026-10-15T10:41Z -->
+<!-- status: final -->
 # Depth-first search
 
 [Depth-first search](https://en.wikipedia.org/wiki/Depth-first_search) (DFS) explores a
@@ -9,7 +9,7 @@ is almost always something slightly different and more useful — a way to *enum
 constructed objects*. There is no graph on disk. The tree is implicit: a node is a partly
 built object, an edge is one more choice, and a leaf is a finished candidate. Sets of
 primes, factorisations, addition chains, digit strings, binary circles, tilings,
-Pythagorean triples, squares packed under a curve — the problems below all build their
+Pythagorean triples, squares packed under a curve, palindromes in base $\varphi$ — the problems below all build their
 answers that way.
 
 ## The idea — a tree you never store
@@ -50,6 +50,11 @@ branch is dead. In problem 60's clique of pairwise-concatenable primes the same 
 as `if prime <= current_list[-1]: continue` — members are added in ascending order, so a
 five-element set is built once rather than $5!$ times, and the first clique found is
 automatically the minimal one.
+
+The order can also enforce a rule between neighbouring choices. Problem 473's digit pairs must
+never sit next to each other, and that is built into the moves themselves. Skipping pair $k$
+moves on to $k-1$; taking it jumps to $k-2$. No illegal set can be built at all, so there is
+nothing to check and nothing to throw away.
 
 The node need not carry what has been built; it can carry **what is left to build**.
 Problem 248 inverts Euler's totient — every $n$ with $\varphi(n) = 13!$ — and its node is
@@ -100,7 +105,7 @@ cannot be written.
 
 A bare DFS over these trees is exponential and useless. What makes it finish is the test
 that kills a subtree before entering it, and that test is where the real thinking goes.
-Three flavours recur:
+Four flavours recur:
 
 - **Monotone feasibility.** The partial object only ever gets bigger, so the moment it
   breaks the bound, stop. Multiplying primes into a smooth number (204) or a powerful
@@ -117,6 +122,19 @@ Three flavours recur:
   with the largest unused digits to get an upper bound; problem 103 adds, to the partial sum
   of a special set, the smallest total the remaining elements could possibly contribute, and
   breaks when even that meets the best sum already found.
+- **Reachability window.** Some searches need a running quantity to land on an exact
+  target, and it can move in both directions. Problem 473 sums palindromes in the golden-ratio
+  base: each palindrome is a set of mirrored digit pairs $\varphi^k + \varphi^{-(k+1)}$, every pair
+  adds a $\pm F\sqrt5$ term, and the total is an integer only when those $\sqrt5$ terms add to
+  exactly zero. The search decides pairs from the largest $k$ down. Prefix sums record the most
+  the remaining pairs could still push the balance up, and the most they could pull it down. Any
+  node whose balance lies outside that window is dead. The Fibonacci coefficients grow
+  geometrically, so once a large pair is taken the window closes around a narrow band of small
+  pairs, and the search costs about as much as its output rather than the full Fibonacci-sized
+  count of subsets. Its other prune, a floating-point value bound, shows what *admissible*
+  means in practice. The float is only allowed to cut a branch, never to accept a leaf, and it
+  carries a little slack so rounding cannot discard a real hit. Acceptance happens in exact
+  integers.
 - **Algebraic.** The cheapest prune is one the mathematics hands you. Problem 484 notices
   that a certain multiplicative factor is zero for particular exponents and drops the whole
   subtree, since every deeper term carries the zero. Problem 241's search over abundancy
@@ -154,8 +172,16 @@ into that level at all** — replacing it by arithmetic over the whole fan-out a
   free cofactor below $T/p$ are then summed together, with the large $p$ grouped by the
   value of $\lfloor T/p \rfloor$ and priced by prefix sums over primes and over
   admissible cofactors. The deepest level — by far the widest — is never enumerated.
+- **Sum a free factor from a table.** Problem 516 sums the $n \le L$ whose totient is
+  5-smooth. The totient product formula splits every such $n$ uniquely as $h \cdot m$: $h$ is a
+  Hamming number $2^a3^b5^c$, and $m$ is a square-free product of primes $q > 5$ with $q-1$
+  Hamming. Only $m$ has structure worth searching. A 204-style DFS over the ascending admissible
+  primes lists every $m$. The $h$ side is a complete, independent level: every Hamming number up to
+  $L/m$. A sorted Hamming list with prefix sums prices that level with one binary search, so it
+  contributes $m \cdot \sum_{h \le L/m} h$ with no further descent. The DFS visits a few million
+  products, and none of the far more numerous $n$.
 
-The pattern is the same in both: let the DFS do the combinatorial part, where the
+The pattern is the same in all three: let the DFS do the combinatorial part, where the
 choices genuinely interact, and hand the final, independent choice to a formula or a
 table. See [closed form over iteration](/topics/takeaway/closed-form-over-iteration).
 
