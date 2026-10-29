@@ -5614,12 +5614,12 @@
       "path": "technique/fermats-little-theorem-application",
       "title": "Fermat's little theorem (application)",
       "status": "final",
-      "written": "2026-08-04T07:24Z",
+      "written": "2026-10-29T01:56Z",
       "solved": 9,
       "problems": 9,
       "tags": ["fermats-little-theorem-application"],
       "refs": ["p0133_s0", "p0421_s0", "p0650_s0", "p0675_s0", "p0739_s0", "p0743_s0", "p0822_s0", "p0860_s0", "p0926_s0"],
-      "solved_after": ["p0675", "p0739", "p0822", "p0860"]
+      "solved_after": []
     },
     {
       "path": "technique/fibonacci-fast-doubling",
