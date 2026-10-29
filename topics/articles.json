@@ -2875,12 +2875,12 @@
       "path": "domain/prime-counting-function",
       "title": "Prime-counting function",
       "status": "final",
-      "written": "2026-10-17T07:35Z",
+      "written": "2026-10-29T02:07Z",
       "solved": 7,
       "problems": 13,
       "tags": ["prime-counting-function"],
       "refs": ["p0050", "p0187", "p0308", "p0347", "p0423", "p0452", "p0501", "p0537", "p0609", "p0642", "p0668", "p0801", "p0869"],
-      "solved_after": ["p0452", "p0668"]
+      "solved_after": []
     },
     {
       "path": "domain/prime-factor",
