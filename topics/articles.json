@@ -5559,12 +5559,12 @@
       "path": "technique/extended-euclidean-algorithm",
       "title": "Extended Euclidean algorithm",
       "status": "final",
-      "written": "2026-10-16T07:24Z",
+      "written": "2026-10-29T12:17Z",
       "solved": 9,
       "problems": 9,
       "tags": ["extended-euclidean-algorithm"],
       "refs": ["p0134_s0", "p0160_s0", "p0198_s0", "p0236_s0", "p0250_s0", "p0251_s0", "p0271_s0", "p0932_s0", "p0934_s0"],
-      "solved_after": ["p0271"]
+      "solved_after": []
     },
     {
       "path": "technique/extended-slice",
