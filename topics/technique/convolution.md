@@ -1,5 +1,5 @@
 <!-- tags: [convolution] -->
-<!-- status: final 2026-10-15T11:05Z -->
+<!-- status: final -->
 # Convolution
 
 [Convolution](https://en.wikipedia.org/wiki/Convolution) is the operation that combines two
@@ -79,8 +79,8 @@ element, but its elements fall into only 250 residue classes, so each class of *
 is `(1 + x^r)^c` — written down directly from a row of binomial coefficients rather than built by
 *c* multiplications. Group equal factors before multiplying anything.
 
-**The index set need not be the integers.** Convolution is defined over any group — replace
-`i + j` with the group operation. The everyday case is the cyclic group ℤ/*m*: "how many subsets
+**The index set need not be the integers.** Convolution is defined over any group — indeed any monoid —
+replace `i + j` with its operation. The everyday case is the cyclic group ℤ/*m*: "how many subsets
 have a sum divisible by *m*?" is a product of `(1 + x^e)` factors in the ring
 `ℤ[x]/(x^m − 1)`, where exponents add modulo *m* and the array has a fixed length *m* forever —
 an index past the end wraps to the front instead of growing the array. Problem 250 asks this for
@@ -98,6 +98,17 @@ move in two variables at once: each half's subsets are tallied by (vector sum, s
 are joined only where their sums cancel — the sum variable evaluated at the identity — while the
 sizes convolve in full. When a problem's parts compose by some associative rule other than
 addition, look for the same collapse.
+
+The rule need not even be invertible. Freshman's Product (problem 778) multiplies numbers digit by
+digit with no carries, so each decimal place is its own sub-problem — the same independence across
+positions that problem 92 exploits. Within one place, each of the *R* factors contributes a
+ten-entry histogram of digits, and two independent digits combine by
+`(a * b)[z] = Σ_{xy ≡ z (mod 10)} a[x]·b[y]`: a convolution over the digits under multiplication
+mod 10. That is a [monoid](https://en.wikipedia.org/wiki/Monoid), not a group — 0 absorbs
+everything, 5 times any even digit is 0, and most digits have no inverse — yet the *R*-fold power
+still falls to repeated squaring from the identity distribution (all mass on the digit 1), because
+associativity is the only property square-and-multiply uses. The array is ten slots forever, so
+*R* in the hundreds of thousands costs a few dozen 10 × 10 multiplies per place.
 
 **A comparison is a convolution plus a prefix sum.** "How often does one sum beat another?" is not
 a single coefficient but a triangular sum over the product distribution. Precompute the prefix sums
