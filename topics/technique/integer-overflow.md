@@ -1,5 +1,5 @@
 <!-- tags: [integer-overflow] -->
-<!-- status: final 2026-10-12T14:46Z -->
+<!-- status: final -->
 # Integer overflow
 
 [Integer overflow](https://en.wikipedia.org/wiki/Integer_overflow) is an arithmetic result that
@@ -10,7 +10,8 @@ answer simply comes out wrong. The takeaway
 enough for a value you can bound. This page is about the cases where you *can't* simply widen:
 products that grow inside a search with no fixed ceiling, powers whose size is the thing being
 tested, and intermediates that are briefly far larger than anything kept. These need a guard, a
-signal or a domain restriction, and the problems below use all three.
+signal or a domain restriction. Occasionally the right move is to let the wrap happen on
+purpose. The problems below use all of these.
 
 ## What C actually does
 
@@ -21,11 +22,13 @@ signal or a domain restriction, and the problems below use all three.
   undefined behavior in C and would silently corrupt the result".
 - **Unsigned overflow wraps modulo $2^w$.** This is defined, and sometimes useful, but it is
   just as silent. Problem 421's answer passes $2^{64}$, and a 64-bit accumulator would be off by
-  *exactly* $2^{64}$. That exact error is the signature of a wrapped unsigned sum.
+  *exactly* $2^{64}$. That exact error is the signature of a wrapped unsigned sum. Problem 516
+  shows the useful side: its answer is wanted modulo $2^{32}$, so a wrap modulo $2^{64}$ loses
+  nothing.
 - **Python can't show you any of this.** Its answer is the oracle. When the C port disagrees,
   suspect width before you suspect the algorithm.
 
-## Five defences
+## Six defences
 
 **1. Prove the bound, then pick the type.** Most overflows are prevented by an estimate made
 before any code is written. Problem 6's sums of squares outgrow a 32-bit `int`, so everything is
@@ -51,6 +54,8 @@ Problems 108 and 110 search over prime-exponent assignments with
 check *and* the pruning test at once: a candidate that would exceed the best found so far is
 abandoned before its product is formed. Problem 484 uses the same test, $p^a > \lfloor N/d \rfloor / p$,
 as its loop bound. Problem 119 breaks out of its power loop the moment `power > max_val / base`.
+Problem 516's depth-first enumeration of squarefree products stops extending a product with
+`prime > limit / value`, so no product beyond the limit is ever formed.
 
 **3. Signal instead of computing.** Sometimes the overflow *is* information. Problem 63 asks which
 powers have exactly $n$ digits. Its C `ipow` returns $-1$ when the product would overflow, and the
@@ -63,12 +68,29 @@ briefly huge, compute just that candidate wide. Problem 221's product $p(p+1)(p+
 $10^{22}$ for the extreme divisor pair, although every value it keeps is below $10^{17}$. So each
 candidate is formed in [`__int128`](/topics/technique/int128) and narrowed only after the bound
 test. Problem 259 compares exact rationals by cross-multiplication. The products overflow 64 bits
-before the gcd reduction shrinks them, so each one is cast to `__int128` first.
+before the gcd reduction shrinks them, so each one is cast to `__int128` first. The commonest case
+is a modular multiply: once the modulus passes $2^{32}$, $a \cdot b$ no longer fits in 64 bits
+before it is reduced. Problem 516 runs Miller–Rabin on candidates near $10^{12}$, so its `mulmod`
+forms the product in `unsigned __int128`, takes the remainder, and narrows:
+
+```c
+static u64 mulmod(u64 a, u64 b, u64 m) { return (u64)((unsigned __int128)a * b % m); }
+```
 
 **5. Restrict the domain up front.** If a fast path is only valid in a range, reject inputs
 outside it rather than let them corrupt the answer. Problem 421 multiplies residues modulo primes
 up to $M$, so it refuses $M \ge 2^{32}$ before starting, and it accumulates the total in
 `unsigned __int128`.
+
+**6. Let it wrap, when the wrap is the modulus.** Unsigned arithmetic in C is arithmetic modulo
+$2^{64}$, and that is exact for any modulus dividing $2^{64}$. Problem 516 asks for a huge sum
+modulo $2^{32}$. Its C port lets the `u64` prefix sums and the running total wrap freely, and
+masks with `0xFFFFFFFF` only when printing. Every addition and multiplication stays correct
+modulo $2^{32}$, so there is no reduction in the hot loop. The trick has hard limits. It holds
+only for unsigned types, since a signed wrap is undefined. It holds only for a power-of-two
+modulus. And it holds only for ring operations: a division or comparison of the wrapped value is
+meaningless. Index lookups such as 516's `limit / products[i]` must be done on values that never
+wrapped.
 
 ## The failure you don't see
 
