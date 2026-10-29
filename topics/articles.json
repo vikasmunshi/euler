@@ -4943,12 +4943,12 @@
       "path": "technique/catastrophic-cancellation",
       "title": "Catastrophic cancellation",
       "status": "final",
-      "written": "2026-10-28T09:34Z",
+      "written": "2026-10-29T12:14Z",
       "solved": 3,
       "problems": 3,
       "tags": ["catastrophic-cancellation"],
       "refs": ["p0247_s0", "p0318_s0", "p0461_s0"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "technique/cayley-table",
