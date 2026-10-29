@@ -1,5 +1,5 @@
 <!-- tags: [binary-search-algorithm] -->
-<!-- status: final 2026-10-16T15:07Z -->
+<!-- status: final -->
 # Binary search algorithm
 
 [Binary search](https://en.wikipedia.org/wiki/Binary_search_algorithm) is the first non-trivial
@@ -57,6 +57,23 @@ Problem 501 does the same for a three-shape divisor count, problem 231 locates w
 stops holding, problem 772 finds the $\sqrt{k}$ boundary that splits primes contributing one factor
 from those contributing several. The array is sorted because it was *generated* sorted; the search
 costs nothing to add.
+
+Put a prefix-sum array next to the sorted one and the same search answers a richer question: it
+returns the **sum** of every element $\le x$, not just how many there are. Problem 516 needs exactly
+that. It sums the $n \le L$ whose totient is 5-smooth, and those $n$ factor as $h \cdot m$, with $h$
+a [Hamming number](https://en.wikipedia.org/wiki/Regular_number) and $m$ a squarefree product of
+primes $q > 5$ for which $q-1$ is itself a Hamming number. For a fixed $m$, every admissible $h$
+contributes, so that $m$'s share of the sum is $m \cdot \sum_{h \le L/m} h$. That is one bisection
+and one prefix lookup:
+
+```python
+total += m * prefix[bisect_right(hamming, limit // m)]
+```
+
+The proportions are what make this the right shape. There are only about 3,400 Hamming numbers below
+$10^{12}$, so the array fits in L1 cache, but there are millions of products $m$. Each query costs a
+dozen probes, and nobody ever lists the $n$ themselves. Problem 565's first solution has the same
+shape, a sum of $g(p)$ over primes up to $x$, read from a prefix array at a bisected index.
 
 **Searching the answer** is the interesting one, and the array is imaginary. All you need is a
 monotone predicate over the integers (or the reals) and a cheap way to evaluate it:
@@ -188,7 +205,9 @@ increases, so `j` never moves back — one sequential pass instead of millions o
 252's C merge and problem 184's rotating-arc count are the same trade. Note what the Python versions
 of those solutions do instead: they call `searchsorted`, in chunks, because in vectorised code you
 cannot `break` out of a loop — a binary search *is* the vectorised form of "where does this monotone
-condition stop". Both are right; the language decides. See
+condition stop". Both are right; the language decides. The precondition matters, though. Problem
+516's products come out of a depth-first enumeration in no particular order, and sorting millions
+of queries just to sweep a few thousand keys would cost more than the searches it saves. See
 [two-pointer technique](/topics/technique/two-pointer-technique).
 
 **When the key space is structured, index it directly.** $O(\log n)$ in an inner loop is still a
