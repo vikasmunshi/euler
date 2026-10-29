@@ -1,5 +1,5 @@
 <!-- tags: [floating-point-arithmetic] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T12:18Z -->
 # Floating-point arithmetic
 
 Project Euler answers are almost always exact: an integer, a count, a digit string. The quickest

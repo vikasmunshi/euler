@@ -5680,12 +5680,12 @@
       "path": "technique/floating-point-arithmetic",
       "title": "Floating-point arithmetic",
       "status": "final",
-      "written": "2026-10-14T12:15Z",
+      "written": "2026-10-29T12:18Z",
       "solved": 10,
       "problems": 10,
       "tags": ["floating-point-arithmetic"],
       "refs": ["p0042_s0", "p0044_s0", "p0063_s0", "p0093_s0", "p0190_s0", "p0235_s0", "p0247_s0", "p0318_s0", "p0395_s0", "p0800_s0"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "technique/floor-and-ceiling-functions",
