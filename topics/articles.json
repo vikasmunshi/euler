@@ -2160,12 +2160,12 @@
       "path": "domain/legendres-formula",
       "title": "Legendre's formula",
       "status": "final",
-      "written": "2026-10-14T07:16Z",
+      "written": "2026-10-29T07:51Z",
       "solved": 10,
       "problems": 11,
       "tags": ["legendres-formula"],
       "refs": ["p0154", "p0160", "p0231", "p0288", "p0383", "p0429", "p0549", "p0650", "p0675", "p0704", "p0926"],
-      "solved_after": ["p0675"]
+      "solved_after": []
     },
     {
       "path": "domain/lenticular-hole",
