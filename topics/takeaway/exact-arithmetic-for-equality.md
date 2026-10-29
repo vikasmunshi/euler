@@ -1,5 +1,5 @@
 <!-- tags: [exact-arithmetic-for-equality] -->
-<!-- status: final 2026-10-15T10:37Z -->
+<!-- status: final -->
 # Use exact arithmetic for equality checks
 
 Floating point is built for *approximation*. It gives up a little accuracy to gain speed and
@@ -98,6 +98,17 @@ then packs each vector into a single integer, with enough headroom per coordinat
 can cross. A balanced subset is then exactly a packed sum of `0` — one integer comparison, used
 as a hash key in a meet-in-the-middle.
 
+[Problem 473](/solutions/0473/) (palindromes in the [golden-ratio base](https://en.wikipedia.org/wiki/Golden_ratio_base))
+is the quadratic case of the same move. A palindromic representation pairs each power $\varphi^k$
+with its mirror $\varphi^{-(k+1)}$, and the question is which sets of pairs sum to an *integer*.
+In floating point that is an `is_integer()` test on a sum of irrationals, which is exactly the kind
+of test that fails silently. In $\mathbb{Z}[\varphi]$ every power is $\tfrac12(L_k + F_k\sqrt5)$,
+with [Lucas](https://en.wikipedia.org/wiki/Lucas_number) and Fibonacci numbers as coordinates. So
+each pair becomes two integers, a rational part and a $\sqrt5$ coefficient, and "the sum is an
+integer" becomes "the $\sqrt5$ coefficients add to exactly $0$". The exact form does more than
+decide the leaves. The $\sqrt5$ balance is an integer the search can bound: prefix sums say how far
+the remaining pairs could still move it, and a branch that cannot bring it back to zero is cut.
+
 **Stay exact to the last digit, then round in integers.** Problems that ask for a decimal answer
 still have an equality inside them: the twelfth digit is decided by whether the value is above or
 below a rounding boundary. [Problem 239](/solutions/0239/) computes a probability by
@@ -138,7 +149,10 @@ while (r + 1) * (r + 1) <= v: r += 1
 Problem 241 goes a step further and lets floats into a *pruning bound*: a prefix sum of logarithms
 estimates the most the remaining primes could raise the ratio. That is safe because the bound is
 inflated by a small slack, so rounding can only make it keep a branch it could have cut, never
-cut one it should keep. The hit test itself, $a = b$, stays exact.
+cut one it should keep. The hit test itself, $a = b$, stays exact. Problem 473 splits its work
+the same way. A running `float` value of $\sum \varphi^k$, padded by a relative slack, ends any branch
+already past $N$. Acceptance needs a $\sqrt5$ balance of exactly $0$ and a doubled rational part of
+at most $2N$, both checked in integers.
 
 Exactness also pays off in *reasoning*. Problem 950's pirates weigh coins against a payoff of
 $1/\sqrt{m}$ per walk. Because $\sqrt{m}$ is irrational, no two outcomes can ever tie, so the
@@ -148,7 +162,7 @@ the floors exactly. A float could create a tie that the mathematics rules out.
 Two pitfalls worth naming. First, "I'll just use a small epsilon" replaces one bug with a subtler
 one. Make the tolerance too tight and you split equal values; too loose and you merge distinct
 ones; and the right value drifts with the magnitude of the inputs. If the true relation is exact,
-model it exactly and delete the epsilon. Keep tolerances for one-sided bounds like Problem 241's,
+model it exactly and delete the epsilon. Keep tolerances for one-sided bounds like those in Problems 241 and 473,
 where an error can only cost time. Second, watch the *whole* pipeline: it is not enough to
 compute exactly and then compare a `float` at the end (Problem 44's `is_integer()` is exactly this
 seam, and so would be dividing Problem 239's exact numerator by $n!$ in floating point before
