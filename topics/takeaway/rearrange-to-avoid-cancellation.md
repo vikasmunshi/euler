@@ -1,5 +1,5 @@
 <!-- tags: [rearrange-to-avoid-cancellation] -->
-<!-- status: final 2026-08-06T22:09Z -->
+<!-- status: final -->
 # Rearrange a formula to avoid cancellation
 
 A formula that is exact on paper can still be wrong in `double`, and the culprit is almost always
@@ -117,6 +117,42 @@ when $r^n$ overflows during the bracket search, a product yields a signed infini
 still usable by the bisection, where a difference of overflowing quotients yields a NaN and the
 search dies.
 
+## Two cancellations in a row
+
+The library primitive only helps if its argument is clean, and problem 318 is where that bites.
+It asks how many even powers of $\sqrt p + \sqrt q$ it takes before the fractional part opens
+with a long run of nines. The conjugate $y = \sqrt q - \sqrt p$ settles the maths: when $0 < y < 1$,
+$x^{2n} + y^{2n}$ is an integer, so the fractional part is $1 - y^{2n}$. That turns each pair's
+count into a closed form in $\log y$, roughly $d / (-2\log_{10} y)$ for $d$ nines. The trouble
+sits at the top of each $q$ range, where $y$ creeps up towards $1$ and the count reaches the tens
+of millions. That one expression hides **two** cancellations stacked on each other:
+$\sqrt q - \sqrt p$ subtracts two near-equal roots, and $\log$ of a value near $1$ is the
+`log1p` case.
+
+The obvious fix, `log1p(-(1 - y))`, gains nothing. Against $50$-digit `decimal` on the pair
+$(931, 993)$, where $1 - y \approx 4 \times 10^{-4}$, plain `log(sqrt(q) - sqrt(p))` and the
+`log1p` version have the same relative error, about $10^{-12}$. The small quantity $1 - y$ was
+already left over from a subtraction before `log1p` ever saw it, so the primitive just keeps
+noise that has already come through. The repair has to start earlier: two conjugate
+multiplications produce the gap directly,
+
+$$1 - y \;=\; \frac{4p - (q - p - 1)^2}{\bigl(2\sqrt p + q - p - 1\bigr)\bigl(1 + \sqrt p + \sqrt q\bigr)},$$
+
+with an **exact integer** numerator and a denominator that adds positive terms. Feed that to
+`log1p` and the error drops to one rounding. This is the extreme case of "make the small quantity
+the numerator": here it is also exact.
+
+The answer-conditioning question from problem 247 applies again, because the count is a
+ceiling. At the problem's own limit (about $42{,}000$ pairs), the naive form's worst absolute
+error in the quotient is $2 \times 10^{-5}$ and, as it happens, it flips no ceiling. The
+rearranged form's worst error is $4 \times 10^{-9}$. Raise the limit to $p + q \le 10^5$
+(about $15$ million pairs) and the naive form is off by as much as $0.8$, and $34$ ceilings come
+out wrong. Again, the naive version passes at the tested size and fails one size up. The
+rearrangement also has a regime: when $y$ is small, $1 - y$ is near $1$ and recovering $y$ from it
+cancels again. That end is harmless only because the counts there are tiny. A ceiling still
+needs a guard against quotients that land near an integer, which the solution recomputes in
+arbitrary precision. That is the diagnostic role described below, used narrowly.
+
 Sometimes the luck runs the other way and you should notice. Problem 44 inverts the pentagonal
 formula with the root that happens to add:
 
@@ -160,6 +196,8 @@ size later.
   difference on top, you moved the problem rather than solving it.
 - **Prefer the library primitive.** `expm1`, `log1p`, `hypot`, `fma` exist precisely because these
   rewrites are error-prone; they are vetted, often correctly rounded, and no slower.
+  But they only work on the argument you give them. If that argument is itself the result of a
+  cancellation, as with `log1p(1 - y)`, rearrange first.
 - **Ask what precision the *answer* needs.** A comparison needs the error to be smaller than the
   gap between neighbours; a rank among $10^7$ near-equal reals is a far harsher requirement than
   printing six decimals. Work that budget out before deciding `double` suffices — it is the same
