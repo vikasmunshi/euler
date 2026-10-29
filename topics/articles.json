@@ -4272,12 +4272,12 @@
       "path": "takeaway/exact-arithmetic-for-equality",
       "title": "Use exact arithmetic for equality checks",
       "status": "final",
-      "written": "2026-10-15T10:37Z",
+      "written": "2026-10-29T08:08Z",
       "solved": 35,
       "problems": 35,
       "tags": ["exact-arithmetic-for-equality"],
       "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0239", "p0241", "p0243", "p0246", "p0252", "p0259", "p0331", "p0473", "p0493", "p0751", "p0768", "p0800", "p0950"],
-      "solved_after": ["p0473"]
+      "solved_after": []
     },
     {
       "path": "takeaway/exact-sums-resist-modular-shortcuts",
