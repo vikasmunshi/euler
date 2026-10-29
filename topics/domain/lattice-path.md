@@ -1,5 +1,5 @@
 <!-- tags: [lattice-path] -->
-<!-- status: final 2026-10-14T11:51Z -->
+<!-- status: final -->
 # Lattice path
 
 A **lattice path** is a walk on the integer grid ℤ² made from a fixed set of steps — most often
@@ -82,6 +82,34 @@ relaxing the cyclic part inside each slice. When the cycles are global — Probl
 directions — no sweep order exists, and the DP becomes
 [Dijkstra's algorithm](/topics/technique/dijkstras-algorithm): the same `min`-plus relaxation, with
 the order discovered at run time by a priority queue instead of fixed by the geometry.
+
+## When the grid is hiding
+
+Sometimes nobody mentions a grid. Problem 739 takes a sequence, drops its first term, replaces the
+rest by their prefix sums, and repeats until one term is left. Write the rows as a triangle, with
+row `r` occupying columns `r … n−1`, and the prefix-sum step reads
+
+    T(r, c) = T(r, c−1) + T(r−1, c)        with T(r, c−1) = 0 when c−1 < r
+
+— Pascal's rule again, the counting recurrence from Problem 15, now confined to the half of the
+grid on one side of the diagonal. The operation is linear, so the last term is a weighted sum of
+the starting terms, and the weight on term `k` is the number of monotone paths from its cell to
+the apex that never cross the diagonal. That is the
+[ballot problem](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem), and the
+[reflection principle](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem#Proof_by_reflection)
+solves it: each path that touches the forbidden line is matched with a reflected path that starts
+on the other side of the line. So the constrained count is the difference of two binomials, which
+simplifies to the ballot number
+
+    paths staying strictly above the diagonal, (0,0) → (a,b), a > b:   (a − b)/(a + b) · C(a + b, a)
+
+Starting from all ones, the weights add up to a [Catalan number](/topics/domain/catalan-number).
+That is why the statement's example ends at 429 = C₇, and the 429 was the tell that the process
+was a lattice-path count. Seen that way, the simulation gives way to a single O(n) sum of
+binomials times sequence terms. The rest is modular arithmetic: computing the binomials as running
+prefix and suffix products, so that only one inverse is needed at the end. The general lesson:
+when a repeated linear operation's output is wanted, ask what each input contributes, and whether
+that contribution counts paths through some grid.
 
 ## How to reason about it
 
