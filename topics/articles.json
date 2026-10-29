@@ -2567,12 +2567,12 @@
       "path": "domain/palindromic-number",
       "title": "Palindromic number",
       "status": "final",
-      "written": "2026-10-14T11:58Z",
+      "written": "2026-10-29T07:53Z",
       "solved": 7,
       "problems": 8,
       "tags": ["palindromic-number"],
       "refs": ["p0004", "p0036", "p0055", "p0125", "p0348", "p0473", "p0655", "p0808"],
-      "solved_after": ["p0473"]
+      "solved_after": []
     },
     {
       "path": "domain/pancake-sorting",
