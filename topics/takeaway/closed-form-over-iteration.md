@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
-<!-- status: final 2026-10-15T10:39Z -->
+<!-- status: final -->
 # Prefer closed form over iteration
 
 A loop that adds up a structured sequence is doing arithmetic the sequence has
@@ -56,7 +56,7 @@ structure do the counting.
 
 In the harder problems the formula rarely *is* the answer. It is a component —
 the part of the computation that would otherwise be the inner loop — and the
-surrounding algorithm is designed around having it. Four shapes recur.
+surrounding algorithm is designed around having it. Five shapes recur.
 
 **A formula per item, in place of a search per item.**
 [Divisibility Multipliers](/solutions/0274/) asks, for every prime $p$ coprime
@@ -106,6 +106,29 @@ two geometric series evaluated with modular exponentiation at each large
 quotient. Without these leaf formulas each method would be a linear scan in
 disguise.
 
+**A formula for a process, read off a small run of it.** Some problems do not
+hand you a sequence at all. They hand you a *procedure*, a recursion or a greedy
+rule, and the closed form is something you discover. [Crazy Function](/solutions/0340/)
+generalises the [McCarthy 91 function](https://en.wikipedia.org/wiki/McCarthy_91_function):
+above a threshold $b \approx 5.6 \times 10^{17}$ it subtracts a constant, and
+below it the call nests four deep. Taken literally that is unbounded recursion
+summed over $b+1$ arguments. A memoised brute force on small parameters shows
+the pattern. Cut $[0, b]$ into blocks of width $a$ counted down from $b$. Then
+$F(n)$ is $n$ plus a fixed offset plus one constant increment per block, and
+induction on the block index proves it. Summing an affine function block by
+block brings back the Gauss sum, and the whole problem becomes $O(1)$.
+[Hilbert's New Hotel](/solutions/0359/) is the greedy version. Guests take the
+first floor where they sum to a perfect square with the previous occupant, and
+the question needs occupants of order $10^{27}$. Simulating forty thousand
+guests shows the rigid structure. Neighbouring rooms sum to *consecutive*
+squares, so two rooms apart the squares telescope,
+$P(f, r+2) - P(f, r) = (s+1)^2 - s^2 = 2s + 1$, which is linear in $r$. That
+makes each floor a quadratic in the room number, and the requested sum shrinks
+to a few hundred formula evaluations over the divisors of $N$. In both problems
+the brute force is a microscope rather than the solution. It shows you the
+pattern, a proof makes the pattern safe to use, and the formula replaces the
+process.
+
 The plainest variant is a sum that is short rather than constant.
 [Twenty-two Foolish Primes](/solutions/0239/) asks a probability over all $100!$
 permutations; [inclusion–exclusion](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
@@ -129,20 +152,25 @@ nearest a target — no formula collapses the whole thing, and iteration is the
 honest answer. The skill is telling the two apart: derive on paper first, and if
 the algebra does not close, do not force it.
 
-Three cautions earn their keep:
+Four cautions earn their keep:
 
 - **Derive, then verify.** A closed form is only as good as its derivation; an
   off-by-one in the bounds or a dropped term is silent. Keep a brute-force
   version as an oracle and check them against each other on small inputs —
   [Number Spiral Diagonals](/solutions/0028/) ships exactly that, running an
   $O(N^2)$ spiral simulation under `--show` purely to confirm the formula.
+  When the formula came *from* the brute force, as in Crazy Function and
+  Hilbert's New Hotel, checking it on the same few cases proves nothing. Test
+  it on fresh ones: Crazy Function was checked on 400 random parameter
+  triples, and Hilbert's New Hotel on every room the simulation filled.
 - **Mind the arithmetic.** Formulas multiply before they divide, so intermediate
   values can be far larger than the answer — a real overflow risk in C, and a
   reason to prefer exact integer arithmetic (Python's big integers, or careful
   ordering so the division is exact) over anything that rounds. Division is the
   sharp edge. Under a modulus the halving in $(3^{m+1} - 3)/2$ is not a plain
   division; Bounded Sequences works modulo $2M$, where the residue stays even,
-  and halves that. A `round` inside the summand, as in Alcuin's sequence, is
+  and halves that. Crazy Function, working modulo $10^9$ where 2 has no
+  inverse, halves whichever factor of $n(n+1)$ is even *before* it reduces. A `round` inside the summand, as in Alcuin's sequence, is
   not something to evaluate in floating point term by term; Primitive Triangles
   folds it into a periodic integer correction. Twenty-two Foolish Primes keeps
   its probability as an exact ratio of two big integers and rounds to twelve
