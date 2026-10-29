@@ -5724,12 +5724,12 @@
       "path": "technique/fractions-fraction",
       "title": "fractions.Fraction",
       "status": "final",
-      "written": "2026-10-14T17:38Z",
+      "written": "2026-10-29T12:20Z",
       "solved": 9,
       "problems": 9,
       "tags": ["fractions-fraction"],
       "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0523_s0"],
-      "solved_after": ["p0523"]
+      "solved_after": []
     },
     {
       "path": "technique/frequency-statistics",

@@ -1,5 +1,5 @@
 <!-- tags: [fractions-fraction] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T12:20Z -->
 # fractions.Fraction
 
 [`fractions.Fraction`](https://docs.python.org/3/library/fractions.html) is Python's exact
