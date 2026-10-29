@@ -1,5 +1,5 @@
 <!-- tags: [integer-square-root] -->
-<!-- status: final 2026-10-15T10:54Z -->
+<!-- status: final -->
 # Integer square root
 
 The [integer square root](https://en.wikipedia.org/wiki/Integer_square_root) of $n$ is the unique
@@ -55,7 +55,12 @@ $\lfloor n/k \rfloor$ is either at most $\sqrt n$ or of the form $n/k$ for $k \l
 arrays of length $\sqrt n$ index the whole range — a standard device for prime-counting sums.
 Problem 276 uses the same split for a [Möbius inversion](/topics/technique/mobius-inversion-formula) over the
 gcd of a triangle's sides: `small[v]` holds the answer for $v \le \sqrt n$, `large[k]` the answer for
-$n/k$, and `isqrt(n)` is the one number that sizes both tables.
+$n/k$, and `isqrt(n)` is the one number that sizes both tables. Problem 668 runs the same two tables
+through Lucy_Hedgehog's prime-counting sieve, and is a good illustration of where the root does and
+does not belong. Its definition — every prime factor below $\sqrt n$ — never needs one: squaring
+gives $P(n)^2 < n$, and the count is all integers. The root survives only as $r = \lfloor \sqrt N
+\rfloor$, which sizes the tables and fixes the split between the two sums, and that split is itself
+exact integer arithmetic: $\lfloor N/k \rfloor > r$ precisely when $k \le \lfloor N/(r+1) \rfloor$.
 
 **A perfect-square predicate.** `s = isqrt(n); s * s == n`. Problem 141 tests each generated
 candidate this way, problems 140 and 932 test discriminants, and problem 142 wraps it in a named
@@ -122,6 +127,21 @@ width. $x^2$ and $q^2 m$ are about twice as many bits as $x$, so the C sibling w
 [watch integer width](/topics/takeaway/watch-integer-width) habit applied to the *argument* of
 `isqrt`, not its result.
 
+Problem 721 meets the irrational in an exponent: it wants $\lfloor (\lceil \sqrt a \rceil + \sqrt a)^n
+\rfloor$ for exponents in the trillions. The conjugate $c - \sqrt a$, with $c = \lceil \sqrt a
+\rceil$, lies in $[0, 1)$, so the power sum of the pair is an integer and the floor is that integer,
+or one less — and which one depends only on whether $a$ is a perfect square, the one case where the
+conjugate is exactly zero. A single floor root gives everything the formula needs:
+
+```python
+is_square = root * root == a
+c = root + ~is_square          # ceil(sqrt a): floor, plus one unless exact
+```
+
+The squareness bit is not bookkeeping here; it is a $\pm 1$ in every term of the answer. Problem
+721 computes it for five million values at once, with the same corrected float root as problem 331
+— the cheap seed is safe because $a$ is small, and the fix-up makes it exact anyway.
+
 **High precision, by scaling.** $\lfloor \sqrt{n \cdot 10^{2d}} \rfloor$ is the first $d$ significant
 digits of $\sqrt n$ — an arbitrary-precision square root built from an integer one. Problem 80 is the
 public exhibit and carries both classical algorithms. Heron's method, which is
@@ -155,7 +175,7 @@ the same idea, implemented once, in C.
   correction loop's own `(r + 1) * (r + 1)` overflows for $n$ near $2^{63}$ — problem 141 guards by
   comparing against `n / (s + 1)` instead of squaring — and a `double` seed carries 53 bits, so for
   128-bit inputs the fix-up may need many steps rather than one or two. Problem 141 carries a
-  separate `__int128` version for exactly this reason. The later siblings (276, 331, 348, 950) seed
+  separate `__int128` version for exactly this reason. The later siblings (276, 331, 348, 668, 950) seed
   with `sqrtl` instead: where `long double` is the x87 80-bit format its 64-bit mantissa holds any
   `int64` exactly, and lands within a step of the truth even for problem 950's 128-bit arguments.
   That is a platform property, not a language one — `long double` is plain `double` on some
