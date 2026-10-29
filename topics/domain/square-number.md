@@ -1,5 +1,5 @@
 <!-- tags: [square-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T08:02Z -->
 # Square number
 
 A [square number](https://en.wikipedia.org/wiki/Square_number) is $k^2$ for some integer $k$ — the
