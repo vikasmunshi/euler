@@ -4294,12 +4294,12 @@
       "path": "takeaway/exploit-symmetry",
       "title": "Exploit symmetry and complementary counting",
       "status": "final",
-      "written": "2026-10-15T10:25Z",
+      "written": "2026-10-29T12:05Z",
       "solved": 59,
       "problems": 59,
       "tags": ["exploit-symmetry"],
       "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0670", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"],
-      "solved_after": ["p0670"]
+      "solved_after": []
     },
     {
       "path": "takeaway/invert-cost-to-capacity",
