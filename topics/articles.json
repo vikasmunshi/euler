@@ -6131,12 +6131,12 @@
       "path": "technique/integer-overflow",
       "title": "Integer overflow",
       "status": "final",
-      "written": "2026-10-12T14:46Z",
+      "written": "2026-10-29T12:23Z",
       "solved": 13,
       "problems": 13,
       "tags": ["integer-overflow"],
       "refs": ["p0006_s0", "p0027_s0", "p0063_s0", "p0108_s1", "p0110_s0", "p0119_s0", "p0221_s0", "p0251_s0", "p0259_s0", "p0421_s0", "p0429_s0", "p0484_s0", "p0516_s0"],
-      "solved_after": ["p0516"]
+      "solved_after": []
     },
     {
       "path": "technique/integer-square-root",
