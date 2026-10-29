@@ -1,5 +1,5 @@
 <!-- tags: [binomial-coefficient] -->
-<!-- status: final 2026-10-14T07:09Z -->
+<!-- status: final -->
 # Binomial coefficient
 
 The [binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient)
@@ -34,6 +34,18 @@ recur often enough to learn by sight:
 - **Ratios as probabilities.** $\binom{N-K}{n}/\binom{N}{n}$ is the probability that a draw of $n$
   from $N$ misses a given $K$. With linearity of expectation that is the whole of problem 493 — one
   ratio of binomials instead of an enumeration of every colour split.
+- **Paths that may not cross a line.** When the lattice path is forbidden from crossing a diagonal,
+  the free count $\binom{a+b}{a}$ becomes a [ballot number](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem),
+  a binomial times a rational factor such as $\frac{a-b}{a+b}$. Problem 739 hides one inside a
+  repeated prefix-sum process: the process is linear, so the final value is a weighted sum of the
+  starting terms, and each weight counts the constrained paths from a starting position to the
+  apex. The all-ones example ending at a [Catalan number](/topics/domain/catalan-number) is the tell.
+- **Coefficients of a product.** A count of sequences whose steps must sum to zero is the constant
+  term of $(\text{step polynomial})^n$. If that polynomial *factors* into binomials, the
+  [binomial theorem](https://en.wikipedia.org/wiki/Binomial_theorem) turns the coefficient into a
+  short convolution. Problem 860 reduces a partizan coin game to steps of $\pm 4, \pm 1$, and
+  $x^4 + x + x^{-1} + x^{-4} = x^{-4}(1+x^3)(1+x^5)$ leaves a single sum
+  $\sum_{3i+5j=4n}\binom{n}{i}\binom{n}{j}$ in place of a double sum of multinomials.
 
 The pattern is to stop counting objects and start counting *decisions*. Once each object
 corresponds to exactly one set of choices, the binomial is the count, and the remaining work is
@@ -64,6 +76,15 @@ bigger than the answer. Two better routes:
 - **The additive recurrence** $\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k}$ builds a whole table
   with additions only, which is the right shape when you need many coefficients at once, or need
   them modulo something where division is awkward.
+
+- **Factorial tables modulo a prime** answer the common case of many coefficients $\bmod p$ with
+  $p > n$. Build $k! \bmod p$ up to $n$, invert $n!$ once with
+  [Fermat's little theorem](/topics/domain/modular-multiplicative-inverse), and walk the inverses
+  back down with $((k-1)!)^{-1} = k\cdot(k!)^{-1}$. After $O(n)$ setup, each $\binom{n}{k}$ costs three
+  lookups, which is all problem 860's sum needs. When $n$ is so large that even those tables
+  strain memory (problem 739 sums $10^8$ ballot-weighted terms), rewrite each binomial as a ratio of a
+  running prefix product and a suffix product, multiply the whole sum through by the shared
+  denominator, and take a single inverse at the end.
 
 In Python the standard library already has [`math.comb`](https://docs.python.org/3/library/math.html#math.comb),
 which is exact and fast; in C, the recurrences above with 64-bit (or 128-bit) integers are the
