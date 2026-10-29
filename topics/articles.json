@@ -1203,12 +1203,12 @@
       "path": "domain/eulers-totient-function",
       "title": "Euler's totient function",
       "status": "final",
-      "written": "2026-10-16T07:33Z",
+      "written": "2026-10-29T02:06Z",
       "solved": 15,
       "problems": 28,
       "tags": ["eulers-totient-function"],
       "refs": ["p0069", "p0070", "p0072", "p0180", "p0182", "p0188", "p0214", "p0228", "p0243", "p0245", "p0248", "p0302", "p0337", "p0342", "p0351", "p0432", "p0441", "p0448", "p0478", "p0512", "p0516", "p0531", "p0533", "p0625", "p0652", "p0715", "p0756", "p0931"],
-      "solved_after": ["p0512", "p0516"]
+      "solved_after": []
     },
     {
       "path": "domain/exclusive-or",
