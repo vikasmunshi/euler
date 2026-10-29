@@ -1,5 +1,5 @@
 <!-- tags: [divisor] -->
-<!-- status: final 2026-10-08T09:57Z -->
+<!-- status: final -->
 # Divisor
 
 A [divisor](https://en.wikipedia.org/wiki/Divisor) of `n` is an integer `d` with `n = d · e` for
@@ -44,6 +44,14 @@ after one `O(N log log N)` pass, factoring any `x ≤ N` takes `O(log x)` steps.
 need is a product of coprime pieces, factor the pieces separately and concatenate.
 [Problem 834](/solutions/0834/) does this with `n(n − 1)`: consecutive integers share no prime, so
 the factorisation of `n − 1` from the previous iteration is reused as-is.
+
+The divisor count is also tiny next to `n`, so expanding from the factorisation is worth it even
+for a huge `n`. [Problem 359](/solutions/0359/) asks for a sum of `P(f, r)` over every pair with
+`f × r = N`, where `P` is the occupant of room `r` on floor `f` of an infinite hotel. The constraint
+`f × r = N` is just "`f` runs over the divisors of `N`, and `r = N/f`". Its `N` is about `7 · 10¹³`
+but is built only from 2s and 3s, `2²⁷ · 3¹²`, so it has `28 · 13 = 364` divisors. The real work is
+finding a closed form for `P`. Once that exists, the divisor loop costs nothing, and the exponent
+product `∏(eᵢ + 1)` tells you so before you write it.
 
 ### Turn the loop inside out: sieve over multiples
 
@@ -127,6 +135,9 @@ signature shortcut does not apply.
   `⌊N/d⌋` for `O(√N)`. Reach for this before you reach for a bigger sieve.
 - **Work from the factorisation.** `σ₀`, `σ₁` and the full divisor list all follow from the prime
   exponents. Factor coprime pieces separately; `n` and `n ± 1` are always coprime.
+- **Read `a × b = N` as a divisor loop.** A sum over factor pairs of one fixed `N` has `σ₀(N)`
+  terms, usually a few hundred or thousand even for `N` near `10¹⁴`. Check that count first: if it
+  is small, the hard part is the per-term function, not the enumeration.
 - **Memoise on the exponent signature.** If the question is about divisibility structure (chains,
   antichains, counts) and not the actual values, two numbers with the same exponent multiset have
   the same answer. Check that no step uses `n` itself (a subtraction, a bound) before relying on it.
