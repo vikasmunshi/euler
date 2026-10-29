@@ -1,5 +1,5 @@
 <!-- tags: [size-work-to-the-input] -->
-<!-- status: final 2026-10-15T11:00Z -->
+<!-- status: final -->
 # Size the work to the input
 
 These solutions all take a size as their one argument — an n, a ceiling N, a
@@ -45,6 +45,20 @@ needs to reach $L$ divided by that product, and the prime list only $L$ divided 
 the smallest $(k-1)$-factor product. Both sizes come from the two arguments, and
 both come out orders of magnitude below $L$ — the structure of the problem, read
 off the input, is what makes the scaffolding small.
+
+Sometimes the input implies a size far below its own magnitude because the answer
+depends on only a few *distinct values*. [Square Root Smooth
+Numbers](/solutions/0668/) counts up to $N = 10^{10}$, and after counting the
+complement it needs only the prime-counting function $\pi$ at the quotients
+$\lfloor N/k \rfloor$. There are only about $2\sqrt{N}$ distinct quotients — the
+idea behind [quotient blocking](/topics/technique/quotient-blocking) — so the
+tables are two arrays of length $\lfloor\sqrt{N}\rfloor + 1$, about $10^5$ entries
+each, rather than a sieve of $10^{10}$. Both ports allocate them at run time from
+the argument: NumPy arrays in Python, `malloc` in C, with no static array sized to
+the main case. The one number they hang on is the
+[integer square root](https://en.wikipedia.org/wiki/Integer_square_root), computed
+exactly (`math.isqrt`, or a floating estimate corrected by a step), because a
+`sqrt` rounded the wrong way would leave the table one entry short.
 
 **A bound that shrinks as the work proceeds.** Sometimes the right size is not
 known up front but tightens as you go. [Largest Prime Factor](/solutions/0003/)
