@@ -2622,12 +2622,12 @@
       "path": "domain/partizan-game",
       "title": "Partizan game",
       "status": "final",
-      "written": "2026-10-12T14:22Z",
+      "written": "2026-10-29T07:55Z",
       "solved": 3,
       "problems": 3,
       "tags": ["partizan-game"],
       "refs": ["p0860", "p0882", "p0963"],
-      "solved_after": ["p0860"]
+      "solved_after": []
     },
     {
       "path": "domain/pentagonal-number-theorem",
