@@ -3733,12 +3733,12 @@
       "path": "domain/tiling",
       "title": "Tiling",
       "status": "final",
-      "written": "2026-10-14T07:28Z",
+      "written": "2026-10-29T08:04Z",
       "solved": 10,
       "problems": 20,
       "tags": ["tiling"],
       "refs": ["p0115", "p0116", "p0117", "p0128", "p0139", "p0161", "p0215", "p0247", "p0256", "p0324", "p0338", "p0405", "p0440", "p0594", "p0670", "p0671", "p0766", "p0780", "p0867", "p0979"],
-      "solved_after": ["p0670"]
+      "solved_after": []
     },
     {
       "path": "domain/toads-and-frogs",
