@@ -1,5 +1,5 @@
 <!-- tags: [integer-square-root] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:02Z -->
 # Integer square root
 
 The [integer square root](https://en.wikipedia.org/wiki/Integer_square_root) of $n$ is the unique
