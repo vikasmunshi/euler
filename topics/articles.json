@@ -5801,12 +5801,12 @@
       "path": "technique/gauss-summation",
       "title": "Gauss summation trick",
       "status": "final",
-      "written": "2026-10-19T09:31Z",
+      "written": "2026-10-29T12:21Z",
       "solved": 4,
       "problems": 4,
       "tags": ["gauss-summation"],
       "refs": ["p0006_s0", "p0153_s0", "p0234_s0", "p0340_s0"],
-      "solved_after": ["p0340"]
+      "solved_after": []
     },
     {
       "path": "technique/gaussian-binomial-coefficient",
