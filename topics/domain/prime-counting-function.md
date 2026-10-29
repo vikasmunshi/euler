@@ -1,5 +1,5 @@
 <!-- tags: [prime-counting-function] -->
-<!-- status: final 2026-10-17T07:35Z -->
+<!-- status: final -->
 # Prime-counting function
 
 The [prime-counting function](https://en.wikipedia.org/wiki/Prime-counting_function) `π(x)` is the
@@ -27,6 +27,10 @@ freely. The count of choices for that free prime is a difference of two `π` val
   fixed smooth part `m`, every prime `P` in `(largest prime of m, ⌊N/m⌋]` contributes. The answer
   needs the *sum* of those primes, not their count, so the query becomes a weighted `π`. The same
   DP serves both, as shown below.
+- **Constant on primes (452).** Counting ordered `n`-tuples with product `≤ m` means summing the
+  `n`-fold divisor function `d_n`, which is multiplicative with `d_n(p) = n` on *every* prime. The
+  prime part of the sum is therefore `n·π(x)`, a pure `π` query, and the composites peel off one
+  smallest prime power at a time, each step asking for `π` at another `⌊m/pᵉ⌋`.
 
 The shape split must be **exhaustive and disjoint**, which unique factorisation guarantees when each
 shape fixes a canonical order (`p < q < r`, `p ≤ q`). The off-by-one at the boundary is the usual
@@ -42,13 +46,22 @@ affordable, and an enumeration rather than a count is the right call. Ask whethe
 enters the summand only through its *membership* in a range (or as a weight with a cheap prefix
 sum). If it does, the count collapses to `π`. If it doesn't, you enumerate.
 
+Before giving up, try **swapping the order of summation**. Problem 668 counts the square-root-smooth
+numbers through their complement: `n = p·m` with `p` its largest prime fails exactly when `m ≤ p`.
+That gives `Σ_{p ≤ √N} p + Σ_{p > √N} ⌊N/p⌋`, and the second sum looks like 347's trap, because each
+prime's contribution depends on the prime. Read it the other way round, though: a prime `p > √N`
+is counted once for every `k` with `p ≤ N/k`. So the sum is `Σ_k (π(⌊N/k⌋) − π(√N))` over the `k`
+with `⌊N/k⌋ > √N`. The summand that depended on `p` turns into a range test on `p`, and the range
+test is a `π` difference. The one condition is that the inner value is a floor quotient, which
+`⌊N/p⌋` always is.
+
 ## Answering the queries: three regimes
 
 | Arguments | Method | Cost | Problems |
 | --- | --- | --- | --- |
 | Up to a sieve you can afford | sieve to the largest argument, read `π` off the prime list | `O(X log log X)` once, then `O(log X)` or `O(1)` per query | 50, 187 |
 | A few values beyond the sieve | count by segmented sieving ([primesieve](/topics/technique/primesieve) `count_primes`) | `O(X)` per value, no memory | — |
-| Every `⌊n/k⌋`, with `n` up to about `10¹²` | Lucy_Hedgehog DP over the quotient set | `O(n^{3/4})` time, `O(√n)` memory | 501, 642 |
+| Every `⌊n/k⌋`, with `n` up to about `10¹²` | Lucy_Hedgehog DP over the quotient set | `O(n^{3/4})` time, `O(√n)` memory | 452, 501, 642, 668 |
 
 **Regime 1: the index is π.** In a dense ascending array of primes, the prime at index `i` has
 exactly `i` primes before it, so `π(pᵢ − 1) = i` costs nothing. For any other `x`, `π(x)` is the
@@ -91,7 +104,10 @@ because each struck `pm` weighs `p` times `m`. Problem 642 runs both tables side
 and sums, and a DFS over smooth parts then reads ranges like `(pⱼ, ⌊N/m⌋]` from them. Every
 `⌊N/m⌋` it asks about is a key, so the tables answer every query. That closure is the whole point.
 The full prime-and-composite version of this machinery is the
-[Min_25 sieve](/topics/technique/min-25-sieve), and the wider family is on
+[Min_25 sieve](/topics/technique/min-25-sieve). Problem 452 is the cleanest case of it: the Lucy
+table supplies `n·(π(x) − j)` for the primes at each node of a recursion over smallest prime
+factors, and since `⌊⌊m/a⌋/b⌋ = ⌊m/(ab)⌋`, every `x` that recursion reaches is again a key. The
+wider family is on the wider family is on
 [Summing Multiplicative Functions](/topics/number-theory/summing-multiplicative-functions).
 
 ## C and Python
@@ -106,10 +122,20 @@ The two languages agree on the algorithm everywhere; they diverge on where the i
   on the predicate `p·p < limit`, which avoids a floating-point square root.
 - **The Lucy sweep (501).** The `large[k]` update for one prime is independent across `k`, so
   Python vectorises it: compute `⌊n/k⌋/p` for all `k`, mask small from large, gather from each
-  array, subtract in one batch. The `small[v]` update has to run in descending order and stays a
-  Python loop. At `n = 10¹²` the C version runs in about 2 s and the Python in about 39 s, and most
-  of that gap is the `small` loop the vectoriser cannot take. In C, all three regions are plain
-  loops over `long long`.
+  array, subtract in one batch. Its `small[v]` update runs as a descending Python loop, and at
+  `n = 10¹²` the C version takes about 2 s against about 39 s for the Python, mostly because of
+  that loop. The loop turns out to be unnecessary. 452 and 668 write the same update as one slice
+  assignment, `small[p²:] -= small[v // p] − π(p−1)`. NumPy evaluates the right-hand side in full
+  before it writes anything, so every read sees the previous round, and that is all the descending
+  order was ever for. 668 also drops the mask on the `large` side. It splits at `k ≤ √n/p`, where
+  `⌊n/(kp)⌋` is itself a `large` entry, a strided slice `large[p::p]`, and gathers from `small`
+  only beyond that point. With both halves vectorised the Python comes within a factor of four of
+  C (0.14 s against 0.04 s at `10¹⁰`). C stays with plain loops over `long long` and gets the same
+  guarantee from the loop direction: ascending `k` for `large`, since it reads index `kp > k`, and
+  descending `v` for `small`.
+- **Where the gap comes back (452).** Once the table is vectorised, whatever runs *after* it
+  decides the ratio. In 452 that is the Min_25 recursion over smallest prime factors, which is pure
+  scalar code with nothing to batch, and it leaves Python about 30× slower than C.
 - **Roots and widths.** `π(n^{1/7})` in 501 takes a floating-point seventh root and then corrects
   it up or down with overflow-safe multiplications. C's `isqrt_ll` gets the same treatment: a
   `sqrt((double)n)` estimate followed by correction loops. That costs nothing and stays exact even
@@ -134,8 +160,10 @@ The two languages agree on the algorithm everywhere; they diverge on where the i
   all of them in one pass.
 - **Weights come free.** Sums of primes, or of `p^k`, cost one more table in the same sweep. Reach
   for that before inventing a second algorithm.
-- **Don't force π.** When each prime contributes something that depends on the prime itself
-  (347), `π` only tells you how many iterations to budget.
+- **Swap the sum before you give up.** A contribution like `⌊N/p⌋` depends on `p`, but summing over
+  the quotient instead turns it back into a `π` difference (668).
+- **Don't force π.** When each prime contributes something that depends on the prime itself, and
+  no reordering separates the two (347), `π` only tells you how many iterations to budget.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
