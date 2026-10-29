@@ -1,5 +1,5 @@
 <!-- tags: [math-isqrt] -->
-<!-- status: final 2026-10-16T07:25Z -->
+<!-- status: final -->
 # math.isqrt
 
 [`math.isqrt(n)`](https://docs.python.org/3/library/math.html#math.isqrt) returns the largest integer
@@ -44,13 +44,23 @@ the surrounding loop actually needs:
 | smallest $a$ with $a^2 \ge n$, i.e. $\lceil \sqrt n \rceil$ | `isqrt(n - 1) + 1` | problem 229's lower end of a band |
 | is $n$ a perfect square | `isqrt(n) ** 2 == n` | problems 141, 142 |
 | $\lfloor x / \sqrt m \rfloor$, for $x \ge 0$ | `isqrt(x * x // m)` | problem 950 |
+| $\lfloor \sqrt{n / k} \rfloor$, $\lfloor n^{1/4} \rfloor$ | `isqrt(n // k)`, `isqrt(isqrt(n))` | problem 641 |
 
-The middle two hold for $n \ge 1$ and are worth memorising, because the alternative — computing
+The second and third rows hold for $n \ge 1$ and are worth memorising, because the alternative — computing
 `isqrt(n)` and then correcting with an `if` — is where off-by-ones live. Problem 229 sweeps a
 window $[lo, hi)$ of a lattice and needs both ends at once: `amax = isqrt(hi - 1 - c)` for the strict
 upper bound and `amin = isqrt(amin_sq - 1) + 1` for the inclusive lower one, after which `range(amin,
 amax + 1)` is exactly the row. Nothing in that loop tests whether a point is in range; the arithmetic
 already guarantees it.
+
+The last two rows rest on one fact: for $y \ge 0$, $\lfloor \sqrt{\lfloor y \rfloor} \rfloor = \lfloor
+\sqrt y \rfloor$, because no integer square lies strictly between $\lfloor y \rfloor$ and $y$. So floors
+compose — you may floor the inside of a root for free, as often as you like. Problem 641 leans on this
+twice. The dice left showing a one are squares $m^2 \le n$, so the whole problem lives on
+$m \le$ `isqrt(n)`; the Möbius sieve under it needs only $\lfloor n^{1/4} \rfloor$, which is
+`isqrt(isqrt(n))` with no fourth root in sight; and each term of its main sum bounds a range by
+$\lfloor \sqrt{X / c^3} \rfloor$, written `isqrt(X // c ** 3)` — an integer division and an integer root,
+each of which would have been a rounding question in floats.
 
 Problem 348 is the same window in a different setting: sums $a^2 + b^3$ swept one decimal-length band
 $[10^{d-1}, 10^d)$ at a time, so for each cube the admissible $a$ run from
@@ -163,7 +173,14 @@ ceiling pays for itself many times over.
 - **It is the natural bound for anything that pairs around $\sqrt n$.** Divisors, the small factor of
   a semiprime, the smaller denominator of a fraction pair: problems 179, 187 and 198 all bound a
   search this way, and the [Sieve of Eratosthenes](/topics/technique/sieve-of-eratosthenes) stops at
-  `isqrt(limit) + 1` for the same reason.
+  `isqrt(limit) + 1` for the same reason. Problem 401 is where the pairing stops being a bound and
+  becomes an identity: the [Dirichlet hyperbola method](https://en.wikipedia.org/wiki/Dirichlet_hyperbola_method)
+  splits $\sum_{dq \le n} d^2$ at $s =$ `isqrt(n)` into a $d \le s$ sum, a $q \le s$ sum, and a
+  subtracted $s \times s$ square where they overlap. That correction is right only if $s^2 \le n <
+  (s+1)^2$ — one off in either direction and the square either pokes outside the hyperbola or misses a
+  strip of it, and the total is wrong with nothing to flag it. The problem's $n = 10^{15}$ sits a
+  hair under the $2^{52}$ threshold below, so a float root would get away with it; the repository's
+  own $10^{16}$ test case is past it, and there it would be luck rather than design.
 - **There is no vectorised `isqrt`.** NumPy has no exact integer square root, and `math.isqrt`
   applied per element is a Python loop that undoes the point of the array. Where the root is the
   *summand* rather than a bound and runs millions of times — counting lattice points row by row, as
@@ -171,7 +188,10 @@ ceiling pays for itself many times over.
   That is a deliberate trade in vectorised code, not a licence to use floats in scalar code. When the
   root only *bounds* each row, there is nothing to trade: problem 348 takes two scalar `isqrt`s per
   cube for the row's ends and hands the row itself to `np.arange`, so the exact part runs once per
-  row and the array does the per-element work.
+  row and the array does the per-element work. Problem 641 shows the fix-up spelled out, for the
+  cube root it needs across an array of bounds: `np.cbrt` for a guess, then one integer comparison
+  each way — subtract one where `c ** 3 > bound`, add one where `(c + 1) ** 3 <= bound` — which is
+  exactly the seed-and-correct shape below, vectorised.
 - **The C sibling has to hand-roll it.** C has no integer square root either, so every C counterpart
   here opens with a five-line seed-and-correct helper: a `sqrtl` guess, then two loops that step
   it down and up until it is exact. The correction loop's own `(r + 1) * (r + 1)` overflows near
