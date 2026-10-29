@@ -1,5 +1,5 @@
 <!-- tags: [divisor] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:13Z -->
 # Divisor
 
 A [divisor](https://en.wikipedia.org/wiki/Divisor) of `n` is an integer `d` with `n = d · e` for
