@@ -1082,12 +1082,12 @@
       "path": "domain/divisor-summatory-function",
       "title": "Divisor summatory function",
       "status": "final",
-      "written": "2026-10-28T07:57Z",
+      "written": "2026-10-29T07:14Z",
       "solved": 4,
       "problems": 9,
       "tags": ["divisor-summatory-function"],
       "refs": ["p0153", "p0401", "p0452", "p0530", "p0608", "p0615", "p0625", "p0639", "p0694"],
-      "solved_after": ["p0452"]
+      "solved_after": []
     },
     {
       "path": "domain/dragon-curve",
