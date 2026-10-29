@@ -1,5 +1,5 @@
 <!-- tags: [legendres-formula] -->
-<!-- status: final 2026-10-14T07:16Z -->
+<!-- status: final -->
 # Legendre's formula
 
 [Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) answers one narrow
@@ -79,7 +79,7 @@ is exactly Legendre's layering. The units in each full period multiply to $\pm 1
 
 Several problems need $v_p$ for **every** prime up to $n$, not just one. Examples are the sum of the prime factors of a
 binomial (231), the unitary-divisor or divisor sums of $n!$ or of a product of binomials (429, 650),
-and the roundness of $n!$ (926). The pattern is a
+a divisor-type sum over every factorial up to $n$ (675), and the roundness of $n!$ (926). The pattern is a
 [sieve](/topics/technique/sieve-of-eratosthenes), then Legendre per prime. Then a
 [multiplicative](/topics/domain/multiplicative-function) assembly from the exponents: $\sigma$,
 $\sigma_2^*$, or a divisor count is a product over primes of a function of $e_p$ alone. Two
@@ -91,6 +91,15 @@ refinements show up repeatedly:
 - **Binomials subtract**: $v_p\binom{n}{k} = v_p(n!) - v_p(k!) - v_p((n-k)!)$. Each term
   $\lfloor n/p^i\rfloor - \lfloor k/p^i\rfloor - \lfloor (n-k)/p^i\rfloor$ is 0 or 1 (a carry
   again), so I can accumulate level by level without building the three factorial exponents.
+- **A run of factorials updates, it does not recompute.** Problem 675 sums $S(i!)$ for every
+  $i \le 10^7$, where $S(p^e) = 2e + 1$. Running Legendre afresh for each $i$ would cost $\pi(i)$
+  primes per term. The difference form is what saves it: $v_p(i!) - v_p((i-1)!) = v_p(i)$, so
+  going from $(i-1)!$ to $i!$ changes only the exponents of the primes dividing $i$. The product
+  then moves by at most $\omega(i)$ ratios $(2e+1)/(2(e - v)+1)$, which is a modular inverse
+  because the modulus is prime. Prime $p$ is touched at $n/p$ positions, so the whole sequence
+  costs $O(n \log\log n)$. The large-prime band appears again: for $p > \sqrt n$ the exponent at
+  the $k$-th multiple is just $k$, so the ratio $(2k+1)/(2k-1)$ depends on $k$ alone and one
+  update can serve every such prime at once.
 
 ### Running it backwards
 
