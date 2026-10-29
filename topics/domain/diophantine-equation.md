@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-equation] -->
-<!-- status: final 2026-10-15T10:56Z -->
+<!-- status: final -->
 # Diophantine equation
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a
@@ -122,6 +122,32 @@ Problem 251 also has to choose its loop order. For small moduli the residue clas
 dense, so the loop walks one parameter. For large moduli the class is almost empty, so it
 walks the cofactor instead. Balancing the two costs puts the switch near `L^{1/4}`.
 
+### When the unknown is its own exponent, iterate to a fixed point
+
+Some Diophantine conditions are congruences rather than equalities, and the unknown sits in
+the exponent. [Problem 455](/solutions/0455/) asks, for each base `n`, for the `x < 10⁹`
+whose last nine digits of `nˣ` spell `x` itself, that is `nˣ ≡ x (mod 10⁹)`. Nothing
+factors and no recurrence applies, and a scan over `10⁹` exponents for each of a million
+bases is out of the question. The useful structure is that `x` is a **fixed point** of the
+map `T(x) = nˣ mod 10⁹`.
+
+Iterating that map from `x = 1` builds the power tower `n, nⁿ, n^(nⁿ), …` modulo `10⁹`.
+Such [towers](https://en.wikipedia.org/wiki/Tetration) become constant after a few levels.
+Once the exponent is large, `nᵃ mod m` depends only on `a` modulo the
+[Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function) `λ(m)`. The level
+below therefore only matters modulo `λ(m)`, the one below that modulo `λ(λ(m))`, and the
+chain of moduli shrinks to 1 within a handful of steps. The settled value satisfies
+`T(x) = x` by construction, so a dozen rounds of
+[fixed-point iteration](https://en.wikipedia.org/wiki/Fixed-point_iteration) replace the
+search. Each round is one modular exponentiation per base, and every base can be run in
+lockstep as a vectorised array. Two pieces of ordinary Diophantine reasoning finish the job.
+A divisibility argument rules out the multiples of ten before any iteration. If `10 | n`,
+then `nˣ` ends in 0, so `x` must too. That makes `x ≥ 10`, so `10⁹` divides `nˣ` and forces
+`x ≡ 0`, which is excluded. Then the claim that the tower's limit is the
+*largest* solution, which the problem asks for, is not something the iteration proves. The
+solution checks it by exhaustive search on the scaled-down moduli `10³`, `10⁴` and `10⁵`
+before relying on it.
+
 ### When no structure appears, choose the side you search from
 
 Not every Diophantine question gives way to algebra. [Problem 348](/solutions/0348/) asks
@@ -157,6 +183,9 @@ a Diophantine equation and work through these questions before writing any loop:
 - **Counting, not listing?** Parametrise by primitive solutions, usually coprime pairs, and
   count each family's members with `⌊N / L⌋` or a residue-class count. Do not enumerate
   them.
+- **Is the unknown in the exponent of a congruence?** Look for a fixed point. Iterating
+  `x ← nˣ mod m` settles quickly because the Carmichael chain `m, λ(m), λ(λ(m)), …` is
+  short. Verify on small moduli that the limit is the solution the problem wants.
 - **Nothing reduces?** Pick the search direction by its constant factors as well as its
   exponent. Generating the solutions and filtering them can beat testing the targets when
   it avoids roots and vectorises.
