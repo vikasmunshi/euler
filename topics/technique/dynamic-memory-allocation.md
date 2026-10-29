@@ -1,5 +1,5 @@
 <!-- tags: [dynamic-memory-allocation] -->
-<!-- status: final 2026-08-07T15:03Z -->
+<!-- status: final -->
 # Dynamic memory allocation
 
 [Dynamic memory allocation](https://en.wikipedia.org/wiki/Dynamic_memory_allocation) is what the C
@@ -48,6 +48,21 @@ Note the second line of each pair. `malloc` returns `NULL` on failure, and every
 the first allocation has to free what is already held — which is why the failure paths get longer
 the further into a function you are. It is tedious and it is the job.
 
+There is a shorter form when the allocations are independent of one another. `free(NULL)` is defined
+to do nothing, so a function can make all of its requests up front and check them together, with
+one failure path that frees everything unconditionally. Problem 668 allocates its two tables that
+way:
+
+```c
+long long *small = malloc((size_t)(r + 1) * sizeof *small);
+long long *large = malloc((size_t)(r + 1) * sizeof *large);
+if (!small || !large) { free(small); free(large); return NULL; }
+```
+
+Whichever one failed is `NULL`, and freeing it costs nothing. The staged form in problem 23 is what
+you need when a later size depends on an earlier result. When it does not, the grouped form keeps
+the cleanup in one place no matter how many blocks there are.
+
 ## Where the size comes from
 
 Four shapes cover almost every allocation here, and choosing among them is the actual technique.
@@ -55,6 +70,11 @@ Four shapes cover almost every allocation here, and choosing among them is the a
 **The size is known.** The best case: one `malloc`, no growth, no waste. Problem 23's sieve is
 `limit + 1` entries because that is exactly what a sieve to `limit` needs; problem 725's digit-sum
 DP allocates `n + 1` rows of `SMAX + 1`. When a bound falls out of the problem statement, take it.
+Sometimes the bound comes from the algorithm instead. Problem 668 needs prime counts up to
+$N = 10^{10}$, but the [Lucy_Hedgehog](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80(x))
+recurrence only ever reads $\pi(v)$ and $\pi(N/k)$ for $v, k \le \sqrt N$. So two arrays of
+$\sqrt N + 1$ entries, about 1.6 MB together, replace a sieve that would need 10 GB. The best
+allocation is often the one a better method makes small.
 
 **The size is bounded, then trimmed.** Sieve first into a byte array, count what survived, then
 allocate the exact array of primes. Problem 196 does this to build its prime lists, and it is the
