@@ -1,5 +1,5 @@
 <!-- tags: [greatest-common-divisor] -->
-<!-- status: final 2026-10-14T12:01Z -->
+<!-- status: final -->
 # Greatest common divisor
 
 The [greatest common divisor](https://en.wikipedia.org/wiki/Greatest_common_divisor) `gcd(a, b)`
@@ -114,6 +114,26 @@ gcd. That gives three routes:
 
 All three replace "test every pair with gcd" with something that only ever produces coprime pairs.
 That shift comes up again and again on this page.
+
+### A recurrence that mostly adds one: Problem 443
+
+[Problem 443](/solutions/0443/) defines `g(4) = 13` and `g(n) = g(n−1) + gcd(n, g(n−1))`, and asks
+for `g(10¹⁵)`. Stepping it costs one gcd per term, which is fine for a million terms and hopeless
+for a quadrillion. What makes it tractable is the same reduction that drives Euclid's algorithm:
+a gcd doesn't change when you subtract a multiple of one argument from the other. I write
+`g(k) = k + d`. While the gcd stays 1, `g` grows by one per step, so `d` doesn't move, and at the next
+index `j`
+
+    gcd(j, g(j−1)) = gcd(j, j − 1 + d) = gcd(j, d − 1).
+
+The second argument no longer depends on `j`. With `c = d − 1` fixed, the run of `+1` steps lasts
+until the first `j > k` that shares a prime with `c`, and that index is
+`min over p | c of p·(⌊k/p⌋ + 1)`. So the sequence collapses into a chain of jumps, with one
+factorisation of `c` per jump instead of one gcd per term. There are only a few hundred jumps up to
+`10¹⁵`. The lesson matches the coprimality bullet below: a gcd that is almost always 1 tells you
+nothing on most steps, so find the steps where it isn't 1 and skip straight to them. The factoriser
+itself, [Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm), finds its factors
+with gcds too: it takes `gcd(|x − y|, n)` and waits for a non-trivial value.
 
 ## How to reason about it
 
