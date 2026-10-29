@@ -1,5 +1,5 @@
 <!-- tags: [binomial-theorem] -->
-<!-- status: final 2026-08-03T06:50Z -->
+<!-- status: final -->
 # Binomial theorem
 
 The [binomial theorem](https://en.wikipedia.org/wiki/Binomial_theorem) is the one-line statement
@@ -60,6 +60,22 @@ residue share a factor, and the binomial theorem expands their combined contribu
 $(1 + x^{r})^{c_r}$ as a single row $\sum_i \binom{c_r}{i} x^{ri}$. Two hundred and fifty thousand
 polynomial multiplications become at most two hundred and fifty.
 
+Sometimes the binomials are hiding, and the move is to *factor before you expand*. Problem 860 is
+a coin game that turns out to be blue-red [Hackenbush](https://en.wikipedia.org/wiki/Hackenbush)
+on stalks of height two: each stack has a surreal value of $\pm 2$ or $\pm\tfrac12$, and a
+"fair" arrangement is one whose values sum to zero. In half-units that counts length-$n$ sequences
+of steps from $\{+4, +1, -1, -4\}$ that return to the origin, the constant term of
+$(x^4 + x + x^{-1} + x^{-4})^n$. Expanding that directly is a multinomial over four step types.
+But the Laurent polynomial factors:
+
+$$x^4 + x + x^{-1} + x^{-4} = x^{-4}(1 + x^3)(1 + x^5),$$
+
+so the count is $[x^{4n}]\,(1+x^3)^n(1+x^5)^n$. Expand each factor with the binomial theorem and the
+coefficient is $\sum_{3i+5j=4n} \binom{n}{i}\binom{n}{j}$, a single sum with about $n/5$ terms, the
+constraint solved for $j$ instead of searched. The general lesson is that a step set closed under
+negation gives a palindromic polynomial, and those often split into $(1+x^a)(1+x^b)$ factors. Try
+factoring before reaching for a multinomial.
+
 Problems 172 and 788 use the same bookkeeping without any polynomial appearing in the code. Both
 count digit strings under a repetition constraint, and both turn on the same question — *which
 positions carry this digit?* — whose answer is a binomial coefficient times a free choice for the
@@ -102,7 +118,9 @@ shorter, not longer.
 
 The tell for use **1** is a modulus that is a power of a term inside the parentheses. The tell for
 **2** is a sum of binomial coefficients against a geometric weight. The tell for **3** is any
-counting problem where the objects are built from independent choices and only a total matters.
+counting problem where the objects are built from independent choices and only a total matters —
+and if the per-choice polynomial has more than two terms, check whether it factors into binomials
+first.
 
 Three practical cautions, all of which cost real time in the archive:
 
@@ -119,7 +137,11 @@ Three practical cautions, all of which cost real time in the archive:
   a prime and *wrong* mod $10^{16}$ or $2^{64}$. Problem 250 hits this squarely: Python carries the
   coefficient as an exact bignum and reduces on store, while the C port has to strip the powers of
   $2$ and $5$ out and carry them as exponents so the remaining unit is coprime to the modulus. If
-  your modulus is not prime, plan the representation before you write the loop.
+  your modulus is not prime, plan the representation before you write the loop. When it *is* a
+  prime larger than $n$, as in problem 860, do the easy thing: build a factorial table, invert
+  $n!$ once with [Fermat](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), walk the
+  inverses back down with $((k-1)!)^{-1} = k\,(k!)^{-1}$, and every $\binom{n}{k}$ costs three
+  lookups.
 - **Bignums are correct and slow.** Both problem 788 and problem 172 build intermediates of
   thousands of digits if you defer the reduction to the end; reducing at every step — legitimate,
   because reduction is a ring homomorphism — moved 788 from over a minute to a few hundredths of a
