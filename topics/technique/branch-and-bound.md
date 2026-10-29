@@ -1,11 +1,11 @@
 <!-- tags: [branch-and-bound] -->
-<!-- status: final 2026-10-17T06:41Z -->
+<!-- status: final -->
 # Branch and bound
 
 [Branch and bound](https://en.wikipedia.org/wiki/Branch_and_bound) splits a search space into
 pieces (the *branch*) and attaches to each piece a cheap, provable statement about the best it
 could possibly contain (the *bound*). Any piece whose bound cannot beat what is already known gets
-discarded unexplored, along with everything inside it. In the seven problems below the branching is
+discarded unexplored, along with everything inside it. In the eight problems below the branching is
 nothing special: factorisations, exponent vectors, digit strings, subsets, a tree of triples. What
 makes each one finish in milliseconds, against a search space of $2^{62}$ or $10^{18}$ or a number
 with $10^{10}$ digits, is the bound. This page is about how to find bounds and how to use them. How
@@ -53,7 +53,7 @@ factorisations does not.
 
 ## Where bounds come from
 
-The seven solutions draw their bounds from four places.
+The eight solutions draw their bounds from five places.
 
 **An optimistic completion.** Finish the partial solution in the most favourable way the
 constraints allow, ignoring the rest of the constraints, and evaluate it. Problem 170 looks for the
@@ -91,6 +91,20 @@ That bound only grows with $F$, so the scan stops as soon as $\lfloor F/9! \rflo
 incumbent length. In the worst case the window is about $37 \cdot 9!$ wide, and in practice it is much
 narrower, because each shorter candidate shrinks it.
 
+**A reachability window on a constraint.** Not every bound is about the objective. When the
+problem is a *feasibility* condition, such as a quantity that must end at exactly zero, the bound
+asks whether the undecided items can still get it there. Problem 473 looks for integers whose
+[phigital](https://en.wikipedia.org/wiki/Golden_ratio_base) representation is a palindrome. Each
+mirrored pair of digits, $\varphi^k + \varphi^{-(k+1)}$, is a number $\tfrac12(a + b\sqrt5)$, and a
+set of pairs sums to an integer only when the $\sqrt5$ coefficients cancel. The search decides the
+pairs from the largest down. Prefix sums of the positive and of the negative coefficients over pairs
+$1..k$ give the most the balance can still rise and the most it can still fall. A node whose balance
+lies outside that window can never return to zero, so it is cut. Because the coefficients are
+Fibonacci numbers and grow geometrically, once a large pair is taken only a thin band of smaller
+pairs can cancel it. The window catches this, and the search becomes output-sensitive: it does work
+roughly in proportion to the answers, not to the Fibonacci-sized count of digit strings. The same
+window works for any search that must hit a target sum exactly, such as subset sum with mixed signs.
+
 ## How to reason about it
 
 **Seed the incumbent.** Until a first complete solution exists, an incumbent bound cuts nothing.
@@ -127,17 +141,24 @@ lose a solution but never invent one. Its result was also confirmed against a di
 an independent variant that needs none of the algebra. Problem 254 was checked against two brute
 forces. Before trusting a cut on a large input, compare it against an unpruned search on a small one.
 
+**Let approximate arithmetic prune, never decide.** Floating point is cheap enough to run at every
+node, but a rounding error in a bound is a validity bug. Problem 473 keeps a running real value of
+each partial sum and cuts a branch once it passes $N$. That test carries a small relative slack, so
+rounding can only make it keep too much, never too little. Membership is then decided at the leaves
+in exact integers: a balance of exactly $0$ and a doubled value at most $2N$. The float bound only
+has to be safe. The exact test has to be right.
+
 ## C and Python
 
-All seven are direct ports: the C and Python sides apply the same bounds in the same order. The
+All eight are direct ports: the C and Python sides apply the same bounds in the same order. The
 differences are in the plumbing.
 
 | Concern | Python | C |
 |---|---|---|
 | Incumbent shared across recursion | closure over `nonlocal best` or an enclosing list (88, 110) | file-scope globals such as `g_min_prod`, `best` (88, 110) |
-| Products that may exceed 64 bits | free with unbounded `int` | guard before multiplying: `n > best / pe` (110); `unsigned __int128` with caps proven to fit (241); [GMP](/topics/technique/gmp) with a native `unsigned long long` fast path (254) |
+| Products that may exceed 64 bits | free with unbounded `int` | guard before multiplying: `n > best / pe` (110); `unsigned __int128` with caps proven to fit (241); `__int128` totals and a hand-written decimal printer (473); [GMP](/topics/technique/gmp) with a native `unsigned long long` fast path (254) |
 | Memo for the exact-count prune | `functools.lru_cache` (755) | hand-written open-addressing table keyed on $b \cdot 128 + i$, cleared on every call (755) |
-| Explicit DFS stack | `list` push/pop (139) | `realloc`-doubled array (139) |
+| Explicit DFS stack | `list` push/pop (139, 473) | `realloc`-doubled array (139); a fixed-size array (473) |
 | Deduplicating results | `sum(set(...))` (88) | a `char` seen-array indexed by value (88) |
 
 The [overflow](/topics/technique/integer-overflow) row matters more than it looks. A bound like
