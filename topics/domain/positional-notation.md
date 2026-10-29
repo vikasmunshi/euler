@@ -1,5 +1,5 @@
 <!-- tags: [positional-notation] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T01:58Z -->
 # Positional notation
 
 [Positional notation](https://en.wikipedia.org/wiki/Positional_notation) is the convention that a
