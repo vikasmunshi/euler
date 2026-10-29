@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-15T11:07Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -20,18 +20,23 @@ move. Every use below is some form of "I have a quotient I cannot compute, so I 
 inverse instead."
 
 The inverse exists exactly when `gcd(a, m) = 1`, which is the one precondition worth checking before
-anything else. Two routes to it, both `O(log m)`:
+anything else. Three routes to it, all `O(log m)`:
 
 | Route | Requires | Cost |
 |---|---|---|
 | [Extended Euclid](/topics/technique/extended-euclidean-algorithm) | `gcd(a, m) = 1` | `O(log m)` divisions |
 | [Fermat](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem): `a⁻¹ ≡ a^(m−2)` | `m` **prime** | `O(log m)` multiplications |
+| [Euler](https://en.wikipedia.org/wiki/Euler%27s_theorem): `a⁻¹ ≡ a^(φ(m)−1)` | `gcd(a, m) = 1`, `φ(m)` known | `O(log m)` multiplications |
 
-In Python both are one expression — `pow(a, -1, m)` and `pow(a, m - 2, m)` — so the choice is about
+In Python each is one expression — `pow(a, -1, m)`, `pow(a, m - 2, m)` — so the choice is about
 the modulus, not the ergonomics. Prefer `pow(a, -1, m)`: it is faster, and it raises rather than
-silently returning a wrong value when the inverse does not exist. Reach for the Fermat form only
-when the modulus is a known prime *and* you are already doing
-[modular exponentiation](/topics/technique/modular-exponentiation) anyway.
+silently returning a wrong value when the inverse does not exist. Reach for the exponent forms when
+the modulus is a known prime *and* you are already doing
+[modular exponentiation](/topics/technique/modular-exponentiation) anyway — or when you need
+inverses of a whole *array* at once. Euclid branches on every element; square-and-multiply does the
+same operations on every lane, so it [vectorises](/topics/technique/vectorized) cleanly. Problem 0675
+inverts every odd number up to `2n + 1` in one NumPy Fermat pass. Problem 0407 inverts every residue
+of a small composite `s` with the Euler form, computing `φ(s)` along the way as the count of units.
 
 ## Three shapes it takes
 
@@ -45,7 +50,9 @@ a digit-suffix condition, a [Farey](https://en.wikipedia.org/wiki/Farey_sequence
 relation, a residue class modulo 3, a divisibility constraint from a
 [Diophantine](https://en.wikipedia.org/wiki/Diophantine_equation) reduction — but each ends at
 `something · unknown ≡ constant (mod n)`, and each is then `O(1)`. When you see that line at the end
-of a derivation, stop searching. At its barest the unknown *is* the inverse: problem 0274's
+of a derivation, stop searching. The same move can thin out a sum, too. In problem 0860 the
+constraint `3i + 5j = 4n` gives `3i ≡ 4n (mod 5)`, so `i ≡ 4n · 3⁻¹ ≡ 3n (mod 5)`. A double sum over
+`(i, j)` becomes one loop that steps `i` by 5 from a known start. At its barest the unknown *is* the inverse: problem 0274's
 "divisibility multiplier" — the `m` that makes `a + b·m` a test for divisibility of `10a + b` by `p`
 — turns out, after one line of algebra (`10·f(n) = n + b(10m − 1)`), to be exactly `10⁻¹ mod p`. A
 puzzle phrased about digits is a sum of inverses.
@@ -66,6 +73,11 @@ three prime moduli. 0365 also shows the optimisation worth knowing: its lift nee
 for twenty million prime triples, but the inverse is *multiplicative* — `(q·r)⁻¹ ≡ q⁻¹ · r⁻¹` — so a
 table of `O(P²)` pairwise inverses serves an `O(P³)` loop. Inverting a product is never worth doing
 directly if the factors recur.
+
+Sometimes the merged residue is the answer itself. For problem 0407, the idempotents of `ℤ/n`
+(`a² ≡ a`) are exactly the CRT solutions of `a ≡ 0 (mod d)`, `a ≡ 1 (mod e)` over the coprime
+splits `n = d·e`. Each one is `d · (d⁻¹ mod e)`: the CRT basis element, an inverse times its modulus.
+Finding the largest idempotent is then a sweep over factorisations, not a search over `a`.
 
 **3 — Exact division of a number you never build.** This is the deepest use, and the one that
 justifies the technique's presence in problems that look nothing like number theory. A combinatorial
@@ -94,7 +106,12 @@ line can vanish.
 
 A variant of the same idea is the inverse as *undo*. Problem 0926 sweeps a running product across
 segment boundaries and multiplies by a factor's inverse to remove it again when the segment ends;
-0650 keeps a running `p^(−v)` for the same reason. Where a sliding window over sums would use a
+0650 keeps a running `p^(−v)` for the same reason. Problem 0675 shows the undo at its clearest. Its
+`S(i!)` is a product `∏ (2eₚ + 1)` over the prime exponents of `i!`. Going from `(i−1)!` to `i!`
+changes only the exponents of primes dividing `i`, so each step multiplies in the new factor and
+multiplies by the inverse of the old one. That is an incremental update of a multiplicative function,
+and it is affordable only because the inverse removes one factor without rebuilding the whole
+product. Where a sliding window over sums would use a
 subtraction, a sliding window over products uses an inverse — with the caveat that a zero factor has
 no inverse and breaks the trick, so this only works in a field with the zeros excluded by
 construction.
@@ -107,7 +124,7 @@ the repetition.
 
 - **Batch the inverses you need in bulk.** For a whole factorial table, compute *one* inverse and
   sweep backwards, since `(i−1)!⁻¹ = i!⁻¹ · i`. `n` inverses for one exponentiation and `n`
-  multiplications — problem 0487 does exactly this. The general form is
+  multiplications — problems 0487 and 0860 do exactly this. The general form is
   [Montgomery's trick](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Multiple_inverses):
   any `n` inverses cost one inversion plus `3n` multiplications via a prefix-product pass.
 
@@ -120,6 +137,9 @@ the repetition.
 - **Hoist loop-invariant inverses.** If the divisor depends on the outer index only, invert once
   outside — 0650 precomputes `(p − 1)⁻¹` per prime before the sweep, not per iteration of it. In
   0996 every binomial in the sum shares the same `n!` denominator, so one `(n!)⁻¹` serves them all.
+- **Invert the residues, not the operands.** When a small modulus `s` meets many large values `L`,
+  `L⁻¹ mod s` depends only on `L mod s`. Problem 0407 builds one table of all `s` residues' inverses,
+  then gathers `inv[L % s]` for thousands of `L` in a single indexed read.
 - **Divide once, at the end.** When the answer is one big quotient of products, keep numerator and
   denominator as separate running residues — or, as in 1010, as exponent counts per factor — and
   invert the denominator a single time. Per-term inverses turn `k` multiplications into `k`
@@ -141,8 +161,11 @@ the repetition.
   pulls all factors of 5 out of a factorial before working modulo `5⁵`, precisely so the remaining
   quantity is invertible. Problem 0134's statement excludes one prime pair for the same reason — the
   inverse genuinely does not exist there — and 0274 masks out 2 and 5, the only primes sharing a
-  factor with 10. The cheapest proof of invertibility is a size argument: in 0996 and 1010 the prime
-  modulus exceeds every factor of the denominator, so the check is done before the code starts.
+  factor with 10. The cheapest proof of invertibility is a size argument: in 0996, 1010 and 0675 the
+  prime modulus exceeds every factor of the denominator, so the check is done before the code starts.
+  When non-units can't be excluded, handle them on purpose. Problem 0407's inverse table stores 0 for
+  every non-unit, and the CRT formula then gives the trivial idempotents 0 and 1 for those splits,
+  which the maximum discards. It never yields a wrong one.
 - **A composite modulus is not a field, but inverses still work.** `gcd(a, m) = 1` is the only
   requirement; primality is not. Problem 0152 inverts squares modulo `p²` and problem 0251 works
   modulo an odd square, both perfectly well. What primality buys is only the Fermat shortcut and the
