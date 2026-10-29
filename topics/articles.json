@@ -5933,12 +5933,12 @@
       "path": "technique/greedy-algorithm",
       "title": "Greedy algorithm",
       "status": "final",
-      "written": "2026-10-17T06:27Z",
+      "written": "2026-10-29T07:00Z",
       "solved": 11,
       "problems": 11,
       "tags": ["greedy-algorithm"],
       "refs": ["p0069_s0", "p0089_s0", "p0110_s0", "p0111_s0", "p0152_s0", "p0219_s0", "p0297_s0", "p0347_s0", "p0692_s0", "p0698_s0", "p0887_s0"],
-      "solved_after": ["p0698", "p0887"]
+      "solved_after": []
     },
     {
       "path": "technique/grid-spatial-index",

@@ -1,5 +1,5 @@
 <!-- tags: [greedy-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:00Z -->
 # Greedy algorithm
 
 A [greedy algorithm](https://en.wikipedia.org/wiki/Greedy_algorithm) builds its answer one
