@@ -3810,12 +3810,12 @@
       "path": "domain/triangular-number",
       "title": "Triangular number",
       "status": "final",
-      "written": "2026-10-14T11:43Z",
+      "written": "2026-10-29T08:06Z",
       "solved": 11,
       "problems": 21,
       "tags": ["triangular-number"],
       "refs": ["p0001", "p0006", "p0012", "p0042", "p0045", "p0067", "p0085", "p0196", "p0321", "p0359", "p0378", "p0459", "p0581", "p0621", "p0647", "p0726", "p0747", "p0833", "p0944", "p0955", "p0985"],
-      "solved_after": ["p0359"]
+      "solved_after": []
     },
     {
       "path": "domain/triangular-tiling",

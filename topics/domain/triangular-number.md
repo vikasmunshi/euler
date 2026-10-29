@@ -1,5 +1,5 @@
 <!-- tags: [triangular-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T08:06Z -->
 # Triangular number
 
 A [triangular number](https://en.wikipedia.org/wiki/Triangular_number) counts the dots in a
