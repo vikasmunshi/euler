@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function] -->
-<!-- status: final 2026-10-16T07:33Z -->
+<!-- status: final -->
 # Euler's totient function
 
 [Euler's totient function](https://en.wikipedia.org/wiki/Euler%27s_totient_function) $\varphi(n)$
@@ -98,6 +98,17 @@ the summand is a messier multiplicative function than $\varphi$ itself, the gene
 [Min-25 sieve](/topics/technique/min-25-sieve) or the
 [Dirichlet hyperbola method](/topics/technique/dirichlet-hyperbola-method).
 
+Problem 512 shows the recurrence absorbing a restriction for free. Its sum of totients of powers
+collapses first, because $n^i$ has the same radical as $n$: $\varphi(n^i) = n^{i-1}\varphi(n)$, and
+modulo $n+1$ the powers of $n$ alternate in sign, so what is left is $\varphi(n)$ summed over the
+*odd* $n \le N$ only. Splitting off the odd terms looks like a fresh summatory problem, but the
+prime $2$ acts on $\varphi$ in a simple way: $\varphi(2m)$ is $\varphi(m)$ for odd $m$ and
+$2\varphi(m)$ for even $m$. Unrolling that gives
+$$\sum_{\substack{n \le N \\ n \text{ odd}}} \varphi(n) = \Phi(N) - \sum_{k \ge 1} \Phi\!\left(\lfloor N/2^k \rfloor\right),$$
+and every $\lfloor N/2^k \rfloor$ is already one of the quotients the recursion fills in. The
+restriction costs $\log_2 N$ extra lookups. Before writing a new recurrence for a filtered sum, check
+whether the filter is a prime acting on $\varphi$, and so on arguments the table already holds.
+
 ## How a problem reaches it
 
 Three routes, and it is worth learning to recognise which one you are on.
@@ -141,6 +152,17 @@ or constrain its value's shape (problems 342, 302 and 516 want $\varphi(n)$ to b
 Achilles number, or [5-smooth](/topics/domain/smooth-number)). These are the hardest of the three,
 because the sieve gives you no leverage: the search space is the *structure* of the factorisation,
 and the algorithm is usually a recursive walk over prime choices with hard pruning.
+
+Problem 516 shows how far that structure can carry you. Because $\varphi$ is multiplicative,
+$\varphi(n)$ is 5-smooth exactly when each factor $p^{a-1}(p-1)$ is. For $p \le 5$ that holds at
+any exponent. For a larger $p$ it forces $a = 1$ and needs $p - 1$ to be 5-smooth itself. So every
+admissible $n$ splits uniquely into a [Hamming number](https://en.wikipedia.org/wiki/Regular_number)
+times a square-free product of "good" primes of the form $h + 1$. Up to $10^{12}$ there are a few
+thousand Hamming numbers and a few hundred good primes. The search over $10^{12}$ integers becomes a
+depth-first walk over subsets of a few hundred primes, each paired with a prefix sum over the
+Hamming numbers. The same move, putting the condition on each prime-power factor of $\varphi(n)$ and
+then on the primes that can supply it, is what problems 248 and 342 need, only with less forgiving
+targets.
 
 ## How to reason about it
 
