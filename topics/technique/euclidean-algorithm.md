@@ -1,5 +1,5 @@
 <!-- tags: [euclidean-algorithm] -->
-<!-- status: final 2026-10-16T15:11Z -->
+<!-- status: final -->
 # Euclidean algorithm
 
 The [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm) computes the greatest
@@ -126,12 +126,26 @@ count into an interior lattice-point count, and the boundary count is a sum of g
 counts RSA exponents whose number of unconcealed messages is minimal, and that number is a product of
 two gcd terms — here the gcd is not a filter or a normaliser but the actual value being tabulated.
 
-One more use is worth knowing even though it fits none of the four: the *quotients* the loop throws
-away are themselves data. The sequence $q_1, q_2, \dots$ produced by successive divisions is exactly
+Two more uses are worth knowing even though they fit none of the four. The first: the *quotients*
+the loop throws away are themselves data. The sequence $q_1, q_2, \dots$ produced by successive divisions is exactly
 the [continued fraction](https://en.wikipedia.org/wiki/Continued_fraction) expansion of $a/b$, and
 running the algorithm to collect them is how you convert a rational into that form. Problem 175 does
 precisely this — it reduces its fraction by the gcd and then keeps walking, emitting one run per
 Euclidean quotient, because the quotient sequence is the answer's structure rather than a by-product.
+
+The second: the step itself can be a *model of something else*, with no gcd wanted at all. Problem
+700 asks for the record lows of the orbit $x_n = na \bmod m$ for a modulus near $4.5 \times 10^{15}$,
+far too long to walk. The trick is to track two records: $L$, the smallest term so far, and $D$, the
+smallest distance below $m$ so far. Adding their indices adds their residues, so the next term that
+can beat either record is $L - D$. If $D < L$ that is a new low; otherwise $D - L$ is a new gap. That
+is Euclid's subtractive algorithm running on $(L, D)$, which is the geometry of the
+[three-distance theorem](https://en.wikipedia.org/wiki/Three-gap_theorem) in another form. It also
+sharpens the "use the remainder" advice above. The solution collapses runs of gap steps with a
+`%`, because nobody needs to see those intermediates, but it deliberately keeps the coin branch
+subtractive, because every intermediate there is a record it has to sum. When the steps themselves
+are the output, unrolling the division is correct and costs nothing extra. The loop also stops at
+the right place for free: the smallest positive value $na \bmod m$ can take is
+$\gcd(a, m)$ (Bézout), so the walk ends exactly when the "gap" becomes a multiple of the "low".
 
 ## How to reason about it
 
