@@ -1,5 +1,5 @@
 <!-- tags: [transfer-matrix-method] -->
-<!-- status: final 2026-10-18T12:38Z -->
+<!-- status: final -->
 # Transfer matrix method
 
 The [transfer-matrix method](https://en.wikipedia.org/wiki/Transfer-matrix_method) counts
@@ -9,9 +9,10 @@ cells a path crosses), then the count is a product of matrices: entry $T_{uv}$ i
 ways to fill one slice so that boundary $u$ on the left becomes boundary $v$ on the right, and the
 total is $\mathbf{1}^\top T_1 T_2 \cdots T_n \mathbf{1}$. Colourings of grids, tours of strips and
 chains of gadgets all fit this shape, which is why the method keeps coming back. What changes from
-problem to problem is how much of the matrix you actually build. Of the three solved problems
+problem to problem is how much of the matrix you actually build. Of the four solved problems
 below, one contracts it a column at a time without ever writing it down, one collapses it to a
-single number, and one replaces it with the linear recurrence it guarantees.
+single number, one replaces it with the linear recurrence it guarantees, and one, the textbook
+case, shrinks it to ten states by symmetry and then builds it and raises it to a power.
 
 ## The idea — boundary states and a matrix per slice
 
@@ -32,7 +33,7 @@ linear-algebra notation. The notation earns its keep through the second and thir
 you a recurrence exists and what order to expect, and it lets you reason about eigenvectors
 instead of states.
 
-## Three sizes of matrix
+## Four sizes of matrix
 
 **189, tri-colouring a triangular grid: contract, don't build.** The grid has 8 rows of small
 triangles, and a row's upward triangles are its only link to the row below, so the boundary state
@@ -80,6 +81,27 @@ $10^8$. The transfer matrix is never seen, but it is why fitting a recurrence wa
 [small cases reveal the recurrence](/topics/takeaway/small-cases-reveal-recurrence) and, for doing
 the fit mechanically, [Berlekamp–Massey](/topics/technique/berlekamp-massey-algorithm).
 
+**670, colouring a $2 \times n$ strip: quotient, then build and power.** The strip is tiled by
+horizontal tiles of length 1 to 3 in either row and vertical dominoes spanning both, with four
+colours, adjacent tiles distinct, and no point where four tile corners meet. $n = 10^{16}$, so
+only $T^{n-1}$ by repeated squaring will do, and that needs a matrix small enough to square. The
+literal boundary state is the colour and remaining overhang of each row's tile plus a "last column
+was vertical" flag, which is over a hundred states. The quotient is 194's idea applied partially.
+The two tiles at a boundary always touch, so they always differ, and every ordered pair of distinct
+colours is equivalent under permuting the four colours. The colours therefore leave the state and
+become **weights** on the transitions: a new horizontal tile must avoid two distinct colours, so it
+contributes 2; a domino after a domino contributes 3; two horizontal tiles after a domino
+contribute $3 \cdot 2 = 6$. What remains is the pair of overhangs, $3 \times 3$, plus the vertical
+state, ten in all. The four-corners rule fits as well: when both rows end at the same interior line,
+the only allowed transition is into the vertical state, so the rule becomes a zero pattern in $T$
+and needs no extra memory. Here, unlike 194, the colour symmetry does not reduce the matrix to a
+scalar, because the overhangs are a genuine state that the symmetry does not touch. The initial
+vector (the first column has no left neighbour, so 12 per horizontal pair and 4 for a domino) is
+calibrated against a brute-force count for $n \le 7$ and the statement's $F(100)$. See
+[matrix exponentiation](/topics/technique/matrix-exponentiation) and
+[exponentiation by squaring](/topics/technique/exponentiation-by-squaring), which explains why the
+vector can be folded in with vector–matrix products while only the squarings cost $s^3$.
+
 ## Python and C
 
 The algorithms match; the differences are in arithmetic width and modular reduction.
@@ -97,21 +119,28 @@ The algorithms match; the differences are in arithmetic width and modular reduct
 - **237** stores the recurrence's $-2$ as $10^8 - 2$ in C, so every matrix entry is a non-negative
   residue and every product stays below $10^{16}$. Python can keep the $-2$, because `%` on a
   negative `int` already returns a non-negative result.
+- **670** is a line-for-line port. Its modulus $1\,000\,004\,321$ is just under $2^{30}$, so one
+  product of residues is below $2^{60}$, but a ten-term dot product summed before reducing could
+  pass $2^{64}$. C therefore reduces after every term; Python sums the row and reduces once.
 
 ## How to reason about it
 
 - **Choose the cut first.** The method only works if the two sides of a cut interact through the
   state alone. For colourings that is the colours along the cut; for paths it is which positions
-  are crossed *and* how the strands pair up. If you leave out part of the interaction, the counts
-  come out plausible and wrong.
+  are crossed *and* how the strands pair up; for tiles it is how far each tile still overhangs.
+  If you leave out part of the interaction, the counts come out plausible and wrong.
+- **Push rules into the matrix, not the state.** A local prohibition, such as 670's four corners,
+  is usually a zero (or a forced entry) in $T$. Labels that only need to differ, such as colours,
+  can usually leave the state and become multiplicities on the transitions.
 - **Estimate $s$ before you build anything.** $s^2$ entries to store, $s^3$ to multiply. If that is
   too much, either the matrix factors into local pieces (contract it, as 189 does), or a symmetry
-  shrinks it (quotient by it, as 194 does), or you only need the sequence (fit the recurrence, as
-  237 does).
+  shrinks it (quotient by it, as 194 does, and as 670 does before it squares the result), or you
+  only need the sequence (fit the recurrence, as 237 does).
 - **Look for an invariant vector.** If the problem is symmetric under some group acting on the
   states (colour permutations, reflections), the vector constant on orbits is invariant and the
   matrix acts on the much smaller space of orbits. In the extreme case of 194 there is one orbit,
-  and the matrix becomes a number.
+  and the matrix becomes a number; in 670 the colours collapse to one orbit but the overhangs do
+  not, so ten states remain.
 - **A fitted recurrence needs a check beyond the fit.** Fit it on some small cases and verify it on
   more, as 237 does up to $n = 12$. The transfer-matrix argument bounds the order, which tells you
   how many terms the check needs.
