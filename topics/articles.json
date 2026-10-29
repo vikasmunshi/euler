@@ -3656,12 +3656,12 @@
       "path": "domain/surreal-number",
       "title": "Surreal number",
       "status": "final",
-      "written": "2026-10-12T14:16Z",
+      "written": "2026-10-29T08:03Z",
       "solved": 3,
       "problems": 3,
       "tags": ["surreal-number"],
       "refs": ["p0860", "p0882", "p0963"],
-      "solved_after": ["p0860"]
+      "solved_after": []
     },
     {
       "path": "domain/symmetry-in-mathematics",
