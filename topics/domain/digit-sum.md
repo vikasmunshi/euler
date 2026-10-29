@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum] -->
-<!-- status: final 2026-10-16T07:07Z -->
+<!-- status: final -->
 # Digit sum
 
 The [digit sum](https://en.wikipedia.org/wiki/Digit_sum) $s(n)$ — add up the decimal digits and stop
@@ -90,6 +90,20 @@ that this is really true of your object before relying on it — problem 788 cou
 $10^N$, where a leading zero would make the number shorter and change which digit dominates, and
 problem 164 counts genuine $20$-digit numbers, so both must seed the top position separately.
 
+Nor does the convolution have to be additive. Problem 778's "freshman's product" multiplies numbers
+digit by digit, keeping only the last digit of each product — the carry-free operation the carry
+identity above warns you ordinary arithmetic is not. Discarding carries makes the positions
+independent, and [linearity](/topics/domain/positional-notation) splits the sum over all $(M+1)^R$
+tuples into one sub-problem per decimal place: $\sum_i 10^i \sum_d d \cdot N_i(d)$, where $N_i$ is
+the distribution of the $i$-th digit of the product. Each $x_j$ then matters only through its digit
+at that place, so $[0, M]$ collapses to a ten-bucket histogram (closed-form: whole periods of $10^{i+1}$
+plus one clipped partial run), and $N_i$ is that histogram's $R$-th
+[convolution](/topics/technique/convolution) power over the monoid $(\{0,\dots,9\}, \times \bmod 10)$.
+Associativity is all [repeated squaring](/topics/technique/exponentiation-by-squaring) needs — not
+inverses, which this monoid lacks — so a quarter-million-fold product costs a few dozen $10 \times 10$
+convolutions per digit. Here leading zeros are not merely harmless but *correct*: the operation itself
+reads a missing digit as $0$.
+
 ## Digit DP: count the buckets, not the numbers
 
 Generalise the pass above and you have [digit DP](/topics/technique/digit-dp): walk the number one
@@ -164,6 +178,9 @@ checksum at the end. Recognising which family you are in is the first decision.
 - **Ask what the property actually depends on.** If it depends only on the digit sum, or only on the
   digit multiset, the search space is $O(d)$ or $O(d^{10})$ states, not $10^d$ numbers. If it depends
   on the digits' *order* too, you usually still win — the state is a bounded suffix.
+- **No carries, no coupling.** A digit-wise operation that drops carries splits into one
+  independent problem per position; sum over all inputs by weighting each position's digit
+  distribution by its place value.
 - **Count, then unrank.** "The $n$-th number such that…" is never a loop over $n$.
 - **When the length is huge, fit the recurrence.** A digit DP over a fixed automaton is a linear
   recurrence in the length; recover it from a prefix sized by the state count, then jump.
