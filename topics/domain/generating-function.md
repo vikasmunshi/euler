@@ -1,5 +1,5 @@
 <!-- tags: [generating-function] -->
-<!-- status: final 2026-10-16T07:10Z -->
+<!-- status: final -->
 # Generating function
 
 A [generating function](https://en.wikipedia.org/wiki/Generating_function) is a whole infinite
@@ -41,6 +41,17 @@ reduced mod 10¹⁶ throughout; the series is never written down, only walked.
 `[x^k](1 + b·x + x²)^k` at *k* = 10⁸ — a central trinomial coefficient with a multinomial closed
 form, computable as one O(*k*) loop with no array at all. Recognising the polynomial is what buys
 the shortcut; the generating function is the *model*, not the *method*.
+
+Problem 860 shows how far that recognition can go. It is a partizan coin game, and combinatorial
+game theory gives each height-two stack a value of ±2 or ±½. "Fair" means the values sum to zero.
+Measured in half-units, *F*(*n*) counts ordered sequences of *n* steps from {±4, ±1} that sum to
+zero. That is a walk that comes back to the origin, so the count is the **constant term** of the
+Laurent polynomial `(x⁴ + x + x⁻¹ + x⁻⁴)ⁿ`. Negative exponents are fine; multiply through by `x⁴ⁿ`
+and you are reading `[x⁴ⁿ]` of an ordinary polynomial. The useful part is that the step polynomial
+factors: `x⁴ + x + x⁻¹ + x⁻⁴ = x⁻⁴(1 + x³)(1 + x⁵)`. The *n*-th power of a four-term polynomial
+becomes the product of two binomial powers. So the coefficient is a single sum `Σ C(n,i)·C(n,j)` over
+`3i + 5j = 4n`, about *n*/5 terms, where the direct count would sum multinomials over four stack
+multiplicities. Before you expand a power, try factoring its base.
 
 **Extract by powering.** When the independent parts are also *identical*, the product is a power,
 and a power takes [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring):
@@ -164,7 +175,7 @@ becomes an array of 250 machine words.
   passes (problem 768).
 - **Look for the structure before the array.** The best outcomes here are not faster expansions but
   escapes from expanding at all: a sparse reciprocal (problem 78), a closed-form coefficient
-  (problem 743), a periodicity that makes the input census O(1) (problem 250), a rational form that
+  (problem 743), a base that factors into binomials (problem 860), a periodicity that makes the input census O(1) (problem 250), a rational form that
   hands the problem to number theory (problems 137, 140), a known denominator that takes the target
   degree out of the cost (problem 996). Write the generating function down first; then look hard at
   what it *is* before you start multiplying.
