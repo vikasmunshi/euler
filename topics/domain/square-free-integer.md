@@ -1,5 +1,5 @@
 <!-- tags: [square-free-integer] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T08:02Z -->
 # Square-free integer
 
 A [square-free integer](https://en.wikipedia.org/wiki/Square-free_integer) is one that no prime

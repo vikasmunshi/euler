@@ -3425,12 +3425,12 @@
       "path": "domain/square-free-integer",
       "title": "Square-free integer",
       "status": "final",
-      "written": "2026-10-17T07:05Z",
+      "written": "2026-10-29T08:02Z",
       "solved": 7,
       "problems": 18,
       "tags": ["square-free-integer"],
       "refs": ["p0193", "p0203", "p0273", "p0357", "p0362", "p0399", "p0464", "p0536", "p0556", "p0580", "p0591", "p0632", "p0633", "p0634", "p0641", "p0694", "p0745", "p0864"],
-      "solved_after": ["p0641"]
+      "solved_after": []
     },
     {
       "path": "domain/square-number",
