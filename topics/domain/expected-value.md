@@ -1,5 +1,5 @@
 <!-- tags: [expected-value] -->
-<!-- status: final 2026-10-16T07:09Z -->
+<!-- status: final -->
 # Expected value
 
 The [expected value](https://en.wikipedia.org/wiki/Expected_value) of a random quantity is
@@ -54,6 +54,19 @@ high-dimensional problem dissolves into a list of one-dimensional probabilities 
 When you see "expected number of …", reach for indicators first. If you can name the individual
 events being counted and find each one's probability, linearity finishes the job — and it does not
 care that the events overlap.
+
+The pieces need not be indicators, either. Problem 523 asks for the expected number of moves a
+quirky sort makes on a random permutation — a *process*, not a count, and on its face one whose
+moves interleave messily. The leverage is to recognise the procedure as
+[insertion sort](https://en.wikipedia.org/wiki/Insertion_sort) in disguise: it always keeps a sorted
+prefix and never touches the tail until that prefix is clean, so the total cost is a sum of $n-1$
+*per-element insertion costs*. Each of those is a deterministic function of one thing — how many
+prefix elements are smaller than the newcomer — which a small recurrence pins down in closed form,
+and in a uniform permutation that rank is uniform. Linearity then turns the expected total into a
+single sum over $k$ of "average cost of inserting the $(k+1)$-th element", with no permutation ever
+enumerated. The general move: when a random process runs in stages, ask whether its cost
+*decomposes by stage*, and whether each stage's cost depends only on a variable whose distribution
+you know. You do not need the stages to be independent — only to be able to average each one alone.
 
 ## Conditioning and recursion
 
@@ -138,7 +151,11 @@ that read the same thing contribute the same amount, and can be counted together
   thirteen decimal places. An expectation is a sum or ratio of rationals, so the exact answer is a
   fraction; carrying it as integers (Python's arbitrary precision, or `__int128` / a rational type
   in C) and rounding only at the very end avoids the floating-point drift that a `double`
-  accumulates over a long sum — problems 121 and 493 both hinge on this, and problem 255 keeps an
+  accumulates over a long sum — problems 121 and 493 both hinge on this. Exactness matters most
+  where an expectation lands *on* a rounding boundary: problem 523's own worked example, $E(10)$,
+  is a fraction whose decimal expansion ends exactly in a 5 at the third place, so asked for two
+  decimals, any `double` drift — or a banker's-rounding `round` — picks the wrong side; summing
+  rationals and rounding half-up in integers is the only deterministic answer. Problem 255 keeps an
   integer total and rounds to ten places with an integer formula, using `__int128` in C only for
   the one product that would overflow. But exactness is a judgement, not a rule: a forward pass that
   only adds and multiplies non-negative probabilities summing to $1$ is numerically benign, and
