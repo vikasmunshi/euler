@@ -1,5 +1,5 @@
 <!-- tags: [precompute-once-reuse] -->
-<!-- status: final 2026-10-15T10:59Z -->
+<!-- status: final -->
 # Precompute once, reuse
 
 Many of these problems ask the same small question thousands of times over: *is
@@ -76,6 +76,19 @@ one integer, so that comparing two candidates is one integer comparison. Both
 tables are built in one pass by extending them one factorial digit at a time.
 The candidates grow far beyond anything a table could index, but the tables
 never grow.
+
+Sometimes you have to choose the key yourself. [Idempotents](/solutions/0407/)
+enumerates coprime splits $n = d \cdot e \le N$ and solves a
+Chinese-remainder system for each one. Each solve needs a modular inverse, and
+there are $\Theta(N \log N)$ of them. One factor of every split is at most
+$\sqrt N$, so the solution always inverts modulo that *small* factor $s$. The
+inverse of a partner $L$ then depends only on $L \bmod s$, and one table of
+$s$ inverses serves every partner of $s$: the sweep fetches a whole row's
+inverses with a single `inv[L % s]` gather. Inverting modulo the large factor
+instead would leave nothing to share. A quirk of the same table removes a
+branch: storing $0$ as the "inverse" of a non-unit makes non-coprime pairs come
+out as the trivial idempotents, which never beat the running maximum, so the
+sweep needs no coprimality mask.
 
 **Tabulate at the lowest arity the work allows.** [A Huge Binomial
 Coefficient](/solutions/0365/) sums a
