@@ -1,5 +1,5 @@
 <!-- tags: [graph-coloring] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:18Z -->
 # Graph coloring
 
 A [proper colouring](https://en.wikipedia.org/wiki/Graph_coloring) gives every vertex of a graph a
