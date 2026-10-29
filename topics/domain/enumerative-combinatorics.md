@@ -1,5 +1,5 @@
 <!-- tags: [enumerative-combinatorics] -->
-<!-- status: final 2026-10-18T12:42Z -->
+<!-- status: final -->
 # Enumerative combinatorics
 
 [Enumerative combinatorics](https://en.wikipedia.org/wiki/Enumerative_combinatorics) is the part of
@@ -7,9 +7,10 @@ combinatorics that treats a count as a **function of a size parameter**: not "ho
 this row?" but $a(n)$, the number of tilings of a row of length $n$, as a sequence to be computed,
 inverted or summed. The broader [combinatorics](/topics/domain/combinatorics) page covers the
 general toolkit (modelling equivalence, recurrences, complements, symmetry, integer width), and the
-three solved problems here use parts of it. This page adds the sequence view, which asks three
-questions those problems turn on: how to get $a(n)$ for one $n$, how to get $a(n)$ for *every*
-$n$ up to a bound at once, and how to find the $n$ at which $a(n)$ takes a given value.
+solved problems here use parts of it. This page adds the sequence view, which asks four questions
+those problems turn on: how to get $a(n)$ for one $n$, how to get $a(n)$ for *every* $n$ up to a
+bound at once, how to find the $n$ at which $a(n)$ takes a given value, and, turning counting
+around, how to find the $n$-th object itself.
 
 ## The idea — a count is a sequence
 
@@ -21,6 +22,7 @@ goal is a *good description* of $a(n)$, and a good description can be any of:
 | a recurrence in $n$ | every $a(n)$ in order, by a table | 114 |
 | a tabulation by enumerating structures and recording their size | $a(n)$ for all $n \le N$ at once | 126 |
 | an explicit sum (often alternating, from inclusion–exclusion) | one $a(n)$ directly | 239 |
+| a count of completions for every prefix | the $n$-th object, by unranking | 698 |
 | a generating function $\sum a(n) x^n$ | all of the above, as algebra | (background) |
 
 Which description is "good" depends on what the problem asks of the sequence. A single large $n$
@@ -28,7 +30,7 @@ favours an explicit sum or a fast recurrence. A question like "the least $n$ wit
 favours tabulating every $n$ at once, because $a(n)$ is not monotone and no single evaluation tells
 you where to look.
 
-## Three descriptions in practice
+## Four descriptions in practice
 
 **114, block combinations: a recurrence from the first decision.** A row of length $n$ is filled
 with grey unit squares and red blocks of length at least $m$, with two red blocks never adjacent.
@@ -83,6 +85,41 @@ not from floating point. A double can hold the magnitude of $100!$ but only 53 b
 alternating sum of such terms would carry rounding error of unknown size into the result. Exact
 integers make the twelfth decimal certain.
 
+**698, 123 numbers: count by multiset, then unrank.** A 123-number uses only the digits 1, 2 and
+3, and each digit's count is either zero or itself a 123-number. The task is to find $F(n)$, the
+$n$-th one in ascending order, for an $n$ near $10^{17}$. Listing them is impossible, but two
+observations make the count cheap. First, the definition depends only on the count triple
+$(c_1, c_2, c_3)$ and never on the order of the digits, so each admissible triple contributes a
+whole block of
+[multinomial](/topics/technique/multinomial-theorem) size $\binom{L}{c_1,\,c_2,\,c_3}$ strings of
+length $L$. Second, the counts are at most $L$, and the 123-numbers below 111 are just the twelve
+from 1 to 33. So the count for one length is a sum over a few hundred triples at most. It is a
+[sum over the multisets](/topics/takeaway/aggregate-by-value), each weighted by its number of
+arrangements, instead of a sum over the strings themselves.
+
+The count is not the answer, though. The answer is the object at position $n$, and getting it is
+[unranking](/topics/technique/unranking). Among strings over $\{1,2,3\}$, numeric order means
+shortest first and then [lexicographic order](/topics/technique/lexicographic-order). So
+the method is greedy. Subtract whole length-blocks from $n$ until it falls inside one. Then, at each
+position, try digits in increasing order and subtract the number of completions of each rejected
+prefix. A prefix fixes the digits used so far, $(u_1, u_2, u_3)$, so its completion count is the
+same multinomial sum, restricted to triples with $c_i \ge u_i$ and taken over the remaining
+positions. The general shape is this:
+
+```text
+for each position:
+    for d in digits, ascending:
+        k = completions(prefix + d)
+        if n <= k: prefix += d; break
+        n -= k
+```
+
+The cost is (length of the answer) × (alphabet size) × (one count). Because the count of
+123-numbers grows roughly like $3^L$, the answer is only a few dozen digits long, and the whole run
+is a few thousand big-integer operations. Any counting function that can be *conditioned on a
+prefix* can be unranked this way. That is the reason to write it as "completions of a partial
+object" from the start.
+
 ## Python and C
 
 - **114** is identical on both sides. The only change is the accumulator: `long long` in C, because
@@ -96,6 +133,12 @@ integers make the twelfth decimal certain.
   updates use `mpz_divexact_ui`, which is faster than general division because it is told the
   division is exact. The half-up rounding is `mpz_mul_2exp` and `mpz_fdiv_q`. The scaled result
   fits in an `unsigned long`, so it leaves GMP only for printing.
+- **698** shows the other C response to big numbers: [narrowing what you compute](/topics/takeaway/watch-integer-width)
+  rather than bringing in GMP. The rank and the block counts exceed 64 bits, so C uses
+  `unsigned __int128`. $L!$ overflows even that, so the factorial-ratio form of the multinomial,
+  which Python evaluates with no trouble, becomes a product of two binomials,
+  $\binom{r}{x}\binom{r-x}{y}$, from a Pascal's-triangle table. No intermediate value then exceeds
+  the final count, which stays below $3^r$.
 
 ## How to reason about it
 
@@ -106,7 +149,12 @@ integers make the twelfth decimal certain.
   bin them, and scan. Grow the bound geometrically if you cannot predict it.
 - **Make the order canonical.** Both 114 (first decision) and 126 ($a \le b \le c$) count each object
   once because there is exactly one way to generate it. Check this against brute force for small
-  sizes. A missing or doubled symmetry is the usual bug.
+  sizes. A missing or doubled symmetry is the usual bug. Unranking (698) has the same requirement
+  in a different form: the completion counts must agree exactly with the order you walk.
+- **For "the $n$-th object", count completions and unrank.** Write the count as a function of a
+  partial object (a prefix, or the counts used so far), then walk choices in order and subtract
+  the blocks you skip. If the objects are defined by a multiset, count the multisets and multiply
+  by their arrangements rather than enumerating strings.
 - **Use exact arithmetic for alternating sums.** Inclusion–exclusion sums large terms of
   alternating sign to get a small result. Big integers (or a modulus, if the problem allows one)
   are required, and incremental updates keep the cost to one multiply or divide per term.
