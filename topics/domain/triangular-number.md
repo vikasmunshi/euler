@@ -1,5 +1,5 @@
 <!-- tags: [triangular-number] -->
-<!-- status: final 2026-10-14T11:43Z -->
+<!-- status: final -->
 # Triangular number
 
 A [triangular number](https://en.wikipedia.org/wiki/Triangular_number) counts the dots in a
@@ -73,6 +73,27 @@ numbers *are* the odd-indexed triangular numbers. A three-way intersection becom
 sequence with one membership test. The congruence on the root is the part people forget: a
 perfect-square discriminant only says the quadratic has a rational root; the residue condition is
 what makes that root a positive integer of the right parity.
+
+## Neighbours sum to squares
+
+One more identity is worth having to hand: two consecutive triangular numbers add up to a square,
+
+    T(n−1) + T(n) = n²
+
+— two staircases of side *n* − 1 and *n* fit together into an *n* × *n* block. Read backwards it
+is a recurrence: start at 1, and let each next term be "whatever completes the next square", and
+you generate T(n) without ever writing n(n+1)/2.
+
+The private [Problem 359](/solutions/0359/) is built on exactly that recurrence. Guests take rooms
+on the lowest floor where their number plus the previous occupant's makes a perfect square, and
+the first floor fills with 1, 3, 6, 10, … — the triangular numbers, because each newcomer is the
+one that completes the next square. Simulating a few thousand guests shows every other floor obeys
+the same rule from a different start: the sums of neighbouring rooms run through consecutive
+squares. Then two rooms apart the squares telescope, P(r + 2) − P(r) = (s + 1)² − s² = 2s + 1, a
+difference linear in *r* — the same "growing step" that defines T(n) — so every floor has a
+quadratic closed form and any room is O(1) to evaluate, even with occupants around 10²⁷. The
+lesson carries: when a sequence is defined by adjacent sums hitting squares, take differences two
+apart, and a triangular-style quadratic falls out.
 
 ## Pitfalls
 
