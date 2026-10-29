@@ -6736,12 +6736,12 @@
       "path": "technique/modular-arithmetic-application",
       "title": "Modular arithmetic (application)",
       "status": "final",
-      "written": "2026-10-16T15:22Z",
+      "written": "2026-10-29T01:57Z",
       "solved": 40,
       "problems": 40,
       "tags": ["modular-arithmetic-application"],
       "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0401_s0", "p0429_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0700_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0772_s0", "p0788_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"],
-      "solved_after": ["p0340", "p0401", "p0512", "p0700"]
+      "solved_after": []
     },
     {
       "path": "technique/modular-exponentiation",
