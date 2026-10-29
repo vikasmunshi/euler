@@ -1,5 +1,5 @@
 <!-- tags: [chinese-remainder-theorem] -->
-<!-- status: final 2026-10-16T07:22Z -->
+<!-- status: final -->
 # Chinese remainder theorem
 
 The [Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) (CRT) says
@@ -74,9 +74,14 @@ x = Σ aᵢ · Mᵢ · (Mᵢ⁻¹ mod mᵢ)   (mod m)
 ```
 
 Each term is `aᵢ` in its own component and `0` in every other, so the sum lands on the right residue
-everywhere. The inverses depend only on the moduli, not on the residues, so this form pays off when
-you lift *many* different residue vectors through the *same* moduli — the inverse table is built
-once and amortised. Problem 0365 pushes that further: it lifts twenty million triples `(p, q, r)`
+everywhere. The coefficients `eᵢ = Mᵢ · (Mᵢ⁻¹ mod mᵢ)` deserve a name: each is `1` in component `i`
+and `0` elsewhere, so `eᵢ² = eᵢ` — they are the
+[idempotents](https://en.wikipedia.org/wiki/Idempotent_(ring_theory)) of `ℤ/m`, the basis vectors of
+the product ring, and lifting a residue vector is just taking a linear combination of them. They
+depend only on the moduli, not on the residues, so this form pays off when you lift *many* different
+residue vectors through the *same* moduli — the basis is built once and amortised. Problem 0271
+precomputes one `eᵢ` per prime power of its modulus and then assembles every root as `Σ rᵢ·eᵢ`,
+growing a list of partial sums that branches once per root choice at each prime. Problem 0365 pushes that further: it lifts twenty million triples `(p, q, r)`
 drawn from a pool of 501 primes, and since `(qr)⁻¹ mod p` factors as `q⁻¹·r⁻¹ mod p`, every inverse
 it will ever need is one of `O(P²)` *pairwise* ones. The `O(P³)` triple loop then contains no
 inverse at all, just a few multiplications.
@@ -102,6 +107,10 @@ roots of unity" has stopped being about congruences at all: it is "which `n` hav
 contributing factors", a factor-shape enumeration that never computes a root. That is the payoff of
 the counting direction — the theorem translates an arithmetic condition into a statement about the
 shape of the factorisation, and the search runs over factorisations instead of over residues.
+Problem 0271 is the same equation asked the other way — not *how many* cube roots of unity modulo
+one fixed primorial, but their *sum* — so there the count `3ᵏ` is no longer the answer but the size
+of the enumeration, and a small one: the theorem says in advance that only a few hundred residues
+exist, and the remaining work is to factor the modulus and build them.
 
 **Construct a solution set, one prime at a time.** When you do need the solutions, CRT is the
 constructor that turns a choice per component into an actual residue. Problem 0932 needs the `s`
@@ -111,6 +120,19 @@ residues, one per binary choice, each assembled by CRT. That converts a scan ove
 into a walk along a handful of arithmetic progressions. Read this direction of the theorem
 carefully — it is the one people miss. CRT is not only how you *solve* a congruence system, it is
 how you *enumerate* the solutions of a condition that is local to each prime.
+
+Those `2ᵏ` residues are exactly the idempotents from the Gauss construction above, and problem 0407
+asks for the largest one modulo *every* `n` up to `10⁷`. Factoring each `n` and trying its `2ᵏ`
+splits would work; the better move is to turn the theorem inside out and enumerate the splits
+directly. Every idempotent of `n` comes from a coprime pair `n = d·e` with `a ≡ 0 (mod d)` and
+`a ≡ 1 (mod e)`, so sweeping all coprime pairs with `d·e ≤ N` visits every idempotent of every `n`
+once — `Θ(N log N)` pairs, no factorisation anywhere. The merge for each pair needs an inverse, and
+here the Garner form's asymmetry becomes a lever: one factor of every pair is at most `√N`, so always
+invert modulo the *small* factor `s`. The inverse of the partner `L` depends only on `L mod s`, so a
+single table of inverses mod `s` serves every partner, and the per-pair work drops to a lookup and a
+multiply. Two more structural facts trim it further: the two idempotents of a split are `a` and
+`n + 1 − a`, so one merge yields both, and a non-coprime pair can be left in the sweep with a `0`
+"inverse", which collapses it to the trivial idempotents that never win.
 
 The general recipe for a polynomial congruence `f(x) ≡ 0 (mod m)` has three stages: find the roots
 modulo each prime `p`, lift them to `pᵉ` with [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma),
@@ -152,6 +174,11 @@ memo.
   unremarked. Arranging the lift as a sum of terms each below `m` — so the total is below `k·m` and
   the reduction is a couple of conditional subtractions rather than a division — is both faster and
   narrower.
+- **The lift gives residues; the question may want integers.** CRT returns each solution reduced
+  into `[0, m)`, which is the right object — but if the problem sums or compares the solutions,
+  keep them as integers and do that arithmetic outside the modulus. Problem 0271 sums its roots of
+  unity: adding them modulo `n` would yield only the sum mod `n`, while the true total is hundreds of
+  times larger than `n` and needs a wider accumulator (`__int128` in the C port).
 - **Normalise the sign in C.** `(a₂ − a₁)` is routinely negative and C's `%` follows the dividend's
   sign, so the merge needs `((x % m) + m) % m`. Python's `%` already returns a non-negative result
   for a positive modulus.
@@ -171,7 +198,7 @@ memo.
 - **Recognise the trigger.** Any of these should make you reach for it: the modulus is composite
   and its factorisation is known; a condition is stated independently at each prime; you are asked
   to count or list the roots of a polynomial modulo many different `n`; or constraints modulo
-  several coprime numbers must hold simultaneously. In all three the theorem
+  several coprime numbers must hold simultaneously. In every case the theorem
   turns a global problem into local ones, and local problems are the ones you can solve.
 
 <!-- problems (generated by update-tags) -->
