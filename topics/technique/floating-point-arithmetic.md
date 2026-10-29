@@ -1,5 +1,5 @@
 <!-- tags: [floating-point-arithmetic] -->
-<!-- status: final 2026-10-14T12:15Z -->
+<!-- status: final -->
 # Floating-point arithmetic
 
 Project Euler answers are almost always exact: an integer, a count, a digit string. The quickest
@@ -112,6 +112,34 @@ There are two sound fixes:
   but a few thousand values per digit set is nothing, and `v.denominator == 1` is a test that cannot
   lie.
 
+### A ceiling over a logarithm near 1 (318)
+
+Problem 318 reduces, through the conjugate `y = √q − √p`, to a closed form per pair:
+`N = ⌈d / (−2 log₁₀ y)⌉`. The trouble is that the interesting pairs have `y` just below 1, so the
+quantity that matters is the small gap `ε = 1 − y`. Computing `√q − √p` subtracts two nearly
+equal square roots, and `log` of a number near 1 then throws away the leading digits a second
+time. The solution avoids both losses:
+
+- It rationalises `ε` into a form whose numerator, `4p − (q − p − 1)²`, is an exact integer and
+  whose denominator is a sum of positive terms. Nothing cancels, so `ε` keeps full relative
+  precision however small it gets. This is the same move as 247.
+- It takes `log1p(−ε)` instead of `log(1 − ε)`.
+  [`log1p`](https://docs.python.org/3/library/math.html#math.log1p) exists for exactly this case:
+  it computes `ln(1 + x)` from `x` itself, without first rounding `1 + x`.
+
+I measured the difference on the pair with the smallest `ε` in range, where `N` is about six
+million. The naive `log(sqrt(q) - sqrt(p))` has relative error 2.5 × 10⁻¹², which works out to
+about 1.5 × 10⁻⁵ in absolute terms on the quotient. The rationalised `log1p` version has relative
+error 10⁻¹⁶, which is within an ulp.
+
+That still is not enough to trust a ceiling without thinking. `⌈x⌉` is fragile only when `x` is
+close to an integer, so the solution states a band: if the float quotient is within 10⁻⁴ of an
+integer, that one pair is recomputed in 60-digit `Decimal` (MPFR in the C port). The band is
+far wider than the error bound, and it is almost never entered, so the exact path costs nothing.
+Problem 800 has the same shape: floats settle everything outside a stated margin, and exact
+arithmetic decides inside it. The difference is that 318's exact path is high-precision reals
+rather than integers, because the quantity is irrational.
+
 ### The rest of the tag
 
 The private problems apply the same rules at larger scale. Problem 800 compares `p^q · q^p` with
@@ -135,7 +163,7 @@ Before trusting a float in an exact problem, ask four questions:
 |---|---|---|
 | Is every intermediate an integer ≤ 2⁵³, or a correctly rounded op whose exact result is representable? | The float is exact. Use it. | Go on. |
 | Is the error provably smaller than the gap the decision depends on? | Use it, and write the bound down in a comment. | Go on. |
-| Can the float be just a *guess* that an integer check confirms (42/44 in C, 63, 800)? | Do that. It costs one extra multiply. | Go on. |
+| Can the float be just a *guess* that an integer check confirms (42/44 in C, 63, 800), or that a high-precision recomputation confirms near the boundary (318)? | Do that. It costs one extra multiply, or one slow path taken almost never. | Go on. |
 | Is the problem fundamentally about rationals or long decimals (93, 235)? | Use `Fraction`, `Decimal`, or scaled integers. | Rethink the formulation. |
 
 Some pitfalls come up again and again:
@@ -145,8 +173,9 @@ Some pitfalls come up again and again:
 - **`floor` and `ceil` near an integer boundary**, as in digit counts, bucket indices and
   `int(x ** (1/k))` for integer roots. Nudge the estimate and correct it in integers:
   `while r ** k > n: r -= 1`.
-- **Subtracting nearly equal values** wipes out significant digits. Rearrange algebraically (247)
-  before reaching for more precision.
+- **Subtracting nearly equal values** wipes out significant digits. Rearrange algebraically (247,
+  318) before reaching for more precision. For logarithms and exponentials near 1, use `log1p` and
+  `expm1`.
 - **The 2⁵³ cliff.** C's `double` and Python's `float` share it. A test that passes at 10⁶ fails
   silently at 10¹⁶, so check how large the inputs can get, not just the values in the example.
 - **C and Python can disagree** if one rounds and verifies while the other trusts the float, as
