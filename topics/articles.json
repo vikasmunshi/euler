@@ -994,12 +994,12 @@
       "path": "domain/diophantine-approximation",
       "title": "Diophantine approximation",
       "status": "final",
-      "written": "2026-10-28T09:32Z",
+      "written": "2026-10-29T07:11Z",
       "solved": 3,
       "problems": 10,
       "tags": ["diophantine-approximation"],
       "refs": ["p0192", "p0198", "p0318", "p0542", "p0566", "p0576", "p0591", "p0771", "p0889", "p0904"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "domain/diophantine-equation",
