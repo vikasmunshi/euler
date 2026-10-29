@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum, palindromic-number, string-slicing, positional-notation] -->
-<!-- status: final 2026-10-14T12:24Z -->
+<!-- status: final -->
 # Digit Manipulation
 
 A surprising share of Project Euler is about the *writing* of a number rather than the number:
@@ -152,6 +152,32 @@ multiplication, which must carry one digit at a time (see
 times faster and then make every digit query a `% 10` loop again. Store what the problem *asks
 about*: when the output is a digit property, base-10 storage is the right trade.
 
+## When neither route applies
+
+Both routes assume there is a number in hand to take apart. Past a certain scale there isn't, and the
+digit operations above turn up as *bookkeeping* instead. Three recent problems show the three ways
+this happens (their mathematics is on [Positional notation](/topics/domain/positional-notation); what
+matters here is what replaces the extraction loop).
+
+- **The number is too long to hold.** Problem 698 asks for a 123-number of rank about $10^{17}$, but
+  only modulo $123\,123\,123$. Unranking picks its digits most-significant first, and each one is
+  folded straight into the residue with `ans = (ans * 10 + d) % m`. That is the reversal loop's
+  `r * 10 + d` step, run in the other direction. The full number is never formed, so it never needs to
+  be converted or divided. Its only other digit question is "how many of each digit". That is the
+  order-blind fingerprint from problem 52, and here it is the whole definition.
+- **There are too many numbers to visit.** Problem 778 sums a carry-free digitwise product over
+  $(M+1)^R$ sequences. Each place is independent, so all it ever needs is how often digit $d$ appears
+  at place $10^i$ across $[0, M]$. That count has a closed form from the digit's period-$10^{i+1}$
+  cycle: with $u = 10^i$ and $M + 1 = 10u\,q + r$, it is $q\,u + \min(\max(r - d\,u, 0), u)$. No number in the range is ever split
+  into digits. This is the "replace the digit loop with a count" advice from the Python section, taken
+  as far as it goes.
+- **There is no `% 10` and no `str()`.** Problem 473 asks which integers have palindromic
+  expansions in base $\varphi$. Neither tool exists for an irrational radix, so testing each $n$
+  means a greedy expansion in exact $\mathbb{Z}[\varphi]$ arithmetic. The solution does what problem
+  36 does with `digits + digits[::-1]`: it *generates* palindromes from their halves. Each chosen
+  exponent $k$ brings its mirror $-(k+1)$, and the search keeps only the combinations that land on an
+  integer. Generating from halves was a speed-up in base 10. Here it is the only practical route.
+
 ## Choosing
 
 - **Python, big integers or one-shot work** — use the string. `str`, slicing, `sorted` and `join`
@@ -163,6 +189,8 @@ about*: when the output is a digit property, base-10 storage is the right trade.
   palindrome is `n == rev(n)`, a fingerprint is a histogram. Reach for `snprintf` only to print.
 - **C, big integers** — store decimal digits when the question is about digits; the representation
   *is* the string, and the manipulation becomes array indexing.
+- **Beyond any representation** — build the number digit by digit into a residue, count digits per
+  place in closed form, or generate the digit strings you want rather than testing values.
 - **Either language** — mind the edges: `0` has one digit but the `while n` loop sees none; leading
   zeros exist in strings and in fixed-width digit arrays but not in integers; and the reversal of a
   number ending in `0` is shorter than the original, so `n == rev(n)` is the palindrome test only
