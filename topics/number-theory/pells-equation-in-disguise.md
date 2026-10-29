@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: final 2026-10-14T07:33Z -->
+<!-- status: final -->
 # Pell equation in disguise
 
 Some Euler problems are about a probability, some about triangles, some about tiling a floor, and
@@ -103,6 +103,13 @@ while p <= max_perimeter:
   $p_{k+1} = Tp_k - p_{k-1} + c$, and check the fit against a sixth term. $T$ should come out as
   $2x_1$ for a recognisable unit. If it doesn't, you have more than one family interleaved
   (Problem 94, Problem 321).
+- **Know when the costume doesn't fit.** The tags put problems near this page that have no
+  quadratic in them. Problem 455 asks for $n^x \equiv x \pmod{10^9}$. The unknown sits in the
+  exponent, so there is no square to complete, and the tool is a power tower iterated to its fixed
+  point. Problem 887 is driven by a recurrence, but it is a nested one,
+  $F(h, c) = F(h-1, c-1) + F(h-1,\ c-1+F(h-1, c-1))$, and no constant trace fits it. So the test
+  runs in both directions: no perfect-square condition means no Pell equation, and a fit that
+  needs more than $T$ and a constant means you are holding some other kind of recurrence.
 - **Count the families.** For $N = \pm1$ there is one orbit. For $N = 44$ (Problem 140) or
   $N = -7$ (Problem 321) there are several, and a missed seed silently drops every answer in that
   family. Compare the merged sequence against all the terms the statement gives.
