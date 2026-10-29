@@ -1,5 +1,5 @@
 <!-- tags: [markov-chain, expected-value-application, stationary-distribution, random-walk] -->
-<!-- status: final 2026-10-14T07:42Z -->
+<!-- status: final -->
 # Markov chains and expected value
 
 A large share of the archive's probability problems ask for an *expected* something — turns until
@@ -86,6 +86,20 @@ Independence only comes in when you compute one indicator's probability. In Prob
 `P(square t is empty)` is a product over fleas, and that product is valid only because the fleas
 hop independently. Adding those probabilities over all squares needs no independence at all.
 
+The pieces don't have to be indicators, and the randomness doesn't have to be in the process.
+Problem 523 asks for the expected number of moves a fixed, deterministic sorting procedure makes
+on a uniformly random permutation. Simulating it is hopeless: there are `30!` inputs. Look closely,
+though, and the procedure is insertion sort in disguise. The list is always a sorted prefix
+followed by untouched elements, and the tail is never inspected until the prefix is clean. So the
+total cost splits into one *insertion cost* per element, and linearity adds their expectations. Each
+insertion's cost depends only on the new element's rank among the elements before it. In a random
+permutation that
+[relative rank](https://en.wikipedia.org/wiki/Random_permutation_statistics) is uniform, whatever
+order those earlier elements arrived in. One small recurrence for the cost of an insertion, averaged
+over a uniform rank, turns `n!` permutations into `n` terms. The same trick (cut the cost into
+per-element pieces, and notice that each piece only sees a uniform relative rank) is how the
+textbook average-case analyses of insertion sort and quicksort work.
+
 ### They are the same idea, seen from two sides
 
 The two tools are not really rivals. The fundamental matrix of an absorbing chain is a linearity
@@ -104,6 +118,7 @@ linearity adds them up.
 | The quantity is…                                            | Reach for                                   |
 |-------------------------------------------------------------|---------------------------------------------|
 | a count or sum of local events (empty cells, colours seen)  | linearity over indicators                   |
+| the cost of a fixed algorithm on a random input             | linearity over per-element costs            |
 | a time until something happens                              | absorbing chain, first-step analysis        |
 | a probability of ending in one outcome rather than another  | absorbing chain, absorption probabilities   |
 | a long-run frequency                                        | stationary distribution                     |
@@ -141,6 +156,9 @@ If the state space is still in the millions, the model is usually wrong, not the
   top squares are close enough that the ranking itself can flip. Solve the chain exactly.
 - **Mind the precision the answer needs.** A double is fine for 227's ten significant figures, but
   rounding an exact rational like 493's to nine places is safest done in integer arithmetic.
+  Expectations over permutations are rationals with small denominators, so they can land exactly
+  on a rounding boundary. 523's own worked example, `E(10) = 115.725`, sits on a half. Sum
+  with `Fraction` and round in integers, not floats; Python's `round` also rounds halves to even.
 - **Dense solves cost `O(s³)`.** That is fine for a few hundred states. Beyond that, use the
   structure: triangular systems become recurrences (938), local transitions become stencils (213),
   and a chain whose state only grows can be swept in topological order.
