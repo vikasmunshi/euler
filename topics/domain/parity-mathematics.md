@@ -1,5 +1,5 @@
 <!-- tags: [parity-mathematics] -->
-<!-- status: final 2026-10-14T07:19Z -->
+<!-- status: final -->
 # Parity (mathematics)
 
 [Parity](https://en.wikipedia.org/wiki/Parity_(mathematics)) is whether an integer is even or odd —
@@ -58,6 +58,20 @@ is even — and divisor counts multiply across them. In Problems 120 and 123, ex
 linear terms cancel and the remainder is the constant `2`; for odd `n` the constants cancel and the
 remainder is linear in `n`. Every even exponent is discarded on sight, and the exponential-looking
 computation becomes a single multiplication.
+
+Problem 512 has the same collapse and then a second use of parity. Its sum of `φ(n^i)` taken mod
+`n + 1` reads `n ≡ −1`, so the terms alternate in sign and cancel in pairs. Even `n` contributes
+nothing and odd `n` contributes `φ(n)`, which leaves a totient sum over the **odd** `n ≤ N` only.
+Filtering a fast summatory function by parity looks like it needs a new algorithm, but the even
+half has a recursive form. Since `φ(2m)` is `φ(m)` for odd `m` and `2φ(m)` for even `m`, the
+even-index sum `E(N)` equals `Φ(N/2) + E(N/2)`. Unrolling it gives
+
+    odd-only sum = Φ(N) − Φ(⌊N/2⌋) − Φ(⌊N/4⌋) − Φ(⌊N/8⌋) − …
+
+Every `⌊N/2^k⌋` is a floor quotient that the standard summatory-totient recursion evaluates anyway,
+so the restriction costs about `log₂ N` table lookups. The same trick applies whenever `f(2m)` is a
+simple function of `f(m)` and the parity of `m`: to keep only the odd indices, peel off the factor
+of two one level at a time.
 
 Same-parity constraints are the geometric version of this. Problem 174's square laminae need a
 border of whole thickness `(outer − hole)/2`, so the outer and hole sides must share parity; Problem
