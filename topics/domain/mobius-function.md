@@ -1,5 +1,5 @@
 <!-- tags: [mobius-function] -->
-<!-- status: final 2026-07-28T09:33Z -->
+<!-- status: final -->
 # Möbius function
 
 The [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) $\mu(n)$ is
@@ -47,7 +47,7 @@ strikes, and it costs $O(n \log \log n)$. Two things to notice in it: the sign f
 [squarefree](/topics/domain/square-free-integer); and the zeroing must come second, or the flips
 would resurrect it.
 
-## The two ways a problem reaches it
+## How a problem reaches it
 
 **The statement names it.** Problem 464 defines $\mu$ outright and asks about intervals $[a, b]$
 where the count of $+1$s and the count of $-1$s stay within one percent of each other. Here the
@@ -70,9 +70,27 @@ $\mu$ to appear.** [Euler's totient](/topics/domain/eulers-totient-function) is 
 the smallest possible example ($\varphi = \mu * \mathrm{id}$, primitive fractions with denominator
 $n$).
 
+**The derivation asks for a sign, not a sum.** Problem 641 sits between the two. It is a row of
+dice, each turned once per divisor $\ge 2$ of its position, and nothing in the statement mentions
+primes. Working through the divisor counts mod 6 reduces the survivors to integers of the shape
+$c^3 q^2$ with $q$ squarefree *and having an even number of prime factors* — that is, $\mu(q) = +1$.
+Here $\mu$ is not a coefficient in a sum, it is a *filter*: the indicator of "squarefree with even
+$\omega$". The trick worth keeping is that this indicator is linear in things you already know how
+to sum,
+
+$$[\mu(q) = +1] = \frac{\mu(q)^2 + \mu(q)}{2}, \qquad\text{so}\qquad S(x) = \frac{Q(x) + M(x)}{2},$$
+
+where $Q(x) = \sum_{d \le \sqrt x} \mu(d) \lfloor x/d^2 \rfloor$ counts squarefree integers (itself a
+$\mu$ sum) and $M$ is Mertens. The same move selects $\mu = -1$ with $(Q - M)/2$. Any condition on
+the *parity* of the number of distinct primes, restricted to squarefree numbers, should send you
+here. The rest of 641 is a two-sided lattice count over pairs $(c, q)$: small $q$ is summed
+directly from the sieve, and large $q$ is handled through $S$ at the few dozen points
+$\sqrt{X/c^3}$. That is the hyperbola split again, with $M$ needed only at a handful of large
+arguments.
+
 ## How to reason about it
 
-The hard part is almost never $\mu$ itself. It is that both roads lead to a *summatory* $\mu$ —
+The hard part is almost never $\mu$ itself. It is that every road leads to a *summatory* $\mu$ —
 $M(x)$, or a sum $\sum_d \mu(d) F(\lfloor n/d \rfloor)$ — at an $n$ far past what you can sieve.
 Problem 319 wants $n = 10^{10}$; there is no array of that length. The standard escape has three
 moves, and they compose:
