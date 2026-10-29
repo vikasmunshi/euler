@@ -3051,12 +3051,12 @@
       "path": "domain/quadratic-equation",
       "title": "Quadratic equation",
       "status": "final",
-      "written": "2026-10-17T06:35Z",
+      "written": "2026-10-29T07:56Z",
       "solved": 9,
       "problems": 14,
       "tags": ["quadratic-equation"],
       "refs": ["p0042", "p0044", "p0045", "p0137", "p0144", "p0261", "p0317", "p0318", "p0356", "p0457", "p0587", "p0757", "p0932", "p0935"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "domain/quadratic-form",
