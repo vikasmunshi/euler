@@ -1,5 +1,5 @@
 <!-- tags: [fractions-fraction] -->
-<!-- status: final 2026-10-14T17:38Z -->
+<!-- status: final -->
 # fractions.Fraction
 
 [`fractions.Fraction`](https://docs.python.org/3/library/fractions.html) is Python's exact
@@ -14,7 +14,7 @@ it also covers what a Fraction turns into in C, and when the convenience costs m
 
 ## The idea
 
-A Fraction does three jobs, and each covered problem leans on a different one.
+A Fraction does four jobs, and each covered problem leans on a different one.
 
 **It reduces for you.** Problem 33 multiplies the four digit-cancelling fractions together and wants
 the denominator of the product in lowest terms. The solution folds them as Fractions, so the
@@ -61,6 +61,28 @@ evaluates [Lagrange](/topics/technique/lagrange-polynomial) interpolants whose b
 ratios $(x - x_j)/(x_i - x_j)$. Problem 236 uses `Fraction(p, q)` only as a `key=` to order ratios
 exactly. Problem 198 parses its bound with `Fraction("1/100")`, because the constructor accepts the
 string form.
+
+**It keeps the value exact until the last decimal.** Some answers are rationals that must be
+reported "rounded to two digits after the decimal point". Problem 523 is one. It asks for the
+expected number of moves of an odd restart-from-the-front sort over all permutations of $n$
+items. Once you see that the sort is insertion sort in disguise, the expectation is a short sum of
+rational terms. The given example $E(10) = 115.725$ is exactly $4629/40$, which sits *on* a half. The
+rounding is then the delicate step, and neither of Python's obvious tools gives the half-up answer:
+
+```python
+>>> x = Fraction(4629, 40)
+>>> round(x, 2), f"{x:.2f}"       # Fraction rounds half to even
+(Fraction(2893, 25), '115.72')
+>>> round(115.725, 2)             # the float is 115.72499999999999…
+115.72
+```
+
+So the solution keeps the sum as a Fraction and rounds once, in integers:
+$\lfloor 100x + \tfrac12 \rfloor$ via `(x * 100 + Fraction(1, 2)).__floor__()`, then `divmod` by
+100 to format the whole and decimal parts itself. The float version fails differently from the
+Fraction version. The float has already moved off the half before `round` sees it, while the
+Fraction is exactly on the half and `round` applies the banker's rule. Exact arithmetic fixes the
+first problem. Choosing the rounding rule yourself fixes the second.
 
 ## When the overhead stops paying
 
@@ -112,6 +134,13 @@ question the Python could skip: does this value need to be reduced, and how big 
 - **Compare by cross-multiplying.** Where problem 236's Python picks the smallest ratio with
   `key=lambda pool: Fraction(pool[0], pool[1])`, its C compares $a/b < c/d$ as $ad < bc$ on the
   integers directly. That needs the same check that the products fit.
+- **Use a real rational type when nothing stays small.** In problem 523, the common denominator
+  grows like $\operatorname{lcm}(2, \dots, n)$ and the numerators grow exponentially, so no
+  `long long` pair survives and no invariant lets you skip the reduction. Its C uses GMP's
+  [`mpq_t`](https://gmplib.org/manual/Rational-Number-Functions), which is the closest thing C has
+  to `Fraction`: arbitrary-precision, and kept in lowest terms by `mpq_add` once each term has been
+  `mpq_canonicalize`d. The half-up rounding is ported the same way, with `mpz_fdiv_q` on
+  $100x + \tfrac12$.
 
 Going in the other direction, a C `num`/`den` pair translates into Python as two `int`s, not as a
 Fraction, unless the C was reducing anyway. Translating it to a Fraction adds a gcd per step that
@@ -133,6 +162,10 @@ the C never paid ([parity across languages](/topics/takeaway/parity-across-langu
   Farey and Stern–Brocot problems. `math.gcd` is the hand-rolled path. Building a Fraction *from* a
   float gives you the float's exact binary value (`Fraction(0.1)` is not $1/10$), so construct from
   integers or strings.
+- **Round once, at the end, using a rule you chose.** When the answer is a decimal rendering of a
+  rational, keep everything exact and convert only in the formatter. `round()` and `:.2f` on a
+  Fraction round half to even. If the problem's numbers land on halves, as problem 523's do, write
+  the floor-of-plus-a-half yourself.
 - **Exact is not the same as correct.** A Fraction makes the arithmetic right. It cannot make the
   formula right. Problem 71 asks for the left neighbour of $3/7$ among fractions with denominator
   $\le N$. That neighbour is $p/q$ with $3q - 7p = 1$ and $q$ as large as possible. It is not
