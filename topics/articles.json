@@ -2116,12 +2116,12 @@
       "path": "domain/lattice-path",
       "title": "Lattice path",
       "status": "final",
-      "written": "2026-10-14T11:51Z",
+      "written": "2026-10-29T07:51Z",
       "solved": 4,
       "problems": 17,
       "tags": ["lattice-path"],
       "refs": ["p0015", "p0081", "p0082", "p0295", "p0300", "p0354", "p0372", "p0403", "p0408", "p0411", "p0416", "p0460", "p0628", "p0638", "p0662", "p0739", "p1005"],
-      "solved_after": ["p0739"]
+      "solved_after": []
     },
     {
       "path": "domain/law-of-cosines",
