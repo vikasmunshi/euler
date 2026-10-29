@@ -1,5 +1,5 @@
 <!-- tags: [tiling] -->
-<!-- status: final 2026-10-14T07:28Z -->
+<!-- status: final -->
 # Tiling
 
 A [tiling](https://en.wikipedia.org/wiki/Tessellation) covers a region with pieces that don't
@@ -61,9 +61,20 @@ every way to tile a single row of bricks and encodes each row as a bitmask of it
 layered walk over the compatibility graph of rows. This is the
 [transfer-matrix method](/topics/domain/transfer-matrix-method): states are row profiles, the
 matrix entries say which profiles may be adjacent, and an $H$-layer count is a power of that
-matrix. Problems 670 and 671 use the same structure for a $2 \times n$ strip with colour and
-corner constraints. Problem 671 closes the strip into a loop, and the count becomes a *trace* of
-the matrix power rather than a sum over its entries. Problem 324 asks for a $3 \times 3 \times n$
+matrix.
+
+Problem 670 shows how far that state can be shrunk when the pieces also carry colours. A
+$2 \times n$ strip is tiled with $1 \times 1$, $1 \times 2$ and $1 \times 3$ tiles in four
+colours, neighbours must differ, and no four corners may meet. The obvious boundary state records
+each row's tile colour and overhang, more than a hundred states. But the two tiles at any boundary
+are always adjacent, so they always differ, and every such colour pair looks the same under a
+permutation of the colours. The colours can therefore leave the state altogether: they only show
+up as **weights** on the transitions ("a new tile must avoid two distinct colours, so it has 2
+choices"). What remains is the pair of overhangs plus one flag for "the last column was a vertical
+domino", ten states in all. The four-corners rule fits into the same machinery. When both rows end
+at the same line, the only legal next move is the vertical domino, so the rule is just a missing
+set of edges in the transition graph. Problem 671 closes the strip into a loop, and the count
+becomes a *trace* of the matrix power rather than a sum over its entries. Problem 324 asks for a $3 \times 3 \times n$
 tower at a height of $10^{10000}$. No table reaches that, but the transfer matrix is small and
 fixed, so [matrix exponentiation](/topics/technique/matrix-exponentiation) (or the
 [linear recurrence](/topics/technique/linear-recurrence-with-constant-coefficients) it satisfies)
@@ -117,7 +128,9 @@ state still works, but deciding what the frontier *is* gets much harder.
 - **Closed loops and symmetry change the bookkeeping.** A cylinder or torus needs a trace or
   explicit wrap-around states. Problems that count rotated tilings as distinct (most of them, as
   the statements spell out) let you skip [symmetry reduction](/topics/takeaway/exploit-symmetry).
-  When they don't, you need Burnside's lemma.
+  When they don't, you need Burnside's lemma. Symmetry inside the problem can still pay, though:
+  if the labels on the pieces (colours, say) are interchangeable, count *how many* labels each
+  transition allows and leave the labels out of the state, as problem 670 does.
 - **Check against small boards.** Every one of these problems gives small values. A brute-force
   tiler that reproduces them is the cheapest way to test a clever state encoding, and its output
   is often the best route to a formula.
