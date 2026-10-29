@@ -1,5 +1,5 @@
 <!-- tags: [positional-notation] -->
-<!-- status: final 2026-10-16T07:15Z -->
+<!-- status: final -->
 # Positional notation
 
 [Positional notation](https://en.wikipedia.org/wiki/Positional_notation) is the convention that a
@@ -95,9 +95,30 @@ state the property needs (a carry, a remainder, a running digit sum, a "still ti
 flag). The pages for [digit sum](/topics/domain/digit-sum), [palindromic numbers](/topics/domain/palindromic-number)
 and [pandigital numbers](/topics/domain/pandigital-number) are this tag's most crowded neighbours.
 
+When an operation has no carries, the places come apart completely. Problem 778's "freshman's
+product" multiplies numbers digit by digit, keeping only the last digit of each product. Digit $i$ of
+the result depends only on digit $i$ of each factor, so by linearity the sum over all $(M+1)^R$
+sequences is $\sum_i 10^i \cdot E_i$, where $E_i$ is a sum over one column alone. Within that column,
+each factor collapses to a ten-entry histogram of how often each digit appears in place $10^i$ across
+$[0, M]$ (closed form, from the period-$10^{i+1}$ cycle). The $R$-fold product then becomes an
+$R$-fold convolution over the digits under multiplication mod 10, which
+[exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) handles in
+$O(\log R)$ steps. A count with a million digits reduces to a handful of $10 \times 10$ convolutions
+per column. The general lesson: check whether the carry is real before you build any machinery for it.
+
 Problem 885 is a reminder that position carries weight, not just identity: summing "digits sorted
 ascending, zeros dropped" over all numbers groups the inputs by digit multiset, and the value of each
 group follows from where each digit lands — smaller digits occupy the more significant places.
+
+Counting by prefix also runs the other way, as **unranking**: to find the $n$-th number with a digit
+property, choose its length and then its digits from the left, at each step subtracting the count of
+completions under each smaller choice. Problem 698's 123-numbers are a good example. They use only
+the digits 1–3, and each digit's count must be $0$ or another 123-number. Two facts make the problem
+tractable. First, among equal-length numbers over a fixed alphabet, numeric order is lexicographic
+order. Second, the property depends only on the digit *counts*, so the completions of a prefix total
+a sum of [multinomial coefficients](https://en.wikipedia.org/wiki/Multinomial_theorem#Multinomial_coefficients)
+over the admissible count triples. The rank is around $10^{17}$, yet the answer is only 38 digits
+long. The whole unranking takes $38 \times 3$ such counts.
 
 ## The base is a parameter
 
@@ -126,6 +147,17 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
   and the set of allowed digits must be re-derived for each base, and that is where those problems
   put their difficulty.
 
+  Problem 473 shows what that re-derivation looks like. Base $\varphi$ uses the digits 0 and 1, and
+  forbidding adjacent 1s makes the expansion unique, the same rule
+  [Zeckendorf's theorem](https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem) imposes on Fibonacci
+  sums. The question asks which integers have palindromic expansions. Because the radix point counts
+  as a character, a palindrome must have it in the middle, so the digits pair up as
+  $\varphi^k + \varphi^{-(k+1)}$. Every such pair is $\tfrac12(a + b\sqrt5)$ with Lucas and Fibonacci
+  coefficients, so "the sum is an integer" becomes "the $\sqrt5$ parts cancel". That is an exact
+  balance condition over non-adjacent subsets, and a branch-and-bound search can prune on it. It is
+  also a pointed instance of the floating-point warning below: in an irrational base, integrality has
+  to be decided in $\mathbb{Z}[\varphi]$, never by rounding a float.
+
 ## How to reason about it
 
 - **Decide which view you are in.** String operations are clear and quick to write; if the space is
@@ -137,7 +169,8 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
   ("$6x$ must not gain a digit") come from.
 - **Group by digit length.** Almost every closed form here is per length band: rotations, reversals,
   concatenation and leading-zero rules all depend on $k$, and fixing it first turns them into
-  ordinary algebra.
+  ordinary algebra. It also orders things: over a fixed alphabet, "ascending" means "by length,
+  then lexicographic", which is what makes unranking (problem 698) a left-to-right walk.
 - **Mind the leading zero.** It is the commonest off-by-one in the family: a rotation or reversal that
   produces a leading zero is not a $k$-digit number (problems 145, 168), and inclusion–exclusion over
   digit strings must treat the first position separately (problem 162). Sometimes the rule is the
