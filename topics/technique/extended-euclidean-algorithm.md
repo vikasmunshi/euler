@@ -1,5 +1,5 @@
 <!-- tags: [extended-euclidean-algorithm] -->
-<!-- status: final 2026-10-16T07:24Z -->
+<!-- status: final -->
 # Extended Euclidean algorithm
 
 The [extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)
@@ -58,7 +58,26 @@ its unknown, and as the glue step inside the
 0160, 0932 and 0934 all use it that way: each merges congruences modulo coprime factors, and each
 merge is one inverse.
 
-There is a language asymmetry here that recurs in six of the eight problems below. Python has the
+Problem 0271 shows the CRT glue in its other arrangement, and is worth seeing for that reason. It
+sums the cube roots of unity modulo a squarefree `n` with fourteen prime factors, and the roots
+modulo `n` are every combination of one root modulo each factor — hundreds of combinations, not
+one. Merging pairwise would repeat the inversions for every combination. Instead, each factor `q`
+gets one *idempotent* up front,
+
+```
+e_q = (n/q) · ((n/q)⁻¹ mod q)        ≡ 1 (mod q),  ≡ 0 (mod n/q)
+```
+
+after which any combination of per-factor residues `r_q` is just `Σ r_q·e_q mod n` — additions and
+multiplications only. The inverses are paid once per factor, not once per combination: a fixed
+basis, then cheap linear algebra. The same problem uses the inverse a second time, inside a
+Newton step: lifting a root of `x³ − 1` from `p` to `p^k` by
+[Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma) is
+`ω ← ω − (ω³ − 1)·(3ω²)⁻¹`, and the division by the derivative is, once again, an inverse modulo
+the current prime power — one that exists precisely because `3ω²` is a unit when `p ≠ 3`, which is
+exactly why `p = 3` is the case that needs separate handling.
+
+There is a language asymmetry here that recurs in most of the problems below. Python has the
 inverse built in — `pow(a, -1, m)` since 3.8 — so the Python solution is a single expression and
 the technique is invisible in the source. The C port has no such primitive and carries a
 hand-written `mod_inverse` doing the loop above. When you compare a Python and a C solution in this
@@ -139,8 +158,8 @@ inverse per `(n₁, b₁)` pair.
 - **Watch the coefficient growth.** The remainders shrink monotonically but the coefficients grow;
   they stay bounded by roughly `max(a, b)`, so the danger is not the coefficients themselves but the
   `x·a` products you form afterwards. Reduce operands modulo `m` *before* multiplying, and reach for
-  a wider type when the intermediate does not fit — problems 0236 and 0932 both do the arithmetic in
-  `__int128` on the C side for this reason, and 0250, whose modulus `10¹⁶` already fills most of a
+  a wider type when the intermediate does not fit — problems 0236, 0271 and 0932 all do the
+  arithmetic in `__int128` on the C side for this reason, and 0250, whose modulus `10¹⁶` already fills most of a
   64-bit word, runs the Euclid loop itself in `__int128`, where Python's
   [arbitrary-precision integers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic)
   simply absorb it.
