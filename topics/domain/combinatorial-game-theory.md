@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-game-theory] -->
-<!-- status: final 2026-10-16T07:03Z -->
+<!-- status: final -->
 # Combinatorial game theory
 
 [Combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) studies
@@ -125,7 +125,19 @@ induction with the terminal condition flipped rather than adjust the answer at t
 If each move still touches one component but the players differ, Conway's theory replaces the
 nimber with a general game value $G = \{\,\text{Left's options} \mid \text{Right's options}\,\}$, and
 the value of a sum is still the sum of the values. What changes is the arithmetic those values live
-in, and the two digit-deletion problems show both ends of it.
+in, and three problems show the range of it.
+
+The gentlest entry is 860, the gold-and-silver coin game. Taking a coin removes everything stacked
+above it, which is exactly cutting an edge of a stalk in
+[blue-red Hackenbush](https://en.wikipedia.org/wiki/Hackenbush): every stack is a number, and the
+four stacks of height two are worth $\text{GG} = 2$, $\text{SS} = -2$, $\text{GS} = \{0 \mid 1\} =
+\tfrac12$ and $\text{SG} = -\tfrac12$. "Fair" is value zero, so counting fair arrangements of $n$
+stacks is counting ordered sequences of $n$ steps from $\{\pm 4, \pm 1\}$ (in half-units) that sum
+to zero — the constant term of $(x^4 + x + x^{-1} + x^{-4})^n$. The game theory ends there, in one
+paragraph; the rest is noticing that $x^8 + x^5 + x^3 + 1 = (1 + x^3)(1 + x^5)$, which turns a
+double sum of multinomials into a single sum of products of two binomials. It is the cleanest
+example in the archive of a partisan sum reducing, in two moves, to a
+[generating function](https://en.wikipedia.org/wiki/Generating_function) coefficient.
 
 In 882 each integer on the board is a component — Left deletes a 1 from its binary string, Right a
 0 — and every component turns out to be a [surreal number](/topics/domain/surreal-number), in fact a
@@ -155,7 +167,7 @@ written as a vector of coefficients over independent infinitesimals — with the
 882's table for the string with the 2s deleted. Once values are vectors, game equality is vector
 equality and game addition is vector addition, and the count is ordinary bucketing.
 
-The lesson across the pair: in a partisan sum, first find out *what kind of value* the components
+The lesson across the three: in a partisan sum, first find out *what kind of value* the components
 take. Numbers give you a total order and plain arithmetic; anything hotter or fuzzier needs a
 canonical representation before you can even test equality, let alone count.
 
@@ -199,7 +211,8 @@ pipeline is nearly always the same three stages:
    $(\mathbb{Z}/2)^{b}$ that a Walsh–Hadamard style transform or a per-bit argument handles in
    $O(\text{bits})$ rather than $O(n^k)$ — that is the shape of 409, 560 and 888. With partisan
    values the same step is a sum or a multiplicity count over values: a rounded-up total (882),
-   or the number of equal pair sums (963), which is cheap because only a few thousand distinct
+   the zero coefficient of a power of the per-stack value polynomial (860), or the number of
+   equal pair sums (963), which is cheap because only a few thousand distinct
    values occur among $10^5$ components.
 
 Problem 961 is a compact illustration of the whole arc: the game is played on the decimal digits of
