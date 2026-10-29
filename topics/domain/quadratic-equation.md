@@ -1,5 +1,5 @@
 <!-- tags: [quadratic-equation] -->
-<!-- status: final 2026-10-17T06:35Z -->
+<!-- status: final -->
 # Quadratic equation
 
 A [quadratic equation](https://en.wikipedia.org/wiki/Quadratic_equation) is rarely what a Project
@@ -11,7 +11,7 @@ once you have it — which root, how to evaluate it without cancellation, when t
 overflows. This page is about the step before: **recognising the quadratic, and choosing which of
 its structures to exploit.** Often the best answer never evaluates a root at all.
 
-## Four structures a quadratic hands you
+## Five structures a quadratic hands you
 
 A quadratic in one unknown carries more than its roots. The solved problems below each lean on a
 different piece:
@@ -21,6 +21,7 @@ different piece:
 | The inverse of a closed form | O(1) membership test | 42, 44, 45 |
 | A perfect-square discriminant | an integrality condition — a Diophantine equation | 137, 757 |
 | A root you already know | the other root by one division (Vieta) | 144 |
+| A small conjugate root | an integer sum, so the big root's fractional part | 318 |
 | A factorisation | a divisibility condition instead of a search | 932 |
 
 Problem 587 (a line meeting a circle) is the plain "solve it and pick the right branch" case, and
@@ -116,6 +117,44 @@ time. Cancelling the known root analytically removes the question. The Python an
 line-for-line identical here; plain `double` is all either needs. (The reflection itself is the
 [specular reflection](/topics/technique/specular-reflection) formula.)
 
+## The conjugate that tells you the fractional part
+
+Vieta works in the other direction too. When a quadratic with integer coefficients has one large
+root and one small one, the small one is not noise — it is the exact distance from the large
+root's powers to an integer.
+
+**Problem 318** asks how fast the even powers of `√p + √q` creep up on an integer: `N(p, q)` is the
+first `n` at which the fractional part of `(√p + √q)²ⁿ` opens with 2011 nines. Squaring removes
+one radical, and `x² = (p + q) + 2√(pq)` is a root of
+
+```
+z² - 2(p + q)z + (p - q)² = 0
+```
+
+whose other root is `y² = (√q - √p)²`. Both sum and product are integers, so the power sums
+`sₙ = x²ⁿ + y²ⁿ` obey the integer recurrence `sₙ = 2(p+q)·sₙ₋₁ - (p-q)²·sₙ₋₂` — the same
+[Lucas-sequence](https://en.wikipedia.org/wiki/Lucas_sequence) argument that makes every power of
+`(2 + √3)` sit next to an integer. If `0 < y < 1`, the fractional part of `x²ⁿ` is therefore
+exactly `1 - y²ⁿ`, and "how many nines?" becomes "when does `y²ⁿ ≤ 10⁻ᵈ`?" — one logarithm, a
+closed form per pair, and no high-precision power ever computed. The membership test `y < 1` is
+itself a squared-out inequality, `(q - p - 1)² < 4p`, decided in integers.
+
+The numerical lesson is the one the [quadratic formula](/topics/technique/quadratic-formula) page
+teaches for the small root, met again in disguise. The pairs that matter most have `y` just below
+`1`, so `N` is in the millions and `log y` is tiny; computing `√q - √p` and then `1 - y` subtracts
+nearly equal floats twice. The fix is the same rationalisation that gives the stable root formula:
+multiply through by the conjugates until the numerator is an exact integer,
+
+```
+1 - y = (4p - (q-p-1)²) / ((2√p + q - p - 1)(1 + √p + √q))
+```
+
+a difference of squares over a sum of positive terms, then take `log1p(-ε)`. Nothing cancels,
+and the float quotient is good to about fifteen digits. Both ports keep one more safety net for
+the ceiling: a quotient within `10⁻⁴` of an integer is recomputed in arbitrary precision —
+`decimal` in Python, MPFR in C — so the float proposes and exact arithmetic decides, the same
+discipline as the figurate tests above.
+
 ## Factor it instead of solving it
 
 Sometimes the quadratic factors into pieces with structure, and divisibility does the rest.
@@ -129,12 +168,16 @@ bound that becomes an interval between two roots.
 ## How to reason about it
 
 - **Write the problem as a polynomial before writing any loop.** If the unknown appears squared,
-  or as a product with its partner, you are holding a quadratic, and one of the four structures
+  or as a product with its partner, you are holding a quadratic, and one of the five structures
   above probably deletes your search.
 - **Integer or rational answers wanted → look at the discriminant first.** `Δ = p²` is the real
   equation; expect it to factor as a difference of squares or to be Pell.
 - **A known root is free information.** Ray–curve intersections, recurrences with a fixed point,
   Vieta jumping: divide it out and keep the linear remainder.
+- **A small conjugate is an error term.** If `x + y` and `xy` are integers and `|y| < 1`, then
+  `xⁿ` is within `|y|ⁿ` of an integer — ask about the conjugate, not the power.
+- **Rationalise before you subtract.** `√q - √p`, `1 - y`, `-b + √Δ`: multiply by the conjugate
+  so the numerator is an exact integer and the denominator a sum.
 - **Let floats propose and integers decide.** The C ports of the figurate tests show the shape;
   `math.isqrt` is the Python way to skip the float entirely.
 - **Watch what squaring does to width.** `Δ` and products of roots grow twice as fast as their
