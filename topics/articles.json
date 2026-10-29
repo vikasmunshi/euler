@@ -2600,12 +2600,12 @@
       "path": "domain/parity-mathematics",
       "title": "Parity (mathematics)",
       "status": "final",
-      "written": "2026-10-14T07:19Z",
+      "written": "2026-10-29T07:54Z",
       "solved": 16,
       "problems": 25,
       "tags": ["parity-mathematics"],
       "refs": ["p0002", "p0012", "p0100", "p0120", "p0123", "p0142", "p0145", "p0174", "p0242", "p0331", "p0430", "p0502", "p0512", "p0520", "p0539", "p0588", "p0611", "p0720", "p0859", "p0868", "p0951", "p0974", "p0980", "p0981", "p1003"],
-      "solved_after": ["p0512"]
+      "solved_after": []
     },
     {
       "path": "domain/partition-number-theory",
