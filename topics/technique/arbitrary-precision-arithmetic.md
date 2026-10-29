@@ -1,5 +1,5 @@
 <!-- tags: [arbitrary-precision-arithmetic] -->
-<!-- status: final 2026-10-15T10:47Z -->
+<!-- status: final -->
 # Arbitrary-precision arithmetic
 
 [Arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) is
@@ -140,6 +140,22 @@ within one program: Problem 768's C keeps its packed vector codes in `__int128` 
 for the truncated polynomial power at the end, where the counts outgrow 64 bits quickly and reach
 34 digits already at $n = 720$ — too close to the `__int128` ceiling to trust it.
 Pick the rung per quantity, not per program.
+
+**Or per case: use floating point by default and big precision only where it can go wrong.** Problem 318
+evaluates one closed form per pair, a ceiling of $d / (-2\log_{10} y)$, over about 42,000 pairs,
+some of them with quotients in the millions. Running every pair in `decimal` would work, and it would
+be slow for no reason. A `double` is enough for nearly all of them, provided the logarithm is taken
+without [cancellation](/topics/takeaway/rearrange-to-avoid-cancellation). But a ceiling is a
+discontinuous function: it is fragile only when its argument lies near an integer. So the solution
+checks for exactly that — if the float quotient is within $10^{-4}$ of an integer, that one pair is
+recomputed in arbitrary precision (60-digit `decimal` in Python;
+[MPFR](https://www.mpfr.org/), GMP's arbitrary-precision floating-point sibling, at 200 bits in C).
+The check costs one comparison per pair and almost never triggers, and the result goes from
+"probably right" to guaranteed. The same problem uses big precision a second way, as the
+*reference*: a brute-force checker expands $(\sqrt p + \sqrt q)^{2n}$ directly in high-precision
+`decimal` and counts the nines, an independent oracle for the closed form on small inputs. Keeping
+the slow exact computation for the borderline cases and for testing, and the fast approximate one for
+everything else, is often the right split.
 
 **Two pitfalls specific to Python.** First, `int` being free is exactly why the C translation
 surprises you — the overflow you never saw is now yours to handle, and the port is not a
