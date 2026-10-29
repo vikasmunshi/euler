@@ -1654,12 +1654,12 @@
       "path": "domain/greatest-common-divisor",
       "title": "Greatest common divisor",
       "status": "final",
-      "written": "2026-10-14T12:01Z",
+      "written": "2026-10-29T07:49Z",
       "solved": 11,
       "problems": 30,
       "tags": ["greatest-common-divisor"],
       "refs": ["p0005", "p0039", "p0073", "p0120", "p0139", "p0157", "p0257", "p0276", "p0338", "p0343", "p0350", "p0388", "p0433", "p0440", "p0443", "p0484", "p0489", "p0504", "p0530", "p0570", "p0625", "p0643", "p0715", "p0728", "p0795", "p0876", "p0913", "p0915", "p0958", "p0959"],
-      "solved_after": ["p0443"]
+      "solved_after": []
     },
     {
       "path": "domain/greedy-algorithm-simulation",

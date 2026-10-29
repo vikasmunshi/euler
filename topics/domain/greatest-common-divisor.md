@@ -1,5 +1,5 @@
 <!-- tags: [greatest-common-divisor] -->
-<!-- status: final -->
+<!-- status: final 2026-10-29T07:49Z -->
 # Greatest common divisor
 
 The [greatest common divisor](https://en.wikipedia.org/wiki/Greatest_common_divisor) `gcd(a, b)`
