@@ -4723,12 +4723,12 @@
       "path": "technique/binomial-theorem",
       "title": "Binomial theorem",
       "status": "final",
-      "written": "2026-08-03T06:50Z",
+      "written": "2026-10-29T12:11Z",
       "solved": 8,
       "problems": 8,
       "tags": ["binomial-theorem"],
       "refs": ["p0101_s1", "p0101_s3", "p0120_s0", "p0123_s0", "p0172_s0", "p0242_s0", "p0250_s0", "p0788_s0", "p0860_s0"],
-      "solved_after": ["p0860"]
+      "solved_after": []
     },
     {
       "path": "technique/bisect",
