@@ -1,5 +1,5 @@
 <!-- tags: [greedy-algorithm] -->
-<!-- status: final 2026-10-17T06:27Z -->
+<!-- status: final -->
 # Greedy algorithm
 
 A [greedy algorithm](https://en.wikipedia.org/wiki/Greedy_algorithm) builds its answer one
@@ -93,6 +93,20 @@ greedy step solves the inner problem. A short loop over $b$ then takes the maxim
 good pattern to recognise: greedy is often correct for *one coordinate* once the others are
 pinned, even when it is not correct for the whole problem.
 
+**Fill the left side completely (887).** Here the greedy choice removes the `max` from a
+recurrence. A questioning strategy for "guess the number, each $x$ in at most $x + d$
+questions" is a binary decision tree whose leaves are $1, \dots, N$ in order. The question is
+how many leaves a tree of height $h$ can serve when its $j$-th leaf may sit no deeper than
+$j + c$. At the root, every leaf placed in the left subtree gives the right subtree one more
+level of slack. Capacity never decreases as slack grows, so the exchange is one line: moving a
+leaf from right to left can only help. The best split therefore packs the left side to its own
+capacity, and the "maximise over every split point" step of a
+[dynamic programming](/topics/technique/dynamic-programming) recurrence collapses to a single
+term, $F(h, c) = F(h-1, c-1) + F(h-1, c-1 + F(h-1, c-1))$. An interval DP over all split
+points, the honest brute force, confirmed it on small cases before the solution relied on it.
+This is the DP contrast from above, seen from the other side: greedy is DP where one branch is
+known to win.
+
 ## Shape 2 — greedy as the walk a recurrence follows
 
 By [Zeckendorf's theorem](/topics/domain/zeckendorfs-theorem), the Fibonacci numbers are a
@@ -119,6 +133,30 @@ The two languages differ here only in integer width. Python's arbitrary-precisio
 absorbs everything. 692's C fits in `long long` arrays of 96 entries. 297's C needs
 `unsigned __int128` for its block sums, because the larger benchmark case goes past
 $2^{64}$, and it has to print that number by hand since `printf` has no conversion for it.
+
+The same walk works without Fibonacci numbers. It is just
+[unranking](https://en.wikipedia.org/wiki/Ranking_(combinatorics)): to find the $n$-th object
+in an ordered family, choose each piece in order and subtract whole blocks you skip past.
+Problem 698 asks for the $n$-th "123-number", a number with digits 1 to 3 whose digit counts
+are themselves 0 or 123-numbers. Only the *multiset* of digits matters, so the number of
+completions of any prefix is a sum of
+[multinomial coefficients](https://en.wikipedia.org/wiki/Multinomial_theorem) over a dozen
+admissible count triples. The greedy walk then runs twice. First over lengths, subtracting
+each length's block until $n$ lands inside one. Then over positions, trying 1, 2, 3 and
+keeping the first digit whose block still contains $n$:
+
+```text
+for each position:
+    for d in 1, 2, 3:
+        k = completions(prefix + d)
+        if n <= k:  prefix += d;  break
+        n -= k
+```
+
+This is greedy in the Shape 2 sense: each choice is final because the blocks are disjoint and
+ordered, so only one of them can contain the target and nothing is ever revisited. The cost depends on the
+length of the answer, not its rank. An index near $10^{17}$ is fewer than 40 positions, each
+with three counting calls.
 
 ## Shape 3 — greedy inside an exact search
 
@@ -165,8 +203,8 @@ logic. They differ in the big-integer arithmetic underneath (`math.lcm` against 
   [dynamic programming](/topics/technique/dynamic-programming) or a
   [knapsack](/topics/technique/knapsack-problem) formulation.
 - **Batch identical choices.** When the greedy choice comes in interchangeable copies, as with
-  equal-cost leaves in 219 or whole Fibonacci blocks in 297 and 692, handle a whole class in
-  one step. That is how the problems at $10^9$ and $10^{17}$ become a hundred iterations.
+  equal-cost leaves in 219, whole Fibonacci blocks in 297 and 692, or every completion of a
+  prefix in 698, handle a whole class in one step. That is how the problems at $10^9$ and $10^{17}$ become a hundred iterations.
 - **Use greedy as a bound when it is not the answer.** Even a suboptimal greedy solution is a
   real, feasible incumbent, and in a [branch-and-bound](/topics/technique/branch-and-bound)
   search a good incumbent is worth more than a clever cut.
