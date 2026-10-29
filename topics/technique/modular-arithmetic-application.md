@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic-application] -->
-<!-- status: final 2026-10-16T15:22Z -->
+<!-- status: final -->
 # Modular arithmetic (application)
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) as a *technique* is not the
@@ -27,7 +27,14 @@ collapses to two, and the whole expression reduces to a constant for even $n$ an
 for odd $n$. What was an exponentiation per candidate becomes one multiply, and the search over $n$
 becomes a one-line maximisation. Problem 168 does the same to a $10^{100}$-wide search: "n divides
 its own right-rotation" is a linear equation whose solutions are counted directly, with the modulus
-appearing only at the end, where the question asks for the last five digits. This is
+appearing only at the end, where the question asks for the last five digits. Problem 512 hides the
+same collapse inside a sum of totients: it wants $\sum_{i=1}^{n} \varphi(n^i) \bmod (n+1)$ for every
+$n$ up to $5 \times 10^8$, and the modulus is chosen so that $n \equiv -1$. With
+$\varphi(n^i) = n^{i-1}\varphi(n)$ the inner sum becomes $\varphi(n)$ times an alternating sum of
+$\pm 1$ — $\varphi(n)$ for odd $n$, zero for even — and since $\varphi(n) \le n$ the final reduction
+does nothing at all. A double sum of huge powers turns into "sum $\varphi$ over the odd integers",
+and the real work moves to a [summatory totient](/topics/domain/eulers-totient-function) that never
+mentions a modulus again. This is
 [reduce-before-coding](/topics/takeaway/reduce-before-coding) in its purest form — the modulus is a
 tool of *algebra* first and of arithmetic second.
 
@@ -79,6 +86,17 @@ single residue class mod $3^L$, recovered one digit at a time — a search becom
 [digit DPs](/topics/technique/dynamic-programming) (725, 885, 217) are the same trick with a small
 modulus: the state is a digit sum or a count, not the number.
 
+Sometimes the right state is not one residue but two. Problem 700 walks the sequence $an \bmod m$
+for a 16-digit $a$ and $m$ and asks for the sum of its record lows. The terms look random and the
+records thin out fast, so a scan stalls after a handful. But the orbit of a multiplication mod $m$ is
+not random: carry just the current record low $L$ and the current record gap below the modulus $D$
+(the term closest to $m$ from beneath), and the next term to beat either one sits at the sum of their
+indices, with value $L - D$ or $D - L$. The state is a pair of residues, the update is a subtraction,
+and the whole walk is the [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm)
+on $(a, m)$ in disguise — the [three-gap
+theorem](https://en.wikipedia.org/wiki/Three-gap_theorem) explaining why. The indices, which run to
+around $10^{16}$, never need to be tracked at all.
+
 **4 — The modulus you are handed.** Late problems often *state* the modulus — "give $S(k)$ modulo
 $1123581313$" — and then the residue is the deliverable, not a shortcut. The discipline is
 mechanical but unforgiving: reduce at **every** combine, inside the recurrence, not at the end.
@@ -87,6 +105,22 @@ value defined over Fibonacci-sized arguments costs $O(\log m + \log n)$ per entr
 [multinomial](https://en.wikipedia.org/wiki/Multinomial_theorem) DP accumulates mod $1123455689$ cell
 by cell. A single unreduced accumulator anywhere in the loop reintroduces the growth the modulus was
 there to prevent.
+
+The handed modulus is often *composite* — "the last nine digits" means mod $10^9$ — and that
+quietly removes division. Closed forms are full of it: problem 340 reduces its nested "crazy
+function" to a sum with a $b(b+1)/2$ in it, and problem 401's
+[hyperbola-method](/topics/technique/dirichlet-hyperbola-method) sum of $\sigma_2$ evaluates
+$x(x+1)(2x+1)/6$ at $x$ up to $10^{15}$. Neither $2$ nor $6$ has an inverse mod $10^9$, so you cannot
+reduce the factors and then divide. The fix is to divide *first*, while the factors are still exact:
+$2$ divides $x$ or $x+1$, $3$ divides one of $x$, $x+1$, $2x+1$ (which one is decided by $x \bmod 3$),
+so strike the factors out of the right term, then reduce and multiply the cofactors.
+
+```python
+a, b = (x // 2, x + 1) if x % 2 == 0 else (x, (x + 1) // 2)   # x(x+1)/2, exact
+half = (a % m) * (b % m) % m                                     # x(x+1)/2 mod m
+```
+
+It costs nothing, needs no inverse, and works for any modulus — prime or not.
 
 ## How to reason about it
 
