@@ -1511,12 +1511,12 @@
       "path": "domain/generating-function",
       "title": "Generating function",
       "status": "final",
-      "written": "2026-10-16T07:10Z",
+      "written": "2026-10-29T07:18Z",
       "solved": 10,
       "problems": 29,
       "tags": ["generating-function"],
       "refs": ["p0078", "p0137", "p0140", "p0172", "p0249", "p0250", "p0377", "p0511", "p0519", "p0537", "p0588", "p0614", "p0618", "p0621", "p0623", "p0638", "p0648", "p0677", "p0709", "p0722", "p0743", "p0768", "p0851", "p0860", "p0865", "p0881", "p0890", "p0929", "p0996"],
-      "solved_after": ["p0860"]
+      "solved_after": []
     },
     {
       "path": "domain/genus-theory",
