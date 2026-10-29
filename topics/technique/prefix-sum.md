@@ -1,5 +1,5 @@
 <!-- tags: [prefix-sum] -->
-<!-- status: final 2026-10-16T07:00Z -->
+<!-- status: final -->
 # Prefix sum
 
 A [prefix sum](https://en.wikipedia.org/wiki/Prefix_sum) is the running total of a sequence:
@@ -47,6 +47,11 @@ it passes $n$, then recovering the number and the digit within it by one floor-d
 modulo — $O(\log n)$, with the string never built. Problem 565 stores a prefix sum of a weight over
 the primes and evaluates its summatory function at arbitrary $x$ by binary-searching the prime
 array: a prefix sum plus `bisect` is a piecewise-constant function evaluated in $O(\log n)$.
+Problem 516 asks that function many times. Every $n$ with a 5-smooth totient factors as a
+[Hamming number](https://en.wikipedia.org/wiki/Regular_number) times a squarefree product $m$ of
+"good" primes, so the sum over all such $n \le L$ becomes, for each $m$, $m$ times the sum of the
+Hamming numbers up to $\lfloor L/m \rfloor$. One sorted list and one prefix array serve every $m$
+with a single `bisect` each. The Hamming numbers themselves are never multiplied out.
 
 Problem 205 shows the probabilistic form. Each player's dice total is
 [convolved](/topics/technique/convolution) into an exact integer count distribution, and a prefix
@@ -102,6 +107,16 @@ contributes (the sum of good primes in $(T/(q+1),\, T/q]$, a difference of a pri
 by `bisect`) × (the prefix sum of admissible cofactors up to $q$). Two tables, one subtraction each,
 and the primes above $\sqrt T$ are never visited one at a time.
 
+Problem 675 runs the job on a running *product*. It needs $S(i!)$ for every $i \le n$, where $S$
+is multiplicative and $S(i!) = \prod_p (2e_p(i!) + 1)$. Two cumulative scans do the work. First,
+for each prime $p$, an `np.cumsum` of the valuations $v_p(kp)$ gives
+[Legendre's](https://en.wikipedia.org/wiki/Legendre%27s_formula) exponent $e_p((kp)!)$ at every
+multiple at once. Second, going from $(i-1)!$ to $i!$ changes only the factors for the primes
+dividing $i$. Each one swaps a $(2e'+1)$ for a $(2e+1)$, so $S(i!) = S((i-1)!) \cdot \text{mult}[i]$.
+The answer is the sum of that prefix product. The swap is a division, and that only works because
+the modulus is prime: each removed factor is undone by multiplying by its
+[Fermat inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse).
+
 **A second scan over the prefix array.** The prefix array is itself a sequence, and the deeper uses
 scan it again. Maximum subarray is the canonical one:
 $\max_j \left( P_{j+1} - \min_{i \le j} P_i \right)$ — a
@@ -129,7 +144,9 @@ sums stop being an intermediate and become the data structure.
 - **It needs an *invertible* operation.** Sum, xor, count, product in a field: all fine, because the
   query is a subtraction. Problem 943 carries a third, xor array of parity bitmasks beside its
   counts and sums. Because xor is its own inverse, $q$ whole periods contribute the period's xor
-  once if $q$ is odd and not at all if $q$ is even. Min and max are not — no prefix bookkeeping recovers $\min a[i{:}j]$. That
+  once if $q$ is odd and not at all if $q$ is even. Problem 675's prefix product is safe only
+  because $1\,000\,000\,087$ is prime; under a composite modulus a factor sharing a divisor with it
+  could not be removed. Min and max are not — no prefix bookkeeping recovers $\min a[i{:}j]$. That
   is precisely why maximum subarray is solved by a running minimum *over the prefixes* rather than by
   a range-minimum query, and why real range minima need a sparse table or a monotone deque.
 - **Only for a static array.** Any update to the underlying values invalidates every prefix past it.
