@@ -1,5 +1,5 @@
 <!-- tags: [gmp] -->
-<!-- status: final 2026-10-16T15:15Z -->
+<!-- status: final -->
 # GMP
 
 [GMP](https://gmplib.org/) — the GNU Multiple Precision Arithmetic Library — is the bignum library
@@ -59,7 +59,8 @@ hard part of the port, and these are exactly the ones the problems below reach f
 | `mpz_set_str`, `mpz_get_str` | decimal string ↔ value, any base | writing a bound like $10^{100}$ or $10^{25}$ as a literal, and printing the result (Problems 168, 169) |
 | `mpz_sizeinbase` | digit or bit count without materialising the string | checking that the answer fits its output buffer before `mpz_get_str` writes it (Problem 254) |
 | `mpz_ui_pow_ui`, `mpz_pow_ui` | exact powers | scaling a probability to an integer before dividing (Problem 239) |
-| `mpq_*` with `mpq_canonicalize` | exact rationals, kept in lowest terms | a sum of fractions that must be compared for exact equality (Problem 180) |
+| `mpq_*` with `mpq_canonicalize` | exact rationals, kept in lowest terms | a sum of fractions that must be compared for exact equality (Problem 180), or rounded only once, at the end (Problem 523) |
+| `gmp_printf`, `gmp_snprintf` | `printf` with `%Zd` / `%Qd` conversions for `mpz_t` / `mpq_t` | printing a fixed-point decimal straight into the answer buffer, and a `--show` trace of the exact rational (Problem 523) |
 
 That last row is worth separating out. `mpq_t` is a numerator/denominator pair of `mpz_t`s with
 accessors `mpq_numref` / `mpq_denref`; arithmetic reduces through a
@@ -70,6 +71,26 @@ when the Python used `Fraction`, and it is the right tool when the *problem* is 
 need to compare two ratios, cross-multiplying with plain `mpz_t` ($ad$ versus $bc$) avoids the
 normalisation entirely; that is why the continued-fraction work in Problem 192 stays in `mpz_t` and
 compares products, rather than building rationals.
+
+Problem 523 shows the other common use of `mpq_t`: an expected value that is a sum of fractions
+with different denominators, which the problem wants rounded to two decimals. The Python sums
+`Fraction`s and rounds once at the end. The C port does the same, with an `mpq_add` accumulator, and
+then rounds using only integer operations, so no `double` is ever involved:
+
+```c
+mpq_mul(shifted, shifted, value);              /* value · 10^d                     */
+mpq_add(shifted, shifted, half);               /* + 1/2: round half up             */
+mpz_fdiv_q(scaled, mpq_numref(shifted), mpq_denref(shifted));   /* floor          */
+mpz_fdiv_qr(whole, frac, scaled, scale);       /* split at the decimal point       */
+gmp_snprintf(out, size, "%Zd.%0*Zd", whole, d, frac);
+```
+
+That is a translation of Python's `floor(x·10^d + ½)` followed by `divmod`, and the `%0*Zd` keeps
+the leading zeros of the fractional part. One more rule is worth knowing. Every `mpq_*` arithmetic
+function assumes its operands are already in lowest terms. If you assign a numerator and a
+denominator directly, through `mpq_set_num` or `mpq_denref` as Problem 523 does for each
+$(2^k-1)/(k+1)$ term, you must call `mpq_canonicalize` before you use the value. Forgetting it does
+not raise an error. The arithmetic simply gives wrong answers.
 
 In this repository the build glue is already done: `scripts/c/compile.sh` greps the source for
 `#include <gmp.h>` and appends `-lgmp` to the `gcc` line (and `-lmpfr -lgmp`, in that order, for
@@ -100,6 +121,11 @@ bound fits in 64 bits. GMP is in the C port so that the same code also handles t
 ($i \le 500$), where the count of nines reaches about $10^{51}$. That is a good reason to link it,
 but say so in the source. A reader who sees `mpz_t` will otherwise assume the stated problem
 overflows, and anyone who later tries to remove GMP needs to know which input breaks without it.
+Problem 523 sits on the same boundary from the other direction. At the problem's own size, the
+reduced numerator of the sum is only a couple of bits past $2^{64}$, so an `__int128` fraction would
+technically hold it. `mpq_t` is still the better choice there. It is the line-for-line translation
+of `Fraction`, its GCD reduction comes for free, and it keeps working when $n$ grows and $2^n$ takes
+over.
 
 **Expect a 5–20× win over CPython when GMP does the work, and more when it mostly stays out of
 it.** On this project's benchmarks, on the same test case with the same approach, the GMP port beats
