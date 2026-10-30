@@ -4326,8 +4326,8 @@
     {
       "path": "takeaway/memo-key-is-the-full-state",
       "title": "Key the memo on the full state",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-30T12:35Z",
       "solved": 3,
       "problems": 3,
       "tags": ["memo-key-is-the-full-state"],
