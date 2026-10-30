@@ -1,5 +1,5 @@
 <!-- tags: [primesieve] -->
-<!-- status: final 2026-10-16T15:38Z -->
+<!-- status: final -->
 # primesieve
 
 [primesieve](https://github.com/kimwalisch/primesieve) is Kim Walisch's C/C++ library for
@@ -112,7 +112,13 @@ than that, or something different.
   [divisor-sum sieve](/topics/technique/divisor-sum-sieve), which work at every n anyway. Problem
   464 shows the hybrid: primesieve supplies the primes and the solution's own loop spreads each one
   over the μ table it actually needs. Once you are writing that loop, the library has only saved you
-  the primality bits. Compare 484, which never needs a table. It walks a DFS over the primes up to
+  the primality bits. Problem 675 is the same hybrid, with one extra benefit. It builds a
+  per-step multiplier table for factorials by spreading each prime over its own multiples. Because
+  the library returns the primes as a *sorted array*, a single `np.searchsorted` divides them at
+  max(√n, n/301). Below that point each prime gets its own strided pass. Above it every prime has
+  valuation 1 at all of its multiples, so they are batched by multiple index k: about 300
+  fancy-indexed updates replace 660 000 per-prime Python calls. A bitmap sieve can't be split like
+  that without first being turned into a list. Compare 484, which never needs a table. It walks a DFS over the primes up to
   √N, and a plain prime list is exactly what that DFS takes.
 - **You need O(1) membership.** primesieve hands back primes, not a bitmap. Problem 35 has to test
   whether each rotation is prime, so it rebuilds an indexed flag array (C) or a `set` (Python) from
