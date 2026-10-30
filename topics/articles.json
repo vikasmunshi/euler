@@ -6714,12 +6714,12 @@
       "path": "technique/mobius-function-application",
       "title": "M\u00f6bius function (application)",
       "status": "final",
-      "written": "2026-10-17T06:50Z",
+      "written": "2026-10-30T06:38Z",
       "solved": 7,
       "problems": 7,
       "tags": ["mobius-function-application"],
       "refs": ["p0153_s0", "p0193_s0", "p0202_s0", "p0464_s0", "p0478_s0", "p0478_s1", "p0641_s0", "p0745_s0"],
-      "solved_after": ["p0641"]
+      "solved_after": []
     },
     {
       "path": "technique/mobius-inversion-formula",
