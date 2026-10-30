@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation-application] -->
-<!-- status: final 2026-10-16T15:24Z -->
+<!-- status: final -->
 # Recurrence relation (application)
 
 This is the **technique** side of the [recurrence relation](/topics/domain/recurrence-relation) —
@@ -98,12 +98,28 @@ object by its final move and remove that move, so counts of size $i$ are sums of
 sizes. Problems 115, 116 and 117 are the tiling family; the derivation and the pitfalls of the case
 analysis are covered on the [recurrence relation](/topics/domain/recurrence-relation) page.
 
+Sometimes the quantity asked for has no recurrence, but its **inverse** does. Problem 887 wants
+$Q(N, d)$, the least height of a comparison tree that finds any secret $x \in \{1..N\}$ within
+$x + d$ questions, summed over hundreds of millions of $N$. Minimising a height over trees for each
+$N$ is hopeless; asking the converse — how many leaves can a tree of height $h$ serve? — conditions
+cleanly on the root's split. The left subtree inherits a tighter budget, the right a looser one by
+exactly as many leaves as went left, so with a *slack* $c$ carried in the state the capacity obeys
+
+$$F(h, c) = F(h-1, c-1) + F\bigl(h-1,\ c-1 + F(h-1, c-1)\bigr),$$
+
+with the left side filled greedily because $F$ only grows with slack. $Q$ is then the least $h$ whose
+capacity reaches $N$, and because capacity is monotone in $N$, the sum over every $N$ turns into a
+sum over the few dozen heights — $\sum_h \max(0, M - F(h, c_0))$. The move generalises: when the
+answer is "the smallest resource that suffices", recur on what each resource level buys, and let the
+monotonicity do the inversion.
+
 ## How to reason about it
 
 - **The design decision is the state, not the formula.** Ask what the update needs that the previous
   step already knew. If the answer is "more than one number", widen the tuple — problem 169 carries a
   pair because a single value cannot advance itself. If it is "something I discarded", carry that
-  too; the state is usually two or three integers regardless.
+  too; the state is usually two or three integers regardless. Problem 887 widens it differently: a
+  slack parameter makes every subtree look like the whole problem, so one function recurs on itself.
 - **Write the update as a tuple assignment.** `a, b = b, a + b` evaluates the whole right-hand side
   first, which removes the temporaries and the classic sequential-assignment bug where the second
   line reads the value the first line just overwrote.
