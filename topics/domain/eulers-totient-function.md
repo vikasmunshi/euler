@@ -212,7 +212,7 @@ targets.
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
-- ○ [0531](/solutions/0531/) — Chinese Leftovers
+- ● [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0625](/solutions/0625/) — Gcd Sum
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function

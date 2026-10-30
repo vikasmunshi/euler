@@ -182,6 +182,7 @@ inverse per `(n₁, b₁)` pair.
 - ● [0250](/solutions/0250/) — $250250$
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
+- ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 
