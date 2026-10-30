@@ -1,5 +1,5 @@
 <!-- tags: [lexicographic-order] -->
-<!-- status: final 2026-10-17T06:29Z -->
+<!-- status: final -->
 # Lexicographic order
 
 Lexicographic order is dictionary order applied to any sequence: compare the first elements, and
@@ -63,7 +63,15 @@ answer one position at a time. At each position I try candidates in increasing o
 many completions each one allows. If the remaining rank fits within that count, I take the
 candidate. Otherwise I subtract the count and move to the next candidate.
 [Problem 845](/solutions/0845/) finds the n-th integer with a prime digit sum this way. A table of digit-sum counts supplies the completion counts, which is the
-[digit DP](/topics/technique/digit-dp) pattern. [Problem 336](/solutions/0336/)
+[digit DP](/topics/technique/digit-dp) pattern. [Problem 698](/solutions/0698/) unranks in
+shortlex, and it joins this idea with the canonical-form idea from use 3. A "123-number" uses only
+the digits 1–3, and each digit's count must itself be 0 or a 123-number. That rule sees only the
+digit multiset, so the completions of a prefix depend only on how many 1s, 2s and 3s it has used.
+Their number is a sum of [multinomial coefficients](/topics/technique/multinomial-theorem) over the
+admissible final count triples. The unranking then runs at two levels. First it skips whole lengths,
+since shortlex makes every length-`L` block one contiguous range. Then it fixes digits within the
+chosen length. Positions in the order become counting questions about multisets, so an index near
+10^17 resolves in about 38 digit choices. [Problem 336](/solutions/0336/)
 shows the other side of the trade-off. Its notes considered unranking, but the reversal-and-splice
 structure of its arrangements makes completion counts awkward. With fewer than 4·10^5 candidates,
 generating them all, sorting, and indexing is simpler and fast enough. See
