@@ -6516,12 +6516,12 @@
       "path": "technique/math-gcd",
       "title": "math.gcd",
       "status": "final",
-      "written": "2026-10-16T15:48Z",
+      "written": "2026-10-30T06:36Z",
       "solved": 11,
       "problems": 11,
       "tags": ["math-gcd"],
       "refs": ["p0005_s0", "p0039_s0", "p0106_s0", "p0139_s0", "p0141_s0", "p0141_s1", "p0155_s0", "p0175_s0", "p0183_s0", "p0236_s0", "p0443_s0", "p0504_s0"],
-      "solved_after": ["p0443"]
+      "solved_after": []
     },
     {
       "path": "technique/math-isqrt",
