@@ -4564,8 +4564,8 @@
     "level": 6,
     "pct": 16,
     "solvers": 1549,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 30 Oct 2026, 13:31"
   },
   "572": {
     "title": "Idempotent Matrices",
