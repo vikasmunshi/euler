@@ -1,5 +1,5 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: final 2026-10-28T21:43Z -->
+<!-- status: final -->
 # Watch integer width
 
 Almost every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
@@ -48,7 +48,10 @@ Problems 240 and 242 land at 80–97% of $2^{63}-1$, and both C ports keep `long
 bounding every term added; 242's answer grows like $t^{\log_2 3}$, so a modestly larger input would
 cross the line. Problem 365's answer sits near $9 \times 10^{18}$ — inside `long long`, but close
 enough that the port takes an `unsigned __int128` accumulator as the honest choice rather than
-defend a margin of a few percent.
+defend a margin of a few percent. And the claim has to hold for every input the solution is run
+on, not only the headline one: problem 531's main total sits inside half the signed range, but one
+of its larger test windows sums past $2^{63}$, so its accumulator is `unsigned __int128` too. The
+test cases, not the problem statement, set the width.
 
 **Tier 2 — the intermediate overflows 64 bits, even though the answer doesn't.** Problem 48 sums
 $i^i \bmod 10^{10}$. The *answer* is a ten-digit number, but computing it multiplies two operands
@@ -97,6 +100,13 @@ static const char *format_u128(unsigned __int128 value) {
     return cursor;
 }
 ```
+
+Sometimes it is the *input* that has outgrown the box. Problem 551 follows the sequence
+$a_{k+1} = a_k + s(a_k)$ ($s$ the digit sum) out to $n = 10^{20}$ — already past $2^{64}$ before any
+arithmetic happens — and its memoised digit-block jumps count steps and carry low parts of the same
+size. The C makes `unsigned __int128` the working type throughout, stops its table of powers of ten
+at $10^{38}$, the largest that type holds, and parses the argument by hand, because the runner's `parse_int`
+stops at $2^{63}$; the printer above handles the way out.
 
 Even 128 bits is a box with walls. Problem 241 carries exact fractions in `unsigned __int128` and
 needs two guards to keep every product under $2^{128}$, one of them capping a product of primes at
