@@ -1,5 +1,5 @@
 <!-- tags: [multinomial-theorem] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T06:39Z -->
 # Multinomial theorem
 
 The [multinomial theorem](https://en.wikipedia.org/wiki/Multinomial_theorem) expands a power of a
