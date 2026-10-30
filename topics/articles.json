@@ -6483,12 +6483,12 @@
       "path": "technique/lucas-number",
       "title": "Lucas number",
       "status": "final",
-      "written": "2026-10-28T09:38Z",
+      "written": "2026-10-30T06:35Z",
       "solved": 3,
       "problems": 3,
       "tags": ["lucas-number"],
       "refs": ["p0209_s0", "p0473_s0", "p0739_s0"],
-      "solved_after": ["p0739"]
+      "solved_after": []
     },
     {
       "path": "technique/mask-computing",
