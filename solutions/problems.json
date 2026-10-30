@@ -5644,8 +5644,8 @@
     "level": 8,
     "pct": 22,
     "solvers": 869,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 30 Oct 2026, 13:03"
   },
   "707": {
     "title": "Lights Out",
