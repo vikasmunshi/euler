@@ -1,5 +1,5 @@
 <!-- tags: [memo-key-is-the-full-state] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T12:35Z -->
 # Key the memo on the full state
 
 A memo table makes a promise: the same key always gets the same answer. That promise holds only
