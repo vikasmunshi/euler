@@ -1,5 +1,5 @@
 <!-- tags: [matrix-exponentiation] -->
-<!-- status: final 2026-10-12T14:45Z -->
+<!-- status: final -->
 # Matrix exponentiation
 
 Matrix exponentiation here means computing an integer power $M^n$ of a square matrix by
@@ -8,10 +8,10 @@ Matrix exponentiation here means computing an integer power $M^n$ of a square ma
 different object.) The reason it matters: any process that advances a fixed-size state by the
 same linear rule each step is one matrix multiplication per step, so $n$ steps are $M^n$. Squaring
 reaches $M^n$ in about $2\log_2 n$ multiplications instead of $n$. So a question about the
-$10^{12}$th board column, or an index of $1.2 \times 10^{10}$, costs a few dozen small matrix
-products. Each problem below hides a linear step behind something else: Hamiltonian tours of a
-narrow board, a two-variable function defined by mixed rules, a sequence that branches on the
-parity of its index.
+$10^{12}$th board column, a strip $10^{16}$ cells long, or an index of $1.2 \times 10^{10}$, costs a
+few dozen small matrix products. Each problem below hides a linear step behind something else:
+Hamiltonian tours of a narrow board, coloured tilings of a strip, a two-variable function defined
+by mixed rules, a sequence that branches on the parity of its index.
 
 ## The idea: one step is one multiply
 
@@ -34,7 +34,7 @@ def mat_pow(M, e, mod):
 ```
 
 For a $d \times d$ matrix that is $O(d^3 \log n)$ operations, with
-`mat_pow([[1, 1], [1, 0]], n, mod)[0][1]` as the Fibonacci check. Three ways the problems arrive
+`mat_pow([[1, 1], [1, 0]], n, mod)[0][1]` as the Fibonacci check. Four ways the problems arrive
 at $M$:
 
 - **A recurrence's companion matrix (Problem 237).** Counting tours of a $4 \times n$ board is a
@@ -44,6 +44,14 @@ at $M$:
   top row and shifts the history down with $1$s below the diagonal. About forty $4 \times 4$
   products reach $n = 10^{12}$. Finding the recurrence is covered under
   [small cases reveal the recurrence](/topics/takeaway/small-cases-reveal-recurrence).
+- **A transfer matrix built directly, then shrunk by symmetry (Problem 670).** Here no recurrence
+  is guessed: the matrix is written down from the rules. A column boundary of a $2 \times n$ strip
+  of coloured $1 \times L$ tiles remembers each row's overhang and colour, over a hundred states.
+  But the four colours are interchangeable, and the two tiles at a boundary always differ, so every
+  colour pair looks the same. Quotienting by [that symmetry](/topics/technique/symmetry) keeps only
+  the two overhangs plus a "vertical domino" state, ten in all, and moves the colours into the
+  weights: an entry counts how many colours the new tile may take, not which. That shrinks the
+  cost of each of the ~54 squarings for $n = 10^{16}$ by a factor of about a thousand.
 - **Two directions, two matrices (Problem 940).** The function $A(m, n)$ is linear in each index
   separately. So one $2 \times 2$ matrix advances $m$, another advances $n$, and every value is
   $e_1^{\mathsf T} N^{n} M^{m} e_2$. Because that expression is bilinear in the two powers, a double
@@ -59,7 +67,9 @@ at $M$:
 - **Want one entry? Multiply a vector.** If only $v_n$ is needed, keep squaring $M$ but
   apply each needed $M^{2^k}$ to the vector, which is $O(d^2)$ per bit instead of a full product.
   Or take a single row of $M^n$ times the seed at the end. Problem 237 reads one
-  component as a dot product of the power's top row with its seed.
+  component as a dot product of the power's top row with its seed; Problem 670 carries a row
+  vector of first-column counts through the $M^{2^k}$ picked out by $n - 1$, then sums the two
+  states in which nothing overhangs the right edge.
 - **Sums of powers with a block matrix.** $\begin{pmatrix} M & I \\ 0 & I \end{pmatrix}^{n}$ has
   $I + M + \dots + M^{n-1}$ in its top-right block. One power of a matrix twice the size gives a
   geometric sum of matrices, which is useful for running totals of a recurrence.
@@ -76,7 +86,9 @@ at $M$:
 
 - **Find the smallest state that makes the step linear.** Add a constant $1$ to the state to
   handle an affine term, a running total to get prefix sums, or two consecutive terms when the
-  rule looks back two steps. The matrix size is the cost driver, so keep it minimal.
+  rule looks back two steps. The matrix size is the cost driver, so keep it minimal. When labels
+  such as colours only matter up to relabelling, count *choices* in the weights instead of carrying
+  the labels in the state, as Problem 670 does.
 - **Reduce after every product, and mind the dot product's width.** A modulus below $2^{31}$ keeps
   each product below $2^{62}$, but a row of $d$ such products summed before reduction can reach
   $d \cdot 2^{62}$. Just two terms reach $2^{63}$, past the signed 64-bit limit. In C, reduce inside the
@@ -85,7 +97,9 @@ at $M$:
 - **Seed and index carefully.** $v_n = M^{n-k} v_k$ for a seed at index $k$. Off-by-one errors in
   the exponent are the usual bug, so check the first few values against direct iteration.
 - **Verify the closed matrix form on given values.** Problem 940's two-matrix form was checked
-  against the statement's four values of $A(m, n)$ before the factorisation was trusted.
+  against the statement's four values of $A(m, n)$ before the factorisation was trusted. A
+  hand-built transfer matrix deserves the same: Problem 670's ten-state matrix was compared with a
+  brute-force enumeration of every coloured tiling for $n \le 7$ before it was raised to $10^{16}$.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
