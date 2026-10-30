@@ -1,5 +1,5 @@
 <!-- tags: [number-theory] -->
-<!-- status: final 2026-10-28T20:59Z -->
+<!-- status: final -->
 # Number theory
 
 [Number theory](https://en.wikipedia.org/wiki/Number_theory) is the study of the integers on their
@@ -63,6 +63,18 @@ the coprime splits $n = d \cdot e$. There are $2^{\omega(n)}$ of them, and the s
 largest becomes a sweep over coprime pairs. In all three problems the question is about $n$ but the
 work is done one prime power at a time.
 
+Problem 531 runs the theorem in the other direction. It builds a system rather than taking one
+apart: for each pair $n < m$ in a window just above $10^6$, solve $x \equiv \varphi(n) \pmod n$,
+$x \equiv \varphi(m) \pmod m$. Neighbouring integers share factors all the time, so the textbook
+coprime CRT does not apply. The
+[generalised form](https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Generalization_to_non-coprime_moduli)
+does. With $d = \gcd(n, m)$, the system is solvable exactly when $d \mid b - a$, and then it has
+one solution class modulo $\operatorname{lcm}(n, m)$. Substituting $x = a + nt$ leaves the
+[linear congruence](/topics/domain/linear-congruence-theorem) $(n/d)\,t \equiv (b-a)/d \pmod{m/d}$,
+whose coefficient is now a unit. So the consistency test and the solution are one gcd and one
+[modular inverse](/topics/technique/modular-multiplicative-inverse-application). A cheap detail
+makes them cheaper: $\gcd(n, m) = \gcd(n, m - n)$, and $m - n$ is small inside a narrow window.
+
 ## Move 1 — build the whole table in one pass
 
 $\varphi(d)$ for a single $d$ costs a factorization. $\varphi(d)$ for *every* $d \le N$ costs one
@@ -95,7 +107,12 @@ divisor sums. Problem 675 adds a twist. It needs a multiplicative function of ev
 $i!$ up to $10^7$, and consecutive factorials differ only in the primes dividing $i$. So the sieve
 records, for each $i$, the ratio by which the running product changes. A prime $p$ updates only its
 $n/p$ multiples, and one prefix product yields every value; nothing is ever refactored
-([update only what changes](/topics/takeaway/update-only-what-changes)). The rule of
+([update only what changes](/topics/takeaway/update-only-what-changes)). Problem 531 needs
+$\varphi$ only on a window of a few thousand integers above $10^6$, so it sieves the window alone
+([segmented sieve](/topics/technique/segmented-sieve)). The primes up to $\sqrt{\text{end}}$ are
+pushed into the window, and each one is also divided out of a residual copy of every multiple.
+Whatever residual is still above 1 afterwards is the single prime factor larger than the square
+root, and one last pass applies it. The rule of
 thumb is blunt: **if you find yourself factoring inside a loop over a
 range, you have the loop inside out.** Invert it — iterate over primes or divisors and push into an
 array. See [sieve of Eratosthenes](/topics/technique/sieve-of-eratosthenes) and
@@ -214,8 +231,19 @@ product over the distinct primes dividing $d$, it ignores multiplicity entirely 
 depends only on which primes appear, and the cheapest way to push it down is to use the smallest
 ones. The candidates collapse to multiples of a
 [primorial](https://en.wikipedia.org/wiki/Primorial), and an unbounded search becomes a handful of
-checks. Three problems, three different things reduced: the formula, the comparison, the candidate
-set.
+checks.
+
+Problem 571 reduces a search tree, and the fact it uses is about
+[positional notation](/topics/domain/positional-notation) rather than divisibility. It wants the
+smallest integers that are [pandigital](/topics/domain/pandigital-number) in every base from 2 up
+to $n$. The base-$n$ condition is the strictest, so the search builds base-$n$ permutations digit
+by digit, in increasing order. A partial permutation confines every completion to an interval
+$[lo, hi]$. Every number in an interval shares its leading digits *in any base* down to the first
+place where $lo$ and $hi$ differ. If that shared prefix is missing more digits of base $b$ than
+there are free places left below it, no completion can be pandigital in base $b$, and the whole
+subtree is dropped. One cheap interval test stands in for hundreds of millions of base
+conversions. Four problems, four different things reduced: the formula, the comparison, the
+candidate set, the search tree.
 
 Sometimes the reduction is a congruence that makes most of the problem disappear. Problem 512 sums
 $\varphi(n^i) \bmod (n+1)$ over $i \le n$. But $\varphi(n^i) = n^{i-1}\varphi(n)$, and
@@ -320,8 +348,10 @@ reducing it would discard most of the answer
 
 The second trap is width, and it is language-shaped. Python's integers are arbitrary-precision, so
 a solution that works in Python can overflow silently the moment it is ported to C. Problems 241,
-251, 271, 272, 276, 359 and 641 all need `__int128` or a reduction that keeps intermediates small. In 276 the
-answer itself still fits in 64 bits, but the intermediate $k(k+1)(2k+1)$ does not. Problems 168 and
+251, 271, 272, 276, 359, 531 and 641 all need `__int128` or a reduction that keeps intermediates small. In 276 the
+answer itself still fits in 64 bits, but the intermediate $k(k+1)(2k+1)$ does not. Problem 531 has
+the reverse problem: every term fits, but the running total of millions of them passes $2^{63}$ on
+the larger test window, so the accumulator has to be wider than the values going into it. Problems 168 and
 321 need [GMP](https://gmplib.org/) outright. The Python version gives no warning that the C
 version is about to be wrong. See [watch integer width](/topics/takeaway/watch-integer-width).
 
@@ -338,6 +368,8 @@ The tells are reasonably reliable:
 | the total is a formula, the question asks for the gcd-1 part | invert over floor quotients, $O(N^{3/4})$ (moves 2–3) |
 | the condition only sees which primes divide $n$ | enumerate the prime part, prefix-sum the cofactors (move 5) |
 | a congruence modulo a composite $n$ | solve per prime power, recombine by CRT |
+| two congruences whose moduli share factors | generalised CRT: solvable iff $\gcd$ divides the difference |
+| a condition on the digits of $n$ in several bases | prune whole intervals by their shared leading digits |
 | $\pi(v)$, or a function constant on primes, summed to $10^9$+ | Lucy / Min_25 over the floor quotients (move 3) |
 | a recurrence or greedy process run $10^{15}$ times | find the events or the steady state; jump (move 6) |
 | $f$ is multiplicative | build $f$ from prime powers; a sieve exists |
