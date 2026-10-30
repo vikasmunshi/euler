@@ -1,5 +1,5 @@
 <!-- tags: [lucas-number] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T06:35Z -->
 # Lucas number
 
 The [Lucas numbers](https://en.wikipedia.org/wiki/Lucas_number) $2, 1, 3, 4, 7, 11, 18, \dots$
