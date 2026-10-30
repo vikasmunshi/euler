@@ -233,7 +233,7 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ○ [0520](/solutions/0520/) — Simbers
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ○ [0538](/solutions/0538/) — Maximum Quadrilaterals
-- ○ [0551](/solutions/0551/) — Sum of Digits Sequence
+- ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ○ [0612](/solutions/0612/) — Friend Numbers
 - ○ [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0676](/solutions/0676/) — Matching Digit Sums

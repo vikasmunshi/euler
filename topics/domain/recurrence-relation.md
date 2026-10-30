@@ -297,7 +297,7 @@ induction will confirm. The shape picks the method.
 - ○ [0535](/solutions/0535/) — Fractal Sequence
 - ○ [0539](/solutions/0539/) — Odd Elimination
 - ○ [0546](/solutions/0546/) — The Floor's Revenge
-- ○ [0551](/solutions/0551/) — Sum of Digits Sequence
+- ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ○ [0555](/solutions/0555/) — McCarthy 91 Function
 - ○ [0558](/solutions/0558/) — Irrational Base
 - ○ [0570](/solutions/0570/) — Snowflakes
