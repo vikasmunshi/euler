@@ -6012,8 +6012,8 @@
     "level": 17,
     "pct": 45,
     "solvers": 961,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 30 Oct 2026, 17:47"
   },
   "753": {
     "title": "Fermat Equation",
