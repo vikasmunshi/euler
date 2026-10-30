@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-10-28T21:01Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -61,7 +61,13 @@ multiplier $m$ that makes the schoolbook divisibility rule "drop the last digit 
 exact for a prime $p$. Writing $n = 10a + b$ gives $10 f(n) = n + b(10m - 1)$, so the rule works
 precisely when $10m \equiv 1 \pmod p$ — every such divisibility trick is a
 [modular inverse](/topics/domain/modular-multiplicative-inverse) of $10$ in disguise, and this one
-even has a closed form that depends only on the last digit of $p$.
+even has a closed form that depends only on the last digit of $p$. Problem 706 asks about
+divisibility of every *substring* at once. A substring is divisible by $3$ exactly when the digit
+prefix sums at its two ends agree mod $3$, so $f(n)$ is $\sum_r \binom{c_r}{2}$ over the counts
+$c_r$ of prefixes with each residue. The problem only asks whether $f(n)$ is itself divisible by
+$3$, so the counts can be kept mod $3$ too. That leaves $81$ states for a
+[transfer matrix](/topics/domain/transfer-matrix-method), raised to the $10^5$th power by
+squaring. Residues are being taken twice here: once of the digit sums and once of the counts.
 
 **"Give the answer modulo $1\,000\,000\,007$."** Counting problems whose true answer overflows any
 integer type hand you the modulus explicitly — the residue *is* the deliverable. Here the domain is
@@ -73,7 +79,11 @@ matters. The contract can even be attached to a question that looks real-valued.
 $\lfloor(\lceil\sqrt a\rceil + \sqrt a)^{a^2}\rfloor$. Its conjugate $\lceil\sqrt a\rceil - \sqrt a$
 lies in $[0, 1)$, so the floor is the integer $x^n + y^n$ minus one. That integer is computed
 in the ring $\mathbb{Z}_p[\sqrt a]$, whose elements are pairs of residues, and no real number ever
-appears.
+appears. Problem 517 is a recursion on a real argument, $g_a(x) = g_a(x-1) + g_a(x-a)$ with
+$a = \sqrt n$. Unrolled, it counts lattice paths and telescopes to a sum of binomials
+$\binom{\lfloor x - ja \rfloor + j}{j}$, taken mod the prime from factorial tables. The real number
+survives only inside that floor, and an integer square root of $j^2 n$ computes it exactly, so
+floating point never touches the residue.
 
 **"… modulo $n + 1$" written into the definition.** A modulus that is part of the *object*,
 rather than of the deliverable, is often there to simplify it. Problem 512 defines
@@ -168,7 +178,12 @@ modulus, so read it before you write the first line:
   prime fields, so you solve in each and glue. Problem 365 wants $\binom{10^{18}}{10^9}$ — over nine
   billion digits — modulo some twenty million products of three primes; per prime it is one
   application of [Lucas's theorem](/topics/domain/lucass-theorem), and the recombination factors so
-  that only pairwise inverses are ever needed.
+  that only pairwise inverses are ever needed. When the moduli are *not* coprime, CRT comes with a
+  condition. Problem 531 solves $x \equiv \varphi(n) \pmod n$, $x \equiv \varphi(m) \pmod m$ for
+  some twelve million pairs of neighbouring $n, m$. With $d = \gcd(n, m)$ the system is solvable
+  exactly when $d \mid \varphi(m) - \varphi(n)$, and then it has one solution modulo
+  $\operatorname{lcm}(n, m)$. Dividing the linear congruence through by $d$ leaves coprime moduli and
+  an ordinary inverse. Test the consistency first: a pair that fails it contributes $0$.
 - **A composite modulus also takes division away.** In problem 250 the answer is wanted mod
   $10^{16}$, and the binomial recurrence $\binom{c}{i+1} = \binom{c}{i}(c-i)/(i+1)$ divides by
   numbers that share factors with $10$ — no inverse exists. The two escapes are the two
@@ -188,7 +203,9 @@ modulus, so read it before you write the first line:
   what the statement reduces.
 - **Mind the width.** A modulus near $10^{16}$ means the product of two residues no longer fits in
   64 bits, and a sum that is *not* reduced — problem 421's lands just under $2^{63}$ — leaves no
-  headroom at all; estimate the magnitude before choosing the type. The fixes (`__int128`, a split
+  headroom at all; estimate the magnitude before choosing the type. Problem 531 sums CRT solutions
+  up to $\operatorname{lcm}(n, m) \approx 10^{12}$ without reduction, and a wider test window already
+  pushes the total past $2^{63}$, so its C port accumulates in 128 bits. The fixes (`__int128`, a split
   multiply, reducing the operands first) are in the
   [Modular Arithmetic](/topics/number-theory/modular-arithmetic) note.
 
