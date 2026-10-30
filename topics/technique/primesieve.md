@@ -154,6 +154,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 

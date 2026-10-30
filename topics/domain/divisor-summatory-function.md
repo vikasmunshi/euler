@@ -132,7 +132,6 @@ its own sub-linear recursion (see
 - ● [0452](/solutions/0452/) — Long Products
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ○ [0608](/solutions/0608/) — Divisor Sums
-- ○ [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0625](/solutions/0625/) — Gcd Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
 - ● [0694](/solutions/0694/) — Cube-full Divisors

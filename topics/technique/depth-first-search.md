@@ -309,6 +309,7 @@ kept warm between them flatters the measurement.
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0571](/solutions/0571/) — Super Pandigital Numbers
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 
 <!-- /problems -->

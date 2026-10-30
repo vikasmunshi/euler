@@ -279,7 +279,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ○ [0592](/solutions/0592/) — Factorial Trailing Digits 2
 - ○ [0598](/solutions/0598/) — Split Divisibilities
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
-- ○ [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
 - ○ [0619](/solutions/0619/) — Square Subsets

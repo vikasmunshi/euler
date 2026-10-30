@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Order_statisti
 ## Problems
 
 - ● [0240](/solutions/0240/) — Top Dice
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 
 <!-- /problems -->

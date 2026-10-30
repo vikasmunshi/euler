@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Exponential_se
 ## Problems
 
 - ● [0587](/solutions/0587/) — Concave Triangle
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 
 <!-- /problems -->

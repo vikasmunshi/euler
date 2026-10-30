@@ -611,7 +611,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences
-- ○ [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
 - ○ [0619](/solutions/0619/) — Square Subsets

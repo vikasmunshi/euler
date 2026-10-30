@@ -187,6 +187,7 @@ The idioms in these solutions show what each choice involves:
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0255](/solutions/0255/) — Rounded Square Roots
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 
 <!-- /problems -->

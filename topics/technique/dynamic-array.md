@@ -150,6 +150,7 @@ it is appended to, the choice of a sequence over a set is the bug.
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0387](/solutions/0387/) — Harshad Numbers
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0834](/solutions/0834/) — Add and Divide

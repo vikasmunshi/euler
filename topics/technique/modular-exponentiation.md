@@ -207,6 +207,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0743](/solutions/0743/) — Window into a Matrix

@@ -234,6 +234,7 @@ is free from the second benchmark run onward, and the timing will lie about it.
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [1000](/solutions/1000/) — Problem $1000$
 

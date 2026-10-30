@@ -463,7 +463,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0586](/solutions/0586/) — Binary Quadratic Form
 - ○ [0596](/solutions/0596/) — Number of Lattice Points in a Hyperball
 - ○ [0601](/solutions/0601/) — Divisibility Streaks
-- ○ [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
+- ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0617](/solutions/0617/) — Mirror Power Sequence
 - ○ [0625](/solutions/0625/) — Gcd Sum
