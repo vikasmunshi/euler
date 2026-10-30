@@ -7099,12 +7099,12 @@
       "path": "technique/primesieve",
       "title": "primesieve",
       "status": "final",
-      "written": "2026-10-16T15:38Z",
+      "written": "2026-10-30T06:40Z",
       "solved": 15,
       "problems": 15,
       "tags": ["primesieve"],
       "refs": ["p0010_s4", "p0029_s1", "p0035_s1", "p0187_s0", "p0233_s0", "p0272_s0", "p0274_s0", "p0304_s1", "p0381_s0", "p0421_s0", "p0464_s0", "p0484_s0", "p0565_s1", "p0675_s0", "p0808_s0"],
-      "solved_after": ["p0675"]
+      "solved_after": []
     },
     {
       "path": "technique/primorial",
