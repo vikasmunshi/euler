@@ -6560,12 +6560,12 @@
       "path": "technique/matrix-exponentiation",
       "title": "Matrix exponentiation",
       "status": "final",
-      "written": "2026-10-12T14:45Z",
+      "written": "2026-10-30T06:37Z",
       "solved": 4,
       "problems": 4,
       "tags": ["matrix-exponentiation"],
       "refs": ["p0237_s0", "p0670_s0", "p0918_s0", "p0940_s0"],
-      "solved_after": ["p0670"]
+      "solved_after": []
     },
     {
       "path": "technique/maximum-subarray-problem",
