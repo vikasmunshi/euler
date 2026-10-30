@@ -7264,12 +7264,12 @@
       "path": "technique/recursion-computer-science",
       "title": "Recursion (computer science)",
       "status": "final",
-      "written": "2026-08-07T08:55Z",
+      "written": "2026-10-30T06:41Z",
       "solved": 37,
       "problems": 37,
       "tags": ["recursion-computer-science"],
       "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0452_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0", "p1000_s0"],
-      "solved_after": ["p0452"]
+      "solved_after": []
     },
     {
       "path": "technique/regula-falsi",
