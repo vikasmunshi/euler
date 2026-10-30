@@ -292,6 +292,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0698](/solutions/0698/) — 123 Numbers

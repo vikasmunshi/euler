@@ -213,6 +213,7 @@ on the clock.
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0692](/solutions/0692/) — Siegbert and Jo

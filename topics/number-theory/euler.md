@@ -225,7 +225,7 @@ the loop.
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
-- ○ [0531](/solutions/0531/) — Chinese Leftovers
+- ● [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
