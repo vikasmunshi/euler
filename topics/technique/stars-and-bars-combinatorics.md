@@ -1,5 +1,5 @@
 <!-- tags: [stars-and-bars-combinatorics] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T06:42Z -->
 # Stars and bars (combinatorics)
 
 [Stars and bars](https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics)) counts the ways to

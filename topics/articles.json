@@ -7484,12 +7484,12 @@
       "path": "technique/stars-and-bars-combinatorics",
       "title": "Stars and bars (combinatorics)",
       "status": "final",
-      "written": "2026-10-18T10:11Z",
+      "written": "2026-10-30T06:42Z",
       "solved": 5,
       "problems": 5,
       "tags": ["stars-and-bars-combinatorics"],
       "refs": ["p0113_s0", "p0253_s0", "p0452_s0", "p0862_s0", "p0996_s0"],
-      "solved_after": ["p0452"]
+      "solved_after": []
     },
     {
       "path": "technique/stencil-numerical-analysis",
