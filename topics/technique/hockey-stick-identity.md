@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hockey_stick_i
 ## Problems
 
 - ● [0113](/solutions/0113/) — Non-bouncy Numbers
+- ● [0517](/solutions/0517/) — A Real Recursion
 
 <!-- /problems -->

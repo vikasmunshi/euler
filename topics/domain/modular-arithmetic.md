@@ -322,7 +322,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
-- ○ [0517](/solutions/0517/) — A Real Recursion
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ● [0529](/solutions/0529/) — $10$-substrings

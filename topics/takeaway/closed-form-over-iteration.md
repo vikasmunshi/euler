@@ -256,6 +256,7 @@ Four cautions earn their keep:
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients

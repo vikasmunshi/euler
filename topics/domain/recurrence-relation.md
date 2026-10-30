@@ -290,7 +290,7 @@ induction will confirm. The shape picks the method.
 - ○ [0497](/solutions/0497/) — Drunken Tower of Hanoi
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
-- ○ [0517](/solutions/0517/) — A Real Recursion
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0523](/solutions/0523/) — First Sort I
 - ○ [0527](/solutions/0527/) — Randomized Binary Search
 - ○ [0532](/solutions/0532/) — Nanobots on Geodesics

@@ -193,6 +193,7 @@ let every later query pay a lookup instead of the full price.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

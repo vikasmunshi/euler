@@ -222,7 +222,7 @@ clever was done with the primes themselves.
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ○ [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
-- ○ [0517](/solutions/0517/) — A Real Recursion
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ○ [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0541](/solutions/0541/) — Divisibility of Harmonic Number Denominators

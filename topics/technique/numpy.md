@@ -278,6 +278,7 @@ both slower and harder to read.
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
