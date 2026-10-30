@@ -1,5 +1,5 @@
 <!-- tags: [recursion-computer-science] -->
-<!-- status: final 2026-08-07T08:55Z -->
+<!-- status: final -->
 # Recursion (computer science)
 
 [Recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)) is a function that solves
@@ -143,8 +143,21 @@ gaps after $n$ iterations, but congruent gaps have identical futures, so the sol
 their sorted curvature triple and carries a count instead of a copy. Same recursion, distinct states
 only.
 
-Both are worth internalising as a habit: before descending, ask whether the subtree's *contribution*
-has a closed form or a duplicate elsewhere. Recursion with algebra attached beats recursion alone.
+Problem 452 shows the same habit at a whole subtree's *leaves*. It sums the $n$-fold divisor
+function $d_n$ up to $10^9$ by walking integers through their prime factorisation in increasing
+order of primes. A call $S(x, j)$ covers everything up to $x$ whose smallest prime factor is at
+least $p_j$. It branches on $p_i^e$ for $i \ge j$, recurses on $(\lfloor x/p_i^e \rfloor, i+1)$, and
+so uses the same pass-the-lower-bound trick as problem 88: each integer is reached along exactly one
+path. What it never does is descend into the numbers that are a single prime. Because $d_n(p) = n$
+on every prime, that entire fringe is $n\,(\pi(x) - j)$, a single lookup into a prime-count table
+precomputed at every $\lfloor m/i \rfloor$. The recursion only visits composites, about
+$m^{3/4}/\log m$ work rather than $m$, and it needs no memo. Its depth also needs no guard, which
+is the next section's concern from the other side: depth is the number of distinct prime factors, at
+most nine below $10^9$, so the bound comes from the problem's structure rather than from
+`setrecursionlimit`.
+
+All three are worth internalising as a habit: before descending, ask whether the subtree's
+*contribution* has a closed form or a duplicate elsewhere. Recursion with algebra attached beats recursion alone.
 
 ## The stack is a finite resource
 
