@@ -3,7 +3,7 @@
     "title": "Multiples of 3 or 5",
     "level": 0,
     "pct": 1,
-    "solvers": 849007,
+    "solvers": 849046,
     "solved": true,
     "date": "Thu, 2 Jul 2015, 18:16"
   },
@@ -11,7 +11,7 @@
     "title": "Even Fibonacci Numbers",
     "level": 0,
     "pct": 1,
-    "solvers": 679257,
+    "solvers": 679283,
     "solved": true,
     "date": "Fri, 3 Jul 2015, 14:05"
   },
@@ -19,7 +19,7 @@
     "title": "Largest Prime Factor",
     "level": 0,
     "pct": 1,
-    "solvers": 512540,
+    "solvers": 512556,
     "solved": true,
     "date": "Fri, 3 Jul 2015, 15:27"
   },
@@ -27,7 +27,7 @@
     "title": "Largest Palindrome Product",
     "level": 0,
     "pct": 2,
-    "solvers": 453216,
+    "solvers": 453235,
     "solved": true,
     "date": "Fri, 3 Jul 2015, 11:39"
   },
@@ -35,7 +35,7 @@
     "title": "Smallest Multiple",
     "level": 0,
     "pct": 2,
-    "solvers": 439694,
+    "solvers": 439711,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 13:00"
   },
@@ -43,7 +43,7 @@
     "title": "Sum Square Difference",
     "level": 0,
     "pct": 1,
-    "solvers": 444738,
+    "solvers": 444757,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 12:30"
   },
@@ -51,7 +51,7 @@
     "title": "10 001st Prime",
     "level": 0,
     "pct": 1,
-    "solvers": 387579,
+    "solvers": 387597,
     "solved": true,
     "date": "Fri, 27 Sep 2019, 13:56"
   },
@@ -59,7 +59,7 @@
     "title": "Largest Product in a Series",
     "level": 0,
     "pct": 3,
-    "solvers": 330437,
+    "solvers": 330454,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 13:23"
   },
@@ -67,7 +67,7 @@
     "title": "Special Pythagorean Triplet",
     "level": 0,
     "pct": 1,
-    "solvers": 335872,
+    "solvers": 335887,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 13:55"
   },
@@ -75,7 +75,7 @@
     "title": "Summation of Primes",
     "level": 0,
     "pct": 2,
-    "solvers": 315376,
+    "solvers": 315389,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 14:21"
   },
@@ -83,7 +83,7 @@
     "title": "Largest Product in a Grid",
     "level": 2,
     "pct": 6,
-    "solvers": 236631,
+    "solvers": 236644,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 15:26"
   },
@@ -91,7 +91,7 @@
     "title": "Highly Divisible Triangular Number",
     "level": 1,
     "pct": 4,
-    "solvers": 232959,
+    "solvers": 232967,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 15:54"
   },
@@ -99,7 +99,7 @@
     "title": "Large Sum",
     "level": 1,
     "pct": 4,
-    "solvers": 233734,
+    "solvers": 233741,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 20:55"
   },
@@ -107,7 +107,7 @@
     "title": "Longest Collatz Sequence",
     "level": 1,
     "pct": 4,
-    "solvers": 238122,
+    "solvers": 238130,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 21:38"
   },
@@ -115,7 +115,7 @@
     "title": "Lattice Paths",
     "level": 2,
     "pct": 6,
-    "solvers": 202167,
+    "solvers": 202173,
     "solved": true,
     "date": "Wed, 9 Oct 2019, 09:41"
   },
@@ -123,7 +123,7 @@
     "title": "Power Digit Sum",
     "level": 0,
     "pct": 1,
-    "solvers": 236468,
+    "solvers": 236474,
     "solved": true,
     "date": "Wed, 9 Oct 2019, 09:51"
   },
@@ -131,7 +131,7 @@
     "title": "Number Letter Counts",
     "level": 2,
     "pct": 8,
-    "solvers": 169699,
+    "solvers": 169704,
     "solved": true,
     "date": "Wed, 9 Oct 2019, 16:43"
   },
@@ -139,7 +139,7 @@
     "title": "Maximum Path Sum I",
     "level": 2,
     "pct": 7,
-    "solvers": 164110,
+    "solvers": 164116,
     "solved": true,
     "date": "Thu, 10 Oct 2019, 10:30"
   },
@@ -147,7 +147,7 @@
     "title": "Counting Sundays",
     "level": 2,
     "pct": 8,
-    "solvers": 153899,
+    "solvers": 153902,
     "solved": true,
     "date": "Thu, 10 Oct 2019, 10:45"
   },
@@ -155,7 +155,7 @@
     "title": "Factorial Digit Sum",
     "level": 0,
     "pct": 1,
-    "solvers": 207023,
+    "solvers": 207028,
     "solved": true,
     "date": "Thu, 10 Oct 2019, 10:54"
   },
@@ -163,7 +163,7 @@
     "title": "Amicable Numbers",
     "level": 1,
     "pct": 5,
-    "solvers": 169209,
+    "solvers": 169216,
     "solved": true,
     "date": "Thu, 10 Oct 2019, 11:23"
   },
@@ -171,7 +171,7 @@
     "title": "Names Scores",
     "level": 0,
     "pct": 2,
-    "solvers": 155901,
+    "solvers": 155906,
     "solved": true,
     "date": "Thu, 10 Oct 2019, 11:49"
   },
@@ -179,7 +179,7 @@
     "title": "Non-Abundant Sums",
     "level": 3,
     "pct": 9,
-    "solvers": 128755,
+    "solvers": 128757,
     "solved": true,
     "date": "Thu, 24 Oct 2019, 16:49"
   },
@@ -187,7 +187,7 @@
     "title": "Lexicographic Permutations",
     "level": 2,
     "pct": 7,
-    "solvers": 137849,
+    "solvers": 137850,
     "solved": true,
     "date": "Mon, 28 Oct 2019, 15:03"
   },
@@ -203,7 +203,7 @@
     "title": "Reciprocal Cycles",
     "level": 3,
     "pct": 10,
-    "solvers": 104873,
+    "solvers": 104876,
     "solved": true,
     "date": "Tue, 29 Oct 2019, 01:05"
   },
@@ -211,7 +211,7 @@
     "title": "Quadratic Primes",
     "level": 1,
     "pct": 3,
-    "solvers": 108372,
+    "solvers": 108374,
     "solved": true,
     "date": "Wed, 30 Oct 2019, 09:55"
   },
@@ -219,7 +219,7 @@
     "title": "Number Spiral Diagonals",
     "level": 0,
     "pct": 2,
-    "solvers": 127095,
+    "solvers": 127098,
     "solved": true,
     "date": "Wed, 30 Oct 2019, 14:18"
   },
@@ -227,7 +227,7 @@
     "title": "Distinct Powers",
     "level": 0,
     "pct": 3,
-    "solvers": 128030,
+    "solvers": 128037,
     "solved": true,
     "date": "Mon, 11 Nov 2019, 12:17"
   },
@@ -235,7 +235,7 @@
     "title": "Digit Fifth Powers",
     "level": 0,
     "pct": 1,
-    "solvers": 132895,
+    "solvers": 132901,
     "solved": true,
     "date": "Mon, 11 Nov 2019, 12:42"
   },
@@ -243,7 +243,7 @@
     "title": "Coin Sums",
     "level": 2,
     "pct": 8,
-    "solvers": 104604,
+    "solvers": 104608,
     "solved": true,
     "date": "Mon, 11 Nov 2019, 22:11"
   },
@@ -251,7 +251,7 @@
     "title": "Pandigital Products",
     "level": 1,
     "pct": 5,
-    "solvers": 89199,
+    "solvers": 89202,
     "solved": true,
     "date": "Mon, 11 Nov 2019, 23:27"
   },
@@ -259,7 +259,7 @@
     "title": "Digit Cancelling Fractions",
     "level": 0,
     "pct": 2,
-    "solvers": 89086,
+    "solvers": 89090,
     "solved": true,
     "date": "Tue, 12 Nov 2019, 15:14"
   },
@@ -267,7 +267,7 @@
     "title": "Digit Factorials",
     "level": 0,
     "pct": 2,
-    "solvers": 115248,
+    "solvers": 115252,
     "solved": true,
     "date": "Tue, 12 Nov 2019, 20:12"
   },
@@ -275,7 +275,7 @@
     "title": "Circular Primes",
     "level": 1,
     "pct": 3,
-    "solvers": 103212,
+    "solvers": 103216,
     "solved": true,
     "date": "Tue, 12 Nov 2019, 22:40"
   },
@@ -283,7 +283,7 @@
     "title": "Double-base Palindromes",
     "level": 0,
     "pct": 1,
-    "solvers": 107827,
+    "solvers": 107833,
     "solved": true,
     "date": "Wed, 13 Nov 2019, 11:27"
   },
@@ -291,7 +291,7 @@
     "title": "Truncatable Primes",
     "level": 1,
     "pct": 3,
-    "solvers": 91175,
+    "solvers": 91181,
     "solved": true,
     "date": "Wed, 13 Nov 2019, 12:33"
   },
@@ -307,7 +307,7 @@
     "title": "Integer Right Triangles",
     "level": 0,
     "pct": 3,
-    "solvers": 90132,
+    "solvers": 90135,
     "solved": true,
     "date": "Tue, 26 Nov 2019, 11:48"
   },
@@ -323,7 +323,7 @@
     "title": "Pandigital Prime",
     "level": 1,
     "pct": 5,
-    "solvers": 84467,
+    "solvers": 84470,
     "solved": true,
     "date": "Tue, 3 Dec 2019, 22:22"
   },
@@ -331,7 +331,7 @@
     "title": "Coded Triangle Numbers",
     "level": 0,
     "pct": 2,
-    "solvers": 90159,
+    "solvers": 90162,
     "solved": true,
     "date": "Thu, 5 Dec 2019, 10:28"
   },
@@ -339,7 +339,7 @@
     "title": "Sub-string Divisibility",
     "level": 1,
     "pct": 3,
-    "solvers": 74497,
+    "solvers": 74502,
     "solved": true,
     "date": "Tue, 3 Dec 2019, 12:59"
   },
@@ -347,7 +347,7 @@
     "title": "Pentagon Numbers",
     "level": 2,
     "pct": 7,
-    "solvers": 73026,
+    "solvers": 73029,
     "solved": true,
     "date": "Tue, 3 Dec 2019, 23:39"
   },
@@ -355,7 +355,7 @@
     "title": "Triangular, Pentagonal, and Hexagonal",
     "level": 0,
     "pct": 3,
-    "solvers": 86550,
+    "solvers": 86553,
     "solved": true,
     "date": "Wed, 4 Dec 2019, 11:56"
   },
@@ -363,7 +363,7 @@
     "title": "Goldbach's Other Conjecture",
     "level": 1,
     "pct": 5,
-    "solvers": 76589,
+    "solvers": 76594,
     "solved": true,
     "date": "Wed, 4 Dec 2019, 15:25"
   },
@@ -371,7 +371,7 @@
     "title": "Distinct Primes Factors",
     "level": 1,
     "pct": 5,
-    "solvers": 72051,
+    "solvers": 72054,
     "solved": true,
     "date": "Thu, 28 Nov 2019, 09:32"
   },
@@ -379,7 +379,7 @@
     "title": "Self Powers",
     "level": 0,
     "pct": 2,
-    "solvers": 123176,
+    "solvers": 123177,
     "solved": true,
     "date": "Thu, 28 Nov 2019, 12:03"
   },
@@ -387,7 +387,7 @@
     "title": "Prime Permutations",
     "level": 1,
     "pct": 3,
-    "solvers": 71644,
+    "solvers": 71647,
     "solved": true,
     "date": "Thu, 28 Nov 2019, 12:36"
   },
@@ -411,7 +411,7 @@
     "title": "Permuted Multiples",
     "level": 0,
     "pct": 2,
-    "solvers": 79051,
+    "solvers": 79052,
     "solved": true,
     "date": "Fri, 6 Dec 2019, 12:24"
   },
@@ -419,7 +419,7 @@
     "title": "Combinatoric Selections",
     "level": 0,
     "pct": 3,
-    "solvers": 71618,
+    "solvers": 71621,
     "solved": true,
     "date": "Wed, 11 Dec 2019, 10:20"
   },
@@ -427,7 +427,7 @@
     "title": "Poker Hands",
     "level": 3,
     "pct": 9,
-    "solvers": 44756,
+    "solvers": 44757,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 09:35"
   },
@@ -443,7 +443,7 @@
     "title": "Powerful Digit Sum",
     "level": 1,
     "pct": 4,
-    "solvers": 70773,
+    "solvers": 70777,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 12:59"
   },
@@ -451,7 +451,7 @@
     "title": "Square Root Convergents",
     "level": 1,
     "pct": 5,
-    "solvers": 51883,
+    "solvers": 51884,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 13:18"
   },
@@ -459,7 +459,7 @@
     "title": "Spiral Primes",
     "level": 2,
     "pct": 6,
-    "solvers": 49825,
+    "solvers": 49827,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 14:13"
   },
@@ -467,7 +467,7 @@
     "title": "XOR Decryption",
     "level": 1,
     "pct": 4,
-    "solvers": 49661,
+    "solvers": 49662,
     "solved": true,
     "date": "Fri, 13 Dec 2019, 14:38"
   },
@@ -475,7 +475,7 @@
     "title": "Prime Pair Sets",
     "level": 3,
     "pct": 10,
-    "solvers": 34859,
+    "solvers": 34860,
     "solved": true,
     "date": "Tue, 17 Dec 2019, 12:19"
   },
@@ -483,7 +483,7 @@
     "title": "Cyclical Figurate Numbers",
     "level": 2,
     "pct": 7,
-    "solvers": 32491,
+    "solvers": 32493,
     "solved": true,
     "date": "Tue, 10 Mar 2020, 15:56"
   },
@@ -491,7 +491,7 @@
     "title": "Cubic Permutations",
     "level": 1,
     "pct": 5,
-    "solvers": 40076,
+    "solvers": 40077,
     "solved": true,
     "date": "Wed, 11 Mar 2020, 13:16"
   },
@@ -499,7 +499,7 @@
     "title": "Powerful Digit Counts",
     "level": 2,
     "pct": 6,
-    "solvers": 52818,
+    "solvers": 52822,
     "solved": true,
     "date": "Wed, 11 Mar 2020, 14:52"
   },
@@ -507,7 +507,7 @@
     "title": "Odd Period Square Roots",
     "level": 3,
     "pct": 9,
-    "solvers": 28172,
+    "solvers": 28173,
     "solved": true,
     "date": "Wed, 11 Mar 2020, 15:39"
   },
@@ -515,7 +515,7 @@
     "title": "Convergents of $e$",
     "level": 2,
     "pct": 6,
-    "solvers": 37204,
+    "solvers": 37207,
     "solved": true,
     "date": "Wed, 11 Mar 2020, 16:10"
   },
@@ -523,7 +523,7 @@
     "title": "Diophantine Equation",
     "level": 10,
     "pct": 26,
-    "solvers": 25399,
+    "solvers": 25401,
     "solved": true,
     "date": "Thu, 12 Mar 2020, 14:14"
   },
@@ -531,7 +531,7 @@
     "title": "Maximum Path Sum II",
     "level": 4,
     "pct": 11,
-    "solvers": 106867,
+    "solvers": 106871,
     "solved": true,
     "date": "Thu, 12 Mar 2020, 17:36"
   },
@@ -571,7 +571,7 @@
     "title": "Counting Fractions",
     "level": 3,
     "pct": 9,
-    "solvers": 28302,
+    "solvers": 28303,
     "solved": true,
     "date": "Wed, 16 Jul 2025, 22:07"
   },
@@ -579,7 +579,7 @@
     "title": "Counting Fractions in a Range",
     "level": 2,
     "pct": 6,
-    "solvers": 31172,
+    "solvers": 31174,
     "solved": true,
     "date": "Wed, 16 Jul 2025, 22:47"
   },
@@ -587,7 +587,7 @@
     "title": "Digit Factorial Chains",
     "level": 1,
     "pct": 5,
-    "solvers": 33530,
+    "solvers": 33531,
     "solved": true,
     "date": "Thu, 17 Jul 2025, 00:31"
   },
@@ -603,7 +603,7 @@
     "title": "Counting Summations",
     "level": 2,
     "pct": 8,
-    "solvers": 35187,
+    "solvers": 35188,
     "solved": true,
     "date": "Thu, 17 Jul 2025, 09:45"
   },
@@ -611,7 +611,7 @@
     "title": "Prime Summations",
     "level": 2,
     "pct": 7,
-    "solvers": 24599,
+    "solvers": 24601,
     "solved": true,
     "date": "Thu, 17 Jul 2025, 15:45"
   },
@@ -627,7 +627,7 @@
     "title": "Passcode Derivation",
     "level": 2,
     "pct": 6,
-    "solvers": 46458,
+    "solvers": 46459,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 10:26"
   },
@@ -643,7 +643,7 @@
     "title": "Path Sum: Two Ways",
     "level": 2,
     "pct": 6,
-    "solvers": 41410,
+    "solvers": 41412,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 14:45"
   },
@@ -651,7 +651,7 @@
     "title": "Path Sum: Three Ways",
     "level": 3,
     "pct": 10,
-    "solvers": 26153,
+    "solvers": 26154,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 15:23"
   },
@@ -659,7 +659,7 @@
     "title": "Path Sum: Four Ways",
     "level": 3,
     "pct": 8,
-    "solvers": 22846,
+    "solvers": 22847,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 16:10"
   },
@@ -675,7 +675,7 @@
     "title": "Counting Rectangles",
     "level": 3,
     "pct": 8,
-    "solvers": 30572,
+    "solvers": 30573,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 18:30"
   },
@@ -683,7 +683,7 @@
     "title": "Cuboid Route",
     "level": 4,
     "pct": 11,
-    "solvers": 16454,
+    "solvers": 16455,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 20:02"
   },
@@ -699,7 +699,7 @@
     "title": "Product-sum Numbers",
     "level": 4,
     "pct": 13,
-    "solvers": 13515,
+    "solvers": 13516,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 21:21"
   },
@@ -731,7 +731,7 @@
     "title": "Square Digit Chains",
     "level": 1,
     "pct": 4,
-    "solvers": 49551,
+    "solvers": 49553,
     "solved": true,
     "date": "Fri, 18 Jul 2025, 22:55"
   },
@@ -755,7 +755,7 @@
     "title": "Amicable Chains",
     "level": 2,
     "pct": 8,
-    "solvers": 18629,
+    "solvers": 18630,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 02:43"
   },
@@ -763,7 +763,7 @@
     "title": "Su Doku",
     "level": 2,
     "pct": 7,
-    "solvers": 21265,
+    "solvers": 21267,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 15:43"
   },
@@ -771,7 +771,7 @@
     "title": "Large Non-Mersenne Prime",
     "level": 1,
     "pct": 4,
-    "solvers": 50267,
+    "solvers": 50269,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 04:14"
   },
@@ -779,7 +779,7 @@
     "title": "Anagramic Squares",
     "level": 5,
     "pct": 13,
-    "solvers": 14800,
+    "solvers": 14804,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 15:04"
   },
@@ -787,7 +787,7 @@
     "title": "Largest Exponential",
     "level": 2,
     "pct": 7,
-    "solvers": 37400,
+    "solvers": 37403,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 15:42"
   },
@@ -795,7 +795,7 @@
     "title": "Arranged Probability",
     "level": 5,
     "pct": 13,
-    "solvers": 21044,
+    "solvers": 21046,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 15:43"
   },
@@ -803,7 +803,7 @@
     "title": "Optimum Polynomial",
     "level": 4,
     "pct": 12,
-    "solvers": 15199,
+    "solvers": 15200,
     "solved": true,
     "date": "Sat, 19 Jul 2025, 22:55"
   },
@@ -811,7 +811,7 @@
     "title": "Triangle Containment",
     "level": 3,
     "pct": 9,
-    "solvers": 26819,
+    "solvers": 26820,
     "solved": true,
     "date": "Sun, 20 Jul 2025, 14:21"
   },
@@ -819,7 +819,7 @@
     "title": "Special Subset Sums: Optimum",
     "level": 5,
     "pct": 14,
-    "solvers": 10629,
+    "solvers": 10630,
     "solved": true,
     "date": "Wed, 6 Aug 2025, 19:04"
   },
@@ -835,7 +835,7 @@
     "title": "Special Subset Sums: Testing",
     "level": 8,
     "pct": 21,
-    "solvers": 10525,
+    "solvers": 10527,
     "solved": true,
     "date": "Fri, 8 Aug 2025, 00:07"
   },
@@ -851,7 +851,7 @@
     "title": "Minimal Network",
     "level": 4,
     "pct": 12,
-    "solvers": 13646,
+    "solvers": 13647,
     "solved": true,
     "date": "Fri, 29 Aug 2025, 14:44"
   },
@@ -867,7 +867,7 @@
     "title": "Darts",
     "level": 4,
     "pct": 13,
-    "solvers": 10553,
+    "solvers": 10555,
     "solved": true,
     "date": "Tue, 2 Sep 2025, 14:17"
   },
@@ -891,7 +891,7 @@
     "title": "Bouncy Numbers",
     "level": 1,
     "pct": 5,
-    "solvers": 30156,
+    "solvers": 30157,
     "solved": true,
     "date": "Sat, 6 Sep 2025, 15:58"
   },
@@ -899,7 +899,7 @@
     "title": "Non-bouncy Numbers",
     "level": 4,
     "pct": 11,
-    "solvers": 13787,
+    "solvers": 13789,
     "solved": true,
     "date": "Sat, 6 Sep 2025, 20:50"
   },
@@ -907,7 +907,7 @@
     "title": "Counting Block Combinations I",
     "level": 4,
     "pct": 12,
-    "solvers": 13713,
+    "solvers": 13714,
     "solved": true,
     "date": "Mon, 8 Sep 2025, 14:00"
   },
@@ -915,7 +915,7 @@
     "title": "Counting Block Combinations II",
     "level": 4,
     "pct": 11,
-    "solvers": 12556,
+    "solvers": 12557,
     "solved": true,
     "date": "Mon, 8 Sep 2025, 14:56"
   },
@@ -939,7 +939,7 @@
     "title": "Pandigital Prime Sets",
     "level": 9,
     "pct": 23,
-    "solvers": 9138,
+    "solvers": 9139,
     "solved": true,
     "date": "Wed, 10 Sep 2025, 12:08"
   },
@@ -979,7 +979,7 @@
     "title": "Prime Square Remainders",
     "level": 4,
     "pct": 11,
-    "solvers": 14288,
+    "solvers": 14289,
     "solved": true,
     "date": "Sat, 20 Sep 2025, 12:07"
   },
@@ -1027,7 +1027,7 @@
     "title": "Repunit Divisibility",
     "level": 10,
     "pct": 27,
-    "solvers": 8114,
+    "solvers": 8115,
     "solved": true,
     "date": "Fri, 22 May 2026, 14:11"
   },
@@ -1043,7 +1043,7 @@
     "title": "Prime Cube Partnership",
     "level": 5,
     "pct": 13,
-    "solvers": 9445,
+    "solvers": 9447,
     "solved": true,
     "date": "Sat, 23 May 2026, 14:41"
   },
@@ -1139,7 +1139,7 @@
     "title": "Torricelli Triangles",
     "level": 16,
     "pct": 41,
-    "solvers": 3824,
+    "solvers": 3825,
     "solved": true,
     "date": "Tue, 26 May 2026, 10:42"
   },
@@ -1219,7 +1219,7 @@
     "title": "Investigating Gaussian Integers",
     "level": 14,
     "pct": 37,
-    "solvers": 3613,
+    "solvers": 3614,
     "solved": true,
     "date": "Sun, 31 May 2026, 17:40"
   },
@@ -1283,7 +1283,7 @@
     "title": "Triominoes",
     "level": 17,
     "pct": 45,
-    "solvers": 2998,
+    "solvers": 2999,
     "solved": true,
     "date": "Sun, 31 May 2026, 18:26"
   },
@@ -1291,7 +1291,7 @@
     "title": "Hexadecimal Numbers",
     "level": 13,
     "pct": 34,
-    "solvers": 6695,
+    "solvers": 6696,
     "solved": true,
     "date": "Thu, 4 Jun 2026, 21:05"
   },
@@ -1307,7 +1307,7 @@
     "title": "Three Consecutive Digital Sum Limit",
     "level": 5,
     "pct": 15,
-    "solvers": 7404,
+    "solvers": 7406,
     "solved": true,
     "date": "Sun, 14 Jun 2026, 17:13"
   },
@@ -1371,7 +1371,7 @@
     "title": "Few Repeated Digits",
     "level": 11,
     "pct": 29,
-    "solvers": 4987,
+    "solvers": 4988,
     "solved": true,
     "date": "Tue, 16 Jun 2026, 09:09"
   },
@@ -1379,7 +1379,7 @@
     "title": "Hollow Square Laminae I",
     "level": 4,
     "pct": 12,
-    "solvers": 11185,
+    "solvers": 11187,
     "solved": true,
     "date": "Tue, 16 Jun 2026, 17:40"
   },
@@ -1387,7 +1387,7 @@
     "title": "Hollow Square Laminae II",
     "level": 4,
     "pct": 13,
-    "solvers": 7487,
+    "solvers": 7488,
     "solved": true,
     "date": "Wed, 17 Jun 2026, 09:56"
   },
@@ -1635,7 +1635,7 @@
     "title": "Dice Game",
     "level": 3,
     "pct": 10,
-    "solvers": 17721,
+    "solvers": 17722,
     "solved": true,
     "date": "Tue, 26 May 2026, 15:41"
   },
@@ -1763,7 +1763,7 @@
     "title": "Alexandrian Integers",
     "level": 18,
     "pct": 47,
-    "solvers": 2831,
+    "solvers": 2832,
     "solved": true,
     "date": "Sat, 18 Jul 2026, 20:43"
   },
@@ -1843,7 +1843,7 @@
     "title": "Prime Factorisation of Binomial Coefficients",
     "level": 4,
     "pct": 12,
-    "solvers": 6827,
+    "solvers": 6829,
     "solved": true,
     "date": "Fri, 19 Jun 2026, 20:49"
   },
@@ -1987,7 +1987,7 @@
     "title": "Prime Subset Sums",
     "level": 12,
     "pct": 32,
-    "solvers": 3310,
+    "solvers": 3311,
     "solved": true,
     "date": "Mon, 3 Aug 2026, 08:25"
   },
@@ -2003,7 +2003,7 @@
     "title": "Cardano Triplets",
     "level": 25,
     "pct": 63,
-    "solvers": 1939,
+    "solvers": 1940,
     "solved": true,
     "date": "Mon, 3 Aug 2026, 13:13"
   },
@@ -2115,7 +2115,7 @@
     "title": "Binary Circles",
     "level": 5,
     "pct": 14,
-    "solvers": 5230,
+    "solvers": 5231,
     "solved": true,
     "date": "Tue, 13 Oct 2026, 12:43"
   },
@@ -2131,7 +2131,7 @@
     "title": "Billionaire",
     "level": 7,
     "pct": 19,
-    "solvers": 4268,
+    "solvers": 4269,
     "solved": false,
     "date": ""
   },
@@ -2339,7 +2339,7 @@
     "title": "Pseudo-Fortunate Numbers",
     "level": 6,
     "pct": 16,
-    "solvers": 3870,
+    "solvers": 3871,
     "solved": true,
     "date": "Fri, 19 Jun 2026, 21:33"
   },
@@ -2403,7 +2403,7 @@
     "title": "Nim",
     "level": 5,
     "pct": 15,
-    "solvers": 8151,
+    "solvers": 8152,
     "solved": true,
     "date": "Thu, 11 Jun 2026, 22:59"
   },
@@ -2499,7 +2499,7 @@
     "title": "Sliding Game",
     "level": 5,
     "pct": 15,
-    "solvers": 2285,
+    "solvers": 2286,
     "solved": true,
     "date": "Sat, 20 Jun 2026, 00:34"
   },
@@ -2579,7 +2579,7 @@
     "title": "Bitwise-OR Operations on Random Integers",
     "level": 6,
     "pct": 17,
-    "solvers": 4911,
+    "solvers": 4912,
     "solved": false,
     "date": ""
   },
@@ -2779,7 +2779,7 @@
     "title": "Sum of a Square and a Cube",
     "level": 5,
     "pct": 14,
-    "solvers": 4041,
+    "solvers": 4043,
     "solved": true,
     "date": "Tue, 13 Oct 2026, 13:43"
   },
@@ -2851,7 +2851,7 @@
     "title": "Prime Generating Integers",
     "level": 5,
     "pct": 15,
-    "solvers": 9961,
+    "solvers": 9962,
     "solved": true,
     "date": "Thu, 4 Jun 2026, 14:15"
   },
@@ -2915,7 +2915,7 @@
     "title": "A Huge Binomial Coefficient",
     "level": 15,
     "pct": 40,
-    "solvers": 1747,
+    "solvers": 1748,
     "solved": true,
     "date": "Sat, 1 Aug 2026, 08:59"
   },
@@ -3203,7 +3203,7 @@
     "title": "Sum of Squares of Divisors",
     "level": 6,
     "pct": 17,
-    "solvers": 3486,
+    "solvers": 3487,
     "solved": true,
     "date": "Tue, 27 Oct 2026, 15:22"
   },
@@ -3427,7 +3427,7 @@
     "title": "Sum of Squares of Unitary Divisors",
     "level": 6,
     "pct": 18,
-    "solvers": 3338,
+    "solvers": 3339,
     "solved": true,
     "date": "Wed, 27 May 2026, 16:44"
   },
@@ -3475,7 +3475,7 @@
     "title": "Polynomials of Fibonacci Numbers",
     "level": 14,
     "pct": 36,
-    "solvers": 1575,
+    "solvers": 1576,
     "solved": false,
     "date": ""
   },
@@ -3659,7 +3659,7 @@
     "title": "Permutations of Project",
     "level": 25,
     "pct": 63,
-    "solvers": 1306,
+    "solvers": 1307,
     "solved": false,
     "date": ""
   },
@@ -3723,7 +3723,7 @@
     "title": "Distinct Terms in a Multiplication Table",
     "level": 27,
     "pct": 68,
-    "solvers": 527,
+    "solvers": 528,
     "solved": false,
     "date": ""
   },
@@ -3931,9 +3931,9 @@
     "title": "Exploding Sequence",
     "level": 24,
     "pct": 61,
-    "solvers": 540,
+    "solvers": 541,
     "solved": true,
-    "date": "Fri, 30 Oct 2026, 17:41"
+    "date": "Fri, 30 Oct 2026, 19:02"
   },
   "493": {
     "title": "Under the Rainbow",
@@ -3995,7 +3995,7 @@
     "title": "Problem 500!!!",
     "level": 16,
     "pct": 40,
-    "solvers": 5196,
+    "solvers": 5197,
     "solved": false,
     "date": ""
   },
@@ -4043,7 +4043,7 @@
     "title": "Clock Sequence",
     "level": 9,
     "pct": 24,
-    "solvers": 1264,
+    "solvers": 1265,
     "solved": false,
     "date": ""
   },
@@ -4059,7 +4059,7 @@
     "title": "Integers in Base $i-1$",
     "level": 37,
     "pct": 95,
-    "solvers": 386,
+    "solvers": 387,
     "solved": false,
     "date": ""
   },
@@ -4267,7 +4267,7 @@
     "title": "Weak Queens",
     "level": 22,
     "pct": 56,
-    "solvers": 484,
+    "solvers": 485,
     "solved": false,
     "date": ""
   },
@@ -4307,7 +4307,7 @@
     "title": "Odd Elimination",
     "level": 9,
     "pct": 24,
-    "solvers": 1155,
+    "solvers": 1156,
     "solved": false,
     "date": ""
   },
@@ -4563,7 +4563,7 @@
     "title": "Super Pandigital Numbers",
     "level": 6,
     "pct": 16,
-    "solvers": 1554,
+    "solvers": 1557,
     "solved": true,
     "date": "Fri, 30 Oct 2026, 14:01"
   },
@@ -4683,7 +4683,7 @@
     "title": "Binary Quadratic Form",
     "level": 34,
     "pct": 86,
-    "solvers": 372,
+    "solvers": 373,
     "solved": false,
     "date": ""
   },
@@ -4803,7 +4803,7 @@
     "title": "Divisibility Streaks",
     "level": 6,
     "pct": 17,
-    "solvers": 2772,
+    "solvers": 2773,
     "solved": false,
     "date": ""
   },
@@ -4851,7 +4851,7 @@
     "title": "Marsh Crossing",
     "level": 8,
     "pct": 20,
-    "solvers": 2213,
+    "solvers": 2214,
     "solved": false,
     "date": ""
   },
@@ -4917,7 +4917,7 @@
     "pct": 63,
     "solvers": 826,
     "solved": true,
-    "date": "Fri, 30 Oct 2026, 17:56"
+    "date": "Fri, 30 Oct 2026, 20:18"
   },
   "616": {
     "title": "Creative Numbers",
@@ -5453,7 +5453,7 @@
     "pct": 64,
     "solvers": 404,
     "solved": true,
-    "date": "Fri, 30 Oct 2026, 17:59"
+    "date": "Fri, 30 Oct 2026, 20:20"
   },
   "683": {
     "title": "The Chase II",
@@ -5643,7 +5643,7 @@
     "title": "$3$-Like Numbers",
     "level": 8,
     "pct": 22,
-    "solvers": 871,
+    "solvers": 873,
     "solved": true,
     "date": "Fri, 30 Oct 2026, 13:49"
   },
@@ -5659,7 +5659,7 @@
     "title": "Twos Are All You Need",
     "level": 34,
     "pct": 86,
-    "solvers": 512,
+    "solvers": 513,
     "solved": false,
     "date": ""
   },
@@ -5667,7 +5667,7 @@
     "title": "Even Stevens",
     "level": 19,
     "pct": 48,
-    "solvers": 1247,
+    "solvers": 1248,
     "solved": false,
     "date": ""
   },
@@ -5675,7 +5675,7 @@
     "title": "One Million Members",
     "level": 8,
     "pct": 21,
-    "solvers": 1814,
+    "solvers": 1815,
     "solved": true,
     "date": "Tue, 9 Jun 2026, 01:43"
   },
@@ -5683,7 +5683,7 @@
     "title": "Binary Blackboard",
     "level": 14,
     "pct": 38,
-    "solvers": 510,
+    "solvers": 511,
     "solved": false,
     "date": ""
   },
@@ -5699,7 +5699,7 @@
     "title": "Tur\u00e1n's Water Heating System",
     "level": 7,
     "pct": 19,
-    "solvers": 1052,
+    "solvers": 1053,
     "solved": false,
     "date": ""
   },
@@ -5755,7 +5755,7 @@
     "title": "Unpredictable Permutations",
     "level": 23,
     "pct": 58,
-    "solvers": 443,
+    "solvers": 444,
     "solved": true,
     "date": "Mon, 1 Jun 2026, 21:07"
   },
@@ -6013,7 +6013,7 @@
     "pct": 45,
     "solvers": 961,
     "solved": true,
-    "date": "Fri, 30 Oct 2026, 17:47"
+    "date": "Fri, 30 Oct 2026, 19:04"
   },
   "753": {
     "title": "Fermat Equation",
@@ -6035,7 +6035,7 @@
     "title": "Not Zeckendorf",
     "level": 7,
     "pct": 20,
-    "solvers": 1304,
+    "solvers": 1305,
     "solved": true,
     "date": "Sat, 13 Jun 2026, 15:59"
   },
@@ -6051,7 +6051,7 @@
     "title": "Stealthy Numbers",
     "level": 6,
     "pct": 17,
-    "solvers": 1853,
+    "solvers": 1854,
     "solved": true,
     "date": "Tue, 9 Jun 2026, 23:13"
   },
@@ -6179,7 +6179,7 @@
     "title": "Ruff Numbers",
     "level": 27,
     "pct": 69,
-    "solvers": 311,
+    "solvers": 312,
     "solved": false,
     "date": ""
   },
@@ -6339,7 +6339,7 @@
     "title": "Median of Products",
     "level": 18,
     "pct": 47,
-    "solvers": 976,
+    "solvers": 977,
     "solved": false,
     "date": ""
   },
@@ -6395,7 +6395,7 @@
     "title": "Hybrid Integers",
     "level": 6,
     "pct": 16,
-    "solvers": 2899,
+    "solvers": 2900,
     "solved": true,
     "date": "Tue, 2 Jun 2026, 18:31"
   },
@@ -6747,7 +6747,7 @@
     "title": "$k$-Markov Numbers",
     "level": 21,
     "pct": 54,
-    "solvers": 319,
+    "solvers": 320,
     "solved": false,
     "date": ""
   },
@@ -6827,7 +6827,7 @@
     "title": "Pisano Periods 2",
     "level": 22,
     "pct": 56,
-    "solvers": 503,
+    "solvers": 504,
     "solved": false,
     "date": ""
   },
@@ -6907,7 +6907,7 @@
     "title": "Square + 1 = Squarefree",
     "level": 39,
     "pct": 99,
-    "solvers": 291,
+    "solvers": 292,
     "solved": false,
     "date": ""
   },
@@ -7019,7 +7019,7 @@
     "title": "XOR-Equation B",
     "level": 23,
     "pct": 59,
-    "solvers": 379,
+    "solvers": 380,
     "solved": false,
     "date": ""
   },
@@ -7115,7 +7115,7 @@
     "title": "Binary Partitions",
     "level": 28,
     "pct": 72,
-    "solvers": 326,
+    "solvers": 327,
     "solved": false,
     "date": ""
   },
@@ -7171,7 +7171,7 @@
     "title": "Maximal $n$-gon in a region",
     "level": 26,
     "pct": 67,
-    "solvers": 568,
+    "solvers": 569,
     "solved": false,
     "date": ""
   },
@@ -7283,7 +7283,7 @@
     "title": "Khinchin Exceptions",
     "level": 34,
     "pct": 85,
-    "solvers": 269,
+    "solvers": 271,
     "solved": false,
     "date": ""
   },
@@ -7563,9 +7563,9 @@
     "title": "Continued Fraction Fraction",
     "level": 12,
     "pct": 32,
-    "solvers": 376,
+    "solvers": 377,
     "solved": true,
-    "date": "Fri, 30 Oct 2026, 17:52"
+    "date": "Fri, 30 Oct 2026, 20:15"
   },
   "947": {
     "title": "Fibonacci Residues",
@@ -7715,7 +7715,7 @@
     "title": "Expected Minimal Fractional Value",
     "level": 10,
     "pct": 27,
-    "solvers": 727,
+    "solvers": 728,
     "solved": true,
     "date": "Fri, 12 Jun 2026, 13:55"
   },
@@ -7787,7 +7787,7 @@
     "title": "Very Odd Numbers",
     "level": 8,
     "pct": 22,
-    "solvers": 641,
+    "solvers": 642,
     "solved": true,
     "date": "Thu, 11 Jun 2026, 23:10"
   },
@@ -7819,7 +7819,7 @@
     "title": "Random Walk Skewness",
     "level": 9,
     "pct": 24,
-    "solvers": 559,
+    "solvers": 560,
     "solved": false,
     "date": ""
   },
@@ -8083,7 +8083,7 @@
     "title": "Modified Euclidean Algorithm",
     "level": "",
     "pct": "",
-    "solvers": 280,
+    "solvers": 281,
     "solved": false,
     "date": ""
   },
@@ -8099,7 +8099,7 @@
     "title": "Sum 25 Divisors",
     "level": "",
     "pct": "",
-    "solvers": 628,
+    "solvers": 629,
     "solved": false,
     "date": ""
   },
@@ -8115,7 +8115,7 @@
     "title": "Partisan Kayles",
     "level": "",
     "pct": "",
-    "solvers": 89,
+    "solvers": 91,
     "solved": false,
     "date": ""
   },
@@ -8123,7 +8123,7 @@
     "title": "Squareful Matrix",
     "level": "",
     "pct": "",
-    "solvers": 58,
+    "solvers": 59,
     "solved": false,
     "date": ""
   }
