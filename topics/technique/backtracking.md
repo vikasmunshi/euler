@@ -133,6 +133,7 @@ tree, where each pruned branch takes the most leaves with it.
 - ● [0122](/solutions/0122/) — Efficient Exponentiation
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0265](/solutions/0265/) — Binary Circles
+- ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 

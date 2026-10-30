@@ -224,6 +224,7 @@ buy the most where the instructions are real.
 - ● [0265](/solutions/0265/) — Binary Circles
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0345](/solutions/0345/) — Matrix Sum
+- ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0768](/solutions/0768/) — Chandelier

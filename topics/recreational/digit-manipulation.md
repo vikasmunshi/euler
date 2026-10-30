@@ -267,7 +267,7 @@ matters here is what replaces the extraction loop).
 - ○ [0538](/solutions/0538/) — Maximum Quadrilaterals
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ○ [0558](/solutions/0558/) — Irrational Base
-- ○ [0571](/solutions/0571/) — Super Pandigital Numbers
+- ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ○ [0592](/solutions/0592/) — Factorial Trailing Digits 2
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
 - ○ [0612](/solutions/0612/) — Friend Numbers
