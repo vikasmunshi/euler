@@ -904,6 +904,19 @@ body.terminal-doc {
 .pane-filter:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
 .pane-filter::placeholder { color: var(--muted); }
 .pane-filter:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Expand all / collapse all (the topics' folds): two small mono chips beside the filter,
+   in the rule's own quiet voice — layout verbs, not content. */
+.pagerule-folds { display: inline-flex; gap: 0.35rem; flex: none; }
+.pagerule-btn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem; line-height: 1; letter-spacing: 0.02em; white-space: nowrap;
+  color: var(--muted); background: none; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 6px; padding: 0.32rem 0.55rem;
+}
+.pagerule-btn:hover {
+  color: var(--accent-ink); border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
 @media (max-width: 700px) { .pagerule { flex-wrap: wrap; } .pane-filter { flex: 1 1 8rem; } }
 
 /* ── The README, below the strip on the start page ───────────────────────── */
@@ -1631,6 +1644,10 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
    the .fold marker (›, turning ⌄ when open) leads it. The rule keeps its own spacing, open
    or folded — the panel fold's open margin would push the cards a line further down. */
 .topic-group > summary.subrule { align-items: center; margin: 0.95rem 0 0.6rem; }
+/* The category is what a reader scans this page by, folded, so it reads a size up from the
+   house .subrule label — and in the text ink, the marker beside it. */
+.topic-group > summary.subrule h3 { font-size: 0.9rem; letter-spacing: 0.1em; color: var(--text); }
+.topic-group > summary.subrule::before { font-size: 1.15rem; }
 
 .topic-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
 @media (max-width: 700px) { .topic-cards { grid-template-columns: 1fr; } }

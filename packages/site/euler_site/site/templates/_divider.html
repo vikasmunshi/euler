@@ -16,9 +16,12 @@
      `filter` the input's placeholder. Empty renders the `note` instead — the home
               page has no tiles below the rule, and a dead input box invites a click
               that does nothing where a plain statement of the fact does not.
-     `note`   what stands in for the filter when there is nothing to filter. #}
+     `note`   what stands in for the filter when there is nothing to filter.
+     `folds`  the region below is in folds (the topics' categories): offer expand all /
+              collapse all beside the filter. On the page rather than in the Actions menu,
+              because the public site has no Actions menu and its readers fold too. #}
 
-{% macro divider(label, count=none, filter='', note='no tiles to filter') %}
+{% macro divider(label, count=none, filter='', note='no tiles to filter', folds=False) %}
 <div class="pagerule">
   <h2 class="pagerule-label">{{ label }}</h2>
   <span class="pagerule-hair" aria-hidden="true"></span>
@@ -35,6 +38,16 @@
          data-filter-scope="{{ here | default('') }}">
   {% else %}
   <span class="pagerule-note">{{ note }}</span>
+  {% endif %}
+  {% if folds %}
+  {# site.js (§ folds) opens or closes every fold in the pane, and remembers that as the
+     reader's choice for the sitting, exactly as one-by-one clicks would be. #}
+  <span class="pagerule-folds">
+    <button type="button" class="pagerule-btn" data-folds="open"
+            title="Expand every category">expand all</button>
+    <button type="button" class="pagerule-btn" data-folds="close"
+            title="Collapse every category">collapse all</button>
+  </span>
   {% endif %}
   {% if count is not none %}
   <span class="pagerule-count" data-filter-count data-filter-total="{{ count }}"

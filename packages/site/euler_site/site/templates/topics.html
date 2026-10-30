@@ -26,7 +26,7 @@
 {% set shown = groups | map(attribute='entries') | map('length') | sum %}
 {{ divider('topics', count=shown,
            filter='Filter by name, slug or facet…' if groups else '',
-           note='nothing to filter yet') }}
+           note='nothing to filter yet', folds=groups | length > 1) }}
 {% if groups %}
 {# One section per folder of topics/: the folder is the (foldable) heading, so the cards below
    carry only their leaf name and pack four to a row. A card's second line is the
@@ -36,17 +36,18 @@
    card's first line; the title stays as the card's tooltip and in the filter's
    haystack. A tree read without the index has no counts, and falls back to the title. #}
 {% for g in groups %}
-{# Each folder folds: its heading is the summary of a <details>, so a reader can put away
-   the categories they are not reading and keep the page to the one they are. Open by
-   default — the server cannot know what you folded — and site.js (§ the pane filter)
-   restores the folds you chose this sitting, keyed by `data-fold`. Cards inside a folder
+{# Each folder folds: its heading is the summary of a <details>, and the page arrives with
+   every one FOLDED — the categories are the index, and a reader opens the one they came
+   for rather than scrolling past six hundred cards to find it. site.js (§ folds) reopens
+   the ones you opened this sitting, keyed by `data-fold`, as it does the scroll and the
+   filter. Cards inside a folder
    run widest reach first (content.list_topic_groups).
 
    The folder's own count tracks the filter (site.js § the pane filter), like the
    divider's above it: a heading that still claimed seven over two visible cards would be
    the one number on the page that is not what you are looking at. A live filter also
    opens every folder it has a match in — a match folded out of sight is not a match. #}
-<details class="fold topic-group" open data-fold="{{ g.name or '-' }}">
+<details class="fold topic-group" data-fold="{{ g.name or '-' }}">
 <summary class="subrule fold-summary"><h3>{{ g.heading }}</h3>
   <span class="count" data-group-count>{{ g.entries | length }}</span></summary>
 <nav class="cards" aria-label="{{ g.heading }} topics">
