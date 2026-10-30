@@ -1,5 +1,5 @@
 <!-- tags: [math-gcd] -->
-<!-- status: final 2026-10-16T15:48Z -->
+<!-- status: final -->
 # math.gcd
 
 [`math.gcd`](https://docs.python.org/3/library/math.html#math.gcd) and its partner
@@ -8,9 +8,11 @@
 why Euclid's algorithm is correct, why it's logarithmic, and what the gcd *means* in a problem.
 This page is about the call itself. What the Python functions accept and return, what I write in C
 where there is no such function, and the one situation where it's worth replacing Euclid with
-something cleverer. In the problems below, the gcd is never the answer. It's a guard (is this
-pair coprime?) or a normaliser (put this fraction in lowest terms), called many times inside a
-loop. That's why the details of the call matter.
+something cleverer. In most of the problems below, the gcd is never the answer. It's a guard (is
+this pair coprime?), a normaliser (put this fraction in lowest terms) or a detector (does this
+product share a factor with `n`?), called many times inside a loop. That's why the details of the
+call matter. The one exception, Problem 443, puts the gcd in the statement itself, and there the
+lesson runs the other way: the fastest gcd is the one an identity lets you skip.
 
 ## What the Python functions promise
 
@@ -50,9 +52,9 @@ loop gets interpreted one bytecode at a time, and for large integers CPython swi
 the Euclid steps on machine-word approximations of the leading digits, so it does far fewer
 big-number divisions. You won't beat that by hand.
 
-## In the problems: guard and normaliser
+## In the problems: guard, normaliser, detector
 
-Every use in the problems below is one of two patterns.
+Every use in the problems below is one of three patterns.
 
 **The coprimality guard.** You generate a parametrised family over pairs `(m, n)` and skip the
 pairs that would produce a scaled duplicate:
@@ -86,6 +88,38 @@ When a pair of small arguments comes up millions of times, use a table: build `g
 look values up instead of calling gcd. [Problem 504](/solutions/0504/) does this. It needs four gcds
 per quadrilateral across `m⁴` shapes, but only `m²` distinct pairs. Following the house rule, the
 table is built inside `solve()`, sized to `m`, so its cost is part of the timing.
+
+**The detector.** In [Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm),
+the gcd is how a factor is *noticed*. The walk produces differences `x − y`, and a non-trivial
+`gcd(x − y, n)` is a factor of `n`. Testing each difference costs one gcd per step, so
+[Brent's variant](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm#Variants) multiplies a batch of
+them together mod `n` and takes one gcd of the product:
+
+```python
+q = q * abs(x - y) % n      # 128 of these…
+g = math.gcd(q, n)          # …then one gcd
+```
+
+A product shares a factor with `n` as soon as any of its terms does, so the batch loses nothing
+except, rarely, overshooting to `g == n`. The algorithm then backtracks and replays that batch one
+gcd at a time. This is the factoriser inside [Problem 443](/solutions/0443/). Batching turns
+the gcd from the dominant cost of each step into a rounding error.
+
+## Reasoning the call away
+
+[Problem 443](/solutions/0443/) defines a sequence by `g(n) = g(n−1) + gcd(n, g(n−1))` and asks for
+a term near `10¹⁵`. Calling the gcd once per term is out of the question, however fast the call.
+What saves it is the identity behind Euclid's algorithm, `gcd(a, b) = gcd(a, b − a)`. Write
+`g(k) = k + d`. While every gcd is 1, the offset `d` stays put, and the next step's gcd is
+`gcd(j, j − 1 + d) = gcd(j, d − 1)`. The second argument no longer moves. So the run of `+1` steps
+ends exactly at the first `j` that shares a prime with the fixed number `d − 1`, and that index
+can be computed from the factorisation instead of searched for. A quadrillion gcds become a few
+hundred factorisations, each one a call to the detector above.
+
+The same move applies whenever a gcd's arguments drift together. Subtract one from the other
+(or reduce mod it) and check whether what's left is constant over a stretch. If it is, the gcd
+over that stretch is a question about divisibility by fixed primes, and you can jump to the next
+place it changes.
 
 ## The C counterpart
 
@@ -152,7 +186,8 @@ In practice, it's rarely the change that matters:
 
 - **Only when the gcd is the hot loop.** If a profile doesn't show the gcd dominating, swapping it
   for a binary version saves a fraction of a fraction. In every problem on this page, the gcd is a
-  guard next to heavier work.
+  guard next to heavier work. Even Problem 443's Pollard rho, whose gcds take full 64-bit
+  operands, batches them so that the modular multiplications dominate.
 - **Only in C.** In Python, `math.gcd` is already compiled C, so a hand-written binary gcd in Python
   would be far slower.
 - **Mostly for wide operands.** With small arguments, as in Problem 39 where `m, n < 30`, Euclid
