@@ -4132,8 +4132,8 @@
     "level": 23,
     "pct": 60,
     "solvers": 671,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 30 Oct 2026, 13:11"
   },
   "518": {
     "title": "Prime Triples and Geometric Sequences",
