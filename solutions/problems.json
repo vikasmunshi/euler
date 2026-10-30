@@ -7564,8 +7564,8 @@
     "level": 12,
     "pct": 32,
     "solvers": 376,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 30 Oct 2026, 17:52"
   },
   "947": {
     "title": "Fibonacci Residues",
