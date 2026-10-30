@@ -1,5 +1,5 @@
 <!-- tags: [symmetry] -->
-<!-- status: final 2026-10-12T14:29Z -->
+<!-- status: final -->
 # Symmetry
 
 A [symmetry](https://en.wikipedia.org/wiki/Symmetry) of a problem is a transformation that leaves
@@ -8,10 +8,10 @@ three dimensions, reflecting a lattice region, swapping the legs of a triangle, 
 regular polygon, or flipping the sign of a vector. The takeaway
 [exploit symmetry](/topics/takeaway/exploit-symmetry) explains the counting principle: orbits,
 fixed points, Burnside. This page is about the *technique*, meaning the specific moves in code
-that turn a symmetry into less work. The problems below use five of them. Each makes a search,
+that turn a symmetry into less work. The problems below use six of them. Each makes a search,
 a sweep or a check smaller by the order of the symmetry group, and sometimes by much more.
 
-## Five ways to use a symmetry
+## Six ways to use a symmetry
 
 **1. Enumerate one canonical representative.** When the answer doesn't depend on the order of
 some parameters, enumerate them in sorted order and never see a permutation twice.
@@ -62,13 +62,26 @@ ever tested exactly. Problem 331's board is symmetric under $x \leftrightarrow y
 column's black-disk count equals the matching row's. A formula over rows then covers the columns
 for free.
 
+**6. Quotient the state by a symmetry of the labels.** When a dynamic programme or
+[transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method) carries arbitrary labels,
+such as colours, in its state, and the rules only ever ask whether two labels are *equal*, then
+permuting the labels maps valid configurations to valid configurations. The state can forget
+which labels it holds and keep only the pattern of equalities, with the number of label choices
+moved into the transition weights. Problem 670 colours tilings of a $2 \times n$ strip with four
+colours. A boundary state that remembers each row's colour and overhang has over a hundred
+entries. But the two tiles at any boundary touch, so they always differ, and every ordered pair of
+distinct colours looks the same to the future. The state shrinks to the two overhangs plus a
+"vertical domino" flag, ten states in all, and a new tile that must avoid two known colours simply
+contributes a weight of $2$. Matrix exponentiation costs $O(S^3 \log n)$, so cutting $S$ by an
+order of magnitude cuts the work by about a thousand.
+
 ## How to reason about it
 
 - **Write down the group, then decide where it acts.** List the transformations that fix the
   problem: permutations, reflections, rotations, sign changes, the swap of two players or two
   legs. Then ask whether each acts on the *inputs* (enumerate canonically), on the *region*
-  (sweep a fundamental domain), on the *generator* (prune mirror subtrees) or on the *candidate*
-  (check one representative).
+  (sweep a fundamental domain), on the *generator* (prune mirror subtrees), on the *candidate*
+  (check one representative) or on the *labels* in a state (keep only their equality pattern).
 - **Account for points the symmetry fixes.** Axis points in 246, the diagonal in 224, the middle
   entry of an even Pascal row in 53. A point mapped to itself is one point, so it gets weight
   one. Most symmetry bugs are double-counted fixed points.
@@ -78,7 +91,8 @@ for free.
   shapes, which found nothing better. 983's claim that only the sign parity matters was confirmed
   by brute force over random class sets.
 - **Verify the invariance on a small case.** Fold the computation by the symmetry and compare it
-  with the unfolded brute force on a small input. An invariance that is almost true corrupts the
+  with the unfolded brute force on a small input, as 670 did against a full enumeration of
+  colourings up to $n = 7$. An invariance that is almost true corrupts the
   answer silently, and a small case catches it immediately.
 - **Expect more than a constant factor sometimes.** A reflection halves the work and a dihedral
   group divides it by $2n$. 983's sign collapse turns $2^{K-1}$ tests into $2$, an exponential
