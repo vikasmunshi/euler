@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Finite-state_m
 
 - ● [0191](/solutions/0191/) — Prize Strings
 - ● [0529](/solutions/0529/) — $10$-substrings
+- ● [0706](/solutions/0706/) — $3$-Like Numbers
 
 <!-- /problems -->

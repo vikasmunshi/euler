@@ -77,5 +77,6 @@ occurrence swallows a short integer whole is left to a direct check.
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
+- ● [0706](/solutions/0706/) — $3$-Like Numbers
 
 <!-- /problems -->

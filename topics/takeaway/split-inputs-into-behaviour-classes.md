@@ -103,6 +103,7 @@ apart.
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0305](/solutions/0305/) — Reflexive Position
+- ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

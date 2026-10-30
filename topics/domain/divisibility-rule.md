@@ -131,7 +131,7 @@ histogram is small enough to be the state of a DP.
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ○ [0635](/solutions/0635/) — Subset Sums
 - ○ [0655](/solutions/0655/) — Divisible Palindromes
-- ○ [0706](/solutions/0706/) — $3$-Like Numbers
+- ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0714](/solutions/0714/) — Duodigits
 - ○ [0954](/solutions/0954/) — Heptaphobia
 - ○ [0967](/solutions/0967/) — $B$-Trivisible Numbers
