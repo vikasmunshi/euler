@@ -1,5 +1,5 @@
 <!-- tags: [sieve-of-eratosthenes] -->
-<!-- status: final 2026-10-15T10:29Z -->
+<!-- status: final -->
 # Sieve of Eratosthenes
 
 The [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) finds
@@ -139,7 +139,14 @@ patterns recur.
   every quotient below a cutoff `L` directly and the recursion fills in the few above it.
   The two costs, `O(L)` for the sieve and `O(n/√L)` for the recursion, balance at
   `L = n^(2/3)`, which is the whole algorithm's complexity: problem 319 reaches `n = 10¹⁰`
-  from a sieve of under five million entries.
+  from a sieve of under five million entries. The values above the cutoff need no memo
+  dictionary either. Each is `F(⌊n/k⌋)` for a small `k`, and `⌊⌊n/k⌋/d⌋ = ⌊n/(kd)⌋`, so
+  a plain array indexed by `k`, filled in *decreasing* `k`, already holds every large
+  term the recursion for `k` asks for. Problem 512 shows what this two-tier table buys
+  once it exists. Its sum of `φ` over the *odd* `n ≤ N` peels off the even part with
+  `φ(2m) = φ(m)` or `2φ(m)`, giving `Φ(N) − Σ Φ(⌊N/2ᵏ⌋)`. Every `⌊N/2ᵏ⌋` is already one
+  of the quotients the table covers, so restricting to odd `n` costs `log₂ N` lookups and
+  no extra sieving.
 
 ## Things to get right
 
