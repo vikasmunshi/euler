@@ -6802,12 +6802,12 @@
       "path": "technique/multinomial-theorem",
       "title": "Multinomial theorem",
       "status": "final",
-      "written": "2026-10-18T10:14Z",
+      "written": "2026-10-30T06:39Z",
       "solved": 5,
       "problems": 5,
       "tags": ["multinomial-theorem"],
       "refs": ["p0154_s0", "p0240_s0", "p0698_s0", "p0743_s0", "p0885_s0"],
-      "solved_after": ["p0698"]
+      "solved_after": []
     },
     {
       "path": "technique/multiplication-algorithm",
