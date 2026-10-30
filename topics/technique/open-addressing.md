@@ -168,6 +168,7 @@ write inline: without deletion, the hard part of open addressing disappears.
 - ● [0208](/solutions/0208/) — Robot Walks
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
+- ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 
