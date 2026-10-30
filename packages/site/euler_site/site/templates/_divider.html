@@ -25,6 +25,29 @@
 <div class="pagerule">
   <h2 class="pagerule-label">{{ label }}</h2>
   <span class="pagerule-hair" aria-hidden="true"></span>
+  {% if folds %}
+  {# site.js (§ folds) opens or closes every fold in the pane, and remembers that as the
+     reader's choice for the sitting, exactly as one-by-one clicks would be. BEFORE the
+     filter, on the hairline's side: the hair absorbs their width, so the filter and the
+     count hold the same place on every index page, with these or without them. #}
+  {# Glyphs, not words, to keep the row narrow: chevrons pointing apart (unfold) and
+     together (fold) — drawn at line weight like the header's marks. The act is in the
+     title and the accessible name. #}
+  <span class="pagerule-folds">
+    <button type="button" class="pagerule-btn" data-folds="open"
+            title="Expand all" aria-label="Expand all">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+    </button>
+    <button type="button" class="pagerule-btn" data-folds="close"
+            title="Collapse all" aria-label="Collapse all">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        d="M8 4l4 4 4-4M8 20l4-4 4 4"/></svg>
+    </button>
+  </span>
+  {% endif %}
   {% if filter %}
   {# Rendered empty with the whole region showing; site.js paints the session's
      remembered query back onto it once the markup lands, so a revisit resumes where
@@ -38,16 +61,6 @@
          data-filter-scope="{{ here | default('') }}">
   {% else %}
   <span class="pagerule-note">{{ note }}</span>
-  {% endif %}
-  {% if folds %}
-  {# site.js (§ folds) opens or closes every fold in the pane, and remembers that as the
-     reader's choice for the sitting, exactly as one-by-one clicks would be. #}
-  <span class="pagerule-folds">
-    <button type="button" class="pagerule-btn" data-folds="open"
-            title="Expand every category">expand all</button>
-    <button type="button" class="pagerule-btn" data-folds="close"
-            title="Collapse every category">collapse all</button>
-  </span>
   {% endif %}
   {% if count is not none %}
   <span class="pagerule-count" data-filter-count data-filter-total="{{ count }}"
