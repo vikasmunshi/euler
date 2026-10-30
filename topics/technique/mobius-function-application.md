@@ -1,5 +1,5 @@
 <!-- tags: [mobius-function-application] -->
-<!-- status: final 2026-10-17T06:50Z -->
+<!-- status: final -->
 # Möbius function (application)
 
 The [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) $\mu(n)$ is $0$ when
@@ -51,7 +51,7 @@ hand. It costs $O(\sqrt S)$ for the factorisation and $2^k$ terms after that, wh
 
 ## The direct uses
 
-Once the table exists, the solutions read it in three ways.
+Once the table exists, the solutions read it in four ways.
 
 - **As a coprimality filter.** $[\gcd(a, b) = 1] = \sum_{d \mid \gcd(a,b)} \mu(d)$ turns "count
   the $k$ in $[lo, hi]$ coprime to $g$" into $\sum_{d \mid g} \mu(d)\,
@@ -70,6 +70,17 @@ Once the table exists, the solutions read it in three ways.
   differences $M(d_{hi}) - M(d-1)$ weight whole blocks of equal $\lfloor n/d \rfloor$ at once. Past
   what you can sieve, the [Mertens recursion](/topics/technique/mertens-function-application) takes
   over.
+- **As a sign selector.** $Q$ counts where $\mu = \pm 1$ and $M$ is the difference between the two
+  signs, so $(Q + M)/2$ counts the squarefree numbers with an *even* number of prime factors
+  ($\mu = +1$), and $(Q - M)/2$ the odd ones. Problem 641 needs exactly that class. A die ends on 1
+  when its divisor count is $\equiv 1 \pmod 6$, which forces a square $m^2$ whose exponents
+  avoid $1 \bmod 3$ and include an even number of $2 \bmod 3$. Those $m$ factor uniquely as
+  $c^3 q^2$ with $\mu(q) = +1$, so the answer is a count of pairs $(c, q)$. For small $q$ the
+  solution reads $\mu(q) = 1$ off the table and adds $\lfloor \sqrt[3]{X/q^2} \rfloor$. For large
+  $q$, only a few $c$ remain, and each needs a count of $\mu = +1$ values up to a bound far past
+  the table. There it evaluates $Q$ by the 193 formula and $M$ by the Mertens recursion, both fed
+  by the same small table. Neither of these functions alone gives the sign class, but their
+  average does.
 
 Problem 745 adds one more variation: sieve the convolution, not $\mu$. The sum of the largest
 square divisor rearranges into $\sum_m h(m) \lfloor N/m^2 \rfloor$, where
@@ -83,7 +94,10 @@ $\mu$ appears only inside a fixed convolution, sieving the product saves both a 
 **Size the sieve to the scaling.** The range of $\mu$ you need follows from how $d$ enters the sum.
 With $\lfloor x/d \rfloor$ you need it up to $x$ (464, 478). With $\lfloor x/d^2 \rfloor$ you need
 it only up to $\sqrt x$ (153, 193, and 745's $h$). Sieving to $x$ when $\sqrt x$ would do is the
-most common waste, and for 193 it is the difference between $2^{25}$ entries and $2^{50}$.
+most common waste, and for 193 it is the difference between $2^{25}$ entries and $2^{50}$. When
+the sum splits into a sieved part and a recursive part, the bound becomes a tuning knob instead:
+641 sieves to about $4\sqrt[3]{X}$, which is large enough that only a handful of $c$ fall into the
+large-$q$ part and the Mertens recursion bottoms out in the table quickly.
 
 **Pick the sieve for the language.** In C the two sieves are equally easy to write. In Python the
 choice matters more. The linear sieve is $O(n)$, but every step runs in the interpreter. The
@@ -92,7 +106,7 @@ Eratosthenes-style sieve does more work in total, but each prime's pass is a sin
 fast solution use the NumPy form for tables of $10^7$ entries or more, and the pure-Python linear
 sieve is kept for 153's table of about $10^4$ and for 478's small oracle.
 
-**Mind the widths.** $\mu$ fits in a byte, and that is how 193, 464 and 478 store it: NumPy
+**Mind the widths.** $\mu$ fits in a byte, and that is how 193, 464, 478 and 641 store it: NumPy
 `int8` in Python and `signed char` in C, an eighth of the memory of `int64`. The prefix sums do not
 fit in a byte. Python's 464 casts with `mu.astype(np.int64)` before `np.cumsum`, because otherwise
 the cumulative sum accumulates in the narrow type. C's 464 accumulates $M$ and $Q$ into
@@ -112,6 +126,7 @@ entire nested quotient-blocked evaluation each time.
 | 202 | bitmask subsets of the distinct primes, sign by flipping; `pow(d, -1, 3)` for the residue | same subsets over a fixed `primes[16]`; an explicit guard where C's truncating division would miscount the residue class |
 | 464 | NumPy sieve, `cumsum` for $M$ and $Q$ | `signed char` sieve, one loop builds both prefix arrays, then frees $\mu$ |
 | 478 | NumPy sieve fills $\mu$ and $\varphi$ together | the same combined sieve over a `char` primality table |
+| 641 | NumPy sieve that finds its own primes; `cumsum` of `mu == 1` and of $\mu$ for $S$ and $M$ | `signed char` $\mu$, `long long` $M$, a fixed-size memo for the recursion, 128-bit input |
 | 745 | linear sieve of $h = \mu * \mathrm{id}^2$ mod $m$ | same, `long long` tables |
 
 The algorithms match one-for-one. Python's speed comes from NumPy's strided slices and
