@@ -139,6 +139,7 @@ totient and abundancy searches of problems 241, 245 and 248.
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0932](/solutions/0932/) — $2025$
 
 <!-- /problems -->

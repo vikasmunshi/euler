@@ -166,7 +166,7 @@ Problem 250 uses this to cut the `250250` terms of `nⁿ mod 250` down to a shor
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0622](/solutions/0622/) — Riffle Shuffles
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
-- ○ [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0847](/solutions/0847/) — Jack's Bean
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial

@@ -104,6 +104,7 @@ apart.
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

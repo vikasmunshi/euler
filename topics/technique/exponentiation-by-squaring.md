@@ -218,6 +218,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0670](/solutions/0670/) — Colouring a Strip
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0788](/solutions/0788/) — Dominating Numbers

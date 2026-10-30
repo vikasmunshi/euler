@@ -3694,7 +3694,7 @@
       "reference": "https://en.wikipedia.org/wiki/Chinese_remainder_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0160_s0", "p0245_s0", "p0271_s0", "p0272_s0", "p0365_s0", "p0407_s0", "p0531_s0", "p0932_s0", "p0934_s0"]
+      "refs": ["p0160_s0", "p0245_s0", "p0271_s0", "p0272_s0", "p0365_s0", "p0407_s0", "p0531_s0", "p0752_s0", "p0932_s0", "p0934_s0"]
     },
     {
       "slug": "circular-buffer",
@@ -4171,7 +4171,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation_by_squaring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0670_s0", "p0706_s0", "p0721_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
+      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0670_s0", "p0706_s0", "p0721_s0", "p0752_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
     },
     {
       "slug": "extended-euclidean-algorithm",
@@ -4325,6 +4325,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0038_s0", "p0054_s0", "p0059_s0"]
+    },
+    {
+      "slug": "frobenius-endomorphism",
+      "facet": "technique",
+      "name": "Frobenius endomorphism",
+      "reference": "https://en.wikipedia.org/wiki/Frobenius_endomorphism",
+      "additional-references": [],
+      "summary": "Using y -> y^p as conjugation in F_{p^2}, so y^(p+1) is the norm and powers collapse into the base field.",
+      "refs": ["p0752_s0"]
     },
     {
       "slug": "frozenset",
@@ -4549,7 +4558,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hensel%27s_lemma",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0245_s0", "p0271_s0", "p0277_s0"]
+      "refs": ["p0245_s0", "p0271_s0", "p0277_s0", "p0752_s0"]
     },
     {
       "slug": "hockey-stick-identity",
@@ -5161,7 +5170,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0516_s0", "p0545_s0", "p0650_s0", "p0675_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0516_s0", "p0545_s0", "p0650_s0", "p0675_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "modular-multiplicative-inverse-application",
@@ -5440,7 +5449,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "Decomposing a number into its prime power components to compute multiplicative properties like divisor counts.",
-      "refs": ["p0029_s0", "p0029_s1", "p0108_s0", "p0110_s0", "p0221_s0", "p0347_s0", "p0545_s0", "p0932_s0"]
+      "refs": ["p0029_s0", "p0029_s1", "p0108_s0", "p0110_s0", "p0221_s0", "p0347_s0", "p0545_s0", "p0752_s0", "p0932_s0"]
     },
     {
       "slug": "primesieve",
@@ -5521,7 +5530,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_residue",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0216_s0", "p0221_s0", "p0245_s0", "p0492_s0"]
+      "refs": ["p0216_s0", "p0221_s0", "p0245_s0", "p0492_s0", "p0752_s0"]
     },
     {
       "slug": "quaternion-group",
@@ -5674,7 +5683,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
       "additional-references": ["https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler%27s_sieve"],
       "summary": "",
-      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0650_s0", "p0772_s0", "p0800_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0"]
+      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0650_s0", "p0752_s0", "p0772_s0", "p0800_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0"]
     },
     {
       "slug": "sieve-of-sundaram",
@@ -5872,7 +5881,7 @@
       "reference": "https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0216_s0"]
+      "refs": ["p0216_s0", "p0752_s0"]
     },
     {
       "slug": "topological-sorting",
@@ -6043,7 +6052,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the analysis is subtle, demand that it reproduce every given value exactly before trusting it on the unknown case.",
-      "refs": ["p0265", "p0336", "p0455", "p0670", "p0761", "p0860", "p0882", "p0887", "p0963", "p0983"]
+      "refs": ["p0265", "p0336", "p0455", "p0670", "p0752", "p0761", "p0860", "p0882", "p0887", "p0963", "p0983"]
     },
     {
       "slug": "cancel-divisors-before-reducing",
@@ -6268,7 +6277,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a deterministic process must be run on every input in a huge range, carry whole intervals of inputs that behave identically and split them only where the behaviour diverges.",
-      "refs": ["p0255", "p0257", "p0305", "p0706", "p0963"]
+      "refs": ["p0255", "p0257", "p0305", "p0706", "p0752", "p0963"]
     },
     {
       "slug": "update-only-what-changes",

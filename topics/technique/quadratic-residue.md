@@ -115,5 +115,6 @@ Things to keep in mind:
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0492](/solutions/0492/) — Exploding Sequence
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 
 <!-- /problems -->

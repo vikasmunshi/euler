@@ -211,6 +211,7 @@ memo.
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0531](/solutions/0531/) — Chinese Leftovers
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 

@@ -177,6 +177,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0670](/solutions/0670/) — Colouring a Strip
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0882](/solutions/0882/) — Removing Bits

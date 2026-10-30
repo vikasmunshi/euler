@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tonelli%E2%80%
 ## Problems
 
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 
 <!-- /problems -->

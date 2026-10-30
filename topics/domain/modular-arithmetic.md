@@ -400,7 +400,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0746](/solutions/0746/) — A Messy Dinner
 - ○ [0747](/solutions/0747/) — Triangular Pizza
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
-- ○ [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0753](/solutions/0753/) — Fermat Equation
 - ○ [0754](/solutions/0754/) — Product of Gauss Factorials
 - ○ [0758](/solutions/0758/) — Buckets of Water

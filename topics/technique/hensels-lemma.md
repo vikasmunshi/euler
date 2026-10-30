@@ -110,5 +110,6 @@ at a time, never backtracking, then moves up to the smallest representative abov
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 
 <!-- /problems -->

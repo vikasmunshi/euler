@@ -223,6 +223,7 @@ patterns recur.
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ● [0834](/solutions/0834/) — Add and Divide

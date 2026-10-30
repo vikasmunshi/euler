@@ -336,7 +336,7 @@ induction will confirm. The shape picks the method.
 - ○ [0737](/solutions/0737/) — Coin Loops
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
-- ○ [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0770](/solutions/0770/) — Delphi Flip
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
