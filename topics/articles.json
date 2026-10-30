@@ -6417,12 +6417,12 @@
       "path": "technique/logarithm",
       "title": "Logarithm",
       "status": "final",
-      "written": "2026-10-28T08:30Z",
+      "written": "2026-10-30T06:33Z",
       "solved": 4,
       "problems": 4,
       "tags": ["logarithm"],
       "refs": ["p0030_s0", "p0318_s0", "p0822_s0", "p0957_s0"],
-      "solved_after": ["p0318"]
+      "solved_after": []
     },
     {
       "path": "technique/long-division",
