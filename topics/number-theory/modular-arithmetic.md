@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-30T12:38Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -108,7 +108,11 @@ it computes powers in any [monoid](https://en.wikipedia.org/wiki/Monoid). Proble
 $\lfloor(\lceil\sqrt a\rceil + \sqrt a)^{a^2}\rfloor$. The conjugate $\lceil\sqrt a\rceil - \sqrt a$
 lies in $[0, 1)$, so the floor is the integer $x^n + y^n$ less one, and that integer is computed in
 the ring $\mathbb{Z}_p[\sqrt a]$. Its elements are pairs $(u, v)$ standing for $u + v\sqrt a$, multiplied
-by a two-line rule and raised to the power by the usual loop. Problem 778 uses an even stranger
+by a two-line rule and raised to the power by the usual loop. You need not always carry the
+whole element. Problem 492 wants only the trace $V_k = \alpha^k + \alpha^{-k}$ of a power of a
+quadratic unit, and traces obey $V_{2k} = V_k^2 - 2$ and $V_{2k+1} = V_k V_{k+1} - V_1$. A
+[Lucas](https://en.wikipedia.org/wiki/Lucas_sequence) ladder on the pair $(V_k, V_{k+1})$ walks the
+exponent's bits with two residue products per bit, and $\alpha$ itself is never formed. Problem 778 uses an even stranger
 monoid. The carry-free "freshman's product" acts on each decimal place separately, so one place's
 distribution of digit products is a ten-entry histogram. Combining $R$ independent factors is
 then a convolution over the digits under multiplication mod 10, and the $R$-fold convolution power
@@ -175,6 +179,12 @@ factorial, then walk down with $(k-1)!^{-1} = k!^{-1} \cdot k$, so a whole table
 factorials costs one exponentiation. Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
 $2 \cdot 10^7 + 1$. It computes all of them at once, as $a^{p-2}$ by one vectorised
 square-and-multiply over a NumPy array, about thirty array multiplications for ten million inverses.
+Sometimes the structure removes the inverse altogether. Problem 682 extracts one coefficient of a
+rational generating function $N(y)/D(y)$ with the
+[Bostan–Mori](https://arxiv.org/abs/2008.08822) halving step, which multiplies top and bottom by
+$D(-y)$. The only division left is by the final denominator's constant term. That constant is
+$D(0)^{2^r}$ after $r$ rounds, and since $D(0) = 1$ it is still 1, so the C port takes no inverse
+at all.
 
 A **composite** modulus is the opposite case. Problem 250 needs binomial coefficients modulo
 $10^{16}$, and the natural row recurrence $\binom{c}{i+1} = \binom{c}{i} \cdot \frac{c-i}{i+1}$
@@ -231,6 +241,37 @@ family of problems without testing a single residue:
 Problem 421 also shows the swap that makes such problems feasible at all: instead of factoring
 $10^{11}$ numbers of up to 165 digits, exchange the order of summation and ask, per prime, how many
 $n \le N$ fall in its few residue classes — the progression count from above, one division per root.
+
+### Orders, and where they live
+
+The [**multiplicative order**](https://en.wikipedia.org/wiki/Multiplicative_order) of a unit $u$ is
+the least $e$ with $u^e = 1$, and it is what an exponent may be reduced by. Computing it follows one
+recipe. Start from a known multiple $d$, usually the group order. For each prime $q \mid d$, divide
+$d$ by $q$ as long as $u^{d/q}$ is still 1. What remains is the order, and the cost is a
+factorisation of $d$ plus a few modular exponentiations. That is why problem 752 builds a
+smallest-prime-factor sieve one past its bound: the same table factors every $p - 1$ and $p + 1$
+it will reduce.
+
+Those two group orders come from the two shapes a quadratic ring $\mathbb{F}_p[\sqrt c]$ can take.
+If $c$ is a quadratic residue mod $p$, the ring splits as $\mathbb{F}_p \times \mathbb{F}_p$ through
+$\sqrt c \mapsto (s, -s)$ with $s^2 \equiv c$. An element's order is then the lcm of two orders that
+divide $p - 1$. If $c$ is a non-residue, the ring is the field $\mathbb{F}_{p^2}$, whose units number
+$p^2 - 1$. But [Frobenius](https://en.wikipedia.org/wiki/Frobenius_endomorphism), $y \mapsto y^p$, is
+conjugation there, so $u^{p+1} = u\bar u = N(u)$, the [norm](https://en.wikipedia.org/wiki/Field_norm).
+An element of norm 1 therefore has order dividing $p + 1$. Problem 492 lives on this: its root
+$\alpha$ has norm 1, so the astronomical exponent $2^{n-1}$ is reduced modulo $p - 1$ or $p + 1$.
+[Quadratic reciprocity](https://en.wikipedia.org/wiki/Quadratic_reciprocity) decides which from
+$p \bmod 13$, a table lookup per prime. Problem 752's $u = 1 + \sqrt 7$ has norm $-6$, so it first
+takes $o = \operatorname{ord}_p(-6)$ inside $\mathbb{F}_p$. Then $u^o$ has norm 1, and only $p + 1$
+remains to reduce against, not the much richer $p^2 - 1$. Most of the work never leaves the prime
+field.
+
+The norm also says whether there is an order at all. It is multiplicative, so $u$ is a unit modulo
+$x$ exactly when $N(u)$ is, and in problem 752 that removes every $x$ sharing a factor with 6
+before any power is taken. And orders lift cheaply from primes to prime powers. Every element of
+the kernel $1 + p^{k-1}R$ of reduction mod $p^{k-1}$ has order dividing $p$. So the order mod
+$p^k$ is either the order mod $p^{k-1}$ or $p$ times it, and one power decides which. CRT (below)
+then makes the order modulo a composite the lcm of its prime-power orders.
 
 ## Combining moduli: the Chinese Remainder Theorem
 
@@ -293,6 +334,13 @@ roots of unity as integers in $[0, n)$. That sum is hundreds of times $n$, so ad
 combinations modulo $n$ would give only its residue. Read the statement for exactly where the
 modulus applies; a `% m` one level too high gives a plausible, wrong number.
 
+When the order matters but the numbers are too big to compare, split each one into a part that
+decides the order and a part that only sets the scale. Problem 615 wants the millionth integer
+with at least a million prime factors. Every early member of that list carries a common power
+$2^{k-s}$ with $s = 36$, and dividing it out keeps them in the same order. The selection then runs
+over ordinary 64-bit integers, and the modulus touches only the scale factor, as one
+$2^{k-s} \bmod m$ at the end.
+
 The converse is a gift: a modulus written into a *definition* is often there to simplify it. Problem
 512 sums $\varphi(n^i)$ for $i = 1, \dots, n$, taken modulo $n + 1$. Modulo $n + 1$, $n \equiv -1$,
 and $\varphi(n^i) = n^{i-1}\varphi(n)$, so the terms alternate in sign and cancel in pairs. Each
@@ -331,7 +379,12 @@ Three variations on the same budget:
   arrays because each product of two residues stays below $2^{60}$, and NumPy has no `__int128`
   to fall back on. A matrix product is worse, because it sums 81 such products before any
   reduction. Problem 706 splits one factor into 15-bit halves and multiplies each half separately,
-  which keeps every dot product inside `int64`.
+  which keeps every dot product inside `int64`. The bound is a tight one: problem 492's primes sit
+  just above $10^9$, so its residue products reach about $1.03 \times 10^{18}$, still below $2^{63}$.
+- **A comparison can overflow too.** Not every oversized product is reduced. Problem 615's C port
+  prunes a depth-first search when a candidate $V \cdot p$ exceeds a bound, and that product can
+  briefly pass 64 bits. A wrapped value would look small and slip past the test. So it is formed in
+  `__int128` and compared there, although nothing is ever reduced modulo anything.
 
 ## How to reason about it
 
@@ -348,13 +401,16 @@ directly. When you see it:
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
   under a composite one, audit every division — including the $/2$ and $/6$ of a closed form
   modulo $10^9$. Where you can, defer all the divisions to a single inverse at the end.
+- Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
+  $\mathbb{F}_{p^2}$) and strip primes while the power stays 1. Lift to $p^k$ by at most a factor
+  $p$ per step, and take the lcm across a composite modulus.
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
   the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
   Remainder Theorem, working prime power by prime power; solution counts multiply. If the moduli
   share a factor $d$, check that $d$ divides the difference of the residues before solving.
 - Writing **C** (or any fixed-width language)? Widen every modular multiply once $m \ge 2^{32}$, and
-  bound the accumulated total as well as each product.
+  bound the accumulated total as well as each product, including products you only compare.
 
 The classic mistake is to compute the honest quantity first and reduce at the end — materialising the
 million-digit power, or the true factorial, before taking the remainder. The whole point is that you
