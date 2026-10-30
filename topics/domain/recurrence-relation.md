@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: final 2026-10-28T21:03Z -->
+<!-- status: final -->
 # Recurrence relation
 
 A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a
@@ -143,6 +143,14 @@ the offset $d = g(k) - k$ is frozen. The gcd then reduces to $\gcd(j, d-1)$, so 
 the first multiple above $k$ of some prime factor of $d - 1$. One factorisation per event (Pollard
 rho, at these sizes) replaces up to $10^{15}$ steps with a few hundred. The state is
 $(k, d)$, not $g$. The general question to ask is what stays constant between events.
+Problem 551 asks it at every scale at once. Its $a_n = a_{n-1} + s(a_{n-1})$ adds the
+[digit sum](/topics/domain/digit-sum) each step, so nothing is ever trivial. But while the low $k$
+digits climb towards $10^k$, the high digits are frozen, and they enter each step only through
+their digit sum $c$. The run to the next carry therefore depends on $(k, c, \text{low part})$
+alone. It splits into at most ten runs one level down, one per leading digit, and those triples
+recur so often that a memo of a few tens of thousands of jumps covers $10^{15}$ steps. Where
+443 skips one flat stretch at a time, 551 nests its stretches, and the memo key is again the
+frozen part rather than the value.
 
 **Telescope it away.** Occasionally a sum of terms collapses to one term. Splitting $S(N)$ by index
 parity and substituting the recurrence can make almost everything cancel
@@ -167,7 +175,14 @@ prefix sums, so the final value is $\sum_k w_k a_k$ for fixed weights. Feeding i
 exposes the weights, and with all-ones input the statement's example ends at 429, a
 [Catalan number](https://en.wikipedia.org/wiki/Catalan_number). That points to
 [ballot numbers](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem), and the $n$ rows of
-iteration collapse to one weighted sum.
+iteration collapse to one weighted sum. A recurrence with **constant leaves** has a fourth: its
+value is the number of root-to-leaf paths in its own call tree. Problem 517's
+$g_a(x) = g_a(x-1) + g_a(x-a)$, with $a = \sqrt n$ irrational, defeats memoisation outright,
+because the arguments $x - i - ja$ are all distinct reals. Unrolled, though, $g_a(x)$ counts the
+orders in which unit steps and $a$-steps can carry $x$ below $a$. That is a
+[lattice path](/topics/domain/lattice-path) count, and grouping by the number of $a$-steps
+telescopes it to a single sum of about $\sqrt n$ binomial coefficients. The real number survives
+only inside a floor, which an integer square root computes exactly.
 
 ## How to reason about it
 
