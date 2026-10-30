@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum, palindromic-number, string-slicing, positional-notation] -->
-<!-- status: final 2026-10-29T02:00Z -->
+<!-- status: final -->
 # Digit Manipulation
 
 A surprising share of Project Euler is about the *writing* of a number rather than the number:
@@ -154,10 +154,11 @@ about*: when the output is a digit property, base-10 storage is the right trade.
 
 ## When neither route applies
 
-Both routes assume there is a number in hand to take apart. Past a certain scale there isn't, and the
-digit operations above turn up as *bookkeeping* instead. Three recent problems show the three ways
-this happens (their mathematics is on [Positional notation](/topics/domain/positional-notation); what
-matters here is what replaces the extraction loop).
+Both routes assume there is a number in hand to take apart, and that taking it apart once is cheap
+enough to do as often as needed. Past a certain scale neither holds, and the digit operations above
+turn up as *bookkeeping* instead. Recent problems show the ways this happens (their mathematics is on
+[Positional notation](/topics/domain/positional-notation) and [Digit sum](/topics/domain/digit-sum);
+what matters here is what replaces the extraction loop).
 
 - **The number is too long to hold.** Problem 698 asks for a 123-number of rank about $10^{17}$, but
   only modulo $123\,123\,123$. Unranking picks its digits most-significant first, and each one is
@@ -165,6 +166,33 @@ matters here is what replaces the extraction loop).
   `r * 10 + d` step, run in the other direction. The full number is never formed, so it never needs to
   be converted or divided. Its only other digit question is "how many of each digit". That is the
   order-blind fingerprint from problem 52, and here it is the whole definition.
+- **The fold has a small state, so count all inputs at once.** Problem 706 asks how many $d$-digit
+  numbers, for $d = 10^5$, have a number of 3-divisible substrings that is itself a multiple of 3.
+  Reading the digits left to right is the same fold as above, but the state it carries is richer than
+  one residue: the running digit sum mod 3, how many earlier prefixes share each residue (mod 3), and
+  the substring count so far (mod 3). Measured relative to the current residue, that is 81 states, and
+  every digit of a residue class moves them the same way. So the "loop over digits" becomes an
+  $81 \times 81$ transfer matrix raised to the power $d - 1$. The digit string is never written down;
+  only how many strings sit in each state.
+- **There are too many steps to take.** Problem 551 iterates $a \mapsto a + s(a)$, the same shape as
+  problem 74's digit-factorial successor, but $10^{15}$ times. The numbers fit in a machine word (or
+  two), so extraction is not the problem; doing it $10^{15}$ times is. The fix splits the number the way
+  the base-1000 table does, into a high block $H$ and a low block $L$ of $k$ digits. Until $L$ carries
+  out of $10^k$, $H$ is frozen and enters every step only through its digit sum. So "how many steps to
+  overflow the low block, and what is left behind" depends on $(k, s(H), L)$ alone. That is a small,
+  heavily repeated key, so the jumps memoise, and each level splits into at most ten jumps one level
+  down, one per leading digit of $L$. The digit loop survives, but it walks the digits of the
+  *position*, not of each of the $10^{15}$ values.
+- **The digits you need are in other bases, of numbers not built yet.** Problem 571 wants the
+  smallest numbers that are pandigital in every base from $2$ to $n$. The search builds base-$n$
+  permutations most-significant first. Converting each of some $10^8$ candidates into ten bases is the
+  arithmetic route at its most brute. Instead, a fixed prefix confines every completion to an interval
+  $[lo, hi]$, and in any base $b$, all numbers in it share the leading digits on which $lo$ and $hi$
+  agree, found by the same division as always, $\lfloor lo / b^{j} \rfloor = \lfloor hi / b^{j} \rfloor$.
+  If that shared prefix is missing more digits than there are free places below it, the whole subtree
+  dies. Digit extraction is still the tool, but applied to the *bounds* of a set of numbers rather than
+  to its members. The leaf test, for what survives, is problem 52's fingerprint again in its C form: a
+  bitmask of digits seen, compared with a full mask.
 - **There are too many numbers to visit.** Problem 778 sums a carry-free digitwise product over
   $(M+1)^R$ sequences. Each place is independent, so all it ever needs is how often digit $d$ appears
   at place $10^i$ across $[0, M]$. That count has a closed form from the digit's period-$10^{i+1}$
@@ -189,8 +217,12 @@ matters here is what replaces the extraction loop).
   palindrome is `n == rev(n)`, a fingerprint is a histogram. Reach for `snprintf` only to print.
 - **C, big integers** — store decimal digits when the question is about digits; the representation
   *is* the string, and the manipulation becomes array indexing.
-- **Beyond any representation** — build the number digit by digit into a residue, count digits per
-  place in closed form, or generate the digit strings you want rather than testing values.
+- **Beyond any representation** — build the number digit by digit into a residue (or a small
+  automaton, then count strings with a matrix power), count digits per place in closed form, or
+  generate the digit strings you want rather than testing values.
+- **Too many steps or candidates** — split the number into digit blocks and memoise what the low
+  block does given only a summary of the high one, or extract digits from the bounds of a whole
+  interval of candidates and prune on them.
 - **Either language** — mind the edges: `0` has one digit but the `while n` loop sees none; leading
   zeros exist in strings and in fixed-width digit arrays but not in integers; and the reversal of a
   number ending in `0` is shorter than the original, so `n == rev(n)` is the palindrome test only
