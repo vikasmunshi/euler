@@ -205,6 +205,7 @@ ask which coefficient you actually need.
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ○ [0648](/solutions/0648/) — Skipping Squares
 - ○ [0677](/solutions/0677/) — Coloured Graphs
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0709](/solutions/0709/) — Even Stevens
 - ○ [0722](/solutions/0722/) — Slowly Converging Series
 - ● [0743](/solutions/0743/) — Window into a Matrix

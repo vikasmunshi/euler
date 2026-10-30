@@ -1255,7 +1255,7 @@
       "reference": "https://en.wikipedia.org/wiki/Generating_function",
       "additional-references": ["https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function_(EGF)"],
       "summary": "",
-      "refs": ["p0078", "p0137", "p0140", "p0172", "p0249", "p0250", "p0377", "p0511", "p0519", "p0537", "p0588", "p0614", "p0618", "p0621", "p0623", "p0638", "p0648", "p0677", "p0709", "p0722", "p0743", "p0768", "p0851", "p0860", "p0865", "p0881", "p0890", "p0929", "p0996"]
+      "refs": ["p0078", "p0137", "p0140", "p0172", "p0249", "p0250", "p0377", "p0511", "p0519", "p0537", "p0588", "p0614", "p0618", "p0621", "p0623", "p0638", "p0648", "p0677", "p0682", "p0709", "p0722", "p0743", "p0768", "p0851", "p0860", "p0865", "p0881", "p0890", "p0929", "p0996"]
     },
     {
       "slug": "genus-theory",
@@ -2605,7 +2605,7 @@
       "reference": "https://en.wikipedia.org/wiki/Regular_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0133", "p0228"]
+      "refs": ["p0133", "p0228", "p0682"]
     },
     {
       "slug": "repeating-decimal",
@@ -3553,6 +3553,15 @@
       "refs": ["p0122_s0", "p0136_s0", "p0177_s0", "p0201_s0", "p0208_s0", "p0215_s0", "p0216_s0", "p0229_s0", "p0238_s0", "p0301_s0", "p0315_s0", "p0679_s0", "p0899_s0", "p0944_s0"]
     },
     {
+      "slug": "bostan-mori-algorithm",
+      "facet": "technique",
+      "name": "Bostan\u2013Mori algorithm",
+      "reference": "https://arxiv.org/abs/2008.08822",
+      "additional-references": [],
+      "summary": "Extracting the n-th coefficient of a rational power series by repeatedly multiplying numerator and denominator by Q(\u2212x) and halving n, in O(d\u00b2 log n).",
+      "refs": ["p0682_s0"]
+    },
+    {
       "slug": "brahmagupta-fibonacci-identity",
       "facet": "technique",
       "name": "Brahmagupta\u2013Fibonacci identity",
@@ -3811,7 +3820,7 @@
       "reference": "https://en.wikipedia.org/wiki/Convolution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0092_s0", "p0205_s0", "p0240_s0", "p0250_s0", "p0743_s0", "p0768_s0", "p0778_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0092_s0", "p0205_s0", "p0240_s0", "p0250_s0", "p0682_s0", "p0743_s0", "p0768_s0", "p0778_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "counting-sort",
@@ -4072,7 +4081,7 @@
       "reference": "https://en.wikipedia.org/wiki/Dynamic_programming",
       "additional-references": ["https://en.wikipedia.org/wiki/Dynamic_programming#Bottom-up_approach"],
       "summary": "",
-      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0150_s0", "p0151_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0232_s0", "p0240_s0", "p0249_s0", "p0252_s0", "p0253_s0", "p0259_s0", "p0269_s0", "p0301_s0", "p0345_s0", "p0395_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0882_s0", "p0885_s0", "p0938_s0", "p0951_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0150_s0", "p0151_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0232_s0", "p0240_s0", "p0249_s0", "p0252_s0", "p0253_s0", "p0259_s0", "p0269_s0", "p0301_s0", "p0345_s0", "p0395_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0682_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0882_s0", "p0885_s0", "p0938_s0", "p0951_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
     },
     {
       "slug": "eisenstein-integer",
@@ -4783,7 +4792,7 @@
       "reference": "https://en.wikipedia.org/wiki/Knapsack_problem",
       "additional-references": ["https://en.wikipedia.org/wiki/Knapsack_problem#Unbounded_knapsack_problem"],
       "summary": "",
-      "refs": ["p0181_s0", "p0201_s0", "p0249_s0"]
+      "refs": ["p0181_s0", "p0201_s0", "p0249_s0", "p0682_s0"]
     },
     {
       "slug": "kruskals-algorithm",
@@ -4864,7 +4873,7 @@
       "reference": "https://en.wikipedia.org/wiki/Linear_recurrence_with_constant_coefficients",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0057_s0", "p0094_s0", "p0219_s0", "p0237_s0", "p0529_s0", "p0918_s0", "p0940_s0", "p0951_s0", "p0957_s0"]
+      "refs": ["p0057_s0", "p0094_s0", "p0219_s0", "p0237_s0", "p0529_s0", "p0682_s0", "p0918_s0", "p0940_s0", "p0951_s0", "p0957_s0"]
     },
     {
       "slug": "linear-sieve",
@@ -5179,7 +5188,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0401_s0", "p0429_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0772_s0", "p0788_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0401_s0", "p0429_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0682_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0772_s0", "p0788_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -6295,7 +6304,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Brute-force the small instances, fit a linear recurrence to them, confirm it on terms held back from the fit, then jump to a huge index by matrix power.",
-      "refs": ["p0237", "p0529", "p0957", "p0996"]
+      "refs": ["p0237", "p0529", "p0682", "p0957", "p0996"]
     },
     {
       "slug": "split-inputs-into-behaviour-classes",

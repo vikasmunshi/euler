@@ -119,5 +119,6 @@ How each language enforces the loop direction is the most instructive difference
 - ● [0181](/solutions/0181/) — Grouping Two Different Coloured Objects
 - ● [0201](/solutions/0201/) — Subsets with a Unique Sum
 - ● [0249](/solutions/0249/) — Prime Subset Sums
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 
 <!-- /problems -->

@@ -290,7 +290,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ○ [0646](/solutions/0646/) — Bounded Divisors
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
-- ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0699](/solutions/0699/) — Triffle Numbers
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ○ [0712](/solutions/0712/) — Exponent Difference

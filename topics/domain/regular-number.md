@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Regular_number
 
 - ● [0133](/solutions/0133/) — Repunit Nonfactors
 - ● [0228](/solutions/0228/) — Minkowski Sums
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 
 <!-- /problems -->

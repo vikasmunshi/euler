@@ -155,6 +155,7 @@ one's distribution separately and convolve.
 - ● [0205](/solutions/0205/) — Dice Game
 - ● [0240](/solutions/0240/) — Top Dice
 - ● [0250](/solutions/0250/) — $250250$
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0778](/solutions/0778/) — Freshman's Product

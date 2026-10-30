@@ -630,7 +630,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
-- ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0687](/solutions/0687/) — Shuffling Cards
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ○ [0699](/solutions/0699/) — Triffle Numbers

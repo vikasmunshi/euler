@@ -399,7 +399,7 @@ of crossing it.
 - ○ [0671](/solutions/0671/) — Colouring a Loop
 - ○ [0677](/solutions/0677/) — Coloured Graphs
 - ● [0679](/solutions/0679/) — Freefarea
-- ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0687](/solutions/0687/) — Shuffling Cards
 - ○ [0688](/solutions/0688/) — Piles of Plates

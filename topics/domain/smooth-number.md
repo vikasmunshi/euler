@@ -106,6 +106,6 @@ in `O(N^(3/4))` time. A smoothness question ends up as a prime-counting question
 - ○ [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ○ [0627](/solutions/0627/) — Counting Products
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
-- ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 
 <!-- /problems -->

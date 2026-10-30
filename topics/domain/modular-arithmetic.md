@@ -377,7 +377,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0672](/solutions/0672/) — One More One
 - ○ [0673](/solutions/0673/) — Beds and Desks
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever
-- ○ [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator

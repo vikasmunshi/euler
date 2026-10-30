@@ -207,6 +207,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0679](/solutions/0679/) — Freefarea
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
