@@ -1,5 +1,5 @@
 <!-- tags: [unranking] -->
-<!-- status: final 2026-10-19T09:39Z -->
+<!-- status: final -->
 # Unranking
 
 [Unranking](https://en.wikipedia.org/wiki/Unranking) is the inverse of ranking: given an index $k$
@@ -7,8 +7,9 @@ into an ordered family of objects, construct the $k$-th object **directly**, wit
 $k - 1$ before it. Project Euler asks for this often. "The millionth permutation", "the
 $10^{16}$-th number with property $X$": $k$ is far too large to count up to, but the objects are
 built one symbol at a time, and you can *count* how many objects begin with a given prefix. The
-three solved problems below use the same construction loop. They differ in the counting function
-behind it, from a closed form ($n!$) to a [digit DP](/topics/technique/digit-dp) table.
+four solved problems below use the same construction loop. They differ in the counting function
+behind it, from a closed form ($n!$) through a sum of multinomial coefficients to a
+[digit DP](/topics/technique/digit-dp) table.
 
 ## The idea — count the subtree, skip it or enter it
 
@@ -36,7 +37,7 @@ interesting is in **how $w$ is computed**:
 The same table answers "how long is the $k$-th object?". Subtract whole lengths' counts first, then
 unrank within the right length.
 
-## Three problems, three counting functions
+## Four problems, four counting functions
 
 **24, lexicographic permutations: a closed form.** All $(n-1)!$ completions of a one-digit prefix are
 valid, so the leading digit is the quotient of $k - 1$ by $(n-1)!$, and the remainder is the rank
@@ -50,6 +51,20 @@ result: str = digits[current] + recursive_solution(
 ```
 
 Ten steps, against the $10^6$ that `itertools.permutations` would have to step through.
+
+**698, 123-numbers: a sum of multinomials over digit counts.** A 123-number uses only the digits
+1, 2, 3, and each digit's count is either 0 or itself a 123-number; we need the $n$-th one for $n$
+around $10^{17}$. The rule never looks at the *order* of the digits, only at the count triple
+$(c_1, c_2, c_3)$, so the prefix summary is the vector of digits used so far, $(u_1, u_2, u_3)$, and
+there is no table at all. The number of completions is a direct sum over the admissible final triples
+$c_i \ge u_i$ with $c_1 + c_2 + c_3 = L$:
+$$w = \sum \binom{L - |\text{prefix}|}{c_1 - u_1,\; c_2 - u_2,\; c_3 - u_3},$$
+a [multinomial coefficient](https://en.wikipedia.org/wiki/Multinomial_theorem#Multinomial_coefficients)
+for each triple. Admissible counts are few (only a dozen below 111), so each query is a few hundred
+terms. Two details are worth stealing. The self-reference resolves itself during the length phase:
+whether $L$ is admissible depends only on smaller counts, so the solution appends $L$ to the admissible
+list just before it counts the length-$L$ block. And because the answer is wanted modulo a constant,
+each chosen digit is folded into a running residue, so the full number is never held.
 
 **845, prime digit sum: a DP over digit sums.** We need the $n$-th positive integer whose digit sum is
 prime, with $n$ up to $10^{16}$. Whether a completion is valid depends only on the prefix's digit sum, so
@@ -74,6 +89,10 @@ construction.
   becomes a `malloc`ed copy with one character skipped, and each level allocates a new result
   string. C's `long long` factorial is ample for ten digits. It would overflow past $20!$, where
   Python keeps going.
+- **698**: Python's exact integers make $L!/(c_1!\,c_2!\,c_3!)$ safe. In C, $L!$ overflows even
+  `unsigned __int128`, so the port writes each multinomial as a product of two binomials,
+  $\binom{r}{x}\binom{r-x}{y}$, read from a Pascal's-triangle table; no intermediate value exceeds
+  $3^r$, the total number of length-$r$ strings.
 - **845**: Python grows `counts` as a list of lists only as long as needed. C allocates a static
   `long long counts[MAX_LEN + 1][MAX_SUM + 1]` with fixed generous bounds and `memset`s it for each
   call. For $n = 10^{16}$ the table stops at about 18 digits, so every count and every prefix total is
@@ -89,7 +108,9 @@ construction.
 - **Is there an order and a way to count by prefix?** Then the $k$-th object can be built in
   $O(\text{length} \times \text{alphabet})$ count queries, however large $k$ is.
 - **Find the smallest prefix summary that determines validity.** That summary is the DP state: nothing
-  for permutations, the digit sum for 845, (mod 7, mod 3, parity mask) for 974.
+  for permutations, the used-digit counts for 698, the digit sum for 845, (mod 7, mod 3, parity
+  mask) for 974. When validity depends only on the multiset of symbols, as in 698, the count of
+  completions is a sum of multinomials and needs no DP.
 - **Use 0-based ranks inside the loop.** `divmod(k - 1, …)` avoids the off-by-one that 1-based ranks
   invite. Convert back only at the boundary.
 - **Settle the length first.** Subtract the counts of whole shorter lengths, or let leading zeros
