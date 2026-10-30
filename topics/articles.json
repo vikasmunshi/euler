@@ -6758,12 +6758,12 @@
       "path": "technique/modular-multiplicative-inverse-application",
       "title": "Modular multiplicative inverse (application)",
       "status": "final",
-      "written": "2026-10-29T02:03Z",
+      "written": "2026-10-30T12:48Z",
       "solved": 22,
       "problems": 22,
       "tags": ["modular-multiplicative-inverse-application"],
       "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0517_s0", "p0531_s0", "p0650_s0", "p0675_s0", "p0743_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"],
-      "solved_after": ["p0517", "p0531"]
+      "solved_after": []
     },
     {
       "path": "technique/modulo",

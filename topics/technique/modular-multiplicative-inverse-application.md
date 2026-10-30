@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T12:48Z -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
