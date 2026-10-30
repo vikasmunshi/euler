@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum] -->
-<!-- status: final 2026-10-29T07:10Z -->
+<!-- status: final -->
 # Digit sum
 
 The [digit sum](https://en.wikipedia.org/wiki/Digit_sum) $s(n)$ — add up the decimal digits and stop
@@ -26,6 +26,17 @@ which is $n \bmod 9$ with the residue $0$ read as $9$. Problem 159 leans on exac
 per-factor digital roots are never computed by summing digits at all, which turns the inner term of
 a divisor-sieve DP into one modulo. In base $b$ the statement generalises to $s_b(n) \equiv n
 \pmod{b-1}$, so the trick is about the base, not about ten.
+
+Because the congruence is additive over digits, it survives being cut into pieces: a substring
+$n[i..j)$ is divisible by $3$ exactly when the [prefix sums](https://en.wikipedia.org/wiki/Prefix_sum)
+of the digits agree mod $3$ at $i$ and at $j$. Problem 706 counts the $d$-digit numbers in which the
+number of divisible substrings is itself a multiple of $3$ — a property of all $\binom{d+1}{2}$
+substrings, reduced by that one observation to residue counts: with $c_r$ prefixes of residue $r$, the
+count is $\sum_r \binom{c_r}{2}$, and appending a digit adds exactly the count of earlier prefixes
+sharing the new residue. Everything the future depends on is three counts and a running total, all
+mod $3$, so the number is read by an $81$-state automaton whose transitions depend only on each
+digit's residue class. That is a [digit DP](/topics/technique/digit-dp) with a constant-size state,
+and it sets up the huge-length trick at the end of that section.
 
 The closed form gives you the *destination*, not the route. Problem 315 feeds primes to
 [seven-segment](/topics/domain/seven-segment-display) "digital root clocks" that display every
@@ -65,6 +76,17 @@ everything downstream of the first digit sum is a function on $\{1, \dots, 90\}$
 right-aligned under $p$, only ever meets $p$'s last two digits, so each prime's contribution is a
 function of the pair $(p \bmod 100,\ s(p))$ — a few thousand table entries — and the per-prime work
 shrinks to one digit sum and two lookups. The cost of the problem moves entirely into the prime sieve.
+
+Smallness also tames a sequence that *feeds* $s$ back into itself. Problem 551 iterates
+$a \mapsto a + s(a)$ for $10^{15}$ steps, with no closed form in sight. Split the current value as
+$H \cdot 10^k + L$: until $L$ overflows $10^k$ the high part is frozen, and it influences each step
+only through $s(H)$ — a number below $9$ times its length. So "how many steps until the low block
+carries, and what is left behind" is a function of $(k, s(H), L)$ alone, not of $H$, and each
+level-$k$ jump decomposes into at most ten level-$(k-1)$ jumps, one per leading digit of $L$. The
+overshoot after a carry is at most one digit sum, so the same states recur constantly and
+[memoization](https://en.wikipedia.org/wiki/Memoization) turns $10^{15}$ steps into a few tens of
+thousands of cached blocks. The pattern to remember: when the high digits are only ever *read
+through* $s$, the digit sum is the whole of their influence, and you can jump over everything below.
 
 **The digit sum ignores order.** $s$ depends only on the *multiset* of digits, so $123$, $321$ and
 $213$ are the same object. Two ways to cash that in. Enumerate the multisets directly — problems 30
@@ -144,7 +166,10 @@ astronomical: problem 529 wants the count over all numbers of up to $10^{18}$ di
 then a fixed automaton run for $L$ steps, and its count of accepted words of length $L$ obeys a
 [linear recurrence with constant coefficients](/topics/technique/linear-recurrence-with-constant-coefficients)
 of order at most the number of states ([Cayley–Hamilton](/topics/domain/cayley-hamilton-theorem) on
-the transition matrix). With a few thousand states, matrix powers are too slow, but you do not need
+the transition matrix). When the automaton is small, raise its matrix directly: problem 706's $81$
+states make an $81 \times 81$ [power by squaring](/topics/technique/exponentiation-by-squaring), so
+$10^5$ or $10^6$ digits cost the same handful of products. With a few thousand states, matrix powers
+are too slow, but you do not need
 the matrix: run the DP for twice the (minimised) state count, let
 [Berlekamp–Massey](/topics/technique/berlekamp-massey-algorithm) recover the recurrence, and jump to
 index $10^{18}$ with $O(\log L)$ polynomial products. The automaton's size is what makes the fit
@@ -181,6 +206,8 @@ checksum at the end. Recognising which family you are in is the first decision.
 - **No carries, no coupling.** A digit-wise operation that drops carries splits into one
   independent problem per position; sum over all inputs by weighting each position's digit
   distribution by its place value.
+- **Freeze the high digits.** If a process sees the digits above some position only through their
+  sum, key the block below on that sum and memoise whole carries instead of single steps.
 - **Count, then unrank.** "The $n$-th number such that…" is never a loop over $n$.
 - **When the length is huge, fit the recurrence.** A digit DP over a fixed automaton is a linear
   recurrence in the length; recover it from a prefix sized by the state count, then jump.
