@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-28T20:55Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -38,6 +38,14 @@ many land on each residue mod 250, and the generating function is multiplied out
 $\mathbb{Z}[x]/(x^{250} - 1)$ — a ring where $x^{250} = 1$, so the *exponents* wrap modulo 250 on
 their own. Reducing both the coefficients and the exponents keeps the whole computation to a
 250-slot array.
+
+Residues can also be taken twice, of two different things. Problem 706 asks how many $10^5$-digit
+numbers have a count of substrings divisible by 3 that is itself divisible by 3. A substring is
+divisible by 3 exactly when the digit prefix sums at its two ends agree mod 3. So the count is
+$\sum_r \binom{c_r}{2}$ over the numbers $c_r$ of prefixes in each residue class $r$. Only that count
+mod 3 matters, so the $c_r$ can be kept mod 3 as well. The state shrinks to 81 values, small enough
+for a [transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method) raised to the
+$10^5$th power.
 
 The catch is that congruence is preserved by $+$, $-$, and $\times$ **but not by division** — and
 not, in general, by exponentiation done naively. Those two operations are what most of this page is
@@ -152,13 +160,19 @@ also licenses whole algorithms: [Berlekamp–Massey](https://en.wikipedia.org/wi
 which problem 529 uses to recover a linear recurrence of order 2772 from a digit automaton's counts,
 divides by a discrepancy at every step and so only works over a field — there, modulo $10^9 + 7$.
 Problem 860 is the same licence at its most ordinary. It reduces to a sum of products of binomials,
-read off a factorial table modulo a prime larger than $n$.
+read off a factorial table modulo a prime larger than $n$. So does problem 517, a recursion
+$g_a(x) = g_a(x-1) + g_a(x-a)$ on the irrational step $a = \sqrt n$. Unrolled, it counts lattice
+paths and telescopes to one binomial $\binom{\lfloor x - ja \rfloor + j}{j}$ per count $j$ of
+$a$-steps. The real number survives only inside that floor, and $\lfloor n - j\sqrt n\rfloor$ comes
+exactly from an integer square root of $j^2 n$. The modulus never meets a float.
 
 Even over a field an inverse costs a modular exponentiation, so how many you take is worth
 planning. Problem 739 needs about $10^8$ binomial coefficients modulo $10^9 + 7$. It multiplies
 the sum through by $(n-1)(n-2)!$, which turns every $1/j!$ into a suffix product, so each term
 becomes a prefix product times a suffix product and the sum needs only **one** inversion, taken at
-the end. Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
+the end. The factorial tables behind 517 and 860 use the same economy. Invert only the largest
+factorial, then walk down with $(k-1)!^{-1} = k!^{-1} \cdot k$, so a whole table of inverse
+factorials costs one exponentiation. Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
 $2 \cdot 10^7 + 1$. It computes all of them at once, as $a^{p-2}$ by one vectorised
 square-and-multiply over a NumPy array, about thirty array multiplications for ten million inverses.
 
@@ -233,8 +247,17 @@ primes between 1000 and 5000. [Lucas's theorem](https://en.wikipedia.org/wiki/Lu
 gives the binomial modulo each prime from its base-$p$ digits, and CRT lifts the three residues to one
 modulo $pqr$. With twenty million triples the lift must be cheap, and it is once you notice that
 $(qr)^{-1} \bmod p = q^{-1} r^{-1} \bmod p$: every inverse the sum needs is a *pairwise* one,
-tabulated once. (Problem 531 is CRT at its barest: the smallest $x$ meeting two congruences, and
-nothing when non-coprime moduli clash.)
+tabulated once.
+
+Coprimality is what makes CRT unconditional. Drop it and the theorem gains a hypothesis. With
+$d = \gcd(m_1, m_2)$, the system is solvable **exactly when $d \mid a_2 - a_1$**, and then it has
+one solution modulo $\operatorname{lcm}(m_1, m_2)$ rather than the product. Problem 531 is that
+generalised form at its barest. For every pair of neighbouring $n < m$ in a window of a few thousand
+integers near $10^6$, it wants the least $x \equiv \varphi(n) \pmod n$, $x \equiv \varphi(m) \pmod m$,
+or $0$ when there is none. Write $x = \varphi(n) + n t$. The second congruence becomes
+$n t \equiv \varphi(m) - \varphi(n) \pmod m$. Test that $d$ divides the right-hand side; if it does,
+divide all three terms by $d$. That leaves $n/d$ coprime to $m/d$, and one inverse gives $t$.
+Neighbouring integers make the gcd cheap, since $\gcd(n, m) = \gcd(n, m - n)$ and $m - n$ is small.
 
 Second, it lets you *decompose* a hard modulus: answer the question modulo each prime power, where the
 structure is simple, and glue the answers back together. The number of solutions of a polynomial
@@ -295,7 +318,9 @@ Three variations on the same budget:
 - **Guard the input, and size the total.** Problem 421 multiplies residues below $p \le M$, so it
   rejects $M \ge 2^{32}$ up front rather than let a larger input corrupt the result quietly — and its
   *total*, which grows like $4 N \pi(M)$, approaches the 64-bit ceiling although no single residue
-  comes close. Estimate the size of the answer, not only of its terms.
+  comes close. Estimate the size of the answer, not only of its terms. Problem 531's answer is not
+  reduced at all: it sums CRT solutions of up to $\operatorname{lcm}(n, m) \approx 10^{12}$ over
+  millions of pairs, so its C port accumulates in `unsigned __int128`.
 - **Reduce lazily when you can prove headroom.** Problem 529's C port accumulates a polynomial
   product's terms in an unsigned 64-bit word and subtracts $8m^2$ whenever the sum reaches it, taking
   one `%` per output coefficient instead of one per term.
@@ -304,7 +329,9 @@ Three variations on the same budget:
   prime, where a product of two residue vectors would not. When the vectors *do* multiply, a prime
   below $2^{30}$ buys the headroom. Problems 675 and 721 run square-and-multiply over whole NumPy
   arrays because each product of two residues stays below $2^{60}$, and NumPy has no `__int128`
-  to fall back on.
+  to fall back on. A matrix product is worse, because it sums 81 such products before any
+  reduction. Problem 706 splits one factor into 15-bit halves and multiplies each half separately,
+  which keeps every dot product inside `int64`.
 
 ## How to reason about it
 
@@ -324,7 +351,8 @@ directly. When you see it:
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
   the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
-  Remainder Theorem, working prime power by prime power; solution counts multiply.
+  Remainder Theorem, working prime power by prime power; solution counts multiply. If the moduli
+  share a factor $d$, check that $d$ divides the difference of the residues before solving.
 - Writing **C** (or any fixed-width language)? Widen every modular multiply once $m \ge 2^{32}$, and
   bound the accumulated total as well as each product.
 
