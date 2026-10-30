@@ -164,7 +164,7 @@
     enhanceEditors();
     externalize(document);
     // A swapped-in pane may carry terminal controls of its own (the start page's
-    // Terminal tile): they arrive with the server's static markup and know nothing
+    // Shell tile): they arrive with the server's static markup and know nothing
     // of the live socket / hidden state, so paint them from the state we hold.
     paintWsHidden();
     // A swapped-in index arrives with an empty filter box and the whole region
@@ -415,7 +415,9 @@
     // panel's spelled-out button wears, so a control with a label and one without say
     // the same thing.
     var act = (termConnected ? 'Disconnect' : 'Connect') + ' the terminal';
-    document.querySelectorAll('[data-term-toggle]').forEach(function (button) {
+    // Not the disabled ones: the public site's window has no session to toggle, and its
+    // controls keep the title the markup gave them ("Sign in to connect").
+    document.querySelectorAll('[data-term-toggle]:not([disabled])').forEach(function (button) {
       button.title = act;
       button.setAttribute('aria-label', act);
     });
@@ -428,7 +430,7 @@
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
     });
-    // The section strip's Terminal tile says the state in words as well as in the dot:
+    // The section strip's Shell tile says the state in words as well as in the dot:
     // it is the tile's data line, where its three neighbours carry a count, and a lone
     // dot in that slot would be the one tile in the row that says nothing.
     document.querySelectorAll('[data-term-state]').forEach(function (word) {
@@ -474,6 +476,14 @@
   // Not registered on DOMContentLoaded itself: paintWsHidden() below calls this after
   // toggling the layout class, so the two readouts are always painted from one pass.
 
+  //: Put the caret in the right pane's window: the terminal (by message — the parent cannot
+  //: reach xterm's textarea across the frame) or, on the public site, the sign-in's email.
+  function focusWs() {
+    var email = document.querySelector('[data-ws-signin] #email');
+    if (email) { email.focus(); return; }
+    postToTerminal({ euler: 'focus' });
+  }
+
   //: Post an act into the terminal iframe. Unframed (or signed out) there is none.
   function postToTerminal(message) {
     var terminal = document.getElementById('terminal');
@@ -498,7 +508,7 @@
   //
   // Hide and show are SEPARATE acts, so each control does one predictable thing:
   //   [data-term-hide] — the pane's own titlebar handle — always hides;
-  //   [data-term-show] — the header's Terminal item, the Terminal tile, the footer's
+  //   [data-term-show] — the header's Shell item, the Shell tile, the footer's
   //                      hidden window — always shows AND focuses.
   //
   // Show means "take me to the terminal", so it also puts the caret there: a control
@@ -506,7 +516,7 @@
   // half its job. Focus is the iframe's to give (the parent cannot reach xterm's hidden
   // textarea across the boundary), so it is asked for by message. Showing an already-
   // visible terminal is layout-wise a no-op but still focuses — that is what the
-  // header's Terminal item does beyond swapping /shell into the pane.
+  // header's Shell item does beyond swapping /shell into the pane.
   //
   // A narrow screen (site.css § The narrow layout: one pane at a time, the terminal
   // over the content) keeps its own flag, and starts every document HIDDEN: on a phone the
@@ -519,18 +529,37 @@
   var narrow = window.matchMedia ? window.matchMedia('(max-width: 820px)') : null;
   var narrowHidden = true;
 
+  // The public site's right pane is the same window holding the sign-in instead of a
+  // session (base.html, [data-ws-signin]), and it hides and shows the same way — but it
+  // STARTS hidden, and keeps its own flag. A visitor came for the content; the window waits
+  // in the footer, and the header's Login brings it back (§ the login link, below). Its flag
+  // lives for the tab (sessionStorage), so a new visit starts minimized again, and it never
+  // touches what a signed-in reader chose for their terminal.
+  var WS_SIGNIN_HIDDEN_KEY = 'euler:ws-signin-hidden';
+
   function isNarrow() { return !!(narrow && narrow.matches); }
+  //: Which window the right pane holds: 'terminal', 'signin', or null — the auth tier's
+  //: pages, whose right pane is the dialogue itself and never hides (so a stale flag never
+  //: collapses it, and the chip never reports "hidden" about a window that is not there).
+  function wsKind() {
+    if (document.getElementById('terminal')) { return 'terminal'; }
+    return document.querySelector('[data-ws-signin]') ? 'signin' : null;
+  }
   function wsHidden() {
-    // Only where there is a terminal to hide — the signed-out shell holds a sign-in box
-    // in the right pane, not a session, so a stale flag never collapses it (and the chip
-    // never reports "hidden" about a terminal that is not there).
-    if (!document.getElementById('terminal')) { return false; }
+    var kind = wsKind();
+    if (!kind) { return false; }
     if (isNarrow()) { return narrowHidden; }
-    try { return localStorage.getItem(WS_HIDDEN_KEY) === '1'; } catch (e) { return false; }
+    try {
+      if (kind === 'signin') { return sessionStorage.getItem(WS_SIGNIN_HIDDEN_KEY) !== '0'; }
+      return localStorage.getItem(WS_HIDDEN_KEY) === '1';
+    } catch (e) { return kind === 'signin'; }
   }
   function setWsHidden(on) {
     if (isNarrow()) { narrowHidden = on; return; }
-    try { localStorage.setItem(WS_HIDDEN_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+    try {
+      if (wsKind() === 'signin') { sessionStorage.setItem(WS_SIGNIN_HIDDEN_KEY, on ? '1' : '0'); return; }
+      localStorage.setItem(WS_HIDDEN_KEY, on ? '1' : '0');
+    } catch (e) { /* private mode */ }
   }
   function paintWsHidden() {
     document.body.classList.toggle('ws-hidden', wsHidden());
@@ -545,7 +574,7 @@
   // see a page, and the page is under the terminal. Not a re-render of the same page (the
   // refresh arrow, a nudge from the shell after a command): that would pull the terminal
   // away mid-typing. And not a control that asks for the terminal too ([data-term-show],
-  // the nav's Terminal item, which swaps /shell into the pane and shows the shell).
+  // the nav's Shell item, which swaps /shell into the pane and shows the shell).
   var landedPath = window.location.pathname;
   document.addEventListener('htmx:afterSwap', function (ev) {
     if (!ev.detail || !ev.detail.target || ev.detail.target.id !== 'content') { return; }
@@ -565,15 +594,16 @@
     if (!ev.target.closest) { return; }
     var hideBtn = ev.target.closest('[data-term-hide]');
     var showBtn = ev.target.closest('[data-term-show]');
-    if ((!hideBtn && !showBtn) || !document.getElementById('terminal')) { return; }
+    if ((!hideBtn && !showBtn) || !wsKind()) { return; }
     setWsHidden(!!hideBtn);             // hide → true, show → false (no-op if already visible)
     paintWsHidden();
     // After the paint, so the pane is on screen before the frame takes focus (a hidden
     // iframe cannot hold it, and the message is delivered asynchronously either way).
-    if (showBtn) { postToTerminal({ euler: 'focus' }); }
+    // The public window has no frame: the caret goes to its sign-in form instead.
+    if (showBtn) { focusWs(); }
     var menu = (hideBtn || showBtn).closest('details');
     if (menu) { menu.open = false; }
-    // No preventDefault: the header's Terminal item and the start page's tile are real
+    // No preventDefault: the header's Shell item and the start page's tile are real
     // links (hx-get /shell) that carry [data-term-show], and both halves of that click
     // must run — the pane swaps, the terminal shows and takes the caret.
   });
@@ -744,6 +774,34 @@
     } catch (e) { /* private mode */ }
   }
 
+  // ── folds ──────────────────────────────────────────────────────────────────
+  // The topics index's folders ([data-fold], topics.html) render open — the server cannot
+  // know what you folded — and the ones you closed are remembered for the sitting, like the
+  // filter beside them (sessionStorage: where you are, not a standing preference), and
+  // re-folded as the page arrives. A toggle made while a query is live is the filter's
+  // doing (it opens what it matched), not the reader's, so it is not recorded.
+  var FOLDS_KEY = 'euler:folds';
+  function closedFolds() {
+    try { return JSON.parse(sessionStorage.getItem(FOLDS_KEY) || '[]') || []; } catch (e) { return []; }
+  }
+  function paintFolds(root) {
+    var closed = closedFolds();
+    (root || document).querySelectorAll('details[data-fold]').forEach(function (fold) {
+      fold.open = closed.indexOf(fold.getAttribute('data-fold')) === -1;
+    });
+  }
+  // `toggle` does not bubble, so it is caught on the way down.
+  document.addEventListener('toggle', function (ev) {
+    var fold = ev.target;
+    if (!fold.matches || !fold.matches('details[data-fold]')) { return; }
+    var input = document.querySelector('.pane-filter');
+    if (input && input.value.trim()) { return; }
+    var name = fold.getAttribute('data-fold');
+    var closed = closedFolds().filter(function (n) { return n !== name; });
+    if (!fold.open) { closed.push(name); }
+    try { sessionStorage.setItem(FOLDS_KEY, JSON.stringify(closed)); } catch (e) { /* private mode */ }
+  }, true);
+
   function hay(el) {
     return (el.getAttribute('data-filter') || el.textContent || '').toLowerCase();
   }
@@ -782,7 +840,17 @@
         var groupCount = heading.querySelector('[data-group-count]');
         if (groupCount) { groupCount.textContent = visible; }
       }
+      // A topics folder (topics.html) is a <details> around its heading and grid: the whole
+      // fold goes with its cards, and a live query opens it — a match folded out of sight is
+      // not a match. Opening it here is not the reader folding it (§ folds, below).
+      var fold = box.closest('details[data-fold]');
+      if (fold) {
+        fold.hidden = !visible;
+        if (q && visible) { fold.open = true; }
+      }
     });
+    // With the box empty the folds are the reader's again: what they folded this sitting.
+    if (!q) { paintFolds(pane); }
     // The century grids.
     pane.querySelectorAll('.century').forEach(function (century) {
       var anyVisible = false;
@@ -906,11 +974,20 @@
     var link = ev.target.closest && ev.target.closest('a[data-login]');
     if (!link) { return; }
     // The public site carries the sign-in form in its right pane: the header's Login goes
-    // there, not to a page that holds the same form — while that pane is on screen. The
-    // narrow layout hides it (site.css § The narrow layout), and focusing a hidden field
-    // does nothing at all, so there the link goes to /login like everywhere else.
-    var email = document.querySelector('#login-form #email');
-    if (email && email.getClientRects().length) { ev.preventDefault(); email.focus(); return; }
+    // there, not to a page that holds the same form. That window starts minimized to the
+    // footer (§ hide the terminal), so Login SHOWS it first — exactly as the footer's hidden
+    // window would — and then focuses the form; on a narrow screen the shown window covers
+    // the content, which is the point. Anywhere without that window (the auth tier's pages)
+    // the link goes to /login.
+    if (wsKind() === 'signin') {
+      ev.preventDefault();
+      setWsHidden(false);
+      paintWsHidden();
+      focusWs();
+      var menu = link.closest('details');
+      if (menu) { menu.open = false; }
+      return;
+    }
     link.href = '/login?next=' + encodeURIComponent(currentPage());
   }, true);
   document.addEventListener('submit', function (ev) {

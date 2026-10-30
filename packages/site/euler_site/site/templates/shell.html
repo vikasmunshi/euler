@@ -1,6 +1,6 @@
-{# `/shell` — the Terminal item's page (web-server-guide § The site).
+{# `/shell` — the Shell item's page (web-server-guide § The site).
 
-   The header's Terminal item and the section strip's Terminal tile are the only two
+   The header's Shell item and the section strip's Shell tile are the only two
    controls that point at something already on screen: the shell in the right pane. They
    still show it and focus it (data-term-show, site.js) — but a nav item that swaps
    nothing left the left pane on whatever was there, so the click read as half an act.
@@ -18,7 +18,7 @@
    as the docs pages mark their bodies), `filterable` (what the one filter can narrow:
    the shelf and the catalogue's rows together). #}
 {% extends "base.html" %}
-{% block title %}terminal — euler{% endblock %}
+{% block title %}shell — euler{% endblock %}
 {% block content %}
 {% from "_divider.html" import divider with context %}
 <header class="hero">

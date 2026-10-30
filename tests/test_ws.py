@@ -32,6 +32,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from euler_site.auth.tickets import TicketStore
 from euler_webshell.ws.app import PTY_MANAGER, build_app
+from euler_webshell.ws.manager import TermModes
 from euler_webshell.ws.config import WsConfig
 from euler_webshell.ws.pty import PtySession
 from tests import silence
@@ -216,6 +217,7 @@ class WsAttachTests(_WsServiceCase):
         opening = json.loads(await _read_text(first))   # even with no scrollback
         self.assertEqual(opening['replay'], 'end')
         self.assertRegex(opening['osc'], r'^[0-9a-f]{32}$', 'the shell\'s OSC key rides the marker')
+        self.assertEqual((opening['busy'], opening['kitty'], opening['otherKeys']), (False, [0], 0))
         await _read_until(first, b'BANNER')
 
         second = await self.client.ws_connect('/ws', headers=_HEADERS)   # replays
@@ -404,6 +406,50 @@ class RealShellTest(_WsServiceCase):
 
         await ws.send_bytes(b'exit\n')
         await _read_close(ws, timeout=60.0)                       # shell exit → drainer → close
+
+
+class TermModesTests(unittest.TestCase):
+    """The terminal state a reattach restores, kept from the whole PTY stream — so a long
+    session whose replay has lost the `busy` (or `claude`'s keyboard flags) still comes back
+    with them."""
+
+    KEY = 'ab' * 16
+
+    def osc(self, state: str, key: str = KEY) -> bytes:
+        return f'\x1b]5379;{key};{state};1700000000000\x07'.encode()
+
+    def test_busy_outlives_the_replay_buffer(self) -> None:
+        modes = TermModes(self.KEY)
+        modes.feed(self.osc('busy'))
+        modes.feed(b'x' * 1_000_000)                     # far past any replay cap
+        self.assertTrue(modes.busy)
+        modes.feed(self.osc('ready'))
+        self.assertFalse(modes.busy)
+
+    def test_a_sequence_split_across_reads_is_seen_once(self) -> None:
+        seq = self.osc('busy') + b'\x1b[>1u'
+        for cut in range(1, len(seq)):
+            modes = TermModes(self.KEY)
+            modes.feed(seq[:cut])
+            modes.feed(seq[cut:])
+            self.assertEqual((modes.busy, modes.kitty), (True, [0, 1]), cut)
+
+    def test_printed_text_without_the_key_is_ignored(self) -> None:
+        modes = TermModes(self.KEY)
+        modes.feed(self.osc('busy', key='cd' * 16))
+        self.assertFalse(modes.busy)
+
+    def test_keyboard_modes_mirror_terminal_js(self) -> None:
+        modes = TermModes(self.KEY)
+        modes.feed(b'\x1b[>1u\x1b[=4;2u\x1b[>4;2m')
+        self.assertEqual((modes.kitty, modes.other_keys), ([0, 5], 2))
+        modes.feed(b'\x1b[=1;3u')                        # clear bits
+        self.assertEqual(modes.kitty, [0, 4])
+        modes.feed(b'\x1b[<5u\x1b[>m')                   # over-pop keeps the base; reset
+        self.assertEqual((modes.kitty, modes.other_keys), ([0], 0))
+        modes.feed(b'\x1b[>1u' * 100)                     # an app that never pops
+        self.assertLessEqual(len(modes.kitty), 16)
+        self.assertEqual(modes.snapshot(), {'busy': False, 'kitty': modes.kitty, 'otherKeys': 0})
 
 
 if __name__ == '__main__':

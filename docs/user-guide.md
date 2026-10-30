@@ -99,7 +99,8 @@ problem, navigating it for another.
 
 Signed out, the same pages — solutions, docs, topics — are public: they are served from a
 packaged copy of the published content, without the private solutions and without a
-terminal; the right pane is the way to sign in.
+terminal; the right pane is the way to sign in — minimized to the footer until you click
+*Login* in the user menu.
 
 The browser's shell is the **web shell**: the same `solver` shell, plus the web host's own
 commands (`msg`, `users`, `user-authorize`, `key-split`, `host-authorize`) and a few

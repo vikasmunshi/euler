@@ -29,19 +29,19 @@
     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
     <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
     <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>
-    {# Terminal is two things at once, and this one item does both: it takes you to the
+    {# Shell is two things at once, and this one item does both: it takes you to the
        shell in the right pane — showing it when it has been hidden to the footer, and
        focusing it either way (site.js), so the next keystroke lands there — and it swaps
        the left pane to /shell, the page about the thing you were just taken to. A plain
        hx-get link, so the swap is htmx's; site.js's [data-term-show] handler does not
        preventDefault, so both halves run on the one click. #}
     <a href="/shell" hx-get="/shell" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
-       data-term-show title="go to the terminal">Terminal</a>
+       data-term-show title="go to the shell">Shell</a>
     {% else %}
     <span class="is-locked" aria-disabled="true">Solutions</span>
     <span class="is-locked" aria-disabled="true">Docs</span>
     <span class="is-locked" aria-disabled="true">Topics</span>
-    <span class="is-locked" aria-disabled="true">Terminal</span>
+    <span class="is-locked" aria-disabled="true">Shell</span>
     {% endif %}
   </nav>
   <span class="hsep" aria-hidden="true"></span>
@@ -90,13 +90,19 @@
        It used to report only. The controls lived on the terminal window's own titlebar,
        which is exactly where they are *not* reachable in the state a person most needs
        them: hide the window and the titlebar goes with it, leaving the header saying
-       "hidden" beside no way to bring it back but the nav's Terminal item. Two states, two
+       "hidden" beside no way to bring it back but the nav's Shell item. Two states, two
        rows, in the one place that is always on screen.
+
+       The public site wears the same chip over the same window — there holding the sign-in
+       rather than a session — so the window row works as it does signed in and the session
+       row's Connect is shown disabled: the shape a visitor will have once in, with the one
+       act that needs an account greyed out. The auth tier's own pages (`auth_tier`) have no
+       such window — their right pane is the dialogue itself — so the chip is inert there.
 
        Both rows carry the attributes site.js already dispatches on ([data-term-toggle],
        [data-term-hide]/[data-term-show]) — no new wiring, and the titlebar's controls keep
        working unchanged from the same single `termConnected`. #}
-    {% if subject %}
+    {% if subject or not auth_tier %}
     {# Deliberately NOT `.term-menu`: that marks a menu whose verbs type into the shell, and
        site.js dims those when the socket is down. These two act on the terminal itself, and
        Connect is exactly what someone looking at a disconnected chip came here for. #}
@@ -120,8 +126,13 @@
         {# Connect/disconnect: one control that flips, because the act on offer is always
            the opposite of the state. site.js writes the label, the title and the accessible
            name from `termConnected`, so this row can never name an act it would not take. #}
+        {% if subject %}
         <li class="verb"><button type="button" data-term-toggle>
           <span data-term-toggle-label>Connect the terminal</span></button></li>
+        {% else %}
+        <li class="verb"><button type="button" data-term-toggle disabled
+          title="Sign in to connect">Connect the terminal</button></li>
+        {% endif %}
         <li class="menu-sep" aria-hidden="true"></li>
         <li class="menu-info">Window
           <span class="menu-state"><span data-term-layout>visible</span>
@@ -137,8 +148,8 @@
       </ul>
     </details>
     {% else %}
-    {# Signed out there is no session to report — the right pane holds the sign-in
-       dialogue, not a terminal. Inert, never absent: the header keeps its shape. #}
+    {# The auth tier's pages: no window to report on — the right pane is the dialogue
+       itself. Inert, never absent: the header keeps its shape. #}
     <span class="term-chip is-locked" aria-disabled="true" title="no terminal">
       <svg class="term-glyph" viewBox="0 0 24 24" aria-hidden="true">
         <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"

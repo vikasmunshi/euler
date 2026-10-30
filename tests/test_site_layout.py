@@ -134,12 +134,22 @@ class NarrowLayoutTests(unittest.TestCase):
         self.assertIn('localStorage', wide_branch)
         self.assertIn('var narrowHidden = true;', self.site_js)
 
-    def test_login_goes_to_the_form_only_while_it_is_on_screen(self) -> None:
-        """The header's Login focuses the right pane's sign-in form instead of navigating.
-        The narrow layout hides that pane, and focusing a hidden field does nothing — which
-        left a phone with a Login that went nowhere. It must navigate to /login there."""
+    def test_login_shows_the_public_window_before_focusing_it(self) -> None:
+        """The header's Login goes to the right pane's sign-in form instead of navigating.
+        That window starts minimized, and focusing a hidden field does nothing — so Login
+        shows it first. Without that window (the auth tier's pages) it navigates to /login."""
         handler = self.site_js.split("closest('a[data-login]')")[1].split('}, true);')[0]
-        self.assertIn('email.getClientRects().length', handler)
+        shown = handler.split("if (wsKind() === 'signin') {")[1].split('return;')[0]
+        self.assertIn('setWsHidden(false)', shown)
+        self.assertLess(shown.index('paintWsHidden()'), shown.index('focusWs()'))
+        self.assertIn("link.href = '/login?next='", handler)
+
+    def test_the_public_window_starts_hidden_on_its_own_flag(self) -> None:
+        """Signed out, the sign-in window defaults to hidden, on a per-tab flag that never
+        touches what a signed-in reader chose for their terminal."""
+        hidden = self.site_js.split('function wsHidden() {')[1].split('\n  }')[0]
+        self.assertIn("sessionStorage.getItem(WS_SIGNIN_HIDDEN_KEY) !== '0'", hidden)
+        self.assertIn("localStorage.getItem(WS_HIDDEN_KEY) === '1'", hidden)
 
     def test_the_section_strip_gives_way_to_the_header_nav(self) -> None:
         """On a phone the strip is four stacked tiles repeating the header nav's links."""
@@ -147,10 +157,11 @@ class NarrowLayoutTests(unittest.TestCase):
         self.assertIn('.cards.sections { display: none; }', narrow)
 
     def test_each_page_kind_says_which_pane_leads(self) -> None:
-        """Signed out, the right pane is either the way in (hidden: the pill offers it) or,
-        on the auth pages, the page itself (shown instead of the content)."""
+        """Signed out, the right pane is either the way in (minimized: Login shows it), a
+        document's companion (terms: hidden), or, on the auth pages, the page itself (shown
+        instead of the content)."""
         base = _read(_SITE / 'site' / 'templates' / 'base.html')
-        self.assertIn('{% block body_class %}{% if not subject %}is-signin{% endif %}', base)
+        self.assertIn('{% block body_class %}{% if not subject %}ws-hidden{% endif %}', base)
         self.assertIn('is-dialogue', _read(_SITE / 'templates' / 'auth_base.html'))
         self.assertIn('is-signin', _read(_SITE / 'templates' / 'terms.html'))   # a document
         narrow = self.css.split('@media (max-width: 820px)')[1]

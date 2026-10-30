@@ -156,7 +156,20 @@
       // write is parsed, and NUL is the one byte the VT parser ignores outright, so
       // it draws nothing and lands exactly on the scrollback/live boundary. (It has
       // to be a real byte — xterm does not run the callback for an empty write.)
-      term.write('\x00', function () { live = true; });
+      //
+      // At that same boundary the frame's own account of the terminal's state replaces
+      // what the replay rebuilt (euler_webshell/ws/manager.py § TermModes). The replay is
+      // only the newest bytes: after a long session the `busy` that lent the PTY to
+      // `claude`, or the keyboard flags `claude` turned on, may have scrolled out while
+      // both still hold. The server saw every byte, and it is the shell's state rather
+      // than this tab's, so it wins. Replacing — not adding to — also undoes a reattach's
+      // replay pushing the kitty flags a second time onto the stack the last attach left.
+      term.write('\x00', function () {
+        if (Array.isArray(msg.kitty) && msg.kitty.length) { kittyFlags = msg.kitty.map(Number); }
+        if (typeof msg.otherKeys === 'number') { otherKeys = msg.otherKeys; }
+        if (typeof msg.busy === 'boolean') { setHandedOff(msg.busy); }
+        live = true;
+      });
     };
     socket.onclose = function (ev) {
       disarm();
@@ -319,8 +332,8 @@
   // The mode state is rebuilt from the attach replay as well, deliberately, and
   // unlike the OSC actions below: an action must not re-fire, but a *mode* is the
   // state of the shell we are reattaching to, still running whatever app set it.
-  // A truncated replay cannot leave us wrongly enabled — the buffer drops its
-  // oldest bytes, so an enable is lost before, or along with, its disable.
+  // A truncated replay can lose an enable that still holds, so the replay-end frame's
+  // own account of the modes replaces what the replay rebuilt (§ the socket, above).
   var kittyFlags = [0];                 // the kitty flag stack; [0] is the base entry
   var otherKeys = 0;                    // xterm's modifyOtherKeys level (0 = off)
 

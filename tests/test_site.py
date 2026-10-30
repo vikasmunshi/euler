@@ -578,10 +578,10 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('is-draft', body)                                     # …and marked as one
 
     @unittest_run_loop
-    async def test_topics_all_orders_cards_by_coverage(self) -> None:
-        """The writing queue is ordered by reach — widest coverage first, within each folder —
-        while the reader's index stays alphabetical. Both are read off the rendered grid: the
-        card link order *is* the page's order."""
+    async def test_topics_order_cards_by_coverage(self) -> None:
+        """Both views — the reader's index and the writing queue — order each folder's cards
+        by reach, widest coverage first. Read off the rendered grid: the card link order *is*
+        the page's order."""
         def links(body: str) -> list[str]:
             return re.findall(r'<a class="card[^"]*"\s+href="/topics/([^"]+)"', body)
 
@@ -590,10 +590,18 @@ class ContentServiceTests(AioHTTPTestCase):
         queue = links(await (await self.client.get('/topics/all', headers=_MAINTAINER)).text())
         index = links(await (await self.client.get('/topics/', headers=_READER)).text())
         self.assertTrue(queue and index)
-        for folder in {name.rpartition('/')[0] for name in queue}:          # per section, as rendered
-            reach = [counts[name] for name in queue if name.rpartition('/')[0] == folder]
-            self.assertEqual(reach, sorted(reach, reverse=True), folder)
-        self.assertEqual(index, sorted(index))                              # the reader: by name
+        for view in (queue, index):
+            for folder in {name.rpartition('/')[0] for name in view}:       # per section, as rendered
+                reach = [counts[name] for name in view if name.rpartition('/')[0] == folder]
+                self.assertEqual(reach, sorted(reach, reverse=True), folder)
+
+    @unittest_run_loop
+    async def test_topics_folders_fold(self) -> None:
+        """Each folder is a <details> (open by default) whose summary is the folder's
+        heading, keyed for site.js to remember what the reader folded."""
+        body = await (await self.client.get('/topics/', headers=_READER)).text()
+        self.assertIn('<details class="fold topic-group" open data-fold="', body)
+        self.assertIn('<summary class="subrule fold-summary"><h3>', body)
 
     @unittest_run_loop
     async def test_topics_all_is_not_swallowed_by_the_page_route(self) -> None:

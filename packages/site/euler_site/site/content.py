@@ -1129,8 +1129,7 @@ def _count(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
-def list_topic_groups(repo_root: Path, *, drafts: bool = False,
-                      by_coverage: bool = False) -> list[TopicGroup]:
+def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGroup]:
     """The topics index, folded by folder.
 
     The article index is the source when it is there (it alone knows each page's status);
@@ -1142,12 +1141,12 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False,
     writing queue. A statusless fallback (no index on disk) lists everything either way —
     there is nothing to filter on, and showing nothing would be worse.
 
-    `by_coverage` orders the cards within each folder by *reach* — the problems the topic's
-    tags cover, the count the card already shows — widest first, ties broken by path so the
-    order is stable. It is the writing queue's order: alphabetical says nothing about what
-    is worth writing next, and the number the maintainer is choosing on is the one on the
-    card. Entries with no count (a tree read without the index) sort last, keeping their
-    path order. The reader's index stays alphabetical, where a page is looked up by name.
+    Within each folder the cards are ordered by *reach* — the problems the topic's tags
+    cover, the count the card already shows — widest first, ties broken by path so the order
+    is stable. For the reader it puts the ideas that matter most to the problem set first
+    (a page is looked up by name through the filter, not by scanning an alphabet); for the
+    maintainer's writing queue it is what is worth writing next. Entries with no count (a
+    tree read without the index) sort last, keeping their path order.
 
     The folder is the section heading, so each card drops the trail and shows only
     its leaf heading. Groups come out in path order, the pages loose at the root of
@@ -1167,8 +1166,10 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False,
         heading = _filename_heading(leaf)
         title = entry.title or leaf
         groups.setdefault(folder, []).append(entry._replace(heading=heading, title=title))
-    order = (lambda e: (-(e.problems if e.problems is not None else -1), e.name)) if by_coverage \
-        else (lambda e: (0, e.name))
+
+    def order(entry: DocEntry) -> tuple[int, str]:
+        return -(entry.problems if entry.problems is not None else -1), entry.name
+
     return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
                        entries=sorted(entries, key=order))
             for folder, entries in sorted(groups.items())]

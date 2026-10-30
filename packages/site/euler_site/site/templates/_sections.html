@@ -1,4 +1,4 @@
-{# The section strip — Solutions · Docs · Topics · Terminal — as ONE definition, opening
+{# The section strip — Solutions · Docs · Topics · Shell — as ONE definition, opening
    every one of the five index pages: the start page (`_home.html`, rendered by both
    tiers), solutions, docs, topics and the terminal page. One place to add a fifth
    section, and five pages that grow it.
@@ -61,7 +61,7 @@
    body face where there is only the section's own words (site.css § the tile — a tile
    says ONE thing about itself, and which face it wears says which kind of thing it is).
    The progress hairline follows the same rule as everywhere else: it appears only where
-   a fraction is a real fact, so Docs and Terminal have none rather than an empty one. #}
+   a fraction is a real fact, so Docs and Shell have none rather than an empty one. #}
 {% macro line(key, desc) %}
 {% if not sections %}
   <span class="card-desc">{{ desc }}</span>
@@ -95,6 +95,6 @@
      swaps the pane to /shell like any tile, and (data-term-show, site.js) brings the
      terminal back when it has been hidden to the footer, focusing it either way. The
      socket is untouched: Connect/Disconnect lives on the terminal's own titlebar. #}
-  {{ tile('terminal', '/shell', '❯', 'Terminal',
+  {{ tile('terminal', '/shell', '❯', 'Shell',
           'A real solver shell, in the right pane. Yours once you sign in.') }}
 </nav>

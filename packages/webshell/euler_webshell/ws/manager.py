@@ -17,13 +17,20 @@ blocks on a full kernel buffer while disconnected — appending output to a
 bounded replay buffer and fanning it out to every attached socket. On
 (re)attach the buffer is replayed so the reconnecting terminal redraws its
 recent scrollback and live prompt instead of a blank screen.
+
+The buffer is bounded, so a long session can push out the sequence that set a terminal
+*mode* while the mode still holds — the `busy` that lent the PTY to `claude`, the kitty
+keyboard flags `claude` turned on. :class:`TermModes` watches the same stream and the
+replay's end frame carries what it saw, so a reattach restores the state the replay alone
+can no longer promise.
 """
 from __future__ import annotations
 
-__all__ = ['PersistentPty', 'PtyManager', 'replay_end']
+__all__ = ['PersistentPty', 'PtyManager', 'TermModes', 'replay_end']
 
 import asyncio
 import json
+import re
 import time
 from typing import Awaitable, Callable
 
@@ -35,7 +42,92 @@ from euler_webshell.ws.pty import PtySession
 _REPLAY_CAP: int = 256 * 1024
 
 
-def replay_end(osc_key: str) -> str:
+#: The sequences :class:`TermModes` follows: the web shell's OSC 5379 `busy` / `ready`
+#: (group 1 the key, 2 the state) and the keyboard-mode CSIs terminal.js obeys — kitty's
+#: `CSI > f u` / `CSI < n u` / `CSI = f ; m u` and XTMODKEYS `CSI > r ; v m` (group 3 the
+#: prefix, 4 the parameters, 5 the final).
+_MODE_RE = re.compile(rb'\x1b\]5379;([^;\x07\x1b]*);(busy|ready)[^\x07\x1b]*\x07'
+                      rb'|\x1b\[([<>=])([0-9;]*)([um])')
+
+#: A sequence split across two PTY reads is held back at most this long (bytes) awaiting
+#: its end; the longest one followed here — the OSC, with its 32-hex key — is under 80.
+_MODE_CARRY: int = 256
+
+#: The kitty flag stack's depth bound. The protocol lets a terminal cap it; this one keeps
+#: an app that pushes without popping from growing it without end.
+_KITTY_DEPTH: int = 16
+
+
+class TermModes:
+    """The terminal state a reattach must restore, kept from the whole PTY stream.
+
+    The replay rebuilds it in the browser too (terminal.js), but only from the bytes the
+    buffer still holds: after a long session the `busy` that lent the PTY to `claude` has
+    scrolled out while `claude` still runs, and the page comes back offering to type into
+    it. This sees every byte, so it does not forget — and it is the shell's state, not one
+    tab's, so it is right for a second tab, another device, or a browser restarted since.
+
+    It mirrors terminal.js's handlers exactly (§ the OSC handler, § modified Enter), and
+    :meth:`snapshot` is what the replay's end frame carries for the page to adopt.
+    """
+
+    def __init__(self, osc_key: str) -> None:
+        self._key = osc_key.encode()
+        self.busy = False
+        self.kitty: list[int] = [0]       # the kitty flag stack; [0] is the base entry
+        self.other_keys = 0               # xterm's modifyOtherKeys level (0 = off)
+        self._pending = b''
+
+    def feed(self, data: bytes) -> None:
+        """Follow one PTY read. A sequence cut by the read's edge is held for the next."""
+        data = self._pending + data
+        end = 0
+        for match in _MODE_RE.finditer(data):
+            self._apply(match)
+            end = match.end()
+        tail = data[end:]
+        esc = tail.rfind(b'\x1b')
+        self._pending = tail[esc:] if esc != -1 and len(tail) - esc <= _MODE_CARRY else b''
+
+    def _apply(self, match: re.Match[bytes]) -> None:
+        key, state, prefix, raw, final = match.groups()
+        if state is not None:
+            if self._key and key == self._key:    # printed text does not know the key
+                self.busy = state == b'busy'
+            return
+        params = [int(p) if p else None for p in raw.split(b';')]
+
+        def param(index: int, fallback: int) -> int:
+            value = params[index] if index < len(params) else None
+            return fallback if value is None else value
+
+        if final == b'm':
+            if prefix == b'>':
+                resource = param(0, 0)
+                if resource == 0:
+                    self.other_keys = 0
+                elif resource == 4:
+                    self.other_keys = param(1, 0)
+        elif prefix == b'>':
+            self.kitty.append(param(0, 0))
+            if len(self.kitty) > _KITTY_DEPTH:
+                del self.kitty[1]
+        elif prefix == b'<':
+            count = param(0, 1) or 1
+            while count > 0 and len(self.kitty) > 1:
+                self.kitty.pop()
+                count -= 1
+        else:                                     # '=': 1 assign, 2 set bits, 3 clear bits
+            flags, mode = param(0, 0), param(1, 1) or 1
+            top = self.kitty[-1]
+            self.kitty[-1] = top | flags if mode == 2 else top & ~flags if mode == 3 else flags
+
+    def snapshot(self) -> dict[str, object]:
+        """The state as the replay's end frame carries it (terminal.js adopts it)."""
+        return {'busy': self.busy, 'kitty': list(self.kitty), 'otherKeys': self.other_keys}
+
+
+def replay_end(osc_key: str, modes: TermModes | None = None) -> str:
     """The text frame closing the replay on attach, carrying the shell's OSC key.
 
     Everything before it is scrollback, everything after is live. The client must not act
@@ -43,8 +135,12 @@ def replay_end(osc_key: str) -> str:
     pane on every load) — see :meth:`PersistentPty.attach`. And a text frame never enters
     the replay buffer and cannot be written by the PTY, so the key reaches the page by a
     path no printed text can imitate.
+
+    With *modes* it also carries the terminal's state (:class:`TermModes`), which the page
+    adopts over whatever the replay rebuilt — the replay may have lost the sequence that
+    set it.
     """
-    return json.dumps({'replay': 'end', 'osc': osc_key})
+    return json.dumps({'replay': 'end', 'osc': osc_key, **(modes.snapshot() if modes else {})})
 
 
 class PersistentPty:
@@ -64,6 +160,7 @@ class PersistentPty:
         self._reader: asyncio.Task[None] | None = None
         self._closed = False
         self._detached_since: float = time.monotonic()  # zero subscribers since (the reaper)
+        self._modes = TermModes(getattr(session, 'osc_key', ''))
 
     def start(self) -> None:
         """Launch the background drainer task (call once, right after construction)."""
@@ -87,7 +184,11 @@ class PersistentPty:
     # -- output path --------------------------------------------------------
 
     def _append(self, data: bytes) -> None:
-        """Append output to the replay buffer, trimming to the newest `_cap` bytes."""
+        """Append output to the replay buffer, trimming to the newest `_cap` bytes.
+
+        The modes are followed here too, before the trim: they outlive the bytes that set them.
+        """
+        self._modes.feed(data)
         self._buffer.extend(data)
         if len(self._buffer) > self._cap:
             del self._buffer[:len(self._buffer) - self._cap]
@@ -146,7 +247,7 @@ class PersistentPty:
         try:
             if self._buffer:
                 await ws.send_bytes(bytes(self._buffer))
-            await ws.send_str(replay_end(getattr(self.session, 'osc_key', '')))
+            await ws.send_str(replay_end(getattr(self.session, 'osc_key', ''), self._modes))
         except (ConnectionError, RuntimeError):
             self.detach(ws)
 

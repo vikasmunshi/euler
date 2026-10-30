@@ -231,6 +231,9 @@ details.menu > summary:hover { color: var(--text); background: color-mix(in srgb
   cursor: pointer;
 }
 .menu-list a:hover, .menu-list button:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+/* A row on offer but not now (the public site's Connect: nothing to connect until you sign in). */
+.menu-list button:disabled { color: var(--muted); cursor: not-allowed; }
+.menu-list button:disabled:hover { background: none; }
 .menu-list form { margin: 0; }
 .menu-info { padding: 0.4rem 0.7rem 0.5rem; color: var(--muted); font-size: 0.85rem;
              border-bottom: 1px solid var(--border); margin-bottom: 0.3rem; }
@@ -574,6 +577,14 @@ body.term-busy [data-term-cmd]:hover { background: none; }
 }
 .ws-conn:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .ws-conn .dot { flex: none; }
+/* The public site's window: the same dot, with nothing to connect until you sign in. */
+.ws-conn:disabled { cursor: not-allowed; opacity: 0.55; }
+.ws-conn:disabled:hover { background: none; }
+/* …and its occupant, the sign-in, where the iframe would be. The window already draws the
+   frame, so the dialogue's own pane drops its border and radius rather than nesting a
+   second box inside the first. */
+.ws-signin { flex: 1; min-height: 0; display: flex; }
+.ws-signin .auth-pane { border: 0; border-radius: 0; }
 
 /* ── Hide the terminal to the footer: layout only, socket untouched ─────────── */
 /* Hidden: the panes become a single column and the terminal pane is not rendered, so
@@ -1587,7 +1598,8 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
    page's tag facets and the topics index's folders read as the same kind of break. */
 /* The filter hides via the [hidden] attribute, which the display rules on these
    elements would otherwise override — so [hidden] wins here explicitly. */
-.card[hidden], nav.cards[hidden], .subrule[hidden], .century[hidden] { display: none !important; }
+.card[hidden], nav.cards[hidden], .subrule[hidden], .century[hidden],
+.topic-group[hidden] { display: none !important; }
 .catalogue tr[hidden], .catalogue table[hidden] { display: none !important; }
 
 /* ── The command catalogue, below the shelf on the terminal page ─────────────
@@ -1615,6 +1627,10 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 }
 .subrule .count { font-size: 0.7rem; color: var(--muted); }
 .subrule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+/* The topics index's folders fold (topics.html): the .subrule is the <details>' summary, and
+   the .fold marker (›, turning ⌄ when open) leads it. The rule keeps its own spacing, open
+   or folded — the panel fold's open margin would push the cards a line further down. */
+.topic-group > summary.subrule { align-items: center; margin: 0.95rem 0 0.6rem; }
 
 .topic-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
 @media (max-width: 700px) { .topic-cards { grid-template-columns: 1fr; } }
@@ -1648,9 +1664,11 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
    The shell still fills exactly one viewport; `dvh` is the one a phone's collapsing
    toolbars do not overflow.
 
-   The body's class says which pane a page leads with (base.html § body_class): signed
-   out, `is-signin` shows the content alone (the header's pill is the way in) and
-   `is-dialogue` — the auth pages — shows the dialogue alone, because there it is the page.
+   The body's class says which pane a page leads with (base.html § body_class): the public
+   site's pages arrive `ws-hidden` (its sign-in window is minimized, like a phone's
+   terminal, and Login brings it back); the auth tier's terms page, `is-signin`, shows the
+   content alone; and `is-dialogue` — the other auth pages — shows the dialogue alone,
+   because there it is the page.
 
    The header keeps one control surface but sheds what a phone cannot spare: the
    separators, the breadcrumbs (the pane's back arrow and the page's own heading carry
@@ -1660,7 +1678,7 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
    who you are (back, refresh, bookmarks · the chips, the theme, the pill) below. The
    break is a zero-height pseudo-element ordered between the two groups.
 
-   The section strip (_sections.html: Solutions · Docs · Topics · Terminal) goes too. On a
+   The section strip (_sections.html: Solutions · Docs · Topics · Shell) goes too. On a
    wide screen it is the pages' own way across, with counts; on a phone it is four stacked
    tiles above the content, repeating the four links the header's nav already holds. */
 @media (max-width: 820px) {

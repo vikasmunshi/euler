@@ -289,7 +289,8 @@ and remember-me token — and destroys the vault, deliberately (§8.2).
 right pane *is* the sign-in form — the `/login` page's own (`_loginform.html`), marked
 `data-next-here` — and once the handshake succeeds `login.js` reloads the page the left pane
 shows at that moment, which, now carrying a session, is served by the reader's own instance.
-The header's *Login* link there just focuses the form. Elsewhere sign-in and sign-out are
+That pane starts minimized to the footer, so the header's *Login* link there *shows* it (the
+same act as the footer's hidden window) and focuses the form. Elsewhere sign-in and sign-out are
 full-page trips through this service, so the page the left pane is on travels with them as
 `next`: the header's *Login* link carries `/login?next=<path>`, the *Logout* form a `next`
 field, and Caddy's redirect of an expired session `?next=` its path. `site.js` stamps the live
@@ -1134,7 +1135,14 @@ In the templates, `browsable` (navigation is live: a subject, or the public site
 from `subject` (what is *yours*: Actions, the terminal, the chips, the account). On the public
 site the right pane, where the terminal would be, is the way in: the sign-in form itself
 (`_signin.html`, the `/login` page's form from `_loginform.html`), so signing in costs no
-extra page. The public
+extra page. It sits in the **same window** a signed-in reader's terminal does — the titlebar,
+its connect dot shown *disabled* (nothing to connect until you sign in) and its hide button
+live, the header's terminal chip with the same two rows, the footer's hidden window — so the
+pane looks and behaves as it will after sign-in. Unlike the terminal it **starts hidden**
+(rendered `ws-hidden`, so a no-JS page is never covered by it), on its own per-tab flag
+(`sessionStorage`), and the header's *Login* brings it back. The auth tier's own pages pass
+`auth_tier`, which keeps the chip and the footer window inert there: their right pane is the
+dialogue itself. The public
 copy is as current as the last `make redeploy-web` — it is versioned with the code (the
 release that installed it), where a signed-in visitor sees their clone as it is.
 
@@ -1180,8 +1188,9 @@ pane scrolls its own overflow.
   **Bookmarks** (`_bookmarks.html`) is the third of those marks and the one that leaves:
   everything in it opens in a tab of its own. Almost all of it is the places the work
   refers to that this app does not host — Project Euler (site, archive, your progress),
-  the repository and its pull requests, and the three references a solver actually opens
-  mid-problem (OEIS, MathWorld, the Python docs). The two same-origin entries are **The Euler
+  the repository and its pull requests, and the five references a solver actually opens
+  mid-problem (OEIS, MathWorld, Wolfram|Alpha to check a result, and the standard library
+  docs of both solution languages — Python's and cppreference's C). The two same-origin entries are **The Euler
   story**, the presentation deck at `/story/` (§ 11.5, The story deck), and **The source
   code**, the code viewer at `/code/` (§ 11.5, The code viewer): this host serves both, but
   as pages of their own rather than pane views, so they belong with the links that leave. They are a menu rather than nav items because the nav names pages this app
@@ -1217,7 +1226,7 @@ pane scrolls its own overflow.
   **And it offers the act for each.** The chip used to report only, with every control on
   the terminal window's own titlebar — which is exactly where they are unreachable in the
   state a person most needs them: hide the window and the titlebar goes with it, leaving the
-  header saying "hidden" beside no way to bring it back but the nav's Terminal item. It is
+  header saying "hidden" beside no way to bring it back but the nav's Shell item. It is
   now a `<details class="menu">` on the same chassis as messages, git and the user pill, with
   a row per state: **connect/disconnect** and **hide/show**. The titlebar's controls are
   unchanged and stay the closest ones to hand while the window is there.
@@ -1421,7 +1430,7 @@ screen, waiting in the footer, so a phone opens on the content. A pane that *mov
 another page hides it again — the header's nav, the back arrow, the shell's `show` each
 asked to see a page — but a re-render of the same page (the refresh arrow, a nudge from
 the shell after a command) does not, or the terminal would vanish mid-typing, and neither
-does a control that asks for the terminal too (`[data-term-show]`: the nav's Terminal item).
+does a control that asks for the terminal too (`[data-term-show]`: the nav's Shell item).
 The narrow state is the document's own: never written to storage, so showing the terminal
 on a phone does not change what a wide screen remembers, and the wide flag never opens a
 terminal under a phone's reader. Crossing the breakpoint repaints from whichever flag now
@@ -1432,11 +1441,12 @@ Form fields are 16px at this width. iOS zooms the page into any focused field se
 and does not zoom back out, and the site's 13px root put every field there — the sign-in
 form, the filters, the editor's buffer and xterm's hidden input alike.
 
-Signed out, the body's class says which pane leads (`base.html` § `body_class`):
-`is-signin` on the content pages shows the content alone, since the right pane is only the
-way in and the header's pill offers the same; `is-dialogue` on the auth pages
-(`auth_base.html`) shows the dialogue alone, because there it *is* the page (the terms
-page, a document, takes `is-signin`). The header keeps one control surface but sheds what
+Signed out, the body's class says which pane leads (`base.html` § `body_class`): the
+public site's pages arrive `ws-hidden`, so the content leads and the sign-in window waits in
+the footer exactly as a phone's terminal does (Login shows it, covering the content);
+`is-dialogue` on the auth pages (`auth_base.html`) shows the dialogue alone, because there it
+*is* the page; and the terms page, a document, takes `is-signin`, which shows the content
+alone. The header keeps one control surface but sheds what
 a phone cannot spare — the separators, the breadcrumbs, the formula beside the glyph, the
 controls that are locked anyway — and breaks onto two rows at a fixed place: where to go
 (brand, nav, Actions) above, where you are and who you are (back, refresh, bookmarks; the
@@ -1483,7 +1493,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 |---|---|---|---|
 | GET | `/` | the app shell; left pane = landing (`_home.html` + README), right pane = the `/terminal` iframe | reader |
 | GET | `/terminal` | the right pane's standalone document: xterm.js + the `/ws` client | reader |
-| GET | `/shell` | the Terminal item's target page: the four start tiles + `docs/user-guide.md` | reader |
+| GET | `/shell` | the Shell item's target page: the four start tiles + `docs/user-guide.md` | reader |
 | GET | `/solutions/` | `problems.json` as 10×10 century grids + summary | reader |
 | GET | `/solutions/{n}/` | statement, then test cases · results · files · notes | reader |
 | GET | `/solutions/{n}/{filename}` | one problem file | reader |
@@ -1607,7 +1617,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   **The section strip** (`_sections.html`, one definition for all five pages) carries live
   **counts**, not prose: it repeats the header's nav on every page, so it has to say
   something the header cannot — how much is solved, how much is written, whether the shell
-  is up. The Terminal tile's line is the socket itself, painted by `site.js` from the
+  is up. The Shell tile's line is the socket itself, painted by `site.js` from the
   iframe's report (`[data-term-dot]`, `[data-term-state]`), never asserted by the server.
   The counts come from `content.section_state` — `problems.json`, a `docs/` scan, and the
   **union** (not the sum) of the problems the finished topic articles reach.
@@ -1622,7 +1632,9 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   **The divider** (`_divider.html`) is the `.subrule` device — a mono label trailed by a
   hairline — doing three jobs: it names the region below, it **narrows** it, and the count
   at the end of the rule is the count of what survived. Typing hides the cards that miss
-  and folds away a folder heading whose whole grid went; on the century grids it **dims**
+  and folds away a folder heading whose whole grid went (on `/topics/` each folder is itself
+  a `<details>` the reader can fold — remembered for the session — which a live query opens
+  wherever it matched; its cards run widest reach first, `content.list_topic_groups`); on the century grids it **dims**
   instead, because a cell's position is what says which problem it is and hiding the misses
   would renumber the grid under the reader. The query is remembered per section for the
   browser session (`sessionStorage`), so returning to the topics resumes the narrowed view
@@ -1635,7 +1647,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   standing at a prompt is actually looking for. It closes the page instead of a link out
   to the docs index: a page about the shell should end with what to type into it. The one
   filter narrows the shelf and the catalogue's rows together, so `git` leaves the git
-  commands standing. `/shell` is what the header's Terminal item and the Terminal tile
+  commands standing. `/shell` is what the header's Shell item and the Shell tile
   swap into the pane while they show and focus the shell: the page about the thing the
   click just took you to. Not to be confused with `/terminal`, which *is* the shell (the
   right pane's own document).
@@ -1677,7 +1689,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   viewport the grid drops to two and below 700px to one, because under ~150px a tile
   truncates its own title.
 
-  The **Terminal** tile, and the header's Terminal item with it, points at two things at
+  The **Shell** tile, and the header's Shell item with it, points at two things at
   once: the shell already here in the right pane, and `/shell`, the page *about* it. So
   each is an ordinary `hx-get` link that also carries `[data-term-show]` — the pane swaps
   to `/shell`, and the terminal is *shown* when it has been hidden to the footer and
@@ -2247,6 +2259,19 @@ interactive child (`run_interactive`), and a header verb clicked meanwhile would
 pair is a *state*, rebuilt from the attach replay (the later one wins), so a reconnect
 mid-subshell comes back disabled. The child cannot forge `ready`: it never had the key.
 
+**State outlives the replay.** The replay is only the newest 256 KiB, and a long `claude`
+session repaints far more than that — the `busy` that opened it scrolls out while it still
+runs, and a reconnect would come back offering to type `git-sync` into it. So the per-user
+service follows the states through the *whole* stream as it drains the PTY
+(`ws/manager.py` § `TermModes`: `busy`/`ready` under the shell's key, and the keyboard modes
+below), and the replay-end frame carries them — `{"replay":"end","osc":…,"busy":…,"kitty":
+[…],"otherKeys":…}`. `terminal.js` adopts them at the replay/live boundary, over whatever the
+replay rebuilt. The state lives with the shell rather than in the browser: one shell is shared
+by every tab and device a collaborator attaches from, and a browser-side copy (a variable,
+`sessionStorage`, a cookie) would be one tab's memory of a state that can change while it is
+away — a second tab exits the subshell, the browser restarts — where the server saw every
+byte.
+
 **Enter carries its modifiers — when the application asked for them.** xterm.js sends Enter
 as a bare CR whatever else is held down (its keyboard knows only Alt, as ESC CR), so
 Shift-Enter used to reach the PTY indistinguishable from Enter, and the tools that read that
@@ -2265,8 +2290,10 @@ prompt-toolkit accepts the line on all three, exactly as it did on a bare CR.
 
 Modes, unlike the OSC actions above, *are* rebuilt from the replay. An action must not
 re-fire; a mode is the state of the shell being reattached to, still running whatever app set
-it — and since the buffer drops its oldest bytes, an enable can only be lost before, or along
-with, its disable, never after. The kitty **query** (`CSI ? u`) is deliberately left
+it. The replay alone can lose an enable that still holds (it drops its oldest bytes), so the
+replay-end frame's `kitty` / `otherKeys` — followed through the whole stream server-side, as
+above — replace what the replay rebuilt; replacing rather than adding also stops a reattach
+pushing the same kitty flags onto the stack a second time. The kitty **query** (`CSI ? u`) is deliberately left
 unanswered: this client encodes Enter and nothing else, so advertising a flag set would
 promise an app the disambiguated Esc and Tab it would then sit waiting for.
 

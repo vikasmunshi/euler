@@ -56,11 +56,13 @@
 </head>
 {# The body's class says which pane a NARROW screen leads with (site.css § The narrow
    layout), where the two panes stack instead of sitting side by side. Signed in, nothing:
-   the content leads and the terminal sits below it. Signed out, `is-signin`: the right
-   pane is only the way in, which the header's pill also offers, so a phone shows the
-   content alone. The auth pages override it (auth_base.html), because there the right
-   pane IS the page. #}
-<body class="{% block body_class %}{% if not subject %}is-signin{% endif %}{% endblock %}">
+   the content leads and the terminal sits below it. On the public site, `ws-hidden`: the
+   right pane is the same window, holding the way in rather than a session, and it starts
+   minimized to the footer — the content is what a visitor came for, and the header's
+   Login brings the window back (site.js § hide the terminal). Rendered server-side, so a
+   page without JS — which cannot sign in anyway — never has its content covered by it.
+   The auth pages override it (auth_base.html), because there the right pane IS the page. #}
+<body class="{% block body_class %}{% if not subject %}ws-hidden{% endif %}{% endblock %}">
   {% include "_nav.html" %}
   {# The two equal middle panes (web-server-guide § The site): together with header + footer
      they fill the viewport exactly — the page never scrolls, each pane does.
@@ -75,10 +77,6 @@
     </main>
     <aside id="ws" class="pane pane-ws" aria-label="{% block ws_label %}solver terminal{% endblock %}">
       {% block ws %}
-      {% if not subject %}
-      {# The public site: no session, so no terminal — the way in, where the terminal would be. #}
-      {% include "_signin.html" %}
-      {% else %}
       {# The terminal's titlebar: its name, then the two controls this window owns —
          connect/disconnect, and hide. They sit here, on the window they act on,
          rather than in the user menu: the session is a property of this pane, and a
@@ -91,7 +89,10 @@
          header's own chip keeps reporting both states while this bar is collapsed away.
 
          In the default ws block, so the signed-out auth pages (which override it) get
-         no titlebar. #}
+         no titlebar. The public site keeps it: there the window is the same window,
+         holding the way in instead of a session, so connect is shown and DISABLED (there
+         is nothing to connect until you sign in) and hide works exactly as it does
+         signed in. [data-ws-signin] is what tells site.js this window has no terminal. #}
       <div class="ws-bar">
         <span class="ws-bar-title">solver terminal</span>
         <span class="ws-bar-controls">
@@ -100,18 +101,29 @@
              its title (and its accessible name), which site.js flips with the state. It
              renders DISCONNECTED — the markup is served before the terminal has said
              anything — and is painted from the iframe's first report. #}
+          {% if subject %}
           <button type="button" class="ws-conn" data-term-toggle
                   title="Connect the terminal" aria-label="Connect the terminal">
             <span class="dot off" data-term-dot></span>
           </button>
+          {% else %}
+          <button type="button" class="ws-conn" data-term-toggle disabled
+                  title="Sign in to connect" aria-label="Sign in to connect">
+            <span class="dot off" data-term-dot></span>
+          </button>
+          {% endif %}
           <button type="button" class="ws-hide" data-term-hide
                   aria-label="hide terminal" title="hide terminal">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 19h12v2H6z"/></svg>
           </button>
         </span>
       </div>
+      {% if subject %}
       <iframe id="terminal" class="terminal-frame" src="/terminal"
               title="solver terminal"></iframe>
+      {% else %}
+      {# The public site: no session, so no terminal — the way in, where the terminal will be. #}
+      <div class="ws-signin" data-ws-signin>{% include "_signin.html" %}</div>
       {% endif %}
       {% endblock %}
     </aside>
@@ -152,8 +164,10 @@
     {% endif %}
     {# The hidden terminal, last in the row: present only while the terminal is
        hidden (site.js toggles body.ws-hidden on the CSS), and taking no room at
-       all otherwise — the documents simply sit at the right edge until it appears. #}
-    {% if subject %}
+       all otherwise — the documents simply sit at the right edge until it appears.
+       On the public site too, where the hidden window is the sign-in; not on the auth
+       tier's own pages (`auth_tier`), whose right pane is the page and never hides. #}
+    {% if subject or not auth_tier %}
     <button type="button" class="ws-show" data-term-show
             title="show the terminal">
       {# A window, collapsed to its titlebar: the window figure, its name in the

@@ -509,7 +509,11 @@ def build_public_app(service: AuthService) -> web.Application:
         # Signed out, the content is still browsable: the public site serves it, so the start
         # page's tiles and the header's nav lead there rather than wearing padlocks.
         # `page_path` stays empty: an auth page is never the place a sign-in returns to.
-        return {'subject': subject, 'browsable': True, 'page_path': '', 'readme_html': content.readme_html()}
+        # `auth_tier`: the right pane here is the page's own dialogue, not the public site's
+        # minimizable window, so the header's terminal chip and the footer's hidden window
+        # (which act on that window) stay inert — the content tiers never set it.
+        return {'subject': subject, 'browsable': True, 'page_path': '', 'auth_tier': True,
+                'readme_html': content.readme_html()}
 
     app = web.Application(
         middlewares=[cache_middleware, csp_middleware, aiohttp_jinja2.context_processors_middleware])

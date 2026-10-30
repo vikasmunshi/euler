@@ -28,7 +28,7 @@
            filter='Filter by name, slug or facet…' if groups else '',
            note='nothing to filter yet') }}
 {% if groups %}
-{# One section per folder of topics/: the folder is the heading, so the cards below
+{# One section per folder of topics/: the folder is the (foldable) heading, so the cards below
    carry only their leaf name and pack four to a row. A card's second line is the
    topic's REACH — "n of m", the problems its tags cover (from topics/articles.json,
    maintained by `update-tags`) against every published problem (problems.json). It
@@ -36,11 +36,19 @@
    card's first line; the title stays as the card's tooltip and in the filter's
    haystack. A tree read without the index has no counts, and falls back to the title. #}
 {% for g in groups %}
-{# The folder's own count tracks the filter (site.js § the pane filter), like the
+{# Each folder folds: its heading is the summary of a <details>, so a reader can put away
+   the categories they are not reading and keep the page to the one they are. Open by
+   default — the server cannot know what you folded — and site.js (§ the pane filter)
+   restores the folds you chose this sitting, keyed by `data-fold`. Cards inside a folder
+   run widest reach first (content.list_topic_groups).
+
+   The folder's own count tracks the filter (site.js § the pane filter), like the
    divider's above it: a heading that still claimed seven over two visible cards would be
-   the one number on the page that is not what you are looking at. #}
-<div class="subrule"><h3>{{ g.heading }}</h3>
-  <span class="count" data-group-count>{{ g.entries | length }}</span></div>
+   the one number on the page that is not what you are looking at. A live filter also
+   opens every folder it has a match in — a match folded out of sight is not a match. #}
+<details class="fold topic-group" open data-fold="{{ g.name or '-' }}">
+<summary class="subrule fold-summary"><h3>{{ g.heading }}</h3>
+  <span class="count" data-group-count>{{ g.entries | length }}</span></summary>
 <nav class="cards" aria-label="{{ g.heading }} topics">
   {% for e in g.entries %}
   {# The same tile the home, docs and solutions pages wear (site.css § the tile): glyph ·
@@ -72,6 +80,7 @@
   </a>
   {% endfor %}
 </nav>
+</details>
 {% endfor %}
 {% else %}
 <p class="muted">Nothing written yet — the mathematics is still oral tradition.
