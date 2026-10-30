@@ -1,5 +1,5 @@
 <!-- tags: [finite-state-machine] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T12:36Z -->
 # Finite-state machine
 
 A [finite-state machine](https://en.wikipedia.org/wiki/Finite-state_machine) reads a string one
