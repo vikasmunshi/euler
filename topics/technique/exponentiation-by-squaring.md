@@ -216,6 +216,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0670](/solutions/0670/) — Colouring a Strip
+- ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0778](/solutions/0778/) — Freshman's Product

@@ -188,6 +188,7 @@ Python original and both produce a plausible wrong number rather than a crash.
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0700](/solutions/0700/) — Eulercoin
+- ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0725](/solutions/0725/) — Digit Sum Numbers

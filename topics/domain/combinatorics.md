@@ -408,7 +408,6 @@ of crossing it.
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ○ [0701](/solutions/0701/) — Random Connected Area
 - ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
-- ○ [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0707](/solutions/0707/) — Lights Out
 - ○ [0709](/solutions/0709/) — Even Stevens
 - ● [0710](/solutions/0710/) — One Million Members
