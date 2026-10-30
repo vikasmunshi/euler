@@ -775,19 +775,19 @@
   }
 
   // ── folds ──────────────────────────────────────────────────────────────────
-  // The topics index's folders ([data-fold], topics.html) render folded, and the ones you
-  // opened are remembered for the sitting, like the scroll and the filter beside them
-  // (sessionStorage: where you are, not a standing preference), and reopened as the page
+  // The topics index's folders ([data-fold], topics.html) render open, and the ones you
+  // closed are remembered for the sitting, like the scroll and the filter beside them
+  // (sessionStorage: where you are, not a standing preference), and re-folded as the page
   // arrives. A toggle made while a query is live is the filter's doing (it opens what it
   // matched), not the reader's, so it is not recorded.
-  var FOLDS_KEY = 'euler:folds-open';
-  function openFolds() {
+  var FOLDS_KEY = 'euler:folds';
+  function closedFolds() {
     try { return JSON.parse(sessionStorage.getItem(FOLDS_KEY) || '[]') || []; } catch (e) { return []; }
   }
   function paintFolds(root) {
-    var opened = openFolds();
+    var closed = closedFolds();
     (root || document).querySelectorAll('details[data-fold]').forEach(function (fold) {
-      fold.open = opened.indexOf(fold.getAttribute('data-fold')) !== -1;
+      fold.open = closed.indexOf(fold.getAttribute('data-fold')) === -1;
     });
   }
   // Expand all / collapse all ([data-folds], _divider.html): every fold in the pane at once,
@@ -801,7 +801,7 @@
       fold.open = open;
       names.push(fold.getAttribute('data-fold'));
     });
-    try { sessionStorage.setItem(FOLDS_KEY, JSON.stringify(open ? names : [])); } catch (e) { /* private mode */ }
+    try { sessionStorage.setItem(FOLDS_KEY, JSON.stringify(open ? [] : names)); } catch (e) { /* private mode */ }
   });
 
   // `toggle` does not bubble, so it is caught on the way down.
@@ -811,9 +811,9 @@
     var input = document.querySelector('.pane-filter');
     if (input && input.value.trim()) { return; }
     var name = fold.getAttribute('data-fold');
-    var opened = openFolds().filter(function (n) { return n !== name; });
-    if (fold.open) { opened.push(name); }
-    try { sessionStorage.setItem(FOLDS_KEY, JSON.stringify(opened)); } catch (e) { /* private mode */ }
+    var closed = closedFolds().filter(function (n) { return n !== name; });
+    if (!fold.open) { closed.push(name); }
+    try { sessionStorage.setItem(FOLDS_KEY, JSON.stringify(closed)); } catch (e) { /* private mode */ }
   }, true);
 
   function hay(el) {
@@ -863,7 +863,7 @@
         if (q && visible) { fold.open = true; }
       }
     });
-    // With the box empty the folds are the reader's again: what they opened this sitting.
+    // With the box empty the folds are the reader's again: what they folded this sitting.
     if (!q) { paintFolds(pane); }
     // The century grids.
     pane.querySelectorAll('.century').forEach(function (century) {

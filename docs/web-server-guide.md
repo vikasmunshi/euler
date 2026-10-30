@@ -1633,7 +1633,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   hairline — doing three jobs: it names the region below, it **narrows** it, and the count
   at the end of the rule is the count of what survived. Typing hides the cards that miss
   and folds away a folder heading whose whole grid went (on `/topics/` each folder is itself
-  a `<details>`, arriving folded, whose openings are remembered for the session like the
+  a `<details>`, arriving open, whose foldings are remembered for the session like the
   scroll and the query — and which a live query opens wherever it matched; the divider
   carries *expand all* / *collapse all* beside the filter, on the page rather than in the
   Actions menu since the public site has none; its cards run widest reach first, `content.list_topic_groups`); on the century grids it **dims**

@@ -597,11 +597,10 @@ class ContentServiceTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_topics_folders_fold(self) -> None:
-        """Each folder is a <details>, folded by default, whose summary is the folder's
-        heading, keyed for site.js to remember what the reader opened."""
+        """Each folder is a <details>, open by default, whose summary is the folder's
+        heading, keyed for site.js to remember what the reader folded."""
         body = await (await self.client.get('/topics/', headers=_READER)).text()
-        self.assertIn('<details class="fold topic-group" data-fold="', body)
-        self.assertNotIn('topic-group" open', body)
+        self.assertIn('<details class="fold topic-group" open data-fold="', body)
         self.assertIn('data-folds="open"', body)                          # expand all
         self.assertIn('data-folds="close"', body)                         # collapse all
         self.assertIn('<summary class="subrule fold-summary"><h3>', body)
