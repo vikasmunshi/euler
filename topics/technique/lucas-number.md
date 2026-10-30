@@ -1,5 +1,5 @@
 <!-- tags: [lucas-number] -->
-<!-- status: final 2026-10-28T09:38Z -->
+<!-- status: final -->
 # Lucas number
 
 The [Lucas numbers](https://en.wikipedia.org/wiki/Lucas_number) $2, 1, 3, 4, 7, 11, 18, \dots$
@@ -89,11 +89,18 @@ Three regimes come up, and each has its own tool.
   ```
 
 - **A long run of terms starting deep in the sequence.** Combine the two: compute one start
-  pair by doubling, then step. 739 needs the Lucas terms in *descending* order over $10^8$
-  indices. So it doubles to a start pair near the top and walks down with
-  $L_{k-1} = L_{k+1} - L_k$. Its vectorised Python version cannot step one term at a time.
-  It uses the shift identity at negative offsets to fill a whole row of a NumPy grid from one
-  start pair and two precomputed Fibonacci coefficient vectors.
+  pair by doubling, then step. In 739 the repeated prefix-summing is linear, so the final term
+  is a fixed [ballot-number](/topics/domain/catalan-number)-weighted sum of the starting terms,
+  and the Lucas numbers are just the data being weighted. The sum is evaluated in chunks over
+  $10^8$ indices, and its pairing of weights to terms wants the Lucas terms in *descending*
+  order. So each chunk doubles to a start pair at its top, using
+  $a_x = L_{x+1} = 2F_x + F_{x+1}$ for the problem's shifted indexing, and walks down with
+  $L_{k-1} = L_{k+1} - L_k$. Running the recurrence backwards costs nothing extra, because
+  subtraction undoes the addition exactly, modulo $p$ included. The vectorised Python version
+  cannot step one term at a time. It uses the shift identity at negative offsets,
+  $a_{x-t} = (-1)^t F_{t+1}\,a_x + (-1)^{t+1} F_t\,a_{x+1}$, to fill a whole row of a NumPy
+  grid from one start pair and two precomputed coefficient vectors. That turns a sequential
+  recurrence into an elementwise multiply-add.
 
 ## How to reason about it
 
