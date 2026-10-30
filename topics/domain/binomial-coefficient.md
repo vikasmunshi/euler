@@ -172,6 +172,7 @@ factorials that every formula above is built from.
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ○ [0498](/solutions/0498/) — Remainder of Polynomial Division
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ○ [0567](/solutions/0567/) — Reciprocal Games I
 - ○ [0568](/solutions/0568/) — Reciprocal Games II
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients

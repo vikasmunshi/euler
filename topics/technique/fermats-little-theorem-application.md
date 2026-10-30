@@ -206,6 +206,7 @@ front of you is asking for.
 
 - ● [0133](/solutions/0133/) — Repunit Nonfactors
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0739](/solutions/0739/) — Summation of Summations

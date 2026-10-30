@@ -150,6 +150,7 @@ that contribution counts paths through some grid.
 - ○ [0411](/solutions/0411/) — Uphill Paths
 - ○ [0416](/solutions/0416/) — A Frog's Trip
 - ○ [0460](/solutions/0460/) — An Ant on the Move
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ○ [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ○ [0662](/solutions/0662/) — Fibonacci Paths

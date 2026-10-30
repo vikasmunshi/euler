@@ -204,6 +204,7 @@ decision.
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0493](/solutions/0493/) — Under the Rainbow
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0800](/solutions/0800/) — Hybrid Integers

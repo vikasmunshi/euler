@@ -128,7 +128,7 @@ real expressions, and summing them) and
 
 - ● [0080](/solutions/0080/) — Square Root Digital Expansion
 - ● [0318](/solutions/0318/) — 2011 Nines
-- ○ [0517](/solutions/0517/) — A Real Recursion
+- ● [0517](/solutions/0517/) — A Real Recursion
 - ○ [0558](/solutions/0558/) — Irrational Base
 - ○ [0566](/solutions/0566/) — Cake Icing Puzzle
 - ○ [0576](/solutions/0576/) — Irrational Jumps
