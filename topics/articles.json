@@ -7572,12 +7572,12 @@
       "path": "technique/symmetry",
       "title": "Symmetry",
       "status": "final",
-      "written": "2026-10-12T14:29Z",
+      "written": "2026-10-30T06:43Z",
       "solved": 9,
       "problems": 9,
       "tags": ["symmetry"],
       "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0", "p0670_s0", "p0761_s0", "p0983_s0"],
-      "solved_after": ["p0670"]
+      "solved_after": []
     },
     {
       "path": "technique/system-of-linear-equations",
