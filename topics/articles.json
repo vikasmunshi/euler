@@ -5657,8 +5657,8 @@
     {
       "path": "technique/finite-state-machine",
       "title": "Finite-state machine",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-10-30T12:36Z",
       "solved": 3,
       "problems": 3,
       "tags": ["finite-state-machine"],
