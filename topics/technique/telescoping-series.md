@@ -1,5 +1,5 @@
 <!-- tags: [telescoping-series] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T06:44Z -->
 # Telescoping series
 
 A [telescoping series](https://en.wikipedia.org/wiki/Telescoping_series) is a sum whose terms are

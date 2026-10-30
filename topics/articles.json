@@ -7594,12 +7594,12 @@
       "path": "technique/telescoping-series",
       "title": "Telescoping series",
       "status": "final",
-      "written": "2026-08-07T08:51Z",
+      "written": "2026-10-30T06:44Z",
       "solved": 3,
       "problems": 3,
       "tags": ["telescoping-series"],
       "refs": ["p0359_s0", "p0918_s0", "p0934_s0"],
-      "solved_after": ["p0359"]
+      "solved_after": []
     },
     {
       "path": "technique/tensor-network",
