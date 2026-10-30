@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-10-30T12:37Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -154,7 +154,14 @@ $a^2 \equiv a \pmod n$, must be $0$ or $1$ modulo each prime power of $n$, becau
 are coprime. So the idempotents correspond to the ways of splitting $n$ into a coprime pair
 $d \cdot e$, and there are $2^{\omega(n)}$ of them. Finding the largest one for every $n \le 10^7$
 means enumerating coprime factor pairs and solving two congruences by CRT, rather than testing
-residues.
+residues. Problem 752 does the same for an *order*. It asks for the least $n$ with
+$(1 + \sqrt 7)^n \equiv 1$ in $(\mathbb{Z}/x\mathbb{Z})[\sqrt 7]$, for every $x$ up to $10^6$. The
+norm $a^2 - 7b^2$ is multiplicative, and $1 + \sqrt 7$ has norm $-6$. So it is a unit exactly
+when $\gcd(x, 6) = 1$, and every other $x$ contributes $0$. CRT splits the ring over the prime
+powers of $x$, so the order is the lcm of the orders modulo each $p^k$. Lifting from $p^{k-1}$ to
+$p^k$ either keeps the order or multiplies it by $p$, and a single power decides which. The real
+work is one order per prime: in $\mathbb{F}_p$ when $7$ is a square mod $p$, and in
+$\mathbb{F}_{p^2}$ otherwise, with the same Frobenius bound as problem 492 below.
 
 ## What the modulus allows
 
@@ -170,7 +177,15 @@ modulus, so read it before you write the first line:
   inequality too, since a prime *smaller* than your factorials makes them vanish. A field also
   shrinks exponents. By Fermat, $a^{p-1} \equiv 1$, so problem 822 reduces the exponent $2^k$ of a
   number squared $k \approx 10^{12}$ times modulo $p - 1$, which is one modular exponentiation inside
-  another. Division is legal but not free: each inverse is an exponentiation. Problem 739 needs
+  another. The same shrinking works one level up, in a quadratic extension. Problem 492 iterates
+  $a \mapsto 6a^2 + 10a + 3$ a quadrillion times. Completing the square turns it into
+  $b \mapsto b^2 - 2$, the doubling rule of a Lucas sequence $\alpha^k + \alpha^{-k}$, so the
+  $n$th term is $V_{2^{n-1}}$. Here $\alpha$ is a root of $t^2 - 11t + 1$. If the discriminant is a
+  square mod $p$, $\alpha$ lies in $\mathbb{F}_p$ and its order divides $p - 1$. If not, it lies in
+  $\mathbb{F}_{p^2}$, where [Frobenius](https://en.wikipedia.org/wiki/Frobenius_endomorphism)
+  sends $\alpha$ to its conjugate $\alpha^{-1}$, so $\alpha^{p+1} = 1$. Quadratic reciprocity
+  decides between the two cases from $p \bmod 13$, and the exponent $2^{n-1}$ is reduced mod
+  $p \mp 1$. Division is legal but not free: each inverse is an exponentiation. Problem 739 needs
   about $10^8$ binomials, so it multiplies the whole sum through by a factorial until every term is a
   prefix product times a suffix product, and takes a single inverse at the end.
 - **A composite modulus is a product of smaller problems.** By the [Chinese Remainder
@@ -199,8 +214,12 @@ modulus, so read it before you write the first line:
   squared a trillion times. It decides the order with the real-valued key
   $\log_2\log_2 x^{2^k} = k + \log_2\log_2 x$ and uses residues only for the final sum. Problem 271
   sums the cube roots of unity mod a primorial *as integers*, and that total is many times the
-  modulus. Adding the CRT combinations mod $n$ would return a plausible wrong number. Reduce exactly
-  what the statement reduces.
+  modulus. Adding the CRT combinations mod $n$ would return a plausible wrong number. Problem 615
+  shows the escape when the order matters and the numbers are too big to compare. It wants the
+  millionth number with at least a million prime factors. Every early member of that list carries
+  a common factor $2^{k-s}$, and dividing it out keeps them in the same order. So the order statistic is
+  found among ordinary 64-bit integers, and the residue appears only at the end, as
+  $2^{k-s} \bmod m$. Reduce exactly what the statement reduces.
 - **Mind the width.** A modulus near $10^{16}$ means the product of two residues no longer fits in
   64 bits, and a sum that is *not* reduced — problem 421's lands just under $2^{63}$ — leaves no
   headroom at all; estimate the magnitude before choosing the type. Problem 531 sums CRT solutions
@@ -224,7 +243,8 @@ far too large to form directly. When you catch it:
   materialise the million-digit power or the true factorial first; the whole point is that you
   never have to.
 - **Substitute the modulus into the definition.** When the modulus is $n + 1$ and the base is
-  $n$, the base is $-1$. When the modulus is prime, exponents live mod $p - 1$. Simplify the object
+  $n$, the base is $-1$. When the modulus is prime, exponents live mod $p - 1$, or mod $p + 1$ for
+  a norm-one element of $\mathbb{F}_p[\sqrt d]$ when $d$ is not a square. Simplify the object
   before you compute it.
 - **Keep size outside the ring.** Orderings, comparisons and unreduced totals need the real
   magnitude, through logarithms or plain integers. Residues are only for the quantity the
