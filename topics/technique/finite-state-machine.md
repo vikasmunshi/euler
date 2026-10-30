@@ -98,5 +98,6 @@ forbids a leading zero.
 - ● [0191](/solutions/0191/) — Prize Strings
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 
 <!-- /problems -->

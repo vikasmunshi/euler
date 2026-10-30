@@ -164,7 +164,7 @@ The pitfalls are always the same few:
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
 - ○ [0656](/solutions/0656/) — Palindromic Sequences
 - ○ [0911](/solutions/0911/) — Khinchin Exceptions
-- ○ [0946](/solutions/0946/) — Continued Fraction Fraction
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 
 <!-- /problems -->

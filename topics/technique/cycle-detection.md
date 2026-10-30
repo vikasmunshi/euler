@@ -121,5 +121,6 @@ $\lambda$, and "the first $k$ children" is answered by counting whole periods wi
 - ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 
 <!-- /problems -->

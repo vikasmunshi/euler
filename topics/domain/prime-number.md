@@ -258,7 +258,7 @@ clever was done with the primes themselves.
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root
-- ○ [0946](/solutions/0946/) — Continued Fraction Fraction
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
 - ○ [0971](/solutions/0971/) — Modular Polynomial Composition
 - ○ [0975](/solutions/0975/) — A Winding Path

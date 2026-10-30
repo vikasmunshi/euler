@@ -686,7 +686,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root
-- ○ [0946](/solutions/0946/) — Continued Fraction Fraction
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 - ○ [0956](/solutions/0956/) — Super Duper Sum

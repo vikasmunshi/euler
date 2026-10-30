@@ -9,6 +9,5 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Convergent_(co
 
 - ● [0057](/solutions/0057/) — Square Root Convergents
 - ● [0192](/solutions/0192/) — Best Approximations
-- ○ [0946](/solutions/0946/) — Continued Fraction Fraction
 
 <!-- /problems -->

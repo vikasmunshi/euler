@@ -625,7 +625,7 @@
       "reference": "https://en.wikipedia.org/wiki/Convergent_(continued_fraction)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0057", "p0192", "p0946"]
+      "refs": ["p0057", "p0192"]
     },
     {
       "slug": "convex-function",
@@ -1615,7 +1615,7 @@
       "reference": "https://en.wikipedia.org/wiki/Irrational_number",
       "additional-references": [],
       "summary": "A real number that cannot be written as a ratio of integers and whose decimal expansion never terminates or repeats.",
-      "refs": ["p0080", "p0318", "p0517", "p0558", "p0566", "p0576", "p0585", "p0656", "p0721", "p0731", "p0911", "p0950"]
+      "refs": ["p0080", "p0318", "p0517", "p0558", "p0566", "p0576", "p0585", "p0656", "p0721", "p0731", "p0911", "p0946", "p0950"]
     },
     {
       "slug": "isoperimetric-inequality",
@@ -3847,7 +3847,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cycle_detection",
       "additional-references": ["https://en.wikipedia.org/wiki/Cycle_detection#Floyd's_tortoise_and_hare"],
       "summary": "",
-      "refs": ["p0064_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0092_s0", "p0095_s0", "p0167_s0", "p0197_s0", "p0209_s0", "p0225_s0", "p0238_s0", "p0853_s0", "p0943_s0"]
+      "refs": ["p0064_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0092_s0", "p0095_s0", "p0167_s0", "p0197_s0", "p0209_s0", "p0225_s0", "p0238_s0", "p0853_s0", "p0943_s0", "p0946_s0"]
     },
     {
       "slug": "dancing-links",
@@ -4261,7 +4261,7 @@
       "reference": "https://en.wikipedia.org/wiki/Finite-state_machine",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0191_s0", "p0529_s0", "p0706_s0"]
+      "refs": ["p0191_s0", "p0529_s0", "p0706_s0", "p0946_s0"]
     },
     {
       "slug": "fixed-point-iteration",
@@ -4478,6 +4478,15 @@
       "additional-references": [],
       "summary": "Locating the extremum of a unimodal function by shrinking a bracket in the golden ratio.",
       "refs": ["p0761_s0"]
+    },
+    {
+      "slug": "gosper-continued-fraction-arithmetic",
+      "facet": "technique",
+      "name": "Gosper's continued fraction arithmetic",
+      "reference": "https://en.wikipedia.org/wiki/HAKMEM",
+      "additional-references": [],
+      "summary": "Streaming a continued fraction through a M\u00f6bius transformation (a x + b)/(c x + d), ingesting input terms and emitting output terms as soon as they are determined.",
+      "refs": ["p0946_s0"]
     },
     {
       "slug": "greatest-common-divisor-application",
@@ -5071,7 +5080,7 @@
       "reference": "https://en.wikipedia.org/wiki/Memoization",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0060_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0092_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0153_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0549_s0", "p0551_s0", "p0641_s0", "p0755_s0", "p0887_s0", "p0943_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0060_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0092_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0153_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0549_s0", "p0551_s0", "p0641_s0", "p0755_s0", "p0887_s0", "p0943_s0", "p0946_s0", "p1000_s0"]
     },
     {
       "slug": "mersenne-twister",
@@ -5683,7 +5692,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
       "additional-references": ["https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler%27s_sieve"],
       "summary": "",
-      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0650_s0", "p0752_s0", "p0772_s0", "p0800_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0"]
+      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0650_s0", "p0752_s0", "p0772_s0", "p0800_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0", "p0946_s0"]
     },
     {
       "slug": "sieve-of-sundaram",
@@ -6136,6 +6145,15 @@
       "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0670", "p0706", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
     },
     {
+      "slug": "invariant-bounds-the-state-space",
+      "facet": "takeaway",
+      "name": "An invariant that bounds the state turns a long run into a cycle",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When a conserved quantity keeps a process inside finitely many states, long repetitive inputs become eventually periodic walks that can be skipped by whole cycles.",
+      "refs": ["p0946"]
+    },
+    {
       "slug": "invert-cost-to-capacity",
       "facet": "takeaway",
       "name": "Invert least cost into greatest capacity",
@@ -6160,7 +6178,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "A memo key must hold everything the cached result depends on, even context inherited from outside the subproblem, and nothing more.",
-      "refs": ["p0551", "p0706", "p0943"]
+      "refs": ["p0551", "p0706", "p0943", "p0946"]
     },
     {
       "slug": "parity-across-languages",

@@ -248,7 +248,7 @@ the loop.
 - ○ [0922](/solutions/0922/) — Young's Game A
 - ○ [0931](/solutions/0931/) — Totient Graph
 - ○ [0939](/solutions/0939/) — Partisan Nim
-- ○ [0946](/solutions/0946/) — Continued Fraction Fraction
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 - ● [1010](/solutions/1010/) — March of the Penguins
 

@@ -137,6 +137,7 @@ real expressions, and summing them) and
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ○ [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0911](/solutions/0911/) — Khinchin Exceptions
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ● [0950](/solutions/0950/) — Pirate Treasure
 
 <!-- /problems -->

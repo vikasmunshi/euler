@@ -101,5 +101,6 @@ because each individual cached value is correct under the context it was compute
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 
 <!-- /problems -->

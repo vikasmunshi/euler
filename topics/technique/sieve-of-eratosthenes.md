@@ -230,5 +230,6 @@ patterns recur.
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0946](/solutions/0946/) — Continued Fraction Fraction
 
 <!-- /problems -->
