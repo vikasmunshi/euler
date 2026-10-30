@@ -424,7 +424,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0552](/solutions/0552/) — Chinese Leftovers II
 - ○ [0556](/solutions/0556/) — Squarefree Gaussian Integers
 - ○ [0561](/solutions/0561/) — Divisor Pairs
-- ○ [0571](/solutions/0571/) — Super Pandigital Numbers
+- ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ○ [0578](/solutions/0578/) — Integers with Decreasing Prime Powers
 - ○ [0580](/solutions/0580/) — Squarefree Hilbert Numbers
 - ○ [0585](/solutions/0585/) — Nested Square Roots

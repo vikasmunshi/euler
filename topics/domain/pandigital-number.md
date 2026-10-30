@@ -105,7 +105,7 @@ it as rarely as possible.
 - ● [0170](/solutions/0170/) — Pandigital Concatenating Products
 - ● [0178](/solutions/0178/) — Step Numbers
 - ○ [0491](/solutions/0491/) — Double Pandigital Number Divisible by $11$
-- ○ [0571](/solutions/0571/) — Super Pandigital Numbers
+- ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
 
 <!-- /problems -->

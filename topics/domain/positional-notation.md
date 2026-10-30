@@ -214,7 +214,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0520](/solutions/0520/) — Simbers
 - ○ [0524](/solutions/0524/) — First Sort II
 - ○ [0558](/solutions/0558/) — Irrational Base
-- ○ [0571](/solutions/0571/) — Super Pandigital Numbers
+- ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ○ [0592](/solutions/0592/) — Factorial Trailing Digits 2
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
 - ○ [0637](/solutions/0637/) — Flexible Digit Sum

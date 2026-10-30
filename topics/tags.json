@@ -3451,7 +3451,7 @@
       "reference": "https://en.wikipedia.org/wiki/Backtracking",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0043_s0", "p0060_s0", "p0061_s0", "p0068_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0118_s0", "p0122_s0", "p0170_s0", "p0265_s0", "p0719_s0", "p0983_s0"]
+      "refs": ["p0043_s0", "p0060_s0", "p0061_s0", "p0068_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0118_s0", "p0122_s0", "p0170_s0", "p0265_s0", "p0571_s0", "p0719_s0", "p0983_s0"]
     },
     {
       "slug": "backward-induction",
@@ -3532,7 +3532,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit_manipulation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0244_s0", "p0265_s0", "p0269_s0", "p0345_s0", "p0704_s0", "p0755_s0", "p0768_s0", "p0872_s0", "p0882_s0", "p0918_s0", "p0943_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0244_s0", "p0265_s0", "p0269_s0", "p0345_s0", "p0571_s0", "p0704_s0", "p0755_s0", "p0768_s0", "p0872_s0", "p0882_s0", "p0918_s0", "p0943_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "bitwise-operation",
@@ -3892,7 +3892,7 @@
       "reference": "https://en.wikipedia.org/wiki/Depth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0642_s0"]
+      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0642_s0"]
     },
     {
       "slug": "descartes-circle-theorem",
@@ -4819,7 +4819,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lexicographic_order",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0336_s0", "p0698_s0", "p0720_s0", "p0845_s0"]
+      "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0336_s0", "p0571_s0", "p0698_s0", "p0720_s0", "p0845_s0"]
     },
     {
       "slug": "linear-congruential-generator",
@@ -6259,7 +6259,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When consecutive terms of a sequence differ by a small local change, carry the previous value forward and apply just that change instead of recomputing each term from scratch.",
-      "refs": ["p0675"]
+      "refs": ["p0571", "p0675"]
     },
     {
       "slug": "watch-integer-width",
