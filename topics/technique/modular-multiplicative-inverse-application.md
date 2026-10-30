@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-29T02:03Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -74,6 +74,14 @@ for twenty million prime triples, but the inverse is *multiplicative* — `(q·r
 table of `O(P²)` pairwise inverses serves an `O(P³)` loop. Inverting a product is never worth doing
 directly if the factors recur.
 
+Garner's step assumes `gcd(m₁, m₂) = 1`. Problem 0531 shows what to do when it isn't: it merges
+`x ≡ φ(n) (mod n)` with `x ≡ φ(m) (mod m)` over every pair in a window of consecutive integers,
+where the moduli share factors all the time. With `d = gcd(n, m)`, the step congruence
+`n·t ≡ r₂ − r₁ (mod m)` is solvable only when `d` divides `r₂ − r₁`. When it is, you divide all
+three by `d` and invert `n/d` modulo `m/d`, which is now a unit. The answer is unique modulo
+`lcm(n, m)`, not `n·m`. So the inverse still does the work. The gcd decides first whether there is
+a solution at all, and then shrinks the modulus until the inverse exists.
+
 Sometimes the merged residue is the answer itself. For problem 0407, the idempotents of `ℤ/n`
 (`a² ≡ a`) are exactly the CRT solutions of `a ≡ 0 (mod d)`, `a ≡ 1 (mod e)` over the coprime
 splits `n = d·e`. Each one is `d · (d⁻¹ mod e)`: the CRT basis element, an inverse times its modulus.
@@ -124,7 +132,11 @@ the repetition.
 
 - **Batch the inverses you need in bulk.** For a whole factorial table, compute *one* inverse and
   sweep backwards, since `(i−1)!⁻¹ = i!⁻¹ · i`. `n` inverses for one exponentiation and `n`
-  multiplications — problems 0487 and 0860 do exactly this. The general form is
+  multiplications — problems 0487 and 0860 do exactly this. The table also pays off across
+  queries. Problem 0517 turns its real-valued recursion into a sum of about `√n` binomials
+  `C(m + j, j)` for each of several hundred primes `n`. It builds the factorial and
+  inverse-factorial tables once, up to the largest `n`, and every binomial after that is three
+  lookups and two multiplications. The general form is
   [Montgomery's trick](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Multiple_inverses):
   any `n` inverses cost one inversion plus `3n` multiplications via a prefix-product pass.
 
@@ -165,7 +177,8 @@ the repetition.
   prime modulus exceeds every factor of the denominator, so the check is done before the code starts.
   When non-units can't be excluded, handle them on purpose. Problem 0407's inverse table stores 0 for
   every non-unit, and the CRT formula then gives the trivial idempotents 0 and 1 for those splits,
-  which the maximum discards. It never yields a wrong one.
+  which the maximum discards. It never yields a wrong one. Problem 0531 handles them by dividing:
+  it pulls out the shared `gcd` before inverting (see the CRT section above).
 - **A composite modulus is not a field, but inverses still work.** `gcd(a, m) = 1` is the only
   requirement; primality is not. Problem 0152 inverts squares modulo `p²` and problem 0251 works
   modulo an odd square, both perfectly well. What primality buys is only the Fermat shortcut and the
