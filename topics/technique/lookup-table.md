@@ -1,5 +1,5 @@
 <!-- tags: [lookup-table] -->
-<!-- status: final 2026-10-16T15:19Z -->
+<!-- status: final -->
 # Lookup table
 
 A [lookup table](https://en.wikipedia.org/wiki/Lookup_table) is the oldest optimisation in
@@ -30,7 +30,7 @@ What ends up in the slots falls into four recurring shapes:
 | What the table holds | Indexed by | Seen in |
 | --- | --- | --- |
 | A relation with no formula | a symbol or small integer | 17 (number → English word), 89 (Roman symbol ↔ value), 103 (the small cases given in the statement), 315 (digit → seven-segment glyph) |
-| Values of an expensive function | its argument | 34, 862 (factorials), 365 ($i! \bmod p$), 160 (running products of units mod $p^5$), 504 ($\gcd(i,j)$), 177 ($\sin(k\pi/n)$), 254 (factorial-base digit sums) |
+| Values of an expensive function | its argument | 34, 862 (factorials), 365 ($i! \bmod p$), 407 ($r^{-1} \bmod s$), 160 (running products of units mod $p^5$), 504 ($\gcd(i,j)$), 177 ($\sin(k\pi/n)$), 254 (factorial-base digit sums) |
 | The outcome of a case analysis | the discriminant | 381 ($p \bmod 8$), 315 ($p \bmod 100$ and the digit sum), 159 (digital root), 244 (legal moves per blank cell) |
 | An entire state space's answers | a packed state | 244 (distance to target per board state) |
 
@@ -145,6 +145,11 @@ position*, not once per prime. The recorded averages on the $[10^8, 2 \times 10^
 1.14 s in Python against 0.82 s in C — a factor of 1.4, with both sides now spending most of their
 time on the sieve rather than on the table.
 
+Problem 407 (whose table is costed in the next section) lands in the same place by the same route: its gather `inv[large % s]` reads a whole
+array of partners per modulus, and the result is written back through a strided slice of the answer
+array, so the interpreter runs once per *modulus*, not once per $n$. On $N = 10^7$ that is 1.82 s
+in Python against 1.28 s in C — again a factor of 1.4.
+
 The other end of the range is worth seeing too. Problem 177 precomputes $\sin(k\pi/n)$ once and
 indexes it throughout — the textbook trigonometric table — in both languages, and the two land at
 2.149 s and 2.135 s. When the table does enough of the work, the language stops mattering.
@@ -165,6 +170,26 @@ In isolation that is a losing trade by two orders of magnitude. It survives beca
 sits beside an $O(P^3)$ CRT combination that dwarfs it, and because the table makes the Lucas loop
 obviously correct. Worth knowing that it is a deliberate loss rather than assuming a table is free:
 **count the reads before you build.**
+
+Problem 407 builds the same kind of per-modulus table and lands on the winning side of the ratio,
+and its loop bound is where the count shows. It finds the largest
+[idempotent](https://en.wikipedia.org/wiki/Idempotent_(ring_theory)) modulo every $n \le N$ by
+splitting $n = s \cdot L$ into coprime factors and solving a
+[CRT](/topics/technique/chinese-remainder-theorem) pair, which needs $L^{-1} \bmod s$. For each small
+factor $s$ it builds a table of inverses of every residue mod $s$ — $s$ entries — and reads it once
+for every partner $L$ from $s + 1$ to $N/s$. The sweep stops at $s(s+1) > N$, which is also exactly
+where the partners run out: while the loop runs there are at least as many reads as entries, and for
+small $s$ there are far more. The CRT itself only needs the key `L % s`, so one $s$-slot table
+serves every $n$ the factor $s$ divides — the shrink-the-key move again, with the modulus doing the
+shrinking.
+
+The table is also built without a per-entry loop. Rather than run the extended Euclidean algorithm
+on each residue, it raises *all* of them to $\varphi(s) - 1$ at once (by [Euler's
+theorem](https://en.wikipedia.org/wiki/Euler%27s_theorem)), one array-wide
+[square-and-multiply](/topics/technique/exponentiation-by-squaring), and zeroes the non-units
+afterwards. That spends $O(s \log s)$ multiplications where Euclid would spend fewer, but every one
+of them is a vector operation; when the table is rebuilt for each of $\sqrt N$ moduli, the right
+fill method is the one that vectorises, not the one with the lowest operation count.
 
 One rule is specific to this repository and easy to get wrong. Build tables **inside** `solve()`.
 The harness times repeated calls, so a table hoisted to module level is built once at import and is
@@ -189,7 +214,8 @@ guessed bound never is.
 - **Pad rather than remap.** Unreachable slots that keep the index arithmetic-free are cheaper than
   the arithmetic that would avoid them.
 - **Count entries built against reads served.** A table read fewer times than it has entries is a
-  loss, and only survives when something larger hides it.
+  loss, and only survives when something larger hides it (365); a loop bound that guarantees the
+  reads outnumber the entries makes the win structural (407).
 - **Put the exceptions in the data.** Every irregularity you can move from control flow into a table
   is a branch you cannot get wrong.
 - **If the index can be an array, the whole case analysis vectorises** — which is the one advantage
