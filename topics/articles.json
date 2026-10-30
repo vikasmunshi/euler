@@ -6450,12 +6450,12 @@
       "path": "technique/lookup-table",
       "title": "Lookup table",
       "status": "final",
-      "written": "2026-10-16T15:19Z",
+      "written": "2026-10-30T06:34Z",
       "solved": 17,
       "problems": 17,
       "tags": ["lookup-table"],
       "refs": ["p0017_s0", "p0019_s0", "p0034_s0", "p0043_s0", "p0089_s0", "p0103_s0", "p0103_s1", "p0159_s0", "p0160_s0", "p0177_s0", "p0244_s0", "p0254_s0", "p0315_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0504_s0", "p0862_s0"],
-      "solved_after": ["p0407"]
+      "solved_after": []
     },
     {
       "path": "technique/loop-invariant-code-motion",
