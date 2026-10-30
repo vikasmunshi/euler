@@ -208,6 +208,7 @@ the repetition.
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

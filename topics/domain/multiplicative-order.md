@@ -135,6 +135,7 @@ you think about, and how much of the edge-case handling is explicit.
 - ● [0132](/solutions/0132/) — Large Repunit Factors
 - ● [0133](/solutions/0133/) — Repunit Nonfactors
 - ○ [0417](/solutions/0417/) — Reciprocal Cycles II
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0622](/solutions/0622/) — Riffle Shuffles
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking

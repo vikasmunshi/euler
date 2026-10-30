@@ -10,7 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_func
 - ● [0027](/solutions/0027/) — Quadratic Primes
 - ● [0126](/solutions/0126/) — Cuboid Layers
 - ○ [0403](/solutions/0403/) — Lattice Points Enclosed by Parabola and Line
-- ○ [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0802](/solutions/0802/) — Iterated Composition
 
 <!-- /problems -->

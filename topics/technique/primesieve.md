@@ -151,6 +151,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$

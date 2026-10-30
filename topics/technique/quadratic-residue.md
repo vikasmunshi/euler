@@ -114,5 +114,6 @@ Things to keep in mind:
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0492](/solutions/0492/) — Exploding Sequence
 
 <!-- /problems -->

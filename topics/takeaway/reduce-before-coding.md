@@ -374,6 +374,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers

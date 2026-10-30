@@ -277,6 +277,7 @@ both slower and harder to read.
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0549](/solutions/0549/) — Divisibility of Factorials

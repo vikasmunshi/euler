@@ -301,7 +301,7 @@ induction will confirm. The shape picks the method.
 - ○ [0472](/solutions/0472/) — Comfortable Distance II
 - ○ [0477](/solutions/0477/) — Number Sequence Game
 - ○ [0490](/solutions/0490/) — Jumping Frog
-- ○ [0492](/solutions/0492/) — Exploding Sequence
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0497](/solutions/0497/) — Drunken Tower of Hanoi
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
 - ○ [0515](/solutions/0515/) — Dissonant Numbers

@@ -204,6 +204,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
