@@ -7737,12 +7737,12 @@
       "path": "technique/unranking",
       "title": "Unranking",
       "status": "final",
-      "written": "2026-10-19T09:39Z",
+      "written": "2026-10-30T06:45Z",
       "solved": 4,
       "problems": 4,
       "tags": ["unranking"],
       "refs": ["p0024_s0", "p0698_s0", "p0845_s0", "p0974_s0"],
-      "solved_after": ["p0698"]
+      "solved_after": []
     },
     {
       "path": "technique/vectorized",
