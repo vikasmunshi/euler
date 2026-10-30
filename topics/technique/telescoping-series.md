@@ -1,5 +1,5 @@
 <!-- tags: [telescoping-series] -->
-<!-- status: final 2026-08-07T08:51Z -->
+<!-- status: final -->
 # Telescoping series
 
 A [telescoping series](https://en.wikipedia.org/wiki/Telescoping_series) is a sum whose terms are
@@ -81,12 +81,32 @@ for level in levels:            # increasing
 Note what the reformulation bought: `survivors` is a *counting* question over a structured set,
 which is usually tractable, whereas $g(n)$ itself was only defined by a search.
 
+**Differencing a neighbour relation.** Sometimes the constraint ties *adjacent* terms together
+rather than defining one term at a time: $a_r + a_{r+1} = g(r)$. That relation is not a difference,
+so nothing cancels as written — but subtract it from its own shift and the unknowns two apart are
+left alone:
+
+$$a_{r+2} - a_r = g(r+1) - g(r)$$
+
+Now each parity class is an ordinary telescope, $a_{2t+1} = a_1 + \sum_{i<t}\bigl(g(2i+1) - g(2i)\bigr)$,
+and if $g$ is a polynomial its difference is one degree lower, so the sum is a closed form one
+degree back up. The other parity class needs no second telescope: it is read straight off the
+relation, $a_{r+1} = g(r) - a_r$. Problem 359 is this shape hidden inside a simulation. Its greedy
+seating rule says nothing about formulas, but seating a few tens of thousands of guests and reading
+the floors shows each floor's neighbouring occupants summing to *consecutive perfect squares*. With
+$g(r)$ a run of squares, $g(r+1) - g(r)$ is a consecutive odd number, the odd rooms come out
+quadratic in $r$, and any single room $P(f, r)$ costs $O(1)$ — which is what lets a sum over the
+divisor pairs $f \cdot r = N$ of a fourteen-digit $N$ touch only a few hundred rooms. The lesson
+generalises: when a process is too opaque to analyse, simulate it small, look for a relation
+between neighbours, and difference that relation until it telescopes.
+
 ## How to reason about it
 
 - **The tell.** A summand that is a difference, a ratio of consecutive terms, a
   [recurrence](/topics/domain/recurrence-relation)-defined sequence, or a "smallest / first index
-  such that …" definition. All four are telescopes waiting for the right split. So is any statement
-  whose bound ($10^{12}$, $10^{17}$) is far beyond what the terms' cost would allow.
+  such that …" definition — or a fixed sum of *neighbouring* terms, which telescopes once you
+  difference it against its own shift. All of these are telescopes waiting for the right split.
+  So is any statement whose bound ($10^{12}$, $10^{17}$) is far beyond what the terms' cost would allow.
 - **What it buys.** Usually $O(1)$ or $O(\log N)$ from $O(N)$ — a category change, not a constant
   factor. That makes it worth a long time at the whiteboard before any code:
   [reduce algebraically before coding](/topics/takeaway/reduce-before-coding).
