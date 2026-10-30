@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-10-28T21:08Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -85,6 +85,21 @@ Factor by factor, $p^{a-1}(p-1)$ must be smooth. So a prime above $5$ may appear
 when $p - 1$ is itself a [Hamming number](https://en.wikipedia.org/wiki/Regular_number). There are
 $3429$ Hamming numbers below $10^{12}$, and $543$ of them sit just below a prime. A trillion candidates
 collapse to Hamming numbers times squarefree products of those primes.
+
+Two more problems work on the exponent vector directly. Problem 682 pairs Hamming numbers by their
+factor count $\Omega$ and by the sum of their prime factors counted with multiplicity. Both are
+*linear* in the exponents. So I can tag each prime with a marker $x$ for "one more factor" and $y^p$
+for "add $p$ to the sum", which gives the generating function $\prod_{p \in \{2,3,5\}} 1/(1 - x y^p)$.
+That is the [Euler product](#from-counting-to-the-zeta-function) below, cut down to three primes and
+given two variables. A finite product of geometric series is a rational function, so the paired count
+obeys a fixed-order linear recurrence. Its $10^7$-th term then costs a logarithm's worth of small
+polynomial products. Problem 615 asks for the millionth number with *at least a million* prime
+factors. Nothing that size can be listed, but the exponent vector shows where the small ones are.
+Trading a factor $2$ for an odd prime multiplies the value by at least $3/2$. So among the first $n$
+members, all but about $\log_{3/2} n$ of the factors are $2$. Dividing out that shared power of two
+maps the head of the list onto the same question with $k = 36$, which is an ordinary 64-bit
+enumeration. The power comes back at the end as a modular exponentiation. Order is what the question
+asks for, and order survives the scaling even though the values do not.
 
 [Coprimality](https://en.wikipedia.org/wiki/Coprime_integers) is the same lens with the exponents
 reduced to "shares a prime or not". Problem 351 counts the lattice points visible from the centre of a
@@ -268,7 +283,12 @@ $10^{11}$ divided by the smallest product of four admissible factors, which is a
 sieve's only output is a **count**. Problem 239 needs nothing but $\pi(100) = 25$, because its
 derangement formula treats every prime the same, so their values cancel out of the argument.
 Problem 249 sieves the *sums* of prime subsets, up to the total of all primes below $5000$, about
-$1.5$ million, to know which totals are prime.
+$1.5$ million, to know which totals are prime. When only a **window** is needed, generate just that
+window. Problem 492 wants the primes in $[10^9, 10^9 + 10^7]$. primesieve writes them straight into a
+NumPy array, and every later per-prime step is one vector operation over all $482\,449$ of them. When
+**how many primes you need depends on the output**, double the bound until it is enough. Problem 946
+feeds consecutive primes in as run lengths of a continued fraction, and it cannot tell in advance how
+many runs will produce $10^8$ output terms.
 
 **Count without listing — sublinear summatory functions.** Some problems need a sum over every
 $n \le 10^{10}$, such as $\sum \varphi(n)$ or $\sum \mu(n)$, and no sieve reaches that far. The way
@@ -358,7 +378,27 @@ $p - 1$, and that one structural fact answers a whole class of counting question
   billion digits to one residue per prime, then recombines triples of primes by CRT. Every inverse it
   needs factors into *pairwise* inverses, $(qr)^{-1}_p = q^{-1}_p r^{-1}_p$. Problem 274's divisibility
   multiplier is just $10^{-1} \bmod p$, and it has a closed form that depends only on $p$'s last digit,
-  so no Euclid call is needed.
+  so no Euclid call is needed. When many binomials share one prime, as the two million terms of
+  problem 517 do modulo $10^9 + 7$, build the factorials once. Then take a single Fermat inverse
+  $N!^{\,p-2}$ and run $(k-1)!^{-1} = k \cdot k!^{-1}$ downwards. That is one exponentiation in place
+  of $N$ separate inversions.
+- **Orders divide $p - 1$, or $p + 1$.** Fermat's little theorem bounds the order of a nonzero
+  residue by $p - 1$, so a huge exponent can be reduced modulo the group order. Problems 492 and 752
+  need the same reduction for a *quadratic irrational*: a root $\alpha$ of $t^2 - 11t + 1$ in 492, and
+  the unit $1 + \sqrt 7$ in 752. Whether $\alpha$ exists in $\mathbb{F}_p$ depends on whether the
+  discriminant is a quadratic residue modulo $p$. If it is (the prime *splits*), the order divides
+  $p - 1$. If not (the prime is *inert*), $\alpha$ lives in $\mathbb{F}_{p^2}$. There the
+  [Frobenius map](https://en.wikipedia.org/wiki/Frobenius_endomorphism) $y \mapsto y^p$ is
+  conjugation, so $\alpha^{p+1} = \alpha \bar\alpha$ is the [norm](https://en.wikipedia.org/wiki/Field_norm),
+  which lies in $\mathbb{F}_p$ again. The norm is $1$ in problem 492, so the order divides $p + 1$, and
+  an exponent of $2^{10^{15} - 1}$ shrinks to a residue modulo $p \mp 1$.
+  [Quadratic reciprocity](https://en.wikipedia.org/wiki/Quadratic_reciprocity) turns the
+  split-or-inert test into a lookup of $p \bmod 13$. In problem 752 the norm is $-6$. So the order of
+  $-6$ in $\mathbb{F}_p$ divides the order, and what remains is an order dividing $p + 1$. A composite
+  modulus then splits by CRT: the order is the lcm of the orders at the prime powers. Going from
+  $p^{k-1}$ to $p^k$ either keeps the order or multiplies it by exactly $p$, because every element of
+  the reduction kernel has order dividing $p$. One test per level decides which. The primes that divide
+  the discriminant or the norm ($2$, $3$, $7$ in 752) are the exceptions, and each needs its own case.
 - **Residuosity restricts which primes can divide a polynomial.** In problem 245,
   $4(x^2 - x + 1) = (2x - 1)^2 + 3$. So a prime can divide $x^2 - x + 1$ only if $-3$ is a
   [quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) modulo it, which means
@@ -417,11 +457,15 @@ that makes some larger quantity computable:
   of two primes" — and reach for the factorisation. The exponent vector is the object you actually
   manipulate; the answer is a product over the primes dividing $n$. When the *value* is given and $n$
   is wanted, search the factorisations of the target (problems 241, 248, 516), not the integers. Over
-  a run of factorials, update the exponents incrementally rather than refactoring (problem 675).
+  a run of factorials, update the exponents incrementally rather than refactoring (problem 675). When
+  the statistic is linear in the exponents, a per-prime generating function makes the count rational
+  (problem 682). When only the *order* of the numbers matters, divide out the factor they all share
+  (problem 615).
 - **See a congruence summed over a huge range** — and consider reordering the sum to run over the
   primes. The cyclic group modulo $p$ answers "how many residues" in $O(1)$ (problem 421). CRT
   multiplies those counts across prime powers (problem 272) and builds one solution per coprime split
-  (problem 407).
+  (problem 407). An exponent too large to write down reduces modulo the group order. That order is
+  $p - 1$, or $p + 1$ for an irrational at an inert prime (problems 492, 752).
 - **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$, $\pi(x)$ — and a sieve will
   not reach. Work on the quotient set: the recursion at $O(n^{2/3})$ for $\Phi$ and $M$ (problems 319,
   351, 512), Lucy_Hedgehog at $O(n^{3/4})$ for $\pi$ (problem 668), and Min_25 for a multiplicative
