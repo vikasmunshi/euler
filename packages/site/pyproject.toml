@@ -14,7 +14,7 @@ license = "MIT"
 requires-python = ">=3.14"
 # Lockstep (Q5): the pin is rewritten by scripts/version/release.sh with every version.py.
 dependencies = [
-    "euler-solver==4.23.1",
+    "euler-solver==4.23.2",
     # aiohttp is the one framework across the app services; Jinja2 (via aiohttp-jinja2,
     # autoescape on) renders every page.
     "aiohttp",
