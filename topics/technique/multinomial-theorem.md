@@ -1,5 +1,5 @@
 <!-- tags: [multinomial-theorem] -->
-<!-- status: final 2026-10-18T10:14Z -->
+<!-- status: final -->
 # Multinomial theorem
 
 The [multinomial theorem](https://en.wikipedia.org/wiki/Multinomial_theorem) expands a power of a
@@ -11,9 +11,11 @@ $$(x_1 + \dots + x_m)^n = \sum_{k_1 + \dots + k_m = n} \binom{n}{k_1, \dots, k_m
 The coefficient counts the ways to label $n$ positions with $m$ classes so that class $i$ gets
 $k_i$ of them. These problems need that count whenever *order matters but only the class sizes
 are known*: dice sorted into above, at and below a pivot, digit strings grouped by their digit
-content, factors of a trinomial power picking one of three terms. The four solutions below compute
+content, factors of a trinomial power picking one of three terms. The solutions below compute
 the coefficient in four different forms: its $p$-adic valuation, its exact value, a ratio between
-neighbouring terms, and a product of binomials. Which form to use is the main design decision.
+neighbouring terms, and a product of binomials. Which form to use is the main design decision. A
+fifth problem uses the coefficient as a counting oracle, asked over and over while a string is
+built one digit at a time.
 
 ## The idea
 
@@ -89,20 +91,49 @@ positions at no cost. The same factorisation is what lets 862 (on
 [stars and bars](/topics/technique/stars-and-bars-combinatorics)) thread a running denominator
 down its recursion.
 
+## The coefficient as a counting oracle
+
+**Unranking by class sizes: 698.** A 123-number uses only the digits 1, 2, 3, and each digit's
+count is either 0 or itself a 123-number. The task is to find the $n$-th one for
+$n \approx 1.1 \times 10^{17}$. The definition depends only on the count triple
+$(c_1, c_2, c_3)$, never on the order of the digits, so every arrangement of an admissible triple
+qualifies. The number of length-$L$ 123-numbers is therefore
+
+$$\sum_{\substack{c_1 + c_2 + c_3 = L \\ c_i \in \{0\} \cup S}} \binom{L}{c_1,\, c_2,\, c_3},$$
+
+where $S$ holds the 123-numbers up to $L$. Below 111 it has only twelve members. This is the
+first reading of the theorem, the one used for counting arrangements, but with the class sizes
+restricted to a set instead of left free.
+
+What 698 adds is that the sum is evaluated with a prefix already fixed. To
+[unrank](/topics/technique/unranking), the solution picks the length and then each digit greedily,
+and at every step it needs the number of valid completions of the current prefix. A prefix fixes
+how many of each digit are used, $(u_1, u_2, u_3)$. The completions are then the same sum over
+admissible final triples with $c_i \ge u_i$, each term the multinomial of the deficits
+$(c_i - u_i)$ over the remaining positions. A count of ordered strings collapses to at most
+$13^2$ multinomial terms, and the answer, about 38 digits long, takes a few thousand of them.
+Whenever membership depends only on class sizes, a prefix count is a multinomial of what is left,
+and unranking is cheap.
+
 ## C and Python
 
 | problem | Python | C |
 | --- | --- | --- |
 | 154 | forward slice plus reversed slice of the digit-sum table, two masks, `sum()` per row | explicit loop over half the row, using the $j \leftrightarrow k$ symmetry (add 2 off the diagonal, 1 on it) |
 | 240 | exact `int` factorials | `long long`, after checking that $20!$ and every partial sum fit below $2^{63}$ |
+| 698 | exact `int` factorial ratio | `unsigned __int128`, multinomial as $\binom{r}{x}\binom{r-x}{y}$ from a Pascal table |
 | 743 | `pow(x, MOD - 2, MOD)` | hand-written `power_mod` with 64-bit reduction |
 | 885 | `math.comb` | Pascal's triangle flattened to one block, indexed `a * (n + 1) + k` |
 
-Two of these are worth a closer look. 240's C stays on native integers because of an argument, not
-a hope. Every term in the sum is positive, so no partial sum exceeds the answer, and the answer is
-81% of `LLONG_MAX`. 154's C halves its inner loop with a symmetry the vectorised Python does not
-bother with. A whole-row NumPy expression costs the same either way, while in a scalar loop the
-saving is real.
+Three of these are worth a closer look. 240's C stays on native integers because of an argument,
+not a hope. Every term in the sum is positive, so no partial sum exceeds the answer, and the answer
+is 81% of `LLONG_MAX`. 698's C needs the same kind of argument, and the obvious form fails it:
+$38!$ overflows even 128 bits, so the factorial ratio is unusable. The product of binomials is
+safe because every intermediate is itself a multinomial, and a trinomial coefficient over $r$
+positions is at most $3^r$, the sum of all of them. That fits in 128 bits for $r \le 80$. Here the
+binomial factorisation 885 uses to shrink a DP state is used to bound the width instead. 154's C
+halves its inner loop with a symmetry the vectorised Python does not bother with. A whole-row
+NumPy expression costs the same either way, while in a scalar loop the saving is real.
 
 ## How to reason about it
 
@@ -114,8 +145,12 @@ saving is real.
   single sum. Step between terms by their ratio when tables would be too large.
 - **Factor into binomials to shrink a DP state.** Choosing one class at a time from the remaining
   positions turns a vector state into a single counter.
+- **Membership by class sizes makes unranking cheap.** If a predicate depends only on how many of
+  each symbol a string holds, the completions of any prefix are a multinomial sum over the
+  remaining deficits, and the $n$-th string can be built greedily.
 - **Prove the width.** Before using a bignum in C, check whether the terms are positive and the
-  total is bounded. If so, the final answer bounds every intermediate.
+  total is bounded. If so, the final answer bounds every intermediate. For a single coefficient,
+  $\binom{n}{k_1, \dots, k_m} \le m^n$, and the product-of-binomials form never exceeds it.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
