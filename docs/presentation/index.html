@@ -312,6 +312,58 @@
   </aside>
 </section>
 
+<section class="slide" data-viz="sudoku-count" data-problems="96">
+  <h2>Too many to try</h2>
+  <div class="story">
+    <div class="story-visual" data-role="visual"></div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+      <p class="story-tally" data-role="tally" aria-live="polite"></p>
+    </div>
+  </div>
+  <aside class="notes"><p class="pn"><strong>Problem 96: Su Doku</strong> · answer <strong>24,702</strong><br><em>The problem:</em> Solve all fifty Su Doku puzzles in the given file, and add up the 3-digit numbers in the top-left corner of each solution grid.<br><em>The solution:</em> Kept three ways, all depth-first searches that prune hard: backtracking with fewest-candidates-first and forward checking, exact cover by Knuth's Dancing Links, and Norvig-style constraint propagation that deduces to a fixpoint before guessing.</p>
+    <p>Space steps through: Grid 01 (the statement's own example, 32 clues), every blank flickering through digits (9⁴⁹ boards), all nines (nonsense), then whole-board counts written out in full, shrinking rule by rule, and finally why listing them all is no way out.</p>
+    <p>The ladder: 9⁸¹ ≈ 2.0 × 10⁷⁷ with no rule; (9!)⁹ ≈ 1.1 × 10⁵⁰ with boxes; bands of rows and boxes are independent, 948,109,639,680 = 9! × 56 × 6⁶ each, so (that)³ ≈ 8.5 × 10³⁵ with rows; 6,670,903,752,021,072,936,960 ≈ 6.7 × 10²¹ with columns (Felgenhauer and Jarvis, 2005). Note the switch of framing: 9⁴⁹ counts fillings of this one puzzle, the ladder counts whole boards with no clues.</p>
+    <p>If asked about symmetry: relabelling digits, swapping rows within a band, bands, transposing and so on fold the count to 5,472,730,538 essentially different grids (Russell and Jarvis, 2006). That would fit on a disk, but a puzzle's clues are not in canonical form: matching them means unfolding the 1.2 trillion symmetries again.</p>
+    <p>The clues in the fifty grids range from 22 to 36, about 28 on average. The fewest clues any uniquely solvable puzzle can have is 17 (McGuire, Tugemann and Civario, 2012, by exhaustive computer search).</p>
+  </aside>
+</section>
+
+<section class="slide" data-viz="sudoku-search" data-problems="96">
+  <h2>Deduce first, guess last</h2>
+  <div class="story">
+    <div class="story-visual" data-role="visual"></div>
+    <div class="story-side">
+      <p class="story-step" data-role="step"></p>
+      <p class="caption" data-role="detail"></p>
+      <p class="story-tally" data-role="tally" aria-live="polite"></p>
+      <table class="sd-table" data-role="compare" hidden>
+        <thead><tr><th scope="col">Approach</th><th scope="col">Grid 01</th><th scope="col">All fifty</th></tr></thead>
+        <tbody>
+          <tr><td>Try every board</td><td>5.7 × 10⁴⁶</td><td>2.3 × 10⁵⁶</td></tr>
+          <tr><td>Backtrack, cell by cell</td><td>1,605 tries</td><td>11,011,447 tries</td></tr>
+          <tr><td>Deduce, then guess</td><td>no guesses</td><td>28 guesses</td></tr>
+        </tbody>
+      </table>
+      <table class="sd-table" data-role="methods" hidden>
+        <thead><tr><th scope="col">Solver</th><th scope="col">C</th><th scope="col">Python</th></tr></thead>
+        <tbody>
+          <tr><td>Backtracking, fewest candidates first</td><td>6.4 ms</td><td>46 ms</td></tr>
+          <tr><td>Exact cover: Dancing Links<small>Donald Knuth, 2000</small></td><td>1.6 ms</td><td>54 ms</td></tr>
+          <tr><td>Constraint propagation<small>after Peter Norvig, 2006</small></td><td>1.0 ms</td><td>51 ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <aside class="notes"><p>Space steps through: Grid 01 with its candidates pencilled in (159 across 49 blanks), the deduction cascade (four waves of 15, 10, 13 and 11 placements; the candidates thin out as they go), the comparison with trying and plain backtracking, and the three kept solvers, with the top-left 483 from the statement highlighted.</p>
+    <p>The comparison was counted offline in Python. "Tries" are digit placements tested by plain backtracking (first blank, digits 1 to 9, check the 20 peers). "Guesses" are tentative placements made after propagation stalls; 40 of the 50 grids need none, and the hardest needs 7. Try every board for all fifty is the sum of 9 to the number of blanks, dominated by the grid with 59 blanks.</p>
+    <p>The timings are each solver's average over all fifty puzzles, from Problem 96's results.json (63 runs each); they are typed into the slide, so re-check them after a re-benchmark.</p>
+    <p>Literature: Donald Knuth, "Dancing Links" (2000): Algorithm X on exact cover, 324 constraint columns for Su Doku. Peter Norvig, "Solving Every Sudoku Puzzle" (2006): the two propagation rules plus fewest-candidates search. Yato and Seta (2003): Su Doku on n² × n² boards is NP-complete. Felgenhauer and Jarvis (2005): the count of valid grids.</p>
+    <p>The point for a general audience: when there are too many possibilities to try, use every rule to cut them down before trying anything.</p>
+  </aside>
+</section>
+
 <section class="slide" data-viz="vault" data-problems="7">
   <h2>An honour code, backed by a vault</h2>
   <div class="story">
@@ -698,6 +750,7 @@ replace = "euler_webshell.shell.viewer:show"</pre>
 <script src="triangle.js"></script>
 <script src="collatz.js"></script>
 <script src="bignum.js"></script>
+<script src="sudoku.js"></script>
 <script src="general.js"></script>
 <script src="dev.js"></script>
 <script src="deck.js"></script>

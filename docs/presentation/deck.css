@@ -514,6 +514,50 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   .bn-ladder.play .bn-rung, .bn-sum-row span.play { animation: none; }
 }
 
+/* ---- Su Doku ---- */
+
+.sd-stage { position: absolute; inset: 0; }
+.sd-layer { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity 320ms ease, visibility 0s 320ms; }
+.sd-layer.on { opacity: 1; visibility: visible; transition: opacity 320ms ease; }
+.sd-board { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sd-cell rect { fill: #FFFFFF; transition: fill 240ms ease; }
+.sd-thin { stroke: #C9D1DB; stroke-width: 1.5; }
+.sd-thick { stroke: var(--ink); stroke-width: 3.5; stroke-linecap: square; }
+.sd-digit { font-family: var(--serif); font-size: 38px; fill: var(--ink); font-variant-numeric: lining-nums; }
+.sd-cell.given .sd-digit { font-weight: 500; }
+.sd-cell.given rect { fill: #EEF1F5; }
+.sd-cell.guessed .sd-digit { fill: var(--ink-soft); opacity: 0.75; }
+.sd-cell.wrong .sd-digit { fill: var(--heat-4); }
+.sd-cell.placed .sd-digit { fill: var(--heat-2); }
+.sd-cell.fresh rect { fill: #DCE8F3; }
+.sd-cell.fresh .sd-digit { animation: rise 420ms ease-out both; }
+.sd-cell.corner rect { fill: var(--ink); }
+.sd-cell.corner .sd-digit { fill: var(--paper); }
+.sd-mark { font-family: var(--sans); font-size: 15px; fill: var(--ink-soft); opacity: 0; transition: opacity 400ms ease; }
+.sd-mark.on { opacity: 1; }
+
+.sd-ladder { display: flex; flex-direction: column; justify-content: center; gap: 30px; }
+.sd-rung { display: flex; flex-direction: column; gap: 6px; opacity: 0; transition: opacity 400ms ease; }
+.sd-rung.on { opacity: 1; }
+.sd-rule { font-size: 22px; color: var(--ink-soft); }
+.sd-num { font-family: var(--mono); font-size: 13px; line-height: 1.4; color: var(--ink); white-space: nowrap;
+  font-variant-numeric: tabular-nums; }
+.sd-sci { font-family: var(--serif); font-size: 30px; font-variant-numeric: lining-nums; }
+.sd-rung.final .sd-num, .sd-rung.final .sd-sci { color: var(--heat-4); }
+
+.sd-table { margin-top: 28px; border-collapse: collapse; font-size: 23px; font-variant-numeric: tabular-nums; }
+.sd-table th { text-align: left; font-weight: 400; font-size: 19px; color: var(--ink-soft); padding: 0 32px 8px 0; }
+.sd-table td { padding: 8px 32px 8px 0; border-top: 1px solid #C9D1DB; }
+.sd-table td:not(:first-child), .sd-table th:not(:first-child) { text-align: right; }
+.sd-table td:last-child, .sd-table th:last-child { padding-right: 0; }
+.sd-table small { display: block; font-size: 17px; color: var(--ink-soft); }
+.sd-table[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sd-cell.fresh .sd-digit { animation: none; }
+  .sd-layer, .sd-rung, .sd-mark { transition: none; }
+}
+
 /* ---- the opener ---- */
 
 .ob-table { display: grid; grid-template-columns: 250px 1fr 280px 210px; gap: 0 18px; align-content: center; }
