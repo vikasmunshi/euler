@@ -6340,12 +6340,12 @@
       "path": "technique/lexicographic-order",
       "title": "Lexicographic order",
       "status": "final",
-      "written": "2026-10-17T06:29Z",
+      "written": "2026-10-30T06:32Z",
       "solved": 10,
       "problems": 10,
       "tags": ["lexicographic-order"],
       "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0336_s0", "p0698_s0", "p0720_s0", "p0845_s0"],
-      "solved_after": ["p0698"]
+      "solved_after": []
     },
     {
       "path": "technique/linear-congruential-generator",

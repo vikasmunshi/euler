@@ -1,5 +1,5 @@
 <!-- tags: [lexicographic-order] -->
-<!-- status: final -->
+<!-- status: final 2026-10-30T06:32Z -->
 # Lexicographic order
 
 Lexicographic order is dictionary order applied to any sequence: compare the first elements, and
