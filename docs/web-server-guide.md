@@ -2267,7 +2267,7 @@ runs, and a reconnect would come back offering to type `git-sync` into it. So th
 service follows the states through the *whole* stream as it drains the PTY
 (`ws/manager.py` § `TermModes`: `busy`/`ready` under the shell's key, and the keyboard modes
 below), and the replay-end frame carries them — `{"replay":"end","osc":…,"busy":…,"kitty":
-[…],"otherKeys":…}`. `terminal.js` adopts them at the replay/live boundary, over whatever the
+[…],"otherKeys":…,"mouse":…,"sgrMouse":…,"focus":…,"paste":…}`. `terminal.js` adopts them at the replay/live boundary, over whatever the
 replay rebuilt. The state lives with the shell rather than in the browser: one shell is shared
 by every tab and device a collaborator attaches from, and a browser-side copy (a variable,
 `sessionStorage`, a cookie) would be one tab's memory of a state that can change while it is
@@ -2298,6 +2298,18 @@ above — replace what the replay rebuilt; replacing rather than adding also sto
 pushing the same kitty flags onto the stack a second time. The kitty **query** (`CSI ? u`) is deliberately left
 unanswered: this client encodes Enter and nothing else, so advertising a flag set would
 promise an app the disambiguated Esc and Tab it would then sit waiting for.
+
+**The replay types nothing.** xterm.js *answers* some of what it parses: a Device Attributes
+query (`CSI c`) gets `CSI ? 1 ; 2 c`, and enabling focus reporting (`CSI ? 1004 h`) gets an
+immediate `CSI O` while the terminal is unfocused. The replay still carries the queries of
+programs that already ran — `claude` sends both as it starts — and the answers, sent on,
+land at whatever reads the PTY now: the solver's prompt, as stray `[O[?1;2c` text. So
+`terminal.js` forwards nothing xterm emits until the replay/live boundary (a keystroke in
+those milliseconds goes with it). The *reporting* modes — mouse tracking and its SGR
+encoding, focus reports, bracketed paste — are the ones that make a terminal write to the PTY
+unasked, so they are followed server-side like the keyboard modes (`mouse` / `sgrMouse` /
+`focus` / `paste`, with RIS resetting them) and written into xterm just ahead of the
+boundary, where the focus report that enabling 1004 provokes is dropped with the rest.
 
 ## 13 · Messaging
 

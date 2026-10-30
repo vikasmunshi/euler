@@ -164,7 +164,11 @@
       // both still hold. The server saw every byte, and it is the shell's state rather
       // than this tab's, so it wins. Replacing — not adding to — also undoes a reattach's
       // replay pushing the kitty flags a second time onto the stack the last attach left.
-      term.write('\x00', function () {
+      // The reporting modes are xterm's own, so they are set the way an app sets them:
+      // as sequences written ahead of the NUL, still on the replay's side of the boundary
+      // — enabling focus reporting makes xterm report the focus at once, and that reply
+      // must be dropped with the rest (§ term.onData below).
+      term.write(reportingModes(msg) + '\x00', function () {
         if (Array.isArray(msg.kitty) && msg.kitty.length) { kittyFlags = msg.kitty.map(Number); }
         if (typeof msg.otherKeys === 'number') { otherKeys = msg.otherKeys; }
         if (typeof msg.busy === 'boolean') { setHandedOff(msg.busy); }
@@ -203,7 +207,30 @@
     }
   }
 
-  term.onData(function (data) { send(new TextEncoder().encode(data)); });
+  //: The sequences that put xterm's reporting modes where the replay-end frame says the
+  //: shell left them (euler_webshell/ws/manager.py § TermModes): mouse tracking and its
+  //: SGR encoding, focus reports, bracketed paste. Mouse tracking is reset first, because
+  //: one protocol is active at a time and resetting any of them turns all of it off.
+  //: A frame without them (an older service) changes nothing.
+  function reportingModes(msg) {
+    if (typeof msg.focus !== 'boolean') { return ''; }
+    var mouse = [9, 1000, 1002, 1003].indexOf(msg.mouse) !== -1 ? msg.mouse : 0;
+    return '\x1b[?1000l' + (mouse ? '\x1b[?' + mouse + 'h' : '')
+      + '\x1b[?1006' + (msg.sgrMouse ? 'h' : 'l')
+      + '\x1b[?1004' + (msg.focus ? 'h' : 'l')
+      + '\x1b[?2004' + (msg.paste ? 'h' : 'l');
+  }
+
+  // Nothing reaches the PTY until the replay has been parsed. What xterm emits meanwhile
+  // is not the user typing: it is xterm answering the replay, which still carries the
+  // queries of programs that already ran — a Device Attributes request (`CSI c`) gets a
+  // fresh `CSI ? 1 ; 2 c`, a replayed `CSI ? 1004 h` an immediate `CSI O` focus report.
+  // Sent on, those land at whatever reads now — the solver's prompt, as typed text. A
+  // keystroke in that instant is lost with them; the replay takes milliseconds.
+  term.onData(function (data) {
+    if (!live) { return; }
+    send(new TextEncoder().encode(data));
+  });
   term.onResize(sendSize);
 
   // The pane is a flex/grid cell; a window resize (or the shell's layout

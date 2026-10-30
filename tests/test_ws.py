@@ -218,6 +218,7 @@ class WsAttachTests(_WsServiceCase):
         self.assertEqual(opening['replay'], 'end')
         self.assertRegex(opening['osc'], r'^[0-9a-f]{32}$', 'the shell\'s OSC key rides the marker')
         self.assertEqual((opening['busy'], opening['kitty'], opening['otherKeys']), (False, [0], 0))
+        self.assertEqual((opening['mouse'], opening['focus'], opening['paste']), (0, False, False))
         await _read_until(first, b'BANNER')
 
         second = await self.client.ws_connect('/ws', headers=_HEADERS)   # replays
@@ -449,7 +450,24 @@ class TermModesTests(unittest.TestCase):
         self.assertEqual((modes.kitty, modes.other_keys), ([0], 0))
         modes.feed(b'\x1b[>1u' * 100)                     # an app that never pops
         self.assertLessEqual(len(modes.kitty), 16)
-        self.assertEqual(modes.snapshot(), {'busy': False, 'kitty': modes.kitty, 'otherKeys': 0})
+        self.assertEqual(modes.snapshot(), {'busy': False, 'kitty': modes.kitty, 'otherKeys': 0,
+                                            'mouse': 0, 'sgrMouse': False, 'focus': False,
+                                            'paste': False})
+
+    def test_reporting_modes_mirror_xterm(self) -> None:
+        """The modes that make the terminal write to the PTY unasked — a stale focus mode
+        types `ESC [ O` at the solver's prompt on every blur."""
+        modes = TermModes(self.KEY)
+        modes.feed(b'\x1b[?1004h\x1b[?1000;1006h\x1b[?2004h\x1b[?25l')   # 25: not followed
+        self.assertEqual((modes.focus, modes.mouse, modes.sgr_mouse, modes.paste), (True, 1000, True, True))
+        modes.feed(b'\x1b[?1003h')                       # one protocol at a time: the newest
+        self.assertEqual(modes.mouse, 1003)
+        modes.feed(b'\x1b[?1000l\x1b[?1004l')           # any protocol's reset turns tracking off
+        self.assertEqual((modes.mouse, modes.focus), (0, False))
+        modes.feed(b'\x1b[?1004h\x1bc')                 # RIS resets them all
+        self.assertEqual((modes.focus, modes.sgr_mouse, modes.paste), (False, False, False))
+        snap = modes.snapshot()
+        self.assertEqual((snap['mouse'], snap['sgrMouse'], snap['focus'], snap['paste']), (0, False, False, False))
 
 
 if __name__ == '__main__':

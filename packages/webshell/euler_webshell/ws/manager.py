@@ -20,9 +20,9 @@ recent scrollback and live prompt instead of a blank screen.
 
 The buffer is bounded, so a long session can push out the sequence that set a terminal
 *mode* while the mode still holds — the `busy` that lent the PTY to `claude`, the kitty
-keyboard flags `claude` turned on. :class:`TermModes` watches the same stream and the
-replay's end frame carries what it saw, so a reattach restores the state the replay alone
-can no longer promise.
+keyboard flags and the focus and mouse reporting `claude` turned on. :class:`TermModes`
+watches the same stream and the replay's end frame carries what it saw, so a reattach
+restores the state the replay alone can no longer promise.
 """
 from __future__ import annotations
 
@@ -43,11 +43,24 @@ _REPLAY_CAP: int = 256 * 1024
 
 
 #: The sequences :class:`TermModes` follows: the web shell's OSC 5379 `busy` / `ready`
-#: (group 1 the key, 2 the state) and the keyboard-mode CSIs terminal.js obeys — kitty's
+#: (group 1 the key, 2 the state), the keyboard-mode CSIs terminal.js obeys — kitty's
 #: `CSI > f u` / `CSI < n u` / `CSI = f ; m u` and XTMODKEYS `CSI > r ; v m` (group 3 the
-#: prefix, 4 the parameters, 5 the final).
+#: prefix, 4 the parameters, 5 the final) — DECSET / DECRST `CSI ? n ; … h|l` (group 6
+#: the modes, 7 set or reset), and RIS `ESC c`, the full reset (group 8).
 _MODE_RE = re.compile(rb'\x1b\]5379;([^;\x07\x1b]*);(busy|ready)[^\x07\x1b]*\x07'
-                      rb'|\x1b\[([<>=])([0-9;]*)([um])')
+                      rb'|\x1b\[([<>=])([0-9;]*)([um])'
+                      rb'|\x1b\[\?([0-9;]*)([hl])'
+                      rb'|\x1b(c)')
+
+#: The DEC private modes that make the terminal *write to the PTY unasked*: X10 and the
+#: three mouse-tracking protocols (one is active at a time, and resetting any of them turns
+#: tracking off, as in xterm.js), focus reporting (1004), and bracketed paste (2004) — plus
+#: SGR mouse encoding (1006), which says how the mouse reports are spelled. A stale one
+#: sends the solver's prompt bytes it never asked for (`ESC [ O` on every blur), so these
+#: are the modes a reattach restores. Screen modes (the alternate screen, the cursor) the
+#: replay redraws well enough on its own.
+_MOUSE_PROTOCOLS: frozenset[int] = frozenset({9, 1000, 1002, 1003})
+_FOCUS, _PASTE, _SGR_MOUSE = 1004, 2004, 1006
 
 #: A sequence split across two PTY reads is held back at most this long (bytes) awaiting
 #: its end; the longest one followed here — the OSC, with its 32-hex key — is under 80.
@@ -76,6 +89,10 @@ class TermModes:
         self.busy = False
         self.kitty: list[int] = [0]       # the kitty flag stack; [0] is the base entry
         self.other_keys = 0               # xterm's modifyOtherKeys level (0 = off)
+        self.mouse = 0                    # the active mouse protocol's mode (0 = off)
+        self.sgr_mouse = False            # mouse reports in SGR encoding (1006)
+        self.focus = False                # focus in/out reports (1004)
+        self.paste = False                # bracketed paste (2004)
         self._pending = b''
 
     def feed(self, data: bytes) -> None:
@@ -90,7 +107,13 @@ class TermModes:
         self._pending = tail[esc:] if esc != -1 and len(tail) - esc <= _MODE_CARRY else b''
 
     def _apply(self, match: re.Match[bytes]) -> None:
-        key, state, prefix, raw, final = match.groups()
+        key, state, prefix, raw, final, dec, setting, reset = match.groups()
+        if reset is not None:
+            self.mouse, self.sgr_mouse, self.focus, self.paste = 0, False, False, False
+            return
+        if dec is not None:
+            self._dec(dec, setting == b'h')
+            return
         if state is not None:
             if self._key and key == self._key:    # printed text does not know the key
                 self.busy = state == b'busy'
@@ -122,9 +145,23 @@ class TermModes:
             top = self.kitty[-1]
             self.kitty[-1] = top | flags if mode == 2 else top & ~flags if mode == 3 else flags
 
+    def _dec(self, raw: bytes, on: bool) -> None:
+        """Follow one DECSET (*on*) or DECRST: only the modes in § `_MOUSE_PROTOCOLS` above."""
+        for mode in (int(p) for p in raw.split(b';') if p):
+            if mode in _MOUSE_PROTOCOLS:
+                self.mouse = mode if on else 0
+            elif mode == _SGR_MOUSE:
+                self.sgr_mouse = on
+            elif mode == _FOCUS:
+                self.focus = on
+            elif mode == _PASTE:
+                self.paste = on
+
     def snapshot(self) -> dict[str, object]:
         """The state as the replay's end frame carries it (terminal.js adopts it)."""
-        return {'busy': self.busy, 'kitty': list(self.kitty), 'otherKeys': self.other_keys}
+        return {'busy': self.busy, 'kitty': list(self.kitty), 'otherKeys': self.other_keys,
+                'mouse': self.mouse, 'sgrMouse': self.sgr_mouse, 'focus': self.focus,
+                'paste': self.paste}
 
 
 def replay_end(osc_key: str, modes: TermModes | None = None) -> str:
