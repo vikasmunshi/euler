@@ -44,7 +44,7 @@ from typing import Annotated, Any, NamedTuple
 
 from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
-from solver.core.problems import Problem, parse_solved_date, problems, solution_dir
+from solver.core.problems import Problem, problems, solution_dir
 from solver.shell import console, register
 from solver.shell.dialogue import Abort, Ask, Choice
 from solver.shell.variables import variable
@@ -70,8 +70,8 @@ STATUSES = ('draft', 'final')
 #: the minute (`<!-- status: final 2026-10-14T08:32Z -->`). A string, not a Unix integer: it is
 #: read by people in the page and its diffs, and one fixed-width format in one zone still sorts and
 #: compares as plain text. UTC, not local-with-offset, because mixed offsets (summer/winter) break
-#: that text order. Minutes, because the problems' solve times - what it is compared against, to
-#: find an article written before some of its problems were solved - go no finer. It lives inside
+#: that text order. Minutes, because a page's writing is a minute-scale event (staleness itself is
+#: set arithmetic on the index's `covered` snapshot, not a time comparison). It lives inside
 #: the status comment because it *is* the status's time - when the page became final - and so is
 #: machine-owned on the same footing: `update-tags` stamps an undated `final` (`_stamp_status`).
 WRITTEN_FORMAT = '%Y-%m-%dT%H:%MZ'
@@ -613,32 +613,75 @@ def _problem_meta() -> tuple[dict[int, str], set[int]]:
     return titles, solved
 
 
-def _solve_dates() -> dict[int, str]:
-    """`number → solve time` (:data:`WRITTEN_FORMAT`, UTC) for every solved problem with a
-    readable date — the form an article's `written` stamp takes, so the two compare as text.
+#: A solution file's path tail: `p0042_s0.py` → problem 42.
+_SOLUTION_FILE_RE = re.compile(r'(?:^|/)p(\d{4})_s\d+\.(?:py|c)$')
 
-    `problems.json` records Amsterdam wall-clock times (`solver.core.progress.RECORD_TZ`),
-    which `parse_solved_date` reads as such — never as this machine's zone.
+
+def _ref_numbers(refs: list[str]) -> list[int]:
+    """The distinct problem numbers behind *refs*, sorted."""
+    return sorted({int(r.split('_')[0][1:]) for r in refs})
+
+
+def _first_commit_dates() -> dict[int, str]:
+    """`number → time` (:data:`WRITTEN_FORMAT`, UTC) a solution file for the problem first
+    entered git, from one `git log` over `solutions/`.
+
+    The repository's own record of when a solution existed — unlike `problems.json`'s date,
+    which `summary` re-stamps with the time projecteuler.net registered the answer. The
+    earliest add wins, so a later move (public → private, a bucket rename) never makes an old
+    solve look new; and it is the *author* date, which a rebase keeps, where the committer date
+    becomes the time of the rebase. Only `_covered` asks, and only for a final page indexed before snapshots.
     """
+    try:
+        out = subprocess.run(['git', '-C', str(config.root_dir), 'log', '--diff-filter=A',
+                              '--name-only', '--format=%x00%aI', '--', 'solutions'],
+                             capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.SubprocessError):
+        return {}
     dates: dict[int, str] = {}
-    for p in problems.solved_problems:
-        if when := parse_solved_date(problems.solutions_history.get(p.number, '')):
-            dates[p.number] = when.astimezone(UTC).strftime(WRITTEN_FORMAT)
+    when = ''
+    for line in out.splitlines():
+        if line.startswith('\0'):
+            when = datetime.fromisoformat(line[1:]).astimezone(UTC).strftime(WRITTEN_FORMAT)
+        elif (m := _SOLUTION_FILE_RE.search(line)) and when:
+            n = int(m.group(1))
+            dates[n] = min(dates.get(n, when), when)
     return dates
 
 
-def _solved_after(refs: list[str], written: str | None, dates: dict[int, str]) -> list[str]:
-    """The problems behind an article that were solved at or after the minute it was *written*.
+def _covered(refs: list[str], written: str | None, solved: set[int],
+             previous: dict[str, Any] | None, commit_dates: dict[int, str] | None) -> list[str]:
+    """The solved problems a final page drew on — its snapshot, taken once per `written` stamp.
 
-    Each is a solution the article could not have drawn on, so a non-empty list marks the page
-    as a candidate for a rewrite. A same-minute solve counts: it may have come after the writing,
-    and a false alarm costs a reread where a miss costs a stale page.
-    A draft (no *written*) has nothing to be stale against. `pNNNN` granularity, sorted.
+    A page stamped since the last index (a new final, or a rewrite with a fresh stamp) snapshots
+    what is solved **now**: `update-tags` stamps a page in the run right after the blogger
+    commits it, so the snapshot is the set the writer saw. A page whose stamp is unchanged keeps
+    its earlier snapshot, so later solves never leak into it. A final indexed before snapshots
+    existed is backfilled once from git (*commit_dates*): its solved problems whose solution was
+    committed before the minute it was written. A draft (no *written*) covers nothing.
+    `pNNNN` granularity, sorted.
     """
     if written is None:
         return []
-    nums = sorted({int(r.split('_')[0][1:]) for r in refs})
-    return [f'p{n:04d}' for n in nums if dates.get(n, '') >= written]
+    if previous is not None and previous.get('written') == written:
+        if 'covered' in previous:
+            return list(previous['covered'])
+        if commit_dates is not None:
+            return [f'p{n:04d}' for n in _ref_numbers(refs)
+                    if n in solved and commit_dates.get(n, '9') < written]
+    return [f'p{n:04d}' for n in _ref_numbers(refs) if n in solved]
+
+
+def _solved_after(refs: list[str], solved: set[int], covered: list[str]) -> list[str]:
+    """The solved problems behind an article that its *covered* snapshot does not hold.
+
+    Each is a solution the page could not have drawn on, so a non-empty list marks it as a
+    candidate for a rewrite. Set arithmetic, not dates: a page is stale for what it has not
+    seen, however its problems' recorded times move. A draft covers nothing and is never stale
+    — the caller passes no snapshot for one. `pNNNN` granularity, sorted.
+    """
+    seen = set(covered)
+    return [p for n in _ref_numbers(refs) if n in solved and (p := f'p{n:04d}') not in seen]
 
 
 def _problems_block(declared: list[str], by_slug: dict[str, Any],
@@ -725,14 +768,19 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
     a tag (`number-theory/primes`) join on the same footing. Each row carries the page's own
     `refs`, the same list the page's generated comment holds, so a consumer can rank or filter
     without re-deriving it from the vocabulary — plus the `solved`/`problems` pair derived
-    from those refs, which is what the web topics index shows as each card's subtitle — and
-    `solved_after`, the problems solved since a final page was `written` (see `_solved_after`). It is
-    stored rather than recomputed per request: the derivation needs the whole vocabulary and the
-    solved set, and the index is exactly the place that already holds both.
+    from those refs, which is what the web topics index shows as each card's subtitle — plus, for
+    a final page, `covered`, the solved problems it drew on (see `_covered`), and `solved_after`,
+    those solved since that it has not (see `_solved_after`). It is stored rather than recomputed
+    per request: the derivation needs the whole vocabulary and the solved set, and the index is
+    exactly the place that already holds both. `covered` is also carried *forward* from the
+    index on disk: it is a snapshot, which no rebuild from the files could recreate.
     """
     by_slug = {t['slug']: t for t in central['tags']}
     _, solved = _problem_meta()
-    dates = _solve_dates()
+    previous = {row['path']: row for row in (_load_index() or {}).get('articles', [])}
+    # Only a final indexed before snapshots needs git; read it once, and only then.
+    commit_dates = (_first_commit_dates()
+                    if any(r.get('written') and 'covered' not in r for r in previous.values()) else None)
     rows: dict[str, dict[str, Any]] = {}
     for file in _iter_articles():
         text = file.read_text()
@@ -741,11 +789,12 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
         refs = _article_refs(declared, by_slug)
         n_solved, n_problems = _article_counts(refs, solved)
         written = article_written(text)
+        covered = _covered(refs, written, solved, previous.get(path), commit_dates)
         rows[path] = {'path': path, 'title': _article_title(text, file.stem),
                       'status': article_status(text), 'written': written,
                       'solved': n_solved, 'problems': n_problems,
-                      'tags': declared, 'refs': refs,
-                      'solved_after': _solved_after(refs, written, dates)}
+                      'tags': declared, 'refs': refs, 'covered': covered,
+                      'solved_after': _solved_after(refs, solved, covered) if written else []}
     return {'articles': [rows[path] for path in sorted(rows)]}
 
 
@@ -778,11 +827,11 @@ def update_tags(check: bool = False) -> int:
     vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
     the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
     the topic articles' problem lists and rewrite the article index `topics/articles.json`
-    (one row per writable topic: title, status, written date, solved/problem counts, tags, refs
-    and the problems solved since the page was written), and name the final articles those
-    later solves have overtaken — the rewrite candidates. A
-    problem with notes but no `tags.json` is reported, not created here — the
-    `claude-api tags` target (or the skill) authors it.
+    (one row per writable topic: title, status, written date, solved/problem counts, tags, refs,
+    the solved problems a final page covered when written, and those it has not), and name the
+    final articles those later solves have overtaken — the rewrite candidates. A problem with
+    notes but no `tags.json` is reported, not created here — the `claude-api tags` target (or
+    the skill) authors it.
 
     The reconciled graph is committed — both legs together, and nothing beside them.
 

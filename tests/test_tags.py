@@ -8,9 +8,7 @@ used throughout so `_apply_membership` never needs on-disk solution indices.
 """
 from __future__ import annotations
 
-import os
 import tempfile
-import time
 import unittest
 from pathlib import Path
 from typing import Any
@@ -117,12 +115,40 @@ class ArticleIndexTests(unittest.TestCase):
         # a page on disk is never 'missing', whatever its comment claims
         self.assertEqual(tags.article_status('<!-- status: missing -->\n# Alpha\n'), 'draft')
 
-    def test_solved_after_names_the_problems_solved_since_the_page_was_written(self) -> None:
+    def test_solved_after_is_what_the_snapshot_has_not_seen(self) -> None:
         refs = ['p0001', 'p0002_s0', 'p0002_s1', 'p0003', 'p0004']
-        dates = {1: '2026-07-23T09:59Z', 2: '2026-08-01T12:00Z', 3: '2026-07-23T10:00Z'}  # p0004 unsolved
-        self.assertEqual(tags._solved_after(refs, '2026-07-23T10:00Z', dates), ['p0002', 'p0003'])
-        self.assertEqual(tags._solved_after(refs, '2026-09-01T00:00Z', dates), [])
-        self.assertEqual(tags._solved_after(refs, None, dates), [])
+        solved = {1, 2, 3}                                                  # p0004 unsolved
+        self.assertEqual(tags._solved_after(refs, solved, ['p0001']), ['p0002', 'p0003'])
+        self.assertEqual(tags._solved_after(refs, solved, ['p0001', 'p0002', 'p0003']), [])
+
+    def test_a_new_stamp_snapshots_what_is_solved_now(self) -> None:
+        refs = ['p0001', 'p0002_s0', 'p0003']
+        self.assertEqual(tags._covered(refs, '2026-10-30T17:01Z', {1, 2}, None, None), ['p0001', 'p0002'])
+        rewritten = {'written': '2026-10-01T00:00Z', 'covered': ['p0001']}  # a rewrite re-stamps
+        self.assertEqual(tags._covered(refs, '2026-10-30T17:01Z', {1, 2}, rewritten, None),
+                         ['p0001', 'p0002'])
+        self.assertEqual(tags._covered(refs, None, {1, 2}, None, None), [])  # a draft covers nothing
+
+    def test_an_unchanged_stamp_keeps_its_snapshot_however_dates_move(self) -> None:
+        """The bug this replaced: `summary` re-dates a solve to when projecteuler.net registered
+        it, which can fall after a page that already drew on it. A snapshot has no date to move."""
+        refs = ['p0001', 'p0002', 'p0003']
+        kept = {'written': '2026-10-30T17:01Z', 'covered': ['p0001', 'p0002']}
+        self.assertEqual(tags._covered(refs, '2026-10-30T17:01Z', {1, 2, 3}, kept, None), ['p0001', 'p0002'])
+
+    def test_a_pre_snapshot_final_is_backfilled_from_first_commits(self) -> None:
+        refs = ['p0001', 'p0002', 'p0003']
+        legacy = {'written': '2026-10-30T17:01Z'}                           # no `covered` yet
+        commits = {1: '2026-10-30T16:42Z', 2: '2026-10-30T17:01Z'}          # same minute: not covered
+        self.assertEqual(tags._covered(refs, '2026-10-30T17:01Z', {1, 2, 3}, legacy, commits), ['p0001'])
+
+    def test_first_commit_dates_take_the_earliest_add_in_utc(self) -> None:
+        log = ('\x002026-10-30T17:42:01+01:00\n\nsolutions/private/p0400_0499/p0492/p0492_s0.py\n'
+               'solutions/private/p0400_0499/p0492/notes.html\n'
+               '\x002026-08-01T12:00:00+02:00\n\nsolutions/public/p0042/p0042_s1.c\n'
+               '\x002026-07-01T12:00:00+02:00\n\nsolutions/p0042/p0042_s0.py\n')
+        with patch('solver.core.tags.subprocess.run', return_value=MagicMock(stdout=log)):
+            self.assertEqual(tags._first_commit_dates(), {492: '2026-10-30T16:42Z', 42: '2026-07-01T10:00Z'})
 
     def test_a_final_status_carries_the_time_it_was_written(self) -> None:
         dated = '<!-- status: final 2026-10-14T08:32Z -->\n# Alpha\n'
@@ -140,16 +166,6 @@ class ArticleIndexTests(unittest.TestCase):
             self.assertEqual(tags._stamp_status(draft), draft)                   # a draft stays undated
             older = '<!-- status: final 2026-08-03T14:12Z -->\n# Alpha\n'
             self.assertEqual(tags._stamp_status(older), older)                   # a stamp is never moved
-
-    def test_solve_dates_are_amsterdam_times_whatever_zone_the_machine_runs_in(self) -> None:
-        problem = MagicMock(number=7)
-        fake = MagicMock(solved_problems=[problem], solutions_history={7: 'Wed, 14 Oct 2026, 10:32'})
-        try:
-            with patch.object(tags, 'problems', fake), patch.dict(os.environ, {'TZ': 'UTC'}):
-                time.tzset()
-                self.assertEqual(tags._solve_dates(), {7: '2026-10-14T08:32Z'})  # CEST is UTC+2
-        finally:
-            time.tzset()                                                   # back to the real zone
 
     def test_stamp_lands_under_the_tags_comment_and_is_idempotent(self) -> None:
         stamped = tags._stamp_status('<!-- tags: [alpha] -->\n# Alpha\n')
@@ -169,12 +185,19 @@ class ArticleIndexTests(unittest.TestCase):
                       '<!-- tags: [alpha] -->\n<!-- status: final 2026-10-14T08:32Z -->\n# Alpha, at length\n')
         self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
         with (patch.object(tags, '_problem_meta', return_value=({}, {2})),
-              patch.object(tags, '_solve_dates', return_value={2: '2026-10-14T08:32Z'})):
+              patch.object(tags, '_load_index', return_value=None)):
             index = tags._build_index(_central())
         rows = {row['path']: row for row in index['articles']}
         self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
-        self.assertEqual(rows['domain/alpha']['solved_after'], ['p0002'])             # solved that minute
+        self.assertEqual(rows['domain/alpha']['covered'], ['p0002'])                  # newly stamped: snapshot
+        self.assertEqual(rows['domain/alpha']['solved_after'], [])
+        self.assertEqual(rows['curated/mix']['covered'], [])
         self.assertEqual(rows['curated/mix']['solved_after'], [])                     # a draft is never stale
+        previous = {'articles': [dict(rows['domain/alpha'], covered=[])]}           # snapshot predates p0002
+        with (patch.object(tags, '_problem_meta', return_value=({}, {2})),
+              patch.object(tags, '_load_index', return_value=previous)):
+            again = {row['path']: row for row in tags._build_index(_central())['articles']}
+        self.assertEqual(again['domain/alpha']['solved_after'], ['p0002'])            # carried, so stale
         self.assertEqual(set(rows), {'domain/alpha', 'curated/mix'})                 # pages only
         self.assertEqual(rows['domain/alpha']['status'], 'final')
         self.assertEqual(rows['domain/alpha']['written'], '2026-10-14T08:32Z')
