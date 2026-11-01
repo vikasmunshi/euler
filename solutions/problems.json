@@ -5468,8 +5468,8 @@
     "level": 9,
     "pct": 25,
     "solvers": 3554,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 19:56"
   },
   "685": {
     "title": "Inverse Digit Sum II",
