@@ -1,5 +1,5 @@
 <!-- tags: [prime-number] -->
-<!-- status: final 2026-10-16T07:17Z -->
+<!-- status: final -->
 # Prime number
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ divisible
@@ -9,7 +9,9 @@ plays in the problems below: in almost none of them is a prime the object of stu
 consecutive sums, a spiral diagonal, a Fibonacci index) — and the problem is a search over that
 structure, filtered by the predicate. Where it is not a filter, it is a **domain**: the problem
 asks for some quantity attached to each prime and summed over all of them, and the prime is just the
-index of the sum (and often the modulus inside it). The mathematics of *what primes are* is covered on
+index of the sum (and often the modulus inside it). Occasionally it is a **structure**, the vertex
+set of a graph. In every role, the question to ask is which property of primality the problem
+actually uses. The mathematics of *what primes are* is covered on
 [Prime Numbers](/topics/number-theory/prime-numbers), and the decomposition view — a number read
 through its factors — on [prime factorisation](/topics/domain/prime-factorization). This page is
 about the other half: what happens to a program when "and it must be prime" is added to a search, or
@@ -83,6 +85,16 @@ arithmetic progressions of $n$ to cross out, so the sieve runs over the *index s
 the value space. This polynomial sieve is the standard escape whenever a problem imposes primality
 on a sequence rather than on an interval.
 
+Problem 659 runs the same sieve for a different question: the *largest* prime factor of $4k^2 + 1$
+for every $k \le 10^7$, with values up to $4 \times 10^{14}$. Each prime $p \equiv 1 \pmod 4$ divides
+the polynomial along two progressions of $k$, which come from a square root of $-1$ modulo $p$.
+[Hensel lifting](https://en.wikipedia.org/wiki/Hensel%27s_lemma) carries those roots up to $p^2, p^3, \dots$,
+so repeated factors are divided out along finer progressions. The part worth taking away is how the
+sieve stops. Once every prime up to $2N + 1$ has been divided out, whatever is left of $f(k)$ is
+either $1$ or a single prime, because two factors above $2N + 1$ would multiply to more than $f(k)$.
+That **size bound certifies primality with no test at all**. It is the one piece of algebra the
+predicate does have, and it is what limits the sieve to $\sqrt{\max f}$ rather than $\max f$.
+
 **Sieve a window.** The primes near $10^{14}$ are spaced about $\ln(10^{14}) \approx 32$ apart, so
 the $100{,}000$ consecutive primes problem 304 needs occupy a window of only a few million integers.
 A [segmented sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve) over that
@@ -127,6 +139,24 @@ quantity depends on far less than the prime:
   overlaps the prime's units and tens, and every later step depends on the digit sum alone. So
   $\Delta(p)$ is a function of $(p \bmod 100,\ s(p))$, a few thousand table entries computed once.
   The per-prime work drops to one digit sum and two lookups.
+- Problem 492 asks, for every prime in a window near $10^9$, for the $10^{15}$-th term of an exploding
+  quadratic recurrence modulo $p$. Completing the square turns the recurrence into the doubling rule
+  of a [Lucas sequence](https://en.wikipedia.org/wiki/Lucas_sequence), so the term is
+  $\alpha^{2^{n-1}} + \alpha^{-2^{n-1}}$ for a root $\alpha$ of a fixed quadratic. Here the prime
+  gives something more than a modulus: a **finite group whose order it fixes**. If the discriminant
+  is a square mod $p$, then $\alpha \in \mathbb{F}_p^*$ and its order divides $p - 1$. Otherwise
+  $\alpha$ lives in $\mathbb{F}_{p^2}$, where the Frobenius map sends it to $\alpha^{-1}$, and its
+  order divides $p + 1$. [Quadratic reciprocity](https://en.wikipedia.org/wiki/Quadratic_reciprocity)
+  turns "is the discriminant a square mod $p$" into "is $p \bmod 13$ a square mod $13$". So the
+  small key is $p \bmod 13$. It chooses $p \mp 1$, the astronomical exponent shrinks modulo that
+  value, and one Lucas ladder per prime finishes the job.
+
+The same "every prime counts" shape also allows a second saving: **share the work across primes**
+instead of redoing it per prime. Problems 517 and 635 both reduce to binomial coefficients at
+arguments set by $p$, for hundreds or millions of primes. Both build one factorial table, or one
+running factorial scan, out to the largest argument and read every prime's terms from it. Problem 635
+also inverts all its denominators in one vectorised Fermat exponentiation instead of one inversion
+per prime.
 
 The lesson is the counterpart of "the win is upstream of the test": when nothing can be pruned,
 **find the small key the per-prime answer depends on**, and tabulate over the key instead of
@@ -134,6 +164,49 @@ computing over the prime. After that the remaining cost is just generating the p
 solutions' benchmarks are almost all sieve, which means it is the sieve that is worth optimising: an
 odd-only array that halves the memory traffic, or a segmented library sieve such as
 [primesieve](https://github.com/kimwalisch/primesieve).
+
+## Ask which property of primality is actually used
+
+"For every prime $p$" in a statement does not mean the proof needs primality. Before building on it,
+find the one property the argument uses. Three recent problems give three different answers:
+
+- **Essential.** Problem 635 counts the $p$-element subsets of $\{1, \dots, qp\}$ whose sum is
+  divisible by $p$. A [roots-of-unity filter](https://en.wikipedia.org/wiki/Root_of_unity#Summation)
+  writes the count as an average over all $p$-th roots of unity. Because $p$ is prime, every
+  non-trivial root is *primitive*, so all $p - 1$ non-trivial terms are equal and the sum collapses to
+  $\left(\binom{qp}{p} + q(p-1)\right)/p$. For composite $n$ the roots split by order and the closed
+  form is lost. Here primality carries the whole argument.
+- **Incidental.** Problem 517 sums a real-step recurrence $G(p) = g_{\sqrt p}(p)$ over primes in a
+  window. The recurrence unrolls into a sum of binomials, and the only fact about $p$ the computation
+  needs is that it is not a perfect square: then $j\sqrt p$ is irrational, and
+  $\lfloor p - j\sqrt p \rfloor$ is exact through an integer square root. Every non-square $n$ would
+  do. The solution accepts a non-prime mode, which is how the statement's $G(90)$ becomes a test case.
+- **Decorative.** Problem 946 expands a Möbius transform of a continued fraction whose runs of $1$s
+  have prime lengths. [Gosper's algorithm](https://en.wikipedia.org/wiki/Continued_fraction#Generalized_continued_fraction)
+  turns out to visit only $32$ states. A run of $p$ ones is therefore a walk that enters a cycle
+  within $32$ steps, and the run is consumed through $p$ modulo the cycle length, with the whole cycles
+  skipped by multiplication. The primes are just a list of run lengths. Any other sequence would cost
+  the same, and the sieve feeding it is the least of the work.
+
+The payoff is practical. An essential use is where the closed form comes from, so look for it
+deliberately: primitive roots, $\mathbb{F}_p$ being a field, Fermat and Frobenius. An incidental or
+decorative use frees the solution from primality entirely. It can be tested on small composite inputs
+and checked against the statement's examples even when those are not prime.
+
+## When the primes are the vertices
+
+One problem here uses the primes as neither filter nor domain but as **structure**. Problem 425
+links two primes when they differ in one digit or when one is the other with a digit prepended. A
+prime $P$ qualifies if a chain from $2$ reaches it using no prime above $P$. That is a
+[bottleneck path](https://en.wikipedia.org/wiki/Widest_path_problem) condition whose cap is the vertex
+being tested. So the order of the primes *is* the algorithm. Insert the primes in increasing order,
+union each one with its already-present smaller neighbours in a
+[disjoint-set](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) structure, and $P$ qualifies
+exactly when it shares a root with $2$ at the moment it arrives. This is Kruskal's algorithm with each
+edge weighted by its larger endpoint. Each edge is generated once, from its larger end, and the sieve
+supplies both the vertex set and a value-to-index map. Whenever a condition on a prime is "using only
+primes up to this one", sweep the primes in order and keep the answer incrementally, instead of
+re-searching for each prime.
 
 ## How to reason about it
 
@@ -154,7 +227,13 @@ When primality appears as a condition in a problem, work through it in this orde
    integers — $\pi(x)$ differences, a digit-sum reformulation, a telescoping sum.
 6. **If every prime counts, shrink the per-prime body.** Look for the few residues or digits the
    quantity actually depends on, and replace the work with a closed form or a table over that key.
-   The sieve should be what you are left paying for.
+   The sieve should be what you are left paying for. If the prime is a modulus, its group order
+   ($p - 1$, or $p + 1$ in $\mathbb{F}_{p^2}$) reduces any huge exponent. Work that depends only on
+   magnitude, such as a factorial table, is built once and shared by every prime.
+7. **Name the property of primality the argument uses.** If it is essential, that property is where
+   the closed form comes from. If it is incidental, drop it and test on composites too.
+8. **If the condition caps a chain at the prime itself, sweep the primes in increasing order** and
+   keep the answer incrementally, as union–find does for problem 425.
 
 The recurring mistake is to reach for a faster primality test when the real problem is that too many
 candidates are being tested at all. Almost every filtered search below that is fast is fast because
