@@ -4996,8 +4996,8 @@
     "level": 18,
     "pct": 47,
     "solvers": 975,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 20:00"
   },
   "626": {
     "title": "Counting Binary Matrices",
