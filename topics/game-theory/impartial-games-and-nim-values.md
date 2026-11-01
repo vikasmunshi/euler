@@ -117,7 +117,7 @@ the history into the state before you look for a value.
 - ○ [0344](/solutions/0344/) — Silver Dollar Game
 - ○ [0366](/solutions/0366/) — Stone Game III
 - ○ [0391](/solutions/0391/) — Hopping Game
-- ○ [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ○ [0459](/solutions/0459/) — Flipping Game
 - ○ [0488](/solutions/0488/) — Unbalanced Nim
 - ○ [0509](/solutions/0509/) — Divisor Nim

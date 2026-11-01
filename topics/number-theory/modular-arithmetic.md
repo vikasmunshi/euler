@@ -490,6 +490,7 @@ handful of operations on small numbers.
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ○ [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0405](/solutions/0405/) — A Rectangular Tiling

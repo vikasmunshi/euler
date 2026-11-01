@@ -267,6 +267,7 @@ both slower and harder to read.
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix

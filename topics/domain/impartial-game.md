@@ -13,7 +13,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Impartial_game
 - ○ [0344](/solutions/0344/) — Silver Dollar Game
 - ○ [0366](/solutions/0366/) — Stone Game III
 - ○ [0391](/solutions/0391/) — Hopping Game
-- ○ [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ○ [0459](/solutions/0459/) — Flipping Game
 - ○ [0488](/solutions/0488/) — Unbalanced Nim
 - ○ [0550](/solutions/0550/) — Divisor Game

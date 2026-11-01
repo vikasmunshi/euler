@@ -11,6 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Nimber>._
 - ● [0301](/solutions/0301/) — Nim
 - ○ [0306](/solutions/0306/) — Paper-strip Game
 - ○ [0310](/solutions/0310/) — Nim Square
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ○ [0459](/solutions/0459/) — Flipping Game
 - ○ [0488](/solutions/0488/) — Unbalanced Nim
 - ○ [0509](/solutions/0509/) — Divisor Nim

@@ -159,6 +159,7 @@ not style but necessity (see below).
 - ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0301](/solutions/0301/) — Nim
 - ● [0315](/solutions/0315/) — Digital Root Clocks
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0679](/solutions/0679/) — Freefarea
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0944](/solutions/0944/) — Sum of Elevisors

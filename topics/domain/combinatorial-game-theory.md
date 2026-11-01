@@ -259,7 +259,7 @@ weighting each winning mask by how many integers wear it.
 - ○ [0367](/solutions/0367/) — Bozo Sort
 - ○ [0391](/solutions/0391/) — Hopping Game
 - ○ [0396](/solutions/0396/) — Weak Goodstein Sequence
-- ○ [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ○ [0406](/solutions/0406/) — Guessing Game
 - ○ [0409](/solutions/0409/) — Nim Extreme
 - ○ [0426](/solutions/0426/) — Box-Ball System

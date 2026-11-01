@@ -131,7 +131,7 @@ be found by descending through the lengths — never materialising a string of `
 - ● [0304](/solutions/0304/) — Primonacci
 - ○ [0384](/solutions/0384/) — Rudin-Shapiro Sequence
 - ○ [0399](/solutions/0399/) — Squarefree Fibonacci Numbers
-- ○ [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0406](/solutions/0406/) — Guessing Game
 - ○ [0435](/solutions/0435/) — Polynomials of Fibonacci Numbers

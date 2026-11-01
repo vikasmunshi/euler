@@ -175,6 +175,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 
 - ● [0265](/solutions/0265/) — Binary Circles
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0670](/solutions/0670/) — Colouring a Strip
