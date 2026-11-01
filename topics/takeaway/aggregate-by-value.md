@@ -106,6 +106,7 @@ state the invariant that makes a class a class, and check that the boundary enfo
 ## Problems
 
 - ● [0452](/solutions/0452/) — Long Products
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials

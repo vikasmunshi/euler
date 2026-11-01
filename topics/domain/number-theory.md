@@ -558,7 +558,7 @@ show up there at once. See
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0617](/solutions/0617/) — Mirror Power Sequence
-- ○ [0625](/solutions/0625/) — Gcd Sum
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
 - ● [0637](/solutions/0637/) — Flexible Digit Sum

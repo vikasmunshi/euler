@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://oeis.org/A002088>._
 
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
+- ● [0625](/solutions/0625/) — Gcd Sum
 
 <!-- /problems -->

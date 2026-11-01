@@ -231,7 +231,7 @@ the loop.
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
-- ○ [0625](/solutions/0625/) — Gcd Sum
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ○ [0629](/solutions/0629/) — Scatterstone Nim
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0656](/solutions/0656/) — Palindromic Sequences

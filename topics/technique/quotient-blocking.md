@@ -158,6 +158,7 @@ interval, never per `n`.
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials

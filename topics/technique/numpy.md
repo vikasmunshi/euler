@@ -334,6 +334,7 @@ both slower and harder to read.
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0637](/solutions/0637/) — Flexible Digit Sum

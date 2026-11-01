@@ -638,6 +638,7 @@ handful of operations on small numbers.
 - ○ [0619](/solutions/0619/) — Square Subsets
 - ○ [0622](/solutions/0622/) — Riffle Shuffles
 - ○ [0624](/solutions/0624/) — Two Heads Are Better Than One
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices
 - ○ [0627](/solutions/0627/) — Counting Products
 - ● [0628](/solutions/0628/) — Open Chess Positions

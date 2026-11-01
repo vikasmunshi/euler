@@ -108,6 +108,7 @@ is itself computed by the hyperbola identity for `μ * 1 = ε`: `M(v) = 1 − Σ
 
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 

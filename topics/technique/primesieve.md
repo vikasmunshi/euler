@@ -189,6 +189,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0659](/solutions/0659/) — Largest Prime

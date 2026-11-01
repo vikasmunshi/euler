@@ -214,7 +214,7 @@ targets.
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
-- ○ [0625](/solutions/0625/) — Gcd Sum
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
 - ○ [0756](/solutions/0756/) — Approximating a Sum

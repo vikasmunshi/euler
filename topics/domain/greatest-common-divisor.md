@@ -184,7 +184,7 @@ with gcds too: it takes `gcd(|x − y|, n)` and waits for a non-trivial value.
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ○ [0570](/solutions/0570/) — Snowflakes
-- ○ [0625](/solutions/0625/) — Gcd Sum
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ○ [0643](/solutions/0643/) — $2$-Friendly
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
 - ○ [0728](/solutions/0728/) — Circle of Coins

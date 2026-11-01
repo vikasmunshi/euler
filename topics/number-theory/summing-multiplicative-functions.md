@@ -216,7 +216,7 @@ already been computed.
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ○ [0608](/solutions/0608/) — Divisor Sums
-- ○ [0625](/solutions/0625/) — Gcd Sum
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors

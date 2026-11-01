@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Dirichlet_conv
 ## Problems
 
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 
