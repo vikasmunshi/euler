@@ -6924,8 +6924,8 @@
     "level": 9,
     "pct": 24,
     "solvers": 650,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 11:11"
   },
   "867": {
     "title": "Tiling Dodecagon",
