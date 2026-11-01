@@ -3396,8 +3396,8 @@
     "level": 10,
     "pct": 27,
     "solvers": 1996,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 14:53"
   },
   "426": {
     "title": "Box-Ball System",
