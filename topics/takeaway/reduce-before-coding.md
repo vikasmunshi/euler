@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final 2026-10-28T21:02Z -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the
@@ -76,7 +76,7 @@ all the way.
 
 The four degrees above simplify a computation that is already the right one.
 The harder problems on the list mostly need something earlier: a reduction that
-changes *what* is computed before any of it is simplified. Four such moves
+changes *what* is computed before any of it is simplified. Five such moves
 recur.
 
 **Restate the condition.** The question as posed is often the awkward form of
@@ -97,7 +97,12 @@ $\mu(q) = +1$ — a dice simulation becomes a lattice count under a hyperbola.
 [Idempotents](/solutions/0407/) asks for the largest $a$ with
 $a^2 \equiv a \pmod n$; since $a$ and $a-1$ are coprime, every prime power of
 $n$ divides one or the other, so the idempotents are exactly the coprime splits
-$n = d \cdot e$, and a per-$n$ search becomes a sweep over pairs. Each restatement is a line of algebra, and each one
+$n = d \cdot e$, and a per-$n$ search becomes a sweep over pairs.
+[Largest Prime](/solutions/0659/) asks for the largest prime dividing two
+*successive* terms of $n^2 + k^2$; a common divisor divides their difference
+$2n + 1$, which pins $n \equiv -\tfrac12 \pmod p$, and substituting back leaves
+the condition $p \mid 4k^2 + 1$ — a search over $n$ for every $k$ becomes the
+largest prime factor of one polynomial value. Each restatement is a line of algebra, and each one
 is where the problem actually gets solved.
 
 **Translate into a known object.** Sometimes the restated problem is one that
@@ -128,7 +133,14 @@ two records, so the coins arrive in logarithmically many steps.
 [Summation of Summations](/solutions/0739/) applies a linear operator, so the
 answer is a weighted sum of the inputs; the statement's 429 is a
 [Catalan number](https://en.wikipedia.org/wiki/Catalan_number), the tell that
-the weights are ballot numbers. Once the object has a name, its theory comes with it, and the code
+the weights are ballot numbers. Sometimes the object only shows its name after a
+change of variables. [Exploding Sequence](/solutions/0492/) iterates the quadratic
+map $a \mapsto 6a^2 + 10a + 3$, whose terms double in length every step;
+completing the square with $b = 6a + 5$ turns it into $b \mapsto b^2 - 2$, the
+doubling rule of a [Lucas sequence](https://en.wikipedia.org/wiki/Lucas_sequence),
+so the $n$-th term is $V_{2^{n-1}}$. Modulo a prime $p$ that index only matters
+modulo the order of the underlying root, which divides $p - 1$ or $p + 1$, so
+$10^{15}$ iterations become two short exponentiations. Once the object has a name, its theory comes with it, and the code
 implements a theorem rather than a search.
 
 **Keep only what the answer reads.** Most inputs carry far more information
@@ -147,6 +159,19 @@ as one. [Freshman's Product](/solutions/0778/) has more sequences than a
 number with a million digits, but its carry-free product reads each decimal
 place independently and each input only through its digit there — a ten-entry
 histogram per place, raised to the $R$-th power under multiplication modulo 10.
+[Fibonacci Tree Game](/solutions/0400/) plays on a tree with a 2000-digit node
+count, but once the game is recognised as Green Hackenbush, a move matters only
+through the [Grundy value](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
+it leaves at the root, and those values stay small. So the moves are counted per
+(level, target value), a few thousand values per level, and no node is ever visited.
+A huge *parameter* can be state the answer does not read, too.
+[The Millionth Number with at Least One Million Prime Factors](/solutions/0615/)
+looks impossible because $k = 10^6$, but the early members of the list are
+overwhelmingly powers of two: each odd prime that replaces a two multiplies the
+value by at least $3/2$, so beyond about 36 prime factors every early member
+shares a common power of two. Dividing it out maps the head of the list for $k$
+onto the head of the list for 36 in order, and $k$ is gone — the answer is an
+ordinary 64-bit enumeration times one modular power.
 The question to ask is: *what is this result actually a function of?*
 The answer is the real state space.
 
@@ -170,6 +195,23 @@ Hamming number times distinct primes $q$ with $q - 1$ Hamming, so $10^{12}$
 candidates become a few thousand Hamming numbers and the square-free products of
 a few hundred primes. Construction beats filtering whenever the answers are
 sparse and the space is not.
+
+**Trade the condition for a sum that collapses.** A congruence condition, "the
+total is $0 \bmod n$", is awkward to count directly but easy to *filter*: the
+average of $\omega^{js}$ over the $n$-th roots of unity is $1$ when $n \mid s$
+and $0$ otherwise. The
+[roots-of-unity filter](https://en.wikipedia.org/wiki/Root_of_unity#Orthogonality)
+turns the count into $n$ sums with no condition at all, and the reduction pays
+when those sums turn out to be nearly all alike. In
+[Subset Sums](/solutions/0635/) the modulus is prime, so every non-trivial root
+is primitive and the $p-1$ non-trivial terms are *identical*, each worth $q$;
+the count becomes $\bigl(\binom{qp}{p} + q(p-1)\bigr)/p$, a single binomial
+coefficient per prime. [Quadruple Congruence](/solutions/0875/) filters the zeros
+of an eight-variable quadratic form the same way; each term becomes a power of a
+[quadratic Gauss sum](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum), whose
+*modulus* is classical even though its value is not, and $n^8$ tuples collapse
+into a Dirichlet convolution summed with a totient sieve. The transform costs a
+sum over $n$ roots and buys a structure that counting never exposes.
 
 ## How to reason about it
 
@@ -211,7 +253,10 @@ Three cautions keep the habit honest:
   was trusted. [Summation of Summations](/solutions/0739/) found its ballot-number
 weights by simulating unit vectors, and
 [Gold and Silver Coin Game](/solutions/0860/) checked its surreal values by
-playing every arrangement out for $n \le 7$. And small edge cases hide in correct derivations too: in
+playing every arrangement out for $n \le 7$. A reduction often predicts something
+checkable on its own: [problem 615](/solutions/0615/)'s says that past the threshold,
+raising $k$ by one exactly doubles the unreduced answer, and a brute force confirms
+it does. And small edge cases hide in correct derivations too: in
   [Euler's Totient Function Equals 13!](/solutions/0248/) the factor contributed
   by the prime 2 at exponent 1 is $1$, so a search that stops when the residual
   target reaches 1 silently drops half the solutions.
