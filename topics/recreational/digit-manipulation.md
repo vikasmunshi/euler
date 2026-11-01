@@ -316,7 +316,7 @@ what matters here is what replaces the extraction loop).
 - ○ [0714](/solutions/0714/) — Duodigits
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
-- ○ [0731](/solutions/0731/) — A Stoneham Number
+- ● [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0749](/solutions/0749/) — Near Power Sums
 - ○ [0776](/solutions/0776/) — Digit Sum Division
 - ● [0778](/solutions/0778/) — Freshman's Product

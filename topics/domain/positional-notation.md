@@ -222,7 +222,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0676](/solutions/0676/) — Matching Digit Sums
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ○ [0714](/solutions/0714/) — Duodigits
-- ○ [0731](/solutions/0731/) — A Stoneham Number
+- ● [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0749](/solutions/0749/) — Near Power Sums
 - ○ [0776](/solutions/0776/) — Digit Sum Division
 - ● [0778](/solutions/0778/) — Freshman's Product

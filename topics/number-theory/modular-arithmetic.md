@@ -594,6 +594,7 @@ handful of operations on small numbers.
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ○ [0728](/solutions/0728/) — Circle of Coins
+- ● [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls
 - ○ [0733](/solutions/0733/) — Ascending Subsequences
 - ○ [0734](/solutions/0734/) — A Bit of Prime

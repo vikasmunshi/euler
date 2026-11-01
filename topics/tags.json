@@ -1183,7 +1183,7 @@
       "reference": "https://en.wikipedia.org/wiki/Fractional_part",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0820", "p0850", "p0965"]
+      "refs": ["p0731", "p0820", "p0850", "p0965"]
     },
     {
       "slug": "fractran",
@@ -4207,7 +4207,7 @@
       "reference": "https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134_s0", "p0160_s0", "p0198_s0", "p0236_s0", "p0250_s0", "p0251_s0", "p0271_s0", "p0531_s0", "p0932_s0", "p0934_s0"]
+      "refs": ["p0134_s0", "p0160_s0", "p0198_s0", "p0236_s0", "p0250_s0", "p0251_s0", "p0271_s0", "p0531_s0", "p0731_s0", "p0932_s0", "p0934_s0"]
     },
     {
       "slug": "extended-slice",
@@ -4666,7 +4666,7 @@
       "reference": "https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0293_s0", "p0297_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0531_s0", "p0545_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0686_s0", "p0698_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
+      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0293_s0", "p0297_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0531_s0", "p0545_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
     },
     {
       "slug": "int64",
@@ -5215,7 +5215,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0516_s0", "p0545_s0", "p0615_s0", "p0635_s0", "p0650_s0", "p0675_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0516_s0", "p0545_s0", "p0615_s0", "p0635_s0", "p0650_s0", "p0675_s0", "p0731_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "modular-multiplicative-inverse-application",
@@ -5224,7 +5224,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_multiplicative_inverse",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0492_s0", "p0517_s0", "p0531_s0", "p0635_s0", "p0650_s0", "p0675_s0", "p0743_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"]
+      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0492_s0", "p0517_s0", "p0531_s0", "p0635_s0", "p0650_s0", "p0675_s0", "p0731_s0", "p0743_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"]
     },
     {
       "slug": "modulo",
@@ -6188,6 +6188,15 @@
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
       "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0635", "p0670", "p0706", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
+    },
+    {
+      "slug": "extract-digits-by-modular-shift",
+      "facet": "takeaway",
+      "name": "Extract far digits by a modular shift",
+      "reference": null,
+      "additional-references": [],
+      "summary": "To read digits deep inside a series' expansion, shift each term by a power of the base reduced modulo its denominator, keeping only the window you want and a bounded carry from the fractional parts.",
+      "refs": ["p0731"]
     },
     {
       "slug": "invariant-bounds-the-state-space",
