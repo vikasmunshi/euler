@@ -5268,8 +5268,8 @@
     "level": 19,
     "pct": 49,
     "solvers": 1350,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 11:16"
   },
   "660": {
     "title": "Pandigital Triangles",
