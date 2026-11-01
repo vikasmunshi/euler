@@ -283,6 +283,7 @@ both slower and harder to read.
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0632](/solutions/0632/) — Square Prime Factors
+- ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations

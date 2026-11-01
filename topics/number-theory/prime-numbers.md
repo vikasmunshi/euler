@@ -662,7 +662,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
-- ○ [0635](/solutions/0635/) — Subset Sums
+- ● [0635](/solutions/0635/) — Subset Sums
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors

@@ -156,6 +156,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0632](/solutions/0632/) — Square Prime Factors
+- ● [0635](/solutions/0635/) — Subset Sums
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 

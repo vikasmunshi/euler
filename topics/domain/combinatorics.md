@@ -385,7 +385,7 @@ of crossing it.
 - ○ [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0630](/solutions/0630/) — Crossed Lines
 - ○ [0631](/solutions/0631/) — Constrained Permutations
-- ○ [0635](/solutions/0635/) — Subset Sums
+- ● [0635](/solutions/0635/) — Subset Sums
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ○ [0645](/solutions/0645/) — Every Day Is a Holiday

@@ -257,6 +257,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0632](/solutions/0632/) — Square Prime Factors
+- ● [0635](/solutions/0635/) — Subset Sums
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$

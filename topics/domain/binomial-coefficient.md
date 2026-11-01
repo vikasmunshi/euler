@@ -176,6 +176,7 @@ factorials that every formula above is built from.
 - ○ [0567](/solutions/0567/) — Reciprocal Games I
 - ○ [0568](/solutions/0568/) — Reciprocal Games II
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
+- ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0739](/solutions/0739/) — Summation of Summations

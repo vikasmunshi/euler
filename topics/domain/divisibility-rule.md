@@ -129,7 +129,6 @@ histogram is small enough to be the state of a DP.
 - ○ [0491](/solutions/0491/) — Double Pandigital Number Divisible by $11$
 - ○ [0601](/solutions/0601/) — Divisibility Streaks
 - ○ [0614](/solutions/0614/) — Special Partitions 2
-- ○ [0635](/solutions/0635/) — Subset Sums
 - ○ [0655](/solutions/0655/) — Divisible Palindromes
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0714](/solutions/0714/) — Duodigits

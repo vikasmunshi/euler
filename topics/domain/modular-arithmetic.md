@@ -386,7 +386,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0627](/solutions/0627/) — Counting Products
 - ○ [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0631](/solutions/0631/) — Constrained Permutations
-- ○ [0635](/solutions/0635/) — Subset Sums
+- ● [0635](/solutions/0635/) — Subset Sums
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ○ [0653](/solutions/0653/) — Frictionless Tube

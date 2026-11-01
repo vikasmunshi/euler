@@ -211,6 +211,7 @@ the repetition.
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0531](/solutions/0531/) — Chinese Leftovers
+- ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0743](/solutions/0743/) — Window into a Matrix
