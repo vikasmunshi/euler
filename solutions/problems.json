@@ -6996,8 +6996,8 @@
     "level": 21,
     "pct": 55,
     "solvers": 320,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 11:09"
   },
   "876": {
     "title": "Triplet Tricks",
