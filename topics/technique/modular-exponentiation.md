@@ -216,6 +216,7 @@ the bare reduction gives a wrong answer that looks plausible.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0822](/solutions/0822/) — Square the Smallest
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game

@@ -223,6 +223,7 @@ already been computed.
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0745](/solutions/0745/) — Sum of Squares II
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0926](/solutions/0926/) — Total Roundness
 

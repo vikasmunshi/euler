@@ -220,7 +220,7 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ○ [0699](/solutions/0699/) — Triffle Numbers
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ● [0745](/solutions/0745/) — Sum of Squares II
-- ○ [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ○ [0795](/solutions/0795/) — Alternating GCD Sum
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0875](/solutions/0875/) — Quadruple Congruence

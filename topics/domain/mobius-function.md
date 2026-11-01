@@ -129,5 +129,6 @@ summing it fast.
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0641](/solutions/0641/) — A Long Row of Dice
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 
 <!-- /problems -->

@@ -422,7 +422,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0753](/solutions/0753/) — Fermat Equation
-- ○ [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators

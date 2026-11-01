@@ -143,5 +143,6 @@ table as soon as its prefix sums are built.
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0745](/solutions/0745/) — Sum of Squares II
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 
 <!-- /problems -->

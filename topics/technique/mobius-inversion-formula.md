@@ -138,5 +138,6 @@ totals cancel down to a much smaller answer.
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0478](/solutions/0478/) — Mixtures
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 
 <!-- /problems -->

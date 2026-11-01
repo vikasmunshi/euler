@@ -1048,7 +1048,7 @@
       "reference": "https://en.wikipedia.org/wiki/Factorial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0248", "p0254", "p0288", "p0320", "p0330", "p0381", "p0383", "p0418", "p0429", "p0474", "p0495", "p0549", "p0592", "p0598", "p0608", "p0628", "p0636", "p0646", "p0675", "p0829", "p0851", "p0926", "p0937", "p0952", "p0956"]
+      "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0248", "p0254", "p0288", "p0320", "p0330", "p0381", "p0383", "p0418", "p0429", "p0474", "p0495", "p0549", "p0592", "p0598", "p0608", "p0628", "p0636", "p0646", "p0675", "p0754", "p0829", "p0851", "p0926", "p0937", "p0952", "p0956"]
     },
     {
       "slug": "factorial-number-system",
@@ -1948,7 +1948,7 @@
       "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0319", "p0464", "p0641"]
+      "refs": ["p0319", "p0464", "p0641", "p0754"]
     },
     {
       "slug": "modular-arithmetic",
@@ -3571,6 +3571,15 @@
       "refs": ["p0122_s0", "p0136_s0", "p0177_s0", "p0201_s0", "p0208_s0", "p0215_s0", "p0216_s0", "p0229_s0", "p0238_s0", "p0301_s0", "p0310_s0", "p0315_s0", "p0400_s0", "p0679_s0", "p0899_s0", "p0944_s0"]
     },
     {
+      "slug": "blocked-prefix-scan",
+      "facet": "technique",
+      "name": "Blocked prefix scan",
+      "reference": "https://en.wikipedia.org/wiki/Prefix_sum",
+      "additional-references": [],
+      "summary": "Vectorise a sequential running product or sum by laying the array out as a matrix, scanning all rows in parallel column by column, then adding each row's carry-in.",
+      "refs": ["p0754_s0"]
+    },
+    {
       "slug": "bostan-mori-algorithm",
       "facet": "technique",
       "name": "Bostan\u2013Mori algorithm",
@@ -5161,7 +5170,7 @@
       "reference": "https://en.wikipedia.org/wiki/Mertens_function",
       "additional-references": [],
       "summary": "Evaluating M(x) = sum of the Moebius function up to x at every quotient n/d, by sieving below a cutoff and recursing above it.",
-      "refs": ["p0319_s0", "p0641_s0"]
+      "refs": ["p0319_s0", "p0641_s0", "p0754_s0"]
     },
     {
       "slug": "methods-of-computing-square-roots",
@@ -5215,7 +5224,7 @@
       "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0153_s0", "p0193_s0", "p0202_s0", "p0464_s0", "p0478_s0", "p0478_s1", "p0641_s0", "p0745_s0"]
+      "refs": ["p0153_s0", "p0193_s0", "p0202_s0", "p0464_s0", "p0478_s0", "p0478_s1", "p0641_s0", "p0745_s0", "p0754_s0"]
     },
     {
       "slug": "mobius-inversion-formula",
@@ -5224,7 +5233,7 @@
       "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0073_s2", "p0153_s0", "p0193_s0", "p0276_s0", "p0319_s0", "p0478_s0", "p0478_s1"]
+      "refs": ["p0073_s2", "p0153_s0", "p0193_s0", "p0276_s0", "p0319_s0", "p0478_s0", "p0478_s1", "p0754_s0"]
     },
     {
       "slug": "modular-arithmetic-application",
@@ -5242,7 +5251,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0516_s0", "p0545_s0", "p0615_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0731_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0516_s0", "p0545_s0", "p0615_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0731_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0754_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "modular-multiplicative-inverse-application",
@@ -5251,7 +5260,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_multiplicative_inverse",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0492_s0", "p0517_s0", "p0531_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0731_s0", "p0743_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"]
+      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0492_s0", "p0517_s0", "p0531_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0731_s0", "p0743_s0", "p0754_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"]
     },
     {
       "slug": "modulo",
@@ -5386,7 +5395,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5647,7 +5656,7 @@
       "reference": "https://codeforces.com/blog/entry/53925",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0153_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0429_s0", "p0452_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0565_s1", "p0642_s0", "p0668_s0", "p0875_s0", "p0926_s0"]
+      "refs": ["p0153_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0429_s0", "p0452_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0565_s1", "p0642_s0", "p0668_s0", "p0754_s0", "p0875_s0", "p0926_s0"]
     },
     {
       "slug": "randomized-incremental-algorithm",
@@ -5746,7 +5755,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
       "additional-references": [],
       "summary": "Run a sieve over consecutive fixed-size windows so memory stays bounded and the search can extend until an answer appears.",
-      "refs": ["p0256_s0", "p0531_s0", "p0632_s0"]
+      "refs": ["p0256_s0", "p0531_s0", "p0632_s0", "p0754_s0"]
     },
     {
       "slug": "sentinel-value",
@@ -6097,7 +6106,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0721_s0", "p0739_s0", "p0757_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0"]
     },
     {
       "slug": "walrus-operator",
@@ -6133,7 +6142,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When only an input's value class matters, count the inputs per class and compute on the counts instead of enumerating the inputs.",
-      "refs": ["p0452", "p0675", "p0698", "p0776", "p0778"]
+      "refs": ["p0452", "p0675", "p0698", "p0754", "p0776", "p0778"]
     },
     {
       "slug": "algorithm-beats-language",
@@ -6358,7 +6367,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "An exponent too large to write down only matters modulo the order of the group the base lives in \u2014 find that order, even when it is p + 1 in an extension field.",
-      "refs": ["p0492"]
+      "refs": ["p0492", "p0754"]
     },
     {
       "slug": "right-tool-per-cost",

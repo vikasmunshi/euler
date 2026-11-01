@@ -217,6 +217,7 @@ the repetition.
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0731](/solutions/0731/) — A Stoneham Number
 - ● [0743](/solutions/0743/) — Window into a Matrix
+- ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0932](/solutions/0932/) — $2025$
