@@ -4484,8 +4484,8 @@
     "level": 9,
     "pct": 24,
     "solvers": 1125,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 09:52"
   },
   "562": {
     "title": "Maximal Perimeter",
