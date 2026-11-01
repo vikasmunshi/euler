@@ -190,6 +190,7 @@ Python original and both produce a plausible wrong number rather than a crash.
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0700](/solutions/0700/) — Eulercoin
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0710](/solutions/0710/) — One Million Members

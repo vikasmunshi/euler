@@ -260,6 +260,7 @@ Four cautions earn their keep:
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0757](/solutions/0757/) — Stealthy Numbers

@@ -210,6 +210,7 @@ front of you is asking for.
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0822](/solutions/0822/) — Square the Smallest

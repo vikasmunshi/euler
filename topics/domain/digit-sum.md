@@ -263,7 +263,7 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ○ [0612](/solutions/0612/) — Friend Numbers
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0676](/solutions/0676/) — Matching Digit Sums
-- ○ [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0706](/solutions/0706/) — $3$-Like Numbers

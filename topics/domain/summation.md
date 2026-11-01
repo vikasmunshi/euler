@@ -317,7 +317,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0672](/solutions/0672/) — One More One
 - ○ [0676](/solutions/0676/) — Matching Digit Sums
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever
-- ○ [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0688](/solutions/0688/) — Piles of Plates
 - ○ [0689](/solutions/0689/) — Binary Series

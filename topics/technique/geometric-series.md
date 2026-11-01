@@ -124,5 +124,6 @@ two is formed:
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 
 <!-- /problems -->

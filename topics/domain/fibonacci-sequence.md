@@ -144,7 +144,7 @@ be found by descending through the lengths — never materialising a string of `
 - ○ [0662](/solutions/0662/) — Fibonacci Paths
 - ○ [0669](/solutions/0669/) — The King's Banquet
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever
-- ○ [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ○ [0707](/solutions/0707/) — Lights Out
 - ● [0755](/solutions/0755/) — Not Zeckendorf

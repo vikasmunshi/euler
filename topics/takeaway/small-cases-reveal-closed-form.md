@@ -190,6 +190,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0628](/solutions/0628/) — Open Chess Positions
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis

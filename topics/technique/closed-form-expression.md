@@ -395,6 +395,7 @@ loop was never needed.
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0635](/solutions/0635/) — Subset Sums
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix

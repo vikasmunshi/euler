@@ -291,6 +291,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0731](/solutions/0731/) — A Stoneham Number
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0745](/solutions/0745/) — Sum of Squares II

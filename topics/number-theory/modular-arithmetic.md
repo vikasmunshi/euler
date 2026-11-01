@@ -658,7 +658,7 @@ handful of operations on small numbers.
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
-- ○ [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0696](/solutions/0696/) — Mahjong
