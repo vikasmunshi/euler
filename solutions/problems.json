@@ -5052,8 +5052,8 @@
     "level": 19,
     "pct": 50,
     "solvers": 712,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 09:56"
   },
   "633": {
     "title": "Square Prime Factors II",
