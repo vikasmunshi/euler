@@ -1,12 +1,13 @@
 <!-- tags: [primesieve] -->
-<!-- status: final 2026-10-30T06:40Z -->
+<!-- status: final -->
 # primesieve
 
 [primesieve](https://github.com/kimwalisch/primesieve) is Kim Walisch's C/C++ library for
 generating primes, and it is my default answer to "I need the primes up to N, and the primes are
 not the interesting part." The solutions below delegate to it for exactly that reason. In each of
 them the primes are only the raw material: a sum for problem 10, a set of rotations to check in 35,
-a semiprime count in 187, a Fibonacci-mod stream in 304, a vector of residues in 381 and 421. A
+a semiprime count in 187, a Fibonacci-mod stream in 304, a vector of residues in 381 and 421, the
+points at which 635 reads a running factorial, the outer loop's index set in 517. A
 tuned library that fills that one need cleanly frees the solution to spend its code on the actual
 problem. This page is about the library as a **tool**: what it does for you, the calls the
 solutions make from C and Python, and when a hand-written sieve is still the right call. For the
@@ -101,6 +102,34 @@ hopeless at 10¹⁵. Past that point you need the combinatorial methods
 for a rare check, but each call sets up a sieve, so a test inside a hot loop should be a real
 primality test or a lookup.
 
+## Sizing the call: the bound comes from the argument
+
+The call is cheap, and that tempts you to pass the problem's headline N. Usually the right bound is
+smaller, and you get it by reasoning about the problem.
+
+- **A window, not a prefix.** Problem 492 sums over the primes in `[x, x+y]` with x = 10⁹ and
+  y = 10⁷. `primesieve.numpy.primes(x, x + y)` never sieves from 2. It finds the base primes up to
+  √(x+y) ≈ 3·10⁴ and then sieves the window, so the cost scales with y, not x + y. The returned
+  ndarray then becomes a set of vector lanes, and each lane works modulo its own prime: the
+  exponent is reduced mod p − 1 or mod p + 1, chosen per lane with `np.where` by a Legendre symbol,
+  before a vectorised Lucas ladder runs. When you know where the window *ends*, use this array
+  form. When you only know *how many* primes you need, use the iterator, as in 304.
+- **Only the roots of the range.** Problem 632 runs its own segmented sieve over d ≤ √N = 10⁸, but
+  it asks the library for primes only up to N^¼ = 10⁴. Every d in range has at most one prime
+  factor above 10⁴. So when a squarefree d's product of small prime factors falls short of d, the
+  missing part is exactly one large prime, and ω(d) is the small count plus one. The large primes
+  are never listed. One comparison per entry replaces a sieve 10⁴ times longer.
+- **A bound you prove first.** Problem 615 walks a DFS over odd prime factorisations. Its
+  head-of-list bound n·2^s means the smallest odd prime in any candidate is at most 2n, so it
+  calls `primes(3, 2 * n)`, a figure that comes from the pruning argument and appears nowhere in
+  the statement. Problem 659 sieves the values 4k² + 1 for k ≤ N using primes up to 2N + 1, which
+  is √(4N² + 1) rounded up. After those primes have been divided out, the cofactor left is 1 or a
+  single prime. It also drops every p ≢ 1 (mod 4), because −1 is not a square modulo those primes,
+  so they can never divide 4k² + 1.
+
+In every case the library is asked one clear question. Deciding which question to ask is still
+the solution's job.
+
 ## When a hand-written sieve is still better
 
 primesieve answers one question: *which numbers are prime?* Use your own sieve when you need more
@@ -111,8 +140,13 @@ than that, or something different.
   with a [linear sieve](/topics/technique/linear-sieve) or a
   [divisor-sum sieve](/topics/technique/divisor-sum-sieve), which work at every n anyway. Problem
   464 shows the hybrid: primesieve supplies the primes and the solution's own loop spreads each one
-  over the μ table it actually needs. Once you are writing that loop, the library has only saved you
-  the primality bits. Problem 675 is the same hybrid, with one extra benefit. It builds a
+  over the μ table it actually needs. Problem 875 does the same for φ in NumPy: one strided slice
+  update per prime. Once you are writing that loop, the library has only saved you the primality
+  bits. Sometimes the loop is one no library could run. In 659's
+  [polynomial sieve](/topics/technique/polynomial-sieve), a prime does not strike its multiples. It
+  strikes the two residue classes of k where p divides 4k² + 1, and those classes are
+  [Hensel-lifted](/topics/technique/hensels-lemma) to p², p³, … to remove full powers. The library
+  can only supply the p. Problem 675 is the same hybrid, with one extra benefit. It builds a
   per-step multiplier table for factorials by spreading each prime over its own multiples. Because
   the library returns the primes as a *sorted array*, a single `np.searchsorted` divides them at
   max(√n, n/301). Below that point each prime gets its own strided pass. Above it every prime has
