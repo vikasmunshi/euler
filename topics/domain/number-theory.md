@@ -1,5 +1,5 @@
 <!-- tags: [number-theory] -->
-<!-- status: final 2026-10-30T12:42Z -->
+<!-- status: final -->
 # Number theory
 
 [Number theory](https://en.wikipedia.org/wiki/Number_theory) is the study of the integers on their
@@ -7,10 +7,10 @@ own terms — divisibility, primes, remainders, and the arithmetic functions bui
 With 141 problems it is the third-largest domain tag in the archive, behind only
 [combinatorics](/topics/domain/combinatorics) and
 [modular arithmetic](/topics/domain/modular-arithmetic), and it is the one most often paired with
-something sharper: 35 of these problems also carry `modular-arithmetic`, 24
+something sharper: 35 of these problems also carry `modular-arithmetic`, 23
 [prime factorization](/topics/domain/prime-factorization), 21
 [Diophantine equation](/topics/domain/diophantine-equation), 21
-[multiplicative function](/topics/domain/multiplicative-function), 16
+[multiplicative function](/topics/domain/multiplicative-function), 15
 [divisor function](/topics/domain/divisor-function). Those pages describe the *objects*. This one
 is about what all 141 have in common — the shape the question takes, and the small set of moves
 that turn it from impossible into a few seconds of work.
@@ -112,11 +112,29 @@ $\varphi$ only on a window of a few thousand integers above $10^6$, so it sieves
 ([segmented sieve](/topics/technique/segmented-sieve)). The primes up to $\sqrt{\text{end}}$ are
 pushed into the window, and each one is also divided out of a residual copy of every multiple.
 Whatever residual is still above 1 afterwards is the single prime factor larger than the square
-root, and one last pass applies it. The rule of
+root, and one last pass applies it. Problems 632 and 754 sieve to $10^8$ with the same economy.
+They push only the primes up to $10^4$ and keep a running product of the small primes found in
+each cell. A squarefree cell whose product falls short of its index must hold exactly one large
+prime, so the millions of primes above $10^4$ never have to be touched. The rule of
 thumb is blunt: **if you find yourself factoring inside a loop over a
 range, you have the loop inside out.** Invert it — iterate over primes or divisors and push into an
 array. See [sieve of Eratosthenes](/topics/technique/sieve-of-eratosthenes) and
 [precompute once, reuse](/topics/takeaway/precompute-once-reuse).
+
+The sieve does not need its cells to be the integers themselves. Problem 659 reduces to the
+largest prime factor of $f(k) = 4k^2 + 1$ for every $k \le 10^7$, values up to $4 \times 10^{14}$.
+That is far too large to factor one at a time, but the values can still be sieved, because divisibility
+by $p$ is periodic in $k$. The prime $p$ divides $f(k)$ exactly when $k$ is a root of $f$ modulo
+$p$, and the multiples of $p$ in the integer sieve become the arithmetic progressions through
+those roots. Here $(2k)^2 \equiv -1$ forces $p \equiv 1 \pmod 4$. Every such prime has exactly
+two roots, found from a square root of $-1$ (a
+[quadratic non-residue](/topics/technique/quadratic-residue) raised to $(p-1)/4$). Higher powers of
+$p$ come from [lifting each root](/topics/technique/hensels-lemma) to the next progression. A size
+bound ends the work at $p \le 2N + 1$: two primes above that would multiply past $f(k)$, so
+whatever survives the sieve is $1$ or a single prime. This is the
+[polynomial sieve](/topics/technique/polynomial-sieve), and it is the engine of the
+[quadratic sieve](https://en.wikipedia.org/wiki/Quadratic_sieve). Wherever the integer sieve walks
+over multiples, it walks over roots.
 
 ## Move 2 — swap the order of summation
 
@@ -145,6 +163,23 @@ exchange the sums so the *small* variable is the outer one. The machinery has a 
 [Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution) — and problem 153
 (sums over [Gaussian integer](https://en.wikipedia.org/wiki/Gaussian_integer) divisors) is the
 archive's fullest workout of it.
+
+"Exactly $k$" needs one more step, because a single divisor sum gives "at least". Problem 632
+counts the $n \le 10^{16}$ with exactly $k$ square prime factors. For a squarefree $d$ the count of
+$n$ divisible by $d^2$ is $\lfloor N/d^2 \rfloor$. Summing that over the $d$ with $\omega(d) = j$
+gives $A_j$, which counts every $n$ once per $j$-subset of its square primes:
+$A_j = \sum_k \binom{k}{j} C_k$. That triangular system inverts with alternating signs,
+$C_k = \sum_{j \ge k} (-1)^{j-k} \binom{j}{k} A_j$
+([binomial inversion](/topics/technique/binomial-inversion), inclusion–exclusion graded by size).
+The outer variable is again $d \le \sqrt{N}$, and $j$ stops at 8, since nine primes already
+multiply past $10^8$. One sieve classifies each $d$ by $\omega$, and nine sums do the rest.
+
+The swap works for products as well as sums, with the Möbius function moved into the exponent.
+Problem 754 multiplies the [Gauss factorials](https://en.wikipedia.org/wiki/Wilson%27s_theorem#Gauss's_generalization)
+$g(n)$, the product of the $k \le n$ coprime to $n$, for every $n \le 10^8$. Inversion gives
+$g(n) = \prod_{d \mid n} (d^{n/d} (n/d)!)^{\mu(d)}$. Substituting $n = dm$ and exchanging the
+products leaves one product over $d$, in which every factor depends only on $\lfloor N/d \rfloor$.
+That sets up move 3.
 
 ## Move 3 — there are only $O(\sqrt{N})$ distinct quotients
 
@@ -208,6 +243,15 @@ over $q$ when $q$ is small, and over $c$ when $q$ is large. The large side needs
 $\#\{q \le x : \mu(q) = +1\}$, which is half the sum of the squarefree count $Q(x)$ and the Mertens
 function $M(x)$. Both are the sublinear sums from moves 2 and 3.
 
+Problem 754 shows that blocking survives the switch from sums to products. Over a run of $d$ with
+the same quotient $M$, the exponents $\mu(d)$ on the superfactorial
+$F(M) = \prod_{m \le M} m!$ add up to a difference of
+[Mertens values](/topics/technique/mertens-function-application). The factors $d^{\mu(d)}$ become a
+ratio of running products, kept as separate $\mu = +1$ and $\mu = -1$ products so that each block
+needs one modular inverse instead of one per element. The running quantities are only *read* at
+the $2\sqrt{N}$ checkpoints $\lfloor N/k \rfloor$, so only those values are stored. A linear pass
+builds them, and the final product costs $O(\sqrt{N})$ exponentiations.
+
 ## Move 4 — reduce the algebra before you write the loop
 
 The three moves above are all mechanical once the sum exists. Getting to the sum is not, and the
@@ -244,6 +288,35 @@ there are free places left below it, no completion can be pandigital in base $b$
 subtree is dropped. One cheap interval test stands in for hundreds of millions of base
 conversions. Four problems, four different things reduced: the formula, the comparison, the
 candidate set, the search tree.
+
+Problem 637 is about splitting digits too. $f(n)$ counts how many rounds of inserting plus signs
+it takes to reach a single digit. A number has $2^{L-1}$ splits, but $f$ never exceeds 3 below
+$10^7$. So the useful question is not "what is the minimum" but "is $f(n) \le t$", and that
+question is settled by a single witness split. Splitting at every place gives the digit sum,
+which is the cheapest split, and it settles level 1 with no search. Most of level 2 then falls to
+a [meet-in-the-middle](/topics/technique/meet-in-the-middle-attack) bit-array AND over the high and
+low halves. When a function has a tiny range, asking about thresholds turns a minimisation into a
+search for one witness.
+
+Sometimes what shrinks is the *answer's* form. Problem 561 asks for the 2-adic valuation of a
+divisor-pair count, summed over $10^{12}$ exponents. Divisors of a primorial power are exponent
+vectors, and divisibility compares them one coordinate at a time, so the count factorises into a
+closed form. Its [2-adic valuation](/topics/domain/p-adic-valuation) then splits on parity. One
+branch needs the [lifting-the-exponent lemma](/topics/technique/lifting-the-exponent-lemma), and
+each branch comes down to $\sum_{t \le N} v_2(t) = v_2(N!)$. [Legendre's formula](/topics/domain/legendres-formula)
+gives that as $N - s_2(N)$, where $s_2$ is the binary digit sum. The sum of $10^{12}$ terms is a
+popcount. A question that asks for a valuation rather than a value is usually asking for this:
+LTE turns $v_p(a^n - b^n)$ into valuations of $a - b$ and $n$, and Legendre adds them up.
+
+Problem 615 makes a parameter vanish. It wants the millionth integer with at least $10^6$ prime
+factors counted with multiplicity ([almost primes](/topics/domain/almost-prime) of every order
+$\ge k$). Nothing that size can be written down. But every early member is mostly made of twos.
+Replacing a two by an odd prime costs a factor of at least $3/2$, and $(3/2)^{36}$ already exceeds
+$n$. So the first $n$ members all carry $2^{k-36}$, and dividing it out maps them in order onto the
+first $n$ members of the $k = 36$ list, which are ordinary 64-bit integers. The
+[order statistic](/topics/domain/order-statistic) is then a pruned depth-first search over odd
+parts, below a bound found by [doubling](/topics/technique/exponential-search), followed by a sort.
+Look for the point where the huge parameter stops changing anything except a scale factor.
 
 Sometimes the reduction is a congruence that makes most of the problem disappear. Problem 512 sums
 $\varphi(n^i) \bmod (n+1)$ over $i \le n$. But $\varphi(n^i) = n^{i-1}\varphi(n)$, and
@@ -345,10 +418,21 @@ Modular reduction has its own exactness trap. In problem 271 the roots are combi
 the question asks for their sum as integers. That sum is hundreds of times larger than $n$, so
 reducing it would discard most of the answer
 ([exact sums resist modular shortcuts](/topics/takeaway/exact-sums-resist-modular-shortcuts)).
+Problem 632 multiplies its non-zero counts modulo $10^9 + 7$. Which counts are non-zero is a
+question about the exact integers, so the binomial inversion runs without a modulus. A count that
+happens to be divisible by the modulus is still a factor. Exponents are where reduction *is*
+licensed, if the modulus is right. In problem 754 the base modulus $p$ is prime, so exponents
+reduce modulo $p - 1$ by [Fermat](/topics/domain/fermats-little-theorem)
+([reduce the exponent modulo the group order](/topics/takeaway/reduce-exponent-modulo-group-order)).
+A negative Mertens difference then becomes an ordinary positive exponent. That works only because
+$p > N$, so no base is ever $0 \bmod p$.
 
 The second trap is width, and it is language-shaped. Python's integers are arbitrary-precision, so
 a solution that works in Python can overflow silently the moment it is ported to C. Problems 241,
-251, 271, 272, 276, 359, 531 and 641 all need `__int128` or a reduction that keeps intermediates small. In 276 the
+251, 271, 272, 276, 359, 531, 615, 632, 641 and 659 all need `__int128` or a reduction that keeps
+intermediates small. In 615 it is a pruning product that briefly passes $2^{64}$ before the
+comparison rejects it. In 632 it is an alternating sum whose terms are larger than its result.
+In 276 the
 answer itself still fits in 64 bits, but the intermediate $k(k+1)(2k+1)$ does not. Problem 531 has
 the reverse problem: every term fits, but the running total of millions of them passes $2^{63}$ on
 the larger test window, so the accumulator has to be wider than the values going into it. Problems 168 and
@@ -364,6 +448,9 @@ The tells are reasonably reliable:
 | "for every $n$ up to $N$", $N \le 10^8$ | sieve the whole table (move 1) |
 | $N \ge 10^{12}$, or "below $2^{50}$" | find a summatory identity; sieve only $\sqrt{N}$ (moves 2–3) |
 | "coprime", "gcd is 1", "squarefree", "exactly $k$ prime factors" | Möbius / inclusion–exclusion over divisors (move 2) |
+| "exactly $k$" of something a divisor sum counts as "at least" | count the $j$-subsets, then binomial inversion (move 2) |
+| a *product* over coprime $k$ or over divisors | Möbius in the exponent; block it like a sum (moves 2–3) |
+| the factors of $f(k)$ for a polynomial $f$, every $k$ | sieve along the roots of $f$ mod $p$, Hensel for powers (move 1) |
 | $\lfloor N/d \rfloor$ anywhere in the derived sum | quotient blocking (move 3) |
 | the total is a formula, the question asks for the gcd-1 part | invert over floor quotients, $O(N^{3/4})$ (moves 2–3) |
 | the condition only sees which primes divide $n$ | enumerate the prime part, prefix-sum the cofactors (move 5) |
@@ -371,6 +458,9 @@ The tells are reasonably reliable:
 | two congruences whose moduli share factors | generalised CRT: solvable iff $\gcd$ divides the difference |
 | a condition on the digits of $n$ in several bases | prune whole intervals by their shared leading digits |
 | $\pi(v)$, or a function constant on primes, summed to $10^9$+ | Lucy / Min_25 over the floor quotients (move 3) |
+| the answer is a $p$-adic valuation | LTE per term, Legendre's formula for the sum (move 4) |
+| the $n$-th element for an enormous parameter $k$ | find where $k$ only scales the answer; divide it out (move 4) |
+| a minimum whose range is tiny | decide "$\le t$" level by level; one witness settles it (move 4) |
 | a recurrence or greedy process run $10^{15}$ times | find the events or the steady state; jump (move 6) |
 | $f$ is multiplicative | build $f$ from prime powers; a sieve exists |
 | the number is too large to write down | work in logs, or modulo whatever the question actually asks for |
@@ -383,7 +473,9 @@ before a line is written — a sieve indexed off by one, or a Möbius identity w
 produces a plausible number rather than an error. Verify on the small case the statement gives you;
 it exists for exactly that reason. When there is no small case, as in problem 276, make one: a
 brute force for tiny $N$, plus an asymptotic check. Primitive triangles should be about
-$1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that badly. See
+$1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that badly. Problem
+632's count with no square prime factors must match the squarefree density $6/\pi^2$; a slip in the binomial signs would
+show up there at once. See
 [calibrate theory on known answers](/topics/takeaway/calibrate-theory-on-known-answers).
 
 <!-- problems (generated by update-tags) -->
