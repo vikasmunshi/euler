@@ -659,7 +659,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
 - ○ [0619](/solutions/0619/) — Square Subsets
 - ○ [0627](/solutions/0627/) — Counting Products
-- ○ [0632](/solutions/0632/) — Square Prime Factors
+- ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
 - ○ [0635](/solutions/0635/) — Subset Sums

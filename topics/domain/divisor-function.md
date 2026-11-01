@@ -188,7 +188,6 @@ composites one smallest prime factor at a time, in roughly $O(m^{3/4})$ total.
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ○ [0598](/solutions/0598/) — Split Divisibilities
 - ○ [0608](/solutions/0608/) — Divisor Sums
-- ○ [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ○ [0646](/solutions/0646/) — Bounded Divisors

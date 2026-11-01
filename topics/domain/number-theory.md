@@ -467,7 +467,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0617](/solutions/0617/) — Mirror Power Sequence
 - ○ [0625](/solutions/0625/) — Gcd Sum
-- ○ [0632](/solutions/0632/) — Square Prime Factors
+- ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
 - ○ [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function

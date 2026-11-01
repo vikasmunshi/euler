@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sieve_of_Erato
 
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0531](/solutions/0531/) — Chinese Leftovers
+- ● [0632](/solutions/0632/) — Square Prime Factors
 
 <!-- /problems -->

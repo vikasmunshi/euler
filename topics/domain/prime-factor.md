@@ -123,7 +123,7 @@ it — the same asymmetry as before, seen from the other side.
 - ● [0132](/solutions/0132/) — Large Repunit Factors
 - ○ [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0526](/solutions/0526/) — Largest Prime Factors of Consecutive Numbers
-- ○ [0632](/solutions/0632/) — Square Prime Factors
+- ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ○ [0779](/solutions/0779/) — Prime Factor and Exponent

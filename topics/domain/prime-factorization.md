@@ -283,7 +283,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
 - ○ [0619](/solutions/0619/) — Square Subsets
 - ○ [0627](/solutions/0627/) — Counting Products
-- ○ [0632](/solutions/0632/) — Square Prime Factors
+- ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
 - ○ [0646](/solutions/0646/) — Bounded Divisors

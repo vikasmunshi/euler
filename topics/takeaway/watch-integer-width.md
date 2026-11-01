@@ -305,6 +305,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
+- ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0698](/solutions/0698/) — 123 Numbers
