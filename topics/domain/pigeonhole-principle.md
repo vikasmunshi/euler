@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pigeonhole_pri
 
 - ● [0074](/solutions/0074/) — Digit Factorial Chains
 - ● [0129](/solutions/0129/) — Repunit Divisibility
+- ● [0303](/solutions/0303/) — Multiples with Small Digits
 
 <!-- /problems -->

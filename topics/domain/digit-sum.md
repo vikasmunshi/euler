@@ -246,7 +246,6 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ○ [0284](/solutions/0284/) — Steady Squares
 - ● [0290](/solutions/0290/) — Digital Signature
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
-- ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ○ [0358](/solutions/0358/) — Cyclic Numbers
 - ○ [0377](/solutions/0377/) — Sum of Digits - Experience #13

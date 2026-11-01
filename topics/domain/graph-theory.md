@@ -217,7 +217,7 @@ counting walks.
 - ● [0244](/solutions/0244/) — Sliders
 - ○ [0270](/solutions/0270/) — Cutting Squares
 - ○ [0289](/solutions/0289/) — Eulerian Cycles
-- ○ [0303](/solutions/0303/) — Multiples with Small Digits
+- ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
 - ○ [0380](/solutions/0380/) — Amazing Mazes!
 - ○ [0393](/solutions/0393/) — Migrating Ants

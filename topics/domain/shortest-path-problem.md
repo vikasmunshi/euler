@@ -187,6 +187,7 @@ What is yours is the model.
 - ● [0083](/solutions/0083/) — Path Sum: Four Ways
 - ● [0244](/solutions/0244/) — Sliders
 - ○ [0262](/solutions/0262/) — Mountain Range
+- ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ○ [0353](/solutions/0353/) — Risky Moon
 - ○ [0736](/solutions/0736/) — Paths to Equality
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost

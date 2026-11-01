@@ -119,7 +119,6 @@ histogram is small enough to be the state of a DP.
 - ● [0139](/solutions/0139/) — Pythagorean Tiles
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
-- ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
 - ○ [0333](/solutions/0333/) — Special Partitions
 - ○ [0383](/solutions/0383/) — Divisibility Comparison Between Factorials

@@ -116,6 +116,7 @@ order total, so the k-th element is the same on every run.
 - ● [0068](/solutions/0068/) — Magic 5-gon Ring
 - ● [0124](/solutions/0124/) — Ordered Radicals
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
+- ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ● [0698](/solutions/0698/) — 123 Numbers

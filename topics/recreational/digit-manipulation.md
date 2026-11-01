@@ -271,7 +271,6 @@ what matters here is what replaces the extraction loop).
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0290](/solutions/0290/) — Digital Signature
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
-- ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ○ [0316](/solutions/0316/) — Numbers in Decimal Expansions

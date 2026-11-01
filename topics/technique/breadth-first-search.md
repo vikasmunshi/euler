@@ -108,6 +108,7 @@ transition. Here BFS is used for its layer-completeness guarantee.
 ## Problems
 
 - ● [0244](/solutions/0244/) — Sliders
+- ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0679](/solutions/0679/) — Freefarea
 
