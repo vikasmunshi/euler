@@ -113,6 +113,7 @@ carry-propagating add and the arrays grow by doubling.
 - ● [0025](/solutions/0025/) — $1000$-digit Fibonacci Number
 - ● [0145](/solutions/0145/) — Reversible Numbers
 - ● [0181](/solutions/0181/) — Grouping Two Different Coloured Objects
+- ● [0290](/solutions/0290/) — Digital Signature
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 
 <!-- /problems -->

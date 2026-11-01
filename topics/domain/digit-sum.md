@@ -244,7 +244,7 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0254](/solutions/0254/) — Sums of Digit Factorials
 - ○ [0284](/solutions/0284/) — Steady Squares
-- ○ [0290](/solutions/0290/) — Digital Signature
+- ● [0290](/solutions/0290/) — Digital Signature
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0315](/solutions/0315/) — Digital Root Clocks

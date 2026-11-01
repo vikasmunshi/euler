@@ -269,7 +269,7 @@ what matters here is what replaces the extraction loop).
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ○ [0284](/solutions/0284/) — Steady Squares
 - ● [0288](/solutions/0288/) — An Enormous Factorial
-- ○ [0290](/solutions/0290/) — Digital Signature
+- ● [0290](/solutions/0290/) — Digital Signature
 - ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ○ [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0305](/solutions/0305/) — Reflexive Position

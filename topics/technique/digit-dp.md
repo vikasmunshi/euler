@@ -225,6 +225,7 @@ everything that does depend on $n$ costs $O(\log n)$ polynomial products.
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
+- ● [0290](/solutions/0290/) — Digital Signature
 - ● [0301](/solutions/0301/) — Nim
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
