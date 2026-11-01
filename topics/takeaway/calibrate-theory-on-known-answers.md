@@ -182,6 +182,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0963](/solutions/0963/) — Removing Trits

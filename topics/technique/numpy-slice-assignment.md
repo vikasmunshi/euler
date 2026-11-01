@@ -223,5 +223,6 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 
 <!-- /problems -->

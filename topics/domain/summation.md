@@ -341,7 +341,6 @@ problems are where the collection makes the point most bluntly.
 - ○ [0830](/solutions/0830/) — Binomials and Powers
 - ○ [0831](/solutions/0831/) — Triple Product
 - ○ [0850](/solutions/0850/) — Fractions of Powers
-- ○ [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0884](/solutions/0884/) — Removing Cubes
 - ○ [0893](/solutions/0893/) — Matchsticks
 - ○ [0905](/solutions/0905/) — Now I Know

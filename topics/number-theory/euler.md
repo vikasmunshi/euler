@@ -243,6 +243,7 @@ the loop.
 - ○ [0799](/solutions/0799/) — Pentagonal Puzzle
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ○ [0859](/solutions/0859/) — Cookie Game
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ○ [0911](/solutions/0911/) — Khinchin Exceptions
 - ○ [0922](/solutions/0922/) — Young's Game A

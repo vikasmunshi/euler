@@ -721,6 +721,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0861](/solutions/0861/) — Products of Bi-Unitary Divisors
 - ○ [0869](/solutions/0869/) — Prime Guessing
 - ○ [0874](/solutions/0874/) — Maximal Prime Score
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0881](/solutions/0881/) — Divisor Graph Width
 - ○ [0886](/solutions/0886/) — Coprime Permutations
 - ○ [0920](/solutions/0920/) — Tau Numbers

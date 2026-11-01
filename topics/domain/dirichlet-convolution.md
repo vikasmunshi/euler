@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Dirichlet_conv
 
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0745](/solutions/0745/) — Sum of Squares II
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 
 <!-- /problems -->

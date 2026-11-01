@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Series_multise
 ## Problems
 
 - ● [0635](/solutions/0635/) — Subset Sums
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 
 <!-- /problems -->

@@ -465,7 +465,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0871](/solutions/0871/) — Drifting Subsets
 - ○ [0873](/solutions/0873/) — Words with Gaps
 - ○ [0874](/solutions/0874/) — Maximal Prime Score
-- ○ [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ○ [0889](/solutions/0889/) — Rational Blancmange
 - ○ [0891](/solutions/0891/) — Ambiguous Clock

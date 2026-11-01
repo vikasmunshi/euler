@@ -16,7 +16,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_form
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
-- ○ [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0876](/solutions/0876/) — Triplet Tricks
 - ○ [0989](/solutions/0989/) — Fibonacci Sum
 
