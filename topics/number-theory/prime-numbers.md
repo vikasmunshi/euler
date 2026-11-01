@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-10-30T17:05Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -101,6 +101,18 @@ maps the head of the list onto the same question with $k = 36$, which is an ordi
 enumeration. The power comes back at the end as a modular exponentiation. Order is what the question
 asks for, and order survives the scaling even though the values do not.
 
+The exponent vector also splits a number into its square and squarefree parts. Every $n$ is uniquely
+$a^2 b$ with $b$ [squarefree](https://en.wikipedia.org/wiki/Square-free_integer), and $p^2 \mid n$
+exactly when $p \mid a$. Problem 632 counts the $n \le 10^{16}$ with *exactly* $k$ such square prime
+factors. "Exactly" is awkward, because it forbids every other prime from appearing squared. "At least
+these $j$ primes" is easy: for a squarefree $d$, the multiples of $d^2$ number $\lfloor N/d^2 \rfloor$.
+Each $n$ with exactly $k$ square factors is counted once for every $j$-subset of them, so the
+"at least" totals are binomial sums of the "exactly" counts. [Binomial
+inversion](https://en.wikipedia.org/wiki/Binomial_transform) undoes that triangle with alternating
+signs. The $k = 0$ count gives a free check: it is the number of squarefree $n \le N$, whose density is
+$\prod_p (1 - p^{-2}) = 1/\zeta(2) = 6/\pi^2$, the [Euler product](#from-counting-to-the-zeta-function)
+evaluated at $s = 2$.
+
 [Coprimality](https://en.wikipedia.org/wiki/Coprime_integers) is the same lens with the exponents
 reduced to "shares a prime or not". Problem 351 counts the lattice points visible from the centre of a
 hexagonal orchard. A point $(a, b)$ is hidden exactly when $\gcd(a, b) > 1$, and since
@@ -108,6 +120,16 @@ $\gcd(a, b) = \gcd(a, a + b)$, the visible points on ring $s$ number $\varphi(s)
 reduces to one totient sum. Problems 251 and 257 use the same move as a parametrisation tool: split
 off $d = \gcd$, or reduce a ratio to lowest terms $p/q$, and the leftover coprime parts satisfy a
 divisibility condition clean enough to count whole families with a single floor division.
+
+When the coprimality condition sits *inside* a product, the [Möbius
+function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) removes it. Problem 754 multiplies, for
+every $n \le 10^8$, the integers up to $n$ that are coprime to $n$. Since $\sum_{d \mid m} \mu(d)$ is
+$1$ when $m = 1$ and $0$ otherwise, the test "$\gcd(k, n) = 1$" becomes a signed sum over the common
+divisors $d$. Inside a product, that sum lands in the exponent, as $\mu(d)$. The multiples of each
+$d \mid n$ then contribute a power of $d$ times a factorial. After swapping the order, the whole
+product runs over $d$ alone, with $\lfloor N/d \rfloor$ taking only $O(\sqrt N)$ distinct values. The
+prime modulus $10^9 + 7$ does two jobs here. It exceeds $N$, so no factor vanishes, and by Fermat every
+exponent, including a negative Mertens difference, can be reduced modulo $p - 1$.
 
 Factorials are where the exponent vector is cheapest to know.
 [Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) gives the exponent of $p$ in
@@ -228,6 +250,16 @@ neighbourhoods, and problem 50 chases the longest run of consecutive primes that
 each a small window onto the same theme, that the primes are random enough to be endlessly surprising
 and structured enough that the surprises obey laws.
 
+Sometimes the primes are not a sequence at all but the vertices of a graph. Problem 425 joins two
+primes when one becomes the other by changing a single digit or by prepending one. It then asks which
+primes $P$ can be reached from $2$ by a chain that never passes a prime larger than $P$. That is a
+bottleneck-path question, and the cap is the very vertex being tested. So I add the primes in
+increasing order and merge components with a [union–find](https://en.wikipedia.org/wiki/Disjoint-set_data_structure)
+structure. Once $P$ arrives, the graph present is exactly the one on the primes $\le P$, and $P$
+qualifies when it shares a root with $2$. That is [Kruskal's algorithm](https://en.wikipedia.org/wiki/Kruskal%27s_algorithm)
+with each edge weighted by its larger endpoint. The increasing order the sieve already provides does
+all the work.
+
 Residue classes obey a law too.
 [Dirichlet's theorem](https://en.wikipedia.org/wiki/Dirichlet%27s_theorem_on_arithmetic_progressions)
 says the primes split *evenly* among the $\varphi(q)$ residue classes modulo $q$ that are coprime to
@@ -288,7 +320,25 @@ window. Problem 492 wants the primes in $[10^9, 10^9 + 10^7]$. primesieve writes
 NumPy array, and every later per-prime step is one vector operation over all $482\,449$ of them. When
 **how many primes you need depends on the output**, double the bound until it is enough. Problem 946
 feeds consecutive primes in as run lengths of a continued fraction, and it cannot tell in advance how
-many runs will produce $10^8$ output terms.
+many runs will produce $10^8$ output terms. When the sieve must **classify every $d$ below a
+bound**, as squarefree or not and by its count of distinct primes, the primes up to $\sqrt N$ are
+enough. A $d \le N$ has at most one prime factor above $\sqrt N$. So the sieve also tracks the product
+of the small primes it found in each $d$. If that product falls short of $d$, exactly one large prime
+is missing, and one comparison accounts for it. Problems 632 and 754 sieve $10^8$ values this way with
+1229 primes instead of 5.76 million, which matters in NumPy, where every prime costs one slice
+operation.
+
+**Factor a polynomial's values together.** Problem 659 needs the largest prime factor of $4k^2 + 1$
+for every $k \le 10^7$, values up to $4 \times 10^{14}$. Factoring each value by trial division would
+take about $10^{14}$ steps. But a prime divides $f(k)$ only along fixed residue classes of $k$, the
+roots of $f$ modulo $p$. So each prime is sieved along its own progressions, exactly as Eratosthenes
+sieves along multiples. For $f(k) = (2k)^2 + 1$, the roots exist only when $-1$ is a [quadratic
+residue](https://en.wikipedia.org/wiki/Quadratic_residue), so $p \equiv 1 \pmod 4$. Each such prime
+then has exactly two roots, and [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma) lifts
+each root to the progression of $p^2$, $p^3$, and so on. A size bound turns the partial sieve into a
+complete factorisation. Once every prime up to $2N + 1$ is divided out, the cofactor is either $1$ or
+a single prime, because two primes above $2N + 1$ multiply to more than any $f(k)$. So the leftover
+needs no primality test at all: the bound already proves it is prime.
 
 **Count without listing — sublinear summatory functions.** Some problems need a sum over every
 $n \le 10^{10}$, such as $\sum \varphi(n)$ or $\sum \mu(n)$, and no sieve reaches that far. The way
@@ -403,6 +453,26 @@ $p - 1$, and that one structural fact answers a whole class of counting question
   $4(x^2 - x + 1) = (2x - 1)^2 + 3$. So a prime can divide $x^2 - x + 1$ only if $-3$ is a
   [quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) modulo it, which means
   $p = 3$ or $p \equiv 1 \pmod 3$. Half the candidate moduli disappear before the search starts.
+- **A prime modulus makes every non-trivial root of unity primitive.** A
+  [roots-of-unity filter](https://en.wikipedia.org/wiki/Root_of_unity#Orthogonality) keeps the terms
+  of a generating function whose exponent is divisible by $n$: substitute each $n$-th root
+  $\omega^j$ and average. Problem 635 counts the $p$-element subsets of $\{1, \dots, qp\}$ whose sum
+  is divisible by $p$. For a general $n$ the $n$ filter terms are all different. For a prime they
+  collapse. Every $\omega^j$ with $j \ne 0$ is again primitive, so as $k$ runs to $qp$ the powers
+  $\omega^{jk}$ visit each root exactly $q$ times, and all $p - 1$ non-trivial terms are equal. Each
+  works out to $q$, so the count is a binomial coefficient plus a small correction, divided by $p$.
+  The remaining work is that binomial modulo $10^9 + 9$ for 5.76 million primes. One running scan of
+  factorials, stopping at every point that is needed, serves all of them. All the inverses together
+  then cost one vectorised Fermat exponentiation.
+- **Exponential sums at a prime have a known size.** Problem 875 counts the zeros modulo $n$ of a
+  quadratic form in eight variables. The same filter turns the count into a sum of eighth powers of
+  [quadratic Gauss sums](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum) $G = \sum_x e(t x^2 / n)$.
+  Their values are erratic, but their modulus is not: $|G|^2 = m$ for every odd modulus $m$ and every
+  unit $t$. So the count becomes a [Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution)
+  of two simple multiplicative functions, and the problem reduces to a totient sieve. At an odd prime
+  it gives the classical $p^7 + p^4 - p^3$. The prime $2$ is the exception, as it so often is: the Gauss
+  sum vanishes modulo $2$ and is larger at higher powers of $2$, and that case needs its own correction
+  factor.
 
 The same structure, at cryptographic sizes, is what the next section turns into a lever.
 
@@ -460,12 +530,21 @@ that makes some larger quantity computable:
   a run of factorials, update the exponents incrementally rather than refactoring (problem 675). When
   the statistic is linear in the exponents, a per-prime generating function makes the count rational
   (problem 682). When only the *order* of the numbers matters, divide out the factor they all share
-  (problem 615).
+  (problem 615). When the question says "exactly $k$" prime factors, count "at least" and invert
+  binomially (problem 632). When it says "coprime to $n$", turn the condition into a Möbius sum over
+  divisors, which sits in the exponent when the quantity is a product (problem 754).
 - **See a congruence summed over a huge range** — and consider reordering the sum to run over the
   primes. The cyclic group modulo $p$ answers "how many residues" in $O(1)$ (problem 421). CRT
   multiplies those counts across prime powers (problem 272) and builds one solution per coprime split
   (problem 407). An exponent too large to write down reduces modulo the group order. That order is
-  $p - 1$, or $p + 1$ for an irrational at an inert prime (problems 492, 752).
+  $p - 1$, or $p + 1$ for an irrational at an inert prime (problems 492, 752). When a filter or an
+  exponential sum appears, ask which property of primality it needs. Every non-trivial root is
+  primitive (problem 635), and a Gauss sum has modulus $\sqrt p$ (problem 875).
+- **Need the factors of a whole family of values** — the values of a polynomial, or every $d$ below a
+  bound — and sieve along residue classes rather than factoring one value at a time. Each prime acts
+  only on its roots, lifted by Hensel to its powers. A size bound then certifies the cofactor as $1$
+  or a prime (problem 659). Primes up to $\sqrt N$, plus a product check, account for the one
+  possible large factor (problems 632, 754).
 - **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$, $\pi(x)$ — and a sieve will
   not reach. Work on the quotient set: the recursion at $O(n^{2/3})$ for $\Phi$ and $M$ (problems 319,
   351, 512), Lucy_Hedgehog at $O(n^{3/4})$ for $\pi$ (problem 668), and Min_25 for a multiplicative
