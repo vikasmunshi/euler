@@ -5076,8 +5076,8 @@
     "level": 11,
     "pct": 30,
     "solvers": 571,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 10:02"
   },
   "636": {
     "title": "Restricted Factorisations",
