@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum, palindromic-number, string-slicing, positional-notation] -->
-<!-- status: final -->
+<!-- status: final 2026-11-01T19:06Z -->
 # Digit Manipulation
 
 A surprising share of Project Euler is about the *writing* of a number rather than the number:
