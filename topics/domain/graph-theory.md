@@ -221,7 +221,7 @@ counting walks.
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
 - ○ [0380](/solutions/0380/) — Amazing Mazes!
 - ○ [0393](/solutions/0393/) — Migrating Ants
-- ○ [0425](/solutions/0425/) — Prime Connection
+- ● [0425](/solutions/0425/) — Prime Connection
 - ○ [0434](/solutions/0434/) — Rigid Graphs
 - ○ [0475](/solutions/0475/) — Music Festival
 - ○ [0490](/solutions/0490/) — Jumping Frog

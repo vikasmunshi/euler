@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Disjoint-set_d
 
 - ● [0107](/solutions/0107/) — Minimal Network
 - ● [0186](/solutions/0186/) — Connectedness of a Network
+- ● [0425](/solutions/0425/) — Prime Connection
 
 <!-- /problems -->

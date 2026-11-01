@@ -603,7 +603,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0423](/solutions/0423/) — Consecutive Die Throws
-- ○ [0425](/solutions/0425/) — Prime Connection
+- ● [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ○ [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ○ [0441](/solutions/0441/) — The Inverse Summation of Coprime Couples

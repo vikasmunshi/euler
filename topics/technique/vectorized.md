@@ -249,6 +249,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0407](/solutions/0407/) — Idempotents
+- ● [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0461](/solutions/0461/) — Almost Pi

@@ -215,6 +215,7 @@ patterns recur.
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures

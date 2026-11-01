@@ -207,7 +207,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0396](/solutions/0396/) — Weak Goodstein Sequence
 - ○ [0414](/solutions/0414/) — Kaprekar Constant
 - ○ [0419](/solutions/0419/) — Look and Say Sequence
-- ○ [0425](/solutions/0425/) — Prime Connection
+- ● [0425](/solutions/0425/) — Prime Connection
 - ○ [0442](/solutions/0442/) — Eleven-free Integers
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$

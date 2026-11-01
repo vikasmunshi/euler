@@ -215,7 +215,7 @@ clever was done with the primes themselves.
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0387](/solutions/0387/) — Harshad Numbers
-- ○ [0425](/solutions/0425/) — Prime Connection
+- ● [0425](/solutions/0425/) — Prime Connection
 - ○ [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ○ [0467](/solutions/0467/) — Superinteger

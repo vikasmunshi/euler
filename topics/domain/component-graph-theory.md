@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Component_(gra
 ## Problems
 
 - ● [0186](/solutions/0186/) — Connectedness of a Network
+- ● [0425](/solutions/0425/) — Prime Connection
 - ○ [0553](/solutions/0553/) — Power Sets of Power Sets
 - ○ [0701](/solutions/0701/) — Random Connected Area
 

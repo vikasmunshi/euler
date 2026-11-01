@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Kruskal%27s_al
 ## Problems
 
 - ● [0107](/solutions/0107/) — Minimal Network
+- ● [0425](/solutions/0425/) — Prime Connection
 
 <!-- /problems -->
