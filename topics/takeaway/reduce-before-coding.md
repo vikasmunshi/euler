@@ -385,6 +385,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0659](/solutions/0659/) — Largest Prime
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0700](/solutions/0700/) — Eulercoin
 - ● [0720](/solutions/0720/) — Unpredictable Permutations

@@ -571,6 +571,7 @@ handful of operations on small numbers.
 - ○ [0653](/solutions/0653/) — Frictionless Tube
 - ○ [0654](/solutions/0654/) — Neighbourly Constraints
 - ○ [0658](/solutions/0658/) — Incomplete Words II
+- ● [0659](/solutions/0659/) — Largest Prime
 - ○ [0663](/solutions/0663/) — Sums of Subarrays
 - ○ [0666](/solutions/0666/) — Polymorphic Bacteria
 - ○ [0672](/solutions/0672/) — One More One

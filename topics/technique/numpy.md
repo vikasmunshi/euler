@@ -286,6 +286,7 @@ both slower and harder to read.
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers

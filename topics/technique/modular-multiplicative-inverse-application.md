@@ -213,6 +213,7 @@ the repetition.
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0659](/solutions/0659/) — Largest Prime
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0731](/solutions/0731/) — A Stoneham Number
 - ● [0743](/solutions/0743/) — Window into a Matrix

@@ -475,7 +475,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0643](/solutions/0643/) — $2$-Friendly
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0655](/solutions/0655/) — Divisible Palindromes
-- ○ [0659](/solutions/0659/) — Largest Prime
+- ● [0659](/solutions/0659/) — Largest Prime
 - ○ [0672](/solutions/0672/) — One More One
 - ○ [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
