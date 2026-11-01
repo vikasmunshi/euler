@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-30T17:03Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -46,6 +46,16 @@ $\sum_r \binom{c_r}{2}$ over the numbers $c_r$ of prefixes in each residue class
 mod 3 matters, so the $c_r$ can be kept mod 3 as well. The state shrinks to 81 values, small enough
 for a [transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method) raised to the
 $10^5$th power.
+
+"Last digits" generalises to digits *anywhere*. The ten digits starting at position $n$ of a real
+number $A$ are $\lfloor 10^{n+9} A \rfloor \bmod 10^{10}$, and when $A$ is a sum of simple fractions
+the floor splits term by term. Problem 731 does this for the Stoneham number
+$\sum_i 3^{-i} 10^{-3^i}$ at position $10^{16}$. Each term's shifted value $10^e / 3^i$ divides
+into an integer quotient, wanted only mod $10^{10}$, and a remainder $10^e \bmod 3^i$, one modular
+exponentiation. The remainders' fractions add up to a small carry, and the tail of terms too small
+to matter provably cannot cross an integer. It is the
+[Bailey–Borwein–Plouffe](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula)
+trick for $\pi$, and it costs $O(\log^2 n)$ where writing the expansion out is impossible.
 
 The catch is that congruence is preserved by $+$, $-$, and $\times$ **but not by division** — and
 not, in general, by exponentiation done naively. Those two operations are what most of this page is
@@ -179,7 +189,21 @@ factorial, then walk down with $(k-1)!^{-1} = k!^{-1} \cdot k$, so a whole table
 factorials costs one exponentiation. Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
 $2 \cdot 10^7 + 1$. It computes all of them at once, as $a^{p-2}$ by one vectorised
 square-and-multiply over a NumPy array, about thirty array multiplications for ten million inverses.
-Sometimes the structure removes the inverse altogether. Problem 682 extracts one coefficient of a
+Problem 635 does the same for its 5.76 million denominators, one per prime, and folds an extra
+factor $p$ into each so that a single inverse serves both terms of its closed form.
+
+Over a prime, the *exponent* is a residue too, modulo $p - 1$, and that includes negative ones:
+$a^{-k} = a^{(-k) \bmod (p-1)}$. Problem 754 multiplies Gauss factorials, and Möbius inversion
+writes each as a product of factorials and powers raised to $\mu(d) = \pm 1$. Grouped by the
+$O(\sqrt N)$ values of $\lfloor N/d \rfloor$, each block's exponent becomes a difference of
+[Mertens](https://en.wikipedia.org/wiki/Mertens_function) values, often negative, and reducing it
+modulo $p - 1$ turns the inverse powers into ordinary ones. The $d^{\mu(d)}$ factors are handled
+by keeping two running products, one for $\mu = +1$ and one for $\mu = -1$. One inverse per block
+then replaces one per element.
+
+Sometimes the structure removes the inverse altogether. Problem 866's expectation recurrence has a
+$1/N$ that the hexagonal factor $H(N) = N(2N-1)$ cancels exactly, so the whole computation stays
+in integers. Problem 682 extracts one coefficient of a
 rational generating function $N(y)/D(y)$ with the
 [Bostan–Mori](https://arxiv.org/abs/2008.08822) halving step, which multiplies top and bottom by
 $D(-y)$. The only division left is by the final denominator's constant term. That constant is
@@ -204,6 +228,14 @@ $x(x+1)(2x+1)/6$ with $x$ up to $10^{15}$. Since $2$ has no inverse modulo $10^9
 multiple of 3. Dividing those factors exactly leaves integers that each fit in 64 bits; only then
 are they reduced and multiplied.
 
+Two more repairs complete the set. An **exact** division by a number **coprime** to the modulus
+is safe even when the modulus is composite. Problem 731 divides $10^e - r$ by $3^i$ modulo
+$10^{10}$ by multiplying with $3^{-i}$, which exists because 3 shares nothing with 10. And when
+the divisor $c$ is not coprime, compute modulo $c \cdot m$ and divide the residue by $c$ at the
+end. If $x \equiv y \pmod{cm}$ and $c \mid x$, then $x / c \equiv y / c \pmod m$. Problem 875's
+C port evaluates a Faulhaber polynomial with denominator 24 this way, modulo $24m$ in `__int128`,
+with no inverse at all.
+
 ### Counting the solutions of a congruence
 
 A congruence also *counts*. Its solutions form an
@@ -216,6 +248,31 @@ admissible $d$ below a ceiling, and a whole family of triplets is counted in con
 Champernowne stream by demanding that the left integer end in a given suffix — a congruence modulo
 $10^i$ that absorbs any carry automatically. (In C, `/` truncates towards zero; a progression count
 whose bounds can go negative needs a true floor division.)
+
+### Filtering by a residue: roots of unity
+
+When the congruence is a condition on a *sum*, there is a filter that turns "count the things
+whose total is $\equiv 0 \pmod n$" into an average. With $\omega = e^{2\pi i/n}$,
+
+$$\frac1n \sum_{j=0}^{n-1} \omega^{js} = [\, n \mid s \,],$$
+
+so substituting $x = \omega^j$ into a generating function and averaging keeps exactly the
+exponents divisible by $n$. This is the
+roots-of-unity filter (or [series multisection](https://en.wikipedia.org/wiki/Series_multisection)), and it pays off when
+the substituted products have a closed form. Problem 250 kept a residue census and multiplied it
+out. Problem 635 counts the $p$-element subsets of $\{1, \dots, qp\}$ with sum divisible by a prime
+$p$, and here the filter collapses. Every non-trivial $\omega^j$ is again a primitive $p$-th root,
+so each of the $p - 1$ non-trivial terms is the same product $\prod_r (1 + rt) = 1 + t^p$. The
+count becomes $\bigl(\binom{qp}{p} + q(p-1)\bigr)/p$, one binomial per prime.
+
+Problem 875 runs the same filter over $\mathbb{Z}/n$ to count the zeros of an eight-variable
+quadratic form, and the inner sums become
+[quadratic Gauss sums](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum)
+$G(t, n) = \sum_x e(t x^2 / n)$. Their absolute values are classical ($|G|^2 = m$ for odd $m$,
+with a separate rule for powers of 2), and only $|G|^8$ enters. The count is therefore a
+[Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution) of two multiplicative
+functions, and a totient sieve plus quotient blocks finish it. The pattern: a congruence condition
+becomes a character sum, and the character sum has structure that the condition hid.
 
 ## The unit group: roots of unity, and how many there are
 
@@ -237,10 +294,21 @@ family of problems without testing a single residue:
   exponentiation per prime.
 - Problem 245 needs the roots of $x^2 - x + 1 \equiv 0 \pmod \ell$; they are $-\omega$ for a primitive
   cube root of unity $\omega$, found the same way and cheaper than a general modular square root.
+- Problem 659 needs $\sqrt{-1} \bmod p$, a fourth root of unity, so it exists exactly for
+  $p \equiv 1 \pmod 4$. For any non-residue $c$, [Euler's criterion](https://en.wikipedia.org/wiki/Euler%27s_criterion)
+  gives $c^{(p-1)/2} = -1$, so $c^{(p-1)/4}$ squares to $-1$. Trying $c = 2, 3, \dots$ finds one
+  within a few tries, which is far simpler than
+  [Tonelli–Shanks](https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm).
 
 Problem 421 also shows the swap that makes such problems feasible at all: instead of factoring
 $10^{11}$ numbers of up to 165 digits, exchange the order of summation and ask, per prime, how many
 $n \le N$ fall in its few residue classes — the progression count from above, one division per root.
+Problem 659 takes the swap one step further and *factors* every value of $4k^2 + 1$ for
+$k \le 10^7$. Each prime $p \equiv 1 \pmod 4$ divides it on exactly two residue classes of $k$, so
+the primes are divided out along those two progressions, a sieve over a polynomial's values rather
+than over the integers. Higher powers of $p$ are found by
+[Hensel](https://en.wikipedia.org/wiki/Hensel%27s_lemma)-lifting the root to $p^2, p^3, \dots$, each
+lift using an inverse modulo $p$ alone, so no intermediate grows past the values being sieved.
 
 ### Orders, and where they live
 
@@ -381,6 +449,13 @@ Three variations on the same budget:
   reduction. Problem 706 splits one factor into 15-bit halves and multiplies each half separately,
   which keeps every dot product inside `int64`. The bound is a tight one: problem 492's primes sit
   just above $10^9$, so its residue products reach about $1.03 \times 10^{18}$, still below $2^{63}$.
+- **A running product is sequential, and NumPy has no modular `cumprod`.** Problems 635 and 754
+  need factorials modulo a prime up to $3 \cdot 10^8$ and $10^8$. Each lays a chunk out as a
+  matrix and advances every row's running product at once, one vectorised multiply-and-reduce per
+  column. A short scalar pass then gives each row its carry-in. That
+  [blocked prefix scan](https://en.wikipedia.org/wiki/Prefix_sum#Parallel_algorithms) still does
+  $O(L)$ multiplications, but only $O(\sqrt L)$ of them at interpreter speed. It works because
+  multiplication mod $p$ is associative, the same property that powers square-and-multiply.
 - **A comparison can overflow too.** Not every oversized product is reduced. Problem 615's C port
   prunes a depth-first search when a candidate $V \cdot p$ exceeds a bound, and that product can
   briefly pass 64 bits. A wrapped value would look small and slip past the test. So it is formed in
@@ -400,12 +475,16 @@ directly. When you see it:
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
   under a composite one, audit every division — including the $/2$ and $/6$ of a closed form
-  modulo $10^9$. Where you can, defer all the divisions to a single inverse at the end.
+  modulo $10^9$. An exact division by a coprime divisor is still safe, and a stubborn $c$ can be
+  divided out of a residue taken modulo $cm$. Where you can, defer all the divisions to a single
+  inverse at the end, and remember that over a prime a negative exponent is just a residue mod
+  $p - 1$.
 - Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
   $\mathbb{F}_{p^2}$) and strip primes while the power stays 1. Lift to $p^k$ by at most a factor
   $p$ per step, and take the lcm across a composite modulus.
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
-  the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$.
+  the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$. A condition "the sum is
+  $\equiv 0 \pmod n$" is a roots-of-unity filter, and a closed form may be hiding behind it.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
   Remainder Theorem, working prime power by prime power; solution counts multiply. If the moduli
   share a factor $d$, check that $d$ divides the difference of the residues before solving.
