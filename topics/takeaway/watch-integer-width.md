@@ -315,6 +315,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors

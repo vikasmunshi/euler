@@ -196,6 +196,7 @@ If the state space is still in the millions, the model is usually wrong, not the
 - ○ [0819](/solutions/0819/) — Iterative Sampling
 - ○ [0825](/solutions/0825/) — Chasing Game
 - ○ [0852](/solutions/0852/) — Coins in a Box
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ○ [0930](/solutions/0930/) — The Gathering
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ○ [0959](/solutions/0959/) — Asymmetric Random Walk

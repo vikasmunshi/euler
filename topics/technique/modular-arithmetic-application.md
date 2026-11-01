@@ -196,6 +196,7 @@ Python original and both produce a plausible wrong number rather than a crash.
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0788](/solutions/0788/) — Dominating Numbers
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0980](/solutions/0980/) — The Quaternion Group I

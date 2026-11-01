@@ -461,7 +461,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0854](/solutions/0854/) — Pisano Periods 2
 - ○ [0858](/solutions/0858/) — LCM
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
-- ○ [0866](/solutions/0866/) — Tidying Up B
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ○ [0871](/solutions/0871/) — Drifting Subsets
 - ○ [0873](/solutions/0873/) — Words with Gaps
 - ○ [0874](/solutions/0874/) — Maximal Prime Score

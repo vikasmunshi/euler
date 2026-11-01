@@ -9,6 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hexagonal_numb
 
 - ● [0045](/solutions/0045/) — Triangular, Pentagonal, and Hexagonal
 - ○ [0354](/solutions/0354/) — Distances in a Bee's Honeycomb
-- ○ [0866](/solutions/0866/) — Tidying Up B
+- ● [0866](/solutions/0866/) — Tidying Up B
 
 <!-- /problems -->

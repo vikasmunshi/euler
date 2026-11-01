@@ -648,7 +648,7 @@ handful of operations on small numbers.
 - ○ [0858](/solutions/0858/) — LCM
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
-- ○ [0866](/solutions/0866/) — Tidying Up B
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ○ [0871](/solutions/0871/) — Drifting Subsets
 - ○ [0873](/solutions/0873/) — Words with Gaps
 - ○ [0874](/solutions/0874/) — Maximal Prime Score

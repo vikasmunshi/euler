@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
+- ● [0866](/solutions/0866/) — Tidying Up B
 
 <!-- /problems -->

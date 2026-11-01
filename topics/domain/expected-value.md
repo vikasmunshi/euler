@@ -237,7 +237,7 @@ that read the same thing contribute the same amount, and can be counted together
 - ○ [0852](/solutions/0852/) — Coins in a Box
 - ○ [0856](/solutions/0856/) — Waiting for a Pair
 - ○ [0863](/solutions/0863/) — Different Dice
-- ○ [0866](/solutions/0866/) — Tidying Up B
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ○ [0869](/solutions/0869/) — Prime Guessing
 - ○ [0898](/solutions/0898/) — Claire Voyant
 - ○ [0901](/solutions/0901/) — Well Drilling

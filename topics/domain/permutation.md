@@ -222,7 +222,7 @@ tell is a problem that counts permutations
 - ○ [0837](/solutions/0837/) — Amidakuji
 - ○ [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
-- ○ [0866](/solutions/0866/) — Tidying Up B
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0868](/solutions/0868/) — Belfry Maths
 - ○ [0886](/solutions/0886/) — Coprime Permutations
 - ○ [0896](/solutions/0896/) — Divisible Ranges

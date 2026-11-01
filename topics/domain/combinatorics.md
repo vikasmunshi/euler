@@ -461,7 +461,7 @@ of crossing it.
 - ○ [0858](/solutions/0858/) — LCM
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
-- ○ [0866](/solutions/0866/) — Tidying Up B
+- ● [0866](/solutions/0866/) — Tidying Up B
 - ○ [0867](/solutions/0867/) — Tiling Dodecagon
 - ○ [0873](/solutions/0873/) — Words with Gaps
 - ○ [0878](/solutions/0878/) — XOR-Equation B
