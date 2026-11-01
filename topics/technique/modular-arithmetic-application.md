@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic-application] -->
-<!-- status: final -->
+<!-- status: final 2026-11-01T19:04Z -->
 # Modular arithmetic (application)
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) as a *technique* is not the
