@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic-application] -->
-<!-- status: final 2026-10-29T01:57Z -->
+<!-- status: final -->
 # Modular arithmetic (application)
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) as a *technique* is not the
@@ -86,6 +86,18 @@ single residue class mod $3^L$, recovered one digit at a time — a search becom
 [digit DPs](/topics/technique/dynamic-programming) (725, 885, 217) are the same trick with a small
 modulus: the state is a digit sum or a count, not the number.
 
+Two refinements make a residue state much smaller. The first turns a question about *substrings*
+into one about *prefixes*: a digit string is divisible by 3 exactly when its digit sum is, so the
+substring between positions $i$ and $j$ is divisible precisely when the prefix sums $P_i$ and $P_j$
+agree mod 3 — the same move as finding zero-sum subarrays by matching prefix sums. Problem 706 counts
+$d$-digit numbers whose number of divisible substrings is itself a multiple of 3. Appending a digit
+adds one new divisible substring for each earlier prefix with the new running residue, so the state
+is the running residue, three prefix counts and the running total. The question wants the total
+only mod 3, so the counts can be kept mod 3 too — the modulus applies to the bookkeeping as well as
+to the number. The second refinement is to measure the counts *relative to the current residue*.
+That removes the residue from the state and leaves $3^4 = 81$ states. One digit then acts as an
+$81 \times 81$ transfer matrix, and $d = 10^5$ is a matrix power.
+
 Sometimes the right state is not one residue but two. Problem 700 walks the sequence $an \bmod m$
 for a 16-digit $a$ and $m$ and asks for the sum of its record lows. The terms look random and the
 records thin out fast, so a scan stalls after a handful. But the orbit of a multiplication mod $m$ is
@@ -103,7 +115,11 @@ mechanical but unforgiving: reduce at **every** combine, inside the recurrence, 
 Problem 940's $2 \times 2$ transfer matrices are multiplied mod the given prime throughout, so a
 value defined over Fibonacci-sized arguments costs $O(\log m + \log n)$ per entry; problem 885's
 [multinomial](https://en.wikipedia.org/wiki/Multinomial_theorem) DP accumulates mod $1123455689$ cell
-by cell. A single unreduced accumulator anywhere in the loop reintroduces the growth the modulus was
+by cell. A prime modulus does more than bound the numbers: it makes the residues a field, so whole
+algebraic objects can be carried exactly. Problem 682 counts pairs of 5-smooth numbers through a
+*rational* generating function with a degree-40 denominator. With every coefficient a residue, the
+$n$-th coefficient comes from [Bostan–Mori](https://arxiv.org/abs/2008.08822)
+halving in $O(d^2 \log n)$ — the same cost at $10^7$ as at $10^{18}$. A single unreduced accumulator anywhere in the loop reintroduces the growth the modulus was
 there to prevent.
 
 The handed modulus is often *composite* — "the last nine digits" means mod $10^9$ — and that
@@ -120,7 +136,24 @@ a, b = (x // 2, x + 1) if x % 2 == 0 else (x, (x + 1) // 2)   # x(x+1)/2, exact
 half = (a % m) * (b % m) % m                                     # x(x+1)/2 mod m
 ```
 
-It costs nothing, needs no inverse, and works for any modulus — prime or not.
+It costs nothing, needs no inverse, and works for any modulus — prime or not. When it is not
+obvious which factor absorbs the divisor, a residue argument can prove the division exact. In problem
+764, odd $a$ and $b$ give $a^4 \equiv b^4 \equiv 1 \pmod{16}$, so $5a^4 + 3b^4 \equiv 8 \pmod{16}$ and
+division by 8 is exact before anything is reduced. Better still, the division can cancel on paper.
+Problem 866's expected product of hexagonal numbers carries a $1/N$ from averaging over the last
+piece placed, but $H(N)/N = 2N - 1$ exactly. The recurrence is integral term by term, and the
+modulus never meets a fraction.
+
+Sometimes even the exact factor cannot be formed. Problem 684 needs $10^q$ where $q = \lfloor f/9
+\rfloor$ and $f$ is a Fibonacci number near $3 \times 10^{18}$, carried only as a residue. This needs
+two moves. First, the exponent and the coefficient live in different moduli: by [Fermat's little
+theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), $10^q \bmod p$ depends only on
+$q \bmod (p-1)$, while a linear term in $q$ needs $q \bmod p$. So one unknown integer is wanted
+modulo two different numbers. Second, the quotient by 9 does not survive reduction mod $p$, so
+*lift the modulus*. Run the Fibonacci recurrence mod $9p$ and mod $9(p-1)$. Each residue then
+still shows $f \bmod 9$; subtracting that leaves a multiple of 9, and dividing by 9 gives $q \bmod p$
+and $q \bmod (p-1)$ exactly. To divide by $k$ under a modulus where $k$ has no inverse, carry the
+value mod $km$.
 
 ## How to reason about it
 
@@ -151,8 +184,15 @@ solution after C solution here. Division has the same split: the progression cou
 Python's `//` flooring, and with `lo - 1 - r` negative C's `/` would round the wrong way, so the C
 port of problem 305 carries a small `floor_div` helper. The companion hazard is that two residues below $m$ multiply to
 nearly $m^2$, past the 64-bit ceiling once $m$ exceeds about $3 \times 10^9$; see
-[`__int128`](/topics/technique/int128) for the standard widening. Both bugs are invisible in the
-Python original and both produce a plausible wrong number rather than a crash.
+[`__int128`](/topics/technique/int128) for the standard widening. A *sum* of products overflows
+sooner than a single product. Problem 866's convolution has each term below $2^{60}$, but thousands
+of them together pass 64 bits, so the C port accumulates in `__int128` and reduces once per entry.
+NumPy has no 128-bit type at all: problem 706's 81-term matrix products of 30-bit residues would
+overflow `int64`, so the Python splits one operand into 15-bit halves to keep every partial sum
+below $2^{52}$. The reverse case is a budget you can rely on. Problem 400 only adds, so with modulus
+$10^{18}$ the sum of two residues stays below $2 \times 10^{18}$, which still fits a signed 64-bit
+integer. Both the sign bug and the overflow bug produce a plausible wrong number rather than a
+crash, and neither shows up on small test inputs.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
