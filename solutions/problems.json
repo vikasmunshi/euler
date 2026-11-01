@@ -6028,8 +6028,8 @@
     "level": 16,
     "pct": 43,
     "solvers": 998,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 15:05"
   },
   "755": {
     "title": "Not Zeckendorf",
