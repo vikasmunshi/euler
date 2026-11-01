@@ -187,6 +187,7 @@ Python original and both produce a plausible wrong number rather than a crash.
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0700](/solutions/0700/) — Eulercoin

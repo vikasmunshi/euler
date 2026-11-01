@@ -122,6 +122,7 @@ counts the repdigits twice, so it subtracts them once.
 - ● [0239](/solutions/0239/) — Twenty-two Foolish Primes
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0957](/solutions/0957/) — Point Genesis

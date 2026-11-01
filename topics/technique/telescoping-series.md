@@ -136,6 +136,7 @@ rewritten until it is not a loop at all.
 
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0934](/solutions/0934/) — Unlucky Primes
 

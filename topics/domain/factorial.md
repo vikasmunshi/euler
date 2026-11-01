@@ -219,6 +219,7 @@ Things that bite:
 - ○ [0592](/solutions/0592/) — Factorial Trailing Digits 2
 - ○ [0598](/solutions/0598/) — Split Divisibilities
 - ○ [0608](/solutions/0608/) — Divisor Sums
+- ● [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0636](/solutions/0636/) — Restricted Factorisations
 - ○ [0646](/solutions/0646/) — Bounded Divisors
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$

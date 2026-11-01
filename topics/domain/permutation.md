@@ -209,7 +209,7 @@ tell is a problem that counts permutations
 - ○ [0599](/solutions/0599/) — Distinct Colourings of a Rubik's Cube
 - ○ [0622](/solutions/0622/) — Riffle Shuffles
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices
-- ○ [0628](/solutions/0628/) — Open Chess Positions
+- ● [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0631](/solutions/0631/) — Constrained Permutations
 - ○ [0673](/solutions/0673/) — Beds and Desks
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever

@@ -382,7 +382,7 @@ of crossing it.
 - ○ [0619](/solutions/0619/) — Square Subsets
 - ○ [0623](/solutions/0623/) — Lambda Count
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices
-- ○ [0628](/solutions/0628/) — Open Chess Positions
+- ● [0628](/solutions/0628/) — Open Chess Positions
 - ○ [0630](/solutions/0630/) — Crossed Lines
 - ○ [0631](/solutions/0631/) — Constrained Permutations
 - ● [0635](/solutions/0635/) — Subset Sums
