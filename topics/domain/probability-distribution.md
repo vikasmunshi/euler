@@ -169,7 +169,7 @@ analysis above says rounding is harmless.
 - ○ [0573](/solutions/0573/) — Unfair Race
 - ○ [0584](/solutions/0584/) — Birthday Problem Revisited
 - ○ [0597](/solutions/0597/) — Torpids
-- ○ [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0624](/solutions/0624/) — Two Heads Are Better Than One
 - ○ [0661](/solutions/0661/) — A Long Chess Match
 - ○ [0666](/solutions/0666/) — Polymorphic Bacteria

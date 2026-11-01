@@ -176,7 +176,7 @@ factorisation beyond its disjointness from the other's.
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples
 - ○ [0560](/solutions/0560/) — Coprime Nim
 - ○ [0574](/solutions/0574/) — Verifying Primes
-- ○ [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0643](/solutions/0643/) — $2$-Friendly
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ● [0694](/solutions/0694/) — Cube-full Divisors

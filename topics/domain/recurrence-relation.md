@@ -316,7 +316,7 @@ induction will confirm. The shape picks the method.
 - ○ [0555](/solutions/0555/) — McCarthy 91 Function
 - ○ [0558](/solutions/0558/) — Irrational Base
 - ○ [0570](/solutions/0570/) — Snowflakes
-- ○ [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences
 - ○ [0617](/solutions/0617/) — Mirror Power Sequence
 - ○ [0623](/solutions/0623/) — Lambda Count

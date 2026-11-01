@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Arithmetico-ge
 ## Problems
 
 - ● [0235](/solutions/0235/) — An Arithmetic Geometric Sequence
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 
 <!-- /problems -->

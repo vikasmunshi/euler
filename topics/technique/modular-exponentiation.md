@@ -285,6 +285,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

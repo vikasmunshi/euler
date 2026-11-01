@@ -213,6 +213,7 @@ $\gcd(a, m)$ (Bézout), so the walk ends exactly when the "gap" becomes a multip
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0700](/solutions/0700/) — Eulercoin

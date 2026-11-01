@@ -392,6 +392,7 @@ loop was never needed.
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0587](/solutions/0587/) — Concave Triangle
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients

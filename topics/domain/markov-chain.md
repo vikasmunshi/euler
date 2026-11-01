@@ -193,6 +193,7 @@ For the closely related question of what you *do* with the resulting distributio
 - ○ [0575](/solutions/0575/) — Wandering Robots
 - ○ [0589](/solutions/0589/) — Poohsticks Marathon
 - ○ [0595](/solutions/0595/) — Incremental Random Sort
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0610](/solutions/0610/) — Roman Numerals II
 - ○ [0640](/solutions/0640/) — Shut the Box
 - ○ [0683](/solutions/0683/) — The Chase II

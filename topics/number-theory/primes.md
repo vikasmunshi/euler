@@ -176,6 +176,7 @@ The win comes from what the generator can *prove* about its candidates before th
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0926](/solutions/0926/) — Total Roundness

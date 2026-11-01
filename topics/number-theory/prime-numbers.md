@@ -730,7 +730,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0593](/solutions/0593/) — Fleeting Medians
 - ○ [0598](/solutions/0598/) — Split Divisibilities
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
-- ○ [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors

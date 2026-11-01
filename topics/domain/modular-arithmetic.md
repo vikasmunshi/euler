@@ -375,7 +375,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0593](/solutions/0593/) — Fleeting Medians
 - ○ [0602](/solutions/0602/) — Product of Head Counts
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
-- ○ [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0612](/solutions/0612/) — Friend Numbers
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors

@@ -186,6 +186,7 @@ If the state space is still in the millions, the model is usually wrong, not the
 - ○ [0575](/solutions/0575/) — Wandering Robots
 - ○ [0589](/solutions/0589/) — Poohsticks Marathon
 - ○ [0595](/solutions/0595/) — Incremental Random Sort
+- ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0610](/solutions/0610/) — Roman Numerals II
 - ○ [0640](/solutions/0640/) — Shut the Box
 - ○ [0648](/solutions/0648/) — Skipping Squares
