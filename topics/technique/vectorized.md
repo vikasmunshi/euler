@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-10-28T21:06Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -95,6 +95,18 @@ sieved prime. The digit sums themselves come from the bounded-iteration shape be
 `np.divmod(rem, 10)` per digit position, ten array steps instead of a Python loop per prime.
 The slow, readable code runs over the tiny domain; only the indexing touches the big one.
 
+**Linear maps are matrix products.** When the per-element function is *linear* in some small
+vector the element carries, a weight vector computes it and a weight *matrix* computes many
+variants at once. [Problem 637](/solutions/0637/) needs every way of putting plus signs between
+a number's digits. Each placement gives every digit a weight, a power of the base counted from
+the end of its block, so that placement's sum is `digits · w`. Stack every placement's `w` as a
+column and `digits @ W` returns every split sum of every number in one matrix product. The same
+problem shows the companion trick for sets: a boolean row of width `64k` packed with
+[`np.packbits`](https://numpy.org/doc/stable/reference/generated/numpy.packbits.html) and
+viewed as `uint64` is `k` machine words. "Do these two sets meet?" then becomes `(a & b).any()`,
+which runs 64 membership tests per operation, and a broadcast over a block of rows answers it
+for a whole grid of pairs.
+
 **Batch the lookups.**
 [`np.searchsorted`](https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html)
 does a whole vector of binary searches in one call, which quietly converts "for each `x`, look
@@ -112,6 +124,15 @@ problem 983 stores each lattice vector `(x, y)` as the single integer `x * 2**21
 encoding is *linear*, so adding two vectors is adding their keys, and the whole search runs on
 one-dimensional `int64` arrays.
 
+Sorting and searching in bulk also builds graphs. [Problem 425](/solutions/0425/) links primes
+that differ in one digit. Its edge list comes from array passes: one per digit position and
+decrement, masked by a prime lookup. A stable `argsort` by endpoint and two `searchsorted`
+calls then give each vertex its slice of the edge array, which is a
+[CSR](https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format))
+adjacency built without a Python loop over vertices. `np.cumsum(is_prime) - 1` provides the
+inverse map from a prime's value to its index. The union-find that follows is genuinely serial
+and stays in Python, but it only walks slices the arrays have already prepared.
+
 **Advance the whole ensemble.** When many independent processes share one update rule, make
 the process an *axis* and step them in lockstep. [Problem 213](/solutions/0213/) tracks the
 probability distribution of every flea on the board simultaneously — one ring of the simulation
@@ -120,7 +141,11 @@ board advances in a constant number of NumPy calls per step. [Problem 149](/solu
 runs [Kadane's algorithm](https://en.wikipedia.org/wiki/Maximum_subarray_problem) down every
 row of a grid at once: one vector update per column, all rows in parallel. A dynamic program
 whose states at step `k` depend only on step `k-1` is exactly this shape — the DP table row
-becomes the array, and the recurrence becomes one array expression per step.
+becomes the array, and the recurrence becomes one array expression per step. The axis need not
+be space or time. [Problem 400](/solutions/0400/) runs its DP over *Grundy values*: each level of
+the game tree holds a weight vector indexed by the value a move must reach. XOR with a constant
+permutes `[0, 2**b)`, so pushing a whole level down to a child is a single scatter through the
+index array `(idx ^ mask) - 1`.
 
 **Vectorize the modular arithmetic too.** Nothing about the technique is limited to `+` and
 `*`. [Problem 944](/solutions/0944/) computes `2**e mod m` for a whole array of exponents by
@@ -133,7 +158,13 @@ to its fixed point modulo `10**9`, for a million bases at once, stopping when
 `np.array_equal` says no lane moved. [Problem 721](/solutions/0721/) lifts the same loop into
 the ring `ℤ_p[√a]`: each element `u + v√a` is *two* arrays, the ring product is a few lines of
 array arithmetic, and the square-and-multiply sweep raises every `c + √a` to its own power
-`a²` in about 45 steps. The other modular staple vectorizes as well: problem 675 gets the
+`a²` in about 45 steps. The lanes need not share a modulus either.
+[Problem 492](/solutions/0492/) gives every lane its own *prime* modulus, a whole sieved range of
+them. Each lane's exponent is reduced modulo `p − 1` or `p + 1`, and a quadratic-residue mask
+picks which, before a [Lucas-sequence](https://en.wikipedia.org/wiki/Lucas_sequence) ladder
+runs on all of them. A ladder step has two branches depending on the exponent bit. The array
+form computes both candidate pairs for every lane and keeps one with `np.where(bit, …)`, so
+the branch becomes a select. The other modular staple vectorizes as well: problem 675 gets the
 [Fermat inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Using_Euler's_theorem)
 of every odd number up to `2n + 1` from one array-wide `pow(·, p − 2)`, and problem 407 builds
 a table of inverses modulo `s` the same way with exponent `φ(s) − 1`, then applies it with
@@ -193,7 +224,16 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   [problem 739](/solutions/0739/) reshapes each chunk into a `rows × cols` grid, scans it one
   column at a time across all rows, then multiplies each row by the carried product of the rows
   before it. That costs about `2√chunk` Python steps per chunk instead of one per element; a
-  plain product is a pairwise tree, `a[0::2] * a[1::2] % m`, halving each step.
+  plain product is a pairwise tree, `a[0::2] * a[1::2] % m`, halving each step. Two refinements
+  extend the split scan. When only *some* prefixes are needed, the full scan never has to be
+  stored. [Problem 635](/solutions/0635/) wants factorials at a scattered set of points, so it
+  sorts them, runs the chunked scan, and in each chunk gathers just the queries that fall inside
+  it (`grid[off % rows, block] * carry[block]`) before moving on. When the product runs over a
+  *masked* subset, substitute the identity rather than compacting: `np.where(mask, d, 1)` turns a
+  product over the selected elements into a product over all of them, which the same scan
+  handles. [Problem 754](/solutions/0754/) does this twice per sieve segment, once for `μ = +1`
+  and once for `μ = −1`, threading three carries (two products and a running sum) across
+  segments.
 - **`np.vectorize` is not vectorization.** It is a convenience wrapper that calls your Python
   function once per element — the documentation says as much. It buys broadcasting semantics,
   not speed. [Problem 56](/solutions/0056/) uses it only inside a diagnostic path, which is the
