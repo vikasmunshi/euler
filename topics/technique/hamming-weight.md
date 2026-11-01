@@ -128,6 +128,7 @@ For the surrounding toolbox (isolating the low bit, iterating submasks), see
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0345](/solutions/0345/) — Matrix Sum
+- ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0961](/solutions/0961/) — Removing Digits

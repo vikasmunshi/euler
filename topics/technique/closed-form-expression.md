@@ -390,6 +390,7 @@ loop was never needed.
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0523](/solutions/0523/) — First Sort I
+- ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0739](/solutions/0739/) — Summation of Summations

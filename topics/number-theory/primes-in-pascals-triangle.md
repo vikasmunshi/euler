@@ -141,6 +141,7 @@ whether adding $k$ and $n-k$ in base $p$ produces two or more carries. "Divisibl
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients

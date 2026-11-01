@@ -640,7 +640,6 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0552](/solutions/0552/) — Chinese Leftovers II
 - ○ [0556](/solutions/0556/) — Squarefree Gaussian Integers
 - ○ [0560](/solutions/0560/) — Coprime Nim
-- ○ [0561](/solutions/0561/) — Divisor Pairs
 - ○ [0563](/solutions/0563/) — Robot Welders
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ○ [0569](/solutions/0569/) — Prime Mountain Range

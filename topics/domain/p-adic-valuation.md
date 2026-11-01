@@ -104,6 +104,7 @@ the bottleneck.
 - ○ [0383](/solutions/0383/) — Divisibility Comparison Between Factorials
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0712](/solutions/0712/) — Exponent Difference
 - ○ [0779](/solutions/0779/) — Prime Factor and Exponent

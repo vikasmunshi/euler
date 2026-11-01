@@ -113,5 +113,6 @@ why 357's C (on [power set](/topics/technique/power-set)) can use a fixed 256-en
 - ● [0146](/solutions/0146/) — Investigating a Prime Pattern
 - ● [0243](/solutions/0243/) — Resilience
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
+- ● [0561](/solutions/0561/) — Divisor Pairs
 
 <!-- /problems -->

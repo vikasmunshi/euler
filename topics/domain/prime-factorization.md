@@ -271,7 +271,6 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ○ [0548](/solutions/0548/) — Gozinta Chains
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ○ [0556](/solutions/0556/) — Squarefree Gaussian Integers
-- ○ [0561](/solutions/0561/) — Divisor Pairs
 - ○ [0563](/solutions/0563/) — Robot Welders
 - ○ [0574](/solutions/0574/) — Verifying Primes
 - ○ [0578](/solutions/0578/) — Integers with Decreasing Prime Powers

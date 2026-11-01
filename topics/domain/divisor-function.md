@@ -184,7 +184,7 @@ composites one smallest prime factor at a time, in roughly $O(m^{3/4})$ total.
 - ○ [0500](/solutions/0500/) — Problem 500!!!
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ○ [0548](/solutions/0548/) — Gozinta Chains
-- ○ [0561](/solutions/0561/) — Divisor Pairs
+- ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ○ [0598](/solutions/0598/) — Split Divisibilities
 - ○ [0608](/solutions/0608/) — Divisor Sums

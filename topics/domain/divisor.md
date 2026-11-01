@@ -174,7 +174,7 @@ signature shortcut does not apply.
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ○ [0548](/solutions/0548/) — Gozinta Chains
 - ○ [0550](/solutions/0550/) — Divisor Game
-- ○ [0561](/solutions/0561/) — Divisor Pairs
+- ● [0561](/solutions/0561/) — Divisor Pairs
 - ○ [0563](/solutions/0563/) — Robot Welders
 - ○ [0580](/solutions/0580/) — Squarefree Hilbert Numbers
 - ○ [0598](/solutions/0598/) — Split Divisibilities
