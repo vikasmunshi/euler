@@ -228,6 +228,7 @@ everything that does depend on $n$ costs $O(\log n)$ polynomial products.
 - ● [0301](/solutions/0301/) — Nim
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
+- ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [1000](/solutions/1000/) — Problem $1000$

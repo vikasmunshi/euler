@@ -3397,7 +3397,7 @@
       "reference": "https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic",
       "additional-references": ["https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex"],
       "summary": "",
-      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0050_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0097_s0", "p0113_s0", "p0114_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0147_s0", "p0152_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0184_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0205_s0", "p0208_s0", "p0209_s0", "p0211_s0", "p0216_s0", "p0221_s0", "p0238_s0", "p0239_s0", "p0250_s0", "p0259_s0", "p0277_s0", "p0318_s0", "p0321_s0", "p0387_s0", "p0493_s0", "p0686_s0", "p0686_s1", "p0751_s0", "p0768_s0", "p0788_s0", "p0800_s0", "p0862_s0", "p0872_s0", "p0932_s0", "p0934_s0", "p0957_s0", "p0974_s0"]
+      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0050_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0097_s0", "p0113_s0", "p0114_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0147_s0", "p0152_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0184_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0205_s0", "p0208_s0", "p0209_s0", "p0211_s0", "p0216_s0", "p0221_s0", "p0238_s0", "p0239_s0", "p0250_s0", "p0259_s0", "p0277_s0", "p0318_s0", "p0321_s0", "p0387_s0", "p0493_s0", "p0686_s0", "p0686_s1", "p0751_s0", "p0768_s0", "p0776_s0", "p0788_s0", "p0800_s0", "p0862_s0", "p0872_s0", "p0932_s0", "p0934_s0", "p0957_s0", "p0974_s0"]
     },
     {
       "slug": "arg-max",
@@ -3955,7 +3955,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_DP",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0301_s0", "p0529_s0", "p0725_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0301_s0", "p0529_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "dijkstras-algorithm",
@@ -4342,7 +4342,7 @@
       "reference": "https://docs.python.org/3/library/fractions.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0523_s0"]
+      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0523_s0", "p0776_s0"]
     },
     {
       "slug": "frequency-statistics",
@@ -4495,7 +4495,7 @@
       "reference": "https://gmplib.org/",
       "additional-references": ["https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library"],
       "summary": "",
-      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0", "p0523_s0"]
+      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0", "p0523_s0", "p0776_s0"]
     },
     {
       "slug": "golden-section-search",
@@ -6079,7 +6079,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When only an input's value class matters, count the inputs per class and compute on the counts instead of enumerating the inputs.",
-      "refs": ["p0452", "p0675", "p0698", "p0778"]
+      "refs": ["p0452", "p0675", "p0698", "p0776", "p0778"]
     },
     {
       "slug": "algorithm-beats-language",
@@ -6116,6 +6116,15 @@
       "additional-references": [],
       "summary": "When a closed form divides by a constant that has no inverse modulo m, divide it out of the exact integer factors first and only then reduce them modulo m.",
       "refs": ["p0401"]
+    },
+    {
+      "slug": "carry-sums-alongside-counts",
+      "facet": "takeaway",
+      "name": "Carry sums alongside counts",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When a counting DP must also total the counted objects' values, carry a (count, sum) pair per state and update the sum with the same linear rule that builds the value, so the totals come for free.",
+      "refs": ["p0776"]
     },
     {
       "slug": "cheap-checks-first",

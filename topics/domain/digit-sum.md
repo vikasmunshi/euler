@@ -273,7 +273,7 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ○ [0749](/solutions/0749/) — Near Power Sums
-- ○ [0776](/solutions/0776/) — Digit Sum Division
+- ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ○ [0805](/solutions/0805/) — Shifted Multiples

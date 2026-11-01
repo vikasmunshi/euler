@@ -186,5 +186,6 @@ the C never paid ([parity across languages](/topics/takeaway/parity-across-langu
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ● [0236](/solutions/0236/) — Luxury Hampers
 - ● [0523](/solutions/0523/) — First Sort I
+- ● [0776](/solutions/0776/) — Digit Sum Division
 
 <!-- /problems -->
