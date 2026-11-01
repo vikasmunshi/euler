@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum, palindromic-number, string-slicing, positional-notation] -->
-<!-- status: final 2026-10-30T12:40Z -->
+<!-- status: final -->
 # Digit Manipulation
 
 A surprising share of Project Euler is about the *writing* of a number rather than the number:
@@ -110,6 +110,20 @@ problem 92 counts digit-square-sum *buckets* by convolution and only ever classi
 distinct sums, and problem 30 enumerates digit multisets rather than numbers. The fastest digit loop
 is the one you replaced with a count.
 
+The rule flips once more when the *same* digit edit applies to a whole array of numbers. Problem 425
+links two primes if they differ in one digit, or if one is the other with a digit prepended. It needs
+every such link among the 660 000 primes below $10^7$. The string route would build, slice and parse
+millions of strings. The arithmetic route writes each edit as a change of place value: lowering the
+digit at place $10^k$ by $\delta$ is `v - delta * 10**k`, valid when `v // 10**k % 10 >= delta`, and
+dropping the leading digit is `v % 10**(d-1)`. Both are whole-array expressions in NumPy, one per
+(place, $\delta$) pair, run over every prime at once and filtered through the sieve mask. The
+per-digit work leaves the interpreter just as `str()` does, and nothing is ever formatted. The edge
+cases are positional rules, not string rules. A leading digit may not drop to 0, because that
+shortens the number and is a different kind of link. And dropping the lead of 203 gives 3, which is
+not a link: prepending 2 to 3 makes 23, so the remainder must still have $d-1$ digits. Generating
+only the *downward* edits, toward smaller neighbours, halves the work, because each edge is made
+when its larger end arrives.
+
 ## C: the formatter is the slow path
 
 C reverses every conclusion. There is no interpreter overhead to amortise; `n % 10` and `n / 10` on
@@ -166,6 +180,15 @@ what matters here is what replaces the extraction loop).
   `r * 10 + d` step, run in the other direction. The full number is never formed, so it never needs to
   be converted or divided. Its only other digit question is "how many of each digit". That is the
   order-blind fingerprint from problem 52, and here it is the whole definition.
+- **The number is a digit pattern, so it has a formula.** Problem 684 needs the smallest number
+  with digit sum $n$, for $n$ up to a Fibonacci number near $3 \times 10^{18}$. The greedy answer
+  is a short leading digit followed by as many 9s as possible. Writing $n = 9q + r$, a run of $q$
+  nines is $10^q - 1$, so the number is $(r+1)\,10^q - 1$. The digit string is now a formula, so
+  sums of it are geometric series. Its $3 \times 10^{17}$ digits never exist: $10^q$ is taken
+  modulo a prime, with the exponent reduced by Fermat. A `str()` of it would fill hundreds of
+  petabytes. The
+  general move is to name a digit string by the arithmetic that spells it: repunits are
+  $(10^k - 1)/9$, and a block $w$ repeated is $w \cdot (10^{kL} - 1)/(10^L - 1)$.
 - **The fold has a small state, so count all inputs at once.** Problem 706 asks how many $d$-digit
   numbers, for $d = 10^5$, have a number of 3-divisible substrings that is itself a multiple of 3.
   Reading the digits left to right is the same fold as above, but the state it carries is richer than
@@ -174,6 +197,26 @@ what matters here is what replaces the extraction loop).
   every digit of a residue class moves them the same way. So the "loop over digits" becomes an
   $81 \times 81$ transfer matrix raised to the power $d - 1$. The digit string is never written down;
   only how many strings sit in each state.
+- **The question is about a second number made from the first.** Problem 290 counts $n < 10^{18}$
+  whose digit sum equals that of $137n$. Here the fold has to run *right to left*, the order the
+  `% 10` loop already gives. Long multiplication by a constant reads one digit $d$ of $n$, together
+  with a carry $c$, and writes one digit of $137n$: `c, out = divmod(137 * d + c, 10)`. So the
+  multiplication is a finite automaton (the carry stays below 137), and the second number's digits
+  come out in step with the first's. Track only the carry and the running difference of the two digit
+  sums. Then every $n$ is counted together in at most $137 \times 325$ states, and no product is
+  ever formed. At the end the leftover carry is the top of $137n$; its digit sum settles the last
+  comparison. Adding a constant has the same shape. Whenever the second number's digit at each place
+  depends only on the first number's digit there and a bounded carry, read both numbers in lockstep.
+- **The count is not enough; the values are needed too.** Problem 776 sums $n / d(n)$ for every $n$
+  up to about $1.2 \times 10^{18}$. Grouping by the digit sum leaves at most 171 denominators, each
+  multiplying $T(s)$, the *sum* of the $n$ with that digit sum, rather than their count. A digit DP
+  ordinarily stores only counts. Here positional notation is linear, which lets it carry values too.
+  Appending digit $d$ to a prefix $p$ gives $10p + d$. So if a state holds $c$ prefixes totalling
+  $t$, appending $d$ to all of them gives $(c,\ 10t + d\,c)$. This is the reversal loop's
+  `r * 10 + d` step again, applied to a whole class of numbers at once. The same pair works for any
+  quantity linear in $n$, and adding squared totals extends it to sums of $n^2$. The limit $N$ is
+  handled by one *tight* prefix, which equals $N$'s own prefix. At each position it spills off
+  its smaller digits as new free states, so no state needs a "tight" flag.
 - **There are too many steps to take.** Problem 551 iterates $a \mapsto a + s(a)$, the same shape as
   problem 74's digit-factorial successor, but $10^{15}$ times. The numbers fit in a machine word (or
   two), so extraction is not the problem; doing it $10^{15}$ times is. The fix splits the number the way
@@ -193,6 +236,17 @@ what matters here is what replaces the extraction loop).
   dies. Digit extraction is still the tool, but applied to the *bounds* of a set of numbers rather than
   to its members. The leaf test, for what survives, is problem 52's fingerprint again in its C form: a
   bitmask of digits seen, compared with a full mask.
+- **There are too many ways to read the digits.** Problem 637 lets a step insert plus signs
+  anywhere in a number's base-$B$ digits. It asks how few steps reach a single digit, in base 10
+  and in base 3, for every $n$ up to $10^7$. A 15-digit base-3 number has $2^{14}$ splits. Each
+  split is a fixed *weight vector*: a digit's weight is $B$ raised to its distance from the end of
+  its block. A split sum is then the dot product of that vector with the digit vector. Laying all $n$
+  out as a digit matrix makes a split one matrix-vector product, which is vectorised re-reading.
+  Before that, the high/low block split from problem 551 does most of the work. Write
+  $n = h \cdot B^k + \ell$ and cut only at the boundary. Then a split sum is a split sum of $h$
+  plus one of $\ell$, and each half has only a few thousand values. Store each half's set of
+  reachable sums as a bitset, and one AND settles nearly every number. Exhaustive search is left for
+  the few the filter cannot decide.
 - **There are too many numbers to visit.** Problem 778 sums a carry-free digitwise product over
   $(M+1)^R$ sequences. Each place is independent, so all it ever needs is how often digit $d$ appears
   at place $10^i$ across $[0, M]$. That count has a closed form from the digit's period-$10^{i+1}$
@@ -205,6 +259,17 @@ what matters here is what replaces the extraction loop).
   36 does with `digits + digits[::-1]`: it *generates* palindromes from their halves. Each chosen
   exponent $k$ brings its mirror $-(k+1)$, and the search keeps only the combinations that land on an
   integer. Generating from halves was a speed-up in base 10. Here it is the only practical route.
+- **There is no integer at all.** Problem 731 asks for ten digits of a real number, the
+  [Stoneham number](https://en.wikipedia.org/wiki/Stoneham_number)
+  $A = \sum_i 3^{-i} 10^{-3^i}$, starting at position $10^{16}$. The digit extraction loop still
+  applies, scaled up. `n % 10` takes the units digit after shifting; for a real $x$, the ten digits
+  from position $n$ on are $\lfloor 10^{n+9} x \rfloor \bmod 10^{10}$. The floor splits term by
+  term. Each term's integer part is a quotient by $3^i$, so it is a modular exponentiation times a
+  modular inverse modulo $10^{10}$. Its fractional part, $10^e \bmod 3^i$ over $3^i$, adds a small
+  carry. The terms too small to reach the window provably cannot change the floor. About 33 terms do
+  the work, and none of the $10^{16}$ earlier digits is ever written. This is the
+  [BBP](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula) idea:
+  shift the window to the units place by multiplying modulo the denominator, then read it off.
 
 ## Choosing
 
@@ -213,13 +278,21 @@ what matters here is what replaces the extraction loop).
 - **Python, small numbers in a hot loop** — the arithmetic loop is competitive, and it is the one
   that extends to chunked lookup tables. Better: restructure so the per-number digit work
   disappears (multisets, bucket counts, memoised chains).
+- **Python, one digit edit over many numbers** — write the edit as place-value arithmetic
+  (`v - delta * 10**k`, `v % 10**(d-1)`) and apply it to a NumPy array; the same goes for
+  re-reading digits under a new grouping, which is a weight vector against a digit matrix.
 - **C, anything that fits in 64 bits** — arithmetic, always. Reversal is `r = r*10 + n%10`, a
   palindrome is `n == rev(n)`, a fingerprint is a histogram. Reach for `snprintf` only to print.
 - **C, big integers** — store decimal digits when the question is about digits; the representation
   *is* the string, and the manipulation becomes array indexing.
 - **Beyond any representation** — build the number digit by digit into a residue (or a small
   automaton, then count strings with a matrix power), count digits per place in closed form, or
-  generate the digit strings you want rather than testing values.
+  generate the digit strings you want rather than testing values. Name a patterned digit string
+  by its formula ($10^q - 1$ for $q$ nines), and get digits deep inside a real number from
+  $\lfloor 10^{k} x \rfloor \bmod 10^{m}$ by modular arithmetic.
+- **A digit DP that needs more than a count** — carry a bounded carry in the state to follow a
+  derived number such as $kn$ (read right to left), and carry (count, total) pairs, updated as
+  $(c, 10t + dc)$, when the answer sums values rather than counting them.
 - **Too many steps or candidates** — split the number into digit blocks and memoise what the low
   block does given only a summary of the high one, or extract digits from the bounds of a whole
   interval of candidates and prune on them.
