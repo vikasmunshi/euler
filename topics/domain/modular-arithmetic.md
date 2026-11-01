@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-10-30T17:01Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -68,6 +68,13 @@ $c_r$ of prefixes with each residue. The problem only asks whether $f(n)$ is its
 $3$, so the counts can be kept mod $3$ too. That leaves $81$ states for a
 [transfer matrix](/topics/domain/transfer-matrix-method), raised to the $10^5$th power by
 squaring. Residues are being taken twice here: once of the digit sums and once of the counts.
+Problem 303 makes the residue the state of a search. It wants, for each $n \le 10^4$, the least
+multiple of $n$ written with the digits $0$, $1$, $2$ only, and for some $n$ that multiple runs to
+twenty digits. Appending a digit $d$ sends the remainder $r$ to $(10r + d) \bmod n$, so two prefixes
+with the same remainder behave identically from then on and only the smaller is worth extending.
+The candidates collapse to a graph on $n$ remainders. A breadth-first search that tries digits in
+ascending order reaches remainder $0$ first along the smallest numeral. Pigeonhole on the repunits
+guarantees that a path to $0$ exists.
 
 **"Give the answer modulo $1\,000\,000\,007$."** Counting problems whose true answer overflows any
 integer type hand you the modulus explicitly — the residue *is* the deliverable. Here the domain is
@@ -102,7 +109,12 @@ $\mathbb{Z}[x]$ but in $\mathbb{Z}[x]/(x^{250} - 1)$, where $x^{250} = 1$ makes 
 modulo $250$ by themselves: the state is $250$ counters, never a polynomial of growing degree. The
 smallest instance of the same trick is parity — problem 996 keeps only the even-total terms of a
 generating function as $\tfrac12\big(f(y) + f(-y)\big)$, the [root-of-unity
-filter](/topics/domain/root-of-unity) for modulus $2$.
+filter](/topics/domain/root-of-unity) for modulus $2$. The filter is cheapest when the modulus is
+prime. Problem 635 counts the $p$-element subsets of $\{1, \dots, qp\}$ whose sum is divisible by
+$p$. Averaging over the $p$th roots of unity $\omega^j$, every $j \ne 0$ gives a primitive root
+again, so $k \mapsto \omega^{jk}$ visits each root exactly $q$ times and all $p - 1$ non-trivial
+terms are equal. Each is read off from $\prod_r (1 + rt) = 1 + t^p$. The filter collapses to one
+binomial coefficient plus a correction, divided by $p$.
 
 **Periodicity and cyclic structure.** Residues wrap around, so any process defined by "$+$" or
 "$\times$ a constant" is eventually periodic modulo $m$, and the period is often the real question.
@@ -161,7 +173,13 @@ when $\gcd(x, 6) = 1$, and every other $x$ contributes $0$. CRT splits the ring 
 powers of $x$, so the order is the lcm of the orders modulo each $p^k$. Lifting from $p^{k-1}$ to
 $p^k$ either keeps the order or multiplies it by $p$, and a single power decides which. The real
 work is one order per prime: in $\mathbb{F}_p$ when $7$ is a square mod $p$, and in
-$\mathbb{F}_{p^2}$ otherwise, with the same Frobenius bound as problem 492 below.
+$\mathbb{F}_{p^2}$ otherwise, with the same Frobenius bound as problem 492 below. Problem 875
+counts solutions with the filter from the subset-sum disguise, written additively. The zeros of the
+eight-variable form $a_1^2 + \dots + a_4^2 - b_1^2 - \dots - b_4^2$ modulo $n$ number
+$\frac1n \sum_t |G(t, n)|^8$, where $G(t, n) = \sum_x e^{2\pi i t x^2 / n}$ is a
+[quadratic Gauss sum](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum). Its modulus is known in
+closed form: $|G|^2 = m$ for an odd reduced modulus $m$, with a 2-adic exception. So the count is a
+Dirichlet convolution of multiplicative functions, and $n^8$ tuples become a totient sieve.
 
 ## What the modulus allows
 
@@ -208,7 +226,12 @@ modulus, so read it before you write the first line:
   commonest case is easy to miss: "the last nine digits" means mod $10^9$, and $10^9$ is even.
   Problem 401's closed form $x(x+1)(2x+1)/6$, with $x$ up to $10^{15}$, has no inverse of $2$ or $3$
   to lean on. The cure is to **divide before reducing**: one of $x, x+1$ is even and one of the three
-  factors is a multiple of 3, so divide those exactly, then reduce and multiply.
+  factors is a multiple of 3, so divide those exactly, then reduce and multiply. When the values
+  are too large to hold before reducing, **lift the modulus** instead. To divide by a fixed $k$
+  modulo $m$, carry the residue modulo $km$. Problem 684 needs $q = (f - r)/9$ for Fibonacci
+  numbers $f$ with $10^{18}$-scale values, reduced mod $p$ for a linear term and mod $p - 1$ for an
+  exponent. Running the recurrence modulo $9p$ and $9(p-1)$ keeps $r = f \bmod 9$ visible.
+  Subtracting it leaves a multiple of $9$, and dividing yields $q$ exactly in each ring.
 - **A residue forgets size.** Once a value is reduced you can no longer compare it with another
   or count how often a sum wrapped. Problem 822 must repeatedly pick the *smallest* of numbers
   squared a trillion times. It decides the order with the real-valued key
@@ -219,7 +242,12 @@ modulus, so read it before you write the first line:
   millionth number with at least a million prime factors. Every early member of that list carries
   a common factor $2^{k-s}$, and dividing it out keeps them in the same order. So the order statistic is
   found among ordinary 64-bit integers, and the residue appears only at the end, as
-  $2^{k-s} \bmod m$. Reduce exactly what the statement reduces.
+  $2^{k-s} \bmod m$. Cancellation is a question about size too. Problem 605 wants an
+  *irreducible* fraction, modulo $10^8$, whose denominator $(2^n - 1)^2$ has some thirty million
+  digits. Residues cannot reveal a gcd, so it is settled from structure first. Every common prime
+  divides $\gcd(n, 2^n - 1)$, which needs only $2^n \bmod n$. Its multiplicity is read by evaluating
+  both parts modulo a high power of that prime. Only then are the parts reduced. Reduce exactly
+  what the statement reduces.
 - **Mind the width.** A modulus near $10^{16}$ means the product of two residues no longer fits in
   64 bits, and a sum that is *not* reduced — problem 421's lands just under $2^{63}$ — leaves no
   headroom at all; estimate the magnitude before choosing the type. Problem 531 sums CRT solutions
@@ -246,9 +274,14 @@ far too large to form directly. When you catch it:
   $n$, the base is $-1$. When the modulus is prime, exponents live mod $p - 1$, or mod $p + 1$ for
   a norm-one element of $\mathbb{F}_p[\sqrt d]$ when $d$ is not a square. Simplify the object
   before you compute it.
-- **Keep size outside the ring.** Orderings, comparisons and unreduced totals need the real
-  magnitude, through logarithms or plain integers. Residues are only for the quantity the
-  statement reduces.
+- **Keep size outside the ring.** Orderings, comparisons, unreduced totals and the gcd of an
+  irreducible fraction need the real magnitude or its structure, through logarithms, plain
+  integers or a factorisation. Residues are only for the quantity the statement reduces.
+- **Lift the modulus to keep what you will divide by.** Carry a residue modulo $km$ when you must
+  later divide exactly by $k$, or modulo a prime power when you need a valuation.
+- **Make the residue the state.** When a number is built digit by digit and only its remainder
+  matters, prefixes with equal remainders are interchangeable. Search or count over the $m$
+  remainders, not over the numbers.
 - **Collapse inputs to their residues.** If only the residue of a total matters, a quarter-million
   elements are a census over $m$ buckets, and their generating function can live in
   $\mathbb{Z}[x]/(x^m - 1)$.
