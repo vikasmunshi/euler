@@ -1,9 +1,9 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final 2026-10-28T21:09Z -->
+<!-- status: final -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes
-`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in more than thirty
+`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in more than forty
 problems below: over and over, the quantity a problem asks for is a *residue* — the last ten digits, a count
 modulo `10^9+7`, whether some power lands on `1` — while the power itself has more digits than
 there are atoms in the universe. The naive route computes a number you cannot store to answer a
@@ -50,17 +50,18 @@ precision integers, and a hand-rolled version is strictly slower. The same probl
 ## The roles it plays
 
 The reason this tag lands on so many solutions is that `pow(b, e, m)` is rarely the *answer* — it
-is the primitive that other number-theoretic machinery is built from. Seven recurring roles:
+is the primitive that other number-theoretic machinery is built from. Eight recurring roles:
 
 | Role | Shape | Seen in |
 | --- | --- | --- |
-| Direct residue | `pow(b, e, m)` | 48, 97, 194, 820 |
-| [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 487, 545, 650, 675, 743, 860, 926 |
+| Direct residue | `pow(b, e, m)` | 48, 97, 194, 615, 731, 820 |
+| [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 487, 545, 635, 650, 675, 743, 860, 926 |
 | Primality witness | `pow(a, d, n)` then repeated squaring — [Miller–Rabin](/topics/technique/miller-rabin-primality-test) | 111, 146, 216, 271, 293, 516 |
-| [Multiplicative order](/topics/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133 |
-| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 745 |
-| Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 822 |
-| Product by multiplicity | `∏ pow(b, count[b], m)` | 1010 |
+| [Multiplicative order](/topics/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133, 752 |
+| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 659, 745 |
+| Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 492, 754, 822 |
+| Product by multiplicity | `∏ pow(b, count[b], m)` | 754, 1010 |
+| Power in a ring extension | `(a + b√d)^n` by square-and-multiply on pairs | 492, 752 |
 
 The inverse row deserves a note, because it is the most common use by volume. By [Fermat's little
 theorem](/topics/technique/fermats-little-theorem-application), `a^(p-1) ≡ 1 (mod p)`, so
@@ -76,14 +77,33 @@ needs every `k!⁻¹` for `k ≤ n` to evaluate binomials; it makes exactly one 
 `(n!)⁻¹`, and walks the table down with `(k-1)!⁻¹ = k · k!⁻¹` — `n` multiplications in place of
 `n` exponentiations. Problem 675 has no such telescoping structure: it needs the inverse of every
 odd `2k+1` up to `2·10^7`, so it pays for all of them, but as one vectorised exponentiation over the
-whole array (see below) rather than ten million interpreted calls.
+whole array (see below) rather than ten million interpreted calls. Problem 635 shows the third
+way to invert less: an inverse of a product is an inverse of each factor in disguise. Each of its
+terms divides by `p · p! · ((q-1)p)!`; it inverts that whole denominator once, and recovers `1/p`
+for free as `inv · p! · ((q-1)p)!` — two multiplications instead of a second exponentiation. The
+same identity, chained, is [batch
+inversion](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Multiple_inverses): `n`
+inverses for one `pow` and `3n` multiplications.
 
 The root row is the same power map read the other way. In a cyclic group of order `p - 1`,
 raising to `(p-1)/k` lands in the subgroup of `k`-th roots of unity, so problem 271 — cube roots of
 `1` modulo a primorial — gets a primitive cube root modulo each prime from `pow(g, (p-1)//3, p)`
 for any `g` that is not a cubic residue, then lifts it to higher prime powers with a
 [Hensel](https://en.wikipedia.org/wiki/Hensel%27s_lemma) step whose division is, again, a modular
-inverse.
+inverse. Problem 659 is the `k = 4` case: a polynomial sieve over `4k² + 1` needs the roots of that
+quadratic modulo every prime `p ≡ 1 (mod 4)`, which is `√-1` halved — and `c^((p-1)/4)` is a square
+root of `-1` for any non-residue `c`, recognised by its square landing on `p - 1`.
+
+The direct-residue row hides a pattern worth naming: reading digits far to the right of a
+decimal point. The `n`-th digit of `1/k` is a function of `10^(n-1) mod k` alone (problem 820),
+so a digit a billion places out costs `log n` multiplications. Problem 731 pushes the same move
+through a series: its [Stoneham number](https://en.wikipedia.org/wiki/Stoneham_number) is a sum of
+terms `1/(3^i · 10^(3^i))`, and a ten-digit window deep inside it is `∑ ⌊10^e / 3^i⌋ mod 10^10`
+plus a carry. Each term needs *two* moduli: `r = pow(10, e, 3^i)` is the remainder, so
+`(10^e − r)` is exactly divisible by `3^i`, and *because* that division is exact and `3` is coprime
+to `10`, it becomes a multiplication by `3^(-i)` mod `10^10`. The remainders `r / 3^i` are summed
+exactly for the carry. It is the [BBP digit-extraction
+idea](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula) in base ten.
 
 The last row is the newest, and it turns the usual relationship around: the exponent is not given,
 it is *counted*. Problem 1010 asks for a product of tableau counts over every partition of `300`
@@ -95,6 +115,16 @@ functions, not enumeration); once those exponents are known, `n + 1` calls to `p
 inverse finish the job. Whenever a product ranges over more objects than you can visit but its
 factors come from a small alphabet, count multiplicities and let modular exponentiation absorb
 them — and divide once, at the end, rather than once per factor.
+
+Problem 754 adds signs. Its product of [Gauss
+factorials](https://en.wikipedia.org/wiki/Gauss_factorial) over `n ≤ 10^8` becomes, by Möbius
+inversion, `∏_d (d^(T(N/d)) · F(N/d))^(μ(d))` — `F` a superfactorial, `T` a triangular number, and
+`μ(d) ∈ {-1, 0, 1}` an exponent that can be negative. Two observations make it cheap. The exponent
+of a nonzero residue under a prime modulus lives mod `p - 1`, so a negative exponent is just
+`(e mod (p-1))` — no separate inversion branch. And the factor depends on `d` only through
+`⌊N/d⌋`, which takes `O(√N)` distinct values: within each block, `∏ d^(μ(d))` is a ratio of two
+prefix products (the `μ = +1` and `μ = -1` factors kept apart), so one inverse and two `pow` calls
+per block replace `10^8` of them.
 
 ## Reducing the exponent
 
@@ -138,11 +168,57 @@ a^e ≡ a^((e mod φ(m)) + φ(m))   (mod m)
 Problem 188 needs precisely this: `1777` is not coprime to every modulus on its totient chain, and
 the bare reduction gives a wrong answer that looks plausible.
 
+## Powers in a ring extension
+
+Square-and-multiply never cared that its operands were integers — only that multiplication is
+associative. So the same loop raises `a + b√d` to a power modulo `m`, carrying the pair `(a, b)` and
+multiplying by `(a + b√d)(c + e√d) = (ac + d·be) + (ae + bc)√d`:
+
+```python
+def ring_pow(a, b, n, m, d):           # (a + b√d)^n mod m, as a pair
+    ra, rb = 1, 0
+    while n:
+        if n & 1:
+            ra, rb = (ra*a + d*rb*b) % m, (ra*b + rb*a) % m
+        a, b = (a*a + d*b*b) % m, 2*a*b % m
+        n >>= 1
+    return ra, rb
+```
+
+What makes this more than a curiosity is that exponent reduction carries over, with a twist that
+the [Legendre symbol](https://en.wikipedia.org/wiki/Legendre_symbol) decides. Modulo a prime `p`,
+if `d` is a square the ring `𝔽_p[√d]` splits into two copies of `𝔽_p` and every unit's order divides
+`p - 1`, as usual. If `d` is not a square, the ring is the field `𝔽_{p²}`, and
+[Frobenius](https://en.wikipedia.org/wiki/Frobenius_endomorphism) — `x^p` is the conjugate of `x` —
+gives `x^(p+1) = N(x)`, the norm. An element of norm `1` therefore has order dividing `p + 1`.
+
+Problem 752 asks for the multiplicative order of `1 + √7` modulo every `x` up to a million. CRT
+reduces it to prime powers, and the split/inert dichotomy hands each prime a known multiple of the
+order — `p - 1` in the split case; in the inert one, the order `o` of the norm `-6` in `𝔽_p`, times
+a divisor of `p + 1` for the norm-1 element `x^o`. The exact order is then found the standard way:
+strip each prime factor `q` from the multiple while `x^(multiple/q)` is still `1`. Lifting to `p^k`
+costs one more ring power, because the order either stays or gains exactly one factor of `p`.
+
+Problem 492 never mentions a square root: its sequence `a' = 6a² + 10a + 3` becomes, after
+`b = 6a + 5`, the doubling map `b' = b² - 2`, so `b(n) = α^(2^(n-1)) + α^(-2^(n-1))` for a root `α`
+of `x² - 11x + 1`. The index is doubly exponential, but modulo `p` the exponent `2^(n-1)` reduces
+mod `p - 1` or `p + 1` according to whether the discriminant `117` is a residue — one nested `pow`
+— and the [Lucas sequence](https://en.wikipedia.org/wiki/Lucas_sequence) `V(k) = α^k + α^(-k)` is
+then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on the pair
+`(V(k), V(k+1))` with `V(2k) = V(k)² - 2` and `V(2k+1) = V(k)V(k+1) - P`. The ladder never touches
+`√117` at all, which is why it works identically for split and inert primes.
+
 ## How to reason about it
 
 - **Reach for it the moment the answer is a residue.** If the problem says "last `k` digits", "modulo
   `1000000007`", or "is `x ≡ 1`", you are in this territory, and the size of the true value is a red
   herring you should stop thinking about immediately.
+- **…but residues forget order.** When the problem asks for the `n`-th smallest of something and
+  only then for a residue, you cannot sort residues. Problem 615 wants the millionth number with at
+  least a million prime factors: every candidate near the front is `2^(k-s)` times a small number,
+  so the ranking is done exactly on the small numbers, and the astronomical factor enters only at
+  the very end, as one `pow(2, k - s, m)`. Factor out the part that is too big to compare, compare
+  what is left, exponentiate last.
 - **`O(log e)` is not always necessary.** Problem 97's linear doubling loop is `7.8 × 10^6`
   iterations — 23 with square-and-multiply, but both finish instantly, and the linear one is easier
   to read. Square-and-multiply earns its keep when the exponent is genuinely large (`10^18`), or
@@ -162,8 +238,10 @@ the bare reduction gives a wrong answer that looks plausible.
   with its own exponent in problem 455, every odd denominator's inverse in problem 675 — `pow` in
   a Python loop is the bottleneck. Square-and-multiply ports directly to NumPy: one pass per
   exponent bit, squaring a base *array* and using `np.where` to fold it into a result array where
-  that bit is set. Thirty array operations replace a million interpreted calls. The width rule
-  above applies here too: operands under `2^31` keep every product inside `int64`.
+  that bit is set. Thirty array operations replace a million interpreted calls. The modulus can
+  vary per lane as easily as the exponent: problem 492 runs one shared exponent `2^(n-1)` against
+  an array of moduli `p ∓ 1`, then a Lucas ladder in which every prime reads its own exponent bit.
+  The width rule above applies here too: operands under `2^31` keep every product inside `int64`.
 - **Reduce the base before the loop, not after.** `base %= mod` on entry costs one division and
   bounds every subsequent operand; skipping it is how a "correct" `mod_pow` overflows on its first
   squaring.
