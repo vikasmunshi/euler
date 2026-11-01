@@ -151,7 +151,7 @@ triple.
 - ○ [0723](/solutions/0723/) — Pythagorean Quadrilaterals
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples
 - ○ [0748](/solutions/0748/) — Upside Down Diophantine Equation
-- ○ [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0827](/solutions/0827/) — Pythagorean Triple Occurrence
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
 - ○ [0904](/solutions/0904/) — Pythagorean Angle

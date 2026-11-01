@@ -586,7 +586,7 @@ show up there at once. See
 - ○ [0749](/solutions/0749/) — Near Power Sums
 - ○ [0753](/solutions/0753/) — Fermat Equation
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
-- ○ [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
 - ○ [0789](/solutions/0789/) — Minimal Pairing Modulo $p$

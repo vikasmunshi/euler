@@ -221,7 +221,7 @@ while p <= max_perimeter:
 - ○ [0748](/solutions/0748/) — Upside Down Diophantine Equation
 - ○ [0753](/solutions/0753/) — Fermat Equation
 - ● [0757](/solutions/0757/) — Stealthy Numbers
-- ○ [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
 - ○ [0784](/solutions/0784/) — Reciprocal Pairs
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation

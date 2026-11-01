@@ -186,7 +186,7 @@ factorisation beyond its disjointness from the other's.
 - ○ [0748](/solutions/0748/) — Upside Down Diophantine Equation
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ○ [0758](/solutions/0758/) — Buckets of Water
-- ○ [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
 - ○ [0773](/solutions/0773/) — Ruff Numbers
 - ○ [0777](/solutions/0777/) — Lissajous Curves

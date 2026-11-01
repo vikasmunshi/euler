@@ -691,6 +691,7 @@ handful of operations on small numbers.
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ○ [0773](/solutions/0773/) — Ruff Numbers

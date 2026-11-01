@@ -217,6 +217,7 @@ $\gcd(a, m)$ (Bézout), so the walk ends exactly when the "gap" becomes a multip
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0700](/solutions/0700/) — Eulercoin
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 
 <!-- /problems -->

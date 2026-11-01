@@ -105,6 +105,7 @@ apart.
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0963](/solutions/0963/) — Removing Trits
 
 <!-- /problems -->

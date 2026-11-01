@@ -345,6 +345,7 @@ both slower and harder to read.
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0757](/solutions/0757/) — Stealthy Numbers
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0944](/solutions/0944/) — Sum of Elevisors

@@ -195,6 +195,7 @@ Python original and both produce a plausible wrong number rather than a crash.
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0866](/solutions/0866/) — Tidying Up B

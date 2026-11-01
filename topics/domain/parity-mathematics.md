@@ -169,6 +169,7 @@ is the natural lever: it lets the exponent be taken apart one binary digit at a 
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
+- ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0859](/solutions/0859/) — Cookie Game
 - ● [0868](/solutions/0868/) — Belfry Maths
 - ● [0951](/solutions/0951/) — A Game of Chance
