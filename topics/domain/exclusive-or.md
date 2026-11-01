@@ -113,6 +113,7 @@ safely. The other differences are in what surrounds XOR:
 
 - ● [0059](/solutions/0059/) — XOR Decryption
 - ● [0301](/solutions/0301/) — Nim
+- ● [0310](/solutions/0310/) — Nim Square
 - ○ [0323](/solutions/0323/) — Bitwise-OR Operations on Random Integers
 - ○ [0334](/solutions/0334/) — Spilling the Beans
 - ○ [0691](/solutions/0691/) — Long Substring with Many Repetitions

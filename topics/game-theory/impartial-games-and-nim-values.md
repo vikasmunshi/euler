@@ -113,7 +113,7 @@ the history into the state before you look for a value.
 - ○ [0260](/solutions/0260/) — Stone Game
 - ● [0301](/solutions/0301/) — Nim
 - ○ [0306](/solutions/0306/) — Paper-strip Game
-- ○ [0310](/solutions/0310/) — Nim Square
+- ● [0310](/solutions/0310/) — Nim Square
 - ○ [0344](/solutions/0344/) — Silver Dollar Game
 - ○ [0366](/solutions/0366/) — Stone Game III
 - ○ [0391](/solutions/0391/) — Hopping Game

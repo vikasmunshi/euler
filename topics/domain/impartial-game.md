@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Impartial_game
 
 - ○ [0260](/solutions/0260/) — Stone Game
 - ○ [0306](/solutions/0306/) — Paper-strip Game
-- ○ [0310](/solutions/0310/) — Nim Square
+- ● [0310](/solutions/0310/) — Nim Square
 - ○ [0344](/solutions/0344/) — Silver Dollar Game
 - ○ [0366](/solutions/0366/) — Stone Game III
 - ○ [0391](/solutions/0391/) — Hopping Game

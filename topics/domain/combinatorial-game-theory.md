@@ -250,7 +250,7 @@ weighting each winning mask by how many integers wear it.
 - ○ [0260](/solutions/0260/) — Stone Game
 - ● [0301](/solutions/0301/) — Nim
 - ○ [0306](/solutions/0306/) — Paper-strip Game
-- ○ [0310](/solutions/0310/) — Nim Square
+- ● [0310](/solutions/0310/) — Nim Square
 - ○ [0325](/solutions/0325/) — Stone Game II
 - ○ [0334](/solutions/0334/) — Spilling the Beans
 - ○ [0335](/solutions/0335/) — Gathering the Beans

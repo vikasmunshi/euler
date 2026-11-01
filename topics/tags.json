@@ -1012,7 +1012,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exclusive_or",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0059", "p0301", "p0323", "p0334", "p0691", "p0707", "p0760", "p0774", "p0806", "p0810", "p0813", "p0832", "p0877", "p0878", "p0945", "p0973", "p1000"]
+      "refs": ["p0059", "p0301", "p0310", "p0323", "p0334", "p0691", "p0707", "p0760", "p0774", "p0806", "p0810", "p0813", "p0832", "p0877", "p0878", "p0945", "p0973", "p1000"]
     },
     {
       "slug": "expected-value",
@@ -1930,7 +1930,7 @@
       "reference": "https://en.wikipedia.org/wiki/Mex_(mathematics)",
       "additional-references": [],
       "summary": "The smallest non-negative (or positive) integer not present in a set, used here to define the sequence-generating process.",
-      "refs": ["p0832"]
+      "refs": ["p0310", "p0832"]
     },
     {
       "slug": "minimum-spanning-tree",
@@ -3559,7 +3559,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bitwise_operation",
       "additional-references": ["https://en.wikipedia.org/wiki/Bitwise_operation#XOR", "https://en.wikipedia.org/wiki/Bitwise_operation#AND"],
       "summary": "",
-      "refs": ["p0122_s0", "p0136_s0", "p0177_s0", "p0201_s0", "p0208_s0", "p0215_s0", "p0216_s0", "p0229_s0", "p0238_s0", "p0301_s0", "p0315_s0", "p0400_s0", "p0679_s0", "p0899_s0", "p0944_s0"]
+      "refs": ["p0122_s0", "p0136_s0", "p0177_s0", "p0201_s0", "p0208_s0", "p0215_s0", "p0216_s0", "p0229_s0", "p0238_s0", "p0301_s0", "p0310_s0", "p0315_s0", "p0400_s0", "p0679_s0", "p0899_s0", "p0944_s0"]
     },
     {
       "slug": "bostan-mori-algorithm",
@@ -3623,6 +3623,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0001_s1", "p0004_s0", "p0008_s0", "p0009_s0", "p0011_s0", "p0012_s1", "p0019_s0", "p0023_s0", "p0023_s1", "p0026_s0", "p0027_s0", "p0028_s0", "p0029_s0", "p0029_s1", "p0033_s0", "p0038_s0", "p0044_s0", "p0046_s0", "p0047_s0", "p0052_s0", "p0055_s0", "p0056_s0", "p0063_s0", "p0085_s0", "p0086_s0", "p0090_s0", "p0093_s0", "p0102_s0", "p0102_s1", "p0105_s0", "p0108_s0", "p0109_s0", "p0112_s0", "p0125_s0", "p0126_s0", "p0129_s0", "p0139_s0", "p0150_s0", "p0163_s0", "p0182_s0", "p0225_s0", "p0478_s0", "p0504_s0", "p0565_s0", "p0637_s0"]
+    },
+    {
+      "slug": "burnside-lemma",
+      "facet": "technique",
+      "name": "Burnside's lemma",
+      "reference": "https://en.wikipedia.org/wiki/Burnside%27s_lemma",
+      "additional-references": [],
+      "summary": "Counting orbits of a group action as the average number of points fixed by each group element.",
+      "refs": ["p0310_s0"]
     },
     {
       "slug": "bytearray",
@@ -4225,7 +4234,7 @@
       "reference": "https://numpy.org/doc/stable/user/basics.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0229_s0", "p0249_s0", "p0420_s0", "p0420_s1", "p0421_s0"]
+      "refs": ["p0229_s0", "p0249_s0", "p0310_s0", "p0420_s0", "p0420_s1", "p0421_s0"]
     },
     {
       "slug": "fast-fourier-transform",
@@ -5341,7 +5350,7 @@
       "reference": "https://numpy.org/doc/stable/reference/generated/numpy.bincount.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0135_s0", "p0980_s0"]
+      "refs": ["p0135_s0", "p0310_s0", "p0980_s0"]
     },
     {
       "slug": "np-flatnonzero",
@@ -5368,7 +5377,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0757_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5818,7 +5827,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem",
       "additional-references": [],
       "summary": "Assigning every impartial-game position a nimber (Grundy value) so that sums of games combine by XOR and a position is lost exactly when its value is zero.",
-      "refs": ["p0400_s0"]
+      "refs": ["p0310_s0", "p0400_s0"]
     },
     {
       "slug": "sqrt",
@@ -6241,7 +6250,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
-      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0635", "p0670", "p0706", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
+      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0310", "p0331", "p0346", "p0351", "p0395", "p0420", "p0478", "p0565", "p0635", "p0670", "p0706", "p0761", "p0768", "p0788", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
     },
     {
       "slug": "extract-digits-by-modular-shift",
@@ -6251,6 +6260,15 @@
       "additional-references": [],
       "summary": "To read digits deep inside a series' expansion, shift each term by a power of the base reduced modulo its denominator, keeping only the window you want and a bounded carry from the fractional parts.",
       "refs": ["p0731"]
+    },
+    {
+      "slug": "histogram-the-values-not-the-items",
+      "facet": "takeaway",
+      "name": "Histogram the values, not the items",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When a condition depends only on a small per-item value, bucket the items by that value and count over the value alphabet instead of over item tuples.",
+      "refs": ["p0310"]
     },
     {
       "slug": "invariant-bounds-the-state-space",
