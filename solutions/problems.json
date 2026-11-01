@@ -2476,8 +2476,8 @@
     "level": 16,
     "pct": 41,
     "solvers": 1676,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 14:43"
   },
   "311": {
     "title": "Biclinic Integral Quadrilaterals",
