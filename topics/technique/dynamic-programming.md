@@ -206,6 +206,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0679](/solutions/0679/) — Freefarea
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs

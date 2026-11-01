@@ -285,6 +285,7 @@ both slower and harder to read.
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers

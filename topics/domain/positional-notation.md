@@ -217,7 +217,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ○ [0592](/solutions/0592/) — Factorial Trailing Digits 2
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
-- ○ [0637](/solutions/0637/) — Flexible Digit Sum
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
 - ○ [0676](/solutions/0676/) — Matching Digit Sums
 - ● [0698](/solutions/0698/) — 123 Numbers

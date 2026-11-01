@@ -138,6 +138,7 @@ short the code looks.
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0720](/solutions/0720/) — Unpredictable Permutations

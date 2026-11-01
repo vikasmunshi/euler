@@ -125,6 +125,7 @@ three instructions per access to save space you were not short of.
 - ● [0196](/solutions/0196/) — Prime Triplets
 - ● [0201](/solutions/0201/) — Subsets with a Unique Sum
 - ● [0238](/solutions/0238/) — Infinite String Tour
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 
 <!-- /problems -->

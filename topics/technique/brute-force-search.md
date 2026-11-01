@@ -228,5 +228,6 @@ The combinatorial wall arrives abruptly, and three signals say you have reached 
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 
 <!-- /problems -->

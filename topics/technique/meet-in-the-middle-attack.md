@@ -127,6 +127,7 @@ The bitmask enumeration that builds each half's table is on
 - ● [0152](/solutions/0152/) — Sums of Square Reciprocals
 - ● [0166](/solutions/0166/) — Criss Cross
 - ● [0461](/solutions/0461/) — Almost Pi
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0768](/solutions/0768/) — Chandelier
 
 <!-- /problems -->

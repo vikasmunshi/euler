@@ -469,7 +469,7 @@ $1/\zeta(3) \approx 83\%$ of all triangles, and a wrong inversion misses that ba
 - ○ [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
-- ○ [0637](/solutions/0637/) — Flexible Digit Sum
+- ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ○ [0643](/solutions/0643/) — $2$-Friendly
