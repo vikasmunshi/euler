@@ -6204,8 +6204,8 @@
     "level": 12,
     "pct": 31,
     "solvers": 793,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 1 Nov 2026, 10:08"
   },
   "777": {
     "title": "Lissajous Curves",
