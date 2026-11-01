@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-10-28T21:11Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -38,6 +38,23 @@ Lucy_Hedgehog [prime count](https://en.wikipedia.org/wiki/Prime-counting_functio
 way — a Python loop over the primes up to $\sqrt{n}$, each step a couple of strided
 slice subtractions over the table of $\pi(\lfloor n/k \rfloor)$.
 
+The slice's start is the only thing that has to be computed, and two generalisations
+follow from that. A **segmented** sieve over the block $[lo, hi)$ starts each prime at
+`-lo % p`, the first multiple inside the block, so [632](/solutions/0632/) can sieve
+$d \le \sqrt{n}$ a few million at a time in bounded memory. It also multiplies each
+small prime into a per-entry `product` array as it goes: sieving only to $d^{1/2}$,
+an entry with `product < d` has exactly one prime factor left over, which is all its
+prime-factor count needs, so the large primes never have to be sieved at all. A
+**polynomial** sieve walks the values of $f(k)$ instead of $k$: the $k$ with
+$p \mid f(k)$ are the roots of $f$ mod $p$, which form residue classes, so each root
+is one strided slice. [659](/solutions/0659/) sieves $4k^2 + 1$ this way, and it
+*divides* rather than marks (`values[k::q] //= p`), stepping $q$ through
+$p, p^2, \dots$ with each root
+[Hensel-lifted](https://en.wikipedia.org/wiki/Hensel%27s_lemma) to the next power.
+Once every prime up to the bound has been divided out, whatever is left in each entry
+is 1 or a single large prime, and one `np.where` picks the largest factor for every
+$k$.
+
 **A comparison is a mask, and a mask is an index.** `div_sums > np.arange(limit + 1)`
 yields a boolean array;
 [`np.flatnonzero`](https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html)
@@ -75,6 +92,34 @@ so it stores the four cases in a ten-entry array and writes
 `TABLE[primes % 10] * primes` — one gather, no `if`. Two-dimensional tables work the
 same way: [315](/solutions/0315/) precomputes a saving for every (last two digits,
 digit sum) pair and reads it for every prime at once as `first[big % 100, sums]`.
+A binomial coefficient is three gathers from the factorial tables:
+[517](/solutions/0517/) evaluates a whole row of
+$\binom{m+j}{j}$ terms as `fact[m + j] * inv[j] % M * inv[m] % M`.
+
+**An index map is a transition, and a scatter must not collide.** When a DP keeps a
+distribution over states as a dense vector, a deterministic transition is just
+an index array: `dst[to] += src[from]`. [400](/solutions/0400/) pushes its weights
+over [Grundy values](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
+down the tree with `to = (idx ^ mask) - 1`, sizing the vector to a power of two so
+that XOR by a constant *permutes* the indices. That permutation is what makes the
+one-line scatter correct. Fancy-index `+=` reads once and writes once, so if two
+sources land on the same target only one of them sticks, and nothing warns you. An
+injective map, like this one, is safe; a many-to-one map needs
+[`np.add.at`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html)
+or `np.bincount(to, weights=src)`.
+
+**A matrix product enumerates linear combinations.** If each candidate is a fixed
+linear function of some per-element features, put the features in rows and the
+functions in columns, and `@` evaluates every candidate for every element in one
+call. [637](/solutions/0637/) inserts plus signs between digits: each placement is a
+weight vector (a digit is worth base to the power of its distance from the end of its
+block), so `digits @ weights` gives every split sum of every number at once. For set
+intersection the same problem packs booleans into words:
+`np.packbits(bits, axis=1).view(np.uint64)` turns a 512-wide membership row into
+eight integers, and "do these two sets meet?" becomes `(a & b).any(axis=-1)`
+broadcast over every (high half, low half) pair. That is a
+[meet-in-the-middle](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack) split
+of each number's digits, with 64 set members tested per machine AND.
 
 **Loop over the digits, not the numbers.** Digit work on a million integers is a
 handful of passes, not a million calls: `rem, d = np.divmod(rem, 10); sums += d`
@@ -96,7 +141,11 @@ the work per round is only the stragglers. The exponent can differ per element t
 [455](/solutions/0455/) iterates $x \leftarrow n^x \bmod 10^9$ for every $n$ up to a
 million *at once*, each element raised to its own current $x$, and stops when
 `np.array_equal` says the whole array has reached its fixed point — a dozen rounds,
-not a million separate iterations. The element need not even be a number:
+not a million separate iterations. Even the modulus an exponent is reduced by can be
+chosen per element: [492](/solutions/0492/) reduces a tower of 2s mod $p - 1$ or
+$p + 1$ for each prime, picked by a quadratic-residue mask, and then runs a
+[Lucas-sequence](https://en.wikipedia.org/wiki/Lucas_sequence) ladder in which each
+prime reads its own exponent bit. The element need not even be a number:
 [721](/solutions/0721/) exponentiates $c + \sqrt{a}$ in the ring
 $\mathbb{Z}_p[\sqrt{a}]$, holding each ring element as *two* arrays $(u, v)$ — a
 struct of arrays — with a ring multiply written once over whole arrays and each $a$'s
