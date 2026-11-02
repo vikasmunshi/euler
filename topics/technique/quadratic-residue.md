@@ -114,6 +114,7 @@ Things to keep in mind:
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0221](/solutions/0221/) — Alexandrian Integers
 - ● [0245](/solutions/0245/) — Coresilience
+- ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$

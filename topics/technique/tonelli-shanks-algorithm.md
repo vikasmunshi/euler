@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tonelli%E2%80%
 ## Problems
 
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
+- ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 
 <!-- /problems -->

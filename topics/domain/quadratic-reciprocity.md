@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_reci
 ## Problems
 
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
+- ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0492](/solutions/0492/) — Exploding Sequence
 
 <!-- /problems -->

@@ -195,7 +195,7 @@ bound that becomes an interval between two roots.
 - ○ [0317](/solutions/0317/) — Firecracker
 - ● [0318](/solutions/0318/) — 2011 Nines
 - ○ [0356](/solutions/0356/) — Largest Roots of Cubic Polynomials
-- ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
+- ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0932](/solutions/0932/) — $2025$

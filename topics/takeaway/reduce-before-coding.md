@@ -416,6 +416,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0443](/solutions/0443/) — GCD Sequence
 - ● [0452](/solutions/0452/) — Long Products
+- ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0484](/solutions/0484/) — Arithmetic Derivative

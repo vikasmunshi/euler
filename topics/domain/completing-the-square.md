@@ -105,5 +105,6 @@ half-planes with closed-form counts.
 - ● [0100](/solutions/0100/) — Arranged Probability
 - ● [0138](/solutions/0138/) — Special Isosceles Triangles
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
+- ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 
 <!-- /problems -->
