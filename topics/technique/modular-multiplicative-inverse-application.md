@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-10-30T12:48Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -57,6 +57,17 @@ constraint `3i + 5j = 4n` gives `3i ≡ 4n (mod 5)`, so `i ≡ 4n · 3⁻¹ ≡ 
 — turns out, after one line of algebra (`10·f(n) = n + b(10m − 1)`), to be exactly `10⁻¹ mod p`. A
 puzzle phrased about digits is a sum of inverses.
 
+The same congruence is also the step of [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma),
+which lifts a root of a polynomial from modulo `p^e` to modulo `p^(e+1)`. Problem 0659 sieves
+`f(k) = 4k² + 1` by its prime factors. A prime `p` divides `f(k)` along the progressions
+`k ≡ ±√−1 · 2⁻¹ (mod p)`, and the derivation reaches them through a fraction: `n ≡ −1/2`, which is
+just the residue `(p − 1)/2`. To catch `p²`, `p³`, … it looks for the root modulo `p·q` (with
+`q = p^e`) in the form `k + q·s`. Expanding `f` gives a linear congruence for the correction,
+`s ≡ −(f(k)/q) · f′(k)⁻¹ (mod p)`. That is Newton's method done over the integers modulo `p`, and the
+division by the derivative is an inverse. It needs `f′(k) = 8k` to be a unit modulo `p`, and at a
+root it always is: `p` is odd, and `p | k` would make `f(k) ≡ 1`, so the lift exists and is unique. The inverse is taken modulo `p`, not modulo
+`p·q`, so every intermediate stays below `p` and the C port needs no wide arithmetic for it.
+
 **2 — The glue in the Chinese remainder theorem.** The
 [CRT](/topics/technique/chinese-remainder-theorem) tells you a solution exists; an inverse is what
 constructs it. Merging `x ≡ r₁ (mod m₁)` with `x ≡ r₂ (mod m₂)` means finding how many `m₁`-steps to
@@ -112,6 +123,26 @@ denominator is assembled as exponents per hook length and inverted once. Both le
 guarantee — a prime modulus larger than every factor in the denominator, so nothing on the bottom
 line can vanish.
 
+Exactness is a property of the integer, not of the pieces you compute it from. Problem 0635's
+[roots-of-unity filter](https://en.wikipedia.org/wiki/Series_multisection) ends at
+`(C(qp, p) + q(p − 1)) / p`. The sum is divisible by `p`, but neither term has to be. Over the
+integers you would have to add first and then divide. Modulo a prime you can multiply each term by
+`p⁻¹` separately, because multiplying by an inverse distributes over addition and ordinary division
+does not. Problem 0705 uses the same freedom to count with probabilities. Its total is `T · E[X]`:
+the number of sequences times the expected number of inversions. The expectation is a sum of
+fractions with denominators `d(x)·d(y) ≤ 16`. Each fraction becomes a residue, and the product with
+`T` is the count. Linearity of expectation is often the easy way to set up a count, and modular
+inverses let you use it without leaving integer arithmetic.
+
+The modulus does not need to be prime, either. Problem 0731 wants ten digits of a decimal expansion
+starting near position `10¹⁶`, which is an integer part taken modulo `10¹⁰`. Each term needs the
+quotient `q = (10^e − r) / 3^i`, an integer with about `10¹⁶` digits. Since `3^i` is a unit modulo
+`10¹⁰`, its last ten digits are `(10^e − r) · 3^(−i) mod 10¹⁰`. The remainder `r = 10^e mod 3^i`
+comes from a second modular exponentiation in the *other* modulus. So floor division is split into
+two residues: the remainder modulo the divisor, and the quotient modulo the base. This is the
+[BBP](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula)-style
+digit-extraction trick, and the inverse is the part that makes it work for an exact quotient.
+
 A variant of the same idea is the inverse as *undo*. Problem 0926 sweeps a running product across
 segment boundaries and multiplies by a factor's inverse to remove it again when the segment ends;
 0650 keeps a running `p^(−v)` for the same reason. Problem 0675 shows the undo at its clearest. Its
@@ -122,7 +153,16 @@ and it is affordable only because the inverse removes one factor without rebuild
 product. Where a sliding window over sums would use a
 subtraction, a sliding window over products uses an inverse — with the caveat that a zero factor has
 no inverse and breaks the trick, so this only works in a field with the zeros excluded by
-construction.
+construction. The same reasoning gives range products. With prefix products `P(x)`, the product over
+`(a, b]` is `P(b) · P(a)⁻¹`, the multiplicative version of a prefix-sum difference. Problem 0754
+reads a product of `d^μ(d)` over each of its `O(√N)` quotient blocks this way.
+
+The inverse also undoes a change of variables. Problem 0492's recurrence `a′ = 6a² + 10a + 3`
+becomes `b′ = b² − 2` under `b = 6a + 5`, which is a
+[Lucas sequence](https://en.wikipedia.org/wiki/Lucas_sequence) doubling rule with a closed form.
+All the work happens in `b`, and one `6⁻¹` at the end returns to `a`. The substitution is free
+to choose as long as the map back can be inverted modulo every prime involved. Here it fails only
+for 2 and 3, which the solution handles separately.
 
 ## Making it cheap
 
@@ -156,6 +196,23 @@ the repetition.
   denominator as separate running residues — or, as in 1010, as exponent counts per factor — and
   invert the denominator a single time. Per-term inverses turn `k` multiplications into `k`
   exponentiations for no gain; a quotient of products is a product of one quotient.
+  Problem 0754 needs the signed product `∏ d^μ(d)`. It keeps two running products, one over the
+  `d` with `μ = +1` and one over the `d` with `μ = −1`. A block's product is then one ratio, so it
+  takes one inverse per block rather than one per `d`.
+- **Invert the product, then multiply the factors back.** If you need the inverses of several
+  factors that appear together, invert their product once. The inverse of any one factor is that
+  inverse times all the others. Problem 0635 inverts `p · p! · ((q−1)p)!` once per prime. Multiplying
+  it by `(qp)!` gives `C(qp, p) / p`, and multiplying it by `p! · ((q−1)p)!` gives `p⁻¹` for the
+  other term. This is Montgomery's trick for two factors. Since every prime's denominator is
+  inverted by the same Fermat exponent, all 5.76 million inversions run as one
+  [vectorised](/topics/technique/vectorized) exponentiation.
+- **Fold inverse powers into the exponent.** Modulo a prime `p`, `x^(−k) = x^((−k) mod (p − 1))` for
+  any `x` not divisible by `p`, by [Fermat](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem).
+  When signed exponents appear, as with Möbius weights or a difference of
+  [Mertens](https://en.wikipedia.org/wiki/Mertens_function) sums in 0754, reduce the exponent
+  modulo `p − 1` and use an ordinary `pow`. The inverse comes from the same exponentiation, with no
+  separate inversion and no special case for negative signs. Reduce exponents modulo `p − 1`, never
+  modulo `p`.
 - **Ask whether you need one at all.** Problem 0381 is the instructive case. Its derivation ends at
   `S(p) ≡ −3 · 8⁻¹ (mod p)`, an inverse per prime over millions of primes. But `8·S ≡ −3` with
   `0 ≤ S < p` forces `8S = t·p − 3` for a small `t` determined by `p mod 8`, so a four-entry lookup
@@ -163,7 +220,9 @@ the repetition.
   same move from the other side: `10⁻¹ mod p` is `(k·p + 1) / 10`, with `k ∈ {9, 3, 7, 1}` fixed by
   `p`'s last digit, so the inverses of 10 modulo 660-odd thousand primes become one branch-free
   [vectorised](/topics/technique/vectorized) expression over the sieve's output array — no
-  per-prime Euclid at all. When the modulus varies but the *inverted value* is a small constant,
+  per-prime Euclid at all. Problem 0492 does the same for `6⁻¹`: it is `(p + 1)/6` or `(5p + 1)/6`,
+  chosen by `p mod 6`, and it is applied to half a million primes as one array expression. When the
+  modulus varies but the *inverted value* is a small constant,
   look for the integer identity before reaching for the general machinery.
 
 ## Getting it right
@@ -173,8 +232,17 @@ the repetition.
   pulls all factors of 5 out of a factorial before working modulo `5⁵`, precisely so the remaining
   quantity is invertible. Problem 0134's statement excludes one prime pair for the same reason — the
   inverse genuinely does not exist there — and 0274 masks out 2 and 5, the only primes sharing a
-  factor with 10. The cheapest proof of invertibility is a size argument: in 0996, 1010 and 0675 the
-  prime modulus exceeds every factor of the denominator, so the check is done before the code starts.
+  factor with 10. The cheapest proof of invertibility is a size argument: in 0996, 1010, 0675, 0635
+  and 0754 the prime modulus exceeds every factor of the denominator, so the check is done before
+  the code starts.
+- **Check every value the denominator takes, not just the formula.** A closed form can be valid for
+  the formula in general and still divide by zero at one value of its parameter. Problem 0520
+  reduces its count to 21 geometric series `Σ k^L` with ratios `k = −10, …, 10`. Each is summed as
+  `(k^m − 1) · (k − 1)⁻¹`. That works for nineteen of them. At `k = 1` the denominator is zero and
+  the sum is just the number of terms. At `k = 0` only the `0⁰ = 1` term survives. Python's
+  `pow(0, −1, p)` raises an exception, but a hand-written extended Euclid in C usually returns some
+  value without any error, so handle the degenerate values explicitly before applying the closed form. The same check applies modulo
+  `p` to any ratio `k ≡ 1 (mod p)`, not only to `k = 1`.
   When non-units can't be excluded, handle them on purpose. Problem 0407's inverse table stores 0 for
   every non-unit, and the CRT formula then gives the trivial idempotents 0 and 1 for those splits,
   which the maximum discards. It never yields a wrong one. Problem 0531 handles them by dividing:
