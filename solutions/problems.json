@@ -5636,8 +5636,8 @@
     "level": 14,
     "pct": 36,
     "solvers": 680,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 07:44"
   },
   "706": {
     "title": "$3$-Like Numbers",
