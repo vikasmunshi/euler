@@ -22,7 +22,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Impartial_game
 - ○ [0644](/solutions/0644/) — Squares on the Line
 - ○ [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0665](/solutions/0665/) — Proportionate Nim
-- ○ [0711](/solutions/0711/) — Binary Blackboard
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0798](/solutions/0798/) — Card Stacking Game
 - ○ [0859](/solutions/0859/) — Cookie Game
 - ○ [0870](/solutions/0870/) — Stone Game IV

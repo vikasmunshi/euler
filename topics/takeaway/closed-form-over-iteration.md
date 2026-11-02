@@ -264,6 +264,7 @@ Four cautions earn their keep:
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ● [0868](/solutions/0868/) — Belfry Maths

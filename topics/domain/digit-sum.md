@@ -266,7 +266,7 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
-- ○ [0711](/solutions/0711/) — Binary Blackboard
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0714](/solutions/0714/) — Duodigits
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0725](/solutions/0725/) — Digit Sum Numbers

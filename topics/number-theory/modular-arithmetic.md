@@ -742,6 +742,7 @@ handful of operations on small numbers.
 - ○ [0707](/solutions/0707/) — Lights Out
 - ○ [0709](/solutions/0709/) — Even Stevens
 - ● [0710](/solutions/0710/) — One Million Members
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
 - ○ [0716](/solutions/0716/) — Grid Graphs
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula

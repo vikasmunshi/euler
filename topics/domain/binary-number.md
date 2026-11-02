@@ -212,7 +212,7 @@ never shows.
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices
 - ○ [0689](/solutions/0689/) — Binary Series
 - ○ [0703](/solutions/0703/) — Circular Logic II
-- ○ [0711](/solutions/0711/) — Binary Blackboard
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0734](/solutions/0734/) — A Bit of Prime
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators

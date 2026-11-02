@@ -126,5 +126,6 @@ two is formed:
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0711](/solutions/0711/) — Binary Blackboard
 
 <!-- /problems -->

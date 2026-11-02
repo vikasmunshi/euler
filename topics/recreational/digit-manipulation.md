@@ -383,7 +383,7 @@ what matters here is what replaces the extraction loop).
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
-- ○ [0711](/solutions/0711/) — Binary Blackboard
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0714](/solutions/0714/) — Duodigits
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0725](/solutions/0725/) — Digit Sum Numbers

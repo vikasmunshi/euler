@@ -285,7 +285,7 @@ weighting each winning mask by how many integers wear it.
 - ○ [0683](/solutions/0683/) — The Chase II
 - ○ [0690](/solutions/0690/) — Tom and Jerry
 - ● [0692](/solutions/0692/) — Siegbert and Jo
-- ○ [0711](/solutions/0711/) — Binary Blackboard
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ○ [0770](/solutions/0770/) — Delphi Flip
 - ○ [0787](/solutions/0787/) — Bézout's Game

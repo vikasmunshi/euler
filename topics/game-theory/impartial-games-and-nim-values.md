@@ -128,7 +128,7 @@ the history into the state before you look for a value.
 - ○ [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0665](/solutions/0665/) — Proportionate Nim
 - ● [0692](/solutions/0692/) — Siegbert and Jo
-- ○ [0711](/solutions/0711/) — Binary Blackboard
+- ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0798](/solutions/0798/) — Card Stacking Game
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
 - ○ [0832](/solutions/0832/) — Mex Sequence
