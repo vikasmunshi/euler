@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-11-01T14:10Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -48,6 +48,11 @@ valuations at its multiples with nested slices for `p²`, `p³`, … and then a 
 turns them into the prime's exponent in every factorial at once; the many large primes, which
 each have valuation 1 at every multiple, are batched *across* primes by multiple index instead,
 so the Python loop runs a few hundred times rather than once per prime.
+[Problem 625](/solutions/0625/) sidesteps the large primes entirely. It sieves Euler's totient
+with primes up to `√N` only, and alongside `phi` keeps a `rest` array from which strided slices
+divide out each small prime's powers. Whatever survives in `rest` is `1` or the one prime factor
+above `√N`, so a single masked statement, `phi[big] -= phi[big] // rest[big]`, applies every
+large prime at once.
 [Problem 668](/solutions/0668/)'s
 [Lucy_Hedgehog prime count](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80(x))
 is the same shape on the `√N` table of `π(N // k)`: each sieving prime updates the whole
@@ -114,7 +119,13 @@ does a whole vector of binary searches in one call, which quietly converts "for 
 semiprimes by turning the prime-counting function `π` into two array lookups over a sorted
 prime array; [problem 461](/solutions/0461/) uses it as the join step of a
 [meet-in-the-middle](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack) search, locating
-the nearest partner for every candidate at once. Sorting once and searching in bulk is often
+the nearest partner for every candidate at once. The lookup can also choose *which formula* a
+lane evaluates. [Problem 341](/solutions/0341/) builds a few tens of thousands of block tables
+serially, in exact Python integers, then answers a million queries without returning to Python:
+one `searchsorted` finds each query's block, fancy indexing gathers that block's coefficients,
+and every lane solves its own quadratic — a float `sqrt` for the guess, two masked integer
+nudges to make it exact. The serial work runs over the small table, the bulk work over the
+queries. Sorting once and searching in bulk is often
 faster than a dictionary, because the search never leaves compiled code. The same holds for
 the other dictionary and set idioms: `np.unique(values, return_counts=True)` is a bulk
 `Counter` (problem 348 tallies how many square-plus-cube representations each palindrome has
@@ -132,6 +143,14 @@ calls then give each vertex its slice of the edge array, which is a
 adjacency built without a Python loop over vertices. `np.cumsum(is_prime) - 1` provides the
 inverse map from a prime's value to its index. The union-find that follows is genuinely serial
 and stays in Python, but it only walks slices the arrays have already prepared.
+[Problem 705](/solutions/0705/) uses the same grouping to count *ordered pairs*. Its input, the
+digits of every prime below `N` written end to end, is ragged; laying it out as a fixed-width
+`primes × width` digit table makes it rectangular, and since the problem drops zero digits
+anyway, one mask on the flattened table removes the padding with them. Then, for each digit
+`x`, `np.cumsum(digits == x)` counts the `x`s before every position; gathered through a stable
+`argsort` by digit, each digit `y`'s slice sums to how many `x`s precede a `y`. Nine
+[prefix sums](/topics/technique/prefix-sum) build the whole 9 × 9 table of ordered pairs, with
+no pass over the pairs themselves.
 
 **Advance the whole ensemble.** When many independent processes share one update rule, make
 the process an *axis* and step them in lockstep. [Problem 213](/solutions/0213/) tracks the
@@ -213,7 +232,12 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   matrix gets its own scan in one call. [Problem 252](/solutions/0252/) uses this to test
   whole rows of fan triangles for emptiness: a triangle is empty exactly when one direction
   rank is a running maximum of the ranks before it, so one prefix scan per row replaces a
-  scan over every third point. Better still, look for a closed form. A
+  scan over every third point. A recurrence that is only *almost* a scan can often be
+  shifted into one. [Problem 718](/solutions/0718/) walks a residue cycle on which
+  `w_i = min(base_i, w_{i−1} + z)`; subtracting `i·z` from both sides gives
+  `t_i = min(base_i − i·z, t_{i−1})`, a plain running minimum that `np.minimum.accumulate`
+  computes chunk by chunk, carrying the last value into the next chunk. Better still, look for
+  a closed form. A
   [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator)
   looks hopelessly sequential, yet its `k`-th term is `a**k` times the seed, so
   [problem 980](/solutions/0980/) generates its stream in bulk with a baby-step/giant-step
@@ -224,7 +248,12 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   [problem 739](/solutions/0739/) reshapes each chunk into a `rows × cols` grid, scans it one
   column at a time across all rows, then multiplies each row by the carried product of the rows
   before it. That costs about `2√chunk` Python steps per chunk instead of one per element; a
-  plain product is a pairwise tree, `a[0::2] * a[1::2] % m`, halving each step. Two refinements
+  plain product is a pairwise tree, `a[0::2] * a[1::2] % m`, halving each step. Once the scan
+  exists it yields more than factorials. [Problem 423](/solutions/0423/) gets a power table as
+  the prefix product of a constant array, and every inverse factorial from a *single* modular
+  inverse: the prefix product of the descending sequence `top, top − 1, …`, reversed, is
+  `top! / i!`, so one multiply by `1 / top!` turns it into every `1 / i!`. That is one scalar
+  `pow`, against problem 675's array-wide one. Two refinements
   extend the split scan. When only *some* prefixes are needed, the full scan never has to be
   stored. [Problem 635](/solutions/0635/) wants factorials at a scattered set of points, so it
   sorts them, runs the chunked scan, and in each chunk gathers just the queries that fall inside
