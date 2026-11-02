@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum] -->
-<!-- status: final -->
+<!-- status: final 2026-11-02T11:45Z -->
 # Digit sum
 
 The [digit sum](https://en.wikipedia.org/wiki/Digit_sum) $s(n)$ — add up the decimal digits and stop
