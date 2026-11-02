@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function, partition-number-theory, pentagonal-number-theorem, continued-fraction, amicable-numbers, eulerian-path, eulerian-number, linear-sieve] -->
-<!-- status: final 2026-10-29T02:10Z -->
+<!-- status: final -->
 # Euler
 
 More of the mathematics behind these problems traces to one man than to any other. [Leonhard
@@ -42,12 +42,30 @@ The same function carries [Euler's theorem](https://en.wikipedia.org/wiki/Euler%
 what lets the RSA problem (182) and the hyperexponentiation problem (188) collapse an astronomical
 exponent down modulo `φ(n)`.
 
+Just as often, nobody asks for `φ` at all and it appears anyway. The reason is
+[Gauss's identity](https://en.wikipedia.org/wiki/Euler%27s_totient_function#Divisor_sum)
+`Σ_{d|n} φ(d) = n`: sort the fractions `t/n` by their reduced denominator, and exactly `φ(m)` of them
+have denominator `m`. So whenever a sum runs over pairs or residues and the summand depends only on
+a gcd, grouping by that gcd turns it into a
+[Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution) with `φ`. Problem 625
+(Gcd Sum) is the plain case. `Σ_{i≤j} gcd(i, j)` becomes `Σ_k φ(k)·T(⌊N/k⌋)` with `T` the
+triangular numbers, and from there it is the totient-summatory machinery of problem 351 below.
+Problem 875 (Quadruple Congruence) is the same move in a less obvious place. It counts zeros of an
+eight-variable quadratic form mod `n`, and a roots-of-unity filter turns that count into a sum of
+[quadratic Gauss sums](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum) over `t mod n`. A Gauss
+sum's size depends only on the reduced denominator of `t/n`, so grouping by that denominator
+contributes a factor `φ(m)`. The count collapses to a convolution of two multiplicative functions,
+and what remains is one totient sieve.
+
 Evaluating `φ` at one point is the easy direction. The problems push it three other ways, and each
 needs a different tool:
 
 - **Across a range.** When a problem needs `φ` for every `n` up to a bound, sieve it (a modified
   Sieve of Eratosthenes seeding `φ(p) = p-1`, or the linear sieve below) rather than factoring each
-  number in turn.
+  number in turn. If the range is a narrow window far from zero, as in problem 531 (Chinese
+  Leftovers, `φ` on 5000 numbers just above 10⁶), segment the sieve. Run the primes up to `√end`
+  across the window, applying `φ ← φ - φ/p` and dividing `p` out of a residual copy. Whatever
+  residual is left above 1 is the one large prime factor, and it gets the last correction.
 - **Summed, past where a sieve fits.** Often the range is wanted only as a total. Problem 351
   (Hexagonal Orchards) is that case in disguise: a lattice point is hidden from the centre exactly
   when its coordinates share a factor, so each ring of a hexagonal sector shows `φ(s)` points and
@@ -82,7 +100,13 @@ needs a different tool:
   for *proofs*. If `p² | n`, then `p` divides both `n` and `n - φ(n)`, so qualifying `n` are
   squarefree. With three or more prime factors, every prefix must keep `φ(m)/m > 1/2`, which rules
   out even `n` and prunes whole subtrees. The search then *constructs* candidates (solving for the
-  largest prime given the rest) instead of filtering a range.
+  largest prime given the rest) instead of filtering a range. Problem 342 (the totient of a
+  square is a cube) puts the constraint on exponents mod 3. The useful fact there is the
+  *direction* of the coupling. `φ(p^e)` touches only `p` itself and the primes of `p-1`, and all
+  of those are smaller than `p`. Search the primes of `n` from the largest down, and every prime
+  you pass is settled for good. That makes the largest prime's exponent `≡ 2 (mod 3)`, so every
+  prime involved is below `√N`. Each smaller prime that a `p-1` has left with a nonzero residue
+  must then be balanced before the search drops past it.
 
 The common lesson is that once the bound is too large to sieve, the multiplicative structure stops
 being a way to evaluate `φ` and becomes a way to avoid evaluating it at all.
@@ -126,6 +150,18 @@ cut down to a finite box. You build the polynomials with a two-term recurrence, 
 read off the counts. The partitions themselves are never listed, which is the same move as the
 pentagonal recurrence: a statistic of the whole family, computed through its generating function.
 
+Not every partition count has a product to expand. Problem 333 (Special Partitions) allows only
+parts of the form `2^i 3^j`, none dividing another. Divisibility between such parts is the
+componentwise order on exponent pairs, so a valid partition is an
+[antichain](https://en.wikipedia.org/wiki/Antichain) in the grid, and no generating function falls
+out. A *bijection* does the job instead. The odd parts are pure powers of 3, and any two of those
+divide each other, so a partition has at most one odd part. For even `n` it has none, and halving
+every part maps the partitions of `n` exactly onto those of `n/2`. For odd `n` you peel off the
+single `3^b`, then halve the rest, with a cap on the 3-exponents. Every index on the right is below
+`n/2`, so the counts fill a table block by doubling block. The lesson Euler's own bijections teach
+(distinct parts ↔ odd parts) still holds: when a product formula is missing, look for a map that
+shrinks the problem.
+
 ## Continued fractions
 
 In *De fractionibus continuis* Euler put [continued
@@ -142,6 +178,20 @@ rational arithmetic and read a digit off its numerator. The `√2` and Pell-equa
 64, 66) walk the *periodic* expansion of `√D`, and generate convergents with the standard
 recurrence `hₙ = aₙ·hₙ₋₁ + hₙ₋₂` rather than re-evaluating the nested fraction each step.
 
+The convergent recurrence is a product of `2×2` matrices, and that view also lets you do
+*arithmetic* on a continued fraction without ever turning it into a number. Problem 946
+(Continued Fraction Fraction) wants the terms of `β = (2α+3)/(3α+2)`, a
+[Möbius transformation](https://en.wikipedia.org/wiki/M%C3%B6bius_transformation) of a continued
+fraction `α` whose terms are only 1s and 2s, out to 10⁸ terms. Expanding a rational truncation would
+need integers with hundreds of millions of digits. [Gosper's
+algorithm](https://en.wikipedia.org/wiki/HAKMEM) streams instead. It holds the map
+`y = (ax+b)/(cx+d)`, *ingests* a term of `α` when the next output is still undetermined, and *emits*
+a term of `β` as soon as the bounds on the unread tail pin it down. Every step multiplies by a
+determinant-±1 matrix, so `|ad - bc|` never changes, and with inputs restricted to {1, 2} the
+coefficients stay bounded. The process becomes a finite-state machine (32 states), so a long run
+of identical inputs falls into a cycle that you can skip arithmetically. You only see that the
+state is finite because you treat the continued fraction as a product of matrices.
+
 ## The rest of the reach
 
 Euler's fingerprints are wider than number theory:
@@ -157,7 +207,8 @@ Euler's fingerprints are wider than number theory:
   their number of ascents; they surface in problem 158.
 - **The linear sieve.** Euler's refinement of Eratosthenes crosses off each composite *exactly
   once*, via its smallest prime factor, giving both the primes and a smallest-prime-factor table in
-  a genuine `O(n)` pass — the workhorse behind problems 153, 549 and 745.
+  a genuine `O(n)` pass — the workhorse behind problems 153, 549 and 745, and in 342 the table
+  that factors every `p-1` the totient search needs.
 
 ## How to reason about it
 
@@ -167,8 +218,14 @@ The lesson is not "memorise Euler's results" but recognising the shape that invi
   the archetype.
 - A sequence with a **product generating function** — look for a sparse recurrence. The pentagonal
   number theorem is the model: an infinite product whose reciprocal is almost all zeros.
+- A sum over pairs or residues whose summand depends only on a **gcd or reduced denominator**:
+  group by it, and `φ` appears as the multiplicity. That gives a Dirichlet convolution, which you
+  then sieve or sum over quotients.
 - A **best rational approximation** or a **Pell equation** — reach for continued fractions and their
-  convergents.
+  convergents. **Arithmetic on a continued fraction** — stream it through Gosper's matrix
+  algorithm, and look for a finite state space when the inputs are bounded.
+- A partition count with **no product generating function** — look for a bijection (halving,
+  peeling off a forced part) that maps `n` onto smaller instances.
 - A **huge exponent modulo `n`** — reduce the exponent mod `φ(n)` by Euler's theorem before you
   compute anything.
 - A **sum of a multiplicative function** to a bound too large to sieve — look for an identity over
