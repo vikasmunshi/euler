@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-01T14:08Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -46,6 +46,23 @@ $\sum_r \binom{c_r}{2}$ over the numbers $c_r$ of prefixes in each residue class
 mod 3 matters, so the $c_r$ can be kept mod 3 as well. The state shrinks to 81 values, small enough
 for a [transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method) raised to the
 $10^5$th power.
+
+That is the general pattern: a residue is a complete **state**. Appending a digit $d$ to $x$ sends
+$x \bmod n$ to $(10x + d) \bmod n$. The new remainder depends only on the old one, so two prefixes
+with the same remainder behave alike from then on. Problem 303 wants the least multiple of $n$
+written with the digits 0, 1 and 2. That multiple can run to twenty digits, but the search is a
+breadth-first walk over the $n$ remainders, and it stops at the first visit to 0. Expanding digits
+in ascending order makes the first path to each remainder the smallest numeral that reaches it. The
+[pigeonhole principle](https://en.wikipedia.org/wiki/Pigeonhole_principle) also bounds the walk.
+Two of the repunits $1, 11, \dots$ share a remainder within the first $n + 1$, and their difference
+is a 0-1 multiple of $n$, so no search runs past $n$ states.
+
+The residue need not be of the number itself. A number is a perfect cube exactly when every
+exponent in its factorisation is $\equiv 0 \pmod 3$. Problem 342 asks when $\varphi(n^2)$ is a
+cube, so it tracks the exponent vector of $\varphi(n^2)$ modulo 3, and only the primes with a
+non-zero residue are kept. Each prime $p$ of $n$ adds $2e - 1$ to its own exponent and the
+factorisation of $p - 1$ to smaller primes. Placing primes from the largest down therefore settles
+each residue for good, and the search follows that order.
 
 "Last digits" generalises to digits *anywhere*. The ten digits starting at position $n$ of a real
 number $A$ are $\lfloor 10^{n+9} A \rfloor \bmod 10^{10}$, and when $A$ is a sum of simple fractions
@@ -110,6 +127,24 @@ candidates. Problem 822 has the
 same move in its simplest form: a number squared $k$ times is $x^{2^k}$ with $k$ near $10^{12}$, and
 because the modulus is prime the exponent $2^k$ is itself reduced modulo $p - 1$ first. That makes
 two modular exponentiations, one inside the other.
+
+The same number often plays two roles, and then it is needed modulo two different things. Problem
+684 sums the smallest number with digit sum $f_i$ over Fibonacci $f_i$ up to about $3 \times 10^{18}$. Writing
+$f = 9q + r$, that number is $(r + 1) \cdot 10^q - 1$, and the block sums add a linear term in $q$.
+Modulo the prime $p$, the power needs $q \bmod (p - 1)$ while the linear term needs $q \bmod p$.
+Neither can be read off a residue of $f$ modulo $p$, because $q$ is a quotient by 9. The fix is to
+run the Fibonacci recurrence modulo $9p$ and again modulo $9(p - 1)$. Either residue gives
+$r = f \bmod 9$, and subtracting $r$ and dividing by 9 is then exact and yields $q$ in each modulus. It is
+the "work modulo $cm$" repair described under division below, applied to a recurrence rather than
+a closed form.
+
+Problem 520 meets the two roles inside a geometric series. Its counts are power sums
+$\sum_k c_k k^L$, so summing over all lengths $L \le n$ gives one series
+$\sum_L k^L = (k^{n+1} - k)/(k - 1)$ per base $k$. That is an inverse of $k - 1$ modulo the prime,
+plus the degenerate ratio $k = 1$, whose sum is just the number of terms and so needs $n \bmod p$.
+And when $n = b^u$ with $u$ as large as a thousand, the exponent is never formed at all. The power is
+carried instead, $k^{b^u} = \bigl(k^{b^{u-1}}\bigr)^b$, one small exponentiation per step of $u$.
+That keeps the C port in 64 bits without a bignum library.
 
 ### Square-and-multiply works in any monoid
 
@@ -180,6 +215,14 @@ paths and telescopes to one binomial $\binom{\lfloor x - ja \rfloor + j}{j}$ per
 $a$-steps. The real number survives only inside that floor, and $\lfloor n - j\sqrt n\rfloor$ comes
 exactly from an integer square root of $j^2 n$. The modulus never meets a float.
 
+A field also lets you count with **probabilities**. Problem 705 totals the inversions over every
+way of replacing each digit of a 42-million-digit string by one of its divisors. That total is the
+number of choices $T$ times the expected inversion count, and the expectation splits over pairs of
+positions by linearity. One pair of digit values $x, y$ contributes the fraction
+$A(x, y) / (d(x)\,d(y))$, where $d$ counts divisors, and a fraction is just a residue modulo
+$10^9 + 7$. So the 42 million positions collapse to an 81-entry table of digit-pair counts, a few
+inverses of numbers up to 4, and $T$ as a product of powers.
+
 Even over a field an inverse costs a modular exponentiation, so how many you take is worth
 planning. Problem 739 needs about $10^8$ binomial coefficients modulo $10^9 + 7$. It multiplies
 the sum through by $(n-1)(n-2)!$, which turns every $1/j!$ into a suffix product, so each term
@@ -226,7 +269,10 @@ Problem 340 has the triangular numbers $b(b+1)/2$, and problem 401 has the squar
 $x(x+1)(2x+1)/6$ with $x$ up to $10^{15}$. Since $2$ has no inverse modulo $10^9$, the cure is to
 **divide before reducing**. One of $x, x+1$ is even, and exactly one of $x, x+1, 2x+1$ is a
 multiple of 3. Dividing those factors exactly leaves integers that each fit in 64 bits; only then
-are they reduced and multiplied.
+are they reduced and multiplied. Sometimes a congruence is what proves the division is exact.
+Problem 764's summand is $(5a^4 + 3b^4)/8 + ab$ for odd $a, b$. Every odd fourth power is
+$\equiv 1 \pmod{16}$, so the numerator is $\equiv 8 \pmod{16}$. The division by 8 is therefore
+exact, and it is taken on the integer before the term is reduced modulo $10^9$.
 
 Two more repairs complete the set. An **exact** division by a number **coprime** to the modulus
 is safe even when the modulus is composite. Problem 731 divides $10^e - r$ by $3^i$ modulo
@@ -235,6 +281,15 @@ the divisor $c$ is not coprime, compute modulo $c \cdot m$ and divide the residu
 end. If $x \equiv y \pmod{cm}$ and $c \mid x$, then $x / c \equiv y / c \pmod m$. Problem 875's
 C port evaluates a Faulhaber polynomial with denominator 24 this way, modulo $24m$ in `__int128`,
 with no inverse at all.
+
+Problem 605 needs both repairs, and finding its divisor is a modular trick in its own right. Its
+probability is a fraction with denominator $(2^n - 1)^2$, $n \approx 10^8$, and the answer wants
+it in lowest terms. Every common factor $g$ also divides $\gcd(n, 2^n - 1)$. The first step of
+Euclid's algorithm reduces the larger argument modulo the smaller, so that gcd is
+$\gcd\bigl(n, (2^n \bmod n) - 1\bigr)$. One modular exponentiation replaces a thirty-million-digit
+number. Each prime of the result has its multiplicity read off modulo a high power of that prime.
+Since $g$ may share a factor 5 with $10^8$, the product is formed modulo $10^8 g^2$ and divided by
+$g^2$ at the end.
 
 ### Counting the solutions of a congruence
 
@@ -407,7 +462,12 @@ decides the order and a part that only sets the scale. Problem 615 wants the mil
 with at least a million prime factors. Every early member of that list carries a common power
 $2^{k-s}$ with $s = 36$, and dividing it out keeps them in the same order. The selection then runs
 over ordinary 64-bit integers, and the modulus touches only the scale factor, as one
-$2^{k-s} \bmod m$ at the end.
+$2^{k-s} \bmod m$ at the end. Problem 674 goes further and decides the order without any numbers.
+It wants the least common value of two nested expressions in an operator $\mathcal{I}(x, y)$ whose
+values grow doubly exponentially. $\mathcal{I}$ is injective, so the expressions agree only if
+their trees unify. It is also increasing in each argument, so the least value sets every free
+variable to 0. All of that is decided on the tree. Reduction modulo $10^9$ enters only in the final
+evaluation, where nothing is compared any more.
 
 The converse is a gift: a modulus written into a *definition* is often there to simplify it. Problem
 512 sums $\varphi(n^i)$ for $i = 1, \dots, n$, taken modulo $n + 1$. Modulo $n + 1$, $n \equiv -1$,
@@ -456,6 +516,11 @@ Three variations on the same budget:
   [blocked prefix scan](https://en.wikipedia.org/wiki/Prefix_sum#Parallel_algorithms) still does
   $O(L)$ multiplications, but only $O(\sqrt L)$ of them at interpreter speed. It works because
   multiplication mod $p$ is associative, the same property that powers square-and-multiply.
+- **Mind the sign of `%`.** In C the remainder takes the sign of the dividend, so a residue
+  formed from subtractions can come out negative. Problem 463's halving recursion combines
+  memoised sums with coefficients such as $-3$ and $-2$, and an intermediate can dip to about
+  $-4 \times 10^9$. Its C port adds a known multiple of the modulus before reducing, where
+  Python's `%` would already be non-negative.
 - **A comparison can overflow too.** Not every oversized product is reduced. Problem 615's C port
   prunes a depth-first search when a candidate $V \cdot p$ exceeds a bound, and that product can
   briefly pass 64 bits. A wrapped value would look small and slip past the test. So it is formed in
@@ -468,10 +533,14 @@ The recurring cue is a question that depends only on a remainder — *last digit
 directly. When you see it:
 
 - Reduce **early and often** — counts, and where the question allows, elements and exponents too —
-  but only the quantity the statement actually reduces.
+  but only the quantity the statement actually reduces. If a choice depends on order, settle it
+  before reducing.
+- Searching for a number with a divisibility property? Its residue is a complete state, so search
+  the $n$ residues, not the numbers.
 - Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
   Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic. Any
-  associative product (a ring extension, a convolution) can be powered the same way.
+  associative product (a ring extension, a convolution) can be powered the same way. A value used
+  both as an exponent and as a factor is needed modulo $p - 1$ **and** modulo $p$.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
   under a composite one, audit every division — including the $/2$ and $/6$ of a closed form
@@ -489,7 +558,8 @@ directly. When you see it:
   Remainder Theorem, working prime power by prime power; solution counts multiply. If the moduli
   share a factor $d$, check that $d$ divides the difference of the residues before solving.
 - Writing **C** (or any fixed-width language)? Widen every modular multiply once $m \ge 2^{32}$, and
-  bound the accumulated total as well as each product, including products you only compare.
+  bound the accumulated total as well as each product, including products you only compare. Keep
+  `%` away from negative operands.
 
 The classic mistake is to compute the honest quantity first and reduce at the end — materialising the
 million-digit power, or the true factorial, before taking the remainder. The whole point is that you
