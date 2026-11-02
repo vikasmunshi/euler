@@ -6628,8 +6628,8 @@
     "level": 33,
     "pct": 85,
     "solvers": 309,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 23:03"
   },
   "830": {
     "title": "Binomials and Powers",
