@@ -5188,8 +5188,8 @@
     "level": 13,
     "pct": 34,
     "solvers": 626,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 19:14"
   },
   "650": {
     "title": "Divisors of Binomial Product",
