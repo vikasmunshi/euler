@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-02T06:53Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -57,6 +57,14 @@ constraint `3i + 5j = 4n` gives `3i ≡ 4n (mod 5)`, so `i ≡ 4n · 3⁻¹ ≡ 
 — turns out, after one line of algebra (`10·f(n) = n + b(10m − 1)`), to be exactly `10⁻¹ mod p`. A
 puzzle phrased about digits is a sum of inverses.
 
+The congruence can also be solved for *every* right-hand side at once, and then the inverse becomes
+a change of coordinates. Problem 0718 needs, for each residue `r` modulo `x`, the least multiple of
+`y` in that class: `a·y ≡ r` gives `a ≡ r·y⁻¹`, so it is `y · ((r·y⁻¹) mod x)`. The solution walks
+the classes along the cycle `rᵢ = i·z mod x` rather than in order. The class index then becomes
+`rᵢ·y⁻¹ ≡ i·(z·y⁻¹)`, so one precomputed multiplier `k = z·y⁻¹ mod x` turns the whole sweep into
+`y · ((i·k) mod x)` — plain array arithmetic over `i`, with no per-class solve. Multiplying by a unit
+permutes `ℤ/x`, which is why the walk still visits every class exactly once.
+
 The same congruence is also the step of [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma),
 which lifts a root of a polynomial from modulo `p^e` to modulo `p^(e+1)`. Problem 0659 sieves
 `f(k) = 4k² + 1` by its prime factors. A prime `p` divides `f(k)` along the progressions
@@ -67,6 +75,15 @@ just the residue `(p − 1)/2`. To catch `p²`, `p³`, … it looks for the root
 division by the derivative is an inverse. It needs `f′(k) = 8k` to be a unit modulo `p`, and at a
 root it always is: `p` is odd, and `p | k` would make `f(k) ≡ 1`, so the lift exists and is unique. The inverse is taken modulo `p`, not modulo
 `p·q`, so every intermediate stays below `p` and the C port needs no wide arithmetic for it.
+
+Problem 0457 shows the case where the derivative *can* vanish. It wants roots of
+`n² − 3n − 1 ≡ 0 (mod p²)`, and completing the square turns that into the quadratic formula,
+`n ≡ (3 ± √13) · 2⁻¹`. The formula needs two inverses. `2⁻¹` excludes `p = 2`, and is
+`(p² + 1)/2` everywhere else, with no Euclid needed. The Newton step `r ← r − (r² − 13)·(2r)⁻¹` that
+lifts `√13` from modulo `p` to modulo `p²` needs `2r` to be a unit, and that fails exactly at
+`p = 13`, where the root is `0`. Apart from the primes where `13` has no square root at all, the
+only primes the solution treats specially are the ones where an inverse does not exist. Reading the
+formula for its denominators gives the list of special cases.
 
 **2 — The glue in the Chinese remainder theorem.** The
 [CRT](/topics/technique/chinese-remainder-theorem) tells you a solution exists; an inverse is what
@@ -164,6 +181,22 @@ All the work happens in `b`, and one `6⁻¹` at the end returns to `a`. The sub
 to choose as long as the map back can be inverted modulo every prime involved. Here it fails only
 for 2 and 3, which the solution handles separately.
 
+Once you have it, an inverse is also just a residue, and you can use it as a *base* as well as a
+divisor. Problem 0711's closed form needs `Σ 2^(−m)` and `Σ m·2^(−m)` alongside the same sums in
+`2^m`. Modulo a prime, `2^(−m)` is `(2⁻¹)^m`, so these are ordinary geometric and
+arithmetico-geometric series with ratio `2⁻¹`. The function that sums powers of `2` sums powers of
+`2⁻¹` unchanged. Negative exponents need no separate code path.
+
+Problem 1006 uses an inverse power to make a state update *linear*. It walks the Fibonacci word
+letter by letter and tracks `N(r) = Σ_{i<r} gᵢ·10^i`, a number that grows at its high end. That step,
+`N ← N + a·10^r`, depends on the position `r`, so no single matrix per letter describes it, and the
+block-matrix composition the solution relies on needs exactly that. Scaling the state by `10^(−r)`
+fixes this. The tracked value `N′ = 10^(−r)·N` updates as `N′ ← 10⁻¹·(N′ + a)`, the same rule at
+every step, and `N′²` updates the same way with `100⁻¹`. One `10^r` at the end converts back. This
+is the same trick as discounting future cash flows to present value. A position-dependent weight
+becomes a constant factor per step, and a constant factor per step is what a transfer matrix can
+represent.
+
 ## Making it cheap
 
 `pow(a, -1, m)` is not free — it is `O(log m)`, roughly thirty multiplications at a 64-bit modulus.
@@ -179,6 +212,12 @@ the repetition.
   lookups and two multiplications. The general form is
   [Montgomery's trick](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Multiple_inverses):
   any `n` inverses cost one inversion plus `3n` multiplications via a prefix-product pass.
+  The backward sweep has one weakness: each step depends on the previous one, so it runs one
+  element at a time. Problem 0423 needs inverse factorials up to tens of millions in NumPy, and computes
+  them without the sweep. Since `1/i! = (top · (top−1) ⋯ (i+1)) / top!`, the whole table is a
+  running product of the *descending* integers, reversed, times the single inverse `(top!)⁻¹`. A
+  running product of a fixed array can be vectorised, for example in √n blocks, so the sequential
+  sweep becomes a few array passes.
 
   ```python
   inv_fact[n] = pow(fact[n], -1, p)
@@ -249,7 +288,10 @@ the repetition.
   it pulls out the shared `gcd` before inverting (see the CRT section above).
 - **A composite modulus is not a field, but inverses still work.** `gcd(a, m) = 1` is the only
   requirement; primality is not. Problem 0152 inverts squares modulo `p²` and problem 0251 works
-  modulo an odd square, both perfectly well. What primality buys is only the Fermat shortcut and the
+  modulo an odd square, both perfectly well. Problem 0506 sums geometric series modulo
+  `123454321 = 41²·271²`. It divides by `10⁶ − 1` twice, once for each level of the nested sum
+  `Σ_k (x^k − 1)/(x − 1)`. That is valid because `10⁶ − 1 = 3³·7·11·13·37` shares no prime with the
+  modulus. Problem 0718 inverts modulo `17^p` for the same reason. What primality buys is only the Fermat shortcut and the
   guarantee that *every* non-zero element is invertible — modulo `p²`, multiples of `p` are not.
   Using `pow(a, m - 2, m)` on a composite `m` returns a plausible-looking number that is not an
   inverse.
