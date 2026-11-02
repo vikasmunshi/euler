@@ -11,7 +11,7 @@
     "title": "Even Fibonacci Numbers",
     "level": 0,
     "pct": 1,
-    "solvers": 678951,
+    "solvers": 678952,
     "solved": true,
     "date": "Fri, 3 Jul 2015, 14:05"
   },
@@ -59,7 +59,7 @@
     "title": "Largest Product in a Series",
     "level": 0,
     "pct": 3,
-    "solvers": 330360,
+    "solvers": 330362,
     "solved": true,
     "date": "Tue, 8 Oct 2019, 13:23"
   },
@@ -283,7 +283,7 @@
     "title": "Double-base Palindromes",
     "level": 0,
     "pct": 1,
-    "solvers": 107846,
+    "solvers": 107847,
     "solved": true,
     "date": "Wed, 13 Nov 2019, 11:27"
   },
@@ -435,7 +435,7 @@
     "title": "Lychrel Numbers",
     "level": 1,
     "pct": 4,
-    "solvers": 65466,
+    "solvers": 65467,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 12:29"
   },
@@ -451,7 +451,7 @@
     "title": "Square Root Convergents",
     "level": 1,
     "pct": 5,
-    "solvers": 51892,
+    "solvers": 51893,
     "solved": true,
     "date": "Thu, 12 Dec 2019, 13:18"
   },
@@ -483,7 +483,7 @@
     "title": "Cyclical Figurate Numbers",
     "level": 2,
     "pct": 7,
-    "solvers": 32502,
+    "solvers": 32503,
     "solved": true,
     "date": "Tue, 10 Mar 2020, 15:56"
   },
@@ -2323,7 +2323,7 @@
     "title": "Panaitopol Primes",
     "level": 11,
     "pct": 28,
-    "solvers": 2029,
+    "solvers": 2030,
     "solved": false,
     "date": ""
   },
@@ -8045,7 +8045,7 @@
     "pct": 99,
     "solvers": 149,
     "solved": true,
-    "date": "Mon, 2 Nov 2026, 13:37"
+    "date": "Mon, 2 Nov 2026, 13:41"
   },
   "1007": {
     "title": "Alternating Difference",
