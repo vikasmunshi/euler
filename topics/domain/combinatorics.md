@@ -572,7 +572,6 @@ of crossing it.
 - ○ [1003](/solutions/1003/) — Lonely Singles
 - ○ [1004](/solutions/1004/) — Balanced Integer
 - ○ [1005](/solutions/1005/) — Median Prime List
-- ○ [1006](/solutions/1006/) — Fibonacci Subwords
 - ○ [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

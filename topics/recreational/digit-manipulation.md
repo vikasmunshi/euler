@@ -411,6 +411,6 @@ what matters here is what replaces the extraction loop).
 - ○ [0990](/solutions/0990/) — Addition Equations
 - ○ [1003](/solutions/1003/) — Lonely Singles
 - ○ [1004](/solutions/1004/) — Balanced Integer
-- ○ [1006](/solutions/1006/) — Fibonacci Subwords
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

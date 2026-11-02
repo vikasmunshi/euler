@@ -297,6 +297,7 @@ the repetition.
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0996](/solutions/0996/) — Overtakes
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 - ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

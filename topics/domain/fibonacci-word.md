@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fibonacci_word
 
 - ● [0230](/solutions/0230/) — Fibonacci Words
 - ○ [0691](/solutions/0691/) — Long Substring with Many Repetitions
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

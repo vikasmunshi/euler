@@ -133,5 +133,6 @@ but its floor is an integer with a closed form.
 - ○ [0372](/solutions/0372/) — Pencils of Rays
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

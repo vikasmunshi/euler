@@ -466,6 +466,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1000](/solutions/1000/) — Problem $1000$
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 - ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

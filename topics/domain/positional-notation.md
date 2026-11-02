@@ -310,6 +310,6 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0990](/solutions/0990/) — Addition Equations
 - ○ [1003](/solutions/1003/) — Lonely Singles
 - ○ [1004](/solutions/1004/) — Balanced Integer
-- ○ [1006](/solutions/1006/) — Fibonacci Subwords
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

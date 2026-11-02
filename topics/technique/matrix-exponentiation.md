@@ -109,5 +109,6 @@ at $M$:
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

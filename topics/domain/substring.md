@@ -78,5 +78,6 @@ occurrence swallows a short integer whole is left to a direct check.
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

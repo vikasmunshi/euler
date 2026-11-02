@@ -231,5 +231,6 @@ the same idea, implemented once, in C.
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

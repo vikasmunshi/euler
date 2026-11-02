@@ -235,6 +235,5 @@ never shows.
 - ○ [0945](/solutions/0945/) — XOR-Equation C
 - ○ [0948](/solutions/0948/) — Left vs Right
 - ○ [0949](/solutions/0949/) — Left vs Right II
-- ○ [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->
