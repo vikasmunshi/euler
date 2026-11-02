@@ -3101,10 +3101,10 @@
       "title": "Polynomial interpolation",
       "status": "draft",
       "written": null,
-      "solved": 3,
-      "problems": 3,
+      "solved": 2,
+      "problems": 2,
       "tags": ["polynomial-interpolation"],
-      "refs": ["p0101", "p0363_s0", "p0487"],
+      "refs": ["p0101", "p0487"],
       "covered": [],
       "solved_after": []
     },

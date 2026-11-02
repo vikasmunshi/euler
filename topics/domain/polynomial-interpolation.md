@@ -8,7 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Polynomial_int
 ## Problems
 
 - ● [0101](/solutions/0101/) — Optimum Polynomial
-- ● [0363](/solutions/0363/) — Bézier Curves
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 
 <!-- /problems -->
