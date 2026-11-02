@@ -277,6 +277,7 @@ the repetition.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0531](/solutions/0531/) — Chinese Leftovers

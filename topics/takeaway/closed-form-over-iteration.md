@@ -256,6 +256,7 @@ Four cautions earn their keep:
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0561](/solutions/0561/) — Divisor Pairs

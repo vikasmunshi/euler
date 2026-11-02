@@ -680,7 +680,7 @@ handful of operations on small numbers.
 - ○ [0498](/solutions/0498/) — Remainder of Polynomial Division
 - ○ [0500](/solutions/0500/) — Problem 500!!!
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
-- ○ [0506](/solutions/0506/) — Clock Sequence
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0515](/solutions/0515/) — Dissonant Numbers

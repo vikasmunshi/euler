@@ -389,6 +389,7 @@ loop was never needed.
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0493](/solutions/0493/) — Under the Rainbow
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0587](/solutions/0587/) — Concave Triangle

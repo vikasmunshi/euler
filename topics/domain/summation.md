@@ -299,7 +299,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0479](/solutions/0479/) — Roots on the Rise
 - ○ [0489](/solutions/0489/) — Common Factors Between Two Sequences
 - ○ [0490](/solutions/0490/) — Jumping Frog
-- ○ [0506](/solutions/0506/) — Clock Sequence
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ○ [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0528](/solutions/0528/) — Constrained Sums

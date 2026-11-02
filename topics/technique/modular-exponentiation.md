@@ -283,6 +283,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas

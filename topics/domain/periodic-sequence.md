@@ -147,7 +147,7 @@ They differ where the languages offer different shortcuts:
 - ○ [0306](/solutions/0306/) — Paper-strip Game
 - ○ [0349](/solutions/0349/) — Langton's Ant
 - ○ [0426](/solutions/0426/) — Box-Ball System
-- ○ [0506](/solutions/0506/) — Clock Sequence
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ○ [0617](/solutions/0617/) — Mirror Power Sequence
 - ○ [0729](/solutions/0729/) — Range of Periodic Sequence
 - ● [0743](/solutions/0743/) — Window into a Matrix

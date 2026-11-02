@@ -123,6 +123,7 @@ two is formed:
 - ● [0232](/solutions/0232/) — The Race
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0684](/solutions/0684/) — Inverse Digit Sum

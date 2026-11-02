@@ -363,7 +363,7 @@ what matters here is what replaces the extraction loop).
 - ○ [0467](/solutions/0467/) — Superinteger
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
-- ○ [0506](/solutions/0506/) — Clock Sequence
+- ● [0506](/solutions/0506/) — Clock Sequence
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
 - ● [0520](/solutions/0520/) — Simbers
 - ○ [0524](/solutions/0524/) — First Sort II
