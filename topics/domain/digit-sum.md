@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum] -->
-<!-- status: final 2026-10-30T12:40Z -->
+<!-- status: final -->
 # Digit sum
 
 The [digit sum](https://en.wikipedia.org/wiki/Digit_sum) $s(n)$ — add up the decimal digits and stop
@@ -26,6 +26,16 @@ which is $n \bmod 9$ with the residue $0$ read as $9$. Problem 159 leans on exac
 per-factor digital roots are never computed by summing digits at all, which turns the inner term of
 a divisor-sieve DP into one modulo. In base $b$ the statement generalises to $s_b(n) \equiv n
 \pmod{b-1}$, so the trick is about the base, not about ten.
+
+In base $2$ the digit sum is the [Hamming weight](https://en.wikipedia.org/wiki/Hamming_weight), and
+its residue mod $2$ is a parity that composes perfectly: adding a number to a *collection* (not to a
+sum) flips the total count of ones exactly when that number's own weight is odd. Problem 711 is a game
+in which players write numbers under a shrinking budget and the winner is decided by the parity of all
+ones on the board, so every position collapses to (remaining budget, current parity) — a two-column
+table small enough to compute exhaustively for $n$ up to a thousand. The table then shows the winning
+$n$ as two rigid bit patterns, which sum in closed form for $n$ up to $2^{12\,345\,678}$. When the digit
+sum enters only through its residue, the residue is the whole state; tabulate small cases and read the
+structure off before reaching for theory.
 
 Because the congruence is additive over digits, it survives being cut into pieces: a substring
 $n[i..j)$ is divisible by $3$ exactly when the [prefix sums](https://en.wikipedia.org/wiki/Prefix_sum)
@@ -88,6 +98,34 @@ overshoot after a carry is at most one digit sum, so the same states recur const
 thousands of cached blocks. The pattern to remember: when the high digits are only ever *read
 through* $s$, the digit sum is the whole of their influence, and you can jump over everything below.
 
+Problem 506 runs the dual construction: rather than feeding digit sums into a sequence, it cuts a
+periodic digit stream $1234321234\ldots$ into consecutive pieces whose digit sums are $1, 2, 3, \ldots$.
+Measure position in the stream by *cumulative digit sum* instead of by digit index, and the period
+becomes a phase: every six-digit window sums to $15$, so two pieces whose starting offsets differ by a
+multiple of $15$ start at the same phase. Piece $n+15$ therefore reads piece $n$ and then exactly one
+more period, giving an affine recurrence $v_{n+15} = 10^6 v_n + Q_{n \bmod 15}$; within each residue
+class that unrolls to a [geometric series](https://en.wikipedia.org/wiki/Geometric_series), and
+$10^{14}$ terms cost fifteen modular exponentiations. The lesson generalises: when digits come from a
+periodic source, index by the digit-sum offset modulo the period's sum, and periodicity turns into a
+linear recurrence.
+
+Smallness also lets the digit sum sit somewhere arithmetically awkward and still be grouped away.
+Problem 776 sums $n / s(n)$ for every $n$ up to $1.2 \times 10^{18}$ — the digit sum as a
+*denominator*, where no additive trick reaches it. But $s(n) \le 171$, so
+$\sum_n n/s(n) = \sum_s T(s)/s$, with $T(s)$ the total of all $n$ having digit sum $s$: one hundred
+seventy-one integers, each a digit-DP aggregate (next section). Grouping by the small value converts
+a non-linear function of $s$ into a short weighted sum, and because the $T(s)$ are exact integers the
+final rational can be rounded to the requested thirteen significant digits with no floating-point
+doubt.
+
+The digit sum is also the *floor* of a natural family of operations. Problem 637 lets you insert plus
+signs anywhere among a number's base-$B$ digits and add the parts; concatenating parts only increases
+a value ($10a + b \ge a + b$), so the finest split — all plus signs — gives the minimum, and that minimum
+is $s_B(n)$. One step reaches a single digit exactly when $s_B(n) < B$, with no search at all. The
+remaining levels are tiny (at most three up to $10^7$), so the question changes from "find the minimum
+over $2^{L-1}$ splits" to "find *one* split sum already known to settle at the level below" — and a
+witness can be hunted by a meet-in-the-middle bitset over high and low halves of the digits.
+
 **The digit sum ignores order.** $s$ depends only on the *multiset* of digits, so $123$, $321$ and
 $213$ are the same object. Two ways to cash that in. Enumerate the multisets directly — problems 30
 and 34 replace a scan of ten million integers with
@@ -126,6 +164,18 @@ inverses, which this monoid lacks — so a quarter-million-fold product costs a 
 convolutions per digit. Here leading zeros are not merely harmless but *correct*: the operation itself
 reads a missing digit as $0$.
 
+When the condition is on digit *counts* rather than their sum, order-blindness has a sharper tool.
+Problem 520's "simbers" require every odd digit present to occur an odd number of times and every
+even digit an even number. Counting *strings* subject to a constraint on each symbol's multiplicity is
+the job of [exponential generating functions](https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function):
+a symbol allowed $j$ times contributes $x^j/j!$, the product of the factorials reproduces the
+multinomial count of arrangements, and the answer for length $L$ is $L!\,[x^L]$ of the product. Even
+counts give $\cosh x$, odd-or-absent gives $1 + \sinh x$, and both are combinations of $e^{\pm x}$ —
+so the whole product expands into $\sum_k c_k e^{kx}$ with $|k| \le 10$, and since
+$L!\,[x^L]\,e^{kx} = k^L$, the count is an exact sum of $21$ powers. Summing over all lengths up to
+$2^{39}$ is then $21$ geometric series. Whenever the EGF factors are exponentials, the count is a
+power sum in the length, and the length can be astronomical.
+
 ## Digit DP: count the buckets, not the numbers
 
 Generalise the pass above and you have [digit DP](/topics/technique/digit-dp): walk the number one
@@ -145,6 +195,15 @@ keyed by digit sum, and the middle digit of an odd-length number cancels from bo
 halves are counted independently and convolved. And problem 164, whose constraint is "no three
 consecutive digits exceed $9$", keeps the trailing *pair* of digits as its state: what matters is that
 the state is bounded, not that it happens to be a sum.
+
+The state can also carry *arithmetic*. Problem 290 counts $n < 10^{18}$ with $s(n) = s(137n)$, which
+compares a number's digits with those of its multiple. Long multiplication by a constant is itself a
+[transducer](https://en.wikipedia.org/wiki/Finite-state_transducer) read right to left: each column
+computes $137d + c$, emits its last digit and passes on a carry that provably stays below $137$. So
+the DP state is the pair (carry, running difference $s(\text{input}) - s(\text{output})$) — tracking
+the *difference* rather than both sums, because only equality matters, drops a dimension — and the
+final carry's own digit sum closes the comparison. The congruence from the first section gives a free
+check: $s(n) \equiv s(137n) \pmod 9$ forces $9 \mid 136n$, so every hit is a multiple of $9$.
 
 The constraint need not even look local. Problem 529 asks that *every* digit lie in some contiguous
 substring summing to $10$ — a condition on all substrings at once. It still has a bounded state,
@@ -192,6 +251,15 @@ the question "what is the smallest $n$ with a given digit-factorial sum?" is ans
 the digits must be ascending, $0$ is never useful because $0! = 1!$, and the shortest representation
 of the target as $\sum_d c_d \cdot d!$ is greedy from $9!$ down.
 
+The plain digit sum inverts the same greedy way, and then the inverse is a closed form. Problem 684
+wants the smallest number with digit sum $n$: as few digits as possible, so as many $9$s as fit, with
+the remainder in front — writing $n = 9q + r$, that number is $(r+1) \cdot 10^q - 1$. Summing it over
+$n \le k$ is a geometric series in $10^q$, and when $k$ is a Fibonacci number near $3 \times 10^{18}$
+the power $10^q$ has $10^{17}$ digits and exists only modulo the prime: by
+[Fermat](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem) the exponent matters only mod
+$p - 1$, so $k$ is carried modulo $9p$ and $9(p-1)$ at once, and dividing out the $9$ yields $q$ in
+both residues.
+
 Distinguish all of this from the problems where the digit sum is merely the *report*: problem 16
 ($2^{1000}$), problem 20 ($100!$) and problem 56 want a digit sum only as a way to make you produce
 an exact big integer. There the digit sum carries no structure and deserves no thought — the work is
@@ -208,6 +276,13 @@ checksum at the end. Recognising which family you are in is the first decision.
   distribution by its place value.
 - **Freeze the high digits.** If a process sees the digits above some position only through their
   sum, key the block below on that sum and memoise whole carries instead of single steps.
+- **Arithmetic on the number is a carry in the state.** Comparing $s(n)$ with $s(kn)$ is a digit DP
+  over (carry, difference); the carry is bounded by the multiplier.
+- **Group by the small value.** Any function of $s(n)$ — even a denominator — becomes a short sum over
+  the $O(9d)$ possible values, each weighted by a digit-DP total.
+- **Multiplicity constraints are EGFs.** Parity-of-count conditions give $\cosh$/$\sinh$ factors,
+  hence a power sum in the length; a periodic digit source gives an affine recurrence in the
+  digit-sum offset. Either way the length can be astronomical.
 - **Count, then unrank.** "The $n$-th number such that…" is never a loop over $n$.
 - **When the length is huge, fit the recurrence.** A digit DP over a fixed automaton is a linear
   recurrence in the length; recover it from a prefix sized by the state count, then jump.
