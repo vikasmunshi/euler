@@ -4156,8 +4156,8 @@
     "level": 16,
     "pct": 40,
     "solvers": 661,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 07:48"
   },
   "521": {
     "title": "Smallest Prime Factor",
