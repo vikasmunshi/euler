@@ -254,7 +254,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ○ [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
-- ○ [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
+- ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ○ [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0681](/solutions/0681/) — Maximal Area
 - ○ [0718](/solutions/0718/) — Unreachable Numbers

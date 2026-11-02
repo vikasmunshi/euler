@@ -210,7 +210,7 @@ while p <= max_perimeter:
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
-- ○ [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
+- ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ○ [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0681](/solutions/0681/) — Maximal Area
 - ● [0692](/solutions/0692/) — Siegbert and Jo

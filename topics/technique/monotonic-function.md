@@ -119,6 +119,7 @@ That quantity is the axis along which you can stop early, halve, or discard whol
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0587](/solutions/0587/) — Concave Triangle
+- ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0800](/solutions/0800/) — Hybrid Integers
 
 <!-- /problems -->

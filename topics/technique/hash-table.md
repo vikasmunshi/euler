@@ -200,6 +200,7 @@ points in neighbouring cells; the key is a coordinate pair, the table is the spa
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
+- ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing

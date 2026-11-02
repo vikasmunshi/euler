@@ -569,7 +569,6 @@ show up there at once. See
 - ○ [0655](/solutions/0655/) — Divisible Palindromes
 - ● [0659](/solutions/0659/) — Largest Prime
 - ○ [0672](/solutions/0672/) — One More One
-- ○ [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0699](/solutions/0699/) — Triffle Numbers

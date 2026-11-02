@@ -119,6 +119,7 @@ $\lambda$, and "the first $k$ children" is answered by counting whole periods wi
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0225](/solutions/0225/) — Tribonacci Non-divisors
 - ● [0238](/solutions/0238/) — Infinite String Tour
+- ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction

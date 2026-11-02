@@ -143,6 +143,7 @@ of the condensation turns a graph-traversal problem into a combinatorial one.
 - ● [0067](/solutions/0067/) — Maximum Path Sum II
 - ● [0079](/solutions/0079/) — Passcode Derivation
 - ● [0081](/solutions/0081/) — Path Sum: Two Ways
+- ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ○ [0716](/solutions/0716/) — Grid Graphs
 
 <!-- /problems -->

@@ -10,6 +10,5 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Bijection>._
 - ● [0098](/solutions/0098/) — Anagramic Squares
 - ● [0175](/solutions/0175/) — Fractions and Sum of Powers of Two
 - ○ [0480](/solutions/0480/) — The Last Question
-- ○ [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 
 <!-- /problems -->
