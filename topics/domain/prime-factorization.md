@@ -1,5 +1,5 @@
 <!-- tags: [prime-factorization] -->
-<!-- status: final 2026-10-29T02:08Z -->
+<!-- status: final -->
 # Prime factorization
 
 [Prime factorization](https://en.wikipedia.org/wiki/Integer_factorization) is what an integer
@@ -48,8 +48,8 @@ a [$B$-smooth](/topics/domain/smooth-number) number has every prime $\le B$, the
 [radical](/topics/domain/radical-of-an-integer) is the vector with every exponent flattened to
 $1$, and a [highly composite](/topics/domain/highly-composite-number) number is one whose
 exponents are non-increasing over an initial run of primes. Problem 47 wants $\omega = 4$ four
-times running; 615 wants $\Omega \ge 10^6$; 362, 632 and 668 constrain exponents and smoothness
-directly.
+times running; 615 wants $\Omega \ge 10^6$; 362 and 632 constrain exponents directly, 682
+constrains smoothness.
 
 ## Multiplicative functions read straight off the vector
 
@@ -143,6 +143,63 @@ incrementally, and update the function only on the coordinates that moved.
 If a problem's numbers are factorials, binomials, or products of them, do not reach for
 [bignums](/topics/technique/arbitrary-precision-arithmetic). Reach for valuations.
 
+## The vector is a vector: multiplication is addition
+
+"Exponent vector" is not just a figure of speech. Multiplying two numbers *adds* their vectors, so
+the multiplicative world of the integers is a linear world of exponent coordinates, and two things
+from linear algebra keep turning up.
+
+**Reduce the coordinates modulo $k$.** A perfect square is a vector with every coordinate even; a
+perfect cube has every coordinate divisible by $3$. Mod $k$, those are the zero vector, so "is this
+product a $k$-th power" becomes "do these vectors sum to zero mod $k$". Problem 619 takes $k = 2$
+at face value: each number in an interval is a vector over
+[$\mathbb{F}_2$](https://en.wikipedia.org/wiki/GF(2)), a subset has a square product exactly when
+its vectors sum to zero, and the number of such subsets is $2^{n - r} - 1$, where $r$ is the
+[rank](https://en.wikipedia.org/wiki/Rank_(linear_algebra)) of the vectors. Counting subsets becomes
+[Gaussian elimination](https://en.wikipedia.org/wiki/Gaussian_elimination). The catch is that the
+matrix is as wide as the number of primes up to $b$. The fix is a fact that recurs all over this
+page: **a number $\le b$ has at most one prime factor above $\sqrt{b}$, and that factor appears only
+to the first power.** So each large prime is a coordinate touched by a few vectors and nothing else.
+Pick one of those vectors as the pivot and use it to clear that column from the others. That pivot
+adds exactly $1$ to the rank, and what's left is a tall, narrow matrix whose columns are the
+$\pi(\sqrt b)$ small primes. Problem 152 uses the same large-prime fact to split its search. Problem
+632 uses it to sieve only by primes up to $\sqrt{d}$ and infer the one possible large factor from
+what remains.
+
+Problem 342 reduces mod $3$ and adds a second lesson, about *which way the coupling runs*. To make
+$\varphi(n^2) = \prod p^{2e_p - 1}(p - 1)$ a cube, each prime contributes $2e_p - 1$ to its own
+coordinate, and the factorization of $p - 1$ spills into coordinates of strictly *smaller* primes.
+So the influence runs one way, downward. Choose the primes of $n$ from the largest down, and once
+the search drops below a prime, nothing chosen later can touch its coordinate again. Every
+coordinate is settled in turn: the largest prime gets nothing from the others, so its own residue
+must already vanish, and that forces $P^2 \le n$. A prime still carrying a nonzero residue forces
+its own exponent mod $3$. The search tree is shaped by the admissible answers, not by the bound on
+$n$. Whenever constraints couple the coordinates, look for an order in which they become
+triangular.
+
+**Read size and counts as linear functionals.** $\log n = \sum e_i \log p_i$, $\Omega(n) = \sum e_i$
+and the sum of prime factors with multiplicity, $\sum e_i p_i$, are all linear in the vector. That
+makes "smallest number with such-and-such a count" an optimisation problem with a linear cost.
+Problem 615 asks for the millionth number with $\Omega \ge 10^6$, numbers far too large to write
+down. Swapping a factor $2$ for any odd prime $p$ multiplies the value by $p/2 \ge 3/2$, so a member
+with more than about $\log_{3/2} n$ odd factors is already more expensive than $n$ members built
+almost entirely from twos. Every member near the front therefore carries a huge common power of
+two. Dividing it out maps the head of the list, in order, onto the head of the same list for a
+small $\Omega$, which is an ordinary 64-bit enumeration. An
+[exchange argument](https://en.wikipedia.org/wiki/Greedy_algorithm) on a linear cost replaced the
+astronomical parameter with a constant.
+
+The same linearity makes counting problems into
+[generating functions](/topics/domain/generating-function). If a statistic adds over prime
+factors, each prime contributes an independent geometric series. Problem 682 pairs
+[5-smooth](/topics/domain/smooth-number) numbers by $\Omega$ and by the sum of their prime factors,
+and tags each factor $p$ with $x y^p$, so all of them together are counted by
+$\prod_{p \in \{2,3,5\}} (1 - x y^p)^{-1}$. That is the
+[Euler product](https://en.wikipedia.org/wiki/Euler_product) idea in miniature. The pairing is a
+constant-term extraction in $x$, and the result is a *rational* function of $y$, so $f(n)$ obeys a
+fixed-order linear recurrence and is extracted in $O(\log n)$ polynomial steps. Exponents that add
+are the reason the series factor at all.
+
 ## Factoring a whole family: walk the primes, not the numbers
 
 Valuations read one prime's coordinate of one huge number. The same move scales to a *family* of
@@ -196,16 +253,32 @@ them, and each one you build already satisfies the condition.
   $n = h \cdot q_1 \cdots q_k$ — a [Hamming number](https://en.wikipedia.org/wiki/Regular_number)
   times a square-free product of a few hundred
   "good" primes — and the search walks those products, answering the free Hamming part with a
-  prefix sum. Problems 342 and 533 reason backwards from a condition on $\varphi$ and on the
-  Carmichael function in the same spirit — the condition constrains the factorization, and the
+  prefix sum. Problems 342 (above) and 533 reason backwards from a condition on $\varphi$ and on
+  the Carmichael function in the same spirit — the condition constrains the factorization, and the
   factorization is what you enumerate.
 - **Use exponent parity as an argument.** A prime above $\sqrt{B}$ can appear at most once among
   the numbers up to $B$, which in problem 152 forces every large prime's contributions to cancel
   within its own multiples and splits an infeasible $2^{79}$ subset search into independent small
-  ones. Problem 619 makes the parity vector over $\mathbb{F}_2$ the whole object.
+  ones. Problem 619, above, makes the parity vector over $\mathbb{F}_2$ the whole object.
+- **Count "exactly" by way of "at least".** Every $n$ splits uniquely as $a^2 b$ with $b$
+  [square-free](/topics/domain/square-free-integer), and the primes whose square divides $n$ are
+  exactly the primes of $a$. Problem 632 wants the number of $n \le N$ with *exactly* $k$ such
+  primes, which is awkward because "exactly" has to forbid every other prime. "At least these $j$
+  primes" is easy: for square-free $d$ it is $\lfloor N/d^2 \rfloor$. Summing those over
+  $\omega(d) = j$ counts each $n$ once per $j$-subset of its square primes, and
+  [binomial inversion](/topics/technique/binomial-inversion) recovers the exact counts. Prescribing
+  part of the vector is cheap and forbidding the rest is not, so count the prescriptions and let
+  [inclusion–exclusion](/topics/technique/inclusion-exclusion-principle) do the forbidding.
 - **Turn divisibility into a divisor enumeration.** Problem 221 rewrites its condition as
   $d_1 d_2 = p^2 + 1$, so each Alexandrian integer is a divisor pair; problem 834 reduces its
   divisibility test to "the divisors of $n(n-1)/2$ exceeding $n$", which a sieve answers in bulk.
+  The divisors of $n$ are exactly the sub-vectors of its exponent vector, which is a box of
+  $\prod (e_i + 1)$ points. A divisor search is a depth-first walk over that box, and the cofactor's
+  vector is a subtraction, so nothing is ever factored twice. Problem 829 builds on this. Its factor
+  trees split $n$ at the largest divisor $\le \sqrt n$, found by walking the box with a prune at
+  $\sqrt n$. To find the least number with a given tree shape, it generates candidates from its two
+  subtrees' lists and keeps a product $ab$ only if the box holds no divisor strictly between $a$ and
+  $\sqrt{ab}$.
 
 ## How to reason about it
 
@@ -220,9 +293,15 @@ When a problem smells multiplicative, work down this list.
 3. **Ask whether you need the number at all.** If it is a factorial or a binomial, valuations give
    you its factorization without it. If it is one of many values of a polynomial, loop over the
    primes and solve the congruence instead.
-4. **Ask whether to enumerate forward.** Generating numbers of a prescribed multiplicative shape is
-   almost always cheaper than generating integers and decomposing them.
-5. **Only then decide how to factor.** One number or a scattered few: trial division against a
+4. **Ask whether the condition is linear in the exponents.** A $k$-th-power test is a sum that
+   vanishes mod $k$, which makes it linear algebra over $\mathbb{Z}/k$. A size, a factor count or a
+   factor sum is a weighted sum of exponents, which calls for an exchange argument or a generating
+   function. If the coordinates are coupled, find the order in which the coupling becomes
+   triangular.
+5. **Ask whether to enumerate forward.** Generating numbers of a prescribed multiplicative shape is
+   almost always cheaper than generating integers and decomposing them. If the shape says "exactly",
+   enumerate "at least" and invert.
+6. **Only then decide how to factor.** One number or a scattered few: trial division against a
    prime list. Every number below $N$: a smallest-prime-factor or
    [divisor-sum sieve](/topics/technique/divisor-sum-sieve), which computes the whole range for
    about the cost of one pass — problem 124 sieves a hundred thousand radicals this way without
