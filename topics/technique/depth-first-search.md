@@ -305,6 +305,7 @@ kept warm between them flatters the measurement.
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0265](/solutions/0265/) — Binary Circles
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0516](/solutions/0516/) — $5$-smooth Totients

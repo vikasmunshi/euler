@@ -254,7 +254,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
-- ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ○ [0362](/solutions/0362/) — Squarefree Factors
 - ○ [0386](/solutions/0386/) — Maximum Length of an Antichain

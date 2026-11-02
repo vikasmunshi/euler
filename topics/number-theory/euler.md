@@ -216,7 +216,7 @@ the loop.
 - ○ [0325](/solutions/0325/) — Stone Game II
 - ○ [0333](/solutions/0333/) — Special Partitions
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
-- ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ○ [0432](/solutions/0432/) — Totient Sum

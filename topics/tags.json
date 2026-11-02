@@ -2182,7 +2182,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cube_(algebra)",
       "additional-references": [],
       "summary": "An integer that is the third power of another integer, the building block of the cube-subtraction procedure in this problem.",
-      "refs": ["p0348", "p0884"]
+      "refs": ["p0342", "p0348", "p0884"]
     },
     {
       "slug": "perfect-number",
@@ -3469,7 +3469,7 @@
       "reference": "https://en.wikipedia.org/wiki/Backtracking",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0043_s0", "p0060_s0", "p0061_s0", "p0068_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0118_s0", "p0122_s0", "p0170_s0", "p0265_s0", "p0571_s0", "p0719_s0", "p0983_s0"]
+      "refs": ["p0043_s0", "p0060_s0", "p0061_s0", "p0068_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0118_s0", "p0122_s0", "p0170_s0", "p0265_s0", "p0342_s0", "p0571_s0", "p0719_s0", "p0983_s0"]
     },
     {
       "slug": "backward-induction",
@@ -3946,7 +3946,7 @@
       "reference": "https://en.wikipedia.org/wiki/Depth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0615_s0", "p0642_s0"]
+      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0342_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0615_s0", "p0642_s0"]
     },
     {
       "slug": "descartes-circle-theorem",
@@ -4945,7 +4945,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve",
       "additional-references": [],
       "summary": "A sieve that visits each composite exactly once via its smallest prime factor, enabling O(n) construction of multiplicative functions.",
-      "refs": ["p0153_s0", "p0549_s0", "p0745_s0"]
+      "refs": ["p0153_s0", "p0342_s0", "p0549_s0", "p0745_s0"]
     },
     {
       "slug": "list-comprehension",
@@ -5251,7 +5251,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0682_s0", "p0684_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0682_s0", "p0684_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -5548,7 +5548,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "Decomposing a number into its prime power components to compute multiplicative properties like divisor counts.",
-      "refs": ["p0029_s0", "p0029_s1", "p0108_s0", "p0110_s0", "p0221_s0", "p0347_s0", "p0545_s0", "p0752_s0", "p0932_s0"]
+      "refs": ["p0029_s0", "p0029_s1", "p0108_s0", "p0110_s0", "p0221_s0", "p0342_s0", "p0347_s0", "p0545_s0", "p0752_s0", "p0932_s0"]
     },
     {
       "slug": "primesieve",
@@ -6341,6 +6341,15 @@
       "additional-references": [],
       "summary": "A memo key must hold everything the cached result depends on, even context inherited from outside the subproblem, and nothing more.",
       "refs": ["p0551", "p0706", "p0943", "p0946"]
+    },
+    {
+      "slug": "order-search-so-constraints-close",
+      "facet": "takeaway",
+      "name": "Order the search so constraints close",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Pick the order a search places its pieces so that each constraint becomes final at a known point, turning a global condition into a forced local move and a sharp prune.",
+      "refs": ["p0342"]
     },
     {
       "slug": "parity-across-languages",

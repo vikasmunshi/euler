@@ -563,6 +563,7 @@ handful of operations on small numbers.
 - ○ [0330](/solutions/0330/) — Euler's Number
 - ○ [0335](/solutions/0335/) — Gathering the Beans
 - ● [0340](/solutions/0340/) — Crazy Function
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ○ [0344](/solutions/0344/) — Silver Dollar Game
 - ○ [0356](/solutions/0356/) — Largest Roots of Cubic Polynomials
 - ○ [0364](/solutions/0364/) — Comfortable Distance

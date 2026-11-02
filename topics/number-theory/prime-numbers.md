@@ -665,7 +665,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ○ [0329](/solutions/0329/) — Prime Frog
 - ○ [0333](/solutions/0333/) — Special Partitions
-- ○ [0342](/solutions/0342/) — The Totient of a Square Is a Cube
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset

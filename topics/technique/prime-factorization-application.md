@@ -137,6 +137,7 @@ totient and abundancy searches of problems 241, 245 and 248.
 - ● [0108](/solutions/0108/) — Diophantine Reciprocals I
 - ● [0110](/solutions/0110/) — Diophantine Reciprocals II
 - ● [0221](/solutions/0221/) — Alexandrian Integers
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$

@@ -120,6 +120,7 @@ The three solutions run the same sieve in both languages, and the differences ar
 ## Problems
 
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0745](/solutions/0745/) — Sum of Squares II
 

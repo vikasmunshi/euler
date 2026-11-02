@@ -222,6 +222,7 @@ crash, and neither shows up on small test inputs.
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0340](/solutions/0340/) — Crazy Function
+- ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
