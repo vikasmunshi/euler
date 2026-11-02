@@ -1,9 +1,9 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final 2026-11-01T14:14Z -->
+<!-- status: final -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes
-`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in more than forty
+`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in some fifty
 problems below: over and over, the quantity a problem asks for is a *residue* — the last ten digits, a count
 modulo `10^9+7`, whether some power lands on `1` — while the power itself has more digits than
 there are atoms in the universe. The naive route computes a number you cannot store to answer a
@@ -50,17 +50,18 @@ precision integers, and a hand-rolled version is strictly slower. The same probl
 ## The roles it plays
 
 The reason this tag lands on so many solutions is that `pow(b, e, m)` is rarely the *answer* — it
-is the primitive that other number-theoretic machinery is built from. Eight recurring roles:
+is the primitive that other number-theoretic machinery is built from. Nine recurring roles:
 
 | Role | Shape | Seen in |
 | --- | --- | --- |
 | Direct residue | `pow(b, e, m)` | 48, 97, 194, 615, 731, 820 |
 | [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 487, 545, 635, 650, 675, 743, 860, 926 |
+| [Geometric series](https://en.wikipedia.org/wiki/Geometric_series) | `(pow(x, n, m) - 1) · (x - 1)⁻¹` | 506, 520, 711 |
 | Primality witness | `pow(a, d, n)` then repeated squaring — [Miller–Rabin](/topics/technique/miller-rabin-primality-test) | 111, 146, 216, 271, 293, 516 |
 | [Multiplicative order](/topics/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133, 752 |
-| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 659, 745 |
-| Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 492, 754, 822 |
-| Product by multiplicity | `∏ pow(b, count[b], m)` | 754, 1010 |
+| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 457, 659, 745 |
+| Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 492, 684, 754, 822 |
+| Product by multiplicity | `∏ pow(b, count[b], m)` | 705, 754, 1010 |
 | Power in a ring extension | `(a + b√d)^n` by square-and-multiply on pairs | 492, 752 |
 
 The inverse row deserves a note, because it is the most common use by volume. By [Fermat's little
@@ -84,6 +85,24 @@ for free as `inv · p! · ((q-1)p)!` — two multiplications instead of a second
 same identity, chained, is [batch
 inversion](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Multiple_inverses): `n`
 inverses for one `pow` and `3n` multiplications.
+
+Put a power and an inverse side by side and you have the geometric-series row:
+`∑_{k<n} x^k = (x^n − 1)/(x − 1)`, so `n` terms cost one `pow` and one inverse, however large `n`
+is. Problem 506's sequence of digit strings repeats with period 15, so each residue class of
+indices unrolls to `v·x^k + Q·(x^k − 1)/(x − 1)` with `x = 10^6`, and summing a class is a
+geometric series of geometric series, closed in `O(log n)`. Its modulus `41²·271²` is composite,
+so the division is legal only because `10^6 − 1` happens to be coprime to it. Check that before
+you trust `pow(x - 1, -1, m)`. Problem 711 needs the weighted cousin `∑ m·x^m`, whose
+[arithmetico-geometric](https://en.wikipedia.org/wiki/Arithmetico-geometric_sequence) closed form
+divides by `(1 − x)²`, and evaluates it at both `x = 2` and `x = 2⁻¹`. A negative power is just a
+power of the inverse, so `2^-m` needs no branch of its own. Problem 520 shows where such sums come
+from. An [exponential generating
+function](https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function_(EGF))
+in `cosh x` and `sinh x`, expanded in `e^x`, turns the number of valid length-`L` digit strings into
+`∑ c_k · k^L` over the 21 integers `−10 ≤ k ≤ 10`. Summing over every length up to `n` is then 21
+geometric series, with `k = 0` and `k = 1` handled separately because the denominator vanishes
+there. When `x − 1` is not invertible at all, fall back to doubling: `S(2n) = S(n)·(1 + x^n)` is
+square-and-multiply on the pair `(x^n, S(n))`, and it never divides.
 
 The root row is the same power map read the other way. In a cyclic group of order `p - 1`,
 raising to `(p-1)/k` lands in the subgroup of `k`-th roots of unity, so problem 271 — cube roots of
@@ -149,6 +168,16 @@ numbers, about `10^12` squarings each; a number squared `k` times is `x^(2^k)`, 
 itself far too large to hold. So the exponent is computed first, as a residue mod `p - 1`, and fed
 to the outer power — two nested `pow` calls per term, and the only hard part of the problem is
 deciding *which* `k` each number ends with.
+
+Sometimes the exponent comes out of a computation of its own, and then that computation has to run
+in the exponent's modulus. Problem 684's `S(k)` contains `10^q` with `q = ⌊k/9⌋`, and `k` runs along
+the Fibonacci sequence. The solution runs the recurrence twice in lockstep, once modulo `9·p` and
+once modulo `9·(p − 1)`. The factor `9` keeps the floor division alive: from `f mod 9m` you can read
+both `r = f mod 9` and `q mod m`, since `f = 9q + r`. The first copy feeds the linear terms and the
+second feeds the exponent. In problem 520 the exponents are themselves
+powers: it needs `k^n` for `n = b^u` at every `u` in a range. Rather than reduce `b^u` modulo
+anything, it carries `k^n` forward one step at a time, `k^(b^u) = (k^(b^(u-1)))^b`. That is one small
+`pow` per step, and `n` itself is only ever kept modulo `p`.
 
 Problem 455 runs the chain in the other direction: it wants `x` with `n^x ≡ x (mod 10^9)`, a
 fixed point of `x ↦ n^x`. Iterating that map from `x = 1` builds the tower `n, n^n, n^(n^n), …`
@@ -219,6 +248,14 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
   so the ranking is done exactly on the small numbers, and the astronomical factor enters only at
   the very end, as one `pow(2, k - s, m)`. Factor out the part that is too big to compare, compare
   what is left, exponentiate last.
+- **…and they forget divisibility.** When a closed form has to be divided by a `g` that shares a
+  factor with `m`, no inverse exists, yet the division is still exact. The fix is to compute
+  modulo `m·g` and divide the residue as an integer, since `X ≡ X' (mod m·g)` and `g | X, X'` imply
+  `X/g ≡ X'/g (mod m)`. Problem 605 reduces a fraction `2^(n−k)·T / (2^n − 1)²` whose numerator and
+  denominator can share a factor `g` that need not be coprime to `10^8`, so it multiplies modulo `10^8·g²` and
+  divides by `g²` at the end. Finding `g` uses the same idea from the other side. Any common prime
+  divides `gcd(n, 2^n − 1) = gcd(n, pow(2, n, n) − 1)`, and its exact multiplicity comes from
+  residues modulo a high power `p^64` of it. Neither step ever forms the `n`-bit number `2^n − 1`.
 - **`O(log e)` is not always necessary.** Problem 97's linear doubling loop is `7.8 × 10^6`
   iterations — 23 with square-and-multiply, but both finish instantly, and the linear one is easier
   to read. Square-and-multiply earns its keep when the exponent is genuinely large (`10^18`), or
