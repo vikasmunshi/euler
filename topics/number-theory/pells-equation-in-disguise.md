@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: final 2026-10-29T02:11Z -->
+<!-- status: final -->
 # Pell equation in disguise
 
 Some Euler problems are about a probability, some about triangles, some about tiling a floor, and
@@ -9,6 +9,8 @@ near-equilateral and near-isosceles triangles (94, 138), Pythagorean tiles (139)
 almost-right triangles (223, 224), the disc-drawing probability (100) and the counter-swapping
 puzzle (321) all reduce to $X^2 - D Y^2 = N$ with $D \in \{2, 3, 5\}$ and a tiny $N$. After that,
 each is the same short loop: a three-term recurrence that jumps from one solution to the next.
+One more, smooth triangular numbers (581), wears the disguise the other way round: thousands of
+Pell equations at once, used to prove a search is finite rather than to walk a sequence.
 The [technique page](/topics/technique/pells-equation) explains how to *solve* Pell equations.
 This page is about *recognising* one, and about why so many of these problems end up walking
 literally the same sequence of numbers.
@@ -91,6 +93,38 @@ while p <= max_perimeter:
     p = 3 * s2 - m
 ```
 
+## Many equations, few solutions
+
+Every problem above has one fixed $D$ and asks for the $k$-th solution or all solutions below a
+bound. Problem 581 turns this around. It asks for every $n$ whose triangular number
+$n(n+1)/2$ is $47$-smooth, which means $n$ and $n+1$ must both be smooth. There is no bound in the
+statement, and no single equation to walk. The square condition is still there, though. Put
+$x = 2n + 1$, so $x^2 - 1 = 4n(n+1)$, and split $n(n+1)$ into its squarefree part $q$ times a square.
+That gives
+
+$$x^2 - 2q\,y^2 = 1,$$
+
+where $q$ ranges over the products of subsets of the fifteen primes up to $47$. The disguise hides
+a *family* of $2^{15}$ Pell equations, and every answer is a solution of one of them. This is
+[Størmer's theorem](/topics/technique/stormers-theorem). Two facts from Lehmer make it finite and
+cheap:
+
+- **Divisibility runs down the orbit.** $y_1$ divides every $y_k$. If the fundamental solution's
+  $y_1$ is not smooth, no later solution can be, and the whole equation is discarded after one
+  continued-fraction expansion. That filter removes all but a few percent of the equations.
+- **Only the first few powers can matter.** A smooth $y_k$ forces $k \le \max(3, (p+1)/2)$, so
+  each surviving equation is walked a fixed, small number of steps, not up to a numeric bound.
+
+So the Pell structure still does the work, but it does a different job. In Problems 94–321 it
+*generates* answers. In 581 it *bounds* the search: an open-ended question about consecutive
+smooth numbers becomes a finite loop over subsets. The practical difference shows up in the
+fundamental solutions. For a fixed small $D$ the unit is something like $3 + 2\sqrt2$. Across
+thousands of $d = 2q$ values, many units are astronomically large, because the continued fraction
+of $\sqrt d$ can have a period near $\sqrt d$. The solution abandons any expansion once $y$ passes
+a cap, on the grounds that a huge $y_1$ has essentially no chance of being smooth. It does not just
+assume that: the notes check that the answers don't change when the cap is raised by twenty orders
+of magnitude.
+
 ## How to reason about it
 
 - **Smell it from the statement.** Watch for "integral area" or "integer height" (Heron's
@@ -109,7 +143,27 @@ while p <= max_perimeter:
   point. Problem 887 is driven by a recurrence, but it is a nested one,
   $F(h, c) = F(h-1, c-1) + F(h-1,\ c-1+F(h-1, c-1))$, and no constant trace fits it. So the test
   runs in both directions: no perfect-square condition means no Pell equation, and a fit that
-  needs more than $T$ and a constant means you are holding some other kind of recurrence.
+  needs more than $T$ and a constant means you are holding some other kind of recurrence. The
+  newer neighbours fail the fit in instructive ways. Problem 463 halves its index
+  ($f(4n+1) = 2f(2n+1) - f(n)$), so it is divide-and-conquer, not a linear walk. Problem 866
+  convolves the sequence with itself, $E(N) = (2N-1)\sum E(i)E(N-1-i)$, which is quadratic in its
+  own terms. Problem 718 is a min-plus recurrence over residues, $w_i = \min(b_i, w_{i-1} + z)$,
+  and its equation $17^p a + 19^p b + 23^p c = n$ is linear: a Frobenius problem, with no square
+  anywhere.
+- **Check whether $D$ is a square.** A perfect-square condition is necessary for Pell, but not
+  sufficient. If completing the square leaves $X^2 - s^2 Y^2 = N$, the left side factors as
+  $(X - sY)(X + sY)$, and divisor arguments replace the Pell machinery. Problem 764 is the clean
+  example: $16x^2 + y^4 = z^2$ is a Pythagorean triple whose odd leg $y^2 = (m - n)(m + n)$ is a
+  product of two coprime factors, so each factor must itself be a square. That gives two
+  closed-form [parametrisations](/topics/technique/euclids-formula), enumerated in $O(\sqrt N)$
+  pairs, with no unit and no orbit. Problem 581 meets the same degenerate case inside its family
+  ($q = 2$ gives $d = 4$) and simply skips it, because $x^2 - 4y^2 = 1$ has no positive solution.
+- **A square in the statement need not be a condition.** Problem 674's operator
+  $\mathcal{I}(x, y) = (1 + x + y)^2 + y - x$ looks like it invites completing the square. But the
+  square is there to pack pairs into disjoint windows between consecutive squares, which makes
+  $\mathcal{I}$ injective. Equations between $\mathcal{I}$-expressions are then
+  [unification](/topics/technique/unification-computer-science) problems, not Diophantine
+  arithmetic. Before reducing to Pell, ask what job the square is doing in the statement.
 - **Count the families.** For $N = \pm1$ there is one orbit. For $N = 44$ (Problem 140) or
   $N = -7$ (Problem 321) there are several, and a missed seed silently drops every answer in that
   family. Compare the merged sequence against all the terms the statement gives.
