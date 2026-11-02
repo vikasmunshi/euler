@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-02T06:51Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -56,6 +56,19 @@ in ascending order makes the first path to each remainder the smallest numeral t
 [pigeonhole principle](https://en.wikipedia.org/wiki/Pigeonhole_principle) also bounds the walk.
 Two of the repunits $1, 11, \dots$ share a remainder within the first $n + 1$, and their difference
 is a 0-1 multiple of $n$, so no search runs past $n$ states.
+
+Give the residue walk weights and it computes a shortest path. Problem 718 needs every $n$ that is
+*not* $a x + b y + c z$ for three coprime powers. That is the gap set of a
+[numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup), and it is read off the
+[Apéry set](https://en.wikipedia.org/wiki/Ap%C3%A9ry_set): for each residue $r \bmod x$, the least
+representable $w_r \equiv r$. Every larger member of that class is $w_r + kx$, so the class's
+gaps are an arithmetic progression with a closed-form count and sum. In general $w_r$ is a
+Dijkstra search over the $x$ residues. With two other generators there is a shortcut. The least
+multiple of $y$ in class $r$ is $y \cdot (r y^{-1} \bmod x)$, one inverse. Visiting the classes in
+the order $iz \bmod x$, a single cycle because $\gcd(z, x) = 1$, makes "add one more $z$" a step
+to the next index. The minimum over both generators then becomes a running minimum of
+$b_i - iz$, a single vectorised pass over $x$ residues for a semigroup whose gaps run into the
+quadrillions.
 
 The residue need not be of the number itself. A number is a perfect cube exactly when every
 exponent in its factorisation is $\equiv 0 \pmod 3$. Problem 342 asks when $\varphi(n^2)$ is a
@@ -161,8 +174,22 @@ exponent's bits with two residue products per bit, and $\alpha$ itself is never 
 monoid. The carry-free "freshman's product" acts on each decimal place separately, so one place's
 distribution of digit products is a ten-entry histogram. Combining $R$ independent factors is
 then a convolution over the digits under multiplication mod 10, and the $R$-fold convolution power
-takes $O(\log R)$ convolutions. Once you have spotted an associative step, the exponent can be as
-large as the problem likes.
+takes $O(\log R)$ convolutions. Problem 649 does the same with XOR in place of digit products.
+Its game splits into independent coins whose
+[Sprague–Grundy](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem) values combine by
+XOR, so one coin's eight-entry value histogram is raised to the $c$-th XOR-convolution power. Once
+you have spotted an associative step, the exponent can be as large as the problem likes.
+
+The step need not be a power of one element. It can be a product of fixed matrices along a
+structured word. Problem 1006 sums squared values of windows of the
+[Fibonacci word](https://en.wikipedia.org/wiki/Fibonacci_word). Reading one letter is one matrix,
+the matrix of each standard word $S_n = S_{n-1}S_{n-2}$ is the product of the previous two, and any
+prefix of length $10^{18}$ is a [Zeckendorf](https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem)
+product of about ninety blocks. One state does not fit that mould: prepending a digit to $N$
+multiplies it by a power of 10 that grows with the position, which no fixed matrix can do. The repair is
+to carry $10^{-r} N$ and $100^{-r} N^2$ instead. The changing scale is absorbed by a modular
+inverse, and the update becomes linear with constant coefficients again. Dividing a state by a
+known power is a cheap way to make a step position-independent, and so composable.
 
 ## Division: the modular inverse
 
@@ -235,6 +262,16 @@ square-and-multiply over a NumPy array, about thirty array multiplications for t
 Problem 635 does the same for its 5.76 million denominators, one per prime, and folds an extra
 factor $p$ into each so that a single inverse serves both terms of its closed form.
 
+Geometric series are where a field pays off most. Their sum $(x^K - 1)/(x - 1)$ needs one power
+and one inverse, and the ratio may itself be a fraction. Problem 711 sums arithmetico-geometric
+series $\sum m x^m$ in closed form with $x = 1/2$, which modulo $10^9 + 7$ is just the residue
+$2^{-1}$. A first-order linear recurrence is a geometric series in disguise, and seeing that can remove a
+sequential loop. Problem 423's count obeys $G(n+1) = 6G(n) + d(n)$, with increments $d(n)$
+built from binomials. Unrolled, each $d(j)$ reaches every later term multiplied by a power of 6,
+and summing over $n \le L$ gives it the weight $(6^{L-j+1} - 1)/5$. The running state disappears.
+What is left is a dot product of independent terms, each a few table lookups, with one inverse of
+5, and it vectorises over fifty million indices where the recurrence could only be walked.
+
 Over a prime, the *exponent* is a residue too, modulo $p - 1$, and that includes negative ones:
 $a^{-k} = a^{(-k) \bmod (p-1)}$. Problem 754 multiplies Gauss factorials, and Möbius inversion
 writes each as a product of factorials and powers raised to $\mu(d) = \pm 1$. Grouped by the
@@ -261,7 +298,12 @@ as an exact big integer and reduces only when storing it; the C, without that lu
 $2^{e_2} \cdot 5^{e_5} \cdot u$ — the primes of the modulus tracked as exponents, the remaining unit
 $u$ coprime to 10 and therefore safely invertible. That factor-out-the-modulus's-primes move is the
 general repair; the general lesson is that with a composite modulus, every division in your
-derivation is a bug waiting for an input that shares a factor with it.
+derivation is a bug waiting for an input that shares a factor with it. That holds for the divisions
+hidden inside a standard algorithm as well. Problem 649 needs an XOR-convolution power modulo $10^9$,
+and the [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Hadamard_transform) would make it
+pointwise, but its inverse divides by the length 8, which has no inverse modulo $10^9$. With eight
+entries the direct convolution costs nothing and uses only $+$ and $\times$, so it is the right
+choice. A fast transform is only available when the modulus can undo it.
 
 The commonest version is also the easiest to miss: "the last nine digits" means modulo $10^9$, and
 $10^9$ is even. Both problems 340 and 401 end in closed forms with a small fixed denominator.
@@ -269,14 +311,22 @@ Problem 340 has the triangular numbers $b(b+1)/2$, and problem 401 has the squar
 $x(x+1)(2x+1)/6$ with $x$ up to $10^{15}$. Since $2$ has no inverse modulo $10^9$, the cure is to
 **divide before reducing**. One of $x, x+1$ is even, and exactly one of $x, x+1, 2x+1$ is a
 multiple of 3. Dividing those factors exactly leaves integers that each fit in 64 bits; only then
-are they reduced and multiplied. Sometimes a congruence is what proves the division is exact.
+are they reduced and multiplied. The bluntest cure is not to reduce until the division is done.
+Problem 612 counts pairs as $(T^2 - D - T)/2$ with every quantity below $10^{36}$. Python forms it
+exactly, the C port in `unsigned __int128`, and the modulus is applied once, to the quotient.
+Sometimes a congruence is what proves the division is exact.
 Problem 764's summand is $(5a^4 + 3b^4)/8 + ab$ for odd $a, b$. Every odd fourth power is
 $\equiv 1 \pmod{16}$, so the numerator is $\equiv 8 \pmod{16}$. The division by 8 is therefore
 exact, and it is taken on the integer before the term is reduced modulo $10^9$.
 
 Two more repairs complete the set. An **exact** division by a number **coprime** to the modulus
 is safe even when the modulus is composite. Problem 731 divides $10^e - r$ by $3^i$ modulo
-$10^{10}$ by multiplying with $3^{-i}$, which exists because 3 shares nothing with 10. And when
+$10^{10}$ by multiplying with $3^{-i}$, which exists because 3 shares nothing with 10. Problem
+506 works modulo $123454321 = 41^2 \cdot 271^2$, but its digit stream has period 6, so the terms
+obey an affine recurrence $v_{n+15} = 10^6 v_n + Q$ within each residue class of $n \bmod 15$. The
+only divisor its geometric sums need is $10^6 - 1 = 3^3 \cdot 7 \cdot 11 \cdot 13 \cdot 37$. That
+is coprime to the modulus, so the closed form is exact and fifteen modular exponentiations
+replace $10^{14}$ terms. Factor the divisor as well as the modulus before reaching for a repair. And when
 the divisor $c$ is not coprime, compute modulo $c \cdot m$ and divide the residue by $c$ at the
 end. If $x \equiv y \pmod{cm}$ and $c \mid x$, then $x / c \equiv y / c \pmod m$. Problem 875's
 C port evaluates a Faulhaber polynomial with denominator 24 this way, modulo $24m$ in `__int128`,
@@ -364,6 +414,20 @@ the primes are divided out along those two progressions, a sieve over a polynomi
 than over the integers. Higher powers of $p$ are found by
 [Hensel](https://en.wikipedia.org/wiki/Hensel%27s_lemma)-lifting the root to $p^2, p^3, \dots$, each
 lift using an inverse modulo $p$ alone, so no intermediate grows past the values being sieved.
+
+A general quadratic congruence reduces to a square root by the
+[quadratic formula](https://en.wikipedia.org/wiki/Quadratic_formula), read modulo $m$. It needs
+only 2 (strictly, $2a$) to be a unit. Problem 457 wants the least $n$ with
+$p^2 \mid n^2 - 3n - 1$ for every prime up to $10^7$. Completing the square gives
+$4f(n) = (2n - 3)^2 - 13$, and 4 is a unit modulo an odd $p^2$, so the roots are
+$(3 \pm r) \cdot 2^{-1}$ with $r^2 \equiv 13 \pmod{p^2}$. Whether $r$ exists modulo $p$ is a
+reciprocity lookup on $p \bmod 13$. $r$ itself comes from
+[Tonelli–Shanks](https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm), or from
+$13^{(p+1)/4}$ when $p \equiv 3 \pmod 4$. One Newton step $r \leftarrow r - (r^2 - 13)(2r)^{-1}$
+then lifts it to $p^2$. The lift fails exactly where the derivative $2r$ vanishes, at $p = 13$
+itself, and there a short divisibility argument shows there is no root modulo $169$ at all. The
+two exceptional primes, the one that divides 2 and the one that divides the discriminant, are the
+ones to check by hand.
 
 ### Orders, and where they live
 
@@ -536,16 +600,19 @@ directly. When you see it:
   but only the quantity the statement actually reduces. If a choice depends on order, settle it
   before reducing.
 - Searching for a number with a divisibility property? Its residue is a complete state, so search
-  the $n$ residues, not the numbers.
+  the $n$ residues, not the numbers. With weights, the least member of each class (an Apéry set)
+  describes everything the generators cannot reach.
 - Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
   Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic. Any
-  associative product (a ring extension, a convolution) can be powered the same way. A value used
+  associative product (a ring extension, a convolution, a matrix per letter of a recursive word)
+  can be powered the same way. A linear recurrence unrolls into geometric weights. A value used
   both as an exponent and as a factor is needed modulo $p - 1$ **and** modulo $p$.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
   under a composite one, audit every division — including the $/2$ and $/6$ of a closed form
-  modulo $10^9$. An exact division by a coprime divisor is still safe, and a stubborn $c$ can be
-  divided out of a residue taken modulo $cm$. Where you can, defer all the divisions to a single
+  modulo $10^9$, and the division inside a fast transform's inverse. An exact division by a coprime
+  divisor is still safe, and a stubborn $c$ can be divided out of a residue taken modulo $cm$, or
+  the exact value kept until the division is done. Where you can, defer all the divisions to a single
   inverse at the end, and remember that over a prime a negative exponent is just a residue mod
   $p - 1$.
 - Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
@@ -553,7 +620,9 @@ directly. When you see it:
   $p$ per step, and take the lcm across a composite modulus.
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
   the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$. A condition "the sum is
-  $\equiv 0 \pmod n$" is a roots-of-unity filter, and a closed form may be hiding behind it.
+  $\equiv 0 \pmod n$" is a roots-of-unity filter, and a closed form may be hiding behind it. A
+  quadratic congruence is a modular square root plus the quadratic formula, Hensel-lifted to
+  $p^k$; check the primes dividing 2 and the discriminant by hand.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
   Remainder Theorem, working prime power by prime power; solution counts multiply. If the moduli
   share a factor $d$, check that $d$ divides the difference of the residues before solving.
