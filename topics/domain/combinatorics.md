@@ -1,10 +1,10 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final 2026-10-28T21:34Z -->
+<!-- status: final -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
 arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
-collection under some rule. It is the largest domain in this archive — 276 problems carry the tag,
+collection under some rule. It is the largest domain in this archive — 275 problems carry the tag,
 more than any other — and that is not an accident of tagging. Project Euler's favourite question
 shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
 discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
@@ -82,6 +82,18 @@ convolved with itself $R$ times over the digits under multiplication mod 10 — 
 squaring, because the convolution is associative. Independence is a property of the model, not
 the code; a carry, or a prime shared between slots, would break it.
 
+The additive twin of the product rule is to **sum contributions, not configurations**. When the
+question is a total of some statistic over every configuration, swap the order of summation: for each
+small piece that can contribute, count the configurations in which it does. Problem 705 totals the
+inversion counts of a number of digit sequences far too large to list, each built by replacing every
+digit by one of its divisors. An inversion is a pair of positions, and the number of sequences in
+which a given pair is inverted depends only on its two digit *values*, since every other position
+chooses freely. So the total is the sequence count times a weighted sum over a $9 \times 9$ table of
+how often digit $x$ precedes digit $y$ — one linear pass to build the table, and no sequence ever
+touched. This is [double counting](/topics/technique/double-counting-proof-technique), or
+[linearity of expectation](/topics/domain/expected-value) read the other way round: the total is
+the count times the mean, and the mean splits over pairs.
+
 ## The four shapes an answer takes
 
 Across these problems the resolution nearly always falls into one of four moves.
@@ -115,7 +127,13 @@ the two cases are disjoint and exhaustive, so $dp[i] = dp[i-1] + dp[i-L]$. Probl
 vary the same skeleton; problem 215 stacks it, encoding each brick row as a bitmask of its internal
 seams so that "no running crack" becomes `mask_a & mask_b == 0`, and the wall count becomes a
 layered walk over a compatibility graph. The pattern is always: define the state, enumerate the last
-move, sum the disjoint cases. See also [recurrence relations](/topics/domain/recurrence-relation)
+move, sum the disjoint cases. The "last move" need not be the rightmost one, either. Problem 866 lays
+the pieces of a row down in random order, each placement scoring the segment it completes, and asks
+for the expected product of the scores. Condition on the *last piece placed* in time: until then no
+segment crosses it, so its left and right sides evolve as two independent smaller rows. The
+expectation factorises, and the recurrence becomes a self-convolution
+$E(N) \propto \sum_i E(i)\,E(N-1-i)$ — the [Catalan](/topics/domain/catalan-number) shape, which
+shows up whenever one choice splits a structure into two independent halves. See also [recurrence relations](/topics/domain/recurrence-relation)
 and [generating functions](/topics/domain/generating-function), which are the same recurrences
 written as algebra — and which earn their place when the algebra does work the table cannot.
 Problem 249's table *is* the product $\prod_p (1 + x^p)$, one factor per prime. Problem 996 builds
@@ -125,6 +143,22 @@ a polynomial left to right whose coefficients count overtake tuples, and gets th
 independent of the total bound $k$. Problem 768 goes furthest: a balanced chandelier on 360 sockets
 factors into twelve independent copies of the 30-socket problem, and the answer is one coefficient
 of $G_{30}(z)^{12}$.
+
+Two more pieces of algebra extend the reach. When a constraint is on the *multiset* of symbols in a
+string, not their order, the [exponential generating function](/topics/technique/exponential-generating-function)
+does the arranging: a symbol allowed $j$ times contributes $x^j/j!$, and $L!\,[x^L]$ of the product
+puts the multinomial back. Problem 520 needs even digits used an even number of times and odd digits
+an odd number of times or not at all, which gives factors of $\cosh x$ and $1 + \sinh x$; substituting
+$y = e^x$ turns the product into a short Laurent polynomial, since $L!\,[x^L]\,e^{kx} = k^L$, so
+every count is a sum of powers, and summing over all lengths up to $2^{39}$ is a couple of dozen
+geometric series. And when the generating function is **rational**, the sequence obeys a
+[linear recurrence with constant coefficients](/topics/technique/linear-recurrence-with-constant-coefficients),
+and the $n$-th term costs $O(\log n)$ however large $n$ is. Problem 682 pairs $5$-smooth numbers
+with equal factor counts by tagging one side with $x$ and the other with $x^{-1}$ and keeping the
+constant term in $x$. The poles of the result give a degree-40 denominator; a small DP supplies the
+first 81 terms, multiplying by the denominator must zero out every coefficient past the numerator
+(a built-in check that no pole was missed), and [Bostan–Mori](/topics/technique/bostan-mori-algorithm)
+then halves $n$ each round to read off one coefficient at $10^7$ — or at $10^{18}$, for the same cost.
 
 **Count the complement, or inclusion–exclusion.** "At least one" is usually harder than "none".
 Problem 116 subtracts the single all-grey tiling rather than tracking a "used a colour yet?" flag
@@ -138,6 +172,17 @@ short sum, subtracted from $\binom{2n}{n}$. The multiplicative cousin is
 [Möbius inversion](/topics/technique/mobius-inversion-formula): problem 276 counts *all* integer
 triangles up to a perimeter in closed form, then strips the non-primitive ones, since every
 triangle is $g$ times a primitive one — count the easy superset, then invert the scaling.
+
+Inclusion–exclusion is only as cheap as its overlaps, so the work is in describing the bad events
+precisely enough that few of them can co-occur. Problem 628 counts pawn placements — one per row
+and column, so permutations — that leave a right-and-up rook path open. Every such path crosses
+each anti-diagonal exactly once, so the board is blocked exactly when some anti-diagonal is fully
+occupied, which a brute force over $n \le 9$ confirmed before it was trusted. In a permutation a
+full anti-diagonal near a corner forces a reversed corner block, and two blocks of different sizes
+at the same corner would send the same rows to different columns. So there is at most one bad block
+per corner, the inclusion–exclusion has a handful of terms, and the sum telescopes
+($m \cdot m! = (m+1)! - m!$) down to one pass over the
+[left factorials](https://oeis.org/A003422).
 
 **Quotient by symmetry.** If configurations related by rotation, reflection, or relabelling count as
 one, do not enumerate and deduplicate — divide the work by the symmetry group up front, or count
@@ -168,13 +213,21 @@ raised to a huge power, so the state count is cubed in every multiplication. Rem
 boundary's actual colours gives over a hundred states; but the two tiles at a boundary always touch
 and so always differ, and every such colour pair is equivalent under permuting the colours. Only
 *how many* choices each new tile has matters, so the colours fold into the matrix weights and ten
-states remain. See
+states remain.
+
+Symmetry also collapses a *filter*. A condition of the form "the sum is divisible by $n$" is
+picked out of a generating function by a [roots-of-unity filter](/topics/technique/roots-of-unity-filter):
+evaluate at every $n$-th root of unity and average, since $\frac1n\sum_j \omega^{js}$ is $1$ when
+$n \mid s$ and $0$ otherwise. Problem 635 counts $p$-element subsets of $\{1, \dots, qp\}$ with sum
+divisible by $p$. For prime $p$ every non-trivial root is primitive, so all $p - 1$ non-trivial terms
+are permutations of the same product and are equal; one evaluates in closed form, and the whole
+count becomes a binomial plus a small correction, divided by $p$. See
 [exploit symmetry](/topics/takeaway/exploit-symmetry).
 
 ## The counts themselves are the other hazard
 
 Combinatorial answers grow explosively, and this domain's most common companion tag is
-[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 276 problems carry it. That
+[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 275 problems carry it. That
 pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
 the deliverable and you work in the ring from line one), or it wants the honest integer and you
 need [arbitrary precision](/topics/technique/arbitrary-precision-arithmetic). Python gives you the
@@ -218,6 +271,11 @@ paths, partitions — at a size where listing them is hopeless. When you catch i
   matching sequence often comes with the formula attached.
 - **Count the complement when "at least one" appears.** Constraints phrased as prohibitions are
   usually cheaper counted the other way round.
+- **Sum contributions when the question is a total.** A statistic summed over every configuration
+  is usually a sum over small pieces (pairs, positions) of how many configurations each one
+  scores in.
+- **When $n$ is astronomical, look for a rational generating function.** If the table you would
+  fill obeys a fixed-order linear recurrence, the $n$-th term costs $\log n$, not $n$.
 - **Decide the arithmetic régime up front.** A stated modulus means reduce after every operation;
   no modulus means big integers, and in C that means thinking about width before the first
   multiply. Either way, confirm the reduction commutes with what is actually being summed.
