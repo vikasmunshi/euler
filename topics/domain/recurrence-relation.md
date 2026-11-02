@@ -376,7 +376,7 @@ into independent terms, a pattern that induction will confirm. The shape picks t
 - ○ [0546](/solutions/0546/) — The Floor's Revenge
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ○ [0555](/solutions/0555/) — McCarthy 91 Function
-- ○ [0558](/solutions/0558/) — Irrational Base
+- ● [0558](/solutions/0558/) — Irrational Base
 - ○ [0570](/solutions/0570/) — Snowflakes
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences

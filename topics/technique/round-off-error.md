@@ -107,5 +107,6 @@ itself exact.
 - ● [0042](/solutions/0042/) — Coded Triangle Numbers
 - ● [0044](/solutions/0044/) — Pentagon Numbers
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
+- ● [0558](/solutions/0558/) — Irrational Base
 
 <!-- /problems -->

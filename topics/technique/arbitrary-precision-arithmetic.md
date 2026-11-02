@@ -233,6 +233,7 @@ conversion altogether, and is usually faster besides.
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0493](/solutions/0493/) — Under the Rainbow
+- ● [0558](/solutions/0558/) — Irrational Base
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0751](/solutions/0751/) — Concatenation Coincidence

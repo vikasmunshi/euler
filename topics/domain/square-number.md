@@ -140,7 +140,7 @@ identity — inverse test, difference of squares, the odd-number gap — has alr
 - ○ [0431](/solutions/0431/) — Square Space Silo
 - ○ [0459](/solutions/0459/) — Flipping Game
 - ● [0504](/solutions/0504/) — Square on the Inside
-- ○ [0558](/solutions/0558/) — Irrational Base
+- ● [0558](/solutions/0558/) — Irrational Base
 - ○ [0575](/solutions/0575/) — Wandering Robots
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps

@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0363](/solutions/0363/) — Bézier Curves
+- ● [0558](/solutions/0558/) — Irrational Base
 
 <!-- /problems -->

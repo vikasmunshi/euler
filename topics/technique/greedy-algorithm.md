@@ -222,6 +222,7 @@ logic. They differ in the big-integer arithmetic underneath (`math.lcm` against 
 - ● [0219](/solutions/0219/) — Skew-cost Coding
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
+- ● [0558](/solutions/0558/) — Irrational Base
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0887](/solutions/0887/) — Bounded Binary Search

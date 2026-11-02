@@ -329,6 +329,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0558](/solutions/0558/) — Irrational Base
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums

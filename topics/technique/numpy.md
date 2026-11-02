@@ -388,6 +388,7 @@ both slower and harder to read.
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0558](/solutions/0558/) — Irrational Base
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors
