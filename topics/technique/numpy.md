@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-11-01T10:29Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -80,7 +80,13 @@ gives a formula in $d$, evaluating it over $d = 1 \dots N$ is one expression:
 `counts = upper // (d * d)`, then a dot product against a sieved table. That is the
 whole inner loop of the squarefree count in [193](/solutions/0193/), and the
 divisor-block sums in [944](/solutions/0944/) are the same move over the
-$O(\sqrt{n})$ distinct values of $\lfloor n/x \rfloor$. The range need not be the
+$O(\sqrt{n})$ distinct values of $\lfloor n/x \rfloor$. The same holds when the formula
+is a recursion: [625](/solutions/0625/) computes the totient summatory function
+$\Phi(\lfloor N/k \rfloor)$ by [Du's sieve](https://en.wikipedia.org/wiki/Dirichlet_hyperbola_method),
+and each $v = \lfloor N/k \rfloor$'s explicit divisor range is one `arange`. Some terms
+$\Phi(\lfloor v/d \rfloor)$ are large values already memoised, others fall in the sieved
+small table, and the mask `k * d <= k_max` routes each to its table — two gathers, no
+branch. The range need not be the
 answer's index: [257](/solutions/0257/) parametrises its triangles by a fraction
 $p/q$, and for each $q$ the admissible $p$ are one `arange`, filtered to the coprime
 ones by `np.gcd(p, q) == 1`, with every primitive shape's scalings counted by one
@@ -106,7 +112,24 @@ one-line scatter correct. Fancy-index `+=` reads once and writes once, so if two
 sources land on the same target only one of them sticks, and nothing warns you. An
 injective map, like this one, is safe; a many-to-one map needs
 [`np.add.at`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html)
-or `np.bincount(to, weights=src)`.
+or `np.bincount(to, weights=src)`. Plain assignment is the exception: `a[idx] = True`
+lands the same value however often an index repeats, so a scatter of flags may collide
+freely.
+
+**Push, don't pull — and `argmin` is a mex.** A [Grundy value](https://en.wikipedia.org/wiki/Mex_(mathematics))
+is the smallest value *not* among a position's options, and computing it by pulling —
+gather every predecessor, build a set, scan for the gap — is a Python loop per
+position. [310](/solutions/0310/) reverses the direction. It keeps a boolean table
+`reach[heap, value]`, and the moment a heap's value is known it pushes it forward to
+every heap a square-number move leads from, `reach[heap + squares, value] = True` — the
+idempotent scatter above. When the loop reaches a heap, its row is complete, and
+`np.argmin` of a boolean row is the first `False`: the mex, in one call. The table's
+width is bounded because a mex never exceeds the number of options, here about
+$\sqrt{N}$. The count of zero-XOR triples then reuses 400's trick: `bincount` the
+Grundy values into a histogram sized to a power of two, and for each $x$,
+`np.dot(count, count[values ^ x])` is one term of the
+[XOR convolution](https://en.wikipedia.org/wiki/Hadamard_transform) — the gather
+permutes, so the dot product pairs every $g(a)$ with the $g(b)$ that cancels it.
 
 **A matrix product enumerates linear combinations.** If each candidate is a fixed
 linear function of some per-element features, put the features in rows and the
@@ -130,6 +153,19 @@ a [cheap check first](/topics/takeaway/cheap-checks-first) that shrinks the arra
 roughly tenfold per pass, so the whole filter costs barely more than its first
 comparison. `np.unique(..., return_counts=True)` then tallies how many ways each sum
 was reached.
+
+The digits can also *become* the array. [705](/solutions/0705/) needs the
+concatenation of every prime's decimal string, so it writes the digits into a
+(primes × width) `uint8` table, one column per place value, and `ravel()` reads it
+row-major — the concatenated string, with the leading-position zeros dropped by the
+same `flat != 0` filter that drops the real ones. Counting ordered pairs (positions
+$i < j$ holding digits $x$ then $y$) is then one pass per $x$: `np.cumsum(digits == x)`
+counts the $x$'s up to each position, and summed over the positions of $y$ it counts
+the pairs. A stable `argsort` groups positions by digit so each $y$ is one contiguous
+slice. That is a vectorised
+[inversion count](https://en.wikipedia.org/wiki/Inversion_(discrete_mathematics)), and
+it is linear only because the alphabet has nine letters — nine prefix sums, not a
+merge sort.
 
 **Vectorise across instances, not just across a range.** Nothing requires the
 elements to share a modulus. [421](/solutions/0421/) runs square-and-multiply on an
@@ -161,7 +197,15 @@ sequence. The Python loop count drops from $k^2$ to $2k$. A plain product reduce
 pairwise tree, `arr = arr[0::2] * arr[1::2] % p`, in $\log_2$ of the length steps, and
 even a linear recurrence fills the grid row-wise: an index-shift identity jumps the
 recurrence by a whole row, so each row's start is one scalar step and its contents one
-broadcast.
+broadcast. [754](/solutions/0754/) runs the grid scan inside a segmented
+[Möbius](https://en.wikipedia.org/wiki/M%C3%B6bius_function) sieve and adds two moves.
+A product over a *subset* is a full prefix product of `np.where(mu == 1, d, 1)` —
+the identity fills the gaps. And each segment's scan starts from the previous segment's
+last value, so the scan covers $1 \dots N$ in bounded memory while one fancy index per
+segment keeps only the $O(\sqrt{N})$ prefixes the formula reads, at the quotients
+$\lfloor N/k \rfloor$. Its sieve also tracks `rad`, the product of each entry's small
+primes, so `mu[rad != d] *= -1` accounts for the one prime above $\sqrt{N}$ that the
+sieve never visited — the same leftover-factor argument as 632.
 
 **Broadcasting builds the pairwise table.** `xs[None, :] - xs[:, None]` is every
 difference vector between $n$ points as one $n \times n$ array. [252](/solutions/0252/)
@@ -249,6 +293,15 @@ algorithm genuinely is scalar and branchy, the right move is `.tolist()` once an
 loop over plain Python. [464](/solutions/0464/) does exactly that — NumPy for the
 sieve, the prefix sums and the sort, then a hand-written Fenwick tree over Python
 lists, because a pointer-chasing $O(\log n)$ update has nothing to vectorise.
+[425](/solutions/0425/) draws the same line through a graph. Building the edges is
+uniform work: for each digit position and each decrement, one masked subtraction and
+one `is_prime` gather produce every edge of that kind for all primes at once. The edges
+are concatenated, sorted by their larger endpoint with `argsort`, and two
+`searchsorted` calls give every prime its slice of that list — a
+[CSR](https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format))
+adjacency, with `np.cumsum(is_prime) - 1` as the value-to-index map. The
+[union-find](https://en.wikipedia.org/wiki/Disjoint-set_data_structure) that walks it
+is path-chasing, so it runs over `.tolist()` copies in plain Python.
 The converse split works too: [983](/solutions/0983/) is a
 [depth-first search](/topics/technique/depth-first-search), and the recursion stays
 plain Python, but each node carries the table of every signed sum of its chosen
