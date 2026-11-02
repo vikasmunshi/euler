@@ -203,7 +203,7 @@ never shows.
 - ○ [0384](/solutions/0384/) — Rudin-Shapiro Sequence
 - ○ [0391](/solutions/0391/) — Hopping Game
 - ○ [0409](/solutions/0409/) — Nim Extreme
-- ○ [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0486](/solutions/0486/) — Palindrome-containing Strings
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$

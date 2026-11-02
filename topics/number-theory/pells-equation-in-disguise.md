@@ -192,6 +192,7 @@ while p <= max_perimeter:
 - ○ [0450](/solutions/0450/) — Hypocycloid and Lattice Points
 - ○ [0454](/solutions/0454/) — Diophantine Reciprocals III
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0482](/solutions/0482/) — The Incenter of a Triangle
 - ○ [0496](/solutions/0496/) — Incenter and Circumcenter of Triangle
 - ○ [0510](/solutions/0510/) — Tangent Circles

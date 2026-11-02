@@ -225,6 +225,7 @@ in the key.
 - ● [0161](/solutions/0161/) — Triominoes
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0301](/solutions/0301/) — Nim
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0641](/solutions/0641/) — A Long Row of Dice

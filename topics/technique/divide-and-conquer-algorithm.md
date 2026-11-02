@@ -100,6 +100,7 @@ The algorithms are the same in both languages; they differ in how the recursion'
 
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
 - ● [0230](/solutions/0230/) — Fibonacci Words
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 
 <!-- /problems -->

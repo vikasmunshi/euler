@@ -597,7 +597,7 @@ handful of operations on small numbers.
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ○ [0456](/solutions/0456/) — Triangles Containing the Origin II
 - ○ [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
-- ○ [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0467](/solutions/0467/) — Superinteger
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
 - ○ [0475](/solutions/0475/) — Music Festival

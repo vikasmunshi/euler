@@ -294,7 +294,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0444](/solutions/0444/) — The Roundtable Lottery
 - ○ [0447](/solutions/0447/) — Retractions C
 - ○ [0448](/solutions/0448/) — Average Least Common Multiple
-- ○ [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0471](/solutions/0471/) — Triangle Inscribed in Ellipse
 - ○ [0479](/solutions/0479/) — Roots on the Rise
 - ○ [0489](/solutions/0489/) — Common Factors Between Two Sequences

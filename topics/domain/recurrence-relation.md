@@ -296,7 +296,7 @@ induction will confirm. The shape picks the method.
 - ○ [0440](/solutions/0440/) — GCD and Tiling
 - ● [0443](/solutions/0443/) — GCD Sequence
 - ○ [0458](/solutions/0458/) — Permutations of Project
-- ○ [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0469](/solutions/0469/) — Empty Chairs
 - ○ [0472](/solutions/0472/) — Comfortable Distance II
 - ○ [0477](/solutions/0477/) — Number Sequence Game

@@ -226,6 +226,7 @@ crash, and neither shows up on small test inputs.
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0625](/solutions/0625/) — Gcd Sum
