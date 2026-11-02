@@ -5684,8 +5684,8 @@
     "level": 14,
     "pct": 37,
     "solvers": 511,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 12:24"
   },
   "712": {
     "title": "Exponent Difference",
