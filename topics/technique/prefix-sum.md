@@ -1,15 +1,15 @@
 <!-- tags: [prefix-sum] -->
-<!-- status: final 2026-10-29T07:06Z -->
+<!-- status: final -->
 # Prefix sum
 
 A [prefix sum](https://en.wikipedia.org/wiki/Prefix_sum) is the running total of a sequence:
 $P_0 = 0$ and $P_k = a_0 + a_1 + \dots + a_{k-1}$. Build it once in $O(n)$ and every contiguous
 range sum collapses to one subtraction, $\sum_{i \le t < j} a_t = P_j - P_i$. That identity is the
 whole technique. What earns it a tag across problems that share nothing else is that the same array
-answers four quite different questions, and knowing which one you are asking is what tells you
+answers five quite different questions, and knowing which one you are asking is what tells you
 whether to build it at all.
 
-## Four jobs
+## Five jobs
 
 **Range sums in constant time.** The textbook use, and the one to recognise first: a sum over a
 contiguous window, asked many times over values that never change. Problem 50 searches for the
@@ -52,6 +52,18 @@ Problem 516 asks that function many times. Every $n$ with a 5-smooth totient fac
 "good" primes, so the sum over all such $n \le L$ becomes, for each $m$, $m$ times the sum of the
 Hamming numbers up to $\lfloor L/m \rfloor$. One sorted list and one prefix array serve every $m$
 with a single `bisect` each. The Hamming numbers themselves are never multiplied out.
+
+Problem 341 applies the index job to a sequence that describes itself.
+[Golomb's sequence](https://oeis.org/A001462) is constant on runs, and the value $v$ fills exactly
+$G(v)$ positions. So $S(v) = G(1) + \dots + G(v)$ is the last index holding $v$, and a search on
+$S$ inverts the sequence. The question asks for $G(n^3)$ with $n^3$ near $10^{18}$, and one inversion
+is not enough. The trick is to take a prefix sum of a prefix sum: $T(i) = \sum_{t \le i} t\,G(t)$ is
+the last $n$ with $G(G(n)) = i$. Three levels of inversion bring the table down to about
+$3 \times 10^4$ entries. Two details matter. First, inside one level-1 block $G$ is constant, so $T$
+is a quadratic in $i$ there, and the last step of the search is a square root (with an integer
+correction for float rounding) rather than a `bisect`. Second, all the queries go through a single
+`np.searchsorted`. When the prefix array has a closed form between its breakpoints, store only the
+breakpoints and solve the formula in between.
 
 Problem 205 shows the probabilistic form. Each player's dice total is
 [convolved](/topics/technique/convolution) into an exact integer count distribution, and a prefix
@@ -97,6 +109,15 @@ evaluated at each quotient $v = \lfloor n/k \rfloor$ from smallest to largest. T
 stops being the answer and becomes the base case of a sublinear recursion. That is the move to
 reach for once $n$ is too large to sieve.
 
+Problem 463 takes that move all the way: no table at all. Its $f$ is defined by recurrences on
+$f(2n)$, $f(4n+1)$ and $f(4n+3)$, and the target is $S(n) = \sum_{i \le n} f(i)$ at an $n$ far too
+large to sieve. The insight is that a recurrence on $f$ *lifts* to a recurrence on its prefix sums.
+Split the sum by $i \bmod 2$, and the odd part by $i \bmod 4$. The result is a pair of mutually
+recursive prefix sums: $S$ and $O(m) = \sum_{k \le m} f(2k+1)$, each defined from both at about half
+the argument. Memoised, that is $O(\log n)$ states, and $f$ itself is never evaluated beyond the base
+cases. When the pointwise function is defined by halving, look for the halving recurrence its sum
+obeys.
+
 Once that table exists, the standard number-theoretic machinery applies on top of it: problem 233
 reads a sieved prefix table at $\lfloor \text{limit}/c \rfloor$ for each core, and problems 319, 351
 and 464 group the $O(\sqrt n)$ distinct values of $\lfloor n/d \rfloor$ into *differences* of the
@@ -117,6 +138,14 @@ The answer is the sum of that prefix product. The swap is a division, and that o
 the modulus is prime: each removed factor is undone by multiplying by its
 [Fermat inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse).
 
+Problem 423 shows the most common prefix product: the factorial table behind every modular
+binomial. It needs $\binom{n-1}{\pi(n)}$ for every $n$ up to $5 \times 10^7$, so three cumulative
+arrays do all the work. $\pi(n)$ is an `np.cumsum` of the prime indicator. $n!$ is a running product.
+And the inverse factorials come from a *reversed* running product, $top \cdot (top-1) \cdots$, times
+one Fermat inverse of $top!$, because $1/i! = (i+1)(i+2)\cdots top \,/\, top!$. That is one modular
+exponentiation for the whole table, not one per entry: the suffix product undoes the prefix product
+with a single division.
+
 **A second scan over the prefix array.** The prefix array is itself a sequence, and the deeper uses
 scan it again. Maximum subarray is the canonical one:
 $\max_j \left( P_{j+1} - \min_{i \le j} P_i \right)$ — a
@@ -134,6 +163,22 @@ of all: a substring of a periodic digit stream starting after position $t$ sums 
 $P_t + k$ is itself a prefix sum, so the question becomes membership in the *set* of prefix sums —
 held as one machine-word [bitset](/topics/technique/bit-array) and tested by a rotation. The prefix
 sums stop being an intermediate and become the data structure.
+
+**Counting pairs through the prefixes.** Problem 238's inversion has a counting form, and it is the
+reason prefix sums show up in so many "how many substrings" questions. A window $[i, j)$ has
+property $X$ exactly when the pair $(P_i, P_j)$ does. So counting windows means counting pairs of
+prefixes, and for an equality condition that is $\sum_r \binom{c_r}{2}$ over the prefix-value
+counts $c_r$. Problem 706 rests on this: a digit string's substrings divisible by 3 are the pairs of
+prefixes with equal [residue](/topics/domain/modular-arithmetic) mod 3. To count the $d$-digit
+numbers whose number of such substrings is itself divisible by 3, it does not track the substrings
+at all. Its automaton state is the three prefix-residue counts, kept mod 3 and relative to the
+current residue (81 states), and it is raised to the $d$-th power as a matrix. Problem 705 counts
+ordered pairs of a different kind: positions $i < j$ holding digits $x$ and $y$, over a digit string
+of several million characters. For each $x$, a cumulative count of $x$-digits gives "how many $x$
+come before here" at every position. Summing that at the positions of $y$ is the pair count
+$\#(x \text{ before } y)$, so nine cumsums produce the whole $9 \times 9$ table. This is the
+textbook way to count [inversions](https://en.wikipedia.org/wiki/Inversion_(discrete_mathematics))
+over a small alphabet, and it needs neither a Fenwick tree nor a merge sort.
 
 ## How to reason about it
 
@@ -159,7 +204,12 @@ sums stop being an intermediate and become the data structure.
   chunk width so no chunk's `int64` cumulative sum can overflow and carries the running total as a
   Python `int`; problem 351 keeps its totient prefix sums in `int64` and records, next to each
   vectorised sum, why that sum stays under $2^{63}$; problem 710 reduces every count mod $m$ as it extends the arrays. Under a modulus,
-  remember that the query is a subtraction and needs reducing back into range. In floating point,
+  remember that the query is a subtraction and needs reducing back into range. NumPy has no modular
+  `cumprod`, and an `int64` one overflows within a few terms. Problem 423 therefore scans in blocks.
+  It lays the array out as a $\sqrt n \times \sqrt n$ grid and runs $\sqrt n$ vectorised steps that
+  reduce mod $p$ after every multiply. A short Python pass then builds each block's carry-in, and one
+  broadcast multiply applies it. The result is a parallel prefix scan with $O(\sqrt n)$ interpreted
+  steps instead of $n$. In floating point,
   differencing two large nearly-equal prefix sums is
   [catastrophic cancellation](/topics/technique/catastrophic-cancellation) — the technique loses
   precision without complaining.
