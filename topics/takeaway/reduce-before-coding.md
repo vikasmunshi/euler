@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final 2026-11-01T14:22Z -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the
@@ -102,8 +102,23 @@ $n = d \cdot e$, and a per-$n$ search becomes a sweep over pairs.
 *successive* terms of $n^2 + k^2$; a common divisor divides their difference
 $2n + 1$, which pins $n \equiv -\tfrac12 \pmod p$, and substituting back leaves
 the condition $p \mid 4k^2 + 1$ — a search over $n$ for every $k$ becomes the
-largest prime factor of one polynomial value. Each restatement is a line of algebra, and each one
-is where the problem actually gets solved.
+largest prime factor of one polynomial value.
+[A Polynomial Modulo the Square of a Prime](/solutions/0457/) asks for the least
+root of $n^2 - 3n - 1$ modulo $p^2$; completing the square makes that a square
+root of 13, found modulo $p$ and lifted to $p^2$ by one
+[Hensel](https://en.wikipedia.org/wiki/Hensel%27s_lemma) step, and
+[quadratic reciprocity](https://en.wikipedia.org/wiki/Quadratic_reciprocity)
+turns "does 13 have a root modulo $p$?" into a lookup on $p \bmod 13$ — a scan
+of $p^2$ candidates becomes a few modular powers per prime. A restatement can
+also change the *kind* of collection being summed. [Fibonacci
+Subwords](/solutions/1006/) sums over the $k+1$ distinct length-$k$ factors of
+the Fibonacci word, a set that would need deduplicating if listed; reading the
+factors off the arcs of a rotation of the circle makes them the $k+1$
+consecutive windows of one explicit, almost-palindromic word, and a sum over
+sliding windows is a running total, linear in a small state vector and so
+walkable block by block along the Zeckendorf decomposition of $k$. Each
+restatement is a line of algebra, and each one is where the problem actually
+gets solved.
 
 **Translate into a known object.** Sometimes the restated problem is one that
 mathematics has already solved under another name. The Diophantine-reciprocal
@@ -140,7 +155,25 @@ completing the square with $b = 6a + 5$ turns it into $b \mapsto b^2 - 2$, the
 doubling rule of a [Lucas sequence](https://en.wikipedia.org/wiki/Lucas_sequence),
 so the $n$-th term is $V_{2^{n-1}}$. Modulo a prime $p$ that index only matters
 modulo the order of the underlying root, which divides $p - 1$ or $p + 1$, so
-$10^{15}$ iterations become two short exponentiations. Once the object has a name, its theory comes with it, and the code
+$10^{15}$ iterations become two short exponentiations.
+The theory that comes with a name can include a *bound*. [$47$-smooth Triangular
+Numbers](/solutions/0581/) looks like an open-ended search, since nothing in the
+statement says where smooth pairs $n, n+1$ stop; rewriting $n(n+1)$ as a Pell
+equation $x^2 - 2q\,y^2 = 1$, with $q$ ranging over the $2^{15}$ products of
+primes up to 47, brings in
+[Størmer's theorem](https://en.wikipedia.org/wiki/St%C3%B8rmer%27s_theorem) and
+Lehmer's refinement, which say only the first two dozen powers of each
+fundamental solution can qualify — the search is finite because a theorem says
+so, not because a loop happened to stop finding things. And the known object can
+lie outside arithmetic altogether. [Solving
+$\mathcal{I}$-equations](/solutions/0674/) asks for the least common value of two
+nested polynomial expressions, but the operator is injective on pairs of
+non-negative integers, so two expressions are equal exactly when their trees
+match after substitution: the equation is first-order
+[unification](https://en.wikipedia.org/wiki/Unification_(computer_science)),
+solved with union-find and an occurs check, and monotonicity makes the least
+value the most general unifier with every free variable set to zero. No number is
+ever searched. Once the object has a name, its theory comes with it, and the code
 implements a theorem rather than a search.
 
 **Keep only what the answer reads.** Most inputs carry far more information
@@ -172,6 +205,12 @@ value by at least $3/2$, so beyond about 36 prime factors every early member
 shares a common power of two. Dividing it out maps the head of the list for $k$
 onto the head of the list for 36 in order, and $k$ is gone — the answer is an
 ordinary 64-bit enumeration times one modular power.
+Sometimes the state shrinks to a single bit. In [Pairwise Coin-Tossing
+Game](/solutions/0605/) consecutive rounds share exactly one player, so the
+only thing that matters after a round is whether its winner plays the next one;
+the game is a two-state Markov chain, the ending round has a simple geometric
+law, and each player's chance is an arithmetico-geometric series summed in
+closed form.
 The question to ask is: *what is this result actually a function of?*
 The answer is the real state space.
 
@@ -193,7 +232,13 @@ rather than iterating it. [$5$-smooth Totients](/solutions/0516/) reads the
 totient's product formula backwards: $\varphi(n)$ is 5-smooth only when $n$ is a
 Hamming number times distinct primes $q$ with $q - 1$ Hamming, so $10^{12}$
 candidates become a few thousand Hamming numbers and the square-free products of
-a few hundred primes. Construction beats filtering whenever the answers are
+a few hundred primes. For a Diophantine equation the generator is a
+parametrisation. [Asymmetric Diophantine Equation](/solutions/0764/) reads
+$16x^2 + y^4 = z^2$ as a Pythagorean triple with one leg a multiple of 4 and the
+other a square; Euclid's formula, plus the fact that coprime factors of a square
+are squares, yields two two-parameter families in which $z$ grows like a fourth
+power — so $z \le 10^{16}$ means about $3 \times 10^7$ coprime parameter pairs,
+each one a solution, and no search over $(x, y)$ or square test anywhere. Construction beats filtering whenever the answers are
 sparse and the space is not.
 
 **Trade the condition for a sum that collapses.** A congruence condition, "the
@@ -271,7 +316,12 @@ it does. And small edge cases hide in correct derivations too: in
   requested digits is safe only when the reduced formula uses addition and
   multiplication alone — true of the subset-sum table in
   [Prime Subset Sums](/solutions/0249/), and something to check rather than
-  assume once a division appears.
+  assume once a division appears. [Pairwise Coin-Tossing
+  Game](/solutions/0605/) shows the fix when it does: its closed form must be
+  reduced to lowest terms, the common factor $g$ need not be invertible modulo
+  $10^8$, so the product is computed modulo $10^8 g^2$ and divided *exactly* by
+  $g^2$ — and $g$ itself comes from $\gcd(n, 2^n \bmod n - 1)$, never from the
+  thirty-million-digit $2^n - 1$.
 
 The discipline underneath all of it is order of operations, in the human sense:
 do the mathematics *first*. A loop written before the algebra is a loop you will
