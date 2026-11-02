@@ -1,5 +1,5 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final -->
+<!-- status: final 2026-11-02T06:55Z -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
