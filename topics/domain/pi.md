@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pi>._
 ## Problems
 
 - ● [0230](/solutions/0230/) — Fibonacci Words
-- ○ [0363](/solutions/0363/) — Bézier Curves
+- ● [0363](/solutions/0363/) — Bézier Curves
 - ● [0461](/solutions/0461/) — Almost Pi
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
 

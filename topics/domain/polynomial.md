@@ -10,7 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Polynomial>._
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ○ [0286](/solutions/0286/) — Scoring Probabilities
 - ○ [0356](/solutions/0356/) — Largest Roots of Cubic Polynomials
-- ○ [0363](/solutions/0363/) — Bézier Curves
+- ● [0363](/solutions/0363/) — Bézier Curves
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0435](/solutions/0435/) — Polynomials of Fibonacci Numbers
 - ○ [0438](/solutions/0438/) — Integer Part of Polynomial Equation's Solutions

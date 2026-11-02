@@ -99,6 +99,7 @@ evaluation order would need the prefix value recomputed.
 ## Problems
 
 - ● [0028](/solutions/0028/) — Number Spiral Diagonals
+- ● [0363](/solutions/0363/) — Bézier Curves
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0868](/solutions/0868/) — Belfry Maths
 

@@ -216,7 +216,7 @@ near the root.
 - ○ [0332](/solutions/0332/) — Spherical Triangles
 - ○ [0338](/solutions/0338/) — Cutting Rectangular Grid Paper
 - ○ [0353](/solutions/0353/) — Risky Moon
-- ○ [0363](/solutions/0363/) — Bézier Curves
+- ● [0363](/solutions/0363/) — Bézier Curves
 - ○ [0373](/solutions/0373/) — Circumscribed Circles
 - ○ [0385](/solutions/0385/) — Ellipses Inside Triangles
 - ○ [0390](/solutions/0390/) — Triangles with Non Rational Sides and Integral Area

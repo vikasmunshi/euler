@@ -142,6 +142,15 @@
       "refs": ["p0836"]
     },
     {
+      "slug": "arc-length",
+      "facet": "domain",
+      "name": "Arc length",
+      "reference": "https://en.wikipedia.org/wiki/Arc_length",
+      "additional-references": [],
+      "summary": "The length of a curve, the integral of its speed along a parametrisation.",
+      "refs": ["p0363"]
+    },
+    {
       "slug": "arithmetic-derivative",
       "facet": "domain",
       "name": "Arithmetic derivative",
@@ -2326,7 +2335,7 @@
       "reference": "https://en.wikipedia.org/wiki/Polynomial_interpolation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0101", "p0487"]
+      "refs": ["p0101", "p0363_s0", "p0487"]
     },
     {
       "slug": "polyomino",
@@ -4432,7 +4441,7 @@
       "reference": "https://docs.python.org/3/library/fractions.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0523_s0", "p0776_s0"]
+      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0363_s0", "p0523_s0", "p0776_s0"]
     },
     {
       "slug": "frequency-statistics",
@@ -4624,6 +4633,15 @@
       "refs": ["p0069_s0", "p0089_s0", "p0110_s0", "p0111_s0", "p0152_s0", "p0219_s0", "p0297_s0", "p0347_s0", "p0692_s0", "p0698_s0", "p0887_s0"]
     },
     {
+      "slug": "greens-theorem",
+      "facet": "technique",
+      "name": "Green's theorem",
+      "reference": "https://en.wikipedia.org/wiki/Green%27s_theorem",
+      "additional-references": [],
+      "summary": "Turning a planar area integral into a line integral around its boundary.",
+      "refs": ["p0363_s0"]
+    },
+    {
       "slug": "grid-spatial-index",
       "facet": "technique",
       "name": "Grid (spatial index)",
@@ -4720,7 +4738,7 @@
       "reference": "https://en.wikipedia.org/wiki/Horner%27s_method",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0028_s0", "p0720_s0", "p0868_s0"]
+      "refs": ["p0028_s0", "p0363_s0", "p0720_s0", "p0868_s0"]
     },
     {
       "slug": "huffman-coding",
@@ -4810,7 +4828,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integral",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0587_s0"]
+      "refs": ["p0363_s0", "p0587_s0"]
     },
     {
       "slug": "intenum",
@@ -5665,7 +5683,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_formula",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0042_s0", "p0044_s0", "p0045_s0", "p0141_s0", "p0141_s1", "p0241_s0", "p0246_s0", "p0247_s0", "p0341_s0", "p0457_s0", "p0587_s0", "p0932_s0"]
+      "refs": ["p0042_s0", "p0044_s0", "p0045_s0", "p0141_s0", "p0141_s1", "p0241_s0", "p0246_s0", "p0247_s0", "p0341_s0", "p0363_s0", "p0457_s0", "p0587_s0", "p0932_s0"]
     },
     {
       "slug": "quadratic-gauss-sum",
@@ -5765,6 +5783,15 @@
       "additional-references": [],
       "summary": "Bracketed root-finding by secant interpolation, with the Illinois fix against one-sided stalling.",
       "refs": ["p0761_s0"]
+    },
+    {
+      "slug": "romberg-method",
+      "facet": "technique",
+      "name": "Romberg's method",
+      "reference": "https://en.wikipedia.org/wiki/Romberg%27s_method",
+      "additional-references": [],
+      "summary": "Richardson extrapolation of successively halved trapezoidal rules for fast, high-accuracy quadrature.",
+      "refs": ["p0363_s0"]
     },
     {
       "slug": "roots-of-unity-filter",
@@ -6350,6 +6377,15 @@
       "additional-references": [],
       "summary": "When each term is already reduced modulo m, aggregating them inside the same modulus recovers only the total modulo m, so an exact sum forces the terms to be produced individually.",
       "refs": ["p0244", "p0271"]
+    },
+    {
+      "slug": "exact-where-possible-numeric-where-necessary",
+      "facet": "takeaway",
+      "name": "Exact where possible, numeric where necessary",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Solve the part with a closed form exactly and confine numerical approximation to the part that has none.",
+      "refs": ["p0363"]
     },
     {
       "slug": "exploit-symmetry",

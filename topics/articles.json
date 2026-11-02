@@ -181,6 +181,18 @@
       "solved_after": []
     },
     {
+      "path": "domain/arc-length",
+      "title": "Arc length",
+      "status": "draft",
+      "written": null,
+      "solved": 1,
+      "problems": 1,
+      "tags": ["arc-length"],
+      "refs": ["p0363"],
+      "covered": [],
+      "solved_after": []
+    },
+    {
       "path": "domain/arithmetic-derivative",
       "title": "Arithmetic derivative",
       "status": "draft",
@@ -269,7 +281,7 @@
       "title": "B\u00e9zier curve",
       "status": "draft",
       "written": null,
-      "solved": 0,
+      "solved": 1,
       "problems": 1,
       "tags": ["bezier-curve"],
       "refs": ["p0363"],
@@ -1733,12 +1745,12 @@
       "title": "Geometry",
       "status": "final",
       "written": "2026-10-16T07:11Z",
-      "solved": 11,
+      "solved": 12,
       "problems": 71,
       "tags": ["geometry"],
       "refs": ["p0086", "p0091", "p0144", "p0163", "p0177", "p0222", "p0228", "p0246", "p0247", "p0264", "p0279", "p0285", "p0295", "p0296", "p0299", "p0309", "p0311", "p0314", "p0332", "p0338", "p0353", "p0363", "p0373", "p0385", "p0390", "p0397", "p0404", "p0410", "p0428", "p0431", "p0460", "p0465", "p0476", "p0510", "p0525", "p0532", "p0547", "p0557", "p0563", "p0566", "p0579", "p0583", "p0587", "p0600", "p0607", "p0613", "p0620", "p0644", "p0667", "p0681", "p0727", "p0737", "p0747", "p0761", "p0775", "p0786", "p0841", "p0855", "p0883", "p0891", "p0894", "p0897", "p0904", "p0914", "p0919", "p0935", "p0962", "p0966", "p0972", "p0985", "p0998"],
       "covered": ["p0086", "p0091", "p0144", "p0163", "p0177", "p0222", "p0228", "p0246", "p0247", "p0587", "p0761"],
-      "solved_after": []
+      "solved_after": ["p0363"]
     },
     {
       "path": "domain/goldbachs-conjecture",
@@ -2993,7 +3005,7 @@
       "title": "Pi",
       "status": "draft",
       "written": null,
-      "solved": 2,
+      "solved": 3,
       "problems": 4,
       "tags": ["pi"],
       "refs": ["p0230", "p0363", "p0461", "p0591"],
@@ -3077,7 +3089,7 @@
       "title": "Polynomial",
       "status": "draft",
       "written": null,
-      "solved": 1,
+      "solved": 2,
       "problems": 16,
       "tags": ["polynomial"],
       "refs": ["p0269", "p0286", "p0356", "p0363", "p0402", "p0435", "p0438", "p0479", "p0498", "p0602", "p0797", "p0802", "p0812", "p0813", "p0969", "p0995"],
@@ -3089,10 +3101,10 @@
       "title": "Polynomial interpolation",
       "status": "draft",
       "written": null,
-      "solved": 2,
-      "problems": 2,
+      "solved": 3,
+      "problems": 3,
       "tags": ["polynomial-interpolation"],
-      "refs": ["p0101", "p0487"],
+      "refs": ["p0101", "p0363_s0", "p0487"],
       "covered": [],
       "solved_after": []
     },
@@ -4774,6 +4786,18 @@
       "tags": ["exact-sums-resist-modular-shortcuts"],
       "refs": ["p0244", "p0271"],
       "covered": ["p0244", "p0271"],
+      "solved_after": []
+    },
+    {
+      "path": "takeaway/exact-where-possible-numeric-where-necessary",
+      "title": "Exact where possible, numeric where necessary",
+      "status": "draft",
+      "written": null,
+      "solved": 1,
+      "problems": 1,
+      "tags": ["exact-where-possible-numeric-where-necessary"],
+      "refs": ["p0363"],
+      "covered": [],
       "solved_after": []
     },
     {
@@ -6593,12 +6617,12 @@
       "title": "fractions.Fraction",
       "status": "final",
       "written": "2026-10-29T12:20Z",
-      "solved": 10,
-      "problems": 10,
+      "solved": 11,
+      "problems": 11,
       "tags": ["fractions-fraction"],
-      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0523_s0", "p0776_s0"],
+      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0363_s0", "p0523_s0", "p0776_s0"],
       "covered": ["p0033", "p0065", "p0066", "p0071", "p0101", "p0180", "p0198", "p0236", "p0523"],
-      "solved_after": ["p0776"]
+      "solved_after": ["p0363", "p0776"]
     },
     {
       "path": "technique/frequency-statistics",
@@ -6853,6 +6877,18 @@
       "solved_after": []
     },
     {
+      "path": "technique/greens-theorem",
+      "title": "Green's theorem",
+      "status": "draft",
+      "written": null,
+      "solved": 1,
+      "problems": 1,
+      "tags": ["greens-theorem"],
+      "refs": ["p0363_s0"],
+      "covered": [],
+      "solved_after": []
+    },
+    {
       "path": "technique/grid-spatial-index",
       "title": "Grid (spatial index)",
       "status": "draft",
@@ -6977,12 +7013,12 @@
       "title": "Horner's method",
       "status": "final",
       "written": "2026-10-19T06:46Z",
-      "solved": 3,
-      "problems": 3,
+      "solved": 4,
+      "problems": 4,
       "tags": ["horners-method"],
-      "refs": ["p0028_s0", "p0720_s0", "p0868_s0"],
+      "refs": ["p0028_s0", "p0363_s0", "p0720_s0", "p0868_s0"],
       "covered": ["p0028", "p0720", "p0868"],
-      "solved_after": []
+      "solved_after": ["p0363"]
     },
     {
       "path": "technique/huffman-coding",
@@ -7097,10 +7133,10 @@
       "title": "Integral",
       "status": "draft",
       "written": null,
-      "solved": 1,
-      "problems": 1,
+      "solved": 2,
+      "problems": 2,
       "tags": ["integral"],
-      "refs": ["p0587_s0"],
+      "refs": ["p0363_s0", "p0587_s0"],
       "covered": [],
       "solved_after": []
     },
@@ -8237,12 +8273,12 @@
       "title": "Quadratic formula",
       "status": "final",
       "written": "2026-08-02T19:19Z",
-      "solved": 11,
-      "problems": 11,
+      "solved": 12,
+      "problems": 12,
       "tags": ["quadratic-formula"],
-      "refs": ["p0042_s0", "p0044_s0", "p0045_s0", "p0141_s0", "p0141_s1", "p0241_s0", "p0246_s0", "p0247_s0", "p0341_s0", "p0457_s0", "p0587_s0", "p0932_s0"],
+      "refs": ["p0042_s0", "p0044_s0", "p0045_s0", "p0141_s0", "p0141_s1", "p0241_s0", "p0246_s0", "p0247_s0", "p0341_s0", "p0363_s0", "p0457_s0", "p0587_s0", "p0932_s0"],
       "covered": ["p0042", "p0044", "p0045", "p0141", "p0241", "p0246", "p0247", "p0587", "p0932"],
-      "solved_after": ["p0341", "p0457"]
+      "solved_after": ["p0341", "p0363", "p0457"]
     },
     {
       "path": "technique/quadratic-gauss-sum",
@@ -8373,6 +8409,18 @@
       "problems": 1,
       "tags": ["regula-falsi"],
       "refs": ["p0761_s0"],
+      "covered": [],
+      "solved_after": []
+    },
+    {
+      "path": "technique/romberg-method",
+      "title": "Romberg's method",
+      "status": "draft",
+      "written": null,
+      "solved": 1,
+      "problems": 1,
+      "tags": ["romberg-method"],
+      "refs": ["p0363_s0"],
       "covered": [],
       "solved_after": []
     },
