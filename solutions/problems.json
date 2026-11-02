@@ -2732,8 +2732,8 @@
     "level": 14,
     "pct": 37,
     "solvers": 1153,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 07:31"
   },
   "343": {
     "title": "Fractional Sequences",
