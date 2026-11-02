@@ -5388,8 +5388,8 @@
     "level": 35,
     "pct": 88,
     "solvers": 280,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 07:38"
   },
   "675": {
     "title": "$2^{\\omega(n)}$",
