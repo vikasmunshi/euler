@@ -3700,8 +3700,8 @@
     "level": 10,
     "pct": 28,
     "solvers": 1538,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 07:40"
   },
   "464": {
     "title": "M\u00f6bius Function and Intervals",
