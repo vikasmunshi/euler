@@ -1,5 +1,5 @@
 <!-- tags: [sieve-of-eratosthenes] -->
-<!-- status: final -->
+<!-- status: final 2026-11-02T22:26Z -->
 # Sieve of Eratosthenes
 
 The [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) finds
