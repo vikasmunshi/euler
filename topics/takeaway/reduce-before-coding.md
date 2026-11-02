@@ -426,6 +426,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0635](/solutions/0635/) — Subset Sums

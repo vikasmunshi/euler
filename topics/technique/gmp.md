@@ -179,6 +179,7 @@ constant factor.
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0523](/solutions/0523/) — First Sort I
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0776](/solutions/0776/) — Digit Sum Division
 

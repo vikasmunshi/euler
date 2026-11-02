@@ -124,5 +124,6 @@ be a square, and the result is a $D = 5$ Pell equation whose solutions are expre
 - ● [0140](/solutions/0140/) — Modified Fibonacci Golden Nuggets
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ● [0321](/solutions/0321/) — Swapping Counters
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 
 <!-- /problems -->

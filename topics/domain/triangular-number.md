@@ -127,7 +127,7 @@ apart, and a triangular-style quadratic falls out.
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ○ [0378](/solutions/0378/) — Triangle Triples
 - ○ [0459](/solutions/0459/) — Flipping Game
-- ○ [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ○ [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ○ [0726](/solutions/0726/) — Falling Bottles

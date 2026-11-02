@@ -197,6 +197,7 @@ array between stages, because the language will not short-circuit for you.
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0357](/solutions/0357/) — Prime Generating Integers
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0808](/solutions/0808/) — Reversible Prime Squares

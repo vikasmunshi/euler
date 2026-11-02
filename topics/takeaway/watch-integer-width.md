@@ -304,6 +304,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0659](/solutions/0659/) — Largest Prime

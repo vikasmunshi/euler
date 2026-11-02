@@ -210,6 +210,7 @@ Trial division is the default until one of three things is true.
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0853](/solutions/0853/) — Pisano Periods 1

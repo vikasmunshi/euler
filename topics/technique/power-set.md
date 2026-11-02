@@ -130,5 +130,6 @@ lookup before any factorisation or divisor doubling.
 - ● [0118](/solutions/0118/) — Pandigital Prime Sets
 - ● [0152](/solutions/0152/) — Sums of Square Reciprocals
 - ● [0357](/solutions/0357/) — Prime Generating Integers
+- ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 
 <!-- /problems -->
