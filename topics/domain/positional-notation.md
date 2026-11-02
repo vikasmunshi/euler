@@ -1,5 +1,5 @@
 <!-- tags: [positional-notation] -->
-<!-- status: final 2026-10-29T01:58Z -->
+<!-- status: final -->
 # Positional notation
 
 [Positional notation](https://en.wikipedia.org/wiki/Positional_notation) is the convention that a
@@ -50,6 +50,21 @@ is the equation $a \cdot 10^d + c = s^2$ with $s = a + c$, which rearranges to $
 Problem 805 (shifted multiples) and the [cyclic numbers](/topics/domain/cyclic-number) behind
 $142857$ belong to the same family: digit shifts are multiplications by $b$ modulo $b^k - 1$.
 
+Edits and cuts translate the same way. Changing the digit in place $b^k$ by $\delta$ is the
+offset $\pm\delta\, b^k$. Dropping the leading digit of a $d$-digit number is $n \bmod b^{d-1}$.
+Cutting the string after its low $k$ digits splits $n = h \cdot b^k + \ell$ into two independent
+halves. Problem 425 joins primes that differ in one digit, or by one prepended digit. Its solution
+never touches a string: each prime generates its *smaller* neighbours as $v - \delta \cdot 10^k$ and
+$v \bmod 10^{d-1}$. That is one array operation per (place, $\delta$) pair across all primes at once,
+and a [union–find](/topics/technique/disjoint-set-data-structure) sweep in increasing order does
+the rest. Problem 637 inserts plus signs between
+digits. Two facts from the value view tame its $2^{L-1}$ splits. First, merging two parts never
+lowers the total, because $b\,a + c \ge a + c$. So the digit sum is always the *smallest* split sum,
+and it settles most numbers with no search at all. Second, a cut at place $b^k$ divides the number
+into a high half and a low half. Their split sums can be tabulated separately and joined
+[meet-in-the-middle](/topics/technique/meet-in-the-middle-attack), so the same few thousand halves serve
+ten million numbers.
+
 Partial digit constraints become congruences in the same way. Problem 206's square with alternate
 digits pinned reads its last digits first: the low digits of $n^2$ depend only on the low digits of
 $n$, because $n^2 \bmod 10^j$ is determined by $n \bmod 10^j$. That one fact cuts the candidates by
@@ -92,7 +107,34 @@ the property depends on more than one position — problem 145's reversible numb
 of $n + \text{reverse}(n)$ couples mirror digits through the carry — the general tool is
 [digit DP](/topics/technique/digit-dp): build the number one place at a time and carry along only the
 state the property needs (a carry, a remainder, a running digit sum, a "still tight to the bound"
-flag). The pages for [digit sum](/topics/domain/digit-sum), [palindromic numbers](/topics/domain/palindromic-number)
+flag).
+
+A digit DP can also total the numbers' *values*, not just count them, because appending is
+linear. If a state holds $c$ prefixes whose values sum to $t$, appending the digit $d$ to all of them
+gives a total of $b\,t + d\,c$. A (count, sum) pair per state is therefore closed under the
+transition:
+
+```python
+cnt2[s + d] += cnt[s]
+tot2[s + d] += 10 * tot[s] + d * cnt[s]
+```
+
+Problem 776 uses this to sum $n / d(n)$ over about $10^{18}$ terms. The digit sum $d(n)$ takes at
+most 171 values, so the job reduces to the sum of all $n \le N$ with each digit sum. That is one
+(count, sum) digit DP, finished exactly with rationals.
+
+At the other extreme, some properties ignore position entirely. Problem 520's simbers constrain
+only how *often* each digit occurs: even digits an even number of times, odd digits an odd number of
+times or not at all. A condition on the digit multiset is the home ground of
+[exponential generating functions](/topics/technique/exponential-generating-function). Each digit
+contributes $\cosh x$ or $1 + \sinh x$, and $L!\,[x^L]$ of the product counts the strings of length
+$L$. Rewriting $\cosh$ and $\sinh$ in $e^{\pm x}$ makes that count an exact power sum $\sum_k c_k k^L$.
+Summing over lengths then gives a handful of [geometric series](/topics/technique/geometric-series),
+so lengths up to $2^{39}$ cost nothing. The leading zero is handled in the same algebra: pin the first
+digit to $0$ and the remaining positions must hold an odd number of zeros. When the order of the
+digits does not matter, stop building numbers place by place and count multisets.
+
+The pages for [digit sum](/topics/domain/digit-sum), [palindromic numbers](/topics/domain/palindromic-number)
 and [pandigital numbers](/topics/domain/pandigital-number) are this tag's most crowded neighbours.
 
 When an operation has no carries, the places come apart completely. Problem 778's "freshman's
@@ -120,6 +162,22 @@ a sum of [multinomial coefficients](https://en.wikipedia.org/wiki/Multinomial_th
 over the admissible count triples. The rank is around $10^{17}$, yet the answer is only 38 digits
 long. The whole unranking takes $38 \times 3$ such counts.
 
+## One digit, far away
+
+The reverse question, "what *is* the digit at position $n$?", has a value-view answer too. Shift,
+then read low digits: the ten digits after the decimal point starting at position $n$ are
+$\lfloor 10^{n+9} x \rfloor \bmod 10^{10}$. Problem 731 asks for them at $n = 10^{16}$ in a
+[Stoneham number](https://en.wikipedia.org/wiki/Stoneham_number) $\sum_i 3^{-i} 10^{-3^i}$, where no
+expansion could ever be written out. Split the floor term by term. For each term
+$10^{e}/3^i = q_i + r_i/3^i$, the remainder is one
+[modular exponentiation](/topics/technique/modular-exponentiation), $r_i = 10^e \bmod 3^i$. The
+quotient is needed only modulo $10^{10}$, and since $3^i$ is coprime to 10 it is an exact division by
+a modular inverse. The fractional parts add up to a small carry. The terms not yet started are provably
+too small to change the floor, so dropping them is exact. This is the same trick as the
+[Bailey–Borwein–Plouffe formula](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula)
+for the hexadecimal digits of $\pi$: a digit deep in an expansion is a residue, not a string you
+have to reach.
+
 ## The base is a parameter
 
 Base 10 is an accident of anatomy, and several problems make the point by changing it.
@@ -128,6 +186,15 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
   bases 2 and 10; problem 926 sums the trailing zeros of $n!$ in *every* base, which turns into
   counting pairs $(b, k)$ with $b^k \mid n!$ — a question about the prime factorisation, since
   "trailing zeros in base $b$" is just divisibility by powers of $b$.
+- **Several bases at once.** Problem 571 wants numbers pandigital in every base from 2 to $n$. It
+  builds candidates as base-$n$ permutations, most significant digit first, and the pruning comes
+  from one fact: a prefix in one base is an *interval* of values, and an interval fixes the leading
+  digits in every base. The completions of a prefix span $[lo, hi]$, with the unused digits appended
+  in ascending and in descending order. In any base $b$, every number in that range shares the
+  leading digits that $lo$ and $hi$ agree on. If the shared prefix is missing more digits than the
+  free places below it can supply, nothing in the subtree is base-$b$ pandigital. That
+  [branch-and-bound](/topics/technique/branch-and-bound) test prunes almost every branch long before it
+  reaches the $4 \times 10^8$ leaves of the twelve-digit tree. It is "high digits as bounds" used across bases.
 - **The number as a word.** Problem 963 plays a [game](/topics/domain/combinatorial-game-theory) in
   which moves delete a $0$, $1$ or $2$ from a number's ternary expansion. There the value of $x$ hardly
   matters. The integer is only a label for a ternary word, and everything follows from the word's
@@ -166,7 +233,12 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - **Read low digits as congruences, high digits as bounds.** The last $k$ digits are $n \bmod b^k$ —
   they compose with multiplication and are where modular arithmetic prunes. The leading digits and
   the digit count fix an interval $[b^{k-1}, b^k)$, which is where length-preservation arguments
-  ("$6x$ must not gain a digit") come from.
+  ("$6x$ must not gain a digit") come from. Both readings generalise. A digit deep inside an
+  expansion becomes low digits after a shift (problem 731). A prefix in one base is an interval that
+  bounds the prefix in another (problem 571).
+- **Ask what the property depends on.** If it depends on running digit statistics, use a digit DP,
+  and carry value sums alongside counts when you need totals (problem 776). If it depends only on
+  the digit multiset, count with generating functions and forget positions (problem 520).
 - **Group by digit length.** Almost every closed form here is per length band: rotations, reversals,
   concatenation and leading-zero rules all depend on $k$, and fixing it first turns them into
   ordinary algebra. It also orders things: over a fixed alphabet, "ascending" means "by length,
