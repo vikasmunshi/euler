@@ -2724,8 +2724,8 @@
     "level": 20,
     "pct": 52,
     "solvers": 1303,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 18:58"
   },
   "342": {
     "title": "The Totient of a Square Is a Cube",
