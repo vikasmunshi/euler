@@ -8044,8 +8044,8 @@
     "level": 39,
     "pct": 99,
     "solvers": 149,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 13:37"
   },
   "1007": {
     "title": "Alternating Difference",
