@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
-<!-- status: final 2026-10-29T02:13Z -->
+<!-- status: final -->
 # Prefer closed form over iteration
 
 A loop that adds up a structured sequence is doing arithmetic the sequence has
@@ -56,7 +56,7 @@ structure do the counting.
 
 In the harder problems the formula rarely *is* the answer. It is a component —
 the part of the computation that would otherwise be the inner loop — and the
-surrounding algorithm is designed around having it. Five shapes recur.
+surrounding algorithm is designed around having it. Six shapes recur.
 
 **A formula per item, in place of a search per item.**
 [Divisibility Multipliers](/solutions/0274/) asks, for every prime $p$ coprime
@@ -124,10 +124,41 @@ guests shows the rigid structure. Neighbouring rooms sum to *consecutive*
 squares, so two rooms apart the squares telescope,
 $P(f, r+2) - P(f, r) = (s+1)^2 - s^2 = 2s + 1$, which is linear in $r$. That
 makes each floor a quadratic in the room number, and the requested sum shrinks
-to a few hundred formula evaluations over the divisors of $N$. In both problems
-the brute force is a microscope rather than the solution. It shows you the
-pattern, a proof makes the pattern safe to use, and the formula replaces the
-process.
+to a few hundred formula evaluations over the divisors of $N$. [Binary Blackboard](/solutions/0711/)
+is the game version. An exhaustive search of a two-player game up to $n = 1100$
+shows that the first player wins on exactly two families of binary patterns:
+all-ones numbers, and isolated ones at even bit positions followed by an
+optional even-length block of ones. Summing those families up to $2^N$ is pure
+algebra, with $N$ in the tens of millions. In all three problems the brute force
+is a microscope rather than the solution. It shows you the pattern, a proof
+makes the pattern safe to use, and the formula replaces the process.
+
+Sometimes the process yields to derivation instead of observation.
+[A Real Recursion](/solutions/0517/) defines $g_a$ by a recursion with two step
+sizes, $1$ and an irrational $a = \sqrt n$, so no two arguments ever coincide
+and memoisation finds nothing to reuse. Unrolled, though, the recursion is a
+*count*: each path of unit steps and $a$-steps that stops in the final window
+contributes 1. Splitting the paths by their last step and applying the
+[hockey-stick identity](https://en.wikipedia.org/wiki/Hockey-stick_identity)
+makes the two cases [telescope](https://en.wikipedia.org/wiki/Telescoping_series),
+leaving a single sum of about $\sqrt n$ binomial coefficients. [Pairwise Coin-Tossing Game](/solutions/0605/)
+is a random process. Once you see that only one bit of state survives each
+round, it becomes a two-state [Markov chain](https://en.wikipedia.org/wiki/Markov_chain),
+and its recurrence solves exactly: the game ends at round $m$ with probability
+$(m-1)/2^m$. The process is gone, and what remains is a series to sum (see
+below).
+
+**A summand rewritten until it matches a known sum.** [Divisor Pairs](/solutions/0561/)
+asks for a [2-adic valuation](https://en.wikipedia.org/wiki/P-adic_valuation)
+summed over $10^{12}$ values of $i$. Counting divisor pairs coordinate by
+coordinate gives a closed form for each term. A parity case split (with the
+[lifting-the-exponent lemma](https://en.wikipedia.org/wiki/Lifting-the-exponent_lemma)
+for one branch) then shows that each term's valuation is just $v_2$ of a
+half-index, scaled by a constant. And $\sum_{t \le N} v_2(t) = v_2(N!)$, which
+[Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) gives as
+$N - s_2(N)$, where $s_2$ is the count of 1 bits. The summand never gets a
+formula of its own here. You keep rewriting it until it matches a sum someone
+has already closed.
 
 The plainest variant is a sum that is short rather than constant.
 [Twenty-two Foolish Primes](/solutions/0239/) asks a probability over all $100!$
@@ -138,14 +169,63 @@ binomial-times-factorial terms — the
 with as many terms as there are displaced discs. Twenty-three exact
 big-integer terms replace an enumeration no computer could finish.
 
+## Many roads end in a geometric series
+
+Among the later problems, the formula that finally does the work is very often
+the oldest one, the [geometric series](https://en.wikipedia.org/wiki/Geometric_series)
+$\sum_{k<K} x^k = (x^K - 1)/(x - 1)$. Under a prime modulus that is one
+[modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation)
+and one [modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse),
+so $K$ can be $10^{18}$. The hard part is turning the problem into geometric
+series in the first place, and three different routes lead there.
+
+**Periodicity, split into residue classes.** [Clock Sequence](/solutions/0506/)
+reads terms off a digit stream with period 6. Because a full period always sums
+to 15, every fifteenth term starts at the same phase. So within each residue
+class $r \bmod 15$ the terms obey an affine recurrence,
+$v_{n+15} = 10^6 v_n + Q_r$, and unrolling an affine recurrence always gives a
+geometric series. Summing $10^{14}$ terms takes fifteen modular powers. When a
+sequence is periodic, split it by the period and look for a fixed linear map
+from each term to the next term in its class.
+
+**A change of basis to exponentials.** [Simbers](/solutions/0520/) constrains
+how often each digit appears, which is a job for
+[exponential generating functions](https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function):
+"an even number of times" is $\cosh x$ and "zero or an odd number of times" is
+$1 + \sinh x$. Their product is still awkward to read coefficients from. But
+$\cosh$ and $\sinh$ are combinations of $e^{\pm x}$, and
+$L!\,[x^L]\,e^{kx} = k^L$. Rewritten in powers of $e^x$, the product becomes a
+Laurent polynomial with 21 terms, so the count of strings of length $L$ is
+exactly $\sum_k c_k k^L$. Summing over all lengths up to $2^{39}$ is then 21
+geometric series. The general move: if the basis you were given makes
+coefficients hard to read, find a basis where each piece is a pure power.
+
+**One derivative up: arithmetico-geometric sums.** When the terms are $m x^m$
+rather than $x^m$, as in the $(m-1)/2^m$ ending probabilities of Pairwise
+Coin-Tossing Game, the [arithmetico-geometric](https://en.wikipedia.org/wiki/Arithmetico-geometric_sequence)
+sum still closes. That is
+$\sum_{m=1}^{L} m x^m = x\bigl(1 - (L+1)x^L + Lx^{L+1}\bigr)/(1-x)^2$, the
+derivative of the geometric series. Pairwise Coin-Tossing sums it over every
+$n$-th round to get each player's winning probability. Binary Blackboard uses it
+to remove its last loop: grouping the second family by its lowest exponent $m$
+leaves a weighted sum in $m$ with ratio $\tfrac12$, which closes the same way. Without that
+step the sum would be $O(N)$, and with it $N = 10^{18}$ takes microseconds.
+
+Two edge cases come with the formula. Watch for the degenerate ratios: $x = 1$
+sums to the number of terms and $x = 0$ to its $x^0$ term alone, and Simbers
+hits both among its 21 series. And keep $x - 1$ invertible. Clock Sequence
+checks that $10^6 - 1$ shares no factor with its modulus before dividing by it.
+
 ## How to reason about it
 
 Reach for a closed form when the quantity you are accumulating is *structured* —
 the terms obey a recurrence or an algebraic rule, not arbitrary data. The tells
 are concrete: an arithmetic or geometric run, a triangular / pyramidal / binomial
 count, a sum over a regular grid, a linear recurrence with constant coefficients,
-a count over all numbers with a fixed number of digits or bits, or a term that
-is a polynomial up to a periodic wobble (floors and rounds of $k^2/c$).
+a count over all numbers with a fixed number of digits or bits, a term that
+is a polynomial up to a periodic wobble (floors and rounds of $k^2/c$), a
+periodic sequence, a recursion whose unrolling is a path count, or a random
+process with only a few states.
 When the summand is genuinely irregular — the rectangle counts scanned in
 [Counting Rectangles](/solutions/0085/), where the search stops at the shape
 nearest a target — no formula collapses the whole thing, and iteration is the
@@ -175,6 +255,23 @@ Four cautions earn their keep:
   folds it into a periodic integer correction. Twenty-two Foolish Primes keeps
   its probability as an exact ratio of two big integers and rounds to twelve
   decimals in integer arithmetic.
+- **The argument may be too big to write down.** A closed form cheap enough to
+  handle $10^{18}$ will be given inputs where even $10^q$ has $10^{17}$ digits.
+  Then you evaluate the formula without ever forming its argument.
+  [Inverse Digit Sum](/solutions/0684/) has the simple closed form
+  $s(9q + r) = (r+1)\,10^q - 1$ for the smallest number with digit sum $9q + r$,
+  but its $q$ comes from Fibonacci numbers near $3 \times 10^{18}$. By
+  [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem)
+  the exponent only matters modulo $p - 1$, while the linear term only matters
+  modulo $p$. So the solution runs the Fibonacci recurrence modulo $9p$ and
+  modulo $9(p-1)$, and reads off $r$, $q \bmod p$ and $q \bmod (p-1)$ from the
+  two residues. Simbers never forms $n = \text{base}^u$. It moves from one $u$
+  to the next by raising each $k^n$ to the power of the base, which keeps the C
+  port inside 64 bits. Pairwise Coin-Tossing needs a reduced fraction whose
+  numerator has thirty million digits. The structure of the formula confines
+  any common factor to $\gcd(n, 2^n - 1)$, which needs only $2^n \bmod n$. That
+  factor may not be invertible modulo $10^8$, so the solution divides it out
+  exactly under a raised modulus $10^8 g^2$.
 - **A formula is worth deriving once and reusing.** The triangular and
   pyramidal-number identities recur across many of the problems below; naming
   them as small helpers, as these solutions do, keeps each new use a one-liner
