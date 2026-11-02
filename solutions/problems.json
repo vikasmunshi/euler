@@ -4460,8 +4460,8 @@
     "level": 27,
     "pct": 68,
     "solvers": 378,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 23:14"
   },
   "559": {
     "title": "Permuted Matrices",
