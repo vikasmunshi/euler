@@ -194,6 +194,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 

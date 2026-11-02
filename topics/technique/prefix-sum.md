@@ -203,6 +203,7 @@ sums stop being an intermediate and become the data structure.
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0875](/solutions/0875/) — Quadruple Congruence

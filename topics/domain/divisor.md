@@ -182,7 +182,7 @@ signature shortcut does not apply.
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
 - ○ [0608](/solutions/0608/) — Divisor Sums
 - ○ [0646](/solutions/0646/) — Bounded Divisors
-- ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ○ [0735](/solutions/0735/) — Divisors of $2n^2$
 - ○ [0797](/solutions/0797/) — Cyclogenic Polynomials
 - ● [0834](/solutions/0834/) — Add and Divide

@@ -757,7 +757,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0687](/solutions/0687/) — Shuffling Cards
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ○ [0699](/solutions/0699/) — Triffle Numbers
-- ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ○ [0712](/solutions/0712/) — Exponent Difference
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula

@@ -666,6 +666,7 @@ handful of operations on small numbers.
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0696](/solutions/0696/) — Mahjong
 - ● [0700](/solutions/0700/) — Eulercoin
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0707](/solutions/0707/) — Lights Out
 - ○ [0709](/solutions/0709/) — Even Stevens

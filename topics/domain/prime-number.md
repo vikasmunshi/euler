@@ -318,7 +318,7 @@ clever was done with the primes themselves.
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0659](/solutions/0659/) — Largest Prime
 - ○ [0687](/solutions/0687/) — Shuffling Cards
-- ○ [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula
 - ○ [0734](/solutions/0734/) — A Bit of Prime
 - ○ [0753](/solutions/0753/) — Fermat Equation

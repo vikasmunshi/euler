@@ -305,6 +305,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
