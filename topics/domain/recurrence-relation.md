@@ -292,7 +292,7 @@ induction will confirm. The shape picks the method.
 - ○ [0416](/solutions/0416/) — A Frog's Trip
 - ○ [0419](/solutions/0419/) — Look and Say Sequence
 - ○ [0422](/solutions/0422/) — Sequence of Points on a Hyperbola
-- ○ [0423](/solutions/0423/) — Consecutive Die Throws
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0440](/solutions/0440/) — GCD and Tiling
 - ● [0443](/solutions/0443/) — GCD Sequence
 - ○ [0458](/solutions/0458/) — Permutations of Project

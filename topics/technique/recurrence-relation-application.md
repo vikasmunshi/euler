@@ -167,6 +167,7 @@ to `unsigned __int128` (printed by hand, since `printf` has no format for it). S
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0346](/solutions/0346/) — Strong Repunits
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0692](/solutions/0692/) — Siegbert and Jo

@@ -206,6 +206,7 @@ front of you is asking for.
 
 - ● [0133](/solutions/0133/) — Repunit Nonfactors
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

@@ -168,6 +168,7 @@ factorials that every formula above is built from.
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ○ [0408](/solutions/0408/) — Admissible Paths Through a Grid
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0445](/solutions/0445/) — Retractions A
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
 - ● [0493](/solutions/0493/) — Under the Rainbow

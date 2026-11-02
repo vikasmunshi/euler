@@ -241,6 +241,7 @@ of magnitude.
 - ○ [0404](/solutions/0404/) — Crisscross Ellipses
 - ○ [0410](/solutions/0410/) — Circle and Tangent Line
 - ○ [0418](/solutions/0418/) — Factorisation Triples
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0428](/solutions/0428/) — Necklace of Circles
 - ○ [0438](/solutions/0438/) — Integer Part of Polynomial Equation's Solutions
 - ○ [0450](/solutions/0450/) — Hypocycloid and Lattice Points

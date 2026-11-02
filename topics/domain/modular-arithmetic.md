@@ -362,7 +362,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0416](/solutions/0416/) — A Frog's Trip
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ○ [0422](/solutions/0422/) — Sequence of Points on a Hyperbola
-- ○ [0423](/solutions/0423/) — Consecutive Die Throws
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0427](/solutions/0427/) — $n$-sequences
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ○ [0435](/solutions/0435/) — Polynomials of Fibonacci Numbers

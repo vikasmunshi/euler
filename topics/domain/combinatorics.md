@@ -384,7 +384,7 @@ of crossing it.
 - ○ [0413](/solutions/0413/) — One-child Numbers
 - ○ [0415](/solutions/0415/) — Titanic Sets
 - ○ [0416](/solutions/0416/) — A Frog's Trip
-- ○ [0423](/solutions/0423/) — Consecutive Die Throws
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ○ [0426](/solutions/0426/) — Box-Ball System
 - ○ [0427](/solutions/0427/) — $n$-sequences
 - ○ [0430](/solutions/0430/) — Range Flips

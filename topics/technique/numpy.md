@@ -376,6 +376,7 @@ both slower and harder to read.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits

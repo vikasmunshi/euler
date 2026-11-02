@@ -160,6 +160,7 @@ from the table above, made again.
 - ● [0232](/solutions/0232/) — The Race
 - ● [0253](/solutions/0253/) — Tidying Up A
 - ● [0303](/solutions/0303/) — Multiples with Small Digits
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
 - ● [0961](/solutions/0961/) — Removing Digits

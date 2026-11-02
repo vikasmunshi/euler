@@ -197,6 +197,7 @@ sums stop being an intermediate and become the data structure.
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures

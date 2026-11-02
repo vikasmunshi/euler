@@ -180,6 +180,7 @@ spent on deriving that formula.
 
 - ● [0053](/solutions/0053/) — Combinatoric Selections
 - ● [0194](/solutions/0194/) — Coloured Configurations
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ● [0951](/solutions/0951/) — A Game of Chance
