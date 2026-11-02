@@ -1,5 +1,5 @@
 <!-- tags: [impartial-game] -->
-<!-- status: final -->
+<!-- status: final 2026-11-02T18:31Z -->
 # Impartial game
 
 An [impartial game](https://en.wikipedia.org/wiki/Impartial_game) is a two-player game of perfect

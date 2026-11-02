@@ -2079,13 +2079,13 @@
     {
       "path": "domain/impartial-game",
       "title": "Impartial game",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-02T18:31Z",
       "solved": 6,
       "problems": 28,
       "tags": ["impartial-game"],
       "refs": ["p0260", "p0306", "p0310", "p0344", "p0366", "p0391", "p0400", "p0459", "p0488", "p0550", "p0560", "p0629", "p0644", "p0649", "p0665", "p0711", "p0798", "p0859", "p0870", "p0888", "p0899", "p0900", "p0933", "p0939", "p0949", "p0953", "p0961", "p0976"],
-      "covered": [],
+      "covered": ["p0310", "p0400", "p0649", "p0711", "p0899", "p0961"],
       "solved_after": []
     },
     {
