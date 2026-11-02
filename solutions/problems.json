@@ -5740,8 +5740,8 @@
     "level": 18,
     "pct": 46,
     "solvers": 497,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 12:31"
   },
   "719": {
     "title": "Number Splitting",
