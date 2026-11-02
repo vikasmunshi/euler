@@ -120,7 +120,6 @@ histogram is small enough to be the state of a DP.
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
-- ○ [0333](/solutions/0333/) — Special Partitions
 - ○ [0383](/solutions/0383/) — Divisibility Comparison Between Factorials
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0413](/solutions/0413/) — One-child Numbers

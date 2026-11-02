@@ -203,6 +203,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
 - ● [0290](/solutions/0290/) — Digital Signature
 - ● [0301](/solutions/0301/) — Nim
+- ● [0333](/solutions/0333/) — Special Partitions
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game

@@ -287,7 +287,7 @@ clever was done with the primes themselves.
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ○ [0329](/solutions/0329/) — Prime Frog
-- ○ [0333](/solutions/0333/) — Special Partitions
+- ● [0333](/solutions/0333/) — Special Partitions
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ○ [0355](/solutions/0355/) — Maximal Coprime Subset
 - ● [0357](/solutions/0357/) — Prime Generating Integers

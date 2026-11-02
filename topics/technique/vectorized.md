@@ -311,6 +311,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0315](/solutions/0315/) — Digital Root Clocks
+- ● [0333](/solutions/0333/) — Special Partitions
 - ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0357](/solutions/0357/) — Prime Generating Integers

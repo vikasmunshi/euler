@@ -214,7 +214,7 @@ the loop.
 - ○ [0289](/solutions/0289/) — Eulerian Cycles
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers
 - ○ [0325](/solutions/0325/) — Stone Game II
-- ○ [0333](/solutions/0333/) — Special Partitions
+- ● [0333](/solutions/0333/) — Special Partitions
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
 - ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0351](/solutions/0351/) — Hexagonal Orchards

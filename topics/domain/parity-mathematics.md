@@ -161,6 +161,7 @@ is the natural lever: it lets the exponent be taken apart one binary digit at a 
 - ● [0174](/solutions/0174/) — Hollow Square Laminae II
 - ● [0242](/solutions/0242/) — Odd Triplets
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0333](/solutions/0333/) — Special Partitions
 - ○ [0430](/solutions/0430/) — Range Flips
 - ○ [0502](/solutions/0502/) — Counting Castles
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers

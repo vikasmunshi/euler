@@ -101,6 +101,7 @@ in `O(N^(3/4))` time. A smoothness question ends up as a prime-counting question
 
 - ● [0108](/solutions/0108/) — Diophantine Reciprocals I
 - ● [0204](/solutions/0204/) — Generalised Hamming Numbers
+- ● [0333](/solutions/0333/) — Special Partitions
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers

@@ -129,6 +129,7 @@ is built first and then applied.
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0310](/solutions/0310/) — Nim Square
+- ● [0333](/solutions/0333/) — Special Partitions
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 

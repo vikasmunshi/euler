@@ -211,6 +211,7 @@ patterns recur.
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0333](/solutions/0333/) — Special Partitions
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0357](/solutions/0357/) — Prime Generating Integers
