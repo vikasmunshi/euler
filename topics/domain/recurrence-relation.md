@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: final 2026-10-30T12:45Z -->
+<!-- status: final -->
 # Recurrence relation
 
 A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a
@@ -28,7 +28,13 @@ them, because recognising the shape is what tells you which one to write down.
   two-term mixture of its two neighbours. Note the difference in what you then do with it: the
   first is a *cyclic* dependency and becomes a [system of linear
   equations](/topics/technique/system-of-linear-equations); the second is acyclic and becomes a
-  [dynamic programming](/topics/technique/dynamic-programming) sweep.
+  [dynamic programming](/topics/technique/dynamic-programming) sweep. The state is often far
+  smaller than the process suggests. Problem 605's round-robin coin-tossing game seems to need
+  every player's history, but a player can only win twice running in the round they share with
+  the previous winner. One bit remains: did last round's winner carry over? That makes a two-state
+  [Markov chain](https://en.wikipedia.org/wiki/Markov_chain) whose survival probabilities obey a
+  first-order recurrence, solved exactly by $a_t = t/2^t$. Before you write the recurrence, ask
+  what the next step actually reads.
 - **Self-similar construction.** When the object is *defined* recursively, the recurrence is handed
   to you and the only question is how to query it. Problem 230's strings satisfy
   $T_k = T_{k-2}T_{k-1}$, so the *lengths* satisfy Fibonacci and a digit position can be chased down
@@ -40,7 +46,16 @@ them, because recognising the shape is what tells you which one to write down.
   with no index arithmetic in it at all. Read it backwards, though, and every element is the
   *parent* of the run it describes. The prefix is then the leaf level of a derivation tree only
   logarithmically tall, and a prefix sum becomes one root-to-leaf descent that banks every whole
-  subtree to its left. This is 230's digit chase again, with the tree made explicit. Problem 698
+  subtree to its left. This is 230's digit chase again, with the tree made explicit. Problem 341's
+  [Golomb sequence](https://en.wikipedia.org/wiki/Golomb_sequence) is the same kind of
+  self-description, taken a different way. There, $G(n)$ is how many times $n$ occurs. Its prefix
+  sum $S(v)$ is the last position that holds the value $v$, so a question about a *position* turns
+  into a question about a far smaller *value*. And the inversion can be repeated: one level up,
+  $\sum t\,G(t)$ locates where $G(G(n))$ changes. Three inversions take positions near $10^{18}$
+  down to a table of a few tens of thousands of block ends. Within a block the sums are
+  quadratics, which a single square root solves. Each level shrinks the index by roughly a power
+  $\varphi - 1$, so a handful of levels is enough. Problem 698
+  is the shallow end of the same pool: a 123-number is one whose digit *counts* are 0 or
   is the shallow end of the same pool: a 123-number is one whose digit *counts* are 0 or
   themselves 123-numbers, and since a count never exceeds the length, membership at length $L$
   depends only on the members below $L$. The set grows bottom-up and is tiny, so the
@@ -120,7 +135,14 @@ for bit in bin(m)[3:]:             # skip "0b1": the leading bit is the seed
 
 Problems 169 and 918 are both this shape, and problem 872's climb up a tree is its bitwise cousin —
 each step clears the top bit of a gap, so the loop runs
-[popcount](https://en.wikipedia.org/wiki/Hamming_weight) times.
+[popcount](https://en.wikipedia.org/wiki/Hamming_weight) times. Halving survives summation,
+too. Problem 463's $f$, whose rules send $4n+1$ and $4n+3$ back to $n$ and $2n+1$, turns out to
+be binary reversal, but the solution never uses that. It splits the prefix sum
+$S(n) = \sum_{i \le n} f(i)$ by parity. That needs a companion sum over the odd indices, and then
+each of the two sums is a linear combination of both at $\lfloor n/2 \rfloor$ and its neighbour.
+The *sum* of a halving recurrence is itself a halving recurrence, provided you carry enough
+companion sums to close the system. The branching is four-way, so memoise: unmemoised it is
+exponential, memoised it touches about a hundred states for $n \approx 4.5 \times 10^{17}$.
 
 **Exploit a finite state space.** If the state that advances the recurrence lives in a finite set,
 the orbit must eventually repeat, and the sequence is
@@ -135,6 +157,31 @@ the tail plus the cycle. Two variants worth distinguishing:
 The invertibility argument is the one to internalise, because it buys $O(1)$ memory: when the map
 is a permutation you can detect the period by waiting for the *seed* to come back, instead of
 storing every state you have visited.
+
+When the period *is* the question, and over a million moduli, waiting for the seed costs as much
+as the period. Compute it as a group order instead. Problem 752 asks when
+$(1+\sqrt 7)^n \equiv 1$ in $(\mathbb Z/x)[\sqrt 7]$, which is the period of a two-term linear
+recurrence mod $x$. The [Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
+splits $x$ into prime powers, and the periods combine by lcm. A prime then either *splits*
+(7 is a square mod $p$, and the order divides $p - 1$) or is *inert* (the ring is
+$\mathbb F_{p^2}$, the [Frobenius map](https://en.wikipedia.org/wiki/Frobenius_endomorphism) is
+conjugation, and the order is bounded through $p + 1$). Lifting from $p^{k-1}$ to $p^k$ multiplies
+the order by $p$ or by nothing, and one test decides which. The per-modulus cost drops from the
+period to a few dozen modular powers. This is the [Pisano period](/topics/domain/pisano-period)
+theory, done for a general quadratic ring.
+
+**Change variables until it is linear.** A nonlinear recurrence is sometimes a linear one seen
+through a bad coordinate. Problem 492's $a_{n+1} = 6a_n^2 + 10a_n + 3$ roughly squares each term,
+so $a_n$ has about $2^n$ digits. Completing the square, $b = 6a + 5$ obeys $b_{n+1} = b_n^2 - 2$,
+and that is the doubling rule of a [Lucas sequence](https://en.wikipedia.org/wiki/Lucas_sequence),
+$V_{2k} = V_k^2 - 2$. Hence $b_n = V_{2^{n-1}}$. The index is astronomical, but mod $p$ it only
+matters modulo the order of the characteristic root. That order divides $p - 1$ or $p + 1$,
+depending on a [quadratic-residue](https://en.wikipedia.org/wiki/Quadratic_reciprocity) test,
+so $2^{n-1}$ is reduced mod $p \mp 1$ and fed to an $O(\log p)$ Lucas ladder. The squaring maps
+worth recognising are $x^2 - 2$ (Lucas and
+[Chebyshev](https://en.wikipedia.org/wiki/Chebyshev_polynomials) doubling) and $x^2$ itself
+(plain powers). The quadratic you are given is often one of them after an affine change of
+variable.
 
 **Skip the dull stretches.** A nonlinear recurrence often does something trivial on almost every
 step. In that case, compute where the next *interesting* step falls and jump straight to it.
@@ -161,6 +208,20 @@ trillion-term sum into one evaluation. The same collapse in the other direction 
 partition function computable: the reciprocal of its
 [generating function](/topics/domain/generating-function) is almost all zeros, so $p(n)$ obeys a
 recurrence with only $O(\sqrt n)$ terms (problems 76 and 78).
+
+**Unroll it into independent terms.** A first-order linear recurrence
+$G_{n+1} = c\,G_n + d_n$ is sequential as written, but its solution is not:
+$G_n = c^{\,n-1} G_1 + \sum_{j<n} c^{\,n-1-j} d_j$. Summing that over $n \le L$ gives each $d_j$ a
+[geometric](https://en.wikipedia.org/wiki/Geometric_series) weight, and the whole sum becomes one
+dot product of independent terms. Problem 423 arrives at such a recurrence indirectly. It needs a
+truncated binomial sum $\sum_{c \le \pi(n)} \binom{n-1}{c} 5^{n-1-c}$ for every $n$ up to
+$5 \times 10^7$, with a cut-off that moves whenever $n$ passes a prime. Pascal's rule links
+consecutive sums: $m \to m+1$ multiplies by 6 and subtracts the boundary term, and each new prime
+adds one term back. So the $O(\pi(n))$-term sums become a first-order recurrence. Unrolling that
+recurrence then turns a fifty-million-step loop, hopeless in Python, into whole-array NumPy
+operations over factorial tables. Unrolling buys
+[data parallelism](https://en.wikipedia.org/wiki/Data_parallelism), not fewer operations, and in
+an interpreted language that is often the larger win.
 
 **Solve it outright.** Some recurrences have a closed form that a few small cases make obvious and
 induction then confirms. Problem 523's insertion cost obeys the full-history recurrence
@@ -239,8 +300,9 @@ only inside a floor, which an integer square root computes exactly.
 The tell for this whole topic is a problem that describes a process — one more tile, one more turn,
 one more level — and then asks about it at an index you could never walk to. Write the recurrence
 first, in the most literal form you can defend. Then look at its *shape*: constant coefficients,
-halving arguments, a finite state, long trivial stretches, a telescoping sum, a pattern that
-induction will confirm. The shape picks the method.
+halving arguments, a finite state, a period that is really a group order, a nonlinear map that is
+a linear one in disguise, long trivial stretches, a telescoping sum, a sequential loop that unrolls
+into independent terms, a pattern that induction will confirm. The shape picks the method.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
