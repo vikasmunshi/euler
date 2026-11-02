@@ -3652,8 +3652,8 @@
     "level": 13,
     "pct": 35,
     "solvers": 1169,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 12:41"
   },
   "458": {
     "title": "Permutations of Project",
