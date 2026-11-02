@@ -1,5 +1,5 @@
 <!-- tags: [sieve-of-eratosthenes] -->
-<!-- status: final 2026-10-30T06:41Z -->
+<!-- status: final -->
 # Sieve of Eratosthenes
 
 The [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) finds
@@ -48,10 +48,31 @@ survivors (`solutions/public/p0037/`). Both do thousands of membership checks; b
 table, not a fresh test each time. If your solution calls a primality function in a tight
 loop, a sieve that precomputes the answers is usually the speed-up.
 
+The oracle need not be queried one number at a time, either. In problem 333 a dynamic
+programme counts, for every `n` below the bound, its valid partitions; the answer wants the
+primes whose count is exactly one, and with the sieve held as a boolean array that filter is
+a single elementwise AND of two tables. A running sum turns the table into a second
+artefact: `cumsum(is_prime) − 1` maps every prime to its rank `π(p) − 1`, so the primes can
+be renumbered `0, 1, 2, …` with one lookup. Problem 425 needs exactly that. It treats the
+primes below ten million as the vertices of a graph — two primes are joined when changing
+one digit, or dropping the leading one, turns one into the other — keeps a union–find array
+indexed by prime rank rather than by value, and generates the edges with the oracle too,
+testing every one-digit neighbour of every prime as one vectorised query per digit
+position.
+
 The same idea generalises past a boolean: sieve a table of each number's **smallest prime
 factor**, and you can factor any number up to the bound by repeated lookup, with no trial
 division at all — the right tool when a problem needs the *factorisations* of a whole
-range, not merely which numbers are prime.
+range, not merely which numbers are prime. Vectorised, it is the strike-out loop with one
+guard: write `p` only into cells still empty, so the first — smallest — prime to reach a
+cell keeps it. Problem 752 shows the two ways the table earns its keep. Its function `g`,
+the multiplicative order of `1+√7` modulo `x`, combines across coprime factors by `lcm`, so
+it is fixed by its values at prime powers. Walking `x` upward, `spf[x]` names the smallest
+prime `p`, the exact power `p^k` dividing `x` follows from the entry already computed for
+`x/p`, and `g(x) = lcm(g(x/p^k), g(p^k))` reads both operands from cells already filled —
+one `lcm` per number, no factorisation loop at all. And computing an order at a prime `p`
+needs the factorisation of the group order, `p − 1` or `p + 1`, so the same table is
+queried at the *neighbours* of primes — which is why it runs to `N + 1`, not `N`.
 
 Sometimes the oracle is queried about numbers the problem never names. Problem 249 counts
 the subsets of the primes below 5000 whose sum is prime: the subset sums are tabulated by a
@@ -88,6 +109,17 @@ every prime power found, and any cofactor left above 1 is a single prime greater
 (two would exceed `K`), settled by one closing sign flip. That swaps a loop over all `π(K)`
 primes for one over `π(√K)`.
 
+Problem 619 carries that cofactor trick to a window `[a, b]` that does not start at 1, and
+to a value that is a vector rather than a number. It counts the subsets of `[a, b]` whose
+product is a perfect square — linear algebra over GF(2) on each number's vector of exponent
+*parities*. So each cell of the sieve holds a bitmask: for every prime `p ≤ √b`, start at
+the first multiple inside the window (offset `−a mod p`), divide `p` out of a remainder
+array as often as it goes, and flip bit `p` when it went an odd number of times. What is
+left in each cell is `1` or a single prime above `√b`, and those large primes never need a
+column of their own: the first number carrying one becomes its pivot and is XORed out of
+every later carrier, so each adds exactly one to the rank, and the Gaussian elimination
+runs over the `π(√b)` small-prime columns alone.
+
 ## Variants, and when you need them
 
 - **Bounded array** — the default above. You know `N`, it fits in memory, you want a table.
@@ -98,9 +130,18 @@ primes for one over `π(√K)`.
   such generator; `solutions/public/p0037/` streams primes from Eppstein's dict-based
   version until the eleven truncatable primes are found). You trade the array's raw speed
   for not having to guess `N`.
+- **Doubling** — the middle road, when the bound is unknown but every query has the form
+  "the primes up to `x`". Keep an ordinary array sieve; when a query passes its bound,
+  rebuild it at twice the size (or at `x`, if that is larger). The rebuilds form a
+  geometric series, so the total work stays under twice that of one sieve to the final
+  bound, and every query is still answered from a flat array at full speed. Problem 946
+  feeds primes, in order, as run lengths into a continued-fraction engine and cannot know
+  how many it will consume; problem 829 needs all primes below bounds that its own search
+  keeps doubling. Both start small and grow.
 - **Segmented** — when `N` is known but the array will not fit: sieve `[1, √N]` once for
   the small primes, then sweep the range in cache-sized windows, marking each window with
-  those primes. Same primes, bounded memory.
+  those primes. Same primes, bounded memory. Problem 619's window `[a, b]` is the same
+  structure put to work factoring rather than testing.
 - **Odd-only** — store only the odd numbers, index `i` standing for `2i+1`. Half the
   memory and half the strikes, at the price of index arithmetic. It matters when the sieve
   *is* the program: in problem 315 the per-prime work collapses to two table lookups, so
@@ -154,8 +195,8 @@ patterns recur.
   rather than a value ceiling, use the prime number theorem's estimate that the `n`-th
   prime is near `n·ln n` and sieve that far. When it gives a value bound, sieve to the
   bound — or to the largest number you will actually *query*, which is not always the
-  input (problem 249's subset sums), and not always all of it (the roots and `n^(2/3)`
-  above).
+  input (problem 249's subset sums, problem 752's `p + 1`), and not always all of it (the
+  roots and `n^(2/3)` above). When you cannot know it at all, double.
 - **Know whether it is the bottleneck.** In problem 365 the sieve covers primes below
   10 000 and is then followed by twenty million Chinese-remainder lifts; a segmented or
   wheel sieve there would be effort spent on nothing. In problem 315 the sieve *is* the
