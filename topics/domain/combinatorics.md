@@ -437,7 +437,7 @@ of crossing it.
 - ○ [0602](/solutions/0602/) — Product of Head Counts
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
 - ● [0612](/solutions/0612/) — Friend Numbers
-- ○ [0619](/solutions/0619/) — Square Subsets
+- ● [0619](/solutions/0619/) — Square Subsets
 - ○ [0623](/solutions/0623/) — Lambda Count
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices
 - ● [0628](/solutions/0628/) — Open Chess Positions

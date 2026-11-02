@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Gaussian_elimi
 ## Problems
 
 - ● [0227](/solutions/0227/) — The Chase
+- ● [0619](/solutions/0619/) — Square Subsets
 
 <!-- /problems -->

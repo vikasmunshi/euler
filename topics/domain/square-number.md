@@ -144,7 +144,7 @@ identity — inverse test, difference of squares, the odd-number gap — has alr
 - ○ [0575](/solutions/0575/) — Wandering Robots
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps
-- ○ [0619](/solutions/0619/) — Square Subsets
+- ● [0619](/solutions/0619/) — Square Subsets
 - ○ [0648](/solutions/0648/) — Skipping Squares
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0757](/solutions/0757/) — Stealthy Numbers

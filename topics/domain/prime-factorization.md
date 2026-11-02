@@ -281,7 +281,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
-- ○ [0619](/solutions/0619/) — Square Subsets
+- ● [0619](/solutions/0619/) — Square Subsets
 - ○ [0627](/solutions/0627/) — Counting Products
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0633](/solutions/0633/) — Square Prime Factors II

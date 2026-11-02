@@ -103,6 +103,7 @@ apart.
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0305](/solutions/0305/) — Reflexive Position
+- ● [0619](/solutions/0619/) — Square Subsets
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation

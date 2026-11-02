@@ -793,7 +793,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
-- ○ [0619](/solutions/0619/) — Square Subsets
+- ● [0619](/solutions/0619/) — Square Subsets
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ○ [0627](/solutions/0627/) — Counting Products
 - ● [0632](/solutions/0632/) — Square Prime Factors

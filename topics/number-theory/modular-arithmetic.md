@@ -776,7 +776,7 @@ handful of operations on small numbers.
 - ● [0612](/solutions/0612/) — Friend Numbers
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
-- ○ [0619](/solutions/0619/) — Square Subsets
+- ● [0619](/solutions/0619/) — Square Subsets
 - ○ [0622](/solutions/0622/) — Riffle Shuffles
 - ○ [0624](/solutions/0624/) — Two Heads Are Better Than One
 - ● [0625](/solutions/0625/) — Gcd Sum

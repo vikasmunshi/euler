@@ -171,6 +171,7 @@ The algorithms match one for one. The differences come from what each language m
 - ○ [0556](/solutions/0556/) — Squarefree Gaussian Integers
 - ○ [0580](/solutions/0580/) — Squarefree Hilbert Numbers
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
+- ● [0619](/solutions/0619/) — Square Subsets
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0634](/solutions/0634/) — Numbers of the Form $a^2b^3$
