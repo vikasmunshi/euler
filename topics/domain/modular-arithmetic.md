@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-11-01T19:02Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -74,7 +74,14 @@ twenty digits. Appending a digit $d$ sends the remainder $r$ to $(10r + d) \bmod
 with the same remainder behave identically from then on and only the smaller is worth extending.
 The candidates collapse to a graph on $n$ remainders. A breadth-first search that tries digits in
 ascending order reaches remainder $0$ first along the smallest numeral. Pigeonhole on the repunits
-guarantees that a path to $0$ exists.
+guarantees that a path to $0$ exists. Problem 294 asks a divisibility-and-digit-sum question about
+strings of $11^{12}$ digits, too long even to walk one digit at a time. A digit block's residue
+depends on where it sits: a block placed above $L$ lower digits contributes its own residue times
+$10^L$. So each block's table of (residue mod $23$, digit sum) counts is measured from the block's
+own lowest digit, and is multiplied by $10^L \bmod 23$ only at the moment two blocks are joined.
+Joining is then an associative product of small tables. A length of $3 \times 10^{12}$ is reached
+by squaring in about forty doublings. Because $10$ is a unit modulo the prime $23$, that
+multiplication only permutes the residues and never merges two of them.
 
 **"Give the answer modulo $1\,000\,000\,007$."** Counting problems whose true answer overflows any
 integer type hand you the modulus explicitly — the residue *is* the deliverable. Here the domain is
@@ -116,6 +123,16 @@ again, so $k \mapsto \omega^{jk}$ visits each root exactly $q$ times and all $p 
 terms are equal. Each is read off from $\prod_r (1 + rt) = 1 + t^p$. The filter collapses to one
 binomial coefficient plus a correction, divided by $p$.
 
+The residue being counted can be a whole vector. In problem 619 a product is a perfect square when
+every prime exponent in it is even, so a number matters only through its exponents mod $2$. That
+is a vector over the field $\mathbb{F}_2$, and multiplying numbers adds their vectors. A
+square-product subset is a subset whose vectors sum to zero, which makes the count linear algebra:
+$2^{n-r} - 1$ for $n$ vectors of rank $r$. The vectors have one coordinate per prime up to
+$1.2 \times 10^6$, but a prime above $\sqrt b$ divides each number at most once. Each such prime
+can be pivoted out at the cost of exactly one unit of rank, so
+[Gaussian elimination](https://en.wikipedia.org/wiki/Gaussian_elimination) runs over only the
+$186$ small primes.
+
 **Periodicity and cyclic structure.** Residues wrap around, so any process defined by "$+$" or
 "$\times$ a constant" is eventually periodic modulo $m$, and the period is often the real question.
 Problem 19 (public, `solutions/public/p0019/`) is a calendar: the day of the week is a residue mod
@@ -123,7 +140,11 @@ Problem 19 (public, `solutions/public/p0019/`) is a calendar: the day of the wee
 needed. [Pisano periods](https://en.wikipedia.org/wiki/Pisano_period) (the cycle length of Fibonacci
 numbers mod $m$, problem 854), the [multiplicative order](https://en.wikipedia.org/wiki/Multiplicative_order)
 of an element, and "clock"-flavoured problems (506, 790, 891) all turn on the same idea: find the
-cycle, then jump across billions of steps by reducing the step count modulo its length. The period
+cycle, then jump across billions of steps by reducing the step count modulo its length. The cycle
+can also sit in the *index* rather than in the values. In problem 506 the digit stream repeats
+every $6$ digits and sums to $15$ per period. Terms $15$ apart therefore start at the same phase,
+so $v_{n+15} = 10^6 v_n + Q_{n \bmod 15}$. Each residue class of $n$ mod $15$ is then a geometric
+series, and $10^{14}$ terms cost fifteen exponentiations. The period
 is often *provable* rather than merely observed: in problem 250 the map $k \mapsto k^k \bmod 250$
 repeats every $500$ values of $k$ (for $k \ge 3$), because $250 = 2 \cdot 5^3$ and the
 [Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function) gives
@@ -161,7 +182,15 @@ $n^{15} + 1$ for $10^{11}$ values of $n$, which is hopeless; swap the order of s
 each prime $p$ instead "for which residues $n$ does $p \mid n^{15} + 1$?" The answer is the
 negatives of the $15$th roots of unity mod $p$ — exactly $\gcd(15, p - 1)$ of them — and each
 residue class contributes its count of $n \le N$ by a single division. Factorisation turned into
-counting residues. Problem 407 makes the decomposition itself the answer. An idempotent,
+counting residues. Problem 457 needs a root of $n^2 - 3n - 1$ modulo $p^2$ for every prime
+$p \le 10^7$, and a search over $p^2$ residues is out of the question. Completing the square, which
+is legal because $2$ is a unit modulo an odd $p^2$, turns the quadratic into a square root of
+$13$. Quadratic reciprocity decides from $p \bmod 13$ whether one exists modulo $p$, and
+[Tonelli–Shanks](https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm) finds it.
+[Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma) then lifts it to $p^2$ with one
+Newton step, $r \leftarrow r - (r^2 - 13)(2r)^{-1}$, which is valid because the root is simple
+($2r \not\equiv 0$). To solve modulo a prime power, solve modulo the prime and then lift.
+Problem 407 makes the decomposition itself the answer. An idempotent,
 $a^2 \equiv a \pmod n$, must be $0$ or $1$ modulo each prime power of $n$, because $a$ and $a - 1$
 are coprime. So the idempotents correspond to the ways of splitting $n$ into a coprime pair
 $d \cdot e$, and there are $2^{\omega(n)}$ of them. Finding the largest one for every $n \le 10^7$
@@ -195,7 +224,11 @@ modulus, so read it before you write the first line:
   inequality too, since a prime *smaller* than your factorials makes them vanish. A field also
   shrinks exponents. By Fermat, $a^{p-1} \equiv 1$, so problem 822 reduces the exponent $2^k$ of a
   number squared $k \approx 10^{12}$ times modulo $p - 1$, which is one modular exponentiation inside
-  another. The same shrinking works one level up, in a quadratic extension. Problem 492 iterates
+  another. Sometimes the exponent cannot even be written down. Problem 520 turns its count into
+  power sums $\sum_k c_k k^n$ for $n = \text{base}^u$, with $u$ up to $1000$ in the large case.
+  It never forms $n$. Instead it advances $k^{\text{base}^{u-1}}$ to $k^{\text{base}^u}$ by raising
+  it to the power $\text{base}$, and carries $n \bmod p$ separately for the $k = 1$ term, whose
+  geometric series has no ratio to divide by. The same shrinking works one level up, in a quadratic extension. Problem 492 iterates
   $a \mapsto 6a^2 + 10a + 3$ a quadrillion times. Completing the square turns it into
   $b \mapsto b^2 - 2$, the doubling rule of a Lucas sequence $\alpha^k + \alpha^{-k}$, so the
   $n$th term is $V_{2^{n-1}}$. Here $\alpha$ is a root of $t^2 - 11t + 1$. If the discriminant is a
@@ -217,7 +250,10 @@ modulus, so read it before you write the first line:
   exactly when $d \mid \varphi(m) - \varphi(n)$, and then it has one solution modulo
   $\operatorname{lcm}(n, m)$. Dividing the linear congruence through by $d$ leaves coprime moduli and
   an ordinary inverse. Test the consistency first: a pair that fails it contributes $0$.
-- **A composite modulus also takes division away.** In problem 250 the answer is wanted mod
+- **A composite modulus also takes division away**, but only division by numbers that share one
+  of its factors. Problem 506 works modulo $123454321 = 41^2 \cdot 271^2$ and divides by
+  $10^6 - 1 = 3^3 \cdot 7 \cdot 11 \cdot 13 \cdot 37$, which is coprime to it, so the inverse
+  exists. Check the gcd, not whether the modulus is prime. In problem 250 the answer is wanted mod
   $10^{16}$, and the binomial recurrence $\binom{c}{i+1} = \binom{c}{i}(c-i)/(i+1)$ divides by
   numbers that share factors with $10$ — no inverse exists. The two escapes are the two
   implementations: carry the coefficient as an exact big integer and reduce only when storing it
@@ -269,7 +305,9 @@ far too large to form directly. When you catch it:
 - **Reduce early and often.** Never build the honest quantity and take its remainder at the end —
   reduce after each $+$ and $\times$ so operands stay in $[0, m)$. The classic mistake is to
   materialise the million-digit power or the true factorial first; the whole point is that you
-  never have to.
+  never have to. The exception is a value you can afford to hold exactly. Problem 612 computes
+  $(T^2 - D - T)/2$ with $T$ near $10^{18}$ in 128-bit integers and reduces once at the end, so
+  the halving is ordinary integer division and needs no inverse.
 - **Substitute the modulus into the definition.** When the modulus is $n + 1$ and the base is
   $n$, the base is $-1$. When the modulus is prime, exponents live mod $p - 1$, or mod $p + 1$ for
   a norm-one element of $\mathbb{F}_p[\sqrt d]$ when $d$ is not a square. Simplify the object
@@ -278,7 +316,8 @@ far too large to form directly. When you catch it:
   irreducible fraction need the real magnitude or its structure, through logarithms, plain
   integers or a factorisation. Residues are only for the quantity the statement reduces.
 - **Lift the modulus to keep what you will divide by.** Carry a residue modulo $km$ when you must
-  later divide exactly by $k$, or modulo a prime power when you need a valuation.
+  later divide exactly by $k$, or modulo a prime power when you need a valuation. To solve an
+  equation modulo $p^k$, solve it modulo $p$ and Hensel-lift the root.
 - **Make the residue the state.** When a number is built digit by digit and only its remainder
   matters, prefixes with equal remainders are interchangeable. Search or count over the $m$
   remainders, not over the numbers.
