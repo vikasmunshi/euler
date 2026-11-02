@@ -366,6 +366,7 @@ both slower and harder to read.
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient

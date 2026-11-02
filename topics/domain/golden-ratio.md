@@ -161,7 +161,7 @@ for larger $N$ pass $2^{64}$. So the C port keeps its running values in
 - ● [0104](/solutions/0104/) — Pandigital Fibonacci Ends
 - ● [0138](/solutions/0138/) — Special Isosceles Triangles
 - ○ [0325](/solutions/0325/) — Stone Game II
-- ○ [0341](/solutions/0341/) — Golomb's Self-describing Sequence
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ○ [0691](/solutions/0691/) — Long Substring with Many Repetitions
 - ○ [0921](/solutions/0921/) — Golden Recurrence

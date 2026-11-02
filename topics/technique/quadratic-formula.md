@@ -148,6 +148,7 @@ not the body. It converts control flow into arithmetic, and arithmetic is what y
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0932](/solutions/0932/) — $2025$

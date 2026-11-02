@@ -264,6 +264,7 @@ more cheaply than you can enumerate it. Then, in order:
 - ● [0241](/solutions/0241/) — Perfection Quotients
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0305](/solutions/0305/) — Reflexive Position
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0516](/solutions/0516/) — $5$-smooth Totients

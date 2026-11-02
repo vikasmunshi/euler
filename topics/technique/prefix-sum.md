@@ -195,6 +195,7 @@ sums stop being an intermediate and become the data structure.
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals

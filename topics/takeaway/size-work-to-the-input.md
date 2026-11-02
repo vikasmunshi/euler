@@ -209,6 +209,7 @@ on the clock.
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0347](/solutions/0347/) — Largest Integer Divisible by Two Primes
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0461](/solutions/0461/) — Almost Pi

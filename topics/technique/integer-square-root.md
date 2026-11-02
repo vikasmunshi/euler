@@ -221,6 +221,7 @@ the same idea, implemented once, in C.
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion

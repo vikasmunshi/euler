@@ -292,6 +292,7 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0321](/solutions/0321/) — Swapping Counters
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors

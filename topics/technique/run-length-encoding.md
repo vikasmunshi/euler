@@ -80,6 +80,7 @@ $k$") becomes a composition count, which is a small
 ## Problems
 
 - ● [0175](/solutions/0175/) — Fractions and Sum of Powers of Two
+- ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0951](/solutions/0951/) — A Game of Chance
 
