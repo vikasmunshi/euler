@@ -1,5 +1,5 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: final 2026-10-30T12:46Z -->
+<!-- status: final -->
 # Watch integer width
 
 Almost every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
@@ -10,8 +10,8 @@ Almost every one of these problems is trivial in Python and a trap in C, for the
 takeaway is a habit: when you translate a working Python solution to C — as every problem here does
 — stop at each multiply, sum, and power and ask *how big can this actually get?* The number that
 matters is not the final answer but the largest **intermediate** value on the way to it — and, as
-the later problems show, the one place Python *does* overflow is the fixed-width NumPy array
-underneath it.
+the later problems show, the places Python *does* lose exactness are the fixed-width NumPy array
+underneath it and the 53-bit `float`.
 
 ## The idea
 
@@ -117,7 +117,12 @@ Python's multinomial $L!/(a!\,b!\,c!)$ has a numerator that overflows even that.
 it as a product of two binomials from a Pascal table, $\binom{r}{x}\binom{r-x}{y}$, whose every
 intermediate is at most $3^r$; and since $3^{80} < 2^{128}$, it caps the string length at 80 and
 says so in a `#define`. The answer is the same number either way — what changed is the order the
-arithmetic runs in, so that no step is ever larger than the result it builds.
+arithmetic runs in, so that no step is ever larger than the result it builds. Problem 659 makes the
+same choice between two correct formulas. To lift a root of $4k^2 + 1$ from $p^e$ to $p^{e+1}$
+([Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma)) it could take a Newton step
+modulo $p^{e+1}$, whose products outgrow 64 bits as the power climbs; it instead solves for one digit
+$s$ modulo $p$ alone, so every operand stays below $p$ or $f(k)$, and only the final $k + p^e s$ is
+formed in `__int128`.
 
 **Tier 3 — no fixed width is enough; you must build the bignum yourself.** Problem 16 wants the
 digit sum of $2^{1000}$ — a 302-digit number — and problem 25 hunts the first 1000-digit
@@ -142,12 +147,24 @@ When the bignum is only needed some of the time, don't pay for it all of the tim
 candidate length reaches about $10^{51}$ for the largest inputs, so its C uses
 [GMP](https://gmplib.org/) `mpz_t` — but keeps a native `unsigned long long` fast path for every
 candidate of at most 19 digits, which covers the dense small cases, and falls back to GMP only on
-the sparse large ones where a candidate or two settles the answer.
+the sparse large ones where a candidate or two settles the answer. Problem 581 splits by *quantity*
+instead of by case: its Pell equations $x^2 - d\,y^2 = 1$ have $d$ past $2^{64}$ and $d\,y^2$ near
+$4 \times 10^{41}$ — beyond even `__int128` — so the continued-fraction and recurrence arithmetic
+runs in GMP, but the hot smoothness test runs on $y$ alone, which a fixed cap holds below $10^{10}$,
+and so stays in native 64-bit words.
 
 That is the whole spectrum: pick a wider built-in, widen just the risky operation, or hand-roll a
 bignum — in rising order of effort, chosen by how far the biggest intermediate exceeds the box.
 
-## Two places overflow hides
+Before climbing it, ask whether the big part of the number carries any information. Problem 615
+wants the millionth number with at least a million prime factors — values of $2^{10^6}$ and up, which
+no bignum could usefully enumerate. But every early member is mostly twos, and once each carries at
+least $2^{k-36}$, dividing that common factor out maps the head of the list, in order, onto numbers
+with at least 36 prime factors — all below $2^{53}$, ordinary 64-bit integers. The huge factor comes
+back only at the end, as a modular power. The cheapest overflow fix is a reformulation in which the
+big number never exists.
+
+## Three places width hides
 
 **Inside a bound test.** A guard like `n1 * n1 * e < room` reads as harmless, but the products a
 bound test exists to *reject* are exactly the large ones, so they are exactly the ones that
@@ -173,7 +190,25 @@ total = (int((terms >> 32).sum()) << 32) + int((terms & 0xFFFFFFFF).sum())
 
 Problem 249 sums its counters in chunks of 1024 for the same reason, and problem 1010 trusts its
 `int64` arithmetic only after proving the bound: every term counts a partition, the counts sum to
-an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on every run.
+an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on every run. Problem 659's
+total reaches $4 \times 10^{21}$, so its Python adds the high and low $10^9$-digit halves separately
+before taking the last 18 digits.
+
+**Inside a float.** A `double` is a box too: its 53-bit significand holds every integer up to
+$2^{53} \approx 9 \times 10^{15}$ exactly, and beyond that it rounds. Problem 341 needs the least
+$i$ with $i(i+1) \ge c$ for a million values of $c$ at once, and takes it from the quadratic formula
+in floating point — safe because $c$ stays near $10^{14}$, inside the exact range, and made exact by
+one integer check that nudges the root by one if rounding landed it on the wrong side:
+
+```python
+i = np.ceil((np.sqrt(4.0 * c + 1.0) - 1.0) / 2.0).astype(np.int64)
+i += i * (i + 1) < c        # float rounding: correct to the exact root
+```
+
+The float gets within one; the integer comparison, done in a type that is exact, settles it. Problem
+632 does the same for an integer square root in C, starting from `sqrtl` (a `long double`, 64-bit
+significand) and correcting. Never let the float result stand unchecked once its argument nears
+$2^{53}$ — or past it, where consecutive integers share one `double`.
 
 ## How to reason about it
 
@@ -190,7 +225,9 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
   expensive part, and the width you have is a budget. Problem 249's fold can at most double a
   counter, so starting below $10^{16}$ it runs ten folds before reducing — the worst case,
   $2^{10} \cdot 10^{16} \approx 1.02 \times 10^{19}$, still fits an unsigned 64-bit word — and that
-  batching cut the Python run time by more than half.
+  batching cut the Python run time by more than half. A wider accumulator buys the same deferral:
+  problem 866's convolution adds thousands of products, each below $2^{60}$, so its C sums a whole
+  row in `unsigned __int128` and reduces once per row instead of once per multiply-add.
 - **Make the width limit an explicit input limit.** Where a representation caps the input, say so
   up front instead of letting it wrap later. Problem 421's modular multiply needs $p^2 < 2^{64}$,
   so both versions reject a prime bound $M \ge 2^{32}$ on entry; problem 401 likewise asserts its
@@ -204,6 +241,13 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
   The fix is to divide *the factors* — 2 goes into $x$ or $x+1$, 3 into exactly one of the three,
   chosen by $x \bmod 3$ — leaving three integers that each fit in 64 bits and can be reduced before
   they are multiplied.
+- **Some quantities must be exact before they are reduced.** Problem 632 multiplies together the
+  *non-zero* counts $C_k$ modulo $10^9+7$ — and a count that happens to be a multiple of the modulus
+  reduces to 0 while still being non-zero, so a "reduce first" version would silently drop a factor.
+  The counts come from a binomial inversion, an alternating sum whose terms
+  $\binom{j}{k} A_j$ approach $2^8 \cdot 10^{16}$ before they cancel down to the result: the
+  intermediates outgrow the answer *because* of the cancellation. The C accumulates each $C_k$ in
+  `__int128`, exactly, and reduces only after the sum is complete.
 - **Signed overflow is undefined, so it hides.** Unlike Python, a C overflow throws no error and
   may pass small tests. When a C port disagrees with a verified Python solution only on the large
   input, an overflowed intermediate is the first suspect — reach for `long long`, then `__int128`,
@@ -212,8 +256,8 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 - **Let the Python version be the oracle — where it is pure Python.** Python's own integers can't
   overflow, so arithmetic done in them is trustworthy by construction. Port to C for speed, but keep
   the Python solution as the reference the C output must match. That guarantee stops at the NumPy
-  boundary: a vectorised solution needs the same width audit as its C port (problems 249, 401, 421,
-  455, 1010), and a brute force in plain Python ints is the better oracle for both.
+  boundary: a vectorised solution needs the same width audit as its C port (problems 249, 341, 401,
+  421, 455, 659, 1010), and a brute force in plain Python ints is the better oracle for both.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
