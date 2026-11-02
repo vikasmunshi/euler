@@ -399,6 +399,7 @@ loop was never needed.
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0711](/solutions/0711/) — Binary Blackboard
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions

@@ -395,6 +395,7 @@ both slower and harder to read.
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0739](/solutions/0739/) — Summation of Summations

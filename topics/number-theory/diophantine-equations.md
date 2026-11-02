@@ -257,7 +257,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ○ [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0681](/solutions/0681/) — Maximal Area
-- ○ [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples
 - ○ [0748](/solutions/0748/) — Upside Down Diophantine Equation
 - ○ [0753](/solutions/0753/) — Fermat Equation

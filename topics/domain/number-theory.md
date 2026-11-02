@@ -577,7 +577,6 @@ show up there at once. See
 - ○ [0712](/solutions/0712/) — Exponent Difference
 - ○ [0714](/solutions/0714/) — Duodigits
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
-- ○ [0718](/solutions/0718/) — Unreachable Numbers
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples
 - ○ [0735](/solutions/0735/) — Divisors of $2n^2$
 - ○ [0738](/solutions/0738/) — Counting Ordered Factorisations

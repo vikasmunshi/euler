@@ -180,7 +180,7 @@ factorisation beyond its disjointness from the other's.
 - ○ [0643](/solutions/0643/) — $2$-Friendly
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ● [0694](/solutions/0694/) — Cube-full Divisors
-- ○ [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ○ [0727](/solutions/0727/) — Triangle of Circular Arcs
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples
 - ○ [0748](/solutions/0748/) — Upside Down Diophantine Equation

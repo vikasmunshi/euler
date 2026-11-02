@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prefix_sum>._
 ## Problems
 
 - ● [0252](/solutions/0252/) — Convex Holes
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 
 <!-- /problems -->

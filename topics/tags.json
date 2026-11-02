@@ -1210,7 +1210,7 @@
       "reference": "https://en.wikipedia.org/wiki/Coin_problem",
       "additional-references": [],
       "summary": "The largest value not representable as a non-negative integer linear combination of a given set of coprime integers.",
-      "refs": ["p0278"]
+      "refs": ["p0278", "p0718"]
     },
     {
       "slug": "functional-graph",
@@ -2065,7 +2065,7 @@
       "reference": "https://en.wikipedia.org/wiki/Number_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0026", "p0047", "p0072", "p0075", "p0078", "p0124", "p0127", "p0153", "p0168", "p0179", "p0193", "p0231", "p0241", "p0243", "p0251", "p0268", "p0271", "p0272", "p0273", "p0276", "p0278", "p0309", "p0321", "p0335", "p0337", "p0343", "p0346", "p0350", "p0354", "p0355", "p0359", "p0360", "p0370", "p0372", "p0379", "p0388", "p0407", "p0410", "p0417", "p0432", "p0433", "p0439", "p0443", "p0445", "p0446", "p0447", "p0448", "p0451", "p0452", "p0454", "p0455", "p0457", "p0462", "p0466", "p0485", "p0489", "p0508", "p0512", "p0513", "p0516", "p0531", "p0533", "p0540", "p0541", "p0552", "p0556", "p0561", "p0571", "p0578", "p0580", "p0585", "p0586", "p0596", "p0601", "p0615", "p0616", "p0617", "p0625", "p0632", "p0634", "p0637", "p0639", "p0641", "p0643", "p0652", "p0655", "p0659", "p0672", "p0675", "p0693", "p0699", "p0700", "p0708", "p0712", "p0714", "p0715", "p0718", "p0730", "p0735", "p0738", "p0748", "p0749", "p0753", "p0754", "p0764", "p0771", "p0785", "p0789", "p0791", "p0792", "p0795", "p0800", "p0801", "p0804", "p0812", "p0821", "p0822", "p0823", "p0827", "p0832", "p0834", "p0838", "p0844", "p0850", "p0854", "p0858", "p0864", "p0876", "p0880", "p0884", "p0908", "p0915", "p0920", "p0926", "p0931", "p0937", "p0954", "p0967", "p0986", "p0999"]
+      "refs": ["p0026", "p0047", "p0072", "p0075", "p0078", "p0124", "p0127", "p0153", "p0168", "p0179", "p0193", "p0231", "p0241", "p0243", "p0251", "p0268", "p0271", "p0272", "p0273", "p0276", "p0278", "p0309", "p0321", "p0335", "p0337", "p0343", "p0346", "p0350", "p0354", "p0355", "p0359", "p0360", "p0370", "p0372", "p0379", "p0388", "p0407", "p0410", "p0417", "p0432", "p0433", "p0439", "p0443", "p0445", "p0446", "p0447", "p0448", "p0451", "p0452", "p0454", "p0455", "p0457", "p0462", "p0466", "p0485", "p0489", "p0508", "p0512", "p0513", "p0516", "p0531", "p0533", "p0540", "p0541", "p0552", "p0556", "p0561", "p0571", "p0578", "p0580", "p0585", "p0586", "p0596", "p0601", "p0615", "p0616", "p0617", "p0625", "p0632", "p0634", "p0637", "p0639", "p0641", "p0643", "p0652", "p0655", "p0659", "p0672", "p0675", "p0693", "p0699", "p0700", "p0708", "p0712", "p0714", "p0715", "p0730", "p0735", "p0738", "p0748", "p0749", "p0753", "p0754", "p0764", "p0771", "p0785", "p0789", "p0791", "p0792", "p0795", "p0800", "p0801", "p0804", "p0812", "p0821", "p0822", "p0823", "p0827", "p0832", "p0834", "p0838", "p0844", "p0850", "p0854", "p0858", "p0864", "p0876", "p0880", "p0884", "p0908", "p0915", "p0920", "p0926", "p0931", "p0937", "p0954", "p0967", "p0986", "p0999"]
     },
     {
       "slug": "oeis-a000119",
@@ -3409,6 +3409,15 @@
       "refs": ["p0074_s2"]
     },
     {
+      "slug": "apery-set",
+      "facet": "technique",
+      "name": "Ap\u00e9ry set of a numerical semigroup",
+      "reference": "https://en.wikipedia.org/wiki/Numerical_semigroup",
+      "additional-references": [],
+      "summary": "For each residue class modulo one generator, the least representable element of that class; it determines the semigroup's gaps, their count and their sum.",
+      "refs": ["p0718_s0"]
+    },
+    {
       "slug": "arbitrary-precision-arithmetic",
       "facet": "technique",
       "name": "Arbitrary-precision arithmetic",
@@ -3775,7 +3784,7 @@
       "reference": "https://en.wikipedia.org/wiki/Closed-form_expression",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0318_s0", "p0321_s0", "p0340_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0506_s0", "p0523_s0", "p0561_s0", "p0587_s0", "p0605_s0", "p0628_s0", "p0635_s0", "p0684_s0", "p0704_s0", "p0711_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"]
+      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0318_s0", "p0321_s0", "p0340_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0506_s0", "p0523_s0", "p0561_s0", "p0587_s0", "p0605_s0", "p0628_s0", "p0635_s0", "p0684_s0", "p0704_s0", "p0711_s0", "p0718_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"]
     },
     {
       "slug": "closure-computer-programming",
@@ -5296,7 +5305,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_multiplicative_inverse",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0492_s0", "p0506_s0", "p0517_s0", "p0520_s0", "p0531_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0705_s0", "p0711_s0", "p0731_s0", "p0743_s0", "p0754_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"]
+      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0251_s0", "p0274_s0", "p0365_s0", "p0381_s0", "p0407_s0", "p0487_s0", "p0492_s0", "p0506_s0", "p0517_s0", "p0520_s0", "p0531_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0705_s0", "p0711_s0", "p0718_s0", "p0731_s0", "p0743_s0", "p0754_s0", "p0860_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0996_s0", "p1010_s0"]
     },
     {
       "slug": "modulo",
@@ -5431,7 +5440,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0705_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5557,7 +5566,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prefix_sum",
       "additional-references": [],
       "summary": "Replacing a nested search for a dominating element with one running-maximum pass over an ordered sequence.",
-      "refs": ["p0252_s0"]
+      "refs": ["p0252_s0", "p0718_s0"]
     },
     {
       "slug": "prefix-sum",
@@ -6151,7 +6160,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0705_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0"]
     },
     {
       "slug": "walrus-operator",
@@ -6476,6 +6485,15 @@
       "additional-references": [],
       "summary": "When a number is built digit by digit and only its remainder mod n decides success, search the n remainders as graph states instead of enumerating the numbers themselves, whose count grows exponentially with their length.",
       "refs": ["p0303"]
+    },
+    {
+      "slug": "shift-min-plus-recurrence-to-running-minimum",
+      "facet": "takeaway",
+      "name": "Shift a min-plus recurrence into a running minimum",
+      "reference": null,
+      "additional-references": [],
+      "summary": "A recurrence w_i = min(b_i, w_{i-1} + c) becomes a plain prefix minimum of b_i - i\u00b7c, which vectorises and needs no per-step dependency.",
+      "refs": ["p0718"]
     },
     {
       "slug": "simulate-transient-then-extrapolate",

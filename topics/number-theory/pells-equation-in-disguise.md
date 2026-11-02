@@ -215,7 +215,7 @@ while p <= max_perimeter:
 - ○ [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0681](/solutions/0681/) — Maximal Area
 - ● [0692](/solutions/0692/) — Siegbert and Jo
-- ○ [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ○ [0723](/solutions/0723/) — Pythagorean Quadrilaterals
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples

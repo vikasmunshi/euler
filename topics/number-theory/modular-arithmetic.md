@@ -746,6 +746,7 @@ handful of operations on small numbers.
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
 - ○ [0716](/solutions/0716/) — Grid Graphs
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers

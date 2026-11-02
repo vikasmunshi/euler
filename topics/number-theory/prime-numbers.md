@@ -761,7 +761,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ○ [0712](/solutions/0712/) — Exponent Difference
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula
-- ○ [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0718](/solutions/0718/) — Unreachable Numbers
 - ○ [0727](/solutions/0727/) — Triangle of Circular Arcs
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples
 - ○ [0734](/solutions/0734/) — A Bit of Prime
