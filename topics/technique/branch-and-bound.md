@@ -180,5 +180,6 @@ about 81 times faster on a loop that is pure integer arithmetic.
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0755](/solutions/0755/) — Not Zeckendorf
+- ● [0829](/solutions/0829/) — Integral Fusion
 
 <!-- /problems -->

@@ -273,5 +273,6 @@ more cheaply than you can enumerate it. Then, in order:
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0800](/solutions/0800/) — Hybrid Integers
+- ● [0829](/solutions/0829/) — Integral Fusion
 
 <!-- /problems -->

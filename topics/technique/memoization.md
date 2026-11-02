@@ -230,6 +230,7 @@ in the key.
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0755](/solutions/0755/) — Not Zeckendorf
+- ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction

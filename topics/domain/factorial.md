@@ -224,7 +224,7 @@ Things that bite:
 - ○ [0646](/solutions/0646/) — Bounded Divisors
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
-- ○ [0829](/solutions/0829/) — Integral Fusion
+- ● [0829](/solutions/0829/) — Integral Fusion
 - ○ [0851](/solutions/0851/) — SOP and POS
 - ● [0926](/solutions/0926/) — Total Roundness
 - ○ [0937](/solutions/0937/) — Equiproduct Partition

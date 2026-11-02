@@ -313,5 +313,6 @@ kept warm between them flatters the measurement.
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
+- ● [0829](/solutions/0829/) — Integral Fusion
 
 <!-- /problems -->

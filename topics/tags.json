@@ -895,7 +895,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisor",
       "additional-references": ["https://en.wikipedia.org/wiki/Divisor#Further_notions_and_facts", "https://en.wikipedia.org/wiki/Divisor#Definition"],
       "summary": "",
-      "refs": ["p0021", "p0168", "p0170", "p0225", "p0256", "p0263", "p0266", "p0268", "p0320", "p0357", "p0359", "p0386", "p0417", "p0418", "p0454", "p0462", "p0468", "p0474", "p0509", "p0511", "p0530", "p0541", "p0545", "p0548", "p0550", "p0561", "p0563", "p0580", "p0598", "p0601", "p0606", "p0608", "p0646", "p0705", "p0735", "p0797", "p0834", "p0881", "p0896", "p0927", "p0931", "p0944", "p0956", "p0995"]
+      "refs": ["p0021", "p0168", "p0170", "p0225", "p0256", "p0263", "p0266", "p0268", "p0320", "p0357", "p0359", "p0386", "p0417", "p0418", "p0454", "p0462", "p0468", "p0474", "p0509", "p0511", "p0530", "p0541", "p0545", "p0548", "p0550", "p0561", "p0563", "p0580", "p0598", "p0601", "p0606", "p0608", "p0646", "p0705", "p0735", "p0797", "p0829", "p0834", "p0881", "p0896", "p0927", "p0931", "p0944", "p0956", "p0995"]
     },
     {
       "slug": "divisor-function",
@@ -2416,7 +2416,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_factor",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0132", "p0521", "p0526", "p0632", "p0642", "p0659", "p0668", "p0779", "p0823", "p0829", "p0967"]
+      "refs": ["p0132", "p0521", "p0526", "p0632", "p0642", "p0659", "p0668", "p0779", "p0823", "p0967"]
     },
     {
       "slug": "prime-factorization",
@@ -3559,7 +3559,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0"]
+      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0"]
     },
     {
       "slug": "binomial-inversion",
@@ -3658,7 +3658,7 @@
       "reference": "https://en.wikipedia.org/wiki/Branch_and_bound",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0088_s0", "p0110_s0", "p0139_s1", "p0170_s0", "p0241_s0", "p0254_s0", "p0473_s0", "p0615_s0", "p0755_s0"]
+      "refs": ["p0088_s0", "p0110_s0", "p0139_s1", "p0170_s0", "p0241_s0", "p0254_s0", "p0473_s0", "p0615_s0", "p0755_s0", "p0829_s0"]
     },
     {
       "slug": "branch-and-bound-search",
@@ -4000,7 +4000,7 @@
       "reference": "https://en.wikipedia.org/wiki/Depth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0342_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0615_s0", "p0642_s0", "p0674_s0"]
+      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0342_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0615_s0", "p0642_s0", "p0674_s0", "p0829_s0"]
     },
     {
       "slug": "descartes-circle-theorem",
@@ -4288,7 +4288,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponential_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0587_s0", "p0615_s0"]
+      "refs": ["p0587_s0", "p0615_s0", "p0829_s0"]
     },
     {
       "slug": "exponentiation-by-squaring",
@@ -4558,7 +4558,7 @@
       "reference": "https://en.wikipedia.org/wiki/Generate_and_test",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0032_s0", "p0034_s0", "p0036_s0", "p0037_s0", "p0041_s0", "p0051_s0", "p0059_s0", "p0085_s0", "p0085_s1", "p0087_s0", "p0093_s0", "p0098_s0", "p0104_s0", "p0111_s0", "p0119_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0146_s0", "p0167_s0", "p0174_s0", "p0180_s0", "p0200_s0", "p0206_s0", "p0346_s0", "p0348_s0", "p0545_s0", "p0757_s0"]
+      "refs": ["p0030_s0", "p0032_s0", "p0034_s0", "p0036_s0", "p0037_s0", "p0041_s0", "p0051_s0", "p0059_s0", "p0085_s0", "p0085_s1", "p0087_s0", "p0093_s0", "p0098_s0", "p0104_s0", "p0111_s0", "p0119_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0146_s0", "p0167_s0", "p0174_s0", "p0180_s0", "p0200_s0", "p0206_s0", "p0346_s0", "p0348_s0", "p0545_s0", "p0757_s0", "p0829_s0"]
     },
     {
       "slug": "generation-of-primes",
@@ -4684,7 +4684,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hash_consing",
       "additional-references": [],
       "summary": "Interning structurally equal sub-terms into one shared node so a forest of trees becomes a compact DAG.",
-      "refs": ["p0674_s0"]
+      "refs": ["p0674_s0", "p0829_s0"]
     },
     {
       "slug": "hash-function",
@@ -5242,7 +5242,7 @@
       "reference": "https://en.wikipedia.org/wiki/Memoization",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0060_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0092_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0153_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0463_s0", "p0549_s0", "p0551_s0", "p0641_s0", "p0755_s0", "p0887_s0", "p0943_s0", "p0946_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0060_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0092_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0153_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0463_s0", "p0549_s0", "p0551_s0", "p0641_s0", "p0755_s0", "p0829_s0", "p0887_s0", "p0943_s0", "p0946_s0", "p1000_s0"]
     },
     {
       "slug": "mersenne-twister",
@@ -5782,7 +5782,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recursion_(computer_science)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0452_s0", "p0463_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0452_s0", "p0463_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0829_s0", "p0862_s0", "p1000_s0"]
     },
     {
       "slug": "regula-falsi",
@@ -5890,7 +5890,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
       "additional-references": ["https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler%27s_sieve"],
       "summary": "",
-      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0425_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0619_s0", "p0650_s0", "p0752_s0", "p0772_s0", "p0800_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0", "p0946_s0"]
+      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0425_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0619_s0", "p0650_s0", "p0752_s0", "p0772_s0", "p0800_s0", "p0829_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0", "p0946_s0"]
     },
     {
       "slug": "sieve-of-sundaram",
@@ -6478,6 +6478,15 @@
       "refs": ["p0443"]
     },
     {
+      "slug": "keep-candidates-not-just-optima",
+      "facet": "takeaway",
+      "name": "Keep candidates, not just optima",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When a whole's optimum need not be built from its parts' optima, carry each part's complete candidate list up to a bound instead of only its best value.",
+      "refs": ["p0829"]
+    },
+    {
       "slug": "memo-key-is-the-full-state",
       "facet": "takeaway",
       "name": "Key the memo on the full state",
@@ -6511,7 +6520,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Amortise an expensive table across many queries when inputs share structure.",
-      "refs": ["p0014", "p0017", "p0023", "p0035", "p0050", "p0067", "p0074", "p0077", "p0081", "p0087", "p0095", "p0096", "p0103", "p0105", "p0114", "p0115", "p0117", "p0118", "p0124", "p0127", "p0130", "p0133", "p0150", "p0153", "p0154", "p0159", "p0171", "p0179", "p0199", "p0220", "p0233", "p0254", "p0315", "p0357", "p0365", "p0407", "p0461", "p0504", "p0517", "p0549", "p0642", "p0650", "p0710"]
+      "refs": ["p0014", "p0017", "p0023", "p0035", "p0050", "p0067", "p0074", "p0077", "p0081", "p0087", "p0095", "p0096", "p0103", "p0105", "p0114", "p0115", "p0117", "p0118", "p0124", "p0127", "p0130", "p0133", "p0150", "p0153", "p0154", "p0159", "p0171", "p0179", "p0199", "p0220", "p0233", "p0254", "p0315", "p0357", "p0365", "p0407", "p0461", "p0504", "p0517", "p0549", "p0642", "p0650", "p0710", "p0829"]
     },
     {
       "slug": "rearrange-to-avoid-cancellation",
@@ -6574,7 +6583,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the answer's size is unknown, scan ranges that are fully resolved once processed, in increasing order, and stop at the first that suffices instead of guessing a bound.",
-      "refs": ["p0348"]
+      "refs": ["p0348", "p0829"]
     },
     {
       "slug": "search-residues-not-values",

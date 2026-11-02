@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
+- ● [0829](/solutions/0829/) — Integral Fusion
 
 <!-- /problems -->

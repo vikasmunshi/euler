@@ -297,7 +297,7 @@ ask for both, and a factoriser that returns pairs makes the distinction impossib
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ○ [0821](/solutions/0821/) — 123-Separable
 - ○ [0823](/solutions/0823/) — Factor Shuffle
-- ○ [0829](/solutions/0829/) — Integral Fusion
+- ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0834](/solutions/0834/) — Add and Divide
 - ○ [0838](/solutions/0838/) — Not Coprime
 - ○ [0840](/solutions/0840/) — Sum of Products

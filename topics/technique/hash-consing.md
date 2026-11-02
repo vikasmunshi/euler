@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hash_consing>.
 ## Problems
 
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
+- ● [0829](/solutions/0829/) — Integral Fusion
 
 <!-- /problems -->

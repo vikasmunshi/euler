@@ -242,6 +242,7 @@ benchmark reflects the real cost.
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0755](/solutions/0755/) — Not Zeckendorf
+- ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [1000](/solutions/1000/) — Problem $1000$
 

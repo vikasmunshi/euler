@@ -228,6 +228,7 @@ patterns recur.
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0800](/solutions/0800/) — Hybrid Integers
+- ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0834](/solutions/0834/) — Add and Divide
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0926](/solutions/0926/) — Total Roundness
