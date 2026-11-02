@@ -823,7 +823,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_sum",
       "additional-references": ["https://en.wikipedia.org/wiki/Digit_sum#Digital_root"],
       "summary": "",
-      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0051", "p0056", "p0065", "p0080", "p0092", "p0112", "p0119", "p0159", "p0164", "p0171", "p0217", "p0238", "p0254", "p0284", "p0290", "p0294", "p0315", "p0358", "p0377", "p0387", "p0391", "p0442", "p0467", "p0474", "p0506", "p0508", "p0520", "p0529", "p0538", "p0551", "p0612", "p0637", "p0676", "p0684", "p0685", "p0706", "p0711", "p0714", "p0719", "p0725", "p0749", "p0776", "p0778", "p0788", "p0805", "p0817", "p0845", "p0912", "p0924", "p0925", "p0954", "p0974", "p1004"]
+      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0051", "p0056", "p0065", "p0080", "p0092", "p0112", "p0119", "p0159", "p0164", "p0171", "p0217", "p0238", "p0254", "p0284", "p0290", "p0294", "p0315", "p0358", "p0377", "p0387", "p0391", "p0442", "p0467", "p0474", "p0506", "p0508", "p0520", "p0529", "p0538", "p0551", "p0637", "p0676", "p0684", "p0685", "p0706", "p0711", "p0714", "p0719", "p0725", "p0749", "p0776", "p0778", "p0788", "p0805", "p0817", "p0845", "p0912", "p0924", "p0925", "p0954", "p0974", "p1004"]
     },
     {
       "slug": "digital-root",
@@ -4027,7 +4027,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_DP",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0290_s0", "p0301_s0", "p0529_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0290_s0", "p0301_s0", "p0529_s0", "p0612_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "dijkstras-algorithm",
@@ -4783,7 +4783,7 @@
       "reference": "https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0290_s0", "p0293_s0", "p0297_s0", "p0303_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0457_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0531_s0", "p0545_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0659_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0866_s0", "p0875_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
+      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0290_s0", "p0293_s0", "p0297_s0", "p0303_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0457_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0531_s0", "p0545_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0612_s0", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0659_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0866_s0", "p0875_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
     },
     {
       "slug": "int64",
@@ -5125,7 +5125,7 @@
       "reference": "https://en.wikipedia.org/wiki/Mask_(computing)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0105_s0", "p0161_s0", "p0345_s0", "p0679_s0", "p0943_s0", "p0974_s0"]
+      "refs": ["p0105_s0", "p0161_s0", "p0345_s0", "p0612_s0", "p0679_s0", "p0943_s0", "p0974_s0"]
     },
     {
       "slug": "math-comb",
@@ -6028,6 +6028,15 @@
       "refs": ["p0022_s0", "p0042_s0", "p0054_s0"]
     },
     {
+      "slug": "sum-over-subsets-transform",
+      "facet": "technique",
+      "name": "Sum over subsets (zeta transform)",
+      "reference": "https://en.wikipedia.org/wiki/Incidence_algebra",
+      "additional-references": [],
+      "summary": "Summing a function over every submask of each bitmask in O(k 2^k) by sweeping one bit at a time.",
+      "refs": ["p0612_s0"]
+    },
+    {
       "slug": "support-function",
       "facet": "technique",
       "name": "Support function",
@@ -6250,7 +6259,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When only an input's value class matters, count the inputs per class and compute on the counts instead of enumerating the inputs.",
-      "refs": ["p0341", "p0452", "p0625", "p0675", "p0698", "p0754", "p0776", "p0778"]
+      "refs": ["p0341", "p0452", "p0612", "p0625", "p0675", "p0698", "p0754", "p0776", "p0778"]
     },
     {
       "slug": "algorithm-beats-language",
@@ -6340,7 +6349,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the objects you want are hard to enumerate, count the ones you don't want and subtract from the total.",
-      "refs": ["p0520", "p0628", "p0668"]
+      "refs": ["p0520", "p0612", "p0628", "p0668"]
     },
     {
       "slug": "decompose-overlap",

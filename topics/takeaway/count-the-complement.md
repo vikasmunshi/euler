@@ -8,6 +8,7 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0520](/solutions/0520/) — Simbers
+- ● [0612](/solutions/0612/) — Friend Numbers
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 

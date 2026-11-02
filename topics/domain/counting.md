@@ -221,7 +221,7 @@ reach for wide or arbitrary-precision types
 - ○ [0586](/solutions/0586/) — Binary Quadratic Form
 - ○ [0600](/solutions/0600/) — Integer Sided Equiangular Hexagons
 - ○ [0601](/solutions/0601/) — Divisibility Streaks
-- ○ [0612](/solutions/0612/) — Friend Numbers
+- ● [0612](/solutions/0612/) — Friend Numbers
 - ○ [0620](/solutions/0620/) — Planetary Gears
 - ○ [0623](/solutions/0623/) — Lambda Count
 - ○ [0627](/solutions/0627/) — Counting Products

@@ -374,7 +374,6 @@ what matters here is what replaces the extraction loop).
 - ● [0571](/solutions/0571/) — Super Pandigital Numbers
 - ○ [0592](/solutions/0592/) — Factorial Trailing Digits 2
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
-- ○ [0612](/solutions/0612/) — Friend Numbers
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ○ [0655](/solutions/0655/) — Divisible Palindromes
 - ○ [0660](/solutions/0660/) — Pandigital Triangles

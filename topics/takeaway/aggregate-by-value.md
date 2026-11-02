@@ -107,6 +107,7 @@ state the invariant that makes a class a class, and check that the boundary enfo
 
 - ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0452](/solutions/0452/) — Long Products
+- ● [0612](/solutions/0612/) — Friend Numbers
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0698](/solutions/0698/) — 123 Numbers

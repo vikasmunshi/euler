@@ -228,6 +228,7 @@ everything that does depend on $n$ costs $O(\log n)$ polynomial products.
 - ● [0290](/solutions/0290/) — Digital Signature
 - ● [0301](/solutions/0301/) — Nim
 - ● [0529](/solutions/0529/) — $10$-substrings
+- ● [0612](/solutions/0612/) — Friend Numbers
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0845](/solutions/0845/) — Prime Digit Sum
