@@ -1,5 +1,5 @@
 <!-- tags: [dynamic-programming] -->
-<!-- status: final 2026-10-15T10:33Z -->
+<!-- status: final -->
 # Dynamic programming
 
 [Dynamic programming](https://en.wikipedia.org/wiki/Dynamic_programming) (DP) solves a
@@ -101,6 +101,22 @@ whatever the recurrence combines, as long as the combining rule is fixed:
   always gives a smaller number, so the values fill bottom-up in plain index order — stored
   as fixed-point integers, since they are dyadic rationals. Because values *add* over a
   sum of games, a position with thousands of piles is settled by a sum of table lookups.
+  The Fibonacci Tree Game (400) adds a second layer. Its tree has more nodes than
+  there are atoms in the universe, but only `k` distinct subtree *shapes*, and every
+  node's [Grundy value](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
+  stays small. So the DP works with pairs (shape, target value). It counts the moves
+  inside a shape that leave its root at each value, which turns "how many winning first
+  moves" into a vector per level, pushed down two levels at a time.
+- **A saturated count.** When the question is only "is there exactly one?", as in Special
+  Partitions (333), the counts can be capped at 2. Adding non-negative numbers keeps "none,
+  one, many" correct, so each entry fits in a byte and overflow cannot happen.
+- **A yes/no at a level, instead of a minimum.** Flexible Digit Sum (637) defines `f(n)` as
+  the fewest split-and-sum steps that bring `n` down to one digit. Taking a minimum over
+  all `2^(L−1)` splits for each number is too expensive, but `f` never goes above 3. So
+  the solution asks a weaker question one level at a time: is `f(n) ≤ t`? That holds as
+  soon as *one* split lands on a number already known to be at level `t − 1`, so a single
+  witness settles each entry, and a bitset filter finds that witness for almost every
+  number.
 
 ## How to reason about it
 
@@ -111,7 +127,25 @@ and you have silently broken the optimal-substructure property. The state is a
 *sufficient summary*, not the configuration: in 253 the set of placed pieces is
 exponential, but given the history the empty cells are a uniform composition across the
 gaps, so (pieces placed, segment count, which end gaps survive) carries everything the
-next step's odds depend on. Once the state is fixed:
+next step's odds depend on. Two more ways to find the state:
+
+- **Keep only what the condition compares.** A *digit DP* walks a number one column at a
+  time. In Digital Signature (290) the condition is `s(n) = s(137n)`, and long
+  multiplication makes each output digit depend only on the current digit and the incoming
+  carry. Two prefixes with the same carry and the same running *difference* of digit sums
+  have the same future. Tracking that difference, rather than both sums, turns a 3-D state
+  into a 2-D one, and `10^18` candidates become a few million table updates.
+- **Condition on the event that splits the problem.** Tidying Up B (866) uses the same
+  random caterpillar as 253, but now it asks for the expected *product* of the segment
+  scores. Pushing forward through time would have to carry that product along. Look at the
+  *last* piece placed instead. Before it goes down, no segment can cross its position, so
+  the pieces to its left and right form two independent smaller caterpillars. The
+  expectation then factorises into a [Catalan](https://en.wikipedia.org/wiki/Catalan_number)-style
+  self-convolution, `E(N) = (2N−1) Σ E(i)·E(N−1−i)`, which fills bottom-up in `O(N²)`.
+  This is the move behind interval DP in general: choose the step that cuts a problem
+  into independent pieces, and the recurrence follows.
+
+Once the state is fixed:
 
 - **Evaluation order.** Bottom-up needs the dependencies of each state filled before it.
   A grid of right/down moves fills by rows or by anti-diagonals; a path-in-a-triangle
@@ -121,7 +155,11 @@ next step's odds depend on. Once the state is fixed:
   Dobkin–Edelsbrunner–Overmars sweep, whose
   states are the last edge of a convex chain fanned from its lowest vertex, filled in
   angular order. When the order is awkward to state explicitly, top-down memoization
-  sidesteps it — the recursion visits dependencies first by construction.
+  sidesteps it — the recursion visits dependencies first by construction. The order can
+  also be what makes vectorising possible. In 333 every entry for `n` reads only indices
+  below `n/2`, so a whole block `[2^k, 2^(k+1))` depends only on earlier blocks and can be
+  filled in one NumPy step. That replaces a Python loop over `n` with `log₂ N` array
+  operations.
 - **Price the transitions, not just the states.** Total cost is states × transitions per
   state. In 252 the predecessors that keep a chain convex form a prefix of an angularly
   sorted list, so a running maximum over that list answers each state's "best
@@ -140,6 +178,13 @@ next step's odds depend on. Once the state is fixed:
   argument first reduces "the deck is fair" to "some run has length exactly 2", and the DP
   then only counts run-length compositions that avoid it. And in 996 the DP runs over the
   small dimension (players) while a closed form absorbs the large one (days).
+- **Stop the table early when the recurrence is linear.** In 5-Smooth Pairs (682) a small
+  knapsack table gives the first 81 terms of the count, and then the DP's job is done.
+  Those terms show that the generating function is rational with a known denominator of
+  degree 40. The solution checks this by asserting that the higher coefficients cancel,
+  and then the [Bostan–Mori](https://arxiv.org/abs/2008.08822) halving step extracts the
+  `n`-th coefficient in `O(d² log n)`. A DP whose rows follow a constant-coefficient linear
+  recurrence does not have to be filled all the way to `n`.
 - **Build it inside `solve()`.** The table, cache, or memo dict must be constructed on
   each call, sized to the inputs — not kept warm at module level. With `--runs=N` the
   harness times repeated `solve()` calls, and a cache that survives between runs makes
