@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Mex_(mathemati
 ## Problems
 
 - ● [0310](/solutions/0310/) — Nim Square
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0832](/solutions/0832/) — Mex Sequence
 
 <!-- /problems -->

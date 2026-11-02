@@ -276,7 +276,7 @@ weighting each winning mask by how many integers wear it.
 - ○ [0629](/solutions/0629/) — Scatterstone Nim
 - ○ [0640](/solutions/0640/) — Shut the Box
 - ○ [0644](/solutions/0644/) — Squares on the Line
-- ○ [0649](/solutions/0649/) — Low-Prime Chessboard Nim
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0653](/solutions/0653/) — Frictionless Tube
 - ○ [0661](/solutions/0661/) — A Long Chess Match
 - ○ [0664](/solutions/0664/) — An Infinite Game

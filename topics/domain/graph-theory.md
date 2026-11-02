@@ -227,7 +227,6 @@ counting walks.
 - ○ [0490](/solutions/0490/) — Jumping Frog
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ○ [0553](/solutions/0553/) — Power Sets of Power Sets
-- ○ [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0651](/solutions/0651/) — Patterned Cylinders
 - ○ [0669](/solutions/0669/) — The King's Banquet
 - ○ [0673](/solutions/0673/) — Beds and Desks

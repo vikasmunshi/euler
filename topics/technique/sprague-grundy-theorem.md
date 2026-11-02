@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sprague%E2%80%
 
 - ● [0310](/solutions/0310/) — Nim Square
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 
 <!-- /problems -->

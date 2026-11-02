@@ -18,7 +18,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Nimber>._
 - ○ [0550](/solutions/0550/) — Divisor Game
 - ○ [0560](/solutions/0560/) — Coprime Nim
 - ○ [0629](/solutions/0629/) — Scatterstone Nim
-- ○ [0649](/solutions/0649/) — Low-Prime Chessboard Nim
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0665](/solutions/0665/) — Proportionate Nim
 - ○ [0798](/solutions/0798/) — Card Stacking Game
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi

@@ -719,6 +719,7 @@ handful of operations on small numbers.
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0653](/solutions/0653/) — Frictionless Tube
 - ○ [0654](/solutions/0654/) — Neighbourly Constraints

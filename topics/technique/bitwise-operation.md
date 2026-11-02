@@ -161,6 +161,7 @@ not style but necessity (see below).
 - ● [0310](/solutions/0310/) — Nim Square
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0679](/solutions/0679/) — Freefarea
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0944](/solutions/0944/) — Sum of Elevisors

@@ -125,7 +125,7 @@ the history into the state before you look for a value.
 - ○ [0560](/solutions/0560/) — Coprime Nim
 - ○ [0629](/solutions/0629/) — Scatterstone Nim
 - ○ [0644](/solutions/0644/) — Squares on the Line
-- ○ [0649](/solutions/0649/) — Low-Prime Chessboard Nim
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0665](/solutions/0665/) — Proportionate Nim
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0711](/solutions/0711/) — Binary Blackboard

@@ -116,6 +116,7 @@ safely. The other differences are in what surrounds XOR:
 - ● [0310](/solutions/0310/) — Nim Square
 - ○ [0323](/solutions/0323/) — Bitwise-OR Operations on Random Integers
 - ○ [0334](/solutions/0334/) — Spilling the Beans
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0691](/solutions/0691/) — Long Substring with Many Repetitions
 - ○ [0707](/solutions/0707/) — Lights Out
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators

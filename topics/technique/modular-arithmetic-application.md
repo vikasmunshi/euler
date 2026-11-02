@@ -232,6 +232,7 @@ crash, and neither shows up on small test inputs.
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
+- ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
