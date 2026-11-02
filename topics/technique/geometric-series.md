@@ -1,5 +1,5 @@
 <!-- tags: [geometric-series] -->
-<!-- status: final -->
+<!-- status: final 2026-11-02T18:27Z -->
 # Geometric series
 
 A [geometric series](https://en.wikipedia.org/wiki/Geometric_series) is a sum whose terms share a

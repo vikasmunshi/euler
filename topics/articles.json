@@ -6808,13 +6808,13 @@
       "path": "technique/geometric-series",
       "title": "Geometric series",
       "status": "final",
-      "written": "2026-10-18T10:07Z",
+      "written": "2026-11-02T18:27Z",
       "solved": 10,
       "problems": 10,
       "tags": ["geometric-series"],
       "refs": ["p0232_s0", "p0288_s0", "p0319_s0", "p0423_s0", "p0506_s0", "p0520_s0", "p0650_s0", "p0684_s0", "p0711_s0", "p1006_s0"],
-      "covered": ["p0232", "p0288", "p0319", "p0650"],
-      "solved_after": ["p0423", "p0506", "p0520", "p0684", "p0711", "p1006"]
+      "covered": ["p0232", "p0288", "p0319", "p0423", "p0506", "p0520", "p0650", "p0684", "p0711", "p1006"],
+      "solved_after": []
     },
     {
       "path": "technique/global-variable",
