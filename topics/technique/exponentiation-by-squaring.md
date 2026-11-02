@@ -209,6 +209,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0200](/solutions/0200/) — Prime-proof Squbes
 - ● [0217](/solutions/0217/) — Balanced Numbers
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
+- ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0407](/solutions/0407/) — Idempotents

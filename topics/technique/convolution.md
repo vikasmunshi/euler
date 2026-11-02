@@ -155,6 +155,7 @@ one's distribution separately and convolve.
 - ● [0205](/solutions/0205/) — Dice Game
 - ● [0240](/solutions/0240/) — Top Dice
 - ● [0250](/solutions/0250/) — $250250$
+- ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs

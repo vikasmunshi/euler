@@ -3901,7 +3901,7 @@
       "reference": "https://en.wikipedia.org/wiki/Convolution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0092_s0", "p0205_s0", "p0240_s0", "p0250_s0", "p0520_s0", "p0649_s0", "p0682_s0", "p0743_s0", "p0768_s0", "p0778_s0", "p0866_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0092_s0", "p0205_s0", "p0240_s0", "p0250_s0", "p0294_s0", "p0520_s0", "p0649_s0", "p0682_s0", "p0743_s0", "p0768_s0", "p0778_s0", "p0866_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "counting-sort",
@@ -4027,7 +4027,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_DP",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0290_s0", "p0301_s0", "p0529_s0", "p0612_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0290_s0", "p0294_s0", "p0301_s0", "p0529_s0", "p0612_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "dijkstras-algorithm",
@@ -4288,7 +4288,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation_by_squaring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0649_s0", "p0670_s0", "p0706_s0", "p0721_s0", "p0752_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
+      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0294_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0455_s0", "p0649_s0", "p0670_s0", "p0706_s0", "p0721_s0", "p0752_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
     },
     {
       "slug": "extended-euclidean-algorithm",
@@ -5494,7 +5494,7 @@
       "reference": "https://numpy.org/doc/stable/reference/arrays.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0512_s0", "p0632_s0", "p0641_s0", "p0659_s0", "p0668_s0", "p0675_s0", "p0875_s0"]
+      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0294_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0512_s0", "p0632_s0", "p0641_s0", "p0659_s0", "p0668_s0", "p0675_s0", "p0875_s0"]
     },
     {
       "slug": "open-addressing",
@@ -6547,7 +6547,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When an accumulation over a self-similar sequence is linear in a small state vector, each letter is a matrix and whole blocks compose by multiplication, collapsing a length-n walk to O(log n) products.",
-      "refs": ["p1006"]
+      "refs": ["p0294", "p1006"]
     },
     {
       "slug": "search-in-complete-bands",
@@ -6565,7 +6565,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a number is built digit by digit and only its remainder mod n decides success, search the n remainders as graph states instead of enumerating the numbers themselves, whose count grows exponentially with their length.",
-      "refs": ["p0303"]
+      "refs": ["p0294", "p0303"]
     },
     {
       "slug": "shift-min-plus-recurrence-to-running-minimum",

@@ -357,7 +357,7 @@ of crossing it.
 - ○ [0281](/solutions/0281/) — Pizza Toppings
 - ○ [0289](/solutions/0289/) — Eulerian Cycles
 - ○ [0292](/solutions/0292/) — Pythagorean Polygons
-- ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
+- ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ○ [0307](/solutions/0307/) — Chip Defects
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10

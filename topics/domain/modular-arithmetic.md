@@ -334,7 +334,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
 - ○ [0282](/solutions/0282/) — The Ackermann Function
 - ○ [0284](/solutions/0284/) — Steady Squares
-- ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
+- ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0304](/solutions/0304/) — Primonacci
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs

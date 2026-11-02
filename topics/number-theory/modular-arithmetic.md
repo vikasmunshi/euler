@@ -689,7 +689,7 @@ handful of operations on small numbers.
 - ○ [0284](/solutions/0284/) — Steady Squares
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
-- ○ [0294](/solutions/0294/) — Sum of Digits - Experience #23
+- ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0305](/solutions/0305/) — Reflexive Position
