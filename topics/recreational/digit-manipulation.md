@@ -365,7 +365,7 @@ what matters here is what replaces the extraction loop).
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
 - ○ [0506](/solutions/0506/) — Clock Sequence
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
-- ○ [0520](/solutions/0520/) — Simbers
+- ● [0520](/solutions/0520/) — Simbers
 - ○ [0524](/solutions/0524/) — First Sort II
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ○ [0538](/solutions/0538/) — Maximum Quadrilaterals

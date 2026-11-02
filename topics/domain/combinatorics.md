@@ -352,7 +352,7 @@ of crossing it.
 - ○ [0502](/solutions/0502/) — Counting Castles
 - ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
 - ○ [0519](/solutions/0519/) — Tricoloured Coin Fountains
-- ○ [0520](/solutions/0520/) — Simbers
+- ● [0520](/solutions/0520/) — Simbers
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ● [0523](/solutions/0523/) — First Sort I
 - ○ [0524](/solutions/0524/) — First Sort II

@@ -257,6 +257,7 @@ Four cautions earn their keep:
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0520](/solutions/0520/) — Simbers
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game

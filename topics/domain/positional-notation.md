@@ -211,7 +211,7 @@ Base 10 is an accident of anatomy, and several problems make the point by changi
 - ○ [0442](/solutions/0442/) — Eleven-free Integers
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
-- ○ [0520](/solutions/0520/) — Simbers
+- ● [0520](/solutions/0520/) — Simbers
 - ○ [0524](/solutions/0524/) — First Sort II
 - ○ [0558](/solutions/0558/) — Irrational Base
 - ● [0571](/solutions/0571/) — Super Pandigital Numbers

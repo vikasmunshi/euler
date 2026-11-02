@@ -210,6 +210,7 @@ the repetition.
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0520](/solutions/0520/) — Simbers
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

@@ -196,6 +196,7 @@ ask which coefficient you actually need.
 - ○ [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
 - ○ [0519](/solutions/0519/) — Tricoloured Coin Fountains
+- ● [0520](/solutions/0520/) — Simbers
 - ○ [0537](/solutions/0537/) — Counting Tuples
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
 - ○ [0614](/solutions/0614/) — Special Partitions 2

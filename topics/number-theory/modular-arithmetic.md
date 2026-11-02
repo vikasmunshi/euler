@@ -616,6 +616,7 @@ handful of operations on small numbers.
 - ○ [0515](/solutions/0515/) — Dissonant Numbers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0520](/solutions/0520/) — Simbers
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ● [0529](/solutions/0529/) — $10$-substrings
