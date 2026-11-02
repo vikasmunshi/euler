@@ -4644,8 +4644,8 @@
     "level": 18,
     "pct": 45,
     "solvers": 1197,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 2 Nov 2026, 12:37"
   },
   "582": {
     "title": "Nearly Isosceles $120$ Degree Triangles",
