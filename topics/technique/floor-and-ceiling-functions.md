@@ -112,6 +112,7 @@ The [domain page on the floor function](/topics/domain/floor-function) collects 
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0277](/solutions/0277/) — A Modified Collatz Sequence
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals

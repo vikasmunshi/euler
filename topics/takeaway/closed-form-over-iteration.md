@@ -362,6 +362,7 @@ Four cautions earn their keep:
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0711](/solutions/0711/) — Binary Blackboard

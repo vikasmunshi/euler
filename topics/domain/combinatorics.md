@@ -459,7 +459,6 @@ of crossing it.
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
 - ○ [0687](/solutions/0687/) — Shuffling Cards
-- ○ [0688](/solutions/0688/) — Piles of Plates
 - ○ [0690](/solutions/0690/) — Tom and Jerry
 - ○ [0696](/solutions/0696/) — Mahjong
 - ● [0698](/solutions/0698/) — 123 Numbers

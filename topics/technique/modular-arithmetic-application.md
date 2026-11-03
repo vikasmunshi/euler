@@ -238,6 +238,7 @@ crash, and neither shows up on small test inputs.
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0700](/solutions/0700/) — Eulercoin
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0710](/solutions/0710/) — One Million Members

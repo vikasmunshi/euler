@@ -391,7 +391,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0680](/solutions/0680/) — Yarra Gnisrever
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
-- ○ [0688](/solutions/0688/) — Piles of Plates
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ○ [0689](/solutions/0689/) — Binary Series
 - ○ [0708](/solutions/0708/) — Twos Are All You Need
 - ○ [0712](/solutions/0712/) — Exponent Difference

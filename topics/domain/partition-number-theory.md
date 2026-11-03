@@ -143,7 +143,7 @@ decide whether a DP over totals or a recurrence on the generating function fits.
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
 - ○ [0629](/solutions/0629/) — Scatterstone Nim
-- ○ [0688](/solutions/0688/) — Piles of Plates
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ○ [0859](/solutions/0859/) — Cookie Game

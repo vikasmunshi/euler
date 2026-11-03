@@ -805,6 +805,7 @@ handful of operations on small numbers.
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ○ [0685](/solutions/0685/) — Inverse Digit Sum II
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ○ [0693](/solutions/0693/) — Finite Sequence Generator
 - ○ [0696](/solutions/0696/) — Mahjong
 - ● [0700](/solutions/0700/) — Eulercoin

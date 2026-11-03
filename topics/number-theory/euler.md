@@ -292,7 +292,7 @@ the loop.
 - ○ [0629](/solutions/0629/) — Scatterstone Nim
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0656](/solutions/0656/) — Palindromic Sequences
-- ○ [0688](/solutions/0688/) — Piles of Plates
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ○ [0756](/solutions/0756/) — Approximating a Sum

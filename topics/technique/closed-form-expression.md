@@ -458,6 +458,7 @@ loop was never needed.
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
+- ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0711](/solutions/0711/) — Binary Blackboard
 - ● [0718](/solutions/0718/) — Unreachable Numbers
