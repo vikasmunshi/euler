@@ -141,6 +141,7 @@ triple.
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ○ [0292](/solutions/0292/) — Pythagorean Polygons
 - ○ [0295](/solutions/0295/) — Lenticular Holes
+- ● [0309](/solutions/0309/) — Integer Ladders
 - ○ [0311](/solutions/0311/) — Biclinic Integral Quadrilaterals
 - ○ [0373](/solutions/0373/) — Circumscribed Circles
 - ● [0395](/solutions/0395/) — Pythagorean Tree

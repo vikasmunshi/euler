@@ -243,6 +243,7 @@ over a small alphabet, and it needs neither a Fenwick tree nor a merge sort.
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ● [0238](/solutions/0238/) — Infinite String Tour
 - ● [0272](/solutions/0272/) — Modular Cubes, Part 2
+- ● [0309](/solutions/0309/) — Integer Ladders
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence

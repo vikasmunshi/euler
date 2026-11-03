@@ -98,5 +98,6 @@ quantity.
 - ● [0039](/solutions/0039/) — Integer Right Triangles
 - ● [0166](/solutions/0166/) — Criss Cross
 - ● [0174](/solutions/0174/) — Hollow Square Laminae II
+- ● [0309](/solutions/0309/) — Integer Ladders
 
 <!-- /problems -->

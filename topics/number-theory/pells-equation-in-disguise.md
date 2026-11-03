@@ -227,7 +227,7 @@ of magnitude.
 - ○ [0296](/solutions/0296/) — Angular Bisector and Tangent
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ○ [0299](/solutions/0299/) — Three Similar Triangles
-- ○ [0309](/solutions/0309/) — Integer Ladders
+- ● [0309](/solutions/0309/) — Integer Ladders
 - ○ [0311](/solutions/0311/) — Biclinic Integral Quadrilaterals
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0321](/solutions/0321/) — Swapping Counters

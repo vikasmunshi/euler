@@ -450,6 +450,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0297](/solutions/0297/) — Zeckendorf Representation
 - ● [0301](/solutions/0301/) — Nim
+- ● [0309](/solutions/0309/) — Integer Ladders
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0319](/solutions/0319/) — Bounded Sequences

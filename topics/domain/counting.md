@@ -198,7 +198,7 @@ reach for wide or arbitrary-precision types
 - ● [0240](/solutions/0240/) — Top Dice
 - ○ [0275](/solutions/0275/) — Balanced Sculptures
 - ○ [0281](/solutions/0281/) — Pizza Toppings
-- ○ [0309](/solutions/0309/) — Integer Ladders
+- ● [0309](/solutions/0309/) — Integer Ladders
 - ○ [0311](/solutions/0311/) — Biclinic Integral Quadrilaterals
 - ○ [0364](/solutions/0364/) — Comfortable Distance
 - ○ [0369](/solutions/0369/) — Badugi

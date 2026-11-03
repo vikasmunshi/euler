@@ -210,7 +210,7 @@ near the root.
 - ○ [0295](/solutions/0295/) — Lenticular Holes
 - ○ [0296](/solutions/0296/) — Angular Bisector and Tangent
 - ○ [0299](/solutions/0299/) — Three Similar Triangles
-- ○ [0309](/solutions/0309/) — Integer Ladders
+- ● [0309](/solutions/0309/) — Integer Ladders
 - ○ [0311](/solutions/0311/) — Biclinic Integral Quadrilaterals
 - ○ [0314](/solutions/0314/) — The Mouse on the Moon
 - ○ [0332](/solutions/0332/) — Spherical Triangles
