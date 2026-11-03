@@ -5164,13 +5164,13 @@
       "path": "takeaway/small-cases-reveal-closed-form",
       "title": "Small cases reveal a closed form",
       "status": "final",
-      "written": "2026-10-28T21:42Z",
+      "written": "2026-11-03T07:32Z",
       "solved": 17,
       "problems": 17,
       "tags": ["small-cases-reveal-closed-form"],
       "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0555", "p0561", "p0628", "p0684", "p0711", "p0739", "p0950", "p0957", "p0963"],
-      "covered": ["p0256", "p0276", "p0336", "p0340", "p0359", "p0523", "p0739", "p0950", "p0957", "p0963"],
-      "solved_after": ["p0335", "p0374", "p0555", "p0561", "p0628", "p0684", "p0711"]
+      "covered": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0555", "p0561", "p0628", "p0684", "p0711", "p0739", "p0950", "p0957", "p0963"],
+      "solved_after": []
     },
     {
       "path": "takeaway/small-cases-reveal-recurrence",
