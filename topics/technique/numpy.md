@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-11-02T06:58Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -36,7 +36,12 @@ the small factor $s$) and folds a whole array of candidates into it with
 updates every modulus that $s$ divides. [668](/solutions/0668/) runs the
 Lucy_Hedgehog [prime count](https://en.wikipedia.org/wiki/Prime-counting_function) the same
 way — a Python loop over the primes up to $\sqrt{n}$, each step a couple of strided
-slice subtractions over the table of $\pi(\lfloor n/k \rfloor)$.
+slice subtractions over the table of $\pi(\lfloor n/k \rfloor)$. [521](/solutions/0521/)
+carries a prime-*sum* table alongside the count and shows where the slice stops
+working: the entries $\lfloor n/(ip) \rfloor$ that still index the large table are a
+strided slice of it, and past a split index they fall into the small table and become a
+gather. Because the split is one computed index rather than a per-entry test, each prime's
+update is two contiguous pieces, with no mask.
 
 The slice's start is the only thing that has to be computed, and two generalisations
 follow from that. A **segmented** sieve over the block $[lo, hi)$ starts each prime at
@@ -185,7 +190,14 @@ prime reads its own exponent bit. The element need not even be a number:
 [721](/solutions/0721/) exponentiates $c + \sqrt{a}$ in the ring
 $\mathbb{Z}_p[\sqrt{a}]$, holding each ring element as *two* arrays $(u, v)$ — a
 struct of arrays — with a ring multiply written once over whole arrays and each $a$'s
-own exponent bit applied as a mask.
+own exponent bit applied as a mask. [437](/solutions/0437/) uses the same struct of
+arrays in $\mathbb{Z}_p[x]/(x^2 - x - 1)$ and adds what a struct of arrays costs when
+lanes *drop out*. Every prime carries five parallel arrays (the prime, its unfactored
+$p - 1$, and a remembered "dead root" held as a fraction), and each time a factor rules some
+primes out, one `keep` mask compacts all five together. Filter one array and not the others
+and the lanes silently stop lining up. The remainder left after trial division up to
+$\sqrt{N}$ is the single large factor, and it gets one last vectorised pass, which is the
+leftover-factor argument again.
 
 **A scan with no ufunc folds into a grid.** A running product mod $p$ has no
 vectorised form: `np.multiply.accumulate` cannot reduce between steps, so it overflows
@@ -205,7 +217,24 @@ last value, so the scan covers $1 \dots N$ in bounded memory while one fancy ind
 segment keeps only the $O(\sqrt{N})$ prefixes the formula reads, at the quotients
 $\lfloor N/k \rfloor$. Its sieve also tracks `rad`, the product of each entry's small
 primes, so `mu[rad != d] *= -1` accounts for the one prime above $\sqrt{N}$ that the
-sieve never visited — the same leftover-factor argument as 632.
+sieve never visited — the same leftover-factor argument as 632. [423](/solutions/0423/)
+uses the grid scan to build the factorial tables, and the inverse factorials need only
+*one* modular inverse: the scan of $n, n-1, \dots, 1$, read backwards, gives
+$n!/i!$ for every $i$, and one multiply by $(n!)^{-1}$ turns that whole array into
+$1/i!$.
+
+Some recurrences do have a ufunc once you change variables.
+[718](/solutions/0718/) computes the
+[Apéry set](https://en.wikipedia.org/wiki/Numerical_semigroup) of a three-generator
+semigroup by walking the residue cycle of $z$ modulo $x$. Each class's least
+representable value obeys $w_i = \min(b_i,\; w_{i-1} + z)$, a min-plus recurrence with
+no NumPy form as written. Subtracting $iz$ from both sides gives
+$w_i - iz = \min(b_i - iz,\; w_{i-1} - (i-1)z)$, which is a running minimum, so the
+whole recurrence is `np.minimum.accumulate(base - i*z) + i*z`. Done in chunks, each
+chunk's first entry is folded with the previous chunk's last minimum, so the scan
+crosses chunk boundaries with a single scalar of carry. The general rule: a recurrence
+$s_i = s_{i-1} \oplus a_i$ vectorises exactly when $\oplus$ is a ufunc with an
+`accumulate`, and a shift by a known sequence can often make it one.
 
 **Broadcasting builds the pairwise table.** `xs[None, :] - xs[:, None]` is every
 difference vector between $n$ points as one $n \times n$ array. [252](/solutions/0252/)
@@ -217,13 +246,27 @@ reduces each by `np.gcd` so that exactly collinear directions become *equal inte
 third points. When the objects are points but the tool wants scalars, pack them:
 [983](/solutions/0983/) encodes a lattice point as one `int64` key $xB + y$, after
 which `np.unique`, `np.isin` and `searchsorted` handle sets of points as sets of
-integers.
+integers. The pairwise table need not be square or symmetric: for each $q$,
+[518](/solutions/0518/) takes the multipliers $k$ that already passed one primality
+test and the coprime $p < q$, and `np.outer(ks, ps * ps)` lays out every candidate
+$(k, p)$ as a grid. Two gathers from the primality table give a boolean grid, and
+`np.nonzero` returns the *coordinates* of its `True` cells, `rows` and `cols`, which
+index back into `ks` and `ps` to weight each hit. The outer loop runs over $q$ only;
+everything inside it is one grid.
 
 **`searchsorted` is a vectorised binary search.** Given a sorted array of primes,
 [`np.searchsorted`](https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html)
 evaluates $\pi(x)$ for a *whole array* of $x$ at once. [187](/solutions/0187/) counts
 semiprimes as a sum of prime-counting differences and never writes a lookup loop at
-all — the table is the array's own index, and the queries are one call.
+all — the table is the array's own index, and the queries are one call. The same
+call locates the *piece* of a piecewise formula. [341](/solutions/0341/) evaluates
+[Golomb's sequence](https://oeis.org/A001462) at a million cubes up to $10^{18}$ by
+inverting its run-length structure. Inverted three times, the structure leaves a table
+of only a few tens of thousands of block boundaries. Built in exact Python ints, which
+are cheap at that size, it is converted to `int64` once. `searchsorted` then finds every
+query's block, and inside a block the sequence's partial sum is a quadratic, so one
+vectorised quadratic solve finishes the job. The table is small and the queries are
+many, so the binary search is what joins the two.
 
 **`cumsum` is the prefix sum, `bincount` the histogram.** The
 [Mertens function](https://en.wikipedia.org/wiki/Mertens_function) is literally
@@ -274,8 +317,24 @@ off by one either way. [331](/solutions/0331/) takes the float root as a guess a
 corrects it with exact integer comparisons — `root -= root * root > v`, then the
 mirror step up — a vectorised [integer square root](/topics/technique/integer-square-root);
 [721](/solutions/0721/) uses the identical two lines to decide which $a$ are perfect squares.
+[341](/solutions/0341/) rounds its per-element quadratic root the same way.
 [252](/solutions/0252/) applies the same division of labour to angles: `arctan2`
 sorts directions, but equality is decided on gcd-reduced integers.
+
+[558](/solutions/0558/) pushes the division of labour furthest. It expands every square
+greedily in powers of the real root $r$ of $x^3 = x^2 + 1$. Each remainder is held
+*exactly*, as integer coefficients $(a, b, c)$ of $a + br + cr^2$ in three `int64`
+arrays, and the question "is the remainder at least $r^k$?" is answered by a fixed-point
+evaluation $a \cdot 2^P + b\hat{r} + c\widehat{r^2}$. That evaluation is
+allowed to *wrap*. Integer multiplication and addition are exact modulo $2^{64}$, so as
+long as the true result fits in `int64`, the wrapped intermediate terms do not matter.
+The rounding in $\hat r$ gives a known error bound, and the comparison splits the lanes
+three ways: clearly yes, clearly no, and a thin ambiguous band. Only the ambiguous lanes
+leave NumPy, for an exact sign test (the field
+[norm](https://en.wikipedia.org/wiki/Field_norm)) in Python ints, and they are rare
+enough that the exact path costs nothing. The lanes that pass then apply their
+subtraction in place with `np.copyto(a, a - pa, where=take)`. Vectorise the decision
+that is almost always easy, and pay for exactness only where it is actually in doubt.
 
 **The dtype is also the memory budget.** A Möbius array only ever holds $-1, 0, +1$,
 so `int8` costs one byte per entry and a sieve to $2^{25}$ fits in 32 MB instead of
