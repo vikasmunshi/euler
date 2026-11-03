@@ -375,6 +375,7 @@ def _act(ctx: Context, thread_id: str) -> int:
 #: loses its head at each confirmation, so a walk cut short (`show` failing, the confirmation
 #: left with Ctrl-C) leaves exactly the rest in it — and the next `msg act` resumes there,
 #: without walking the ones already registered. Ctrl-C during the wait only skips the wait.
+#: Run without the interpreter's statement echo: what shows is the commands' own output.
 _REGISTER_BLOCK: str = '''loop {unregistered}: {
   show {loop} || break
   pause "please confirm the answer for problem {loop} is registered" || break
@@ -422,7 +423,7 @@ def _register(ctx: Context, thread_id: str, data: dict[str, Any]) -> int:
     if resumed:
         console.print(f'[muted]resuming: {len(numbers) - len(resumed)} of {len(numbers)} '
                       'already confirmed[/muted]')
-    rc = int(ctx.shell.dispatch(_REGISTER_BLOCK))
+    rc = int(ctx.shell.dispatch(_REGISTER_BLOCK, echo=False))
     if _left_to_register():
         console.print(f'[muted]Not every answer was confirmed — message [accent]{thread_id}'
                       '[/accent] is kept; `msg act` it again to carry on.[/muted]')

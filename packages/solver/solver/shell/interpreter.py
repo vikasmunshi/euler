@@ -301,8 +301,14 @@ def _print_syntax_error(exc: _ExprSyntaxError) -> None:
     console.print(located)
 
 
+#: Whether statements are echoed as they run — off for the length of an `execute(echo=False)`.
+_echo: bool = True
+
+
 def _echo_command(name: str, args: list[str], rcode: int) -> None:
     """Echo a run command and its resulting exit code as `name args → rcode`."""
+    if not _echo:
+        return
     text = Text(name if not args else f'{name} {" ".join(args)}', style='muted')
     text.append(' → ', style='accent.dim')
     text.append(str(rcode))
@@ -311,6 +317,8 @@ def _echo_command(name: str, args: list[str], rcode: int) -> None:
 
 def _echo_assignment(target: str, value: Any) -> None:
     """Echo an assignment as `target = repr(value)`."""
+    if not _echo:
+        return
     text = Text(target, style='muted')
     text.append(' = ', style='accent.dim')
     text.append(repr(value))
@@ -319,6 +327,8 @@ def _echo_assignment(target: str, value: Any) -> None:
 
 def _echo_value(var: str, value: Any) -> None:
     """Echo a bare value expression as `var → repr(value)`."""
+    if not _echo:
+        return
     text = Text(f'{var} → ', style='accent.dim')
     text.append(repr(value))
     console.print(text)
@@ -423,8 +433,23 @@ def _loop_values(loop: Eval | None) -> list[Any] | None:
     return [value]
 
 
-def execute(loop: Eval | None, stmts: list[Statement], *, command: CommandRunner) -> int:
-    """Execute parsed statements once per loop value; return the final `rcode`."""
+def execute(loop: Eval | None, stmts: list[Statement], *, command: CommandRunner, echo: bool = True) -> int:
+    """Execute parsed statements once per loop value; return the final `rcode`.
+
+    With *echo* False the statements run without the `name args → rcode` / `name = value`
+    trail — for a block a command runs on the user's behalf, where only what the commands
+    themselves print (and any error) is worth seeing.
+    """
+    global _echo
+    prev_echo, _echo = _echo, echo
+    try:
+        return _execute(loop, stmts, command)
+    finally:
+        _echo = prev_echo
+
+
+def _execute(loop: Eval | None, stmts: list[Statement], command: CommandRunner) -> int:
+    """:func:`execute`'s body, run with the echo already set."""
     try:
         values = _loop_values(loop)
     except _ExprSyntaxError as exc:

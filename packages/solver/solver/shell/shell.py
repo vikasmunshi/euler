@@ -215,8 +215,11 @@ class SolverShell:
 
     # -- dispatch -----------------------------------------------------------
 
-    def dispatch(self, block: str) -> int:
-        """Lex, parse, and interpret one command block; return its exit code."""
+    def dispatch(self, block: str, *, echo: bool = True) -> int:
+        """Lex, parse, and interpret one command block; return its exit code.
+
+        *echo* False runs it without echoing each statement (:func:`~solver.shell.interpreter.execute`).
+        """
         self._record_command(block)
         with self._capture():
             try:
@@ -229,7 +232,7 @@ class SolverShell:
             except ParserError as exc:
                 self._show_syntax_error(exc, canonical=canonical)
                 return ExitCodes.EXIT_USAGE
-            return execute(loop, statements, command=self._run_command)
+            return execute(loop, statements, command=self._run_command, echo=echo)
 
     def _show_syntax_error(self, exc: LexError | ParserError, canonical: str | None) -> None:
         """Report a lex/parse failure as a clean, positioned message.

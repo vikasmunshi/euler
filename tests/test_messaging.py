@@ -977,10 +977,12 @@ class _WalkShell:
         self.rc = rc
         self.confirm = confirm
         self.blocks: list[str] = []
+        self.echoes: list[bool] = []
         self.walked: list[list[int]] = []
 
-    def dispatch(self, block: str) -> int:
+    def dispatch(self, block: str, *, echo: bool = True) -> int:
         self.blocks.append(block)
+        self.echoes.append(echo)
         left = list(variables['unregistered'])
         self.walked.append(left)
         variables['unregistered'] = left[len(left) if self.confirm is None else self.confirm:]
@@ -1030,6 +1032,7 @@ class MsgRegisterTests(_MsgCommandCase):
         self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 0)
         [block] = self.shell.blocks
         self.assertEqual(self.shell.walked, [[341, 1006]])
+        self.assertEqual(self.shell.echoes, [False], 'the walk runs without the statement echo')
         self.assertTrue(block.startswith('loop {unregistered}: {'), block)
         for step in ('show {loop} || break',
                      'pause "please confirm the answer for problem {loop} is registered" || break',

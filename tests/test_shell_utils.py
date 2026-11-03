@@ -58,6 +58,41 @@ class RandomTests(unittest.TestCase):
         self.assertEqual(shell_utils.random(1, 9), ExitCodes.EXIT_USAGE)
 
 
+class EchoTests(unittest.TestCase):
+    """`execute(echo=False)`: the block runs the same, without the statement trail."""
+
+    def _run(self, echo: bool) -> tuple[int, list[str]]:
+        from solver.shell.interpreter import execute
+        from solver.shell.lexer import lex
+        from solver.shell.parser import parse
+        ran: list[str] = []
+
+        def command(name: str, args: list[str]) -> int:
+            ran.append(name)
+            return 0
+
+        loop, statements = parse(lex('loop [1, 2]: { echo_test {loop}; left = {loop} }'))
+        with patch('solver.shell.interpreter.console.print') as printed:
+            rc = execute(loop, statements, command=command, echo=echo)
+        return rc, [str(call.args[0]) for call in printed.call_args_list] + ran
+
+    def test_echo_on_trails_every_statement(self) -> None:
+        rc, out = self._run(echo=True)
+        self.assertEqual(rc, 0)
+        self.assertIn('echo_test 1 → 0', out)
+        self.assertIn('left = 2', out)
+
+    def test_echo_off_runs_the_same_statements_silently(self) -> None:
+        rc, out = self._run(echo=False)
+        self.assertEqual(rc, 0)
+        self.assertEqual(out, ['echo_test', 'echo_test'])
+
+    def test_echo_comes_back_on_afterwards(self) -> None:
+        from solver.shell import interpreter
+        self._run(echo=False)
+        self.assertTrue(interpreter._echo)
+
+
 class UnregisteredLineTests(unittest.TestCase):
     def test_the_numbers_round_trip_through_the_body(self) -> None:
         body = ('These problems are recorded as solved:\n\n'
