@@ -1,5 +1,5 @@
 <!-- tags: [prime-number] -->
-<!-- status: final 2026-11-01T14:18Z -->
+<!-- status: final -->
 # Prime number
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ divisible
@@ -10,8 +10,8 @@ consecutive sums, a spiral diagonal, a Fibonacci index) — and the problem is a
 structure, filtered by the predicate. Where it is not a filter, it is a **domain**: the problem
 asks for some quantity attached to each prime and summed over all of them, and the prime is just the
 index of the sum (and often the modulus inside it). Occasionally it is a **structure**, the vertex
-set of a graph. In every role, the question to ask is which property of primality the problem
-actually uses. The mathematics of *what primes are* is covered on
+set of a graph, or a **hypothesis**, a fact handed to you inside an equation that can be factored. In
+every role, the question to ask is which property of primality the problem actually uses. The mathematics of *what primes are* is covered on
 [Prime Numbers](/topics/number-theory/prime-numbers), and the decomposition view — a number read
 through its factors — on [prime factorisation](/topics/domain/prime-factorization). This page is
 about the other half: what happens to a program when "and it must be prime" is added to a search, or
@@ -38,10 +38,13 @@ that bound and index; if they are few, unbounded, or enormous, test them one at 
 the middle path — an *incremental* sieve as a generator, because the eleven answers are known to
 exist but their ceiling is not, so no bound can be chosen in advance.
 
-The second consequence is subtler and matters more: **the predicate has no algebra**. You cannot
-solve for a prime, invert it, or propagate it through an equation. Everything you can prove about a
-candidate before testing it, you must prove some *other* way — which is why the decisive step in
-these problems is almost never the primality test.
+The second consequence is subtler and matters more: **the predicate has almost no algebra**. You
+cannot solve for a prime, invert it, or propagate it through an equation. It does not even survive a
+recurrence. Problem 333 sums the primes with exactly one partition of a restricted kind, but the
+partition count at $q$ is assembled from counts at indices below $q/2$, and those are not prime. So
+the table has to be filled for every integer, and primality is only a mask read at the end.
+Everything you can prove about a candidate before testing it, you must prove some *other* way —
+which is why the decisive step in these problems is almost never the primality test.
 
 ## The win is upstream of the test
 
@@ -71,10 +74,35 @@ problem 111's construction are the same idea seen from either end, and the const
 whenever the surviving fraction is small enough to make enumeration of the survivors cheaper than
 rejection of the rest.
 
+Construction raises a question of its own when a family carries several prime conditions at once:
+which one goes first? Problem 518 wants prime triples whose successors $a + 1, b + 1, c + 1$ form a
+geometric sequence. Writing the ratio in lowest terms as $v/u$ parametrises every triple uniquely as
+$(ku^2, kuv, kv^2)$, and each of those, less one, must be prime. The three conditions do not depend
+on the same variables. The largest term needs only $(k, v)$, so it is tested once per pair, *outside*
+the loop over $u$. At $n = 10^8$ that alone cuts about $5 \times 10^8$ parameter triples to about
+$5 \times 10^7$ before $u$ is looked at. This is
+[loop-invariant code motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion) applied to a
+filter: test each condition at the outermost level where its variables are bound.
+
+## When the prime is given, factor the equation
+
+The predicate does have one piece of algebra: a prime has no non-trivial factorisation. So when a
+problem *states* that some expression equals a prime, primality stops being a test and becomes a
+hypothesis, and the way to use it is to factor the expression. However many factors come out, all but
+one must be $1$.
+
+Problem 291 looks like a search over two unbounded variables: the primes of the form
+$(x^4 - y^4)/(x^3 + y^3)$. Cancelling the common factor and dividing out $\gcd(x, y)$ leaves $p$ as a
+product of three positive integers. Two of them are forced to $1$, and what remains is a one-variable
+family, the primes of the form $n^2 + (n + 1)^2$. Problem 131 reaches the same place faster: its $p$
+is a difference of two cubes, so the factor $b - a$ must be $1$ and only consecutive cubes remain.
+Each factor pinned this way removes a whole dimension of the search, which no congruence filter can
+do. What is left is primality on a polynomial, and that is the next section's problem.
+
 ## When the candidates are too big, or too many
 
 Past a certain scale a sieve over the candidates is not available, and each problem answers that in
-one of three ways.
+one of four ways.
 
 **Sieve something else.** Problem 216 asks how many values of $2n^2 - 1$ are prime for $n$ up to
 $5 \times 10^7$ — values reaching $5 \times 10^{15}$, hopeless to test individually. The move is to
@@ -92,8 +120,8 @@ the polynomial along two progressions of $k$, which come from a square root of $
 so repeated factors are divided out along finer progressions. The part worth taking away is how the
 sieve stops. Once every prime up to $2N + 1$ has been divided out, whatever is left of $f(k)$ is
 either $1$ or a single prime, because two factors above $2N + 1$ would multiply to more than $f(k)$.
-That **size bound certifies primality with no test at all**. It is the one piece of algebra the
-predicate does have, and it is what limits the sieve to $\sqrt{\max f}$ rather than $\max f$.
+That **size bound certifies primality with no test at all**. It is the same fact about factorisations
+seen from the other side, and it is what limits the sieve to $\sqrt{\max f}$ rather than $\max f$.
 
 **Sieve a window.** The primes near $10^{14}$ are spaced about $\ln(10^{14}) \approx 32$ apart, so
 the $100{,}000$ consecutive primes problem 304 needs occupy a window of only a few million integers.
@@ -112,6 +140,20 @@ over the $\sim 150$ possible digit sums, of which the prime ones are found once 
 Problem 934 reorders a sum over $10^{17}$ integers into a sum over the primes consulted. In each
 case the primes shrink from the thing being searched to a small lookup table on the side.
 
+**Sieve the counters, not the numbers.** Problem 187's array of $\pi$ values runs out eventually.
+Problem 521 sums the smallest prime factor of every integer up to $10^{12}$, where even one bit per
+integer is over a hundred gigabytes. The [Lucy_Hedgehog sieve](/topics/technique/lucy-hedgehog-sieve)
+runs the sieve of Eratosthenes on counters instead of cells. It stores how many integers up to $v$
+are still standing, for only the $O(\sqrt n)$ values $v = \lfloor n/k \rfloor$, and each prime
+$p \le \sqrt n$ updates those counters in one step. Its final state is $\pi$ at every stored point.
+What problem 521 adds is that the **history is worth as much as the result**. Step $p$ of a sieve
+strikes exactly the composites whose smallest factor is $p$, so the size of that step, read off the
+counters as the sieve runs, says how many integers contribute $p$ to the sum. A second table with the
+same update, carrying sums instead of counts, supplies the primes' own contribution. About $10^9$
+updates replace $10^{12}$ cells. Only the primes below $10^6$ are ever identified, and the other
+$3.8 \times 10^{10}$ are never seen individually. When a quantity is defined by what a sieve does,
+look for it in the sieve's intermediate states before computing it afterwards.
+
 ## When the primes are the domain, not the filter
 
 A second family has no search to prune at all. The primes are given, all of them below a bound, and
@@ -122,10 +164,10 @@ range to two seven-segment clocks and asks how many segment transitions one save
 while each clock steps down the prime's digit-sum chain. Here the sieve is not a lookup table the
 search consults. It is the loop itself, and it runs exactly once per prime.
 
-That changes where the effort goes. The congruence reflex of the previous sections has nothing to
-throw away, because every prime counts. What is left is the per-prime body, and the aim is to make
-it so cheap that the sieve is the whole cost. Both problems get there by finding that the per-prime
-quantity depends on far less than the prime:
+That changes where the effort goes. The congruence reflex of the previous sections has almost
+nothing to throw away, because every prime counts. What is left is the per-prime body, and the aim is
+to make it so cheap that the sieve is the whole cost. These problems get there by finding that the
+per-prime quantity depends on far less than the prime:
 
 - In 274 the multiplier turns out to be the
   [inverse of $10$ modulo $p$](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse). Here
@@ -158,17 +200,63 @@ running factorial scan, out to the largest argument and read every prime's terms
 also inverts all its denominators in one vectorised Fermat exponentiation instead of one inversion
 per prime.
 
+When nothing can be shared, the per-prime bodies are at least independent, and that makes the prime
+an **array axis**. Problem 291 takes a modular power for two million primes at once, in one vectorised
+square-and-multiply. Problem 437 gives each candidate prime a lane in a set of NumPy arrays, and it
+compacts a lane away as soon as its prime is ruled out, so later passes touch only primes that can
+still qualify. The interpreter then loops over bit positions and trial divisors, not over primes.
+
 The lesson is the counterpart of "the win is upstream of the test": when nothing can be pruned,
 **find the small key the per-prime answer depends on**, and tabulate over the key instead of
-computing over the prime. After that the remaining cost is just generating the primes. Both
-solutions' benchmarks are almost all sieve, which means it is the sieve that is worth optimising: an
+computing over the prime. After that the remaining cost is just generating the primes. The benchmarks
+of 274 and 315 are almost all sieve, which means it is the sieve that is worth optimising: an
 odd-only array that halves the memory traffic, or a segmented library sieve such as
 [primesieve](https://github.com/kimwalisch/primesieve).
+
+## When every prime gets an equation to solve
+
+A narrower family poses the same polynomial congruence at every prime. Problem 457 wants the least
+$n$ with $p^2 \mid n^2 - 3n - 1$ for each prime up to $10^7$. Problem 437 wants the primes at which a
+root of $x^2 - x - 1$ is a [primitive root](/topics/domain/primitive-root). The number theory is on
+[Prime Numbers](/topics/number-theory/prime-numbers) and
+[quadratic residue](/topics/technique/quadratic-residue). What carries over as engineering is four
+questions to ask, whatever the polynomial:
+
+- **Which primes take part?** Here the congruence reflex comes back, one level up. A quadratic has
+  roots modulo $p$ only when its discriminant is a quadratic residue, and
+  [reciprocity](/topics/domain/quadratic-reciprocity) turns that into a residue class of $p$: six
+  values of $p \bmod 13$ in 457, and $p \equiv \pm 1 \pmod{10}$ in 437. The same test restricts the
+  sieving primes of 291 and 659 to $q \equiv 1 \pmod 4$. About half the primes go, for the price of a
+  table lookup.
+- **Which primes are exceptions?** The argument that serves every other prime breaks at $2$, and at
+  primes dividing the discriminant, where any root is a double root. Those primes are a short list,
+  so decide each by hand. They can go either way. At $p = 13$, problem 457 has a root modulo $13$ that
+  does not lift, so there is no solution modulo $169$. At $p = 5$, problem 437's double root $3$ is a
+  primitive root, so $5$ qualifies. The residue filter rejects both. It is right about $13$ by luck,
+  and wrong about $5$, which the solution has to add back.
+- **Is the modulus really prime?** $\mathbb{Z}/p^2$ is not a field, and $p^2$ reaches $10^{14}$, far
+  too far to scan. So solve in $\mathbb{F}_p$, where the whole toolkit applies, and carry a simple root
+  up with one [Hensel](/topics/technique/hensels-lemma) step. The step divides by the derivative, which
+  is exactly what vanishes at the exceptional primes.
+- **Does the answer need the root at all?** Three problems give three prices. Problem 291 needs a
+  square root of $-1$, which has a closed form: any non-residue raised to the power $(q - 1)/4$. In
+  problem 457 the answer *is* the root, so
+  [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) has to be paid. Problem 437 asks only
+  about a *property* of the root, so it never takes one. It raises a formal root $x$ in the
+  [quotient ring](/topics/technique/quotient-ring-arithmetic) $\mathbb{Z}_p[x]/(x^2 - x - 1)$, where
+  every power reduces to $ax + b$. "This power of $r$ is $1$" then becomes the linear condition
+  $ar + b = 1$, which names the one candidate that fails. Kept as an unreduced fraction, that
+  candidate costs no inverse either, and about $2.9$ million modular square roots disappear.
+
+Problem 437 is also the exception to "the sieve is what you are left paying for". The primitivity test
+needs the prime factors of $p - 1$, so the real per-prime cost is factoring the prime's *neighbour*.
+Problem 492 only reduced an exponent modulo the group order. Here the structure of that order is
+the question, and the trial division that exposes it dominates the Python run.
 
 ## Ask which property of primality is actually used
 
 "For every prime $p$" in a statement does not mean the proof needs primality. Before building on it,
-find the one property the argument uses. Three recent problems give three different answers:
+find the one property the argument uses. There are three possible answers:
 
 - **Essential.** Problem 635 counts the $p$-element subsets of $\{1, \dots, qp\}$ whose sum is
   divisible by $p$. A [roots-of-unity filter](https://en.wikipedia.org/wiki/Root_of_unity#Summation)
@@ -186,7 +274,12 @@ find the one property the argument uses. Three recent problems give three differ
   turns out to visit only $32$ states. A run of $p$ ones is therefore a walk that enters a cycle
   within $32$ steps, and the run is consumed through $p$ modulo the cycle length, with the whole cycles
   skipped by multiplication. The primes are just a list of run lengths. Any other sequence would cost
-  the same, and the sieve feeding it is the least of the work.
+  the same, and the sieve feeding it is the least of the work. Problem 705 goes further: its primes
+  are only a source of digits.
+  [Linearity of expectation](https://en.wikipedia.org/wiki/Expected_value#Properties) reduces the
+  inversion total over all divided sequences to ordered digit-pair counts, so the whole concatenation
+  matters only through an $81$-entry table. The primes need not even exist together. The C port
+  streams them from a primesieve iterator into running counters and keeps no array at all.
 
 The payoff is practical. An essential use is where the closed form comes from, so look for it
 deliberately: primitive roots, $\mathbb{F}_p$ being a field, Fermat and Frobenius. An incidental or
@@ -214,9 +307,11 @@ When primality appears as a condition in a problem, work through it in this orde
 
 1. **Find the congruences first.** What must be true modulo $2$, $3$, $5$, $10$ for a candidate to
    have any chance? This is where the orders of magnitude are won, and it costs nothing but algebra —
-   [reduce before coding](/topics/takeaway/reduce-before-coding).
+   [reduce before coding](/topics/takeaway/reduce-before-coding). If the prime is *given* in an
+   equation, factor the equation: all factors but one must be $1$.
 2. **Ask whether to filter or to construct.** If the survivors are a thin, describable set, build
-   them directly rather than sieving a haystack and rejecting it.
+   them directly rather than sieving a haystack and rejecting it. If several prime conditions apply,
+   test each at the outermost loop whose variables it needs.
 3. **Count the queries, then pick the test.** Many tests below a known bound → sieve once into a
    lookup table, sized to the input and built inside `solve()` so the benchmark counts it honestly
    ([size the work to the input](/topics/takeaway/size-work-to-the-input)). Bound not known in
@@ -224,15 +319,20 @@ When primality appears as a condition in a problem, work through it in this orde
 4. **If the values are too large to sieve, sieve their indices.** Primality on a polynomial or a
    sequence is a sieve over $n$, driven by the congruence conditions that let $p \mid f(n)$.
 5. **If the answer is a count, look for a formula over the primes** instead of a scan over the
-   integers — $\pi(x)$ differences, a digit-sum reformulation, a telescoping sum.
+   integers — $\pi(x)$ differences, a digit-sum reformulation, a telescoping sum. Past the reach of
+   an array, run the sieve on counters at the quotients $\lfloor n/k \rfloor$ and read what each step
+   strikes.
 6. **If every prime counts, shrink the per-prime body.** Look for the few residues or digits the
    quantity actually depends on, and replace the work with a closed form or a table over that key.
    The sieve should be what you are left paying for. If the prime is a modulus, its group order
    ($p - 1$, or $p + 1$ in $\mathbb{F}_{p^2}$) reduces any huge exponent. Work that depends only on
    magnitude, such as a factorial table, is built once and shared by every prime.
-7. **Name the property of primality the argument uses.** If it is essential, that property is where
+7. **If every prime gets an equation, settle its edges first.** Filter the primes by reciprocity,
+   decide $2$ and the discriminant's primes by hand, solve in $\mathbb{F}_p$ and lift, and compute
+   the root only if the answer is the root.
+8. **Name the property of primality the argument uses.** If it is essential, that property is where
    the closed form comes from. If it is incidental, drop it and test on composites too.
-8. **If the condition caps a chain at the prime itself, sweep the primes in increasing order** and
+9. **If the condition caps a chain at the prime itself, sweep the primes in increasing order** and
    keep the answer incrementally, as union–find does for problem 425.
 
 The recurring mistake is to reach for a faster primality test when the real problem is that too many
