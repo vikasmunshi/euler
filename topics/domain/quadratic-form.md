@@ -1,5 +1,5 @@
 <!-- tags: [quadratic-form] -->
-<!-- status: final -->
+<!-- status: final 2026-11-03T22:45Z -->
 # Quadratic form
 
 A [quadratic form](https://en.wikipedia.org/wiki/Quadratic_form) is a polynomial in which every

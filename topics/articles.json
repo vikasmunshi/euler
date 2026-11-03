@@ -3459,13 +3459,13 @@
     {
       "path": "domain/quadratic-form",
       "title": "Quadratic form",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-03T22:45Z",
       "solved": 6,
       "problems": 12,
       "tags": ["quadratic-form"],
       "refs": ["p0223", "p0224", "p0582", "p0586", "p0621", "p0659", "p0752", "p0769", "p0785", "p0875", "p0876", "p0989"],
-      "covered": [],
+      "covered": ["p0223", "p0224", "p0621", "p0659", "p0752", "p0875"],
       "solved_after": []
     },
     {
