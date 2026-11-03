@@ -322,6 +322,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0478](/solutions/0478/) — Mixtures
+- ● [0479](/solutions/0479/) — Roots on the Rise
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0506](/solutions/0506/) — Clock Sequence

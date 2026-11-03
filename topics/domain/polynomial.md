@@ -14,7 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Polynomial>._
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0435](/solutions/0435/) — Polynomials of Fibonacci Numbers
 - ○ [0438](/solutions/0438/) — Integer Part of Polynomial Equation's Solutions
-- ○ [0479](/solutions/0479/) — Roots on the Rise
+- ● [0479](/solutions/0479/) — Roots on the Rise
 - ○ [0498](/solutions/0498/) — Remainder of Polynomial Division
 - ○ [0602](/solutions/0602/) — Product of Head Counts
 - ○ [0797](/solutions/0797/) — Cyclogenic Polynomials

@@ -800,7 +800,7 @@ handful of operations on small numbers.
 - ○ [0475](/solutions/0475/) — Music Festival
 - ○ [0477](/solutions/0477/) — Number Sequence Game
 - ● [0478](/solutions/0478/) — Mixtures
-- ○ [0479](/solutions/0479/) — Roots on the Rise
+- ● [0479](/solutions/0479/) — Roots on the Rise
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0495](/solutions/0495/) — Writing $n$ as the Product of $k$ Distinct Positive Integers
