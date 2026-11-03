@@ -1,5 +1,5 @@
 <!-- tags: [exponentiation-by-squaring] -->
-<!-- status: final 2026-10-28T21:36Z -->
+<!-- status: final -->
 # Exponentiation by squaring
 
 [Exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) computes
@@ -9,8 +9,9 @@ footnote to [modular exponentiation](/topics/technique/modular-exponentiation), 
 residue case in depth. It does not stop there. The reason the tag lands on the problems below is
 that **the operation being squared is a parameter**: the same loop advances a linear recurrence
 $10^{18}$ steps, raises a polynomial to a power while discarding everything above degree $m$, or
-runs a million independent powers in lockstep across a NumPy array. Learning the loop is ten
-minutes; learning to recognise what else it will accept is what pays.
+runs a million independent powers in lockstep across a NumPy array. Sometimes the power is not even
+the answer, only a question put to a group: does this equal 1? Learning the loop is ten minutes;
+learning to recognise what else it will accept is what pays.
 
 ## The idea
 
@@ -45,12 +46,15 @@ in unrelated solutions.
 
 | What you square | Identity | What the power means | Seen in |
 | --- | --- | --- | --- |
-| A residue mod $m$ | `1` | $b^e \bmod m$ | 48, 97, 217, 820, 926 |
-| A $d \times d$ matrix | $I$ | $e$ steps of a linear recurrence | 237, 670, 940 |
+| A residue mod $m$ | `1` | $b^e \bmod m$ | 48, 97, 217, 335, 752, 820, 926 |
+| A $d \times d$ matrix | $I$ | $e$ steps of a linear recurrence | 237, 377, 670, 706, 940 |
 | A polynomial truncated at degree $m$ | $1$ | an $e$-fold convolution, low terms only | 768 |
-| An element $u + v\sqrt{a}$ of $\mathbb{Z}_p[\sqrt{a}]$ | $(1, 0)$ | an irrational power, kept exact | 721 |
+| A table of digit blocks, with its length | the empty block | $e$ digits, summarised | 294 |
+| An element $u + v\sqrt{a}$ of $\mathbb{Z}_p[\sqrt{a}]$ | $(1, 0)$ | an irrational power, kept exact | 721, 752 |
+| A formal root $ax + b$ of $x^2 - x - 1$ | $0x + 1$ | a power of a root never computed | 437 |
 | A distribution over digits under $\times \bmod 10$ | all mass on digit 1 | the digit of an $e$-fold product | 778 |
-| A whole array of residues | `ones` | many independent powers at once | 407, 421, 429, 455, 721, 944 |
+| A distribution over Grundy values under XOR | all mass on value 0 | the value of $e$ independent games | 649 |
+| A whole array of residues | `ones` | many independent powers at once | 407, 421, 429, 437, 455, 721, 944 |
 
 **Matrices — a recurrence in logarithmic time.** Problem 237 counts Hamiltonian tours on a
 $4 \times n$ board; the counts obey $T(n) = 2T(n-1) + 2T(n-2) - 2T(n-3) + T(n-4)$, and a fourth-order
@@ -72,7 +76,15 @@ with colours factored out by symmetry), and what it wants is the start vector ti
 $M^{n-1}$ itself. So `result` starts as that row vector and each set bit folds in with a
 vector–matrix product, $O(S^2)$, while only the base pays the $O(S^3)$ squaring. Nothing changes in
 the bit loop — associativity guarantees $(vA)B = v(AB)$, which is all it needs — and every fold
-becomes a factor $S$ cheaper.
+becomes a factor $S$ cheaper. Problem 706 runs the same shape over an 81-state automaton.
+
+Problem 377 shows that the exponent does not have to exist as a number either. It wants an entry of
+$M^{b^i}$ for every $i$ up to 17, with $M$ an $18 \times 18$ matrix. Taking each target from scratch
+means walking exponents up to 63 bits long, roughly 800 matrix products over the whole sum. But
+$M^{b^i} = (M^{b^{i-1}})^b$, so the solution raises the running matrix to the small fixed power $b$
+and keeps it for the next term: seven products a term, 119 in all. The targets had structure that
+their binary expansions throw away, and the chain keeps it. Since $b^i$ is never formed, a target
+too wide for any integer type would cost nothing extra.
 
 **Truncated polynomials.** Problem 768 raises a generating polynomial to a power, keeping only the
 terms up to degree $m$ because nothing above that can influence the answer. Truncated multiplication
@@ -82,9 +94,24 @@ saving one operation is now worth a line of code, which is why its loop guards t
 (`if exponent:` before squaring the base) instead of computing a square it will never use. Cheap
 when a multiply is a `mul` instruction, genuinely worth it when a multiply is a convolution.
 
+**Elements that carry their own context.** Problem 294 counts digit strings of length about
+$3 \times 10^{12}$ by residue mod 23 and digit sum, and a block of digits is summarised by a small
+table over those two. Concatenation is the operation and it is associative, yet two tables alone
+cannot be multiplied: the upper block's residues must first be scaled by $10^L$, where $L$ is the
+length of the block beneath it. The way out is to widen the element. The monoid is not tables but
+pairs (table, length), with the empty block as identity, a
+[semidirect product](https://en.wikipedia.org/wiki/Semidirect_product) in the same way that affine
+maps $x \mapsto ax + b$ compose as pairs. An operation that seems to depend on position usually
+needs only this: put whatever it depends on into the element.
+
+That solution also runs the loop the other way. Scanning $n$ from its top bit, each step doubles the
+block and, on a set bit, appends one digit, so it holds one running table and one fixed one-digit
+table, where right-to-left would carry two full tables and two lengths. Associativity makes the two
+directions equivalent, and either way it comes to some sixty concatenations for 42 bits.
+
 **Rings you invent for the occasion.** Problem 721 needs $\lfloor (c + \sqrt{a})^{n} \rfloor$ for
 exponents in the trillions. Floating point is useless at that size, but the conjugate $c - \sqrt{a}$
-lies in $[0, 1)$, so $x^n + y^n$ is an integer just above the floor. Write
+lies in $[0, 1)$, so $(c + \sqrt{a})^n + (c - \sqrt{a})^n$ is an integer just above the floor. Write
 $(c + \sqrt{a})^n = u + v\sqrt{a}$ and the pair $(u, v)$ multiplies by
 $(u_1u_2 + a\,v_1v_2,\; u_1v_2 + v_1u_2)$ — the [quadratic integer](https://en.wikipedia.org/wiki/Quadratic_integer)
 ring, reduced mod $p$. That product is associative with identity $(1, 0)$, so the loop
@@ -96,6 +123,34 @@ $(\mathbb{Z}/10, \times)$ — a 10-by-10 `out[x*y % 10] += a[x]*b[y]`. Its ident
 distribution with all its mass on digit **1**; seeding the accumulator with mass on digit 0, the
 natural-looking "empty" choice, makes every product zero. That is the identity pitfall from above,
 in a setting where it is easy to miss.
+
+Problem 649 repeats the construction over a different index set, and the contrast gives the rule.
+Each coin on its board is a game with a [Grundy value](/topics/technique/sprague-grundy-theorem)
+below 8, and independent games combine by XOR, so the histogram for $c$ coins is the $c$-th power of
+one coin's histogram under XOR convolution. Here the identity is all mass on **0**, the very seed
+that breaks problem 778, because the identity of a convolution is a point mass on the identity of
+the operation on its *indices*: 1 for $\times$, 0 for $\oplus$. The problem also shows the loop's
+competitor. A [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Fast_Walsh%E2%80%93Hadamard_transform)
+turns XOR convolution into pointwise multiplication, after which the power is eight scalar `pow`
+calls. But its inverse divides by 8, which has no inverse modulo $10^9$; you would have to work
+modulo $8 \cdot 10^9$ and divide exactly at the end. At width 8 a direct product is only 64
+multiplications, so the plain loop wins. Diagonalise when the width is large and the modulus allows
+it, and otherwise square.
+
+**A root you never find.** Problem 437 asks about the two roots of $x^2 - x - 1$ modulo each of
+about 2.9 million primes, and finding them would take a modular square root of 5 per prime. Instead
+the solution exponentiates the *symbol*. In the
+[quotient ring](/topics/technique/quotient-ring-arithmetic) $\mathbb{Z}_p[x]/(x^2 - x - 1)$ every
+power reduces to $x^m = ax + b$, with $a$ and $b$ consecutive Fibonacci numbers mod $p$, and that one
+result holds for both roots at once, since $r^m = ar + b$ for either. Problem 721's ring keeps an
+irrational exact; this one avoids solving an equation at all. One power answers for two unknowns,
+and whether $r^m = 1$ is settled by algebra on $(a, b)$, with no square root or inverse anywhere.
+
+It is also a cheaper way to write something familiar. The $x$ here is the $2 \times 2$ Fibonacci
+matrix in disguise, and a product costs four multiplications instead of eight. By the
+[Cayley–Hamilton theorem](/topics/domain/cayley-hamilton-theorem) this holds for any companion
+matrix: its powers are polynomials in it of degree below $d$, so multiplying them modulo the
+characteristic polynomial costs $O(d^2)$ where the matrix product costs $O(d^3)$.
 
 **Arrays.** Python's `pow` is scalar and [NumPy](/topics/technique/numpy) has no three-argument
 `pow`, so a sweep that needs a power for each of a million elements is a million interpreter round
@@ -117,7 +172,8 @@ one exponent for the whole `arange`. When each lane has its own exponent, there 
 exponent — and folds under a mask: `result = np.where(bit_set, result * square % m, result)`.
 Problem 455 does this inside a fixed-point iteration, re-evaluating $x \leftarrow n^x \bmod 10^9$
 for every $n$ at once until the power tower stops changing, and 721 does it with its ring elements,
-one $(u, v)$ pair per lane. The masked form pays for every multiply in every lane whether the bit is
+one $(u, v)$ pair per lane; 437 gives each lane its own ring element, exponent and modulus. The
+masked form pays for every multiply in every lane whether the bit is
 set or not, and the price grows with the multiply: 407 and 455 stay within 1.4× and 3.1× of C, but
 721's ring product makes a dozen array temporaries per step and lands at 8×.
 
@@ -148,12 +204,38 @@ exponent, and one test case at $10^{18}$ would end it. The `__int128` casts are 
 the story and belong to [modular exponentiation](/topics/technique/modular-exponentiation): two
 residues near $10^{10}$ multiply to $10^{20}$, which a `long long` cannot hold.
 
-A quieter use of the same loop is worth noticing. The
+## When the power is a question
+
+Sometimes the value of the power is beside the point, and what matters is whether it equals 1. The
 [Miller–Rabin test](/topics/technique/miller-rabin-primality-test) in problems 200 and 387 computes
 $a^d \bmod n$ and then keeps squaring — but it *watches* the intermediate squares, looking for a
 nontrivial square root of $1$. The squarings that exponentiation by squaring normally throws away
 are the evidence; the fast power is the primitive that makes a probabilistic primality test, and
 with it much of public-key cryptography, affordable at all.
+
+Group theory turns the same probe into a measurement. If $d$ is a known multiple of the
+[order](/topics/domain/multiplicative-order) of $u$, then for each prime $q \mid d$ you test whether
+$u^{d/q} = 1$ and divide $d$ by $q$ for as long as it holds; what is left is the order exactly.
+Problem 752 runs that reduction for every prime up to its limit, and the
+[primitive root](/topics/domain/primitive-root) test in 437 is the yes-or-no version, where $r$ has
+order $p - 1$ unless some $r^{(p-1)/q}$ is 1. A search that would naively step through the order
+becomes a handful of logarithmic powers. The price is the factorisation of $d$, which is why a
+smallest-prime-factor sieve sits next to the loop in 752 and trial division next to it in 437.
+
+Problem 752 also shows that the ring is yours to choose. It wants the order of $1 + \sqrt 7$ in
+$(\mathbb{Z}/x)[\sqrt 7]$ and could run its pair loop on every prime, but it does not. Where 7 is a
+[quadratic residue](/topics/technique/quadratic-residue) it pays for one
+[Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) root, maps the ring onto two copies of
+$\mathbb{F}_p$, and hands the rest to the builtin `pow`. Where it is not, the
+[Frobenius endomorphism](/topics/technique/frobenius-endomorphism) gives $u^{p+1} = N(u) = -6$ for
+free, so most of the order is found in $\mathbb{F}_p$, and pair arithmetic is left only with a
+norm-one element whose order divides $p + 1$ instead of $p^2 - 1$.
+
+Set that beside 437, which faces nearly the same choice and decides the other way: it refuses the
+square root and stays in the ring. Both are right. Problem 437 runs on NumPy lanes, where no builtin
+is on offer and one ring power covers both roots. Problem 752 is scalar Python, where `pow` runs in C
+and a hand-written pair loop does not. Find the root when it buys a faster multiply, and skip it
+when it does not.
 
 ## When not to reach for it
 
@@ -183,20 +265,30 @@ with it much of public-key cryptography, affordable at all.
   logarithmic power exists — for matrices, permutations, polynomials, function composition, min-plus
   products, whatever you are iterating.
 - **Then ask what the identity is,** and seed the accumulator with it. This is where the
-  generalisation actually breaks in practice — $(1, 0)$ in a quadratic ring, mass on digit 1 in a
-  monoid algebra, never the "empty" value.
+  generalisation actually breaks in practice — $(1, 0)$ in a quadratic ring, and in a convolution a
+  point mass on the identity of the index operation: digit 1 under $\times$, value 0 under XOR.
+- **If the operation depends on position, widen the element.** Carry the length, or whatever else it
+  depends on, inside the thing being multiplied, as problem 294 does.
 - **The accumulator may be smaller than the base.** If you only need $v \cdot M^e$, start `result`
-  at $v$ and fold with vector–matrix products, as problem 670 does; only the squarings pay full
-  matrix cost.
+  at $v$ and fold with vector–matrix products, as problems 670 and 706 do; only the squarings pay
+  full matrix cost.
 - **Cost is $\log e$ multiplied by the cost of one squaring.** For a $d \times d$ matrix that is
   $O(d^3 \log e)$, so the win comes from shrinking the *state*, not just the exponent: problem 237's
-  companion matrix is $4 \times 4$ because the recurrence has order 4, and no larger.
+  companion matrix is $4 \times 4$ because the recurrence has order 4, and no larger. A better
+  representation helps too, from a matrix to a polynomial in problem 437, or from a pair to a
+  residue in problem 752.
+- **Look at the exponent's shape before its bits.** If the targets are $b, b^2, b^3, \dots$, chain
+  the powers as problem 377 does; a power of a power beats a long binary expansion.
 - **Reduce inside the loop.** Under a modulus, reduce after every multiply, or the operands grow and
   the logarithmic operation count buys you nothing. `pow(b, e)` builds an astronomically large
   integer; `pow(b, e, m)` never exceeds $m^2$.
 - **When the powers come in bulk, invert the loops** — bits outside, data inside — and mind the
   width: with `int64` lanes every partial product needs $m^2 < 2^{63}$, which is why problem 421 caps
   its primes below $2^{32}$.
+- **A matrix product budgets $d \cdot m^2$, not $m^2$,** because a cell sums $d$ products before you
+  can reduce. Problem 377's C fits 18 terms in a `uint64_t` with about 2% to spare and reduces once
+  per cell; problem 706's 81 terms do not fit, so its Python splits an operand into 15-bit halves and
+  its C accumulates in `__int128`.
 - **Skip the last squaring** when a multiply is expensive. One line, one saved convolution.
 
 <!-- problems (generated by update-tags) -->
