@@ -1,12 +1,12 @@
 <!-- tags: [integer-square-root] -->
-<!-- status: final 2026-10-29T07:02Z -->
+<!-- status: final -->
 # Integer square root
 
 The [integer square root](https://en.wikipedia.org/wiki/Integer_square_root) of $n$ is the unique
 $r$ with $r^2 \le n < (r+1)^2$ — a floor, computed entirely in integers. Almost none of the problems
 below actually wants a square root. It appears as a loop bound, as a perfect-square predicate, as an
-integer quadratic solver, as a lattice-row count, and as an exact comparison against an irrational
-number. The reason it deserves a tag rather than a
+integer quadratic solver, as a lattice-row count, as an exact floor of an expression in an
+irrational number, and — applied twice — as a fourth root. The reason it deserves a tag rather than a
 mention is the other half of the story: the floating-point version is *nearly* right, and nearly
 right is a wrong answer with no traceback attached.
 
@@ -56,11 +56,18 @@ arrays of length $\sqrt n$ index the whole range — a standard device for prime
 Problem 276 uses the same split for a [Möbius inversion](/topics/technique/mobius-inversion-formula) over the
 gcd of a triangle's sides: `small[v]` holds the answer for $v \le \sqrt n$, `large[k]` the answer for
 $n/k$, and `isqrt(n)` is the one number that sizes both tables. Problem 668 runs the same two tables
-through Lucy_Hedgehog's prime-counting sieve, and is a good illustration of where the root does and
+through Lucy_Hedgehog's prime-counting sieve (problem 521 runs it once more, for a sum of smallest
+prime factors), and is a good illustration of where the root does and
 does not belong. Its definition — every prime factor below $\sqrt n$ — never needs one: squaring
 gives $P(n)^2 < n$, and the count is all integers. The root survives only as $r = \lfloor \sqrt N
 \rfloor$, which sizes the tables and fixes the split between the two sums, and that split is itself
 exact integer arithmetic: $\lfloor N/k \rfloor > r$ precisely when $k \le \lfloor N/(r+1) \rfloor$.
+
+When the divisor appears *squared*, the split is not needed: $\lfloor n/d^2 \rfloor$ is zero past
+$d = \sqrt n$, so the root is simply the end of the range. Problem 632 counts integers by their
+squarefree square divisors as a sum of $\lfloor n/d^2 \rfloor$ over squarefree $d \le \sqrt n$, and
+classifies those $d$ with a segmented sieve whose primes stop at the root *of that range* —
+`isqrt(isqrt(n))`, the fourth root of $n$. One root sizes the range, the next one sizes its sieve.
 
 **A perfect-square predicate.** `s = isqrt(n); s * s == n`. Problem 141 tests each generated
 candidate this way, problems 140 and 932 test discriminants, and problem 142 wraps it in a named
@@ -85,6 +92,25 @@ for each cube $b^3$, the $a$ with $a^2 + b^3$ inside a decimal band $[lo, hi)$ r
 `np.arange` wants, so the whole inner loop becomes one array per cube. The half-open ends are where
 the care goes: "smallest $a$ with $a^2 \ge x$" is `isqrt(x - 1) + 1`, not `isqrt(x)`, which is wrong
 whenever $x$ is a perfect square.
+
+Problems 291 and 341 add a refinement: when the root is only a step toward the answer, **correct
+against the inequality you actually need**, not against $r^2$. Problem 341 wants, for a whole array
+of targets $c$, the smallest $i$ with $i(i+1) \ge c$ — the ceiling of
+$(\sqrt{4c+1} - 1)/2$. A corrected square root would still leave the `- 1`, the halving and the
+ceiling to round on their own, so the fix-up tests the quadratic itself:
+
+```python
+i = np.ceil((np.sqrt(4.0 * c + 1.0) - 1.0) / 2.0).astype(np.int64)
+i += i * (i + 1) < c        # too small: the predicate fails at i
+i -= (i - 1) * i >= c       # too large: it already held at i - 1
+```
+
+Two comparisons pin the defining property — true at $i$, false at $i-1$ — so every rounding in the
+expression is absorbed at once. Problem 291 does the scalar version: the largest $n$ with
+$2n^2 + 2n + 1 < L$ starts from `(isqrt(2L - 1) - 1) // 2` and then steps down while the polynomial
+itself is too big. The closed form is the fast guess; the predicate is the specification. (Problem
+291 also takes square roots of $-1$ *modulo* primes $q \equiv 1 \pmod 4$ — the same word for a
+different operation; a modular square root is found by exponentiation, not by `isqrt`.)
 
 **Counting lattice points.** The number of integers $y$ with $y^2 \le r^2 - x^2$ is
 $\lfloor \sqrt{r^2 - x^2} \rfloor$, so the count of lattice points inside a circle is a *sum* of
@@ -126,6 +152,33 @@ width. $x^2$ and $q^2 m$ are about twice as many bits as $x$, so the C sibling w
 `unsigned __int128` for the products and for its root — the
 [watch integer width](/topics/takeaway/watch-integer-width) habit applied to the *argument* of
 `isqrt`, not its result.
+
+Problems 517 and 1006 meet the irrational with a **minus sign**, and the identity turns into a
+ceiling. For $b > 0$ and non-square $m$, $b\sqrt m$ is irrational, so
+$\lceil b\sqrt m \rceil = \lfloor b\sqrt m \rfloor + 1$, and a nested floor absorbs any positive
+integer divisor:
+
+```python
+floor((a - b * sqrt(m)) / c) == (a - isqrt(b * b * m) - 1) // c     # b, c > 0, m not a square
+```
+
+Problem 517 unfolds a recursion with steps of $1$ and $\sqrt n$ into a binomial sum whose $j$-th
+term needs $\lfloor n - j\sqrt n \rfloor$, which is `n - isqrt(j*j*n) - 1`, computed for all $j$ at
+once with the corrected float root. Problem 1006 reads letters of the
+[Fibonacci word](https://en.wikipedia.org/wiki/Fibonacci_word) as differences of a
+[Beatty sequence](https://en.wikipedia.org/wiki/Beatty_sequence) $\lfloor k\alpha \rfloor$ with
+$\alpha = (3 - \sqrt 5)/2$ — exactly the shape above with $a = 3k$, $b = k$, $m = 5$, $c = 2$. The
+letter is one bit, and a float that misplaces a single floor flips it, deep inside a word that is
+then multiplied into a matrix product; the integer form makes every letter a theorem rather than an
+estimate.
+
+**Roots of roots.** The nesting identity has a second consequence: since
+$\lfloor \sqrt{\lfloor y \rfloor} \rfloor = \lfloor \sqrt y \rfloor$, applying `isqrt` twice is
+the exact floor of the fourth root. Problem 764 bounds the inner loops of two parametric families
+of $16x^2 + y^4 = z^2$ solutions this way, with $N$ up to $10^{16}$ — `iroot4(n) = isqrt(isqrt(n))`
+gives the largest $b$ with $b^4 \le n$ — and problem 632 uses the same composition to size its sieve. No float, no `** 0.25`,
+and no fix-up loop: correctness is inherited from `isqrt` itself. Odd roots do not compose this
+way from square roots; a cube root needs its own integer Newton iteration or a corrected float.
 
 Problem 721 meets the irrational in an exponent: it wants $\lfloor (\lceil \sqrt a \rceil + \sqrt a)^n
 \rfloor$ for exponents in the trillions. The conjugate $c - \sqrt a$, with $c = \lceil \sqrt a
