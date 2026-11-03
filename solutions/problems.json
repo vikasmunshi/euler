@@ -2468,8 +2468,8 @@
     "level": 12,
     "pct": 31,
     "solvers": 1225,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 13:17"
   },
   "310": {
     "title": "Nim Square",
