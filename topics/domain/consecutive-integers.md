@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_sequen
 
 - ● [0047](/solutions/0047/) — Distinct Primes Factors
 - ● [0164](/solutions/0164/) — Three Consecutive Digital Sum Limit
-- ○ [0374](/solutions/0374/) — Maximum Integer Partition Product
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ○ [0526](/solutions/0526/) — Largest Prime Factors of Consecutive Numbers
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
 

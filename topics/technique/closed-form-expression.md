@@ -443,6 +443,7 @@ loop was never needed.
 - ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0401](/solutions/0401/) — Sum of Squares of Divisors
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix

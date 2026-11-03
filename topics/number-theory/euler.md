@@ -275,7 +275,7 @@ the loop.
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
 - ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
-- ○ [0374](/solutions/0374/) — Maximum Integer Partition Product
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ○ [0432](/solutions/0432/) — Totient Sum
 - ○ [0441](/solutions/0441/) — The Inverse Summation of Coprime Couples
 - ○ [0448](/solutions/0448/) — Average Least Common Multiple

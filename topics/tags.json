@@ -1066,7 +1066,7 @@
       "reference": "https://en.wikipedia.org/wiki/Factorial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0248", "p0254", "p0288", "p0320", "p0330", "p0381", "p0383", "p0418", "p0429", "p0474", "p0495", "p0549", "p0592", "p0598", "p0608", "p0628", "p0636", "p0646", "p0675", "p0754", "p0829", "p0851", "p0926", "p0937", "p0952", "p0956"]
+      "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0248", "p0254", "p0288", "p0320", "p0330", "p0374", "p0381", "p0383", "p0418", "p0429", "p0474", "p0495", "p0549", "p0592", "p0598", "p0608", "p0628", "p0636", "p0646", "p0675", "p0754", "p0829", "p0851", "p0926", "p0937", "p0952", "p0956"]
     },
     {
       "slug": "factorial-number-system",
@@ -1462,7 +1462,7 @@
       "reference": "https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)",
       "additional-references": [],
       "summary": "The divergent series of reciprocals of positive integers, and modified variants like the Kempner series that converge when certain terms are omitted.",
-      "refs": ["p0368"]
+      "refs": ["p0368", "p0374"]
     },
     {
       "slug": "harshad-number",
@@ -3838,7 +3838,7 @@
       "reference": "https://en.wikipedia.org/wiki/Closed-form_expression",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0318_s0", "p0321_s0", "p0335_s0", "p0340_s0", "p0359_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0506_s0", "p0523_s0", "p0561_s0", "p0587_s0", "p0605_s0", "p0628_s0", "p0635_s0", "p0684_s0", "p0704_s0", "p0711_s0", "p0718_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"]
+      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0044_s0", "p0058_s0", "p0070_s0", "p0071_s0", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0141_s0", "p0141_s1", "p0145_s0", "p0147_s0", "p0148_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0176_s0", "p0177_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0222_s0", "p0226_s0", "p0232_s0", "p0234_s0", "p0235_s0", "p0242_s0", "p0246_s0", "p0253_s0", "p0256_s0", "p0269_s0", "p0274_s0", "p0276_s0", "p0288_s0", "p0305_s0", "p0313_s0", "p0318_s0", "p0321_s0", "p0335_s0", "p0340_s0", "p0359_s0", "p0374_s0", "p0381_s0", "p0401_s0", "p0420_s0", "p0420_s1", "p0487_s0", "p0493_s0", "p0506_s0", "p0523_s0", "p0561_s0", "p0587_s0", "p0605_s0", "p0628_s0", "p0635_s0", "p0684_s0", "p0704_s0", "p0711_s0", "p0718_s0", "p0739_s0", "p0743_s0", "p0772_s0", "p0778_s0", "p0862_s0", "p0872_s0", "p0887_s0", "p0899_s0", "p0918_s0", "p0944_s0", "p0950_s0", "p0957_s0", "p0965_s0", "p1000_s0"]
     },
     {
       "slug": "closure-computer-programming",
@@ -4702,7 +4702,7 @@
       "reference": "https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0073_s2", "p0135_s0", "p0136_s0", "p0211_s0"]
+      "refs": ["p0073_s2", "p0135_s0", "p0136_s0", "p0211_s0", "p0374_s0"]
     },
     {
       "slug": "hash-consing",
@@ -5359,7 +5359,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0463_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0649_s0", "p0674_s0", "p0682_s0", "p0684_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0374_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0463_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0649_s0", "p0674_s0", "p0682_s0", "p0684_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -5368,7 +5368,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0335_s0", "p0365_s0", "p0421_s0", "p0455_s0", "p0457_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0506_s0", "p0516_s0", "p0520_s0", "p0545_s0", "p0605_s0", "p0615_s0", "p0619_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0684_s0", "p0705_s0", "p0711_s0", "p0731_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0754_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0245_s0", "p0248_s0", "p0250_s0", "p0271_s0", "p0293_s0", "p0319_s0", "p0335_s0", "p0365_s0", "p0374_s0", "p0421_s0", "p0455_s0", "p0457_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0506_s0", "p0516_s0", "p0520_s0", "p0545_s0", "p0605_s0", "p0615_s0", "p0619_s0", "p0635_s0", "p0650_s0", "p0659_s0", "p0675_s0", "p0684_s0", "p0705_s0", "p0711_s0", "p0731_s0", "p0743_s0", "p0745_s0", "p0752_s0", "p0754_s0", "p0820_s0", "p0822_s0", "p0860_s0", "p0926_s0", "p0944_s0", "p0980_s0", "p1010_s0"]
     },
     {
       "slug": "modular-multiplicative-inverse-application",
@@ -5800,7 +5800,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0423_s0", "p0463_s0", "p0650_s0", "p0692_s0", "p0720_s0", "p0866_s0", "p0887_s0"]
+      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0374_s0", "p0423_s0", "p0463_s0", "p0650_s0", "p0692_s0", "p0720_s0", "p0866_s0", "p0887_s0"]
     },
     {
       "slug": "recursion-computer-science",
@@ -6622,6 +6622,15 @@
       "refs": ["p0333"]
     },
     {
+      "slug": "scale-fraction-sums-to-integer-recurrences",
+      "facet": "takeaway",
+      "name": "Scale fraction sums into integer recurrences",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Multiplying a running sum of fractions by its natural common factor (such as j! times H_j) yields an integer recurrence that needs no modular inverses.",
+      "refs": ["p0374"]
+    },
+    {
       "slug": "search-in-complete-bands",
       "facet": "takeaway",
       "name": "Search in complete bands",
@@ -6673,7 +6682,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Exhaustively solve small instances, read a closed-form characterisation off the table, and check it against the brute force before using it at scale.",
-      "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0523", "p0561", "p0628", "p0684", "p0711", "p0739", "p0950", "p0957", "p0963"]
+      "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0561", "p0628", "p0684", "p0711", "p0739", "p0950", "p0957", "p0963"]
     },
     {
       "slug": "small-cases-reveal-recurrence",

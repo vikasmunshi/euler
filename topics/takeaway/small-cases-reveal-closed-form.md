@@ -188,6 +188,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0628](/solutions/0628/) — Open Chess Positions

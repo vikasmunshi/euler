@@ -235,6 +235,7 @@ of magnitude.
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ○ [0360](/solutions/0360/) — Scary Sphere
 - ○ [0373](/solutions/0373/) — Circumscribed Circles
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ○ [0390](/solutions/0390/) — Triangles with Non Rational Sides and Integral Area
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ○ [0397](/solutions/0397/) — Triangle on Parabola

@@ -316,6 +316,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime

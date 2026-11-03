@@ -209,6 +209,7 @@ Things that bite:
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ○ [0320](/solutions/0320/) — Factorials Divisible by a Huge Integer
 - ○ [0330](/solutions/0330/) — Euler's Number
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ○ [0383](/solutions/0383/) — Divisibility Comparison Between Factorials
 - ○ [0418](/solutions/0418/) — Factorisation Triples

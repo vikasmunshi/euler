@@ -281,7 +281,7 @@ problems are where the collection makes the point most bluntly.
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ○ [0372](/solutions/0372/) — Pencils of Rays
-- ○ [0374](/solutions/0374/) — Maximum Integer Partition Product
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ○ [0375](/solutions/0375/) — Minimum of Subsequences
 - ○ [0384](/solutions/0384/) — Rudin-Shapiro Sequence
 - ○ [0390](/solutions/0390/) — Triangles with Non Rational Sides and Integral Area

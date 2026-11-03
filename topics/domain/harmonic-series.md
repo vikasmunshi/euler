@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Harmonic_serie
 ## Problems
 
 - ○ [0368](/solutions/0368/) — A Kempner-like Series
+- ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 
 <!-- /problems -->
