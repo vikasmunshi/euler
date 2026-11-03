@@ -7732,8 +7732,8 @@
     "level": 23,
     "pct": 58,
     "solvers": 315,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 08:21"
   },
   "968": {
     "title": "5D Summation",
