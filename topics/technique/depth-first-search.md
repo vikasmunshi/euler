@@ -1,5 +1,5 @@
 <!-- tags: [depth-first-search] -->
-<!-- status: final 2026-10-29T02:15Z -->
+<!-- status: final -->
 # Depth-first search
 
 [Depth-first search](https://en.wikipedia.org/wiki/Depth-first_search) (DFS) explores a
@@ -9,8 +9,10 @@ is almost always something slightly different and more useful — a way to *enum
 constructed objects*. There is no graph on disk. The tree is implicit: a node is a partly
 built object, an edge is one more choice, and a leaf is a finished candidate. Sets of
 primes, factorisations, addition chains, digit strings, binary circles, tilings,
-Pythagorean triples, squares packed under a curve, palindromes in base $\varphi$ — the problems below all build their
-answers that way.
+Pythagorean triples, squares packed under a curve, palindromes in base $\varphi$, numbers
+pandigital in every base at once — the problems below all build their answers that way.
+(The exception, problem 674's unifier, is a real graph walk, and it shows what the
+classical version still offers.)
 
 ## The idea — a tree you never store
 
@@ -65,6 +67,25 @@ residual of $1$. The ascending-prime rule does the deduplication exactly as in 2
 the divisibility test is the prune — a much sharper one than a size bound, because almost
 every candidate prime fails it.
 
+The *direction* of the order matters as much as the fact of having one. You can pick it so
+that each choice's side effects land only on choices **not yet made**. Problem 342 sums the
+$n$ for which $\varphi(n^2)$ is a perfect cube. Taking a prime $p$ into $n$ contributes
+$p^{2e-1}$ to $\varphi(n^2)$, and also contributes $p-1$, whose prime factors are all smaller
+than $p$. So the search takes primes in *decreasing* order. Then a choice can only create
+debts — exponents not yet $\equiv 0 \pmod 3$ — on primes that still lie ahead. The node
+carries those debts as a small map from prime to exponent mod 3. The ordering also gives a
+prune for free: the largest prime still owed can only be paid by taking that prime itself,
+since any later prime is smaller. If even its cheapest admissible power overflows the limit,
+the branch is dead. A search whose consequences flowed in both directions would have to wait
+until every prime had been decided before it could judge anything.
+
+An order on the choices also orders the leaves, and sometimes that is what the question asks
+for. Problem 571 wants the *smallest* few numbers that are pandigital in every base below
+$n$. The candidates are base-$n$ digit permutations. Trying the unused digits in ascending
+order makes the leaves arrive in increasing numeric order, so the search can return the
+moment it has found as many as it needs. "The first $k$" becomes an early exit. Nothing has
+to be sorted, and the rest of the tree is never visited.
+
 Cyclic objects need one more decision before the order can do its work: *where the cycle
 starts*. Problem 265 counts binary circles — $2^N$ bits whose $N$-bit windows, read around
 the circle, are all different ([de Bruijn sequences](https://en.wikipedia.org/wiki/De_Bruijn_sequence)).
@@ -101,11 +122,26 @@ or a list. But when the state fits in a machine word the trade-off flips: proble
 the state an immutable value whenever it is small enough, and the backtracking bug
 cannot be written.
 
+Graph DFS has one more classical job that enumerations never need: **post-order with cycle
+detection**. Problem 674 reduces equations between nested $I(x, y)$ expressions to
+[syntactic unification](https://en.wikipedia.org/wiki/Unification_(computer_science)), which
+is possible because $I$ is injective. The terms are
+[hash-consed](https://en.wikipedia.org/wiki/Hash_consing) into one shared DAG, and union-find
+merges the classes that unification forces together. After that the least solution is a
+bottom-up evaluation over the class graph: a node's value needs its children's values first,
+which is post-order. Shared subterms are evaluated once, because each finished class keeps its
+value. The [occurs check](https://en.wikipedia.org/wiki/Occurs_check) — whether a variable
+ended up equal to a term containing itself — is the textbook three-colour test. A class is
+*grey* while its children are still open and *done* once it has a value. Reaching a grey class
+again is a back edge, which means a cycle, which means no solution. The expressions nest far
+too deeply for recursion, so the walk runs on an explicit stack, with the grey set doing the
+work that the call stack would otherwise do.
+
 ## Pruning is the algorithm
 
 A bare DFS over these trees is exponential and useless. What makes it finish is the test
 that kills a subtree before entering it, and that test is where the real thinking goes.
-Four flavours recur:
+Five flavours recur:
 
 - **Monotone feasibility.** The partial object only ever gets bigger, so the moment it
   breaks the bound, stop. Multiplying primes into a smooth number (204) or a powerful
@@ -135,6 +171,17 @@ Four flavours recur:
   means in practice. The float is only allowed to cut a branch, never to accept a leaf, and it
   carries a little slack so rounding cannot discard a real hit. Acceptance happens in exact
   integers.
+- **Interval of completions.** A prefix fixes more than a partial object. It fixes the
+  *range* $[\text{lo}, \text{hi}]$ that every completion falls in, and a property that holds
+  across that whole range can be read off the range's endpoints. Problem 571's prefix is a run
+  of leading base-$n$ digits. Filling the rest with the remaining digits ascending gives
+  $\text{lo}$, and descending gives $\text{hi}$. In every other base $b$, all completions share
+  the leading base-$b$ digits that $\text{lo}$ and $\text{hi}$ share. If the free low places
+  are fewer than the base-$b$ digits that shared prefix is still missing, no completion can be
+  pandigital in base $b$, and the branch is cut — long before any completion has been written
+  out in base $b$. The shared prefix only gets longer with depth, so each base's free-place
+  count and digit mask are passed down the path and updated incrementally. They are never
+  recomputed. Bases are checked largest first, because those fail soonest.
 - **Algebraic.** The cheapest prune is one the mathematics hands you. Problem 484 notices
   that a certain multiplicative factor is zero for particular exponents and drops the whole
   subtree, since every deeper term carries the zero. Problem 241's search over abundancy
@@ -181,9 +228,29 @@ into that level at all** — replacing it by arithmetic over the whole fan-out a
   contributes $m \cdot \sum_{h \le L/m} h$ with no further descent. The DFS visits a few million
   products, and none of the far more numerous $n$.
 
-The pattern is the same in all three: let the DFS do the combinatorial part, where the
+- **Count a chain by its length.** In problem 615 each node is an odd part $o$, and its
+  members are $o$ times an unbounded run of powers of two. The number of members under a
+  bound $L$ is a single `bit_length` of $L / V(o)$, where $V(o)$ is the smallest member. So the
+  powers of two never become a level of the tree.
+
+The pattern is the same in all four: let the DFS do the combinatorial part, where the
 choices genuinely interact, and hand the final, independent choice to a formula or a
 table. See [closed form over iteration](/topics/takeaway/closed-form-over-iteration).
+
+You can take the same split further back, and decide **which choices the tree contains at
+all**. Problem 967 counts $n \le 10^{18}$ by the sum, mod 3, of their distinct prime factors
+up to $B$. It does this with a divisor-sum identity that has one term per square-free product
+of the relevant primes, about $7 \times 10^7$ of them. Searching over every prime is too slow.
+But the contribution of the seven smallest primes depends only on $n$ modulo their product, so
+a period table absorbs them. The DFS then enumerates square-free products of the 22 large
+primes only, which is about $1.4 \times 10^6$ nodes. And because each leaf's weight depends
+only on how many of its primes are $1$ and $2 \bmod 3$, the leaves are summed per class rather
+than one at a time. A small prime is a choice that branches a lot and adds little structure,
+so it belongs in a table; a large prime is rare enough to search. The Python solution also
+shows that a tree pruned only by a monotone bound need not be walked recursively at all.
+Taking the primes in order, it appends $d \cdot p$ for every surviving $d$ to a NumPy array.
+That builds exactly the same node set level by level, vectorised, while the C port walks it
+as an ordinary DFS.
 
 ## A node can be a set of inputs
 
@@ -256,6 +323,27 @@ dominates the total, so re-expanding all the shallow ones costs a constant facto
 122 uses exactly this to find minimal addition chains — chain lengths are small (about
 $\log_2 k$ plus a bit) but not known in advance, which is precisely IDDFS's case.
 
+The same trick works on **value** instead of depth. Many enumerations here are pruned by
+"stop once the product passes $L$", and the question then is what $L$ should be when the
+answer is not known in advance. Start with a bound that is too small and double it. Problem
+615 wants the $n$-th smallest member of a set. The DFS above can *count* the members under a
+bound cheaply, so the solution doubles the bound until the count reaches $n$. Then it runs
+the walk once more to collect those members, and sorts them. Selection becomes counting
+plus a final sort of at most about $2n$ values. Problem 829 needs the smallest number whose
+factor tree has a given shape. It generates every number of that shape below a bound, starting
+from the product of its two subtrees' minima and doubling until the list is non-empty. The first
+non-empty list contains the true minimum, because everything below the bound was enumerated.
+Each shape's list is cached with its bound, so a later request for a smaller bound is
+answered by slicing the cached list. As with IDDFS, the geometric growth is what makes the
+repetition affordable. The last round costs about as much as all the earlier rounds put
+together, so overshooting by up to a factor of two is the whole price.
+
+829 also shows the smallest DFS on this page, an *existence* query. A number's factor
+tree depends on whether it has a divisor in a given interval $(a, \sqrt n\,]$. The divisors
+are walked from the known factorisation, exponent by exponent, with a bound cut whenever the
+partial divisor passes $\sqrt n$, and the search returns at the first hit. A search that only
+needs a yes or no should short-circuit all the way up the call stack, not count.
+
 ## How to reason about it
 
 Reach for DFS when the answer is *built* rather than looked up, when the number of
@@ -266,7 +354,7 @@ partial candidate can be judged before it is finished. Then, in order:
    which block of inputs shares this history), and what "complete" means.
 2. **Fix a canonical extension order**, so each object is reachable one way. This is
    usually a strict inequality on the choices, plus an anchor for anything cyclic, and it
-   is free.
+   is free. Point it so each choice's consequences fall on choices not yet made.
 3. **Find the prune.** Without it you have brute force with extra steps; the prune *is*
    the solution. Make sure it is admissible — a bound that can be wrong silently discards
    real answers, which is much worse than being slow.
@@ -274,7 +362,8 @@ partial candidate can be judged before it is finished. Then, in order:
    cheapest-first.
 5. **Look at the last level.** If the final choice is independent of the rest, solve for
    it or count it in bulk instead of descending.
-6. **Check the depth** before trusting recursion.
+6. **If the bound is unknown, double it** — the value-space twin of iterative deepening.
+7. **Check the depth** before trusting recursion.
 
 And, as everywhere in this repository, build the sieves and tables the search needs
 *inside* `solve()`, sized to the inputs — the harness times repeated calls, and anything
