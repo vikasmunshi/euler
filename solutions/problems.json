@@ -4308,8 +4308,8 @@
     "level": 9,
     "pct": 24,
     "solvers": 1159,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 13:20"
   },
   "540": {
     "title": "Counting Primitive Pythagorean Triples",
