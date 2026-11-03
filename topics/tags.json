@@ -4144,7 +4144,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisor_function",
       "additional-references": [],
       "summary": "Compute the sum of proper divisors for every n up to N in O(N log N) by adding each candidate divisor onto all of its multiples, generalising the Sieve of Eratosthenes' additive pass.",
-      "refs": ["p0095_s0", "p0179_s0", "p0211_s0", "p0256_s0", "p0420_s0", "p0420_s1", "p0834_s0"]
+      "refs": ["p0095_s0", "p0179_s0", "p0211_s0", "p0256_s0", "p0420_s0", "p0420_s1", "p0485_s0", "p0834_s0"]
     },
     {
       "slug": "double-counting-proof-technique",
@@ -4720,7 +4720,7 @@
       "reference": "https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0073_s2", "p0135_s0", "p0136_s0", "p0211_s0", "p0374_s0"]
+      "refs": ["p0073_s2", "p0135_s0", "p0136_s0", "p0211_s0", "p0374_s0", "p0485_s0"]
     },
     {
       "slug": "hash-consing",
@@ -5566,7 +5566,7 @@
       "reference": "https://numpy.org/doc/stable/reference/arrays.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0294_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0512_s0", "p0521_s0", "p0632_s0", "p0641_s0", "p0659_s0", "p0668_s0", "p0675_s0", "p0875_s0", "p0967_s0"]
+      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0294_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0485_s0", "p0512_s0", "p0521_s0", "p0632_s0", "p0641_s0", "p0659_s0", "p0668_s0", "p0675_s0", "p0875_s0", "p0967_s0"]
     },
     {
       "slug": "open-addressing",
@@ -5983,6 +5983,15 @@
       "refs": ["p0185_s0"]
     },
     {
+      "slug": "sliding-window-maximum",
+      "facet": "technique",
+      "name": "Sliding-window maximum (van Herk\u2013Gil-Werman)",
+      "reference": "https://en.wikipedia.org/wiki/Range_minimum_query",
+      "additional-references": [],
+      "summary": "Find the maximum of every length-k window in O(n) by splitting the array into k-blocks and combining one block's suffix maximum with the next block's prefix maximum.",
+      "refs": ["p0485_s0"]
+    },
+    {
       "slug": "snprintf",
       "facet": "technique",
       "name": "snprintf",
@@ -6304,7 +6313,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0"]
     },
     {
       "slug": "walrus-operator",
@@ -6601,7 +6610,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Keep the C and Python algorithms identical so benchmarks compare constant factors.",
-      "refs": ["p0014", "p0018", "p0049", "p0052", "p0054", "p0060", "p0061", "p0084", "p0088", "p0105", "p0126", "p0135", "p0144", "p0153", "p0169", "p0170", "p0181", "p0189", "p0192", "p0198", "p0203", "p0215", "p0223", "p0252", "p0478", "p0487", "p0501", "p0504", "p0549", "p0637", "p0650", "p0719", "p0720", "p0743", "p0845", "p0965"]
+      "refs": ["p0014", "p0018", "p0049", "p0052", "p0054", "p0060", "p0061", "p0084", "p0088", "p0105", "p0126", "p0135", "p0144", "p0153", "p0169", "p0170", "p0181", "p0189", "p0192", "p0198", "p0203", "p0215", "p0223", "p0252", "p0478", "p0485", "p0487", "p0501", "p0504", "p0549", "p0637", "p0650", "p0719", "p0720", "p0743", "p0845", "p0965"]
     },
     {
       "slug": "precompute-once-reuse",

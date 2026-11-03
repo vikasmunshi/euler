@@ -118,5 +118,6 @@ which vectorised Python pays.
 - ● [0136](/solutions/0136/) — Singleton Difference
 - ● [0211](/solutions/0211/) — Divisor Square Sum
 - ● [0374](/solutions/0374/) — Maximum Integer Partition Product
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 
 <!-- /problems -->

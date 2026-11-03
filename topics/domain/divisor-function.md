@@ -180,7 +180,7 @@ composites one smallest prime factor at a time, in roughly $O(m^{3/4})$ total.
 - ○ [0439](/solutions/0439/) — Sum of Sum of Divisors
 - ● [0452](/solutions/0452/) — Long Products
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
-- ○ [0485](/solutions/0485/) — Maximum Number of Divisors
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ○ [0500](/solutions/0500/) — Problem 500!!!
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ○ [0548](/solutions/0548/) — Gozinta Chains

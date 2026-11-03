@@ -813,6 +813,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0468](/solutions/0468/) — Smooth Divisors of Binomial Coefficients
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0495](/solutions/0495/) — Writing $n$ as the Product of $k$ Distinct Positive Integers

@@ -375,6 +375,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0478](/solutions/0478/) — Mixtures
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion

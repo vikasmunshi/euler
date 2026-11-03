@@ -134,6 +134,7 @@ short the code looks.
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0478](/solutions/0478/) — Mixtures
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0504](/solutions/0504/) — Square on the Inside

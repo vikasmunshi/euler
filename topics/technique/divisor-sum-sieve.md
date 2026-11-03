@@ -146,6 +146,7 @@ avoids paying the interpreter for each of the $N \ln N$ additions.
 - ● [0211](/solutions/0211/) — Divisor Square Sum
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ● [0834](/solutions/0834/) — Add and Divide
 
 <!-- /problems -->

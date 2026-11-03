@@ -534,7 +534,7 @@ show up there at once. See
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ○ [0462](/solutions/0462/) — Permutation of 3-smooth Numbers
 - ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table
-- ○ [0485](/solutions/0485/) — Maximum Number of Divisors
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ○ [0489](/solutions/0489/) — Common Factors Between Two Sequences
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers

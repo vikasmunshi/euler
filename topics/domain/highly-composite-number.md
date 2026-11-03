@@ -104,6 +104,6 @@ where the windows' maxima are typically near numbers of this shape.
 - ● [0108](/solutions/0108/) — Diophantine Reciprocals I
 - ● [0110](/solutions/0110/) — Diophantine Reciprocals II
 - ● [0243](/solutions/0243/) — Resilience
-- ○ [0485](/solutions/0485/) — Maximum Number of Divisors
+- ● [0485](/solutions/0485/) — Maximum Number of Divisors
 
 <!-- /problems -->
