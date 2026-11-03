@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-11-02T18:29Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -56,7 +56,12 @@ large prime at once.
 [Problem 668](/solutions/0668/)'s
 [Lucy_Hedgehog prime count](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80(x))
 is the same shape on the `√N` table of `π(N // k)`: each sieving prime updates the whole
-table in two slice expressions.
+table in two slice expressions. [Problem 521](/solutions/0521/) runs it with a second table of
+prime *sums* beside the counts, and shows where the update reads from. For `i·p ≤ √N` the
+value `⌊N/(ip)⌋` sits in the large table at index `i·p`, which is a strided slice
+`large[p::p]`. For larger `i` it lands in the small table at a computed index, so those
+entries are gathered with fancy indexing. One split point decides which form handles each
+entry.
 
 **Invert the loop nest.** When you have nested loops, vectorize the *inner* one and leave the
 outer in Python. This is the single most common shape across these problems, because it needs
@@ -74,7 +79,11 @@ carries the array of every signed subset sum chosen so far, so the test that dec
 to descend is a handful of array operations over all of them. When you want to erase *both* levels,
 [broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html) does it: an
 `(m, 1)` column against a `(1, n)` row produces the full `m × n` grid of combinations in one
-expression, at the price of materialising it.
+expression, at the price of materialising it. The two styles combine: [problem 518](/solutions/0518/)
+keeps a Python loop over the ratio's denominator `q` and builds, for each `q`, a small
+`np.outer` grid of multipliers `k` against coprime numerators `p`. It masks the grid through a
+primality table, and `np.nonzero` on the 2-D mask returns the `(row, col)` coordinates of every
+hit, which recover exactly which `(k, p)` pairs to sum.
 
 **Masks replace `if`.** A comparison yields a boolean array, and boolean arrays index, count,
 and combine. `mask = n <= limit` then `n[mask]` is the vectorized `if`;
@@ -152,6 +161,18 @@ anyway, one mask on the flattened table removes the padding with them. Then, for
 [prefix sums](/topics/technique/prefix-sum) build the whole 9 × 9 table of ordered pairs, with
 no pass over the pairs themselves.
 
+The bulk forms of "group by" and "for each subset" are just as short.
+[Problem 967](/solutions/0967/) needs every squarefree product of the large primes below a
+bound. It grows that set one prime at a time: `ds = np.concatenate((ds, ds[keep] * p))`
+appends every product that still fits, so the Python loop runs once per prime, not once per
+product. Each product carries a class label, and
+[`np.add.at`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html)`(acc, cls, values)`
+sums the values class by class in one unbuffered scatter. A plain `acc[cls] += values` would
+keep only one write per repeated index. The same problem turns a *periodic* function into a
+table: its small-prime part repeats with period `Q`, a product of a few primes, so it is
+tabulated once over `[0, Q)` with prefix sums. Then `np.divmod(n // ds, Q)` splits every
+query into whole periods and a remainder, which costs one multiply and one lookup per lane.
+
 **Advance the whole ensemble.** When many independent processes share one update rule, make
 the process an *axis* and step them in lockstep. [Problem 213](/solutions/0213/) tracks the
 probability distribution of every flea on the board simultaneously — one ring of the simulation
@@ -165,6 +186,18 @@ be space or time. [Problem 400](/solutions/0400/) runs its DP over *Grundy value
 the game tree holds a weight vector indexed by the value a move must reach. XOR with a constant
 permutes `[0, 2**b)`, so pushing a whole level down to a child is a single scatter through the
 index array `(idx ^ mask) - 1`.
+
+A recurrence that looks serial along its own index can still be stepped in blocks, if every
+entry depends only on entries well below it. [Problem 333](/solutions/0333/) counts partitions
+into terms `2^i·3^j`. Its recurrence sends `n` to indices below `n/2`, so the whole block
+`[2^k, 2^{k+1})` depends only on blocks already filled, and the table fills in `log₂ N` vector
+steps instead of `N` scalar ones. The block boundaries come from the dependency structure, not
+from the index order. The ensemble can also shrink as it runs. [Problem 437](/solutions/0437/)
+keeps one lane per candidate prime and folds in the prime factors of `p − 1` one at a time.
+Each fold settles some lanes for good, and those lanes are dropped: one `keep` mask compacts
+the candidate array *and* every per-lane state array alongside it. Later factors then work on
+a shrinking array, as in problem 348's staged filter, except that here the survivors carry
+state from step to step.
 
 **Vectorize the modular arithmetic too.** Nothing about the technique is limited to `+` and
 `*`. [Problem 944](/solutions/0944/) computes `2**e mod m` for a whole array of exponents by
@@ -213,7 +246,13 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   Choosing the *smallest*
   sufficient dtype is also a speed decision: an `int8` Möbius table
   ([problem 193](/solutions/0193/)) is eight times more cache-friendly than `int64`, and
-  bandwidth is what these loops are limited by.
+  bandwidth is what these loops are limited by. Sometimes the question itself makes the small
+  dtype possible. Problem 333 only asks whether a count is *exactly one*, so it clamps every
+  count at 2 with `np.minimum(acc, 2, out=acc)`. The partition counts, which would grow without
+  bound, fit in a `uint8` table. Overflow can even be harmless if it is planned for. Arithmetic on
+  `int64` is exact modulo `2**64`, so when the *final* value is known to fit, intermediate
+  wraparound cancels out. [Problem 558](/solutions/0558/) depends on this in its fixed-point
+  evaluation.
 - **Memory is the real ceiling, and chunking is the fix.** Vectorization trades memory for
   speed: materialising an intermediate of `N` elements needs `N` elements of RAM, and the
   natural array form of an `O(N)` sum can be an `O(N)` allocation. Sweep the range in
@@ -277,6 +316,14 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   [Problem 641](/solutions/0641/) uses the same split for roots: `np.cbrt` makes a guess for
   every `⌊∛x⌋` at once, and two masked integer corrections (`cs -= cs**3 > x`,
   `cs += (cs+1)**3 <= x`) make each one exact.
+  When an approximate test is fast but occasionally wrong, *certify* it rather than abandoning
+  it. Problem 558 expands every square greedily in an irrational base. The remainder is held
+  exactly as three integer coefficients over `(1, r, r²)`, and each digit decision is made by a
+  fixed-point evaluation in every lane at once. Beside it, a rounding-error bound is computed
+  from the largest coefficients. Lanes whose value clears the bound are decided. The few inside
+  the bound fall back to an exact test in Python integers (the sign of a field norm), and the
+  exact zeros among them are settled in bulk first. The array pass decides nearly every lane,
+  and Python only handles the ones near the boundary.
   When the answer depends on exact equality, keep integers — see
   [exact arithmetic for equality](/topics/takeaway/exact-arithmetic-for-equality).
 - **In C, this problem does not exist.** Every one of these solutions has a C counterpart that
