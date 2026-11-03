@@ -1,18 +1,18 @@
 <!-- tags: [number-theory] -->
-<!-- status: final 2026-11-01T14:17Z -->
+<!-- status: final -->
 # Number theory
 
 [Number theory](https://en.wikipedia.org/wiki/Number_theory) is the study of the integers on their
 own terms — divisibility, primes, remainders, and the arithmetic functions built on top of them.
-With 141 problems it is the third-largest domain tag in the archive, behind only
+With 137 problems it is the third-largest domain tag in the archive, behind only
 [combinatorics](/topics/domain/combinatorics) and
 [modular arithmetic](/topics/domain/modular-arithmetic), and it is the one most often paired with
-something sharper: 35 of these problems also carry `modular-arithmetic`, 23
+something sharper: 33 of these problems also carry `modular-arithmetic`, 23
 [prime factorization](/topics/domain/prime-factorization), 21
-[Diophantine equation](/topics/domain/diophantine-equation), 21
-[multiplicative function](/topics/domain/multiplicative-function), 15
+[multiplicative function](/topics/domain/multiplicative-function), 19
+[Diophantine equation](/topics/domain/diophantine-equation), 15
 [divisor function](/topics/domain/divisor-function). Those pages describe the *objects*. This one
-is about what all 141 have in common — the shape the question takes, and the small set of moves
+is about what all 137 have in common — the shape the question takes, and the small set of moves
 that turn it from impossible into a few seconds of work.
 
 ## The question is almost always a summatory function
@@ -74,6 +74,18 @@ one solution class modulo $\operatorname{lcm}(n, m)$. Substituting $x = a + nt$ 
 whose coefficient is now a unit. So the consistency test and the solution are one gcd and one
 [modular inverse](/topics/technique/modular-multiplicative-inverse-application). A cheap detail
 makes them cheaper: $\gcd(n, m) = \gcd(n, m - n)$, and $m - n$ is small inside a narrow window.
+
+When the modulus is a prime power and the polynomial is a quadratic, the per-prime work becomes a
+square root. Problem 457 wants, for every prime $p \le 10^7$, the least $n$ with
+$p^2 \mid n^2 - 3n - 1$. [Completing the square](/topics/domain/completing-the-square) gives
+$4f(n) = (2n - 3)^2 - 13$, so the roots are the quadratic formula read modulo $p^2$, and the whole
+question becomes "does 13 have a square root mod $p$, and what is it?" Whether it has one is free:
+$13 \equiv 1 \pmod 4$, so [quadratic reciprocity](/topics/domain/quadratic-reciprocity) turns
+$\left(\frac{13}{p}\right)$ into $\left(\frac{p}{13}\right)$, a lookup on $p \bmod 13$ instead of an
+exponentiation. What the root is costs one
+[Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) call mod $p$ and one Hensel step to
+$p^2$. Reciprocity is the move worth remembering: a residue question about a *varying* modulus and
+a *fixed* number flips into a question about a fixed modulus, which is a table.
 
 ## Move 1 — build the whole table in one pass
 
@@ -230,6 +242,17 @@ inversion ([totient summatory recursion](/topics/technique/totient-summatory-rec
 $\varphi$ up to $N^{2/3}$ and recursing above that brings the cost to
 $O(N^{2/3})$.
 
+Problem 625 shows the whole chain, moves 2 and 3 run back to back. It sums $\gcd(i, j)$ over all
+$1 \le i \le j \le 10^{11}$. Count by the value of the gcd instead of by pairs: $\gcd(i, j) = d$
+for exactly $\varphi(j/d)$ values of $i$, so the inner sum is the
+[Dirichlet convolution](/topics/domain/dirichlet-convolution) $\sum_{d \mid j} d\,\varphi(j/d)$.
+Swapping the order gives $\sum_k \varphi(k)\,T(\lfloor N/k \rfloor)$ with $T$ the triangular
+numbers. Blocking that sum needs $\Phi$ at every block boundary $\lfloor N/q \rfloor$, and the
+recursion above supplies exactly those. It never leaves the set, because
+$\lfloor \lfloor N/a \rfloor / b \rfloor = \lfloor N/(ab) \rfloor$. That closure is why the floor
+quotients work as a data structure: each recursion asks only for values already in the
+$2\sqrt{N}$-sized table.
+
 The floor-quotient set is also where prime counting lives. The Lucy–Hedgehog sieve computes $\pi(v)$ for
 *every* $v = \lfloor N/i \rfloor$ at once. It stores them in two $\sqrt{N}$-sized arrays, one for
 small $v$ and one indexed by $i$, and removes one prime's multiples per pass. Problem 452 builds on
@@ -297,6 +320,19 @@ which is the cheapest split, and it settles level 1 with no search. Most of leve
 a [meet-in-the-middle](/topics/technique/meet-in-the-middle-attack) bit-array AND over the high and
 low halves. When a function has a tiny range, asking about thresholds turns a minimisation into a
 search for one witness.
+
+Problem 749 reduces the search by noticing what the function cannot see. A near power sum is an
+$n < 10^{16}$ whose digits' $k$-th powers add up to $n \pm 1$. The power sum ignores digit order,
+so the thing to enumerate is the digit *multiset*, not the number. Padded to 16 digits, that is a
+count vector, and [stars and bars](/topics/technique/stars-and-bars-combinatorics) gives about two
+million of them, against $10^{16}$ numbers. For each multiset and exponent, compute $P_k \pm 1$
+once and ask whether its digits are that multiset. Two residue facts make it cheaper still. A
+number is congruent to its digit sum mod 9, so most candidates fail a single
+[mod-9 check](/topics/takeaway/cheap-checks-first) before any digits are extracted. Mod 3,
+[Fermat](/topics/domain/fermats-little-theorem) gives $d^k \equiv d$ for odd $k$, so
+$P_k \equiv n$, and $P_k = n \pm 1$ is impossible: every odd exponent drops out with no search at
+all. When $f(n)$ depends only on an invariant of $n$, enumerate the invariant
+([aggregate by value](/topics/takeaway/aggregate-by-value)) and check the round trip.
 
 Sometimes what shrinks is the *answer's* form. Problem 561 asks for the 2-adic valuation of a
 divisor-pair count, summed over $10^{12}$ exponents. Divisors of a primorial power are exponent
@@ -391,6 +427,51 @@ squares, so the occupant of a room telescopes to a quadratic. The sum then runs 
 divisors of $N$
 ([small cases reveal the closed form](/topics/takeaway/small-cases-reveal-closed-form)).
 
+## Move 7 — when the question is an equation, generate its solutions
+
+A [Diophantine equation](/topics/domain/diophantine-equation) asks for the integer points on a
+surface, and testing candidate points is almost always the slow way. The solutions usually have a
+structure you can walk directly, and there are two common kinds. Either a parametrisation lists
+the solutions, or a symmetry joins them into a tree.
+
+The parametrisation usually starts from
+[Euclid's formula](/topics/technique/euclids-formula) for
+[Pythagorean triples](/topics/domain/pythagorean-triple) and uses one lemma over and over: if a
+product of two coprime integers is a square, each factor is a square. Problem 764 counts
+primitive solutions of $16x^2 + y^4 = z^2$. Read as $(4x)^2 + (y^2)^2 = z^2$, it is a triple whose
+leg $y^2$ must be a square. For odd $y$ that leg is $(m - n)(m + n)$, two coprime odd factors, so
+$m \pm n$ are squares $a^2, b^2$. For even $y$ it is $2mn$, and the same lemma makes one factor a
+square and the other twice a square. Each case gives a closed two-parameter family with $z$ of
+degree four in the parameters. So $z \le 10^{16}$ allows only about $3 \times 10^7$ coprime
+pairs, and they are enumerated directly. The parity split
+([split inputs into behaviour classes](/topics/takeaway/split-inputs-into-behaviour-classes)) is
+not optional: $\gcd(x, y, z) = 1$ means something different in each class.
+
+Problem 309 gets to triples by an integrality argument first. Two crossed ladders of integer
+lengths $x, y$ meet at height $h$ between walls of integer width $w$, and the geometry gives
+$1/h = 1/a + 1/b$, where $a$ and $b$ are the heights the ladders reach. At first $a$ and $b$ look
+like square roots. But if they were irrational, they would have to share a squarefree part
+$\sqrt{d}$ for $1/a + 1/b$ to be rational, and then $1/h$ would be irrational. So $a$ and $b$ are
+integers, $(w, a, x)$ and $(w, b, y)$ are two triples sharing the leg $w$, and $h$ is an integer
+exactly when $(a + b) \mid ab$. Generate all two million triples with hypotenuse below $10^6$,
+group them by leg, and test pairs within each group. The geometry contributes one divisibility
+test.
+
+The tree comes from [Vieta jumping](/topics/technique/vieta-jumping). Problem 844's
+$\sum x_i^2 = k \prod x_i$ is a generalised
+[Markov equation](/topics/domain/markov-number), quadratic in each variable on its own. Fix all
+coordinates but one, and the other root of that quadratic, $kP - x_i$, is again a solution. Jumping
+the largest coordinate down always shrinks the tuple, until it reaches $(1, \ldots, 1)$. So every
+solution lies in one tree rooted there, values only grow away from the root, and a depth-first
+search pruned at $N$ lists them all. The twist is that $k$ runs to $10^{18}$, so there are far too
+many trees to walk. But every node is an integer polynomial in $k$ ($k - 1$, $k^2 - k - 1$, …), so
+for large $k$ the problem
+[treats $k$ as a polynomial variable](/topics/takeaway/treat-a-parameter-as-a-polynomial-variable).
+One symbolic tree, walked once, gives 75 polynomials, each valid up to its own cutoff. Each one's
+total over its range of $k$ is a combination of power sums
+([Faulhaber](/topics/technique/faulhabers-formula)). Seven numeric trees for $k < 10$ and a few dozen
+closed-form sums replace $10^{18}$ searches.
+
 ## Exactness is the discipline
 
 Number theory asks questions whose answers are exact integers, and the characteristic bug in this
@@ -400,7 +481,10 @@ Comparing ratios is where it bites first. Problem 243 needs $\varphi(d)/(d-1) < 
 computing either side as a float and comparing invites a wrong answer at the boundary, where the
 problem's answer lives by construction. Cross-multiply and compare integers instead. The same
 applies to $\sqrt{\cdot}$: use `math.isqrt`, not `int(math.sqrt(x))`, which starts losing integers
-around $2^{52}$ — problems 179 and 193 both depend on an exact integer square root. Where floats
+around $2^{52}$ — problems 179 and 193 both depend on an exact integer square root. The same
+goes for higher roots. Problem 764's parameter bounds are fourth roots of numbers near $10^{16}$,
+and $\lfloor \sqrt{\lfloor \sqrt{n} \rfloor} \rfloor = \lfloor n^{1/4} \rfloor$ makes them two
+`isqrt` calls, with no boundary pair dropped or let in by rounding. Where floats
 are genuinely the right tool, as in problem 800's logarithms, treat a near-boundary comparison as
 undecided and re-check it exactly. A rounding in a closed form deserves the same treatment.
 Problem 276's unrestricted triangle count is built on
@@ -420,7 +504,10 @@ reducing it would discard most of the answer
 ([exact sums resist modular shortcuts](/topics/takeaway/exact-sums-resist-modular-shortcuts)).
 Problem 632 multiplies its non-zero counts modulo $10^9 + 7$. Which counts are non-zero is a
 question about the exact integers, so the binomial inversion runs without a modulus. A count that
-happens to be divisible by the modulus is still a factor. Exponents are where reduction *is*
+happens to be divisible by the modulus is still a factor. Division is the other operation that
+does not survive reduction. Problem 625's recursion uses only $+$, $-$ and $\times$, so everything
+can stay reduced mod its prime. The one exception is the $/2$ in $T(m) = m(m+1)/2$, which is done
+on the exact integer before reducing. Exponents are where reduction *is*
 licensed, if the modulus is right. In problem 754 the base modulus $p$ is prime, so exponents
 reduce modulo $p - 1$ by [Fermat](/topics/domain/fermats-little-theorem)
 ([reduce the exponent modulo the group order](/topics/takeaway/reduce-exponent-modulo-group-order)).
@@ -435,7 +522,13 @@ comparison rejects it. In 632 it is an alternating sum whose terms are larger th
 In 276 the
 answer itself still fits in 64 bits, but the intermediate $k(k+1)(2k+1)$ does not. Problem 531 has
 the reverse problem: every term fits, but the running total of millions of them passes $2^{63}$ on
-the larger test window, so the accumulator has to be wider than the values going into it. Problems 168 and
+the larger test window, so the accumulator has to be wider than the values going into it, and
+problem 457's running total of the smallest roots outgrows 64 bits the same way at $L = 10^8$.
+Problem 749 avoids the overflow altogether. A digit whose $k$-th power already exceeds $10^{16}$
+cannot occur in a live candidate, so its entry in the power table is zeroed, and $9^k$ is never
+formed. Width cuts the other way too. Problem 485 needs $\tau(n)$ for every $n \le 10^8$. No
+value there passes 768, so the table is 16-bit: 200 MB instead of 800 MB for 64-bit counts. That
+matters in a sieve whose real cost is memory traffic, not arithmetic. Problems 168 and
 321 need [GMP](https://gmplib.org/) outright. The Python version gives no warning that the C
 version is about to be wrong. See [watch integer width](/topics/takeaway/watch-integer-width).
 
@@ -455,6 +548,12 @@ The tells are reasonably reliable:
 | the total is a formula, the question asks for the gcd-1 part | invert over floor quotients, $O(N^{3/4})$ (moves 2–3) |
 | the condition only sees which primes divide $n$ | enumerate the prime part, prefix-sum the cofactors (move 5) |
 | a congruence modulo a composite $n$ | solve per prime power, recombine by CRT |
+| a quadratic congruence mod $p$ or $p^2$, for every prime $p$ | complete the square; reciprocity filters, Tonelli–Shanks + Hensel solve |
+| a sum of $\gcd(i, j)$ over pairs | count by the gcd value, a Dirichlet convolution; then swap and block (moves 2–3) |
+| $f(n)$ depends only on $n$'s digit multiset | enumerate the multisets, check the round trip; residues mod 9 filter (move 4) |
+| integer points on $x^2 + y^2 = z^2$-shaped equations | Euclid's formula; coprime factors of a square are squares (move 7) |
+| an equation quadratic in each variable separately | Vieta jumping: one solution tree, walked by DFS (move 7) |
+| a huge parameter $k$ that the solutions depend on polynomially | walk the tree symbolically in $k$, sum with Faulhaber (move 7) |
 | two congruences whose moduli share factors | generalised CRT: solvable iff $\gcd$ divides the difference |
 | a condition on the digits of $n$ in several bases | prune whole intervals by their shared leading digits |
 | $\pi(v)$, or a function constant on primes, summed to $10^9$+ | Lucy / Min_25 over the floor quotients (move 3) |
