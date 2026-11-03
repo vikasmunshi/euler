@@ -3492,8 +3492,8 @@
     "level": 7,
     "pct": 19,
     "solvers": 1242,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 13:28"
   },
   "438": {
     "title": "Integer Part of Polynomial Equation's Solutions",
