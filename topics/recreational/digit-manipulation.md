@@ -1,5 +1,5 @@
 <!-- tags: [digit-sum, palindromic-number, string-slicing, positional-notation] -->
-<!-- status: final 2026-11-01T19:06Z -->
+<!-- status: final -->
 # Digit Manipulation
 
 A surprising share of Project Euler is about the *writing* of a number rather than the number:
@@ -180,6 +180,17 @@ what matters here is what replaces the extraction loop).
   `r * 10 + d` step, run in the other direction. The full number is never formed, so it never needs to
   be converted or divided. Its only other digit question is "how many of each digit". That is the
   order-blind fingerprint from problem 52, and here it is the whole definition.
+- **The constraint is on the multiset, so count arrangements with an EGF.** Problem 520 counts
+  numbers up to $10^{2^{39}}$ digits long in which every even digit appears an even number of times
+  and every odd digit an odd number of times or not at all. That is a condition on problem 52's
+  fingerprint, and it says nothing about order. An
+  [exponential generating function](https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function)
+  counts exactly that: a digit allowed $j$ times contributes $x^j/j!$, and the product of the
+  $1/j!$ factors is the multinomial that counts arrangements. So the even digits are $\cosh x$
+  each and the odd ones $1 + \sinh x$. Both are made of $e^{\pm x}$, and $L!\,[x^L]\,e^{kx} = k^L$,
+  so the count for length $L$ is a sum of 21 powers $k^L$, and summing over lengths is 21 geometric
+  series. Leading zeros cost one more such product, with the zero digit's parity flipped. No
+  digit string is ever enumerated, not even as a state.
 - **The number is a digit pattern, so it has a formula.** Problem 684 needs the smallest number
   with digit sum $n$, for $n$ up to a Fibonacci number near $3 \times 10^{18}$. The greedy answer
   is a short leading digit followed by as many 9s as possible. Writing $n = 9q + r$, a run of $q$
@@ -188,7 +199,12 @@ what matters here is what replaces the extraction loop).
   modulo a prime, with the exponent reduced by Fermat. A `str()` of it would fill hundreds of
   petabytes. The
   general move is to name a digit string by the arithmetic that spells it: repunits are
-  $(10^k - 1)/9$, and a block $w$ repeated is $w \cdot (10^{kL} - 1)/(10^L - 1)$.
+  $(10^k - 1)/9$, and a block $w$ repeated is $w \cdot (10^{kL} - 1)/(10^L - 1)$. The same move
+  sums a whole *family* given by a digit pattern. In problem 711 a brute-force game search shows
+  the winning numbers are all-ones binary strings, plus isolated ones at even bit positions
+  followed by an optional even-length run of ones. Each family is a set of binary patterns, so its
+  sum over all lengths up to $2^{12\,345\,678}$ is a geometric series, or an arithmetico-geometric
+  one when the pattern's position also counts how many tails it allows.
 - **The fold has a small state, so count all inputs at once.** Problem 706 asks how many $d$-digit
   numbers, for $d = 10^5$, have a number of 3-divisible substrings that is itself a multiple of 3.
   Reading the digits left to right is the same fold as above, but the state it carries is richer than
@@ -197,6 +213,27 @@ what matters here is what replaces the extraction loop).
   every digit of a residue class moves them the same way. So the "loop over digits" becomes an
   $81 \times 81$ transfer matrix raised to the power $d - 1$. The digit string is never written down;
   only how many strings sit in each state.
+- **The length itself is astronomical, so concatenate blocks.** Writing a digit after a number is
+  $v \mapsto 10v + d$. Writing a whole block $w$ of $L$ digits after it is
+  $v \mapsto 10^L v + w$. So a block's effect is fixed once you know its length, and blocks
+  compose. Problem 294 counts the $n$-digit strings, for $n = 11^{12}$, whose value is divisible by 23
+  and whose digit sum is 23. Even a matrix step per digit is too many steps. Instead it keeps a table
+  per *block*: how many strings of length $L$ have each residue and each digit sum up to 23. Each
+  block's residue is measured from its own lowest place, so the table does not depend on where the
+  block ends up. Putting block $M$ above block $L$ multiplies $M$'s residues by $10^L \bmod 23$ and
+  convolves the two tables. That join is associative, so the length-$n$ table comes from
+  exponentiation by squaring on *length*: about 80 joins. Problem 506 is the same algebra with a
+  periodic digit stream: one term is the term fifteen places back with one period appended,
+  $v_{n+15} = 10^6 v_n + Q$. That affine step unrolls into a geometric series in each of the
+  fifteen residue classes. Problem 1006 goes furthest. Its strings are factors of the
+  [Fibonacci word](https://en.wikipedia.org/wiki/Fibonacci_word), and it needs sums of their squared
+  decimal values for lengths near $10^{18}$. A state vector such as $(1, Q, Q^2, \Sigma)$ makes
+  "append a digit" a fixed $4 \times 4$ matrix. The word is built by concatenation,
+  $S_n = S_{n-1}S_{n-2}$, so each standard block's matrix is the product of the previous two. Any
+  prefix is then a product of a few blocks, read off its
+  [Zeckendorf representation](https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem). In all three
+  the digit string is defined by how it is put together, and the arithmetic follows that structure,
+  not the digits one at a time.
 - **The question is about a second number made from the first.** Problem 290 counts $n < 10^{18}$
   whose digit sum equals that of $137n$. Here the fold has to run *right to left*, the order the
   `% 10` loop already gives. Long multiplication by a constant reads one digit $d$ of $n$, together
@@ -259,6 +296,18 @@ what matters here is what replaces the extraction loop).
   36 does with `digits + digits[::-1]`: it *generates* palindromes from their halves. Each chosen
   exponent $k$ brings its mirror $-(k+1)$, and the search keeps only the combinations that land on an
   integer. Generating from halves was a speed-up in base 10. Here it is the only practical route.
+  Problem 558 works in a base where testing is the only route, the real root $r \approx 1.4656$ of
+  $x^3 = x^2 + 1$, and asks for the number of digits of five million squares. In this base,
+  greedy extraction is the digit loop: subtract the largest power of $r$ that fits, and repeat. The
+  algebra guarantees that greedy gives the required gap of three between exponents. The catch is
+  numerical. Each step multiplies the remainder by $r$, so floating-point error grows by $r$ every
+  step, and a large square has some 250 places. So the remainder is held exactly as
+  $a + br + cr^2$ with integers. Multiplying by $r$ is then a rotation of three coefficients, the
+  arithmetic analogue of `n // 10`. And because $r$ is a
+  [Pisot number](https://en.wikipedia.org/wiki/Pisot%E2%80%93Vijayaraghavan_number), the
+  coefficients stay small enough for 64-bit integers. Only the comparison "does $r^k$ fit?" needs
+  the real value of $r$, and fixed-point arithmetic, with an exact fallback for close calls,
+  supplies it.
 - **There is no integer at all.** Problem 731 asks for ten digits of a real number, the
   [Stoneham number](https://en.wikipedia.org/wiki/Stoneham_number)
   $A = \sum_i 3^{-i} 10^{-3^i}$, starting at position $10^{16}$. The digit extraction loop still
@@ -290,6 +339,13 @@ what matters here is what replaces the extraction loop).
   generate the digit strings you want rather than testing values. Name a patterned digit string
   by its formula ($10^q - 1$ for $q$ nines), and get digits deep inside a real number from
   $\lfloor 10^{k} x \rfloor \bmod 10^{m}$ by modular arithmetic.
+- **A length too long to step through** — make "append a block" the unit of work: $10^L v + w$,
+  a table convolution with residues shifted by $10^L$, or a matrix. Then compose blocks by squaring
+  on length, or by the recurrence that builds the string.
+- **A condition on how often digits occur, not where** — count arrangements with an exponential
+  generating function. When it is made of $e^{kx}$ terms, the counts are power sums $k^L$.
+- **A non-integer base** — greedy extraction in exact ring arithmetic (coefficients over
+  $1, r, r^2$), with floating point used only to compare.
 - **A digit DP that needs more than a count** — carry a bounded carry in the state to follow a
   derived number such as $kn$ (read right to left), and carry (count, total) pairs, updated as
   $(c, 10t + dc)$, when the answer sums values rather than counting them.
