@@ -2988,8 +2988,8 @@
     "level": 19,
     "pct": 49,
     "solvers": 987,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 08:15"
   },
   "375": {
     "title": "Minimum of Subsequences",
