@@ -1,5 +1,5 @@
 <!-- tags: [numpy-slice-assignment] -->
-<!-- status: final 2026-10-28T21:32Z -->
+<!-- status: final -->
 # NumPy slice assignment
 
 Most sieves in these solutions do one thing over and over: *update every $k$-th entry of
@@ -40,7 +40,18 @@ way. The [sieve page](/topics/technique/sieve-of-eratosthenes) explains why the 
 is $p^2$. On the NumPy side, the Python loop runs only over $p \le \sqrt n$, while each
 statement does about $n/p$ writes. [304](/solutions/0304/) uses the stride to skip even
 numbers: it clears the evens once with `base[4::2]`, then marks odd multiples with step
-$2p$, the same halving the C loop gets from `j += 2 * p`.
+$2p$, the same halving the C loop gets from `j += 2 * p`. [291](/solutions/0291/) halves the
+*memory* as well: its table holds only the odd numbers, with index $i$ standing for
+$2i + 1$. The odd multiples of $p$ are $2p$ apart as values but $p$ apart as indices, so
+the marking line becomes `sieve[p*p // 2::p] = False`. The change is in the index map, and
+the loop header has to be translated through it.
+
+None of this is specific to NumPy. Python's own `bytearray` and `list` accept the same
+extended slice on the left, and [967](/solutions/0967/) builds its small prime list that
+way, with `is_prime[p*p::p] = bytearray(len(range(p*p, b + 1, p)))`. The built-in form
+is stricter, though. It has no broadcasting, so the right-hand side must be a sequence of
+exactly the slice's length (hence the `len(range(...))`), and it has no compound
+operators, so it can mark but cannot accumulate.
 
 **Accumulate: divisor and multiplicative sieves.** Swap `=` for `+=`, `-=`, `*=` or
 `//=` and the strided loop gathers arithmetic instead of marking. With `tau[i::i] += 1`
@@ -55,8 +66,19 @@ still equal to its index is one no earlier prime has touched. The
 strides per prime: they flip the sign at step $p$, then zero the entries at step $p^2$.
 319 also runs `cofactor[q::q] //= p` for each prime power $q$, removing the small primes
 from every index so that what is left over shows which numbers still have a large prime
-factor. Each of these keeps the same `m += step` header in its C version, and only the
-loop body changes.
+factor. [632](/solutions/0632/) does the reverse inside each segment of a segmented sieve:
+`product[start::p] *= p` multiplies up the small primes of each $d$, and `omega += product < d`
+then adds one to $\omega$ wherever the small part falls short, because a squarefree $d$
+can have at most one prime factor above the sieving bound. A third stride on the same
+segment, `squarefree[-lo % square::square] = False` with `square = p*p`, removes the non-squarefree $d$. Each of
+these keeps the same `m += step` header in its C version, and only the loop body changes.
+
+A slice can also patch a sieve's output after the fact, by residue class instead of by
+prime. [875](/solutions/0875/) needs a weight that is $\varphi(m)\,m^3$ for most $m$ but
+is zero when $m \equiv 2 \pmod 4$ and sixteen times larger when $4 \mid m$. It runs the
+totient sieve unchanged and then writes the two exceptions as `w[2::4] = 0` and
+`w[4::4] = w[4::4] * 16 % MOD`. Each slice is one branch of a case split on $m \bmod 4$,
+so the code has no per-element `if`.
 
 The value on the right need not be a scalar. Any array of the slice's length lines up
 with it entry by entry, so the loop body can depend on *which* multiple it is visiting.
@@ -78,7 +100,9 @@ the slices are only one or two entries long, so that overhead becomes most of th
 [179](/solutions/0179/) avoids this with the divisor-pair idea. Every divisor
 $a \le \sqrt m$ comes with a partner $m/a$, so it runs `div_count[a*a::a] += 2` for
 $a \le \sqrt n$ and corrects the square case by one. The work is the same, but there are
-$\sqrt n$ statements instead of $n$. The C version doesn't need this trick, because a
+$\sqrt n$ statements instead of $n$. [485](/solutions/0485/) writes the same sieve without
+the correction. It adds 1 at the square, `d[a*a] += 1`, and starts the stride one step
+later, `d[a*(a+1)::a] += 2`, so the square is never counted twice. The C version doesn't need this trick, because a
 loop iteration there costs a few cycles. The trick exists because in Python the cost
 per slice dominates.
 
@@ -90,7 +114,17 @@ slice once you know its least solution:
   prime $p$ divides that polynomial exactly when $n$ is one of the two square roots of
   $1/2 \pmod p$, so each prime contributes two slices, `is_t_prime[r::p]` for each root
   $r$. Finding $r$ is a modular square root. Once $r$ is known, the marking is the same
-  one-line stride.
+  one-line stride. [291](/solutions/0291/) does the same for $2n^2 + 2n + 1$, with one
+  addition. The root class of $q$ contains the single $n$ with $f(n) = q$, which is prime
+  and must survive, so where the least root is that $n$ the start moves one period
+  further on, to $r + q$.
+- [659](/solutions/0659/) needs more than divisibility. It strips the *whole* power of
+  $p$ from each value of $4k^2 + 1$, so that what is left is the largest prime factor.
+  Each power $q = p^e$ gets its own slice, `values[k::q] //= p`. The start $k$ is the root
+  modulo $p^e$, which it gets from the root modulo $p^{e-1}$ by a
+  [Hensel lift](https://en.wikipedia.org/wiki/Hensel%27s_lemma). So the residue class
+  shrinks as the step grows, and the loop stops when the lifted root passes the end of
+  the array.
 - [304](/solutions/0304/) runs a
   [segmented sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve)
   over a window that starts at `low`. The first multiple of $p$ inside it is at offset
@@ -100,6 +134,13 @@ slice once you know its least solution:
   progression, and the step doubles to $2a$ when an odd side forces the other side to
   be even. One `counts[lo:hi:step] += 1` records a whole band, so the window is filled
   with a Python loop over $(a, k)$ and never over the areas themselves.
+- [967](/solutions/0967/) does not sieve the range at all. For each $m$ it needs the sum,
+  modulo 3, of the distinct primes from a fixed small set that divide $m$. That value
+  depends only on $m \bmod Q$, where $Q$ is the product of the set. So it sieves a single
+  period, `residue[::p] += p % 3` over an array of length $Q$, takes a `cumsum` of each
+  class, and answers a count up to any bound $x$ as whole periods $\lfloor x/Q \rfloor$
+  plus a prefix lookup at $x \bmod Q$. The range is far too long to allocate, but it is
+  periodic, so one period of slices covers it.
 
 **Shift: the overlapping slice.** The fourth variation has no stride. The *source* is a
 slice of the same array, shifted:
@@ -140,7 +181,26 @@ pre-update value — the same reason 249's C loop runs downwards — and the Num
 gets it for free, because the gather `small[v // p]` is a fresh array, evaluated in full
 before anything is written. The comment in 452 says exactly that. The `large` half of
 the table uses the stride on the *source* side instead: `large[p:split*p+1:p]` reads
-every $p$-th entry and feeds a contiguous target.
+every $p$-th entry and feeds a contiguous target. [521](/solutions/0521/) runs the same two
+updates on a second pair of tables, which hold prime *sums* modulo $M$ instead of counts.
+The slices are the same, and only the right-hand side changes.
+
+A shift can run along one axis of a 2-D table. [294](/solutions/0294/) keeps counts indexed
+by (residue mod 23, digit sum), and joining two digit blocks convolves the tables in both
+axes, but differently. Digit sums add and are cut off at 23, so that axis is a truncated
+shift, `out[:, s:] = (out[:, s:] + count * rolled[:, :D+1-s]) % MOD`. Residues add *modulo* 23, so that axis
+must wrap around, which no slice can express. It uses
+[`np.roll`](https://numpy.org/doc/stable/reference/generated/numpy.roll.html) instead,
+which builds a shifted copy. The rule is: a linear shift is a view, a cyclic shift is a copy.
+
+Views can also be reversed and reshaped. [485](/solutions/0485/) needs the maximum of
+every length-$k$ window. It pads the array to a multiple of $k$ and reshapes it into
+$k$-wide blocks, which is still a view. It takes running maxima forwards along each block,
+and also backwards through the reversed view `grid[:, ::-1]`. A window spans at most two
+adjacent blocks, the end of one and the start of the next, so its maximum is
+`np.maximum(suffix[:count], prefix[k-1:k-1+count])`, two views aligned by an offset of
+$k - 1$. That is the [van Herk/Gil–Werman](https://en.wikipedia.org/wiki/Sliding_window_minimum)
+trick, at $O(1)$ work per window and with no Python loop.
 
 The same alignment gives cheap comparisons between neighbours. In
 [179](/solutions/0179/), `div_count[2:n] == div_count[3:n+1]` lines up $d(m)$ with
@@ -186,7 +246,9 @@ most once, it uses a single fancy assignment `seg[offsets] = False`. Duplicates 
 array cannot matter because the value assigned is constant. 675's large-prime pass,
 `mult[large * k] = mult[large * k] * ratio_k[k] % MOD`, is a fancy *update*, and it is
 exact for a different reason: for a fixed $k$, distinct primes give distinct indices
-$pk$, so no index repeats within one statement.
+$pk$, so no index repeats within one statement. [967](/solutions/0967/) is the case where
+indices *do* repeat. It sorts over a million divisor terms into far fewer classes, and adds each term to its class with `np.add.at(acc, cls, values)`. Writing `acc[cls] += values`
+there would keep only one term per class and give a wrong total, with no error.
 
 **The count of statements is the cost model.** A slice statement costs a fixed overhead
 plus a C loop over its entries. Total work is the usual sieve bound,
@@ -200,7 +262,10 @@ shows the restructuring in its general form: primes above $\sqrt n$ with only a 
 multiples each would mean one short slice per prime, so it transposes the loop — the
 Python loop runs over the multiplier $k$, and each statement touches the $k$-th
 multiple of *every* large prime at once. The work is unchanged; the statement count
-drops from $\pi(n)$ to a small constant. When
+drops from $\pi(n)$ to a small constant. [291](/solutions/0291/) uses the same transposition
+for its large primes. It groups them into doubling bands $[L, 2L)$, where each root class
+has at most $N/L + 1$ members, and for each $k$ marks the $k$-th member of every class in
+the band with one fancy assignment. When
 the work genuinely fits the strided shape, a slice assignment keeps a sieve readable
 and close to C speed: one line per loop, matching the C file line for line.
 
