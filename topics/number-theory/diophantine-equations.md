@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation, diophantine-equation] -->
-<!-- status: final 2026-10-29T02:09Z -->
+<!-- status: final -->
 # Diophantine Equations
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a polynomial
@@ -33,11 +33,38 @@ $a < b < c$ bounds the loops to $a \le S/4$, $b \le S/2$. Crucially it computes 
 expression and tests $a^2 + b^2 = c^2$ exactly — never a floating-point square root, which would
 force a tolerance comparison and risk rounding the integrality check away.
 
+A linear equation stops being easy once its unknowns must be **non-negative**. Then
+$ax + by + cz = n$ is the [coin problem](https://en.wikipedia.org/wiki/Coin_problem), and the
+question becomes which $n$ it *cannot* reach. Problem 718 sums those gaps for three generators whose
+gaps run into the quadrillions, so listing them is out. The reachable values form a
+[numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup), and its
+[Apéry set](https://en.wikipedia.org/wiki/Numerical_semigroup#Ap%C3%A9ry_set) holds all the
+information. For each residue $r$ modulo the smallest generator, find the least reachable value in
+that class. Every value above it in the class is reachable and every value below it is a gap, so the
+gaps in each class form one arithmetic progression with a closed-form count and sum. The work is
+linear in the smallest generator, however far the gaps extend.
+
 **Parametrise the solution set.** Many classic families have a formula that generates *every*
 solution. Every primitive [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple) is
 $(m^2 - n^2,\, 2mn,\, m^2 + n^2)$ for coprime $m > n$ of opposite parity; iterating the parameters
 enumerates triples directly instead of testing candidate sides. When a parametrisation exists it is
 almost always the right tool — it makes the infinite solution set walkable.
+
+Most parametrisations come from one lemma: **if coprime factors multiply to a square, each factor is
+a square** (up to a unit, or a factor of 2 handled separately). Problem 518 needs three primes-plus-one
+in geometric progression, $y^2 = xz$. Writing the common ratio in lowest terms as $q/p$ forces $p^2$
+to divide $x$, so every such progression is $(kp^2, kpq, kq^2)$ with $p, q$ coprime, exactly once. A
+search over pairs becomes a walk over three small parameters. Problem 764 applies the lemma twice.
+It reads $16x^2 + y^4 = z^2$ as the Pythagorean triple $(4x, y^2, z)$, then asks the Euclid parameters
+to make the leg $y^2$ a square. Depending on the parity of $y$, that forces $m \pm n$, or $m$ and $2n$,
+to be squares themselves, and the result is two quartic families in a coprime pair. Since $z$ grows
+as the fourth power of the parameters, the enumeration costs only $O(N^{1/2})$.
+
+A parametrised family can also be **joined against itself**. Problem 309's crossed ladders need two
+Pythagorean triples sharing a leg, with a divisibility condition linking their other legs. You
+generate every triple once, bucket the triples by leg, and pair them up only within a bucket. A leg
+belongs to only a handful of triples, so the pairwise test inside each bucket is nearly free, where a
+pairing over all triples would be quadratic.
 
 **Bound the unknown before solving for it.** Some equations have a free integer on one side, such
 as "the ratio is an integer $k$". An inequality can often pin $k$ to a few values before any search
@@ -63,6 +90,23 @@ also shows that the loop order is part of the design. When $b_1$ is small the re
 so the solution walks the cofactor. When $b_1$ is large the class is nearly empty, so it walks the
 quotient and tests divisors instead. Switching near $N^{1/4}$ balances the two halves.
 
+**Factor, and read the solutions off the divisors.** If the equation can be forced into the form
+*product = constant*, its solutions are factorisations. Adding $n^2$ to both sides of
+$1/x + 1/y = 1/n$ gives $(x - n)(y - n) = n^2$
+([Simon's Favorite Factoring Trick](https://artofproblemsolving.com/wiki/index.php/Simon%27s_Favorite_Factoring_Trick)),
+so problems 108 and 110 count divisors of $n^2$ from the exponents of $n$ and never search $x$ at all.
+The same view finds the *least* solution, not just the count. In problem 955 each step of a sequence
+of triangular numbers jumps by the least $j \ge 1$ with $t(x) + t(j) = t(y)$. A difference of squares
+turns this into a factor pair $pq = x(x+1)$ with $q - p = 2j + 1$. The trivial pair $(x, x+1)$ is
+$j = 0$, so the least real jump comes from the divisor of $x(x+1)$ **nearest** below $x$. The cost is
+a [Pollard rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm) factorisation of $x$ and
+$x+1$, not a scan across a gap that may be trillions wide. Factoring also tames the word *prime*.
+Problem 291 wants primes of the form $(x^4 - y^4)/(x^3 + y^3)$. After cancelling $x + y$ and splitting
+off $g = \gcd(x, y)$, the prime equals a product of three positive integers, so two of them must be 1.
+The two-variable equation collapses to $p = n^2 + (n+1)^2$. Counting primes among a quadratic's values
+is then a [polynomial sieve](https://en.wikipedia.org/wiki/Sieve_theory): an odd prime $q$ divides
+some value only when $-1$ is a square mod $q$, and then it strikes exactly two residue classes of $n$.
+
 **Pell's equation and its recurrence.** The equation $x^2 - D y^2 = \pm 1$ (for non-square $D$) is
 the workhorse. It has infinitely many integer solutions, and — this is the key fact — they are *not*
 scattered: from a small **fundamental** solution, every other is produced by a fixed linear
@@ -83,6 +127,15 @@ iterations cross $10^{12}$: the open-ended search has become an $O(\log T)$ walk
 solves a whole cluster of geometry problems — problem 94's almost-equilateral triangles reduce, via
 [Heron's formula](https://en.wikipedia.org/wiki/Heron%27s_formula), to a *Pell-like* equation
 $x^2 - 3y^2 = 1$ and are enumerated by an analogous recurrence.
+
+Pell equations can also prove that a search **ends**. Problem 581 wants every $n$ for which $n$ and
+$n + 1$ are both 47-smooth, with no bound given. Put $x = 2n + 1$ and let $q$ be the squarefree part
+of $n(n+1)$. Then $x^2 - 2q\,y^2 = 1$, and $q$ is a product of some subset of the fifteen primes up to
+47. That leaves $2^{15}$ Pell equations, which is
+[Størmer's theorem](https://en.wikipedia.org/wiki/St%C3%B8rmer%27s_theorem). Lehmer's refinement
+supplies the stopping rules. If the fundamental $y_1$ is not smooth, no later $y_k$ is, because
+$y_1$ divides every $y_k$. And a smooth $y_k$ needs $k \le \max(3, (p+1)/2)$. An open-ended question
+about consecutive integers becomes a fixed, finite list of short recurrences.
 
 **Continued fractions — where the fundamental solution comes from.** For a Pell equation with
 awkward $D$ (problem 66's $D$ up to 1000), the fundamental solution is found among the convergents
@@ -105,6 +158,29 @@ solution by construction, and a dozen rounds settle every base. The cheap case a
 first: a valuation argument rules out every multiple of ten before any iteration. Unlike Pell, this
 is not a structure the textbooks hand you. Verify on scaled-down moduli that the limit really is the
 solution the problem wants before trusting it at full size.
+
+**Jump between the roots of a quadratic.** Some equations are quadratic in each variable taken
+alone, and then every solution has a neighbour. Problem 844's Markov-type equation
+$x_1^2 + \cdots + x_k^2 = k\,x_1 \cdots x_k$ is quadratic in $x_1$ once the others are fixed, so by
+[Vieta's formulas](https://en.wikipedia.org/wiki/Vieta%27s_formulas) the other root,
+$k\,x_2 \cdots x_k - x_1$, is also a positive integer. Swapping one root for the other is
+[Vieta jumping](https://en.wikipedia.org/wiki/Vieta_jumping). Always swapping out the largest entry
+shrinks any solution down to the fundamental one (all ones). Run backwards, the same move hangs every
+solution on a single tree whose values grow along each branch, so a depth-first search pruned at the
+bound lists all of them. The values grow doubly exponentially, so the tree is tiny. The problem adds
+a sum over $k$ up to $10^{18}$, and here the structure pays again. For large $k$ the tree has the
+same shape, with each node a fixed polynomial in $k$, so the sum over $k$ becomes a few dozen
+[power sums](https://en.wikipedia.org/wiki/Faulhaber%27s_formula).
+
+**Check whether the arithmetic carries any information.** Problem 674 asks when two nested
+expressions built from $I(x, y) = (1 + x + y)^2 + y - x$ are equal. For fixed $s = x + y$ the values
+of $I$ fill a window around $(s + 1)^2$, and the windows never overlap. So $I$ is **injective**, like
+a [pairing function](https://en.wikipedia.org/wiki/Pairing_function), and two expressions are equal
+exactly when their trees match. The "equation" is really first-order
+[unification](https://en.wikipedia.org/wiki/Unification_(computer_science)): union-find over a
+hash-consed term graph, with an occurs check to reject cycles. Because $I$ increases in each argument,
+the least solution sets every variable left free by the most general unifier to 0. No integer is
+computed until the very end.
 
 ## The sibling: Diophantine approximation
 
@@ -153,12 +229,25 @@ at 18 digits, and the solution checks that limit explicitly rather than letting 
 The moment a problem says "integer" and a naive search would overrun the magnitude of the answer,
 stop searching and look for structure:
 
-- Is one constraint **linear**? Eliminate a variable and shrink the search (problem 9).
+- Is one constraint **linear**? Eliminate a variable and shrink the search (problem 9). If the
+  unknowns must be non-negative, it is a coin problem: count the gaps per residue class through the
+  Apéry set, never one at a time (problem 718).
 - Does the solution family have a known **parametrisation** (Pythagorean triples, sums of two
-  squares)? Generate solutions instead of testing candidates.
+  squares)? Generate solutions instead of testing candidates. Do coprime factors multiply to a
+  square? Then each is a square, and a coprime pair parametrises everything (problems 518, 764).
+  When two members of a family must share a part, bucket by that part and pair within the
+  buckets (problem 309).
+- Can you force a **product equal to a constant**? Solutions are then divisors. Count them from the
+  exponents, take the divisor nearest the trivial one for the least solution, and if the constant
+  is prime, all factors but one are 1 (problems 108, 291, 955).
 - Does the equation reduce to $x^2 - D y^2 = N$? It is **Pell** or Pell-like — find the fundamental
   solution (directly, or via the continued fraction of $\sqrt{D}$) and iterate the recurrence
-  (problems 66, 94, 100).
+  (problems 66, 94, 100). A finite family of Pell equations can also prove an unbounded search
+  finite (problem 581).
+- Is it **quadratic in each variable**? Vieta jumping links the solutions into a tree rooted at a
+  fundamental solution; walk it with a pruned DFS (problem 844).
+- Is the operation **injective**? Then equality means the expressions match, and the equation is a
+  unification problem, not an arithmetic one (problem 674).
 - Is there an integer unknown with **no obvious bound** (a ratio, a quotient)? Use the ordering of
   the variables to confine it to a few values, then solve each case (problem 257).
 - Is the question **how many**, not which? Parametrise by primitive solutions, usually coprime
