@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-02T18:20Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -39,6 +39,15 @@ $\mathbb{Z}[x]/(x^{250} - 1)$ — a ring where $x^{250} = 1$, so the *exponents*
 their own. Reducing both the coefficients and the exponents keeps the whole computation to a
 250-slot array.
 
+Closure also says exactly when a *recursive* state may be reduced early: every update must be built
+from $+$, $-$ and $\times$ by integers. Problem 521 sums smallest prime factors up to $10^{12}$
+with a sieve over the quotients $\lfloor n/k \rfloor$. Each step subtracts $p$ times a difference
+of table entries, so its prime-sum tables live modulo $10^9$ from initialisation, though their
+honest values reach $10^{22}$. Problem 539's elimination game obeys a halving recurrence in which
+the sum of survivors depends on the half-size sum with integer coefficients, so that sum is reduced
+at each of sixty levels. A division, a comparison or a floor applied to the state would break
+this, and those cases are what the rest of this page is about.
+
 Residues can also be taken twice, of two different things. Problem 706 asks how many $10^5$-digit
 numbers have a count of substrings divisible by 3 that is itself divisible by 3. A substring is
 divisible by 3 exactly when the digit prefix sums at its two ends agree mod 3. So the count is
@@ -76,6 +85,16 @@ cube, so it tracks the exponent vector of $\varphi(n^2)$ modulo 3, and only the 
 non-zero residue are kept. Each prime $p$ of $n$ adds $2e - 1$ to its own exponent and the
 factorisation of $p - 1$ to smaller primes. Placing primes from the largest down therefore settles
 each residue for good, and the search follows that order.
+
+Modulo 2 the exponent residues form a vector space, and then linear algebra counts for you. A
+product is a perfect square exactly when every exponent is even, so problem 619 maps each number to
+its exponent-parity vector over [$\mathbb{F}_2$](https://en.wikipedia.org/wiki/GF(2)).
+Multiplication becomes vector addition, and the subsets with a square product are the kernel of a
+linear map. If the $n$ vectors have [rank](https://en.wikipedia.org/wiki/Rank_(linear_algebra)) $r$,
+there are $2^{n-r} - 1$ non-empty such subsets. The rank can be found without a matrix that has
+one column per prime up to $10^6$. A number has at most one prime above $\sqrt b$, so each large
+prime is pivoted away along the few numbers that share it, and each such prime adds one to the
+rank. Elimination then runs on only the 186 small-prime columns.
 
 "Last digits" generalises to digits *anywhere*. The ten digits starting at position $n$ of a real
 number $A$ are $\lfloor 10^{n+9} A \rfloor \bmod 10^{10}$, and when $A$ is a sum of simple fractions
@@ -180,6 +199,16 @@ Its game splits into independent coins whose
 XOR, so one coin's eight-entry value histogram is raised to the $c$-th XOR-convolution power. Once
 you have spotted an associative step, the exponent can be as large as the problem likes.
 
+Problem 294 builds its monoid out of digit strings. It counts the $n$-digit strings,
+$n = 11^{12}$, whose value is divisible by 23 and whose digit sum is 23. A block of digits is
+summarised by a $23 \times 24$ table, which records how many strings of that length have each
+residue and each digit sum up to 23. Placing a block above one of length $L$ multiplies the upper
+block's residues by $10^L \bmod 23$. Since 10 is a unit mod 23, that only permutes the rows. The two
+tables are then convolved, cyclically in the residue and truncated in the digit sum. Each table
+measures its residue from its own lowest digit, so it never depends on where it will sit, and the
+single scalar $10^L$ is all the join needs. Concatenation is associative, so the $n$-digit table
+takes about 80 joins.
+
 The step need not be a power of one element. It can be a product of fixed matrices along a
 structured word. Problem 1006 sums squared values of windows of the
 [Fibonacci word](https://en.wikipedia.org/wiki/Fibonacci_word). Reading one letter is one matrix,
@@ -256,7 +285,12 @@ the sum through by $(n-1)(n-2)!$, which turns every $1/j!$ into a suffix product
 becomes a prefix product times a suffix product and the sum needs only **one** inversion, taken at
 the end. The factorial tables behind 517 and 860 use the same economy. Invert only the largest
 factorial, then walk down with $(k-1)!^{-1} = k!^{-1} \cdot k$, so a whole table of inverse
-factorials costs one exponentiation. Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
+factorials costs one exponentiation. Sometimes you can avoid the inverses by changing what you carry.
+Problem 374's block sums need the [harmonic numbers](https://en.wikipedia.org/wiki/Harmonic_number)
+$H_j$, and as residues those cost one inverse per $j$. It carries $A_j = j!\,H_j$ instead. That is
+an integer (a [Stirling number of the first kind](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_first_kind))
+with $A_j = j A_{j-1} + (j-1)!$, so a loop of fourteen million steps takes no inverse at all.
+Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
 $2 \cdot 10^7 + 1$. It computes all of them at once, as $a^{p-2}$ by one vectorised
 square-and-multiply over a NumPy array, about thirty array multiplications for ten million inverses.
 Problem 635 does the same for its 5.76 million denominators, one per prime, and folds an extra
@@ -379,6 +413,16 @@ with a separate rule for powers of 2), and only $|G|^8$ enters. The count is the
 functions, and a totient sieve plus quotient blocks finish it. The pattern: a congruence condition
 becomes a character sum, and the character sum has structure that the condition hid.
 
+The filter does not need complex numbers. Problem 967 counts the $n \le 10^{18}$ for which the
+distinct primes up to 120 dividing $n$ sum to a multiple of 3. Rather than average over cube roots
+of unity, it computes $\sum_n x^{S(n)}$ in the group ring $\mathbb{Z}[x]/(x^3 - 1)$, where problem
+250 let exponents wrap. An element is a triple of exact integer counts, one per residue. Since
+$x^{S(n)}$ is multiplicative, the sum is a Dirichlet convolution over square-free divisors. The
+residue modulus helps a second time. The small primes' share of $S(n)$ depends only on
+$n \bmod Q$, where $Q \approx 3.2 \times 10^6$ is their product, so its partial sums come from one
+periodic prefix table. The convolution then runs only over the roughly $1.4 \times 10^6$ products
+of the large primes.
+
 ## The unit group: roots of unity, and how many there are
 
 Some problems ask not for a residue but for **how many** residues solve a polynomial congruence, and
@@ -459,6 +503,16 @@ before any power is taken. And orders lift cheaply from primes to prime powers. 
 the kernel $1 + p^{k-1}R$ of reduction mod $p^{k-1}$ has order dividing $p$. So the order mod
 $p^k$ is either the order mod $p^{k-1}$ or $p$ times it, and one power decides which. CRT (below)
 then makes the order modulo a composite the lcm of its prime-power orders.
+
+The element whose order you test need not even be found. Problem 437 wants the primes below $10^8$
+that have a Fibonacci primitive root, a root of $x^2 - x - 1$ that is also a
+[primitive root](https://en.wikipedia.org/wiki/Primitive_root_modulo_n). Finding the roots would
+take a modular square root of 5 for each of about three million primes. Instead it powers the
+formal root in $\mathbb{Z}_p[x]/(x^2 - x - 1)$, where $x^m$ reduces to $ax + b$. Substituting either
+root $r$ gives $r^m = ar + b$. When $a \ne 0$, the power $r^{(p-1)/q}$ is 1 only for the single
+residue $r = (1 - b)/a$, and only if that residue really is a root. One ring power therefore tests
+both candidates at once. The failing residue is kept as the fraction $(1 - b, a)$ and compared by
+cross-multiplication, so the test never needs an inverse either.
 
 ## Combining moduli: the Chinese Remainder Theorem
 
@@ -597,15 +651,15 @@ The recurring cue is a question that depends only on a remainder — *last digit
 directly. When you see it:
 
 - Reduce **early and often** — counts, and where the question allows, elements and exponents too —
-  but only the quantity the statement actually reduces. If a choice depends on order, settle it
-  before reducing.
+  but only the quantity the statement actually reduces. A recursive state may be reduced while
+  its updates are integer-linear. If a choice depends on order, settle it before reducing.
 - Searching for a number with a divisibility property? Its residue is a complete state, so search
   the $n$ residues, not the numbers. With weights, the least member of each class (an Apéry set)
   describes everything the generators cannot reach.
 - Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
   Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic. Any
-  associative product (a ring extension, a convolution, a matrix per letter of a recursive word)
-  can be powered the same way. A linear recurrence unrolls into geometric weights. A value used
+  associative product (a ring extension, a convolution, a matrix per letter of a recursive word,
+  a table per block of digits joined by a factor $10^L$) can be powered the same way. A linear recurrence unrolls into geometric weights. A value used
   both as an exponent and as a factor is needed modulo $p - 1$ **and** modulo $p$.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
@@ -613,14 +667,17 @@ directly. When you see it:
   modulo $10^9$, and the division inside a fast transform's inverse. An exact division by a coprime
   divisor is still safe, and a stubborn $c$ can be divided out of a residue taken modulo $cm$, or
   the exact value kept until the division is done. Where you can, defer all the divisions to a single
-  inverse at the end, and remember that over a prime a negative exponent is just a residue mod
+  inverse at the end or carry a scaled quantity ($j!\,H_j$, not $H_j$) that needs none, and remember that over a prime a negative exponent is just a residue mod
   $p - 1$.
 - Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
   $\mathbb{F}_{p^2}$) and strip primes while the power stays 1. Lift to $p^k$ by at most a factor
-  $p$ per step, and take the lcm across a composite modulus.
+  $p$ per step, and take the lcm across a composite modulus. To test a root you cannot cheaply
+  find, power the formal root in $\mathbb{Z}_p[x]/(f)$.
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
   the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$. A condition "the sum is
-  $\equiv 0 \pmod n$" is a roots-of-unity filter, and a closed form may be hiding behind it. A
+  $\equiv 0 \pmod n$" is a roots-of-unity filter, or exactly a group-ring sum, and a closed form
+  may be hiding behind it. Exponent parities are vectors over $\mathbb{F}_2$, so "the product is a
+  square" counts as $2^{n-r} - 1$. A
   quadratic congruence is a modular square root plus the quadratic formula, Hensel-lifted to
   $p^k$; check the primes dividing 2 and the discriminant by hand.
 - Facing **several congruences** or a **composite modulus**? Combine or decompose with the Chinese
