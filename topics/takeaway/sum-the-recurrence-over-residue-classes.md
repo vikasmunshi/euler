@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0539](/solutions/0539/) — Odd Elimination
 
 <!-- /problems -->

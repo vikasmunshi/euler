@@ -208,7 +208,7 @@ never shows.
 - ○ [0505](/solutions/0505/) — Bidirectional Recurrence
 - ○ [0508](/solutions/0508/) — Integers in Base $i-1$
 - ○ [0538](/solutions/0538/) — Maximum Quadrilaterals
-- ○ [0539](/solutions/0539/) — Odd Elimination
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ○ [0626](/solutions/0626/) — Counting Binary Matrices
 - ○ [0689](/solutions/0689/) — Binary Series
 - ○ [0703](/solutions/0703/) — Circular Logic II

@@ -377,7 +377,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ○ [0534](/solutions/0534/) — Weak Queens
 - ○ [0535](/solutions/0535/) — Fractal Sequence
-- ○ [0539](/solutions/0539/) — Odd Elimination
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ○ [0542](/solutions/0542/) — Geometric Progression with Maximum Sum
 - ○ [0543](/solutions/0543/) — Prime-Sum Numbers
 - ○ [0546](/solutions/0546/) — The Floor's Revenge

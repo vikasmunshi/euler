@@ -107,6 +107,7 @@ order of magnitude cuts the work by about a thousand.
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0331](/solutions/0331/) — Cross Flips
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ● [0670](/solutions/0670/) — Colouring a Strip
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing

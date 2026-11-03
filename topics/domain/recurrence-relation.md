@@ -371,7 +371,7 @@ into independent terms, a pattern that induction will confirm. The shape picks t
 - ○ [0527](/solutions/0527/) — Randomized Binary Search
 - ○ [0532](/solutions/0532/) — Nanobots on Geodesics
 - ○ [0535](/solutions/0535/) — Fractal Sequence
-- ○ [0539](/solutions/0539/) — Odd Elimination
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ○ [0546](/solutions/0546/) — The Floor's Revenge
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0555](/solutions/0555/) — McCarthy 91 Function

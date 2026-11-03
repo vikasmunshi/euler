@@ -238,6 +238,7 @@ benchmark reflects the real cost.
 - ● [0301](/solutions/0301/) — Nim
 - ● [0452](/solutions/0452/) — Long Products
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors

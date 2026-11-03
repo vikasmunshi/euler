@@ -255,6 +255,7 @@ of magnitude.
 - ○ [0513](/solutions/0513/) — Integral Median
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0528](/solutions/0528/) — Constrained Sums
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples
 - ○ [0557](/solutions/0557/) — Cutting Triangles
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers

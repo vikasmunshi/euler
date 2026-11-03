@@ -170,6 +170,7 @@ to `unsigned __int128` (printed by hand, since `printf` has no format for it). S
 - ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0720](/solutions/0720/) — Unpredictable Permutations

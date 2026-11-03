@@ -763,6 +763,7 @@ handful of operations on small numbers.
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0536](/solutions/0536/) — Modulo Power Identity
 - ○ [0537](/solutions/0537/) — Counting Tuples
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ○ [0546](/solutions/0546/) — The Floor's Revenge
 - ○ [0552](/solutions/0552/) — Chinese Leftovers II

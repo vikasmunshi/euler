@@ -187,6 +187,7 @@ cheap:
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ○ [0535](/solutions/0535/) — Fractal Sequence
+- ● [0539](/solutions/0539/) — Odd Elimination
 - ○ [0570](/solutions/0570/) — Snowflakes
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
 - ○ [0702](/solutions/0702/) — Jumping Flea
