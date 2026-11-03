@@ -932,6 +932,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
 - ○ [0953](/solutions/0953/) — Factorisation Nim
+- ● [0955](/solutions/0955/) — Finding Triangles
 - ○ [0956](/solutions/0956/) — Super Duper Sum
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers

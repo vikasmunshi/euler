@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pollard%27s_rh
 
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0443](/solutions/0443/) — GCD Sequence
+- ● [0955](/solutions/0955/) — Finding Triangles
 
 <!-- /problems -->

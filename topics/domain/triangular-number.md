@@ -134,7 +134,7 @@ apart, and a triangular-style quadratic falls out.
 - ○ [0747](/solutions/0747/) — Triangular Pizza
 - ○ [0833](/solutions/0833/) — Square Triangle Products
 - ● [0944](/solutions/0944/) — Sum of Elevisors
-- ○ [0955](/solutions/0955/) — Finding Triangles
+- ● [0955](/solutions/0955/) — Finding Triangles
 - ○ [0985](/solutions/0985/) — Telescoping Triangles
 
 <!-- /problems -->

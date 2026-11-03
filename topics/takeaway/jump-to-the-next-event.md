@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0443](/solutions/0443/) — GCD Sequence
+- ● [0955](/solutions/0955/) — Finding Triangles
 
 <!-- /problems -->
