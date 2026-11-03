@@ -4076,8 +4076,8 @@
     "level": 7,
     "pct": 20,
     "solvers": 1428,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 23:05"
   },
   "511": {
     "title": "Sequences with Nice Divisibility Properties",
