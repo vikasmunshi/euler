@@ -4964,8 +4964,8 @@
     "level": 19,
     "pct": 50,
     "solvers": 779,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 23:14"
   },
   "622": {
     "title": "Riffle Shuffles",
