@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-11-02T11:47Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -114,6 +114,18 @@ maps the head of the list onto the same question with $k = 36$, which is an ordi
 enumeration. The power comes back at the end as a modular exponentiation. Order is what the question
 asks for, and order survives the scaling even though the values do not.
 
+Divisibility itself is a statement about exponent vectors: $m \mid n$ exactly when every exponent of
+$m$ is at most the matching exponent of $n$. So divisibility is the componentwise
+[partial order](https://en.wikipedia.org/wiki/Partially_ordered_set) on those vectors. Problem 333
+partitions a prime $q$ into numbers $2^i 3^j$, none of which divides another. In exponent space that
+is an [antichain](https://en.wikipedia.org/wiki/Antichain) in the grid $\mathbb{N}^2$, and the grid
+picture gives the recurrence. The odd terms are the pure powers $3^j$, and any two of those are
+comparable, so an antichain holds at most one. For even $n$ it holds none, and halving every term
+maps the partitions of $n$ onto those of $n/2$. For odd $n$ it holds exactly one, $3^b$, and the rest
+halve into a partition of $(n - 3^b)/2$ that uses only powers of $3$ below $b$. Every index falls
+below $n/2$, so the table fills in doubling blocks. The question only asks whether a count is $1$,
+so I cap every entry at $2$. "None, one, or many" survives addition, and the table fits in bytes.
+
 The exponent vector also splits a number into its square and squarefree parts. Every $n$ is uniquely
 $a^2 b$ with $b$ [squarefree](https://en.wikipedia.org/wiki/Square-free_integer), and $p^2 \mid n$
 exactly when $p \mid a$. Problem 632 counts the $n \le 10^{16}$ with *exactly* $k$ such square prime
@@ -125,6 +137,19 @@ inversion](https://en.wikipedia.org/wiki/Binomial_transform) undoes that triangl
 signs. The $k = 0$ count gives a free check: it is the number of squarefree $n \le N$, whose density is
 $\prod_p (1 - p^{-2}) = 1/\zeta(2) = 6/\pi^2$, the [Euler product](#from-counting-to-the-zeta-function)
 evaluated at $s = 2$.
+
+Reduce every exponent modulo $2$ and the exponent vector becomes a vector over the two-element field
+$\mathbb{F}_2$. Multiplying numbers adds their vectors, and a product is a perfect square exactly
+when the sum is zero. Problem 619 counts the subsets of an interval $[a, b]$ whose product is a
+square. That is the kernel of a linear map, so the count is $2^{n - r} - 1$ for $n$ numbers whose
+parity vectors have rank $r$. This is the same linear algebra that the
+[quadratic sieve](https://en.wikipedia.org/wiki/Quadratic_sieve) uses to factor large numbers. The
+obstacle is width: there is one coordinate per prime up to $1.2$ million. The way through is a size
+argument. A number $x \le b$ has at most one prime factor above $\sqrt b$, and only to the first
+power. Such a large prime is a coordinate that only its own few multiples touch. I pick one of them
+as the pivot, which adds exactly $1$ to the rank, and XOR it into the others to clear that
+coordinate. What remains is a matrix with only $\pi(\sqrt b) = 186$ columns, so Gaussian
+elimination over at most 186 basis rows finishes the job.
 
 [Coprimality](https://en.wikipedia.org/wiki/Coprime_integers) is the same lens with the exponents
 reduced to "shares a prime or not". Problem 351 counts the lattice points visible from the centre of a
@@ -142,6 +167,14 @@ Euclid's parametrisation writes that leg as $(m - n)(m + n)$ or $2mn$, a product
 So each factor is a square, or twice a square, and the equation becomes two explicit families in
 coprime parameters $(a, b)$. Since $z$ grows like their fourth power, about $\sqrt N$ pairs cover
 $z \le N$.
+
+The same coprimality argument parametrises a ratio. Problem 518 wants prime triples $a < b < c$ with
+$a + 1$, $b + 1$, $c + 1$ in geometric progression. Write the common ratio in lowest terms as $q/p$.
+Then $p^2$ must divide $a + 1$, because $\gcd(p^2, q^2) = 1$, and the triple is exactly
+$(kp^2, kpq, kq^2)$ with $\gcd(p, q) = 1$, each $(k, p, q)$ appearing once. A search over pairs of
+primes becomes a walk over parameters with $kq^2 \le n$. The parametrisation also decides the order
+of the tests. "$kq^2 - 1$ is prime" depends only on $(k, q)$, is shared by every $p$, and holds for
+about one $k$ in $\ln n$. So I test it first, and the loop over $p$ runs only on the survivors.
 
 Coprimality also decides when a set of coin values leaves only *finitely many* totals unpayable.
 Problem 718 takes the [numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup)
@@ -161,6 +194,19 @@ $d \mid n$ then contribute a power of $d$ times a factorial. After swapping the 
 product runs over $d$ alone, with $\lfloor N/d \rfloor$ taking only $O(\sqrt N)$ distinct values. The
 prime modulus $10^9 + 7$ does two jobs here. It exceeds $N$, so no factor vanishes, and by Fermat every
 exponent, including a negative Mertens difference, can be reduced modulo $p - 1$.
+
+A function of *which* primes divide $n$ is periodic in $n$ once the primes are fixed. Problem 967
+counts the $n \le 10^{18}$ for which the sum of the distinct primes $p \le 120$ dividing $n$ is
+divisible by $3$. Only $p \bmod 3$ matters, so I track all three remainders together as an element
+of the group ring $\mathbb{Z}[C_3]$, a triple of integers. The function $x^{S(n)}$ is multiplicative,
+and it is $1 * h$ with $h$ supported on squarefree $d$, so the count is
+$\sum_d h(d) \lfloor N/d \rfloor$. That sum runs over the squarefree products of 29 primes, about
+$7 \times 10^7$ terms, so I split the primes into two groups. For the seven smallest primes, the
+contribution depends only on $n$ modulo their product $Q \approx 3.2 \times 10^6$. One prefix table
+over a single period then answers any partial sum in $O(1)$. The convolution runs only over the
+large primes, about $1.4 \times 10^6$ products. This is a wheel in the
+[wheel-factorisation](https://en.wikipedia.org/wiki/Wheel_factorization) sense, used to count rather
+than to skip: the small primes are absorbed into a period, and only the large ones are enumerated.
 
 Factorials are where the exponent vector is cheapest to know.
 [Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula) gives the exponent of $p$ in
@@ -198,6 +244,14 @@ $x/\ln x$ with the [logarithmic integral](https://en.wikipedia.org/wiki/Logarith
 $\mathrm{Li}(x) = \int_2^x \mathrm{d}t/\ln t$, which tracks $\pi(x)$ far more closely — and the
 question of *how closely* is where the shallow-looking business of counting primes plunges into the
 deepest water in mathematics.
+
+In a program, $\pi(n)$ for every $n \le N$ is a single cumulative sum over the sieve's boolean array.
+It is a step function that moves only at a prime. Problem 423 uses that sparseness. It sums, for
+every $n \le 5 \times 10^7$, a binomial tail truncated at $c \le \pi(n)$. Evaluated directly, that is
+about $10^{14}$ terms. Pascal's rule links consecutive tails, so moving from $n$ to $n + 1$ costs one
+correction term, and the cut-off rises by one only when $n + 1$ is prime. The recurrence has a
+constant multiplier, so it unrolls into a closed sum of independent terms, with the prime indicator
+selecting where each extra term enters. NumPy then evaluates the whole sum as vector operations.
 
 ### From counting to the zeta function
 
@@ -586,7 +640,12 @@ that makes some larger quantity computable:
   binomially (problem 632). When it says "coprime to $n$", turn the condition into a Möbius sum over
   divisors, which sits in the exponent when the quantity is a product (problem 754). When coprime
   factors multiply to a square, each factor is a square (problem 764). When the generators of a
-  semigroup are coprime, a multiple of one walks every residue class of another (problem 718).
+  semigroup are coprime, a multiple of one walks every residue class of another (problem 718). A
+ratio in lowest terms forces a square divisor (problem 518). When the condition is divisibility
+between smooth numbers, think of antichains in exponent space (problem 333). When it is "the product
+is a square", the parities form a vector over $\mathbb{F}_2$, and the count is a kernel dimension
+(problem 619). When it depends only on which small primes divide $n$, absorb those primes into one
+period table and enumerate only the large ones (problem 967).
 - **See a congruence summed over a huge range** — and consider reordering the sum to run over the
   primes. The cyclic group modulo $p$ answers "how many residues" in $O(1)$ (problem 421). CRT
   multiplies those counts across prime powers (problem 272) and builds one solution per coprime split
@@ -608,7 +667,9 @@ that makes some larger quantity computable:
   function that is simple on primes (problem 452).
 - **Need a bound or a density** — how many primes below $N$, how large the $n$-th prime, how many
   semiprimes in a range — and the prime number theorem ($\pi(x) \sim x/\ln x$, $p_n \sim n \ln n$) is
-  your estimate. Use it to *size* a sieve, not to replace an exact count.
+  your estimate. Use it to *size* a sieve, not to replace an exact count. When $\pi(n)$ is a
+  parameter for every $n$, it is a cumulative sum of the sieve, and it changes only at primes
+  (problem 423).
 - **See a one-way structure** — a public key, a semiprime to be split, a discrete log — and recognise
   that its security *is* the hardness of a prime problem. The Euler problems that touch cryptography
   (RSA-flavoured factorisation, modular inverses) are miniatures of the same asymmetry.
