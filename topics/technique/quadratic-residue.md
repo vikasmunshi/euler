@@ -117,6 +117,7 @@ Things to keep in mind:
 - ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0492](/solutions/0492/) — Exploding Sequence
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 

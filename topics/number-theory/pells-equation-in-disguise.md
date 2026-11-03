@@ -327,7 +327,7 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0613](/solutions/0613/) — Pythagorean Ant
 - ○ [0620](/solutions/0620/) — Planetary Gears
-- ○ [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0660](/solutions/0660/) — Pandigital Triangles

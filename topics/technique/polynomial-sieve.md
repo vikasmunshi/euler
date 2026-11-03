@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_siev
 ## Problems
 
 - ● [0291](/solutions/0291/) — Panaitopol Primes
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime
 
 <!-- /problems -->

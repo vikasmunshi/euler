@@ -369,7 +369,7 @@ discipline still shapes the search.
 - ○ [0583](/solutions/0583/) — Heron Envelopes
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0620](/solutions/0620/) — Planetary Gears
-- ○ [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations

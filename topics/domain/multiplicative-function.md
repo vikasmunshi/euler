@@ -213,6 +213,7 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ○ [0530](/solutions/0530/) — GCD of Divisors
 - ○ [0548](/solutions/0548/) — Gozinta Chains
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0633](/solutions/0633/) — Square Prime Factors II
 - ○ [0639](/solutions/0639/) — Summing a Multiplicative Function
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

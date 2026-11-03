@@ -201,7 +201,6 @@ ask which coefficient you actually need.
 - ○ [0588](/solutions/0588/) — Quintinomial Coefficients
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
-- ○ [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0623](/solutions/0623/) — Lambda Count
 - ○ [0638](/solutions/0638/) — Weighted Lattice Paths
 - ○ [0648](/solutions/0648/) — Skipping Squares

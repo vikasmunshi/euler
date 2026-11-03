@@ -484,6 +484,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0635](/solutions/0635/) — Subset Sums
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product

@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quadratic_form
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ○ [0586](/solutions/0586/) — Binary Quadratic Form
-- ○ [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II

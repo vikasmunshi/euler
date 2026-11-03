@@ -140,6 +140,7 @@ The theorem is rarely named in a problem statement. Usually you recognise it aft
 - ● [0291](/solutions/0291/) — Panaitopol Primes
 - ○ [0596](/solutions/0596/) — Number of Lattice Points in a Hyperball
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps
+- ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime
 - ○ [0723](/solutions/0723/) — Pythagorean Quadrilaterals
 - ○ [0846](/solutions/0846/) — Magic Bracelets
