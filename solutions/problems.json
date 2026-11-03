@@ -2324,8 +2324,8 @@
     "level": 11,
     "pct": 28,
     "solvers": 2030,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 18:28"
   },
   "292": {
     "title": "Pythagorean Polygons",
