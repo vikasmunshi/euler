@@ -188,6 +188,7 @@ state the invariant that makes a class a class, and check that the boundary enfo
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0698](/solutions/0698/) — 123 Numbers
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0778](/solutions/0778/) — Freshman's Product

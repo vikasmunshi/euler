@@ -223,6 +223,7 @@ too large or too structured to index directly.
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0926](/solutions/0926/) — Total Roundness

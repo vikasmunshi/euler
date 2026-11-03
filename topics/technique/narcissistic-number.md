@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Narcissistic_n
 ## Problems
 
 - ● [0030](/solutions/0030/) — Digit Fifth Powers
+- ● [0749](/solutions/0749/) — Near Power Sums
 
 <!-- /problems -->

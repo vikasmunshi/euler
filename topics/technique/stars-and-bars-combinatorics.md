@@ -163,6 +163,7 @@ The combinatorics is the same in both languages. The binomial coefficient is not
 - ● [0113](/solutions/0113/) — Non-bouncy Numbers
 - ● [0253](/solutions/0253/) — Tidying Up A
 - ● [0452](/solutions/0452/) — Long Products
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0996](/solutions/0996/) — Overtakes
 

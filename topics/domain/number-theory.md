@@ -580,7 +580,7 @@ show up there at once. See
 - ○ [0735](/solutions/0735/) — Divisors of $2n^2$
 - ○ [0738](/solutions/0738/) — Counting Ordered Factorisations
 - ○ [0748](/solutions/0748/) — Upside Down Diophantine Equation
-- ○ [0749](/solutions/0749/) — Near Power Sums
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ○ [0753](/solutions/0753/) — Fermat Equation
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation

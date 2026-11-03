@@ -149,5 +149,6 @@ is on [combinatorics](/topics/domain/combinatorics).
 - ● [0111](/solutions/0111/) — Primes with Runs
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
+- ● [0749](/solutions/0749/) — Near Power Sums
 
 <!-- /problems -->

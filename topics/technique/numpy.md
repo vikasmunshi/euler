@@ -465,6 +465,7 @@ both slower and harder to read.
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0739](/solutions/0739/) — Summation of Summations
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation

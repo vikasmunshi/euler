@@ -359,6 +359,7 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0745](/solutions/0745/) — Sum of Squares II
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals

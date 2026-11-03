@@ -135,5 +135,6 @@ integer `%`.
 - ● [0149](/solutions/0149/) — Maximum-sum Subsequence
 - ● [0218](/solutions/0218/) — Perfect Right-angled Triangles
 - ● [0719](/solutions/0719/) — Number Splitting
+- ● [0749](/solutions/0749/) — Near Power Sums
 
 <!-- /problems -->

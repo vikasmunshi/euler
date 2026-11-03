@@ -205,6 +205,7 @@ whenever the property refers to smaller members of the same family.
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0829](/solutions/0829/) — Integral Fusion
 
