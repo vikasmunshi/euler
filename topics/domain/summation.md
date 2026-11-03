@@ -1,5 +1,5 @@
 <!-- tags: [summation] -->
-<!-- status: final 2026-10-29T01:59Z -->
+<!-- status: final -->
 # Summation
 
 [Summation](https://en.wikipedia.org/wiki/Summation) is the most deceptive domain tag in the
@@ -64,6 +64,24 @@ proved by induction on the block, the sum is Gauss's triangular number twice ove
 identity, once for the block indices — plus a correction for the one partial block. Tabulate
 small cases, guess the piecewise-linear shape, prove it, then sum the shape.
 
+Problem 555 is the same function family one level up. It sums the *fixed points* of a generalised
+McCarthy function over every parameter pair $(k, s)$ up to $p$. Tabulating again gives the shape:
+the outputs cycle through a window of width $d = k - s$, and the window is all fixed points exactly
+when $d \mid s$. That leaves a double sum over $d$ and $s = jd$, about $p \ln p$ pairs, each an
+arithmetic progression. The last step is the one to remember. **Index the outer sum by the
+parameter that makes the inner one a polynomial.** For a fixed gap $d$, the sum over $j$ is a
+quadratic in $J = \lfloor p/d \rfloor - 1$, so each $d$ costs $O(1)$ and the total is $O(p)$.
+Before you write the inner loop, check whether it has a closed form.
+
+Periodicity is a closed form in disguise. Problem 506 cuts a period-6 digit stream into terms
+$v_n$ whose digit sums are $1, 2, 3, \dots$. Since every six consecutive digits sum to 15, the term
+$v_{n+15}$ starts at the same phase as $v_n$ and is $v_n$ with one full period appended:
+$v_{n+15} = 10^6 v_n + Q_{n \bmod 15}$. That is an affine recurrence *within each residue class*.
+Unroll it and each class is a [geometric series](/topics/technique/geometric-series),
+so a sum to $10^{14}$ costs fifteen modular exponentiations. If the terms
+[repeat their structure](/topics/domain/periodic-sequence)
+with some period, split the sum by residue class and see what each class does on its own.
+
 Watch the integer arithmetic when you do it. `//2` and `//6` in those formulas are exact only
 because the numerator is provably divisible; under a modulus they are not divisions at all but
 multiplications by a [modular inverse](/topics/technique/modular-multiplicative-inverse-application),
@@ -82,6 +100,16 @@ into a relation among $S$ at roughly $N/2$ — and the cancellation is total: th
 a constant minus a *single term* of the sequence. What is left is evaluating $a_m$ at one large
 $m$, which the sequence's binary structure does in about forty steps. A trillion additions became
 forty multiplications, and no part of that came from writing faster code.
+
+The cancellation will not always be total, and problem 463 shows what to do when it is not. Its
+recurrence (it turns out to be binary reversal) relates $f$ at $n$ to $f$ near $n/2$ and $n/4$.
+Splitting $S(n)$ by parity works for the even indices, which give back $S(\lfloor n/2 \rfloor)$.
+The odd indices give a new sum, $O(m) = \sum_k f(2k+1)$. Split that by residue mod 4 and it
+comes back as a linear combination of $S$ and $O$ at half the argument. One sum did not close
+under halving, but the *pair* does. With memoisation, the mutual recursion visits about a hundred
+states for $n \approx 4.5 \times 10^{17}$. When a substitution leaves a sum you cannot express,
+add that sum as a second unknown and substitute again. The state you recur on is a small vector of
+sums.
 
 ### Swap the order of summation
 
@@ -121,9 +149,19 @@ recursion has already computed. Choose restrictions that land on values you alre
 
 The same reflex has a non-arithmetic form: **count contributions instead of objects**. Problem 760
 sums a bitwise expression over a triangular range to $10^{18}$; you do not sum over pairs, you sum
-over *bit positions*, counting how many pairs set each bit. Problems 684, 685 and 776 do it with
-decimal digits. Whenever the terms decompose into independent small pieces, invert the loop so the
-outer index runs over pieces — there are sixty of those and $10^{18}$ of the other.
+over *bit positions*, counting how many pairs set each bit. Whenever the terms decompose into
+independent small pieces, invert the loop so the outer index runs over pieces — there are sixty of
+those and $10^{18}$ of the other.
+
+A related move groups the terms by a statistic that takes **few values**. Problem 776 sums
+$n / d(n)$, where $d(n)$ is the digit sum, out to about $10^{18}$. That denominator is at most
+171, so the sum is $\sum_s T(s)/s$, where $T(s)$ adds up the $n \le N$ with digit sum $s$. Those
+171 totals come from a [digit DP](/topics/technique/digit-dp). A digit DP usually counts. Here it
+also has to sum, which works because appending a digit is linear: $c$ prefixes with total $t$
+become, after digit $d$, $c$ prefixes with total $10t + dc$. So each state carries a
+(count, sum) pair, and a DP that counts can sum at no extra cost. Problem 684 groups the same way
+from the other side. The smallest number with digit sum $n = 9q + r$ is $(r{+}1)10^q - 1$, so
+each run of nine consecutive $n$ shares a $q$, and the runs form a geometric series in $10^q$.
 
 Problem 739 counts contributions through a whole *process*. It applies "drop the first term, take
 prefix sums" to a sequence until one term is left. That operation is linear, so the survivor is
@@ -187,8 +225,22 @@ identical children, the sequence of their masks repeats after a short prefix, so
 [cycle detection](/topics/technique/cycle-detection) answers "the sum of the first $k$ children" by
 counting whole periods instead of walking them.
 
+Problem 341 uses the same self-description to the opposite effect. There, the prefix sum is not
+the answer. It is the **inverse** of the answer. In the [Golomb sequence](/topics/domain/golomb-sequence),
+$S(v) = \sum_{t \le v} G(t)$ is the last position holding $v$, so finding $G(n)$ means finding the
+smallest $v$ with $S(v) \ge n$. Going one level higher, $T(i) = \sum_{t \le i} t\,G(t)$ inverts
+$G(G(n))$. Each inversion turns a question about positions near $10^{18}$ into one about values
+far smaller. After the third inversion, the tables hold about $2.6 \times 10^4$ entries, and
+inside each block $T$ is a quadratic in $i$, so the query solves it with an integer square root.
+When a sequence is its own [run-length encoding](/topics/technique/run-length-encoding), its prefix
+sums are where the values change. Binary-search the sums instead of generating the terms.
+
 Problems 884 and 672 sum a step-count that is constant on long blocks and recurse on the sub-range
-each block leaves behind. The general instruction is the same one that governs
+each block leaves behind. Problem 374 has blocks that are not constant but have closed forms. The
+maximum-product partition of $n$ into distinct parts is a run $\{2, \dots, k{+}2\}$ with one value
+removed, so $n$ falls into blocks of length $k + 2$. Each whole block sums in closed form, and
+there are only $\sqrt{2N}$ blocks below $N$. The cost is one pass over the blocks, not one
+over $n$. The general instruction is the same one that governs
 [recurrence relations](/topics/domain/recurrence-relation): recur on the cheap shadow of the
 structure — a block, a bit, a subtree shape — never on the elements themselves.
 
@@ -212,7 +264,21 @@ and mind what it changes:
   that this needs the modulus to be coprime to the divisor — which is why some statements name a
   prime modulus and others (problem 830's $83^3 89^3 97^3$) deliberately do not. A
   "last nine digits" modulus is $10^9$, which is even, so 2 has no inverse at all; problem 340's
-  triangular numbers survive by halving whichever factor is even *before* reducing.
+  triangular numbers survive by halving whichever factor is even *before* reducing. What has to
+  be coprime is the divisor, not the modulus: problem 506's $123454321 = 41^2 \cdot 271^2$ is far
+  from prime, but the $10^6 - 1$ its geometric series divides by shares no factor with it.
+- **Carry the integer, not the fraction.** Problem 374's block sums involve harmonic numbers
+  $H_j$, and keeping $H_j$ as a residue would cost a modular inverse of every $j$. The product
+  $A_j = j!\,H_j$ is an integer (a [Stirling number](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_first_kind)
+  of the first kind) and satisfies $A_j = j A_{j-1} + (j-1)!$. So the loop carries $j!$ and $A_j$
+  and does no division at all. When a recurrence produces fractions, multiply them by whatever
+  denominator makes them integers, and carry that product instead.
+- **Exponents reduce modulo $p - 1$.** Problem 684 needs $10^q$ where $q$ itself has $10^{17}$
+  digits. By [Fermat's little theorem](/topics/technique/fermats-little-theorem-application),
+  only $q \bmod (p-1)$ matters in the exponent, while $q \bmod p$ matters in the linear terms. So
+  two residues of the same index have to be tracked. Since $q = (f - r)/9$, the Fibonacci values
+  $f$ are carried modulo $9p$ and $9(p-1)$. The extra factor of nine leaves room to divide by 9
+  exactly, after reduction.
 - **Products overflow before sums do.** Two residues below $10^9$ multiply to nearly $10^{18}$,
   which fits `int64` — barely. Add anything, or use a larger modulus, and it does not.
   [Watch the integer width](/topics/takeaway/watch-integer-width): in C this is what
@@ -231,6 +297,10 @@ The converse case is worth its own warning. When a problem wants the sum *exactl
 sum of fifty 50-digit numbers, or problem 48's self-powers — the modulus is a red herring you may
 be tempted to invent. Problem 48 genuinely only needs the last ten digits, so a modulus is right;
 problem 13 needs the leading ones, so it is wrong. Read which end of the number is being asked for.
+The leading end has a trap of its own when the terms are fractions. Problem 776 wants thirteen
+significant digits of a sum of $10^{18}$ rationals. A floating-point accumulation can round the
+wrong way when the fourteenth digit is near a tie. The 171 grouped totals are few enough to add as
+an exact rational, which is then rounded once.
 
 ## How to reason about it
 
@@ -248,7 +318,9 @@ A practical order of attack when a statement hands you a $\sum$:
    catches an under-specified memo key.
 3. **Look at $f$'s definition, not at the loop.** If $f$ is itself a sum, swap the order. If $f$
    obeys a recurrence, try to telescope. If $f$ is defined digit-wise or bit-wise, sum over digits.
-   If $f$ is piecewise-constant on long blocks, sum over blocks.
+   If $f$ is piecewise-constant on long blocks, or has a closed form on each block, sum over
+   blocks. If the terms are periodic, split by residue class. If part of $f$ takes only a few
+   values, group by that part.
 4. **Then, and only then, reach for machinery.** Blocking on $\lfloor N/d \rfloor$,
    [matrix exponentiation](/topics/technique/matrix-exponentiation),
    [dynamic programming](/topics/technique/dynamic-programming) over digits — all of these are
