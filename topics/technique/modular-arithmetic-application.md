@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic-application] -->
-<!-- status: final 2026-11-01T19:04Z -->
+<!-- status: final -->
 # Modular arithmetic (application)
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) as a *technique* is not the
@@ -109,6 +109,17 @@ on $(a, m)$ in disguise — the [three-gap
 theorem](https://en.wikipedia.org/wiki/Three-gap_theorem) explaining why. The indices, which run to
 around $10^{16}$, never need to be tracked at all.
 
+The residue need not be of a value at all. Problem 342 sums the $n < 10^{10}$ for which
+$\varphi(n^2)$ is a perfect cube, and "is a cube" is a statement about a factorisation: every prime
+exponent $\equiv 0 \pmod 3$. Since $\varphi(n^2) = \prod_{p \mid n} p^{2e_p-1}(p-1)$, each prime of
+$n$ adds $2e_p - 1$ to its own exponent, and the factorisation of $p - 1$ adds to strictly smaller
+primes. The state is then a sparse map from prime to exponent mod 3 — the primes still *owed* — and a
+depth-first search places primes from the largest down. Nothing placed later can reach a prime above
+it, so the largest owed prime must be settled before the search passes it, and its exponent in $n$
+is forced by $2e - 1 + r \equiv 0 \pmod 3$. The largest prime of $n$ is owed nothing, which forces
+$e \equiv 2$ and caps every prime at $\sqrt{N}$. The modulus acts on a vector of exponents, and a
+search over $10^{10}$ integers becomes an output-sensitive walk over residue maps.
+
 **4 — The modulus you are handed.** Late problems often *state* the modulus — "give $S(k)$ modulo
 $1123581313$" — and then the residue is the deliverable, not a shortcut. The discipline is
 mechanical but unforgiving: reduce at **every** combine, inside the recurrence, not at the end.
@@ -122,11 +133,30 @@ $n$-th coefficient comes from [Bostan–Mori](https://arxiv.org/abs/2008.08822)
 halving in $O(d^2 \log n)$ — the same cost at $10^7$ as at $10^{18}$. A single unreduced accumulator anywhere in the loop reintroduces the growth the modulus was
 there to prevent.
 
+The converse discipline matters as much: reduce what enters the answer *linearly*, and keep exact
+whatever steers the program. Problem 539's survivor of an alternating elimination game obeys a
+halving recurrence on a pair — the survivor's position $P$ and the running sum $S$ of positions.
+$S(n)$ is an integer-coefficient combination of $S(\lfloor n/2 \rfloor)$ and terms in $P$, so it is
+reduced at every level. $P$ is an *index*, used to locate the next survivor, so it stays exact, which
+it can afford because $P(n) \le n$. Problem 521's [Lucy\_Hedgehog
+sieve](/topics/technique/lucy-hedgehog-sieve) carries two tables side by side for the same reason.
+The prime *sums* are reduced mod $10^9$ from the first entry, since every sieve step is linear in
+them. The prime *counts* stay exact, because the loop recognises a prime by the count rising at it.
+(Problem 463 is the clean case: its paired prefix sums obey linear identities with integer
+coefficients, so the whole state reduces.) Problem 674 takes the split furthest. Its
+$\mathcal{I}$-expressions grow doubly exponentially, and it wants the *least* common value of two of
+them mod $10^9$. "Least" is an ordering, which no residue keeps, so the decision is made where order
+survives. $\mathcal{I}$ is injective and increasing in each argument, so equality is structural
+[unification](/topics/technique/unification-computer-science) of the expression trees, and the
+minimum is the unifier with every free variable set to zero. Only then is the term evaluated, under
+the modulus. Compare and decide exactly; reduce only the number you report.
+
 The handed modulus is often *composite* — "the last nine digits" means mod $10^9$ — and that
 quietly removes division. Closed forms are full of it: problem 340 reduces its nested "crazy
 function" to a sum with a $b(b+1)/2$ in it, and problem 401's
 [hyperbola-method](/topics/technique/dirichlet-hyperbola-method) sum of $\sigma_2$ evaluates
-$x(x+1)(2x+1)/6$ at $x$ up to $10^{15}$. Neither $2$ nor $6$ has an inverse mod $10^9$, so you cannot
+$x(x+1)(2x+1)/6$ at $x$ up to $10^{15}$, and problem 688's floor-sum closed form needs $q(q-1)/2$
+with $q$ near $10^{16}$. Neither $2$ nor $6$ has an inverse mod $10^9$, so you cannot
 reduce the factors and then divide. The fix is to divide *first*, while the factors are still exact:
 $2$ divides $x$ or $x+1$, $3$ divides one of $x$, $x+1$, $2x+1$ (which one is decided by $x \bmod 3$),
 so strike the factors out of the right term, then reduce and multiply the cofactors.
@@ -143,6 +173,24 @@ division by 8 is exact before anything is reduced. Better still, the division ca
 Problem 866's expected product of hexagonal numbers carries a $1/N$ from averaging over the last
 piece placed, but $H(N)/N = 2N - 1$ exactly. The recurrence is integral term by term, and the
 modulus never meets a fraction.
+
+A prime modulus does have inverses, but each one costs a modular exponentiation, and a loop that
+needs one per step pays a logarithmic factor for it. Problem 374 sums, over about $1.4 \times 10^7$
+blocks, terms built from $(k+2)!\,H_{k+2}$, where $H_j$ is the [harmonic
+number](https://en.wikipedia.org/wiki/Harmonic_number). Carrying $H_j$ as a residue would invert
+every $j$. Carrying $A_j = j!\,H_j$ instead — an integer, the [Stirling number of the first
+kind](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_first_kind) $\left[{j+1 \atop 2}\right]$
+— gives the inverse-free recurrence $A_j = j\,A_{j-1} + (j-1)!$, and the loop spends one inverse at
+the very end, for the truncated last block. When a run of fractions shares a natural denominator,
+carry the numerator.
+
+A missing inverse can also veto an *algorithm*, not just a formula. Problem 649 is an [impartial
+game](/topics/domain/impartial-game) whose positions combine by XOR, so the count of winning
+arrangements is a $c$-fold XOR-convolution power of an 8-entry histogram of Grundy values. The
+textbook tool is the [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Hadamard_transform),
+but its inverse divides by 8, which has no inverse mod $10^9$. The direct $8 \times 8$ convolution,
+raised by squaring, uses only $+$ and $\times$ and costs nothing at that size. Before choosing a fast
+transform under a handed modulus, check that its inverse exists there.
 
 Sometimes even the exact factor cannot be formed. Problem 684 needs $10^q$ where $q = \lfloor f/9
 \rfloor$ and $f$ is a Fibonacci number near $3 \times 10^{18}$, carried only as a residue. This needs
