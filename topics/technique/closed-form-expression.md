@@ -1,11 +1,11 @@
 <!-- tags: [closed-form-expression] -->
-<!-- status: final 2026-11-02T11:43Z -->
+<!-- status: final -->
 # Closed-form expression
 
 A [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression) computes a
 quantity with a bounded formula — a finite chain of arithmetic, powers, roots, binomials and a few
 named functions — instead of a loop that walks every case. It is the most common single lever in
-this problem set: the eighty-odd problems below each hide a formula behind a process, a grid, a game
+this problem set: the ninety-odd problems below each hide a formula behind a process, a grid, a game
 or a recurrence. In every one, the obvious program enumerates something astronomically large while
 the real program evaluates an expression whose size does not grow with the input. The bounds
 Project Euler chooses — $10^{12}$, $10^{16}$, a googol — are often the setter's way of saying
@@ -58,9 +58,22 @@ polynomials. The rest of this family is about *getting a problem into that shape
   product of [tetrahedral numbers](https://en.wikipedia.org/wiki/Tetrahedral_number). Problem 234
   uses the triangular-number formula to sum the multiples of $p$ and $q$ between consecutive prime
   squares: one band per prime instead of one step per integer.
+- **Sum a scaling family along its ray.** When an equation is homogeneous, its solutions come as
+  multiples $t$ of primitive ones, and a quantity linear in the solution sums over a whole ray as
+  its primitive value times the triangular number $m(m+1)/2$. Problem 510's tangent circles obey
+  $1/\sqrt{r_C} = 1/\sqrt{r_A} + 1/\sqrt{r_B}$, whose integer solutions are $t$ times polynomials
+  in a coprime pair $(u, v)$. So the loop visits $O(\sqrt n)$ primitive pairs and never touches
+  $t$. Looping over $t$ would undo the parametrisation, because the smallest pair alone has
+  $\lfloor n/4 \rfloor$ multiples.
 - **Double counting.** Problem 944 swaps the order of summation, tallying each integer's
   contribution across all $2^n$ subsets. It lands on a closed form whose one remaining sum runs
   over the $O(\sqrt n)$ distinct values of $\lfloor n/x \rfloor$.
+- **A floor is a staircase.** A prefix sum of $\lfloor j/k \rfloor$ needs no loop, since each value
+  repeats $k$ times: with $L = qk + r$, $\sum_{j<L} \lfloor j/k \rfloor = k\binom{q}{2} + rq$.
+  Problem 688 reaches that shape by swapping its double sum to put the pile count $k$ outermost.
+  The swap pays twice, because $k$ piles of different sizes need a triangular number of plates, so
+  only $k \lesssim \sqrt{2N}$ survive. About $10^{16}$ terms become $O(\sqrt N)$ evaluations of one
+  formula.
 - **Rounding is a periodic correction.** A term like $\operatorname{round}(k^2/12)$ looks
   unsummable, but $k^2 \bmod 12$ takes only four values, so the term is $(k^2 + c(k))/12$ with $c$
   periodic. Its prefix sum is the square-pyramidal polynomial plus whole periods of $c$ plus a
@@ -146,6 +159,14 @@ Smaller counting formulas often sit *inside* a search as its $O(1)$ kernel:
   closed form, since it is a
   [Gauss circle problem](https://en.wikipedia.org/wiki/Gauss_circle_problem), so it is summed row
   by row.
+- Problem 804 shows that a summatory function can be simpler than its summand. Its $g(n)$ counts
+  the representations of $n$ by a
+  [binary quadratic form](https://en.wikipedia.org/wiki/Binary_quadratic_form), and the class
+  number one discriminant even offers a divisor-sum formula for it. Summing over $n$ makes all of
+  that unnecessary: every pair $(x, y)$ is counted exactly once, so the total is a count of lattice
+  points in an ellipse. After completing the square, each row is one integer square root plus a
+  parity correction. $10^{16}$ values of $g$ become $O(\sqrt N)$ rows, and no individual $g(n)$ is
+  ever computed.
 - Problem 276 needs only the *primitive* triangles. Its $O(1)$ count of all triangles up to a
   perimeter is evaluated at each of the $O(\sqrt N)$ floor quotients $\lfloor N/k \rfloor$, and
   [Möbius inversion](https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula) peels off the
@@ -179,6 +200,7 @@ Many problems look computational until one classical theorem reduces them to a f
 | [Divisor function](https://en.wikipedia.org/wiki/Divisor_function) | counting the right triangles on a leg to $\tau(M^2)$ | 176 |
 | [Conjugate](https://en.wikipedia.org/wiki/Conjugate_(square_roots)) pairs | $x^{2n} + y^{2n}$ to an integer, so $\{x^{2n}\} = 1 - y^{2n}$ | 318 |
 | [Fermat's Last Theorem](https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem) | an exponent search to $\lvert n\rvert \le 2$, once the expression is factored | 180 |
+| [Vieta's formulas](https://en.wikipedia.org/wiki/Vieta%27s_formulas) | a symmetric function of a polynomial's roots to its coefficients, so no root is ever found | 479 |
 
 The step before the theorem is usually **algebra on the statement itself**:
 
@@ -188,6 +210,10 @@ The step before the theorem is usually **algebra on the statement itself**:
 - Problem 141's "divisor, quotient and remainder in geometric progression" becomes the explicit
   parametrisation $n = k^2 p^3 q + k q^2$.
 - Problem 772's balanceability is equivalent to a clean divisibility condition.
+- Problem 479 sums powers of $(a+b)(b+c)(c+a)$ over the complex roots of a cubic, and its remark
+  that the result is always an integer is the tell. Since $a + b = e_1 - c$, the product is the
+  cubic evaluated at $e_1$, a polynomial in $k$. The roots vanish from the problem, and what is left
+  is a geometric series per $k$.
 - In Problem 684, the smallest number with digit sum $n = 9q + r$ is $r$ followed by $q$ nines,
   $(r+1)\,10^q - 1$. The nine values that share a $q$ form a block, and the blocks sum as a
   geometric series.
@@ -262,6 +288,14 @@ Continuous problems often have an exact length, area or optimum:
   190 [Lagrange multipliers](https://en.wikipedia.org/wiki/Lagrange_multiplier) give each variable
   its share in closed form.
 
+A discrete optimum has no derivative to set to zero, but an *exchange argument* does the same job:
+assume an optimum, and show that a local swap would improve anything not of the claimed shape.
+Problem 374 maximises the product of distinct parts. Since $(a+1)(b-1) > ab$ whenever $b - a \ge 2$,
+gaps close up until the best partition is a run of consecutive integers with at most one hole. That
+shape makes $f(n)$ a factorial divided by one part across almost all of a block of $n$. The blocks
+start at triangular offsets, so only about $\sqrt{2N}$ of them reach $N$, and each sums in one
+expression.
+
 The [Farey sequence](https://en.wikipedia.org/wiki/Farey_sequence) has a geometry of its own.
 Neighbours $a/b < c/d$ satisfy $bc - ad = 1$, so the left neighbour of $3/7$ in Problem 71 is
 $n = 3k-1$ over $d = 7k$ with $k = \lfloor N/7 \rfloor$, with no scan at all. Problem 198
@@ -296,6 +330,14 @@ $h < Q(N)$, does the rest:
 $\sum_{N \le M} Q(N) = \sum_h \max(0, M - F(h))$. The capacity grows exponentially, so that sum has
 only $O(\log M)$ terms.
 
+A closed form can also be solved *symbolically*, so the search never starts. Problem 555 asks for
+the [fixed points](https://en.wikipedia.org/wiki/Fixed_point_(mathematics)) of a generalised McCarthy
+function with parameters $k$ and $s$. Its value on $[0, m]$ cycles with period $d = k - s$ through a
+window of $d$ consecutive integers. Substituting the formula into $M(n) = n$ leaves one condition,
+$d \mid s$, that does not mention $n$: either the whole window is fixed or none of it is. The
+formula also names the right coordinates. Written in $(d, j)$ with $s = jd$, the answer is a
+polynomial in $j$ for each $d$, so each $d$ costs $O(1)$ and the whole sum costs $O(p)$.
+
 ## How to reason about it
 
 Reach for a closed form when the naive program is a sum, a count of arrangements, a recurrence or
@@ -314,9 +356,17 @@ derivation effort and it brings some standing hazards.
   induction, and then tested on 400 random small parameter sets. Problem 711's winning families
   were read off an exhaustive game table up to $n = 1100$. Problem 628's blocking criterion was
   checked against exhaustive search for every $n \le 9$ before anything was counted with it.
+  Where you sample matters too. Problem 335's $M(x)$ is jagged over all $x$, roughly doubling just
+  past each $2^k + 1$, but along the family the statement asks about it is an exact sum of three
+  exponentials in $k$. Tabulate on the statement's own index, not the natural one. Not every
+  formula here reaches the proof: Problems 335 and 555 rest on their checks alone, and that should
+  be said out loud rather than left implied.
 - **Keep the slow method behind a flag.** Several solutions keep the obvious $O(N^2)$ version,
   such as Problem 28's spiral walk, behind `--show`. It runs on small inputs purely to confirm the
   formula, because a sign slip is invisible once the loop is gone.
+- **An approximate formula still referees.** Problem 804's lattice count has no closed form, but
+  the ellipse's area gives its leading term for free. That is a sanity check at the full input
+  size, where no brute force can reach.
 - **"$O(1)$" can hide real cost.** Problem 15's $\binom{2n}{n}$ takes $O(n)$ big-integer
   multiplications, Problem 162's count is a large integer, and Problem 743's coefficient is an
   $O(k)$ sum. Problem 635's formula is $O(1)$ per prime *given* the factorials, but it needs
@@ -375,7 +425,11 @@ derivation effort and it brings some standing hazards.
   dozen steps. A derivation can also end on a quantity with no closed form of its own. Problem
   628's ends on the left factorial, so the last step is an $O(n)$ running sum. Problem 718's
   formula sums each class's gaps in $O(1)$, but the Apéry elements still take a pass linear in the
-  smallest generator: a prefix minimum along the cycle $iz \bmod x$.
+  smallest generator: a prefix minimum along the cycle $iz \bmod x$. Problem 374's block sum ends on
+  a [harmonic number](https://en.wikipedia.org/wiki/Harmonic_number) $H_j$, and there the choice of
+  what to carry matters. A residue of $H_j$ would cost a modular inverse of every $j$, but the
+  scaled $A_j = j!\,H_j$ is an integer with $A_j = j\,A_{j-1} + (j-1)!$, so the same pass runs with
+  no division at all. When a leftover quantity has denominators, carry it multiplied through.
 - **Evaluate polynomials with [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method).**
   `N * (N * (a*N + b) + c) + d` keeps intermediates small and uses the fewest multiplications.
 
