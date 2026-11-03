@@ -6748,8 +6748,8 @@
     "level": 21,
     "pct": 54,
     "solvers": 321,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 18:12"
   },
   "845": {
     "title": "Prime Digit Sum",
