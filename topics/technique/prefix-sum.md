@@ -260,5 +260,6 @@ over a small alphabet, and it needs neither a Fenwick tree nor a merge sort.
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Dirichlet_conv
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

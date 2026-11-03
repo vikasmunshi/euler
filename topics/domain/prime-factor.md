@@ -129,6 +129,6 @@ it — the same asymmetry as before, seen from the other side.
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ○ [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0823](/solutions/0823/) — Factor Shuffle
-- ○ [0967](/solutions/0967/) — $B$-Trivisible Numbers
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

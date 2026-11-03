@@ -872,7 +872,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 - ○ [0956](/solutions/0956/) — Super Duper Sum
 - ○ [0958](/solutions/0958/) — Euclid's Labour
-- ○ [0967](/solutions/0967/) — $B$-Trivisible Numbers
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ○ [0971](/solutions/0971/) — Modular Polynomial Composition
 - ○ [0975](/solutions/0975/) — A Winding Path
 - ○ [0988](/solutions/0988/) — Non-attacking Frogs

@@ -224,5 +224,6 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - ○ [0795](/solutions/0795/) — Alternating GCD Sum
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

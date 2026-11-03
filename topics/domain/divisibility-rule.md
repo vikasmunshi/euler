@@ -131,7 +131,6 @@ histogram is small enough to be the state of a DP.
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ○ [0714](/solutions/0714/) — Duodigits
 - ○ [0954](/solutions/0954/) — Heptaphobia
-- ○ [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 
 <!-- /problems -->

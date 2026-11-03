@@ -226,5 +226,6 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
 - ● [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

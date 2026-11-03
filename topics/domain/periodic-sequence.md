@@ -155,6 +155,7 @@ They differ where the languages offer different shortcuts:
 - ○ [0843](/solutions/0843/) — Periodic Circles
 - ○ [0908](/solutions/0908/) — Clock Sequence II
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ○ [0993](/solutions/0993/) — Banana Beaver
 
 <!-- /problems -->

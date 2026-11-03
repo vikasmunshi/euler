@@ -199,5 +199,6 @@ let every later query pay a lookup instead of the full price.
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0829](/solutions/0829/) — Integral Fusion
+- ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->
