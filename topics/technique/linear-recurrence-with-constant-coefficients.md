@@ -163,6 +163,7 @@ problems need a little more:
 - ● [0094](/solutions/0094/) — Almost Equilateral Triangles
 - ● [0219](/solutions/0219/) — Skew-cost Coding
 - ● [0237](/solutions/0237/) — Tours on a $4 \times N$ Playing Board
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation

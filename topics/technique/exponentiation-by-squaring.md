@@ -212,6 +212,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$

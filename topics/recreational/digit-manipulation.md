@@ -408,7 +408,7 @@ what matters here is what replaces the extraction loop).
 - ○ [0358](/solutions/0358/) — Cyclic Numbers
 - ○ [0361](/solutions/0361/) — Subsequence of Thue-Morse Sequence
 - ○ [0368](/solutions/0368/) — A Kempner-like Series
-- ○ [0377](/solutions/0377/) — Sum of Digits - Experience #13
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ○ [0391](/solutions/0391/) — Hopping Game
 - ○ [0396](/solutions/0396/) — Weak Goodstein Sequence

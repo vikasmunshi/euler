@@ -371,7 +371,7 @@ of crossing it.
 - ○ [0369](/solutions/0369/) — Badugi
 - ○ [0371](/solutions/0371/) — Licence Plates
 - ○ [0376](/solutions/0376/) — Nontransitive Sets of Dice
-- ○ [0377](/solutions/0377/) — Sum of Digits - Experience #13
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ○ [0378](/solutions/0378/) — Triangle Triples
 - ○ [0380](/solutions/0380/) — Amazing Mazes!
 - ○ [0382](/solutions/0382/) — Generating Polygons

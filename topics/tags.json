@@ -589,7 +589,7 @@
       "reference": "https://en.wikipedia.org/wiki/Composition_(combinatorics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0253", "p0398", "p0502", "p0606", "p0710", "p0719", "p0845", "p0862", "p0929", "p0951", "p0996"]
+      "refs": ["p0253", "p0377", "p0398", "p0502", "p0606", "p0710", "p0719", "p0845", "p0862", "p0929", "p0951", "p0996"]
     },
     {
       "slug": "computational-geometry",
@@ -4360,7 +4360,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation_by_squaring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0294_s0", "p0335_s0", "p0365_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0649_s0", "p0670_s0", "p0706_s0", "p0721_s0", "p0752_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
+      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0171_s0", "p0200_s0", "p0217_s0", "p0237_s0", "p0294_s0", "p0335_s0", "p0365_s0", "p0377_s0", "p0387_s0", "p0407_s0", "p0421_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0649_s0", "p0670_s0", "p0706_s0", "p0721_s0", "p0752_s0", "p0768_s0", "p0778_s0", "p0788_s0", "p0820_s0", "p0926_s0", "p0940_s0", "p0944_s0"]
     },
     {
       "slug": "extended-euclidean-algorithm",
@@ -5107,7 +5107,7 @@
       "reference": "https://en.wikipedia.org/wiki/Linear_recurrence_with_constant_coefficients",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0057_s0", "p0094_s0", "p0219_s0", "p0237_s0", "p0529_s0", "p0682_s0", "p0918_s0", "p0940_s0", "p0951_s0", "p0957_s0"]
+      "refs": ["p0057_s0", "p0094_s0", "p0219_s0", "p0237_s0", "p0377_s0", "p0529_s0", "p0682_s0", "p0918_s0", "p0940_s0", "p0951_s0", "p0957_s0"]
     },
     {
       "slug": "linear-sieve",
@@ -5287,7 +5287,7 @@
       "reference": "https://en.wikipedia.org/wiki/Matrix_exponential",
       "additional-references": [],
       "summary": "Representing a linear recurrence as repeated multiplication by a fixed transfer matrix, computed via fast exponentiation.",
-      "refs": ["p0237_s0", "p0670_s0", "p0706_s0", "p0918_s0", "p0940_s0", "p1006_s0"]
+      "refs": ["p0237_s0", "p0377_s0", "p0670_s0", "p0706_s0", "p0918_s0", "p0940_s0", "p1006_s0"]
     },
     {
       "slug": "maximum-subarray-problem",
@@ -6718,7 +6718,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When an accumulation over a self-similar sequence is linear in a small state vector, each letter is a matrix and whole blocks compose by multiplication, collapsing a length-n walk to O(log n) products.",
-      "refs": ["p0294", "p1006"]
+      "refs": ["p0294", "p0377", "p1006"]
     },
     {
       "slug": "saturate-counts-at-the-threshold",

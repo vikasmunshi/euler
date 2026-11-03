@@ -8,6 +8,7 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

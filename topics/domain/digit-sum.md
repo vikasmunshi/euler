@@ -323,7 +323,7 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ○ [0358](/solutions/0358/) — Cyclic Numbers
-- ○ [0377](/solutions/0377/) — Sum of Digits - Experience #13
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ○ [0391](/solutions/0391/) — Hopping Game
 - ○ [0442](/solutions/0442/) — Eleven-free Integers

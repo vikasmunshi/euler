@@ -111,6 +111,7 @@ on part sizes, run lengths or symmetry.
 ## Problems
 
 - ● [0253](/solutions/0253/) — Tidying Up A
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ○ [0398](/solutions/0398/) — Cutting Rope
 - ○ [0502](/solutions/0502/) — Counting Castles
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
