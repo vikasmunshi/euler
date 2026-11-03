@@ -403,6 +403,7 @@ kept warm between them flatters the measurement.
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0829](/solutions/0829/) — Integral Fusion
+- ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

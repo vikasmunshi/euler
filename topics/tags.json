@@ -1942,6 +1942,15 @@
       "refs": ["p0084", "p0151", "p0213", "p0227", "p0253", "p0280", "p0298", "p0329", "p0339", "p0367", "p0470", "p0575", "p0589", "p0595", "p0605", "p0610", "p0640", "p0683", "p0819", "p0825", "p0852", "p0930", "p0938", "p0973"]
     },
     {
+      "slug": "markov-number",
+      "facet": "domain",
+      "name": "Markov number",
+      "reference": "https://en.wikipedia.org/wiki/Markov_number",
+      "additional-references": [],
+      "summary": "Positive integers appearing in solutions of the Markov equation and its Hurwitz generalisations, which form a tree under Vieta moves.",
+      "refs": ["p0844"]
+    },
+    {
       "slug": "mastermind-board-game",
       "facet": "domain",
       "name": "Mastermind (board game)",
@@ -2362,7 +2371,7 @@
       "reference": "https://en.wikipedia.org/wiki/Polynomial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0269", "p0286", "p0356", "p0363", "p0402", "p0435", "p0438", "p0479", "p0498", "p0602", "p0797", "p0802", "p0812", "p0813", "p0969", "p0995"]
+      "refs": ["p0269", "p0286", "p0356", "p0363", "p0402", "p0435", "p0438", "p0479", "p0498", "p0602", "p0797", "p0802", "p0812", "p0813", "p0844", "p0969", "p0995"]
     },
     {
       "slug": "polynomial-interpolation",
@@ -2650,7 +2659,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002", "p0057", "p0065", "p0076", "p0078", "p0092", "p0094", "p0114", "p0115", "p0116", "p0117", "p0140", "p0169", "p0197", "p0214", "p0225", "p0226", "p0227", "p0230", "p0232", "p0237", "p0258", "p0282", "p0287", "p0312", "p0324", "p0326", "p0327", "p0330", "p0334", "p0337", "p0339", "p0340", "p0341", "p0343", "p0356", "p0364", "p0366", "p0375", "p0382", "p0384", "p0396", "p0405", "p0416", "p0419", "p0422", "p0423", "p0440", "p0443", "p0458", "p0463", "p0469", "p0472", "p0477", "p0490", "p0492", "p0497", "p0505", "p0515", "p0517", "p0523", "p0527", "p0532", "p0535", "p0539", "p0546", "p0551", "p0555", "p0558", "p0570", "p0605", "p0609", "p0617", "p0623", "p0624", "p0645", "p0654", "p0664", "p0666", "p0670", "p0671", "p0672", "p0693", "p0698", "p0721", "p0729", "p0736", "p0737", "p0739", "p0751", "p0752", "p0759", "p0770", "p0774", "p0809", "p0811", "p0812", "p0825", "p0832", "p0839", "p0843", "p0844", "p0848", "p0872", "p0887", "p0909", "p0910", "p0912", "p0915", "p0917", "p0918", "p0921", "p0924", "p0927", "p0935", "p0938", "p0940", "p0943", "p0955", "p0968", "p0969", "p0985", "p0993", "p0999", "p1000", "p1003"]
+      "refs": ["p0002", "p0057", "p0065", "p0076", "p0078", "p0092", "p0094", "p0114", "p0115", "p0116", "p0117", "p0140", "p0169", "p0197", "p0214", "p0225", "p0226", "p0227", "p0230", "p0232", "p0237", "p0258", "p0282", "p0287", "p0312", "p0324", "p0326", "p0327", "p0330", "p0334", "p0337", "p0339", "p0340", "p0341", "p0343", "p0356", "p0364", "p0366", "p0375", "p0382", "p0384", "p0396", "p0405", "p0416", "p0419", "p0422", "p0423", "p0440", "p0443", "p0458", "p0463", "p0469", "p0472", "p0477", "p0490", "p0492", "p0497", "p0505", "p0515", "p0517", "p0523", "p0527", "p0532", "p0535", "p0539", "p0546", "p0551", "p0555", "p0558", "p0570", "p0605", "p0609", "p0617", "p0623", "p0624", "p0645", "p0654", "p0664", "p0666", "p0670", "p0671", "p0672", "p0693", "p0698", "p0721", "p0729", "p0736", "p0737", "p0739", "p0751", "p0752", "p0759", "p0770", "p0774", "p0809", "p0811", "p0812", "p0825", "p0832", "p0839", "p0843", "p0848", "p0872", "p0887", "p0909", "p0910", "p0912", "p0915", "p0917", "p0918", "p0921", "p0924", "p0927", "p0935", "p0938", "p0940", "p0943", "p0955", "p0968", "p0969", "p0985", "p0993", "p0999", "p1000", "p1003"]
     },
     {
       "slug": "reflection-physics",
@@ -3586,7 +3595,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0"]
+      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0844_s0"]
     },
     {
       "slug": "binomial-inversion",
@@ -4027,7 +4036,7 @@
       "reference": "https://en.wikipedia.org/wiki/Depth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0342_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0615_s0", "p0642_s0", "p0674_s0", "p0829_s0", "p0967_s0"]
+      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0241_s0", "p0244_s0", "p0245_s0", "p0247_s0", "p0248_s0", "p0255_s0", "p0265_s0", "p0272_s0", "p0342_s0", "p0473_s0", "p0484_s0", "p0516_s0", "p0571_s0", "p0615_s0", "p0642_s0", "p0674_s0", "p0829_s0", "p0844_s0", "p0967_s0"]
     },
     {
       "slug": "descartes-circle-theorem",
@@ -4037,6 +4046,15 @@
       "additional-references": [],
       "summary": "A relation among the curvatures of four mutually tangent circles, used to find the curvature of the circle filling a gap.",
       "refs": ["p0199_s0"]
+    },
+    {
+      "slug": "descartes-rule-of-signs",
+      "facet": "technique",
+      "name": "Descartes' rule of signs",
+      "reference": "https://en.wikipedia.org/wiki/Descartes%27_rule_of_signs",
+      "additional-references": [],
+      "summary": "Bounding the number of positive real roots of a polynomial by the sign changes in its coefficient sequence.",
+      "refs": ["p0844_s0"]
     },
     {
       "slug": "dfa-minimization",
@@ -4369,7 +4387,7 @@
       "reference": "https://en.wikipedia.org/wiki/Faulhaber%27s_formula",
       "additional-references": [],
       "summary": "A closed-form polynomial for the sum of the k-th powers of the first n integers.",
-      "refs": ["p0875_s0"]
+      "refs": ["p0844_s0", "p0875_s0"]
     },
     {
       "slug": "fenwick-tree",
@@ -4639,7 +4657,7 @@
       "reference": "https://gmplib.org/",
       "additional-references": ["https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library"],
       "summary": "",
-      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0", "p0523_s0", "p0558_s0", "p0581_s0", "p0605_s0", "p0776_s0", "p1006_s0"]
+      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0", "p0523_s0", "p0558_s0", "p0581_s0", "p0605_s0", "p0776_s0", "p0844_s0", "p1006_s0"]
     },
     {
       "slug": "golden-section-search",
@@ -6316,6 +6334,15 @@
       "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0"]
     },
     {
+      "slug": "vieta-jumping",
+      "facet": "technique",
+      "name": "Vieta jumping",
+      "reference": "https://en.wikipedia.org/wiki/Vieta_jumping",
+      "additional-references": [],
+      "summary": "Replacing one root of a quadratic Diophantine equation by its Vieta partner to move between solutions, descending to a fundamental one or generating them all as a tree.",
+      "refs": ["p0844_s0"]
+    },
+    {
       "slug": "walrus-operator",
       "facet": "technique",
       "name": "walrus operator",
@@ -6772,7 +6799,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a deterministic process must be run on every input in a huge range, carry whole intervals of inputs that behave identically and split them only where the behaviour diverges.",
-      "refs": ["p0255", "p0257", "p0305", "p0619", "p0706", "p0752", "p0764", "p0963"]
+      "refs": ["p0255", "p0257", "p0305", "p0619", "p0706", "p0752", "p0764", "p0844", "p0963"]
     },
     {
       "slug": "sum-the-recurrence-over-residue-classes",
@@ -6800,6 +6827,15 @@
       "additional-references": [],
       "summary": "When only the equality of two running totals matters, carry their difference as the DP state instead of the pair, collapsing a two-dimensional state into one.",
       "refs": ["p0290"]
+    },
+    {
+      "slug": "treat-a-parameter-as-a-polynomial-variable",
+      "facet": "takeaway",
+      "name": "Treat a parameter as a polynomial variable",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When a computation's shape stops depending on a parameter beyond some size, run it once with the parameter as a symbol and sum the resulting polynomials in closed form.",
+      "refs": ["p0844"]
     },
     {
       "slug": "unroll-linear-recurrence-to-weighted-sum",

@@ -601,7 +601,7 @@ show up there at once. See
 - ○ [0832](/solutions/0832/) — Mex Sequence
 - ● [0834](/solutions/0834/) — Add and Divide
 - ○ [0838](/solutions/0838/) — Not Coprime
-- ○ [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0850](/solutions/0850/) — Fractions of Powers
 - ○ [0854](/solutions/0854/) — Pisano Periods 2
 - ○ [0858](/solutions/0858/) — LCM

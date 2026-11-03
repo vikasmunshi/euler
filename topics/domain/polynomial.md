@@ -21,6 +21,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Polynomial>._
 - ○ [0802](/solutions/0802/) — Iterated Composition
 - ○ [0812](/solutions/0812/) — Dynamical Polynomials
 - ○ [0813](/solutions/0813/) — XOR-Powers
+- ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping
 - ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
 

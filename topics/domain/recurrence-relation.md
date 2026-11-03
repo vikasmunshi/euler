@@ -408,7 +408,6 @@ into independent terms, a pattern that induction will confirm. The shape picks t
 - ○ [0832](/solutions/0832/) — Mex Sequence
 - ○ [0839](/solutions/0839/) — Beans in Bowls
 - ○ [0843](/solutions/0843/) — Periodic Circles
-- ○ [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0848](/solutions/0848/) — Guessing with Sets
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0887](/solutions/0887/) — Bounded Binary Search

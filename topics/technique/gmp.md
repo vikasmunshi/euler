@@ -183,6 +183,7 @@ constant factor.
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0776](/solutions/0776/) — Digit Sum Division
+- ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

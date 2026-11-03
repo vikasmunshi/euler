@@ -271,7 +271,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ○ [0799](/solutions/0799/) — Pentagonal Puzzle
 - ○ [0833](/solutions/0833/) — Square Triangle Products
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
-- ○ [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0876](/solutions/0876/) — Triplet Tricks
 - ○ [0877](/solutions/0877/) — XOR-Equation A
 - ○ [0880](/solutions/0880/) — Nested Radicals
