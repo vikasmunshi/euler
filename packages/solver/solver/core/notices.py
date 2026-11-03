@@ -19,8 +19,10 @@ the side both can import. Stdlib-only.
 from __future__ import annotations
 
 __all__ = ['KEY_ISSUE_SUBJECT', 'KEY_REQUEST_SUBJECT', 'KEY_SHARE_SUBJECT', 'PR_REVIEW_SUBJECT',
-           'UNREGISTERED_SUBJECT', 'Delivery', 'dismiss', 'install', 'key_hint', 'to_staff']
+           'UNREGISTERED_LINE', 'UNREGISTERED_SUBJECT', 'Delivery', 'dismiss', 'install', 'key_hint',
+           'to_staff', 'unregistered_problems']
 
+import re
 from typing import Protocol
 
 #: The subject a key-authorization request is filed under — the one message *kind* the
@@ -59,10 +61,25 @@ PR_REVIEW_SUBJECT: str = 'Pull request ready for review: '
 
 #: The subject `summary` files under when the progress page disagrees with what is recorded
 #: as solved: a problem `mark` set solved whose answer projecteuler.net has never been given
-#: — so it is solved here and not there. Prose for a person to read (the verb is a plain
-#: `msg read`), named here so it sits with the other command-filed subjects rather than
-#: being invented at the call site.
+#: — so it is solved here and not there. The spool's `verb_for` reads it to make `msg act`
+#: on such a message, for staff, the walk through registering each answer; the problems it
+#: walks are the body's :data:`UNREGISTERED_LINE` lines, read back by
+#: :func:`unregistered_problems`.
 UNREGISTERED_SUBJECT: str = 'Answer not registered for '
+
+#: One body line of an :data:`UNREGISTERED_SUBJECT` message per problem. `summary` writes it
+#: and :func:`unregistered_problems` parses it, so the format is one constant both use: the
+#: subject says only "3 problems" when there are several, and the body is where the numbers are.
+UNREGISTERED_LINE: str = 'answer for problem {number} not registered'
+
+_UNREGISTERED_RE: re.Pattern[str] = re.compile(
+    '^\\s*' + re.escape(UNREGISTERED_LINE).replace(re.escape('{number}'), '(\\d+)') + '\\s*$',
+    re.MULTILINE)
+
+
+def unregistered_problems(body: str) -> list[int]:
+    """The problem numbers an :data:`UNREGISTERED_SUBJECT` message's *body* names, in order."""
+    return [int(number) for number in _UNREGISTERED_RE.findall(body)]
 
 
 class Delivery(Protocol):

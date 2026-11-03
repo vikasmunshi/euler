@@ -15,9 +15,9 @@ possible answer.
 `act` is the other half of that: `save` was a verb for one message kind, which meant the
 reader had to know which of seven verbs their message wanted. A message knows what it is
 for — :func:`~euler_webshell.msg.verb_for` decides it from the subject — so `act` takes the id
-and does the thing: take the key, grant the key, merge the pull request, or, for prose,
-simply read it. The header chip labels its rows from that same function, so what the button
-says and what the command does cannot drift.
+and does the thing: take the key, grant the key, merge the pull request, walk through
+registering unregistered answers, or, for prose, simply read it. The header chip labels its
+rows from that same function, so what the button says and what the command does cannot drift.
 
 Registered at the **reader** floor — the terminal is the front door for every rung, and a
 new invitee's first need is often to ask a question. The two acts that are staff's alone
@@ -48,11 +48,12 @@ from solver.config import ExitCodes, config
 from euler_webshell.shell import osc
 from solver.shell import console, register
 from solver.shell.command import Context
-from solver.shell.dialogue import Abort, Ask, Choice
+from solver.core.notices import unregistered_problems
+from solver.shell.dialogue import Abort, Ask, Choice, interactive
 from solver.shell.variables import variable
 from euler_webshell.msg.client import call as _call
 from euler_webshell.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
-                                PR_REVIEW_SUBJECT, verb_for)
+                                PR_REVIEW_SUBJECT, UNREGISTERED_SUBJECT, verb_for)
 from euler_webshell import roster
 from euler_webshell.msg.identity import STAFF_FLOOR
 
@@ -66,7 +67,8 @@ _ACTIONS: dict[str, str] = {
     'read': 'open one message, and mark it read',
     'send': 'write to staff — or, as staff, to users',
     'dismiss': 'drop a message you are done with',
-    'act': 'do what a message asks: take a key, complete one, grant one, merge a pull request',
+    'act': 'do what a message asks: take a key, complete one, grant one, merge a pull request, '
+           'register answers',
 }
 
 #: The verbs that name an existing message.
@@ -319,7 +321,7 @@ def _show(data: dict[str, Any]) -> int:
     return 0
 
 
-def _act(thread_id: str) -> int:
+def _act(ctx: Context, thread_id: str) -> int:
     """Do what this message asks — and, for prose, that is to read it.
 
     The dispatch is :func:`~euler_webshell.msg.verb_for` on the subject, which is also what
@@ -330,8 +332,9 @@ def _act(thread_id: str) -> int:
     floor for every other way in.
 
     Each act cleans up after itself, so there is nothing left to dismiss: taking a key
-    dismisses the message that carried it, granting one dismisses the request, and a merge
-    dismisses the notice that announced the pull request.
+    dismisses the message that carried it, granting one dismisses the request, a merge
+    dismisses the notice that announced the pull request, and a register walk that confirmed
+    every answer dismisses the notice that listed them.
     """
     data = _fetch(thread_id)
     if data is None:
@@ -359,8 +362,65 @@ def _act(thread_id: str) -> int:
             osc.git_changed()  # master moved
             osc.messages_changed()  # the landed request's notice is dismissed
             return rc
+        case 'register':
+            return _register(ctx, thread_id, data)
         case _:
             return _show(data)
+
+
+#: The walk `msg act` runs on an unregistered-answer notice, one problem per pass: open it,
+#: say what to do, wait a random half hour to an hour, then confirm. A command block rather
+#: than Python, so it is the same block a person could type — and each step a failure can
+#: stop on (`show`, the wait cut short, the confirmation left with Ctrl-C) ends the walk with
+#: a non-zero code, which keeps the message. `random` is not guarded: its value *is* its code.
+_REGISTER_BLOCK: str = '''loop <problems>: {
+  show {loop} || break
+  echo "please register the answer for problem {loop} on projecteuler.net"
+  wait = random 3600 1800
+  sleep {wait} || break
+  pause "please confirm the answer for problem {loop} is registered" || break
+}'''
+
+
+def _register(ctx: Context, thread_id: str, data: dict[str, Any]) -> int:
+    """Walk through registering each answer an unregistered-answer notice names; dismiss it after.
+
+    `summary` files the notice when problems recorded as solved here are not solved on the
+    progress page — the answer was never given to projecteuler.net. Acting on it runs
+    :data:`_REGISTER_BLOCK` over those problems in this shell, and only when the walk ends
+    with every one confirmed is the message dismissed: a walk cut short leaves it in place,
+    to act on again.
+
+    Interactive only, because the walk ends in a confirmation per problem — and `pause`, with
+    nobody to ask, is a no-op that would dismiss the notice on nobody's word.
+    """
+    if not str(data.get('subject', '')).startswith(UNREGISTERED_SUBJECT):
+        console.print(f'[error]error:[/error] message [accent]{thread_id}[/accent] is not an '
+                      'unregistered-answer notice')
+        return 1
+    numbers = unregistered_problems(str(data.get('body', '')))
+    if not numbers:
+        console.print(f'[error]error:[/error] message [accent]{thread_id}[/accent] names no '
+                      'problems to register')
+        return 1
+    if not interactive():
+        console.print('[error]error:[/error] registering answers needs an interactive shell — '
+                      'each one is confirmed by hand')
+        return ExitCodes.EXIT_USAGE
+    if ctx.shell is None:
+        console.print('[error]error:[/error] no shell to run the walk in')
+        return 1
+    _print_thread(data)
+    rc = int(ctx.shell.dispatch(_REGISTER_BLOCK.replace('<problems>', repr(numbers))))
+    if rc != 0:
+        console.print(f'[muted]Not every answer was confirmed — message [accent]{thread_id}'
+                      '[/accent] is kept; `msg act` it again to carry on.[/muted]')
+        return rc
+    if _call('dismiss', thread_id=thread_id) is None:
+        console.print(f'[muted]All confirmed, but could not dismiss [accent]{thread_id}[/accent] — '
+                      '`msg dismiss` it yourself.[/muted]')
+    osc.messages_changed()
+    return 0
 
 
 def _send(subject: str, body: str, to: str) -> int:
@@ -515,8 +575,9 @@ def _dismiss(thread_id: str) -> int:
     return 0
 
 
-@register(requires='reader', aliases=('messages',))
-def msg(action: Annotated[Literal['list', 'read', 'send', 'dismiss', 'act'],
+@register(requires='reader', aliases=('messages',), pass_ctx=True)
+def msg(ctx: Context,
+        action: Annotated[Literal['list', 'read', 'send', 'dismiss', 'act'],
                           Ask('What would you like to do?', labels=_ACTIONS)] = 'list',
         thread: Annotated[str, Ask('Which message?', choices=_thread_choices, when=_needs_thread,
                                    empty='no messages')] = '',
@@ -532,14 +593,16 @@ def msg(action: Annotated[Literal['list', 'read', 'send', 'dismiss', 'act'],
 
     Five verbs, and each is one thing a person does with a message. `act` is the one worth
     knowing: a message *knows* what it is for, so acting on one takes the key it carries,
-    grants the key it asks for, or merges the pull request it announces — and on anything
-    else it simply reads it. The header's message chip labels its rows from the same rule.
+    grants the key it asks for, merges the pull request it announces, or walks you through
+    registering the answers `summary` found unregistered — and on anything else it simply
+    reads it. The header's message chip labels its rows from the same rule.
 
     Typed bare, it walks you through the rest: pick a verb, then whatever that verb needs —
     a message from your own list, or a subject and a body. Every answer can be given on the
     command line instead, and a non-interactive shell asks nothing.
 
     Args:
+        ctx: [injected] The live shell context; the decorator supplies it.
         action: [asked] What to do — `list` everything waiting for you, newest first; `read`
             one message and mark it read; `send` a message; `dismiss` one you are done with;
             `act` on one, doing what it asks. Defaults to `list`.
@@ -563,7 +626,7 @@ def msg(action: Annotated[Literal['list', 'read', 'send', 'dismiss', 'act'],
             return _read(thread)
         if action == 'dismiss':
             return _dismiss(thread)
-        return _act(thread)
+        return _act(ctx, thread)
 
     if not subject or not body:
         raise Abort('msg send needs subject="…" and body="…"', rc=ExitCodes.EXIT_USAGE)

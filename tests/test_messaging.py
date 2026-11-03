@@ -42,7 +42,7 @@ from solver.auth.identity import system_slug
 from solver.shell import dialogue
 from solver.shell.command import Context
 from euler_webshell.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
-                                PR_REVIEW_SUBJECT)
+                                PR_REVIEW_SUBJECT, UNREGISTERED_SUBJECT, verb_for)
 from euler_webshell.msg.app import MessageService, build_admin_app, build_app
 from euler_webshell.msg.config import MsgConfig
 from euler_webshell.msg.identity import box_of
@@ -694,6 +694,9 @@ class UserMessageChipReaderTests(UserMessageChipTests):
 class _MsgCommandCase(_SpoolCase):
     """The `msg` command driven against a real spool, as this process's own login."""
 
+    #: The shell the command's context carries — what `act` runs a command block in.
+    shell: Any = None
+
     async def asyncSetUp(self) -> None:
         await super().asyncSetUp()
         os.environ['EULER_MSG_SOCKET'] = str(self.config.socket_path)
@@ -715,14 +718,14 @@ class _MsgCommandCase(_SpoolCase):
         from euler_webshell.msg.commands import msg
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
-            msg(*args, **kwargs)
+            msg(Context(shell=self.shell), *args, **kwargs)
         return buffer.getvalue()
 
     def _rc(self, *args: Any, **kwargs: Any) -> int:
         """The command's exit code — what a refusal is actually observable as."""
         from euler_webshell.msg.commands import msg
         with contextlib.redirect_stdout(io.StringIO()):
-            return msg(*args, **kwargs)
+            return msg(Context(shell=self.shell), *args, **kwargs)
 
     @staticmethod
     def _nudges(output: str) -> int:
@@ -807,6 +810,9 @@ class MsgActTests(_MsgCommandCase):
         self.enterContext(patch.object(
             msg_commands, '_reconstruct',
             lambda thread_id, data: (done.append(f'reconstruct {thread_id}'), 0)[1]))
+        self.enterContext(patch.object(
+            msg_commands, '_register',
+            lambda ctx, thread_id, data: (done.append(f'register {thread_id}'), 0)[1]))
         return done
 
     async def _from_alice(self, subject: str, body: str = 'the body') -> str:
@@ -877,6 +883,14 @@ class MsgActTests(_MsgCommandCase):
         self.assertEqual(done, ['merge user/x'])
 
     @unittest_run_loop
+    async def test_an_unregistered_answer_notice_is_walked_by_staff(self) -> None:
+        """`summary`'s notice: acting on it is the walk through registering each answer."""
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{UNREGISTERED_SUBJECT}problem 341')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [f'register {thread_id}'])
+
+    @unittest_run_loop
     async def test_a_request_of_your_own_is_a_read(self) -> None:
         """What you await on your own key request is the reply, not a self-grant."""
         done = self._dispatched()
@@ -936,12 +950,106 @@ class MsgActBelowStaffTests(MsgActTests):
         self.assertEqual(done, [], 'a contributor cannot merge')
 
     @unittest_run_loop
+    async def test_an_unregistered_answer_notice_is_walked_by_staff(self) -> None:
+        done = self._dispatched()
+        thread_id = await self._from_alice(f'{UNREGISTERED_SUBJECT}problem 341')
+        await asyncio.to_thread(self._run, 'act', thread_id)
+        self.assertEqual(done, [], 'a notice about the answers is staff\'s to work')
+
+    @unittest_run_loop
     async def test_a_key_message_is_taken(self) -> None:
         """Taking a key issued to you is nobody's privilege — it is your own file."""
         done = self._dispatched()
         thread_id = await self._from_alice(f'{KEY_ISSUE_SUBJECT}{_ME}', '{"verify": "x"}')
         await asyncio.to_thread(self._run, 'act', thread_id)
         self.assertEqual(done, [f'save {thread_id}'])
+
+
+class _WalkShell:
+    """A shell that records the block `act` hands it and answers with a fixed exit code."""
+
+    def __init__(self, rc: int) -> None:
+        self.rc = rc
+        self.blocks: list[str] = []
+
+    def dispatch(self, block: str) -> int:
+        self.blocks.append(block)
+        return self.rc
+
+
+class MsgRegisterTests(_MsgCommandCase):
+    """`msg act` on `summary`'s unregistered-answer notice: the walk, and the dismissal after.
+
+    The walk itself is a command block run in the caller's shell (stood in for here), so what
+    is under test is the contract around it — the problems it is given come out of the body,
+    and the message goes only when the walk reports every answer confirmed.
+    """
+
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        from euler_webshell.msg import commands as msg_commands
+        self.enterContext(patch.object(msg_commands, 'interactive', lambda: True))
+
+    async def _notice(self, *numbers: int) -> str:
+        """The notice as `summary` files it — the body lines are the shared format."""
+        from solver.core.notices import UNREGISTERED_LINE
+        body = 'Not registered:\n\n' + ''.join(
+            f'    {UNREGISTERED_LINE.format(number=number)}\n' for number in numbers)
+        status, data = await self.as_identity('POST', '/admin/messages', _ALICE,
+                                              {'subject': f'{UNREGISTERED_SUBJECT}problems',
+                                               'body': body})
+        self.assertEqual(status, 201)
+        return str(data['id'])
+
+    async def _ids(self) -> list[str]:
+        _status, data = await self.call('GET', '/messages')
+        return [str(thread['id']) for thread in data['threads']]
+
+    @unittest_run_loop
+    async def test_a_confirmed_walk_dismisses_the_notice(self) -> None:
+        self.shell = _WalkShell(0)
+        thread_id = await self._notice(341, 1006)
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 0)
+        [block] = self.shell.blocks
+        self.assertTrue(block.startswith('loop [341, 1006]: {'), block)
+        for step in ('show {loop} || break', 'wait = random 3600 1800', 'sleep {wait} || break',
+                     'pause "please confirm the answer for problem {loop} is registered" || break'):
+            self.assertIn(step, block)
+        self.assertNotIn(thread_id, await self._ids(), 'every answer confirmed: the notice goes')
+
+    @unittest_run_loop
+    async def test_a_walk_cut_short_keeps_the_notice(self) -> None:
+        self.shell = _WalkShell(3)
+        thread_id = await self._notice(341)
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 3)
+        self.assertIn(thread_id, await self._ids(), 'not confirmed: the notice stays to act on again')
+
+    @unittest_run_loop
+    async def test_a_notice_naming_no_problems_runs_nothing(self) -> None:
+        self.shell = _WalkShell(0)
+        thread_id = await self._notice()
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 1)
+        self.assertEqual(self.shell.blocks, [])
+        self.assertIn(thread_id, await self._ids())
+
+    @unittest_run_loop
+    async def test_it_will_not_walk_with_nobody_to_confirm(self) -> None:
+        """`pause` is a no-op non-interactively, so a walk there would dismiss on nobody's word."""
+        from euler_webshell.msg import commands as msg_commands
+        self.shell = _WalkShell(0)
+        thread_id = await self._notice(341)
+        with patch.object(msg_commands, 'interactive', lambda: False):
+            rc = await asyncio.to_thread(self._rc, 'act', thread_id)
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(self.shell.blocks, [])
+        self.assertIn(thread_id, await self._ids())
+
+
+class VerbForRegisterTests(unittest.TestCase):
+    def test_staff_register_and_everyone_else_reads(self) -> None:
+        subject = f'{UNREGISTERED_SUBJECT}problem 341'
+        self.assertEqual(verb_for(subject, is_staff=True, is_own=False, from_staff=False), 'register')
+        self.assertEqual(verb_for(subject, is_staff=False, is_own=False, from_staff=True), 'read')
 
 
 class MsgSendTests(_MsgCommandCase):

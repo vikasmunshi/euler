@@ -18,7 +18,7 @@ from typing import Any
 from solver.config import ExitCodes, config
 from solver.core.git import commit_regenerated
 from solver.core import notices
-from solver.core.notices import UNREGISTERED_SUBJECT
+from solver.core.notices import UNREGISTERED_LINE, UNREGISTERED_SUBJECT
 from solver.core.problems import Problem, format_solved_date, problems
 from solver.core.progress import RECORD_TZ, ProblemRecord, merge_progress, parse_progress
 from solver.shell import console, register
@@ -54,9 +54,10 @@ def _report_unregistered(numbers: list[int]) -> None:
         f'{UNREGISTERED_SUBJECT}{what}',
         'These problems are recorded as solved, but the progress page does not show them as '
         'solved — so the answer was never registered on projecteuler.net:\n\n'
-        + ''.join(f'    answer for problem {number} not registered\n' for number in numbers)
+        + ''.join(f'    {UNREGISTERED_LINE.format(number=number)}\n' for number in numbers)
         + '\nThe recorded state has been kept as it was. Submit each answer on '
-          'https://projecteuler.net, then run `summary` again.\n')
+          'https://projecteuler.net, then run `summary` again. `msg act` on this message walks '
+          'you through them one at a time, and dismisses it once each is confirmed.\n')
 
 
 def _update_problems_state(_problems: dict[int, ProblemRecord]) -> None:

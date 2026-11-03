@@ -91,9 +91,11 @@ a parameter that accepts repetition.
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
 | [`problems`](#command-problems) | — | `reader` | Print a list of problems and their count. |
 | [`progress`](#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
+| [`random`](#command-random) | — | `reader` | Return a random whole number from min to max, both included, as the exit code. |
 | [`results`](#command-results) | — | `reader` | List the recorded results for a problem. |
 | [`search`](#command-search-find) | `find` | `reader` | Search the solution stack for a case-insensitive regular expression. |
 | [`show`](#command-show-open-view) | `open`, `view` | `reader` | Open a problem's page, or any site page, in a browser or the web viewer panel. |
+| [`sleep`](#command-sleep) | — | `reader` | Wait the given number of seconds before the block carries on. |
 | [`summary`](#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. |
 | [`sys-setup`](#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
 | [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
@@ -1466,8 +1468,9 @@ messaging. Delivery is asynchronous — the spool holds the message until you re
 
 Five verbs, and each is one thing a person does with a message. `act` is the one worth
 knowing: a message *knows* what it is for, so acting on one takes the key it carries,
-grants the key it asks for, or merges the pull request it announces — and on anything
-else it simply reads it. The header's message chip labels its rows from the same rule.
+grants the key it asks for, merges the pull request it announces, or walks you through
+registering the answers `summary` found unregistered — and on anything else it simply
+reads it. The header's message chip labels its rows from the same rule.
 
 Typed bare, it walks you through the rest: pick a verb, then whatever that verb needs —
 a message from your own list, or a subject and a body. Every answer can be given on the
@@ -1547,13 +1550,21 @@ Wait for the user to press Enter before the block carries on.
 
 A beat in a command block — after a `show`, or between the steps of a walkthrough. With
 nobody to wait for (a pipe, `< /dev/null`, `--silent`) it is a no-op rather than an error,
-so a block that pauses is still scriptable.
+so a block that pauses is still scriptable. Leaving the prompt with Ctrl-C or Ctrl-D fails
+the command, so `pause "ready?" || break` stops a loop.
 
 **usage**
 
 ```
 pause
+[prompt=<str>] (default paused)
 ```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `prompt` | The line shown above the prompt — what the user is confirming, e.g. `pause "registered the answer?"`. Defaults to `paused`. |
 
 *Defined in* `solver.utils.shell_utils.pause`.
 
@@ -1634,6 +1645,37 @@ progress
 ```
 
 *Defined in* `solver.core.summary.progress`.
+
+---
+
+#### Command: `random`
+
+Return a random whole number from min to max, both included, as the exit code.
+
+* ⚑ needs reader or above.
+
+The number **is** the exit code, which is what an assignment stores — so
+`wait = random 3600 1800` sets `wait` to a number from 1800 to 3600, ready for
+`sleep {wait}`. That also means a result above 0 reads as failure to `&&` / `||`:
+assign it, don't chain on it. (`solver "random"` exits the process with it, which the
+operating system truncates to 0–255.)
+
+**usage**
+
+```
+random
+[max=<int>] (default 100)
+[min=<int>] (default 1)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `max` | The largest number it may return. Defaults to 100. |
+| `min` | The smallest number it may return. Defaults to 1. Must not exceed *max*. |
+
+*Defined in* `solver.utils.shell_utils.random`.
 
 ---
 
@@ -1736,6 +1778,32 @@ show
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.viewer.show`.
+
+---
+
+#### Command: `sleep`
+
+Wait the given number of seconds before the block carries on.
+
+* ⚑ needs reader or above.
+
+Blocking, like the shell's `sleep`: the block resumes when the time is up. Says when that
+will be, so a long wait is not mistaken for a hang. Ctrl-C ends it early and fails the
+command, so `sleep {wait} || break` stops a loop.
+
+**usage**
+
+```
+sleep <seconds>
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `seconds` | How long to wait, in whole seconds; 0 returns at once. Must not be negative. |
+
+*Defined in* `solver.utils.shell_utils.sleep`.
 
 ---
 

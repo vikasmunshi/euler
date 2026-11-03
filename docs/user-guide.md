@@ -257,9 +257,11 @@ its index entry, one click along its name.
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | `admin` | Upgrade packages in the current venv for the given dependency groups. |
 | [`problems`](commands-index.md#command-problems) | — | `reader` | Print a list of problems and their count. |
 | [`progress`](commands-index.md#command-progress) | — | `reader` | Print overall progress through the Euler problems. |
+| [`random`](commands-index.md#command-random) | — | `reader` | Return a random whole number from min to max, both included, as the exit code. |
 | [`results`](commands-index.md#command-results) | — | `reader` | List the recorded results for a problem. |
 | [`search`](commands-index.md#command-search-find) | `find` | `reader` | Search the solution stack for a case-insensitive regular expression. |
 | [`show`](commands-index.md#command-show-open-view) | `open`, `view` | `reader` | Open a problem's page, or any site page, in a browser or the web viewer panel. |
+| [`sleep`](commands-index.md#command-sleep) | — | `reader` | Wait the given number of seconds before the block carries on. |
 | [`summary`](commands-index.md#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
 | [`tags`](commands-index.md#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |

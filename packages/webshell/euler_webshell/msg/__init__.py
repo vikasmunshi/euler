@@ -36,7 +36,8 @@ from solver.core.notices import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHA
 
 
 def verb_for(subject: str, *, is_staff: bool, is_own: bool, from_staff: bool) -> str:
-    """What a message is asking to have done: `save` | `reconstruct` | `authorize` | `merge` | `read`.
+    """What a message is asking to have done: `save` | `reconstruct` | `authorize` | `merge` |
+    `register` | `read`.
 
     **The one rule, in one place.** `msg act <id>` runs it and the header's message chip
     labels its rows with it (:mod:`euler_webshell.user.msg_api`), so the two cannot drift — the
@@ -56,6 +57,10 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool, from_staff: bool) ->
       waiting for. Not your own: what you await on that one is the reply, not a self-grant;
     - a **pull request**, seen by staff, is `merge`. No `is_own` exclusion here, unlike a key
       request: the owner pushes and merges their own branch as a matter of course;
+    - an **unregistered answer** notice (`summary`'s), seen by staff, is `register`: a walk
+      through each problem it names — open it, register the answer, wait, confirm. Staff
+      only, since the notice goes to staff; nothing it does needs a privilege the ladder
+      guards, but for anyone else it is a message about somebody else's answers;
     - everything else is `read`, which is also what a rung below staff gets on the two staff
       acts. That is the honest answer rather than a refusal — a reader offered a grant they
       can never make is worse off than one shown prose.
@@ -76,6 +81,8 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool, from_staff: bool) ->
         return 'authorize'
     if subject.startswith(PR_REVIEW_SUBJECT) and is_staff:
         return 'merge'
+    if subject.startswith(UNREGISTERED_SUBJECT) and is_staff:
+        return 'register'
     return 'read'
 
 

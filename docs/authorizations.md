@@ -101,6 +101,8 @@ a profile on each channel.
 | `solver.utils.scripts` | `tool-setup` |  | ✓ | ✓ | ✓ |
 | `solver.utils.search` | `search` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.shell_utils` | `pause` | ✓ | ✓ | ✓ | ✓ |
+| `solver.utils.shell_utils` | `random` | ✓ | ✓ | ✓ | ✓ |
+| `solver.utils.shell_utils` | `sleep` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
 | `solver.utils.version` | `version` | ✓ | ✓ | ✓ | ✓ |
 <!-- /GEN:authorization-table -->
