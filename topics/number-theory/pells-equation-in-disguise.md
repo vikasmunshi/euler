@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: final 2026-11-02T11:52Z -->
+<!-- status: final -->
 # Pell equation in disguise
 
 Some Euler problems are about a probability, some about triangles, some about tiling a floor, and
@@ -10,7 +10,10 @@ almost-right triangles (223, 224), the disc-drawing probability (100) and the co
 puzzle (321) all reduce to $X^2 - D Y^2 = N$ with $D \in \{2, 3, 5\}$ and a tiny $N$. After that,
 each is the same short loop: a three-term recurrence that jumps from one solution to the next.
 One more, smooth triangular numbers (581), wears the disguise the other way round: thousands of
-Pell equations at once, used to prove a search is finite rather than to walk a sequence.
+Pell equations at once, used to prove a search is finite rather than to walk a sequence. And two
+more, the $k$-Markov numbers (844) and a triangle-hunting sequence (955), keep the walk but change
+the step: one jumps across a tree instead of along a line, the other finds each next solution by
+factoring.
 The [technique page](/topics/technique/pells-equation) explains how to *solve* Pell equations.
 This page is about *recognising* one, and about why so many of these problems end up walking
 literally the same sequence of numbers.
@@ -125,6 +128,43 @@ a cap, on the grounds that a huge $y_1$ has essentially no chance of being smoot
 assume that: the notes check that the answers don't change when the cap is raised by twenty orders
 of magnitude.
 
+## The step itself, undisguised
+
+Why does a Pell orbit obey $s_{k+1} = T s_k - s_{k-1}$? Look at consecutive pairs. The recurrence
+keeps the quantity $s_k^2 - T s_k s_{k-1} + s_{k-1}^2$ fixed, so every pair lies on the conic
+
+$$x^2 - Txy + y^2 = N,$$
+
+which, with $T = 2t$, is $(x - ty)^2 - (t^2 - 1)y^2 = N$: Pell with $D = t^2 - 1$ ($T = 6$ gives
+$D = 8$, $T = 4$ gives $D = 3$, $T = 18$ gives $D = 80 = 5 \cdot 4^2$). Fix $y$, and $x$ is a root
+of a quadratic whose roots sum to $Ty$. So the other root is $Ty - x$. The Pell step replaces one
+coordinate by its partner root, and that move is
+[Vieta jumping](/topics/technique/vieta-jumping). Seen this way, the unit is just a
+way to package two jumps at once.
+
+Problem 844 is that move with more variables. The equation
+$\sum x_i^2 = k \prod x_i$ is quadratic in each $x_i$ separately, so any entry can jump to
+$kP - x_i$, where $P$ is the product of the others. Freeze all but two entries and you are back on
+the conic above, with trace $kP$. For classical [Markov](https://en.wikipedia.org/wiki/Markov_number)
+triples, every branch that holds $z$ fixed is a Pell walk with $T = 3z$. Because any coordinate can
+jump, the solutions form a **tree** rather than an orbit. Jumping the largest entry downward always
+shrinks the tuple, and the descent ends at the all-ones root. That plays the role the fundamental
+solution plays for Pell: one seed, and every solution reachable from it. Jumping any other entry
+produces a new maximum, so a depth-first search pruned at the bound lists everything. The new
+difficulty in 844 is a second parameter, $k$ up to $10^{18}$. It is handled by noticing that for
+large $k$ each node is a fixed polynomial in $k$. The tree is walked once symbolically, and each
+polynomial is summed over its range of $k$ with power sums.
+
+Problem 955 keeps the walk but loses the unit. Its sequence restarts its differences at every
+triangular number, so the next triangle after $t(x)$ is the least $j$ with $t(x) + t(j) = t(y)$.
+Completing the square gives $(2x+1)^2 + (2j+1)^2 = (2y+1)^2 + 1$. That is not Pell, because the
+squares that must cancel give a difference of two squares, and the equation factors:
+$x(x+1) = pq$ with $q - p = 2j + 1$. So the next solution is the factor pair of $x(x+1)$ closest to
+the trivial one $(x, x+1)$. That is a divisor search, done by factoring $x$ and $x + 1$ separately
+and merging the factorisations, since the two are coprime. The walk still jumps from solution to
+solution without visiting the terms in between. But each step costs a factorisation, not a
+multiplication by a fixed unit, and the steps grow irregularly rather than geometrically.
+
 ## How to reason about it
 
 - **Smell it from the statement.** Watch for "integral area" or "integer height" (Heron's
@@ -149,14 +189,24 @@ of magnitude.
   convolves the sequence with itself, $E(N) = (2N-1)\sum E(i)E(N-1-i)$, which is quadratic in its
   own terms. Problem 718 is a min-plus recurrence over residues, $w_i = \min(b_i, w_{i-1} + z)$,
   and its equation $17^p a + 19^p b + 23^p c = n$ is linear: a Frobenius problem, with no square
-  anywhere.
+  anywhere. Problem 374's $A_j = j A_{j-1} + (j-1)!$ (factorial times harmonic number) has a
+  multiplier that changes with $j$, so no trace exists. Problem 539 halves its index as 463 does,
+  and sums by carrying the pair $(P, S)$ down the halving together. Problem 423 is the closest
+  miss. Pascal's rule gives $G(n+1) = 6G(n) - A(n) + [n+1 \text{ prime}]A(n+1)$, which has a constant
+  multiplier but a forcing term that is neither constant nor periodic. Since nothing repeats, the
+  solution does not walk it. It unrolls it: each increment reaches every later term with weight
+  $6^{n-j}$, so the whole sum becomes one dot product against geometric weights.
 - **Check whether $D$ is a square.** A perfect-square condition is necessary for Pell, but not
   sufficient. If completing the square leaves $X^2 - s^2 Y^2 = N$, the left side factors as
   $(X - sY)(X + sY)$, and divisor arguments replace the Pell machinery. Problem 764 is the clean
   example: $16x^2 + y^4 = z^2$ is a Pythagorean triple whose odd leg $y^2 = (m - n)(m + n)$ is a
   product of two coprime factors, so each factor must itself be a square. That gives two
   closed-form [parametrisations](/topics/technique/euclids-formula), enumerated in $O(\sqrt N)$
-  pairs, with no unit and no orbit. Problem 581 meets the same degenerate case inside its family
+  pairs, with no unit and no orbit. Problem 518 is the same principle with nothing to complete:
+  $a+1, b+1, c+1$ in geometric progression means $(b+1)^2 = (a+1)(c+1)$. Write the ratio in lowest
+  terms, $q/p$, and the triple must be $kp^2, kpq, kq^2$. The search then runs over $(k, p, q)$,
+  not over pairs of primes. Problem 955 (above) is the walking version of this degenerate case.
+  Problem 581 meets the same degenerate case inside its family
   ($q = 2$ gives $d = 4$) and simply skips it, because $x^2 - 4y^2 = 1$ has no positive solution.
 - **A square in the statement need not be a condition.** Problem 674's operator
   $\mathcal{I}(x, y) = (1 + x + y)^2 + y - x$ looks like it invites completing the square. But the
@@ -164,6 +214,19 @@ of magnitude.
   $\mathcal{I}$ injective. Equations between $\mathcal{I}$-expressions are then
   [unification](/topics/technique/unification-computer-science) problems, not Diophantine
   arithmetic. Before reducing to Pell, ask what job the square is doing in the statement.
+- **A completed square is useful modulo $q$ too.** Problem 291 first cancels
+  $(x^4 - y^4)/(x^3 + y^3)$ down to the primes $f(n) = n^2 + (n+1)^2$. Then it completes the
+  square, $2f(n) = (2n+1)^2 + 1$, but never solves $f(n) = m^2$. The square answers a different
+  question: which primes $q$ divide some $f(n)$? Exactly those for which $-1$ is a square mod $q$,
+  that is $q \equiv 1 \pmod 4$, and each hits two residue classes of $n$. That turns a primality
+  test per value into a [sieve over the polynomial's values](/topics/technique/sieve-of-eratosthenes).
+  A quadratic that has to be *prime* rather than *square* still gets its square completed, just
+  for a sieve instead of a Pell walk.
+- **Two square conditions sharing a variable are not one Pell equation.** In Problem 309 the
+  ladders give $x^2 = w^2 + a^2$ and $y^2 = w^2 + b^2$ with the same width $w$. Eliminating $w$
+  leaves $x^2 - a^2 = y^2 - b^2$, a quadric in four unknowns rather than a conic in two. The working move is to generate every triple with
+  [Euclid's formula](/topics/technique/euclids-formula), group the triples by shared leg, and test
+  the third condition, $(a+b) \mid ab$, on pairs inside each group.
 - **Count the families.** For $N = \pm1$ there is one orbit. For $N = 44$ (Problem 140) or
   $N = -7$ (Problem 321) there are several, and a missed seed silently drops every answer in that
   family. Compare the merged sequence against all the terms the statement gives.
