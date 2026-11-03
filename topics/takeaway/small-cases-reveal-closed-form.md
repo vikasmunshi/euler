@@ -190,6 +190,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0523](/solutions/0523/) — First Sort I
+- ● [0555](/solutions/0555/) — McCarthy 91 Function
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0684](/solutions/0684/) — Inverse Digit Sum

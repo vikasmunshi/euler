@@ -309,7 +309,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0542](/solutions/0542/) — Geometric Progression with Maximum Sum
 - ○ [0543](/solutions/0543/) — Prime-Sum Numbers
 - ○ [0546](/solutions/0546/) — The Floor's Revenge
-- ○ [0555](/solutions/0555/) — McCarthy 91 Function
+- ● [0555](/solutions/0555/) — McCarthy 91 Function
 - ○ [0577](/solutions/0577/) — Counting Hexagons
 - ○ [0603](/solutions/0603/) — Substring Sums of Prime Concatenations
 - ○ [0658](/solutions/0658/) — Incomplete Words II

@@ -451,6 +451,7 @@ loop was never needed.
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0523](/solutions/0523/) — First Sort I
+- ● [0555](/solutions/0555/) — McCarthy 91 Function
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game

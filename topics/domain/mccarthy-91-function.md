@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/McCarthy_91_fu
 ## Problems
 
 - ● [0340](/solutions/0340/) — Crazy Function
+- ● [0555](/solutions/0555/) — McCarthy 91 Function
 
 <!-- /problems -->

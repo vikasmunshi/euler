@@ -111,5 +111,6 @@ loop left and it also folds into a closed form.
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
 - ● [0234](/solutions/0234/) — Semidivisible Numbers
 - ● [0340](/solutions/0340/) — Crazy Function
+- ● [0555](/solutions/0555/) — McCarthy 91 Function
 
 <!-- /problems -->

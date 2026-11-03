@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Periodic_point
 ## Problems
 
 - ● [0197](/solutions/0197/) — A Recursively Defined Sequence
-- ○ [0555](/solutions/0555/) — McCarthy 91 Function
+- ● [0555](/solutions/0555/) — McCarthy 91 Function
 - ○ [0729](/solutions/0729/) — Range of Periodic Sequence
 - ○ [0802](/solutions/0802/) — Iterated Composition
 - ○ [0843](/solutions/0843/) — Periodic Circles
