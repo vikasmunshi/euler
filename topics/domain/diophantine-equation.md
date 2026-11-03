@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-equation] -->
-<!-- status: final 2026-10-29T07:12Z -->
+<!-- status: final -->
 # Diophantine equation
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a
@@ -41,6 +41,19 @@ for a in range(1, s // 4 + 1):
 Two nested loops instead of three, exact integer arithmetic instead of a floating-point
 square root. The lesson generalises: a linear side-condition is a free dimension of pruning.
 
+A linear equation is not always the easy part, though. Once the unknowns must be
+**non-negative**, `ax + by + cz = n` becomes the
+[coin problem](https://en.wikipedia.org/wiki/Coin_problem). [Problem 718](/solutions/0718/)
+asks for the sum of every `n` that `17ᵖa + 19ᵖb + 23ᵖc` cannot reach. The reachable values
+form a [numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup) with finitely
+many gaps, but at `p = 6` the gaps run into the quadrillions. The way through is the
+[Apéry set](https://en.wikipedia.org/wiki/Numerical_semigroup#Ap%C3%A9ry_set): for each residue
+`r` modulo the smallest generator `x`, find the least reachable value `w_r` in that class.
+Everything above `w_r` in the class is reachable and everything below it is a gap. So the gaps
+in each class form one arithmetic progression, and its count and sum have closed forms. The
+cost is linear in `x` and does not depend on how far the gaps extend. With three generators,
+walking the residues in steps of `z` reduces the Apéry set to a running minimum of one array.
+
 ### Reduce to Pell's equation, then iterate a recurrence
 
 The workhorse pattern. Many geometric or probabilistic constraints, after
@@ -68,6 +81,17 @@ length) is guaranteed to be it — the method Problem 66 uses. When `D` is large
 outrun 64 bits, so you reach for
 [arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic).
 
+Pell equations can also prove that a search is **finite**. [Problem 581](/solutions/0581/)
+needs every `n` for which `n` and `n + 1` are both 47-smooth. With `x = 2n + 1` and `q` the
+squarefree part of `n(n+1)`, the condition becomes `x² − 2q·y² = 1`. Here `q` is a product of
+some subset of the fifteen primes up to 47, so there are only `2¹⁵` equations to check. That
+is [Størmer's theorem](https://en.wikipedia.org/wiki/St%C3%B8rmer%27s_theorem). Lehmer's
+refinement adds two cheap filters. If the fundamental `y₁` is not smooth, no later solution is,
+because `y₁` divides every `yₖ`. If some `yₖ` is smooth, then `k ≤ max(3, (p+1)/2)`. An
+unbounded problem about consecutive smooth numbers therefore becomes a fixed list of Pell
+equations, each with a short run of powers. The equation tells you where the search can stop
+as well as how to generate solutions.
+
 ### Factor the equation into a divisor count
 
 The algebraic sleight-of-hand. An equation in two variables can sometimes be **factored**
@@ -86,6 +110,27 @@ forming `n²`. Asking for the least `n` with more than a thousand solutions then
 search over [highly composite numbers](https://en.wikipedia.org/wiki/Highly_composite_number),
 which is a tiny structured tree rather than a linear scan.
 
+A factorisation can also give you the *least* solution directly. In
+[Problem 955](/solutions/0955/), a sequence jumps from one triangular number `t(x)` to the
+next. The size of each jump is the least `j ≥ 1` with `t(x) + t(j) = t(y)`. Multiplying by 8
+and taking a difference of squares turns this into `x(x+1) = p·q`, where `q − p = 2j + 1`.
+The trivial pair `(x, x+1)` gives `j = 0`. The smallest real jump therefore comes from the
+factor pair **closest** to the trivial one, which is the largest suitable divisor of `x(x+1)`
+below `x`. Each step costs a factorisation of `x` and `x + 1` separately (they are coprime) by
+[Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm), so the method never
+scans gaps that reach into the trillions.
+
+Factoring can also be what makes a condition such as *"is prime"* tractable.
+[Problem 291](/solutions/0291/) asks for primes `p = (x⁴ − y⁴)/(x³ + y³)`. Cancel `x + y`, put
+`x = ga` and `y = gb` with `a` and `b` coprime, and coprimality forces the leftover denominator
+to divide `g`. The prime is then a product of three positive integers, so two of them must
+equal 1, and the two-variable equation collapses to the one-variable form `p = n² + (n+1)²`.
+What remains is to count the primes among the values of a quadratic. A
+[polynomial sieve](https://en.wikipedia.org/wiki/Sieve_theory) handles this: an odd prime `q`
+divides some value only when `−1` is a square mod `q`, which means `q ≡ 1 (mod 4)`. Each such
+`q` then strikes exactly two residue classes of `n`. This is Eratosthenes run over the values
+of `f(n)` instead of over the integers.
+
 ### Parametrise, then count whole families by division
 
 When the question is *how many* solutions lie under a bound, generating them one by one is
@@ -101,6 +146,27 @@ fraction `p/q` turns each primitive triangle into a [coprime](https://en.wikiped
 pair `(p, q)`. Every triangle is then that primitive shape scaled by some `s`, so a pair whose
 smallest member has perimeter `L` contributes `⌊N / L⌋` triangles in one step. The scaled
 copies are never visited.
+
+The parametrisation usually comes from one lemma: **if coprime factors multiply to a square,
+each factor is a square** (up to a unit, or a factor of 2 you track separately). In
+[Problem 518](/solutions/0518/), three numbers are in geometric progression when `y² = xz`.
+Writing the ratio in lowest terms as `q/p` forces `p²` to divide `x`. That gives the complete
+and unique family `(kp², kpq, kq²)` with `p` and `q` coprime, so a pairwise divisibility
+search becomes a walk over three small parameters. [Problem 764](/solutions/0764/) uses the
+lemma twice. It reads `16x² + y⁴ = z²` as a Pythagorean triple `(4x, y², z)` and takes the
+triple from [Euclid's formula](https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple).
+Requiring the leg `y²` to be a square forces `m ± n` (when `y` is odd) or `m` and `2n` (when `y`
+is even) to be squares themselves. The result is two quartic families in a coprime pair
+`(a, b)`. Because `z` grows like the fourth power of the parameters, the enumeration costs
+`O(N^{1/2})`.
+
+A parametrised family can also be **joined against itself**. In
+[Problem 309](/solutions/0309/), crossed ladders reduce to two Pythagorean triples that share a
+leg `w`, together with the condition `(a + b) | ab` on the other legs. You first show that
+`a` and `b` must be integers: an irrational pair would make `1/h` irrational. Then you
+generate every triple once with Euclid's formula, group the triples by their shared leg, and
+test pairs only within each group. Each leg belongs to only a handful of triples, so the
+quadratic pair test inside a group costs almost nothing.
 
 [Problem 251](/solutions/0251/) goes one step further. A condition on nested cube roots
 reduces, through the cubic that `u + v` satisfies, to the integer equation
@@ -148,6 +214,39 @@ then `nˣ` ends in 0, so `x` must too. That makes `x ≥ 10`, so `10⁹` divides
 solution checks it by exhaustive search on the scaled-down moduli `10³`, `10⁴` and `10⁵`
 before relying on it.
 
+### Vieta jumping: the solutions form a tree
+
+Some equations are quadratic in each variable taken separately. Then every solution has a
+neighbour. In the Markov-type equation `x₁² + … + x_k² = k·x₁⋯x_k` of
+[Problem 844](/solutions/0844/), fix all the variables but one. That one is a root of a
+quadratic, and by [Vieta's formulas](https://en.wikipedia.org/wiki/Vieta%27s_formulas) the other
+root `kP − x` is also a positive integer. Swapping one root for the other is
+[Vieta jumping](https://en.wikipedia.org/wiki/Vieta_jumping). If you always swap out the
+largest entry, the tuple shrinks down to a fundamental solution, which here is all ones.
+Run in the other direction, the same move makes every solution a node of a single tree, and the
+values only grow along each branch. A depth-first search pruned at the bound therefore lists
+every solution, and the tree has only `O(log² N)` nodes because the values grow doubly
+exponentially. The problem has one more layer, a sum over `k` up to `10¹⁸`. The tree has the
+same shape for every large `k`, so each node is a fixed polynomial in `k`. The sum over `k`
+then becomes a few dozen [power sums](https://en.wikipedia.org/wiki/Faulhaber%27s_formula)
+instead of 10¹⁸ trees.
+
+### When the function is injective, solve by structure
+
+In some problems the arithmetic turns out to carry no information at all.
+[Problem 674](/solutions/0674/) asks when two nested expressions in
+`I(x, y) = (1+x+y)² + y − x` are equal. For a fixed `s = x + y`, the values of `I` fill a
+window around `(s+1)²`, and the windows for different `s` never overlap. So `I` is
+**injective** on non-negative pairs, much like a
+[pairing function](https://en.wikipedia.org/wiki/Pairing_function), and two expressions are
+equal exactly when their trees match after the variables are substituted. Solving the
+equation is then first-order
+[unification](https://en.wikipedia.org/wiki/Unification_(computer_science)): union-find over
+a hash-consed term DAG, with an occurs check to reject equations like `x = I(x, z)`. `I`
+increases in each argument, so the least solution is the most general unifier with every free
+variable set to 0. The lesson is to ask, before computing anything, whether the equation
+holds only for identical inputs.
+
 ### When no structure appears, choose the side you search from
 
 Not every Diophantine question gives way to algebra. [Problem 348](/solutions/0348/) asks
@@ -172,11 +271,22 @@ a Diophantine equation and work through these questions before writing any loop:
   statement almost always hides one of a few canonical forms: linear, Pell/Pell-like, or
   something that factors.
 - **Is there a linear constraint to spend?** Each one eliminates a variable and a loop level.
+  If the unknowns must be non-negative, it is a Frobenius problem: count the gaps per residue
+  class with the Apéry set, never one by one.
 - **Does it become `x² - Dy² = N`?** Then the solutions form a recurrence-generated family;
   find the fundamental solution (by inspection, or via continued fractions) and iterate. Never
-  bound the loop by the size of the answer.
+  bound the loop by the size of the answer. A family of Pell equations with Lehmer's bounds
+  can also show that a smoothness search is finite.
 - **Does it factor?** If you can force a product `(…)(…) = k`, counting solutions becomes
-  counting divisors of `k`, and the problem turns into a factorisation question.
+  counting divisors of `k`, and the problem turns into a factorisation question. The divisor
+  nearest the trivial one gives the least solution. A prime equal to a product forces every
+  factor but one to be 1.
+- **Do coprime factors multiply to a square?** Then each factor is a square, and the
+  solutions are parametrised by a coprime pair.
+- **Is it quadratic in each variable?** Vieta jumping links the solutions into a tree rooted
+  at a fundamental solution, and a pruned DFS walks all of it.
+- **Is the operation injective?** Then equality means the expression trees match: unify
+  them instead of doing arithmetic.
 - **Can an inequality bound the unknown value?** If the sides are ordered, a ratio or
   quotient often fits in a small interval (Problem 257's `(1, 4]`). One open equation
   then becomes a few fixed ones.
