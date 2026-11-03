@@ -184,6 +184,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0484](/solutions/0484/) — Arithmetic Derivative

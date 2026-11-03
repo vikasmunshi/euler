@@ -135,7 +135,7 @@ be found by descending through the lengths — never materialising a string of `
 - ○ [0402](/solutions/0402/) — Integer-valued Polynomials
 - ○ [0406](/solutions/0406/) — Guessing Game
 - ○ [0435](/solutions/0435/) — Polynomials of Fibonacci Numbers
-- ○ [0437](/solutions/0437/) — Fibonacci Primitive Roots
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ○ [0481](/solutions/0481/) — Chef Showdown
 - ○ [0543](/solutions/0543/) — Prime-Sum Numbers
 - ○ [0554](/solutions/0554/) — Centaurs on a Chess Board

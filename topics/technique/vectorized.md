@@ -323,6 +323,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals

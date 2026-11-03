@@ -161,7 +161,7 @@ Problem 250 uses this to cut the `250250` terms of `nⁿ mod 250` down to a shor
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ○ [0417](/solutions/0417/) — Reciprocal Cycles II
-- ○ [0437](/solutions/0437/) — Fibonacci Primitive Roots
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0622](/solutions/0622/) — Riffle Shuffles

@@ -726,7 +726,7 @@ handful of operations on small numbers.
 - ○ [0427](/solutions/0427/) — $n$-sequences
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ○ [0435](/solutions/0435/) — Polynomials of Fibonacci Numbers
-- ○ [0437](/solutions/0437/) — Fibonacci Primitive Roots
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ○ [0439](/solutions/0439/) — Sum of Sum of Divisors
 - ○ [0440](/solutions/0440/) — GCD and Tiling
 - ○ [0445](/solutions/0445/) — Retractions A

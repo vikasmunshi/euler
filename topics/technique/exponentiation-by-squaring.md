@@ -216,6 +216,7 @@ with it much of public-key cryptography, affordable at all.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0670](/solutions/0670/) — Colouring a Strip

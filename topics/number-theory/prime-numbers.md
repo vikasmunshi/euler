@@ -802,7 +802,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0425](/solutions/0425/) — Prime Connection
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
-- ○ [0437](/solutions/0437/) — Fibonacci Primitive Roots
+- ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ○ [0441](/solutions/0441/) — The Inverse Summation of Coprime Couples
 - ○ [0446](/solutions/0446/) — Retractions B
 - ○ [0451](/solutions/0451/) — Modular Inverses
