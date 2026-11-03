@@ -4164,8 +4164,8 @@
     "level": 21,
     "pct": 53,
     "solvers": 1074,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 13:11"
   },
   "522": {
     "title": "Hilbert's Blackout",
