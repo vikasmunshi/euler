@@ -229,6 +229,7 @@ crash, and neither shows up on small test inputs.
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0628](/solutions/0628/) — Open Chess Positions

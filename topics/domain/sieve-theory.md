@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sieve_theory>.
 ## Problems
 
 - ● [0010](/solutions/0010/) — Summation of Primes
-- ○ [0521](/solutions/0521/) — Smallest Prime Factor
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0580](/solutions/0580/) — Squarefree Hilbert Numbers
 
 <!-- /problems -->

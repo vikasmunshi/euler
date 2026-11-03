@@ -225,6 +225,7 @@ the same idea, implemented once, in C.
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers

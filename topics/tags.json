@@ -2425,7 +2425,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime-counting_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0050", "p0187", "p0308", "p0347", "p0423", "p0452", "p0501", "p0537", "p0609", "p0642", "p0668", "p0801", "p0869"]
+      "refs": ["p0050", "p0187", "p0308", "p0347", "p0423", "p0452", "p0501", "p0521", "p0537", "p0609", "p0642", "p0668", "p0801", "p0869"]
     },
     {
       "slug": "prime-factor",
@@ -4342,7 +4342,7 @@
       "reference": "https://numpy.org/doc/stable/user/basics.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0229_s0", "p0249_s0", "p0310_s0", "p0333_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0518_s0"]
+      "refs": ["p0229_s0", "p0249_s0", "p0310_s0", "p0333_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0518_s0", "p0521_s0"]
     },
     {
       "slug": "fast-fourier-transform",
@@ -4828,7 +4828,7 @@
       "reference": "https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0290_s0", "p0293_s0", "p0297_s0", "p0303_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0457_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0531_s0", "p0545_s0", "p0551_s0", "p0555_s0", "p0565_s0", "p0565_s1", "p0612_s0", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0659_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0866_s0", "p0875_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0967_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
+      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0290_s0", "p0293_s0", "p0297_s0", "p0303_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0457_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0521_s0", "p0531_s0", "p0545_s0", "p0551_s0", "p0555_s0", "p0565_s0", "p0565_s1", "p0612_s0", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0659_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0866_s0", "p0875_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0957_s0", "p0963_s0", "p0967_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
     },
     {
       "slug": "int64",
@@ -4864,7 +4864,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_square_root",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0501_s0", "p0517_s0", "p0632_s0", "p0668_s0", "p0721_s0", "p0764_s0", "p0808_s0", "p0932_s0", "p0950_s0", "p1006_s0"]
+      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0501_s0", "p0517_s0", "p0521_s0", "p0632_s0", "p0668_s0", "p0721_s0", "p0764_s0", "p0808_s0", "p0932_s0", "p0950_s0", "p1006_s0"]
     },
     {
       "slug": "integral",
@@ -5164,6 +5164,15 @@
       "refs": ["p0492_s0"]
     },
     {
+      "slug": "lucy-hedgehog-sieve",
+      "facet": "technique",
+      "name": "Lucy_Hedgehog prime-sum sieve",
+      "reference": "https://en.wikipedia.org/wiki/Prime-counting_function",
+      "additional-references": [],
+      "summary": "Computing prime counts or prime power sums at every quotient floor(n/k) in O(n^(3/4)) by sieving a table indexed by the O(sqrt n) distinct quotients.",
+      "refs": ["p0521_s0"]
+    },
+    {
       "slug": "mask-computing",
       "facet": "technique",
       "name": "Mask (computing)",
@@ -5368,7 +5377,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0374_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0463_s0", "p0512_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0649_s0", "p0674_s0", "p0682_s0", "p0684_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0374_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0463_s0", "p0512_s0", "p0521_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0649_s0", "p0674_s0", "p0682_s0", "p0684_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -5521,7 +5530,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0549_s0", "p0558_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5539,7 +5548,7 @@
       "reference": "https://numpy.org/doc/stable/reference/arrays.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0294_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0512_s0", "p0632_s0", "p0641_s0", "p0659_s0", "p0668_s0", "p0675_s0", "p0875_s0", "p0967_s0"]
+      "refs": ["p0179_s0", "p0216_s0", "p0249_s0", "p0256_s0", "p0294_s0", "p0304_s0", "p0319_s0", "p0351_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0452_s0", "p0464_s0", "p0512_s0", "p0521_s0", "p0632_s0", "p0641_s0", "p0659_s0", "p0668_s0", "p0675_s0", "p0875_s0", "p0967_s0"]
     },
     {
       "slug": "open-addressing",
@@ -5782,7 +5791,7 @@
       "reference": "https://codeforces.com/blog/entry/53925",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0153_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0429_s0", "p0452_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0565_s1", "p0625_s0", "p0642_s0", "p0668_s0", "p0754_s0", "p0875_s0", "p0926_s0"]
+      "refs": ["p0153_s0", "p0255_s0", "p0272_s0", "p0276_s0", "p0319_s0", "p0351_s0", "p0429_s0", "p0452_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0521_s0", "p0565_s1", "p0625_s0", "p0642_s0", "p0668_s0", "p0754_s0", "p0875_s0", "p0926_s0"]
     },
     {
       "slug": "randomized-incremental-algorithm",
@@ -6268,7 +6277,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0558_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0478_s1", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0"]
     },
     {
       "slug": "walrus-operator",
@@ -6349,7 +6358,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a counting DP must also total the counted objects' values, carry a (count, sum) pair per state and update the sum with the same linear rule that builds the value, so the totals come for free.",
-      "refs": ["p0463", "p0776"]
+      "refs": ["p0463", "p0521", "p0776"]
     },
     {
       "slug": "cheap-checks-first",
@@ -6772,7 +6781,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Anticipate 32/64-bit overflow in C where Python bignums silently cope.",
-      "refs": ["p0003", "p0005", "p0006", "p0008", "p0009", "p0016", "p0025", "p0031", "p0048", "p0050", "p0055", "p0058", "p0065", "p0066", "p0071", "p0076", "p0080", "p0087", "p0094", "p0097", "p0108", "p0110", "p0111", "p0114", "p0116", "p0119", "p0120", "p0121", "p0128", "p0136", "p0138", "p0140", "p0147", "p0148", "p0157", "p0166", "p0176", "p0178", "p0180", "p0184", "p0189", "p0192", "p0195", "p0196", "p0198", "p0202", "p0208", "p0209", "p0210", "p0217", "p0218", "p0221", "p0233", "p0234", "p0236", "p0237", "p0240", "p0241", "p0242", "p0245", "p0248", "p0249", "p0250", "p0251", "p0254", "p0255", "p0259", "p0272", "p0276", "p0277", "p0288", "p0297", "p0313", "p0321", "p0341", "p0365", "p0387", "p0401", "p0420", "p0421", "p0429", "p0455", "p0473", "p0484", "p0487", "p0531", "p0551", "p0581", "p0615", "p0632", "p0659", "p0686", "p0694", "p0698", "p0704", "p0745", "p0751", "p0788", "p0820", "p0862", "p0866", "p0882", "p0943", "p0944", "p0963", "p0974", "p1010"]
+      "refs": ["p0003", "p0005", "p0006", "p0008", "p0009", "p0016", "p0025", "p0031", "p0048", "p0050", "p0055", "p0058", "p0065", "p0066", "p0071", "p0076", "p0080", "p0087", "p0094", "p0097", "p0108", "p0110", "p0111", "p0114", "p0116", "p0119", "p0120", "p0121", "p0128", "p0136", "p0138", "p0140", "p0147", "p0148", "p0157", "p0166", "p0176", "p0178", "p0180", "p0184", "p0189", "p0192", "p0195", "p0196", "p0198", "p0202", "p0208", "p0209", "p0210", "p0217", "p0218", "p0221", "p0233", "p0234", "p0236", "p0237", "p0240", "p0241", "p0242", "p0245", "p0248", "p0249", "p0250", "p0251", "p0254", "p0255", "p0259", "p0272", "p0276", "p0277", "p0288", "p0297", "p0313", "p0321", "p0341", "p0365", "p0387", "p0401", "p0420", "p0421", "p0429", "p0455", "p0473", "p0484", "p0487", "p0521", "p0531", "p0551", "p0581", "p0615", "p0632", "p0659", "p0686", "p0694", "p0698", "p0704", "p0745", "p0751", "p0788", "p0820", "p0862", "p0866", "p0882", "p0943", "p0944", "p0963", "p0974", "p1010"]
     }
   ]
 }

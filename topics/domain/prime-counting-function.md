@@ -175,6 +175,7 @@ The two languages agree on the algorithm everywhere; they diverge on where the i
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0452](/solutions/0452/) — Long Products
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0537](/solutions/0537/) — Counting Tuples
 - ○ [0609](/solutions/0609/) — $\pi$ Sequences
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors

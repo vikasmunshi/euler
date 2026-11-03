@@ -823,7 +823,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
-- ○ [0521](/solutions/0521/) — Smallest Prime Factor
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0526](/solutions/0526/) — Largest Prime Factors of Consecutive Numbers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ○ [0536](/solutions/0536/) — Modulo Power Identity

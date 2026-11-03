@@ -220,6 +220,7 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0452](/solutions/0452/) — Long Products
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0659](/solutions/0659/) — Largest Prime

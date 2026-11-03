@@ -347,6 +347,7 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers

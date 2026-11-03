@@ -373,7 +373,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0490](/solutions/0490/) — Jumping Frog
 - ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
-- ○ [0521](/solutions/0521/) — Smallest Prime Factor
+- ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ○ [0534](/solutions/0534/) — Weak Queens
 - ○ [0535](/solutions/0535/) — Fractal Sequence
