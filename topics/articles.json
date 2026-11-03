@@ -8560,13 +8560,13 @@
       "path": "technique/quadratic-residue",
       "title": "Quadratic residue",
       "status": "final",
-      "written": "2026-08-02T16:19Z",
+      "written": "2026-11-03T22:41Z",
       "solved": 9,
       "problems": 9,
       "tags": ["quadratic-residue"],
       "refs": ["p0216_s0", "p0221_s0", "p0245_s0", "p0291_s0", "p0457_s0", "p0492_s0", "p0621_s0", "p0659_s0", "p0752_s0"],
-      "covered": ["p0216", "p0221", "p0245"],
-      "solved_after": ["p0291", "p0457", "p0492", "p0621", "p0659", "p0752"]
+      "covered": ["p0216", "p0221", "p0245", "p0291", "p0457", "p0492", "p0621", "p0659", "p0752"],
+      "solved_after": []
     },
     {
       "path": "technique/quaternion-group",
