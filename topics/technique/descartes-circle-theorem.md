@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Descartes%27_t
 ## Problems
 
 - ● [0199](/solutions/0199/) — Iterative Circle Packing
+- ● [0510](/solutions/0510/) — Tangent Circles
 
 <!-- /problems -->

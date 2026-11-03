@@ -228,7 +228,7 @@ near the root.
 - ○ [0460](/solutions/0460/) — An Ant on the Move
 - ○ [0465](/solutions/0465/) — Polar Polygons
 - ○ [0476](/solutions/0476/) — Circle Packing II
-- ○ [0510](/solutions/0510/) — Tangent Circles
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ○ [0525](/solutions/0525/) — Rolling Ellipse
 - ○ [0532](/solutions/0532/) — Nanobots on Geodesics
 - ○ [0547](/solutions/0547/) — Distance of Random Points Within Hollow Square Laminae

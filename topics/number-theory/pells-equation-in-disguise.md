@@ -314,7 +314,7 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0482](/solutions/0482/) — The Incenter of a Triangle
 - ○ [0496](/solutions/0496/) — Incenter and Circumcenter of Triangle
-- ○ [0510](/solutions/0510/) — Tangent Circles
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ○ [0513](/solutions/0513/) — Integral Median
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0528](/solutions/0528/) — Constrained Sums

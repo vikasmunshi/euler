@@ -278,6 +278,7 @@ the same idea, implemented once, in C.
 - ● [0341](/solutions/0341/) — Golomb's Self-describing Sequence
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0632](/solutions/0632/) — Square Prime Factors

@@ -174,7 +174,6 @@ them, but the three facts do the heavy lifting elsewhere.
 - ○ [0465](/solutions/0465/) — Polar Polygons
 - ● [0478](/solutions/0478/) — Mixtures
 - ○ [0507](/solutions/0507/) — Shortest Lattice Vector
-- ○ [0510](/solutions/0510/) — Tangent Circles
 - ○ [0514](/solutions/0514/) — Geoboard Shapes
 - ○ [0562](/solutions/0562/) — Maximal Perimeter
 - ○ [0577](/solutions/0577/) — Counting Hexagons

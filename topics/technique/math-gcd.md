@@ -219,6 +219,7 @@ entirely.
 - ● [0309](/solutions/0309/) — Integer Ladders
 - ● [0443](/solutions/0443/) — GCD Sequence
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 

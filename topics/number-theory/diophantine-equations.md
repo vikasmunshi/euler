@@ -326,7 +326,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ○ [0482](/solutions/0482/) — The Incenter of a Triangle
 - ○ [0496](/solutions/0496/) — Incenter and Circumcenter of Triangle
-- ○ [0510](/solutions/0510/) — Tangent Circles
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ○ [0513](/solutions/0513/) — Integral Median
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0528](/solutions/0528/) — Constrained Sums

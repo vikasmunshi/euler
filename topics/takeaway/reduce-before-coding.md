@@ -476,6 +476,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences

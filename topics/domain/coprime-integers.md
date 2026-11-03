@@ -173,6 +173,7 @@ factorisation beyond its disjointness from the other's.
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ○ [0441](/solutions/0441/) — The Inverse Summation of Coprime Couples
 - ○ [0451](/solutions/0451/) — Modular Inverses
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples
 - ○ [0560](/solutions/0560/) — Coprime Nim

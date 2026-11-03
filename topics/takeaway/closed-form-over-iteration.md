@@ -355,6 +355,7 @@ Four cautions earn their keep:
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0506](/solutions/0506/) — Clock Sequence
+- ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0517](/solutions/0517/) — A Real Recursion
 - ● [0520](/solutions/0520/) — Simbers
 - ● [0555](/solutions/0555/) — McCarthy 91 Function
