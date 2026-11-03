@@ -20,7 +20,12 @@ version = { attr = "euler_content._version.__version__" }
 
 [tool.setuptools]
 packages = ["euler_content"]
-include-package-data = true
+# The tree ships through `package-data` below, which needs no manifest. With
+# `include-package-data = true` setuptools also reads the files off the manifest, sees that
+# directories like `tree/solutions/public/p0042` are importable (they hold `.py` files) yet not
+# listed in `packages`, and warns "Package would be ignored" once per directory (182 times)
+# when pip shows build output. The wheel's file list is identical either way.
+include-package-data = false
 
 [tool.setuptools.package-data]
 euler_content = ["tree/**/*"]
