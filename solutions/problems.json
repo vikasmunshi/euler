@@ -5500,8 +5500,8 @@
     "level": 9,
     "pct": 24,
     "solvers": 1070,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 13:14"
   },
   "689": {
     "title": "Binary Series",
