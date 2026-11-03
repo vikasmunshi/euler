@@ -14,7 +14,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Binary_quadrat
 - ○ [0586](/solutions/0586/) — Binary Quadratic Form
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
-- ○ [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ○ [0833](/solutions/0833/) — Square Triangle Products
 - ○ [0937](/solutions/0937/) — Equiproduct Partition
 

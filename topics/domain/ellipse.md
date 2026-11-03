@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Ellipse>._
 
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ○ [0404](/solutions/0404/) — Crisscross Ellipses
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 
 <!-- /problems -->

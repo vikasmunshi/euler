@@ -13,5 +13,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Gauss_circle_p
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples
 - ○ [0596](/solutions/0596/) — Number of Lattice Points in a Hyperball
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 
 <!-- /problems -->

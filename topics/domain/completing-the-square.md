@@ -106,5 +106,6 @@ half-planes with closed-form counts.
 - ● [0138](/solutions/0138/) — Special Isosceles Triangles
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 
 <!-- /problems -->

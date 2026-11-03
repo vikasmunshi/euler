@@ -400,6 +400,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers

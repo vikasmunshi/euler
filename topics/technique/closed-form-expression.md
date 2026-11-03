@@ -468,6 +468,7 @@ loop was never needed.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0778](/solutions/0778/) — Freshman's Product
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0887](/solutions/0887/) — Bounded Binary Search

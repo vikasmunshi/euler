@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Class_number_(
 ## Problems
 
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
-- ○ [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 
 <!-- /problems -->

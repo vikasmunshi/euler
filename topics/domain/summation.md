@@ -409,7 +409,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ○ [0794](/solutions/0794/) — Seventeen Points
 - ○ [0795](/solutions/0795/) — Alternating GCD Sum
-- ○ [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ○ [0830](/solutions/0830/) — Binomials and Powers
 - ○ [0831](/solutions/0831/) — Triple Product
 - ○ [0850](/solutions/0850/) — Fractions of Powers

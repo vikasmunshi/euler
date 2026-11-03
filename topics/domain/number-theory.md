@@ -691,7 +691,7 @@ show up there at once. See
 - ○ [0795](/solutions/0795/) — Alternating GCD Sum
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ○ [0801](/solutions/0801/) — $x^y \equiv y^x$
-- ○ [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ○ [0812](/solutions/0812/) — Dynamical Polynomials
 - ○ [0821](/solutions/0821/) — 123-Separable
 - ● [0822](/solutions/0822/) — Square the Smallest
