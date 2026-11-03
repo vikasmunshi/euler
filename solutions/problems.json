@@ -3876,8 +3876,8 @@
     "level": 7,
     "pct": 19,
     "solvers": 1620,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 18:05"
   },
   "486": {
     "title": "Palindrome-containing Strings",
