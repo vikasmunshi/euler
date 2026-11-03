@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final 2026-11-02T18:23Z -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the
@@ -32,7 +32,13 @@ valid larger values fit. Deriving the tightest bounds before the loop is written
 keeps the search inside the region that can actually contain an answer. The
 [cheap-checks-first](/topics/takeaway/cheap-checks-first) and
 [exploit-symmetry](/topics/takeaway/exploit-symmetry) takeaways are this same
-instinct pointed at the loop body and the coordinate system.
+instinct pointed at the loop body and the coordinate system. A domain can also
+be pruned by *type*. [Integer Ladders](/solutions/0309/) promises integers for
+the two ladders, the crossing height $h$ and the street width, but says nothing
+about the heights $a$ and $b$ the ladders reach. A short irrationality argument
+settles it: $1/a + 1/b = 1/h$ cannot hold with an integer $h$ unless both heights
+are integers too. That unstated fact makes each ladder a Pythagorean triple, and
+a problem about real geometry becomes pairs of triples that share a leg.
 
 **Exploit structure to skip work.** Sometimes the sequence itself has a pattern
 that lets you step over most of it. [Even Fibonacci Numbers](/solutions/0002/)
@@ -76,7 +82,7 @@ all the way.
 
 The four degrees above simplify a computation that is already the right one.
 The harder problems on the list mostly need something earlier: a reduction that
-changes *what* is computed before any of it is simplified. Five such moves
+changes *what* is computed before any of it is simplified. Seven such moves
 recur.
 
 **Restate the condition.** The question as posed is often the awkward form of
@@ -176,6 +182,30 @@ value the most general unifier with every free variable set to zero. No number i
 ever searched. Once the object has a name, its theory comes with it, and the code
 implements a theorem rather than a search.
 
+**Turn it into squares, then read the sign.** A quadratic condition often
+becomes a statement about squares, and the sign between them decides which
+theory applies. Triangular numbers are the easiest case, since
+$8T_a + 1 = (2a+1)^2$. [Expressing an Integer as the Sum of Triangular
+Numbers](/solutions/0621/) and [Finding Triangles](/solutions/0955/) both open
+with that line, then part ways. Problem 621 fixes one of its three terms and
+lands on a *sum*, $(2b+1)^2 + (2c+1)^2 = 8m + 2$. The number of ways to write a
+number as a sum of two squares is a
+[multiplicative function](https://en.wikipedia.org/wiki/Multiplicative_function)
+read off the prime factorisation, so the inner search is never run: it is
+*counted*, and more than $10^{13}$ pairs become a few million factorisations.
+In problem 955 the steps between triangles run $1, 2, 3, \dots$, so the next
+triangle is the least $j$ with $t(x) + t(j) = t(y)$. Here the squares land on
+opposite sides, and a *difference* factors: the equation becomes
+$x(x+1) = pq$ with $p = y - j$ and $q = y + j + 1$. The least $j$ is the factor
+pair nearest the trivial one, so the walk
+[jumps from triangle to triangle](/topics/takeaway/jump-to-the-next-event) at
+the cost of one divisor scan each, and the terms between are never generated.
+Problem 621 still has to factor every value of a quadratic, and that is cheaper
+than it sounds, because values of a polynomial factor better together than
+apart. A prime divides such a value only on at most two residue classes of the
+index, so one [sieve over the primes](/topics/technique/polynomial-sieve)
+replaces all the separate factorisations.
+
 **Keep only what the answer reads.** Most inputs carry far more information
 than the question uses, and finding the part it uses shrinks the state.
 [$250250$](/solutions/0250/) needs each $k^k$ only modulo 250, so a quarter of
@@ -241,6 +271,32 @@ power — so $z \le 10^{16}$ means about $3 \times 10^7$ coprime parameter pairs
 each one a solution, and no search over $(x, y)$ or square test anywhere. Construction beats filtering whenever the answers are
 sparse and the space is not.
 
+**Divide out the scale.** When a condition survives multiplying every variable
+by a constant, the solutions lie on rays, and there is a standard way to find
+them: [write the ratio in lowest terms](/topics/takeaway/parametrise-by-reduced-ratio)
+and let coprimality push every denominator into the scale factor. What comes out
+is a complete family in which each solution appears exactly once.
+[Tangent Circles](/solutions/0510/) reduces tangency to
+$1/\sqrt{r_C} = 1/\sqrt{r_A} + 1/\sqrt{r_B}$, which forces $r_A/r_B$ to be the
+square of a reduced fraction $u/v$; since $u + v$ is coprime to $uv$, $(u+v)^2$
+must divide the scale, and the three radii become $t$ times fixed polynomials in
+$u$ and $v$. [Prime Triples and Geometric Sequences](/solutions/0518/) does the
+same to a common ratio $q/p$, giving $(kp^2, kpq, kq^2)$.
+[Panaitopol Primes](/solutions/0291/) takes out $g = \gcd(x, y)$ from
+$(x^4 - y^4)/(x^3 + y^3)$; after cancelling, the denominator is coprime to what
+is left of the numerator, so it too must divide $g$. The step is the same each
+time. What differs is what the problem does with the scale, and that decides the
+program. In problem 510 the radii scale freely, so a family's multiples sum as a
+triangular number, and looping over them would bring back the linear cost the
+parametrisation removed. In problem 518 the members must be one below a prime,
+which breaks the scaling, so $k$ stays a live variable and the program filters
+it, testing $kq^2 - 1$ first because every $p$ shares that result. In problem 291
+the scale disappears altogether. The value has become a product of three positive
+integers, $k(a-b)(a^2+b^2)$, and it must be prime, so $k = 1$ and $a - b = 1$. A
+primality condition is weak until a factorisation appears, and then it is an
+equation: two variables with no stated bound collapse to one, and the answers are
+the primes among $n^2 + (n+1)^2$.
+
 **Trade the condition for a sum that collapses.** A congruence condition, "the
 total is $0 \bmod n$", is awkward to count directly but easy to *filter*: the
 average of $\omega^{js}$ over the $n$-th roots of unity is $1$ when $n \mid s$
@@ -255,8 +311,18 @@ coefficient per prime. [Quadruple Congruence](/solutions/0875/) filters the zero
 of an eight-variable quadratic form the same way; each term becomes a power of a
 [quadratic Gauss sum](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum), whose
 *modulus* is classical even though its value is not, and $n^8$ tuples collapse
-into a Dirichlet convolution summed with a totient sieve. The transform costs a
-sum over $n$ roots and buys a structure that counting never exposes.
+into a Dirichlet convolution summed with a totient sieve. For a small modulus
+the filter needs no complex numbers at all. [$B$-Trivisible
+Numbers](/solutions/0967/) counts the $n$ whose prime factors up to a bound sum
+to $0 \bmod 3$, and it carries all three remainders at once in the
+[group ring](/topics/technique/group-ring-arithmetic) $\mathbb{Z}[C_3]$: a formal
+$x$ with $x^3 = 1$, whose elements are just triples of integers. The condition
+becomes the multiplicative function $x^{S(n)}$, which a Dirichlet convolution
+turns into a sum over square-free divisors. One more reduction finishes it. The
+small primes' share of that function is periodic in $n$, so a prefix table
+answers it in $O(1)$, and only the large primes go through the divisor sum, which
+cuts it from about $7 \times 10^7$ terms to $1.4 \times 10^6$. The transform
+costs a sum over $n$ roots and buys a structure that counting never exposes.
 
 ## How to reason about it
 
@@ -301,7 +367,13 @@ weights by simulating unit vectors, and
 playing every arrangement out for $n \le 7$. A reduction often predicts something
 checkable on its own: [problem 615](/solutions/0615/)'s says that past the threshold,
 raising $k$ by one exactly doubles the unreduced answer, and a brute force confirms
-it does. And small edge cases hide in correct derivations too: in
+it does. Beyond brute-force range, a reduction can still be tested at full size.
+[Problem 621](/solutions/0621/) has a second route it never computes through:
+Gauss's theorem ties its count to a class number, and the class number formula
+predicts the sieve's result to about two parts per million.
+[Problem 967](/solutions/0967/) has a free parameter, the point where small primes
+end and large ones begin, and moving it rearranges the whole calculation without
+changing the answer. And small edge cases hide in correct derivations too: in
   [Euler's Totient Function Equals 13!](/solutions/0248/) the factor contributed
   by the prime 2 at exponent 1 is $1$, so a search that stops when the residual
   target reaches 1 silently drops half the solutions.
