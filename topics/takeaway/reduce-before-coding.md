@@ -476,6 +476,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0504](/solutions/0504/) — Square on the Inside
 - ● [0512](/solutions/0512/) — Sums of Totients of Powers
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game

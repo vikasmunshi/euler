@@ -218,6 +218,7 @@ entirely.
 - ● [0236](/solutions/0236/) — Luxury Hampers
 - ● [0443](/solutions/0443/) — GCD Sequence
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 
 <!-- /problems -->

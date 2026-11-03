@@ -242,6 +242,7 @@ guessed bound never is.
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0504](/solutions/0504/) — Square on the Inside
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 
 <!-- /problems -->

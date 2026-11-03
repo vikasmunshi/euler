@@ -132,5 +132,6 @@ is built first and then applied.
 - ● [0333](/solutions/0333/) — Special Partitions
 - ● [0420](/solutions/0420/) — $2 \times 2$ Positive Integer Matrix
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 
 <!-- /problems -->

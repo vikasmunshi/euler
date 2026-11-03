@@ -239,7 +239,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ○ [0496](/solutions/0496/) — Incenter and Circumcenter of Triangle
 - ○ [0510](/solutions/0510/) — Tangent Circles
 - ○ [0513](/solutions/0513/) — Integral Median
-- ○ [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ○ [0542](/solutions/0542/) — Geometric Progression with Maximum Sum
 - ○ [0557](/solutions/0557/) — Cutting Triangles

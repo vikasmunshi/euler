@@ -189,6 +189,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0517](/solutions/0517/) — A Real Recursion
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0625](/solutions/0625/) — Gcd Sum

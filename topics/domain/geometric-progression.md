@@ -109,7 +109,7 @@ are consecutive terms of a progression.
 - ○ [0394](/solutions/0394/) — Eating Pie
 - ○ [0479](/solutions/0479/) — Roots on the Rise
 - ● [0506](/solutions/0506/) — Clock Sequence
-- ○ [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
+- ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0542](/solutions/0542/) — Geometric Progression with Maximum Sum
 - ○ [0770](/solutions/0770/) — Delphi Flip
 - ○ [0771](/solutions/0771/) — Pseudo Geometric Sequences
