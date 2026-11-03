@@ -356,6 +356,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0315](/solutions/0315/) — Digital Root Clocks
 - ● [0333](/solutions/0333/) — Special Partitions

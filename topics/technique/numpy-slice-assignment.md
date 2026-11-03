@@ -211,6 +211,7 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0319](/solutions/0319/) — Bounded Sequences

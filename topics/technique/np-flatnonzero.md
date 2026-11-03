@@ -115,6 +115,7 @@ member set, where C can usually skip the copy. The other half of the family is o
 - ● [0134](/solutions/0134/) — Prime Pair Connection
 - ● [0214](/solutions/0214/) — Totient Chains
 - ● [0216](/solutions/0216/) — The Primality of $2n^2 - 1$
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0429](/solutions/0429/) — Sum of Squares of Unitary Divisors
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors

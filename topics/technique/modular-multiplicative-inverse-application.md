@@ -314,6 +314,7 @@ the repetition.
 - ● [0202](/solutions/0202/) — Laserbeam
 - ● [0251](/solutions/0251/) — Cardano Triplets
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial

@@ -96,7 +96,7 @@ first step is the quartic factorisation above, which cancels against $x^3 + y^3 
 - ● [0131](/solutions/0131/) — Prime Cube Partnership
 - ● [0174](/solutions/0174/) — Hollow Square Laminae II
 - ● [0176](/solutions/0176/) — Common Cathetus Right-angled Triangles
-- ○ [0291](/solutions/0291/) — Panaitopol Primes
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0955](/solutions/0955/) — Finding Triangles
 
 <!-- /problems -->

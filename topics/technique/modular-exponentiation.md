@@ -312,6 +312,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0248](/solutions/0248/) — Euler's Totient Function Equals 13!
 - ● [0250](/solutions/0250/) — $250250$
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0335](/solutions/0335/) — Gathering the Beans

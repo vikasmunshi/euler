@@ -230,7 +230,7 @@ discipline still shapes the search.
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ○ [0279](/solutions/0279/) — Triangles with Integral Sides and an Integral Angle
 - ○ [0283](/solutions/0283/) — Integer Sided Triangles with Integral Area/perimeter Ratio
-- ○ [0291](/solutions/0291/) — Panaitopol Primes
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ○ [0296](/solutions/0296/) — Angular Bisector and Tangent
 - ○ [0299](/solutions/0299/) — Three Similar Triangles
 - ● [0309](/solutions/0309/) — Integer Ladders

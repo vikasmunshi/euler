@@ -137,6 +137,7 @@ The theorem is rarely named in a problem statement. Usually you recognise it aft
 - ● [0229](/solutions/0229/) — Four Representations Using Squares
 - ● [0233](/solutions/0233/) — Lattice Points on a Circle
 - ○ [0273](/solutions/0273/) — Sum of Squares
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ○ [0596](/solutions/0596/) — Number of Lattice Points in a Hyperball
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps
 - ● [0659](/solutions/0659/) — Largest Prime

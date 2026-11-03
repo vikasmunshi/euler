@@ -159,6 +159,7 @@ from the table above, made again.
 - ● [0189](/solutions/0189/) — Tri-colouring a Triangular Grid
 - ● [0232](/solutions/0232/) — The Race
 - ● [0253](/solutions/0253/) — Tidying Up A
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0309](/solutions/0309/) — Integer Ladders
 - ● [0423](/solutions/0423/) — Consecutive Die Throws

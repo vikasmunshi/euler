@@ -248,6 +248,7 @@ patterns recur.
 - ● [0245](/solutions/0245/) — Coresilience
 - ● [0249](/solutions/0249/) — Prime Subset Sums
 - ● [0251](/solutions/0251/) — Cardano Triplets
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0304](/solutions/0304/) — Primonacci
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0315](/solutions/0315/) — Digital Root Clocks

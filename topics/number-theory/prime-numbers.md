@@ -772,7 +772,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ● [0288](/solutions/0288/) — An Enormous Factorial
-- ○ [0291](/solutions/0291/) — Panaitopol Primes
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ○ [0302](/solutions/0302/) — Strong Achilles Numbers
 - ● [0304](/solutions/0304/) — Primonacci

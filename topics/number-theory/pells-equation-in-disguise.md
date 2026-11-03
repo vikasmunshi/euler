@@ -221,7 +221,7 @@ of magnitude.
 - ○ [0279](/solutions/0279/) — Triangles with Integral Sides and an Integral Angle
 - ○ [0283](/solutions/0283/) — Integer Sided Triangles with Integral Area/perimeter Ratio
 - ● [0288](/solutions/0288/) — An Enormous Factorial
-- ○ [0291](/solutions/0291/) — Panaitopol Primes
+- ● [0291](/solutions/0291/) — Panaitopol Primes
 - ○ [0292](/solutions/0292/) — Pythagorean Polygons
 - ○ [0295](/solutions/0295/) — Lenticular Holes
 - ○ [0296](/solutions/0296/) — Angular Bisector and Tangent
