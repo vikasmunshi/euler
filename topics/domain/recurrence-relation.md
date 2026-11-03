@@ -337,7 +337,6 @@ into independent terms, a pattern that induction will confirm. The shape picks t
 - ○ [0327](/solutions/0327/) — Rooms of Doom
 - ○ [0330](/solutions/0330/) — Euler's Number
 - ○ [0334](/solutions/0334/) — Spilling the Beans
-- ○ [0335](/solutions/0335/) — Gathering the Beans
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
 - ○ [0339](/solutions/0339/) — Peredur Fab Efrawg
 - ● [0340](/solutions/0340/) — Crazy Function

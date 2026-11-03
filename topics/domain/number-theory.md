@@ -504,7 +504,6 @@ show up there at once. See
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ○ [0309](/solutions/0309/) — Integer Ladders
 - ● [0321](/solutions/0321/) — Swapping Counters
-- ○ [0335](/solutions/0335/) — Gathering the Beans
 - ○ [0337](/solutions/0337/) — Totient Stairstep Sequences
 - ○ [0343](/solutions/0343/) — Fractional Sequences
 - ● [0346](/solutions/0346/) — Strong Repunits

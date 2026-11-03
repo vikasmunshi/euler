@@ -184,6 +184,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 
 - ● [0256](/solutions/0256/) — Tatami-Free Rooms
 - ● [0276](/solutions/0276/) — Primitive Triangles
+- ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0336](/solutions/0336/) — Maximix Arrangements
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel

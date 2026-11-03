@@ -116,6 +116,7 @@ how that inverse is spelled:
 - ● [0134](/solutions/0134/) — Prime Pair Connection
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ● [0274](/solutions/0274/) — Divisibility Multipliers
+- ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
 - ○ [0451](/solutions/0451/) — Modular Inverses
 - ○ [0515](/solutions/0515/) — Dissonant Numbers

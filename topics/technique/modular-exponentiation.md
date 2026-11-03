@@ -314,6 +314,7 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0293](/solutions/0293/) — Pseudo-Fortunate Numbers
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0365](/solutions/0365/) — A Huge Binomial Coefficient
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits

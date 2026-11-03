@@ -217,6 +217,7 @@ is formed, and from how a power of two is formed:
 - ● [0232](/solutions/0232/) — The Race
 - ● [0288](/solutions/0288/) — An Enormous Factorial
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0506](/solutions/0506/) — Clock Sequence
 - ● [0520](/solutions/0520/) — Simbers

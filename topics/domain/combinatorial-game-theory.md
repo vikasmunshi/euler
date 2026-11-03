@@ -253,7 +253,6 @@ weighting each winning mask by how many integers wear it.
 - ● [0310](/solutions/0310/) — Nim Square
 - ○ [0325](/solutions/0325/) — Stone Game II
 - ○ [0334](/solutions/0334/) — Spilling the Beans
-- ○ [0335](/solutions/0335/) — Gathering the Beans
 - ○ [0344](/solutions/0344/) — Silver Dollar Game
 - ○ [0366](/solutions/0366/) — Stone Game III
 - ○ [0367](/solutions/0367/) — Bozo Sort

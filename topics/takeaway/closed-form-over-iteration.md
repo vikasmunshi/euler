@@ -350,6 +350,7 @@ Four cautions earn their keep:
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0319](/solutions/0319/) — Bounded Sequences
+- ● [0335](/solutions/0335/) — Gathering the Beans
 - ● [0340](/solutions/0340/) — Crazy Function
 - ● [0359](/solutions/0359/) — Hilbert's New Hotel
 - ● [0381](/solutions/0381/) — $(\text{prime}-k)$ Factorial
