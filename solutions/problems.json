@@ -6428,8 +6428,8 @@
     "level": 11,
     "pct": 30,
     "solvers": 981,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 23:21"
   },
   "805": {
     "title": "Shifted Multiples",
