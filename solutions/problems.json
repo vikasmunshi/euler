@@ -7636,8 +7636,8 @@
     "level": 11,
     "pct": 30,
     "solvers": 825,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 18:21"
   },
   "956": {
     "title": "Super Duper Sum",
