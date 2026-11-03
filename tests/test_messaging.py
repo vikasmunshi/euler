@@ -41,6 +41,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from solver.auth.identity import system_slug
 from solver.shell import dialogue
 from solver.shell.command import Context
+from solver.shell.variables import variables
 from euler_webshell.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
                                 PR_REVIEW_SUBJECT, UNREGISTERED_SUBJECT, verb_for)
 from euler_webshell.msg.app import MessageService, build_admin_app, build_app
@@ -966,14 +967,23 @@ class MsgActBelowStaffTests(MsgActTests):
 
 
 class _WalkShell:
-    """A shell that records the block `act` hands it and answers with a fixed exit code."""
+    """A shell that records the block `act` hands it and confirms the first *confirm* problems.
 
-    def __init__(self, rc: int) -> None:
+    Confirming is what the real block does at each `pause` answered: drop the head of
+    `{unregistered}`. *confirm* None confirms every one; *rc* is the block's exit code.
+    """
+
+    def __init__(self, rc: int = 0, confirm: int | None = None) -> None:
         self.rc = rc
+        self.confirm = confirm
         self.blocks: list[str] = []
+        self.walked: list[list[int]] = []
 
     def dispatch(self, block: str) -> int:
         self.blocks.append(block)
+        left = list(variables['unregistered'])
+        self.walked.append(left)
+        variables['unregistered'] = left[len(left) if self.confirm is None else self.confirm:]
         return self.rc
 
 
@@ -989,6 +999,14 @@ class MsgRegisterTests(_MsgCommandCase):
         await super().asyncSetUp()
         from euler_webshell.msg import commands as msg_commands
         self.enterContext(patch.object(msg_commands, 'interactive', lambda: True))
+        self._drop_leftovers()
+        self.addCleanup(self._drop_leftovers)
+
+    @staticmethod
+    def _drop_leftovers() -> None:
+        """`{unregistered}` lives in the process-wide variable store: start and end each test without it."""
+        if 'unregistered' in variables:
+            del variables['unregistered']
 
     async def _notice(self, *numbers: int) -> str:
         """The notice as `summary` files it — the body lines are the shared format."""
@@ -1007,22 +1025,53 @@ class MsgRegisterTests(_MsgCommandCase):
 
     @unittest_run_loop
     async def test_a_confirmed_walk_dismisses_the_notice(self) -> None:
-        self.shell = _WalkShell(0)
+        self.shell = _WalkShell()
         thread_id = await self._notice(341, 1006)
         self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 0)
         [block] = self.shell.blocks
-        self.assertTrue(block.startswith('loop [341, 1006]: {'), block)
-        for step in ('show {loop} || break', 'wait = random 3600 1800', 'sleep {wait} || break',
-                     'pause "please confirm the answer for problem {loop} is registered" || break'):
+        self.assertEqual(self.shell.walked, [[341, 1006]])
+        self.assertTrue(block.startswith('loop {unregistered}: {'), block)
+        for step in ('show {loop} || break',
+                     'pause "please confirm the answer for problem {loop} is registered" || break',
+                     'unregistered = {unregistered}[1:]',
+                     '{unregistered} && { wait = random 2700 900; sleep {wait} }'):
             self.assertIn(step, block)
+        self.assertFalse('unregistered' in variables, 'a finished walk leaves no variable behind')
         self.assertNotIn(thread_id, await self._ids(), 'every answer confirmed: the notice goes')
 
     @unittest_run_loop
     async def test_a_walk_cut_short_keeps_the_notice(self) -> None:
-        self.shell = _WalkShell(3)
+        self.shell = _WalkShell(3, confirm=0)
         thread_id = await self._notice(341)
         self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 3)
         self.assertIn(thread_id, await self._ids(), 'not confirmed: the notice stays to act on again')
+
+    @unittest_run_loop
+    async def test_acting_again_resumes_after_the_confirmed_ones(self) -> None:
+        thread_id = await self._notice(341, 423, 1006)
+        self.shell = _WalkShell(3, confirm=1)
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 3)
+        self.assertEqual(variables['unregistered'], [423, 1006])
+        self.shell = _WalkShell()
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 0)
+        self.assertEqual(self.shell.walked, [[423, 1006]], '341 is registered: not walked again')
+        self.assertNotIn(thread_id, await self._ids())
+
+    @unittest_run_loop
+    async def test_all_confirmed_dismisses_whatever_the_blocks_code(self) -> None:
+        """The guarded wait leaves rcode 1 on the last pass: the list, not the code, decides."""
+        self.shell = _WalkShell(1)
+        thread_id = await self._notice(341)
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 0)
+        self.assertNotIn(thread_id, await self._ids())
+
+    @unittest_run_loop
+    async def test_leftovers_of_another_notice_are_not_walked(self) -> None:
+        variables['unregistered'] = [7, 8]
+        self.shell = _WalkShell()
+        thread_id = await self._notice(341, 1006)
+        self.assertEqual(await asyncio.to_thread(self._rc, 'act', thread_id), 0)
+        self.assertEqual(self.shell.walked, [[341, 1006]])
 
     @unittest_run_loop
     async def test_a_notice_naming_no_problems_runs_nothing(self) -> None:

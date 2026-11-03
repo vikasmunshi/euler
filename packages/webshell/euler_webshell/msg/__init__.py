@@ -58,7 +58,8 @@ def verb_for(subject: str, *, is_staff: bool, is_own: bool, from_staff: bool) ->
     - a **pull request**, seen by staff, is `merge`. No `is_own` exclusion here, unlike a key
       request: the owner pushes and merges their own branch as a matter of course;
     - an **unregistered answer** notice (`summary`'s), seen by staff, is `register`: a walk
-      through each problem it names — open it, register the answer, wait, confirm. Staff
+      through each problem it names — open it, register the answer, confirm, wait — that
+      resumes after the ones already confirmed when it was cut short. Staff
       only, since the notice goes to staff; nothing it does needs a privilege the ladder
       guards, but for anyone else it is a message about somebody else's answers;
     - everything else is `read`, which is also what a rung below staff gets on the two staff

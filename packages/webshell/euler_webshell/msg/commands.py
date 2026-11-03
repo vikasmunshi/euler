@@ -50,7 +50,7 @@ from solver.shell import console, register
 from solver.shell.command import Context
 from solver.core.notices import unregistered_problems
 from solver.shell.dialogue import Abort, Ask, Choice, interactive
-from solver.shell.variables import variable
+from solver.shell.variables import variable, variables
 from euler_webshell.msg.client import call as _call
 from euler_webshell.msg import (KEY_ISSUE_SUBJECT, KEY_REQUEST_SUBJECT, KEY_SHARE_SUBJECT,
                                 PR_REVIEW_SUBJECT, UNREGISTERED_SUBJECT, verb_for)
@@ -369,17 +369,21 @@ def _act(ctx: Context, thread_id: str) -> int:
 
 
 #: The walk `msg act` runs on an unregistered-answer notice, one problem per pass: open it,
-#: say what to do, wait a random half hour to an hour, then confirm. A command block rather
-#: than Python, so it is the same block a person could type — and each step a failure can
-#: stop on (`show`, the wait cut short, the confirmation left with Ctrl-C) ends the walk with
-#: a non-zero code, which keeps the message. `random` is not guarded: its value *is* its code.
-_REGISTER_BLOCK: str = '''loop <problems>: {
+#: confirm it is registered, then — unless it was the last — wait a random 15 to 45 minutes
+#: before the next. A command block rather than Python, so it is the same block a person could
+#: type. `{unregistered}` holds the problems still to confirm (seeded by :func:`_register`) and
+#: loses its head at each confirmation, so a walk cut short (`show` failing, the confirmation
+#: left with Ctrl-C) leaves exactly the rest in it — and the next `msg act` resumes there,
+#: without walking the ones already registered. Ctrl-C during the wait only skips the wait.
+_REGISTER_BLOCK: str = '''loop {unregistered}: {
   show {loop} || break
-  echo "please register the answer for problem {loop} on projecteuler.net"
-  wait = random 3600 1800
-  sleep {wait} || break
   pause "please confirm the answer for problem {loop} is registered" || break
+  unregistered = {unregistered}[1:]
+  {unregistered} && { wait = random 2700 900; sleep {wait} }
 }'''
+
+#: The shell variable :data:`_REGISTER_BLOCK` walks and leaves behind.
+_UNREGISTERED_VAR: str = 'unregistered'
 
 
 def _register(ctx: Context, thread_id: str, data: dict[str, Any]) -> int:
@@ -387,9 +391,10 @@ def _register(ctx: Context, thread_id: str, data: dict[str, Any]) -> int:
 
     `summary` files the notice when problems recorded as solved here are not solved on the
     progress page — the answer was never given to projecteuler.net. Acting on it runs
-    :data:`_REGISTER_BLOCK` over those problems in this shell, and only when the walk ends
-    with every one confirmed is the message dismissed: a walk cut short leaves it in place,
-    to act on again.
+    :data:`_REGISTER_BLOCK` over those problems in this shell, and only when the walk has
+    confirmed every one is the message dismissed: a walk cut short leaves it in place, and
+    the problems not yet confirmed in `{unregistered}`, so acting on it again picks up there.
+    Leftovers from some other notice are ignored — only this one's problems are walked.
 
     Interactive only, because the walk ends in a confirmation per problem — and `pause`, with
     nobody to ask, is a no-op that would dismiss the notice on nobody's word.
@@ -411,16 +416,31 @@ def _register(ctx: Context, thread_id: str, data: dict[str, Any]) -> int:
         console.print('[error]error:[/error] no shell to run the walk in')
         return 1
     _print_thread(data)
-    rc = int(ctx.shell.dispatch(_REGISTER_BLOCK.replace('<problems>', repr(numbers))))
-    if rc != 0:
+    left = _left_to_register()
+    resumed = [number for number in left if number in numbers]
+    variables[_UNREGISTERED_VAR] = resumed or numbers
+    if resumed:
+        console.print(f'[muted]resuming: {len(numbers) - len(resumed)} of {len(numbers)} '
+                      'already confirmed[/muted]')
+    rc = int(ctx.shell.dispatch(_REGISTER_BLOCK))
+    if _left_to_register():
         console.print(f'[muted]Not every answer was confirmed — message [accent]{thread_id}'
                       '[/accent] is kept; `msg act` it again to carry on.[/muted]')
-        return rc
+        return rc or 1
+    del variables[_UNREGISTERED_VAR]
     if _call('dismiss', thread_id=thread_id) is None:
         console.print(f'[muted]All confirmed, but could not dismiss [accent]{thread_id}[/accent] — '
                       '`msg dismiss` it yourself.[/muted]')
     osc.messages_changed()
     return 0
+
+
+def _left_to_register() -> list[int]:
+    """The problems `{unregistered}` still holds — `[]` when unset or not a list of numbers."""
+    left = variables[_UNREGISTERED_VAR] if _UNREGISTERED_VAR in variables else None
+    if not isinstance(left, list) or not all(isinstance(number, int) for number in left):
+        return []
+    return left
 
 
 def _send(subject: str, body: str, to: str) -> int:
