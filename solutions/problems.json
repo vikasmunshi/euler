@@ -3012,8 +3012,8 @@
     "level": 14,
     "pct": 37,
     "solvers": 1124,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 3 Nov 2026, 23:02"
   },
   "378": {
     "title": "Triangle Triples",
