@@ -6708,8 +6708,8 @@
     "level": 13,
     "pct": 35,
     "solvers": 530,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 4 Nov 2026, 04:10"
   },
   "840": {
     "title": "Sum of Products",
