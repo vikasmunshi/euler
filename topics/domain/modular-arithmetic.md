@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-11-02T22:19Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -55,8 +55,8 @@ partitions.append(partition_value)
 ```
 
 The private problems 129 and 132 (when does a [repunit](https://en.wikipedia.org/wiki/Repunit)
-become divisible by $n$?) and columns of "$B$-trivisible" or "unlucky prime" divisibility tests
-across the later archive are the same shape. Problem 274 runs the idea backwards: it asks for the
+become divisible by $n$?) and the "unlucky prime" divisibility tests of the later archive are the
+same shape. Problem 274 runs the idea backwards: it asks for the
 multiplier $m$ that makes the schoolbook divisibility rule "drop the last digit $b$, add $b \cdot m$"
 exact for a prime $p$. Writing $n = 10a + b$ gives $10 f(n) = n + b(10m - 1)$, so the rule works
 precisely when $10m \equiv 1 \pmod p$ — every such divisibility trick is a
@@ -93,7 +93,11 @@ matters. The contract can even be attached to a question that looks real-valued.
 $\lfloor(\lceil\sqrt a\rceil + \sqrt a)^{a^2}\rfloor$. Its conjugate $\lceil\sqrt a\rceil - \sqrt a$
 lies in $[0, 1)$, so the floor is the integer $x^n + y^n$ minus one. That integer is computed
 in the ring $\mathbb{Z}_p[\sqrt a]$, whose elements are pairs of residues, and no real number ever
-appears. Problem 517 is a recursion on a real argument, $g_a(x) = g_a(x-1) + g_a(x-a)$ with
+appears. Problem 479 attaches it to complex numbers. It sums powers of $(a+b)(b+c)(c+a)$ over the
+three roots of a cubic whose coefficients depend on $k$, and two of those roots can be complex. The
+product is symmetric in the roots, so [Vieta's formulas](/topics/technique/vietas-formulas) rewrite
+it in the coefficients alone, and it comes out as an integer polynomial in $k$. No root is ever
+found, and each $k$ contributes a plain geometric series in the ring. Problem 517 is a recursion on a real argument, $g_a(x) = g_a(x-1) + g_a(x-a)$ with
 $a = \sqrt n$. Unrolled, it counts lattice paths and telescopes to a sum of binomials
 $\binom{\lfloor x - ja \rfloor + j}{j}$, taken mod the prime from factorial tables. The real number
 survives only inside that floor, and an integer square root of $j^2 n$ computes it exactly, so
@@ -122,6 +126,15 @@ $p$. Averaging over the $p$th roots of unity $\omega^j$, every $j \ne 0$ gives a
 again, so $k \mapsto \omega^{jk}$ visits each root exactly $q$ times and all $p - 1$ non-trivial
 terms are equal. Each is read off from $\prod_r (1 + rt) = 1 + t^p$. The filter collapses to one
 binomial coefficient plus a correction, divided by $p$.
+
+The total can also be a function of $n$ rather than of a chosen subset. Problem 967 counts the
+$n \le 10^{18}$ whose distinct prime factors up to $120$ have a sum $S(n)$ divisible by $3$. Give
+each $n$ the value $x^{S(n)}$ in $\mathbb{Z}[x]/(x^3 - 1)$. Over coprime factors the sums add, so
+this is a [multiplicative function](/topics/domain/multiplicative-function), and the Dirichlet
+machinery runs on triples of exact counts, with no complex root of unity in sight. Divisibility by
+a fixed set of primes is itself periodic, so the small primes' share of $S(n)$ depends only on $n$
+modulo their product, and one prefix table stands in for all of them. The
+[Modular Arithmetic](/topics/number-theory/modular-arithmetic) note has the split.
 
 The residue being counted can be a whole vector. In problem 619 a product is a perfect square when
 every prime exponent in it is even, so a number matters only through its exponents mod $2$. That
@@ -202,7 +215,14 @@ when $\gcd(x, 6) = 1$, and every other $x$ contributes $0$. CRT splits the ring 
 powers of $x$, so the order is the lcm of the orders modulo each $p^k$. Lifting from $p^{k-1}$ to
 $p^k$ either keeps the order or multiplies it by $p$, and a single power decides which. The real
 work is one order per prime: in $\mathbb{F}_p$ when $7$ is a square mod $p$, and in
-$\mathbb{F}_{p^2}$ otherwise, with the same Frobenius bound as problem 492 below. Problem 875
+$\mathbb{F}_{p^2}$ otherwise, with the same Frobenius bound as problem 492 below. Problem 437 shows
+that the element need not even be found. For each of about three million primes it asks whether
+either root of $x^2 - x - 1$ modulo $p$ is a [primitive root](/topics/domain/primitive-root). Those
+roots are built from a square root of $5$, which would cost a search per prime. But when they
+exist, CRT splits $\mathbb{Z}_p[x]/(x^2 - x - 1)$ into two copies of $\mathbb{F}_p$, one per root.
+A power of the formal root $x$ is therefore both roots' powers at once, and one
+[ring](/topics/technique/quotient-ring-arithmetic) exponentiation tests the pair without naming
+either. Problem 875
 counts solutions with the filter from the subset-sum disguise, written additively. The zeros of the
 eight-variable form $a_1^2 + \dots + a_4^2 - b_1^2 - \dots - b_4^2$ modulo $n$ number
 $\frac1n \sum_t |G(t, n)|^8$, where $G(t, n) = \sum_x e^{2\pi i t x^2 / n}$ is a
@@ -236,9 +256,21 @@ modulus, so read it before you write the first line:
   $\mathbb{F}_{p^2}$, where [Frobenius](https://en.wikipedia.org/wiki/Frobenius_endomorphism)
   sends $\alpha$ to its conjugate $\alpha^{-1}$, so $\alpha^{p+1} = 1$. Quadratic reciprocity
   decides between the two cases from $p \bmod 13$, and the exponent $2^{n-1}$ is reduced mod
-  $p \mp 1$. Division is legal but not free: each inverse is an exponentiation. Problem 739 needs
-  about $10^8$ binomials, so it multiplies the whole sum through by a factorial until every term is a
-  prefix product times a suffix product, and takes a single inverse at the end.
+  $p \mp 1$. Problem 921 is the split case, with exponents that need work of their own. A change of
+  variable turns its recurrence into a fifth-power map, so $p_n$ and $q_n$ are the coordinates of a
+  fixed element of $\mathbb{Z}[\sqrt 5]$ raised to the power $5^n$, and the sum runs over
+  $n = F_i$. Its prime modulus $M$ has $5$ as a square, so
+  [exponents reduce](/topics/takeaway/reduce-exponent-modulo-group-order) mod $M - 1$. That square
+  root is used only in the proof. The code stays with coordinate pairs, which are what the problem
+  wants anyway. The exponents have a recurrence too: $5^{F_i} = 5^{F_{i-1}} \cdot 5^{F_{i-2}}$, so
+  each costs one multiplication mod $M - 1$. That leaves one base raised to over a million exponents,
+  all below $M$. Splitting each exponent into low and high bits reads the power from two
+  [lookup tables](/topics/technique/lookup-table) of about $\sqrt M$ entries, and one ring product
+  replaces some thirty squarings. Division is legal but not free: each inverse is an exponentiation.
+  Problem 739 needs about $10^8$ binomials, so it multiplies the whole sum through by a factorial
+  until every term is a prefix product times a suffix product, and takes a single inverse at the
+  end. Problem 374 changes what it carries instead. Harmonic numbers would cost an inverse per step,
+  but the integer $j!\,H_j$ has a recurrence with no division in it.
 - **A composite modulus is a product of smaller problems.** By the [Chinese Remainder
   Theorem](/topics/technique/chinese-remainder-theorem) a squarefree $m = pqr$ splits into three
   prime fields, so you solve in each and glue. Problem 365 wants $\binom{10^{18}}{10^9}$ — over nine
@@ -312,6 +344,9 @@ far too large to form directly. When you catch it:
   $n$, the base is $-1$. When the modulus is prime, exponents live mod $p - 1$, or mod $p + 1$ for
   a norm-one element of $\mathbb{F}_p[\sqrt d]$ when $d$ is not a square. Simplify the object
   before you compute it.
+- **Keep roots formal.** A symmetric expression in a polynomial's roots is a function of its
+  coefficients, and a power of a root reduces in the quotient ring by that polynomial. Neither needs
+  the root itself, whether it is complex or a modular square root.
 - **Keep size outside the ring.** Orderings, comparisons, unreduced totals and the gcd of an
   irreducible fraction need the real magnitude or its structure, through logarithms, plain
   integers or a factorisation. Residues are only for the quantity the statement reduces.
