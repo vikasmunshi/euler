@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-11-03T12:34Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -60,6 +60,22 @@ Once every prime up to the bound has been divided out, whatever is left in each 
 is 1 or a single large prime, and one `np.where` picks the largest factor for every
 $k$.
 
+A slice costs one Python call however few elements it touches, and a polynomial sieve
+can make that the dominant cost. [291](/solutions/0291/) sieves $2n^2 + 2n + 1$, whose
+values grow quadratically, so its sieving primes run *past* the end of the index range.
+Two million primes with two residue classes each would be four million slices, most of
+them striking a handful of entries or none. So the loop is transposed. Think of the hits
+as a table of (prime, hit number): small primes have many hits, so the Python loop runs
+over primes and each slice takes one row; large primes have few hits, so the Python loop
+runs over the hit number and each step takes one column. Primes above $N/64$ are
+grouped into doubling bands $[lo, 2lo)$, where no prime has more than $N/lo + 1$ hits
+per class, and step $k$ strikes every prime's $k$-th hit at once with
+`flags[start + k * q] = False`. The hits are the same hits, so the work is unchanged,
+but the band loops run a few hundred times rather than millions, and the scatter may
+collide freely because every write is the same `False`. The result takes only about
+twice as long as C's plain stride loops: what remains is memory traffic, not the
+interpreter. Run the Python loop along whichever axis is short.
+
 **A comparison is a mask, and a mask is an index.** `div_sums > np.arange(limit + 1)`
 yields a boolean array;
 [`np.flatnonzero`](https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html)
@@ -106,6 +122,19 @@ digit sum) pair and reads it for every prime at once as `first[big % 100, sums]`
 A binomial coefficient is three gathers from the factorial tables:
 [517](/solutions/0517/) evaluates a whole row of
 $\binom{m+j}{j}$ terms as `fact[m + j] * inv[j] % M * inv[m] % M`.
+
+A table can replace a loop as well as a branch. [921](/solutions/0921/) needs
+$\beta^x$ for over a million exponents $x$ below $2^{29}$, all with the *same* base
+$\beta$, an element of $\mathbb{Z}[\sqrt 5]$ modulo a prime. A vectorised
+square-and-multiply would cost about 29 squarings over the whole array. Because the base
+is fixed, I can split each exponent instead: $\beta^x = \beta^{x_{hi} 2^{15}} \cdot \beta^{x_{lo}}$,
+the [baby-step giant-step](https://en.wikipedia.org/wiki/Baby-step_giant-step) shape
+applied to [fixed-base exponentiation](https://en.wikipedia.org/wiki/Exponentiation_by_squaring).
+Two tables of powers, about 45,000 entries between them, are built once in a short
+scalar loop, and every exponent then costs two gathers and one multiply:
+`high[x >> 15] * low[x & 0x7fff]`, with that product being a ring multiply over
+coordinate arrays. The condition is the shared base. Where each element has its own base,
+as in [421](/solutions/0421/) below, there is no table to share and the ladder stays.
 
 **An index map is a transition, and a scatter must not collide.** When a DP keeps a
 distribution over states as a dense vector, a deterministic transition is just
@@ -172,6 +201,25 @@ slice. That is a vectorised
 it is linear only because the alphabet has nine letters — nine prefix sums, not a
 merge sort.
 
+**A recursion that only branches can run breadth-first.** Enumerating combinatorial
+objects is usually a recursive generator, one Python call per node. If nothing prunes
+the tree, it can be built a layer at a time instead, with the whole frontier as one
+array. [749](/solutions/0749/) wants every digit-count vector $(c_0, \dots, c_9)$
+summing to $d$, about two million of them at $d = 16$. A partial vector with $r$ digits
+left has $r + 1$ children, so the child counts differ per row, and the layer needs an
+`arange` of a different length for each parent. That has a loop-free form:
+
+```python
+starts = np.cumsum(sizes) - sizes                          # each parent's first child
+child = np.arange(sizes.sum()) - np.repeat(starts, sizes)  # 0, 1, .. restarting per parent
+```
+
+`sizes = [3, 1, 2]` gives `[0, 1, 2, 0, 0, 1]`, and `np.repeat(rows, sizes, axis=0)`
+lines the parents up against it, so nine passes build the whole table. The price is that
+the frontier lives in memory, about 160 MB of `int64` here, and that every node gets
+built. A search that prunes as it goes wants the recursion, which is why
+[983](/solutions/0983/) below keeps its own.
+
 **Vectorise across instances, not just across a range.** Nothing requires the
 elements to share a modulus. [421](/solutions/0421/) runs square-and-multiply on an
 array of primes, each entry reduced by its *own* prime: `np.where(odd, r * f % p, r)`
@@ -198,6 +246,16 @@ primes out, one `keep` mask compacts all five together. Filter one array and not
 and the lanes silently stop lining up. The remainder left after trial division up to
 $\sqrt{N}$ is the single large factor, and it gets one last vectorised pass, which is the
 leftover-factor argument again.
+
+Lanes that drop out on a *known schedule* need no compaction at all. Each row in
+[749](/solutions/0749/) stays live only while its largest digit's $k$-th power is within
+range, and that ceiling is known before the loop starts. So I sort the rows by ceiling
+once, descending, and the rows live at exponent $k$ are always a prefix: one
+`searchsorted` finds its length and `counts[:live]` is a view, where a mask would copy
+millions of rows on every pass. The same ordering settles an overflow. A digit too big
+for this $k$ cannot occur in any live row, so its entry in the power table is set to 0
+rather than to a value `int64` cannot hold, and `counts[:live] @ powers` never reads it
+with a non-zero count.
 
 **A scan with no ufunc folds into a grid.** A running product mod $p$ has no
 vectorised form: `np.multiply.accumulate` cannot reduce between steps, so it overflows
@@ -290,6 +348,22 @@ generating function as its coefficient array and multiplying by $y^s$ is
 `out[s:] = p[:-s]`. [996](/solutions/0996/) advances a whole transfer recurrence of
 polynomials that way — each step a few shifted sums, every coefficient updated
 together.
+
+A shift can carry a per-cell weight, and then the question is what to do with the cells
+where that weight means nothing. [475](/solutions/0475/) counts 0/1 matrices row by row
+over a 2D table of column-fill counts: each of the 15 ways to place a row's four ones is
+one shifted add of `table * weight`, the weight being a product of binomials gathered at
+each cell's own counts. Those counts come from invariants and go *negative* in
+cells no real state can occupy, about three quarters of the grid on average, and a
+negative index does not fail: it silently wraps to the far end of the table. `np.clip`
+keeps the gather in bounds and the weight it reads there is nonsense, but it does not
+matter, because the state count in those cells is 0 and multiplies it away. A placement
+asking for more columns than a cell has reads $\binom{c}{k} = 0$ the same way. Zero is
+the validity mask, and there is no `if` anywhere. The cost of the dense form is that
+every cell is computed. Only about 6% of this grid is reachable on average, and the C
+version, which skips the zero cells, runs about 36 times faster, against the factor of
+two in 291. A dense table buys simplicity, and it is also fast only while most of it is
+occupied.
 
 ## How to reason about it
 
