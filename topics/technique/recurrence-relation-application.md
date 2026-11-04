@@ -1,12 +1,12 @@
 <!-- tags: [recurrence-relation-application] -->
-<!-- status: final 2026-10-30T06:40Z -->
+<!-- status: final -->
 # Recurrence relation (application)
 
 This is the **technique** side of the [recurrence relation](/topics/domain/recurrence-relation) —
 not problems that are *about* a sequence, but problems about binomial coefficients, Pell equations,
-tilings, permutations and factorials, whose solutions all reach for the same implementation move:
-stop evaluating a quantity at each index and start *stepping* it from the previous one. The
-recurrence is nowhere in the statement. Finding one is the optimisation.
+tilings, permutations, factorials and elimination games, whose solutions all reach for the same
+implementation move: stop evaluating a quantity at each index and start *stepping* it from the
+previous one. The recurrence is nowhere in the statement. Finding one is the optimisation.
 
 The domain page covers where recurrences come from and how to evaluate one at an enormous index.
 This page is about the smaller, more frequent decision: recognising that the thing you are about to
@@ -37,6 +37,31 @@ valuation, letting one vectorised multiply update every prime at once; and in pr
 factorial-base rank is accumulated by Horner's rule, `acc = (d + mult * acc) % m`, so the factorials
 themselves are never formed.
 
+Sometimes a quantity steps cleanly only after it is rescaled. Problem 374's block sums need the
+[harmonic numbers](https://en.wikipedia.org/wiki/Harmonic_number) $H_j$ modulo a prime, and stepping
+$H_j$ directly costs a modular inverse of $j$ at every index. The product $A_j = j!\,H_j$ has no
+such problem. It is an integer, and
+
+$$A_j = j\,A_{j-1} + (j-1)!,$$
+
+so one pass that carries $j!$ alongside it produces both, with no division anywhere in a loop of
+some $10^7$ steps. A sequence of fractions is expensive because of its denominators, so multiply
+them out before you recur, not after.
+
+A formula with two indices steps too, one axis at a time. Problem 423 needs the truncated binomial
+sum $F(m, k) = \sum_{c \le k} \binom{m}{c} x^{m-c}$ for every $n$ up to $5 \times 10^7$, at
+$m = n - 1$ and $k = \pi(n)$. Evaluated afresh, that is millions of terms per $n$. Treat $(m, k)$ as
+a point in the plane instead, and each axis has a cheap move. Pascal's rule advances $m$, and raising
+the cut-off adds one term:
+
+$$F(m+1, k) = (x+1)\,F(m, k) - T(m, k), \qquad F(m, k+1) = F(m, k) + T(m, k+1),$$
+
+where $T(m, k) = \binom{m}{k} x^{m-k}$ is the boundary term, a single lookup in a factorial table.
+The input then dictates the path: $m$ moves on every step, $k$ only when $n + 1$ is prime. A sum of
+unbounded width costs $O(1)$ per step, because each move only touches its edge. What the solution
+does with the resulting first-order recurrence is the
+[unrolling](/topics/domain/recurrence-relation) trick on the domain page.
+
 ## Walk the solution set instead of searching it
 
 The largest family here. When a constraint reduces to a quadratic form, its integer solutions are
@@ -55,6 +80,18 @@ discriminant is a perfect square — is $O(N)$ against $O(\log N)$, and the *sam
 underlies problems 137, 138 and 321, each with a different fundamental unit and a different
 extraction of the answer from $(x, y)$. Problem 137 is the pretty case: the orbit turns out to be
 consecutive Fibonacci products, so the ladder collapses to plain addition.
+
+Problem 582 runs the same walk with a right-hand side that is not $\pm 1$, which raises the question
+of where to start. Fixing the difference $d$ of two sides turns the law of cosines into
+$X^2 - 3Y^2 = d^2$, one equation per $d$, each with one or more orbits of the map
+$(X, Y) \mapsto (2X + 3Y,\ X + 2Y)$. The [Pell page](/topics/technique/pells-equation) bounds such
+seeds with classical theory, but here the map bounds them itself. A square right-hand side hands
+you the trivial solution $(d, 0)$, whose image has $Y = d$. Since the map preserves the order of $Y$
+along the branch, the strip $0 \le Y < d$ holds exactly one point of every orbit, and testing those
+$d$ values for a perfect square finds every seed. The walk also passes through points that are not
+triangles (wrong parity, or a side that is not positive), so the code checks each point as it goes
+rather than deriving which orbits qualify. A check costs one comparison. A missed parity case costs
+the answer.
 
 Convergents of a [continued fraction](/topics/domain/continued-fraction) are the same idea without
 the Diophantine framing. Problem 57 advances the $\sqrt 2$ convergents with
@@ -91,12 +128,46 @@ recurrence and the greedy peel are fixed, and the problem's function only enters
 leading digit changes it. Problem 148's base-7 count has the same shape with powers of 7 for the
 blocks. In every case about $\log_\varphi N$ (or $\log_7 N$) steps replace $N$ evaluations.
 
+A halving recurrence offers a second route to the sum, with no blocks at all: **sum the recurrence
+itself**. Problem 539's survivor comes from a process, not a formula. One sweep of the elimination
+game leaves $2, 4, \dots, 2M$ with $M = \lfloor n/2 \rfloor$, and the next sweep runs the other way,
+which is the original game on $M$ items read backwards. Mirroring the position and doubling the
+value gives
+
+$$P(n) = 2\bigl(M + 1 - P(M)\bigr).$$
+
+The statement wants $\sum_k P(k)$ up to $10^{18}$. Because $2m$ and $2m + 1$ share the half $m$, they
+contribute the same term, so summing the recurrence over $k \le n$ expresses $S(n)$ through $S(M)$,
+$P(M)$ and a triangular number. The pair $(P, S)$ is closed under halving, and the whole computation
+is one chain of sixty levels.
+
+Problem 463 is the same move on harder ground. Its sum does not close on its own: the substitution
+produces a sum over the odd indices, which has to join the state as a companion, and the arguments
+now touch both $n$ and $n - 1$. The chain widens to two values per level and needs a memo to stay
+that narrow. So the working procedure is mechanical. Write the sum, substitute the recurrence, and
+look at what appears. If only the value and the sum itself appear, carry a pair. If a new sum
+appears, name it and repeat until nothing new does.
+
 ## Condition on the last piece
 
 The [dynamic programming](/topics/technique/dynamic-programming) flavour: classify every complete
 object by its final move and remove that move, so counts of size $i$ are sums of counts of smaller
 sizes. Problems 115, 116 and 117 are the tiling family; the derivation and the pitfalls of the case
 analysis are covered on the [recurrence relation](/topics/domain/recurrence-relation) page.
+
+The last piece can be last in *time* rather than in space, and then removing it leaves two objects.
+Problem 866 lays pieces down in a random order, and every placement multiplies a running product by
+a weight $w(k)$ of the segment it forms. Averaging over $N!$ orders is hopeless, but look at the final
+placement. Its position $j$ is uniform, it always forms the full segment, and until that moment
+nothing can cross $j$. The two sides therefore evolve independently, each in a uniform order of its
+own, so the product factorises and so does its expectation:
+
+$$E(N) = \frac{w(N)}{N} \sum_{j=1}^{N} E(j-1)\,E(N-j).$$
+
+That is the self-convolution behind the
+[Catalan numbers](https://en.wikipedia.org/wiki/Catalan_number), with a weight. The cost changes
+character with it. A split into two parts is quadratic in the sequence, so there is no fixed window
+and no matrix to exponentiate: every term reads the whole table, and the evaluation is $O(N^2)$.
 
 Sometimes the quantity asked for has no recurrence, but its **inverse** does. Problem 887 wants
 $Q(N, d)$, the least height of a comparison tree that finds any secret $x \in \{1..N\}$ within
@@ -120,13 +191,17 @@ monotonicity do the inversion.
   pair because a single value cannot advance itself. If it is "something I discarded", carry that
   too; the state is usually two or three integers regardless. Problem 887 widens it differently: a
   slack parameter makes every subtree look like the whole problem, so one function recurs on itself.
+  Problem 866 is the honest exception: a convolution reads every earlier term, so the state is the
+  table.
 - **Write the update as a tuple assignment.** `a, b = b, a + b` evaluates the whole right-hand side
   first, which removes the temporaries and the classic sequential-assignment bug where the second
   line reads the value the first line just overwrote.
 - **Verify the exactness before you use `//`.** A ratio recurrence is only an integer recurrence when
   every intermediate is divisible; when it is not, integer division does not fail, it drifts, and the
   answer is quietly wrong a hundred terms later. If in doubt, run the first twenty terms against a
-  direct computation.
+  direct computation. Better still, choose a form with no division to check. Problem 374's scaled
+  $A_j$ is one, and problem 866's weight happens to be divisible by $N$, so its $1/N$ cancels and the
+  recurrence stays in integers under the modulus.
 - **Seed from an index you have checked.** These recurrences frequently do not hold at the first one
   or two terms, and the small cases are exactly the ones a test case will not cover.
 - **Watch the growth, in both languages.** The terms usually grow geometrically, so an $O(n)$ loop is
@@ -134,8 +209,9 @@ monotonicity do the inversion.
   also has to lift Python 3.11's `int`-to-`str` conversion cap when the numerators get long enough.
   In C the same ladder overflows instead: problem 141's discriminant needs `__int128` because the
   intermediate exceeds $2^{63}$. Problem 297's block sums show a quieter case: the step and the limit
-fit in 64 bits, but the running total for a $10^{18}$ limit does not, so only the accumulator moves
-to `unsigned __int128` (printed by hand, since `printf` has no format for it). See [watch integer width](/topics/takeaway/watch-integer-width).
+  fit in 64 bits, but the running total for a $10^{18}$ limit does not, so only the accumulator moves
+  to `unsigned __int128` (printed by hand, since `printf` has no format for it). See
+  [watch integer width](/topics/takeaway/watch-integer-width).
 - **Know the alternative you are beating.** If the direct formula is cheap and the index count is
   small, a recurrence is extra code and extra places to be wrong. The move pays when the index is
   large, when the direct evaluation is superlinear (factorials, powers, valuations), or when it
