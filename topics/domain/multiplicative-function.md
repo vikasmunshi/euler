@@ -1,12 +1,12 @@
 <!-- tags: [multiplicative-function] -->
-<!-- status: final 2026-10-28T21:39Z -->
+<!-- status: final -->
 # Multiplicative function
 
 An arithmetic function $f$ is [multiplicative](https://en.wikipedia.org/wiki/Multiplicative_function)
 when $f(1) = 1$ and $f(mn) = f(m)\,f(n)$ whenever $\gcd(m, n) = 1$. That one rule is the most
 useful structural fact in computational number theory, because it says the function has no global
 behaviour at all: $f(n)$ is the product of what it does on each prime power of $n$ separately. The
-forty problems below ask about divisor counts, totients, radicals, Möbius signs, unitary
+forty-odd problems below ask about divisor counts, totients, radicals, Möbius signs, unitary
 divisors and stranger things built just for the problem, but they share one move. Find the local
 rule $f(p^a)$, and the rest is bookkeeping in one of a handful of shapes.
 
@@ -31,6 +31,8 @@ Writing down $f(p^a)$ is the whole specification. The functions that recur here:
 | $2^{\omega(n)}$ (squarefree divisors) | $2$ | 675 |
 | $\sum_{d \mid n} 2^{\omega(d)} = d(n^2)$ | $2a + 1$ | 675 |
 | [unitary](/topics/domain/unitary-divisor) square sum | $1 + p^{2a}$ | 429 |
+| [two-square](/topics/domain/sum-of-two-squares-theorem) count $r_2(n)/4$ | $a + 1$ if $p \equiv 1 \pmod 4$; for $p \equiv 3$, $1$ if $a$ is even, else $0$; $1$ at $p = 2$ | 621 |
+| $x^{S(n)}$ with $x^3 = 1$, $S(n)$ the sum of the distinct primes of $n$ | $x^p$ | 967 |
 
 Two cautions belong right next to the definition. First, the coprimality condition is not
 decoration: $d(4) = 3$ but $d(2)^2 = 4$. Only a *completely* multiplicative function ($n$, $n^k$,
@@ -48,7 +50,7 @@ tuple distributes each prime's exponent over the $k$ slots on its own. That is
 [stars and bars](https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics)), which gives the
 binomial in the table.
 
-## Three shapes of computation
+## Four shapes of computation
 
 What you do with the local rule depends on how many values the problem needs.
 
@@ -92,6 +94,20 @@ once through its smallest prime factor and works for any multiplicative $f$. The
 where the sieving prime $p$ already divides $i$: then $i \cdot p$ and $p$ are *not* coprime, and
 $f(ip) \ne f(i)f(p)$. Problem 745 handles it by tracking the full $p$-power block of each index and
 multiplying $f(p^a)$ into the coprime cofactor. That branch is where linear-sieve bugs live.
+
+**Every value along a polynomial: sieve its roots.** Sometimes the values wanted are a thin,
+structured subset, too many to factor one by one and too spread out for a sieve up to the largest.
+Problem 621 counts the ways to write $n$ as three triangular numbers. Fix the first one and the other
+two are a sum-of-two-squares question, so the answer is $\sum_a r_2(f(a))/4$ for a quadratic $f$. That
+is a multiplicative function at about $\sqrt{2n}$ points, each as large as $4n$. What rescues it is
+that a prime $p$ divides $f(a)$ only when $a$ lies in the residue classes of $f$'s roots mod $p$, and
+there are at most two of those. So a [polynomial sieve](/topics/technique/polynomial-sieve) walks
+those progressions instead of the multiples of $p$, starting from
+[modular square roots](/topics/technique/quadratic-residue), and multiplies in the local factor at
+each hit as the totient sieve does. A multiplicative target adds two duties. The local rule reads the
+exponent, so each hit must divide $p$ out completely instead of just noting it. And sieving only to
+the square root of the largest value leaves a cofactor that is $1$ or a single prime, whose factor
+has to be applied at the end; here its residue mod 4 settles it.
 
 **The sum up to a huge $N$: convolve.** When $N$ is $10^{11}$ or $10^{15}$ you cannot touch each $n$,
 and the summatory function $F(N) = \sum_{n \le N} f(n)$ has to come from structure. The tool is
@@ -143,14 +159,28 @@ For $p > 5$, the factor $p^{a-1}$ forces $a = 1$, and $p - 1$ must itself be a
 number times a squarefree product of these "good" primes. The search space drops from $10^{12}$
 integers to a few thousand Hamming numbers and a few million prime subsets.
 
+Problem 342 shows where that argument stops. It asks when
+$\varphi(n^2) = \prod_p p^{2e_p - 1}(p - 1)$ is a perfect cube, and a product can be a cube without
+its factors being cubes, so the condition no longer holds one prime at a time. Worse, the factor
+belonging to $p$ is not local to $p$: its $p - 1$ spills into the exponents of other primes. The
+structure that survives is the direction of the spill, because $p - 1$ only reaches primes *smaller*
+than $p$. So the search takes the primes of $n$ from the largest down and
+[carries only the exponents owed mod 3](/topics/takeaway/search-residues-not-values), and a prime is
+[closed for good](/topics/takeaway/order-search-so-constraints-close) once the search has passed it.
+The largest prime receives nothing from the others, which forces its exponent to be $2 \bmod 3$ and
+puts every prime involved below $\sqrt N$. The coupling also makes pruning harder than it looks. A
+smaller owed prime can be paid off by some later $p - 1$ instead of entering $n$, so only the largest
+owed prime gives a sound lower bound on what is still to come. Charging every owed prime at its forced
+exponent looks like a stronger prune, but it discards real solutions, and only a brute-force
+comparison showed it.
+
 ## Local to global beyond arithmetic functions
 
 The same idea applies to counts modulo $n$. By the
 [Chinese remainder theorem](/topics/technique/chinese-remainder-theorem), $\mathbb{Z}/n$ splits into
 the product of $\mathbb{Z}/p^a$. So the number of solutions of a polynomial congruence mod $n$ is
-multiplicative in $n$: count the cube roots of unity mod each prime power and multiply (problem 271),
-or the solutions of a four-variable congruence (problem 875). The local count still needs care.
-In 271 there are three roots modulo $p$ when $3 \mid p - 1$ and one otherwise, and
+multiplicative in $n$: count the cube roots of unity mod each prime power and multiply (problem 271).
+The local count still needs care. In 271 there are three roots modulo $p$ when $3 \mid p - 1$ and one otherwise, and
 [Hensel's lemma](https://en.wikipedia.org/wiki/Hensel%27s_lemma) lifts each root uniquely to $p^k$.
 The exception is $p = 3$, where the derivative $3x^2$ vanishes: there is one root mod $3$ but three
 mod $9$. A rule derived from the primes alone misses that case. Also, once the roots are combined
@@ -158,6 +188,57 @@ through CRT, the *sum* of the solutions is not multiplicative even though their 
 enumerates the combinations themselves. The
 [Pisano period](/topics/domain/pisano-period) of problem 853 combines the same way, except the prime-power
 periods meet in an $\operatorname{lcm}$ instead of a product.
+
+Lifting roots one at a time is no use when the solutions number about $n^7$. Problem 875 counts the
+zeros mod $n$ of an eight-variable [quadratic form](/topics/domain/quadratic-form), and a
+[roots-of-unity filter](/topics/technique/roots-of-unity-filter) skips the local analysis altogether.
+The filter rewrites the count as $\frac1n \sum_t |G(t, n)|^8$ over
+[quadratic Gauss sums](/topics/technique/quadratic-gauss-sum), and grouping the $t$ by the reduced
+denominator of $t/n$ gives a Dirichlet convolution outright: $q = \mathrm{Id}^7 * w$, where $w$ is a
+multiplicative weight built from $\varphi$ and the size of the Gauss sum. That is more than a proof
+that $q$ is multiplicative. It is the factorisation the summation needs, because the swap from the
+convolution shape leaves $\sum_m w(m)\, S_7(\lfloor N/m \rfloor)$, with $S_7$ a closed form from
+[Faulhaber's formula](/topics/technique/faulhabers-formula). The awkward prime is again the one that
+divides the derivative: $3$ for the cubes of 271, $2$ for the squares here. Every odd prime has
+$q(p) = p^7 + p^4 - p^3$, which predicts $136$ at $p = 2$, but the true count is $128$. The Gauss sum
+mod 2 vanishes, so $w$ needs its own rule at the powers of 2.
+
+## The identity does not care what it sums
+
+Nothing in $f = g * h$ or the swap of summation needs the values to be numbers. A commutative ring
+is enough, and for products an abelian group, and two problems depend on that.
+
+Problem 967 counts the $n \le 10^{18}$ for which $S(n)$, the sum of the distinct primes up to $B$
+dividing $n$, is a multiple of 3. $S$ is additive, not multiplicative, and the target is a residue, not
+a total. Exponentiating fixes both. In the [group ring](/topics/technique/group-ring-arithmetic)
+$\mathbb{Z}[x]/(x^3 - 1)$, the function $\chi(n) = x^{S(n)}$ is multiplicative, and the three
+coefficients of $\sum_n \chi(n)$ count the $n$ in each residue class. Its local rule ignores the
+exponent, $\chi(p^a) = x^p$ for every $a$, so $\chi = \mathbf 1 * h$ with $h$ supported on squarefree
+numbers and $h(p) = x^p - 1$. That is the sparse-$h$ move from the convolution shape with ring elements
+as values, and the prime 3 drops out by itself, since $h(3) = 0$.
+
+The same problem also loosens that move, because $g$ does not have to be $\mathbf 1$. Enumerating every
+squarefree $d$ means about $7 \times 10^7$ terms. Keep the seven smallest relevant primes inside $g$
+instead: their part of $\chi$ is [periodic](/topics/domain/periodic-sequence) in $n$, so a prefix table
+over one period gives its partial sums in $O(1)$, and $h$ runs over the large primes alone, about
+$1.4 \times 10^6$ terms. The split is a dial between table size and term count. And since $h(d)$
+depends only on how many primes of $d$ are $1$ and $2 \bmod 3$, the ring products happen once per class,
+not once per term.
+
+Problem 754 is the multiplicative version, and it starts with a warning. The Gauss factorial
+$\gamma(n)$, the product of the $k \le n$ coprime to $n$, is *not* a multiplicative function:
+$\gamma(15) = 896896$ while $\gamma(3)\gamma(5) = 48$. A definition that mentions coprimality promises
+nothing. The machinery applies one level up, in the group $(\mathbb{Z}/p)^\times$, where a convolution
+is written as a product and $\mu$ moves into the exponent:
+
+$$\gamma(n) = \prod_{d \mid n} \left(d^{\,n/d}\,(n/d)!\right)^{\mu(d)}.$$
+
+The quotient blocks survive that translation, with one difference. Over a run of $d$ sharing
+$\lfloor N/d \rfloor$, a base that depends only on the quotient takes a difference of the
+[Mertens function](/topics/technique/mertens-function-application) as its exponent, while the base $d$,
+which changes inside the run, needs a prefix table of $\prod d^{\mu(d)}$. Exponents
+[reduce mod $p - 1$](/topics/takeaway/reduce-exponent-modulo-group-order), so a negative Mertens
+difference needs no special case.
 
 ## How to reason about it
 
@@ -167,16 +248,20 @@ periods meet in an $\operatorname{lcm}$ instead of a product.
 - **Derive $f(p^a)$ and verify it.** The local rule is the entire specification, so a wrong
   exponent case silently corrupts everything. Compare the product formula against brute force for
   $n \le 1000$. The $p \mid a$ case in problem 484 and the $a = 1$ versus $a \ge 2$ split of $\mu$
-  are where errors hide.
+  are where errors hide. The rule can also vary with $p$ itself: by residue class (problem 621), or at
+  the prime dividing the derivative (3 in problem 271, 2 in problem 875).
 - **Choose the shape from $N$.** One value: factor. All values to $10^7$–$10^8$: sieve, inside
   `solve()`, sized to the input ([size the work to the input](/topics/takeaway/size-work-to-the-input)).
-  A sum to $10^{12}$ and beyond: find a convolution $f = g * h$ with sparse $h$, or a sublinear
-  summatory method.
+  The values of a polynomial: sieve its roots mod each prime. A sum to $10^{12}$ and beyond: find a
+  convolution $f = g * h$ with sparse $h$, or a sublinear summatory method.
+- **Ask where the values live.** A count by residue, or a product mod a prime, is still a convolution
+  problem once the values move into a group ring or an exponent (problems 967 and 754).
 - **Respect the coprimality condition in sieves.** A linear sieve's "$p$ divides $i$" branch and a
   coprime split that forgets the shared factor of $2$ are the same bug: multiplying across a shared
   prime.
 - **Search signatures, not numbers.** When $f(n)$ is given and $n$ is wanted, enumerate exponent
-  patterns over small primes with monotone exponents, and prune with the local rule.
+  patterns over small primes with monotone exponents, and prune with the local rule. If the target
+  couples the primes, find which way the coupling runs and search in that order (problem 342).
 - **Watch the width.** $\sigma_2(n)$ reaches $1.6\,n^2$, convolution sums approach
   $N \log N$, and products of local factors mod $10^9+7$ need a 128-bit intermediate in C
   ([watch integer width](/topics/takeaway/watch-integer-width)).
