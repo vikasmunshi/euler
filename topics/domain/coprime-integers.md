@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers] -->
-<!-- status: final 2026-10-29T07:09Z -->
+<!-- status: final -->
 # Coprime integers
 
 Two integers are [coprime](https://en.wikipedia.org/wiki/Coprime_integers) when
@@ -8,7 +8,8 @@ looks like a triviality worth one line of a library call. It earns a *domain* pa
 it does to the problems below: coprimality is the condition under which arithmetic **stops
 interfering with itself**. Two coprime numbers can be reasoned about independently, so a
 multiplicative quantity splits across them, a fraction has exactly one reduced form, a lattice
-direction has exactly one primitive vector, and a residue becomes invertible. Almost every problem
+direction has exactly one primitive vector, a residue becomes invertible, and a step reaches every
+residue before it repeats. Almost every problem
 on this page is a case of noticing that some pair in the statement is forced to be coprime, and
 then cashing that in.
 
@@ -30,6 +31,18 @@ multiplier" $m$ for a prime $p$ turns out to be $10^{-1} \bmod p$, and the state
 hypothesis "$p$ coprime to $10$" is precisely the condition for that inverse to exist. The
 coprimality also hands over a closed form — $m = (kp+1)/10$ with $k$ fixed by $p$'s last digit —
 so no extended Euclid runs at all.
+
+Problem 605 is what happens when that gcd check is neither cheap nor passing. It needs a fraction
+in lowest terms whose denominator is built from $2^n - 1$, a number some thirty million digits
+long, so the gcd cannot be run on the operands. It does not have to be: the numerator's factor
+$T$ satisfies $T \equiv n \pmod{2^n - 1}$, so one Euclid step taken on paper shows any prime they
+share also divides $n$, and $\gcd(n, 2^n - 1)$ needs only $2^n \bmod n$. That names the candidate
+primes; each one's exponent is then read from residues modulo a high power of it. The common
+factor can still fail to be a unit modulo the required output modulus, so there is no inverse to
+divide by. The way out is to
+[lift the modulus](/topics/takeaway/divide-by-lifting-the-modulus): if $d \mid v$, then
+$(v \bmod md)/d \equiv v/d \pmod m$, so compute modulo $md$ and divide exactly. Coprimality decides
+whether a division is an inverse; it does not decide whether the division is possible.
 
 **Splitting:** a [multiplicative function](/topics/domain/multiplicative-function) satisfies
 $f(ab) = f(a)f(b)$ *only* under $\gcd(a,b) = 1$, and the
@@ -55,6 +68,19 @@ $n-1$ separately for the same reason; problem 127 uses it on the radical
 the triple is pairwise coprime), and problem 694 uses it to give every cube-full number the unique
 form $m_3^3 m_4^4 m_5^5$ with $m_4, m_5$ squarefree and coprime.
 
+The same locality settles exponents. If coprime $a$ and $b$ have $ab = c^k$, each prime of $c$ lies
+wholly in one factor and brings its full exponent, a multiple of $k$, so $a$ and $b$ are perfect
+$k$-th powers themselves. This is the move behind Fermat's
+[infinite descent](https://en.wikipedia.org/wiki/Proof_by_infinite_descent), and problem 764 uses
+it to solve an equation outright. Read $16x^2 + y^4 = z^2$ as a
+[Pythagorean triple](/topics/domain/pythagorean-triple) $(4x, y^2, z)$ and
+[Euclid's formula](/topics/technique/euclids-formula) applies; for odd $y$ the square leg factors
+as $y^2 = (m-n)(m+n)$ with coprime factors, so each factor is a square. Substituting those squares
+turns the solutions into quartic forms in a new coprime pair, and $z \le N$ now holds both
+parameters to $O(N^{1/4})$ and the whole enumeration to $O(N^{1/2})$ pairs. For even $y$ the
+factorisation carries a stray $2$, which must be assigned to one side: the even factor is twice a
+square and the odd one a square.
+
 **Canonical form:** every pair $(a,b)$ is $d \cdot (s,t)$ with $d = \gcd(a,b)$ and
 $\gcd(s,t) = 1$, uniquely. So a family parametrised by an unreduced pair is really a family of
 *primitive* representatives times a scale, and enumerating primitives once each removes the
@@ -73,6 +99,20 @@ $q = O(\sqrt N)$. The
 and the [Stern–Brocot tree](/topics/domain/stern-brocot-tree) are this idea made into generators:
 they emit coprime pairs directly, so no candidate is ever tested and rejected.
 
+The canonical form also proves itself complete, through
+[Euclid's lemma](https://en.wikipedia.org/wiki/Euclid%27s_lemma): if $b \mid ac$ and
+$\gcd(b,c) = 1$ then $b \mid a$, and coprimality survives taking powers. So a
+[reduced ratio](/topics/takeaway/parametrise-by-reduced-ratio) leaves its denominator nowhere to go
+but the scale. In problem 518 a geometric triple with ratio $q/p$ has $z = xq^2/p^2$; since $p^2$
+cannot cancel against $q^2$, it must divide $x$, and every triple is $k(p^2, pq, q^2)$ with no
+exceptions. Problem 510 runs the argument twice. Tangency forces $r_A/r_B = u^2/v^2$, so
+$r_A = ku^2$ and $r_B = kv^2$, and the third radius comes out as $ku^2v^2/(u+v)^2$. Because $u+v$
+is coprime to $uv$, all of $(u+v)^2$ has to be absorbed by $k$. Integrality is therefore a step in
+a derivation rather than a filter on candidates, and it yields the exact shape of every solution.
+What the leftover scale costs depends on the quantity. Problem 510's radii are homogeneous in it,
+so its multiples sum to a triangular number as in problem 257; problem 518 asks whether each term
+is prime, which is not homogeneous, so there the scale has to be walked.
+
 **Visibility:** in the [integer lattice](/topics/domain/integer-lattice), $(p,q)$ is visible from
 the origin — no lattice point strictly between — iff $\gcd(p,q) = 1$. Reduced fraction, primitive
 vector and unobstructed line of sight are three names for one object. Problem 202 unfolds a
@@ -84,6 +124,22 @@ the ring $a + b = s$ of one sector number exactly $\varphi(s)$. Six-fold symmetr
 $H(n) = 3n(n+1) - 6\sum_{s \le n}\varphi(s)$ — the visibility question becomes a totient sum. The
 same condition is what problems 388, 777 and 841 are counting when they talk about distinct lines,
 Lissajous curves and star polygons.
+
+**Reach:** a step $s$ coprime to $n$ generates $\mathbb{Z}/n\mathbb{Z}$ additively: the walk
+$0, s, 2s, \dots$ visits all $n$ residues in one cycle, where $\gcd(s,n) = g > 1$ would trap it in
+a subgroup of size $n/g$. Replace the cycle with non-negative combinations and the statement
+becomes the [Frobenius](/topics/domain/frobenius-number) setting: the
+[numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup) generated by
+$a_1, \dots, a_k$ misses only finitely many integers iff their overall gcd is $1$, and for two
+coprime generators the largest miss is $ab - a - b$. Problem 718 needs both forms. It totals the
+gaps of a three-generator semigroup through its Apéry set, the least reachable member of each
+residue class modulo the smallest generator $x$, which in general is a shortest-path computation
+over the residues. Coprimality removes the graph. An inverse of the second generator modulo $x$
+gives its least multiple in each class directly. Then walking the classes in the order
+$iz \bmod x$, one cycle because $\gcd(z,x) = 1$, makes "add one more $z$" a step between neighbours,
+so the third generator costs a single
+[running minimum](/topics/takeaway/shift-min-plus-recurrence-to-running-minimum) instead of
+Dijkstra.
 
 ## Counting coprime pairs
 
@@ -128,6 +184,20 @@ $O(n^{2/3})$ — the 73-style seed-then-subtract idea, lifted past the reach of 
 width when you do this: $\Phi(n) \approx 3n^2/\pi^2$ outgrows 64 bits once $n$ passes about
 $5.5 \times 10^9$, so a coprime *count* can overflow long before its argument looks large.
 
+Nothing ties the indicator to a sum. Problem 754 wants a *product* over the integers coprime to
+$n$, and in a product the indicator rises into the exponent:
+
+$$\prod_{\substack{k \le n \\ \gcd(k,n) = 1}} k = \prod_{d \mid n} \Bigl(\prod_{\substack{k \le n \\ d \mid k}} k\Bigr)^{\mu(d)} = \prod_{d \mid n} \bigl(d^{\,n/d}\,(n/d)!\bigr)^{\mu(d)}.$$
+
+Swap the order of the products and quotient blocking carries over, with exponents in place of
+terms: across one block of constant $\lfloor N/d \rfloor$ the $\mu(d)$ add up to a difference of the
+[Mertens function](/topics/technique/mertens-function-application). Two things change in the
+multiplicative setting. Exponents
+[reduce modulo $p - 1$](/topics/takeaway/reduce-exponent-modulo-group-order) rather than $p$, which
+[Fermat](/topics/domain/fermats-little-theorem) allows only for bases coprime to $p$, a condition
+met here because $p > N$. And a negative exponent is an inverse, so keeping the $\mu = +1$ and
+$\mu = -1$ running products apart costs one inversion per block instead of one per element.
+
 ## How to reason about it
 
 **Look for coprimality you are given for free.** Consecutive integers, $n$ and $n \pm 1$; a
@@ -146,8 +216,13 @@ $\times$ scale, or Möbius-inverting it, changes the exponent rather than the co
 and the pair $(1,1)$ is a favourite off-by-one. *Pairwise* coprime is strictly stronger than
 *setwise* — $\{6, 10, 15\}$ has overall gcd $1$ with no two members coprime — and problems that
 build a graph or a matching out of "shares a prime factor" (355, 838, 886) live precisely in that
-gap. Finally, coprime is not prime: $\gcd(8, 9) = 1$ says nothing about either number's
-factorisation beyond its disjointness from the other's.
+gap. Check which one a theorem needs: $\langle 6, 10, 15 \rangle$ still has finitely many gaps,
+because that needs only the setwise gcd, but the single-cycle walk of problem 718 needs a coprime
+*pair* and has none here. Primitivity also does not survive a substitution unexamined. Problem
+764's $\gcd(x,y,z) = 1$ is a condition on $(x, y, z)$, not on the triple $(4x, y^2, z)$: its
+solution $(3, 4, 20)$ becomes $(12, 16, 20)$, which is not primitive, so the factor of $4$ must be
+divided out before Euclid's formula applies. Finally, coprime is not prime: $\gcd(8, 9) = 1$ says
+nothing about either number's factorisation beyond its disjointness from the other's.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
