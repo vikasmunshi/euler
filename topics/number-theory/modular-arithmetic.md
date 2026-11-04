@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-03T12:31Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -178,6 +178,12 @@ And when $n = b^u$ with $u$ as large as a thousand, the exponent is never formed
 carried instead, $k^{b^u} = \bigl(k^{b^{u-1}}\bigr)^b$, one small exponentiation per step of $u$.
 That keeps the C port in 64 bits without a bignum library.
 
+Problem 921 carries a power along a stranger index. Its exponents are $5^{F_i}$ for Fibonacci $F_i$,
+wanted modulo $M - 1$ by Fermat, and the index never has to be tracked at all, because
+$5^{F_i} = 5^{F_{i-1}} \cdot 5^{F_{i-2}}$. The Fibonacci addition has become a multiplication of
+the powers, so each reduced exponent is one modular product of the previous two. Only $\times$ is
+used, so it does not matter that $M - 1$ is composite.
+
 ### Square-and-multiply works in any monoid
 
 Square-and-multiply needs nothing from the integers except an **associative** multiplication, so
@@ -219,6 +225,15 @@ multiplies it by a power of 10 that grows with the position, which no fixed matr
 to carry $10^{-r} N$ and $100^{-r} N^2$ instead. The changing scale is absorbed by a modular
 inverse, and the update becomes linear with constant coefficients again. Dividing a state by a
 known power is a cheap way to make a step position-independent, and so composable.
+
+With a fixed base and many exponents, square-and-multiply is the wrong tool, because it repeats the
+same squarings for every exponent. Problem 921 raises the one element $\beta = 2 + \sqrt 5$ of
+$\mathbb{Z}[\sqrt 5]/M$ to over a million exponents below $M < 2^{29}$. Split each exponent as
+$x = h \cdot 2^{15} + l$ and tabulate $\beta^l$ and $\beta^{h \cdot 2^{15}}$, about $\sqrt M$
+entries each. Then $\beta^x$ is two lookups and one ring multiplication, where the loop would take
+some 29 squarings, and the lookups vectorise as array gathers. These are the two tables of
+[baby-step giant-step](https://en.wikipedia.org/wiki/Baby-step_giant-step), used forwards: that
+algorithm searches them for an unknown exponent, and here they apply known ones.
 
 ## Division: the modular inverse
 
@@ -279,6 +294,13 @@ $A(x, y) / (d(x)\,d(y))$, where $d$ counts divisors, and a fraction is just a re
 $10^9 + 7$. So the 42 million positions collapse to an 81-entry table of digit-pair counts, a few
 inverses of numbers up to 4, and $T$ as a product of powers.
 
+A field can also undo a symmetry. Problem 475 counts the ways to split $12n$ musicians into trios
+that never reuse a quartet. Unordered trios are awkward to count, so it labels them, which
+multiplies the count by exactly $(4n)!$ because the trios are distinct. A dynamic programme then
+counts the labelled form in residues. Removing the labels is a division of a residue, one inverse
+at the end, and it is valid because the prime exceeds $4n$. When a group acts freely on what you
+are counting, count the labelled objects and divide by the group's size once.
+
 Even over a field an inverse costs a modular exponentiation, so how many you take is worth
 planning. Problem 739 needs about $10^8$ binomial coefficients modulo $10^9 + 7$. It multiplies
 the sum through by $(n-1)(n-2)!$, which turns every $1/j!$ into a suffix product, so each term
@@ -299,7 +321,9 @@ factor $p$ into each so that a single inverse serves both terms of its closed fo
 Geometric series are where a field pays off most. Their sum $(x^K - 1)/(x - 1)$ needs one power
 and one inverse, and the ratio may itself be a fraction. Problem 711 sums arithmetico-geometric
 series $\sum m x^m$ in closed form with $x = 1/2$, which modulo $10^9 + 7$ is just the residue
-$2^{-1}$. A first-order linear recurrence is a geometric series in disguise, and seeing that can remove a
+$2^{-1}$. The degenerate ratio that problem 520 had to handle can sometimes be ruled out instead:
+problem 479's ratio is $1 - k^2$, which is $\equiv 1$ only if $p \mid k$, and every $k$ is below
+$p$. A first-order linear recurrence is a geometric series in disguise, and seeing that can remove a
 sequential loop. Problem 423's count obeys $G(n+1) = 6G(n) + d(n)$, with increments $d(n)$
 built from binomials. Unrolled, each $d(j)$ reaches every later term multiplied by a power of 6,
 and summing over $n \le L$ gives it the weight $(6^{L-j+1} - 1)/5$. The running state disappears.
@@ -458,6 +482,11 @@ the primes are divided out along those two progressions, a sieve over a polynomi
 than over the integers. Higher powers of $p$ are found by
 [Hensel](https://en.wikipedia.org/wiki/Hensel%27s_lemma)-lifting the root to $p^2, p^3, \dots$, each
 lift using an inverse modulo $p$ alone, so no intermediate grows past the values being sieved.
+Problem 291 turns that sieve into a primality test. It wants the primes among
+$f(n) = 2n^2 + 2n + 1$, and $2f(n) = (2n + 1)^2 + 1$, so once more only $q \equiv 1 \pmod 4$ can
+divide a value and each such $q$ has two classes. Striking both classes for every such
+$q \le \sqrt L$ leaves the primes, with one hazard a factoring sieve does not have. A class can
+contain $q$ itself, as when $f(r) = q$, and that value is prime, so striking starts at $r + q$.
 
 A general quadratic congruence reduces to a square root by the
 [quadratic formula](https://en.wikipedia.org/wiki/Quadratic_formula), read modulo $m$. It needs
@@ -496,6 +525,12 @@ $p \bmod 13$, a table lookup per prime. Problem 752's $u = 1 + \sqrt 7$ has norm
 takes $o = \operatorname{ord}_p(-6)$ inside $\mathbb{F}_p$. Then $u^o$ has norm 1, and only $p + 1$
 remains to reduce against, not the much richer $p^2 - 1$. Most of the work never leaves the prime
 field.
+
+A root can do its work in the proof alone. Problem 921 computes in $\mathbb{Z}[\sqrt 5]/M$ for a
+prime $M \equiv 4 \pmod 5$, so reciprocity makes 5 a residue and this is the split case. Every unit
+then has order dividing $M - 1$, which licenses reducing its enormous exponents. But the code never
+finds $\sqrt 5 \bmod M$. It multiplies pairs $(q, p)$ standing for $q + p\sqrt 5$, and those two
+coordinates are the very integers the problem asks about.
 
 The norm also says whether there is an order at all. It is multiplicative, so $u$ is a unit modulo
 $x$ exactly when $N(u)$ is, and in problem 752 that removes every $x$ sharing a factor with 6
@@ -587,11 +622,28 @@ their trees unify. It is also increasing in each argument, so the least value se
 variable to 0. All of that is decided on the tree. Reduction modulo $10^9$ enters only in the final
 evaluation, where nothing is compared any more.
 
+Distinctness is the same kind of question as order, because equal residues say nothing about equal
+values. Problem 844 sums, for each $k$ up to $10^{18}$, the *distinct* numbers up to $10^{18}$ in the
+solutions of a Markov-type equation. For $k \ge 10$ each number is a fixed polynomial in $k$, so a
+few dozen [power sums](https://en.wikipedia.org/wiki/Faulhaber%27s_formula) replace the loop over
+$k$. But two polynomials could still agree at some $k$, and each polynomial stops at its own cutoff.
+Both are questions about values, so they are settled on exact integers: the coincidences by
+[Descartes' rule of signs](https://en.wikipedia.org/wiki/Descartes%27_rule_of_signs) on each
+difference, the cutoffs by binary search. The power sums run to about $10^{340}$, which big integers
+handle easily, and the modulus is applied once, to the final total.
+
 The converse is a gift: a modulus written into a *definition* is often there to simplify it. Problem
 512 sums $\varphi(n^i)$ for $i = 1, \dots, n$, taken modulo $n + 1$. Modulo $n + 1$, $n \equiv -1$,
 and $\varphi(n^i) = n^{i-1}\varphi(n)$, so the terms alternate in sign and cancel in pairs. Each
 $f(n)$ is just $\varphi(n)$ for odd $n$ and $0$ for even $n$, and the problem becomes a sum of
 totients before any code is written.
+
+A modulus can also be evidence. Problem 479 sums powers of $(a + b)(b + c)(c + a)$ over the roots
+of a cubic, roots that are complex, and then reduces the total modulo a prime. A complex number has
+no residue, so the statement is promising an integer, and that promise says where to look. The
+product is unchanged by permuting the roots, so
+[Vieta's formulas](https://en.wikipedia.org/wiki/Vieta%27s_formulas) express it through the cubic's
+coefficients, and it collapses to $1 - k^2$. The roots are never found.
 
 ## The overflow trap
 
@@ -607,7 +659,7 @@ reduce back to 64 bits immediately — so the oversized value is transient and n
 245 and 248 hit exactly this: their candidates pass $3 \times 10^9$, and squaring one overflows a
 signed 64-bit word.
 
-Three variations on the same budget:
+Variations on the same budget:
 
 - **Guard the input, and size the total.** Problem 421 multiplies residues below $p \le M$, so it
   rejects $M \ge 2^{32}$ up front rather than let a larger input corrupt the result quietly — and its
@@ -643,6 +695,13 @@ Three variations on the same budget:
   prunes a depth-first search when a candidate $V \cdot p$ exceeds a bound, and that product can
   briefly pass 64 bits. A wrapped value would look small and slip past the test. So it is formed in
   `__int128` and compared there, although nothing is ever reduced modulo anything.
+- **A difference can be small when its terms are not.** Problem 839's answer is
+  $\sum i f_i - \sum i a_i$, two moments near $10^{21}$ whose difference fits easily in 64 bits. Its
+  C port accumulates both in `__int128` and narrows only the difference. There is a second route,
+  because unsigned wraparound *is* arithmetic modulo $2^{64}$: a value built from $+$, $-$ and
+  $\times$ that is known to fit comes out right however often it wraps. The word must be unsigned,
+  since signed overflow is undefined in C. The $/2$ in the block sums would have to be taken before
+  multiplying, because 2 has no inverse modulo $2^{64}$.
 
 ## How to reason about it
 
@@ -652,7 +711,9 @@ directly. When you see it:
 
 - Reduce **early and often** — counts, and where the question allows, elements and exponents too —
   but only the quantity the statement actually reduces. A recursive state may be reduced while
-  its updates are integer-linear. If a choice depends on order, settle it before reducing.
+  its updates are integer-linear. If a choice depends on order or distinctness, settle it before
+  reducing. A modulus applied to something that looks irrational or complex promises an integer,
+  so look for the symmetry that makes it one.
 - Searching for a number with a divisibility property? Its residue is a complete state, so search
   the $n$ residues, not the numbers. With weights, the least member of each class (an Apéry set)
   describes everything the generators cannot reach.
@@ -660,7 +721,8 @@ directly. When you see it:
   Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic. Any
   associative product (a ring extension, a convolution, a matrix per letter of a recursive word,
   a table per block of digits joined by a factor $10^L$) can be powered the same way. A linear recurrence unrolls into geometric weights. A value used
-  both as an exponent and as a factor is needed modulo $p - 1$ **and** modulo $p$.
+  both as an exponent and as a factor is needed modulo $p - 1$ **and** modulo $p$. Many powers of
+  one fixed base are two table lookups each, not a loop.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
   for a prime one — and remember it exists only when $\gcd(a, m) = 1$. A prime modulus is a field;
   under a composite one, audit every division — including the $/2$ and $/6$ of a closed form
@@ -668,7 +730,7 @@ directly. When you see it:
   divisor is still safe, and a stubborn $c$ can be divided out of a residue taken modulo $cm$, or
   the exact value kept until the division is done. Where you can, defer all the divisions to a single
   inverse at the end or carry a scaled quantity ($j!\,H_j$, not $H_j$) that needs none, and remember that over a prime a negative exponent is just a residue mod
-  $p - 1$.
+  $p - 1$. Over a prime, a symmetry can be counted labelled and divided out once.
 - Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
   $\mathbb{F}_{p^2}$) and strip primes while the power stays 1. Lift to $p^k$ by at most a factor
   $p$ per step, and take the lcm across a composite modulus. To test a root you cannot cheaply
@@ -685,7 +747,8 @@ directly. When you see it:
   share a factor $d$, check that $d$ divides the difference of the residues before solving.
 - Writing **C** (or any fixed-width language)? Widen every modular multiply once $m \ge 2^{32}$, and
   bound the accumulated total as well as each product, including products you only compare. Keep
-  `%` away from negative operands.
+  `%` away from negative operands. A result known to fit survives unsigned wraparound, so long as
+  no division happens after the wrap.
 
 The classic mistake is to compute the honest quantity first and reduce at the end — materialising the
 million-digit power, or the true factorial, before taking the remainder. The whole point is that you
