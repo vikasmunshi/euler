@@ -4652,8 +4652,8 @@
     "level": 30,
     "pct": 76,
     "solvers": 491,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 4 Nov 2026, 04:03"
   },
   "583": {
     "title": "Heron Envelopes",
