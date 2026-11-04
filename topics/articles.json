@@ -3280,13 +3280,13 @@
       "path": "domain/prime-factor",
       "title": "Prime factor",
       "status": "final",
-      "written": "2026-10-28T08:03Z",
+      "written": "2026-11-04T13:26Z",
       "solved": 8,
       "problems": 10,
       "tags": ["prime-factor"],
       "refs": ["p0132", "p0521", "p0526", "p0632", "p0642", "p0659", "p0668", "p0779", "p0823", "p0967"],
-      "covered": ["p0132", "p0642", "p0668"],
-      "solved_after": ["p0521", "p0632", "p0659", "p0779", "p0967"]
+      "covered": ["p0132", "p0521", "p0632", "p0642", "p0659", "p0668", "p0779", "p0967"],
+      "solved_after": []
     },
     {
       "path": "domain/prime-factorization",
