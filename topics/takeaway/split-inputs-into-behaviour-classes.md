@@ -1,5 +1,5 @@
 <!-- tags: [split-inputs-into-behaviour-classes] -->
-<!-- status: final 2026-10-12T14:28Z -->
+<!-- status: final -->
 # Split inputs into behaviour classes
 
 Many problems ask about a deterministic process run on *every* input in a huge range: the
@@ -10,7 +10,10 @@ looks at the whole input. It reads a quotient, a digit length, a prefix, a value
 on what it reads behave *identically* from then on. So the move is to carry whole **classes** of
 inputs at once, usually intervals, arithmetic progressions or groups with a multiplicity, and
 split a class only at the point where its members' behaviour actually diverges. The work then
-scales with the number of distinct behaviours, not the number of inputs.
+scales with the number of distinct behaviours, not the number of inputs. The same move also goes
+further than intervals: classes can merge as well as split, can share a shape instead of a value,
+can choose the method instead of the count, and can divide the coordinates of a problem instead of
+its inputs.
 
 ## The idea: follow what the process reads
 
@@ -68,12 +71,121 @@ while stack:
             stack.append((sub_lo, sub_hi, nxt))
 ```
 
+## Beyond intervals: four other kinds of class
+
+The problems above all carry a set of inputs and count it. Four later ideas keep the question,
+*what does the process actually read?*, and change what a class is.
+
+### Classes that merge: the state of a prefix
+
+Problem 706 counts the $d$-digit numbers, with $d = 10^5$, whose number of substrings divisible by
+3 is itself divisible by 3. The inputs are strings, and there is no interval to carry. But read a
+number left to right and ask what the future needs. A substring is divisible by 3 when the prefixes
+at its two ends have equal digit sums mod 3, so appending a digit adds one new substring for each
+earlier prefix with the new residue. Two prefixes that agree on those counts mod 3 and on the tally
+so far respond identically to every continuation, whatever their digits were. They are one class
+for good, which is the equivalence behind the
+[Myhill–Nerode theorem](https://en.wikipedia.org/wiki/Myhill%E2%80%93Nerode_theorem).
+
+So classes here *merge*. In 255 the tree only grows, while in 706 every step pours the classes back
+into the same fixed set. A [finite-state machine](/topics/technique/finite-state-machine) is what a
+partition looks like once it stops growing. Three reductions produce this one, and each is a
+question about what is read:
+
+- **Close the summary.** The tally mod 3 is all the question reads, but it is not enough to predict
+  the next tally. The test is that the same class plus the same next symbol must give the same next
+  class. I add what is missing, here the prefix counts, until that holds. This is the
+  [full-state rule for memo keys](/topics/takeaway/memo-key-is-the-full-state) in another guise.
+- **Drop the coordinates nothing reads.** Measuring the counts relative to the current residue
+  removes the residue from the state, taking 243 states to 81. That is a quotient by a
+  [symmetry](/topics/takeaway/exploit-symmetry).
+- **Class the symbols too.** The ten digits drive only three different transitions, so they become
+  three edges weighted $(4, 3, 3)$, or $(3, 3, 3)$ for the leading digit, which cannot be zero.
+
+The worklist above then becomes a vector of class sizes, pushed forward one symbol at a time:
+
+```python
+sizes = {start: 1}                            # class -> how many inputs are in it
+for _ in range(length):
+    nxt = Counter()
+    for state, size in sizes.items():
+        for symbol_class, weight in symbol_classes:
+            nxt[step(state, symbol_class)] += size * weight
+    sizes = nxt
+```
+
+Because the step is the same each time, it is one fixed matrix, and
+[matrix exponentiation](/topics/technique/matrix-exponentiation) turns the length from a loop bound
+into a logarithm. This is the [transfer-matrix method](/topics/domain/transfer-matrix-method). Ten
+times the digits costs only a few more squarings.
+
+### Classes that share a shape, not a value
+
+Problem 844 sums the $k$-Markov numbers up to $10^{18}$ for every $k$ up to $10^{18}$. Each $k$ has
+its own tree of solutions, grown by [Vieta jumping](/topics/technique/vieta-jumping) from the
+all-ones tuple, and the values differ from one $k$ to the next. Yet the *computation* is the same
+for every large $k$: the same branches, with values $k - 1$, then $k^2 - k - 1$, and so on. So I run
+the search once with
+[$k$ as a polynomial variable](/topics/takeaway/treat-a-parameter-as-a-polynomial-variable) and get
+under a hundred polynomials, each valid from a threshold $T = 10$ up to its own cutoff.
+[Power sums](/topics/technique/faulhabers-formula) then add each polynomial over its whole range of
+$k$ at once, and the few $k$ below $T$ are walked numerically.
+
+So the requirement on a class is weaker than it first looks. Its members need not give the same
+result, only follow the same path. The result is then a formula in the input, and the class
+contributes a sum where 255's contributes a product. The price is that "same path" is a claim about
+a vast range of cases, so it has to be earned. The code asserts that every polynomial increases past
+$T$, without which pruning at $T$ would be unsound, and that a tuple always has a one left to
+replace. Two polynomials could also meet at a particular $k$ and count one number twice, so each
+pair is checked with
+[Descartes' rule of signs](https://en.wikipedia.org/wiki/Descartes%27_rule_of_signs) and, where that
+cannot rule a meeting out, a bounded scan. The threshold makes a useful test too, because the split
+point is a free choice: the answer must not change as $T$ moves, and it does not.
+
+### Classes that choose the method
+
+Sometimes the class saves nothing by multiplicity at all. In Problem 752, $g(x)$ is the
+[multiplicative order](/topics/domain/multiplicative-order) of $1 + \sqrt 7$ modulo $x$, and every
+prime still gets its own computation. What the class supplies is a *theorem*. The norm of
+$1 + \sqrt 7$ is $-6$, so any $x$ sharing a factor with 6 has no order, which disposes of two thirds
+of the range with one test. The
+[Chinese remainder theorem](/topics/technique/chinese-remainder-theorem) reduces the rest to prime
+powers, and then one [quadratic-residue](/topics/technique/quadratic-residue) test sorts the primes.
+Where 7 has a square root the ring splits into two copies of $\mathbb F_p$, and the order divides
+$p - 1$. Where it does not, the ring is $\mathbb F_{p^2}$, and Frobenius moves most of the work back
+into $\mathbb F_p$, leaving one factor that divides $p + 1$. The one ramified prime, 7, has its own
+small unit group. Each class has a different algebra, so each has a different known multiple to
+reduce from. A treatment that ignored the classes would have to work in the much larger group of
+order $p^2 - 1$.
+
+Problem 764 is the same kind of split, resolved earlier, on paper. Once $16x^2 + y^4 = z^2$ is
+rewritten as a Pythagorean triple, the condition $\gcd(x, y, z) = 1$ behaves differently for odd and
+even $y$, and the factoring argument differs with it. Each parity class yields its own two-parameter
+family, and the even class's two sub-cases collapse into one. The code has no per-input branch at
+all: it is two loops, each [generating only its own class](/topics/takeaway/reduce-before-coding),
+over $O(N^{1/2})$ parameter pairs. A class that can be derived should be generated, not filtered.
+
+### Classes of coordinates, not inputs
+
+Problem 619 counts subsets of an interval whose product is a perfect square. A number matters only
+through the parities of its prime exponents, so the count comes from the
+[rank of a matrix over GF(2)](/topics/takeaway/count-solutions-by-rank), with a column for every
+prime up to $b$. Here it is the *columns* that split into two behaviours. A number up to $b$ has at
+most one prime above $\sqrt b$, to the first power, so such a prime is a coordinate that a few rows
+share and nothing else touches. Each large prime contributes exactly 1 to the rank: one carrier
+becomes its pivot and the others absorb that pivot's small-prime part. General
+[Gaussian elimination](/topics/technique/gaussian-elimination) is left with only the primes below
+$\sqrt b$, just 186 of them for the target range. The large class needs no elimination, because its structure has already decided
+the outcome, and the hard algorithm runs only on the class that needs it.
+
 ## How to reason about it
 
 Reach for this when the input range is far larger than the number of things that can *happen*.
 Signs of it are floors and ceilings of $n / x$, behaviour that depends on digit length or a
-prefix, a value function with a small image, or a family generated by scaling. The gain is the
-ratio of inputs to classes, often the difference between $10^{14}$ and $10^7$.
+prefix, a value function with a small image, or a family generated by scaling. Others are a future
+that depends on a small summary of the past, a parameter that changes values without changing the
+branching, and a case split that changes which theorem applies. The gain is the ratio of inputs to
+classes, often the difference between $10^{14}$ and $10^7$.
 
 - **Find the coarsest function the process depends on.** Split on what the next step *reads*,
   not on the input itself. If you split too finely, the classes are just the inputs again.
@@ -88,14 +200,22 @@ ratio of inputs to classes, often the difference between $10^{14}$ and $10^7$.
   class. In 305 that is a classification by the first boundary inside an occurrence, and in 257
   it is the unique reduced fraction behind each triangle. Prove it, and then check it, with a
   per-input brute force on a small range. 255 was checked against direct simulation for one to
-  seven digits, 305 against a literal scan of the first $2 \times 10^7$ digits.
+  seven digits, 305 against a literal scan of the first $2 \times 10^7$ digits. Disjoint inputs do
+  not guarantee disjoint *outputs*, either: 844's polynomials could in principle produce the same
+  number, and the question asks for distinct ones.
+- **Test every class, not just a range.** A check that never enters a class says nothing about it.
+  752's given values matter because they reach split, inert and ramified primes as well as lifts to
+  higher prime powers such as $5^4$ and $7^3$.
+- **Look for the size where behaviour simplifies.** 619's primes above $\sqrt b$ and 844's $k$ from
+  $T$ upward are both regimes where a strong structural fact holds. Past that point a cheap rule
+  covers everything, and below it there is little enough left for the general method.
 - **Watch the counting at the edges.** Clipping a child interval to its parent and handling an
   empty intersection are where off-by-one errors live. So are the leading-digit and leading-zero
   edge cases of digit-length classes. Write the clipping once, as a helper, and test it alone.
 
 This is the counting cousin of [exploiting symmetry](/topics/takeaway/exploit-symmetry). There
 the classes are orbits of a transformation. Here they are the inputs that a step cannot tell
-apart.
+apart, and 706 shows the two working together.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
