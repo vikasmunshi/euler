@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final -->
+<!-- status: final 2026-11-04T03:42Z -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
