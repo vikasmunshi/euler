@@ -1,5 +1,5 @@
 <!-- tags: [fermats-little-theorem-application] -->
-<!-- status: final 2026-10-29T01:56Z -->
+<!-- status: final -->
 # Fermat's little theorem (application)
 
 [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem) is one line of
@@ -49,7 +49,7 @@ like $10^9+7$ to qualify: 860 counts fair games mod $989\,898\,989$, which is al
 that is the one fact that licenses its binomial coefficients.
 
 The trade-off is that $a^{p-2}$ costs about $\log_2 M \approx 30$ modular multiplications, so an
-inverse is roughly thirty times a multiply — cheap once, ruinous in a hot loop. Four habits
+inverse is roughly thirty times a multiply — cheap once, ruinous in a hot loop. Five habits
 follow, in increasing order of payoff:
 
 - **Hoist the constant ones.** An inverse of a value that does not change between iterations
@@ -73,12 +73,28 @@ follow, in increasing order of payoff:
   for k in range(n, 0, -1):
       inverse_factorial[k - 1] = inverse_factorial[k] * k % M
   ```
+
+  Once the inverses cost one exponentiation, the table itself is the bill. 517 spends most of its
+  Python time in the two interpreted ten-million-step loops that fill these tables. 423 needs
+  $5 \times 10^7$ entries and cannot pay that, and NumPy's `cumprod` cannot reduce as it goes, so
+  the running product becomes a [blocked prefix scan](/topics/technique/blocked-prefix-scan).
+- **Invert only what you query.** A full table is the wrong shape when the queries are sparse. 635
+  reduces to $\binom{qp}{p}/p$ for each of the 5.76 million primes up to $10^8$, so it wants a few
+  factorials at scattered points below $3 \times 10^8$. It stores no table: it keeps $n!$ only at
+  those points, then inverts the denominators $p \cdot p! \cdot ((q-1)p)!$ as one array, by the
+  vectorised square-and-multiply above, in about sixty array operations however many primes there
+  are. Folding $p$ into the denominator is the move worth stealing, because the inverse of a
+  product hands back the inverse of each factor. The same residue gives $\binom{qp}{p}/p$ directly
+  and, multiplied back by $p!\,((q-1)p)!$, the bare $1/p$ that the formula's other term needs.
+  Montgomery's trick is this move applied to every value at once, but its running product is
+  serial, and an array program can prefer the sixty passes.
 - **Defer the division to the very end.** The strongest habit is to need no inverse in the loop
   at all. 739 sums a ballot-number weight $k\binom{2n-3-k}{n-2}/(n-1)$ against every term; rather
   than invert anything per term, it multiplies each term through by the common denominator
   $(n-1)\,(n-2)!$, so what remains is a prefix product times a suffix product — pure
   multiplication, vectorisable — and a single inverse of that denominator finishes the job. The
-  prime modulus is what guarantees the denominator is invertible at all.
+  prime modulus, with every factor of the denominator below it, is what guarantees the denominator
+  is invertible at all.
 
 ## Setting 2 — bounding the multiplicative order
 
@@ -169,6 +185,61 @@ reduced modulo the order of $b$ mod $p - 1$ — Euler's theorem with $\varphi(p-
 [Carmichael function](https://en.wikipedia.org/wiki/Carmichael_function) — and since $p - 1$ is
 even, $b$ need not be coprime to it, which is where the clean rule ends and care begins.
 
+### One number, two moduli
+
+Reducing an exponent assumes the number is *only* an exponent. In 684 it is not. The huge quantity
+is $q = \lfloor f/9 \rfloor$, where $f$ is a Fibonacci number that outgrows the machine word as the
+index climbs, and $q$ appears twice: as the exponent of $10$ and as a plain linear term. The
+exponent matters modulo $p - 1$ and the linear term modulo $p$, so the same number has to be
+carried in both. Fermat does not replace a quantity by its residue; it tells you which residue
+each *use* of it needs.
+
+The floor is the second obstacle, because it does not commute with reduction: $f \bmod m$ says
+nothing about $\lfloor f/9 \rfloor \bmod m$. The fix is to widen the modulus by the divisor.
+Writing $f = 9q + r$ with $0 \le r < 9$,
+
+$$f \bmod 9m = 9\,(q \bmod m) + r,$$
+
+so a recurrence run modulo $9m$ yields $r$ and $q \bmod m$ together, by an exact division with no
+inverse, which would work even if $9$ shared a factor with $m$. 684 runs its Fibonacci recurrence
+twice, modulo $9p$ and modulo $9(p-1)$, and never holds $f$ at all.
+
+### Fermat for a base you never compute
+
+Problem 921 hands this setting a base that is not a residue. A change of variable turns its
+recurrence into a pure power map, so the integers it asks about are the coordinates of
+$\beta^{\,5^{F_i}}$, with $\beta = 2 + \sqrt 5$ held as a pair $u + v\sqrt 5$ in
+[$\mathbb{Z}[\sqrt 5]/M$](/topics/technique/quotient-ring-arithmetic) for the statement's prime $M$.
+Fermat as stated says nothing about $\sqrt 5$, so the question is whether the exponent reduces at
+all, and modulo what.
+
+The answer comes from the prime. Here $M \equiv 4 \pmod 5$, so
+[quadratic reciprocity](https://en.wikipedia.org/wiki/Quadratic_reciprocity) makes $5$ a
+[quadratic residue](/topics/technique/quadratic-residue) and some $s$ has $s^2 \equiv 5$. The ring
+then splits: $u + v\sqrt 5 \mapsto (u + vs,\ u - vs)$ is an isomorphism onto
+$\mathbb{F}_M \times \mathbb{F}_M$. The norm of $\beta$ is $-1$, so both coordinates are nonzero,
+Fermat applies in each, and $\beta^{\,M-1} = 1$. The solution never computes $s$; it stays in pairs
+and uses $s$ only in the proof. Had $5$ been a non-residue, the ring would be the field
+$\mathbb{F}_{M^2}$, the [Frobenius map](/topics/technique/frobenius-endomorphism) would send $\beta$
+to its conjugate, $\beta^{\,M+1}$ would be the norm, and the period would divide $2(M+1)$ instead.
+Reducing modulo $M - 1$ there would be wrong. The same split is why the
+[Pisano period](/topics/domain/pisano-period) of a prime divides $p - 1$ or $2(p + 1)$ according to
+$p \bmod 5$.
+
+Two more ideas follow once the exponents are reduced:
+
+- **Lift the recurrence into the exponent.** $5^{F_i}$ is the kind of tower the pitfall above warns
+  about, but 921 never reduces $F_i$. Since $5^{F_i} = 5^{F_{i-1}} \cdot 5^{F_{i-2}}$, the reduced
+  exponents obey $x_i = x_{i-1}\,x_{i-2}$ modulo $M - 1$: the additive recurrence becomes a
+  multiplicative one, at one multiplication per term. It only multiplies, so the composite modulus
+  is harmless and no coprimality question arises.
+- **A bounded exponent can be tabulated.** The base is fixed and every exponent is now below $M$,
+  so nothing needs exponentiating. Split $x$ into its low 15 bits and the rest, tabulate $\beta^{k}$
+  and $\beta^{k \cdot 2^{15}}$, and each power is two lookups and one ring multiplication instead of
+  about 29 squarings, for $O(\sqrt M)$ table entries. That is the split of
+  [baby-step giant-step](/topics/technique/baby-step-giant-step), run forwards. Fermat's reduction
+  buys more than a number you can hold: it buys a finite domain, small enough to precompute.
+
 ## The converse does not hold
 
 Reading Fermat backwards gives the [Fermat primality test](https://en.wikipedia.org/wiki/Fermat_primality_test):
@@ -190,10 +261,17 @@ phrased over an unbounded range, or an **exponent too large to write down**. Whe
   with the [extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm),
   which inverts in $O(\log m)$ without factoring anything and is the right default when the modulus
   is not known-prime.
+- **Distrust a silent zero.** $a^{p-2}$ is defined for every $a$, and $0^{p-2} = 0$, so a Fermat
+  inverse of a multiple of $p$ returns $0$ where `pow(a, -1, p)` would raise. Factorials are where
+  this bites, since $n! \equiv 0$ for every $n \ge p$. 635 is safe only because
+  $qp \le 3 \times 10^8$ stays below its modulus; write that bound down before trusting the table.
+- **Ask which ring the base lives in.** A base like $2 + \sqrt 5$ reduces its exponent modulo
+  $p - 1$ only when the surd exists mod $p$. Test that first; the period changes if it does not.
 - **Prefer "does it divide?" to "what is it?"** Testing $a^t \equiv 1$ is one exponentiation;
   computing the order needs $p-1$ factored. Most problems only ever ask the first question.
 - **Count your exponentiations.** They are the unit of cost in this whole family. One per prime
-  scales beautifully; one per inner-loop iteration usually does not.
+  scales beautifully; one per inner-loop iteration usually does not, and a fixed base with many
+  bounded exponents needs none at all.
 - **Mind the width.** A modular multiply forms a product of two residues below $M$, so $M^2$ must
   fit the machine word — with $M$ near $10^9$ that is fine in 64 bits, but a 63-bit modulus needs
   `__int128` in C. Python has no such trap, and `pow(a, b, m)` is already the fast path.
