@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Convex_functio
 ## Problems
 
 - ○ [0604](/solutions/0604/) — Convex Path in Square
+- ● [0839](/solutions/0839/) — Beans in Bowls
 
 <!-- /problems -->

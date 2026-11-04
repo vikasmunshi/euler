@@ -525,7 +525,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [0834](/solutions/0834/) — Add and Divide
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
 - ○ [0837](/solutions/0837/) — Amidakuji
-- ○ [0839](/solutions/0839/) — Beans in Bowls
+- ● [0839](/solutions/0839/) — Beans in Bowls
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0849](/solutions/0849/) — The Tournament

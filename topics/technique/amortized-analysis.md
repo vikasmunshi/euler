@@ -91,5 +91,6 @@ pseudorandom generator provides the random order, but an adversarial order would
 - ● [0186](/solutions/0186/) — Connectedness of a Network
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
+- ● [0839](/solutions/0839/) — Beans in Bowls
 
 <!-- /problems -->

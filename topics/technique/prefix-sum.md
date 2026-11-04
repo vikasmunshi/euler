@@ -259,6 +259,7 @@ over a small alphabet, and it needs neither a Fenwick tree nor a merge sort.
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0710](/solutions/0710/) — One Million Members
+- ● [0839](/solutions/0839/) — Beans in Bowls
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers

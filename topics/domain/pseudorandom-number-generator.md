@@ -189,7 +189,7 @@ deterministic program that happens to explore cleverly.
 - ○ [0793](/solutions/0793/) — Median of Products
 - ○ [0803](/solutions/0803/) — Pseudorandom Sequence
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
-- ○ [0839](/solutions/0839/) — Beans in Bowls
+- ● [0839](/solutions/0839/) — Beans in Bowls
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost
 - ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0980](/solutions/0980/) — The Quaternion Group I
