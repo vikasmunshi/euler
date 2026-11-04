@@ -1,5 +1,5 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final 2026-11-02T11:51Z -->
+<!-- status: final -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes
@@ -50,18 +50,19 @@ precision integers, and a hand-rolled version is strictly slower. The same probl
 ## The roles it plays
 
 The reason this tag lands on so many solutions is that `pow(b, e, m)` is rarely the *answer* — it
-is the primitive that other number-theoretic machinery is built from. Nine recurring roles:
+is the primitive that other number-theoretic machinery is built from. Ten recurring roles:
 
 | Role | Shape | Seen in |
 | --- | --- | --- |
 | Direct residue | `pow(b, e, m)` | 48, 97, 194, 615, 731, 820 |
-| [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 487, 545, 635, 650, 675, 743, 860, 926 |
-| [Geometric series](https://en.wikipedia.org/wiki/Geometric_series) | `(pow(x, n, m) - 1) · (x - 1)⁻¹` | 506, 520, 711 |
+| [Modular inverse](/topics/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 374, 487, 545, 635, 650, 675, 743, 860, 926 |
+| [Geometric series](https://en.wikipedia.org/wiki/Geometric_series) | `(pow(x, n, m) - 1) · (x - 1)⁻¹` | 335, 479, 506, 520, 711 |
 | Primality witness | `pow(a, d, n)` then repeated squaring — [Miller–Rabin](/topics/technique/miller-rabin-primality-test) | 111, 146, 216, 271, 293, 516 |
 | [Multiplicative order](/topics/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133, 752 |
-| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 457, 659, 745 |
+| Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/topics/technique/tonelli-shanks-algorithm) | 200, 271, 291, 457, 659, 745 |
 | Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 492, 684, 754, 822 |
 | Product by multiplicity | `∏ pow(b, count[b], m)` | 705, 754, 1010 |
+| Size of a solution space | `pow(q, n - rank, m)` | 619 |
 | Power in a ring extension | `(a + b√d)^n` by square-and-multiply on pairs | 492, 752 |
 
 The inverse row deserves a note, because it is the most common use by volume. By [Fermat's little
@@ -85,6 +86,16 @@ for free as `inv · p! · ((q-1)p)!` — two multiplications instead of a second
 same identity, chained, is [batch
 inversion](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse#Multiple_inverses): `n`
 inverses for one `pow` and `3n` multiplications.
+
+Problem 374 goes further and barely inverts at all. Its block sums contain the
+[harmonic numbers](https://en.wikipedia.org/wiki/Harmonic_number) `H_j = 1 + 1/2 + … + 1/j`, and
+holding `H_j` as a residue costs an inverse of every `j`, about `1.4 × 10^7` of them. But the sums
+multiply `H_j` by `j!` anyway, and `A_j = j!·H_j` is an integer with a division-free recurrence,
+`A_j = j·A_(j-1) + (j-1)!`. Carry the numerator instead of the fraction and the denominators never
+appear; the only `pow` left is one inverse for a truncated last block. Some inverses need no `pow`
+because they have a closed form: `2⁻¹ ≡ (m+1)/2` for any odd `m`. Problem 374 takes its one constant
+half that way, and problem 291 halves modulo two million different primes at once with no
+exponentiation.
 
 Put a power and an inverse side by side and you have the geometric-series row:
 `∑_{k<n} x^k = (x^n − 1)/(x − 1)`, so `n` terms cost one `pow` and one inverse, however large `n`
@@ -124,7 +135,7 @@ to `10`, it becomes a multiplication by `3^(-i)` mod `10^10`. The remainders `r 
 exactly for the carry. It is the [BBP digit-extraction
 idea](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula) in base ten.
 
-The last row is the newest, and it turns the usual relationship around: the exponent is not given,
+The product-by-multiplicity row turns the usual relationship around: the exponent is not given,
 it is *counted*. Problem 1010 asks for a product of tableau counts over every partition of `300`
 into at most `150` parts — about `9 × 10^15` factors, far too many to multiply. But each factor is
 `n!` divided by a product of hook lengths, and hook lengths only run from `1` to `n`. So the whole
@@ -144,6 +155,16 @@ of a nonzero residue under a prime modulus lives mod `p - 1`, so a negative expo
 `⌊N/d⌋`, which takes `O(√N)` distinct values: within each block, `∏ d^(μ(d))` is a ratio of two
 prefix products (the `μ = +1` and `μ = -1` factors kept apart), so one inverse and two `pow` calls
 per block replace `10^8` of them.
+
+Problem 619 counts its exponent a different way: the exponent is a *dimension*. A product is a
+perfect square exactly when every prime's total exponent is even, so each number becomes a parity
+vector over `𝔽₂`, and the subsets with a square product are the kernel of a linear map. A kernel of
+dimension `d` over `𝔽_q` has exactly `q^d` elements, and
+[rank–nullity](https://en.wikipedia.org/wiki/Rank%E2%80%93nullity_theorem) gives `d = n − r`, so the
+count of non-empty subsets is `2^(n−r) − 1`. All the work goes into the rank `r`, by [Gaussian
+elimination](/topics/technique/gaussian-elimination); `pow` is one call at the end. The pattern is
+general: when the constraints are linear and homogeneous over a finite field, the number of
+solutions is a power of the field size, so count dimensions and not solutions.
 
 ## Reducing the exponent
 
@@ -237,11 +258,28 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 `(V(k), V(k+1))` with `V(2k) = V(k)² - 2` and `V(2k+1) = V(k)V(k+1) - P`. The ladder never touches
 `√117` at all, which is why it works identically for split and inert primes.
 
+Before building a ring, check that you need one. Problem 479 raises `(a+b)(b+c)(c+a)` to a power,
+where `a`, `b`, `c` are roots of a cubic and some of them are complex, so the base seems to live in a
+splitting field. But that product is symmetric in the roots, and [Vieta's
+formulas](/topics/technique/vietas-formulas) rewrite it in the cubic's coefficients, where the
+irrational and complex parts cancel and leave a plain integer polynomial in `k`. Ordinary `pow`
+then does everything. A power of a symmetric function of conjugate roots is an ordinary power in
+disguise, so collapse the base first and exponentiate second.
+
 ## How to reason about it
 
 - **Reach for it the moment the answer is a residue.** If the problem says "last `k` digits", "modulo
   `1000000007`", or "is `x ≡ 1`", you are in this territory, and the size of the true value is a red
   herring you should stop thinking about immediately.
+- **When the input is itself a power, suspect the answer is a sum of powers.** Problem 335 wants a
+  cycle length on a ring of `2^k + 1` bowls for `k` up to `10^18`, so the bowl count alone has about
+  `3 × 10^17` digits and no simulation can start. Simulating the small cases can, though. The
+  values for `k ≤ 12` fit an exact combination of three exponentials `c·r^k`, each of which sums as a
+  geometric series, and the whole total costs `O(log K)`. An exponential sum like that is precisely
+  what a [linear recurrence](/topics/technique/linear-recurrence-with-constant-coefficients)
+  produces, so [Berlekamp–Massey](/topics/technique/berlekamp-massey-algorithm) can recover the
+  form from a short table when the bases are not obvious. A fit is a conjecture, not a proof: what
+  earns it trust is having more data than unknowns, here thirteen terms against six.
 - **…but residues forget order.** When the problem asks for the `n`-th smallest of something and
   only then for a residue, you cannot sort residues. Problem 615 wants the millionth number with at
   least a million prime factors: every candidate near the front is `2^(k-s)` times a small number,
@@ -279,6 +317,9 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
   vary per lane as easily as the exponent: problem 492 runs one shared exponent `2^(n-1)` against
   an array of moduli `p ∓ 1`, then a Lucas ladder in which every prime reads its own exponent bit.
   The width rule above applies here too: operands under `2^31` keep every product inside `int64`.
+  Even a search vectorises. Problem 291 needs a non-residue for each of two million primes, so it
+  tries one small base against every prime at once and keeps only the lanes it failed on; each
+  round clears about half of them.
 - **Reduce the base before the loop, not after.** `base %= mod` on entry costs one division and
   bounds every subsequent operand; skipping it is how a "correct" `mod_pow` overflows on its first
   squaring.
@@ -290,7 +331,13 @@ then evaluated by a *Lucas ladder*, the square-and-multiply loop rewritten on th
 - **`pow` is not free.** Each call is `O(log e)` multiplications of `O(log² m)` bit-cost. A sweep
   that calls it per candidate is `O(n log n)` at best; if you find yourself calling it inside two
   nested loops, look for a way to hoist it — usually by exponentiating once and multiplying
-  incrementally.
+  incrementally. Or change what you call it on. Problem 291 counts the primes among about
+  `5 × 10^7` values of a quadratic, and a primality test on each is tens of millions of
+  exponentiations on numbers near `5 × 10^15`. Asking which primes can *divide* the quadratic
+  instead takes a [polynomial sieve](/topics/technique/polynomial-sieve): a `√-1` for each of two
+  million primes below `2^27`, a few `pow` calls apiece, and then striking needs no `pow` at all.
+  The flip also lands under the width limit: those moduli square inside `int64`, so NumPy can run
+  the exponentiations, where the quadratic's own values would overflow.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
