@@ -1,5 +1,5 @@
 <!-- tags: [extended-euclidean-algorithm] -->
-<!-- status: final 2026-10-29T12:17Z -->
+<!-- status: final -->
 # Extended Euclidean algorithm
 
 The [extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)
@@ -106,13 +106,91 @@ reassembled as `u · 2^e₂ · 5^e₅ mod 10¹⁶` only when it is needed. The r
 composite modulus: the primes it shares with your denominators are tracked as exponents, everything
 else is a unit, and units are exactly what the algorithm can invert.
 
-An alternative exists when the modulus is prime: by
+Problem 0250 keeps its modulus and changes the number. Problem 0531 does the opposite: it keeps the
+number and changes the modulus. It is the Chinese Remainder Theorem with the coprimality taken
+away. For every pair `n < m` in a narrow window it solves `x ≡ a (mod n)`, `x ≡ b (mod m)`, and
+neighbouring moduli routinely share factors. Substituting `x = a + n·t` leaves `n·t ≡ b − a (mod m)`,
+where `n` is not a unit. The [linear congruence theorem](https://en.wikipedia.org/wiki/Linear_congruence_theorem)
+covers this: with `g = gcd(u, m)`, the congruence `u·t ≡ c (mod m)` is solvable exactly when `g`
+divides `c`, and dividing all three through by `g` leaves
+
+```
+(u/g)·t ≡ c/g   (mod m/g)        with gcd(u/g, m/g) = 1
+```
+
+So `g ≠ 1` does not mean "no solution". It asks a sharper question, whether `g` divides `c`, and on
+a yes the inverse exists one level down, modulo `m/g`. In 0531 that one divisibility test decides
+whether a pair's system is consistent at all, and a consistent pair has a single solution class
+modulo `lcm(n, m)`. The substitution also pays off at the end: with `a` in `[0, n)` and `t` in
+`[0, m/g)`, the value `a + n·t` already lies in `[0, lcm(n, m))`, so it is the least solution with
+no further reduction. With some twelve million pairs, the per-pair cost matters too. Because
+`gcd(n, m) = gcd(n, m − n)` and `m − n` is below the window's width, each gcd starts from a small
+operand.
+
+## Division inside a closed form
+
+Derivations often end in a fraction when the answer is wanted modulo something. The standard case
+is a [geometric series](https://en.wikipedia.org/wiki/Geometric_series) far too long to sum term by
+term:
+
+```
+1 + r + r² + … + r^(n−1)  =  (r^n − 1) / (r − 1)
+```
+
+Problems 0335, 0479 and 0520 all reduce to this, at one modular power for the numerator and one
+inverse for the denominator. It is legitimate because the fraction is an integer: `q·d = N` survives
+reduction, so `q ≡ N·d⁻¹` whenever `d` is a unit. Note what that condition does *not* ask for. The
+modulus need not be prime. Problem 0335 works modulo `7⁹`, and its denominators are small numbers
+coprime to 7, which is all the inverse requires.
+
+That is also the case for Euclid over the alternative. By
 [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), `a⁻¹ ≡ a^(p-2)
 (mod p)`, computable by
 [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring). It is a
 one-liner and worth knowing, but it needs a prime modulus and spends `O(log p)` *multiplications*
-where extended Euclid spends `O(log m)` cheap divisions. Prefer Euclid unless you are already doing
-modular exponentiation anyway.
+where extended Euclid spends `O(log m)` cheap divisions. On `7⁹` it does not apply as written, and
+[Euler's generalisation](https://en.wikipedia.org/wiki/Euler%27s_theorem) needs `φ(m)` in hand.
+Prefer Euclid unless you are already doing modular exponentiation anyway.
+
+What the closed form does need is `r − 1` to be a unit, so settle that before trusting it. There
+are three situations to tell apart:
+
+- **The denominator is provably safe.** This is the case to prefer, but the proof belongs in a
+  comment. Problem 0479 has no branch because its denominator is a power of the summation index,
+  which stays far below the prime modulus, so the inverse exists every time.
+- **`r ≡ 1` modulo a prime.** The formula reads `0/0`, while the sum is plainly the term count.
+  Problem 0520 sums twenty-one series whose ratios run through small integers of both signs, so it
+  needs a branch: ratio 1 returns the term count, reduced modulo `p`.
+- **`r − 1` shares a factor with a composite modulus.** Take `r = 8` modulo `7⁹`: `r ≢ 1`, yet
+  `r − 1` has no inverse, so neither branch above helps. Widen instead: compute `r^n` modulo
+  `m·(r − 1)`, subtract 1, and divide exactly. None of these problems needs it, but it is the
+  failure a prime modulus hides.
+
+Problem 0520 also shows that the fraction need not wait until the last step. Its generating function
+expands `cosh` and `sinh` in `eˣ`, each bringing a `½`, so the coefficients it multiplies are true
+fractions with denominators up to 1024, and only the final power sum is an integer. Rather than
+carry rationals, it fixes `½` as the residue `2⁻¹ mod p` once at the start, and everything after is
+integer arithmetic. Compare 0250, where each intermediate was an integer and the trouble was the
+divisor. Here the intermediates are not integers at all, and that does not matter: reduction modulo
+`p` extends to every fraction whose denominator is a unit, so a rational simply *is* a residue. Any
+derivation over the rationals can run modulo `p`, provided `p` divides no denominator.
+
+All of those divisions come out exact in the end. Problem 0731 needs the harder case, a **floor**.
+It reads a window of digits far into a
+[Stoneham number](https://en.wikipedia.org/wiki/Stoneham_number), which splits term by term into
+quotients `⌊N/D⌋ mod M` with `N` a power of ten too large to write down. Multiplying by `D⁻¹` alone
+gives nonsense, because `N/D` is not an integer. The remainder is what repairs it:
+
+```
+N = q·D + r   ⟹   q ≡ (N − r)·D⁻¹ (mod M),     r = N mod D
+```
+
+This takes two moduli. Reduce `N` modulo `D` to find the remainder, then work modulo `M` with the
+remainder subtracted, which makes the division exact. Since `N` is a power, both reductions are
+single modular exponentiations. The identity needs only `gcd(D, M) = 1`, and `D` may be far larger
+than `M`, as it is in 0731. The remainders are not thrown away either: their fractions `r/D` add up
+to the small carry that the floor of the whole sum needs. Whenever you want the low digits of a
+quotient too large to form, this is the move.
 
 ## The general case: a solution family
 
@@ -158,7 +236,7 @@ inverse per `(n₁, b₁)` pair.
 - **Watch the coefficient growth.** The remainders shrink monotonically but the coefficients grow;
   they stay bounded by roughly `max(a, b)`, so the danger is not the coefficients themselves but the
   `x·a` products you form afterwards. Reduce operands modulo `m` *before* multiplying, and reach for
-  a wider type when the intermediate does not fit — problems 0236, 0271 and 0932 all do the
+  a wider type when the intermediate does not fit — problems 0236, 0271, 0731 and 0932 all do the
   arithmetic in `__int128` on the C side for this reason, and 0250, whose modulus `10¹⁶` already fills most of a
   64-bit word, runs the Euclid loop itself in `__int128`, where Python's
   [arbitrary-precision integers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic)
