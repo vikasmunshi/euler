@@ -424,7 +424,7 @@ clever was done with the primes themselves.
 - ○ [0753](/solutions/0753/) — Fermat Equation
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ○ [0773](/solutions/0773/) — Ruff Numbers
-- ○ [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ○ [0801](/solutions/0801/) — $x^y \equiv y^x$
 - ● [0808](/solutions/0808/) — Reversible Prime Squares

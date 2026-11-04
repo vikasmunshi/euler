@@ -9,5 +9,6 @@ _TODO: write this page. No reference on the tag._
 
 - ● [0363](/solutions/0363/) — Bézier Curves
 - ● [0558](/solutions/0558/) — Irrational Base
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 
 <!-- /problems -->

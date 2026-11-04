@@ -225,6 +225,7 @@ is formed, and from how a power of two is formed:
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0711](/solutions/0711/) — Binary Blackboard
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

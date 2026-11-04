@@ -127,7 +127,7 @@ it — the same asymmetry as before, seen from the other side.
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
-- ○ [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0823](/solutions/0823/) — Factor Shuffle
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 

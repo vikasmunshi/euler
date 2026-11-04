@@ -405,7 +405,7 @@ problems are where the collection makes the point most bluntly.
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators
 - ○ [0775](/solutions/0775/) — Saving Paper
 - ● [0776](/solutions/0776/) — Digit Sum Division
-- ○ [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ○ [0794](/solutions/0794/) — Seventeen Points
 - ○ [0795](/solutions/0795/) — Alternating GCD Sum

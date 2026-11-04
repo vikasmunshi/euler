@@ -897,7 +897,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ○ [0773](/solutions/0773/) — Ruff Numbers
 - ○ [0777](/solutions/0777/) — Lissajous Curves
-- ○ [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0784](/solutions/0784/) — Reciprocal Pairs
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
 - ○ [0787](/solutions/0787/) — Bézout's Game

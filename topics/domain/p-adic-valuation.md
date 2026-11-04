@@ -107,7 +107,7 @@ the bottleneck.
 - ● [0561](/solutions/0561/) — Divisor Pairs
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ○ [0712](/solutions/0712/) — Exponent Difference
-- ○ [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ● [0834](/solutions/0834/) — Add and Divide
 

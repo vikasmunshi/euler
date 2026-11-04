@@ -197,6 +197,7 @@ its own.
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0318](/solutions/0318/) — 2011 Nines
 - ● [0395](/solutions/0395/) — Pythagorean Tree
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ● [0800](/solutions/0800/) — Hybrid Integers
 
 <!-- /problems -->

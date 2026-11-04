@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Summation>._
 ## Problems
 
 - ● [0688](/solutions/0688/) — Piles of Plates
+- ● [0779](/solutions/0779/) — Prime Factor and Exponent
 
 <!-- /problems -->
