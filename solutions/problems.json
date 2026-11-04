@@ -3796,8 +3796,8 @@
     "level": 12,
     "pct": 31,
     "solvers": 707,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 4 Nov 2026, 04:21"
   },
   "476": {
     "title": "Circle Packing II",
