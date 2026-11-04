@@ -223,7 +223,7 @@ counting walks.
 - ○ [0393](/solutions/0393/) — Migrating Ants
 - ● [0425](/solutions/0425/) — Prime Connection
 - ○ [0434](/solutions/0434/) — Rigid Graphs
-- ○ [0475](/solutions/0475/) — Music Festival
+- ● [0475](/solutions/0475/) — Music Festival
 - ○ [0490](/solutions/0490/) — Jumping Frog
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ○ [0553](/solutions/0553/) — Power Sets of Power Sets

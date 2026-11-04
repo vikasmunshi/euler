@@ -398,7 +398,7 @@ of crossing it.
 - ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table
 - ○ [0469](/solutions/0469/) — Empty Chairs
 - ○ [0472](/solutions/0472/) — Comfortable Distance II
-- ○ [0475](/solutions/0475/) — Music Festival
+- ● [0475](/solutions/0475/) — Music Festival
 - ○ [0480](/solutions/0480/) — The Last Question
 - ○ [0483](/solutions/0483/) — Repeated Permutation
 - ○ [0486](/solutions/0486/) — Palindrome-containing Strings

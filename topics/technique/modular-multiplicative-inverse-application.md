@@ -321,6 +321,7 @@ the repetition.
 - ● [0407](/solutions/0407/) — Idempotents
 - ● [0423](/solutions/0423/) — Consecutive Die Throws
 - ● [0457](/solutions/0457/) — A Polynomial Modulo the Square of a Prime
+- ● [0475](/solutions/0475/) — Music Festival
 - ● [0479](/solutions/0479/) — Roots on the Rise
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0492](/solutions/0492/) — Exploding Sequence

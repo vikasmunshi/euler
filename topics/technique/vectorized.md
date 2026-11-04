@@ -375,6 +375,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0455](/solutions/0455/) — Powers with Trailing Digits
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
+- ● [0475](/solutions/0475/) — Music Festival
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0485](/solutions/0485/) — Maximum Number of Divisors
 - ● [0492](/solutions/0492/) — Exploding Sequence

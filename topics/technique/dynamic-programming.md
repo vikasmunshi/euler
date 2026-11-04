@@ -252,6 +252,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0345](/solutions/0345/) — Matrix Sum
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0400](/solutions/0400/) — Fibonacci Tree Game
+- ● [0475](/solutions/0475/) — Music Festival
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors

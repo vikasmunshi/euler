@@ -418,7 +418,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ○ [0467](/solutions/0467/) — Superinteger
 - ○ [0474](/solutions/0474/) — Last Digits of Divisors
-- ○ [0475](/solutions/0475/) — Music Festival
+- ● [0475](/solutions/0475/) — Music Festival
 - ○ [0477](/solutions/0477/) — Number Sequence Game
 - ● [0479](/solutions/0479/) — Roots on the Rise
 - ● [0487](/solutions/0487/) — Sums of Power Sums

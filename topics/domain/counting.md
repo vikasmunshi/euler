@@ -211,7 +211,7 @@ reach for wide or arbitrary-precision types
 - ○ [0428](/solutions/0428/) — Necklace of Circles
 - ○ [0465](/solutions/0465/) — Polar Polygons
 - ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table
-- ○ [0475](/solutions/0475/) — Music Festival
+- ● [0475](/solutions/0475/) — Music Festival
 - ○ [0513](/solutions/0513/) — Integral Median
 - ○ [0563](/solutions/0563/) — Robot Welders
 - ○ [0572](/solutions/0572/) — Idempotent Matrices
