@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking, mobius-inversion-formula, mobius-function-application, dirichlet-convolution, divisor-summatory-function, totient-summatory-recursion] -->
-<!-- status: final 2026-10-28T21:35Z -->
+<!-- status: final -->
 # Summing multiplicative functions fast
 
 A whole family of Project Euler problems asks for $\sum_{n \le N} f(n)$, where $f$ is a
@@ -13,8 +13,9 @@ $f$ up to $N$. Four techniques keep turning up in the solutions below:
 [totient summatory recursion](/topics/technique/totient-summatory-recursion). They look like four
 separate tricks, but they are one idea. You factor $f$ as a
 [Dirichlet convolution](/topics/domain/dirichlet-convolution) of two pieces that are each easy to
-sum, then you choose how to walk the hyperbola $ab \le N$. This page explains that idea once and
-shows where each of the four techniques fits.
+sum, then you choose how to walk the hyperbola $ab \le N$. This page explains that idea once, shows
+where each of the four techniques fits, and then covers the problems that use the same machinery
+without a sublinear payoff or without a convolution at all.
 
 ## The one identity
 
@@ -109,6 +110,18 @@ sparse set, so the sum over $a$ is short even though it runs all the way to $x$:
   are only $O(\sqrt x)$ of those. Problem 484 does exactly this with $g(k) = \gcd(k, k')$, which is
   $1$ on squarefree $k$. Problem 694's cube-full divisors are sparser still, at $O(x^{1/3})$. This
   is the "powerful number trick", and it is the natural approach for 639.
+- **Smooth-supported $g$, periodic $h$.** The split need not be by size. It can be by primes.
+  Problem 967 sums a ring-valued multiplicative function that depends only on which primes up to
+  $B$ divide $n$. Let $h$ be the part that sees the few smallest primes. It depends only on
+  $n \bmod Q$, where $Q$ is their product, so it is
+  [periodic](/topics/domain/periodic-sequence) and
+  $H(y) = \lfloor y/Q \rfloor H(Q) + H(y \bmod Q)$ is one lookup in a prefix table. That is a third
+  kind of cheap summatory function, after closed forms and sieved tables. Then $g$ takes the
+  remaining primes and lives on their squarefree products, which thin out fast: about
+  $1.4 \times 10^6$ of them below $10^{18}$, against $7 \times 10^7$ if every prime stayed in $g$.
+  The cost is $O(Q)$ plus the size of the support of $g$, and the choice of $Q$ trades one against
+  the other. The [multiplicative function](/topics/domain/multiplicative-function) page explains
+  why the values may be ring elements.
 
 **Totient summatory recursion: when you know $f * g$ but $f$ is the unknown.** Now invert the
 identity *at the level of summatory functions* rather than term by term. Consider the totient.
@@ -157,14 +170,82 @@ memo dictionary. Store $\Phi(\lfloor N/k \rfloor)$ in an array indexed by $k$ an
 decreasing $k$. Every large value the recursion at $k$ reads lives at index $kd > k$, so it has
 already been computed.
 
+Problem 625 stacks two walks. Its gcd sum is Pillai's function $\mathrm{id} * \varphi$, so the
+identity gives $\sum_{k \le N} \varphi(k)\, T(\lfloor N/k \rfloor)$ with $T$ triangular. One side has
+a closed form, which calls for quotient blocking. But blocking takes differences of the other side's
+summatory function, $\Phi$, at every key, and $\Phi$ has no closed form. That costs nothing extra.
+The recursion for $\Phi(N)$ fills in the large keys anyway, and the sieve below it supplies the small
+ones, so the outer sum is one last pass over a table that already exists. The total stays
+$O(N^{2/3})$. Whenever a walk needs a summatory function at the keys and that function has a
+recursion, the two compose for free.
+
+The same problem removes the weakness of the blocking loop above, which is serial: each `d_end`
+depends on the one before it, so the loop cannot become an array expression. Any cut $c$ divides the
+range exactly, because $d \le \lfloor v/(c+1) \rfloor$ says the same thing as
+$\lfloor v/d \rfloor > c$:
+
+$$\sum_{d \le v} g(d)\, H\!\left(\left\lfloor \tfrac{v}{d} \right\rfloor\right)
+= \sum_{d \le \lfloor v/(c+1) \rfloor} g(d)\, H\!\left(\left\lfloor \tfrac{v}{d} \right\rfloor\right)
++ \sum_{q \le c} H(q) \left( G\!\left(\left\lfloor \tfrac{v}{q} \right\rfloor\right) - G\!\left(\left\lfloor \tfrac{v}{q+1} \right\rfloor\right) \right).$$
+
+The first sum goes through $d$ one at a time, and the second goes through the quotient values. With
+$c$ near $\sqrt v$ both are about $\sqrt v$ long, and both are plain ranges, so each is a single NumPy
+expression. There is no rectangle to subtract, as there is in the hyperbola formula, because the cut
+partitions the terms and nothing is counted twice.
+
+## Outside the four walks
+
+Some problems on this list use the blocks without the sublinear payoff, or without a convolution.
+
+**Blocks over a sieve: when $N$ is within reach.** Problem 875 has $N$ near $10^7$. Its count
+factors as $q = \mathrm{id}^7 * w$, where $w(m)$ is $\varphi(m)\, m^3$ with a separate rule at the
+powers of 2. The [multiplicative function](/topics/domain/multiplicative-function) page derives that
+from Gauss sums. The identity leaves $\sum_m w(m)\, S_7(\lfloor N/m \rfloor)$, with $S_7$ a
+[Faulhaber](/topics/technique/faulhabers-formula) closed form, which looks like a job for blocking.
+But blocking needs the summatory function of $w$, and here that is a prefix sum over a totient sieve
+up to $N$. The sieve sets the cost, and the blocks only cut the evaluations of $S_7$ from $N$ to a few
+thousand. A recursion is available for the main term, since
+$(\varphi\,\mathrm{id}^3) * \mathrm{id}^3 = \mathrm{id}^4$, but at this size it is more code for no
+real gain. Sublinear methods answer a size problem, so
+[size the work to the input](/topics/takeaway/size-work-to-the-input) before reaching for one.
+
+**Stream and checkpoint: when a summatory function has no shortcut.** Problem 754 is a product, and
+its summand is not even multiplicative, yet Möbius inversion still yields a product over $d$ with
+exponent $\mu(d)$, blocked by $\lfloor N/d \rfloor$. The same page shows that algebra. One base
+changes with $d$ inside a block, so each block needs the running product of $d^{\mu(d)}$ at its two
+ends. The solution has no identity to recurse on for that product, so it makes one linear pass. The
+point is that the pass need not keep what it computes. A
+[segmented sieve](/topics/technique/segmented-sieve) produces $\mu$ one window at a time, the running
+quantities advance through the window, and their values are stored only at the keys
+$\lfloor N/k \rfloor$. Memory is one window plus $O(\sqrt N)$ checkpoints. The assembly is then the
+usual walk, with one modular power per block rather than one per $d$. Keeping the $\mu = +1$ and
+$\mu = -1$ products apart also means one modular inverse per block, not one per element.
+
+**Read the sieve mid-flight: when $f$ is not multiplicative at all.** Problem 521 sums the smallest
+prime factor of each $n$ up to $10^{12}$. No convolution reaches that function, but the
+[Lucy sieve](/topics/technique/lucy-hedgehog-sieve) processes numbers in exactly that order: step $p$
+removes the composites whose smallest prime factor is $p$. So the table is useful during the run, not
+only at the end. Let $C_p(v)$ count the survivors in $[2, v]$ just before step $p$. The composites
+$pm \le n$ with smallest factor $p$ match the survivors $m \in [p, \lfloor n/p \rfloor]$, so there are
+$C_p(\lfloor n/p \rfloor) - \pi(p - 1)$ of them. Every composite up to $n$ has its smallest factor
+at most $\sqrt n$, so reading that one entry before each step covers them all. The primes are their own
+smallest factors, and a [sum table carried alongside the count](/topics/takeaway/carry-sums-alongside-counts)
+supplies them when the sieve ends. The extra work is one read per prime, on top of the sieve's
+$O(n^{3/4}/\log n)$. Any weight that depends only on the smallest prime factor works the same way.
+[Min_25](/topics/technique/min-25-sieve)'s second stage has to build numbers up by smallest prime
+factor. Here the first stage's strike order already provides them, so no second stage is needed.
+
 ## How to reason about it
 
 - **Look for the convolution first.** Write $f$ on prime powers, then look for a simple function
   that matches it on primes: $\mathbf 1$, $\mathrm{id}$, $\mathrm{id}^k$, or
   $\mu$. The quotient $h = f * g^{-1}$ is then concentrated on squares, cubes or powerful numbers,
   and that sparseness is what you exploit. If $f$ is defined by a coprimality condition, $\mu$ is
-  already one of the factors.
-- **Choose the walk by what is cheap.** If both summatory functions have closed forms, block the
+  already one of the factors. If $f$ counts solutions mod $n$, a
+  [roots-of-unity filter](/topics/technique/roots-of-unity-filter) can hand you the factorisation:
+  grouping the filter's $t$ by $\gcd(t, n)$ is what produces Problem 875's $\mathrm{id}^7 * w$.
+- **Choose the walk by what is cheap.** If $N$ is small enough to sieve, sieve, and block only to save
+  evaluations. If both summatory functions have closed forms, block the
   sum for $O(\sqrt x)$. If one factor is sparse, use a lopsided hyperbola, with cost equal to the
   size of its support. If the unknown summatory function sits on both sides, use the recursion,
   $O(x^{2/3})$ with a sieve. If you need sums over primes at every $\lfloor x/k \rfloor$ (Problems
@@ -186,12 +267,19 @@ already been computed.
   [modular inverse](/topics/technique/modular-multiplicative-inverse-application) or a reduction
   done before dividing. When the modulus shares a factor with the divisor, there is no inverse.
   Problem 401 asks for $x(x+1)(2x+1)/6 \bmod 10^9$, so it divides the even factor by 2 and the
-  multiple of 3 by 3 exactly, and only then reduces. Products such as $\lfloor x/k \rfloor \cdot G(\cdot)$ overflow 64 bits long
-  before $x$ does. Use `math.isqrt` for the split, never a float square root. Check "below $N$"
+  multiple of 3 by 3 exactly, and only then reduces. A long polynomial has no such tidy factors, but
+  if $c \mid X$ then $(X \bmod cm)/c \equiv X/c \pmod m$. So reduce modulo $cm$ and divide the
+  residue, which is how Problem 875's C port evaluates $S_7$ with $c = 24$. Products such as
+  $\lfloor x/k \rfloor \cdot G(\cdot)$ overflow 64 bits long
+  before $x$ does, and intermediates can outgrow the answer: Problem 967's ring coefficients need
+  128 bits even though its final count does not. Use `math.isqrt` for the split, never a float square
+  root. Check "below $N$"
   against "at most $N$" too: Problem 193 needs $Q(2^{50} - 1)$, not $Q(2^{50})$.
 - **Sanity-check against brute force.** For small $x$, sieve $f$ directly and compare the summatory
   values at every key. Inversion and recursion are quick to code, and a wrong $g(1)$ or a missing
-  rectangle correction makes them quietly wrong.
+  rectangle correction makes them quietly wrong. A free parameter gives a second check at full size,
+  where brute force cannot go. Problem 967 gets the same answer with very different periods $Q$, and
+  the sieve limit in a recursion can be moved in the same way.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
