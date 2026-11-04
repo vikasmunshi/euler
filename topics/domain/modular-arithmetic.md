@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final -->
+<!-- status: final 2026-11-04T03:28Z -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
