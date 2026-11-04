@@ -1,5 +1,5 @@
 <!-- tags: [calibrate-theory-on-known-answers] -->
-<!-- status: final 2026-10-28T21:41Z -->
+<!-- status: final -->
 # Calibrate a theory on the known answers
 
 Some problems are mostly argument. The code at the end is short, but it encodes a claim that is
@@ -38,6 +38,9 @@ calibration:
   by coincidence. An exhaustive search, or an exact simulation over a range of small inputs, turns
   a handful of checks into hundreds. Keep that oracle as a scratch script beside the solution, as
   the record of how the theory was earned.
+- **A stated property is a given too.** The statement's asides count as well as its numbers. If it
+  remarks that a value is always an integer, or that some input has no solution, the theory should
+  produce that fact and be able to say why, as 866 and 752 do.
 
 ## How the problems use it
 
@@ -72,6 +75,17 @@ evidence, and no brute force can scan $10^9$ exponents for each of $10^6$ bases.
 modulus. On $10^3$, $10^4$ and $10^5$ an exhaustive search over every $x$ is cheap. It found the tower
 limit to be the unique solution for every base, and the statement's sum over $n \le 10^3$ agreed as well.
 
+**Problem 632** asks for a product of counts reduced modulo a prime, and a residue is the worst
+thing to calibrate: every value looks equally plausible, so a wrong one gives no sign of it. The
+theory counts integers with *at least* a given set of square prime factors, which is easy, and
+recovers *exactly* $k$ by [binomial inversion](https://en.wikipedia.org/wiki/Binomial_transform).
+The statement's table lists the individual $C_k(N)$ up to $N = 10^8$, so I checked below the
+reduction: a `--show` run prints each count, and they match the table entry for entry. That still
+stops eight orders of magnitude short of the target. For the target itself no given exists, but a
+theorem does. $C_0(N)$ counts the
+[square-free integers](https://en.wikipedia.org/wiki/Square-free_integer), whose density is known
+to be $6/\pi^2$, and the computed $C_0(10^{16})$ agrees with that density to about a dozen digits.
+
 **Problem 670** counts colourings of tiled $2 \times n$ strips with a
 [transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method). The step that makes it
 small is a symmetry argument: permuting the four colours changes nothing, so the state drops the
@@ -81,6 +95,18 @@ separate script enumerated every tiling and colouring for $n \le 7$ and had to a
 at every length. The statement adds a check from the other end: a value at $n = 100$, given modulo
 the problem's prime, which no enumeration reaches but the matrix-power path does. One family of
 checks covers the weights, the other the fast exponentiation.
+
+**Problem 752** sums $g(x)$, the [multiplicative order](https://en.wikipedia.org/wiki/Multiplicative_order)
+of $1 + \sqrt 7$ modulo $x$. The theory splits into cases: primes where $7$ is a quadratic residue,
+primes where it is not, the ramified prime $7$, and a lift from $p^{k-1}$ to $p^k$ that either
+keeps the order or multiplies it by $p$. The aside $g(3) = 0$ falls out first, because the norm
+$-6$ is not invertible modulo $3$. A brute force that just steps the powers reproduces both given
+sums. But a sum does not say which cases it ran through, so that match needs reading. $G(10^2)$
+stops at squares, and it takes $G(10^3)$, with $5^4$ and $7^3$ in range, to exercise the lift
+properly. One outcome of the lift is not exercised at all. When I tested every prime up to
+$\sqrt{10^7}$, the order always grew from $p$ to $p^2$. So the givens say nothing about the
+"keeps the order" outcome at that step, and at these sizes the answer does not depend on it. That
+is a limit worth knowing about, even though it costs nothing here.
 
 **Problem 761** is a pursuit game in a pool: a swimmer tries to reach the edge before a runner
 on the edge can get there. The statement gives the critical runner speed for a circular pool and
@@ -101,6 +127,27 @@ which factors into a single binomial sum. Each step is textbook, and an error in
 a tidy formula. So the oracle ignores the theory. It plays the partizan game out by memoised search
 over all $4^n$ arrangements for $n \le 7$, and the sequence it produces must equal the closed sum
 term by term, as must the given $F(10)$.
+
+**Problem 866** gives one value, $E(4) = 994$, and one remark: the expected product is always an
+integer. An expectation over $N!$ orders has no obvious reason to be whole, so the remark is a
+real constraint. The theory conditions on the last piece placed, which splits the caterpillar into
+two independent smaller ones, and the $1/N$ from averaging over that piece cancels against the
+$N(2N-1)$ it contributes. Integrality is then a consequence of the recurrence and not a surprise.
+The oracle averages every placement order with exact
+[`Fraction`](https://docs.python.org/3/library/fractions.html) arithmetic for $N \le 8$. It has to
+land on whole numbers as well as on the recurrence's values, and a float average could not show
+that.
+
+**Problem 875** counts solutions of an eight-variable congruence. The theory is a
+[Gauss-sum](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum) calculation that ends in a tidy
+[Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution), and the classical
+evaluation behaves differently at powers of two, so the formula carries an exception there.
+Enumerating $n^8$ tuples stops being possible almost at once, yet the oracle needs no Gauss sums to
+go further. It builds the distribution of a sum of four squares modulo $n$ and adds up the squares
+of those counts, which is only the statement regrouped. That reaches $n = 37$, which would be about
+$3.5 \times 10^{12}$ tuples if enumerated. The test points cover each part of the formula: $2$, $4$
+and $8$ reach the exception, $10$ mixes it with an odd prime, and $37$ is a plain odd prime. The
+given $q(4)$ and $Q(10)$ are among them.
 
 **Problem 882** rests on the claim that every single-number game is a
 [surreal number](/topics/domain/surreal-number). That is true only if, at every position, Left's
@@ -147,8 +194,19 @@ brute-force script and a few test cases, and it protects the expensive part of t
   theory's own characterisation will agree with it, mistakes included. In 336 the oracle never
   sees the "carriage strictly inside the suffix" condition the construction rests on. It just
   runs Simon's routine and takes the maximum step count, as the statement defines it. 860's oracle
-  plays the coin game rather than adding surreal values, and 887's searches every tree rather than
-  the greedy one. 983's final check is independent of the cube model for the same reason.
+  plays the coin game rather than adding surreal values, 400's plays the take-away game on the tree
+  with no Grundy value in sight, and 887's searches every tree rather than the greedy one. 983's
+  final check is independent of the cube model for the same reason.
+- **An oracle may be clever, just not in the theory's way.** Independence is the requirement, and
+  naivety is not. 875's oracle regroups the count by residue, which is plain bookkeeping that shares
+  nothing with the Gauss sums, and that buys it moduli a literal enumeration never reaches.
+- **Aim the checks at the branches.** A theory with cases is several theories, and a given only
+  tests the ones it passes through. List the cases, then ask which check reaches each. Pick inputs
+  that land on the exceptions, as 875 does at powers of two, and note any branch nothing reaches,
+  as 752 does for its lift.
+- **Check before the reduction.** A modular answer hides every magnitude, so compare the unreduced
+  quantities whenever they can be seen, as in 632. Where no given reaches the target scale, a known
+  density or asymptotic can still catch a wrong theory there.
 - **Shrink the axis that makes brute force impossible.** That axis is not always $n$. In 455 it is
   the modulus: $10^9$ is out of reach, but $10^5$ is not, and the claim being tested ("the tower
   limit is the only fixed point") means the same thing at every modulus. Then add a check at full
