@@ -5272,13 +5272,13 @@
       "path": "takeaway/split-inputs-into-behaviour-classes",
       "title": "Split inputs into behaviour classes",
       "status": "final",
-      "written": "2026-10-12T14:28Z",
+      "written": "2026-11-04T13:11Z",
       "solved": 9,
       "problems": 9,
       "tags": ["split-inputs-into-behaviour-classes"],
       "refs": ["p0255", "p0257", "p0305", "p0619", "p0706", "p0752", "p0764", "p0844", "p0963"],
-      "covered": ["p0255", "p0257", "p0305", "p0963"],
-      "solved_after": ["p0619", "p0706", "p0752", "p0764", "p0844"]
+      "covered": ["p0255", "p0257", "p0305", "p0619", "p0706", "p0752", "p0764", "p0844", "p0963"],
+      "solved_after": []
     },
     {
       "path": "takeaway/sum-of-representations-is-a-point-count",
