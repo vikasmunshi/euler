@@ -1,5 +1,5 @@
 <!-- tags: [convolution] -->
-<!-- status: final 2026-10-29T12:15Z -->
+<!-- status: final -->
 # Convolution
 
 [Convolution](https://en.wikipedia.org/wiki/Convolution) is the operation that combines two
@@ -64,6 +64,26 @@ fitting in a box. The count it wants is one coefficient of their triple product,
 factors once (`np.convolve`) and then reads off the coefficients it needs, for every arm length at
 once, as a vectorised dot product against the third.
 
+**A constraint between the parts is a constant term.** Problem 682 counts pairs of Hamming numbers
+whose prime-factor sums add to *n* and whose prime-factor counts are *equal*. The sums add, which is
+ordinary convolution; the counts must match, which looks like a coupling that rules convolution
+out. Give it a variable instead. Tag each prime factor of the first number with `x` and each of the
+second with `x⁻¹`, and multiply the two generating functions: a term lands on `x⁰` exactly when the
+counts cancel, so equality has become a constant term, while a second variable `y` carries the sums
+as usual.
+
+Nor must the factors be finite. Each prime there contributes `1/(1 − x·y^p)`, any number of copies,
+yet the constant term in `x` is a [rational function](https://en.wikipedia.org/wiki/Rational_function)
+`N(y)/D(y)` with a denominator of degree 40, so the sequence obeys a
+[linear recurrence](https://en.wikipedia.org/wiki/Linear_recurrence_with_constant_coefficients) and
+the target is one coefficient of an infinite series. The
+[Bostan–Mori algorithm](https://arxiv.org/abs/2008.08822) reads it in O(*d*² log *n*): multiply top
+and bottom by `D(−y)`, which makes the denominator even, keep only the numerator terms whose parity
+matches *n*, and *n* halves while the degrees stay put. One safeguard is worth stealing. `D` came
+from a pen-and-paper residue argument, so the code computes 81 terms directly, multiplies them by
+`D`, and asserts that every coefficient from degree 40 to 80 vanishes: a missed pole fails loudly
+instead of producing a plausible wrong number.
+
 **Many identical parts: power by squaring, truncated.** When the same part repeats *t* times and
 *t* is large, raise its polynomial to the *t*-th by
 [repeated squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) — O(log *t*)
@@ -110,6 +130,61 @@ still falls to repeated squaring from the identity distribution (all mass on the
 associativity is the only property square-and-multiply uses. The array is ten slots forever, so
 *R* in the hundreds of thousands costs a few dozen 10 × 10 multiplies per place.
 
+Problem 294 takes that claim further: the rule need not commute, and the parts need not be identical.
+It counts digit strings of length 11¹² with a fixed digit sum and a fixed residue mod 23. Digits are
+not identical parts here, because digit *d* at position *i* adds `d·10ⁱ` to the residue, so no single
+polynomial is being raised to a power. The way out is to change what is multiplied. Describe a
+*block* of digits by a table `T[r][s]`, with the residue *r* measured from the block's own lowest
+digit and the digit sum *s*, and carry the block's length beside it. Placing one block above another
+of length *L* first relabels its residues by `r → r·10ᴸ` and then convolves, cyclically in *r* and
+truncated at 23 in *s*. That twisted product of (table, length) pairs cares about order, as `12` and
+`21` do, but it is associative, so doubling still works: about 80 products of a 23 × 24 table for a
+length in the trillions. When parts differ only by a position-dependent relabelling, fold the
+position into the element and square that.
+
+**A transform turns convolution into pointwise multiplication, if you can divide.** The
+[convolution theorem](https://en.wikipedia.org/wiki/Convolution_theorem) holds over any finite
+abelian group: transform, multiply entry by entry, invert, and a *c*-fold power is just the *c*-th
+power of each transformed entry. For XOR the transform is
+[Walsh–Hadamard](https://en.wikipedia.org/wiki/Hadamard_transform), and problem 649 has exactly that
+shape: the [Sprague–Grundy theorem](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
+reduces each coin to a Grundy value and makes the sum of games an XOR, so the arrangements of *c*
+coins are a *c*-fold XOR-convolution power of an 8-slot histogram. Yet the solution deliberately
+skips the transform. The inverse divides by the group's size, 8, and the answer is wanted modulo
+10⁹, where 8 has no inverse. (The escape is to work modulo 8·10⁹ and divide exactly at the end, at
+the price of wider products.) Square-and-multiply on the direct 8 × 8 product needs only ring
+operations and is free at this size. Before reaching for a transform, check that the ring can invert
+it, and that the array is long enough to need it.
+
+**Interleaved parts convolve binomially.** Everything above combines parts that occupy fixed places.
+When parts are shuffled together, as letters in a string or events in an order, splitting *n* slots
+into *k* and *n − k* must also choose *which* slots, so the rule becomes
+`(a ⋆ b)[n] = Σₖ C(n,k)·a[k]·b[n−k]`. Divide each `a[n]` by `n!` and the binomial disappears: that
+is the [exponential generating function](https://en.wikipedia.org/wiki/Exponential_generating_function),
+and independent parts multiply again. Problem 520 constrains only how often each digit occurs, so
+each digit is one such part: an even digit, occurring an even number of times, is `cosh x`, an odd
+digit is `1 + sinh x`, and the strings of length *L* are `L!·[x^L]` of the ten-fold product.
+
+That product has a further move in it. `cosh` and `sinh` are built from `e^{±x}`, so setting
+`y = e^x` makes it a [Laurent polynomial](https://en.wikipedia.org/wiki/Laurent_polynomial) in `y`
+with exponents −10 to 10, an ordinary 21-slot convolution, and `L!·[x^L] e^{kx} = k^L` reads the
+count back as a fixed combination of 21 powers `k^L`. Summing over lengths is then 21
+[geometric series](https://en.wikipedia.org/wiki/Geometric_series). The length, which reaches 2³⁹,
+never enters the convolution at all: a change of basis moved the multiplication onto a small index
+set and left *L* as an exponent.
+
+**A sequence can be convolved with itself to define itself.** Sometimes the independent parts are
+smaller copies of the whole. Tidying Up B (problem 866) lays *N* pieces in a random order and
+multiplies in a hexagonal number `H(k)` for each segment a placement forms. Condition on the last
+piece placed: it separates two stretches that never touched, each one's sub-order is still uniform,
+so the expectation factorises and `E(N) = (H(N)/N)·Σⱼ E(j−1)·E(N−j)`, the
+[Catalan](https://en.wikipedia.org/wiki/Catalan_number) recurrence with a weight. This is no product
+of two known arrays. `E(N)` needs every earlier term, so the table fills in order at O(*N*²), and
+speeding it up would take an online scheme rather than one FFT. The sum is symmetric, so half the
+loop suffices. It is also the binomial rule in disguise: counted over orders, the two sides interleave
+in `C(N−1, j−1)` ways, and dividing by *N*! to get an expectation is precisely the exponential
+normalisation, which is why no binomial survives in the recurrence.
+
 **A comparison is a convolution plus a prefix sum.** "How often does one sum beat another?" is not
 a single coefficient but a triangular sum over the product distribution. Precompute the prefix sums
 of one side and each query becomes O(1) — problem 205's win count is exactly this, with the
@@ -130,7 +205,9 @@ off-by-one (*strictly* greater, so exclude the tie) doing real work.
   every multiply (problem 250 keeps only 16 digits — and in C the product of two 16-digit
   residues still needs 128 bits) or prove they cannot overflow: NumPy's `int64` wraps silently,
   and problem 1010 is safe only because every coefficient it convolves counts partitions of at
-  most 300, which stay below 10¹⁶.
+  most 300, which stay below 10¹⁶. The sum can overflow where each product does not: problem 866's
+  products fit 64 bits, but thousands of them added up do not, so its C accumulates in 128 bits and
+  reduces once per `E(N)`.
 - **Watch the array's length.** Each convolution step grows the support by the new part's span, so
   either allocate a fresh array of length `len(a) + span` or extend in place — and be clear whether
   the old contents should survive (they encode the zero-contribution case) or be cleared first.
@@ -141,8 +218,9 @@ off-by-one (*strictly* greater, so exclude the tie) doing real work.
   quantities do not constrain each other. If they do — if some choice couples the parts — either
   find a variable that decouples them (problem 240 conditions on the value of the tenth-largest
   die, after which the three classes of dice are independent; problem 1010 fixes one cell and
-  its arm and leg, after which the three regions around it are) or accept that convolution is the
-  wrong tool.
+  its arm and leg, after which the three regions around it are; problem 866 fixes the last piece
+  placed), give the coupling a variable of its own (problem 682), or accept that convolution is
+  the wrong tool.
 
 The tell is a brute force whose cost is a *product* of independent ranges. When you catch yourself
 writing nested loops over things that never interact except through their sum, stop: build each
