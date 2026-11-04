@@ -1,5 +1,5 @@
 <!-- tags: [recurrence-relation] -->
-<!-- status: final 2026-11-02T18:21Z -->
+<!-- status: final -->
 # Recurrence relation
 
 A [recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation) defines each term of a
@@ -55,7 +55,6 @@ them, because recognising the shape is what tells you which one to write down.
   down to a table of a few tens of thousands of block ends. Within a block the sums are
   quadratics, which a single square root solves. Each level shrinks the index by roughly a power
   $\varphi - 1$, so a handful of levels is enough. Problem 698
-  is the shallow end of the same pool: a 123-number is one whose digit *counts* are 0 or
   is the shallow end of the same pool: a 123-number is one whose digit *counts* are 0 or
   themselves 123-numbers, and since a count never exceeds the length, membership at length $L$
   depends only on the members below $L$. The set grows bottom-up and is tiny, so the
@@ -143,6 +142,13 @@ each of the two sums is a linear combination of both at $\lfloor n/2 \rfloor$ an
 The *sum* of a halving recurrence is itself a halving recurrence, provided you carry enough
 companion sums to close the system. The branching is four-way, so memoise: unmemoised it is
 exponential, memoised it touches about a hundred states for $n \approx 4.5 \times 10^{17}$.
+Problem 539 shows when the memo can go. Its elimination game is self-similar only up to a
+reflection: one sweep leaves the even numbers, and the next sweep runs the other way, so the
+remainder is the same game on $M = \lfloor n/2 \rfloor$ items read backwards. The recurrence has
+to carry that mirror, $P(n) = 2\bigl(M + 1 - P(M)\bigr)$. Since $P(n)$ reads only
+$\lfloor n/2 \rfloor$, the indices $2m$ and $2m + 1$ contribute the same term, and
+[summing the recurrence](/topics/technique/recurrence-relation-application) closes the pair
+$(P, S)$ on one unbranched chain of halvings.
 
 **Exploit a finite state space.** If the state that advances the recurrence lives in a finite set,
 the orbit must eventually repeat, and the sequence is
@@ -183,6 +189,21 @@ worth recognising are $x^2 - 2$ (Lucas and
 (plain powers). The quadratic you are given is often one of them after an affine change of
 variable.
 
+The change of variable need not be affine. Problem 921's map
+$a \mapsto a(a^4 + 10a^2 + 5)/(5a^4 + 10a^2 + 1)$ looks arbitrary, but its numerator and
+denominator are the sum and difference of $(a+1)^5$ and $(a-1)^5$, up to a common factor. So the
+[Möbius transformation](https://en.wikipedia.org/wiki/M%C3%B6bius_transformation)
+$t = (a+1)/(a-1)$, which is its own inverse, turns the map into plain $t \mapsto t^5$, and $n$
+steps become the single power $t_0^{5^n}$. Any rational map whose degree multiplies at each step
+deserves this question: is it a power map seen through a Möbius transformation? The solved form
+then raises a new problem of its own. Here $n$ runs over Fibonacci numbers, so the exponents are
+$5^{F_i}$. Reduced modulo the group order they obey a second recurrence,
+$x_i = x_{i-1} x_{i-2}$, which is Fibonacci written multiplicatively. With millions of exponents
+on one base, even a logarithmic power per term is wasteful. Splitting each exponent into a high
+and a low half, as [baby-step giant-step](/topics/technique/baby-step-giant-step) does, lets two
+tables, each about the square root of the modulus in size, answer every power with one
+multiplication.
+
 **Skip the dull stretches.** A nonlinear recurrence often does something trivial on almost every
 step. In that case, compute where the next *interesting* step falls and jump straight to it.
 Problem 443's $g(n) = g(n-1) + \gcd(n, g(n-1))$ adds 1 on nearly every step, and along such a run
@@ -197,7 +218,27 @@ their digit sum $c$. The run to the next carry therefore depends on $(k, c, \tex
 alone. It splits into at most ten runs one level down, one per leading digit, and those triples
 recur so often that a memo of a few tens of thousands of jumps covers $10^{15}$ steps. Where
 443 skips one flat stretch at a time, 551 nests its stretches, and the memo key is again the
-frozen part rather than the value.
+frozen part rather than the value. Problem 955 finds its next event a different way. Its rule is
+second-order, but the differences $d_n = a_n - a_{n-1}$ just count up by one and reset at each
+[triangular number](https://en.wikipedia.org/wiki/Triangular_number), so from a triangle $t(x)$
+the sequence runs $t(x) + t(j)$ in closed form. Once the stretch has a closed form, "when is the
+next event?" is an equation rather than a search: the least $j$ with $t(x) + t(j) = t(y)$. That
+rearranges to $x(x+1) = (y-j)(y+j+1)$, so the next triangle comes from the factor pair of $x(x+1)$
+that lies closest to the trivial one and has opposite parity. One factorisation per triangle
+replaces a walk whose single gaps reach the trillions.
+
+**Read the step count off a potential.** When the question is how many steps a process takes, the
+route may not matter at all. Problem 839 moves one bean at a time along a row of bowls, and the
+statement's $B(100)$ alone is over three billion moves. Each move lowers exactly one prefix sum by
+exactly one, so the prefix sums form a
+[potential](https://en.wikipedia.org/wiki/Potential_method), and
+[the move count is simply its total drop](/topics/takeaway/potential-counts-the-moves). Summing by
+parts gives $B = \sum_i i\,(f_i - a_i)$, where $f$ is the final arrangement. The process has now
+gone, and only its end state is left to find. That state has a direct description: the row
+levelled into blocks, which [pool adjacent
+violators](/topics/technique/pool-adjacent-violators) computes in $O(N)$. So look for a quantity
+that every step changes by a fixed amount. If there is one, you need the end state, never the
+trajectory.
 
 **Telescope it away.** Occasionally a sum of terms collapses to one term. Splitting $S(N)$ by index
 parity and substituting the recurrence can make almost everything cancel
@@ -230,8 +271,13 @@ $T(s) = 2^s$. Problem 340's function nests four calls deep, a generalised
 [McCarthy 91](https://en.wikipedia.org/wiki/McCarthy_91_function), and read literally it would
 recurse a quintillion times. Brute force on small parameters shows that it is the identity plus
 a constant per block of width $a$, and that pattern is easy to prove by induction on the block.
-The sum over $b + 1$ arguments then becomes $O(1)$ arithmetic. When the recurrence is **linear in
-its input sequence**, there is a third route. Problem 739 repeatedly replaces a sequence by its
+The sum over $b + 1$ arguments then becomes $O(1)$ arithmetic. A closed form can also be *solved*,
+not just evaluated. Problem 555 wants the fixed points of the same function family, each member
+$M$ climbing by $k$ and descending by $s$. Its small cases show $M$ cycling through a window of
+$d = k - s$ values, a formula the solution checks against brute force rather than proves. Setting
+$M(n) = n$ in that formula leaves one divisibility test: if $d \mid s$ the whole window is fixed,
+and otherwise nothing is. A search over functions and arguments becomes a sum over $d$ and its
+multiples. When the recurrence is **linear in its input sequence**, there is a third route. Problem 739 repeatedly replaces a sequence by its
 prefix sums, so the final value is $\sum_k w_k a_k$ for fixed weights. Feeding in unit vectors
 exposes the weights, and with all-ones input the statement's example ends at 429, a
 [Catalan number](https://en.wikipedia.org/wiki/Catalan_number). That points to
@@ -296,13 +342,25 @@ only inside a floor, which an integer square root computes exactly.
   *exact* equality test only because its map truncates to nine decimals, making the cycle bit-for-bit
   identical; without a quantising step like that, use `fractions.Fraction`, integers, or an explicit
   tolerance you can justify.
+- **An expanding map needs exact state.** No tolerance helps when each step multiplies the error.
+  Problem 558's greedy expansion in base $r \approx 1.4656$, the real root of $x^3 = x^2 + 1$,
+  multiplies the remainder by $r$ at every digit, across some 250 digit positions. So keep the
+  state in the ring $\mathbb{Z}[r]$ instead: a remainder is an integer triple $(a, b, c)$ meaning
+  $a + br + cr^2$, and multiplying by $r$ is the companion step $(a, b, c) \mapsto (c, a, b + c)$.
+  The integers stay small because $r$ is a
+  [Pisot number](https://en.wikipedia.org/wiki/Pisot%E2%80%93Vijayaraghavan_number): its conjugates
+  have modulus below 1, so the two dimensions the real value cannot see contract. The only real
+  number left is the sign that decides each digit. A fixed-point estimate settles nearly all of
+  them, and the [field norm](https://en.wikipedia.org/wiki/Field_norm), an exact integer with the
+  same sign, settles the rest.
 
 The tell for this whole topic is a problem that describes a process — one more tile, one more turn,
 one more level — and then asks about it at an index you could never walk to. Write the recurrence
 first, in the most literal form you can defend. Then look at its *shape*: constant coefficients,
 halving arguments, a finite state, a period that is really a group order, a nonlinear map that is
-a linear one in disguise, long trivial stretches, a telescoping sum, a sequential loop that unrolls
-into independent terms, a pattern that induction will confirm. The shape picks the method.
+a linear one or a plain power in disguise, long trivial stretches, a potential that counts the
+steps, a telescoping sum, a sequential loop that unrolls into independent terms, a pattern that
+induction will confirm. The shape picks the method.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
