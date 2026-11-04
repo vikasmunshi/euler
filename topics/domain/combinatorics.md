@@ -1,10 +1,10 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final 2026-11-02T06:55Z -->
+<!-- status: final -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
 arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
-collection under some rule. It is the largest domain in this archive — 275 problems carry the tag,
+collection under some rule. It is the largest domain in this archive — 272 problems carry the tag,
 more than any other — and that is not an accident of tagging. Project Euler's favourite question
 shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
 discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
@@ -119,6 +119,18 @@ count's generating function collapses to $x(1+x)^{n-1}$, and the whole census be
 $\sum_t 2^{\operatorname{popcount}(t)}$, summed bit by bit in forty steps. See
 [closed-form expression](/topics/technique/closed-form-expression).
 
+A formula can also have a parameter that must be computed. Problem 619 counts the subsets of an
+interval whose product is a perfect square. Only the parity of each prime exponent matters, so each
+number is a vector over the [two-element field](/topics/domain/gf2), multiplying numbers adds their
+vectors, and a square subset is a solution of a homogeneous linear system. Solutions of such a
+system form a subspace, so with $n$ vectors of [rank](https://en.wikipedia.org/wiki/Rank_(linear_algebra))
+$r$ the count is $2^{n-r} - 1$, the $-1$ dropping the empty subset. Nothing is enumerated and no table
+is filled; the counting problem has become a rank computation. The vectors look far too wide for
+that, one coordinate per prime, but a number up to $b$ has at most one prime factor above $\sqrt b$.
+So each large prime is cleared by a single pivot, and
+[Gaussian elimination](/topics/technique/gaussian-elimination) only ever sees the primes up to
+$\sqrt b$. See [count solutions by rank](/topics/takeaway/count-solutions-by-rank).
+
 **A recurrence, evaluated as a table.** When no formula exists, decompose by the last decision. It
 is the single most common shape here — [dynamic programming](/topics/technique/dynamic-programming)
 is the most frequent technique across the solved problems on this list. Problem 116 asks for tilings
@@ -160,6 +172,38 @@ first 81 terms, multiplying by the denominator must zero out every coefficient p
 (a built-in check that no pole was missed), and [Bostan–Mori](/topics/technique/bostan-mori-algorithm)
 then halves $n$ each round to read off one coefficient at $10^7$ — or at $10^{18}$, for the same cost.
 
+That logarithm has two preconditions, and both can be engineered. The first is that the quantity
+must close under its own recurrence, and a total often does not. Problem 377 sums the zero-free
+numbers with digit sum $n$, for $n$ up to $13^{17}$. Appending a digit $d$ sends a value $v$ to
+$10v + d$, so the sum obeys $s(n) = \sum_d \bigl(10\,s(n-d) + d\,c(n-d)\bigr)$, which needs the
+*count* $c$ as well. The count closes on its own, so carrying the two together gives 18 values that
+advance through one fixed [matrix](/topics/technique/matrix-exponentiation). If a statistic's update
+mentions another statistic, the other one joins the state. See
+[running totals as matrix products](/topics/takeaway/running-totals-as-matrix-products).
+
+The second is that the state must be small, because a matrix product costs its cube. Problem 294
+counts digit strings of length $11^{12}$ that have digit sum 23 and are divisible by 23. The
+[digit DP](/topics/technique/digit-dp) state, residue and digit sum, has $23 \times 24 = 552$ values
+(sums past 23 are dead), so a dense product is some $1.7 \times 10^8$ operations. But the matrix is
+redundant: a block of $L$ digits acts the same way on every prefix, multiplying its residue by
+$10^L$ and adding the block's own residue and digit sum. So one table of 552 counts, plus the scalar
+$10^L$, *is* the whole matrix. Joining two blocks is a convolution, cyclic in the residue and
+truncated in the digit sum, and because concatenation is associative,
+[squaring](/topics/technique/exponentiation-by-squaring) works on the tables directly, each product
+552 times cheaper. Before raising a matrix to a power, ask whether its rows are all the same row in
+disguise.
+
+The table can also run along a *parameter* of the problem rather than along a configuration.
+Problem 423 counts die sequences of length $n$ with at most $\pi(n)$ repeated neighbours. Recoding a
+sequence as its first face plus a repeat-or-change mark at each gap gives
+$\binom{n-1}{c}\,5^{n-1-c}$ for each first face and exactly $c$ repeats — but the cut-off asks for a
+partial sum of that row, and partial sums of a binomial row have no closed form. They do have
+neighbours. With $F(m,k) = \sum_{c \le k}\binom{m}{c}5^{m-c}$, [Pascal's rule](/topics/technique/pascals-triangle)
+gives $F(m+1,k) = 6F(m,k) - \binom{m}{k}5^{m-k}$, and raising $k$ adds one term. So each $n$ costs
+$O(1)$ instead of $O(\pi(n))$, which over the problem's range replaces some $10^{14}$ terms with
+$5 \times 10^7$ steps. When a quantity has no formula, look for a formula for its *difference* from
+the neighbouring instance. See [update only what changes](/topics/takeaway/update-only-what-changes).
+
 **Count the complement, or inclusion–exclusion.** "At least one" is usually harder than "none".
 Problem 116 subtracts the single all-grey tiling rather than tracking a "used a colour yet?" flag
 through the recurrence. When constraints overlap, [inclusion–exclusion](/topics/technique/inclusion-exclusion-principle)
@@ -183,6 +227,17 @@ at the same corner would send the same rows to different columns. So there is at
 per corner, the inclusion–exclusion has a handful of terms, and the sum telescopes
 ($m \cdot m! = (m+1)! - m!$) down to one pass over the
 [left factorials](https://oeis.org/A003422).
+
+When the objects sort into few classes, the complement can be taken over the classes. Problem 612
+counts pairs of numbers below $10^{18}$ with a digit in common. That depends only on each number's
+digit *set*, so the numbers fall into at most $2^{10}$ classes, whose sizes $c_S$ a
+[digit DP](/topics/technique/digit-dp) supplies. "Share a digit" is a union of ten overlapping
+events; its complement is one clean condition, since $S'$ is disjoint from $S$ exactly when
+$S' \subseteq \overline{S}$. So what is needed is $F(M) = \sum_{S' \subseteq M} c_{S'}$ at every mask
+$M$, and the [sum-over-subsets transform](/topics/technique/sum-over-subsets-transform) fills that
+in one sweep per bit: $10 \cdot 2^{10}$ additions, not the $3^{10}$ submask pairs. This is
+inclusion–exclusion's own machinery seen from the other side: $F$ is the zeta transform of the
+subset lattice, and undoing it is Möbius inversion there.
 
 **Quotient by symmetry.** If configurations related by rotation, reflection, or relabelling count as
 one, do not enumerate and deduplicate — divide the work by the symmetry group up front, or count
@@ -215,6 +270,19 @@ and so always differ, and every such colour pair is equivalent under permuting t
 *how many* choices each new tile has matters, so the colours fold into the matrix weights and ten
 states remain.
 
+The opposite move also works: *add* labels to get something rigid, count that, and divide. Problem
+475 regroups $12n$ musicians from $3n$ quartets into $4n$ trios with no former partners together, and
+unlabelled groups of people are awkward to count. Label the trios, and each arrangement yields a
+$3n \times 4n$ binary incidence matrix with row sums 4 and column sums 3. Each such matrix arises
+from exactly $4!$ assignments per row, so
+[counting both ways](/topics/technique/double-counting-proof-technique) gives
+$f(12n) = 24^{3n} M / (4n)!$, with $M$ the number of matrices. The division is honest only because
+every orbit is the same size: the trios are distinct sets, so all $(4n)!$ labellings differ. Where
+orbits vary, that shortcut is wrong and [Burnside's lemma](https://en.wikipedia.org/wiki/Burnside%27s_lemma)
+takes over. And $M$ then yields to the state quotient above: columns with equal fill are
+interchangeable, so a partial matrix is just a histogram of column fills, and
+[its invariants](/topics/takeaway/invariant-bounds-the-state-space) leave two free counters per row.
+
 Symmetry also collapses a *filter*. A condition of the form "the sum is divisible by $n$" is
 picked out of a generating function by a [roots-of-unity filter](/topics/technique/roots-of-unity-filter):
 evaluate at every $n$-th root of unity and average, since $\frac1n\sum_j \omega^{js}$ is $1$ when
@@ -227,7 +295,7 @@ count becomes a binomial plus a small correction, divided by $p$. See
 ## The counts themselves are the other hazard
 
 Combinatorial answers grow explosively, and this domain's most common companion tag is
-[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 275 problems carry it. That
+[modular arithmetic](/topics/domain/modular-arithmetic) — 75 of these 272 problems carry it. That
 pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
 the deliverable and you work in the ring from line one), or it wants the honest integer and you
 need [arbitrary precision](/topics/technique/arbitrary-precision-arithmetic). Python gives you the
@@ -275,7 +343,13 @@ paths, partitions — at a size where listing them is hopeless. When you catch i
   is usually a sum over small pieces (pairs, positions) of how many configurations each one
   scores in.
 - **When $n$ is astronomical, look for a rational generating function.** If the table you would
-  fill obeys a fixed-order linear recurrence, the $n$-th term costs $\log n$, not $n$.
+  fill obeys a fixed-order linear recurrence, the $n$-th term costs $\log n$, not $n$. Add to the
+  state whatever the update needs, and if every prefix is treated alike, compose one table instead
+  of a matrix.
+- **When the constraints are linear, compute a rank.** Over a finite field the solutions form a
+  subspace, so their number is a power of the field size and nothing needs listing.
+- **When there is no formula, look for a step.** A sum that resists closing may still move to its
+  neighbouring instance in constant time.
 - **Decide the arithmetic régime up front.** A stated modulus means reduce after every operation;
   no modulus means big integers, and in C that means thinking about width before the first
   multiply. Either way, confirm the reduction commutes with what is actually being summed.
