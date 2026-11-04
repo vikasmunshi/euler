@@ -132,7 +132,7 @@ The algorithms are the same in both languages; the containers are not.
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
 - ○ [0279](/solutions/0279/) — Triangles with Integral Sides and an Integral Angle
 - ○ [0496](/solutions/0496/) — Incenter and Circumcenter of Triangle
-- ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
 - ○ [0919](/solutions/0919/) — Fortunate Triangles
 

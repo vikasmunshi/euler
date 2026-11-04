@@ -554,6 +554,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers

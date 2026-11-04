@@ -190,7 +190,7 @@ its signature, you already know which family of algorithms applies and roughly w
 
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
 - ● [0224](/solutions/0224/) — Almost Right-angled Triangles II
-- ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ○ [0586](/solutions/0586/) — Binary Quadratic Form
 - ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime

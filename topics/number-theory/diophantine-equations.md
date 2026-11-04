@@ -335,7 +335,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ○ [0566](/solutions/0566/) — Cake Icing Puzzle
 - ○ [0576](/solutions/0576/) — Irrational Jumps
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
-- ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ○ [0583](/solutions/0583/) — Heron Envelopes
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers

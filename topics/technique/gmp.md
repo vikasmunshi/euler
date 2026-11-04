@@ -181,6 +181,7 @@ constant factor.
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0558](/solutions/0558/) — Irrational Base
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers

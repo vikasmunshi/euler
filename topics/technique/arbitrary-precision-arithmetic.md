@@ -235,6 +235,7 @@ conversion altogether, and is usually faster besides.
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0558](/solutions/0558/) — Irrational Base
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
 - ● [0768](/solutions/0768/) — Chandelier

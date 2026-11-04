@@ -365,7 +365,7 @@ discipline still shapes the search.
 - ○ [0528](/solutions/0528/) — Constrained Sums
 - ○ [0557](/solutions/0557/) — Cutting Triangles
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
-- ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ○ [0583](/solutions/0583/) — Heron Envelopes
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0620](/solutions/0620/) — Planetary Gears

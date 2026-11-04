@@ -322,7 +322,7 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
 - ○ [0540](/solutions/0540/) — Counting Primitive Pythagorean Triples
 - ○ [0557](/solutions/0557/) — Cutting Triangles
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
-- ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ○ [0583](/solutions/0583/) — Heron Envelopes
 - ○ [0585](/solutions/0585/) — Nested Square Roots
 - ○ [0613](/solutions/0613/) — Pythagorean Ant

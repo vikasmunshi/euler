@@ -9,6 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Eisenstein_tri
 
 - ● [0143](/solutions/0143/) — Torricelli Triangles
 - ● [0195](/solutions/0195/) — $60$-degree Triangle Inscribed Circles
-- ○ [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 
 <!-- /problems -->
