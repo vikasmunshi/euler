@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
-<!-- status: final 2026-11-02T11:49Z -->
+<!-- status: final -->
 # Prefer closed form over iteration
 
 A loop that adds up a structured sequence is doing arithmetic the sequence has
@@ -56,7 +56,7 @@ structure do the counting.
 
 In the harder problems the formula rarely *is* the answer. It is a component —
 the part of the computation that would otherwise be the inner loop — and the
-surrounding algorithm is designed around having it. Six shapes recur.
+surrounding algorithm is designed around having it. Nine shapes recur.
 
 **A formula per item, in place of a search per item.**
 [Divisibility Multipliers](/solutions/0274/) asks, for every prime $p$ coprime
@@ -148,6 +148,34 @@ and its recurrence solves exactly: the game ends at round $m$ with probability
 $(m-1)/2^m$. The process is gone, and what remains is a series to sum (see
 below).
 
+The deepest derivation changes coordinates. [Golden Recurrence](/solutions/0921/)
+iterates a degree-five rational map and wants its terms at Fibonacci indices,
+far past anything a loop could step through. But the map's numerator and
+denominator are the odd and even halves of a binomial expansion, and the
+[Möbius transformation](https://en.wikipedia.org/wiki/M%C3%B6bius_transformation)
+$t = (a+1)/(a-1)$ [conjugates](https://en.wikipedia.org/wiki/Topological_conjugacy) it
+into the plain power map $t \mapsto t^5$. Conjugation is what makes this pay: if
+$f = \phi^{-1} \circ g \circ \phi$, the steps in between cancel and
+$f^n = \phi^{-1} \circ g^n \circ \phi$, so $n$ steps of $f$ cost only what $n$
+steps of $g$ cost, and $n$ steps of a power map are one power. Diagonalising a
+matrix does the same for a linear recurrence, which is why
+[Binet's formula](https://en.wikipedia.org/wiki/Fibonacci_sequence#Binet's_formula)
+exists. Here the trick reaches a nonlinear one, and the article on
+[recurrence relations](/topics/domain/recurrence-relation) takes up how to spot it.
+
+**A formula you solve, not just evaluate.** An expression can do something a
+process cannot: it can stand in an equation. [McCarthy 91 Function](/solutions/0555/)
+starts as Crazy Function did, with memoised runs on small parameters showing
+that below the threshold the generalised function is a sawtooth in $n$ of period
+$d = k - s$. But this problem wants the *fixed points*, summed over every
+parameter pair. With the formula on paper, $M(n) = n$ can simply be solved, and
+the result is all-or-nothing: fixed points exist exactly when $d \mid s$, and
+then a whole window of $d$ consecutive integers is fixed. That condition also
+tells you how to index the sum. Almost every pair $(k, s)$ contributes nothing,
+so stop looping over them and loop over $d$ and the multiples $s = jd$ instead.
+Each window is a Gauss sum and the sum over $j$ is a polynomial, which leaves one
+closed form per $d$.
+
 **A summand rewritten until it matches a known sum.** [Divisor Pairs](/solutions/0561/)
 asks for a [2-adic valuation](https://en.wikipedia.org/wiki/P-adic_valuation)
 summed over $10^{12}$ values of $i$. Counting divisor pairs coordinate by
@@ -159,6 +187,28 @@ half-index, scaled by a constant. And $\sum_{t \le N} v_2(t) = v_2(N!)$, which
 $N - s_2(N)$, where $s_2$ is the count of 1 bits. The summand never gets a
 formula of its own here. You keep rewriting it until it matches a sum someone
 has already closed.
+
+**A double sum turned on its side.** A term with a formula does not make the sum
+of those terms easy, and which index you sum first can decide it.
+[Piles of Plates](/solutions/0688/) sums a floor over a plate count $n$ up to
+$N = 10^{16}$ and a pile count $k$. Taken in that order, the outer loop alone is
+hopeless. [Swap the order](https://en.wikipedia.org/wiki/Summation) and $k$ is
+fixed while $n$ runs, so the floors form a staircase in which each value repeats
+$k$ times, and a prefix of a staircase closes as a triangular number plus one
+partial step. Only $k$ up to about $\sqrt{2N}$ contribute, so what remains is
+$O(\sqrt N)$ closed-form terms. When a double sum resists, ask which index the
+summand is simplest in, and put that index innermost.
+
+**A formula for the solution set.** A search can close as well as a sum.
+[Tangent Circles](/solutions/0510/) sums over the integer triples of radii that
+satisfy a tangency equation. Instead of testing pairs of radii, you
+[parametrise by the reduced ratio](/topics/takeaway/parametrise-by-reduced-ratio):
+every solution is a scale $t$ times a fixed polynomial triple in a coprime pair
+$(u, v)$, and it appears exactly once. That shrinks $O(n^2)$ pairs of radii to
+$O(\sqrt n)$ pairs $(u, v)$, but only with a second closed form behind it.
+The radii are linear in $t$, so a pair's multiples sum as one triangular number.
+A loop over $t$ would bring back the linear cost, since the smallest pair alone
+has $\lfloor n/4 \rfloor$ multiples.
 
 The plainest variant is a sum that is short rather than constant.
 [Twenty-two Foolish Primes](/solutions/0239/) asks a probability over all $100!$
@@ -173,11 +223,11 @@ big-integer terms replace an enumeration no computer could finish.
 
 Among the later problems, the formula that finally does the work is very often
 the oldest one, the [geometric series](https://en.wikipedia.org/wiki/Geometric_series)
-$\sum_{k<K} x^k = (x^K - 1)/(x - 1)$. Under a prime modulus that is one
-[modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation)
+$\sum_{k<K} x^k = (x^K - 1)/(x - 1)$. Under any modulus coprime to $x - 1$ that
+is one [modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation)
 and one [modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse),
 so $K$ can be $10^{18}$. The hard part is turning the problem into geometric
-series in the first place, and three different routes lead there.
+series in the first place, and five different routes lead there.
 
 **Periodicity, split into residue classes.** [Clock Sequence](/solutions/0506/)
 reads terms off a digit stream with period 6. Because a full period always sums
@@ -211,10 +261,32 @@ to remove its last loop: grouping the second family by its lowest exponent $m$
 leaves a weighted sum in $m$ with ratio $\tfrac12$, which closes the same way. Without that
 step the sum would be $O(N)$, and with it $N = 10^{18}$ takes microseconds.
 
+**Symmetry, past roots you never compute.** [Roots on the Rise](/solutions/0479/)
+defines each term through the three complex roots of a cubic with parameter $k$,
+and sums the $p$-th power of a product built from those roots over both $k$ and
+$p$. No root is ever found. The product is symmetric in the roots, so
+[Vieta's formulas](/topics/technique/vietas-formulas) rewrite it in the cubic's
+coefficients. The complex parts cancel and leave a polynomial in $k$. Each inner
+sum over $p$ is then a geometric series with that polynomial as its ratio, and
+$10^{12}$ terms become $10^6$ closed forms. When a definition passes through
+objects you cannot write down, check whether the final quantity is symmetric in
+them.
+
+**A table that fits a sum of powers.** [Gathering the Beans](/solutions/0335/) is
+a sowing game on a ring of bowls, asked at $2^k + 1$ bowls with $k$ up to
+$10^{18}$. Simulation is practical to about $k = 12$, and the solution never needs the
+general $M(x)$, only that one family, so that is the sequence to tabulate. Its
+consecutive ratios settle on a small integer, which is what a sum of pure powers
+does as the largest base takes over, and the table fits three such powers
+exactly. Each power is then its own geometric series. If a sequence grows at a
+steady ratio, try that form before anything cleverer.
+
 Two edge cases come with the formula. Watch for the degenerate ratios: $x = 1$
 sums to the number of terms and $x = 0$ to its $x^0$ term alone, and Simbers
 hits both among its 21 series. And keep $x - 1$ invertible. Clock Sequence
 checks that $10^6 - 1$ shares no factor with its modulus before dividing by it.
+A prime modulus is convenient but not required: Gathering the Beans works modulo
+$7^9$, and all it needs is that its denominators are coprime to 7.
 
 ## How to reason about it
 
@@ -224,15 +296,17 @@ are concrete: an arithmetic or geometric run, a triangular / pyramidal / binomia
 count, a sum over a regular grid, a linear recurrence with constant coefficients,
 a count over all numbers with a fixed number of digits or bits, a term that
 is a polynomial up to a periodic wobble (floors and rounds of $k^2/c$), a
-periodic sequence, a recursion whose unrolling is a path count, or a random
-process with only a few states.
+periodic sequence, a recursion whose unrolling is a path count, a random
+process with only a few states, a quantity symmetric in roots you cannot write
+down, a rational map that may be a power map in disguise, or a double sum that
+is simple in one of its indices.
 When the summand is genuinely irregular — the rectangle counts scanned in
 [Counting Rectangles](/solutions/0085/), where the search stops at the shape
 nearest a target — no formula collapses the whole thing, and iteration is the
 honest answer. The skill is telling the two apart: derive on paper first, and if
 the algebra does not close, do not force it.
 
-Four cautions earn their keep:
+Five cautions earn their keep:
 
 - **Derive, then verify.** A closed form is only as good as its derivation; an
   off-by-one in the bounds or a dropped term is silent. Keep a brute-force
@@ -243,6 +317,14 @@ Four cautions earn their keep:
   Hilbert's New Hotel, checking it on the same few cases proves nothing. Test
   it on fresh ones: Crazy Function was checked on 400 random parameter
   triples, and Hilbert's New Hotel on every room the simulation filled.
+  Sometimes no proof arrives, and then the formula is only as good as the
+  evidence, so aim that evidence where a wrong formula would show.
+  Gathering the Beans rests on simulation alone, but thirteen table entries
+  against the handful of constants in its fit leave the fit little freedom.
+  McCarthy 91 Function was never proved either, so its checks use lopsided
+  parameters that force the window-clipping branch, where an off-by-one would
+  hide. Say which of the two you have: a proved formula and a well-tested one
+  are not the same claim.
 - **Mind the arithmetic.** Formulas multiply before they divide, so intermediate
   values can be far larger than the answer — a real overflow risk in C, and a
   reason to prefer exact integer arithmetic (Python's big integers, or careful
@@ -282,7 +364,10 @@ Four cautions earn their keep:
   Sequences accumulates $F$ incrementally below $\sqrt n$ and switches to the
   closed form only for the scattered large quotients. Use the formula where it
   lets you skip arguments, and plain iteration where you visit every one
-  anyway.
+  anyway. A formula evaluated millions of times can also be paid for in bulk.
+  Golden Recurrence needs one fixed base raised to over a million scattered
+  exponents, so it tabulates the powers for an exponent's low and high bits, and
+  one multiplication of two table entries replaces about 29 squarings.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
