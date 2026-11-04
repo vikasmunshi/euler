@@ -6652,13 +6652,13 @@
       "path": "technique/extended-euclidean-algorithm",
       "title": "Extended Euclidean algorithm",
       "status": "final",
-      "written": "2026-10-29T12:17Z",
+      "written": "2026-11-04T18:08Z",
       "solved": 14,
       "problems": 14,
       "tags": ["extended-euclidean-algorithm"],
       "refs": ["p0134_s0", "p0160_s0", "p0198_s0", "p0236_s0", "p0250_s0", "p0251_s0", "p0271_s0", "p0335_s0", "p0479_s0", "p0520_s0", "p0531_s0", "p0731_s0", "p0932_s0", "p0934_s0"],
-      "covered": ["p0134", "p0160", "p0198", "p0236", "p0250", "p0251", "p0271", "p0932", "p0934"],
-      "solved_after": ["p0335", "p0479", "p0520", "p0531", "p0731"]
+      "covered": ["p0134", "p0160", "p0198", "p0236", "p0250", "p0251", "p0271", "p0335", "p0479", "p0520", "p0531", "p0731", "p0932", "p0934"],
+      "solved_after": []
     },
     {
       "path": "technique/extended-slice",
