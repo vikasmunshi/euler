@@ -6676,13 +6676,13 @@
       "path": "technique/fancy-indexing",
       "title": "fancy-indexing",
       "status": "final",
-      "written": "2026-10-18T10:09Z",
+      "written": "2026-11-04T13:15Z",
       "solved": 9,
       "problems": 9,
       "tags": ["fancy-indexing"],
       "refs": ["p0229_s0", "p0249_s0", "p0291_s0", "p0310_s0", "p0333_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0518_s0", "p0521_s0"],
-      "covered": ["p0229", "p0249", "p0420", "p0421"],
-      "solved_after": ["p0291", "p0310", "p0333", "p0518", "p0521"]
+      "covered": ["p0229", "p0249", "p0291", "p0310", "p0333", "p0420", "p0421", "p0518", "p0521"],
+      "solved_after": []
     },
     {
       "path": "technique/fast-fourier-transform",
