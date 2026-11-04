@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-11-03T12:37Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -62,6 +62,36 @@ value `⌊N/(ip)⌋` sits in the large table at index `i·p`, which is a strided
 `large[p::p]`. For larger `i` it lands in the small table at a computed index, so those
 entries are gathered with fancy indexing. One split point decides which form handles each
 entry.
+
+**Flatten ragged work.** A strided slice costs one Python call per progression, which is a
+bargain only while each progression is long. A
+[polynomial sieve](/topics/technique/polynomial-sieve) breaks that assumption: a prime divides a
+quadratic's values on at most two residue classes, the classes start at arbitrary roots, and
+hundreds of thousands of large primes have only a handful of hits each.
+[Problem 291](/solutions/0291/) keeps slices for primes up to `N/64` and splits the rest into
+octave bands `[lo, 2·lo)`. Every prime in a band has about the same number of hits, so the loop
+turns inside out: it runs over the hit number `k`, and `start + k * q` strikes the `k`-th hit of
+every prime in the band at once. [Problem 621](/solutions/0621/) drops that loop too. Given
+progressions of unequal lengths `counts`, three lines write them all out as one flat array:
+
+```python
+offsets = np.cumsum(counts) - counts                          # where each run begins
+steps = np.arange(counts.sum()) - np.repeat(offsets, counts)  # 0, 1, 2, 0, 1, 0, 1, 2, 3, …
+index = np.repeat(starts, counts) + np.repeat(moduli, counts) * steps
+```
+
+`np.repeat` copies each run's parameters onto its lanes, and subtracting the repeated offsets
+numbers the lanes within their run. That is the general way to make ragged work rectangular,
+and it brings two obligations. The flat array is as long as the total work, so batches must be
+cut by work, not by item count: problem 621 runs `searchsorted` over the cumulative hit counts
+to take progressions about four million hits at a time. And two primes in a batch can strike
+the same index, so the updates go through `np.floor_divide.at` and `np.multiply.at`, the
+unbuffered scatter that problem 967 uses below. The same idiom also enumerates.
+[Problem 749](/solutions/0749/) builds every digit multiset as a row of digit counts, one digit
+per step. A partial row with `r` digits left has `r + 1` children, so
+`np.repeat(rows, choices, axis=0)` copies the parents and the lane numbering supplies each
+child's count. Nine array steps walk a tree with two million leaves, level by level, with no
+recursion.
 
 **Invert the loop nest.** When you have nested loops, vectorize the *inner* one and leave the
 outer in Python. This is the single most common shape across these problems, because it needs
@@ -142,7 +172,11 @@ with it), and [`np.isin`](https://numpy.org/doc/stable/reference/generated/numpy
 is bulk set membership. Both want flat scalar keys, so when the items are tuples, pack them:
 problem 983 stores each lattice vector `(x, y)` as the single integer `x * 2**21 + y`. The
 encoding is *linear*, so adding two vectors is adding their keys, and the whole search runs on
-one-dimensional `int64` arrays.
+one-dimensional `int64` arrays. A key can also forget order on purpose. Problem 749 compares
+digit multisets, so its key is the count vector read as a base-`(d + 1)` numeral: `counts @ weight`
+for the rows, and for a candidate number one `weight[digit]` gather per digit position, summed.
+Addition discards the order of the digits, so one integer comparison per lane decides whether
+two numbers are anagrams.
 
 Sorting and searching in bulk also builds graphs. [Problem 425](/solutions/0425/) links primes
 that differ in one digit. Its edge list comes from array passes: one per digit position and
@@ -187,6 +221,17 @@ the game tree holds a weight vector indexed by the value a move must reach. XOR 
 permutes `[0, 2**b)`, so pushing a whole level down to a child is a single scatter through the
 index array `(idx ^ mask) - 1`.
 
+The state can be two-dimensional as well. [Problem 475](/solutions/0475/) reduces to counting
+0/1 matrices row by row, and all that matters is how many columns already hold two ones and how
+many hold three; the rest follows from the row number. So the state is a 2-D table, and an
+`arange` column against an `arange` row gives every state's coordinates by broadcasting. Each of
+the 15 ways a new row can spread over the columns moves the whole table by a fixed offset: one
+shifted slice, scaled by a weight array gathered from a binomial table at those coordinates.
+Unreachable states have impossible coordinates, some of them negative, so `np.clip` forces them
+into range before the gather. The nonsense weight fetched for such a state is multiplied by a
+table entry of zero. When the lanes a clamp corrupts are already dead, it does the work of a
+mask for less.
+
 A recurrence that looks serial along its own index can still be stepped in blocks, if every
 entry depends only on entries well below it. [Problem 333](/solutions/0333/) counts partitions
 into terms `2^i·3^j`. Its recurrence sends `n` to indices below `n/2`, so the whole block
@@ -197,7 +242,10 @@ keeps one lane per candidate prime and folds in the prime factors of `p − 1` o
 Each fold settles some lanes for good, and those lanes are dropped: one `keep` mask compacts
 the candidate array *and* every per-lane state array alongside it. Later factors then work on
 a shrinking array, as in problem 348's staged filter, except that here the survivors carry
-state from step to step.
+state from step to step. When each lane's lifetime is known in advance, even the mask can go.
+Problem 749 sorts its rows once by the last exponent each can use, so the rows still alive at
+exponent `k` are always a prefix, and `counts[:live]` is a free view where a mask would copy two
+million rows.
 
 **Vectorize the modular arithmetic too.** Nothing about the technique is limited to `+` and
 `*`. [Problem 944](/solutions/0944/) computes `2**e mod m` for a whole array of exponents by
@@ -210,7 +258,14 @@ to its fixed point modulo `10**9`, for a million bases at once, stopping when
 `np.array_equal` says no lane moved. [Problem 721](/solutions/0721/) lifts the same loop into
 the ring `ℤ_p[√a]`: each element `u + v√a` is *two* arrays, the ring product is a few lines of
 array arithmetic, and the square-and-multiply sweep raises every `c + √a` to its own power
-`a²` in about 45 steps. The lanes need not share a modulus either.
+`a²` in about 45 steps. When every lane shares the base and the exponents are bounded, the
+ladder can be paid for in advance. [Problem 921](/solutions/0921/) raises one element of such a
+ring to over a million unrelated exponents. It splits each exponent into its low 15 bits and the
+rest, and tabulates the base's powers for each half, a few tens of thousands of serial
+multiplications. Then `high[x >> 15] * low[x & 0x7fff]` is two gathers and one ring product per
+lane, in place of about 29 squarings. Problem 980's power tables, below, use the same split to
+produce a consecutive run of powers; here it gives random access to them.
+The lanes need not share a modulus either.
 [Problem 492](/solutions/0492/) gives every lane its own *prime* modulus, a whole sieved range of
 them. Each lane's exponent is reduced modulo `p − 1` or `p + 1`, and a quadratic-residue mask
 picks which, before a [Lucas-sequence](https://en.wikipedia.org/wiki/Lucas_sequence) ladder
@@ -239,7 +294,10 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   code: problem 348 scans palindromes by digit count and raises `OverflowError` past 18
   digits, the last length whose sums still fit, instead of letting a 19th band wrap silently.
   Packed keys need the same accounting, since each field must fit its share of the 64 bits,
-  sums included. Masks help with the accounting too. [Problem 401](/solutions/0401/) needs
+  sums included. An entry that would overflow can be dropped if no live lane reads it: problem
+  749's table of digit powers zeroes every power above the limit, because a digit with such a
+  power cannot appear in a row still alive at that exponent. Masks help with the accounting too.
+  [Problem 401](/solutions/0401/) needs
   `x(x+1)(2x+1)/6 mod m` for `x` up to `10**15`, where the raw product would overflow and `6`
   has no inverse modulo the composite `m`. So it divides the `2` and the `3` out of whichever factor
   they divide, using masks such as `a[x % 3 == 0] //= 3`, and reduces only after that.
@@ -271,7 +329,15 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   matrix gets its own scan in one call. [Problem 252](/solutions/0252/) uses this to test
   whole rows of fan triangles for emptiness: a triangle is empty exactly when one direction
   rank is a running maximum of the ranks before it, so one prefix scan per row replaces a
-  scan over every third point. A recurrence that is only *almost* a scan can often be
+  scan over every third point. Even a sliding window reduces to scans. The textbook window
+  maximum keeps a monotonic deque, as serial as code gets, but
+  [problem 485](/solutions/0485/) uses the
+  [van Herk–Gil-Werman](/topics/technique/sliding-window-maximum) decomposition instead. It
+  reshapes the array into aligned blocks of the window length `k` and scans each row twice,
+  forwards for prefix maxima and over `grid[:, ::-1]` for suffix maxima. Every window spans at
+  most two blocks, so its maximum is `max(suffix[n], prefix[n + k - 1])`, and one more
+  `np.maximum` over two shifted arrays answers all the windows at once.
+  A recurrence that is only *almost* a scan can often be
   shifted into one. [Problem 718](/solutions/0718/) walks a residue cycle on which
   `w_i = min(base_i, w_{i−1} + z)`; subtracting `i·z` from both sides gives
   `t_i = min(base_i − i·z, t_{i−1})`, a plain running minimum that `np.minimum.accumulate`
