@@ -1,5 +1,5 @@
 <!-- tags: [primesieve] -->
-<!-- status: final 2026-11-01T10:31Z -->
+<!-- status: final -->
 # primesieve
 
 [primesieve](https://github.com/kimwalisch/primesieve) is Kim Walisch's C/C++ library for
@@ -7,8 +7,8 @@ generating primes, and it is my default answer to "I need the primes up to N, an
 not the interesting part." The solutions below delegate to it for exactly that reason. In each of
 them the primes are only the raw material: a sum for problem 10, a set of rotations to check in 35,
 a semiprime count in 187, a Fibonacci-mod stream in 304, a vector of residues in 381 and 421, the
-points at which 635 reads a running factorial, the outer loop's index set in 517. A
-tuned library that fills that one need cleanly frees the solution to spend its code on the actual
+points at which 635 reads a running factorial, the outer loop's index set in 517, a digit stream in
+705, the terms of a convergent series in 779. A tuned library that fills that one need cleanly frees the solution to spend its code on the actual
 problem. This page is about the library as a **tool**: what it does for you, the calls the
 solutions make from C and Python, and when a hand-written sieve is still the right call. For the
 theory, see [generation of primes](/topics/technique/generation-of-primes) and the
@@ -75,6 +75,31 @@ optional extension. The PyPI build does not include it, and it is rebuilt from s
 NumPy 2 by `scripts/setup/primesieve_numpy_extension.sh`. Plain `primesieve.primes` is always
 available.
 
+The two forms are not interchangeable, and the per-prime arithmetic decides between them. The
+ndarray holds `int64`, so it suits work that fits in 63 bits and takes the same steps in every lane.
+Problem 437 qualifies: with p < 10⁸ every product of two residues stays below 10¹⁶, and its ring
+exponentiation squares in all lanes at once, with a mask choosing which lanes also multiply. Problem
+457 does not, for two reasons. It works modulo p², so its Hensel step multiplies two residues near
+10¹⁴, and its Tonelli–Shanks square root loops a different number of times for each prime. Iterating
+the `array('Q')` hands out Python integers, which absorb that width, so a plain `for p in
+primesieve.primes(limit)` is the right call there. The C port needs `__int128` for the same products.
+
+**Back to a table.** A prime list is also the index list of a bitmap, so one scatter turns it into
+O(1) membership:
+
+```python
+is_prime = np.zeros(n + 1, dtype=np.bool_)
+is_prime[primesieve.numpy.primes(n)] = True
+```
+
+That makes membership a poor reason to write your own sieve. At n = 10⁸ on this machine the two
+lines above take about 40 ms, and a hand-written strided NumPy sieve over odd numbers takes about
+510 ms. Problem 518 is built on this table: its inner loop is nothing but scattered lookups. Problem
+35 makes the same conversion by hand, into a flag array in C and a `set` in Python. Problem 423
+takes one more step. `np.cumsum` of the mask gives π(n) for every n at once, which is the form its
+binomial terms read. The counting call below answers one interval per sieve, so it is the wrong tool
+for a table of π.
+
 **Iterators.** When you don't know where the primes stop, use the iterator, which sieves lazily
 one segment at a time. Problem 304 needs a fixed number of primes just past 10¹⁴: far too high to
 sieve from 2, and with no closed form for where the run ends. The iterator handles it in a few
@@ -91,6 +116,18 @@ primesieve_free_iterator(&it);
 `primesieve_prev_prime` walks the same iterator downwards. Problem 808 streams its candidate primes
 the same way, from 2 upwards, until it has found enough. The `stop_hint` matters: a tight hint
 avoids sieving a large first segment the loop never reaches, and `UINT64_MAX` just says "no idea."
+
+An unknown end is not the only reason to stream. Problem 705 knows exactly where it stops, but its
+C port still uses the iterator, because each prime is consumed once and then forgotten: its digits
+update nine running counts, with no large array anywhere. The Python port has to vectorise, so it
+materialises all 4·10⁷ digits and pays for a prefix-sum pass per digit value, at 5.08 s against
+0.286 s. A one-pass fold wants the iterator, even when the bound is known. Random access or vector
+lanes want the array.
+
+**Order is part of the contract.** The array calls and `next_prime` deliver primes in ascending order,
+and some solutions depend on it. In 705 the order *is* the sequence being measured. Problem 779 keeps
+∏(1 − 1/q) over the primes below p as a single running product, which only works if the primes
+arrive smallest first.
 
 **Counting.** `primesieve_count_primes(a, b)` gives π(b) − π(a−1) by sieving, with no array
 materialised and on every core. That is a sieve, not a [prime-counting
@@ -126,6 +163,21 @@ smaller, and you get it by reasoning about the problem.
   is √(4N² + 1) rounded up. After those primes have been divided out, the cofactor left is 1 or a
   single prime. It also drops every p ≢ 1 (mod 4), because −1 is not a square modulo those primes,
   so they can never divide 4k² + 1.
+- **Two calls, two bounds.** Problem 437 needs p − 1 factored for about 2.9 million primes, so the
+  library supplies both sides of a trial division: primes up to N become the lanes, and primes up to
+  √N become the divisors. The loop is transposed. Python walks the divisors, each one tests every
+  surviving lane in a single array operation, and lanes that can no longer qualify are dropped as it
+  goes. What remains above 1 is the one prime factor beyond √N, the same leftover argument as 632.
+  The price is that no single lane can stop early. The C port walks one prime at a time, stops at
+  q² > rem, and takes 3.81 s against Python's 19.57 s.
+- **A bound you choose.** The bounds above are forced by the mathematics. Two others are decisions.
+  In 625 any sieve limit L past √N gives the right answer. L only moves work between the sieve and
+  the recursion over large quotients, and N^⅔ is where those two costs balance. In 779 the sum runs
+  over every prime, so nothing in the statement says where to stop, and the limit comes from the
+  tolerance instead. The tail past P is below 1/(2P²), and P = 10⁷ was chosen because the result
+  sits unusually close to a rounding boundary at the twelfth decimal. That bound is only worth having
+  if the summation keeps up with it, which is why the terms go through `math.fsum` (`long double` in
+  C) and not a plain running total.
 
 In every case the library is asked one clear question. Deciding which question to ask is still
 the solution's job.
@@ -152,11 +204,13 @@ than that, or something different.
   max(√n, n/301). Below that point each prime gets its own strided pass. Above it every prime has
   valuation 1 at all of its multiples, so they are batched by multiple index k: about 300
   fancy-indexed updates replace 660 000 per-prime Python calls. A bitmap sieve can't be split like
-  that without first being turned into a list. Compare 484, which never needs a table. It walks a DFS over the primes up to
-  √N, and a plain prime list is exactly what that DFS takes.
-- **You need O(1) membership.** primesieve hands back primes, not a bitmap. Problem 35 has to test
-  whether each rotation is prime, so it rebuilds an indexed flag array (C) or a `set` (Python) from
-  the list. If lookup is all you need, a sieve that *is* the bitmap avoids building it twice.
+  that without first being turned into a list. Problem 625 avoids the large primes altogether. For
+  its φ table up to L ≈ 2·10⁷ it asks only for primes up to √L, roughly 600 strided passes where 875's
+  shape would need 1.4 million, and divides every power of each prime out of a parallel remainder
+  array. Whatever survives in that array is 1 or the single large prime factor of n, so one masked
+  update applies all the large primes together, and the solution never lists them. Compare 484,
+  which never needs a table. It walks a DFS over the primes up to √N, and a plain prime list is
+  exactly what that DFS takes.
 - **The bound is tiny.** For N in the thousands, library setup outweighs the work (see the N = 10
   timing above). It doesn't matter, but it's no reason to add a dependency either.
 - **The sieve is the lesson, or the oracle.** Several problems keep a hand-written variant alongside
