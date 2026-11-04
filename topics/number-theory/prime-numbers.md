@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-11-03T07:34Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -354,6 +354,22 @@ of the total, matching the prediction to three digits. That regularity is useful
 the answer's magnitude before writing the program, and here the estimate showed the sum would land
 just under the 64-bit ceiling.
 
+Divisibility by different primes is independent as well, and that lets me treat a random integer as a
+probability model. By the Chinese Remainder Theorem, the multiples of distinct primes are independent
+events in the limit, in the sense of [natural density](https://en.wikipedia.org/wiki/Natural_density).
+So the integers whose smallest prime factor is $p$ have density $\frac{1}{p} \prod_{q < p} (1 - 1/q)$.
+Problem 779 averages a function of that smallest prime and its exponent over all integers, so the
+average is an expected value. Given $p$, the exponent beyond the first is geometric with mean
+$1/(p - 1)$. The problem's infinite sum over $K$ is a geometric series, and because every term is
+positive I can take it first. What remains is one series over the primes, with terms falling like
+$1/p^3$, so stopping at a bound $P$ costs less than $1/(2P^2)$. A single running product, updated as
+the primes go past, evaluates it. [Mertens' third theorem](https://en.wikipedia.org/wiki/Mertens%27_theorems)
+says that product shrinks like $e^{-\gamma}/\ln p$, and this is also where the independence stops.
+Applied to every prime up to $\sqrt x$, it would predict a prime density of
+$2e^{-\gamma}/\ln x \approx 1.12/\ln x$, which is 12% above what the prime number theorem says.
+Independence holds for a fixed set of primes as $N \to \infty$, not for a set that grows with $N$.
+Problem 779 is safe because each term fixes $p$ first, and the large primes carry almost no weight.
+
 ## Generating and testing primes
 
 Knowing what the primes *are* is one thing; getting the ones you need into a program is another, and
@@ -411,7 +427,12 @@ enough. A $d \le N$ has at most one prime factor above $\sqrt N$. So the sieve a
 of the small primes it found in each $d$. If that product falls short of $d$, exactly one large prime
 is missing, and one comparison accounts for it. Problems 632 and 754 sieve $10^8$ values this way with
 1229 primes instead of 5.76 million, which matters in NumPy, where every prime costs one slice
-operation.
+operation. When the sieve counts **divisors** rather than primes, count them in pairs. Problem 485 needs
+$d(n)$ for every $n \le 10^8$. Each divisor $e$ of $n$ pairs with $n/e$, and one of the two is at most
+$\sqrt n$. So only $i \le \sqrt N$ need visit their multiples, adding $2$ beyond $i^2$ and $1$ at
+$i^2$ itself. That is $10^4$ slice operations rather than $10^8$. The largest value is known in advance
+too, set by a [highly composite number](https://en.wikipedia.org/wiki/Highly_composite_number), and it
+fits in 16 bits, which keeps the whole table at 200 MB.
 
 **Factor a polynomial's values together.** Problem 659 needs the largest prime factor of $4k^2 + 1$
 for every $k \le 10^7$, values up to $4 \times 10^{14}$. Factoring each value by trial division would
@@ -424,6 +445,19 @@ each root to the progression of $p^2$, $p^3$, and so on. A size bound turns the 
 complete factorisation. Once every prime up to $2N + 1$ is divided out, the cofactor is either $1$ or
 a single prime, because two primes above $2N + 1$ multiply to more than any $f(k)$. So the leftover
 needs no primality test at all: the bound already proves it is prime.
+
+The same walk answers primality when factors are not wanted. Problem 291 begins as a Diophantine
+equation in two variables. Factoring both sides and dividing out the gcd reduces it to one family, the
+primes of the form $f(n) = n^2 + (n + 1)^2$ below $L = 5 \times 10^{15}$. (Problem 216 asks the same of
+$2n^2 - 1$.) Since $2f(n) = (2n + 1)^2 + 1$, only primes $q \equiv 1 \pmod 4$ divide any value, and each
+strikes two residue classes of $n$. The array is indexed by $n$, not by the value, so about
+$5 \times 10^7$ cells stand for numbers up to $L$. A composite value has a prime factor at most
+$\sqrt L$, so anything that survives every such $q$ is prime. Two details separate this from the
+ordinary sieve. Each prime needs a root first, and for $-1$ there is a closed form: if $a$ is a
+non-residue, then $a^{(q-1)/4}$ squares to $-1$ by
+[Euler's criterion](https://en.wikipedia.org/wiki/Euler%27s_criterion), so the general square-root
+algorithm is not needed. And a value equal to $q$ itself must survive, so its class starts one step
+later, just as Eratosthenes leaves $p$ standing while it crosses off the multiples.
 
 **Count without listing — sublinear summatory functions.** Some problems need a sum over every
 $n \le 10^{10}$, such as $\sum \varphi(n)$ or $\sum \mu(n)$, and no sieve reaches that far. The way
@@ -457,6 +491,16 @@ in $p$. Problem 452 counts ordered tuples with product at most $10^9$, which is 
 of the $n$-fold divisor function $d_n$. That function equals the constant $n$ on every prime, so the
 primes contribute $n \cdot \pi(m)$. A recursion over smallest prime factors adds the composites.
 
+Lucy_Hedgehog's intermediate tables carry information too, because step $p$ strikes exactly the
+numbers whose smallest prime factor is $p$. Problem 521 sums the smallest prime factor of every
+$n \le 10^{12}$. A prime contributes itself. A composite is $p \cdot m$, with $p \le \sqrt N$ its
+smallest prime and $m \in [p, \lfloor N/p \rfloor]$ still standing when step $p$ begins. So there are
+$S(\lfloor N/p \rfloor) - \pi(p - 1)$ such composites, read from the table just before that step
+updates it, and the total is a by-product of the run. The prime term comes from a second table that
+starts at $v(v + 1)/2 - 1$ and whose update is scaled by $p$. That scaling is valid because $f(n) = n$
+is completely multiplicative. Both updates are linear, so the tables can stay reduced modulo the
+requested modulus from the start.
+
 **Factor or test a single number — [trial division](https://en.wikipedia.org/wiki/Trial_division).**
 When you have one number, not a range, sieving the whole space below it is wasteful. To factor $n$,
 divide by $2, 3, 4, \dots$ and peel off each divisor you find; to test primality, divide by
@@ -480,6 +524,18 @@ multiplies your confidence — and for $n$ below fixed thresholds a *specific sm
 the test **deterministic**, exactly correct with no probability left. Its cost is $O(k \log^3 n)$ for
 $k$ bases: effectively instant even for numbers with dozens of digits, which is why the
 higher-numbered primality problems (and RSA key generation) reach for it rather than a sieve.
+
+**Split a large composite — [Pollard's rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm).**
+Miller–Rabin can say that a number is composite, but it gives no factor. Rho iterates
+$x \mapsto x^2 + c \pmod n$. Modulo an unknown prime factor $p$ the walk repeats after about $\sqrt p$
+steps, and a gcd of differences with $n$ catches that repeat without knowing $p$. The expected cost is
+about $n^{1/4}$, against $\sqrt n$ for trial division. A complete factoriser strips the small primes by
+trial division, stops on anything Miller–Rabin calls prime, and otherwise splits with rho and recurses.
+Problem 955 needs one at every step of a walk. Triangular numbers in its sequence are linked by
+$t(x) + t(j) = t(y)$, which rearranges to $x(x + 1) = ab$. The next one comes from the factor pair of
+opposite parity that lies closest to the trivial pair $x \cdot (x + 1)$. Consecutive integers are
+coprime, so I factor $x$ and $x + 1$ separately and merge the results, and the much larger product is
+never factored at all.
 
 The most common pattern in the problems is a **hybrid**: sieve the small primes, and run
 Miller–Rabin on the large candidates a search *constructs*. Problem 245 sieves only to $\sqrt N$, then
@@ -537,6 +593,18 @@ $p - 1$, and that one structural fact answers a whole class of counting question
   $p^{k-1}$ to $p^k$ either keeps the order or multiplies it by exactly $p$, because every element of
   the reduction kernel has order dividing $p$. One test per level decides which. The primes that divide
   the discriminant or the norm ($2$, $3$, $7$ in 752) are the exceptions, and each needs its own case.
+- **Test a primitive root through the factors of $p - 1$, and keep the root formal.** A residue $r$ is
+  a [primitive root](https://en.wikipedia.org/wiki/Primitive_root_modulo_n) of $p$ exactly when
+  $r^{(p-1)/q} \ne 1$ for every prime $q \mid p - 1$, because any smaller order divides one of those
+  exponents. Problem 437 asks which primes have a primitive root that satisfies $x^2 \equiv x + 1$.
+  Roots exist only when $5$ is a quadratic residue, and finding them would take a modular square root
+  for each of nearly three million primes. I never find them. In the ring
+  $\mathbb{Z}_p[x]/(x^2 - x - 1)$ every power reduces to $x^m = ax + b$, where $a$ and $b$ are the
+  Fibonacci numbers $F_m$ and $F_{m-1}$ modulo $p$, and those coefficients hold for both roots at once.
+  So one ring power tests both. If $a \ne 0$, then $ar + b = 1$ has one solution, so at most one root
+  fails on that $q$. If $a = 0$, both fail or neither does. For $p = 11$, $x^5 = 5x + 3$ equals $1$ at
+  the root $4$ but not at the root $8$. This is the ring of problems 492 and 752 at a *split* prime,
+  where it is two copies of $\mathbb{F}_p$ rather than a field, and the formal root stands for both.
 - **Residuosity restricts which primes can divide a polynomial.** In problem 245,
   $4(x^2 - x + 1) = (2x - 1)^2 + 3$. So a prime can divide $x^2 - x + 1$ only if $-3$ is a
   [quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) modulo it, which means
@@ -650,7 +718,9 @@ period table and enumerate only the large ones (problem 967).
   primes. The cyclic group modulo $p$ answers "how many residues" in $O(1)$ (problem 421). CRT
   multiplies those counts across prime powers (problem 272) and builds one solution per coprime split
   (problem 407). An exponent too large to write down reduces modulo the group order. That order is
-  $p - 1$, or $p + 1$ for an irrational at an inert prime (problems 492, 752). When a filter or an
+  $p - 1$, or $p + 1$ for an irrational at an inert prime (problems 492, 752). To test for a primitive
+  root, check the powers $(p - 1)/q$, and if the candidates are the roots of a polynomial, compute in
+  the quotient ring so that one power tests them all (problem 437). When a filter or an
   exponential sum appears, ask which property of primality it needs. Every non-trivial root is
   primitive (problem 635), and a Gauss sum has modulus $\sqrt p$ (problem 875). A quadratic modulo
   $p^2$ is a square root modulo $p$ followed by a Hensel lift (problem 457). A number too large to
@@ -659,17 +729,22 @@ period table and enumerate only the large ones (problem 967).
 - **Need the factors of a whole family of values** — the values of a polynomial, or every $d$ below a
   bound — and sieve along residue classes rather than factoring one value at a time. Each prime acts
   only on its roots, lifted by Hensel to its powers. A size bound then certifies the cofactor as $1$
-  or a prime (problem 659). Primes up to $\sqrt N$, plus a product check, account for the one
-  possible large factor (problems 632, 754).
+  or a prime (problem 659). If only primality is wanted, index the array by $n$ and strike with primes
+  up to the square root of the largest value (problems 216, 291). Primes up to $\sqrt N$, plus a
+  product check, account for the one possible large factor (problems 632, 754). Divisor counts need
+  only $\sqrt N$ strides, because divisors come in pairs (problem 485).
 - **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$, $\pi(x)$ — and a sieve will
   not reach. Work on the quotient set: the recursion at $O(n^{2/3})$ for $\Phi$ and $M$ (problems 319,
   351, 512), Lucy_Hedgehog at $O(n^{3/4})$ for $\pi$ (problem 668), and Min_25 for a multiplicative
-  function that is simple on primes (problem 452).
+  function that is simple on primes (problem 452). When the sum is over smallest prime factors, read
+  the Lucy tables mid-run, since step $p$ strikes exactly those numbers (problem 521).
 - **Need a bound or a density** — how many primes below $N$, how large the $n$-th prime, how many
   semiprimes in a range — and the prime number theorem ($\pi(x) \sim x/\ln x$, $p_n \sim n \ln n$) is
   your estimate. Use it to *size* a sieve, not to replace an exact count. When $\pi(n)$ is a
   parameter for every $n$, it is a cumulative sum of the sieve, and it changes only at primes
-  (problem 423).
+  (problem 423). When an average runs over all integers, treat divisibility by each fixed prime as an
+  independent event and sum over the primes, but do not let the set of primes grow with $N$
+  (problem 779).
 - **See a one-way structure** — a public key, a semiprime to be split, a discrete log — and recognise
   that its security *is* the hardness of a prime problem. The Euler problems that touch cryptography
   (RSA-flavoured factorisation, modular inverses) are miniatures of the same asymmetry.
@@ -678,7 +753,9 @@ period table and enumerate only the large ones (problem 967).
   counts it honestly. Factor one number, or a modest range → trial division to $\sqrt{n}$ with
   full division-out and a $6k \pm 1$ wheel. A yes/no on one *large* number → Miller–Rabin with a
   deterministic base set; a search that builds large candidates from small primes → sieve the small
-  primes and Miller–Rabin the candidates it builds. The classic mistake is answering a range question one number at a time — a
+  primes and Miller–Rabin the candidates it builds. Factors of a number too large for trial division
+  → Pollard's rho, with Miller–Rabin to stop the recursion (problem 955). The classic mistake is
+  answering a range question one number at a time — a
   primality test in a loop where a single $O(N \log \log N)$ sieve would produce the whole set — or
   answering a single-number question with a sieve of millions of primes to check just one.
 
