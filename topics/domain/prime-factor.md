@@ -1,5 +1,5 @@
 <!-- tags: [prime-factor] -->
-<!-- status: final 2026-10-28T08:03Z -->
+<!-- status: final -->
 # Prime factor
 
 The [prime factorization](/topics/domain/prime-factorization) page is about the whole exponent
@@ -8,8 +8,10 @@ $\operatorname{lpf}(n)$, and the **largest**, $P(n)$. They keep coming back beca
 information in a factorization, they are the two that split $n$ into "the part below $p$" and "the
 part at $p$" — and once you can do that, you stop handling integers one at a time and start handling
 them in bulk. Problem 3 asks for $P(n)$ of a single number; problems 642 and 521 ask for $\sum P(n)$
-and $\sum \operatorname{lpf}(n)$ over every $n$ up to $10^{11}$ and beyond, and that change of scale
-is what the rest of this page is about.
+and $\sum \operatorname{lpf}(n)$ over every $n$ up to $10^{11}$ and beyond; problem 779 averages over
+every integer there is. That change of scale is what the rest of this page is about, along with what
+happens when the numbers stop being a range (659) and when the cut falls at a prime you pick rather
+than one $n$ picks (967).
 
 ## The two extremes are not symmetric
 
@@ -80,11 +82,99 @@ largest-factor problems. Lucy's update
 $$S(v) \leftarrow S(v) - \bigl(S(\lfloor v/p \rfloor) - S(p-1)\bigr) \qquad (v \ge p^2)$$
 
 removes, at step $p$, precisely the composites $\le v$ whose **smallest** prime factor is $p$; after
-the last prime $\le \sqrt v$, only primes remain. Weight each removed block by $p$ instead of
-discarding it and you are summing $\operatorname{lpf}(n)$ — which is what problem 521 asks — and the
+the last prime $\le \sqrt v$, only primes remain. Problem 521 asks for $\sum \operatorname{lpf}(n)$,
+and that sentence is nearly the whole solution. With $S$ counting survivors, the block struck from
+$S(N)$ at step $p$ *is* the set of composites with smallest factor $p$, so $p$ times its size, read
+before the step runs, is their entire contribution. The primes are their own smallest factors, and a
+[sum table carried alongside the count](/topics/takeaway/carry-sums-alongside-counts) supplies them
+at the end. The result was never in the sieve's final table: it is in the states the table passes
+through, one entry read per prime
+([worked through here](/topics/number-theory/summing-multiplicative-functions)). The
 [Min_25 sieve](/topics/technique/min-25-sieve) generalises the same bookkeeping to arbitrary
 multiplicative weights. So "largest" and "smallest" are not two techniques: the sieve walks numbers
 by their smallest prime, and the $m \cdot p$ split reads them by their largest.
+
+## Group by the smallest, with no $N$ at all
+
+Take that invariant to the limit. Problem 779 wants the mean, over all integers, of a weight built
+from $\operatorname{lpf}(n)$ and its exponent, so there is no $N$ to sieve to and no table to read.
+What replaces the table is the [natural density](/topics/domain/natural-density) of each class. An
+integer has smallest prime $p$ when $p$ divides it and no smaller prime does, and divisibility by
+distinct primes is independent in the limit, by the
+[Chinese remainder theorem](/topics/technique/chinese-remainder-theorem):
+
+$$\operatorname{dens}\{n : \operatorname{lpf}(n) = p\} = \frac{1}{p} \prod_{q < p} \Bigl(1 - \frac{1}{q}\Bigr).$$
+
+Read it as the sieve again. The product is the fraction of integers still standing when the sieve
+reaches $p$, and $1/p$ is the share of those that step strikes. Each class is the drop in that
+survivor product from one prime to the next, so the classes telescope to a total of 1, as a partition
+of the integers must. Inside a class, each further factor of $p$ is one more independent event of
+probability $1/p$, so the exponent is [geometric](https://en.wikipedia.org/wiki/Geometric_distribution).
+
+The effect is that a mean over every integer becomes a single series over the primes. The problem's
+outer sum over a parameter folds in first, by
+[swapping the order of summation](/topics/technique/interchange-of-summation), and what is left
+falls off so fast that a modest list of primes finishes it. The cost is the length of that prime
+list, not anything to do with integers. The catch moves to the output, which is now a real number.
+The truncation has to be judged against the distance to the nearest rounding boundary, not against
+the digits requested, and 779's value happens to sit close to one, so both the tail and the
+[accumulated rounding error](/topics/technique/floating-point-arithmetic) have to be held below that
+gap.
+
+## When the numbers are not a range: sieve the values, read the leftover
+
+The bijection $n = m \cdot P(n)$ pays off only because the $n$ fill an interval, so that every pair
+$(m, p)$ lands on a member. Problem 659 removes that. A prime dividing two successive terms of
+$n^2 + k^2$ divides their difference $2n + 1$, and substituting back shows it divides $4k^2 + 1$, so
+the problem is $P(4k^2 + 1)$ for every $k \le 10^7$: ten million numbers scattered up to
+$4 \times 10^{14}$. A prime count at $\lfloor N/m \rfloor$ cannot tell you which of them exist, so
+the regrouping has nothing to hold on to. This is the one place on the page where you really do factor
+everything, but together rather than one at a time.
+
+Two things make that affordable. The first is a
+[polynomial sieve](/topics/technique/polynomial-sieve). $p \mid 4k^2 + 1$ is a congruence on $k$ with
+two roots when $-1$ is a [quadratic residue](/topics/technique/quadratic-residue) mod $p$ and none
+otherwise, so only primes $p \equiv 1 \pmod 4$ take part, and each walks two arithmetic progressions
+through the array of values, just as Eratosthenes walks one through the integers.
+
+The second is the elementary fact from the top of this page, used as a stopping rule. Any two primes
+above $2N + 1$ multiply past every value, so the sieve stops there, and what is left in a cell is $1$
+or a single prime. That leftover is $P$, because it exceeds everything already stripped; if the cell
+reached $1$, then $P$ is the last prime that touched it, since primes arrive in increasing order, and
+one overwrite per hit records it with no comparison. This is the last line of the problem 3 loop,
+applied to an array. It is also why [Hensel lifting](/topics/technique/hensels-lemma) to the prime
+powers is not an optional refinement: a factor of $p$ left behind would make a composite leftover
+pass for a large prime.
+
+Problem 632 runs the same rule more cheaply. It needs $\omega(d)$ for the square-free $d \le 10^8$,
+sieves with the primes up to $10^4$ alone, and keeps a running product of the primes that hit each
+$d$. If the product falls short of $d$, exactly one large prime is missing, and the problem never
+needs to know which. One comparison replaces millions of slice operations. So the leftover rule
+comes in two strengths: divide, when you need the prime itself, and compare, when you only need to
+know it is there. (The other half of 632, getting "exactly $k$" from "at least $j$", is on the
+[factorization](/topics/domain/prime-factorization) page.)
+
+## Cut at a bound: small primes repeat, large primes are rare
+
+Smallest and largest split $n$ at a prime that $n$ chooses. Problem 967 splits at one you choose. It
+scores each $n \le 10^{18}$ by its distinct primes up to $B = 120$, so primes above $B$ are invisible
+and the question is only which of a fixed list divide $n$. That has a property no question about
+$P(n)$ has: whether a fixed $p$ divides $n$ depends only on $n \bmod p$, so for a set of primes with
+product $Q$ the pattern is [periodic](/topics/domain/periodic-sequence) in $n$ with period $Q$. The
+seven smallest primes that matter have $Q \approx 3.2 \times 10^6$, one table over one period holds
+everything about them, and a [prefix sum](/topics/technique/prefix-sum) over it answers any partial
+sum up to $10^{18}$ in $O(1)$.
+
+The remaining primes are handled the opposite way. Their products are sparse, so they can be
+enumerated: about $1.4 \times 10^6$ square-free products below $N$. The
+[multiplicative function](/topics/domain/multiplicative-function) page has the convolution that joins
+the two halves and the ring that carries the residues. The point here is the shape of the split: it
+echoes the $\sqrt N$ split above, but for a different reason. Small primes are dense, so use their
+regularity; large primes are rare, so list them. And the cut is a dial set by how big a table you can
+afford, not a fixed $\sqrt N$.
+
+The period depends on the question seeing only *distinct* primes. The exact power of 2 dividing $n$
+has no period at all, so a question that reads exponents, as 632 and 779 do, gets no such table.
 
 ## When the number is too big to touch: test primes, not $n$
 
@@ -103,19 +193,29 @@ it — the same asymmetry as before, seen from the other side.
 - **Ask which extreme the problem is about.** "Smallest" means the factor is $\le \sqrt n$ and a
   sieve or a prime scan finds it; "largest" means it is probably $> \sqrt n$, appears once, and
   leaves a small cofactor worth enumerating.
-- **Over a range, never factor.** Rewrite $n = m \cdot P(n)$ (or sort by $\operatorname{lpf}$) and
-  turn the sum into prime counts or prime sums at the $\lfloor N/k \rfloor$ points. If you find
-  yourself sieving all the way to $10^{10}$, you have missed the regrouping.
+- **Over a full range, never factor.** Rewrite $n = m \cdot P(n)$ (or sort by $\operatorname{lpf}$)
+  and turn the sum into prime counts or prime sums at the $\lfloor N/k \rfloor$ points. If you find
+  yourself sieving all the way to $10^{10}$, you have missed the regrouping. A sparse set is the
+  exception: for the values of a polynomial, sieve at the roots and stop at the square root of the
+  largest value.
+- **Ask what the question can see.** Only primes below a bound, and only whether they divide: the
+  problem is periodic, and a table over one period replaces those primes. No bound on $n$ at all:
+  it is a density, and the answer is a series over primes.
 - **Know the densities.** By [Dickman's function](https://en.wikipedia.org/wiki/Dickman_function),
   the fraction of $n \le x$ with $P(n) \le x^{1/u}$ tends to $\rho(u)$; for $u = 2$ that is
   $1 - \ln 2 \approx 0.31$. It tells you up front how much of the range the "large $p$" branch owns,
-  and gives a rough plausibility check on any count you produce.
+  and gives a rough plausibility check on any count you produce. The smallest-prime density above is
+  a limit at *fixed* $p$, so do not push it to a $p$ that grows with $N$: by
+  [Mertens' third theorem](https://en.wikipedia.org/wiki/Mertens%27_theorems) the product up to
+  $\sqrt x$ is about $1.12/\ln x$, not the true prime density $1/\ln x$.
 - **Mind the boundaries.** $1$ has no prime factor and belongs to neither side; strict versus
   non-strict ($P(n) < \sqrt n$ against $\le$) flips the squares of primes; and in the $m \cdot p$
   enumeration the run of admissible $p$ starts at the cofactor's own largest prime, not above it.
   A brute-force cross-check up to $10^6$ catches all three.
 - **Under a modulus, differences go negative.** Isolating a prime interval as $S(b) - S(a)$ after
-  reducing mod $M$ can leave a negative residue; add $M$ before the final reduction.
+  reducing mod $M$ can leave a negative residue; add $M$ before the final reduction. And test for
+  zero before you reduce: problem 632 multiplies its non-zero counts, and a count that happens to be
+  a multiple of $M$ is still non-zero.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
