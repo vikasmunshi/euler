@@ -1,5 +1,5 @@
 <!-- tags: [summation] -->
-<!-- status: final 2026-11-03T07:30Z -->
+<!-- status: final -->
 # Summation
 
 [Summation](https://en.wikipedia.org/wiki/Summation) is the most deceptive domain tag in the
@@ -29,7 +29,8 @@ terms is hard. The count is.
 
 Check the bound first, always. It tells you which problem you are in, and roughly how much
 structure you are going to have to find: at $10^6$ you may loop, at $10^{12}$ you need something
-sublinear, at $10^{18}$ you need something logarithmic or closed.
+sublinear, at $10^{18}$ you need something logarithmic or closed. And when the bound is $\infty$, it
+stops being a cost and becomes a precision target, which has its own section below.
 
 ## Five ways to not iterate
 
@@ -73,6 +74,17 @@ parameter that makes the inner one a polynomial.** For a fixed gap $d$, the sum 
 quadratic in $J = \lfloor p/d \rfloor - 1$, so each $d$ costs $O(1)$ and the total is $O(p)$.
 Before you write the inner loop, check whether it has a closed form.
 
+Sometimes the *term* has to close before the sum can. Problem 479 sums powers of a product built
+from the three roots of a cubic, real and complex, over an $n \times n$ grid of $(k, p)$. You could
+find the roots numerically, but the statement gives the game away when it remarks that the sum is
+always an integer: complex ingredients with an integer result usually means they cancel. Here they
+do. The product is symmetric in the roots, so
+[Vieta's formulas](/topics/technique/vietas-formulas) rewrite it from the cubic's coefficients and
+it collapses to a polynomial in $k$. Once the base is a plain integer, the sum over $p$ is a
+[geometric series](/topics/technique/geometric-series), and the $n^2$ grid becomes $n$ modular
+exponentiations. A term you cannot compute can still have a sum you can, so simplify the summand
+before you think about the range.
+
 Periodicity is a closed form in disguise. Problem 506 cuts a period-6 digit stream into terms
 $v_n$ whose digit sums are $1, 2, 3, \dots$. Since every six consecutive digits sum to 15, the term
 $v_{n+15}$ starts at the same phase as $v_n$ and is $v_n$ with one full period appended:
@@ -111,6 +123,13 @@ states for $n \approx 4.5 \times 10^{17}$. When a substitution leaves a sum you 
 add that sum as a second unknown and substitute again. The state you recur on is a small vector of
 sums.
 
+Problem 539 shows that the second unknown need not be a sum. Its survivor $P(n)$ depends only on
+$\lfloor n/2 \rfloor$, so $2m$ and $2m{+}1$ contribute the same term and the sum
+[folds onto half its range](/topics/takeaway/sum-the-recurrence-over-residue-classes) with
+multiplicity two. All that is left over is the one unpaired term at the top edge when $n$ is even,
+so the state is the pair (term, sum). Each level has exactly one argument, so this is a chain of
+sixty steps rather than a tree, and it needs no memo.
+
 ### Swap the order of summation
 
 The single most productive technique in this whole topic, and the one to reach for by reflex when
@@ -147,11 +166,36 @@ costs almost nothing: how $\varphi$ treats a factor of two peels the even terms 
 $\sum_k \Phi(\lfloor N/2^k \rfloor)$, and every one of those arguments is a floor quotient the
 recursion has already computed. Choose restrictions that land on values you already have.
 
+It matters which slot of the floor is moving. In $\lfloor N/d \rfloor$ the denominator runs, the
+steps have uneven widths, and blocking is the best you can do. Problem 688 is the other case. Its
+$f(n, k)$ works out to a single [floor](/topics/domain/floor-function) with $n$ in the numerator
+and the pile count $k$ in the denominator, so
+[swapping the sums](/topics/technique/interchange-of-summation) puts $k$ outside and leaves the
+numerator running through a prefix. That is a staircase with equal treads, and it needs no blocks:
+
+$$\sum_{j=0}^{L-1} \left\lfloor \frac{j}{k} \right\rfloor \;=\; k\binom{q}{2} + rq, \qquad L = qk + r,\quad 0 \le r < k$$
+
+The outer range is short as well, because $k$ piles of different sizes need about $k^2/2$ plates,
+so only $k \lesssim \sqrt{2N}$ ever contributes. A sum over $10^{16}$ values of $n$ becomes
+$O(\sqrt N)$ constant-time terms. With a general slope in place of $1/k$, the same kind of sum
+still falls, to the [floor-sum algorithm](/topics/technique/floor-sum-algorithm).
+
 The same reflex has a non-arithmetic form: **count contributions instead of objects**. Problem 760
 sums a bitwise expression over a triangular range to $10^{18}$; you do not sum over pairs, you sum
 over *bit positions*, counting how many pairs set each bit. Whenever the terms decompose into
 independent small pieces, invert the loop so the outer index runs over pieces — there are sixty of
 those and $10^{18}$ of the other.
+
+Taken to its limit, the swap removes the summand altogether. Problem 804's $g(n)$ counts the integer
+pairs that a [quadratic form](/topics/domain/quadratic-form) sends to $n$. It is tempting to compute
+$g$, which has a divisor-sum formula because the form's discriminant has class number one. But
+every pair with a value in $[1, N]$ is counted exactly once across the whole sum, so
+[a sum of representation counts is a point count](/topics/takeaway/sum-of-representations-is-a-point-count):
+$T(N)$ is the number of [lattice points](/topics/technique/lattice-point) in an ellipse, a relative
+of the [Gauss circle problem](/topics/domain/gauss-circle-problem). Counted row by row, each row
+costs one [integer square root](/topics/technique/integer-square-root), and $10^{16}$ terms become
+$O(\sqrt N)$ rows. Whenever $f(n)$ counts the solutions of "something $= n$", the sum counts the
+solutions of "something $\le N$", and that is usually a simpler object than $f$.
 
 A related move groups the terms by a statistic that takes **few values**. Problem 776 sums
 $n / d(n)$, where $d(n)$ is the digit sum, out to about $10^{18}$. That denominator is at most
@@ -162,6 +206,19 @@ become, after digit $d$, $c$ prefixes with total $10t + dc$. So each state carri
 (count, sum) pair, and a DP that counts can sum at no extra cost. Problem 684 groups the same way
 from the other side. The smallest number with digit sum $n = 9q + r$ is $(r{+}1)10^q - 1$, so
 each run of nine consecutive $n$ shares a $q$, and the runs form a geometric series in $10^q$.
+
+A statistic with many values can still be grouped if a sieve computes the groups. Problem 521 sums
+the smallest prime factor out to $10^{12}$. A prime is its own smallest factor and a composite's is
+at most $\sqrt N$, so the sum splits into the sum of the primes plus, for each prime $p \le \sqrt N$,
+$p$ times the number of composites whose smallest factor is $p$. That number is exactly what a sieve
+strikes out at step $p$. Quotient blocking alone cannot do this, because it needs a closed form for
+$g$ over a block and nothing closes a sum over primes. The
+[Lucy_Hedgehog sieve](/topics/technique/lucy-hedgehog-sieve) runs the sieve itself, on the
+$O(\sqrt N)$ floor quotients only, for about $N^{3/4}$ work. Its tables hold each group's survivor
+count at the moment that group is needed, so the answer is read from the sieve's intermediate
+states rather than from its result. A second table
+[carried alongside the count](/topics/takeaway/carry-sums-alongside-counts) supplies the prime sum
+for the price of one more array.
 
 Problem 739 counts contributions through a whole *process*. It applies "drop the first term, take
 prefix sums" to a sequence until one term is left. That operation is linear, so the survivor is
@@ -302,22 +359,54 @@ significant digits of a sum of $10^{18}$ rationals. A floating-point accumulatio
 wrong way when the fourteenth digit is near a tie. The 171 grouped totals are few enough to add as
 an exact rational, which is then rounded once.
 
+## When the sum has no last term
+
+Everything above assumes a finite $N$ and an exact answer. Problem 779 has neither: it wants a sum
+over all $K$ of limiting averages over all integers, rounded to twelve decimal places. Each infinity
+has to be removed by a different argument.
+
+The limit of an average is a [natural density](/topics/domain/natural-density) question. Divisibility
+by distinct primes is independent in the limit, so the integers with a given smallest prime have a
+density, and the average becomes a sum over primes of that density times an
+[expected value](/topics/technique/expected-value-application). $N$ is gone. The sum over $K$ then
+goes the way of every double sum in this topic, with one difference: finite sums always commute,
+but [infinite ones need a licence](/topics/technique/interchange-of-summation). Non-negative terms
+grant it (that is [Tonelli's theorem](https://en.wikipedia.org/wiki/Fubini%27s_theorem)), while a
+conditionally convergent series can change its value when reordered. Check the signs before you
+swap. Summing $K$ first gives a geometric series, which leaves one series over the primes.
+
+That series has to be truncated, and now *you* set the bound. Read the precision as the
+specification: prove a bound on the tail, then pick the cutoff that puts the tail below the digits
+you need. Leave a margin, because rounding to twelve places can need more than twelve correct
+digits, and this answer sits very close to a rounding boundary. For the same reason the additions
+themselves matter. Hundreds of thousands of tiny terms added to a total near $0.5$ lose low bits at
+every step, so the Python adds them with `math.fsum`, in the spirit of
+[compensated summation](/topics/technique/kahan-summation-algorithm), and the C carries `long double`.
+Problem 776 could add its terms exactly and round once. Here that is out of reach, so
+[numeric where necessary](/topics/takeaway/exact-where-possible-numeric-where-necessary) means
+knowing how much error each step adds.
+
 ## How to reason about it
 
 A practical order of attack when a statement hands you a $\sum$:
 
 1. **Read the bound and the modulus.** They jointly announce the complexity class you have to
    reach. $N = 10^{18}$ with a mod means logarithmic or closed; $N = 10^{15}$ means $O(\sqrt N)$ is
-   probably the target; a small $N$ means the sum is not the problem at all.
+   probably the target; a small $N$ means the sum is not the problem at all. An infinite bound with
+   a stated precision means the target is a proved tail bound.
 2. **Write the brute force anyway.** Fifteen lines, correct by construction, and useless at scale —
    but it is your oracle. Every identity below is a claim, and a claim you have checked against
    $S(10)$ and $S(1000)$ is worth far more than one you derived carefully and never tested. The
    given sample values in the statement exist for exactly this. Check against more than the given
    samples when the method has state that the samples might never reach: problem 943's descent was
    held against direct generation of the sequence on two thousand random $(a, b, N)$, which is what
-   catches an under-specified memo key.
-3. **Look at $f$'s definition, not at the loop.** If $f$ is itself a sum, swap the order. If $f$
-   obeys a recurrence, try to telescope. If $f$ is defined digit-wise or bit-wise, sum over digits.
+   catches an under-specified memo key. At full scale, where no oracle reaches, compare with
+   something cruder: problem 804's ellipse area predicts $T(N)$ to leading order, and problem 779's
+   series was held against a direct average over the first $3 \times 10^7$ integers.
+3. **Look at $f$'s definition, not at the loop.** If $f$ is built from objects you cannot compute,
+   simplify the term first. If $f$ is itself a sum, swap the order. If $f$ counts solutions, count
+   them all at once. If $f$ obeys a recurrence, try to telescope. If $f$ is defined digit-wise or
+   bit-wise, sum over digits.
    If $f$ is piecewise-constant on long blocks, or has a closed form on each block, sum over
    blocks. If the terms are periodic, split by residue class. If part of $f$ takes only a few
    values, group by that part.
