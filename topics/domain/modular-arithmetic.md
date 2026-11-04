@@ -550,7 +550,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0912](/solutions/0912/) — Where are the Odds?
 - ○ [0916](/solutions/0916/) — Restricted Permutations
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost
-- ○ [0921](/solutions/0921/) — Golden Recurrence
+- ● [0921](/solutions/0921/) — Golden Recurrence
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions

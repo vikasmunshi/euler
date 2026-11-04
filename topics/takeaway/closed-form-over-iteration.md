@@ -374,6 +374,7 @@ Four cautions earn their keep:
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
+- ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value

@@ -132,5 +132,6 @@ Three regimes come up, and each has its own tool.
 - ● [0209](/solutions/0209/) — Circular Logic
 - ● [0473](/solutions/0473/) — Phigital Number Base
 - ● [0739](/solutions/0739/) — Summation of Summations
+- ● [0921](/solutions/0921/) — Golden Recurrence
 
 <!-- /problems -->

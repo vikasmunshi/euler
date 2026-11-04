@@ -216,6 +216,7 @@ front of you is asking for.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0822](/solutions/0822/) — Square the Smallest
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
+- ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0926](/solutions/0926/) — Total Roundness
 
 <!-- /problems -->

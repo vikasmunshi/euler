@@ -151,7 +151,7 @@ be found by descending through the lengths — never materialising a string of `
 - ○ [0841](/solutions/0841/) — Regular Star Polygons
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ○ [0854](/solutions/0854/) — Pisano Periods 2
-- ○ [0921](/solutions/0921/) — Golden Recurrence
+- ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
 - ○ [0958](/solutions/0958/) — Euclid's Labour

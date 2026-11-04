@@ -472,6 +472,7 @@ both slower and harder to read.
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0944](/solutions/0944/) — Sum of Elevisors

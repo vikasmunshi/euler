@@ -417,7 +417,7 @@ into independent terms, a pattern that induction will confirm. The shape picks t
 - ○ [0915](/solutions/0915/) — Giant GCDs
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
-- ○ [0921](/solutions/0921/) — Golden Recurrence
+- ● [0921](/solutions/0921/) — Golden Recurrence
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
 - ○ [0935](/solutions/0935/) — Rolling Square

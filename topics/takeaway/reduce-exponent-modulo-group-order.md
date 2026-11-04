@@ -10,5 +10,6 @@ _TODO: write this page. No reference on the tag._
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0921](/solutions/0921/) — Golden Recurrence
 
 <!-- /problems -->
