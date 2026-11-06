@@ -6,7 +6,7 @@ Each running per-user instance keeps its own countdown (:mod:`euler_webshell.use
 starts them, waits for them all, then revokes every session and remember-me token, which is what
 signs out a user with no tab open. Only instances already running are called: dialling a socket
 is what starts a stopped one. `--extend` adds time and returns, leaving the run that is waiting
-to finish the job; `--now` ends the wait for everyone and finishes it here.
+to finish the job; `--now` closes every shell at once, notice or no notice, and finishes it here.
 
 Invocation::
 
@@ -95,7 +95,8 @@ def main(argv: list[str]) -> int:
         return 0
     body = {'now': True} if args.now else {'reason': args.reason, 'seconds': args.seconds, 'limit': args.limit}
     reached = _push(slugs, body)
-    print(f'notice on {len(reached)} instance(s): {args.reason}')
+    print(f'closing the shells on {len(reached)} instance(s)' if args.now
+          else f'notice on {len(reached)} instance(s): {args.reason}')
     try:
         _wait(reached)
     except KeyboardInterrupt:

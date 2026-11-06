@@ -385,7 +385,7 @@ def logout_all(reason: str = DEFAULT_REASON, extend: int = 0, now: bool = False)
     Args:
         reason: What the notice tells users.
         extend: Add this many seconds to a notice already running, then return.
-        now: End the wait for everyone at once, running work or not.
+        now: Close every shell at once, running work or not, with no notice.
     """
     argv = ['sudo', sys.executable, '-m', 'euler_webshell.logout_all']
     argv += [f'--extend={extend}'] if extend else ['--now'] if now else [reason]

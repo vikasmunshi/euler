@@ -2256,8 +2256,8 @@ and the notice uses it:
 - an idle shell closes when the 60s countdown ends, or at once with no terminal attached;
 - running work extends the wait on its own, up to a 10-minute limit, then is killed. Waiting counts
   as running, so an idle `claude` or an open dialogue holds the wait, and a `&` job does not;
-- `logout-all extend=<seconds>` adds to the countdown and the limit, and `logout-all --now` ends
-  the wait for everyone.
+- `logout-all extend=<seconds>` adds to the countdown and the limit, and `logout-all --now` closes
+  every shell at once, whether or not a notice stands, so no reason is shown.
 
 Enter ends the wait at once, even while work runs: the sign-out closes the shell and kills that
 work, and the notice says so. Running programs therefore lose Enter as input for as long as a

@@ -117,6 +117,23 @@ class NoticeTests(unittest.IsolatedAsyncioTestCase):
         await self.settle(notice)
         self.assertTrue(manager.closed)
 
+    async def test_now_with_no_notice_standing_still_closes_the_shell(self) -> None:
+        manager = _Manager(running=True)
+        notice = self.notice(manager)
+        notice.now()
+        await self.settle(notice)
+        self.assertTrue(manager.closed)
+        self.assertEqual(manager.frames, [{'euler': 'logout-end'}], 'open tabs still sign out')
+        self.assertEqual(self.ended, 1, 'the vault key goes with the shell')
+
+    async def test_no_notice_standing_reports_no_time_left(self) -> None:
+        manager = _Manager()
+        notice = self.notice(manager)
+        notice.arm('stopping', 0, 600)
+        await self.settle(notice)
+        manager.closed, manager.running = False, True      # the user is back, and busy
+        self.assertEqual(notice.status()['remaining'], 0)
+
     async def test_extend_moves_the_countdown_and_the_limit(self) -> None:
         manager = _Manager(running=True)
         notice = self.notice(manager)

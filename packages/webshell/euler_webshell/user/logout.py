@@ -13,7 +13,7 @@ The shell closes at the first of:
   is reading the countdown;
 - the limit, with or without running work: waiting counts as running, so an idle `claude` would
   otherwise hold a shutdown for ever;
-- `--now`.
+- `--now`, which needs no notice standing: with none it closes the shell just the same.
 
 Running work past the countdown extends the wait on its own, up to the limit. The final frame
 tells open tabs to sign out; a user with no tab open is signed out by the operator's push.
@@ -70,14 +70,17 @@ class LogoutNotice:
         self._limit += seconds
 
     def now(self) -> None:
-        """End the wait at once, running work or not."""
+        """Close the shell at once, running work or not, with or without a notice standing."""
+        if not self.active:
+            self.arm('', 0, 0)
         self._forced = True
         self._wake.set()
 
     def status(self) -> dict[str, object]:
         """Where the notice stands, for the operator's wait."""
         running = self._running()
-        return {'active': self.active, 'running': running, 'remaining': self._remaining(running)}
+        return {'active': self.active, 'running': running,
+                'remaining': self._remaining(running) if self.active else 0}
 
     async def cancel(self) -> None:
         """Stop the clock (service stop: the shells are closed by the cleanup that follows)."""
