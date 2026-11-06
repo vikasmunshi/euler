@@ -153,16 +153,17 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertEqual(resp.status, 401)
 
     @unittest_run_loop
-    async def test_shell_page_is_the_terminal_items_target(self) -> None:
-        """`/shell` is the page ABOUT the terminal: the start tiles + the user guide."""
+    async def test_shell_page_is_the_shell_items_target(self) -> None:
+        """`/shell` is the page ABOUT the shell: the start tiles + the user guide."""
         resp = await self.client.get('/shell', headers=_READER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertIn('<!DOCTYPE html>', body)               # the shell, not the frame
-        self.assertIn('data-term-show', body)                # the Terminal tile shows the pane
+        self.assertIn('data-term-show', body)                # the Shell tile shows the pane
         self.assertIn('hx-get="/solutions/"', body)          # the same four tiles as home
         self.assertIn('User Guide', body)                    # …and the guide below them
         self.assertNotIn('terminal-doc', body)               # not /terminal, which is the frame
+        self.assertIn('<span class="crumb-leaf">shell</span>', body)   # the page is `shell`, the pane `terminal`
         resp = await self.client.get('/shell')               # gated like every content route
         self.assertEqual(resp.status, 401)
 

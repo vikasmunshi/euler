@@ -292,9 +292,9 @@ async def home(request: web.Request) -> web.StreamResponse:
 
 @requires(VIEW)
 async def shell_page(request: web.Request) -> web.StreamResponse:
-    """`GET /shell` — the Terminal item's page: the section strip + the shell's shelf.
+    """`GET /shell` — the Shell item's page: the section strip + the shell's shelf.
 
-    The header's Terminal item and the start page's Terminal tile show and focus the
+    The header's Shell item and the start page's Shell tile show and focus the
     right pane's shell (`data-term-show`, site.js); this is the left pane's half of
     that click — the page *about* the thing you were just taken to. Not to be confused
     with `/terminal`, the right pane's own document: that one *is* the shell.
@@ -317,7 +317,7 @@ async def shell_page(request: web.Request) -> web.StreamResponse:
         'commands': commands,
         # What the filter can narrow on this page: the shelf and the catalogue's rows.
         'filterable': len(entries) + commands,
-        'crumbs': [_HOME, ('terminal', None)],
+        'crumbs': [_HOME, ('shell', None)],
         **_sections(request, 'terminal'),
     }, block='content')
 
@@ -1017,7 +1017,7 @@ def _read_routes() -> list[web.RouteDef]:
     return [
         web.get('/healthz', healthz),
         web.get('/', home),
-        web.get('/shell', shell_page),      # the page ABOUT the terminal (nav: Terminal)
+        web.get('/shell', shell_page),      # the page ABOUT the shell (nav: Shell)
         # solutions — canonical with the trailing slash (web-server-guide § The site)
         web.get('/solutions', redirect_slash),
         web.get('/solutions/', solutions_index),
