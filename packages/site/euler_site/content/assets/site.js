@@ -398,8 +398,9 @@
   // ── the logout notice ──────────────────────────────────────────────────────
   // The terminal keeps the clock and says what to show; the page shows it, so a hidden
   // terminal warns like any other. The reason is announced once, not on every tick.
-  var sessionNotice = document.getElementById('session-notice');
-  if (sessionNotice) {
+  document.addEventListener('DOMContentLoaded', function () {
+    var sessionNotice = document.getElementById('session-notice');
+    if (!sessionNotice) { return; }
     var noticeReason = sessionNotice.querySelector('[data-notice-reason]');
     var noticeLeave = sessionNotice.querySelector('[data-notice-leave]');
     noticeLeave.addEventListener('click', signOut);
@@ -411,7 +412,7 @@
       sessionNotice.querySelector('[data-notice-detail]').textContent = ev.data.detail;
       noticeLeave.textContent = ev.data.running ? 'Stop work and sign out' : 'Sign out now';
     });
-  }
+  });
 
   // ── the terminal controls ──────────────────────────────────────────────────
   // Any number of controls, one state. A control is [data-term-toggle]: it carries

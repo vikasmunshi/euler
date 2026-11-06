@@ -234,6 +234,8 @@ class HeaderChipShapeTests(unittest.TestCase):
             self.assertIn(hook, base)
         for hook in ('session-notice', '[data-notice-reason]', '[data-notice-detail]', '[data-notice-leave]'):
             self.assertIn(hook, script)
+        # site.js runs in the head, before the body it looks for exists.
+        self.assertRegex(script, r"'DOMContentLoaded', function \(\) \{\s+var sessionNotice =")
 
     def test_the_terminal_obeys_the_notices_frames(self) -> None:
         """The two frame names are the wire between `user/logout.py` and the page."""
