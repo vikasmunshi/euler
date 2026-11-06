@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Sign every web user out ahead of a shutdown: run **under sudo** by `logout-all` and `redeploy-web`.
+"""Sign every web user out ahead of a shutdown: run **under sudo** by `logout-all` and `make logout-web`.
 
 Each running per-user instance keeps its own countdown (:mod:`euler_webshell.user.logout`); this
 starts them, waits for them all, then revokes every session and remember-me token, which is what

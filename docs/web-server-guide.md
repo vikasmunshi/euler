@@ -2246,8 +2246,8 @@ is one sign-out whichever control started it, and path 2 above reaps the shell. 
 stands Enter skips the wait and nothing else types. A shell no page answers closes itself and
 says the browser session is still signed in.
 
-**`logout-all`, ahead of a shutdown.** `redeploy-web` runs it first (`make logout-web`), and an
-operator can run it alone. `euler_webshell.logout_all`, under sudo, posts to the root-only
+**`logout-all`, ahead of a shutdown.** `redeploy-web`, `upgrade-web` and `remove-web` run it first
+(`make logout-web`), and an operator can run it alone. `euler_webshell.logout_all`, under sudo, posts to the root-only
 `/internal/logout-notice` of each instance `systemctl` reports running (dialling a socket would
 start a stopped one), and each instance keeps its own clock (`user/logout.py`), ticking to its
 terminals over text frames. The shell reports `running` / `idle` over OSC, `TermModes` follows it,

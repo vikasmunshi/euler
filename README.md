@@ -382,7 +382,7 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     render.py                     — The full-page-vs-block render contract (§4.5).
     validate.py                   — The save gate: the checks every write passes.
 packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-guide.md).
-  logout_all.py                   — Sign every web user out ahead of a shutdown: run **under sudo** by `logout-all` and `redeploy-web`.
+  logout_all.py                   — Sign every web user out ahead of a shutdown: run **under sudo** by `logout-all` and `make logout-web`.
   roster.py                       — The collaborator roster — `/etc/euler/roster/users.json`.
   users.py                        — The `users` shell command: account administration for the operator.
   version.py                      — The euler-webshell build version — in lockstep with `solver.version` (docs/package-guide.md § 5.2).

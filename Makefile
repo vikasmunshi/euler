@@ -361,22 +361,27 @@ deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smt
 	@printf "✓ deploy-web complete: full web stack deployed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-remove-web: remove-user remove-site remove-msg remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
+remove-web: logout-web remove-user remove-site remove-msg remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
 	@printf "✓ remove-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
 ## ddns and firewall have no upgrade action — their deploy is idempotent and doubles
 ## as one, and the firewall reload is the final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-msg upgrade-site upgrade-user
+upgrade-web: logout-web upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-msg upgrade-site upgrade-user
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
-LOGOUT_REASON ?= the server is redeploying
+# What each stopping target's notice says; LOGOUT_REASON on the command line overrides it.
+LOGOUT_REASON_redeploy-web := the server is redeploying
+LOGOUT_REASON_upgrade-web := the server is upgrading
+LOGOUT_REASON_remove-web := the web stack is being removed
+LOGOUT_REASON ?= $(LOGOUT_REASON_$(firstword $(MAKECMDGOALS)))
 
 ## Warn every running instance, then sign everyone out: a 60s countdown, held by running work
-## for up to 10 minutes. Set the notice with LOGOUT_REASON; LOGOUT_ARGS=--now skips the wait.
+## for up to 10 minutes. redeploy-web, upgrade-web and remove-web run it first. Set the notice
+## with LOGOUT_REASON; LOGOUT_ARGS=--now skips the wait.
 logout-web:
-	./scripts/setup/user.sh logout-all "$(LOGOUT_REASON)" $(LOGOUT_ARGS)
+	./scripts/setup/user.sh logout-all $(if $(LOGOUT_REASON),"$(LOGOUT_REASON)") $(LOGOUT_ARGS)
 
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
 ## ACLs, units, certs, or the firewall: refresh the edge's static content + Caddyfile →

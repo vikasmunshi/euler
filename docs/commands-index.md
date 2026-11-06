@@ -1415,8 +1415,8 @@ Sign every web user out, after a countdown that running work can extend.
 Everyone with a terminal open sees the reason and a countdown; Enter skips it for them,
 while their shell is idle. Work still running holds the shell past the countdown, up to a
 limit, then is killed. The command waits for all of that, then revokes every session and
-remember-me token. `redeploy-web` runs it first. Runs under `sudo`, so it is the operator
-terminal's.
+remember-me token. `redeploy-web`, `upgrade-web` and `remove-web` run it first. Runs under
+`sudo`, so it is the operator terminal's.
 
 **usage**
 

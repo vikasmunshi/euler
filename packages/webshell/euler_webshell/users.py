@@ -379,8 +379,8 @@ def logout_all(reason: str = DEFAULT_REASON, extend: int = 0, now: bool = False)
     Everyone with a terminal open sees the reason and a countdown; Enter skips it for them,
     while their shell is idle. Work still running holds the shell past the countdown, up to a
     limit, then is killed. The command waits for all of that, then revokes every session and
-    remember-me token. `redeploy-web` runs it first. Runs under `sudo`, so it is the operator
-    terminal's.
+    remember-me token. `redeploy-web`, `upgrade-web` and `remove-web` run it first. Runs under
+    `sudo`, so it is the operator terminal's.
 
     Args:
         reason: What the notice tells users.
