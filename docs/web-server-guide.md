@@ -1358,7 +1358,8 @@ that used to be literals: `--on-accent` (ink on the primary button), `--shadow` 
 `site.js` too and themes itself the same way; a toggle in the page reaches it as a
 `storage` event (fired in every *other* same-origin document when the key changes), which
 also keeps other open tabs in step. `terminal.js` re-reads the tokens into xterm's options;
-the editor (`editor.js`) holds its theme in a CodeMirror `Compartment` and reconfigures
+the editor (`editor.js`, which also draws a solution file's read-only view, so a file reads
+the same viewed as edited) holds its theme in a CodeMirror `Compartment` and reconfigures
 every mounted view in place, buffer and history intact — oneDark's syntax colours on the
 dark ground, CodeMirror's default (light-page) highlight style on the light.
 

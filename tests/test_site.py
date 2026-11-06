@@ -338,7 +338,9 @@ class ContentServiceTests(AioHTTPTestCase):
     async def test_problem_file_view_and_traversal_guard(self) -> None:
         resp = await self.client.get('/solutions/0042/p0042_s0.py', headers=_READER)
         self.assertEqual(resp.status, 200)
-        self.assertIn('solve', await resp.text())
+        body = await resp.text()
+        self.assertIn('solve', body)
+        self.assertIn('data-cm data-language="python"', body)   # the editor's read-only view
         for path in ('/solutions/0042/../../keys/enc-key.json',
                      '/solutions/0042/%2e%2e/%2e%2e/keys/enc-key.json',
                      '/solutions/0042/no_such_file.py'):

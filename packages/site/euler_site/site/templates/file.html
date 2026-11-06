@@ -4,6 +4,8 @@
 <section class="panel">
   <h1><code>{{ filename }}</code></h1>
   <p class="meta"><span class="muted">problem {{ number }} · {{ lines }} lines</span></p>
-  <pre class="code-block"><code>{{ text }}</code></pre>
+  {# data-cm shows a file the editor can open in the editor's own read-only view (site.js
+     lazy-loads it), so it reads the same in both; with no JS this <pre> is the view. #}
+  <pre class="code-block"{% if language %} data-cm data-language="{{ language }}"{% endif %}><code>{{ text }}</code></pre>
 </section>
 {% endblock %}

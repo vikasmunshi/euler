@@ -478,6 +478,7 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
         'number': number,
         'filename': filename,
         'text': text,
+        'language': _EDIT_LANGUAGES.get(target.suffix, ''),
         'lines': text.count('\n') + 1,
         'crumbs': [_HOME, ('solutions', '/solutions/'),
                    (f'{number:04d}', f'/solutions/{number:04d}/'), (filename, None)],

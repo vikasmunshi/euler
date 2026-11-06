@@ -328,16 +328,16 @@
     refreshBack();
   });
 
-  // Lazy-load the CodeMirror editor only when an edit page appears in the pane —
-  // its vendored graph (~630 KB) never loads on other pages. The module is cached
-  // after first import; each visit just (re)mounts on the fresh textarea.
+  // Lazy-load the CodeMirror editor only when an edit page or a solution file's read-only
+  // view appears in the pane — its vendored graph (~630 KB) never loads on other pages. The
+  // module is cached after first import; each visit just (re)mounts on the fresh element.
   var cm = null;
   function enhanceEditors() {
     var pane = document.getElementById('content') || document;
-    if (!pane.querySelector('textarea.editor-buffer[data-cm]')) { return; }
+    if (!pane.querySelector('[data-cm]')) { return; }
     if (cm) { cm.mount(pane); return; }
     import('/assets/editor.js').then(function (m) { cm = m; m.mount(pane); })
-      .catch(function () { /* no-JS/blocked: the plain textarea still works */ });
+      .catch(function () { /* no-JS/blocked: the plain textarea or <pre> still works */ });
   }
   document.addEventListener('DOMContentLoaded', enhanceEditors);
 

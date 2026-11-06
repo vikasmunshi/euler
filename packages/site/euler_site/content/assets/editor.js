@@ -3,8 +3,10 @@
  * the new site as **progressive enhancement**: it upgrades the edit form's plain
  * <textarea name="content"> in place, syncing the buffer back to the textarea so
  * the existing htmx POST → 5c validation gate flow is untouched (no-JS still
- * edits the plain textarea and submits). Lazy-imported by site.js only on an edit
- * page, so its ~630 KB vendored graph never loads elsewhere.
+ * edits the plain textarea and submits). A solution file's read-only view upgrades
+ * its <pre data-cm> the same way, so a file reads the same viewed as edited.
+ * Lazy-imported by site.js only on those pages, so its ~630 KB vendored graph never
+ * loads elsewhere.
  *
  * ES module, same-origin ('self'); CodeMirror injects its stylesheet at runtime
  * (covered by the CSP style-src 'unsafe-inline', §4.7). No eval. */
@@ -70,10 +72,13 @@ function reap() {
   });
 }
 
+//: The CodeMirror language extension *el*'s data-language names, if it has one.
+function language(el) { return LANG[el.dataset.language] ? LANG[el.dataset.language]() : []; }
+
 function enhance(textarea) {
   if (textarea.dataset.cmMounted) { return; }
   textarea.dataset.cmMounted = '1';
-  const langExt = LANG[textarea.dataset.language] ? LANG[textarea.dataset.language]() : [];
+  const langExt = language(textarea);
 
   const host = document.createElement('div');
   host.className = 'cm-host';
@@ -110,14 +115,46 @@ function enhance(textarea) {
   return view;
 }
 
+//: A view that takes no input has no line being worked on, so none is marked.
+const noActiveLine = EditorView.theme({
+  '&.cm-editor .cm-activeLine': { background: 'transparent' },
+  '&.cm-editor .cm-activeLineGutter': { background: 'transparent', color: 'var(--muted)' },
+});
+
+//: Upgrade a read-only <pre> into the same view, minus everything that edits.
+function display(pre) {
+  if (pre.dataset.cmMounted) { return; }
+  pre.dataset.cmMounted = '1';
+
+  const host = document.createElement('div');
+  host.className = 'cm-host';
+  pre.after(host);
+  pre.style.display = 'none';
+  const view = new EditorView({
+    parent: host,
+    doc: pre.textContent,
+    extensions: [
+      noActiveLine,
+      basicSetup,
+      themeSlot.of(theme()),
+      language(pre),
+      EditorView.editable.of(false),
+      EditorView.lineWrapping,
+    ],
+  });
+  views.add(view);
+  requestAnimationFrame(() => view.requestMeasure());   // as enhance: mounted mid-swap, before layout
+}
+
 window.addEventListener('euler:theme', () => {
   reap();
   views.forEach((view) => view.dispatch({ effects: themeSlot.reconfigure(theme()) }));
 });
 
-//: (Re)mount CodeMirror on every enhanceable textarea under *root* (the swapped
-//: #content, or the document on first load). Idempotent per textarea.
+//: (Re)mount CodeMirror on every enhanceable textarea and read-only <pre> under *root*
+//: (the swapped #content, or the document on first load). Idempotent per element.
 export function mount(root = document) {
   reap();
   root.querySelectorAll('textarea.editor-buffer[data-cm]').forEach(enhance);
+  root.querySelectorAll('pre[data-cm]').forEach(display);
 }
