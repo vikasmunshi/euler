@@ -214,6 +214,15 @@ class HeaderChipShapeTests(unittest.TestCase):
         self.assertIn('form.requestSubmit()', script)
         self.assertIn('data-logout', self._template('_nav.html'))
 
+    def test_a_page_with_no_terminal_finds_out_its_session_ended(self) -> None:
+        """With no socket no frame reaches the page, so it asks; an open editor keeps its text."""
+        script = (_SITE / 'content' / 'assets' / 'site.js').read_text(encoding='utf-8')
+        self.assertIn("fetch('/auth/check'", script)
+        self.assertIn('if (termConnected ||', script)
+        self.assertIn("'#content [data-cm]'", script)
+        for template in ('edit_file.html', 'edit_article.html', 'edit_progress.html'):
+            self.assertIn('data-cm', self._template(template))
+
     def test_the_terminal_obeys_the_notices_frames(self) -> None:
         """The two frame names are the wire between `user/logout.py` and the page."""
         script = (_SITE / 'content' / 'assets' / 'terminal.js').read_text(encoding='utf-8')

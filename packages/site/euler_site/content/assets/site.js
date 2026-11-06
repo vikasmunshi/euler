@@ -642,10 +642,29 @@
   // there.
   window.addEventListener('message', function (ev) {
     if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'term-state') { return; }
+    var dropped = termConnected && !ev.data.connected;
     termConnected = !!ev.data.connected;
     termBusy = termConnected && !!ev.data.busy;
     paintTerminalControls();
+    if (dropped) { checkSession(); }
   });
+
+  // ── a session ended somewhere else ─────────────────────────────────────────
+  // A live terminal is how the server reaches this page: `logout-end` signs it out. With
+  // none, nothing says the session has gone (`logout-all`, a revocation, its expiry), and the
+  // page would go on looking signed in. So while the terminal is down, and this tab is on
+  // screen, ask; loading the page again then lands wherever a signed-out reader belongs.
+  // An open editor is left alone: its text is worth more than a tidy header.
+  var SESSION_CHECK_MS = 15000;
+  function checkSession() {
+    if (termConnected || document.visibilityState === 'hidden') { return; }
+    if (!document.getElementById('terminal') || document.querySelector('#content [data-cm]')) { return; }
+    fetch('/auth/check', { credentials: 'same-origin', cache: 'no-store' }).then(function (response) {
+      if (response.status === 401) { location.assign(location.pathname + location.search); }
+    }).catch(function () {});           // unreachable says nothing about the session
+  }
+  setInterval(checkSession, SESSION_CHECK_MS);
+  document.addEventListener('visibilitychange', checkSession);
 
   // A click in the terminal lands in the iframe's document, out of reach of the click
   // listener that closes open menus, so the iframe reports it and the menus close here.

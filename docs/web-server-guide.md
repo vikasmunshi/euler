@@ -2264,7 +2264,9 @@ work, and the notice says so. Running programs therefore lose Enter as input for
 notice stands; other keys still reach them. At the end the instance sends `logout-end`, which signs open
 tabs out through the header's form. The waiting command then calls `/admin/revoke-all`, which covers
 users with no tab open and deliberately pushes no teardown, since that would start every stopped
-instance. A notice is only as old as the deployed venv: the deploy that first ships this runs the
+instance. A tab whose terminal is down gets no frame, so while it is on screen `site.js` asks
+`/auth/check` when the terminal drops, on returning to the tab, and every 15s, and reloads the page on
+a 401. A page with an editor open stays put, to keep its text. A notice is only as old as the deployed venv: the deploy that first ships this runs the
 previous build's `logout-web`, which skips it.
 
 **The attach replay is drawn, never obeyed.** A reattaching terminal is sent the shell's
