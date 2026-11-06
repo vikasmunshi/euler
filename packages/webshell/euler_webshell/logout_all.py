@@ -32,8 +32,8 @@ from solver.config.env import load_spec
 
 DEFAULT_REASON: str = 'the server is shutting down'
 #: The countdown, and how long running work may hold the shell past it in all.
-DEFAULT_SECONDS: int = 60
-DEFAULT_LIMIT: int = 600
+DEFAULT_SECONDS: int = 5
+DEFAULT_LIMIT: int = 300
 
 _ROUTE: str = '/internal/logout-notice'
 _POLL_SECONDS: float = 2.0

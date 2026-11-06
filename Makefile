@@ -377,8 +377,8 @@ LOGOUT_REASON_upgrade-web := the server is upgrading
 LOGOUT_REASON_remove-web := the web stack is being removed
 LOGOUT_REASON ?= $(LOGOUT_REASON_$(firstword $(MAKECMDGOALS)))
 
-## Warn every running instance, then sign everyone out: a 60s countdown, held by running work
-## for up to 10 minutes. redeploy-web, upgrade-web and remove-web run it first. Set the notice
+## Warn every running instance, then sign everyone out: a 5s countdown, held by running work
+## for up to 5 minutes. redeploy-web, upgrade-web and remove-web run it first. Set the notice
 ## with LOGOUT_REASON; LOGOUT_ARGS=--now skips the wait.
 logout-web:
 	./scripts/setup/user.sh logout-all $(if $(LOGOUT_REASON),"$(LOGOUT_REASON)") $(LOGOUT_ARGS)

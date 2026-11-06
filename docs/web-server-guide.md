@@ -2253,8 +2253,8 @@ start a stopped one), and each instance keeps its own clock (`user/logout.py`), 
 terminals over text frames. The shell reports `running` / `idle` over OSC, `TermModes` follows it,
 and the notice uses it:
 
-- an idle shell closes when the 60s countdown ends, or at once with no terminal attached;
-- running work extends the wait on its own, up to a 10-minute limit, then is killed. Waiting counts
+- an idle shell closes when the 5s countdown ends, or at once with no terminal attached;
+- running work extends the wait on its own, up to a 5-minute limit, then is killed. Waiting counts
   as running, so an idle `claude` or an open dialogue holds the wait, and a `&` job does not;
 - `logout-all extend=<seconds>` adds to the countdown and the limit, and `logout-all --now` closes
   every shell at once, whether or not a notice stands, so no reason is shown.
