@@ -29,6 +29,7 @@ from rich.text import Text
 
 from solver.config import ExitCodes, config
 from solver.shell.command import Context, registry
+from solver.shell.extension import active
 from solver.shell.interpreter import execute
 from solver.shell.lexer import LexError, lex
 from solver.shell.parser import ParserError, parse, set_commands
@@ -127,6 +128,20 @@ class _CommandCompleter(Completer):
                 yield candidate
             elif candidate.startswith(partial):
                 yield Completion(candidate, start_position=-len(partial))
+
+
+@contextmanager
+def _working() -> Iterator[None]:
+    """Tell the active extension a block is running, and that it ended, whatever its exit."""
+    ext = active()
+    if ext is None or ext.working is None:
+        yield
+        return
+    ext.working(True)
+    try:
+        yield
+    finally:
+        ext.working(False)
 
 
 class SolverShell:
@@ -334,7 +349,8 @@ class SolverShell:
                     if not block.strip():
                         continue
                     try:
-                        self.dispatch(block)
+                        with _working():
+                            self.dispatch(block)
                     except SystemExit:
                         break
                     except KeyboardInterrupt:

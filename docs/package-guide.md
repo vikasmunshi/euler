@@ -160,6 +160,7 @@ the web package is installed in — a developer's terminal included.
 | `on_start` | a step before the banner, which reports the state it leaves; returns a line for under the banner | a quiet `git-sync`, with one line if it failed |
 | `notices` | the carrier for staff notices (§3.3) | the message spool |
 | `handoff` | told when an interactive child (`! sh`, `! py`, `claude`) takes the terminal and gives it back | `osc.handoff`: `busy` / `ready`, which disable the page's command-typing controls |
+| `working` | told when the interactive shell leaves its prompt to run a block and comes back | `osc.working`: `running` / `idle`, which the per-user service follows to tell work from an idle prompt |
 
 ### 3.2 Overlays
 

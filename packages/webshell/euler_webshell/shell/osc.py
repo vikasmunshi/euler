@@ -39,6 +39,10 @@ payload carries a *token* (:func:`token`):
   **state**, not an act: while busy the page obeys no other action and disables every control
   that types a command, since the keystrokes would land in the child, not the shell.
 
+- `running;<token>` / `idle;<token>` — the shell left its prompt to run a block / came back to
+  it (:func:`working`). Also a **state**, but the page has no use for it: the per-user service
+  reads it from the PTY stream (`ws/manager.py` § `TermModes`), which it sees with no tab open.
+
 The token is a server-side millisecond clock, strictly increasing per command. On
 attach the service replays the scrollback, which redraws the sequences of commands
 that already ran; the token lets the browser tell a replay from a fresh act and obey
@@ -56,7 +60,7 @@ shell's `notify` — `overlays.toml` names the commands after which each one fir
 from __future__ import annotations
 
 __all__ = ['EVENTS', 'OSC_CODE', 'OSC_KEY_ENV', 'account_changed', 'emit', 'git_changed', 'handoff',
-           'logout', 'messages_changed', 'nudge', 'progress_changed', 'token']
+           'logout', 'messages_changed', 'nudge', 'progress_changed', 'token', 'working']
 
 import os
 import sys
@@ -181,6 +185,16 @@ def nudge(event: str) -> None:
 def logout(seconds: int) -> None:
     """Ask the page to count *seconds* down and sign out: only the browser holds the cookies."""
     emit('logout', str(token()), str(seconds))
+
+
+def working(running: bool) -> None:
+    """The web shell's `working`: `running` as a block starts, `idle` back at the prompt.
+
+    How the service tells work from an idle prompt without typing into the terminal: a probe
+    written to the PTY would land in whatever holds it. Waiting counts as work, so an idle
+    `claude` or an open dialogue reads as running, and a job left in the background does not.
+    """
+    emit('running' if running else 'idle', str(token()))
 
 
 def handoff(taken: bool) -> None:

@@ -18,6 +18,7 @@ import asyncio
 import json
 import os
 import select
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -30,6 +31,7 @@ import aiohttp
 from aiohttp import WSMsgType, web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
+from solver.config import config
 from euler_site.auth.tickets import TicketStore
 from euler_webshell.ws.app import PTY_MANAGER, build_app
 from euler_webshell.ws.manager import TermModes
@@ -396,6 +398,8 @@ class RealShellTest(_WsServiceCase):
         scratch = TemporaryDirectory()
         self.addCleanup(scratch.cleanup)
         subprocess.run(['git', 'init', '-q'], cwd=scratch.name, check=False)
+        (Path(scratch.name) / 'solutions').mkdir()               # the prompt names a problem
+        shutil.copy(config.static_file_problems, Path(scratch.name) / 'solutions' / 'problems.json')
         os.environ['EULER_REPO_ROOT'] = scratch.name
         self.addCleanup(os.environ.pop, 'EULER_REPO_ROOT', None)
 
@@ -404,6 +408,10 @@ class RealShellTest(_WsServiceCase):
         output = await _read_until(ws, b'SOLVER', timeout=60.0)   # the shell banner
         self.assertIn(b'SOLVER', output)                          # the shell came up
         self.assertEqual(self.auth.mints, 1)
+
+        await ws.send_bytes(b'echo probe\n')                      # a block brackets itself
+        output = await _read_until(ws, b';idle;', timeout=60.0)
+        self.assertIn(b';running;', output)
 
         await ws.send_bytes(b'exit\n')
         await _read_close(ws, timeout=60.0)                       # shell exit → drainer → close
@@ -418,6 +426,20 @@ class TermModesTests(unittest.TestCase):
 
     def osc(self, state: str, key: str = KEY) -> bytes:
         return f'\x1b]5379;{key};{state};1700000000000\x07'.encode()
+
+    def test_running_follows_the_shells_prompt(self) -> None:
+        modes = TermModes(self.KEY)
+        self.assertFalse(modes.running)
+        modes.feed(self.osc('running'))
+        self.assertTrue(modes.running)
+        self.assertFalse(modes.busy, 'running and busy are separate states')
+        modes.feed(self.osc('idle'))
+        self.assertFalse(modes.running)
+
+    def test_printed_text_cannot_fake_running(self) -> None:
+        modes = TermModes(self.KEY)
+        modes.feed(self.osc('running', key='00' * 16))
+        self.assertFalse(modes.running)
 
     def test_busy_outlives_the_replay_buffer(self) -> None:
         modes = TermModes(self.KEY)

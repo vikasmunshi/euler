@@ -163,6 +163,14 @@ class NudgeTests(unittest.TestCase):
         self.assertLessEqual(int(busy[1]), int(ready[1]), 'the token')
         self.assertIsNone(host_extension().handoff, 'the host terminal has no page to tell')
 
+    def test_working_sends_running_then_idle(self) -> None:
+        self.assertIs(extension().working, osc.working)
+        with channel('web') as out:
+            osc.working(True)
+            osc.working(False)
+        self.assertEqual([fields[0] for fields in _sequences(out.getvalue())], ['running', 'idle'])
+        self.assertIsNone(host_extension().working, 'no service watches the host terminal')
+
     def test_a_terminal_hears_nothing(self) -> None:
         with channel('terminal') as out:
             osc.nudge('git')

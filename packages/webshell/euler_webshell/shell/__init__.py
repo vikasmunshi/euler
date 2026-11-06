@@ -49,7 +49,7 @@ def extension() -> Extension:
         raise ExtensionError(f'{OVERLAYS_FILE.name}: unknown event(s) {unknown}; known: {sorted(osc.EVENTS)}')
     return Extension(modules=HOST_COMMANDS, overlays=overlays, notify=osc.nudge, identity=ticket_subject,
                      prompt_vault=False, on_start=sync_at_start, notices=Spool(WEB_KEY_HINT),
-                     handoff=osc.handoff)
+                     handoff=osc.handoff, working=osc.working)
 
 
 def host_extension() -> Extension:

@@ -182,6 +182,25 @@ class ExtensionTests(unittest.TestCase):
             bash.run_interactive(Context(argv=[]), 'true', Path('.'))   # no extension: nothing to tell
 
 
+class WorkingTests(unittest.TestCase):
+    def test_a_block_is_bracketed_by_working_whatever_its_exit(self) -> None:
+        from solver.shell.shell import _working
+        told: list[bool] = []
+        extension_mod._active = Extension(working=told.append)
+        try:
+            with _working():
+                self.assertEqual(told, [True])
+            self.assertEqual(told, [True, False])
+            told.clear()
+            with self.assertRaises(SystemExit), _working():
+                raise SystemExit
+            self.assertEqual(told, [True, False])
+        finally:
+            extension_mod._active = None
+        with _working():
+            pass                                     # no extension: nothing to tell
+
+
 class ReadOverlaysTests(unittest.TestCase):
     def read(self, text: str) -> tuple[Overlay, ...]:
         with tempfile.TemporaryDirectory() as tmp:

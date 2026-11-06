@@ -42,12 +42,12 @@ from euler_webshell.ws.pty import PtySession
 _REPLAY_CAP: int = 256 * 1024
 
 
-#: The sequences :class:`TermModes` follows: the web shell's OSC 5379 `busy` / `ready`
-#: (group 1 the key, 2 the state), the keyboard-mode CSIs terminal.js obeys — kitty's
+#: The sequences :class:`TermModes` follows: the web shell's OSC 5379 `busy` / `ready` and
+#: `running` / `idle` (group 1 the key, 2 the state), the keyboard-mode CSIs terminal.js obeys — kitty's
 #: `CSI > f u` / `CSI < n u` / `CSI = f ; m u` and XTMODKEYS `CSI > r ; v m` (group 3 the
 #: prefix, 4 the parameters, 5 the final) — DECSET / DECRST `CSI ? n ; … h|l` (group 6
 #: the modes, 7 set or reset), and RIS `ESC c`, the full reset (group 8).
-_MODE_RE = re.compile(rb'\x1b\]5379;([^;\x07\x1b]*);(busy|ready)[^\x07\x1b]*\x07'
+_MODE_RE = re.compile(rb'\x1b\]5379;([^;\x07\x1b]*);(busy|ready|running|idle)[^\x07\x1b]*\x07'
                       rb'|\x1b\[([<>=])([0-9;]*)([um])'
                       rb'|\x1b\[\?([0-9;]*)([hl])'
                       rb'|\x1b(c)')
@@ -87,6 +87,7 @@ class TermModes:
     def __init__(self, osc_key: str) -> None:
         self._key = osc_key.encode()
         self.busy = False
+        self.running = False              # a block is running; never replayed, so not in snapshot
         self.kitty: list[int] = [0]       # the kitty flag stack; [0] is the base entry
         self.other_keys = 0               # xterm's modifyOtherKeys level (0 = off)
         self.mouse = 0                    # the active mouse protocol's mode (0 = off)
@@ -116,7 +117,10 @@ class TermModes:
             return
         if state is not None:
             if self._key and key == self._key:    # printed text does not know the key
-                self.busy = state == b'busy'
+                if state in (b'busy', b'ready'):
+                    self.busy = state == b'busy'
+                else:
+                    self.running = state == b'running'
             return
         params = [int(p) if p else None for p in raw.split(b';')]
 
@@ -207,6 +211,11 @@ class PersistentPty:
     def alive(self) -> bool:
         """True while the shell has not been torn down and its process is running."""
         return not self._closed and self.session.is_alive()
+
+    @property
+    def running(self) -> bool:
+        """True while the shell is away from its prompt: a block, or a child lent the terminal."""
+        return self.alive and (self._modes.running or self._modes.busy)
 
     @property
     def detached_for(self) -> float:
@@ -416,6 +425,7 @@ class PtyManager:
         return [{'user': email,
                  'alive': pty.alive,
                  'attached': pty.attached,
+                 'running': pty.running,
                  'detached_for': round(pty.detached_for, 1),
                  'pid': pty.session.pid}
                 for email, pty in self._shells.items()]

@@ -9,7 +9,8 @@ an extension into *every* shell of a venv it is installed in, the terminal one i
 
 An extension may bring its own **identity** (who the session runs as, in place of the OS
 login), say whether the vault may be unlocked by prompting, run a step before the banner,
-hear when the shell lends the terminal to an interactive child, and carry the notices
+hear when the shell lends the terminal to an interactive child or leaves its prompt to run a
+block, and carry the notices
 commands file (:mod:`solver.core.notices`). It contributes extra command modules and an
 **overlay table**, one overlay per command it changes:
 
@@ -89,6 +90,9 @@ class Extension:
     #: (:func:`solver.shell.bash.run_interactive`: a subshell, Python, Claude Code) and False
     #: once it hands it back — whatever the child's exit, an interrupt included.
     handoff: Callable[[bool], None] | None = None
+    #: Told True as the interactive shell leaves its prompt to run a block and False once it
+    #: is back, whatever the block's exit: what a watcher needs to tell work from an idle prompt.
+    working: Callable[[bool], None] | None = None
 
 
 def read_overlays(path: Path) -> tuple[Overlay, ...]:
