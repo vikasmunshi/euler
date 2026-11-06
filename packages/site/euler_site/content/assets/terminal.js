@@ -20,7 +20,8 @@
      controls know whether a command would reach the shell;
      {euler: 'pane-click'} on a press in this document, which the parent's own click
      listener cannot see, so an open header menu closes as on any outside click;
-     {euler: 'logout'} when a logout notice ends, which submits the header's form.
+     {euler: 'logout-notice'} on each tick of a logout notice, which the page draws, and with
+     no detail when it clears; {euler: 'logout'} when one ends, which submits the header's form.
 
    Wire protocol (packages/webshell/euler_webshell/ws/app.py): binary frames are raw PTY bytes both
    ways; a text frame {"resize": [cols, rows]} carries the geometry. */
@@ -491,8 +492,9 @@
   }
 
   // ── the logout notice ──────────────────────────────────────────────────────
-  // Drawn over the terminal in its own element, never into xterm: the text stays out of the
-  // scrollback, and a program holding the screen is not written over. Enter always ends the
+  // Drawn by the page around this frame (site.js § the logout notice), or with no page in an
+  // element of its own, never into xterm: the text stays out of the scrollback, and a
+  // program holding the screen is not written over. Enter always ends the
   // wait (§ term.onData): the sign-out closes the shell, which kills any running work, so the
   // notice says so. Other keys reach running work and go nowhere at an idle prompt, so no new
   // work starts in a shell that is about to close.
@@ -507,16 +509,23 @@
 
   function drawNotice(reason, seconds, running) {
     notice = { running: running };
-    noticeBox.textContent = reason + ' — ' + (running
-      ? 'signing out when your running work ends, in ' + duration(seconds)
-        + ' at most. Press Enter to stop it and sign out now.'
-      : 'signing out in ' + duration(seconds) + '. Press Enter to sign out now.');
+    var detail = running
+      ? 'signing out when your running work ends, in ' + duration(seconds) + ' at most'
+      : 'signing out in ' + duration(seconds);
+    if (window.parent !== window) {
+      window.parent.postMessage({ euler: 'logout-notice', reason: reason, detail: detail, running: running },
+        location.origin);
+      return;
+    }
+    noticeBox.textContent = reason + ' — ' + detail + '. Press Enter to '
+      + (running ? 'stop it and ' : '') + 'sign out now.';
     noticeBox.hidden = false;
   }
 
   function clearNotice() {
     notice = null;
     noticeBox.hidden = true;
+    if (window.parent !== window) { window.parent.postMessage({ euler: 'logout-notice' }, location.origin); }
   }
 
   //: Sign out. Framed, the parent submits the header's form, which also disarms this

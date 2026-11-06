@@ -531,8 +531,28 @@ body.term-busy [data-term-cmd]:hover { background: none; }
   gap: 0.8rem;
   padding: 0.8rem 1rem;
   min-height: 0;                             /* let the panes, not the page, scroll */
+  position: relative;                        /* the session notice sits over them */
 }
 .pane { min-width: 0; min-height: 0; }
+/* A sign-out on its way: hung from the header's lower edge, across both panes. */
+.session-notice {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 20;                               /* under the header's open menus */
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  box-shadow: 0 2px 8px var(--shadow);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.session-notice[hidden] { display: none; }
+.session-notice-reason { color: var(--notice-fg); font-weight: 600; }
+.session-notice-detail { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; }
+.session-notice .btn { flex: none; padding: 0.2rem 0.7rem; font-size: 0.78rem; }
 /* Both axes when content overflows — and the vertical gutter is reserved whether or not
    a scrollbar is in it. Without that, every page that grows past the pane (or shrinks
    back under it, as the filter narrows a grid) takes the scrollbar's width away from the
@@ -1562,7 +1582,8 @@ dl.account dd { margin: 0; min-width: 0; }
   background: var(--border); border-radius: 6px;
 }
 
-/* The logout notice: drawn over the terminal, not into it, so a running program's screen
+/* The logout notice on a terminal with no page around it (a direct visit to /terminal); in the
+   app shell it is .session-notice. Over the terminal, not in it, so a running program's screen
    is left alone and the text never enters the scrollback (terminal.js § the logout notice). */
 .logout-notice {
   position: fixed;
@@ -1747,6 +1768,7 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
   .ws-hide { width: 2.4rem; height: 2.4rem; }
   .ws-hide svg { width: 1.3rem; height: 1.3rem; }
 
+  .session-notice { flex-wrap: wrap; gap: 0.25rem 0.6rem; padding: 0.4rem 0.6rem; }
   .app-footer { flex-wrap: wrap; justify-content: center; row-gap: 0.3rem; padding: 0.45rem 0.6rem; }
 
   /* iOS zooms the page into any text field set below 16px when it takes focus, and does

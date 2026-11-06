@@ -223,6 +223,18 @@ class HeaderChipShapeTests(unittest.TestCase):
         for template in ('edit_file.html', 'edit_article.html', 'edit_progress.html'):
             self.assertIn('data-cm', self._template(template))
 
+    def test_the_page_draws_the_notice_the_terminal_counts(self) -> None:
+        """Outside the iframe, so a hidden terminal still warns; every hook site.js reads exists."""
+        assets = _SITE / 'content' / 'assets'
+        self.assertIn("euler: 'logout-notice'", (assets / 'terminal.js').read_text(encoding='utf-8'))
+        script = (assets / 'site.js').read_text(encoding='utf-8')
+        self.assertIn("ev.data.euler !== 'logout-notice'", script)
+        base = self._template('base.html')
+        for hook in ('id="session-notice"', 'data-notice-reason', 'data-notice-detail', 'data-notice-leave'):
+            self.assertIn(hook, base)
+        for hook in ('session-notice', '[data-notice-reason]', '[data-notice-detail]', '[data-notice-leave]'):
+            self.assertIn(hook, script)
+
     def test_the_terminal_obeys_the_notices_frames(self) -> None:
         """The two frame names are the wire between `user/logout.py` and the page."""
         script = (_SITE / 'content' / 'assets' / 'terminal.js').read_text(encoding='utf-8')

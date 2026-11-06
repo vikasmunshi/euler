@@ -386,11 +386,32 @@
 
   // The shell's `logout` reaches here through the terminal: submit the header's own form, so
   // the sign-out above runs unchanged. requestSubmit, because submit() fires no submit event.
-  window.addEventListener('message', function (ev) {
-    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'logout') { return; }
+  function signOut() {
     var form = document.querySelector('form[data-logout]');
     if (form) { form.requestSubmit(); }
+  }
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'logout') { return; }
+    signOut();
   });
+
+  // ── the logout notice ──────────────────────────────────────────────────────
+  // The terminal keeps the clock and says what to show; the page shows it, so a hidden
+  // terminal warns like any other. The reason is announced once, not on every tick.
+  var sessionNotice = document.getElementById('session-notice');
+  if (sessionNotice) {
+    var noticeReason = sessionNotice.querySelector('[data-notice-reason]');
+    var noticeLeave = sessionNotice.querySelector('[data-notice-leave]');
+    noticeLeave.addEventListener('click', signOut);
+    window.addEventListener('message', function (ev) {
+      if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'logout-notice') { return; }
+      sessionNotice.hidden = !ev.data.detail;
+      if (!ev.data.detail) { return; }
+      if (noticeReason.textContent !== ev.data.reason) { noticeReason.textContent = ev.data.reason; }
+      sessionNotice.querySelector('[data-notice-detail]').textContent = ev.data.detail;
+      noticeLeave.textContent = ev.data.running ? 'Stop work and sign out' : 'Sign out now';
+    });
+  }
 
   // ── the terminal controls ──────────────────────────────────────────────────
   // Any number of controls, one state. A control is [data-term-toggle]: it carries

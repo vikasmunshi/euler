@@ -72,6 +72,15 @@
      Signed out there is no session to protect and no terminal to hold: the auth
      pages override `ws` and put their sign-in dialogue in the same box. #}
   <div class="app-panes">
+    {# A sign-out on its way (site.js § the logout notice): over the panes rather than in the
+       row, so neither pane resizes, and outside the terminal, so hiding it hides nothing. #}
+    {% if subject %}
+    <div id="session-notice" class="session-notice" hidden>
+      <span class="session-notice-reason" role="status" data-notice-reason></span>
+      <span class="session-notice-detail" data-notice-detail></span>
+      <button type="button" class="btn" data-notice-leave></button>
+    </div>
+    {% endif %}
     <main id="content" class="pane pane-content" role="main">
       {% block content %}{% endblock %}
     </main>
