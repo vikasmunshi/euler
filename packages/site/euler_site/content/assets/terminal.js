@@ -19,7 +19,8 @@
      so the titlebar's toggle can name the act it offers and the command-typing
      controls know whether a command would reach the shell;
      {euler: 'pane-click'} on a press in this document, which the parent's own click
-     listener cannot see, so an open header menu closes as on any outside click.
+     listener cannot see, so an open header menu closes as on any outside click;
+     {euler: 'logout'} when a logout notice ends, which submits the header's form.
 
    Wire protocol (packages/webshell/euler_webshell/ws/app.py): binary frames are raw PTY bytes both
    ways; a text frame {"resize": [cols, rows]} carries the geometry. */
@@ -231,6 +232,10 @@
   // keystroke in that instant is lost with them; the replay takes milliseconds.
   term.onData(function (data) {
     if (!live) { return; }
+    if (notice) {                       // § the logout notice: Enter skips, nothing else types
+      if (data === '\r') { leave(); }
+      return;
+    }
     send(new TextEncoder().encode(data));
   });
   term.onResize(sendSize);
@@ -314,10 +319,10 @@
   }
 
   //: Where the token sits: second field for the nudges (`git`, `msg`, `account`,
-  //: `progress`) and `nav`, third for the pane actions that carry a problem number first (§ above).
+  //: `progress`), `nav` and `logout`, third for the pane actions that carry a problem number first (§ above).
   function oscToken(parts) {
     var fieldless = parts[0] === 'git' || parts[0] === 'msg' || parts[0] === 'account' ||
-      parts[0] === 'progress' || parts[0] === 'nav';
+      parts[0] === 'progress' || parts[0] === 'nav' || parts[0] === 'logout';
     return Number(fieldless ? parts[1] : parts[2]) || 0;
   }
 
@@ -332,6 +337,11 @@
     if (handedOff) { return true; }           // the channel is shut while a child holds the PTY
     var token = oscToken(parts);
     if (!live || token <= lastToken) { return true; }
+    if (parts[0] === 'logout') {
+      lastToken = token;
+      startCountdown(Number(parts[2]) || 0);
+      return true;
+    }
     var message = oscMessage(parts);
     if (message && window.parent !== window) {
       lastToken = token;
@@ -476,6 +486,47 @@
     if (guard) { window.removeEventListener('beforeunload', guard); guard = null; }
   }
 
+  // ── the logout notice ──────────────────────────────────────────────────────
+  // Drawn over the terminal in its own element, never into xterm: the text stays out of the
+  // scrollback, and a program holding the screen is not written over. While it stands the
+  // keyboard is the notice's (§ term.onData): Enter skips the wait, and nothing else types,
+  // so no new work starts in a shell that is about to close.
+  var noticeBox = document.getElementById('logout-notice');
+  var notice = null;                    // set while a notice stands
+  var countdown = null;                 // the `logout` command's timer
+  var leaving = false;
+
+  function drawNotice(reason, seconds) {
+    notice = {};
+    noticeBox.textContent = reason + ' — signing out in ' + seconds + 's. Press Enter to sign out now.';
+    noticeBox.hidden = false;
+  }
+
+  //: Sign out. Framed, the parent submits the header's form, which also disarms this
+  //: document. Unframed (a direct visit to /terminal) there is no form, so post it here.
+  function leave() {
+    if (leaving) { return; }
+    leaving = true;
+    clearInterval(countdown);
+    if (window.parent !== window) {
+      window.parent.postMessage({ euler: 'logout' }, location.origin);
+      return;
+    }
+    closedByUs = true;
+    disarm();
+    fetch('/auth/logout', { method: 'POST' }).finally(function () { location.assign('/'); });
+  }
+
+  function startCountdown(seconds) {
+    if (notice) { return; }
+    var left = seconds;
+    drawNotice('user initiated logout', left);
+    countdown = setInterval(function () {
+      left -= 1;
+      if (left <= 0) { leave(); } else { drawNotice('user initiated logout', left); }
+    }, 1000);
+  }
+
   // A press in this document never reaches the parent's listeners, so say so. Capture,
   // because xterm handles its own mouse events and may stop them on the way down.
   window.addEventListener('pointerdown', function () {
@@ -520,6 +571,7 @@
         if (typeof ev.data.command !== 'string' || !ev.data.command) { break; }
         // The parent greys its controls out while a child holds the PTY; this is the
         // backstop, because typing `git-sync` at a bash or Python prompt runs it THERE.
+        if (notice) { break; }          // § the logout notice: this shell is about to close
         if (handedOff) {
           term.write('\r\n\x1b[33mthe shell has handed this terminal to another program — '
                      + 'exit it first, then try again.\x1b[0m\r\n');

@@ -384,6 +384,14 @@
     }
   });
 
+  // The shell's `logout` reaches here through the terminal: submit the header's own form, so
+  // the sign-out above runs unchanged. requestSubmit, because submit() fires no submit event.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'logout') { return; }
+    var form = document.querySelector('form[data-logout]');
+    if (form) { form.requestSubmit(); }
+  });
+
   // ── the terminal controls ──────────────────────────────────────────────────
   // Any number of controls, one state. A control is [data-term-toggle]: it carries
   // the state on its [data-term-dot] and names the act it offers in its title (which

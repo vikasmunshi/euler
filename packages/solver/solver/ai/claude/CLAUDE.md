@@ -273,6 +273,7 @@ packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended
     host.py                       — Host terminal entry point: `python -m euler_webshell.shell.host` — what `solver-host` runs.
     identity.py                   — The web shell's identity: a one-time shell ticket, redeemed at the auth service.
     keys.py                       — Key distribution: issuing the master key over the message spool and by mail.
+    logout.py                     — The `logout` shell command: sign out of the web session from the terminal.
     notices.py                    — The message spool as the carrier of the solver shell's notices (:mod:`solver.core.notices`).
     osc.py                        — The shell → browser control channel: `OSC 5379`.
     viewer.py                     — The web shell's `show` and `edit`: swap the app shell's left pane instead of opening a tab.

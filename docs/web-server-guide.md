@@ -2237,6 +2237,14 @@ exits (the shell posts `{euler: 'disarm'}` to the iframe before logout). The PTY
 survives server-side regardless — the dialog protects the *scrollback and flow*, not the
 process.
 
+**`logout`, from the shell.** Only the browser holds the session cookies, so the command asks
+the page: it emits `OSC 5379` `logout;<token>;<seconds>` and waits. `terminal.js` draws a notice
+over the terminal (`#logout-notice`, never into xterm, so it stays out of the scrollback), counts
+down, and posts `{euler: 'logout'}` up; `site.js` submits the header's own logout form, so there
+is one sign-out whichever control started it, and path 2 above reaps the shell. While the notice
+stands Enter skips the wait and nothing else types. A shell no page answers closes itself and
+says the browser session is still signed in.
+
 **The attach replay is drawn, never obeyed.** A reattaching terminal is sent the shell's
 recent scrollback, which contains the *control sequences* of commands that already ran —
 `show`/`edit`'s OSC 5379 among them. A client that acted on those again would hijack the

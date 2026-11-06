@@ -118,6 +118,7 @@ a parameter that accepts repetition.
 |---------|---------|----------|-------------|
 | [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
+| [`logout`](#command-logout) | — | `reader` | Sign out of the web session, after a short countdown that Enter skips. |
 | [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
 | [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
@@ -1381,6 +1382,26 @@ lint
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.utils.linter.lint`.
+
+---
+
+#### Command: `logout`
+
+Sign out of the web session, after a short countdown that Enter skips.
+
+* ⚑ needs reader or above.
+
+The page signs out the way the header's Logout does: the session and its remember-me
+token end, the vault locks and this shell closes. Web shell only: a terminal session
+ends with `exit`.
+
+**usage**
+
+```
+logout
+```
+
+*Defined in* `euler_webshell.shell.logout.logout` — on the web host only (the web shell and `solver-host`).
 
 ---
 

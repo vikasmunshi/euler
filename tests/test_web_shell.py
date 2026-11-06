@@ -24,7 +24,7 @@ from solver.core.problems import Problem
 from solver.shell.command import registry
 from solver.shell.extension import check_overlays
 from solver.utils.loader import load_commands
-from euler_webshell.shell import extension, host_extension, identity, osc, sync_at_start, viewer
+from euler_webshell.shell import extension, host_extension, identity, logout, osc, sync_at_start, viewer
 from tests import silence
 
 silence()
@@ -180,6 +180,26 @@ class NudgeTests(unittest.TestCase):
         with patch.object(osc, '_KEY', 'abc'), channel('web') as stdout:
             osc.nudge('git')
         self.assertTrue(stdout.getvalue().startswith('\x1b]5379;abc;git;'))
+
+
+class LogoutTests(unittest.TestCase):
+    def test_it_asks_the_page_then_waits_for_the_teardown(self) -> None:
+        with channel('web') as out, patch('time.sleep') as wait:
+            with self.assertRaises(SystemExit) as raised:
+                logout.logout()
+        [fields] = _sequences(out.getvalue())
+        self.assertEqual(fields[0], 'logout')
+        self.assertTrue(fields[1].isdigit(), 'the token')
+        self.assertEqual(fields[2], str(logout.COUNTDOWN_SECONDS))
+        wait.assert_called_once()
+        self.assertGreater(wait.call_args.args[0], logout.COUNTDOWN_SECONDS, 'the page gets time to answer')
+        self.assertEqual(raised.exception.code, 1, 'reached only when no page signed out')
+
+    def test_a_terminal_session_is_refused(self) -> None:
+        with channel('terminal') as out, patch('time.sleep') as wait:
+            self.assertEqual(logout.logout(), 2)
+        self.assertEqual(_sequences(out.getvalue()), [])
+        wait.assert_not_called()
 
 
 class ViewerTests(unittest.TestCase):

@@ -12,11 +12,12 @@ identity is a one-time ticket (:mod:`euler_webshell.shell.identity`), the vault 
 for (the browser unlocks it), and the shell syncs the clone with origin before its banner, so
 the banner reports the synced clone. The PTY runs `python -m euler_webshell.shell`.
 
-Both extensions here add the host's own commands — `msg`, `users` and key distribution
-(:mod:`euler_webshell.shell.keys`) — and carry the solver shell's notices on the message spool
-(:mod:`euler_webshell.shell.notices`). :func:`host_extension` is the same minus the browser: the
-OS login, a terminal vault prompt, no OSC; `solver-host` runs it, for the operator's terminal
-on the web host.
+Both extensions here add the host's own commands — `msg`, `users`, key distribution
+(:mod:`euler_webshell.shell.keys`) and `logout` (:mod:`euler_webshell.shell.logout`), which
+refuses off the web channel but is loaded there so `update-docs` sees it — and carry the solver
+shell's notices on the message spool (:mod:`euler_webshell.shell.notices`).
+:func:`host_extension` is the same minus the browser: the OS login, a terminal vault prompt, no
+OSC; `solver-host` runs it, for the operator's terminal on the web host.
 """
 from __future__ import annotations
 
@@ -36,7 +37,8 @@ from euler_webshell.shell.notices import HOST_KEY_HINT, WEB_KEY_HINT, Spool
 OVERLAYS_FILE: Path = Path(__file__).with_name('overlays.toml')
 HOST_OVERLAYS_FILE: Path = Path(__file__).with_name('host.toml')
 #: The command modules only the web host can run: they need its spool, roster and mail relay.
-HOST_COMMANDS: tuple[str, ...] = ('euler_webshell.users', 'euler_webshell.msg.commands', 'euler_webshell.shell.keys')
+HOST_COMMANDS: tuple[str, ...] = ('euler_webshell.users', 'euler_webshell.msg.commands', 'euler_webshell.shell.keys',
+                                  'euler_webshell.shell.logout')
 
 
 def extension() -> Extension:

@@ -44,6 +44,7 @@ a profile on each channel.
 | `euler_webshell.shell.keys` | `host-authorize` |  |  |  | ✓ |
 | `euler_webshell.shell.keys` | `key-split` |  |  | ✓ | ✓ |
 | `euler_webshell.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
+| `euler_webshell.shell.logout` | `logout` | ✓ | ✓ | ✓ | ✓ |
 | `euler_webshell.users` | `users` |  |  |  | ✓ |
 | `solver.ai.api` | `claude-api` |  | ✓ | ✓ | ✓ |
 | `solver.ai.batch` | `claude-batch` |  |  | ✓ | ✓ |

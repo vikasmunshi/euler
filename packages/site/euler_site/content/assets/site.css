@@ -1562,6 +1562,23 @@ dl.account dd { margin: 0; min-width: 0; }
   background: var(--border); border-radius: 6px;
 }
 
+/* The logout notice: drawn over the terminal, not into it, so a running program's screen
+   is left alone and the text never enters the scrollback (terminal.js § the logout notice). */
+.logout-notice {
+  position: fixed;
+  top: 0.4rem;
+  left: 0.6rem;
+  right: 0.9rem;
+  z-index: 10;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-hi);
+  color: var(--text);
+  pointer-events: none;
+}
+.logout-notice[hidden] { display: none; }
+
 /* ── Footer (fixed) ──────────────────────────────────────────────────────────
    Right-aligned: © · the documents, and — only while the terminal is hidden — its
    window at the very end (§ .ws-show). Nothing is reserved for it: with the terminal

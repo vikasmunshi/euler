@@ -32,6 +32,8 @@ payload carries a *token* (:func:`token`):
   sign-in); re-read the account page — *if it is the visible pane*.
 - `progress;<token>` — `problems.json` changed (`summary`, `mark`); re-read the
   solutions grid — *if it is the visible pane*.
+- `logout;<token>;<seconds>` — the user ran `logout`: draw the notice, count *seconds* down and
+  sign out (:mod:`euler_webshell.shell.logout`).
 - `busy;<token>` / `ready;<token>` — the shell has lent the terminal to an interactive child
   (`! sh`, `! py`, `claude`, …) / taken it back (:func:`handoff`). Unlike the rest these are a
   **state**, not an act: while busy the page obeys no other action and disables every control
@@ -54,7 +56,7 @@ shell's `notify` — `overlays.toml` names the commands after which each one fir
 from __future__ import annotations
 
 __all__ = ['EVENTS', 'OSC_CODE', 'OSC_KEY_ENV', 'account_changed', 'emit', 'git_changed', 'handoff',
-           'messages_changed', 'nudge', 'progress_changed', 'token']
+           'logout', 'messages_changed', 'nudge', 'progress_changed', 'token']
 
 import os
 import sys
@@ -174,6 +176,11 @@ EVENTS: dict[str, Callable[[], None]] = {
 def nudge(event: str) -> None:
     """The web shell's `notify`: send the *event* named in an overlay (:data:`EVENTS`)."""
     EVENTS[event]()
+
+
+def logout(seconds: int) -> None:
+    """Ask the page to count *seconds* down and sign out: only the browser holds the cookies."""
+    emit('logout', str(token()), str(seconds))
 
 
 def handoff(taken: bool) -> None:

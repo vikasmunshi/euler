@@ -204,6 +204,16 @@ class HeaderChipShapeTests(unittest.TestCase):
         self.assertIn("postMessage({ euler: 'pane-click' }", (assets / 'terminal.js').read_text(encoding='utf-8'))
         self.assertIn("ev.data.euler !== 'pane-click'", (assets / 'site.js').read_text(encoding='utf-8'))
 
+    def test_a_logout_notice_ends_in_the_headers_own_form(self) -> None:
+        """The shell's `logout` signs out through the form the header's Logout submits, and
+        requestSubmit is what keeps that form's submit listeners (vault, disarm) in the path."""
+        assets = _SITE / 'content' / 'assets'
+        self.assertIn("postMessage({ euler: 'logout' }", (assets / 'terminal.js').read_text(encoding='utf-8'))
+        script = (assets / 'site.js').read_text(encoding='utf-8')
+        self.assertIn("ev.data.euler !== 'logout'", script)
+        self.assertIn('form.requestSubmit()', script)
+        self.assertIn('data-logout', self._template('_nav.html'))
+
     def test_site_js_paints_every_readout_the_chip_declares(self) -> None:
         """The panel's words are site.js's to write, so a hook the template declares and the
         script never fills would render as the static placeholder for ever."""
