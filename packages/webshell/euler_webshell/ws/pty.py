@@ -136,7 +136,11 @@ class PtySession:
         except subprocess.TimeoutExpired:  # pragma: no cover — a wedged shell
             self._process.kill()
             self._process.wait()
-        try:
-            os.close(self.fd)
-        except OSError:
-            pass
+        # Once only: the number is free again after this, and the next connection accepted
+        # may hold it by the time the drainer's shutdown calls here too.
+        fd, self.fd = self.fd, -1
+        if fd >= 0:
+            try:
+                os.close(fd)
+            except OSError:
+                pass

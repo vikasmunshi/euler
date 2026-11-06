@@ -340,6 +340,20 @@ class PtySignalTest(unittest.TestCase):
         self.assertIn(f'KEY={session.osc_key}.'.encode(), buffer)
         self.assertRegex(session.osc_key, r'^[0-9a-f]{32}$')
 
+    def test_closing_twice_leaves_the_descriptors_next_owner_alone(self) -> None:
+        """The drainer's shutdown closes a session already closed: by then a new connection
+        may hold the number, and closing it again would kill that connection."""
+        session = PtySession(ticket='unused', profile='', argv=(sys.executable, '-c', 'pass'))
+        number = session.fd
+        session.close()
+        reused = os.open(os.devnull, os.O_RDONLY)
+        try:
+            self.assertEqual(reused, number, 'the kernel hands out the lowest free number')
+            session.close()
+            os.fstat(reused)
+        finally:
+            os.close(reused)
+
 
 class ReaperTests(_WsServiceCase):
     """The detached-TTL reaper (hygiene, not security): a shell nobody has reattached to for
