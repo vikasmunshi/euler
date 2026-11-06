@@ -118,7 +118,7 @@ a parameter that accepts repetition.
 |---------|---------|----------|-------------|
 | [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
-| [`logout`](#command-logout) | — | `reader` | Sign out of the web session, after a short countdown that Enter skips. |
+| [`logout`](#command-logout) | — | `reader` | Sign out of the web session, after a short countdown the notice can skip. |
 | [`logout-all`](#command-logout-all) | — | `admin` | Sign every web user out, after a countdown that running work can extend. |
 | [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
@@ -1388,7 +1388,7 @@ lint
 
 #### Command: `logout`
 
-Sign out of the web session, after a short countdown that Enter skips.
+Sign out of the web session, after a short countdown the notice can skip.
 
 * ⚑ needs reader or above.
 
@@ -1412,8 +1412,8 @@ Sign every web user out, after a countdown that running work can extend.
 
 * ⚑ needs admin.
 
-Everyone with a terminal open sees the reason and a countdown; Enter signs them out at once,
-killing any work they have running. Work still running holds the shell past the countdown, up to a
+Everyone with a terminal open sees the reason and a countdown; the notice's button signs them
+out at once, killing any work they have running. Work still running holds the shell past the countdown, up to a
 limit, then is killed. The command waits for all of that, then revokes every session and
 remember-me token. `redeploy-web`, `upgrade-web` and `remove-web` run it first. Runs under
 `sudo`, so it is the operator terminal's.
