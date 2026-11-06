@@ -11,7 +11,7 @@ import unittest
 from typing import Any, cast
 from unittest.mock import patch
 
-from euler_webshell import logout_all
+from euler_webshell import logout_all, users
 from euler_webshell.user.logout import LogoutNotice
 from euler_webshell.ws.manager import PtyManager
 from tests import silence
@@ -162,6 +162,45 @@ class NoticeTests(unittest.IsolatedAsyncioTestCase):
         await self.settle(notice)
         self.assertEqual(manager.frames.count({'euler': 'logout-end'}), 0)
         self.assertEqual(self.ended, 1)
+
+
+class CommandTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.launch = self.enterContext(patch('euler_webshell.users.subprocess.run'))
+        self.launch.return_value.returncode = 0
+        self.printed = self.enterContext(patch('euler_webshell.users.console.print'))
+
+    def said(self) -> str:
+        return ' '.join(str(call.args[0]) for call in self.printed.call_args_list)
+
+    def test_a_reason_with_now_is_called_out(self) -> None:
+        self.assertEqual(users.logout_all('stopping', now=True), 0)
+        self.assertIn('--now', self.launch.call_args.args[0])
+        self.assertIn('reason goes unused', self.said())
+
+    def test_a_reason_with_extend_is_called_out(self) -> None:
+        users.logout_all('stopping', extend=60)
+        self.assertIn('reason goes unused', self.said())
+
+    def test_the_default_reason_says_nothing(self) -> None:
+        users.logout_all(now=True)
+        self.assertEqual(self.said(), '')
+
+    def test_a_notice_keeps_its_reason_without_comment(self) -> None:
+        users.logout_all('stopping')
+        self.assertIn('stopping', self.launch.call_args.args[0])
+        self.assertEqual(self.said(), '')
+
+    def test_ctrl_c_is_an_interruption_not_an_error(self) -> None:
+        self.launch.side_effect = KeyboardInterrupt
+        self.assertEqual(users.logout_all('stopping'), 130)
+        self.assertIn('interrupted', self.said())
+        self.assertNotIn('error', self.said())
+
+    def test_a_failed_launch_is_still_an_error(self) -> None:
+        self.launch.side_effect = OSError('no sudo')
+        self.assertEqual(users.logout_all('stopping'), 1)
+        self.assertIn('no sudo', self.said())
 
 
 class LogoutAllTests(unittest.TestCase):

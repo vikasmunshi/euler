@@ -387,11 +387,16 @@ def logout_all(reason: str = DEFAULT_REASON, extend: int = 0, now: bool = False)
         extend: Add this many seconds to a notice already running, then return.
         now: Close every shell at once, running work or not, with no notice.
     """
+    if (extend or now) and reason != DEFAULT_REASON:
+        console.print('[warning]note:[/warning] no notice is drawn for this, so the reason goes unused')
     argv = ['sudo', sys.executable, '-m', 'euler_webshell.logout_all']
     argv += [f'--extend={extend}'] if extend else ['--now'] if now else [reason]
     try:
         return subprocess.run(argv, check=False).returncode
-    except (OSError, KeyboardInterrupt) as exc:
+    except KeyboardInterrupt:
+        console.print('[muted]logout-all interrupted[/muted]')
+        return 130
+    except OSError as exc:
         console.print(f'[error]error:[/error] could not run logout-all ({exc})')
         return 1
 
