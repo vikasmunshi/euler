@@ -1433,7 +1433,7 @@ logout-all
 |----------|-------------|
 | `reason` | What the notice tells users. |
 | `extend` | Add this many seconds to a notice already running, then return. |
-| `now` | End the wait for everyone at once, running work or not. |
+| `now` | Close every shell at once, running work or not, with no notice. |
 
 *Defined in* `euler_webshell.users.logout_all` — on the web host only (the web shell and `solver-host`).
 
