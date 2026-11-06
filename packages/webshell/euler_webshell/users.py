@@ -376,8 +376,8 @@ def _report_drift() -> None:
 def logout_all(reason: str = DEFAULT_REASON, extend: int = 0, now: bool = False) -> int:
     """Sign every web user out, after a countdown that running work can extend.
 
-    Everyone with a terminal open sees the reason and a countdown; Enter signs them out at once,
-    killing any work they have running. Work still running holds the shell past the countdown, up to a
+    Everyone with a terminal open sees the reason and a countdown; the notice's button signs them
+    out at once, killing any work they have running. Work still running holds the shell past the countdown, up to a
     limit, then is killed. The command waits for all of that, then revokes every session and
     remember-me token. `redeploy-web`, `upgrade-web` and `remove-web` run it first. Runs under
     `sudo`, so it is the operator terminal's.

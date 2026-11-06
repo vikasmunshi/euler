@@ -158,7 +158,7 @@ class NoticeTests(unittest.IsolatedAsyncioTestCase):
         manager = _Manager()
         notice = self.notice(manager)
         notice.arm('stopping', 60, 600)
-        manager.alive = False                    # the user pressed Enter and signed out
+        manager.alive = False                    # the user signed out from the notice
         await self.settle(notice)
         self.assertEqual(manager.frames.count({'euler': 'logout-end'}), 0)
         self.assertEqual(self.ended, 1)

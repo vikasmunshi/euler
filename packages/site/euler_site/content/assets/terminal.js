@@ -237,10 +237,6 @@
   // keystroke in that instant is lost with them; the replay takes milliseconds.
   term.onData(function (data) {
     if (!live) { return; }
-    if (notice) {                       // § the logout notice: Enter signs out, whatever is running
-      if (data === '\r') { leave(); return; }
-      if (!notice.running) { return; }
-    }
     send(new TextEncoder().encode(data));
   });
   term.onResize(sendSize);
@@ -494,12 +490,10 @@
   // ── the logout notice ──────────────────────────────────────────────────────
   // Drawn by the page around this frame (site.js § the logout notice), or with no page in an
   // element of its own, never into xterm: the text stays out of the scrollback, and a
-  // program holding the screen is not written over. Enter always ends the
-  // wait (§ term.onData): the sign-out closes the shell, which kills any running work, so the
-  // notice says so. Other keys reach running work and go nowhere at an idle prompt, so no new
-  // work starts in a shell that is about to close.
+  // program holding the screen is not written over. It takes nothing from the terminal:
+  // every key still reaches the shell, and signing out early is the page's button.
   var noticeBox = document.getElementById('logout-notice');
-  var notice = null;                    // set while a notice stands
+  var notice = false;                   // true while a notice stands
   var countdown = null;                 // the `logout` command's timer
   var leaving = false;
 
@@ -508,7 +502,7 @@
   }
 
   function drawNotice(reason, seconds, running) {
-    notice = { running: running };
+    notice = true;
     var detail = running
       ? 'signing out when your running work ends, in ' + duration(seconds) + ' at most'
       : 'signing out in ' + duration(seconds);
@@ -517,13 +511,12 @@
         location.origin);
       return;
     }
-    noticeBox.textContent = reason + ' — ' + detail + '. Press Enter to '
-      + (running ? 'stop it and ' : '') + 'sign out now.';
+    noticeBox.textContent = reason + ' — ' + detail;
     noticeBox.hidden = false;
   }
 
   function clearNotice() {
-    notice = null;
+    notice = false;
     noticeBox.hidden = true;
     if (window.parent !== window) { window.parent.postMessage({ euler: 'logout-notice' }, location.origin); }
   }
@@ -597,7 +590,6 @@
         if (typeof ev.data.command !== 'string' || !ev.data.command) { break; }
         // The parent greys its controls out while a child holds the PTY; this is the
         // backstop, because typing `git-sync` at a bash or Python prompt runs it THERE.
-        if (notice) { break; }          // § the logout notice: this shell is about to close
         if (handedOff) {
           term.write('\r\n\x1b[33mthe shell has handed this terminal to another program — '
                      + 'exit it first, then try again.\x1b[0m\r\n');

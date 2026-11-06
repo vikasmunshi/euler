@@ -2244,8 +2244,8 @@ posts each tick up as `{euler: 'logout-notice'}`, and `site.js` draws it in `#se
 under the header across both panes: outside the terminal, so a hidden terminal still warns, and
 over the panes, so neither resizes. Then `{euler: 'logout'}` makes `site.js` submit the header's own
 logout form, as the bar's button does, so there is one sign-out whichever control started it, and
-path 2 above reaps the shell. While the notice stands Enter in the terminal skips the wait and
-nothing else types. A shell no page answers closes itself and
+path 2 above reaps the shell. The notice takes nothing from the terminal: every key still reaches the
+shell, and the button is how to skip the wait. A shell no page answers closes itself and
 says the browser session is still signed in.
 
 **`logout-all`, ahead of a shutdown.** `redeploy-web`, `upgrade-web` and `remove-web` run it first
@@ -2261,9 +2261,8 @@ and the notice uses it:
 - `logout-all extend=<seconds>` adds to the countdown and the limit, and `logout-all --now` closes
   every shell at once, whether or not a notice stands, so no reason is shown.
 
-Enter, or the bar's button, ends the wait at once, even while work runs: the sign-out closes the
-shell and kills that work, and the button says so. Running programs therefore lose Enter as input for as long as a
-notice stands; other keys still reach them. At the end the instance sends `logout-end`, which signs open
+The bar's button ends the wait at once, even while work runs: the sign-out closes the shell and
+kills that work, and the button says so. At the end the instance sends `logout-end`, which signs open
 tabs out through the header's form. The waiting command then calls `/admin/revoke-all`, which covers
 users with no tab open and deliberately pushes no teardown, since that would start every stopped
 instance. A tab whose terminal is down gets no frame, so while it is on screen `site.js` asks

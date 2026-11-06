@@ -234,6 +234,8 @@ class HeaderChipShapeTests(unittest.TestCase):
             self.assertIn(hook, base)
         for hook in ('session-notice', '[data-notice-reason]', '[data-notice-detail]', '[data-notice-leave]'):
             self.assertIn(hook, script)
+        # The notice takes no keys: Enter belongs to whatever runs in the terminal.
+        self.assertNotIn("data === '\\r'", (assets / 'terminal.js').read_text(encoding='utf-8'))
         # site.js runs in the head, before the body it looks for exists.
         self.assertRegex(script, r"'DOMContentLoaded', function \(\) \{\s+var sessionNotice =")
 

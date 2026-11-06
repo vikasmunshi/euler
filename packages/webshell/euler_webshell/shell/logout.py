@@ -18,7 +18,7 @@ from euler_webshell.shell import osc
 from solver.config import config
 from solver.shell import console, register
 
-#: How long the page counts down before it signs out; Enter skips it.
+#: How long the page counts down before it signs out; the notice's button skips it.
 COUNTDOWN_SECONDS: int = 5
 #: How long past the countdown the sign-out may take before the shell gives up on the page.
 _GRACE_SECONDS: int = 10
@@ -26,7 +26,7 @@ _GRACE_SECONDS: int = 10
 
 @register(requires='reader')
 def logout() -> int:
-    """Sign out of the web session, after a short countdown that Enter skips.
+    """Sign out of the web session, after a short countdown the notice can skip.
 
     The page signs out the way the header's Logout does: the session and its remember-me
     token end, the vault locks and this shell closes. Web shell only: a terminal session
