@@ -251,7 +251,7 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .prompt .sym { color: var(--dev-accent); }
 .prompt .path { color: var(--dev-blue); }
 
-/* ---- chrome: counter, notes, nav buttons ---- */
+/* ---- chrome: counter, notes, slide index, nav buttons ---- */
 
 .counter {
   position: absolute;
@@ -300,6 +300,52 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .notes-body p:last-child { margin-bottom: 0; }
 .notes-body p.pn { padding: 10px 12px; background: #16233B; border-left: 3px solid var(--heat-1); border-radius: 4px; }
 
+/* The slide index: one icon per slide, in the deck's order, popped up over the nav buttons
+   as the notes are. A panel, not a strip along the bottom: it covers nothing while closed,
+   and its grid wraps to a phone's width. */
+.index-panel {
+  position: fixed;
+  left: 16px;
+  bottom: 64px;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(60vh, calc(100vh - 96px));
+  display: flex;
+  flex-direction: column;
+  background: #0F1726F7;
+  color: #E8ECF2;
+  font: 17px/1.5 var(--sans);
+  border: 1px solid #2C3A52;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px #0008;
+  z-index: 11;
+}
+.index-panel[hidden] { display: none; }
+.index-panel .notes-head span { text-transform: none; letter-spacing: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 8px;
+  padding: 12px;
+  overflow: auto;
+}
+/* A small slide: the paper of the story, or the dark of the developer section. */
+.index-grid button {
+  aspect-ratio: 16 / 10;
+  min-height: 34px;
+  padding: 0;
+  font: 15px var(--sans);
+  font-variant-numeric: tabular-nums;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid #2C3A52;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.index-grid button[data-theme="dev"] { background: var(--dev-bg); color: var(--dev-text); border-color: var(--dev-border); }
+.index-grid button:hover { border-color: var(--heat-1); }
+.index-grid button:focus-visible { outline: 3px solid var(--heat-1); outline-offset: 1px; }
+.index-grid button[aria-current="true"] { border-color: var(--heat-1); box-shadow: 0 0 0 2px var(--heat-1); }
+
 .nav {
   position: fixed;
   bottom: 12px;
@@ -311,7 +357,7 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   transition: opacity 150ms;
 }
 .nav:hover, .nav:focus-within { opacity: 1; }
-.figure .nav, .figure .counter, .figure .notes-panel { display: none; }
+.figure .nav, .figure .counter, .figure .notes-panel, .figure .index-panel { display: none; }
 .nav button {
   font: 15px var(--sans);
   padding: 8px 14px;
@@ -334,7 +380,7 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   .viewport { position: static; display: block; }
   .stage { position: static; margin: 0; transform: none !important; overflow: visible; height: auto; }
   .slide { display: flex !important; position: relative; height: 900px; page-break-after: always; }
-  .nav, .notes-panel, .counter { display: none !important; }
+  .nav, .notes-panel, .index-panel, .counter { display: none !important; }
 }
 
 .slide code { font-family: var(--mono); font-size: 0.86em; color: var(--ink); }

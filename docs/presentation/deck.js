@@ -352,6 +352,11 @@
     notes.hidden = !on;
     notesButton.setAttribute('aria-pressed', String(on));
   };
+  const index = document.getElementById('index');
+  const indexTitle = document.getElementById('index-title');
+  const indexGrid = document.getElementById('index-grid');
+  const indexButton = document.getElementById('toggle-index');
+  const INDEX_PROMPT = indexTitle.textContent;
   let current = 0;
 
   const RENDER = { 'title-grid': titleGrid, timeline: timelineFinal, cumulative, difficulty };
@@ -376,6 +381,7 @@
     const slide = slides[current];
     stage.dataset.theme = slide.dataset.theme || '';
     counter.textContent = `${current + 1} / ${slides.length}`;
+    [...indexGrid.children].forEach((b, i) => b.setAttribute('aria-current', String(i === current)));
     const n = slide.querySelector('.notes');
     notesBody.innerHTML = n ? n.innerHTML : '<p>No notes for this slide.</p>';
     notesTitle.textContent = `Speaker notes · slide ${current + 1} of ${slides.length}`;
@@ -392,15 +398,59 @@
     if (ctrl) ctrl.replay(); else show(current);
   };
 
+  /* The slide index: an icon per slide, numbered, named by the slide's heading. */
+  const slideTitle = slide => {
+    if (slide.dataset.title) return slide.dataset.title;
+    const heading = slide.querySelector('h1, h2, .statement');
+    if (!heading) return '';
+    const copy = heading.cloneNode(true);
+    copy.querySelectorAll('br').forEach(br => br.replaceWith(' '));
+    return copy.textContent.replace(/\s+/g, ' ').trim();
+  };
+  const showIndex = (on, refocus = true) => {
+    index.hidden = !on;
+    indexButton.setAttribute('aria-pressed', String(on));
+    indexTitle.textContent = INDEX_PROMPT;
+    if (on) indexGrid.children[current].focus();
+    else if (refocus) indexButton.focus();
+  };
+  const buildIndex = () => slides.forEach((slide, i) => {
+    const title = slideTitle(slide);
+    const label = title ? `${i + 1}: ${title}` : `Slide ${i + 1}`;
+    const icon = document.createElement('button');
+    icon.type = 'button';
+    icon.textContent = i + 1;
+    icon.setAttribute('aria-label', label);
+    if (slide.dataset.theme) icon.dataset.theme = slide.dataset.theme;
+    // the panel's head names the slide under the pointer, or under the keyboard's focus
+    const name = () => { indexTitle.textContent = label; };
+    const unname = () => { indexTitle.textContent = INDEX_PROMPT; };
+    icon.addEventListener('pointerenter', name);
+    icon.addEventListener('pointerleave', unname);
+    icon.addEventListener('focus', name);
+    icon.addEventListener('blur', unname);
+    icon.addEventListener('click', () => {
+      showIndex(false);
+      if (i !== current) show(i);
+    });
+    indexGrid.append(icon);
+  });
+
   document.addEventListener('keydown', e => {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === ' ' && indexGrid.contains(e.target)) return;  // Space picks the focused icon
     switch (e.key) {
       case 'ArrowRight': case 'ArrowDown': case 'PageDown': case ' ': forward(); break;
       case 'ArrowLeft': case 'ArrowUp': case 'PageUp': back(); break;
       case 'Home': show(0); break;
       case 'End': show(slides.length - 1); break;
       case 'n': case 'N': showNotes(notes.hidden); break;
-      case 'Escape': if (notes.hidden) return; showNotes(false); break;
+      case 's': case 'S': showIndex(index.hidden); break;
+      case 'Escape':
+        if (!index.hidden) showIndex(false);
+        else if (!notes.hidden) showNotes(false);
+        else return;
+        break;
       case 'r': case 'R': replay(); break;
       case 'f': case 'F':
         if (document.fullscreenElement) document.exitFullscreen();
@@ -414,6 +464,12 @@
   document.getElementById('next').addEventListener('click', forward);
   notesButton.addEventListener('click', () => showNotes(notes.hidden));
   document.getElementById('notes-close').addEventListener('click', () => showNotes(false));
+  indexButton.addEventListener('click', () => showIndex(index.hidden));
+  document.getElementById('index-close').addEventListener('click', () => showIndex(false));
+  // a click anywhere else closes the index, and leaves the focus with whatever was clicked
+  document.addEventListener('click', e => {
+    if (!index.hidden && !index.contains(e.target) && !indexButton.contains(e.target)) showIndex(false, false);
+  });
   window.addEventListener('resize', fit);
   // A phone has no keys: a horizontal swipe across the slide steps like → and ←. A mostly
   // vertical or short drag is left alone (a scroll, a tap on a control).
@@ -432,6 +488,7 @@
   }, { passive: true });
 
   fillStats();
+  buildIndex();  // after the stats: some headings carry them
   slides.forEach(s => { const render = RENDER[s.dataset.viz]; if (render) render(s); });
   for (const s of slides) {
     if (s.dataset.problems !== undefined) problemRef(s, s.dataset.problems.split(/\s+/).filter(Boolean));
