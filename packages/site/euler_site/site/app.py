@@ -394,7 +394,7 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'tags': content.problem_tag_view(repo_root, number),
         'files': _file_entries(repo_root, sdir, git=not request.app.get(PUBLIC_KEY, False)),
         'test_cases': test_cases,
-        'results': content.load_json(sdir / 'results.json') or [],
+        'results': content.result_rows(content.load_json(sdir / 'results.json') or []),
         'crumbs': [_HOME, ('solutions', '/solutions/'), (f'{number:04d}', None)],
         'actions': [],
     }

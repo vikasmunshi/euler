@@ -271,6 +271,8 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('test-cases', body)                   # test cases as a table (§7)
         self.assertLess(body.index('test-cases'), body.index('file-flow'))
         self.assertLess(body.index('class="results"'), body.index('file-flow'))
+        self.assertIn('avg&nbsp;seconds&nbsp;py', body)     # one timing column per language
+        self.assertNotIn('<th>runs</th>', body)
 
     @unittest_run_loop
     async def test_problem_page_tags_and_topics(self) -> None:
@@ -1024,6 +1026,61 @@ class TopicCardStatusTests(unittest.TestCase):
         body = self._render('final', total=950)
         self.assertIn('Generating and testing primes', body)
         self.assertNotIn('card-bar', body)
+
+
+class ResultRowsTests(unittest.TestCase):
+    """`content.result_rows`: a record per language → one table row per solution index."""
+
+    @staticmethod
+    def _record(solution: str, verdict: str = 'correct', answer: object = 13,
+                category: str = 'main', average: float = 0.5, runs: int = 84) -> dict[str, object]:
+        return {'category': category, 'solution': solution, 'args': '6', 'answer': answer,
+                'verdict': verdict, 'average': average, 'number_runs': runs}
+
+    def test_languages_share_a_row(self) -> None:
+        rows = content.result_rows([self._record('p0007_s0_c', average=0.25, runs=10),
+                                    self._record('p0007_s0.py', average=1.5, runs=3)])
+        self.assertEqual(1, len(rows))
+        self.assertEqual('p0007_s0', rows[0]['solution'])
+        self.assertEqual('correct', rows[0]['verdict'])
+        self.assertEqual('0.250000 (10)', rows[0]['c'])
+        self.assertEqual('1.500000 (3)', rows[0]['py'])
+
+    def test_indexes_and_categories_keep_their_own_rows(self) -> None:
+        rows = content.result_rows([self._record('p0007_s0.py'), self._record('p0007_s1.py'),
+                                    self._record('p0007_s0.py', category='dev')])
+        self.assertEqual([('p0007_s0', 'main'), ('p0007_s1', 'main'), ('p0007_s0', 'dev')],
+                         [(r['solution'], r['category']) for r in rows])
+
+    def test_a_failure_names_its_language(self) -> None:
+        for py, c, verdict in (('timeout', 'correct', 'incorrect (py)'),
+                               ('correct', 'overflow', 'incorrect (c)'),
+                               ('timeout', 'overflow', 'incorrect (both)')):
+            row = content.result_rows([self._record('p0007_s0.py', py), self._record('p0007_s0_c', c)])[0]
+            self.assertEqual(verdict, row['verdict'])
+            self.assertFalse(row['correct'])
+            self.assertIn(f'py: {py}', row['detail'])
+
+    def test_a_lone_language_is_named_not_both(self) -> None:
+        row = content.result_rows([self._record('p0007_s0.py', 'overflow')])[0]
+        self.assertEqual('incorrect (py)', row['verdict'])
+        self.assertEqual('', row['c'])
+
+    def test_a_pass_speaks_for_its_language(self) -> None:
+        row = content.result_rows([self._record('p0007_s0.py', 'timeout', answer=None, average=9.0, runs=1),
+                                   self._record('p0007_s0.py', average=2.0, runs=5),
+                                   self._record('p0007_s0_c')])[0]
+        self.assertEqual('correct', row['verdict'])
+        self.assertEqual('2.000000 (5)', row['py'])
+        self.assertEqual(13, row['answer'])
+
+    def test_the_answer_comes_from_the_pass(self) -> None:
+        row = content.result_rows([self._record('p0007_s0.py', 'timeout', answer=None),
+                                   self._record('p0007_s0_c', answer=0)])[0]
+        self.assertEqual(0, row['answer'])
+
+    def test_malformed_records_are_skipped(self) -> None:
+        self.assertEqual([], content.result_rows(['not a record', 7]))
 
 
 class MathSpanTests(unittest.TestCase):

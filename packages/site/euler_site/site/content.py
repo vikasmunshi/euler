@@ -16,7 +16,7 @@ from __future__ import annotations
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
            'TEXT_SUFFIXES', 'CODE_ROOTS', 'in_code_scope', 'ABOUT_PAGES', 'SHELL_DOCS', 'CATALOGUE_DOC',
            'solution_dir', 'load_problems', 'centuries', 'problem_files', 'section_state',
-           'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'collapse_problems',
+           'resolve_file', 'resolve_repo_file', 'load_json', 'result_rows', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'recolour_statement', 'plate_statement_images',
            'prepare_statement', 'STATEMENT_COLOURS', 'git_status', 'topic_status',
            'list_docs', 'read_doc', 'shell_docs', 'command_catalogue', 'list_topics', 'list_topic_groups',
@@ -279,6 +279,56 @@ def load_json(path: Path) -> Any | None:
         return json.loads(path.read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError):
         return None
+
+
+def _solution_language(solution: str) -> tuple[str, str]:
+    """Split a `results.json` solution name into its index and language: `p0042_s0.py`, `p0042_s0_c`."""
+    for suffix, language in (('.py', 'py'), ('_c', 'c')):
+        if solution.endswith(suffix):
+            return solution.removesuffix(suffix), language
+    return solution, ''
+
+
+def _timing(result: dict[str, Any] | None) -> str:
+    """One language's cell in a results row: the average seconds, then the runs in brackets."""
+    if result is None or result.get('average') is None:
+        return ''
+    return f"{result['average']:.6f} ({result.get('number_runs', '?')})"
+
+
+def result_rows(results: list[Any]) -> list[dict[str, Any]]:
+    """`results.json` as the problem page's table: one row per test case and solution index.
+
+    The file holds a record per language, and can hold two for one language, since a verdict
+    is part of its key: a solution that timed out once and passed later keeps both. The pass
+    then speaks for that language. Anything else counts as `incorrect`, naming the language,
+    and `detail` keeps the stored verdicts (`timeout`, `overflow`) for the cell's tooltip.
+    """
+    groups: dict[tuple[str, str, str], dict[str, dict[str, Any]]] = {}
+    for result in results:
+        if not isinstance(result, dict):
+            continue
+        index, language = _solution_language(str(result.get('solution', '')))
+        group = groups.setdefault((str(result.get('category', '')), str(result.get('args', '')), index), {})
+        if language not in group or result.get('verdict') == 'correct':
+            group[language] = result
+
+    rows: list[dict[str, Any]] = []
+    for (category, _, index), group in groups.items():
+        failed = [language for language, result in group.items() if result.get('verdict') != 'correct']
+        passed = [result for result in group.values() if result.get('verdict') == 'correct']
+        named = 'both' if len(failed) == 2 else failed[0] if failed else ''
+        rows.append({
+            'solution': index,
+            'category': category,
+            'answer': next((r['answer'] for r in passed + list(group.values()) if r.get('answer') is not None), ''),
+            'correct': not failed,
+            'verdict': 'correct' if not failed else f'incorrect ({named})' if named else 'incorrect',
+            'detail': ', '.join(f"{language}: {result.get('verdict', '')}" for language, result in group.items()),
+            'c': _timing(group.get('c')),
+            'py': _timing(group.get('py')),
+        })
+    return rows
 
 
 # ── progress (the /edit/solutions/ collection editor, 5d) ──────────────────────────
