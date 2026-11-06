@@ -186,6 +186,7 @@ script's tables, too.
 | --- | --- |
 | [`capture-evidence.sh`](../scripts/ops/capture-evidence.sh) | Snapshot the evidence a change to the web host would destroy, before making it. |
 | [`capture-host.sh`](../scripts/ops/capture-host.sh) | Capture the web host's security posture, read-only, into one 0600 file you own. |
+| [`capture-journal.sh`](../scripts/ops/capture-journal.sh) | Collect the web services' journals and the live shells' state, read-only, for debugging. |
 | [`capture-run.sh`](../scripts/ops/capture-run.sh) | Run make targets (or one command) in order, with the whole session captured to audit/logs/. |
 | [`release.sh`](../scripts/ops/release.sh) | Cut a new version and ship it — the whole release turnaround, in one command. |
 | [`reset-user.sh`](../scripts/ops/reset-user.sh) | Reset one collaborator's clone to origin/master — the operator's repair of last resort. |
