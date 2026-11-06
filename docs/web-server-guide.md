@@ -1231,6 +1231,10 @@ pane scrolls its own overflow.
   a row per state: **connect/disconnect** and **hide/show**. The titlebar's controls are
   unchanged and stay the closest ones to hand while the window is there.
 
+  Every `details.menu` closes on a click outside it. A click in the terminal lands in the
+  iframe's document, which the page's listener cannot see, so `terminal.js` reports each
+  press as `{euler: 'pane-click'}` and `site.js` closes the open menus.
+
   Both rows carry the attributes `site.js` already dispatches on, so the panel added no
   wiring: `[data-term-toggle]` for the session, `[data-term-hide]`/`[data-term-show]` for the
   layout. The session row is **one** control that flips (the act on offer is always the

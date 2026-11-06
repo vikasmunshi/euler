@@ -17,7 +17,9 @@
      {euler: 'term-state', connected, busy} whenever the socket opens or closes, or
      the shell lends the terminal to an interactive child and takes it back (busy),
      so the titlebar's toggle can name the act it offers and the command-typing
-     controls know whether a command would reach the shell.
+     controls know whether a command would reach the shell;
+     {euler: 'pane-click'} on a press in this document, which the parent's own click
+     listener cannot see, so an open header menu closes as on any outside click.
 
    Wire protocol (packages/webshell/euler_webshell/ws/app.py): binary frames are raw PTY bytes both
    ways; a text frame {"resize": [cols, rows]} carries the geometry. */
@@ -473,6 +475,14 @@
   function disarm() {
     if (guard) { window.removeEventListener('beforeunload', guard); guard = null; }
   }
+
+  // A press in this document never reaches the parent's listeners, so say so. Capture,
+  // because xterm handles its own mouse events and may stop them on the way down.
+  window.addEventListener('pointerdown', function () {
+    if (window.parent !== window) {
+      window.parent.postMessage({ euler: 'pane-click' }, location.origin);
+    }
+  }, true);
 
   // Parent → here (site.js): the shell's terminal controls, plus 'disarm' before a
   // deliberate exit (logout) so the beforeunload dialog stays quiet.

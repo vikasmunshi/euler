@@ -639,6 +639,15 @@
     paintTerminalControls();
   });
 
+  // A click in the terminal lands in the iframe's document, out of reach of the click
+  // listener that closes open menus, so the iframe reports it and the menus close here.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'pane-click') { return; }
+    document.querySelectorAll('details.menu[open]').forEach(function (menu) {
+      menu.removeAttribute('open');
+    });
+  });
+
   // ── the git chip's refresh (OSC 5379 `git`) ────────────────────────────────
   // The header reads its git state once per navigation and never polls — but the
   // git commands run in the TERMINAL, and that is not a navigation. So the shell

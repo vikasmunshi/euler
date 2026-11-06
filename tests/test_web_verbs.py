@@ -197,6 +197,13 @@ class HeaderChipShapeTests(unittest.TestCase):
         nav = self._template('_nav.html')
         self.assertNotIn('term-menu', nav.split('id="term-chip"')[1][:200])
 
+    def test_a_click_in_the_terminal_closes_open_menus(self) -> None:
+        """The iframe's clicks never reach the page's listener, so the two scripts must agree
+        on the message that carries them across."""
+        assets = _SITE / 'content' / 'assets'
+        self.assertIn("postMessage({ euler: 'pane-click' }", (assets / 'terminal.js').read_text(encoding='utf-8'))
+        self.assertIn("ev.data.euler !== 'pane-click'", (assets / 'site.js').read_text(encoding='utf-8'))
+
     def test_site_js_paints_every_readout_the_chip_declares(self) -> None:
         """The panel's words are site.js's to write, so a hook the template declares and the
         script never fills would render as the static placeholder for ever."""
