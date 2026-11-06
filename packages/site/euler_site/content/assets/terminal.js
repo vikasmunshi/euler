@@ -151,6 +151,9 @@
         window.parent.postMessage({ euler: 'message', unread: msg.unread }, location.origin);
         return;
       }
+      // The shutdown notice: the instance keeps the clock and ticks here (user/logout.py).
+      if (msg.euler === 'logout') { drawNotice(String(msg.reason), msg.remaining, !!msg.running); return; }
+      if (msg.euler === 'logout-end') { leave(); return; }
       if (msg.replay !== 'end') { return; }
       oscKey = typeof msg.osc === 'string' ? msg.osc : '';
       // term.write() is asynchronous — the replayed bytes are queued for parsing,
@@ -183,6 +186,7 @@
       socket = null;
       handedOff = false;
       report(false);
+      if (!countdown && !leaving) { clearNotice(); }  // no more ticks are coming
       if (closedByUs) {
         term.write('\r\n\x1b[33mdisconnected — your shell keeps running; '
                    + 'reconnect from the titlebar above.\x1b[0m\r\n');
@@ -232,7 +236,7 @@
   // keystroke in that instant is lost with them; the replay takes milliseconds.
   term.onData(function (data) {
     if (!live) { return; }
-    if (notice) {                       // § the logout notice: Enter skips, nothing else types
+    if (notice && !notice.running) {    // § the logout notice: Enter skips, nothing else types
       if (data === '\r') { leave(); }
       return;
     }
@@ -488,18 +492,30 @@
 
   // ── the logout notice ──────────────────────────────────────────────────────
   // Drawn over the terminal in its own element, never into xterm: the text stays out of the
-  // scrollback, and a program holding the screen is not written over. While it stands the
-  // keyboard is the notice's (§ term.onData): Enter skips the wait, and nothing else types,
-  // so no new work starts in a shell that is about to close.
+  // scrollback, and a program holding the screen is not written over. While the shell is idle
+  // the keyboard is the notice's (§ term.onData): Enter skips the wait, and nothing else types,
+  // so no new work starts in a shell that is about to close. While work runs the keyboard stays
+  // the program's, because Enter there is input, and skipping would kill what it is typed into.
   var noticeBox = document.getElementById('logout-notice');
   var notice = null;                    // set while a notice stands
   var countdown = null;                 // the `logout` command's timer
   var leaving = false;
 
-  function drawNotice(reason, seconds) {
-    notice = {};
-    noticeBox.textContent = reason + ' — signing out in ' + seconds + 's. Press Enter to sign out now.';
+  function duration(seconds) {
+    return seconds < 60 ? seconds + 's' : Math.floor(seconds / 60) + 'm ' + (seconds % 60) + 's';
+  }
+
+  function drawNotice(reason, seconds, running) {
+    notice = { running: running };
+    noticeBox.textContent = reason + ' — ' + (running
+      ? 'signing out when your running work ends, in ' + duration(seconds) + ' at most.'
+      : 'signing out in ' + duration(seconds) + '. Press Enter to sign out now.');
     noticeBox.hidden = false;
+  }
+
+  function clearNotice() {
+    notice = null;
+    noticeBox.hidden = true;
   }
 
   //: Sign out. Framed, the parent submits the header's form, which also disarms this
@@ -520,10 +536,10 @@
   function startCountdown(seconds) {
     if (notice) { return; }
     var left = seconds;
-    drawNotice('user initiated logout', left);
+    drawNotice('user initiated logout', left, false);
     countdown = setInterval(function () {
       left -= 1;
-      if (left <= 0) { leave(); } else { drawNotice('user initiated logout', left); }
+      if (left <= 0) { leave(); } else { drawNotice('user initiated logout', left, false); }
     }, 1000);
   }
 

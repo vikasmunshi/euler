@@ -214,6 +214,14 @@ class HeaderChipShapeTests(unittest.TestCase):
         self.assertIn('form.requestSubmit()', script)
         self.assertIn('data-logout', self._template('_nav.html'))
 
+    def test_the_terminal_obeys_the_notices_frames(self) -> None:
+        """The two frame names are the wire between `user/logout.py` and the page."""
+        script = (_SITE / 'content' / 'assets' / 'terminal.js').read_text(encoding='utf-8')
+        service = Path('packages/webshell/euler_webshell/user/logout.py').read_text(encoding='utf-8')
+        for frame in ('logout', 'logout-end'):
+            self.assertIn(f"msg.euler === '{frame}'", script)
+            self.assertIn(f"'euler': '{frame}'", service)
+
     def test_site_js_paints_every_readout_the_chip_declares(self) -> None:
         """The panel's words are site.js's to write, so a hook the template declares and the
         script never fills would render as the static placeholder for ever."""

@@ -382,6 +382,7 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     render.py                     — The full-page-vs-block render contract (§4.5).
     validate.py                   — The save gate: the checks every write passes.
 packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-guide.md).
+  logout_all.py                   — Sign every web user out ahead of a shutdown: run **under sudo** by `logout-all` and `redeploy-web`.
   roster.py                       — The collaborator roster — `/etc/euler/roster/users.json`.
   users.py                        — The `users` shell command: account administration for the operator.
   version.py                      — The euler-webshell build version — in lockstep with `solver.version` (docs/package-guide.md § 5.2).
@@ -408,6 +409,7 @@ packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended
     __main__.py                   — Per-user service entry point: `python -m euler_webshell.user`.
     app.py                        — The per-user aiohttp app: one collaborator's content **and** web shell.
     config.py                     — Per-user service runtime configuration, read from the environment.
+    logout.py                     — The shutdown notice: one instance's countdown to closing its shell (`logout-all`).
     msg_api.py                    — The header's message chip for the per-user service (web-server-guide § Messaging).
     vault_api.py                  — Vault + account routes for the per-user service.
   ws/                             — The web-shell service: the solver PTY terminal over WebSocket.

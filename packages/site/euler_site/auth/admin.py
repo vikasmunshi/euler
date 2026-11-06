@@ -30,7 +30,7 @@ the SoR.
 """
 from __future__ import annotations
 
-__all__ = ['main']
+__all__ = ['main', 'revoke_all']
 
 import grp
 import json
@@ -192,6 +192,14 @@ def _api(method: str, path: str, *, body: dict[str, Any] | None = None,
     if not token:
         raise RuntimeError('EULER_ADMIN_TOKEN not found (is /etc/euler/auth.env deployed, and are you root?)')
     return request(socket_path, method, path, body=body, headers={'X-Admin-Token': token}, timeout=timeout)
+
+
+def revoke_all() -> int:
+    """Drop every session and remember-me token; return how many. Raises on a refusal."""
+    status, data = _api('POST', '/admin/revoke-all')
+    if status != 200 or not isinstance(data, dict):
+        raise RuntimeError(f'admin API: {status} {data}')
+    return int(data.get('revoked', 0))
 
 
 # ── dispatch ────────────────────────────────────────────────────────────────────────

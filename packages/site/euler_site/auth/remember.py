@@ -98,6 +98,13 @@ class RememberStore:
         if records.pop(selector, None) is not None:
             save_json(self._path, records)
 
+    def revoke_all(self) -> int:
+        """Drop every token (`logout-all`); return how many."""
+        records = self._load()
+        if records:
+            save_json(self._path, {})
+        return len(records)
+
     def revoke_email(self, email: str) -> int:
         """Drop every token for *email* (disable/remove); return how many."""
         records = self._load()

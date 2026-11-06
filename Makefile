@@ -16,7 +16,7 @@
         deploy-msg remove-msg upgrade-msg redeploy-msg \
         deploy-site remove-site upgrade-site redeploy-site \
         deploy-user remove-user upgrade-user redeploy-user \
-        deploy-web remove-web upgrade-web redeploy-web status-web \
+        deploy-web remove-web upgrade-web redeploy-web logout-web status-web \
         test run audit verify-solutions uninstall version release check-version
 
 VENV   := .venv
@@ -371,16 +371,25 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
+LOGOUT_REASON ?= the server is redeploying
+
+## Warn every running instance, then sign everyone out: a 60s countdown, held by running work
+## for up to 10 minutes. Set the notice with LOGOUT_REASON; LOGOUT_ARGS=--now skips the wait.
+logout-web:
+	./scripts/setup/user.sh logout-all "$(LOGOUT_REASON)" $(LOGOUT_ARGS)
+
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
 ## ACLs, units, certs, or the firewall: refresh the edge's static content + Caddyfile →
 ## rebuild the shared venv (auth) → restart the message spool and the public site on it →
 ## bounce the per-user instances so their sockets re-activate them against it. The edge goes first: the restarted services name each
 ## asset by a hash of its bytes (?v=, cached immutable), so those bytes must already be
-## there. Note the running instances are stopped, so live terminals are dropped. The
+## there. logout-web goes before all of it, so users are warned and signed out first: it
+## blocks until their running work ends or the limit passes. Skip the wait with
+## LOGOUT_ARGS=--now. The
 ## everyday "I changed Python/templates/CSS/JS, push it" turnaround. Gated on
 ## check-version so the deployed build's tag is on origin (run serially — the default —
 ## so the guard runs before any deploy step).
-redeploy-web: check-version redeploy-frontend redeploy-auth redeploy-msg redeploy-site redeploy-user
+redeploy-web: check-version logout-web redeploy-frontend redeploy-auth redeploy-msg redeploy-site redeploy-user
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 ## Report the whole web stack in one read-only sweep, in deploy order: the edge, the

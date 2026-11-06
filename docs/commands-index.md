@@ -119,6 +119,7 @@ a parameter that accepts repetition.
 | [`host-authorize`](#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`key-split`](#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`logout`](#command-logout) | — | `reader` | Sign out of the web session, after a short countdown that Enter skips. |
+| [`logout-all`](#command-logout-all) | — | `admin` | Sign every web user out, after a countdown that running work can extend. |
 | [`msg`](#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
 | [`users`](#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |
@@ -1402,6 +1403,39 @@ logout
 ```
 
 *Defined in* `euler_webshell.shell.logout.logout` — on the web host only (the web shell and `solver-host`).
+
+---
+
+#### Command: `logout-all`
+
+Sign every web user out, after a countdown that running work can extend.
+
+* ⚑ needs admin.
+
+Everyone with a terminal open sees the reason and a countdown; Enter skips it for them,
+while their shell is idle. Work still running holds the shell past the countdown, up to a
+limit, then is killed. The command waits for all of that, then revokes every session and
+remember-me token. `redeploy-web` runs it first. Runs under `sudo`, so it is the operator
+terminal's.
+
+**usage**
+
+```
+logout-all
+[reason=<str>] (default the server is shutting down)
+[extend=<int>] (default 0)
+[now=true|--now]
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `reason` | What the notice tells users. |
+| `extend` | Add this many seconds to a notice already running, then return. |
+| `now` | End the wait for everyone at once, running work or not. |
+
+*Defined in* `euler_webshell.users.logout_all` — on the web host only (the web shell and `solver-host`).
 
 ---
 

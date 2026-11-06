@@ -51,7 +51,7 @@ reset verb.
 """
 from __future__ import annotations
 
-__all__ = ['users', 'account_identities']
+__all__ = ['logout_all', 'users', 'account_identities']
 
 import json
 import subprocess
@@ -62,6 +62,7 @@ from typing import Annotated, Any, Literal
 from rich.text import Text
 
 from euler_webshell import roster
+from euler_webshell.logout_all import DEFAULT_REASON
 from solver.auth.identity import system_slug
 from solver.config import config
 from solver.shell import console, register
@@ -369,6 +370,30 @@ def _report_drift() -> None:
         if tracked[slug] and host[slug] and tracked[slug] != host[slug]:
             console.print(f'  [warning]drift[/warning] {slug}: roster says {tracked[slug]}, the '
                           f'host says [accent]{host[slug]}[/accent] — the host is what applies')
+
+
+@register(requires='admin')
+def logout_all(reason: str = DEFAULT_REASON, extend: int = 0, now: bool = False) -> int:
+    """Sign every web user out, after a countdown that running work can extend.
+
+    Everyone with a terminal open sees the reason and a countdown; Enter skips it for them,
+    while their shell is idle. Work still running holds the shell past the countdown, up to a
+    limit, then is killed. The command waits for all of that, then revokes every session and
+    remember-me token. `redeploy-web` runs it first. Runs under `sudo`, so it is the operator
+    terminal's.
+
+    Args:
+        reason: What the notice tells users.
+        extend: Add this many seconds to a notice already running, then return.
+        now: End the wait for everyone at once, running work or not.
+    """
+    argv = ['sudo', sys.executable, '-m', 'euler_webshell.logout_all']
+    argv += [f'--extend={extend}'] if extend else ['--now'] if now else [reason]
+    try:
+        return subprocess.run(argv, check=False).returncode
+    except (OSError, KeyboardInterrupt) as exc:
+        console.print(f'[error]error:[/error] could not run logout-all ({exc})')
+        return 1
 
 
 @register(requires='admin')

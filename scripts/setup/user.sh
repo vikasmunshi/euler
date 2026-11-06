@@ -94,6 +94,9 @@ Usage: $0 <action> [args]
                                read) from this repo, and stop the running instances so
                                their sockets re-activate them against a freshly rebuilt
                                venv (drops live shells).
+  logout-all [reason] [--now]  Warn every running instance and sign everyone out, waiting
+                               for running work up to a limit (euler_webshell.logout_all).
+                               Never fails a deploy: it warns and carries on.
   provision <slug> <email> <profile>
                                Provision one collaborator: the uid <slug> + /home/<slug> (0700), a
                                filter-disabled clone of ~/euler from the public GitHub
@@ -972,6 +975,18 @@ status_one() {
     printf '  %-10s web shell %s\n' '' "${shell}"
 }
 
+# Sign everyone out ahead of a stop. The deployed venv runs this, so the first deploy of the
+# feature finds no module and skips it. A failure must not block a redeploy: that redeploy
+# may be the fix, and stopping the instances drops the shells regardless.
+do_logout_all() {
+    if ! sudo "${VENV_PY}" -P -c 'import euler_webshell.logout_all' 2> /dev/null; then
+        echo "note: the deployed venv has no logout-all yet; skipping the notice"
+        return 0
+    fi
+    sudo "${VENV_PY}" -P -m euler_webshell.logout_all "$@" \
+        || echo "warning: logout-all did not finish; carrying on (live shells will be dropped)"
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 shift || true
@@ -979,6 +994,7 @@ case "${ACTION}" in
     deploy)      do_deploy ;;
     upgrade)     do_upgrade ;;
     redeploy)    do_redeploy ;;
+    logout-all)  do_logout_all "$@" ;;
     remove)      do_remove ;;
     provision)   do_provision "$@" ;;
     deprovision) do_deprovision "$@" ;;

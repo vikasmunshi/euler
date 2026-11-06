@@ -45,6 +45,7 @@ a profile on each channel.
 | `euler_webshell.shell.keys` | `key-split` |  |  | ✓ | ✓ |
 | `euler_webshell.shell.keys` | `user-authorize` |  |  | ✓ | ✓ |
 | `euler_webshell.shell.logout` | `logout` | ✓ | ✓ | ✓ | ✓ |
+| `euler_webshell.users` | `logout-all` |  |  |  | ✓ |
 | `euler_webshell.users` | `users` |  |  |  | ✓ |
 | `solver.ai.api` | `claude-api` |  | ✓ | ✓ | ✓ |
 | `solver.ai.batch` | `claude-batch` |  |  | ✓ | ✓ |
@@ -140,6 +141,7 @@ stops someone below its floor there (phase 7). The answer is never "the floor":
 | `host-unlock` | admin | this machine's own enc-key file, only if it unwraps with this machine's private key | the private key: a block sealed to another machine is refused before anything is written |
 | `key-export` | admin | prints the master key sealed to a public key | the master key |
 | `key-rekey` | admin | rotates this clone's key, commits re-encrypted blobs, re-issues over the spool | the master key; own clone (landing: GitHub); the spool for the re-issue |
+| `logout-all` | admin | signs every web user out: closes their shells, revokes sessions and remember-me tokens | sudo (root-only instance route and the admin plane) |
 | `pip-upgrade` | admin | the running venv | file ownership: `/opt/euler` is root's, so from a web shell it fails; a terminal's own `.venv` is its owner's anyway |
 | `sys-setup` | admin | system packages and services | sudo |
 | `update-docs` | admin | generated docs, committed | own clone (landing: GitHub) |

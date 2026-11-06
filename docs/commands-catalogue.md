@@ -90,6 +90,7 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`host-authorize`](commands-index.md#command-host-authorize) | — | `admin` | Mail the master key, sealed to one machine's public key — the off-host grant. |
 | [`key-split`](commands-index.md#command-key-split) | — | `maintainer` | Send someone half the master key, sealed to their public key. |
 | [`logout`](commands-index.md#command-logout) | — | `reader` | Sign out of the web session, after a short countdown that Enter skips. |
+| [`logout-all`](commands-index.md#command-logout-all) | — | `admin` | Sign every web user out, after a countdown that running work can extend. |
 | [`msg`](commands-index.md#command-msg-messages) | `messages` | `reader` | Read and send messages: what is waiting for you, and what it asks you to do. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | `maintainer` | Record someone's public key and send them half the master key. |
 | [`users`](commands-index.md#command-users) | — | `admin` | Administer accounts on the authorization map + the auth service. |

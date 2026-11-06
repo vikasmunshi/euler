@@ -48,6 +48,12 @@ class SessionStore:
         if token:
             self._sessions.pop(token, None)
 
+    def revoke_all(self) -> int:
+        """Close every session (`logout-all`); return how many."""
+        count = len(self._sessions)
+        self._sessions.clear()
+        return count
+
     def revoke_email(self, email: str, keep: str | None = None) -> int:
         """Close every session for *email* (disable/remove); return how many.
 

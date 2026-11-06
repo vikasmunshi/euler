@@ -477,6 +477,26 @@ class AttachOriginTests(_UserServiceCase):
         await ws.close()
 
 
+class LogoutNoticeRouteTests(_UserServiceCase):
+    @unittest_run_loop
+    async def test_no_shell_means_the_notice_ends_at_once(self) -> None:
+        resp = await self.client.post('/internal/logout-notice',
+                                      json={'reason': 'stopping', 'seconds': 60, 'limit': 600})
+        self.assertEqual(resp.status, 200)
+        await asyncio.sleep(0.05)
+        state = await (await self.client.get('/internal/logout-notice')).json()
+        self.assertFalse(state['active'])
+
+    @unittest_run_loop
+    async def test_a_bad_body_is_refused(self) -> None:
+        bodies: list[object] = [[], {'seconds': -1, 'limit': 600}, {'seconds': '60', 'limit': 600},
+                                {'extend': True}, {'seconds': 60}, {'extend': 10 ** 9}]
+        for body in bodies:
+            with self.subTest(body=body):
+                resp = await self.client.post('/internal/logout-notice', json=body)
+                self.assertEqual(resp.status, 400)
+
+
 class PeerGateTests(_UserServiceCase):
     """Over the unix socket, only the PEERS accounts may call the instance.
 
@@ -512,6 +532,11 @@ class PeerGateTests(_UserServiceCase):
     async def test_an_unlisted_peer_cannot_push_a_logout(self) -> None:
         self.assertEqual(
             await self._unix_request('POST', '/internal/logout', json={'email': _EMAIL}), 403)
+
+    @unittest.skipIf(os.geteuid() == 0, 'root is always an allowed peer')
+    @unittest_run_loop
+    async def test_an_unlisted_peer_cannot_arm_a_logout_notice(self) -> None:
+        self.assertEqual(await self._unix_request('POST', '/internal/logout-notice', json={'now': True}), 403)
 
     @unittest_run_loop
     async def test_a_peer_without_credentials_is_let_through(self) -> None:

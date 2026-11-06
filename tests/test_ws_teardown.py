@@ -119,6 +119,15 @@ class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(self.ws.reaped, [_EMAIL])
 
+    async def test_revoke_all_pushes_no_teardown(self) -> None:
+        """`logout-all` closed the shells first, and a push would start a stopped instance."""
+        self._session_cookie()
+        resp = await self.admin.post('/admin/revoke-all', headers={'X-Admin-Token': _TOKEN})
+        self.assertEqual(resp.status, 200)
+        self.assertEqual((await resp.json())['revoked'], 1)
+        self.assertEqual(self.ws.reaped, [])
+        self.assertEqual(self.service.sessions.revoke_all(), 0, 'nothing left to close')
+
     async def test_users_change_revoke_pushes_teardown(self) -> None:
         """The `users change` path: the admin CLI rewrites the map then calls
         /admin/users/{email}/revoke, which must also reap the live shell."""

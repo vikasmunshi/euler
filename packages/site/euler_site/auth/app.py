@@ -658,6 +658,16 @@ def build_admin_app(service: AuthService) -> web.Application:
         log.info('revoked %d session/remember token(s) for %s', n, email)
         return web.json_response({'email': email, 'revoked': n})
 
+    async def revoke_everyone(_request: web.Request) -> web.Response:
+        """Drop every session and remember token (`logout-all`).
+
+        No teardown push: `logout-all` has closed the shells by now, and a push would start
+        every stopped instance, since dialling a socket is what activates one.
+        """
+        n = service.sessions.revoke_all() + service.remember.revoke_all()
+        log.info('revoked %d session/remember token(s) for everyone', n)
+        return web.json_response({'revoked': n})
+
     async def list_requests(_request: web.Request) -> web.Response:
         """The invite-request queue — prospective collaborators from the public form."""
         return web.json_response({'requests': [r.summary() for r in service.requests.all()]})
@@ -676,6 +686,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         web.post('/admin/users', add_user),
         web.post('/admin/users/{email}/{action:enable|disable}', set_enabled),
         web.post('/admin/users/{email}/revoke', revoke_sessions),
+        web.post('/admin/revoke-all', revoke_everyone),
         web.delete('/admin/users/{email}', remove_user),
         web.get('/admin/requests', list_requests),
         web.delete('/admin/requests/{email}', dismiss_request),

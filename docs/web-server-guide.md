@@ -2142,7 +2142,7 @@ attaches to the *same* shell. A single background drainer reads the PTY continuo
 a bounded replay buffer and fans output out to every attached socket, so the shell
 survives disconnects and a reconnect redraws.
 
-Its lifetime is decoupled from any socket and bounded by exactly four teardown paths:
+Its lifetime is decoupled from any socket and bounded by exactly five teardown paths:
 
 1. **In-shell exit** (`exit` / Ctrl-D) — the drainer sees EOF and reaps.
 2. **Logout** — the auth service, the only party that sees the event, POSTs a best-effort
@@ -2153,7 +2153,8 @@ Its lifetime is decoupled from any socket and bounded by exactly four teardown p
    identical teardown. This closes the one real gap in "staleness is re-login": a
    *running* shell resolved its permissions at startup, and without the push a demoted or
    disabled account would keep its old authority until the process happened to die.
-4. **Service stop** — `on_cleanup` closes every shell, and systemd's cgroup kill collects
+4. **Shutdown notice** — `logout-all` warns first, then closes the shell (below).
+5. **Service stop** — `on_cleanup` closes every shell, and systemd's cgroup kill collects
    stragglers.
 
 Plus hygiene, not security: a **detached-TTL reaper** closes a shell with zero attached
@@ -2244,6 +2245,26 @@ down, and posts `{euler: 'logout'}` up; `site.js` submits the header's own logou
 is one sign-out whichever control started it, and path 2 above reaps the shell. While the notice
 stands Enter skips the wait and nothing else types. A shell no page answers closes itself and
 says the browser session is still signed in.
+
+**`logout-all`, ahead of a shutdown.** `redeploy-web` runs it first (`make logout-web`), and an
+operator can run it alone. `euler_webshell.logout_all`, under sudo, posts to the root-only
+`/internal/logout-notice` of each instance `systemctl` reports running (dialling a socket would
+start a stopped one), and each instance keeps its own clock (`user/logout.py`), ticking to its
+terminals over text frames. The shell reports `running` / `idle` over OSC, `TermModes` follows it,
+and the notice uses it:
+
+- an idle shell closes when the 60s countdown ends, or at once with no terminal attached;
+- running work extends the wait on its own, up to a 10-minute limit, then is killed. Waiting counts
+  as running, so an idle `claude` or an open dialogue holds the wait, and a `&` job does not;
+- `logout-all extend=<seconds>` adds to the countdown and the limit, and `logout-all --now` ends
+  the wait for everyone.
+
+Enter skips the wait only while the shell is idle. While work runs the keyboard stays the
+program's, since Enter there is input. At the end the instance sends `logout-end`, which signs open
+tabs out through the header's form. The waiting command then calls `/admin/revoke-all`, which covers
+users with no tab open and deliberately pushes no teardown, since that would start every stopped
+instance. A notice is only as old as the deployed venv: the deploy that first ships this runs the
+previous build's `logout-web`, which skips it.
 
 **The attach replay is drawn, never obeyed.** A reattaching terminal is sent the shell's
 recent scrollback, which contains the *control sequences* of commands that already ran —

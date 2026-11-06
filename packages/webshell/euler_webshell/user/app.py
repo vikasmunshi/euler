@@ -46,6 +46,7 @@ from euler_site.site.app import _MAX_BODY, install_content
 from euler_site.site.render import SUBJECT_KEY
 from euler_webshell.msg.identity import peer_uid
 from euler_webshell.user.config import UserConfig
+from euler_webshell.user.logout import LogoutNotice
 from euler_webshell.user.msg_api import add_message_routes
 from euler_webshell.user.vault_api import add_vault_routes
 from euler_webshell.ws.manager import PtyManager
@@ -71,7 +72,13 @@ PEERS: dict[str, frozenset[str]] = {
     '/internal/vault-reset': frozenset({'euler-auth'}),
     '/internal/message': frozenset({'euler-msg'}),
     '/internal/status': frozenset(),
+    '/internal/logout-notice': frozenset(),
 }
+
+
+#: Bounds on what the logout notice takes: a day of waiting, and a reason that fits the banner.
+_MAX_NOTICE_SECONDS: int = 86400
+_MAX_REASON: int = 200
 
 
 def _peer_allowed(uid: int, path: str) -> bool:
@@ -132,6 +139,7 @@ def build_app(config: UserConfig) -> web.Application:
     authz = Authorizations.load()
     pin_slug = config.slug
     manager = PtyManager()
+    notice = LogoutNotice(manager, vault.clear_session_key)
 
     @web.middleware
     async def peer_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
@@ -251,6 +259,33 @@ def build_app(config: UserConfig) -> web.Application:
         log.info('logout push for %s (shell %s)', email, 'closed' if closed else 'absent')
         return web.json_response({'closed': closed})
 
+    async def internal_logout_notice(request: web.Request) -> web.Response:
+        """Arm, extend or end this instance's shutdown notice (:mod:`euler_webshell.user.logout`).
+
+        Root only, like the status sweep: `{"reason", "seconds", "limit"}` arms it, `{"extend": n}`
+        adds time, `{"now": true}` ends the wait. A GET reports where it stands.
+        """
+        if request.method == 'GET':
+            return web.json_response(notice.status())
+        try:
+            body: Any = await request.json()
+        except json.JSONDecodeError:
+            return web.Response(status=400, text='bad request')
+        if not isinstance(body, dict):
+            return web.Response(status=400, text='bad request')
+        if body.get('now') is True:
+            notice.now()
+            return web.json_response(notice.status())
+        numbers = [body.get(key) for key in (('extend',) if 'extend' in body else ('seconds', 'limit'))]
+        if not all(type(number) is int and 0 <= number <= _MAX_NOTICE_SECONDS for number in numbers):
+            return web.Response(status=400, text='bad request')
+        if 'extend' in body:
+            notice.extend(body['extend'])
+        else:
+            notice.arm(str(body.get('reason', ''))[:_MAX_REASON], body['seconds'], body['limit'])
+            log.info('logout notice armed: %ds, limit %ds', body['seconds'], body['limit'])
+        return web.json_response(notice.status())
+
     async def internal_status(request: web.Request) -> web.Response:
         """Report this instance's shell state for the operator's `status-web` sweep.
 
@@ -287,6 +322,7 @@ def build_app(config: UserConfig) -> web.Application:
                 pass
 
     async def _close_all(app_: web.Application) -> None:
+        await notice.cancel()
         await app_[PTY_MANAGER].close_all()
         vault.clear_session_key()       # service stop: drop the tmpfs key file too
 
@@ -294,6 +330,8 @@ def build_app(config: UserConfig) -> web.Application:
         web.get('/ws', websocket),
         web.post('/internal/logout', internal_logout),
         web.get('/internal/status', internal_status),
+        web.get('/internal/logout-notice', internal_logout_notice),
+        web.post('/internal/logout-notice', internal_logout_notice),
     ])
     app.on_startup.append(_on_startup)
     app.on_cleanup.append(_cancel_reaper)
