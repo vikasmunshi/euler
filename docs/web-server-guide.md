@@ -2259,8 +2259,9 @@ and the notice uses it:
 - `logout-all extend=<seconds>` adds to the countdown and the limit, and `logout-all --now` ends
   the wait for everyone.
 
-Enter skips the wait only while the shell is idle. While work runs the keyboard stays the
-program's, since Enter there is input. At the end the instance sends `logout-end`, which signs open
+Enter ends the wait at once, even while work runs: the sign-out closes the shell and kills that
+work, and the notice says so. Running programs therefore lose Enter as input for as long as a
+notice stands; other keys still reach them. At the end the instance sends `logout-end`, which signs open
 tabs out through the header's form. The waiting command then calls `/admin/revoke-all`, which covers
 users with no tab open and deliberately pushes no teardown, since that would start every stopped
 instance. A notice is only as old as the deployed venv: the deploy that first ships this runs the

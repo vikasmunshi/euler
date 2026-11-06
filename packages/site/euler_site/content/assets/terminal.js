@@ -236,9 +236,9 @@
   // keystroke in that instant is lost with them; the replay takes milliseconds.
   term.onData(function (data) {
     if (!live) { return; }
-    if (notice && !notice.running) {    // § the logout notice: Enter skips, nothing else types
-      if (data === '\r') { leave(); }
-      return;
+    if (notice) {                       // § the logout notice: Enter signs out, whatever is running
+      if (data === '\r') { leave(); return; }
+      if (!notice.running) { return; }
     }
     send(new TextEncoder().encode(data));
   });
@@ -492,10 +492,10 @@
 
   // ── the logout notice ──────────────────────────────────────────────────────
   // Drawn over the terminal in its own element, never into xterm: the text stays out of the
-  // scrollback, and a program holding the screen is not written over. While the shell is idle
-  // the keyboard is the notice's (§ term.onData): Enter skips the wait, and nothing else types,
-  // so no new work starts in a shell that is about to close. While work runs the keyboard stays
-  // the program's, because Enter there is input, and skipping would kill what it is typed into.
+  // scrollback, and a program holding the screen is not written over. Enter always ends the
+  // wait (§ term.onData): the sign-out closes the shell, which kills any running work, so the
+  // notice says so. Other keys reach running work and go nowhere at an idle prompt, so no new
+  // work starts in a shell that is about to close.
   var noticeBox = document.getElementById('logout-notice');
   var notice = null;                    // set while a notice stands
   var countdown = null;                 // the `logout` command's timer
@@ -508,7 +508,8 @@
   function drawNotice(reason, seconds, running) {
     notice = { running: running };
     noticeBox.textContent = reason + ' — ' + (running
-      ? 'signing out when your running work ends, in ' + duration(seconds) + ' at most.'
+      ? 'signing out when your running work ends, in ' + duration(seconds)
+        + ' at most. Press Enter to stop it and sign out now.'
       : 'signing out in ' + duration(seconds) + '. Press Enter to sign out now.');
     noticeBox.hidden = false;
   }
