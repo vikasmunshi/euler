@@ -2,14 +2,11 @@
 {% block title %}euler — account{% endblock %}
 {% block content %}
 {# The account page: who you are, what you hold, and the two things only you can
-   change (your secrets, your password). Four panels, in the order the questions
+   change (your secrets, your password), and the icon you go by. Five panels, in the order the questions
    get asked. #}
 <section class="panel">
   <div class="acct-head">
-    <span class="acct-glyph">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
-        d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
-    </span>
+    <span class="acct-glyph" id="acct-glyph">{% include "_icon.html" %}</span>
     <div class="acct-id">
       <h1>{{ subject.user or 'anon' }}</h1>
       {# The slug is not trivia: it names the system user, home and clone that are
@@ -39,6 +36,8 @@
   <p class="ladder-note">Commands and pages are gated by this rung. Sweet-talking the
      shell has been tried; the shell remains unmoved.</p>
 </section>
+
+<section class="panel" id="icon-panel">{% include "_icon_panel.html" %}</section>
 
 {# The per-user credential panel: filled by the per-user service's /account/vault
    fragment. On a service without that route the placeholder simply stays.

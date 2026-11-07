@@ -37,6 +37,9 @@ SUBJECT_KEY: str = 'subject'
 #: aiohttp request key under which the git middleware stores this clone's GitState
 #: (:mod:`euler_site.site.gitstate`) — None where there is no readable clone.
 GIT_KEY: str = 'git'
+#: aiohttp request key under which the icon middleware stores this user's
+#: :class:`~euler_site.site.icons.Icon` — absent for a signed-out reader.
+ICON_KEY: str = 'icon'
 #: aiohttp request key set by the per-user tier's message routes: True where this
 #: service actually serves `/messages` (:mod:`euler_webshell.user.msg_api`). The header's
 #: chip needs to know whether there is a spool behind it *without* reading one — the
@@ -80,6 +83,7 @@ def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, An
         'crumbs': [],
         'actions': [],
         'git': request.get(GIT_KEY),
+        'icon': request.get(ICON_KEY),
         'msg_spool': request.get(MSG_SPOOL_KEY, False),
     }
     if extra:

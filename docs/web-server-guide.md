@@ -1508,7 +1508,9 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/story/` · `/story/{path}` | the presentation deck's own files, raw: `docs/presentation/` (§ The story deck below) | reader |
 | GET | `/code/` · `/code/{path}` | the code viewer, **public site only**: a folder's contents or one file, highlighted; `?raw` the file itself (§ The code viewer below) | none |
-| GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
+| GET | `/account` | identity + the profile ladder, the icon, the credential panel, the password form | reader |
+| GET | `/account/icon` | this user's uploaded icon | reader |
+| POST | `/account/icon` | choose a standard icon or upload an image; answers with the panel | reader |
 | GET | `/git` | the header git chip's contents — the refresh the shell, the menu-open and the poll ask for (§11.9) | reader |
 | GET | `/messages` | the header's message chip alone — count, rows, verbs (§13) | reader |
 | GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save the page, run `summary` in the terminal | maintainer |
@@ -1709,7 +1711,11 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   that are theirs alone), then the **profile ladder**: the four rungs with theirs lit and
   the ones below it filled, because the ladder is cumulative and a reader who saw only
   their own rung lit would misread it. `LADDER` is the kernel's own tuple, so the rendered
-  rungs cannot drift from the model the checks use. Then the credential panel (the
+  rungs cannot drift from the model the checks use. Then the **icon** (`site/icons.py`): one
+  of a standard set or an uploaded image, worn here and on the header's pill. It is kept in
+  the user's `.state/<slug>/`; `site.js` scales an upload to a small square before sending it,
+  and the server keeps only PNG, JPEG or WebP, by their leading bytes, never SVG, because the
+  bytes come back under this origin. Then the credential panel (the
   per-user service's `/account/vault` fragment) and the password form. Changing a password
   lives here rather than in the user menu: it is an account thing, and the menu is for
   getting places.

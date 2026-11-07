@@ -1,0 +1,11 @@
+{# The user's icon, at whatever size its container gives it: the header's pill, the account
+   page's head. With no `icon` in the context (signed out, or a tier with no clone behind it)
+   it is the plain person. Included, never imported: render_block runs only the block. #}
+{% if icon and icon.version -%}
+<img src="/account/icon?v={{ icon.version }}" alt="">
+{%- elif icon -%}
+<svg viewBox="0 0 24 24" aria-hidden="true">{{ icon.svg }}</svg>
+{%- else -%}
+<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
+  d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+{%- endif %}

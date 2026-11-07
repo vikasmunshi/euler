@@ -20,10 +20,11 @@ import unittest
 from pathlib import Path
 
 import jinja2
+from aiohttp import FormData
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from euler_site import assets
-from euler_site.site import content, gitstate
+from euler_site.site import content, gitstate, icons
 from euler_site.site.app import build_app
 
 from euler_site.site.config import SiteConfig
@@ -1029,6 +1030,88 @@ class TopicCardStatusTests(unittest.TestCase):
         body = self._render('final', total=950)
         self.assertIn('Generating and testing primes', body)
         self.assertNotIn('card-bar', body)
+
+
+class AccountIconTests(AioHTTPTestCase):
+    """`/account/icon`, against a scratch clone: the choice lands in `.state/<slug>/`."""
+
+    _PNG = b'\x89PNG\r\n\x1a\n' + b'\0' * 32
+    _HX = {**_READER, 'HX-Request': 'true'}
+
+    async def get_application(self):
+        os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
+        self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        self.scratch = Path(tempfile.mkdtemp(prefix='euler-site-test-'))
+        self.addCleanup(shutil.rmtree, self.scratch, True)
+        return build_app(SiteConfig(
+            repo_root=self.scratch, static_dir=self.scratch, socket_path=Path('/tmp/unused.sock'),
+            socket_group='', tcp_bind='', serve_static=False, profile=''))
+
+    async def _upload(self, data: bytes, name: str = 'icon') -> str:
+        form = FormData()
+        form.add_field('file', data, filename=name, content_type='image/png')
+        resp = await self.client.post('/account/icon', data=form, headers=self._HX)
+        self.assertEqual(resp.status, 200)
+        return await resp.text()
+
+    @unittest_run_loop
+    async def test_the_person_until_one_is_chosen(self) -> None:
+        body = await (await self.client.get('/account', headers=_READER)).text()
+        self.assertIn('id="icon-panel"', body)
+        self.assertIn('value="person"', body)
+        self.assertRegex(body, r'value="person"[^>]*\s+aria-pressed="true"')
+
+    @unittest_run_loop
+    async def test_a_standard_icon_shows_everywhere_it_should(self) -> None:
+        resp = await self.client.post('/account/icon', data={'name': 'sigma'}, headers=self._HX)
+        body = await resp.text()
+        self.assertEqual(body.count('hx-swap-oob="innerHTML"'), 2)    # the pill and the page's head
+        self.assertRegex(body, r'value="sigma"[^>]*\s+aria-pressed="true"')
+        page = await (await self.client.get('/account', headers=_READER)).text()
+        self.assertGreaterEqual(page.count('>Σ</text>'), 3)            # pill, head, and its button
+
+    @unittest_run_loop
+    async def test_an_unknown_name_is_refused(self) -> None:
+        resp = await self.client.post('/account/icon', data={'name': '../../etc'}, headers=self._HX)
+        self.assertIn('not one of the standard icons', await resp.text())
+
+    @unittest_run_loop
+    async def test_an_upload_is_served_back_under_its_own_type(self) -> None:
+        body = await self._upload(self._PNG)
+        match = re.search(r'/account/icon\?v=\w+', body)
+        assert match is not None
+        resp = await self.client.get(match.group(), headers=_READER)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.headers['Content-Type'], 'image/png')
+        self.assertEqual(await resp.read(), self._PNG)
+
+    @unittest_run_loop
+    async def test_what_is_not_a_raster_image_is_refused(self) -> None:
+        for data in (b'<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>', b'<html>', b'RIFF0000WAVE'):
+            self.assertIn('not a PNG, JPEG or WebP', await self._upload(data))
+        resp = await self.client.get('/account/icon', headers=_READER)
+        self.assertEqual(resp.status, 404)
+
+    @unittest_run_loop
+    async def test_an_oversized_upload_is_refused(self) -> None:
+        self.assertIn('too large', await self._upload(self._PNG + b'\0' * icons.MAX_IMAGE))
+
+    @unittest_run_loop
+    async def test_a_standard_icon_replaces_an_upload(self) -> None:
+        await self._upload(self._PNG)
+        await self.client.post('/account/icon', data={'name': 'star'}, headers=self._HX)
+        self.assertEqual((await self.client.get('/account/icon', headers=_READER)).status, 404)
+        self.assertEqual([], list(self.scratch.glob('.state/*/icon.image')))
+
+    @unittest_run_loop
+    async def test_without_js_the_form_returns_to_the_page(self) -> None:
+        resp = await self.client.post('/account/icon', data={'name': 'pi'}, headers=_READER, allow_redirects=False)
+        self.assertEqual(resp.status, 303)
+        self.assertEqual(resp.headers['Location'], '/account')
+
+    @unittest_run_loop
+    async def test_it_needs_a_subject(self) -> None:
+        self.assertEqual((await self.client.post('/account/icon', data={'name': 'pi'})).status, 401)
 
 
 class ResultRowsTests(unittest.TestCase):

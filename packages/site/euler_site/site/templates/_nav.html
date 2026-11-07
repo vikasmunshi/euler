@@ -186,10 +186,9 @@
     {# The user pill is live in both tiers — signed out it is the way in, so it
        reads as *empty* (dashed ring, muted ink), never as disabled. #}
     <details class="menu user-menu">
-      <summary class="user-glyph{% if not subject %} is-anon{% endif %}"
+      <summary class="user-glyph{% if not subject %} is-anon{% endif %}" id="user-glyph" aria-label="account"
                title="{% if subject %}{{ subject.user or subject.profile }}{% else %}not signed in{% endif %}">
-        <svg viewBox="0 0 24 24" aria-label="account"><path fill="currentColor"
-          d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+        {%- include "_icon.html" -%}
       </summary>
       {% if subject %}
       <ul class="menu-list menu-right">

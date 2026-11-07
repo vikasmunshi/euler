@@ -263,6 +263,12 @@ summary.user-glyph {
   color: var(--accent-ink);
 }
 summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
+/* An uploaded icon fills its circle, whatever shape it arrived in. The pill drops the menu
+   summary's padding and rounded corners for it, which outrank the rule above. */
+details.menu > summary.user-glyph:has(img) { padding: 0; border-radius: 50%; overflow: hidden; }
+summary.user-glyph img, .acct-glyph img {
+  width: 100%; height: 100%; display: block; border-radius: 50%; object-fit: cover;
+}
 /* Signed out the pill is the only live control in the header, so it must not
    read as disabled — but it must read as empty: dashed ring, muted ink. */
 summary.user-glyph.is-anon { border-style: dashed; background: none; color: var(--muted); }
@@ -1454,6 +1460,23 @@ dl.account dd { margin: 0; min-width: 0; }
   color: var(--accent-ink);
 }
 .acct-glyph svg { width: 1.8rem; height: 1.8rem; }
+.icon-choices { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.6rem 0 1rem; }
+.icon-choice {
+  width: 2.75rem; height: 2.75rem; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 50%;
+  background: none; color: var(--text); cursor: pointer;
+}
+.icon-choice svg { width: 1.5rem; height: 1.5rem; }
+.icon-choice:hover { border-color: var(--accent); }
+.icon-choice[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-ink);
+}
+.icon-upload label { display: block; }
+.icon-upload input { display: block; margin-top: 0.4rem; max-width: 100%; font: inherit; }
+.icon-upload p { margin: 0.4rem 0 0; font-size: 0.85rem; }
 .acct-id { min-width: 0; }
 .acct-id h1 { margin: 0; font-size: 1.25rem; overflow-wrap: anywhere; }
 .acct-sub { margin: 0.25rem 0 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }

@@ -1,0 +1,26 @@
+{# The account page's icon panel, included by account.html and re-rendered by every
+   `POST /account/icon`. That answer also carries the two places the icon shows, out of band.
+   Without JS a form posts as usual and the route redirects back to the page. #}
+<h2>Icon</h2>
+{% if icon_error %}<p class="status err">{{ icon_error }}</p>{% endif %}
+<form class="icon-choices" method="post" action="/account/icon"
+      hx-post="/account/icon" hx-target="#icon-panel" hx-swap="innerHTML">
+  {% for name, body in standard_icons.items() %}
+  <button class="icon-choice" type="submit" name="name" value="{{ name }}" aria-label="{{ name }}" title="{{ name }}"
+          aria-pressed="{{ 'true' if icon and not icon.version and icon.name == name else 'false' }}">
+    <svg viewBox="0 0 24 24" aria-hidden="true">{{ body | safe }}</svg>
+  </button>
+  {% endfor %}
+</form>
+<form class="icon-upload" method="post" action="/account/icon" enctype="multipart/form-data"
+      hx-post="/account/icon" hx-encoding="multipart/form-data" hx-target="#icon-panel" hx-swap="innerHTML">
+  <label>Or use your own image
+    <input type="file" name="file" accept="image/png,image/jpeg,image/webp" data-icon-file>
+  </label>
+  <noscript><button class="btn" type="submit">Upload</button></noscript>
+  <p class="muted">A PNG, JPEG or WebP image. It is cropped to a square and scaled to fit.</p>
+</form>
+{% if oob %}
+<div id="user-glyph" hx-swap-oob="innerHTML">{% include "_icon.html" %}</div>
+<div id="acct-glyph" hx-swap-oob="innerHTML">{% include "_icon.html" %}</div>
+{% endif %}

@@ -40,9 +40,9 @@ from solver.auth import LADDER, Authorizations, Subject, slugify
 from euler_site import assets
 from euler_site.cache import build_fingerprint, cache_middleware, revalidated_middleware
 from euler_site.csp import csp_middleware
-from euler_site.site import code, content, gitstate
+from euler_site.site import code, content, gitstate, icons
 from euler_site.site.config import SiteConfig
-from euler_site.site.render import GIT_KEY, PUBLIC_KEY, SUBJECT_KEY, is_htmx, render
+from euler_site.site.render import GIT_KEY, ICON_KEY, PUBLIC_KEY, SUBJECT_KEY, is_htmx, render
 from euler_site.site.validate import EDITABLE_SUFFIXES, validate, validate_article
 from euler_site.version import __version__
 
@@ -687,6 +687,11 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
+def _state_dir(request: web.Request) -> Path:
+    """This user's state directory in their clone, the shell's `.state/<slug>`."""
+    return request.app[CONFIG_KEY].repo_root / '.state' / _subject(request).slug
+
+
 @requires('reader')
 async def account(request: web.Request) -> web.StreamResponse:
     """`GET /account` — identity, the ladder, credentials, and the password form.
@@ -698,11 +703,46 @@ async def account(request: web.Request) -> web.StreamResponse:
     return render(request, 'account.html', {
         'ladder': LADDER,
         'email': _subject(request).user,
+        'standard_icons': icons.STANDARD,
         'crumbs': [_HOME, ('account', None)],
         # A client-side Action (site.js) that opens the folded password form in place —
         # a rare, deliberate act kept behind a summary on the page, surfaced from the menu.
         'actions': [Action(label='Change password', kind='client', command='change-password')],
     }, block='content')
+
+
+@requires('reader')
+async def account_icon(request: web.Request) -> web.StreamResponse:
+    """`GET /account/icon` — this user's uploaded icon, as the media type it was stored under."""
+    icon = request[ICON_KEY]
+    if not icon.version:
+        raise web.HTTPNotFound(text='no uploaded icon')
+    return web.FileResponse(_state_dir(request) / icons.IMAGE_FILE, headers={'Content-Type': icon.type})
+
+
+@requires('reader')
+async def account_icon_save(request: web.Request) -> web.StreamResponse:
+    """`POST /account/icon` — choose a standard icon (`name`) or upload an image (`file`).
+
+    Answers with the icon panel and, out of band, the two places the icon shows. A refusal
+    is said in the panel, as the editor's gate says one, and changes nothing. With no JS
+    there is nothing to swap into, so the form returns to the page.
+    """
+    form = await request.post()
+    upload = form.get('file')
+    state_dir = _state_dir(request)
+    try:
+        if isinstance(upload, web.FileField):
+            error = icons.save_image(state_dir, upload.file.read(icons.MAX_IMAGE + 1))
+        else:
+            error = icons.save_standard(state_dir, str(form.get('name', '')))
+    except OSError as exc:
+        error = f'could not save the icon: {exc.strerror}'
+    if not is_htmx(request):
+        raise web.HTTPSeeOther('/account')
+    return render(request, '_icon_panel.html', {
+        'icon': icons.read(state_dir), 'icon_error': error, 'standard_icons': icons.STANDARD, 'oob': True,
+    })
 
 
 @requires('reader')
@@ -1067,6 +1107,8 @@ def add_content_routes(app: web.Application, *, public: bool = False) -> None:
         web.delete(r'/edit/topics/{name:.+}', article_delete),
         # account
         web.get('/account', account),
+        web.get('/account/icon', account_icon),
+        web.post('/account/icon', account_icon_save),
         # edit routes (writes always answer with a fragment)
         web.get('/edit/solutions', redirect_slash),
         web.get('/edit/solutions/', progress_editor),
@@ -1111,6 +1153,23 @@ def git_middleware(repo_root: Path) -> Any:
     return _middleware
 
 
+def icon_middleware(repo_root: Path) -> Any:
+    """The user's icon, read once per request, as :func:`git_middleware` reads the chip's state.
+
+    One small file. Skipped for anyone without a subject, and for the routes that render no
+    chrome; `render._context` picks it up from the request.
+    """
+
+    @web.middleware
+    async def _middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
+        subject = request.get(SUBJECT_KEY)
+        if subject is not None and not request.path.startswith(('/healthz', '/assets/', '/vendor/', '/ws', '/story')):
+            request[ICON_KEY] = icons.read(repo_root / '.state' / subject.slug)
+        return await handler(request)
+
+    return _middleware
+
+
 def install_content(app: web.Application, config: SiteConfig, authz: Authorizations | None,
                     *, public: bool = False) -> None:
     """Wire the content surface (config, readable roots, jinja, routes, static) onto *app*.
@@ -1125,6 +1184,7 @@ def install_content(app: web.Application, config: SiteConfig, authz: Authorizati
     app[PUBLIC_KEY] = public
     if not public:
         app.middlewares.append(git_middleware(config.repo_root))
+        app.middlewares.append(icon_middleware(config.repo_root))
     # The /docs/file/ view may serve only these content trees — every one a
     # reader-floor read. These used to come from the policy's objects→paths map;
     # with the plain-profile re-simplification they are the service's own roots

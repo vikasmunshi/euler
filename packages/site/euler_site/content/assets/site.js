@@ -328,6 +328,28 @@
     refreshBack();
   });
 
+  // An account icon is scaled here, before it is sent: a phone's photo becomes a small square,
+  // and loses its metadata on the way. A file the browser cannot read goes as it is, for the
+  // server to say why it will not keep it.
+  var ICON_SIZE = 160;
+  document.addEventListener('change', function (ev) {
+    var input = ev.target;
+    if (!input.matches || !input.matches('input[data-icon-file]') || !input.files.length) { return; }
+    createImageBitmap(input.files[0]).then(function (image) {
+      var side = Math.min(image.width, image.height);
+      var canvas = document.createElement('canvas');
+      canvas.width = canvas.height = ICON_SIZE;
+      canvas.getContext('2d').drawImage(image, (image.width - side) / 2, (image.height - side) / 2,
+                                        side, side, 0, 0, ICON_SIZE, ICON_SIZE);
+      canvas.toBlob(function (blob) {
+        var files = new DataTransfer();
+        files.items.add(new File([blob], 'icon', { type: blob.type }));
+        input.files = files.files;
+        input.form.requestSubmit();
+      }, 'image/webp', 0.9);
+    }).catch(function () { input.form.requestSubmit(); });
+  });
+
   // Lazy-load the CodeMirror editor only when an edit page or a solution file's read-only
   // view appears in the pane — its vendored graph (~630 KB) never loads on other pages. The
   // module is cached after first import; each visit just (re)mounts on the fresh element.
