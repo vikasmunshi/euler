@@ -45,7 +45,7 @@ _COMMON_VARS: dict[str, str] = {
     ),
 }
 
-#: Convention docs that are the single source of truth for each topic. Each markdown file lives
+#: Convention docs that are the single source of truth for each blog. Each markdown file lives
 #: under `docs/` (the `convention_*.md` guides) and is injected here, as a $<var> substitution,
 #: into whichever prompts are relevant — so the prose lives in exactly one place. Keys must not
 #: collide with _COMMON_VARS keys or Facts fields.

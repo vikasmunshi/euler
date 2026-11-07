@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """Links the content pages rewrite: a statement's links to other projecteuler.net pages, a
-nested topic's relative links to its neighbours, and a guide's images (euler_site.site.content)."""
+nested blog's relative links to its neighbours, and a guide's images (euler_site.site.content)."""
 from __future__ import annotations
 
 import unittest
@@ -25,16 +25,16 @@ class StatementLinkTests(unittest.TestCase):
         self.assertIn('href="#x"', html)
 
 
-class NestedTopicLinkTests(unittest.TestCase):
+class NestedBlogLinkTests(unittest.TestCase):
     def render(self, markdown: str) -> str:
-        return content.render_markdown(markdown, route_base='/topics/', page_dir='domain')
+        return content.render_markdown(markdown, route_base='/blogs/', page_dir='domain')
 
     def test_a_sibling_resolves_in_the_same_folder(self) -> None:
-        self.assertIn('href="/topics/domain/functional-graph"', self.render('[g](functional-graph.md)'))
+        self.assertIn('href="/blogs/domain/functional-graph"', self.render('[g](functional-graph.md)'))
 
     def test_a_cousin_resolves_across_folders(self) -> None:
         html = self.render('[m](../technique/memoization.md#top)')
-        self.assertIn('href="/topics/technique/memoization#top"', html)
+        self.assertIn('href="/blogs/technique/memoization#top"', html)
 
     def test_a_link_out_of_the_tree_is_repo_relative(self) -> None:
         html = self.render('[g](../../docs/user-guide.md)')

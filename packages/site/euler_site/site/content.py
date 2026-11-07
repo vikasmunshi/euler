@@ -6,22 +6,22 @@ Every function takes the repo working tree (`SiteConfig.repo_root`) explicitly
 and imports nothing from :mod:`solver.config` (the one `solver.core` import,
 :mod:`solver.core.progress`, is config-free for exactly this reason) (which resolves the shell's
 identity + per-user state — paths the service uid cannot use). The service reads
-exactly the declared content trees — `solutions/` · `docs/` · `topics/` ·
+exactly the declared content trees — `solutions/` · `docs/` · `blogs/` ·
 `packages/site/euler_site/content/` — plus, best-effort, the AI reference sources under
 `packages/solver/solver/` for the composed `ai` doc, which degrade to a note when the uid may
 not read them.
 """
 from __future__ import annotations
 
-__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
+__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'BlogGroup', 'SectionState',
            'TEXT_SUFFIXES', 'CODE_ROOTS', 'in_code_scope', 'ABOUT_PAGES', 'SHELL_DOCS', 'CATALOGUE_DOC',
            'solution_dir', 'load_problems', 'centuries', 'problem_files', 'section_state',
            'resolve_file', 'resolve_repo_file', 'load_json', 'result_rows', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'recolour_statement', 'plate_statement_images',
-           'prepare_statement', 'STATEMENT_COLOURS', 'git_status', 'topic_status',
+           'prepare_statement', 'STATEMENT_COLOURS', 'git_status', 'blog_status',
            'list_docs', 'DOC_GROUPS', 'list_doc_groups',
-           'read_doc', 'shell_docs', 'command_catalogue', 'list_topics', 'list_topic_groups',
-           'read_topic', 'drop_article',
+           'read_doc', 'shell_docs', 'command_catalogue', 'list_blogs', 'list_blog_groups',
+           'read_blog', 'drop_article',
            'problem_tag_view',
            'read_about', 'readme_html',
            'save_progress']
@@ -41,14 +41,14 @@ from markdown_it import MarkdownIt
 # Config-free by design (its module docstring), which is what makes this import allowed here.
 from solver.core.progress import parse_progress
 
-#: Markdown renderer for the guides/topics (GitHub-flavoured: tables + strikethrough).
+#: Markdown renderer for the guides/blogs (GitHub-flavoured: tables + strikethrough).
 _MD = MarkdownIt('commonmark').enable(['table', 'strikethrough'])
 
 #: Suffixes the file view renders inline as escaped source; anything else
 #: (images, downloads) is served as raw bytes.
 TEXT_SUFFIXES: frozenset[str] = frozenset({'.py', '.c', '.h', '.json', '.html', '.md', '.txt', '.csv'})
 
-#: A doc/topic page name: a bare stem, no separators (anything else is 404).
+#: A doc/blog page name: a bare stem, no separators (anything else is 404).
 _NAME_RE = re.compile(r'[\w-]+')
 
 
@@ -86,14 +86,14 @@ class Century(NamedTuple):
 
 
 class DocEntry(NamedTuple):
-    """A docs/topics index row (web-server-guide § The site): the URL *name*, the *heading*
+    """A docs/blogs index row (web-server-guide § The site): the URL *name*, the *heading*
     derived from the filename (title-cased, separators → spaces — the card's
     first line), and the *title* from the page's leading `#` heading (second
     line). Index lists are sorted by *name* (the filename).
 
-    *status* is carried by topic articles only (`draft` / `final`, from the article
+    *status* is carried by blog articles only (`draft` / `final`, from the article
     index); the docs tree leaves it empty. *solved* / *problems* likewise come from the
-    article index — how many of the problems behind a topic we have solved — and are
+    article index — how many of the problems behind a blog we have solved — and are
     `None` for any entry read from a bare tree walk, where the counts are unknown
     rather than zero."""
 
@@ -105,10 +105,10 @@ class DocEntry(NamedTuple):
     problems: int | None = None
 
 
-class TopicGroup(NamedTuple):
-    """One folder of the topics tree: the folder segment, its display *heading*,
+class BlogGroup(NamedTuple):
+    """One folder of the blogs tree: the folder segment, its display *heading*,
     and the pages inside it (each :class:`DocEntry` keeping its full URL *name*).
-    Pages sitting directly under `topics/` collect into the group named `''`."""
+    Pages sitting directly under `blogs/` collect into the group named `''`."""
 
     name: str
     heading: str
@@ -595,7 +595,7 @@ def prepare_statement(html: str, number: int, sdir: Path) -> str:
                                   number, sdir)
 
 
-# ── markdown (docs + topics) ────────────────────────────────────────────────────────
+# ── markdown (docs + blogs) ────────────────────────────────────────────────────────
 
 def _doc_slug(text: str) -> str:
     """GitHub-style heading slug — matches `update_doc.py`'s catalogue anchors, so a
@@ -693,11 +693,11 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
     cross-doc `#anchor` links land. Then the link rewrites:
 
     - a relative `foo.md` (or `docs/foo.md`) link → the *route_base* route; for a page in a
-      sub-folder of its tree (*page_dir*, e.g. a topic under `domain/`), resolved against that
+      sub-folder of its tree (*page_dir*, e.g. a blog under `domain/`), resolved against that
       folder first — `functional-graph.md` and `../technique/memoization.md` from
-      `domain/repeating-decimal` are `/topics/domain/functional-graph` and
-      `/topics/technique/memoization`;
-    - a repo-relative `../<path>` link (docs/topics sit one level under the
+      `domain/repeating-decimal` are `/blogs/domain/functional-graph` and
+      `/blogs/technique/memoization`;
+    - a repo-relative `../<path>` link (docs/blogs sit one level under the
       repo root, so `../` reaches it) → the `/docs/file/<path>` view route when
       that route can serve it (:data:`VIEWABLE_ROOTS`), the **code viewer** (`/code/<path>`,
       in a tab of its own) when the path is in its scope (:data:`CODE_ROOTS`), and **GitHub
@@ -764,7 +764,7 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
 def _nested_link(route_base: str, page_dir: str, target: str, anchor: str) -> str:
     """A page's relative `.md` link resolved against its folder within the *route_base* tree.
 
-    A link that climbs out of the tree (`../../docs/x.md` from a topic) is handed back
+    A link that climbs out of the tree (`../../docs/x.md` from a blog) is handed back
     repo-relative (`../docs/x.md` — the tree is one level under the repo root), for the
     repo-link rule that follows.
     """
@@ -787,10 +787,10 @@ _RENDERED_PROBLEMS_RE = re.compile(
 
 
 def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None) -> str:
-    """Fold a topic's generated Problems list into a collapsed `<details>` (click to expand).
+    """Fold a blog's generated Problems list into a collapsed `<details>` (click to expand).
 
     The block `update-tags` writes can run to dozens of entries and pushes the article's
-    prose off-screen, so on the topic page it renders collapsed: a `<summary>` carrying the
+    prose off-screen, so on the blog page it renders collapsed: a `<summary>` carrying the
     `## Problems` heading — its `id="problems"` anchor preserved so `#problems` links still
     land — and the entry count, with the list revealed on click. Purely presentational: the
     source article keeps the plain heading-and-list that renders on GitHub. An article
@@ -812,7 +812,7 @@ def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None)
             label = f'{solved} / {len(numbers)}'
         else:
             label = str(listing.count('<li>'))
-        return ('<details class="fold topic-problems">'
+        return ('<details class="fold blog-problems">'
                 '<summary class="fold-summary">'
                 f'<h2 id="problems" class="fold-title">{match.group("title")}'
                 f'<span class="problems-count">{label}</span></h2></summary>'
@@ -900,7 +900,7 @@ _README_MD = 'README.md'
 #: :data:`TEXT_SUFFIXES` misses it and the viewer would hand the browser a download rather
 #: than a page. The README always linked it to GitHub for that reason, and now the route
 #: agrees rather than offering a capability nobody could use.
-VIEWABLE_ROOTS: tuple[str, ...] = ('docs/', 'topics/', 'packages/solver/solver/templates/', 'solutions/',
+VIEWABLE_ROOTS: tuple[str, ...] = ('docs/', 'blogs/', 'packages/solver/solver/templates/', 'solutions/',
                                    'README.md', 'packages/site/euler_site/content/vendor/README.md')
 #: Where a link the viewer cannot serve goes instead — the source of truth. The repository is
 #: public, so every path that is not viewable here is readable there.
@@ -972,8 +972,8 @@ _AI_INTRO = """\
 
 The framework's AI paths, collated into one reference. The shell's `claude-solve`
 command runs Claude Code **headless** against a single problem's solution files
-(the **claude-euler-solver** skill), and `claude-blog` runs it against one topic
-article under `topics/` (the **claude-euler-blogger** skill); both skills are
+(the **claude-euler-solver** skill), and `claude-blog` runs it against one blog
+article under `blogs/` (the **claude-euler-blogger** skill); both skills are
 below. `claude-api` generates solution artifacts — Python and C code,
 `notes.html`, `test_cases.json` — through the Claude API from the **prompt
 templates** further down. All of them are held to the shared `convention_*`
@@ -1067,7 +1067,7 @@ DOC_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 
-def list_doc_groups(repo_root: Path) -> list[TopicGroup]:
+def list_doc_groups(repo_root: Path) -> list[BlogGroup]:
     """The docs index, in :data:`DOC_GROUPS`.
 
     A guide the list does not name yet lands under `other`, so it can never drop off the page.
@@ -1078,10 +1078,10 @@ def list_doc_groups(repo_root: Path) -> list[TopicGroup]:
     for heading, names in DOC_GROUPS:
         found = [entries.pop(name) for name in names if name in entries]
         if found:
-            groups.append(TopicGroup(heading, heading, [
+            groups.append(BlogGroup(heading, heading, [
                 entry._replace(heading=entry.heading.removeprefix('Convention ')) for entry in found]))
     if entries:
-        groups.append(TopicGroup('other', 'other', list(entries.values())))
+        groups.append(BlogGroup('other', 'other', list(entries.values())))
     return groups
 
 
@@ -1168,16 +1168,16 @@ def _docs_count(repo_root: Path) -> int:
     return guides + 1 + (1 if (repo_root / _README_MD).is_file() else 0)
 
 
-# ── topics ──────────────────────────────────────────────────────────────────────────
+# ── blogs ──────────────────────────────────────────────────────────────────────────
 
-def list_topics(repo_root: Path) -> list[DocEntry]:
-    """The topics index: every `topics/**/*.md` writeup, nested folders included.
+def list_blogs(repo_root: Path) -> list[DocEntry]:
+    """The blogs index: every `blogs/**/*.md` writeup, nested folders included.
 
     A nested page's `name` is its folder-qualified path (`number-theory/primes`)
     and its `heading` shows the folder trail (`Number Theory / Primes`); sorting by
     the full path keeps same-folder pages together in the card grid.
     """
-    tree = repo_root / 'topics'
+    tree = repo_root / 'blogs'
     if not tree.is_dir():
         return []
     entries: list[DocEntry] = []
@@ -1193,8 +1193,8 @@ def list_topics(repo_root: Path) -> list[DocEntry]:
     return entries
 
 
-def _indexed_topics(repo_root: Path) -> list[DocEntry]:
-    """The written pages of the article index (`topics/articles.json`, maintained by
+def _indexed_blogs(repo_root: Path) -> list[DocEntry]:
+    """The written pages of the article index (`blogs/articles.json`, maintained by
     `update-tags`) — with their status and their solved/problem counts. Its `missing`
     rows are vocabulary rather than pages, so they are dropped: there is nothing to open.
     Empty when the index is absent or unreadable, which sends the caller back to walking
@@ -1202,7 +1202,7 @@ def _indexed_topics(repo_root: Path) -> list[DocEntry]:
 
     A row written before the counts existed simply has none: they stay `None` and the
     card falls back to the page's title, rather than claiming "solved 0 of 0"."""
-    data = load_json(repo_root / 'topics' / 'articles.json')
+    data = load_json(repo_root / 'blogs' / 'articles.json')
     rows = data.get('articles', []) if isinstance(data, dict) else []
     return [DocEntry(name=str(row['path']), heading=str(row['path']),
                      title=str(row.get('title', '')), status=str(row.get('status', '')),
@@ -1216,11 +1216,11 @@ def _count(value: Any) -> int | None:
     return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
 
 
-def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGroup]:
-    """The topics index, folded by folder.
+def list_blog_groups(repo_root: Path, *, drafts: bool = False) -> list[BlogGroup]:
+    """The blogs index, folded by folder.
 
     The article index is the source when it is there (it alone knows each page's status);
-    otherwise the tree is walked as :func:`list_topics` does, statusless.
+    otherwise the tree is walked as :func:`list_blogs` does, statusless.
 
     `drafts` decides *which* pages: by default only the finished ones, because update-tags
     now creates a skeleton for every tag and a reader offered six hundred TODO stubs cannot
@@ -1228,7 +1228,7 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
     writing queue. A statusless fallback (no index on disk) lists everything either way —
     there is nothing to filter on, and showing nothing would be worse.
 
-    Within each folder the cards are ordered by *reach* — the problems the topic's tags
+    Within each folder the cards are ordered by *reach* — the problems the blog's tags
     cover, the count the card already shows — widest first, ties broken by path so the order
     is stable. For the reader it puts the ideas that matter most to the problem set first
     (a page is looked up by name through the filter, not by scanning an alphabet); for the
@@ -1237,16 +1237,16 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
 
     The folder is the section heading, so each card drops the trail and shows only
     its leaf heading. Groups come out in path order, the pages loose at the root of
-    `topics/` (if any) first under a generic heading. Every card keeps a *title* — the
+    `blogs/` (if any) first under a generic heading. Every card keeps a *title* — the
     page's own heading, or its leaf slug when it has none — so all cards carry a second
     line and stand the same height in the grid.
     """
-    # `or list_topics(...)` only when the index is *absent*. An index that filters to nothing
+    # `or list_blogs(...)` only when the index is *absent*. An index that filters to nothing
     # (no page is final yet) must list nothing - falling back there would show every draft,
     # which is precisely what the filter exists to prevent.
-    indexed = _indexed_topics(repo_root)
+    indexed = _indexed_blogs(repo_root)
     entries = ([entry for entry in indexed if drafts or entry.status == 'final']
-               if indexed else list_topics(repo_root))
+               if indexed else list_blogs(repo_root))
     groups: dict[str, list[DocEntry]] = {}
     for entry in entries:
         folder, _, leaf = entry.name.rpartition('/')
@@ -1257,8 +1257,8 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
     def order(entry: DocEntry) -> tuple[int, str]:
         return -(entry.problems if entry.problems is not None else -1), entry.name
 
-    return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
-                       entries=sorted(entries, key=order))
+    return [BlogGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
+                      entries=sorted(entries, key=order))
             for folder, entries in sorted(groups.items())]
 
 
@@ -1273,20 +1273,20 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
 #: A row may also reference things that are not problems; those simply do not match.
 _REF_RE = re.compile(r'p?(\d+)$')
 
-#: mtime-keyed cache of the topic coverage read, per articles.json path. The index is
+#: mtime-keyed cache of the blog coverage read, per articles.json path. The index is
 #: ~650 rows and the strip wants it on every navigation, so it is parsed once per write.
 _coverage_cache: dict[Path, tuple[float, tuple[int, frozenset[int]]]] = {}
 
 
-def _topic_coverage(repo_root: Path) -> tuple[int, frozenset[int]]:
-    """`(written, reached)` — how many topic pages are finished, and which problems they
-    reach between them, from the article index (`topics/articles.json`).
+def _blog_coverage(repo_root: Path) -> tuple[int, frozenset[int]]:
+    """`(written, reached)` — how many blog pages are finished, and which problems they
+    reach between them, from the article index (`blogs/articles.json`).
 
-    The union, not the sum: two topics that both cover problem 42 have covered one
+    The union, not the sum: two blogs that both cover problem 42 have covered one
     problem, and a strip tile that adds them up would claim coverage the site does not
-    have. Drafts are excluded for the same reason `/topics/` excludes them — a skeleton
+    have. Drafts are excluded for the same reason `/blogs/` excludes them — a skeleton
     page written by `update-tags` covers nothing a reader can read."""
-    path = repo_root / 'topics' / 'articles.json'
+    path = repo_root / 'blogs' / 'articles.json'
     try:
         mtime = path.stat().st_mtime
     except OSError:
@@ -1311,7 +1311,7 @@ def _topic_coverage(repo_root: Path) -> tuple[int, frozenset[int]]:
 
 
 class SectionState(NamedTuple):
-    """The four section tiles' data lines: solutions, docs, topics, terminal.
+    """The four section tiles' data lines: solutions, docs, blogs, terminal.
 
     The terminal tile's state is not here — it is the live socket, which only the
     browser knows (`[data-term-dot]`, site.js paints it from the iframe's report)."""
@@ -1319,7 +1319,7 @@ class SectionState(NamedTuple):
     solved: int
     total: int
     docs: int
-    topics: int
+    blogs: int
     covered: int
 
 
@@ -1329,12 +1329,12 @@ def section_state(repo_root: Path) -> SectionState:
     Cheap enough for every navigation: problems.json and the article index are both
     mtime-cached, and the docs count is a directory scan that reads nothing."""
     problems = load_problems(repo_root)
-    written, reached = _topic_coverage(repo_root)
+    written, reached = _blog_coverage(repo_root)
     return SectionState(
         solved=sum(1 for p in problems.values() if p.solved),
         total=len(problems),
         docs=_docs_count(repo_root),
-        topics=written,
+        blogs=written,
         # Only problems this clone actually publishes: an index that still references a
         # problem dropped from problems.json must not push the count past the total.
         covered=len(reached & problems.keys()),
@@ -1348,7 +1348,7 @@ def section_state(repo_root: Path) -> SectionState:
 _ARTICLE_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)(?:\s+\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z)?\s*-->', re.IGNORECASE)
 
 
-def topic_status(text: str) -> str:
+def blog_status(text: str) -> str:
     """An article's status: `final` only when it says so, else `draft`.
 
     A page on disk is never `missing` however its comment reads - the file is the fact.
@@ -1357,21 +1357,21 @@ def topic_status(text: str) -> str:
     return 'final' if m and m.group(1).lower() == 'final' else 'draft'
 
 
-def read_topic(repo_root: Path, name: str) -> str | None:
-    """The raw Markdown of `/topics/{name}`, where *name* may be a nested `folder/page` path."""
-    return _read_nested_page(repo_root / 'topics', name)
+def read_blog(repo_root: Path, name: str) -> str | None:
+    """The raw Markdown of `/blogs/{name}`, where *name* may be a nested `folder/page` path."""
+    return _read_nested_page(repo_root / 'blogs', name)
 
 
 def drop_article(repo_root: Path, name: str) -> None:
-    """Best-effort removal of *name*'s row from `topics/articles.json`.
+    """Best-effort removal of *name*'s row from `blogs/articles.json`.
 
     The article file is the page; the index is the catalogue. Deleting the file alone would
-    leave a dangling index row — `_indexed_topics` would keep listing a page that now 404s —
+    leave a dangling index row — `_indexed_blogs` would keep listing a page that now 404s —
     so the matching `path == name` row is dropped here too. Best-effort by design: an
     absent or malformed index is left untouched, and `update-tags` reconciles it fully on
     its next run.
     """
-    path = repo_root / 'topics' / 'articles.json'
+    path = repo_root / 'blogs' / 'articles.json'
     data = load_json(path)
     if not isinstance(data, dict) or not isinstance(data.get('articles'), list):
         return
@@ -1407,7 +1407,7 @@ def _read_nested_page(tree: Path, name: str) -> str | None:
 
 
 #: The per-tag skeleton pages live under these folders (one page per tag, reached by its
-#: chip). The problem page's "Topics" list shows curated topics — everything *else*.
+#: chip). The problem page's "Blogs" list shows curated blogs — everything *else*.
 _FACET_FOLDERS = ('domain', 'technique', 'takeaway')
 _ARTICLE_TAGS_RE = re.compile(r'<!--\s*tags:\s*\[(.*?)\]\s*-->', re.DOTALL)
 
@@ -1419,23 +1419,23 @@ def _declared_tags(text: str) -> set[str]:
 
 
 def problem_tag_view(repo_root: Path, number: int) -> dict[str, Any]:
-    """The tag/topic view model for a problem page.
+    """The tag/blog view model for a problem page.
 
     Reads the problem's `tags.json` and the central vocabulary, and returns the tags grouped
-    by facet (techniques keyed to each solution index) as chips — each with the `/topics` URL
-    of its per-tag page when one exists — plus `flat` for the header row and `topics`, the
-    curated topic pages (outside the per-tag facet folders) that cover any of the problem's tags.
+    by facet (techniques keyed to each solution index) as chips — each with the `/blogs` URL
+    of its per-tag page when one exists — plus `flat` for the header row and `blogs`, the
+    curated blog pages (outside the per-tag facet folders) that cover any of the problem's tags.
     """
     tags = load_json(solution_dir(repo_root, number) / 'tags.json')
     if not isinstance(tags, dict):
         return {'has_tags': False}
-    vocab = {t['slug']: t for t in (load_json(repo_root / 'topics' / 'tags.json') or {}).get('tags', [])}
-    topics_root = repo_root / 'topics'
+    vocab = {t['slug']: t for t in (load_json(repo_root / 'blogs' / 'tags.json') or {}).get('tags', [])}
+    blogs_root = repo_root / 'blogs'
 
     def chip(slug: str, facet: str) -> dict[str, Any]:
-        page = topics_root / facet / f'{slug}.md'
+        page = blogs_root / facet / f'{slug}.md'
         return {'slug': slug, 'name': vocab.get(slug, {}).get('name', slug),
-                'facet': facet, 'url': f'/topics/{facet}/{slug}' if page.is_file() else None}
+                'facet': facet, 'url': f'/blogs/{facet}/{slug}' if page.is_file() else None}
 
     domain = [chip(s, 'domain') for s in tags.get('domain', [])]
     takeaways = [chip(s, 'takeaway') for s in tags.get('takeaways', [])]
@@ -1451,10 +1451,10 @@ def problem_tag_view(repo_root: Path, number: int) -> dict[str, Any]:
             flat.append(c)
     own = seen
 
-    topics: list[DocEntry] = []
+    blogs: list[DocEntry] = []
     if own:
-        for path in sorted(topics_root.rglob('*.md')):
-            rel = path.relative_to(topics_root)
+        for path in sorted(blogs_root.rglob('*.md')):
+            rel = path.relative_to(blogs_root)
             if rel.parts[0] in _FACET_FOLDERS:            # a per-tag skeleton — reached via its chip
                 continue
             try:
@@ -1463,6 +1463,6 @@ def problem_tag_view(repo_root: Path, number: int) -> dict[str, Any]:
                 continue
             if own & _declared_tags(text):
                 name = rel.with_suffix('').as_posix()
-                topics.append(DocEntry(name=name, heading=name, title=_page_title(text, path.stem)))
+                blogs.append(DocEntry(name=name, heading=name, title=_page_title(text, path.stem)))
     return {'has_tags': bool(flat), 'flat': flat, 'domain': domain,
-            'techniques': techniques, 'takeaways': takeaways, 'topics': topics}
+            'techniques': techniques, 'takeaways': takeaways, 'blogs': blogs}

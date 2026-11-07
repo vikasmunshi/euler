@@ -222,12 +222,12 @@ def _sanitize_html(filename: str, content: bytes) -> Validated:
                      message=f'saved {filename} (sanitised)', diagnostics=[])
 
 
-#: The machine-owned regions of a topic article. `tags` is the page's graph identity (what
+#: The machine-owned regions of a blog article. `tags` is the page's graph identity (what
 #: update-tags reconciles against), `status` is draft/final (a final one timestamped), and `problems` is the generated,
 #: rendered Problems section between its two sentinel comments. The in-browser editor lets a
 #: maintainer rewrite the prose; it must not let a stray keystroke drop or mangle any of these,
 #: or the page detaches from the tag graph. Defined here rather than imported from
-#: `solver.core.tags` for the same reason `content.topic_status` is: that module drags in the
+#: `solver.core.tags` for the same reason `content.blog_status` is: that module drags in the
 #: shell framework.
 _ART_TAGS_RE = re.compile(r'<!--\s*tags:\s*\[.*?\]\s*-->', re.DOTALL)
 _ART_STATUS_RE = re.compile(r'<!--\s*status:\s*\w+(?:\s+\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z)?\s*-->', re.IGNORECASE)
@@ -241,12 +241,12 @@ _RAW_HTML_RE = re.compile(r'</?[A-Za-z][A-Za-z0-9]*[\s/>]')
 
 
 def validate_article(submitted: str, original: str) -> Validated:
-    """Gate an in-browser edit of a topic article against the on-disk *original*.
+    """Gate an in-browser edit of a blog article against the on-disk *original*.
 
     Two invariants. First, the machine-owned regions are preserved exactly: a page's `tags`
     (its graph identity), its `status`, and the generated `problems` section all come from
     the file update-tags maintains, not from a prose edit, so each must survive byte-for-byte.
-    Second, the prose carries no raw HTML: topic pages render Markdown with raw-HTML passthrough
+    Second, the prose carries no raw HTML: blog pages render Markdown with raw-HTML passthrough
     straight to every reader, so an injected `<script>` would be stored cross-user XSS. Markdown
     needs no HTML tags, so the rule is a flat refusal rather than a sanitiser.
 
@@ -273,7 +273,7 @@ def validate_article(submitted: str, original: str) -> Validated:
         return _fail('remove the stray HTML comment — only the tags, status and problems blocks '
                      'belong in an article')
     if _RAW_HTML_RE.search(prose):
-        return _fail('raw HTML is not allowed in a topic article — write Markdown, which renders '
+        return _fail('raw HTML is not allowed in a blog article — write Markdown, which renders '
                      'to every reader; an HTML tag here would be served unsanitised')
 
     return Validated(ok=True, content=(submitted.rstrip('\n') + '\n').encode('utf-8'),

@@ -20,7 +20,7 @@ dependencies = [
     "aiohttp",
     "aiohttp-jinja2",
     "jinja2",
-    # The guides' and topics' Markdown.
+    # The guides' and blogs' Markdown.
     "markdown-it-py",
     # The code viewer's highlighting (/code/, euler_site.site.code). Already in every venv
     # through rich (euler-solver); named here because this package imports it.

@@ -110,8 +110,8 @@ class OverlayTests(unittest.TestCase):
         self.assertEqual(build_config(root=_ROOT, values_file=_NO_FILE).timeout_single, 90.0)
 
     def test_anchors_interpolate(self) -> None:
-        config = build_config(root=_ROOT, values_file=self._write('[paths]\ntopics_dir = ${root_dir}/elsewhere\n'))
-        self.assertEqual(config.topics_dir, _ROOT / 'elsewhere')
+        config = build_config(root=_ROOT, values_file=self._write('[paths]\nblogs_dir = ${root_dir}/elsewhere\n'))
+        self.assertEqual(config.blogs_dir, _ROOT / 'elsewhere')
 
     def test_a_key_set_in_two_sections_is_refused(self) -> None:
         """Two lines claiming one setting have no defensible winner."""

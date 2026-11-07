@@ -16,7 +16,7 @@ import, before anything could print an error saying so.
 Format is `configparser` with `ExtendedInterpolation`, so a value may name another:
 
     [paths]
-    topics_dir = ${root_dir}/topics
+    blogs_dir = ${root_dir}/blogs
 
 Sections are for the reader's benefit only — they are flattened away, and a key repeated
 across two of them is an error rather than a coin toss. The anchors a value may interpolate

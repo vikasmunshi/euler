@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Capture the site's main pages for the README, as one animated GIF that cycles through them.
 
-Captures, signed out, the five main pages (`/`, `/solutions`, `/docs`, `/topics`, `/shell`)
+Captures, signed out, the five main pages (`/`, `/solutions`, `/docs`, `/blogs`, `/shell`)
 and one random problem page below 100, with headless Chrome, and joins them into
 `docs/screenshots.gif`: a frame per page, looping. A GIF plays wherever an image shows (GitHub
 runs no script in a README) and the site's flat colours and text lose nothing to its 256
@@ -65,7 +65,7 @@ def shots(problem: int) -> list[Shot]:
         Shot('/', 'Home'),
         Shot('/solutions/', 'Solutions'),
         Shot('/docs/', 'Docs'),
-        Shot('/topics/', 'Topics'),
+        Shot('/blogs/', 'Blogs'),
         Shot('/shell', 'Terminal'),
         Shot(f'/solutions/{problem}/', f'Problem {problem}'),
     ]

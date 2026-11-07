@@ -404,7 +404,7 @@
         <li>Writing the explanation beside each solution</li>
         <li>Translating a Python solution into C</li>
         <li>Reviewing my work for mistakes</li>
-        <li>Drafting the topic articles</li>
+        <li>Drafting the blog articles</li>
       </ul>
     </div>
     <div class="ai-col">
@@ -556,7 +556,7 @@ def solve(*args: str) -&gt; str:
 def git_commit(
     problem: Problem,
     *targets: Literal[&#x27;solution&#x27;, &#x27;solutions&#x27;, &#x27;docs&#x27;,
-                      &#x27;topics&#x27;, &#x27;update&#x27;],
+                      &#x27;blogs&#x27;, &#x27;update&#x27;],
     message: Annotated[str, Ask(&#x27;Message&#x27;, when=_is_not_amend,
                                 multiline=True)] = &#x27;&#x27;,
     amend: bool = False,
@@ -582,7 +582,7 @@ Stage and commit the named targets — the one commit verb.
 **usage**
 git-commit
 [problem=&lt;n&gt;] (default current)
-[solution|solutions|docs|topics|update ...]
+[solution|solutions|docs|blogs|update ...]
 [message=&lt;str&gt;] (asked)
 [amend=true|--amend]
 [reset=true|--reset]

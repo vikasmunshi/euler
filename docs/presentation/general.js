@@ -144,7 +144,7 @@
       [p.commands, 'shell commands, in a framework that remembers where I left off'],
       [p.python, `solutions in Python, and ${fmt(p.c || 0)} of them also in C`],
       [p.notes, 'written explanations, one beside each solved problem'],
-      [p.articles, `topic articles linking problems by technique (${fmt(p.articles_final || 0)} finished so far)`],
+      [p.articles, `blog articles linking problems by technique (${fmt(p.articles_final || 0)} finished so far)`],
       [p.commits, 'commits, every change recorded'],
     ];
     const list = slide.querySelector('[data-role="list"]');

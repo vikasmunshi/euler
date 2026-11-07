@@ -76,10 +76,10 @@ a profile on each channel.
 | `solver.core.summary` | `mark` |  | ✓ | ✓ | ✓ |
 | `solver.core.summary` | `progress` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.summary` | `summary` |  |  | ✓ | ✓ |
-| `solver.core.tags` | `create-topic` |  |  | ✓ | ✓ |
+| `solver.core.tags` | `create-blog` |  |  | ✓ | ✓ |
 | `solver.core.tags` | `tags` | ✓ | ✓ | ✓ | ✓ |
-| `solver.core.tags` | `topic` | ✓ | ✓ | ✓ | ✓ |
-| `solver.core.tags` | `topics` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `blog` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `blogs` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `update-tags` |  | ✓ | ✓ | ✓ |
 | `solver.core.test_cases` | `test-cases` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `edit` |  | ✓ | ✓ | ✓ |
@@ -148,8 +148,8 @@ stops someone below its floor there (phase 7). The answer is never "the floor":
 | `update-models` | admin | the model catalogue, committed | own clone (landing: GitHub) |
 | `users` | admin | accounts, profiles, instances (`list` is reader and read-only) | sudo (the wheel-gated admin plane) |
 | `claude-batch` | maintainer | tags, via the Batches API | the caller's own API key (their vault); own clone (landing: GitHub) |
-| `claude-blog` | maintainer | a topic article, via Claude Code | the caller's own Claude credentials; own clone (landing: GitHub) |
-| `create-topic` | maintainer | a new topic article | own clone (landing: GitHub) |
+| `claude-blog` | maintainer | a blog article, via Claude Code | the caller's own Claude credentials; own clone (landing: GitHub) |
+| `create-blog` | maintainer | a new blog article | own clone (landing: GitHub) |
 | `gh-merge` | maintainer | merges a pull request onto `master` | GitHub: the merge is made as the caller's GitHub account, and `master` is locked to the repository admin |
 | `git-publish` | maintainer | pushes and opens a pull request | GitHub (a direct push to `master` only for the repository owner's account) |
 | `key-split` | maintainer | lays the host's half (first run), or sends a sealed half | the master key; sudo for `/etc/euler/share.json` (root's); the spool for the send; euler-maint for the roster record |
@@ -159,7 +159,7 @@ stops someone below its floor there (phase 7). The answer is never "the floor":
 | `user-authorize` | maintainer | records a public key, sends half the master key, dismisses the request | euler-maint for the roster; the master key and the spool for the send; the spool for the dismiss |
 
 The site's write routes are the same shape: a file edit, a delete, a progress upload or a
-topic edit changes only the signed-in user's own clone, through their own instance (their
+blog edit changes only the signed-in user's own clone, through their own instance (their
 uid), on a profile the auth service vouched for (`forward_auth`, a separate uid) — and
 reaches anyone else only through GitHub.
 

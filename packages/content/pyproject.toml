@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "euler-content"
-description = "The published Project Euler Solver content: guides, topics, public solutions."
+description = "The published Project Euler Solver content: guides, blogs, public solutions."
 requires-python = ">=3.14"
 license = "MIT"
 dynamic = ["version"]

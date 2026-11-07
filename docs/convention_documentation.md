@@ -43,7 +43,7 @@ Exactly two sections:
 **Scope — analysis and approach only.** `notes.html` covers *what the problem is* and *how each
 solution works*. It does **not** enumerate programming techniques or list transferable takeaways:
 those are captured as **tags** (`tags.json`, see [Tag conventions](convention_tags.md)) and
-discussed in the topic articles under `topics/`. Do not add a `Programming Techniques` or
+discussed in the blog articles under `blogs/`. Do not add a `Programming Techniques` or
 `Key Takeaways` section, and do not end with a bulleted list of general principles.
 
 **Hyperlinking technical terms:** **every** occurrence of each non-trivial technical term (e.g.

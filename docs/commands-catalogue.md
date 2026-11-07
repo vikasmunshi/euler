@@ -29,13 +29,13 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`claude`](commands-index.md#command-claude) | — | `contributor` | Run Claude Code interactively in the repository root, returning its exit code. |
 | [`claude-api`](commands-index.md#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](commands-index.md#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
-| [`claude-blog`](commands-index.md#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
+| [`claude-blog`](commands-index.md#command-claude-blog) | — | `maintainer` | Write (or flesh out) a blog article via the claude-euler-blogger skill. |
 | [`claude-login`](commands-index.md#command-claude-login) | — | `contributor` | Sign Claude Code in, then report whether it is, returning 0 only when signed in. |
 | [`claude-solve`](commands-index.md#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
 | [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. |
 | [`costs`](commands-index.md#command-costs) | — | `contributor` | Print what this session's AI tokens have cost, per model. |
-| [`create-topic`](commands-index.md#command-create-topic) | — | `maintainer` | Seed a curated cross-cutting topic page. |
+| [`create-blog`](commands-index.md#command-create-blog) | — | `maintainer` | Seed a curated cross-cutting blog page. |
 | [`echo`](commands-index.md#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
 | [`edit`](commands-index.md#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. |
@@ -69,11 +69,11 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`sleep`](commands-index.md#command-sleep) | — | `reader` | Wait the given number of seconds before the block carries on. |
 | [`summary`](commands-index.md#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
-| [`tags`](commands-index.md#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
+| [`tags`](commands-index.md#command-tags) | — | `reader` | Report over the central tag vocabulary (`blogs/tags.json`). |
 | [`test-cases`](commands-index.md#command-test-cases) | — | `reader` | List a problem's test cases. |
 | [`tool-setup`](commands-index.md#command-tool-setup) | — | `contributor` | Install, uninstall or reinstall a per-user tool in your own home. |
-| [`topic`](commands-index.md#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
-| [`topics`](commands-index.md#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
+| [`blog`](commands-index.md#command-blog) | — | `reader` | List a blog article's declared tags and what each one maps to. |
+| [`blogs`](commands-index.md#command-blogs) | — | `reader` | List a problem's tags and the blog articles that cover them. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
 | [`update-models`](commands-index.md#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
 | [`update-presentation-data`](commands-index.md#command-update-presentation-data) | — | `maintainer` | Refresh the presentation deck's data from the progress file. |

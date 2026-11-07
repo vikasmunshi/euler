@@ -10,7 +10,7 @@ solver count, solved flag and date, and file *counts* — never an answer, and n
 from inside `solutions/private/`.
 
 Three of its inputs are other verbs' outputs, which is why it runs **last** in any chain of
-them: `problems.json` (`summary`), `topics/articles.json` (`update-tags`) and
+them: `problems.json` (`summary`), `blogs/articles.json` (`update-tags`) and
 `docs/commands-index.md` (`update-docs`).
 
 Two fields move on every run whatever else does — the generation date and the commit count —
@@ -74,7 +74,7 @@ def _project_stats() -> dict[str, int]:
     solutions = config.solutions_dir
     commits = run(['git', 'rev-list', '--count', 'HEAD'], cwd=config.root_dir,
                   capture_output=True, text=True, check=False).stdout.strip()
-    articles = loads(config.topics_index_file.read_text(encoding='utf-8'))['articles']
+    articles = loads(config.blogs_index_file.read_text(encoding='utf-8'))['articles']
     commands = re.findall(r'^#### Command:',
                           (config.docs_dir / 'commands-index.md').read_text(encoding='utf-8'),
                           flags=re.MULTILINE)

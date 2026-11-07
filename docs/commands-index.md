@@ -58,13 +58,13 @@ a parameter that accepts repetition.
 | [`claude`](#command-claude) | — | `contributor` | Run Claude Code interactively in the repository root, returning its exit code. |
 | [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
 | [`claude-batch`](#command-claude-batch) | — | `maintainer` | Bulk-tag a wave of problems in one Message Batches job, at half price. |
-| [`claude-blog`](#command-claude-blog) | — | `maintainer` | Write (or flesh out) a topic article via the claude-euler-blogger skill. |
+| [`claude-blog`](#command-claude-blog) | — | `maintainer` | Write (or flesh out) a blog article via the claude-euler-blogger skill. |
 | [`claude-login`](#command-claude-login) | — | `contributor` | Sign Claude Code in, then report whether it is, returning 0 only when signed in. |
 | [`claude-solve`](#command-claude-solve) | — | `contributor` | Run Claude Code over a problem's solution files, via a skill. |
 | [`clear`](#command-clear-cls) | `cls` | `reader` | Clear the terminal screen and scrollback, then succeed. |
 | [`compile-c`](#command-compile-c-compile) | `compile` | `contributor` | Compile every C solution for the problem into a runnable binary. |
 | [`costs`](#command-costs) | — | `contributor` | Print what this session's AI tokens have cost, per model. |
-| [`create-topic`](#command-create-topic) | — | `maintainer` | Seed a curated cross-cutting topic page. |
+| [`create-blog`](#command-create-blog) | — | `maintainer` | Seed a curated cross-cutting blog page. |
 | [`echo`](#command-echo) | — | `reader` | Print the given text to the console, then succeed. |
 | [`edit`](#command-edit-ed) | `ed` | `contributor` | Open a solution file in the web code editor. |
 | [`evaluate`](#command-evaluate-eval) | `eval` | `contributor` | Evaluate a problem's solutions against its test cases. |
@@ -98,11 +98,11 @@ a parameter that accepts repetition.
 | [`sleep`](#command-sleep) | — | `reader` | Wait the given number of seconds before the block carries on. |
 | [`summary`](#command-summary) | — | `maintainer` | Refresh the solved/unsolved state from your Project Euler progress page. |
 | [`sys-setup`](#command-sys-setup-install) | `install` | `admin` | Install or uninstall a system resource. |
-| [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`topics/tags.json`). |
+| [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`blogs/tags.json`). |
 | [`test-cases`](#command-test-cases) | — | `reader` | List a problem's test cases. |
 | [`tool-setup`](#command-tool-setup) | — | `contributor` | Install, uninstall or reinstall a per-user tool in your own home. |
-| [`topic`](#command-topic) | — | `reader` | List a topic article's declared tags and what each one maps to. |
-| [`topics`](#command-topics) | — | `reader` | List a problem's tags and the topic articles that cover them. |
+| [`blog`](#command-blog) | — | `reader` | List a blog article's declared tags and what each one maps to. |
+| [`blogs`](#command-blogs) | — | `reader` | List a problem's tags and the blog articles that cover them. |
 | [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
 | [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
 | [`update-presentation-data`](#command-update-presentation-data) | — | `maintainer` | Refresh the presentation deck's data from the progress file. |
@@ -420,27 +420,27 @@ claude-batch
 
 #### Command: `claude-blog`
 
-Write (or flesh out) a topic article via the claude-euler-blogger skill.
+Write (or flesh out) a blog article via the claude-euler-blogger skill.
 
 * ⚑ needs maintainer or above.
 * ✎ asks for anything you leave out.
 
-*topic* names what to write about: a tag's `<facet>/<slug>` path (e.g.
-`technique/sieve-of-eratosthenes`), a bare tag slug, or a curated topic path
-(`number-theory/primes`). Tab-completion offers every topic in the article index
-(`topics/articles.json`), unwritten and most-referenced first.
+*blog* names what to write about: a tag's `<facet>/<slug>` path (e.g.
+`technique/sieve-of-eratosthenes`), a bare tag slug, or a curated blog path
+(`number-theory/primes`). Tab-completion offers every blog in the article index
+(`blogs/articles.json`), unwritten and most-referenced first.
 Launches Claude Code headless to research the covering problems and write the article
-under `topics/`, then streams a live Markdown summary. Needs the `claude` CLI, signed in
+under `blogs/`, then streams a live Markdown summary. Needs the `claude` CLI, signed in
 (`claude-login`).
 
-A topic whose article the index reports as `final` is left alone — the skill marks a page
+A blog whose article the index reports as `final` is left alone — the skill marks a page
 final when it is done writing it, and rewriting one is an explicit `--force`.
 
 **usage**
 
 ```
 claude-blog
-[topic=<str>] (asked)
+[blog=<str>] (asked)
 [additional_prompt=<str>] (asked)
 [force=true|--force]
 ```
@@ -449,7 +449,7 @@ claude-blog
 
 | argument | description |
 |----------|-------------|
-| `topic` | The tag or topic to write about. Offered as a menu of the article index when omitted; completion offers the same set. |
+| `blog` | The tag or blog to write about. Offered as a menu of the article index when omitted; completion offers the same set. |
 | `additional_prompt` | Extra free-text guidance for the writer. Asked for in an interactive shell when omitted — the web's Write / Rewrite actions type a bare `claude-blog <path>`, so a maintainer would otherwise never get to pass an angle. Enter skips it. Defaults to empty. |
 | `force` | Rewrite the article even when it is already final. Defaults to False. |
 
@@ -595,17 +595,17 @@ costs
 
 ---
 
-#### Command: `create-topic`
+#### Command: `create-blog`
 
-Seed a curated cross-cutting topic page.
+Seed a curated cross-cutting blog page.
 
 * ⚑ needs maintainer or above.
 * ✎ asks for anything you leave out.
 
-A curated topic (e.g. `number-theory/primes`) gathers several tags under one idea,
+A curated blog (e.g. `number-theory/primes`) gathers several tags under one idea,
 unlike a tag's own auto-generated page.
 
-*path* is the `folder/leaf` the page lives at under `topics/`. Give the tag slugs as
+*path* is the `folder/leaf` the page lives at under `blogs/`. Give the tag slugs as
 arguments to create non-interactively; give none and, in an interactive shell, pick them with
 a search-and-select prompt. Every slug must exist in the vocabulary. The page is seeded from
 the same template a tag page uses (its title is the leaf, title-cased — edit it when you
@@ -615,7 +615,7 @@ Problems section is filled. Write it with `claude-blog <path>`.
 **usage**
 
 ```
-create-topic <path>
+create-blog <path>
 [tags=<str>] (asked)
 ```
 
@@ -623,10 +623,10 @@ create-topic <path>
 
 | argument | description |
 |----------|-------------|
-| `path` | The `folder/leaf` location under `topics/` (lowercase words and hyphens). |
+| `path` | The `folder/leaf` location under `blogs/` (lowercase words and hyphens). |
 | `*tags` | The tag slugs the page covers. Omit them and, in an interactive shell, pick them by search-and-select over the vocabulary. |
 
-*Defined in* `solver.core.tags.create_topic`.
+*Defined in* `solver.core.tags.create_blog`.
 
 ---
 
@@ -761,7 +761,7 @@ prunes the merged branch. It also **dismisses the notice** `git-push` filed for 
 branch — the message asked for this review, and it is done.
 
 Every file in the pull request must sit inside the allowlist: `solutions/`, `docs/`,
-`topics/`, and the specific files the `update` target names — which is exactly what
+`blogs/`, and the specific files the `update` target names — which is exactly what
 `git-commit` can stage. One file outside it refuses the whole request. That is the
 gate, and the only one: a request may carry as many commits, across as many targets,
 as the work needed. What makes this a maintainer's command rather than an admin's is
@@ -844,7 +844,7 @@ The routine "save my progress" step. With no target it commits `solution`: every
 under this problem's directory, plus `solutions/problems.json` (the progress file `mark`
 rewrites), and nothing else. Naming targets widens that to whichever bodies of work you
 mean, and they compose — `git-commit docs update` lands a whole `update-docs` run as one
-commit, `git-commit topics` lands both legs of the tag graph together. A target with
+commit, `git-commit blogs` lands both legs of the tag graph together. A target with
 nothing to stage contributes nothing rather than failing, so composing is cheap.
 
 `--amend` folds the same paths into HEAD with its message untouched — the "I forgot
@@ -861,7 +861,7 @@ Aliased as `commit`.
 ```
 git-commit
 [problem=<n>] (default current)
-[solution|solutions|docs|topics|update ...]
+[solution|solutions|docs|blogs|update ...]
 [message=<str>] (asked)
 [amend=true|--amend]
 [reset=true|--reset]
@@ -873,7 +873,7 @@ git-commit
 | argument | description |
 |----------|-------------|
 | `problem` | The problem whose solution directory the `solution` target stages. Ignored by every other target. |
-| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the articles and every problem's tag leg) or 'update' (what the `update-*` verbs write outside `docs/` — the README, the module registry, the settings file, the model block, the Claude guidance). Defaults to 'solution'. |
+| `*targets` | What to stage — 'solution' (this problem plus the progress file), 'solutions' (the whole solution tree), 'docs' (the guides), 'blogs' (the articles and every problem's tag leg) or 'update' (what the `update-*` verbs write outside `docs/` — the README, the module registry, the settings file, the model block, the Claude guidance). Defaults to 'solution'. |
 | `message` | The commit message. Required unless `amend` is set, and asked for at the prompt when it is left out. |
 | `amend` | Fold the staged changes into HEAD instead of committing, keeping its message. Defaults to False. Refused with a message, with `reset`, or once HEAD is pushed. |
 | `reset` | Soft-reset to `origin/master` first, so the new commit squashes all local commits into a single checkpoint (the working tree is untouched). Defaults to False. `git-reset` is the same move without the re-commit. |
@@ -1812,8 +1812,8 @@ the "browser" command is not available. In the web shell, which has no local
 browser to drive, the page opens in the viewer panel instead.
 
 When *path* is given, `show` opens that site page instead of the problem's —
-`show topics/technique/concatenation`. The page ignores *problem*, but naming
-one still makes it the current problem: `show 121 topics/…` selects 121.
+`show blogs/technique/concatenation`. The page ignores *problem*, but naming
+one still makes it the current problem: `show 121 blogs/…` selects 121.
 
 **usage**
 
@@ -1829,7 +1829,7 @@ show
 | argument | description |
 |----------|-------------|
 | `problem` | The problem to open (and select as the current problem). |
-| `path` | A relative site path to open instead, e.g. `topics/technique/concatenation`. Its first segment must be one of solutions, topics, docs, about, edit, account or shell. Defaults to None, which opens the problem's page. |
+| `path` | A relative site path to open instead, e.g. `blogs/technique/concatenation`. Its first segment must be one of solutions, blogs, docs, about, edit, account or shell. Defaults to None, which opens the problem's page. |
 | `silent` | Suppress this command's output; errors and the result line still show. |
 
 *Defined in* `solver.core.viewer.show`.
@@ -1942,14 +1942,14 @@ sys-setup
 
 #### Command: `tags`
 
-Report over the central tag vocabulary (`topics/tags.json`).
+Report over the central tag vocabulary (`blogs/tags.json`).
 
 * ⚑ needs reader or above.
 
 The vocabulary's own shape, not any one problem's tags: how many tags each facet
 (domain, technique, takeaway) defines, and — with `--details` — how evenly the problems
 are spread across them, which is what shows a tag that has grown too broad or too
-narrow to be worth an article. Use `topic <name>` for one tag's problems.
+narrow to be worth an article. Use `blog <name>` for one tag's problems.
 
 **usage**
 
@@ -2029,9 +2029,9 @@ tool-setup
 
 ---
 
-#### Command: `topic`
+#### Command: `blog`
 
-List a topic article's declared tags and what each one maps to.
+List a blog article's declared tags and what each one maps to.
 
 * ⚑ needs reader or above.
 * ✎ asks for anything you leave out.
@@ -2044,7 +2044,7 @@ matches.
 **usage**
 
 ```
-topic
+blog
 [name=<str>] (asked)
 ```
 
@@ -2052,28 +2052,28 @@ topic
 
 | argument | description |
 |----------|-------------|
-| `name` | The article to report on: a `folder/leaf` path under `topics/`, or a bare leaf name when it is unambiguous. Offered as a menu when omitted; not strict, so a leaf name still works. |
+| `name` | The article to report on: a `folder/leaf` path under `blogs/`, or a bare leaf name when it is unambiguous. Offered as a menu when omitted; not strict, so a leaf name still works. |
 
-*Defined in* `solver.core.tags.topic`.
+*Defined in* `solver.core.tags.blog`.
 
 ---
 
-#### Command: `topics`
+#### Command: `blogs`
 
-List a problem's tags and the topic articles that cover them.
+List a problem's tags and the blog articles that cover them.
 
 * ⚑ needs reader or above.
 * ❏ uses/sets current problem.
 
 Reads the problem's own `tags.json` — grouping the tags by facet (domain, technique per
-solution index, takeaway) — then names every article under `topics/` that declares any
+solution index, takeaway) — then names every article under `blogs/` that declares any
 of them. Fails when the problem has no `tags.json`; `update-tags` reports which
 problems are missing one.
 
 **usage**
 
 ```
-topics
+blogs
 [problem=<n>] (default current)
 ```
 
@@ -2083,7 +2083,7 @@ topics
 |----------|-------------|
 | `problem` | The problem whose tags to list. |
 
-*Defined in* `solver.core.tags.topics`.
+*Defined in* `solver.core.tags.blogs`.
 
 ---
 
@@ -2221,8 +2221,8 @@ The glue for the double-entry tag graph.
 Order (maintainer beats contributor): apply maintainer edits to the central
 vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
 the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
-the topic articles' problem lists and rewrite the article index `topics/articles.json`
-(one row per writable topic: title, status, written date, solved/problem counts, tags, refs,
+the blog articles' problem lists and rewrite the article index `blogs/articles.json`
+(one row per writable blog: title, status, written date, solved/problem counts, tags, refs,
 the solved problems a final page covered when written, and those it has not), and name the
 final articles those later solves have overtaken — the rewrite candidates. A problem with
 notes but no `tags.json` is reported, not created here — the `claude-api tags` target (or

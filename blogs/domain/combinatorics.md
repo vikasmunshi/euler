@@ -1,0 +1,649 @@
+<!-- tags: [combinatorics] -->
+<!-- status: final 2026-11-04T08:07Z -->
+# Combinatorics
+
+[Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
+arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
+collection under some rule. It is the largest domain in this archive — 272 problems carry the tag,
+more than any other — and that is not an accident of tagging. Project Euler's favourite question
+shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
+discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
+so you must find the structure that lets you compute it instead.
+
+## Counting without enumerating
+
+The gap is worth making concrete. Problem 191 asks how many prize strings of length $n$ over a
+three-letter alphabet avoid three consecutive absences and contain at most one late mark. At
+$n = 4$ there are $3^4 = 81$ candidates and you can filter them by hand. At $n = 30$ there are
+over 200 trillion. At $n = 100$ the candidate space has 48 digits, and no amount of hardware
+closes that.
+
+What rescues it is an observation that recurs, in some form, in nearly every problem on this
+page: **whether a partial configuration can be legally extended depends only on a small, bounded
+summary of it, not on its full contents.** For problem 191 the summary is two facts — have I used
+my one late mark, and how many absences sit at the tail (0, 1, or 2, since 3 is illegal and any
+other letter resets the run). Everything else about the prefix is irrelevant to its future. That
+collapses an exponential history into six states, and the count falls out of a linear sweep.
+
+Finding that summary is the intellectual work. Once you have it, the code is short.
+
+## Model before you count
+
+Before any technique, settle the question every combinatorial problem quietly asks: **when are two
+configurations the same one?** Does order matter ([permutations](/blogs/domain/permutation)) or
+not ([combinations](/blogs/technique/combination))? Are the objects labelled or interchangeable?
+Is the result a set, a multiset, or a sequence? Get this wrong and a perfectly correct algorithm
+returns a perfectly wrong number.
+
+Problem 31 (public, `solutions/public/p0031/`) is the cleanest illustration in the archive. Counting
+the ways to make £2 from British coins is an unbounded knapsack count, and the entire
+order-matters-or-not distinction lives in the *nesting order of two loops*:
+
+```python
+result = [1] + [0] * target_amount
+for coin in coins:                              # coins outer: each coin folded in once,
+    for i in range(coin, target_amount + 1):    # in a fixed order, so {1,2} and {2,1}
+        result[i] += result[i - coin]           # have exactly one construction path
+```
+
+Swap the loops and you count ordered sequences instead of unordered combinations — a different
+question, off by orders of magnitude, with no error message. Problem 181 (grouping two colours of
+indistinguishable objects) is the same discipline in two dimensions: each group-type is folded in
+completely, in one canonical order, so every multiset is built exactly once.
+
+The inner loop's *direction* carries the other half of the model. Problem 249 counts subsets of the
+primes below 5000 with a prime sum, and folds each prime into the same one-dimensional table — but a
+subset uses each prime at most once, so the sweep runs *downward*, reading $c_{s-p}$ before this
+prime has touched it. Run it upward, as problem 31 does, and every prime may be reused: you have
+silently switched from a [subset sum](/blogs/domain/subset-sum-problem) to an unbounded
+[knapsack](/blogs/technique/knapsack-problem), and again nothing complains.
+
+"Exactly once" is also the test for any decomposition. Problem 240 counts ordered dice rolls whose
+top ten values hit a target — awkward, because whether a die is "in the top ten" depends on every
+other die. Fixing the value $v$ of the tenth-largest die resolves it: each die is then above, equal
+to, or below $v$, and that split is a property of the roll, not of a choice made while counting. So
+summing over the split counts each roll once with no correction, and each term is a product —
+a [multinomial](/blogs/technique/multinomial-theorem) for which positions hold which class (the
+"ordered" requirement discharged in closed form), a small sum table for the dice above, and
+$(v-1)^{\ell}$ for the free dice below. Pick the statistic that classifies, and the overlaps you
+would otherwise subtract never arise.
+
+That product is the [rule of product](https://en.wikipedia.org/wiki/Rule_of_product), and the
+modelling question behind it is **which parts of a configuration do not interact**. Find them and
+the count factorises. Problem 452 counts ordered $n$-tuples with product at most $m$; for a fixed
+product the tuple splits prime by prime, each exponent $e$ distributed over the $n$ slots
+independently, so the per-prime count is [stars and bars](https://en.wikipedia.org/wiki/Stars_and_bars_(combinatorics)),
+$\binom{n+e-1}{e}$, and the whole count is a
+[multiplicative function](https://en.wikipedia.org/wiki/Multiplicative_function) that a sublinear
+prime-sum sieve can total. Problem 778's "freshman's product" multiplies numbers digit by digit
+with no carries, so each decimal position is its own sub-problem: replace the integers by a
+ten-entry histogram of their digit at that place, and the product's distribution is that histogram
+convolved with itself $R$ times over the digits under multiplication mod 10 — a power taken by
+squaring, because the convolution is associative. Independence is a property of the model, not
+the code; a carry, or a prime shared between slots, would break it.
+
+The additive twin of the product rule is to **sum contributions, not configurations**. When the
+question is a total of some statistic over every configuration, swap the order of summation: for each
+small piece that can contribute, count the configurations in which it does. Problem 705 totals the
+inversion counts of a number of digit sequences far too large to list, each built by replacing every
+digit by one of its divisors. An inversion is a pair of positions, and the number of sequences in
+which a given pair is inverted depends only on its two digit *values*, since every other position
+chooses freely. So the total is the sequence count times a weighted sum over a $9 \times 9$ table of
+how often digit $x$ precedes digit $y$ — one linear pass to build the table, and no sequence ever
+touched. This is [double counting](/blogs/technique/double-counting-proof-technique), or
+[linearity of expectation](/blogs/domain/expected-value) read the other way round: the total is
+the count times the mean, and the mean splits over pairs.
+
+## The four shapes an answer takes
+
+Across these problems the resolution nearly always falls into one of four moves.
+
+**A closed form.** The best outcome: the count is a formula you evaluate in constant time. Choosing
+$k$ of $n$ is a [binomial coefficient](/blogs/domain/binomial-coefficient); a sub-rectangle of a
+grid is fixed by choosing two of the $m+1$ vertical lines and two of the $n+1$ horizontal ones, so
+a grid holds $\binom{m+1}{2}\binom{n+1}{2}$ of them — problem 85's brute-force position count
+collapses to that. [Catalan numbers](/blogs/domain/catalan-number) count balanced structures;
+[necklace counting](/blogs/domain/necklace-counting) handles arrangements up to rotation. Problem
+24's rank-to-permutation unranking is a closed form in disguise: repeated `divmod` by $(n-1)!$ picks
+each digit directly, never touching the million permutations it skips. The general form of that
+move is *count, then descend*: to find the $n$-th object, try each next symbol in order, count the
+objects that start with the extended prefix, and either keep the symbol or subtract the block and
+move on. Problem 698 unranks numbers whose digit counts must themselves be members of the set; the
+membership test only sees the multiset of digits, so the completions of a prefix are a short sum of
+multinomials over admissible count triples, and an index near $10^{17}$ is reached in a few dozen
+digit choices. Unranking is only ever as hard as counting. Sometimes the formula only
+appears once you notice how little the question asks: problem 242 wants pairs $(n, k)$ for which the
+number of odd-sum $k$-subsets of $\{1..n\}$ is odd, over $n \le 10^{12}$. Only *parity* matters,
+and modulo 2 [Lucas' theorem](/blogs/domain/lucass-theorem) makes binomials rigid — the subset
+count's generating function collapses to $x(1+x)^{n-1}$, and the whole census becomes
+$\sum_t 2^{\operatorname{popcount}(t)}$, summed bit by bit in forty steps. See
+[closed-form expression](/blogs/technique/closed-form-expression).
+
+A formula can also have a parameter that must be computed. Problem 619 counts the subsets of an
+interval whose product is a perfect square. Only the parity of each prime exponent matters, so each
+number is a vector over the [two-element field](/blogs/domain/gf2), multiplying numbers adds their
+vectors, and a square subset is a solution of a homogeneous linear system. Solutions of such a
+system form a subspace, so with $n$ vectors of [rank](https://en.wikipedia.org/wiki/Rank_(linear_algebra))
+$r$ the count is $2^{n-r} - 1$, the $-1$ dropping the empty subset. Nothing is enumerated and no table
+is filled; the counting problem has become a rank computation. The vectors look far too wide for
+that, one coordinate per prime, but a number up to $b$ has at most one prime factor above $\sqrt b$.
+So each large prime is cleared by a single pivot, and
+[Gaussian elimination](/blogs/technique/gaussian-elimination) only ever sees the primes up to
+$\sqrt b$. See [count solutions by rank](/blogs/takeaway/count-solutions-by-rank).
+
+**A recurrence, evaluated as a table.** When no formula exists, decompose by the last decision. It
+is the single most common shape here — [dynamic programming](/blogs/technique/dynamic-programming)
+is the most frequent technique across the solved problems on this list. Problem 116 asks for tilings
+of a row with one tile length $L$: the rightmost tile is either a unit square or a length-$L$ block,
+the two cases are disjoint and exhaustive, so $dp[i] = dp[i-1] + dp[i-L]$. Problems 114, 115 and 117
+vary the same skeleton; problem 215 stacks it, encoding each brick row as a bitmask of its internal
+seams so that "no running crack" becomes `mask_a & mask_b == 0`, and the wall count becomes a
+layered walk over a compatibility graph. The pattern is always: define the state, enumerate the last
+move, sum the disjoint cases. The "last move" need not be the rightmost one, either. Problem 866 lays
+the pieces of a row down in random order, each placement scoring the segment it completes, and asks
+for the expected product of the scores. Condition on the *last piece placed* in time: until then no
+segment crosses it, so its left and right sides evolve as two independent smaller rows. The
+expectation factorises, and the recurrence becomes a self-convolution
+$E(N) \propto \sum_i E(i)\,E(N-1-i)$ — the [Catalan](/blogs/domain/catalan-number) shape, which
+shows up whenever one choice splits a structure into two independent halves. See also [recurrence relations](/blogs/domain/recurrence-relation)
+and [generating functions](/blogs/domain/generating-function), which are the same recurrences
+written as algebra — and which earn their place when the algebra does work the table cannot.
+Problem 249's table *is* the product $\prod_p (1 + x^p)$, one factor per prime. Problem 996 builds
+a polynomial left to right whose coefficients count overtake tuples, and gets the parity and
+"no entry above half the total" constraints by algebraic manipulation of the weights
+($\tfrac12(f(y) + f(-y))$ keeps the even part) rather than by extra state — so the run time is
+independent of the total bound $k$. Problem 768 goes furthest: a balanced chandelier on 360 sockets
+factors into twelve independent copies of the 30-socket problem, and the answer is one coefficient
+of $G_{30}(z)^{12}$.
+
+Two more pieces of algebra extend the reach. When a constraint is on the *multiset* of symbols in a
+string, not their order, the [exponential generating function](/blogs/technique/exponential-generating-function)
+does the arranging: a symbol allowed $j$ times contributes $x^j/j!$, and $L!\,[x^L]$ of the product
+puts the multinomial back. Problem 520 needs even digits used an even number of times and odd digits
+an odd number of times or not at all, which gives factors of $\cosh x$ and $1 + \sinh x$; substituting
+$y = e^x$ turns the product into a short Laurent polynomial, since $L!\,[x^L]\,e^{kx} = k^L$, so
+every count is a sum of powers, and summing over all lengths up to $2^{39}$ is a couple of dozen
+geometric series. And when the generating function is **rational**, the sequence obeys a
+[linear recurrence with constant coefficients](/blogs/technique/linear-recurrence-with-constant-coefficients),
+and the $n$-th term costs $O(\log n)$ however large $n$ is. Problem 682 pairs $5$-smooth numbers
+with equal factor counts by tagging one side with $x$ and the other with $x^{-1}$ and keeping the
+constant term in $x$. The poles of the result give a degree-40 denominator; a small DP supplies the
+first 81 terms, multiplying by the denominator must zero out every coefficient past the numerator
+(a built-in check that no pole was missed), and [Bostan–Mori](/blogs/technique/bostan-mori-algorithm)
+then halves $n$ each round to read off one coefficient at $10^7$ — or at $10^{18}$, for the same cost.
+
+That logarithm has two preconditions, and both can be engineered. The first is that the quantity
+must close under its own recurrence, and a total often does not. Problem 377 sums the zero-free
+numbers with digit sum $n$, for $n$ up to $13^{17}$. Appending a digit $d$ sends a value $v$ to
+$10v + d$, so the sum obeys $s(n) = \sum_d \bigl(10\,s(n-d) + d\,c(n-d)\bigr)$, which needs the
+*count* $c$ as well. The count closes on its own, so carrying the two together gives 18 values that
+advance through one fixed [matrix](/blogs/technique/matrix-exponentiation). If a statistic's update
+mentions another statistic, the other one joins the state. See
+[running totals as matrix products](/blogs/takeaway/running-totals-as-matrix-products).
+
+The second is that the state must be small, because a matrix product costs its cube. Problem 294
+counts digit strings of length $11^{12}$ that have digit sum 23 and are divisible by 23. The
+[digit DP](/blogs/technique/digit-dp) state, residue and digit sum, has $23 \times 24 = 552$ values
+(sums past 23 are dead), so a dense product is some $1.7 \times 10^8$ operations. But the matrix is
+redundant: a block of $L$ digits acts the same way on every prefix, multiplying its residue by
+$10^L$ and adding the block's own residue and digit sum. So one table of 552 counts, plus the scalar
+$10^L$, *is* the whole matrix. Joining two blocks is a convolution, cyclic in the residue and
+truncated in the digit sum, and because concatenation is associative,
+[squaring](/blogs/technique/exponentiation-by-squaring) works on the tables directly, each product
+552 times cheaper. Before raising a matrix to a power, ask whether its rows are all the same row in
+disguise.
+
+The table can also run along a *parameter* of the problem rather than along a configuration.
+Problem 423 counts die sequences of length $n$ with at most $\pi(n)$ repeated neighbours. Recoding a
+sequence as its first face plus a repeat-or-change mark at each gap gives
+$\binom{n-1}{c}\,5^{n-1-c}$ for each first face and exactly $c$ repeats — but the cut-off asks for a
+partial sum of that row, and partial sums of a binomial row have no closed form. They do have
+neighbours. With $F(m,k) = \sum_{c \le k}\binom{m}{c}5^{m-c}$, [Pascal's rule](/blogs/technique/pascals-triangle)
+gives $F(m+1,k) = 6F(m,k) - \binom{m}{k}5^{m-k}$, and raising $k$ adds one term. So each $n$ costs
+$O(1)$ instead of $O(\pi(n))$, which over the problem's range replaces some $10^{14}$ terms with
+$5 \times 10^7$ steps. When a quantity has no formula, look for a formula for its *difference* from
+the neighbouring instance. See [update only what changes](/blogs/takeaway/update-only-what-changes).
+
+**Count the complement, or inclusion–exclusion.** "At least one" is usually harder than "none".
+Problem 116 subtracts the single all-grey tiling rather than tracking a "used a colour yet?" flag
+through the recurrence. When constraints overlap, [inclusion–exclusion](/blogs/technique/inclusion-exclusion-principle)
+adds back what double-subtraction removed. Reach for it whenever the forbidden set is easier to
+describe than the permitted one. Problem 951 is a clean case: after showing a card game is fair
+exactly when the deck holds a single-colour run of length 2, "decks with such a run" is messy, but
+the complement — red and black run lengths forming two interleaved
+[compositions](/blogs/domain/composition-combinatorics) of $n$ with no part equal to 2 — is a
+short sum, subtracted from $\binom{2n}{n}$. The multiplicative cousin is
+[Möbius inversion](/blogs/technique/mobius-inversion-formula): problem 276 counts *all* integer
+triangles up to a perimeter in closed form, then strips the non-primitive ones, since every
+triangle is $g$ times a primitive one — count the easy superset, then invert the scaling.
+
+Inclusion–exclusion is only as cheap as its overlaps, so the work is in describing the bad events
+precisely enough that few of them can co-occur. Problem 628 counts pawn placements — one per row
+and column, so permutations — that leave a right-and-up rook path open. Every such path crosses
+each anti-diagonal exactly once, so the board is blocked exactly when some anti-diagonal is fully
+occupied, which a brute force over $n \le 9$ confirmed before it was trusted. In a permutation a
+full anti-diagonal near a corner forces a reversed corner block, and two blocks of different sizes
+at the same corner would send the same rows to different columns. So there is at most one bad block
+per corner, the inclusion–exclusion has a handful of terms, and the sum telescopes
+($m \cdot m! = (m+1)! - m!$) down to one pass over the
+[left factorials](https://oeis.org/A003422).
+
+When the objects sort into few classes, the complement can be taken over the classes. Problem 612
+counts pairs of numbers below $10^{18}$ with a digit in common. That depends only on each number's
+digit *set*, so the numbers fall into at most $2^{10}$ classes, whose sizes $c_S$ a
+[digit DP](/blogs/technique/digit-dp) supplies. "Share a digit" is a union of ten overlapping
+events; its complement is one clean condition, since $S'$ is disjoint from $S$ exactly when
+$S' \subseteq \overline{S}$. So what is needed is $F(M) = \sum_{S' \subseteq M} c_{S'}$ at every mask
+$M$, and the [sum-over-subsets transform](/blogs/technique/sum-over-subsets-transform) fills that
+in one sweep per bit: $10 \cdot 2^{10}$ additions, not the $3^{10}$ submask pairs. This is
+inclusion–exclusion's own machinery seen from the other side: $F$ is the zeta transform of the
+subset lattice, and undoing it is Möbius inversion there.
+
+**Quotient by symmetry.** If configurations related by rotation, reflection, or relabelling count as
+one, do not enumerate and deduplicate — divide the work by the symmetry group up front, or count
+orbits directly. Problem 53 gets a small version free: Pascal's rows are symmetric and unimodal, so
+the first $r$ whose entry exceeds the threshold settles the whole middle of the row at once.
+
+```python
+for r in range(0, n // 2 + 1):
+    if c > threshold:
+        count += n - 2 * r + 1      # symmetry: entries r..n-r all qualify
+        break
+    c = c * (n - r) // (r + 1)      # Pascal's recurrence, no factorials
+```
+
+Note the second line as well: that recurrence sidesteps building $n!$ entirely.
+
+Symmetry also shrinks a *search*, not just a count. Problem 265 sums binary circles whose every
+window is distinct — [de Bruijn sequences](/blogs/domain/de-bruijn-sequence) — and rather than
+generate every rotation and deduplicate, it searches only strings starting at the all-zeros window,
+a [canonical form](/blogs/technique/canonical-form) that names each circle exactly once. Problem 244
+is a 15 puzzle with tiles that are only coloured, seven red and eight blue; treating same-colour
+tiles as interchangeable cuts $16!/2$ states to $16 \cdot \binom{15}{7} \approx 10^5$, and a plain
+[breadth-first search](/blogs/technique/breadth-first-search) finishes the job.
+
+The same quotient shrinks a DP *state*. Problem 670 colours a tiled $2 \times n$ strip with four
+colours, adjacent tiles distinct, for $n = 10^{16}$ — a [transfer matrix](https://en.wikipedia.org/wiki/Transfer-matrix_method)
+raised to a huge power, so the state count is cubed in every multiplication. Remembering each
+boundary's actual colours gives over a hundred states; but the two tiles at a boundary always touch
+and so always differ, and every such colour pair is equivalent under permuting the colours. Only
+*how many* choices each new tile has matters, so the colours fold into the matrix weights and ten
+states remain.
+
+The opposite move also works: *add* labels to get something rigid, count that, and divide. Problem
+475 regroups $12n$ musicians from $3n$ quartets into $4n$ trios with no former partners together, and
+unlabelled groups of people are awkward to count. Label the trios, and each arrangement yields a
+$3n \times 4n$ binary incidence matrix with row sums 4 and column sums 3. Each such matrix arises
+from exactly $4!$ assignments per row, so
+[counting both ways](/blogs/technique/double-counting-proof-technique) gives
+$f(12n) = 24^{3n} M / (4n)!$, with $M$ the number of matrices. The division is honest only because
+every orbit is the same size: the trios are distinct sets, so all $(4n)!$ labellings differ. Where
+orbits vary, that shortcut is wrong and [Burnside's lemma](https://en.wikipedia.org/wiki/Burnside%27s_lemma)
+takes over. And $M$ then yields to the state quotient above: columns with equal fill are
+interchangeable, so a partial matrix is just a histogram of column fills, and
+[its invariants](/blogs/takeaway/invariant-bounds-the-state-space) leave two free counters per row.
+
+Symmetry also collapses a *filter*. A condition of the form "the sum is divisible by $n$" is
+picked out of a generating function by a [roots-of-unity filter](/blogs/technique/roots-of-unity-filter):
+evaluate at every $n$-th root of unity and average, since $\frac1n\sum_j \omega^{js}$ is $1$ when
+$n \mid s$ and $0$ otherwise. Problem 635 counts $p$-element subsets of $\{1, \dots, qp\}$ with sum
+divisible by $p$. For prime $p$ every non-trivial root is primitive, so all $p - 1$ non-trivial terms
+are permutations of the same product and are equal; one evaluates in closed form, and the whole
+count becomes a binomial plus a small correction, divided by $p$. See
+[exploit symmetry](/blogs/takeaway/exploit-symmetry).
+
+## The counts themselves are the other hazard
+
+Combinatorial answers grow explosively, and this domain's most common companion tag is
+[modular arithmetic](/blogs/domain/modular-arithmetic) — 75 of these 272 problems carry it. That
+pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
+the deliverable and you work in the ring from line one), or it wants the honest integer and you
+need [arbitrary precision](/blogs/technique/arbitrary-precision-arithmetic). Python gives you the
+latter free; in C the same count silently overflows, which is why
+[watch integer width](/blogs/takeaway/watch-integer-width) shows up so often alongside these.
+Decide which régime you are in *before* writing the accumulator.
+
+Watch the intermediate values too, not just the answer. Computing $\binom{n}{k}$ as
+$n! / (k!(n-k)!)$ builds enormous factorials to produce a modest result; the Pascal recurrence above
+keeps every intermediate near the size of the answer.
+
+And check that the reduction actually commutes with what you are asked for. Problem 249 wants the
+last 16 digits of a sum of counts, so holding every count modulo $10^{16}$ is sound — additions only,
+nothing to divide. Problem 244 looks similar and is not: its answer is the plain sum of per-path
+checksums that were each reduced on their own, so a DP carrying (count, sum of checksums) modulo
+$100\,000\,007$ would lose track of how many of them wrapped. There the paths must be walked one by one — affordable
+only because the BFS shows how few shortest paths there are.
+
+Expected counts carry their own version of the trap. Problem 523's odd sorting procedure is
+insertion sort in disguise, each insertion costing $2^s$ moves, and
+[linearity of expectation](https://en.wikipedia.org/wiki/Expected_value#Properties) turns the
+average into a single short sum of fractions. The answer is wanted to two decimals, and the
+statement's own $E(10) = 115.725$ sits exactly on a half — so the sum is kept as exact rationals
+and rounded once, in integers, rather than trusting floating point to land on the right side.
+
+## How to reason about it
+
+The cue is a question that begins "how many" — arrangements, tilings, selections, colourings,
+paths, partitions — at a size where listing them is hopeless. When you catch it:
+
+- **Fix the equivalence first.** Ordered or unordered, labelled or identical, set or multiset.
+  Write the definition down before writing a loop; most wrong answers here are modelling errors,
+  not bugs.
+- **Look for the bounded summary.** What is the least you must remember about a prefix to know how
+  it may be extended? If that summary is small and finite, you have a DP state and the problem is
+  essentially solved.
+- **Try to decompose by the last decision.** Cases that are disjoint and exhaustive give a
+  recurrence directly; if they overlap, you need inclusion–exclusion instead.
+- **Ask whether a formula exists.** A binomial, a Catalan number, a product rule — a closed form
+  beats any table. Check [OEIS](https://oeis.org/) with the first few hand-computed terms; a
+  matching sequence often comes with the formula attached.
+- **Count the complement when "at least one" appears.** Constraints phrased as prohibitions are
+  usually cheaper counted the other way round.
+- **Sum contributions when the question is a total.** A statistic summed over every configuration
+  is usually a sum over small pieces (pairs, positions) of how many configurations each one
+  scores in.
+- **When $n$ is astronomical, look for a rational generating function.** If the table you would
+  fill obeys a fixed-order linear recurrence, the $n$-th term costs $\log n$, not $n$. Add to the
+  state whatever the update needs, and if every prefix is treated alike, compose one table instead
+  of a matrix.
+- **When the constraints are linear, compute a rank.** Over a finite field the solutions form a
+  subspace, so their number is a power of the field size and nothing needs listing.
+- **When there is no formula, look for a step.** A sum that resists closing may still move to its
+  neighbouring instance in constant time.
+- **Decide the arithmetic régime up front.** A stated modulus means reduce after every operation;
+  no modulus means big integers, and in C that means thinking about width before the first
+  multiply. Either way, confirm the reduction commutes with what is actually being summed.
+- **Conjecture from small cases, then check against a brute force.** A guessed structure that is
+  only *plausible* is the domain's most expensive mistake.
+
+Brute force does have a place — it is how you get the small terms that verify a formula or seed a
+sequence lookup, and increasingly how the structure is *found*. Problem 256's tatami-free rooms
+follow a band rule that no one hands you: an exhaustive row-by-row tiling checker printed the bad
+lengths per width, the bands were read off the listing, and the rule was trusted only after it
+matched every room up to $16 \times 90$. Problem 996's characterisation of reachable overtake tuples
+was conjectured, then checked against a breadth-first search for every $n \le 7$. The checker is
+also what catches the plausible wrong idea: in problem 768 the natural guess — a balanced chandelier
+is a union of regular polygons — is a theorem for moduli with two prime factors and false for 360,
+which has three; already on 30 sockets the polygon unions miss 30 of the 525 balanced 6-subsets.
+See [small cases reveal the closed form](/blogs/takeaway/small-cases-reveal-closed-form). Just
+never expect brute force to reach the answer. The domain is defined by the distance
+between what you can enumerate and what you are asked to count, and every technique here is a way
+of crossing it.
+
+<!-- problems (generated by update-tags) -->
+## Problems
+
+- ● [0011](/solutions/0011/) — Largest Product in a Grid
+- ● [0024](/solutions/0024/) — Lexicographic Permutations
+- ● [0030](/solutions/0030/) — Digit Fifth Powers
+- ● [0031](/solutions/0031/) — Coin Sums
+- ● [0032](/solutions/0032/) — Pandigital Products
+- ● [0034](/solutions/0034/) — Digit Factorials
+- ● [0051](/solutions/0051/) — Prime Digit Replacements
+- ● [0053](/solutions/0053/) — Combinatoric Selections
+- ● [0054](/solutions/0054/) — Poker Hands
+- ● [0085](/solutions/0085/) — Counting Rectangles
+- ● [0090](/solutions/0090/) — Cube Digit Pairs
+- ● [0091](/solutions/0091/) — Right Triangles with Integer Coordinates
+- ● [0092](/solutions/0092/) — Square Digit Chains
+- ● [0093](/solutions/0093/) — Arithmetic Expressions
+- ● [0105](/solutions/0105/) — Special Subset Sums: Testing
+- ● [0106](/solutions/0106/) — Special Subset Sums: Meta-testing
+- ● [0109](/solutions/0109/) — Darts
+- ● [0111](/solutions/0111/) — Primes with Runs
+- ● [0113](/solutions/0113/) — Non-bouncy Numbers
+- ● [0114](/solutions/0114/) — Counting Block Combinations I
+- ● [0115](/solutions/0115/) — Counting Block Combinations II
+- ● [0116](/solutions/0116/) — Red, Green or Blue Tiles
+- ● [0117](/solutions/0117/) — Red, Green, and Blue Tiles
+- ● [0121](/solutions/0121/) — Disc Game Prize Fund
+- ● [0126](/solutions/0126/) — Cuboid Layers
+- ● [0147](/solutions/0147/) — Rectangles in Cross-hatched Grids
+- ● [0155](/solutions/0155/) — Counting Capacitor Circuits
+- ● [0158](/solutions/0158/) — Lexicographical Neighbours
+- ● [0162](/solutions/0162/) — Hexadecimal Numbers
+- ● [0163](/solutions/0163/) — Cross-hatched Triangles
+- ● [0164](/solutions/0164/) — Three Consecutive Digital Sum Limit
+- ● [0166](/solutions/0166/) — Criss Cross
+- ● [0171](/solutions/0171/) — Square Sum of the Digital Squares
+- ● [0172](/solutions/0172/) — Few Repeated Digits
+- ● [0173](/solutions/0173/) — Hollow Square Laminae I
+- ● [0174](/solutions/0174/) — Hollow Square Laminae II
+- ● [0178](/solutions/0178/) — Step Numbers
+- ● [0181](/solutions/0181/) — Grouping Two Different Coloured Objects
+- ● [0191](/solutions/0191/) — Prize Strings
+- ● [0201](/solutions/0201/) — Subsets with a Unique Sum
+- ● [0204](/solutions/0204/) — Generalised Hamming Numbers
+- ● [0208](/solutions/0208/) — Robot Walks
+- ● [0215](/solutions/0215/) — Crack-free Walls
+- ● [0228](/solutions/0228/) — Minkowski Sums
+- ● [0240](/solutions/0240/) — Top Dice
+- ● [0242](/solutions/0242/) — Odd Triplets
+- ● [0244](/solutions/0244/) — Sliders
+- ● [0249](/solutions/0249/) — Prime Subset Sums
+- ● [0256](/solutions/0256/) — Tatami-Free Rooms
+- ● [0259](/solutions/0259/) — Reachable Numbers
+- ● [0265](/solutions/0265/) — Binary Circles
+- ● [0269](/solutions/0269/) — Polynomials with at Least One Integer Root
+- ○ [0270](/solutions/0270/) — Cutting Squares
+- ○ [0275](/solutions/0275/) — Balanced Sculptures
+- ● [0276](/solutions/0276/) — Primitive Triangles
+- ○ [0281](/solutions/0281/) — Pizza Toppings
+- ○ [0289](/solutions/0289/) — Eulerian Cycles
+- ○ [0292](/solutions/0292/) — Pythagorean Polygons
+- ● [0294](/solutions/0294/) — Sum of Digits - Experience #23
+- ○ [0307](/solutions/0307/) — Chip Defects
+- ● [0319](/solutions/0319/) — Bounded Sequences
+- ○ [0322](/solutions/0322/) — Binomial Coefficients Divisible by 10
+- ○ [0324](/solutions/0324/) — Building a Tower
+- ○ [0338](/solutions/0338/) — Cutting Rectangular Grid Paper
+- ○ [0344](/solutions/0344/) — Silver Dollar Game
+- ○ [0350](/solutions/0350/) — Constraining the Least Greatest and the Greatest Least
+- ○ [0361](/solutions/0361/) — Subsequence of Thue-Morse Sequence
+- ○ [0362](/solutions/0362/) — Squarefree Factors
+- ○ [0364](/solutions/0364/) — Comfortable Distance
+- ○ [0369](/solutions/0369/) — Badugi
+- ○ [0371](/solutions/0371/) — Licence Plates
+- ○ [0376](/solutions/0376/) — Nontransitive Sets of Dice
+- ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
+- ○ [0378](/solutions/0378/) — Triangle Triples
+- ○ [0380](/solutions/0380/) — Amazing Mazes!
+- ○ [0382](/solutions/0382/) — Generating Polygons
+- ○ [0386](/solutions/0386/) — Maximum Length of an Antichain
+- ○ [0393](/solutions/0393/) — Migrating Ants
+- ○ [0398](/solutions/0398/) — Cutting Rope
+- ○ [0409](/solutions/0409/) — Nim Extreme
+- ○ [0412](/solutions/0412/) — Gnomon Numbering
+- ○ [0413](/solutions/0413/) — One-child Numbers
+- ○ [0415](/solutions/0415/) — Titanic Sets
+- ○ [0416](/solutions/0416/) — A Frog's Trip
+- ● [0423](/solutions/0423/) — Consecutive Die Throws
+- ○ [0426](/solutions/0426/) — Box-Ball System
+- ○ [0427](/solutions/0427/) — $n$-sequences
+- ○ [0430](/solutions/0430/) — Range Flips
+- ○ [0434](/solutions/0434/) — Rigid Graphs
+- ○ [0438](/solutions/0438/) — Integer Part of Polynomial Equation's Solutions
+- ● [0452](/solutions/0452/) — Long Products
+- ○ [0453](/solutions/0453/) — Lattice Quadrilaterals
+- ○ [0456](/solutions/0456/) — Triangles Containing the Origin II
+- ○ [0458](/solutions/0458/) — Permutations of Project
+- ○ [0462](/solutions/0462/) — Permutation of 3-smooth Numbers
+- ○ [0465](/solutions/0465/) — Polar Polygons
+- ○ [0466](/solutions/0466/) — Distinct Terms in a Multiplication Table
+- ○ [0469](/solutions/0469/) — Empty Chairs
+- ○ [0472](/solutions/0472/) — Comfortable Distance II
+- ● [0475](/solutions/0475/) — Music Festival
+- ○ [0480](/solutions/0480/) — The Last Question
+- ○ [0483](/solutions/0483/) — Repeated Permutation
+- ○ [0486](/solutions/0486/) — Palindrome-containing Strings
+- ○ [0490](/solutions/0490/) — Jumping Frog
+- ○ [0491](/solutions/0491/) — Double Pandigital Number Divisible by $11$
+- ○ [0494](/solutions/0494/) — Collatz Prefix Families
+- ○ [0495](/solutions/0495/) — Writing $n$ as the Product of $k$ Distinct Positive Integers
+- ○ [0502](/solutions/0502/) — Counting Castles
+- ○ [0511](/solutions/0511/) — Sequences with Nice Divisibility Properties
+- ○ [0519](/solutions/0519/) — Tricoloured Coin Fountains
+- ● [0520](/solutions/0520/) — Simbers
+- ○ [0522](/solutions/0522/) — Hilbert's Blackout
+- ● [0523](/solutions/0523/) — First Sort I
+- ○ [0524](/solutions/0524/) — First Sort II
+- ○ [0528](/solutions/0528/) — Constrained Sums
+- ○ [0534](/solutions/0534/) — Weak Queens
+- ○ [0537](/solutions/0537/) — Counting Tuples
+- ○ [0544](/solutions/0544/) — Chromatic Conundrum
+- ○ [0553](/solutions/0553/) — Power Sets of Power Sets
+- ○ [0557](/solutions/0557/) — Cutting Triangles
+- ○ [0559](/solutions/0559/) — Permuted Matrices
+- ○ [0564](/solutions/0564/) — Maximal Polygons
+- ○ [0572](/solutions/0572/) — Idempotent Matrices
+- ○ [0573](/solutions/0573/) — Unfair Race
+- ○ [0577](/solutions/0577/) — Counting Hexagons
+- ○ [0579](/solutions/0579/) — Lattice Points in Lattice Cubes
+- ○ [0584](/solutions/0584/) — Birthday Problem Revisited
+- ○ [0590](/solutions/0590/) — Sets with a Given Least Common Multiple
+- ○ [0594](/solutions/0594/) — Rhombus Tilings
+- ○ [0595](/solutions/0595/) — Incremental Random Sort
+- ○ [0597](/solutions/0597/) — Torpids
+- ○ [0598](/solutions/0598/) — Split Divisibilities
+- ○ [0599](/solutions/0599/) — Distinct Colourings of a Rubik's Cube
+- ○ [0600](/solutions/0600/) — Integer Sided Equiangular Hexagons
+- ○ [0602](/solutions/0602/) — Product of Head Counts
+- ○ [0606](/solutions/0606/) — Gozinta Chains II
+- ● [0612](/solutions/0612/) — Friend Numbers
+- ● [0619](/solutions/0619/) — Square Subsets
+- ○ [0623](/solutions/0623/) — Lambda Count
+- ○ [0626](/solutions/0626/) — Counting Binary Matrices
+- ● [0628](/solutions/0628/) — Open Chess Positions
+- ○ [0630](/solutions/0630/) — Crossed Lines
+- ○ [0631](/solutions/0631/) — Constrained Permutations
+- ● [0635](/solutions/0635/) — Subset Sums
+- ○ [0636](/solutions/0636/) — Restricted Factorisations
+- ○ [0638](/solutions/0638/) — Weighted Lattice Paths
+- ○ [0645](/solutions/0645/) — Every Day Is a Holiday
+- ○ [0651](/solutions/0651/) — Patterned Cylinders
+- ○ [0654](/solutions/0654/) — Neighbourly Constraints
+- ○ [0657](/solutions/0657/) — Incomplete Words
+- ○ [0658](/solutions/0658/) — Incomplete Words II
+- ○ [0662](/solutions/0662/) — Fibonacci Paths
+- ○ [0669](/solutions/0669/) — The King's Banquet
+- ● [0670](/solutions/0670/) — Colouring a Strip
+- ○ [0671](/solutions/0671/) — Colouring a Loop
+- ○ [0677](/solutions/0677/) — Coloured Graphs
+- ● [0679](/solutions/0679/) — Freefarea
+- ● [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ○ [0685](/solutions/0685/) — Inverse Digit Sum II
+- ○ [0687](/solutions/0687/) — Shuffling Cards
+- ○ [0690](/solutions/0690/) — Tom and Jerry
+- ○ [0696](/solutions/0696/) — Mahjong
+- ● [0698](/solutions/0698/) — 123 Numbers
+- ○ [0701](/solutions/0701/) — Random Connected Area
+- ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
+- ○ [0707](/solutions/0707/) — Lights Out
+- ○ [0709](/solutions/0709/) — Even Stevens
+- ● [0710](/solutions/0710/) — One Million Members
+- ○ [0713](/solutions/0713/) — Turán's Water Heating System
+- ○ [0716](/solutions/0716/) — Grid Graphs
+- ○ [0724](/solutions/0724/) — Drone Delivery
+- ● [0725](/solutions/0725/) — Digit Sum Numbers
+- ○ [0726](/solutions/0726/) — Falling Bottles
+- ○ [0728](/solutions/0728/) — Circle of Coins
+- ○ [0733](/solutions/0733/) — Ascending Subsequences
+- ○ [0734](/solutions/0734/) — A Bit of Prime
+- ○ [0736](/solutions/0736/) — Paths to Equality
+- ○ [0738](/solutions/0738/) — Counting Ordered Factorisations
+- ○ [0740](/solutions/0740/) — Secret Santa
+- ○ [0741](/solutions/0741/) — Binary Grid Colouring
+- ○ [0744](/solutions/0744/) — What? Where? When?
+- ○ [0746](/solutions/0746/) — A Messy Dinner
+- ○ [0747](/solutions/0747/) — Triangular Pizza
+- ○ [0756](/solutions/0756/) — Approximating a Sum
+- ○ [0762](/solutions/0762/) — Amoebas in a 2D Grid
+- ○ [0763](/solutions/0763/) — Amoebas in a 3D Grid
+- ○ [0766](/solutions/0766/) — Sliding Block Puzzle
+- ○ [0767](/solutions/0767/) — Window into a Matrix II
+- ● [0768](/solutions/0768/) — Chandelier
+- ○ [0774](/solutions/0774/) — Conjunctive Sequences
+- ● [0778](/solutions/0778/) — Freshman's Product
+- ○ [0780](/solutions/0780/) — Toriangulations
+- ○ [0781](/solutions/0781/) — Feynman Diagrams
+- ○ [0782](/solutions/0782/) — Distinct Rows and Columns
+- ○ [0783](/solutions/0783/) — Urns
+- ○ [0786](/solutions/0786/) — Billiard
+- ● [0788](/solutions/0788/) — Dominating Numbers
+- ○ [0791](/solutions/0791/) — Average and Variance
+- ○ [0796](/solutions/0796/) — A Grand Shuffle
+- ○ [0798](/solutions/0798/) — Card Stacking Game
+- ○ [0807](/solutions/0807/) — Loops of Ropes
+- ○ [0814](/solutions/0814/) — Mezzo-forte
+- ○ [0815](/solutions/0815/) — Group by Value
+- ○ [0818](/solutions/0818/) — SET
+- ○ [0819](/solutions/0819/) — Iterative Sampling
+- ○ [0824](/solutions/0824/) — Chess Sliders
+- ○ [0828](/solutions/0828/) — Numbers Challenge
+- ○ [0837](/solutions/0837/) — Amidakuji
+- ○ [0842](/solutions/0842/) — Irregular Star Polygons
+- ○ [0847](/solutions/0847/) — Jack's Bean
+- ○ [0848](/solutions/0848/) — Guessing with Sets
+- ○ [0849](/solutions/0849/) — The Tournament
+- ○ [0851](/solutions/0851/) — SOP and POS
+- ○ [0856](/solutions/0856/) — Waiting for a Pair
+- ○ [0857](/solutions/0857/) — Beautiful Graphs
+- ○ [0858](/solutions/0858/) — LCM
+- ● [0862](/solutions/0862/) — Larger Digit Permutation
+- ○ [0865](/solutions/0865/) — Triplicate Numbers
+- ● [0866](/solutions/0866/) — Tidying Up B
+- ○ [0867](/solutions/0867/) — Tiling Dodecagon
+- ○ [0873](/solutions/0873/) — Words with Gaps
+- ○ [0878](/solutions/0878/) — XOR-Equation B
+- ○ [0879](/solutions/0879/) — Touch-screen Password
+- ● [0885](/solutions/0885/) — Sorted Digits
+- ○ [0886](/solutions/0886/) — Coprime Permutations
+- ○ [0888](/solutions/0888/) — 1249 Nim
+- ○ [0891](/solutions/0891/) — Ambiguous Clock
+- ○ [0892](/solutions/0892/) — Zebra Circles
+- ○ [0895](/solutions/0895/) — Gold & Silver Coin Game II
+- ○ [0896](/solutions/0896/) — Divisible Ranges
+- ○ [0902](/solutions/0902/) — Permutation Powers
+- ○ [0903](/solutions/0903/) — Total Permutation Powers
+- ○ [0906](/solutions/0906/) — A Collective Decision
+- ○ [0907](/solutions/0907/) — Stacking Cups
+- ○ [0908](/solutions/0908/) — Clock Sequence II
+- ○ [0913](/solutions/0913/) — Row-major vs Column-major
+- ○ [0916](/solutions/0916/) — Restricted Permutations
+- ○ [0922](/solutions/0922/) — Young's Game A
+- ○ [0923](/solutions/0923/) — Young's Game B
+- ○ [0925](/solutions/0925/) — Larger Digit Permutation III
+- ○ [0927](/solutions/0927/) — Prime-ary Tree
+- ○ [0928](/solutions/0928/) — Cribbage
+- ○ [0930](/solutions/0930/) — The Gathering
+- ○ [0936](/solutions/0936/) — Peerless Trees
+- ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
+- ● [0944](/solutions/0944/) — Sum of Elevisors
+- ○ [0948](/solutions/0948/) — Left vs Right
+- ○ [0949](/solutions/0949/) — Left vs Right II
+- ● [0951](/solutions/0951/) — A Game of Chance
+- ○ [0954](/solutions/0954/) — Heptaphobia
+- ○ [0960](/solutions/0960/) — Stone Game Solitaire
+- ○ [0964](/solutions/0964/) — Musical Chairs Revisited
+- ○ [0968](/solutions/0968/) — 5D Summation
+- ○ [0973](/solutions/0973/) — Random Dealings
+- ○ [0976](/solutions/0976/) — XO Game
+- ○ [0977](/solutions/0977/) — Iterated Functions
+- ○ [0979](/solutions/0979/) — Heptagon Hopping
+- ○ [0981](/solutions/0981/) — The Quaternion Group II
+- ○ [0984](/solutions/0984/) — Knights and Horses
+- ○ [0987](/solutions/0987/) — Straight Eight
+- ○ [0988](/solutions/0988/) — Non-attacking Frogs
+- ○ [0990](/solutions/0990/) — Addition Equations
+- ○ [0992](/solutions/0992/) — Another Frog Jumping
+- ○ [0993](/solutions/0993/) — Banana Beaver
+- ○ [0994](/solutions/0994/) — Counting Triangles
+- ● [0996](/solutions/0996/) — Overtakes
+- ○ [0997](/solutions/0997/) — Dice Box
+- ○ [1001](/solutions/1001/) — Connections I
+- ○ [1003](/solutions/1003/) — Lonely Singles
+- ○ [1004](/solutions/1004/) — Balanced Integer
+- ○ [1005](/solutions/1005/) — Median Prime List
+- ○ [1007](/solutions/1007/) — Alternating Difference
+
+<!-- /problems -->

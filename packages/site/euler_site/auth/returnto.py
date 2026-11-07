@@ -19,7 +19,7 @@ __all__ = ['return_path']
 from urllib.parse import urlsplit, urlunsplit
 
 #: The left pane's routes, readable signed in or out (the public site serves them too).
-_CONTENT: tuple[str, ...] = ('/solutions', '/docs', '/topics', '/about', '/shell')
+_CONTENT: tuple[str, ...] = ('/solutions', '/docs', '/blogs', '/about', '/shell')
 #: Routes only a session can see: a fine place to return to after signing in, and not after
 #: signing out (the page would only bounce to the login).
 _SIGNED_IN: tuple[str, ...] = ('/account',)

@@ -13,9 +13,9 @@ file sits inside the allowlist (:data:`PR_SCOPE`).
 
 `git-commit` is the **one** commit verb, and what it stages is named by its targets
 (:data:`TARGET_PATHS`) rather than by a command per body of work: `solution` for the
-problem the shell is on, `solutions` for the whole tree, and `docs` / `topics` / `update`
+problem the shell is on, `solutions` for the whole tree, and `docs` / `blogs` / `update`
 for the three path sets the doc-maintaining commands write — `update-docs` writes `docs/`
-and the `update` set, `update-tags` writes both legs of the tag graph under `topics`, and
+and the `update` set, `update-tags` writes both legs of the tag graph under `blogs`, and
 `update-models` / `update-usd-rate` write the `update` set. Targets compose, so a regeneration lands as one
 reviewable commit that carries nothing else (`git-commit docs update`), and `--amend`
 folds a fix into it rather than growing a commit behind it.
@@ -104,8 +104,8 @@ def get_repo_owner_email() -> str:
 #:
 #: - `solutions` — the whole solution tree, tag legs and progress file included.
 #: - `docs` — the guides, generated blocks and all (`update-docs`).
-#: - `topics` — **both** legs of the tag graph: the articles and tag vocabulary under
-#:   `topics/`, and each problem's `tags.json` (`update-tags`). They are one double-entry
+#: - `blogs` — **both** legs of the tag graph: the articles and tag vocabulary under
+#:   `blogs/`, and each problem's `tags.json` (`update-tags`). They are one double-entry
 #:   record, so splitting them across two commits is what this target exists to prevent —
 #:   and it is the only thing this target reaches inside `solutions/`.
 #: - `update` — everything else the `update-*` verbs write, wherever it
@@ -117,7 +117,7 @@ def get_repo_owner_email() -> str:
 TARGET_PATHS: dict[str, tuple[str, ...]] = {
     'solutions': ('solutions/',),
     'docs': ('docs/',),
-    'topics': ('topics/', 'solutions/**/tags.json'),
+    'blogs': ('blogs/', 'solutions/**/tags.json'),
     'update': ('README.md', 'packages/solver/solver/modules.csv', 'packages/solver/solver/config/values.conf',
                'packages/solver/solver/ai/models.py', 'packages/solver/solver/ai/claude/CLAUDE.md',
                'packages/site/euler_site/content/home-summary.md'),
@@ -134,7 +134,7 @@ TARGET_PATHS: dict[str, tuple[str, ...]] = {
 #:
 #: What is actually committed is narrower still, and is **not** read from here: each verb
 #: reports the files it wrote, because two entries below are directory prefixes that also
-#: match hand-written work (`docs/` holds the prose guides, `topics/` the articles). This
+#: match hand-written work (`docs/` holds the prose guides, `blogs/` the articles). This
 #: bounds that report; it does not stand in for it.
 #:
 #: Note `packages/solver/solver/ai/claude/CLAUDE.md` rather than the root `CLAUDE.md`: the root name is a
@@ -144,7 +144,7 @@ GENERATED_PATHS: dict[str, tuple[str, ...]] = {
                     'packages/solver/solver/ai/claude/CLAUDE.md', 'packages/site/euler_site/content/home-summary.md'),
     'update-models': ('packages/solver/solver/ai/models.py',),
     'update-presentation-data': ('docs/presentation/data/history.js',),
-    'update-tags': ('topics/', 'solutions/**/tags.json'),
+    'update-tags': ('blogs/', 'solutions/**/tags.json'),
     'update-usd-rate': ('packages/solver/solver/config/values.conf',),
     # Not an `update-*` verb, but the same kind of write: `summary` regenerates the progress
     # file and fetches each new problem's statement. Globs, not `solutions/`, so the envelope
@@ -205,7 +205,7 @@ def _solution_paths(problem: Problem) -> tuple[str, ...]:
 def _commit_paths(problem: Problem, targets: tuple[str, ...]) -> list[str]:
     """The git pathspecs *targets* stage for *problem*, de-duplicated in the order named.
 
-    Targets overlap by design — `solutions` contains every `solution`, and `topics` reaches
+    Targets overlap by design — `solutions` contains every `solution`, and `blogs` reaches
     the tag leg inside the solution tree — so naming two that share a path must stage that
     path once, not twice.
     """
@@ -225,7 +225,7 @@ def _is_not_amend(bound: dict[str, Any]) -> bool:
 
 @register(requires='contributor', aliases=('commit',), quietable=True)
 def git_commit(problem: Problem,
-               *targets: Literal['solution', 'solutions', 'docs', 'topics', 'update'],
+               *targets: Literal['solution', 'solutions', 'docs', 'blogs', 'update'],
                message: Annotated[str, Ask('Message', when=_is_not_amend, multiline=True)] = '',
                amend: bool = False,
                reset: bool = False,
@@ -236,7 +236,7 @@ def git_commit(problem: Problem,
     under this problem's directory, plus `solutions/problems.json` (the progress file `mark`
     rewrites), and nothing else. Naming targets widens that to whichever bodies of work you
     mean, and they compose — `git-commit docs update` lands a whole `update-docs` run as one
-    commit, `git-commit topics` lands both legs of the tag graph together. A target with
+    commit, `git-commit blogs` lands both legs of the tag graph together. A target with
     nothing to stage contributes nothing rather than failing, so composing is cheap.
 
     `--amend` folds the same paths into HEAD with its message untouched — the "I forgot
@@ -252,7 +252,7 @@ def git_commit(problem: Problem,
         problem: [problem] The problem whose solution directory the `solution` target
             stages. Ignored by every other target.
         *targets: What to stage — 'solution' (this problem plus the progress file),
-            'solutions' (the whole solution tree), 'docs' (the guides), 'topics' (the
+            'solutions' (the whole solution tree), 'docs' (the guides), 'blogs' (the
             articles and every problem's tag leg) or 'update' (what the `update-*` verbs
             write outside `docs/` — the README, the module registry, the settings file,
             the model block, the Claude guidance). Defaults to 'solution'.
@@ -341,7 +341,7 @@ def commit_regenerated(verb: str, quips: tuple[str, ...], written: Sequence[str]
     because only the verb knows it. It is required, and empty means the run wrote nothing and
     there is nothing to commit. There is deliberately no "commit my whole scope instead"
     fallback — :data:`GENERATED_PATHS`\\ ``[verb]`` names a directory for two of these verbs
-    (`docs/`, `topics/`), which also matches every *hand-written* guide and article under it,
+    (`docs/`, `blogs/`), which also matches every *hand-written* guide and article under it,
     so a fallback would land a half-finished page the verb never touched under a
     `chore(update-*)` subject, and would do it precisely on the runs that regenerated least.
     That table is the **envelope**: a written path outside it is dropped as a bug in the verb
@@ -1131,7 +1131,7 @@ def git_push(force: bool = False, pr: bool = True) -> int:
 
 #: What a collaborator's pull request may touch — the merge gate's allowlist, and the one
 #: rule `gh-merge` applies: solutions (progress file and tag legs included), the guides,
-#: the topic articles, and the specific files the `update` target names. Read by
+#: the blog articles, and the specific files the `update` target names. Read by
 #: :func:`_in_scope`, so a `dir/` entry is a prefix and a lookalike sibling
 #: (`solutions-of-mine/`) does not pass.
 #:
@@ -1146,7 +1146,7 @@ def git_push(force: bool = False, pr: bool = True) -> int:
 #: may carry several commits spanning several targets, so splitting the queue by tree only
 #: refused branches that were honest work; what the review needs to know is that nothing
 #: outside the allowlist rode along, which is what this checks.
-PR_SCOPE: tuple[str, ...] = ('solutions/', 'docs/', 'topics/') + TARGET_PATHS['update']
+PR_SCOPE: tuple[str, ...] = ('solutions/', 'docs/', 'blogs/') + TARGET_PATHS['update']
 
 
 def _pr_files(number: int) -> list[str] | None:
@@ -1329,7 +1329,7 @@ def gh_merge(action: Literal['list', 'merge'] = 'list',
     branch — the message asked for this review, and it is done.
 
     Every file in the pull request must sit inside the allowlist: `solutions/`, `docs/`,
-    `topics/`, and the specific files the `update` target names — which is exactly what
+    `blogs/`, and the specific files the `update` target names — which is exactly what
     `git-commit` can stage. One file outside it refuses the whole request. That is the
     gate, and the only one: a request may carry as many commits, across as many targets,
     as the work needed. What makes this a maintainer's command rather than an admin's is

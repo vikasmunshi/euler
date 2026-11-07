@@ -160,7 +160,7 @@ quips: Quips = {
         'what the problems claim, the index now confirms',
         'the graph is a graph again',
         'every edge traversed from both of its ends',
-        'the topics know which problems they cover',
+        'the blogs know which problems they cover',
         'reconciled: the tags say what the files say',
         'a tag with no problems was a tag with no purpose',
         'the vocabulary grew by exactly what was used',

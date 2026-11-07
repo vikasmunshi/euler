@@ -300,7 +300,7 @@ is a page only a session can see (`/account`), which lands on `/`.
 
 `next` is attacker-controlled, so it is an allowlist rather than a sanitiser
 (`packages/site/euler_site/auth/returnto.py`): `/` or a path under one of the left pane's
-routes (`/solutions`, `/docs`, `/topics`, `/about`, `/shell`, and `/account` after signing
+routes (`/solutions`, `/docs`, `/blogs`, `/about`, `/shell`, and `/account` after signing
 in). Another host — `//evil.example`, or `/\evil.example`, which browsers read as one — a
 scheme, an auth page, the terminal or an API route is `/`.
 
@@ -1035,7 +1035,7 @@ while the contributor floor stranded the rung least able to help itself — a re
 commit their way out of a clone that has drifted ahead of origin/master.
 
 `git-commit` is the **one** commit verb: what it stages is named by its targets
-(`solution`, `solutions`, `docs`, `topics`, `update`) rather than by a command per body of
+(`solution`, `solutions`, `docs`, `blogs`, `update`) rather than by a command per body of
 work, and `--amend` folds into HEAD instead of a second verb. `gh-merge` is the **one**
 merge verb, and it reads from the same table: its allowlist is the union of those targets,
 so a pull request may carry whatever `git-commit` could have staged — several commits,
@@ -1062,10 +1062,10 @@ one-tree rule and no per-body-of-work gate.
   `--no-pr`.
 - **`gh-merge`** is the one gate to master: `list` shows what is waiting, `merge <number>`
   squash-merges it. **A pull request must sit wholly inside `solutions/` or wholly inside
-  `topics/`** — anything outside is refused, and a branch spanning both is asked to become
+  `blogs/`** — anything outside is refused, and a branch spanning both is asked to become
   two pull requests (one review is of one kind of work),
   and that gate is what puts the command at `maintainer` rather than `admin`: merging a
-  branch of solutions or topic articles is reviewing content, but a branch that also
+  branch of solutions or blog articles is reviewing content, but a branch that also
   edits the framework,
   the scripts, or the keys is asking for something else, and belongs to an admin reading
   it on GitHub. The file list is read from the pull request (`gh pr view --json files`);
@@ -1106,10 +1106,10 @@ with the same templates (docs/package-guide.md § 4):
 
 | Visitor | Served by | Content | Surface |
 |---|---|---|---|
-| Not signed in | `euler-site` (`python -m euler_site.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json`, and the code the code viewer shows (`packages/`, `scripts/`, the root config files) | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
+| Not signed in | `euler-site` (`python -m euler_site.site`, `EULER_SITE_PUBLIC=1`), `/run/euler/site.sock` | the **packaged** copy: the `euler-content` wheel in `/opt/euler`, built from tracked public files only — `README.md`, `docs/`, `blogs/`, `solutions/public/`, `solutions/problems.json`, and the code the code viewer shows (`packages/`, `scripts/`, the root config files) | read routes only (`build_public_app`): no terminal, no git chip, no account, no writes; identity headers are never read |
 | Signed in | their own `euler-user@<slug>` instance | their own `~/euler` clone | everything, by profile |
 
-The docs, topics and public solutions are published unencrypted on GitHub anyway, so asking
+The docs, blogs and public solutions are published unencrypted on GitHub anyway, so asking
 for a login to read them protected nothing. What the public site cannot show is structural,
 not a check: the wheel holds no `solutions/private` (`scripts/content/stage.py` refuses one),
 and the unit runs `ProtectHome=true` on a uid of its own, AF_UNIX only — no clone is even
@@ -1117,7 +1117,7 @@ visible to it. A private problem's page shows its title and solved state from
 `problems.json` (public on projecteuler.net), and nothing else.
 
 Caddy picks the copy by the **session cookie**: a GET/HEAD of a content path (`/`,
-`/solutions/…`, `/docs/…`, `/topics/…`, `/about/…`, `/shell`, `/story/…`) from a browser with
+`/solutions/…`, `/docs/…`, `/blogs/…`, `/about/…`, `/shell`, `/story/…`) from a browser with
 no `solver_session` / `solver_remember` cookie goes to `site.sock`; everything else goes
 through `forward_auth` as before (§ The edge). That is not a trust decision — either copy is
 public content to whoever asks — so a forged or missing cookie gains nothing. The code viewer
@@ -1154,7 +1154,7 @@ pane scrolls its own overflow.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics · Terminal │ Actions │ ⌂ crumbs… │ ❯● │ ⑂ main │ 🯅 │
+│ HEADER  eiπ+1=0 │ Solutions · Docs · Blogs · Terminal │ Actions │ ⌂ crumbs… │ ❯● │ ⑂ main │ 🯅 │
 ├──────────────────────────────────────┬───────────────────────────────────────┤
 │  LEFT PANE  (#content)                │  ┌ solver terminal ─── ● Connect ─ ─┐ │
 │  navigable content, htmx-swapped;     │  │ the solver PTY terminal over /ws │ │  equal
@@ -1502,9 +1502,10 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/solutions/` | `problems.json` as 10×10 century grids + summary | reader |
 | GET | `/solutions/{n}/` | statement, then test cases · results · files · notes | reader |
 | GET | `/solutions/{n}/{filename}` | one problem file | reader |
+| GET | `/topics…` · `/edit/topics…` | the old name of `/blogs`: 301 to the same path there, so existing links keep working | — |
 | GET | `/docs/` · `/docs/{name}` | docs index (a card grid per group of `content.DOC_GROUPS`) · a rendered doc | reader |
 | GET | `/docs/file/{path}` | a doc-referenced repo file, from the readable roots only | reader |
-| GET | `/topics/` · `/topics/{name}` | topics index · a topic page (`{name}` may be a nested `folder/page` path) | reader |
+| GET | `/blogs/` · `/blogs/{name}` | blogs index · a blog page (`{name}` may be a nested `folder/page` path) | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/story/` · `/story/{path}` | the presentation deck's own files, raw: `docs/presentation/` (§ The story deck below) | reader |
 | GET | `/code/` · `/code/{path}` | the code viewer, **public site only**: a folder's contents or one file, highlighted; `?raw` the file itself (§ The code viewer below) | none |
@@ -1521,7 +1522,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 **Canonical trailing slash.** Every GET path is canonical *with* its slash; a slashless
 GET returns a **301**, so each view has exactly one URL.
 
-The `/docs/file/` view may serve only the service's readable roots — `docs/`, `topics/`,
+The `/docs/file/` view may serve only the service's readable roots — `docs/`, `blogs/`,
 `packages/solver/solver/templates/`, `solutions/`, `README.md`, `LICENSE`, and the vendor README.
 
 **The story deck.** `/story/` serves the project presentation (`docs/presentation/`, "Eleven
@@ -1574,7 +1575,7 @@ already public; `tests/test_public_site.py` holds the wheel's roots and `CODE_RO
   `code.js` are versioned assets like the site's own. Below 820 px the tree is a drawer
   behind a **Files** button. Without script the page still works: the tree follows the file,
   and only the filter, the toggle and the drawer are missing.
-- **Links in.** The bookmarks menu's **The source code**, and every guide or topic link into
+- **Links in.** The bookmarks menu's **The source code**, and every guide or blog link into
   the scope that `/docs/file/` cannot serve (`content._repo_link`): those become `/code/…`
   with `target="_blank"` and the `.ext` marker instead of a pane swap. What neither viewer
   shows still goes to GitHub.
@@ -1587,7 +1588,7 @@ the git middleware supplies `git`. Actions is filtered by the subject's profile,
 **hiding is UX; the route's floor is the boundary**.
 
 **Page-specific verbs go in the Actions menu, never on the page.** A page's controls —
-Edit, Save, Delete, a "show drafts" toggle, a topic's Write / Rewrite — belong in the
+Edit, Save, Delete, a "show drafts" toggle, a blog's Write / Rewrite — belong in the
 header **Actions** menu, built as the handler's `actions` list, not rendered as links or
 buttons in the content pane. One place to look for what a page can do, one rendering path,
 and the pane stays the content. An Action is `{label, kind, …}`: `kind` is `get` (an hx
@@ -1595,11 +1596,11 @@ pane-swap), `post` / `delete` (an hx mutation), `submit` (submit the pane's edit
 or **`term`** (type its `command` into the web shell via `data-term-cmd`, the same
 one-execution-path move the git chip's verbs make — so the command's own `requires()` is
 the real boundary). **The back-step is the breadcrumb trail** in the header (and the `←`
-control beside it); a page carries no "← docs" / "← topics" link of its own.
+control beside it); a page carries no "← docs" / "← blogs" link of its own.
 
 ### 11.6 Content pages
 
-- **The five index pages — home · solutions · docs · topics · terminal — are one layout.**
+- **The five index pages — home · solutions · docs · blogs · terminal — are one layout.**
   From a distance they are the same page: a hero, the **section strip**, the **divider**,
   and then the page's own content. What changes below the divider is all that changes.
 
@@ -1607,7 +1608,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   KICKER · H1 · lede
 
   ┏━━━━━━━━━━━┓┌───────────┐┌───────────┐┌───────────┐   the section strip:
-  ┃π Solutions┃│§ Docs     ││λ Topics   ││❯ Terminal │   the current one lit,
+  ┃π Solutions┃│§ Docs     ││λ Blogs   ││❯ Terminal │   the current one lit,
   ┃311 of 1007┃│16 guides  ││859 of 1007││● connected│   each carrying live state
   ┗▔▔▔━━━━━━━━┛└───────────┘└▔▔▔▔▔━━━━━━┛└───────────┘
 
@@ -1619,7 +1620,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   **The hero's three slots say three different things, in the same order on all five
   pages.** The **kicker** is the page's one witty line — an aphorism, lowercase, no full
   stop; it is *not* the section name, which the header nav and the strip already say twice.
-  The **h1** is the plain title (`Solutions`, `The docs`, `The mathematics`, `The solver
+  The **h1** is the plain title (`Solutions`, `Docs`, `Blogs`, `The solver
   shell`; on home, the site's own name). The **lede** is the fact worth knowing, told with
   the same voice as the kicker — a count and what is still ahead of it, never a restatement
   of what the content below already shows.
@@ -1630,7 +1631,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   is up. The Shell tile's line is the socket itself, painted by `site.js` from the
   iframe's report (`[data-term-dot]`, `[data-term-state]`), never asserted by the server.
   The counts come from `content.section_state` — `problems.json`, a `docs/` scan, and the
-  **union** (not the sum) of the problems the finished topic articles reach.
+  **union** (not the sum) of the problems the finished blog articles reach.
 
   It is the same tile object as the grids below it, in a **quieter register**: flat on the
   page ground, no lift on hover, because chrome does not move and content does. Two grids
@@ -1642,14 +1643,14 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   **The divider** (`_divider.html`) is the `.subrule` device — a mono label trailed by a
   hairline — doing three jobs: it names the region below, it **narrows** it, and the count
   at the end of the rule is the count of what survived. Typing hides the cards that miss
-  and folds away a folder heading whose whole grid went (on `/topics/` each folder is itself
+  and folds away a folder heading whose whole grid went (on `/blogs/` each folder is itself
   a `<details>`, arriving open, whose foldings are remembered for the session like the
   scroll and the query — and which a live query opens wherever it matched; the divider
   carries *expand all* / *collapse all* beside the filter, on the page rather than in the
-  Actions menu since the public site has none; its cards run widest reach first, `content.list_topic_groups`); on the century grids it **dims**
+  Actions menu since the public site has none; its cards run widest reach first, `content.list_blog_groups`); on the century grids it **dims**
   instead, because a cell's position is what says which problem it is and hiding the misses
   would renumber the grid under the reader. The query is remembered per section for the
-  browser session (`sessionStorage`), so returning to the topics resumes the narrowed view
+  browser session (`sessionStorage`), so returning to the blogs resumes the narrowed view
   without arriving pre-typed over the guides. The start page has prose below its rule and
   nothing to narrow, so it states that instead of offering a dead box.
 
@@ -1664,7 +1665,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   click just took you to. Not to be confused with `/terminal`, which *is* the shell (the
   right pane's own document).
 
-  **The tile is one object across every page** — the strip, docs, topics, and the head of
+  **The tile is one object across every page** — the strip, docs, blogs, and the head of
   every century grid on solutions — and it is **two lines**, because that is what it has to
   say: what it is, and one fact about it.
 
@@ -1679,14 +1680,14 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   staying on the first.
 
   The supporting line is the rule that makes the pages one system: **mono when it is a
-  number, body face when it is a sentence**. The strip, topics and centuries carry a count
-  (`95 of 240 solved`, from `topics/articles.json` and `problems.json`); a guide carries
+  number, body face when it is a sentence**. The strip, blogs and centuries carry a count
+  (`95 of 240 solved`, from `blogs/articles.json` and `problems.json`); a guide carries
   prose (its `#` title). Nothing carries both — a tile says one thing about itself. Signed
   out the strip has no clone to count, so its tiles fall back to prose rather than to a
   number that would be invented.
 
   Where the count is a **fraction of work done**, the tile also carries a 2px **progress
-  hairline** on its bottom edge, filled to that fraction. It appears on topic tiles and
+  hairline** on its bottom edge, filled to that fraction. It appears on blog tiles and
   century tiles and nowhere else: its absence on a guide says "not a progress thing"
   rather than "zero". The width is the app's one inline `style` — it *is* the datum, and
   there is no class-per-percent worth having (`style-src 'unsafe-inline'` is already a
@@ -1726,7 +1727,7 @@ control beside it); a page carries no "← docs" / "← topics" link of its own.
   `aspect-ratio`), packed as many per row as fit (`auto-fill`), shaded by difficulty with
   the heat tokens, title and pct on hover. Each grid is **headed by the tile**: the range
   where the glyph goes, `36 of 100 solved` on the data line, and the hairline along the
-  bottom edge pointing straight into the grid it measures — a century is a topic you have
+  bottom edge pointing straight into the grid it measures — a century is a blog you have
   or have not worked through, so it says so the same way. It is an `<h2>`, not a link
   (there is no per-century page), so it keeps the chassis and drops the hover.
 - **Progress upload** (maintainer, the `summary` floor) — an **empty** paste buffer,
@@ -1987,11 +1988,11 @@ request", not "Pull requests"; "Un-commit, keep my changes", not "Reset to maste
 command is on every row regardless — the macro renders it into `.cmd` beside the label — so
 the menu still teaches exactly what it types, which frees the label to say which of the
 day's jobs this is. A panel whose labels are the command names is a transcript of the shell
-rather than a way into it, and `git-commit solution docs topics` is a fine thing to run and
+rather than a way into it, and `git-commit solution docs blogs` is a fine thing to run and
 a poor thing to call a button. They are ordered as the job runs: see what changed, take what
 others landed, save it, hand it over, land someone else's.
 
-**One commit row, three targets.** `git-commit solution docs topics` is a single button for
+**One commit row, three targets.** `git-commit solution docs blogs` is a single button for
 "save what I did", whichever of those the afternoon went into. Naming three targets costs
 nothing when only one has changed: a clean target contributes no path and the commit says
 so, which is exactly what makes one row viable where two previously asked the reader to

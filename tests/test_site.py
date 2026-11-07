@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the content service: identity from forward_auth
 headers, the requires-gate, the full-page-vs-block render contract, the baseline
-CSP, the 5b read routes (solutions grid, problem pages/files, docs, topics,
+CSP, the 5b read routes (solutions grid, problem pages/files, docs, blogs,
 account) with their canonical trailing-slash redirects, and the 5d edit routes
 (file editor through the 5c gate, delete, the progress editor) —
 the writes run against a scratch repo tree, never this checkout.
@@ -217,7 +217,7 @@ class ContentServiceTests(AioHTTPTestCase):
         The bug this guards is a *missing* header: with none, a browser applies
         heuristic freshness and keeps serving yesterday's page until a hard refresh.
         """
-        for path in ('/', '/solutions/0042/', '/topics/'):
+        for path in ('/', '/solutions/0042/', '/blogs/'):
             resp = await self.client.get(path, headers=_READER)
             self.assertEqual(resp.headers.get('Cache-Control'), 'no-store', path)
         fragment = await self.client.get('/solutions/0042/', headers={**_READER, **_HTMX})
@@ -251,7 +251,7 @@ class ContentServiceTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_slashless_get_301s_to_canonical(self) -> None:
-        for path in ('/solutions', '/docs', '/topics', '/solutions/0042'):
+        for path in ('/solutions', '/docs', '/blogs', '/solutions/0042'):
             resp = await self.client.get(path, headers=_READER, allow_redirects=False)
             self.assertEqual(resp.status, 301, path)
             self.assertEqual(resp.headers['Location'], path + '/')
@@ -277,9 +277,9 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('<th>runs</th>', body)
 
     @unittest_run_loop
-    async def test_problem_page_tags_and_topics(self) -> None:
+    async def test_problem_page_tags_and_blogs(self) -> None:
         """A: the header chip row, facet-classed, each chip linking to its tag page.
-        B: the workbench panel with per-index techniques and a curated topic card."""
+        B: the workbench panel with per-index techniques and a curated blog card."""
         body = await (await self.client.get('/solutions/0007/', headers=_READER)).text()
         # A — header chips
         self.assertIn('class="tagbar"', body)
@@ -287,10 +287,10 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('tag-chip takeaway', body)
         # The slug itself is regenerated content (see `claude-batch`), so assert the link *shape*
         # a chip must produce - facet-scoped tag page - not whichever technique p0007 carries today.
-        self.assertIn('href="/topics/technique/', body)
-        # B — workbench panel: per-index technique row. The curated-topic card is not asserted
-        # here: curated pages are created by `create-topic`, and none exists in a fresh tree.
-        self.assertIn('Tags &amp; topics', body)
+        self.assertIn('href="/blogs/technique/', body)
+        # B — workbench panel: per-index technique row. The curated-blog card is not asserted
+        # here: curated pages are created by `create-blog`, and none exists in a fresh tree.
+        self.assertIn('Tags &amp; blogs', body)
         self.assertIn('<span class="idx">s0</span>', body)
 
     @unittest_run_loop
@@ -306,7 +306,7 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('class="tagbar"', body)
         self.assertIn('tag-chip domain', body)
-        self.assertIn('href="/topics/technique/', body)
+        self.assertIn('href="/blogs/technique/', body)
 
     @unittest_run_loop
     async def test_a_statement_diagram_that_needs_a_ground_gets_one(self) -> None:
@@ -354,7 +354,17 @@ class ContentServiceTests(AioHTTPTestCase):
         resp = await self.client.get('/solutions/9999/', headers=_READER)
         self.assertEqual(resp.status, 404)
 
-    # ── 5b: docs · topics · account ──────────────────────────────────────────
+    # ── 5b: docs · blogs · account ──────────────────────────────────────────
+
+    @unittest_run_loop
+    async def test_the_old_topics_urls_redirect(self) -> None:
+        for old, new in (('/topics', '/blogs'), ('/topics/', '/blogs/'),
+                         ('/topics/domain/alpha', '/blogs/domain/alpha'),
+                         ('/topics/all?x=1', '/blogs/all?x=1'),
+                         ('/edit/topics/domain/alpha', '/edit/blogs/domain/alpha')):
+            resp = await self.client.get(old, headers=_READER, allow_redirects=False)
+            self.assertEqual(resp.status, 301, old)
+            self.assertEqual(resp.headers['Location'], new)
 
     @unittest_run_loop
     async def test_docs_index_and_page(self) -> None:
@@ -477,7 +487,7 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('runner', body)                        # the source (escaped) in a code block
         self.assertIn('solve', body)
         self.assertIn('packages/solver/solver/templates/new.py', body)
-        # …and a solution file (the solutions object tree — e.g. a topic linking
+        # …and a solution file (the solutions object tree — e.g. a blog linking
         # ../solutions/…) and an about file (README) view through the same route…
         for path in ('/docs/file/solutions/public/p0042/p0042_s0.py',
                      '/docs/file/README.md'):
@@ -570,46 +580,46 @@ class ContentServiceTests(AioHTTPTestCase):
             self.assertEqual(resp.status, 404, name)
 
     @unittest_run_loop
-    async def test_topics_index_lists_final_pages_only(self) -> None:
+    async def test_blogs_index_lists_final_pages_only(self) -> None:
         """update-tags gives every tag a skeleton, so an unfiltered index would bury the few
         written pages under hundreds of TODO stubs. A draft is still servable by URL.
 
         The draft/final examples are read from the live index rather than hardcoded, since which
         pages are final changes as articles get written."""
-        rows = json.loads((Path(__file__).resolve().parents[1] / 'topics/articles.json').read_text())
+        rows = json.loads((Path(__file__).resolve().parents[1] / 'blogs/articles.json').read_text())
         a_draft = next(r['path'] for r in rows['articles'] if r['status'] == 'draft')
         a_final = next(r['path'] for r in rows['articles'] if r['status'] == 'final')
-        body = await (await self.client.get('/topics/', headers=_READER)).text()
-        self.assertIn(f'/topics/{a_final}', body)                       # a final: listed
-        self.assertNotIn(f'/topics/{a_draft}', body)                    # a draft: not listed
+        body = await (await self.client.get('/blogs/', headers=_READER)).text()
+        self.assertIn(f'/blogs/{a_final}', body)                       # a final: listed
+        self.assertNotIn(f'/blogs/{a_draft}', body)                    # a draft: not listed
         # …but the draft is reachable directly, and it renders
-        resp = await self.client.get(f'/topics/{a_draft}', headers=_READER)
+        resp = await self.client.get(f'/blogs/{a_draft}', headers=_READER)
         self.assertEqual(resp.status, 200)
 
     @unittest_run_loop
-    async def test_topics_all_is_maintainer_only_and_shows_drafts(self) -> None:
+    async def test_blogs_all_is_maintainer_only_and_shows_drafts(self) -> None:
         """The writing queue: same grid, drafts included, gated at maintainer."""
         for headers in (_READER, _CONTRIBUTOR):
-            resp = await self.client.get('/topics/all', headers=headers)
+            resp = await self.client.get('/blogs/all', headers=headers)
             self.assertEqual(resp.status, 403, headers['X-Profile'])
-        resp = await self.client.get('/topics/all', headers=_MAINTAINER)
+        resp = await self.client.get('/blogs/all', headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertIn('/topics/technique/sieve-of-eratosthenes', body)      # the draft is listed
+        self.assertIn('/blogs/technique/sieve-of-eratosthenes', body)      # the draft is listed
         self.assertIn('is-draft', body)                                     # …and marked as one
 
     @unittest_run_loop
-    async def test_topics_order_cards_by_coverage(self) -> None:
+    async def test_blogs_order_cards_by_coverage(self) -> None:
         """Both views — the reader's index and the writing queue — order each folder's cards
         by reach, widest coverage first. Read off the rendered grid: the card link order *is*
         the page's order."""
         def links(body: str) -> list[str]:
-            return re.findall(r'<a class="card[^"]*"\s+href="/topics/([^"]+)"', body)
+            return re.findall(r'<a class="card[^"]*"\s+href="/blogs/([^"]+)"', body)
 
         counts = {r['path']: r['problems'] for r in json.loads(
-            (Path(__file__).resolve().parents[1] / 'topics/articles.json').read_text())['articles']}
-        queue = links(await (await self.client.get('/topics/all', headers=_MAINTAINER)).text())
-        index = links(await (await self.client.get('/topics/', headers=_READER)).text())
+            (Path(__file__).resolve().parents[1] / 'blogs/articles.json').read_text())['articles']}
+        queue = links(await (await self.client.get('/blogs/all', headers=_MAINTAINER)).text())
+        index = links(await (await self.client.get('/blogs/', headers=_READER)).text())
         self.assertTrue(queue and index)
         for view in (queue, index):
             for folder in {name.rpartition('/')[0] for name in view}:       # per section, as rendered
@@ -617,42 +627,42 @@ class ContentServiceTests(AioHTTPTestCase):
                 self.assertEqual(reach, sorted(reach, reverse=True), folder)
 
     @unittest_run_loop
-    async def test_topics_folders_fold(self) -> None:
+    async def test_blogs_folders_fold(self) -> None:
         """Each folder is a <details>, open by default, whose summary is the folder's
         heading, keyed for site.js to remember what the reader folded."""
-        body = await (await self.client.get('/topics/', headers=_READER)).text()
-        self.assertIn('<details class="fold topic-group" open data-fold="', body)
+        body = await (await self.client.get('/blogs/', headers=_READER)).text()
+        self.assertIn('<details class="fold blog-group" open data-fold="', body)
         self.assertIn('data-folds="open"', body)                          # expand all
         self.assertIn('data-folds="close"', body)                         # collapse all
         self.assertIn('<summary class="subrule fold-summary"><h3>', body)
 
     @unittest_run_loop
-    async def test_topics_all_is_not_swallowed_by_the_page_route(self) -> None:
-        """`/topics/{name:.+}` would match 'all'; the specific route is registered first."""
-        resp = await self.client.get('/topics/all', headers=_MAINTAINER)
+    async def test_blogs_all_is_not_swallowed_by_the_page_route(self) -> None:
+        """`/blogs/{name:.+}` would match 'all'; the specific route is registered first."""
+        resp = await self.client.get('/blogs/all', headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         self.assertIn('cards', await resp.text())            # the grid, not a 404 page lookup
 
     @unittest_run_loop
-    async def test_topics_nested_folder(self) -> None:
-        """A `topics/<folder>/<page>.md` is listed with its folder-qualified name and
+    async def test_blogs_nested_folder(self) -> None:
+        """A `blogs/<folder>/<page>.md` is listed with its folder-qualified name and
         served at the nested route; the index groups it under its folder.
 
         Every tag page is nested now (`domain/<slug>.md`), so this uses one rather than the
-        curated `number-theory/primes` it used to - curated pages come from `create-topic`."""
-        index = await (await self.client.get('/topics/all', headers=_MAINTAINER)).text()
-        self.assertIn('/topics/domain/practical-number', index)
+        curated `number-theory/primes` it used to - curated pages come from `create-blog`."""
+        index = await (await self.client.get('/blogs/all', headers=_MAINTAINER)).text()
+        self.assertIn('/blogs/domain/practical-number', index)
         self.assertIn('<h3>Domain</h3>', index)                     # the folder is the section
         self.assertIn('class="card-title">Practical Number<', index)  # the card carries the leaf
         self.assertIn('class="cards"', index)                       # the shared card grid (F7)
         # the filter matches facet + slug, not just the display name: the full path is
         # in the card's data-filter search string
         self.assertIn('data-filter="domain/practical-number', index)
-        resp = await self.client.get('/topics/domain/practical-number', headers=_READER)
+        resp = await self.client.get('/blogs/domain/practical-number', headers=_READER)
         self.assertEqual(resp.status, 200)
         self.assertIn('Practical number', await resp.text())
         # a missing nested page is a 404, not a stray match
-        missing = await self.client.get('/topics/domain/no-such-page', headers=_READER)
+        missing = await self.client.get('/blogs/domain/no-such-page', headers=_READER)
         self.assertEqual(missing.status, 404)
 
     @unittest_run_loop
@@ -693,7 +703,7 @@ class EditRouteTests(AioHTTPTestCase):
         (self.pdir / 'test_cases.json').write_text('[{"category": "main", "answer": 31875000}]')
         (scratch / 'solutions' / 'problems.json').write_text(
             json.dumps({'9': {'title': 'T', 'level': 1, 'pct': 30, 'solved': True, 'date': ''}}))
-        self.article = scratch / 'topics' / 'domain' / 'alpha.md'
+        self.article = scratch / 'blogs' / 'domain' / 'alpha.md'
         self.article.parent.mkdir(parents=True)
         self.article.write_text(
             '<!-- tags: [alpha] -->\n<!-- status: draft -->\n# Alpha\n\n'
@@ -784,46 +794,46 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('diag-error', body)
         self.assertEqual((self.pdir / 'p0009_s0.py').read_text(), _PY_OK)
 
-    # ── article editor (in-browser topic edit) ────────────────────────────────
+    # ── article editor (in-browser blog edit) ────────────────────────────────
 
     @unittest_run_loop
     async def test_article_editor_is_maintainer_only(self) -> None:
         for headers, ok in ((_MAINTAINER, True), (_CONTRIBUTOR, False), (_READER, False)):
-            resp = await self.client.get('/edit/topics/domain/alpha', headers=headers)
+            resp = await self.client.get('/edit/blogs/domain/alpha', headers=headers)
             self.assertEqual(resp.status, 200 if ok else 403, headers['X-Profile'])
-        body = await (await self.client.get('/edit/topics/domain/alpha', headers=_MAINTAINER)).text()
+        body = await (await self.client.get('/edit/blogs/domain/alpha', headers=_MAINTAINER)).text()
         self.assertIn('editor-buffer', body)
         self.assertIn('Old prose.', body)
         self.assertIn('data-language="markdown"', body)
 
     @unittest_run_loop
     async def test_article_editor_404s_for_a_missing_page(self) -> None:
-        resp = await self.client.get('/edit/topics/domain/no-such', headers=_MAINTAINER)
+        resp = await self.client.get('/edit/blogs/domain/no-such', headers=_MAINTAINER)
         self.assertEqual(resp.status, 404)
 
     @unittest_run_loop
     async def test_article_page_offers_its_verbs_in_the_actions_menu(self) -> None:
         """Edit / Write / Rewrite are header Actions, not controls on the page body. A draft
         offers Write, a final offers Rewrite --force, and a non-maintainer gets neither."""
-        page = await (await self.client.get('/topics/domain/alpha', headers=_MAINTAINER)).text()
+        page = await (await self.client.get('/blogs/domain/alpha', headers=_MAINTAINER)).text()
         header, _, panel = page.partition('id="content"')      # Actions live in the header; body follows
-        self.assertIn('hx-get="/edit/topics/domain/alpha"', header)            # Edit, in Actions
+        self.assertIn('hx-get="/edit/blogs/domain/alpha"', header)            # Edit, in Actions
         self.assertIn('data-term-cmd="claude-blog domain/alpha"', header)      # Write, in Actions
         self.assertNotIn('--force', header)
         self.assertNotIn('claude-blog', panel)                                 # not on the page body
         # a final page swaps Write for Rewrite --force
         self.article.write_text(self.article.read_text().replace('status: draft', 'status: final'))
-        final = await (await self.client.get('/topics/domain/alpha', headers=_MAINTAINER)).text()
+        final = await (await self.client.get('/blogs/domain/alpha', headers=_MAINTAINER)).text()
         self.assertIn('data-term-cmd="claude-blog domain/alpha --force"', final)
         # a reader sees neither verb, anywhere
-        reader = await (await self.client.get('/topics/domain/alpha', headers=_READER)).text()
-        self.assertNotIn('/edit/topics/domain/alpha', reader)
+        reader = await (await self.client.get('/blogs/domain/alpha', headers=_READER)).text()
+        self.assertNotIn('/edit/blogs/domain/alpha', reader)
         self.assertNotIn('claude-blog', reader)
 
     @unittest_run_loop
     async def test_article_page_shows_no_status_badge(self) -> None:
         """The article page renders the prose only — no draft/final badge on the page body."""
-        page = await (await self.client.get('/topics/domain/alpha', headers=_MAINTAINER)).text()
+        page = await (await self.client.get('/blogs/domain/alpha', headers=_MAINTAINER)).text()
         panel = page.partition('id="content"')[2]
         self.assertNotIn('pill-draft', panel)
         self.assertNotIn('pill-final', panel)
@@ -831,7 +841,7 @@ class EditRouteTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_article_save_writes_edited_prose(self) -> None:
         edited = self.article.read_text().replace('Old prose.', 'New, researched prose.')
-        resp = await self.client.post('/edit/topics/domain/alpha',
+        resp = await self.client.post('/edit/blogs/domain/alpha',
                                       data={'content': edited}, headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         self.assertNotIn('<!DOCTYPE html>', await resp.text())       # a fragment
@@ -841,7 +851,7 @@ class EditRouteTests(AioHTTPTestCase):
     async def test_article_save_refuses_to_edit_the_machine_comments(self) -> None:
         before = self.article.read_text()
         retagged = before.replace('[alpha]', '[beta]')
-        resp = await self.client.post('/edit/topics/domain/alpha',
+        resp = await self.client.post('/edit/blogs/domain/alpha',
                                       data={'content': retagged}, headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         self.assertIn('update-tags', await resp.text())              # the refusal names the owner
@@ -851,7 +861,7 @@ class EditRouteTests(AioHTTPTestCase):
     async def test_article_save_refuses_raw_html(self) -> None:
         before = self.article.read_text()
         injected = before.replace('Old prose.', 'Old prose.<script>steal()</script>')
-        resp = await self.client.post('/edit/topics/domain/alpha',
+        resp = await self.client.post('/edit/blogs/domain/alpha',
                                       data={'content': injected}, headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         self.assertIn('raw HTML', await resp.text())
@@ -880,26 +890,26 @@ class EditRouteTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_article_delete_gated_below_maintainer(self) -> None:
         for headers in (_READER, _CONTRIBUTOR):
-            resp = await self.client.delete('/edit/topics/domain/alpha', headers=headers)
+            resp = await self.client.delete('/edit/blogs/domain/alpha', headers=headers)
             self.assertEqual(resp.status, 403, headers['X-Profile'])
         self.assertTrue(self.article.exists())                       # a refused request deletes nothing
 
     @unittest_run_loop
-    async def test_article_delete_removes_file_and_returns_topics_index(self) -> None:
-        resp = await self.client.delete('/edit/topics/domain/alpha', headers=_MAINTAINER)
+    async def test_article_delete_removes_file_and_returns_blogs_index(self) -> None:
+        resp = await self.client.delete('/edit/blogs/domain/alpha', headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertNotIn('<!DOCTYPE html>', body)                    # a fragment of the topics index
-        self.assertEqual(resp.headers.get('HX-Push-Url'), '/topics/')
+        self.assertNotIn('<!DOCTYPE html>', body)                    # a fragment of the blogs index
+        self.assertEqual(resp.headers.get('HX-Push-Url'), '/blogs/')
         self.assertFalse(self.article.exists())
 
-    # ── solved/total count on a topic page ─────────────────────────────────────
+    # ── solved/total count on a blog page ─────────────────────────────────────
 
     @unittest_run_loop
-    async def test_topic_problems_count_shows_solved_over_total(self) -> None:
+    async def test_blog_problems_count_shows_solved_over_total(self) -> None:
         """The Problems fold summary reads `solved / total` against this clone's progress —
         problem 9 is the one entry and problems.json marks it solved, so `1 / 1`."""
-        page = await (await self.client.get('/topics/domain/alpha', headers=_READER)).text()
+        page = await (await self.client.get('/blogs/domain/alpha', headers=_READER)).text()
         self.assertIn('class="problems-count">1 / 1<', page)
 
     @unittest_run_loop
@@ -988,15 +998,15 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('0009', body)                          # the crumb leaf
 
 
-class TopicCardStatusTests(unittest.TestCase):
+class BlogCardStatusTests(unittest.TestCase):
     """How an article's status reaches the card — rendered from a synthetic index.
 
-    Deliberately not asserted against the live `topics/` tree: a page's status is
+    Deliberately not asserted against the live `blogs/` tree: a page's status is
     exactly the thing that changes when someone writes an article, and a test that
     reads "primes is a draft" fails the day it stops being one.
 
-    Rendered with `show_status`, i.e. the maintainer's `/topics/all`. That is the only
-    view where status is shown: `/topics/` lists finished pages exclusively, so a "final"
+    Rendered with `show_status`, i.e. the maintainer's `/blogs/all`. That is the only
+    view where status is shown: `/blogs/` lists finished pages exclusively, so a "final"
     pill on every card there would carry no information.
     """
 
@@ -1010,8 +1020,8 @@ class TopicCardStatusTests(unittest.TestCase):
         entry = content.DocEntry(name='number-theory/primes', heading='Primes',
                                  title='Generating and testing primes', status=status,
                                  solved=1, problems=problems)
-        group = content.TopicGroup(name='number-theory', heading='Number Theory', entries=[entry])
-        return render_block(env, 'topics.html', 'content',
+        group = content.BlogGroup(name='number-theory', heading='Number Theory', entries=[entry])
+        return render_block(env, 'blogs.html', 'content',
                             {'groups': [group], 'crumbs': [], 'actions': [], 'git': None,
                              'total': total, 'show_status': show_status, 'csp_nonce': '',
                              'subject': None})
@@ -1032,9 +1042,9 @@ class TopicCardStatusTests(unittest.TestCase):
         self.assertIn('pill-final', body)
         self.assertNotIn('is-draft', body)
 
-    def test_the_count_line_is_the_topics_reach(self) -> None:
+    def test_the_count_line_is_the_blogs_reach(self) -> None:
         """The card's second line reads `referenced of all published` — 12 of the 950
-        problems carry this topic's tags — and the hairline fills to that same fraction,
+        problems carry this blog's tags — and the hairline fills to that same fraction,
         not to how many of the twelve are solved."""
         body = self._render('final', problems=12, total=950)
         self.assertIn('<b>12</b> of 950', body)
@@ -1223,7 +1233,7 @@ class MathSpanTests(unittest.TestCase):
     """
 
     def _md(self, text: str) -> str:
-        return content.render_markdown(text, route_base='/topics/')
+        return content.render_markdown(text, route_base='/blogs/')
 
     def test_tex_escapes_survive_inline_and_display(self) -> None:
         """The escapes that were being eaten — one of each kind, both delimiters."""
@@ -1235,9 +1245,9 @@ class MathSpanTests(unittest.TestCase):
 
     def test_markdown_around_the_math_still_renders(self) -> None:
         """Masking must not shield the prose: a span is lifted, its neighbours are not."""
-        html = self._md('A *stressed* [link](/topics/x) near $\\alpha\\,\\beta$ and `code`.\n')
+        html = self._md('A *stressed* [link](/blogs/x) near $\\alpha\\,\\beta$ and `code`.\n')
         self.assertIn('<em>stressed</em>', html)
-        self.assertIn('hx-get="/topics/x"', html)
+        self.assertIn('hx-get="/blogs/x"', html)
         self.assertIn('<code>code</code>', html)
         self.assertIn('$\\alpha\\,\\beta$', html)
 
@@ -1312,7 +1322,7 @@ class PullQuoteTests(unittest.TestCase):
 
 
 class CollapseProblemsTests(unittest.TestCase):
-    """The topic page folds `update-tags`' generated Problems list into a <details>.
+    """The blog page folds `update-tags`' generated Problems list into a <details>.
 
     A render-time transform on the rendered HTML — the source article keeps the plain
     heading-and-list — so it is exercised directly on a rendered sample rather than
@@ -1327,11 +1337,11 @@ class CollapseProblemsTests(unittest.TestCase):
 
     def _folded(self) -> str:
         return content.collapse_problems(
-            content.render_markdown(self._ARTICLE, route_base='/topics/'))
+            content.render_markdown(self._ARTICLE, route_base='/blogs/'))
 
     def test_the_list_is_folded_into_a_closed_details(self) -> None:
         html = self._folded()
-        self.assertIn('<details class="fold topic-problems">', html)
+        self.assertIn('<details class="fold blog-problems">', html)
         self.assertNotIn('[open]', html)               # closed by default: no open attribute
         self.assertIn('</details>', html)
 
@@ -1345,7 +1355,7 @@ class CollapseProblemsTests(unittest.TestCase):
         self.assertIn('<span class="problems-count">2</span>', self._folded())
 
     def test_an_article_without_the_block_is_untouched(self) -> None:
-        plain = content.render_markdown('# Title\n\nJust prose.\n', route_base='/topics/')
+        plain = content.render_markdown('# Title\n\nJust prose.\n', route_base='/blogs/')
         self.assertEqual(content.collapse_problems(plain), plain)
 
 

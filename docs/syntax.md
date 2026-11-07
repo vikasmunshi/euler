@@ -111,7 +111,7 @@ Variable storage, the reserved names, and the two write channels are defined by
 | name | type | meaning | written by |
 |------|------|---------|------------|
 | `accounts` | list[roster.Account] | the collaborator accounts on the roster | computed, on each reference |
-| `articles` | list[Article] | every writable topic — the tag pages and the curated ones | computed, on each reference |
+| `articles` | list[Article] | every writable blog — the tag pages and the curated ones | computed, on each reference |
 | `config` | Config | the global configuration singleton | nothing — fixed |
 | `key_requests` | list[Thread] | the key-authorization requests waiting to be granted | computed, on each reference |
 | `last` | int | number of the last solved problem | computed, on each reference |

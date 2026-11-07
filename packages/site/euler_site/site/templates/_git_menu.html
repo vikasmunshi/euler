@@ -106,7 +106,7 @@
       title="{{ label }} needs the {{ floor }} profile">{{ label }}<span class="cmd">{{ floor }}</span></button></li>
   {% endif %}
   {% endmacro %}
-  {# The rows read as the WORK, not as the commands — `git-commit solution docs topics` is
+  {# The rows read as the WORK, not as the commands — `git-commit solution docs blogs` is
      a fine thing to run and a poor thing to call a button. The command is still on every
      row (the macro puts it in `.cmd`), so the menu still teaches what it types; the label
      just says which of the day's jobs this is. Ordered as the job actually runs: see what
@@ -125,7 +125,7 @@
      reader decide which half of their own work they were saving. `solutions` and
      `update` are deliberately absent: staging the whole tree, or regenerated package
      source, is not a one-click act. #}
-  {{ verb('Save my work', 'git-commit solution docs topics', 'contributor') }}
+  {{ verb('Save my work', 'git-commit solution docs blogs', 'contributor') }}
   {{ verb('Hand it over for review', 'git-push', 'contributor') }}
   {# One row, because there is one gate and one queue: `gh-merge merge` offers the open
      requests as a menu, so the row needs no number and a maintainer sees everything that

@@ -1,6 +1,6 @@
-{# The section strip — Solutions · Docs · Topics · Shell — as ONE definition, opening
+{# The section strip — Solutions · Docs · Blogs · Shell — as ONE definition, opening
    every one of the five index pages: the start page (`_home.html`, rendered by both
-   tiers), solutions, docs, topics and the terminal page. One place to add a fifth
+   tiers), solutions, docs, blogs and the terminal page. One place to add a fifth
    section, and five pages that grow it.
 
    It is the same tile object the content grids below it wear (site.css § the tile), in a
@@ -32,7 +32,7 @@
    hx-get="{{ href }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
    {% if is_here %}aria-current="page"{% endif %}
    {% if key == 'terminal' %}data-term-show{% endif %}
-   {% if key == 'topics' and sections %}title="{{ sections.topics }} topics written, covering {{ sections.covered }} of {{ sections.total }} problems"{% endif %}>
+   {% if key == 'blogs' and sections %}title="{{ sections.blogs }} blogs written, covering {{ sections.covered }} of {{ sections.total }} problems"{% endif %}>
   <span class="card-head"><span class="card-ic">{{ glyph }}</span>
     <span class="card-title">{{ title }}</span>
     {# The corner slot holds affordance or state, never decoration (site.css § the tile).
@@ -70,7 +70,7 @@
   <span class="card-bar"><i style="width: {{ (100 * sections.solved / sections.total) | round(1) if sections.total else 0 }}%"></i></span>
 {% elif key == 'docs' %}
   <span class="card-meta"><b>{{ sections.docs }}</b> docs</span>
-{% elif key == 'topics' %}
+{% elif key == 'blogs' %}
   <span class="card-meta"><b>{{ sections.covered }}</b> of {{ sections.total }} covered</span>
   <span class="card-bar"><i style="width: {{ (100 * sections.covered / sections.total) | round(1) if sections.total else 0 }}%"></i></span>
 {% elif key == 'terminal' %}
@@ -88,7 +88,7 @@
           'Every problem as a century grid — the orange ones are victories.') }}
   {{ tile('docs', '/docs/', '§', 'Docs',
           'The docs. Read one, ignore the rest, feel briefly invincible.') }}
-  {{ tile('topics', '/topics/', 'λ', 'Topics',
+  {{ tile('blogs', '/blogs/', 'λ', 'Blogs',
           'The mathematics behind the problems, written down before it was forgotten.') }}
   {# The one tile whose destination is in two places at once: /shell is the page about the
      shell, and the shell itself is already here, in the right pane. So it does both — it

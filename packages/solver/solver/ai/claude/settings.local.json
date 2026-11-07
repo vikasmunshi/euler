@@ -32,7 +32,7 @@
       "Bash(solutions/* *)",
       "Bash(solutions/*)",
       "Edit(solutions/**)",
-      "Edit(topics/**)",
+      "Edit(blogs/**)",
       "Read(./**)",
       "Read(//usr/local/bin/**)",
       "Skill(claude-api)",

@@ -387,10 +387,10 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])  # refused before gh ran
 
-    def test_a_topics_only_pr_is_rebase_merged_too(self) -> None:
-        """Topic articles are the other content tree a collaborator authors (PR_SCOPE)."""
+    def test_a_blogs_only_pr_is_rebase_merged_too(self) -> None:
+        """Blog articles are the other content tree a collaborator authors (PR_SCOPE)."""
         self.as_profile('maintainer')
-        self.files = ['topics/technique/sieve-of-eratosthenes.md', 'topics/articles.json']
+        self.files = ['blogs/technique/sieve-of-eratosthenes.md', 'blogs/articles.json']
         self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -399,7 +399,7 @@ class GhPrTest(_GitCommandCase):
     def test_a_pr_spanning_both_trees_is_admitted(self) -> None:
         """No one-tree rule: a branch may carry a solution and the article about it."""
         self.as_profile('maintainer')
-        self.files = ['solutions/public/p0042/p0042_s0.py', 'topics/technique/memoization.md']
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'blogs/technique/memoization.md']
         self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
                                          'git fetch --prune origin master',
@@ -407,12 +407,12 @@ class GhPrTest(_GitCommandCase):
 
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
         # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/;
-        # likewise 'topics.md' for topics/ — the scope is prefixes, not name stems.
+        # likewise 'blogs.md' for blogs/ — the scope is prefixes, not name stems.
         self.as_profile('maintainer')
         self.files = ['solutions-of-mine/x.py']
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
-        self.files = ['topics.md']
+        self.files = ['blogs.md']
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
@@ -576,10 +576,10 @@ class GhPrTest(_GitCommandCase):
                                 f'{target} stages {entry}, which no PR may carry')
 
     def test_a_pr_spanning_several_targets_merges_whole(self) -> None:
-        """Multiple commits across solutions, docs and topics are one review, not three."""
+        """Multiple commits across solutions, docs and blogs are one review, not three."""
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solutions/problems.json',
-                      'docs/user-guide.md', 'topics/articles.json',
+                      'docs/user-guide.md', 'blogs/articles.json',
                       'solutions/public/p0042/tags.json', 'README.md', 'packages/solver/solver/config/values.conf']
         self.assertEqual(git.gh_merge('merge', 12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin',
@@ -589,7 +589,7 @@ class GhPrTest(_GitCommandCase):
     def test_a_docs_only_pr_merges_through_the_same_gate(self) -> None:
         """A regeneration is no longer a separate verb: one queue, one gate."""
         self.as_profile('maintainer')
-        self.files = ['docs/user-guide.md', 'topics/articles.json', 'README.md',
+        self.files = ['docs/user-guide.md', 'blogs/articles.json', 'README.md',
                       'packages/solver/solver/modules.csv', 'packages/solver/solver/config/values.conf',
                       'packages/solver/solver/ai/claude/CLAUDE.md']
         self.assertEqual(git.gh_merge('merge', 12), 0)
@@ -777,13 +777,13 @@ class CommitTargetsTest(unittest.TestCase):
 
     def test_paths_are_repo_relative(self) -> None:
         """Absolute paths would work for `git add` but break `:(glob)` beside them."""
-        for spec in git._commit_paths(self.problem, ('solution', 'docs', 'topics', 'update')):
+        for spec in git._commit_paths(self.problem, ('solution', 'docs', 'blogs', 'update')):
             self.assertFalse(spec.removeprefix(':(glob)').startswith('/'), spec)
 
-    def test_topics_carries_both_legs_of_the_tag_graph(self) -> None:
+    def test_blogs_carries_both_legs_of_the_tag_graph(self) -> None:
         """`update-tags` writes both, and a double-entry record must land as one commit."""
-        self.assertEqual(git._commit_paths(self.problem, ('topics',)),
-                         ['topics/', ':(glob)solutions/**/tags.json'])
+        self.assertEqual(git._commit_paths(self.problem, ('blogs',)),
+                         ['blogs/', ':(glob)solutions/**/tags.json'])
 
     def test_update_is_what_the_generators_write_outside_docs(self) -> None:
         self.assertEqual(git._commit_paths(self.problem, ('update',)),
@@ -859,10 +859,10 @@ class GitCommitTest(_GitCommandCase):
 
     def test_the_doc_targets_stage_the_whole_docs_set(self) -> None:
         """The glob leg carries git's explicit :(glob) magic, and is quoted for the shell."""
-        self.assertEqual(git.git_commit(self.problem, 'docs', 'topics', 'update',
+        self.assertEqual(git.git_commit(self.problem, 'docs', 'blogs', 'update',
                                         message='regenerate'), 0)
         self.assertEqual(self.cmdlines, [
-            "git add -A docs/ topics/ ':(glob)solutions/**/tags.json' README.md "
+            "git add -A docs/ blogs/ ':(glob)solutions/**/tags.json' README.md "
             'packages/solver/solver/modules.csv packages/solver/solver/config/values.conf '
             'packages/solver/solver/ai/models.py '
             'packages/solver/solver/ai/claude/CLAUDE.md packages/site/euler_site/content/home-summary.md '

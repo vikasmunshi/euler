@@ -1,11 +1,11 @@
 ---
 name: claude-euler-blogger
 description: Use when Claude is launched by the `claude-blog` command via
-  `claude -p /claude-euler-blogger <tag-or-topic> [additional_prompt]` to write (or flesh out)
-  one topic article under `topics/`. Claude runs headless at the repository root, researches the
-  problems that carry the tag(s), and edits the article's Markdown directly. The `<tag-or-topic>`
+  `claude -p /claude-euler-blogger <tag-or-blog> [additional_prompt]` to write (or flesh out)
+  one blog article under `blogs/`. Claude runs headless at the repository root, researches the
+  problems that carry the tag(s), and edits the article's Markdown directly. The `<tag-or-blog>`
   is a tag's `<facet>/<slug>` path (e.g. `technique/sieve-of-eratosthenes`), a bare tag slug, or a
-  curated topic path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
+  curated blog path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
   post" or for solving problems.
 version: 0.6.0
 model: opus
@@ -13,16 +13,16 @@ model: opus
 
 # Claude Euler Blogger (headless)
 
-A skill that runs **headless** to write one topic page under `topics/`. The `claude-blog` shell
+A skill that runs **headless** to write one blog page under `blogs/`. The `claude-blog` shell
 command launches Claude with:
 
 ```
-claude -p /claude-euler-blogger <tag-or-topic> [additional_prompt]
+claude -p /claude-euler-blogger <tag-or-blog> [additional_prompt]
 ```
 
-A **topic** collects the problems that share a tag and explains the idea behind them. Each tag has
-a page at `topics/<facet>/<slug>.md`; curated cross-cutting topics live elsewhere under `topics/`
-(e.g. `topics/number-theory/primes.md`). Claude researches the covered problems, writes the page,
+A **blog** collects the problems that share a tag and explains the idea behind them. Each tag has
+a page at `blogs/<facet>/<slug>.md`; curated cross-cutting blogs live elsewhere under `blogs/`
+(e.g. `blogs/number-theory/primes.md`). Claude researches the covered problems, writes the page,
 commits it, refreshes its Problems section, and **ends the turn**. The commit stays local: the
 collaborator reviews and amends the work, then pushes it themselves.
 
@@ -34,23 +34,23 @@ The tag graph and the house voice are the two things to honour:
   (domain / technique / takeaway), and how a page declares the tags it covers.
 - **[docs/convention_documentation.md](docs/convention_documentation.md)** — the writing voice
   used in `notes.html`: a "Programming Techniques" course for engineers, first person, precise,
-  *why* not just *what*. A topic page carries that same voice, one level up: it explains the idea
+  *why* not just *what*. A blog page carries that same voice, one level up: it explains the idea
   across many problems, not one.
 
-The central vocabulary is `topics/tags.json` (each tag's `name`, `reference` URL, and `refs` — the
+The central vocabulary is `blogs/tags.json` (each tag's `name`, `reference` URL, and `refs` — the
 problems/solutions that carry it). Read the exact `solver` command usage in
 **[docs/commands-index.md](docs/commands-index.md)** — especially
-[`topic`](docs/commands-index.md#command-topic), [`topics`](docs/commands-index.md#command-topics),
+[`blog`](docs/commands-index.md#command-blog), [`blogs`](docs/commands-index.md#command-blogs),
 and [`update-tags`](docs/commands-index.md#command-update-tags).
 
 ## Rule — reference private problems, but never hand out their answer
 
 Problems **> 100** live under `solutions/private/` and are encrypted at rest, because Project
-Euler asks that solutions to problems past 100 not be published. Topic pages under `topics/` are
+Euler asks that solutions to problems past 100 not be published. Blog pages under `blogs/` are
 plaintext and public. The boundary that follows is about the **answer**, not the problem:
 
 - **Do** name a private problem by number, summarise its statement, and explain the shared idea
-  and the approach in your own words — that is the point of a topic page, and a page that ducks
+  and the approach in your own words — that is the point of a blog page, and a page that ducks
   every private problem is a worse page.
 - **Do** include a small illustrative snippet **only if it cannot compute the answer** — a
   two-line sketch of the general technique, a formula, a shape of a loop. If someone could paste
@@ -65,13 +65,13 @@ themselves if they are entitled to it.
 ## Execution model
 
 Runs at the repository root and edits the one target page in place. `solver` is on `PATH`; run
-subcommands directly (`solver "topic technique/sieve-of-eratosthenes"`). These Bash commands run
-without confirmation; the skill also relies on `Edit`/`Write` under `topics/**` and `Read` on the
+subcommands directly (`solver "blog technique/sieve-of-eratosthenes"`). These Bash commands run
+without confirmation; the skill also relies on `Edit`/`Write` under `blogs/**` and `Read` on the
 project tree — keep `.claude/settings.local.json` in sync:
 
     - bash solver *
     - bash git add:* / git commit:*
-    - edit/write topics/**      # the article
+    - edit/write blogs/**      # the article
     - read ./**
 
 Do **not** change `cwd`; every command runs from the project root, no `./` prefix.
@@ -80,16 +80,16 @@ Do **not** change `cwd`; every command runs from the project root, no `./` prefi
 
 ## Phase 1 — Resolve the target
 
-The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated topic path.
+The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated blog path.
 
 0. **Run `solver "update-tags"` first.** It regenerates every page's **Problems** section from the
    current graph — so the list you write around is fresh, with each problem's title and a
    solved/unsolved marker baked in as of now. (You will run it again at the end.)
 1. Resolve the argument to a file:
-    - a `<facet>/<slug>` path → `topics/<facet>/<slug>.md`;
-    - a bare slug → look it up in `topics/tags.json`, take its `facet`, target `topics/<facet>/<slug>.md`;
-    - any other path → `topics/<path>.md`.
-2. Run `solver "topic <path-without-.md>"` to see the tag(s) the page declares and the
+    - a `<facet>/<slug>` path → `blogs/<facet>/<slug>.md`;
+    - a bare slug → look it up in `blogs/tags.json`, take its `facet`, target `blogs/<facet>/<slug>.md`;
+    - any other path → `blogs/<path>.md`.
+2. Run `solver "blog <path-without-.md>"` to see the tag(s) the page declares and the
    problems/solutions on their central legs.
 3. Read the target file — after step 0 it always exists. It is usually a **skeleton**: a
    `<!-- tags: [...] -->` comment on line 1, a `<!-- status: draft -->` comment under it, an
@@ -103,7 +103,7 @@ The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated t
 The status is the page's state of writing: `draft` while it is a stub or half-written, `final` once
 it is a finished article. A `final` status also carries the **time the article was written**
 (`<!-- status: final 2026-10-14T08:32Z -->`), which `update-tags` stamps — see Phase 4.
-`topics/articles.json` (the article index, maintained by `update-tags`) mirrors both — the time as
+`blogs/articles.json` (the article index, maintained by `update-tags`) mirrors both — the time as
 the row's `written`. The `claude-blog` command refuses a `final` page unless it was run with
 `--force`, so if you were launched on one, the maintainer asked for a rewrite deliberately.
 
@@ -112,7 +112,7 @@ conventions.
 
 ## Phase 2 — Research the idea
 
-1. Read the tag's `reference` URL and `name` from `topics/tags.json` to pin the concept.
+1. Read the tag's `reference` URL and `name` from `blogs/tags.json` to pin the concept.
 2. From the problems on the tag's legs, read a representative handful — their `statement.html`,
    `notes.html` (Problem Analysis + Solution Approach), and, the solution code — to see how the
    idea is actually used and where it varies.
@@ -121,7 +121,7 @@ conventions.
 
 ## Phase 3 — Write the page
 
-Replace the `_TODO_` stub (or, for a new curated topic, create the file) with a focused article:
+Replace the `_TODO_` stub (or, for a new curated blog, create the file) with a focused article:
 
 - **Lead** — one short paragraph: what this domain / technique / takeaway is, and why it keeps
   coming back across the problems below.
@@ -136,7 +136,7 @@ wild" section. Write your prose *above* that section; you may refer to specific 
 in the flow of the idea (a public one when you want to quote code — see the private-problem rule),
 but do not duplicate the list.
 
-Keep it tight — a topic page, not an essay. Leave the `<!-- tags: [...] -->` comment, the
+Keep it tight — a blog page, not an essay. Leave the `<!-- tags: [...] -->` comment, the
 `<!-- status: … -->` comment (until Phase 4 marks it final), and the whole `<!-- problems … -->` … `<!-- /problems -->` section
 exactly as they are — `update-tags` owns them. Use GitHub-flavoured Markdown (`##` headings,
 tables, code fences); do **not** put raw HTML in the page (it renders to every reader and the save
@@ -167,31 +167,31 @@ without the one before it — and any of them failing is a stop-and-report:
    and stop. `final` is a claim that the page needs no more writing.
 2. **Commit your page — before the refresh, not after:**
 
-       solver "git-commit topics message='docs(topic): <name>'"
+       solver "git-commit blogs message='docs(blog): <name>'"
 
-   `git-commit` stages what its targets name, and `topics` is **both** legs of the tag graph:
-   your page and `topics/tags.json` / `topics/articles.json`, *and* each problem's `tags.json`,
+   `git-commit` stages what its targets name, and `blogs` is **both** legs of the tag graph:
+   your page and `blogs/tags.json` / `blogs/articles.json`, *and* each problem's `tags.json`,
    which `update-tags` rewrites when it accepts a proposed tag. One target covers the whole graph,
-   and nothing outside those paths can ride along. Topic pages carry no solutions, so the message
-   needs no secrecy: just say what was written, tagged `docs(topic):` so the log reads at a glance.
+   and nothing outside those paths can ride along. Blog pages carry no solutions, so the message
+   needs no secrecy: just say what was written, tagged `docs(blog):` so the log reads at a glance.
 
    **Order matters.** `update-tags` commits its own output, so running it first would sweep your
-   article into a generic `chore(update-tags):` commit and your `docs(topic):` message would never
+   article into a generic `chore(update-tags):` commit and your `docs(blog):` message would never
    land. Commit first; let the refresh commit only what it itself changes.
 
    Pass the message explicitly, as above. With no `message=` the command asks for one at the
    prompt, and headless there is nobody to ask — it exits `2` without committing.
 
    Do **not** run `solver "commit"` bare: with no target it is problem-scoped — it stages a
-   `solutions/pNNNN` directory plus `problems.json`, *not* a topic page, so it would not commit
+   `solutions/pNNNN` directory plus `problems.json`, *not* a blog page, so it would not commit
    your work at all.
 3. **Refresh the Problems section:** `solver "update-tags"` — it rewrites every article's
    Problems section (fresh titles and solved markers), stamps your `final` with the current time,
-   reconciles the graph, and updates `topics/articles.json` (where your new status lands),
+   reconciles the graph, and updates `blogs/articles.json` (where your new status lands),
    committing whatever it changed. Then
    `solver "update-tags --check"` must exit `0`; fix any issue it names (an unknown tag in your
    `<!-- tags: -->` comment, most likely) and re-run.
-4. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
+4. **Sanity-check:** `solver "blog <path>"` lists the tags and problems the page now resolves to.
 
 The phase ends at the commit. Pushing the branch and opening its pull request is the
 collaborator's step (`solver "git-push"`), taken once they have read the page and amended

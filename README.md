@@ -80,7 +80,7 @@ design notes.
 > **Prefer not to install?** A live instance of the web front end runs at
 > **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** - the same `solver` shell,
 > documentation viewer, and editor, all in the browser and served over HTTPS. Signed out, you can
-> read the first 100 solutions, the docs and the topic articles; the terminal, the editor and the
+> read the first 100 solutions, the docs and the blog articles; the terminal, the editor and the
 > encrypted solutions need an account (see the [web server guide](docs/web-server-guide.md)). If
 > you'd like one to explore or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your
 > own copy, see the installation steps below.
@@ -169,8 +169,8 @@ System packages (`apt`: Python 3.14, `primesieve`, the C toolchain) are recorded
 ### Quick start
 
 <!-- SCREENSHOTS:START: written by scripts/docs/screenshots.py; edit the script, not this. -->
-<p align="center"><img src="docs/screenshots.gif" width="100%" alt="The web front end, signed out: Home, Solutions, Docs, Topics, Terminal, Problem 8"></p>
-<p align="center">The web front end, signed out: <code>/</code> → <code>/solutions/</code> → <code>/docs/</code> → <code>/topics/</code> → <code>/shell</code> → <code>/solutions/8/</code>, 3 seconds each.</p>
+<p align="center"><img src="docs/screenshots.gif" width="100%" alt="The web front end, signed out: Home, Solutions, Docs, Blogs, Terminal, Problem 8"></p>
+<p align="center">The web front end, signed out: <code>/</code> → <code>/solutions/</code> → <code>/docs/</code> → <code>/blogs/</code> → <code>/shell</code> → <code>/solutions/8/</code>, 3 seconds each.</p>
 <!-- SCREENSHOTS:END -->
 
 ```
@@ -202,7 +202,7 @@ A note on the AI assistance: two complementary paths are wired into the shell, b
 aimed at deepening understanding rather than skipping it - the single-shot
 **`claude-api`** (generate a solution, notes, or test cases) and the agentic
 **`claude-solve`** / `claude-blog` / `! claude` (Claude Code working directly on a problem's solution
-files, or on a topic article). The API path needs the `ai` dependency group and an
+files, or on a blog article). The API path needs the `ai` dependency group and an
 `ANTHROPIC_API_KEY`; Claude Code needs only the signed-in `claude` CLI; see the
 [User Guide](docs/user-guide.md#5-ai-assistance) for the trade-offs.
 
@@ -249,7 +249,7 @@ files, or on a topic article). The API path needs the `ai` dependency group and 
     - the single-shot Claude **API** (`claude-api py|c|notes|test-cases`) for solutions and documentation,
     - and full **Claude Code** driven from the shell both interactively (`! claude`)
       and headless: `claude-solve <problem> solve|review` (the `claude-euler-solver` skill) and
-      `claude-blog <topic>` (the `claude-euler-blogger` skill), each stopping at a local commit;
+      `claude-blog <blog>` (the `claude-euler-blogger` skill), each stopping at a local commit;
     - API token costs per `solver` session are tracked, use the command `costs` to show.
 - **Performance dashboard** - benchmarks solutions and records execution times, building a personal history of the
   journey through the problems.
@@ -298,7 +298,7 @@ packages/solver/solver/           — euler-solver: the solver shell — standal
     progress.py                   — The progress page → `problems.json` pipeline, shared by the shell and the web tier.
     results.py                    — Results: save and retrieve problem results.
     summary.py                    — The `summary`, `progress` and `mark` commands: the shell's side of `problems.json`.
-    tags.py                       — Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
+    tags.py                       — Tag/blog glue: the `blogs`, `blog` and `update-tags` commands.
     test_cases.py                 — Load test cases for evaluation
     viewer.py                     — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/

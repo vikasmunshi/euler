@@ -493,7 +493,7 @@ positional naming a *known* problem is consumed as `problem`, so a trailing
 (§3.8) — the marker is how a reader knows the argument is optional at the prompt
 despite having no default in the signature.
 
-For values the type system cannot enumerate — a filename, a topic slug — pass
+For values the type system cannot enumerate — a filename, a blog slug — pass
 `completers={'param': fn}`, where `fn(ctx, incomplete)` returns candidate strings (or
 `Completion` objects, passed through verbatim). It governs the parameter both
 positionally and as `param=`.

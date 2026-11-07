@@ -171,7 +171,7 @@ packages/solver/solver/           — euler-solver: the solver shell — standal
     progress.py                   — The progress page → `problems.json` pipeline, shared by the shell and the web tier.
     results.py                    — Results: save and retrieve problem results.
     summary.py                    — The `summary`, `progress` and `mark` commands: the shell's side of `problems.json`.
-    tags.py                       — Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
+    tags.py                       — Tag/blog glue: the `blogs`, `blog` and `update-tags` commands.
     test_cases.py                 — Load test cases for evaluation
     viewer.py                     — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/
@@ -368,7 +368,7 @@ See `packages/solver/solver/templates/new.py` / `new.c` for the canonical templa
 Two AI entry points, both calling the Claude API. Install the optional deps with `pip install -e "packages/solver[ai]"` (`anthropic` + `python-dotenv`); the key is `ANTHROPIC_API_KEY`, read from the project env file `~/.euler/env` (`config.env_file`, `models.py:get_api_key`).
 
 - **`claude-api`** (`packages/solver/solver/ai/api.py`) generates solution artifacts, dispatching to per-target generators — `code.py` (Python/C), `docs.py` (notes), `facts.py` (test cases) — with prompts in `packages/solver/solver/templates/prompt_*.txt`. Default models: Opus for code (Python + C) and notes, Sonnet for test cases. The `costs` command (`models.py`) reports accumulated token spend.
-- **`claude-solve` / `claude-blog`** (`packages/solver/solver/ai/skill.py`) launch Claude Code headless via a skill under `packages/solver/solver/ai/claude/skills/`, running at the repo root. `claude-solve` works a problem's solution files through the `claude-euler-solver` skill (`claude -p /claude-euler-solver <problem_number> <action>`; actions `solve` and `review`); `claude-blog` writes one topic article under `topics/` through the `claude-euler-blogger` skill (`claude -p /claude-euler-blogger <tag-or-topic>`). Both finish the same way — a local commit, and no further: pushing the branch and opening its pull request (`git-push`) is the collaborator's own step, taken once they have reviewed and amended the work. Both are held to the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`). Every skill in that directory is composed into the web front end's `/docs/ai` page.
+- **`claude-solve` / `claude-blog`** (`packages/solver/solver/ai/skill.py`) launch Claude Code headless via a skill under `packages/solver/solver/ai/claude/skills/`, running at the repo root. `claude-solve` works a problem's solution files through the `claude-euler-solver` skill (`claude -p /claude-euler-solver <problem_number> <action>`; actions `solve` and `review`); `claude-blog` writes one blog article under `blogs/` through the `claude-euler-blogger` skill (`claude -p /claude-euler-blogger <tag-or-blog>`). Both finish the same way — a local commit, and no further: pushing the branch and opening its pull request (`git-push`) is the collaborator's own step, taken once they have reviewed and amended the work. Both are held to the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`). Every skill in that directory is composed into the web front end's `/docs/ai` page.
 
 ### Web front end
 

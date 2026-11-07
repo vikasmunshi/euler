@@ -89,7 +89,7 @@ WEB_CONTENT_SRC="${PROJECT_ROOT}/packages/site/euler_site/content"   # repo sour
 WEB_CONTENT_DIR="${SYS_DIR}/web-content"               # deployed, readable by euler-caddy
 # The content paths the public site serves (docs/package-guide.md § 4) — signed-out reads,
 # and stale-session reads, go there. One list for both Caddy matchers that name it.
-PUBLIC_PATHS="/ /solutions /solutions/* /docs /docs/* /topics /topics/* /about/* /shell /story /story/*"
+PUBLIC_PATHS="/ /solutions /solutions/* /docs /docs/* /blogs /blogs/* /topics /topics/* /about/* /shell /story /story/*"
 
 # ── Service identity ───────────────────────────────────────────────────────
 WEB_GROUP="euler-web"

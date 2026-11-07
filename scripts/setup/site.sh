@@ -2,7 +2,7 @@
 # Public site kit (euler-site): what signed-out visitors read, served from the euler-content wheel.
 # =================================================================================================
 #
-# Deploys / removes the public site — the published content (guides, topics, the public
+# Deploys / removes the public site — the published content (guides, blogs, the public
 # solutions, the progress grid) for visitors who are not signed in (docs/package-guide.md
 # § 3.4; docs/web-server-guide.md § The public site). Sibling to msg.sh / auth.sh.
 #

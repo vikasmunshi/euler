@@ -1,13 +1,13 @@
 # Tag conventions
 
 These govern a problem's `tags.json` — the per-problem leg of the tag graph that powers the
-topic articles under `topics/`. They are distinct from the
+blog articles under `blogs/`. They are distinct from the
 [Documentation conventions](convention_documentation.md), which govern `notes.html`.
 
 `notes.html` explains *what the problem is* and *how each solution works*. The **programming
 techniques** a solution uses and the **transferable takeaways** it teaches are not written as prose
 there — they are recorded as tags in `tags.json`, so they can be collected across problems into
-topic pages.
+blog pages.
 
 ## The graph
 
@@ -22,7 +22,7 @@ Every tag is one of three **facets**:
 - **takeaway** — a **transferable principle** the problem teaches ("prefer a closed form over
   iteration", "a better algorithm beats a faster language"). Attaches to the **problem**.
 
-The central vocabulary of allowed tags lives in `topics/tags.json`; each entry has a `slug`, a
+The central vocabulary of allowed tags lives in `blogs/tags.json`; each entry has a `slug`, a
 `facet`, a human `name`, and a canonical `reference` URL. **Always choose an existing tag by its
 slug.** Propose a new one (below) only when nothing in the vocabulary fits.
 
@@ -48,14 +48,14 @@ Written as standard `json.dumps(indent=2)`. Four keys:
   exists) to the technique slugs *that index actually uses*. Read the code per index: index 0's list
   must reflect index 0's algorithm, not the problem in general. An index that shares an algorithm
   across Python and C lists it once. An index with no notable technique may have an empty list.
-- Every slug in `domain`, `takeaways`, and each `techniques` list must exist in `topics/tags.json`
+- Every slug in `domain`, `takeaways`, and each `techniques` list must exist in `blogs/tags.json`
   and match its facet there. Do not put a `technique` slug under `domain`, etc.
 
 ## Adding a new tag — `new-tags`
 
 When a solution genuinely needs a tag the vocabulary lacks, add its **full definition** to
 `new-tags` (do **not** invent a bare slug in the facet lists). The maintainer's `update-tags`
-command promotes each proposal into `topics/tags.json` and files it into the right bucket.
+command promotes each proposal into `blogs/tags.json` and files it into the right bucket.
 
 ```json
 "new-tags": [
@@ -82,10 +82,10 @@ command promotes each proposal into `topics/tags.json` and files it into the rig
 
 Prefer reusing an existing tag over proposing a near-duplicate; propose sparingly.
 
-## Topic articles and the index — `topics/articles.json`
+## Blog articles and the index — `blogs/articles.json`
 
-Each tag can carry an article at `topics/<facet>/<slug>.md`; curated cross-cutting topics live
-elsewhere under `topics/` (e.g. `topics/number-theory/primes.md`). Every article opens with two
+Each tag can carry an article at `blogs/<facet>/<slug>.md`; curated cross-cutting blogs live
+elsewhere under `blogs/` (e.g. `blogs/number-theory/primes.md`). Every article opens with two
 comments — the tags it covers, and its **status**:
 
 ```markdown
@@ -94,7 +94,7 @@ comments — the tags it covers, and its **status**:
 # Generating and testing primes
 ```
 
-`update-tags` maintains **`topics/articles.json`**, the article index: one row per writable topic —
+`update-tags` maintains **`blogs/articles.json`**, the article index: one row per writable blog —
 every tag in the vocabulary, plus the curated pages — with its title, declared tags, distinct-problem
 count and status. Three statuses:
 
@@ -112,8 +112,8 @@ for a draft). One fixed-width format in one zone, so it sorts and compares as pl
 each covered problem's solve time (read from `problems.json` as local time, converted to UTC) it
 finds the articles written before some of their problems were solved: each row's `solved_after`
 lists the problems solved at or after its `written` minute, and the `update-tags` report names those
-articles as rewrite candidates. `claude-blog` then refuses that topic unless run with `--force`. The
-index also drives `claude-blog` tab-completion (unwritten and most-referenced first) and the web `/topics` grid.
+articles as rewrite candidates. `claude-blog` then refuses that blog unless run with `--force`. The
+index also drives `claude-blog` tab-completion (unwritten and most-referenced first) and the web `/blogs` grid.
 
 ## Choosing good tags
 

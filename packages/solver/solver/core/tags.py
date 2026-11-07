@@ -1,16 +1,16 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
+"""Tag/blog glue: the `blogs`, `blog` and `update-tags` commands.
 
 The tag system is a double-entry graph. Each problem's `solution_dir/tags.json`
-(Layer 2) lists the tags it carries; the central `topics/tags.json` (Layer 1)
+(Layer 2) lists the tags it carries; the central `blogs/tags.json` (Layer 1)
 lists, per tag, the problems/solutions that carry it (its `refs` leg). The two
 legs hold the same information at the same granularity — `pNNNN` for problem-level
 facets (domain, takeaway) and `pNNNN_sN` for per-solution techniques.
 
-`update-tags` is the reconciler that keeps them consistent and feeds the topic
-articles under `topics/`, and it maintains `topics/articles.json` — the article
-index: one row per *writable* topic (every tag in the vocabulary, plus the curated
+`update-tags` is the reconciler that keeps them consistent and feeds the blog
+articles under `blogs/`, and it maintains `blogs/articles.json` — the article
+index: one row per *writable* blog (every tag in the vocabulary, plus the curated
 pages that are not a tag), carrying the page's title, its declared tags, the problems
 behind it (`refs`, and the `solved`/`problems` counts the web index shows as the
 page's subtitle), and its **status**:
@@ -31,7 +31,7 @@ current time; the blogger skill promotes its page to `final` when it finishes wr
 """
 from __future__ import annotations
 
-__all__ = ['tags', 'topics', 'topic', 'update_tags', 'create_topic', 'format_vocabulary',
+__all__ = ['tags', 'blogs', 'blog', 'update_tags', 'create_blog', 'format_vocabulary',
            'facet_map', 'STATUSES', 'article_status', 'article_written']
 
 import json
@@ -64,7 +64,7 @@ _GEN_CLOSE = '/problems'
 _GEN_RE = re.compile(r'<!--\s*' + re.escape(_GEN_OPEN) + r'\s*-->.*?<!--\s*'
                      + re.escape(_GEN_CLOSE) + r'\s*-->', re.DOTALL)
 #: The article statuses, in writing order. There is no `missing`: update-tags creates a page for
-#: every tag, so a topic always has a file and the only question is whether it has been written.
+#: every tag, so a blog always has a file and the only question is whether it has been written.
 STATUSES = ('draft', 'final')
 #: A `final` status carries the time the article was written, as an ISO 8601 UTC timestamp to
 #: the minute (`<!-- status: final 2026-10-14T08:32Z -->`). A string, not a Unix integer: it is
@@ -104,8 +104,8 @@ def _rel(path: Path) -> str:
     """*path* repo-relative — the form `commit_regenerated` names a written file in.
 
     A path *outside* the checkout is returned whole rather than raising. Nothing in a real run
-    produces one (every write below lands under `topics/` or a solution directory); a fixture
-    pointing `topics_dir` at a temp directory does, and a regeneration is not the place to
+    produces one (every write below lands under `blogs/` or a solution directory); a fixture
+    pointing `blogs_dir` at a temp directory does, and a regeneration is not the place to
     discover it. `commit_regenerated` then drops the absolute path as outside the verb's
     envelope — the right answer for a file that is not in the repository at all.
     """
@@ -117,7 +117,7 @@ def _rel(path: Path) -> str:
 
 #: Each writer returns what it wrote, repo-relative, so `update_tags` can hand
 #: `commit_regenerated` the exact file list. It cannot be inferred from the pathspecs this
-#: verb owns: `topics/` holds the articles themselves, and an article being *written by hand*
+#: verb owns: `blogs/` holds the articles themselves, and an article being *written by hand*
 #: right now is the one file a regeneration must not sweep into its own commit.
 def _write_central(obj: Any) -> str:
     """The central vocabulary: compact (scalar lists inline) so big refs legs stay one line."""
@@ -220,10 +220,10 @@ def _all_problem_numbers() -> list[int]:
     return sorted(nums)
 
 
-# ── topic articles ──────────────────────────────────────────────────────────────────────
+# ── blog articles ──────────────────────────────────────────────────────────────────────
 
 def _iter_articles() -> list[Path]:
-    return sorted(p for p in config.topics_dir.rglob('*.md'))
+    return sorted(p for p in config.blogs_dir.rglob('*.md'))
 
 
 def _article_tags(text: str) -> list[str]:
@@ -282,7 +282,7 @@ def _article_title(text: str, fallback: str) -> str:
 def _find_article(name: str) -> Path | None:
     name = name.removesuffix('.md')
     for path in _iter_articles():
-        rel = path.relative_to(config.topics_dir).with_suffix('')
+        rel = path.relative_to(config.blogs_dir).with_suffix('')
         if str(rel) == name or path.stem == name:
             return path
     return None
@@ -303,12 +303,12 @@ def _problem_count(tag: dict[str, Any]) -> int:
 
 @register(requires='reader')
 def tags(details: bool = False) -> int:
-    """Report over the central tag vocabulary (`topics/tags.json`).
+    """Report over the central tag vocabulary (`blogs/tags.json`).
 
     The vocabulary's own shape, not any one problem's tags: how many tags each facet
     (domain, technique, takeaway) defines, and — with `--details` — how evenly the problems
     are spread across them, which is what shows a tag that has grown too broad or too
-    narrow to be worth an article. Use `topic <name>` for one tag's problems.
+    narrow to be worth an article. Use `blog <name>` for one tag's problems.
 
     Args:
         details: Add, per facet, a histogram of how many problems each tag maps to — min /
@@ -344,11 +344,11 @@ def tags(details: bool = False) -> int:
 
 
 @register(requires='reader')
-def topics(problem: Problem) -> int:
-    """List a problem's tags and the topic articles that cover them.
+def blogs(problem: Problem) -> int:
+    """List a problem's tags and the blog articles that cover them.
 
     Reads the problem's own `tags.json` — grouping the tags by facet (domain, technique per
-    solution index, takeaway) — then names every article under `topics/` that declares any
+    solution index, takeaway) — then names every article under `blogs/` that declares any
     of them. Fails when the problem has no `tags.json`; `update-tags` reports which
     problems are missing one.
 
@@ -370,16 +370,16 @@ def topics(problem: Problem) -> int:
             console.print(f'  [muted]technique[/muted] [accent.dim]{sidx}[/accent.dim] {", ".join(slugs)}')
     if data.get('takeaways'):
         console.print(f'  [muted]takeaway [/muted] {", ".join(data["takeaways"])}')
-    covering = [str(p.relative_to(config.topics_dir).with_suffix(''))
+    covering = [str(p.relative_to(config.blogs_dir).with_suffix(''))
                 for p in _iter_articles() if own & set(_article_tags(p.read_text()))]
-    console.print(f'  [muted]topics   [/muted] {", ".join(covering) if covering else "(none)"}')
+    console.print(f'  [muted]blogs   [/muted] {", ".join(covering) if covering else "(none)"}')
     return ExitCodes.EXIT_OK
 
 
 @register(requires='reader')
-def topic(name: Annotated[str, Ask('Which topic?', choices='articles', strict=False,
-                                   empty='no topics indexed — run `update-tags`')]) -> int:
-    """List a topic article's declared tags and what each one maps to.
+def blog(name: Annotated[str, Ask('Which blog?', choices='articles', strict=False,
+                                  empty='no blogs indexed — run `update-tags`')]) -> int:
+    """List a blog article's declared tags and what each one maps to.
 
     Reads the article's `<!-- tags: [...] -->` declaration and, for each slug, prints its
     facet and the problem/solution refs recorded on the central vocabulary's leg — the
@@ -387,20 +387,20 @@ def topic(name: Annotated[str, Ask('Which topic?', choices='articles', strict=Fa
     matches.
 
     Args:
-        name: [asked] The article to report on: a `folder/leaf` path under `topics/`, or a
+        name: [asked] The article to report on: a `folder/leaf` path under `blogs/`, or a
             bare leaf name when it is unambiguous. Offered as a menu when omitted; not
             strict, so a leaf name still works.
     """
     path = _find_article(name)
     if path is None:
-        console.print(f'[error]error:[/error] no topic article {name!r} under topics/')
+        console.print(f'[error]error:[/error] no blog article {name!r} under blogs/')
         return ExitCodes.EXIT_ERROR
     tags = _article_tags(path.read_text())
     if not tags:
         console.print(f'[warning]{path.name}[/warning] declares no tags (add a <!-- tags: [...] --> comment)')
         return ExitCodes.EXIT_OK
     central = {t['slug']: t for t in _load_central()['tags']}
-    console.print(f'[accent]{path.relative_to(config.topics_dir).with_suffix("")}[/accent] — tags: {", ".join(tags)}')
+    console.print(f'[accent]{path.relative_to(config.blogs_dir).with_suffix("")}[/accent] — tags: {", ".join(tags)}')
     seen: set[str] = set()
     for slug in tags:
         tag = central.get(slug)
@@ -419,9 +419,9 @@ def topic(name: Annotated[str, Ask('Which topic?', choices='articles', strict=Fa
 # ── the reconciler ──────────────────────────────────────────────────────────────────────
 
 def _head_central() -> dict[str, Any] | None:
-    """The committed `topics/tags.json` at HEAD, for the maintainer-intent diff."""
+    """The committed `blogs/tags.json` at HEAD, for the maintainer-intent diff."""
     try:
-        proc = subprocess.run(['git', '-C', str(config.root_dir), 'show', f'HEAD:topics/{config.tags_filename}'],
+        proc = subprocess.run(['git', '-C', str(config.root_dir), 'show', f'HEAD:blogs/{config.tags_filename}'],
                               capture_output=True, text=True, timeout=5, check=False)
     except (OSError, subprocess.SubprocessError):
         return None
@@ -592,8 +592,8 @@ def _article_counts(refs: list[str], solved: set[int]) -> tuple[int, int]:
     """`(solved, problems)` behind an article: its `refs` collapsed to distinct problems,
     and how many of those we have a solution for.
 
-    The pair the topics index shows as the page's subtitle ("solved n of m"), so the reader
-    picking a topic sees how much of it is already worked through. Counted at `pNNNN`
+    The pair the blogs index shows as the page's subtitle ("solved n of m"), so the reader
+    picking a blog sees how much of it is already worked through. Counted at `pNNNN`
     granularity — a technique leg naming two solution indices of one problem is one problem,
     the same collapse the article's own Problems list makes.
     """
@@ -741,7 +741,7 @@ def _regen_articles(central: dict[str, Any], write: bool) -> tuple[list[str], li
     written: list[str] = []
     if write:
         for tag in central['tags']:
-            path = config.topics_dir / tag['facet'] / f"{tag['slug']}.md"
+            path = config.blogs_dir / tag['facet'] / f"{tag['slug']}.md"
             if not path.exists():
                 _create_article(path, tag)
                 written.append(_rel(path))
@@ -761,14 +761,14 @@ def _regen_articles(central: dict[str, Any], write: bool) -> tuple[list[str], li
 
 
 def _build_index(central: dict[str, Any]) -> dict[str, Any]:
-    """The article index (`topics/articles.json`): one row per page on disk.
+    """The article index (`blogs/articles.json`): one row per page on disk.
 
     Every tag has a page (`_regen_articles` creates it), so the index is built from the files
     rather than from the vocabulary — a row exists because a page does. Curated pages that are not
     a tag (`number-theory/primes`) join on the same footing. Each row carries the page's own
     `refs`, the same list the page's generated comment holds, so a consumer can rank or filter
     without re-deriving it from the vocabulary — plus the `solved`/`problems` pair derived
-    from those refs, which is what the web topics index shows as each card's subtitle — plus, for
+    from those refs, which is what the web blogs index shows as each card's subtitle — plus, for
     a final page, `covered`, the solved problems it drew on (see `_covered`), and `solved_after`,
     those solved since that it has not (see `_solved_after`). It is stored rather than recomputed
     per request: the derivation needs the whole vocabulary and the solved set, and the index is
@@ -784,7 +784,7 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
     rows: dict[str, dict[str, Any]] = {}
     for file in _iter_articles():
         text = file.read_text()
-        path = file.relative_to(config.topics_dir).with_suffix('').as_posix()
+        path = file.relative_to(config.blogs_dir).with_suffix('').as_posix()
         declared = _article_tags(text)
         refs = _article_refs(declared, by_slug)
         n_solved, n_problems = _article_counts(refs, solved)
@@ -800,13 +800,13 @@ def _build_index(central: dict[str, Any]) -> dict[str, Any]:
 
 def _write_index(index: dict[str, Any]) -> str:
     """The article index: compact (each row's tag list inline), one row per line."""
-    config.topics_index_file.write_text(dumps_compact(index) + '\n')
-    return _rel(config.topics_index_file)
+    config.blogs_index_file.write_text(dumps_compact(index) + '\n')
+    return _rel(config.blogs_index_file)
 
 
 def _load_index() -> dict[str, Any] | None:
     try:
-        data: dict[str, Any] = json.loads(config.topics_index_file.read_text())
+        data: dict[str, Any] = json.loads(config.blogs_index_file.read_text())
         return data
     except (OSError, json.JSONDecodeError):
         return None
@@ -816,8 +816,8 @@ def _load_index() -> dict[str, Any] | None:
 # solver skill writes a problem's `tags.json` and reconciles in the same pass, and a
 # contributor who cannot run this leaves the graph half-written every time they solve
 # something. The blast radius is their own branch, like every other `contributor` write verb:
-# what it reconciles is `topics/` and each problem's tag leg, which is exactly `git-commit`'s
-# `topics` target. Promoting a proposal into the central vocabulary still reaches master only
+# what it reconciles is `blogs/` and each problem's tag leg, which is exactly `git-commit`'s
+# `blogs` target. Promoting a proposal into the central vocabulary still reaches master only
 # through `gh-merge`, where a maintainer reads it.
 @register(requires='contributor')
 def update_tags(check: bool = False) -> int:
@@ -826,8 +826,8 @@ def update_tags(check: bool = False) -> int:
     Order (maintainer beats contributor): apply maintainer edits to the central
     vocabulary (vs HEAD) into the per-problem files first; promote `new-tags` proposals into
     the vocabulary; rebuild every central `refs` leg from the per-problem files; regenerate
-    the topic articles' problem lists and rewrite the article index `topics/articles.json`
-    (one row per writable topic: title, status, written date, solved/problem counts, tags, refs,
+    the blog articles' problem lists and rewrite the article index `blogs/articles.json`
+    (one row per writable blog: title, status, written date, solved/problem counts, tags, refs,
     the solved problems a final page covered when written, and those it has not), and name the
     final articles those later solves have overtaken — the rewrite candidates. A problem with
     notes but no `tags.json` is reported, not created here — the `claude-api tags` target (or
@@ -860,7 +860,7 @@ def update_tags(check: bool = False) -> int:
         issues = _validate(central, ptags)
         issues += _regen_articles(central, write=False)[0]   # nothing is written in a check run
         if _load_index() != _build_index(central):
-            issues.append(f'{config.topics_index_file.name} is out of date')
+            issues.append(f'{config.blogs_index_file.name} is out of date')
         if missing:
             issues.append(f'{len(missing)} problem(s) have no {config.tags_filename}')
         if issues:
@@ -898,7 +898,7 @@ def update_tags(check: bool = False) -> int:
     console.print('[accent]articles:[/accent] ' + ' · '.join(f'{by_status[s]} {s}' for s in STATUSES))
     stale = [a for a in index['articles'] if a['solved_after']]
     stale_line = (f'{len(stale)} final article(s) written before some of their problems were solved'
-                  ' (see `solved_after` in ' + _rel(config.topics_index_file) + ')')
+                  ' (see `solved_after` in ' + _rel(config.blogs_index_file) + ')')
     if stale:
         console.print(f'[accent]stale:[/accent] {stale_line}')
         # Most-overtaken first: the page that has missed the most solves gains most from a rewrite.
@@ -918,11 +918,11 @@ def update_tags(check: bool = False) -> int:
 _STALE_SHOWN = 10
 
 
-# ── curated topics ──────────────────────────────────────────────────────────────────────
+# ── curated blogs ──────────────────────────────────────────────────────────────────────
 
-#: A curated-topic path segment: lowercase words and hyphens, matching the web nested-page route
-#: (`euler_site.site.content._NAME_RE`), so a topic that is creatable here is also servable there.
-_TOPIC_SEG_RE = re.compile(r'[a-z0-9][a-z0-9-]*')
+#: A curated-blog path segment: lowercase words and hyphens, matching the web nested-page route
+#: (`euler_site.site.content._NAME_RE`), so a blog that is creatable here is also servable there.
+_BLOG_SEG_RE = re.compile(r'[a-z0-9][a-z0-9-]*')
 
 
 class Tag(NamedTuple):
@@ -939,7 +939,7 @@ class Tag(NamedTuple):
 
 @variable('the central tag vocabulary')
 def tags_() -> list[Tag]:
-    """Every tag in `topics/tags.json`, the authority a slug is checked against.
+    """Every tag in `blogs/tags.json`, the authority a slug is checked against.
 
     Named `tags_` so the decorator's trailing-underscore rule registers it as `{tags}`: the
     `tags` in this module is the command that reports on the vocabulary, and the variable is
@@ -957,21 +957,21 @@ def _path_is_creatable(bound: dict[str, Any]) -> bool:
     """
     path = str(bound.get('path') or '')
     segments = path.removesuffix('.md').strip('/').split('/')
-    if len(segments) < 2 or not all(_TOPIC_SEG_RE.fullmatch(s) for s in segments):
+    if len(segments) < 2 or not all(_BLOG_SEG_RE.fullmatch(s) for s in segments):
         return False
-    return not config.topics_dir.joinpath(*segments).with_suffix('.md').exists()
+    return not config.blogs_dir.joinpath(*segments).with_suffix('.md').exists()
 
 
 @register(requires='maintainer')
-def create_topic(path: str,
-                 *tags: Annotated[str, Ask('Which tags does it cover?', choices='tags',
-                                           multi=True, when=_path_is_creatable)]) -> int:
-    """Seed a curated cross-cutting topic page.
+def create_blog(path: str,
+                *tags: Annotated[str, Ask('Which tags does it cover?', choices='tags',
+                                          multi=True, when=_path_is_creatable)]) -> int:
+    """Seed a curated cross-cutting blog page.
 
-    A curated topic (e.g. `number-theory/primes`) gathers several tags under one idea,
+    A curated blog (e.g. `number-theory/primes`) gathers several tags under one idea,
     unlike a tag's own auto-generated page.
 
-    *path* is the `folder/leaf` the page lives at under `topics/`. Give the tag slugs as
+    *path* is the `folder/leaf` the page lives at under `blogs/`. Give the tag slugs as
     arguments to create non-interactively; give none and, in an interactive shell, pick them with
     a search-and-select prompt. Every slug must exist in the vocabulary. The page is seeded from
     the same template a tag page uses (its title is the leaf, title-cased — edit it when you
@@ -979,25 +979,25 @@ def create_topic(path: str,
     Problems section is filled. Write it with `claude-blog <path>`.
 
     Args:
-        path: The `folder/leaf` location under `topics/` (lowercase words and hyphens).
+        path: The `folder/leaf` location under `blogs/` (lowercase words and hyphens).
         *tags: [asked] The tag slugs the page covers. Omit them and, in an interactive
             shell, pick them by search-and-select over the vocabulary.
     """
     segments = path.removesuffix('.md').strip('/').split('/')
-    if len(segments) < 2 or not all(_TOPIC_SEG_RE.fullmatch(s) for s in segments):
+    if len(segments) < 2 or not all(_BLOG_SEG_RE.fullmatch(s) for s in segments):
         console.print('[error]error:[/error] path must be [accent]folder/leaf[/accent] '
                       '(lowercase words and hyphens), e.g. [accent]number-theory/primes[/accent]')
         return ExitCodes.EXIT_ERROR
-    target = config.topics_dir.joinpath(*segments).with_suffix('.md')
+    target = config.blogs_dir.joinpath(*segments).with_suffix('.md')
     if target.exists():
-        console.print(f'[error]error:[/error] {target.relative_to(config.topics_dir)} already exists')
+        console.print(f'[error]error:[/error] {target.relative_to(config.blogs_dir)} already exists')
         return ExitCodes.EXIT_ERROR
 
     if not tags:
         # Interactively the adapter has already asked; reaching here empty means a command
         # block, where a menu cannot be put and the slugs have to be written down.
         raise Abort('no tags given and not an interactive shell — pass the slugs as '
-                    f'arguments, e.g. `create-topic {path} prime-number '
+                    f'arguments, e.g. `create-blog {path} prime-number '
                     'sieve-of-eratosthenes`', rc=ExitCodes.EXIT_USAGE)
     chosen = list(dict.fromkeys(tags))               # de-dupe, keep order
     known = {tag.slug for tag in tags_()}
@@ -1009,10 +1009,10 @@ def create_topic(path: str,
     from solver.templates.engine import Templates, get_template
     body = get_template(Templates.ARTICLE).substitute(
         slug=', '.join(chosen), title=title, gen_open=_GEN_OPEN, gen_close=_GEN_CLOSE,
-        reference='Curated topic — draw the through-line across the tags below yourself.')
+        reference='Curated blog — draw the through-line across the tags below yourself.')
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(body)
-    console.print(f'[accent]created[/accent] {target.relative_to(config.topics_dir)} '
+    console.print(f'[accent]created[/accent] {target.relative_to(config.blogs_dir)} '
                   f'covering {len(chosen)} tag(s): {", ".join(chosen)}')
     rc = update_tags()  # index it and fill its Problems section
     console.print(f'[muted]write it with [accent]claude-blog {"/".join(segments)}[/accent][/muted]')

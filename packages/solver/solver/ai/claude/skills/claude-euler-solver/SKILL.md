@@ -174,7 +174,7 @@ Write and verify a Python solution, translate it to C, then document and summari
    *Problem Analysis* and *Solution Approach* only — no techniques or takeaways sections.
 8. **Tag.** Write/refresh the solution directory's `tags.json` per
    [convention_tags.md](docs/convention_tags.md): the problem's `domain`, each solution index's
-   `techniques`, and any `takeaways` — choosing slugs from the vocabulary in `topics/tags.json`
+   `techniques`, and any `takeaways` — choosing slugs from the vocabulary in `blogs/tags.json`
    and proposing anything genuinely new under `new-tags`. Write the file only; reconciling it
    into the central vocabulary is [Finalize](#phase-3--finalize-always-last)'s job, after
    `mark`, so the articles it regenerates carry this problem's solved marker.
@@ -213,7 +213,7 @@ report that this is a `solve` job, not a `review`. Then, in order:
 4. **`tags.json`.** Bring the solution directory's `tags.json` to
    [convention_tags.md](docs/convention_tags.md): confirm the `domain` fits the problem, each
    solution index's `techniques` reflect *that index's* code, and `takeaways` are genuinely
-   transferable — choosing slugs from `topics/tags.json` and proposing new ones only under
+   transferable — choosing slugs from `blogs/tags.json` and proposing new ones only under
    `new-tags`. Write the file only; [Finalize](#phase-3--finalize-always-last) reconciles it.
 
 ---
@@ -238,12 +238,12 @@ stop-and-report:
    unconfirmed solution is not finished work.
 3. **Reconcile the tag graph:** `solver "update-tags"`. It promotes any `new-tags`
    you proposed into the central vocabulary, rebuilds every `refs` leg from the
-   per-problem files, and regenerates the topic articles and `topics/articles.json`.
+   per-problem files, and regenerates the blog articles and `blogs/articles.json`.
 
    **After `mark`, and before the commit.** After, because the articles it
    regenerates carry each problem's solved marker — run it first and this problem
    still reads unsolved. Before, because `update-tags` commits its own output
-   (`topics/` and every problem's `tags.json`, both legs together and nothing else),
+   (`blogs/` and every problem's `tags.json`, both legs together and nothing else),
    so letting it go first means step 4 has only your solution left to stage.
 
    Then `solver "update-tags --check"` must exit `0`; fix whatever it names — an
@@ -296,5 +296,5 @@ found or done) and end the turn.
   goes for the three steps after it — a refused `mark`, a non-zero
   `update-tags --check`, or a failed commit stop the phase and get reported as they
   came back. Never work around one: no `--force`, no hand-edited `problems.json`,
-  no hand-edited `topics/tags.json`, no pushing or merging on the collaborator's
+  no hand-edited `blogs/tags.json`, no pushing or merging on the collaborator's
   behalf.

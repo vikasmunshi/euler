@@ -811,7 +811,7 @@
   // delegated, so it survives the htmx swap that brings the page in.
   //
   // The haystack is each thing's data-filter string, which carries more than its visible
-  // name: a topic's full path and facet, a guide's filename, a problem's number in both
+  // name: a blog's full path and facet, a guide's filename, a problem's number in both
   // the typed and the zero-padded form. It falls back to the element's text if the
   // attribute is ever absent.
   //
@@ -830,16 +830,16 @@
   //
   // The section strip is exempt. It is the page's own chrome, not its content: typing
   // `syn` on the terminal page narrows the guides, and must not blank out Solutions and
-  // Topics on the way.
+  // Blogs on the way.
   //
   // The count on the divider is the answer to what was typed: the total while the box is
   // empty, `matched / total` while a query is live.
   //
-  // The query is remembered for the browser session, per section: leaving /topics/ and
+  // The query is remembered for the browser session, per section: leaving /blogs/ and
   // coming back — by the nav, by the pane's back arrow, or by the drafts toggle, which is
-  // a second route (/topics/all) onto the same grid — restores the narrowed view rather
+  // a second route (/blogs/all) onto the same grid — restores the narrowed view rather
   // than silently reopening the whole tree, while the guides are never met pre-narrowed
-  // by something typed at the topics. sessionStorage, not localStorage: a filter is where
+  // by something typed at the blogs. sessionStorage, not localStorage: a filter is where
   // you are in a sitting, not a standing preference like the hidden terminal, so it dies
   // with the tab. Emptying the box forgets it.
   function filterKey(input) {
@@ -855,7 +855,7 @@
   }
 
   // ── folds ──────────────────────────────────────────────────────────────────
-  // The topics index's folders ([data-fold], topics.html) render open, and the ones you
+  // The blogs index's folders ([data-fold], blogs.html) render open, and the ones you
   // closed are remembered for the sitting, like the scroll and the filter beside them
   // (sessionStorage: where you are, not a standing preference), and re-folded as the page
   // arrives. A toggle made while a query is live is the filter's doing (it opens what it
@@ -934,7 +934,7 @@
         var groupCount = heading.querySelector('[data-group-count]');
         if (groupCount) { groupCount.textContent = visible; }
       }
-      // A topics folder (topics.html) is a <details> around its heading and grid: the whole
+      // A blogs folder (blogs.html) is a <details> around its heading and grid: the whole
       // fold goes with its cards, and a live query opens it — a match folded out of sight is
       // not a match. Opening it here is not the reader folding it (§ folds, below).
       var fold = box.closest('details[data-fold]');

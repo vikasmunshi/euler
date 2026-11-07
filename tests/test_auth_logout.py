@@ -60,7 +60,7 @@ class LogoutTests(_AuthAppCase):
 
     @unittest_run_loop
     async def test_logout_stays_on_a_public_page(self) -> None:
-        self.assertEqual(await self.logout_from('/topics/domain/repeating-decimal'), '/topics/domain/repeating-decimal')
+        self.assertEqual(await self.logout_from('/blogs/domain/repeating-decimal'), '/blogs/domain/repeating-decimal')
         self.assertEqual(await self.logout_from('/solutions/?status=x'), '/solutions/?status=x')
 
     @unittest_run_loop
@@ -113,8 +113,8 @@ class ResumeTests(_AuthAppCase):
 
 class ReturnPathTests(unittest.TestCase):
     def test_the_content_routes_and_home_are_kept(self) -> None:
-        for page in ('/', '/solutions/', '/solutions/0042/p0042_s0.py', '/docs/user-guide', '/topics/all',
-                     '/topics/domain/x', '/about/license', '/shell', '/docs/?q=1'):
+        for page in ('/', '/solutions/', '/solutions/0042/p0042_s0.py', '/docs/user-guide', '/blogs/all',
+                     '/blogs/domain/x', '/about/license', '/shell', '/docs/?q=1'):
             with self.subTest(page=page):
                 self.assertEqual(return_path(page, signed_in=False), page)
 
@@ -125,7 +125,7 @@ class ReturnPathTests(unittest.TestCase):
     def test_anything_else_goes_home(self) -> None:
         for raw in (None, '', 'solutions/', '//evil.example', '/\\evil.example', 'https://evil.example/',
                     '/login', '/auth/logout', '/terminal', '/ws', '/git', '/edit/solutions/', '/internal/status',
-                    '/solutionsx', '/topics\\x', '/docs/\nx', '/' + 'a' * 600):
+                    '/solutionsx', '/blogs\\x', '/docs/\nx', '/' + 'a' * 600):
             with self.subTest(raw=raw):
                 self.assertEqual(return_path(raw, signed_in=True), '/')
 

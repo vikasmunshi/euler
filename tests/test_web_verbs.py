@@ -4,7 +4,7 @@
 
 Every command the web UI types into the terminal must be a real command.
 
-The web shell is the front door: a menu verb, a git-chip action, or a topic Action does not
+The web shell is the front door: a menu verb, a git-chip action, or a blog Action does not
 call a handler — it types a command string into the PTY and lets the shell answer. So a rename
 like `gh-pr` → `gh-merge` that misses a template leaves a button that silently does nothing (the
 shell rejects the unknown command). This scans every terminal command the site can emit —
@@ -101,7 +101,7 @@ class HeaderChipShapeTests(unittest.TestCase):
         menu = self._template('_git_menu.html')
         reset = menu.index("'git-reset'")
         for earlier in ("'git-status --details'", "'git-sync'",
-                        "'git-commit solution docs topics'", "'git-push'", "'gh-merge merge'"):
+                        "'git-commit solution docs blogs'", "'git-push'", "'gh-merge merge'"):
             self.assertLess(menu.index(earlier), reset, earlier)
         # Exactly one verb call between the last separator and the reset row: its own.
         last_sep = menu[:reset].rindex('menu-sep')
@@ -109,7 +109,7 @@ class HeaderChipShapeTests(unittest.TestCase):
                          'the separator is the pause immediately before the undo')
 
     def test_the_git_rows_name_the_work_not_the_command(self) -> None:
-        """`git-commit solution docs topics` is a fine thing to run and a poor thing to call
+        """`git-commit solution docs blogs` is a fine thing to run and a poor thing to call
         a button. The command is on every row already (the macro renders it into `.cmd`), so
         the label is free to say which of the day's jobs this is — and has to, or the menu
         reads as a transcript of the shell rather than a way into it."""

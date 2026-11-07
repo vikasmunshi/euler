@@ -221,9 +221,9 @@ class ViewerTests(unittest.TestCase):
 
     def test_show_a_path_navigates_the_pane(self) -> None:
         with channel('web') as out:
-            self.assertEqual(viewer.show(self.problem, 'topics/'), ExitCodes.EXIT_OK)
+            self.assertEqual(viewer.show(self.problem, 'blogs/'), ExitCodes.EXIT_OK)
         [fields] = _sequences(out.getvalue())
-        self.assertEqual((fields[0], fields[2]), ('nav', 'topics/'))
+        self.assertEqual((fields[0], fields[2]), ('nav', 'blogs/'))
 
     def test_show_refuses_a_path_outside_the_pane_routes(self) -> None:
         with channel('web') as out:

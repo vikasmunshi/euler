@@ -17,7 +17,7 @@ Emit the problem's `tags.json` following the tag conventions above, with one exc
 follows from there being no solution: **assign `domain` tags only**.
 
 - `domain` - the subject matter, from the vocabulary above. Two to four slugs is typical; pick the
-  ones a reader searching for this topic would actually use, not every field the problem touches.
+  ones a reader searching for this blog would actually use, not every field the problem touches.
 - `takeaways` - always the empty list `[]`. A takeaway is what a *solution* teaches, and there is
   no solution yet.
 - `techniques` - always the empty object `{}`. Techniques attach to a solution index, and there

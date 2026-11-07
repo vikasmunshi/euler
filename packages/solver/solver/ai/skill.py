@@ -124,29 +124,29 @@ def claude_solve(
     return _run_skill(ctx, invocation, f'[accent]claude · {action}[/accent]')
 
 
-def _topic_index() -> list[dict[str, Any]]:
-    """The article index — `topics/articles.json`, maintained by `update-tags`.
+def _blog_index() -> list[dict[str, Any]]:
+    """The article index — `blogs/articles.json`, maintained by `update-tags`.
 
-    Empty when it has not been built yet; every reader here degrades to "no topics known"
+    Empty when it has not been built yet; every reader here degrades to "no blogs known"
     rather than failing, so a clone that has not run `update-tags` still works."""
     try:
-        data = json.loads(config.topics_index_file.read_text())
+        data = json.loads(config.blogs_index_file.read_text())
     except (OSError, json.JSONDecodeError):
         return []
     return list(data.get('articles', []))
 
 
-def _find_topic(topic: str) -> dict[str, Any] | None:
+def _find_blog(blog: str) -> dict[str, Any] | None:
     """The index row a `claude-blog` target names: a full `<folder>/<slug>` path (the way
     completion offers it) or a bare slug, with or without the `.md`."""
-    topic = topic.removesuffix('.md').strip('/')
-    rows = _topic_index()
-    return (next((r for r in rows if r['path'] == topic), None)
-            or next((r for r in rows if r['path'].rsplit('/', 1)[-1] == topic), None))
+    blog = blog.removesuffix('.md').strip('/')
+    rows = _blog_index()
+    return (next((r for r in rows if r['path'] == blog), None)
+            or next((r for r in rows if r['path'].rsplit('/', 1)[-1] == blog), None))
 
 
 class Article(NamedTuple):
-    """One writable topic: a tag's own page or a curated one, as the index records it."""
+    """One writable blog: a tag's own page or a curated one, as the index records it."""
 
     path: str
     status: str
@@ -167,50 +167,50 @@ class Article(NamedTuple):
         return Choice(self.path, self.leaf, f'{self.folder} · {self.problems} · {self.status}')
 
 
-@variable('every writable topic — the tag pages and the curated ones')
+@variable('every writable blog — the tag pages and the curated ones')
 def articles() -> list[Article]:
     """The article index, **sorted alphabetically**.
 
     Ranking by how much needs writing sounds helpful and is not: what a maintainer types is
-    the name of the topic they have in mind, and a list whose order shifts as pages get
+    the name of the blog they have in mind, and a list whose order shifts as pages get
     written is one you cannot learn.
     """
     return sorted((Article(row['path'], row['status'],
                            len({ref.split('_')[0] for ref in row.get('refs', [])}))
-                   for row in _topic_index()), key=lambda article: article.path)
+                   for row in _blog_index()), key=lambda article: article.path)
 
 
-def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """`claude-blog` targets: every topic in the article index, as its `<folder>/<slug>` path."""
+def _blog_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
+    """`claude-blog` targets: every blog in the article index, as its `<folder>/<slug>` path."""
     return [Completion(article.path, start_position=-len(incomplete), display=article.leaf,
                        display_meta=f'{article.folder} · {article.problems} · {article.status}')
             for article in articles() if incomplete in article.path]
 
 
-@register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions})
+@register(requires='maintainer', pass_ctx=True, completers={'blog': _blog_completions})
 def claude_blog(ctx: Context,
-                topic: Annotated[str, Ask('Which topic?', choices='articles',
-                                          empty='no topics indexed — run `update-tags`')],
+                blog: Annotated[str, Ask('Which blog?', choices='articles',
+                                         empty='no blogs indexed — run `update-tags`')],
                 additional_prompt: Annotated[str, Ask('Guidance for the writer — an angle, an '
                                                       'emphasis, a constraint — or Enter to '
                                                       'skip', skippable=True)] = '',
                 *, force: bool = False) -> int:
-    """Write (or flesh out) a topic article via the claude-euler-blogger skill.
+    """Write (or flesh out) a blog article via the claude-euler-blogger skill.
 
-    *topic* names what to write about: a tag's `<facet>/<slug>` path (e.g.
-    `technique/sieve-of-eratosthenes`), a bare tag slug, or a curated topic path
-    (`number-theory/primes`). Tab-completion offers every topic in the article index
-    (`topics/articles.json`), unwritten and most-referenced first.
+    *blog* names what to write about: a tag's `<facet>/<slug>` path (e.g.
+    `technique/sieve-of-eratosthenes`), a bare tag slug, or a curated blog path
+    (`number-theory/primes`). Tab-completion offers every blog in the article index
+    (`blogs/articles.json`), unwritten and most-referenced first.
     Launches Claude Code headless to research the covering problems and write the article
-    under `topics/`, then streams a live Markdown summary. Needs the `claude` CLI, signed in
+    under `blogs/`, then streams a live Markdown summary. Needs the `claude` CLI, signed in
     (`claude-login`).
 
-    A topic whose article the index reports as `final` is left alone — the skill marks a page
+    A blog whose article the index reports as `final` is left alone — the skill marks a page
     final when it is done writing it, and rewriting one is an explicit `--force`.
 
     Args:
         ctx: [injected] The live shell context; the decorator supplies it.
-        topic: [asked] The tag or topic to write about. Offered as a menu of the article
+        blog: [asked] The tag or blog to write about. Offered as a menu of the article
             index when omitted; completion offers the same set.
         additional_prompt: [asked] Extra free-text guidance for the writer. Asked for in an
             interactive shell when omitted — the web's Write / Rewrite actions type a bare
@@ -218,12 +218,12 @@ def claude_blog(ctx: Context,
             angle. Enter skips it. Defaults to empty.
         force: Rewrite the article even when it is already final. Defaults to False.
     """
-    entry = _find_topic(topic)
+    entry = _find_blog(blog)
     if entry is not None and entry['status'] == 'final' and not force:
         console.print(f'[muted]{entry["path"]} is already [accent]final[/accent] — '
                       f'use [accent]--force[/accent] to rewrite it.[/muted]')
         return ExitCodes.EXIT_OK
-    invocation = f'/claude-euler-blogger {topic} {additional_prompt}'.strip()
+    invocation = f'/claude-euler-blogger {blog} {additional_prompt}'.strip()
     return _run_skill(ctx, invocation, '[accent]claude · blog[/accent]')
 
 

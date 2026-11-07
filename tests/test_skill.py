@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `claude-blog` command's use of the article index (`topics/articles.json`):
+"""The `claude-blog` command's use of the article index (`blogs/articles.json`):
 target completion (unwritten first, curated pages included) and the `final` gate that
 keeps a finished article from being rewritten without `--force`.
 
@@ -38,23 +38,23 @@ _INDEX: list[dict[str, Any]] = [
 
 def _completions(incomplete: str) -> list[Completion]:
     """The command's completions for *incomplete* — always Completion objects, never bare strings."""
-    return [c for c in skill._topic_completions(cast(Any, None), incomplete) if isinstance(c, Completion)]
+    return [c for c in skill._blog_completions(cast(Any, None), incomplete) if isinstance(c, Completion)]
 
 
-class TopicCompletionTests(unittest.TestCase):
+class BlogCompletionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.enterContext(patch.object(skill, '_topic_index', lambda: _INDEX))
+        self.enterContext(patch.object(skill, '_blog_index', lambda: _INDEX))
 
     def _paths(self, incomplete: str = '') -> list[str]:
         return [c.text for c in _completions(incomplete)]
 
     def test_completions_are_alphabetical(self) -> None:
-        """Sorted by path, not by how much needs writing: a maintainer types the name of the topic
+        """Sorted by path, not by how much needs writing: a maintainer types the name of the blog
         they have in mind, and an order that shifts as pages get written cannot be learned."""
         self.assertEqual(self._paths(), ['domain/alpha', 'domain/beta', 'number-theory/primes',
                                          'technique/gamma'])
 
-    def test_curated_topics_are_offered_not_just_tag_pages(self) -> None:
+    def test_curated_blogs_are_offered_not_just_tag_pages(self) -> None:
         """A page that is no tag's own (`number-theory/primes`) is a completion like any other."""
         self.assertEqual(self._paths('number-theory'), ['number-theory/primes'])
         self.assertEqual(self._paths('prime'), ['number-theory/primes'])
@@ -77,25 +77,25 @@ class FinalGateTests(unittest.TestCase):
             self.launched.append(invocation)
             return ExitCodes.EXIT_OK
 
-        self.enterContext(patch.object(skill, '_topic_index', lambda: _INDEX))
+        self.enterContext(patch.object(skill, '_blog_index', lambda: _INDEX))
         self.enterContext(patch.object(skill, '_run_skill', _record))
 
-    def _blog(self, topic: str, prompt: str = '', *, force: bool = False) -> int:
-        return skill.claude_blog(cast(Any, None), topic, prompt, force=force)
+    def _blog(self, blog: str, prompt: str = '', *, force: bool = False) -> int:
+        return skill.claude_blog(cast(Any, None), blog, prompt, force=force)
 
-    def test_final_topic_is_left_alone(self) -> None:
+    def test_final_blog_is_left_alone(self) -> None:
         self.assertEqual(self._blog('number-theory/primes'), ExitCodes.EXIT_OK)
         self.assertEqual(self.launched, [])
 
-    def test_final_topic_named_by_bare_slug_is_also_gated(self) -> None:
+    def test_final_blog_named_by_bare_slug_is_also_gated(self) -> None:
         self.assertEqual(self._blog('primes'), ExitCodes.EXIT_OK)
         self.assertEqual(self.launched, [])
 
-    def test_force_rewrites_a_final_topic(self) -> None:
+    def test_force_rewrites_a_final_blog(self) -> None:
         self._blog('number-theory/primes', force=True)
         self.assertEqual(self.launched, ['/claude-euler-blogger number-theory/primes'])
 
-    def test_draft_and_unknown_topics_run(self) -> None:
+    def test_draft_and_unknown_blogs_run(self) -> None:
         self._blog('technique/gamma')
         self._blog('technique/not-in-the-index', 'keep it short')
         self.assertEqual(self.launched, ['/claude-euler-blogger technique/gamma',
@@ -113,7 +113,7 @@ class BlogPromptTests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.launched: list[str] = []
-        self.enterContext(patch.object(skill, '_topic_index', lambda: _INDEX))
+        self.enterContext(patch.object(skill, '_blog_index', lambda: _INDEX))
         self.enterContext(patch.object(skill, '_run_skill',
                                        lambda _c, inv, _t: self.launched.append(inv) or ExitCodes.EXIT_OK))
         self._saved_subject = config.subject

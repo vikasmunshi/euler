@@ -184,8 +184,8 @@ class Config:
     static_file_problems: Path = _DERIVED
     static_file_progress: Path = _DERIVED
     templates_dir: Path = _DERIVED
-    topics_dir: Path = _DERIVED
-    topics_index_file: Path = _DERIVED
+    blogs_dir: Path = _DERIVED
+    blogs_index_file: Path = _DERIVED
 
     # -- the scripts the solver drives ---------------------------------------------------
     scripts: Scripts = Scripts()
@@ -202,7 +202,7 @@ class Config:
         for name, derived in (
             ('backup_dir', self.root_dir / '.backup'),
             ('cache_dir', self.root_dir / '.cache'),
-            ('central_tags_file', self.root_dir / 'topics' / 'tags.json'),
+            ('central_tags_file', self.root_dir / 'blogs' / 'tags.json'),
             ('docs_dir', self.root_dir / 'docs'),
             ('env_file', secrets / 'env'),
             ('modules_file', self.package_dir / 'modules.csv'),
@@ -215,8 +215,8 @@ class Config:
             ('static_file_problems', self.root_dir / 'solutions' / 'problems.json'),
             ('static_file_progress', self.root_dir / 'solutions' / '.progress.html'),
             ('templates_dir', self.package_dir / 'templates'),
-            ('topics_dir', self.root_dir / 'topics'),
-            ('topics_index_file', self.root_dir / 'topics' / 'articles.json'),
+            ('blogs_dir', self.root_dir / 'blogs'),
+            ('blogs_index_file', self.root_dir / 'blogs' / 'articles.json'),
         ):
             if getattr(self, name) is _DERIVED:
                 setattr(self, name, derived)

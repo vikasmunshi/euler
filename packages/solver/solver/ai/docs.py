@@ -229,7 +229,7 @@ def enforce_facets(tags_json: str) -> tuple[str, list[str]]:
 def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """Generate a problem's tags.json (domain / per-index techniques / takeaways / new-tags).
 
-    The model chooses from the current vocabulary (`topics/tags.json`) and proposes new tags only
+    The model chooses from the current vocabulary (`blogs/tags.json`) and proposes new tags only
     via `new-tags`; the maintainer's `update-tags` promotes those and reconciles the central legs.
     Retries once with a strict-JSON reminder if the first response cannot be parsed.
 

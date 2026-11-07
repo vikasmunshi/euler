@@ -159,14 +159,14 @@ def edit(problem: Problem,
 #: The site routes `show <path>` may swap the pane to: its first segment must be one of
 #: these. Left out on purpose — `terminal` (the shell would frame itself), `git` (a
 #: header fragment, not a page) and `story` (the deck opens in a tab of its own).
-PANE_ROUTES: tuple[str, ...] = ('solutions', 'topics', 'docs', 'about', 'edit', 'account', 'shell')
+PANE_ROUTES: tuple[str, ...] = ('solutions', 'blogs', 'docs', 'about', 'edit', 'account', 'shell')
 
 
 def pane_path_error(path: str) -> str | None:
     """Why *path* is not a relative web path `show` may open, or None if it is.
 
     Shape first — relative, no `.`/`..` or empty segments (a trailing `/` is fine:
-    `topics/` is the canonical index), no query, fragment, backslash, whitespace or
+    `blogs/` is the canonical index), no query, fragment, backslash, whitespace or
     control characters — then the first segment must name a :data:`PANE_ROUTES`
     route. Whether the page exists is the site's to say: a miss is its 404, in the pane.
     """
@@ -183,15 +183,15 @@ def pane_path_error(path: str) -> str | None:
 
 
 def _pane_path_completions(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """Path completions for `show`: the pane routes, then topic pages under `topics/`.
+    """Path completions for `show`: the pane routes, then blog pages under `blogs/`.
 
-    The topic pages are the articles' paths under `topics/` without their `.md` — the
+    The blog pages are the articles' paths under `blogs/` without their `.md` — the
     route the site serves them at. The adapter prefix-filters them.
     """
-    if not incomplete.startswith('topics/'):
+    if not incomplete.startswith('blogs/'):
         return [f'{route}/' for route in PANE_ROUTES]
-    return sorted(f'topics/{name.removesuffix(".md")}'
-                  for name in iterdir_recursive(config.topics_dir, rt='str') if name.endswith('.md'))
+    return sorted(f'blogs/{name.removesuffix(".md")}'
+                  for name in iterdir_recursive(config.blogs_dir, rt='str') if name.endswith('.md'))
 
 
 @register(requires='reader', aliases=('open', 'view'), quietable=True,
@@ -208,13 +208,13 @@ def show(problem: Problem, path: str | None = None) -> int:
     browser to drive, the page opens in the viewer panel instead.
 
     When *path* is given, `show` opens that site page instead of the problem's —
-    `show topics/technique/concatenation`. The page ignores *problem*, but naming
-    one still makes it the current problem: `show 121 topics/…` selects 121.
+    `show blogs/technique/concatenation`. The page ignores *problem*, but naming
+    one still makes it the current problem: `show 121 blogs/…` selects 121.
 
     Args:
         problem: [problem] The problem to open (and select as the current problem).
-        path: A relative site path to open instead, e.g. `topics/technique/concatenation`.
-            Its first segment must be one of solutions, topics, docs, about, edit,
+        path: A relative site path to open instead, e.g. `blogs/technique/concatenation`.
+            Its first segment must be one of solutions, blogs, docs, about, edit,
             account or shell. Defaults to None, which opens the problem's page.
     """
     if path is not None and (why := pane_path_error(path)) is not None:

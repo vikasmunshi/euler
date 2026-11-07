@@ -99,7 +99,7 @@ class PublicSiteTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_a_visitor_can_browse_without_signing_in(self) -> None:
-        for path in ('/', '/solutions/', '/solutions/0001/', '/docs/', '/topics/', '/shell'):
+        for path in ('/', '/solutions/', '/solutions/0001/', '/docs/', '/blogs/', '/shell'):
             with self.subTest(path=path):
                 resp = await self.client.get(path)
                 self.assertEqual(resp.status, 200, path)
@@ -113,7 +113,7 @@ class PublicSiteTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_the_right_pane_is_the_sign_in_form(self) -> None:
-        body = await (await self.client.get('/topics/')).text()
+        body = await (await self.client.get('/blogs/')).text()
         self.assertIn('id="login-form"', body)                # the /login page's own form…
         self.assertIn('data-next-here', body)                 # …returning to the live page
         self.assertNotIn('autofocus', body)                   # …without taking the reader's focus

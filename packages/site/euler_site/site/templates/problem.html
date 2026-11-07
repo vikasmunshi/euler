@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ '%04d' % number }} · euler{% endblock %}
 {% block content %}
-{# One tag chip: a link to its /topics/<facet>/<slug> page when that page exists, else a plain
+{# One tag chip: a link to its /blogs/<facet>/<slug> page when that page exists, else a plain
    chip. Facet class colours it (domain / technique / takeaway). Defined *inside* the block:
    the htmx path renders this block alone, so a macro at template top level never exists there. #}
 {% macro chip(c) %}{% if c.url %}<a class="tag-chip {{ c.facet }}" href="{{ c.url }}" hx-get="{{ c.url }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><i class="tc-dot"></i>{{ c.name }}</a>{% else %}<span class="tag-chip {{ c.facet }}"><i class="tc-dot"></i>{{ c.name }}</span>{% endif %}{% endmacro %}
@@ -100,11 +100,11 @@
   {% include "_files.html" %}
   {% endif %}
 
-  {# B — the full structure: techniques keyed to each solution index, and the curated topic
+  {# B — the full structure: techniques keyed to each solution index, and the curated blog
      pages that cover this problem's tags. Sits at the end of the workbench, after the files. #}
   {% if tags and tags.has_tags %}
   <section class="panel tag-panel">
-    <h2>Tags &amp; topics</h2>
+    <h2>Tags &amp; blogs</h2>
     {% if tags.domain %}
     <div class="facet-row"><span class="facet-label">domain</span>
       <span class="taglist">{% for c in tags.domain %}{{ chip(c) }}{% endfor %}</span></div>
@@ -117,11 +117,11 @@
     <div class="facet-row"><span class="facet-label">takeaway</span>
       <span class="taglist">{% for c in tags.takeaways %}{{ chip(c) }}{% endfor %}</span></div>
     {% endif %}
-    {% if tags.topics %}
-    <div class="subrule"><h3>Topics</h3></div>
-    <div class="topic-cards">
-      {% for t in tags.topics %}
-      <a class="tcard" href="/topics/{{ t.name }}" hx-get="/topics/{{ t.name }}"
+    {% if tags.blogs %}
+    <div class="subrule"><h3>Blogs</h3></div>
+    <div class="blog-cards">
+      {% for t in tags.blogs %}
+      <a class="tcard" href="/blogs/{{ t.name }}" hx-get="/blogs/{{ t.name }}"
          hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
         <span class="lam">λ</span>
         <span class="tc-body"><span class="tc-name">{{ t.title }}</span>

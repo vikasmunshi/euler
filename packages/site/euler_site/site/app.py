@@ -117,7 +117,7 @@ def _sections(request: web.Request, here: str) -> dict[str, Any]:
 
     Every one of the five index pages opens with the same strip, so every one of them
     merges this into its context. *here* is one of `home` · `solutions` · `docs` ·
-    `topics` · `terminal` — the tile that wears the you-are-here mark instead of the
+    `blogs` · `terminal` — the tile that wears the you-are-here mark instead of the
     arrow. The auth tier renders the start page too and builds its own context, where
     this is simply absent: signed out there are no counts to show (no clone), and the
     strip falls back to the locked tiles and their prose.
@@ -203,6 +203,15 @@ def requires(capability: str) -> Callable[[_Handler], _Handler]:
 
 
 # ── path helpers ─────────────────────────────────────────────────────────────────────
+
+async def blogs_moved(request: web.Request) -> web.StreamResponse:
+    """`GET /topics…` and `GET /edit/topics…` — the old name of `/blogs`, kept for existing links.
+
+    The path only ever gains its new name, so the target stays on this site. Permanent, and
+    open to anyone: the page it lands on decides who may read it.
+    """
+    raise web.HTTPMovedPermanently(request.path_qs.replace('/topics', '/blogs', 1))
+
 
 async def redirect_slash(request: web.Request) -> web.StreamResponse:
     """301 a slashless GET to its canonical trailing-slash form (web-server-guide § The site)."""
@@ -348,7 +357,7 @@ async def solutions_index(request: web.Request) -> web.StreamResponse:
 
 def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
     """The problem-page context: statement · notes, a tag chip row, then the workbench
-    (test-cases · results · files · tags & topics) — shared by the GET view and the
+    (test-cases · results · files · tags & blogs) — shared by the GET view and the
     post-delete fragment. `tags` is the facet-grouped view model (content.problem_tag_view)."""
     config = request.app[CONFIG_KEY]
     repo_root = config.repo_root
@@ -488,7 +497,7 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def docs_index(request: web.Request) -> web.StreamResponse:
-    """`GET /docs/` — the docs index: a card grid per group, folding as the topics do."""
+    """`GET /docs/` — the docs index: a card grid per group, folding as the blogs do."""
     return render(request, 'docs.html', {
         'groups': content.list_doc_groups(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('docs', None)],
@@ -502,7 +511,7 @@ async def doc_file(request: web.Request) -> web.StreamResponse:
 
     Serves a file under the declared-readable content trees (the `docs` +
     `about` + `solutions` roots) — e.g. `packages/solver/solver/templates/new.py` linked
-    from a guide, or a `../solutions/…` file linked from a topic. Text renders in the viewer;
+    from a guide, or a `../solutions/…` file linked from a blog. Text renders in the viewer;
     other bytes are served raw. Anything outside those trees (or a traversal
     attempt) is 404, so the route can never read the wider `packages/solver/solver/` source
     or the key material.
@@ -608,11 +617,11 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
 
 
 @requires('reader')
-async def topics_index(request: web.Request) -> web.StreamResponse:
-    """`GET /topics/` — the topics index (card grid, one section per folder).
+async def blogs_index(request: web.Request) -> web.StreamResponse:
+    """`GET /blogs/` — the blogs index (card grid, one section per folder).
 
     Finished pages only. `update-tags` creates a skeleton for every tag, so the tree holds
-    a page per topic whether or not anyone has written it; a reader given all of them cannot
+    a page per blog whether or not anyone has written it; a reader given all of them cannot
     find the few that say something. Nothing here is marked `final` because everything is.
 
     The maintainer's way into the drafts is an Action, not a link on the page — page verbs live
@@ -621,68 +630,68 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
     repo_root = request.app[CONFIG_KEY].repo_root
     actions: list[Action] = []
     if _has(request, 'maintainer'):
-        actions.append(Action(label='Show drafts', kind='get', path='/topics/all'))
-    return render(request, 'topics.html', {
-        'groups': content.list_topic_groups(repo_root),
+        actions.append(Action(label='Show drafts', kind='get', path='/blogs/all'))
+    return render(request, 'blogs.html', {
+        'groups': content.list_blog_groups(repo_root),
         'total': len(content.load_problems(repo_root)),
-        'crumbs': [_HOME, ('topics', None)],
+        'crumbs': [_HOME, ('blogs', None)],
         'actions': actions,
-        **_sections(request, 'topics'),
+        **_sections(request, 'blogs'),
     }, block='content')
 
 
 @requires('maintainer')
-async def topics_all(request: web.Request) -> web.StreamResponse:
-    """`GET /topics/all` — every page, draft and final: the writing queue.
+async def blogs_all(request: web.Request) -> web.StreamResponse:
+    """`GET /blogs/all` — every page, draft and final: the writing queue.
 
     The maintainer's view of the same grid, where the status *is* the information, so the
     finished ones are marked. Registered ahead of the `{name:.+}` page route, which would
-    otherwise swallow it — the cost is that a topic may not be called `all`.
+    otherwise swallow it — the cost is that a blog may not be called `all`.
 
-    Like the reader's index, the cards come out by coverage — the reach each topic's tags
+    Like the reader's index, the cards come out by coverage — the reach each blog's tags
     have over the problem set, widest first — which for a queue is what to take next.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
-    return render(request, 'topics.html', {
-        'groups': content.list_topic_groups(repo_root, drafts=True),
+    return render(request, 'blogs.html', {
+        'groups': content.list_blog_groups(repo_root, drafts=True),
         'total': len(content.load_problems(repo_root)),
         'show_status': True,
-        'crumbs': [_HOME, ('topics', '/topics/'), ('all', None)],
-        'actions': [Action(label='Hide drafts', kind='get', path='/topics/')],
-        **_sections(request, 'topics'),
+        'crumbs': [_HOME, ('blogs', '/blogs/'), ('all', None)],
+        'actions': [Action(label='Hide drafts', kind='get', path='/blogs/')],
+        **_sections(request, 'blogs'),
     }, block='content')
 
 
 @requires('reader')
-async def topic_page(request: web.Request) -> web.StreamResponse:
-    """`GET /topics/{name}` — one rendered topic page."""
+async def blog_page(request: web.Request) -> web.StreamResponse:
+    """`GET /blogs/{name}` — one rendered blog page."""
     name = request.match_info['name']
     repo_root = request.app[CONFIG_KEY].repo_root
-    text = content.read_topic(repo_root, name)
+    text = content.read_blog(repo_root, name)
     if text is None:
-        raise web.HTTPNotFound(text=f'no topic called {html.escape(name)}')
+        raise web.HTTPNotFound(text=f'no blog called {html.escape(name)}')
     # The maintainer's verbs are Actions in the header, not controls on the page (web-server-guide
     # § The site). Which of Write/Rewrite appears is the page's own status — read from the file,
     # not the index, so a page written since the last update-tags is not offered a stale verb;
     # claude-blog refuses a final page without --force, so offering "Write" on one would decline.
     actions: list[Action] = []
     if _has(request, 'maintainer'):
-        actions.append(Action(label='Edit', kind='get', path=f'/edit/topics/{name}'))
-        if content.topic_status(text) == 'final':
+        actions.append(Action(label='Edit', kind='get', path=f'/edit/blogs/{name}'))
+        if content.blog_status(text) == 'final':
             actions.append(Action(label='Rewrite', kind='term', command=f'claude-blog {name} --force'))
         else:
             actions.append(Action(label='Write', kind='term', command=f'claude-blog {name}'))
-        actions.append(Action(label='Delete', kind='delete', path=f'/edit/topics/{name}',
+        actions.append(Action(label='Delete', kind='delete', path=f'/edit/blogs/{name}',
                               confirm=f'Delete {name}?'))
-    return render(request, 'topic.html', {
+    return render(request, 'blog.html', {
         'name': name,
-        # Collapse the generated Problems list (click to expand) — a topic-page
+        # Collapse the generated Problems list (click to expand) — a blog-page
         # presentation choice, so it wraps the rendered HTML, not the source article.
         # problems.json feeds the solved/total count on the fold summary.
         'body': content.collapse_problems(
-            content.render_markdown(text, route_base='/topics/', page_dir=posixpath.dirname(name)),
+            content.render_markdown(text, route_base='/blogs/', page_dir=posixpath.dirname(name)),
             content.load_problems(repo_root)),
-        'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
+        'crumbs': [_HOME, ('blogs', '/blogs/'), (name, None)],
         'actions': actions,
     }, block='content')
 
@@ -860,16 +869,16 @@ async def file_save(request: web.Request) -> web.StreamResponse:
 
 
 def _article_target(request: web.Request) -> tuple[str, Path]:
-    """Resolve an `/edit/topics/{name}` route to its on-disk article, path-safely.
+    """Resolve an `/edit/blogs/{name}` route to its on-disk article, path-safely.
 
-    Reuses :func:`content.read_topic`'s segment rules (word-and-hyphen only, confined to the
+    Reuses :func:`content.read_blog`'s segment rules (word-and-hyphen only, confined to the
     tree) by resolving through the same helper: a name it refuses to read is one we refuse to
     edit. The page must already exist — update-tags creates the skeleton, the editor edits it.
     """
     name = request.match_info['name']
-    if content.read_topic(request.app[CONFIG_KEY].repo_root, name) is None:
-        raise web.HTTPNotFound(text=f'no editable topic called {html.escape(name)}')
-    return name, request.app[CONFIG_KEY].repo_root / 'topics' / f'{name}.md'
+    if content.read_blog(request.app[CONFIG_KEY].repo_root, name) is None:
+        raise web.HTTPNotFound(text=f'no editable blog called {html.escape(name)}')
+    return name, request.app[CONFIG_KEY].repo_root / 'blogs' / f'{name}.md'
 
 
 def _article_context(name: str, text: str, status: str = '', ok: bool = True,
@@ -877,16 +886,16 @@ def _article_context(name: str, text: str, status: str = '', ok: bool = True,
     """The article-editor view context (the file editor's template, article-shaped path)."""
     return {
         'filename': name, 'text': text, 'language': 'markdown',
-        'action_path': f'/edit/topics/{name}',
+        'action_path': f'/edit/blogs/{name}',
         'status': status, 'ok': ok, 'diagnostics': diagnostics or [],
-        'crumbs': [_HOME, ('topics', '/topics/'), (name, f'/topics/{name}'), ('edit', None)],
+        'crumbs': [_HOME, ('blogs', '/blogs/'), (name, f'/blogs/{name}'), ('edit', None)],
         'actions': [Action(label='Save', kind='submit')],
     }
 
 
 @requires('maintainer')
 async def article_editor(request: web.Request) -> web.StreamResponse:
-    """`GET /edit/topics/{name}` — the Markdown editor for a topic article."""
+    """`GET /edit/blogs/{name}` — the Markdown editor for a blog article."""
     name, target = _article_target(request)
     text = target.read_text(encoding='utf-8', errors='replace')
     return render(request, 'edit_article.html', _article_context(name, text), block='content')
@@ -894,7 +903,7 @@ async def article_editor(request: web.Request) -> web.StreamResponse:
 
 @requires('maintainer')
 async def article_save(request: web.Request) -> web.StreamResponse:
-    """`POST /edit/topics/{name}` — gate against the on-disk original, write, editor block.
+    """`POST /edit/blogs/{name}` — gate against the on-disk original, write, editor block.
 
     The gate (:func:`~euler_site.site.validate.validate_article`) keeps the tags/status/refs
     comments that bind the page to the graph and refuses raw HTML in the prose; nothing is
@@ -923,23 +932,23 @@ async def article_save(request: web.Request) -> web.StreamResponse:
 
 @requires('maintainer')
 async def article_delete(request: web.Request) -> web.StreamResponse:
-    """`DELETE /edit/topics/{name}` — delete a topic article → the topics index.
+    """`DELETE /edit/blogs/{name}` — delete a blog article → the blogs index.
 
     Maintainer-only, mirroring :func:`file_delete`: the `.md` is unlinked, its row is
     pruned from the article index (:func:`content.drop_article`), and the response swaps the
-    `/topics/` index back into `#content` (the deleted page has none to stay on). The
+    `/blogs/` index back into `#content` (the deleted page has none to stay on). The
     :func:`_article_target` resolver 404s a name that does not resolve to an existing page.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     name, target = _article_target(request)
     target.unlink(missing_ok=True)
     content.drop_article(repo_root, name)
-    response = render(request, 'topics.html', {
-        'groups': content.list_topic_groups(repo_root),
-        'crumbs': [_HOME, ('topics', None)],
+    response = render(request, 'blogs.html', {
+        'groups': content.list_blog_groups(repo_root),
+        'crumbs': [_HOME, ('blogs', None)],
         'actions': [],
     }, block='content', fragment=True)
-    response.headers['HX-Push-Url'] = '/topics/'
+    response.headers['HX-Push-Url'] = '/blogs/'
     return response
 
 
@@ -987,7 +996,7 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
 #: with its `requires` floor (tests/test_web_channel.py holds these to the registry's).
 #:
 #: The order is by data flow. `summary` first: it is the import, and its `problems.json` is
-#: the deck's main input. `update-tags` next: it rewrites `topics/articles.json`, which the deck
+#: the deck's main input. `update-tags` next: it rewrites `blogs/articles.json`, which the deck
 #: counts. `update-presentation-data` last: it reads both, so it must see each already
 #: regenerated.
 #:
@@ -1064,15 +1073,16 @@ def _read_routes() -> list[web.RouteDef]:
         web.get(r'/solutions/{n:\d+}', redirect_slash),
         web.get(r'/solutions/{n:\d+}/', problem_page),
         web.get(r'/solutions/{n:\d+}/{filename:.+}', problem_file),
-        # docs + topics + about
+        # docs + blogs + about
         web.get('/docs', redirect_slash),
         web.get('/docs/', docs_index),
         web.get(r'/docs/file/{path:.+}', doc_file),   # before {name}: a multi-segment view
         web.get(r'/docs/{name}', doc_page),
-        web.get('/topics', redirect_slash),
-        web.get('/topics/', topics_index),
-        web.get('/topics/all', topics_all),         # before the catch-all, which would match it
-        web.get(r'/topics/{name:.+}', topic_page),  # {name} may be a nested folder/page path
+        web.get(r'/topics{tail:(/.*)?}', blogs_moved),
+        web.get('/blogs', redirect_slash),
+        web.get('/blogs/', blogs_index),
+        web.get('/blogs/all', blogs_all),         # before the catch-all, which would match it
+        web.get(r'/blogs/{name:.+}', blog_page),  # {name} may be a nested folder/page path
         web.get(r'/about/{name}', about_page),
         # the presentation deck: static files, opened in a tab of its own
         web.get('/story', redirect_slash),
@@ -1102,9 +1112,10 @@ def add_content_routes(app: web.Application, *, public: bool = False) -> None:
     app.add_routes([
         web.get('/git', git_chip),
         web.get('/terminal', terminal),
-        web.get(r'/edit/topics/{name:.+}', article_editor),
-        web.post(r'/edit/topics/{name:.+}', article_save),
-        web.delete(r'/edit/topics/{name:.+}', article_delete),
+        web.get(r'/edit/topics{tail:(/.*)?}', blogs_moved),
+        web.get(r'/edit/blogs/{name:.+}', article_editor),
+        web.post(r'/edit/blogs/{name:.+}', article_save),
+        web.delete(r'/edit/blogs/{name:.+}', article_delete),
         # account
         web.get('/account', account),
         web.get('/account/icon', account_icon),

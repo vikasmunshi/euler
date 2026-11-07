@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 #: The public paths, repo-relative: a file, or a directory taken whole.
 PUBLIC: tuple[str, ...] = (
     'README.md', 'LICENSE',
-    'docs/', 'topics/',
+    'docs/', 'blogs/',
     'solutions/public/', 'solutions/problems.json',
     # The code viewer's scope (/code/, euler_site.site.content.CODE_ROOTS — the two lists are
     # held together by tests/test_public_site.py). `packages/` takes in what the pages read

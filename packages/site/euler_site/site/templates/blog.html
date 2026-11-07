@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}ς euler — {{ name }}{% endblock %}
+{% block content %}
+{# Just the article. The back-step is the header breadcrumb (`blogs ›`), and the maintainer's
+   Edit / Write / Rewrite verbs are Actions in the header — page controls live there, not on the
+   page (web-server-guide § The site). #}
+<section class="panel">
+  <div class="doc-body">{{ body | safe }}</div>
+</section>
+{% endblock %}

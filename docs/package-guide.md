@@ -37,7 +37,7 @@ packages/
 | **euler-solver** | the shell (`shell`), the domain (`core`: problems, git, progress), keys and the vault (`crypto`), the AI commands (`ai`), the runners, templates, config, and the identity kernel (`auth`) |
 | **euler-site** | the content app (`euler_site.site`), the auth service (`euler_site.auth`), the shared service helpers (`cache`, `csp`, `store`, `unixhttp`, `envfile`), the auth pages' templates, and the static tree Caddy serves (`content/`) |
 | **euler-webshell** | the PTY service (`ws`), the per-user service (`user`), the message spool (`msg`), the web shell itself (`shell`: OSC, overlays, ticket identity, key distribution, `solver-host`), the collaborator roster (`roster`) and the `users` command (`users`) |
-| **euler-content** | `README.md`, `docs/`, `topics/`, `solutions/public/`, `solutions/problems.json` and the few package files the pages link to — never `solutions/private` (§4) |
+| **euler-content** | `README.md`, `docs/`, `blogs/`, `solutions/public/`, `solutions/problems.json` and the few package files the pages link to — never `solutions/private` (§4) |
 
 Dependencies point **one way**:
 
@@ -244,7 +244,7 @@ from one of two roots:
 | not signed in | `euler-site` (`EULER_SITE_PUBLIC=1`) — `build_public_app` | the installed `euler-content` tree | read routes only; no identity, no git, no terminal, no account, no writes |
 | signed in | their own `euler-user@<slug>` instance | their `~/euler` clone | everything, by profile |
 
-The docs, topics and public solutions are published unencrypted on GitHub anyway, so asking for
+The docs, blogs and public solutions are published unencrypted on GitHub anyway, so asking for
 a login to read them protected nothing. What the public site cannot show is structural, not a
 check: the content wheel holds no `solutions/private`, and its unit runs on a uid of its own with
 `ProtectHome=true` and AF_UNIX only, so no clone is visible to it. Caddy picks the root by the
@@ -261,7 +261,7 @@ in the repository's own layout, and `_version.py` stamped from the solver's vers
 **tracked** files under fixed public roots only — an untracked scratch file never ships — and
 refuses outright if anything under `solutions/private` would be included. `euler_content.root()`
 returns the installed tree, and the content readers take it exactly as they take a clone.
-Besides the docs, topics and public solutions, the roots take in the code the public site's code
+Besides the docs, blogs and public solutions, the roots take in the code the public site's code
 viewer shows (`/code/`: `packages/`, `scripts/` and the root config files — web server guide
 § 11.5, The code viewer), so the wheel is also the one copy of the code that page reads.
 

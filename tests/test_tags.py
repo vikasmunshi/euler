@@ -91,21 +91,21 @@ class TagReconcileTests(unittest.TestCase):
 class ArticleIndexTests(unittest.TestCase):
     """The article status comment, and the index update-tags builds from it.
 
-    Runs against a scratch `topics/` tree — config is pointed at it for the duration, so
+    Runs against a scratch `blogs/` tree — config is pointed at it for the duration, so
     the real one is never read or written."""
 
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        self.topics = Path(tmp.name)
-        saved = (config.topics_dir, config.topics_index_file)
-        config.topics_dir = self.topics
-        config.topics_index_file = self.topics / 'articles.json'
-        self.addCleanup(lambda: setattr(config, 'topics_index_file', saved[1]))
-        self.addCleanup(lambda: setattr(config, 'topics_dir', saved[0]))
+        self.blogs = Path(tmp.name)
+        saved = (config.blogs_dir, config.blogs_index_file)
+        config.blogs_dir = self.blogs
+        config.blogs_index_file = self.blogs / 'articles.json'
+        self.addCleanup(lambda: setattr(config, 'blogs_index_file', saved[1]))
+        self.addCleanup(lambda: setattr(config, 'blogs_dir', saved[0]))
 
     def _article(self, rel: str, text: str) -> None:
-        path = self.topics / rel
+        path = self.blogs / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
 
@@ -220,7 +220,7 @@ class ArticleIndexTests(unittest.TestCase):
         the page has been *written*."""
         central = _central()
         tags._regen_articles(central, write=True)
-        page = self.topics / 'domain' / 'beta.md'
+        page = self.blogs / 'domain' / 'beta.md'
         self.assertTrue(page.exists())
         text = page.read_text()
         self.assertIn('<!-- tags: [beta] -->', text)
@@ -254,37 +254,37 @@ class ArticleIndexTests(unittest.TestCase):
         self.assertNotEqual(tags._load_index(), tags._build_index(central))
 
 
-class _TopicCase(unittest.TestCase):
-    """A scratch `topics/` tree and a two-tag vocabulary, for everything `create-topic` does."""
+class _BlogCase(unittest.TestCase):
+    """A scratch `blogs/` tree and a two-tag vocabulary, for everything `create-blog` does."""
 
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         root = Path(tmp.name)
-        self.topics = root / 'topics'
-        self.topics.mkdir()
+        self.blogs = root / 'blogs'
+        self.blogs.mkdir()
         vocab = root / 'tags.json'
         vocab.write_text('{"version": 1, "facets": {}, "tags": ['
                          '{"slug": "prime-number", "facet": "domain", "name": "Prime number",'
                          ' "reference": null, "additional-references": [], "summary": "", "refs": []},'
                          '{"slug": "trial-division", "facet": "technique", "name": "Trial division",'
                          ' "reference": null, "additional-references": [], "summary": "", "refs": []}]}')
-        saved = (config.topics_dir, config.central_tags_file)
-        config.topics_dir = self.topics
+        saved = (config.blogs_dir, config.central_tags_file)
+        config.blogs_dir = self.blogs
         config.central_tags_file = vocab
         self.addCleanup(lambda: setattr(config, 'central_tags_file', saved[1]))
-        self.addCleanup(lambda: setattr(config, 'topics_dir', saved[0]))
+        self.addCleanup(lambda: setattr(config, 'blogs_dir', saved[0]))
         # the final reconcile is exercised elsewhere; here it would read the real problem tree
         self.enterContext(patch.object(tags, 'update_tags', lambda **k: 0))
 
     def _page(self, rel: str) -> Path:
-        return self.topics / f'{rel}.md'
+        return self.blogs / f'{rel}.md'
 
 
-class TagSelectionTests(_TopicCase):
-    """Picking the tags for a new topic — driven through the adapter, which is where it lives.
+class TagSelectionTests(_BlogCase):
+    """Picking the tags for a new blog — driven through the adapter, which is where it lives.
 
-    `create-topic`'s `*tags` used to hand-roll `dialogue.select` in the body; it now declares
+    `create-blog`'s `*tags` used to hand-roll `dialogue.select` in the body; it now declares
     `Ask(multi=True, choices='tags')`, so what is worth testing is the whole path: the
     variable supplies the vocabulary, the adapter runs the search-and-select, and the chosen
     slugs arrive as the command's trailing positionals.
@@ -302,7 +302,7 @@ class TagSelectionTests(_TopicCase):
     def _run(self, script: list[str], path: str = 'number-theory/primes') -> None:
         """Drive the command through the two seams every dialogue shares."""
         it = iter(script)
-        command = registry.resolve('create-topic')
+        command = registry.resolve('create-blog')
         assert command is not None
         with (patch.object(console, 'input', lambda *a, **k: next(it)),
               patch.object(dialogue, 'interactive', lambda: True)):
@@ -326,7 +326,7 @@ class TagSelectionTests(_TopicCase):
         self._run(['prime', '1', '1', 'prime', '1', 'done'])
         self.assertEqual(self._tags_of(), 'prime-number')
 
-    def test_quit_leaves_the_topic_uncreated(self) -> None:
+    def test_quit_leaves_the_blog_uncreated(self) -> None:
         self._run(['prime', '1', 'q'])
         self.assertFalse(self._page('number-theory/primes').exists())
 
@@ -344,28 +344,28 @@ class TagSelectionTests(_TopicCase):
         with (patch.object(console, 'input',
                            lambda *a, **k: self.fail('must not ask about a bad path')),
               patch.object(dialogue, 'interactive', lambda: True)):
-            command = registry.resolve('create-topic')
+            command = registry.resolve('create-blog')
             assert command is not None
             command.invoke(Context(argv=['primes']))
         self.assertFalse(self._page('primes').exists())
 
     def test_an_existing_page_is_never_asked_about_either(self) -> None:
-        (self.topics / 'number-theory').mkdir(parents=True, exist_ok=True)
-        (self.topics / 'number-theory' / 'primes.md').write_text('<!-- tags: [prime-number] -->\n')
+        (self.blogs / 'number-theory').mkdir(parents=True, exist_ok=True)
+        (self.blogs / 'number-theory' / 'primes.md').write_text('<!-- tags: [prime-number] -->\n')
         with (patch.object(console, 'input',
                            lambda *a, **k: self.fail('must not ask about a taken path')),
               patch.object(dialogue, 'interactive', lambda: True)):
-            command = registry.resolve('create-topic')
+            command = registry.resolve('create-blog')
             assert command is not None
             command.invoke(Context(argv=['number-theory/primes']))
         self.assertEqual(self._tags_of(), 'prime-number', 'the existing page is untouched')
 
 
-class CreateTopicTests(_TopicCase):
-    """The maintainer `create-topic` command: validation, and the seeded curated page."""
+class CreateBlogTests(_BlogCase):
+    """The maintainer `create-blog` command: validation, and the seeded curated page."""
 
     def test_creates_a_curated_page_with_all_its_tags(self) -> None:
-        rc = tags.create_topic('number-theory/primes', 'prime-number', 'trial-division')
+        rc = tags.create_blog('number-theory/primes', 'prime-number', 'trial-division')
         self.assertEqual(rc, 0)
         text = self._page('number-theory/primes').read_text()
         self.assertIn('<!-- tags: [prime-number, trial-division] -->', text)   # every tag, in order
@@ -374,16 +374,16 @@ class CreateTopicTests(_TopicCase):
         self.assertIn('<!-- problems (generated by update-tags) -->', text)    # the empty region
 
     def test_rejects_an_unknown_tag(self) -> None:
-        rc = tags.create_topic('number-theory/primes', 'prime-number', 'not-a-tag')
+        rc = tags.create_blog('number-theory/primes', 'prime-number', 'not-a-tag')
         self.assertNotEqual(rc, 0)
         self.assertFalse(self._page('number-theory/primes').exists())
 
     def test_rejects_a_bare_path(self) -> None:
-        self.assertNotEqual(tags.create_topic('primes', 'prime-number'), 0)
+        self.assertNotEqual(tags.create_blog('primes', 'prime-number'), 0)
 
     def test_refuses_to_clobber_an_existing_page(self) -> None:
-        self.assertEqual(tags.create_topic('number-theory/primes', 'prime-number'), 0)
-        rc = tags.create_topic('number-theory/primes', 'trial-division')
+        self.assertEqual(tags.create_blog('number-theory/primes', 'prime-number'), 0)
+        rc = tags.create_blog('number-theory/primes', 'trial-division')
         self.assertNotEqual(rc, 0)
         # the first page's single tag is untouched
         self.assertIn('[prime-number]', self._page('number-theory/primes').read_text())
@@ -391,7 +391,7 @@ class CreateTopicTests(_TopicCase):
     def test_non_interactive_without_tags_is_an_error(self) -> None:
         with patch.object(dialogue, 'interactive', lambda: False):
             with self.assertRaises(dialogue.Abort):
-                tags.create_topic('number-theory/primes')
+                tags.create_blog('number-theory/primes')
         self.assertFalse(self._page('number-theory/primes').exists())
 
 

@@ -28,7 +28,7 @@
     {% if browsable %}
     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
     <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
-    <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>
+    <a href="/blogs/" hx-get="/blogs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Blogs</a>
     {# Shell is two things at once, and this one item does both: it takes you to the
        shell in the right pane — showing it when it has been hidden to the footer, and
        focusing it either way (site.js), so the next keystroke lands there — and it swaps
@@ -40,7 +40,7 @@
     {% else %}
     <span class="is-locked" aria-disabled="true">Solutions</span>
     <span class="is-locked" aria-disabled="true">Docs</span>
-    <span class="is-locked" aria-disabled="true">Topics</span>
+    <span class="is-locked" aria-disabled="true">Blogs</span>
     <span class="is-locked" aria-disabled="true">Shell</span>
     {% endif %}
   </nav>

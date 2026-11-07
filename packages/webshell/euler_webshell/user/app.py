@@ -5,7 +5,7 @@
 `build_app` folds two surfaces onto one application:
 
 - **content** — the whole site route table, reused verbatim from
-  :func:`euler_site.site.app.install_content` (home, solutions, docs, topics,
+  :func:`euler_site.site.app.install_content` (home, solutions, docs, blogs,
   account, the edit routes). Nothing about those handlers is per-profile; they read
   the request's :class:`~solver.auth.subject.Subject` and gate on it.
 - **shell** — `GET /ws` attaches the browser terminal to *this user's* persistent

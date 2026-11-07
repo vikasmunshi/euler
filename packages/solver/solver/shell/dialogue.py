@@ -153,7 +153,7 @@ class Ask:
     skippable: bool = False
     #: Ask for **several** values through :func:`select` rather than one through
     #: :func:`choose` — the shape a `*args` parameter needs, and the only shape that suits a
-    #: vocabulary too long to read (`create-topic` picks from 654 tags). Needs options, so
+    #: vocabulary too long to read (`create-blog` picks from 654 tags). Needs options, so
     #: either `choices` or an annotation the adapter can enumerate.
     multi: bool = False
     #: Accept only a listed value, re-asking otherwise — so a bad id is caught here rather
