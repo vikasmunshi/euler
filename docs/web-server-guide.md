@@ -1502,7 +1502,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/solutions/` | `problems.json` as 10×10 century grids + summary | reader |
 | GET | `/solutions/{n}/` | statement, then test cases · results · files · notes | reader |
 | GET | `/solutions/{n}/{filename}` | one problem file | reader |
-| GET | `/docs/` · `/docs/{name}` | docs index (card grid) · a rendered doc | reader |
+| GET | `/docs/` · `/docs/{name}` | docs index (a card grid per group of `content.DOC_GROUPS`) · a rendered doc | reader |
 | GET | `/docs/file/{path}` | a doc-referenced repo file, from the readable roots only | reader |
 | GET | `/topics/` · `/topics/{name}` | topics index · a topic page (`{name}` may be a nested `folder/page` path) | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |

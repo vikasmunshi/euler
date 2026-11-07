@@ -19,7 +19,8 @@ __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'SectionState',
            'resolve_file', 'resolve_repo_file', 'load_json', 'result_rows', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'recolour_statement', 'plate_statement_images',
            'prepare_statement', 'STATEMENT_COLOURS', 'git_status', 'topic_status',
-           'list_docs', 'read_doc', 'shell_docs', 'command_catalogue', 'list_topics', 'list_topic_groups',
+           'list_docs', 'DOC_GROUPS', 'list_doc_groups',
+           'read_doc', 'shell_docs', 'command_catalogue', 'list_topics', 'list_topic_groups',
            'read_topic', 'drop_article',
            'problem_tag_view',
            'read_about', 'readme_html',
@@ -1046,6 +1047,38 @@ def list_docs(repo_root: Path) -> list[DocEntry]:
     entries.append(DocEntry(name='ai', heading='AI', title='AI reference'))
     readme = _readme_entry(repo_root)
     return ([readme] if readme else []) + sorted(entries, key=lambda e: e.name)
+
+
+#: The docs index's groups, by what kind of document each is, and each group's reading order:
+#: how to work with the project, the standards work is held to, what to look things up in, and
+#: how the hosted service is built and protected. A list rather than a folder, so that a guide's
+#: URL and every link to it stay put. `tests/test_site.py` holds it to `docs/`.
+DOC_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ('guides', ('readme', 'user-guide', 'solver-guide', 'developer-guide', 'package-guide', 'config-guide')),
+    ('conventions', ('convention_python_solution', 'convention_c_translation', 'convention_test_cases',
+                     'convention_documentation', 'convention_source_documentation', 'convention_tags')),
+    ('references', ('syntax', 'commands-catalogue', 'commands-index', 'tooling-reference', 'ai')),
+    ('ops', ('web-server-guide', 'authorizations', 'srp-guide', 'vault-guide', 'gitfilter-guide',
+             'secret-sharing-guide')),
+)
+
+
+def list_doc_groups(repo_root: Path) -> list[TopicGroup]:
+    """The docs index, in :data:`DOC_GROUPS`.
+
+    A guide the list does not name yet lands under `other`, so it can never drop off the page.
+    Under its group's heading a convention's card no longer needs to say that it is one.
+    """
+    entries = {entry.name: entry for entry in list_docs(repo_root)}
+    groups = []
+    for heading, names in DOC_GROUPS:
+        found = [entries.pop(name) for name in names if name in entries]
+        if found:
+            groups.append(TopicGroup(heading, heading, [
+                entry._replace(heading=entry.heading.removeprefix('Convention ')) for entry in found]))
+    if entries:
+        groups.append(TopicGroup('other', 'other', list(entries.values())))
+    return groups
 
 
 def _readme_entry(repo_root: Path) -> DocEntry | None:

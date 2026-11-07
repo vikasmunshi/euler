@@ -365,8 +365,8 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('/docs/ai', body)                     # the composed reference
         # card line 1 = the filename title-cased; line 2 = the markdown title
         self.assertIn('>User Guide<', body)
-        self.assertLess(body.index('/docs/commands-index'),  # sorted by filename…
-                        body.index('/docs/user-guide'))      # …commands- before user-
+        self.assertLess(body.index('/docs/user-guide'),      # by group, in reading order…
+                        body.index('/docs/commands-index'))  # …a guide before a reference
         resp = await self.client.get('/docs/user-guide', headers=_READER)
         self.assertEqual(resp.status, 200)
         page = await resp.text()
@@ -1045,6 +1045,30 @@ class TopicCardStatusTests(unittest.TestCase):
         body = self._render('final', total=950)
         self.assertIn('Generating and testing primes', body)
         self.assertNotIn('card-bar', body)
+
+
+class DocGroupsTests(unittest.TestCase):
+    """`content.DOC_GROUPS`: every document in exactly one group, and none lost."""
+
+    _REPO = Path(__file__).resolve().parents[1]
+
+    def test_every_document_has_one_group(self) -> None:
+        named = [name for _, names in content.DOC_GROUPS for name in names]
+        self.assertEqual(len(named), len(set(named)))
+        self.assertEqual(sorted(named), sorted(e.name for e in content.list_docs(self._REPO)))
+
+    def test_a_document_no_group_names_is_not_lost(self) -> None:
+        with tempfile.TemporaryDirectory() as tree:
+            (Path(tree) / 'docs').mkdir()
+            (Path(tree) / 'docs' / 'user-guide.md').write_text('# User\n')
+            (Path(tree) / 'docs' / 'brand-new.md').write_text('# New\n')
+            groups = {g.name: [e.name for e in g.entries] for g in content.list_doc_groups(Path(tree))}
+        self.assertEqual(groups['guides'], ['user-guide'])
+        self.assertEqual(groups['other'], ['brand-new'])
+
+    def test_a_convention_card_drops_the_word(self) -> None:
+        conventions = next(g for g in content.list_doc_groups(self._REPO) if g.name == 'conventions')
+        self.assertFalse([e for e in conventions.entries if 'Convention' in e.heading])
 
 
 class AccountIconTests(AioHTTPTestCase):

@@ -488,9 +488,9 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def docs_index(request: web.Request) -> web.StreamResponse:
-    """`GET /docs/` — the guides index (card grid)."""
+    """`GET /docs/` — the docs index: a card grid per group, folding as the topics do."""
     return render(request, 'docs.html', {
-        'entries': content.list_docs(request.app[CONFIG_KEY].repo_root),
+        'groups': content.list_doc_groups(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('docs', None)],
         **_sections(request, 'docs'),
     }, block='content')

@@ -69,7 +69,7 @@
   <span class="card-meta"><b>{{ sections.solved }}</b> of {{ sections.total }} solved</span>
   <span class="card-bar"><i style="width: {{ (100 * sections.solved / sections.total) | round(1) if sections.total else 0 }}%"></i></span>
 {% elif key == 'docs' %}
-  <span class="card-meta"><b>{{ sections.docs }}</b> guides</span>
+  <span class="card-meta"><b>{{ sections.docs }}</b> docs</span>
 {% elif key == 'topics' %}
   <span class="card-meta"><b>{{ sections.covered }}</b> of {{ sections.total }} covered</span>
   <span class="card-bar"><i style="width: {{ (100 * sections.covered / sections.total) | round(1) if sections.total else 0 }}%"></i></span>

@@ -4,23 +4,29 @@
 {% from "_divider.html" import divider with context %}
 {# The five-page layout (web-server-guide § The site): hero · section strip · divider ·
    content. #}
+{% set shown = groups | map(attribute='entries') | map('length') | sum %}
 <header class="hero">
   <p class="kicker">every guide is a shortcut somebody else already paid for</p>
   <h1>The guides</h1>
-  <p class="lede">{{ entries | length }} guides stand between you and the next
+  <p class="lede">{{ shown }} documents stand between you and the next
      unsolved problem. Read one, ignore the rest, feel briefly invincible.</p>
 </header>
 {% include "_sections.html" %}
-{{ divider('guides', count=entries | length, filter='Filter guides by name…') }}
-{# The tile (site.css § the tile), four to a row — the same object the topics index and
-   the century grids wear, in the filled register that says "the page's own things"
-   against the flat strip above. A guide has no count to show, so its supporting line is
-   prose: the page's own leading heading, under the filename. #}
-<nav class="cards" aria-label="Guides">
-  {% for e in entries %}
+{{ divider('docs', count=shown, filter='Filter docs by name…', folds=groups | length > 1) }}
+{# One fold per group of content.DOC_GROUPS, as the topics index has one per folder, and the
+   same behaviour with it: the filter narrows the cards and each heading's count, and opens
+   any fold it has a match in. The tile (site.css § the tile), four to a row. A document has
+   no count to show, so its supporting line is prose: the page's own leading heading, under
+   the filename. #}
+{% for g in groups %}
+<details class="fold topic-group" open data-fold="docs-{{ g.name }}">
+<summary class="subrule fold-summary"><h3>{{ g.heading }}</h3>
+  <span class="count" data-group-count>{{ g.entries | length }}</span></summary>
+<nav class="cards" aria-label="{{ g.heading }}">
+  {% for e in g.entries %}
   <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
-     data-filter="{{ e.name }} {{ e.heading }} {{ e.title }}">
+     data-filter="{{ e.name }} {{ g.heading }} {{ e.heading }} {{ e.title }}">
     <span class="card-head"><span class="card-ic">&sect;</span>
       <span class="card-title">{{ e.heading }}</span>
       <span class="card-go">&rarr;</span></span>
@@ -28,4 +34,6 @@
   </a>
   {% endfor %}
 </nav>
+</details>
+{% endfor %}
 {% endblock %}
