@@ -538,6 +538,21 @@ class ContentServiceTests(AioHTTPTestCase):
             remote = re.findall(r'(?:src|href)="(https?:[^"]+)"|url\(["\']?(https?:[^"\')]+)', text)
             self.assertEqual(remote, [], name)
 
+    def test_story_deck_motion_has_one_owner(self) -> None:
+        """The override reaches every animation: `motion.js` alone asks the system, it loads
+        first, and each reduced-motion rule stands aside for `.motion-on`."""
+        deck = Path(__file__).resolve().parents[1] / 'docs/presentation'
+        asking = [p.name for p in deck.glob('*.js') if 'prefers-reduced-motion' in p.read_text(encoding='utf-8')]
+        self.assertEqual(asking, ['motion.js'])
+        scripts = re.findall(r'<script src="([^"]+)"', (deck / 'index.html').read_text(encoding='utf-8'))
+        self.assertEqual(scripts[0], 'motion.js')
+        css = (deck / 'deck.css').read_text(encoding='utf-8')
+        blocks = re.findall(r'@media \(prefers-reduced-motion: reduce\) \{((?:[^{}]*\{[^{}]*\})+)\s*\}', css)
+        self.assertGreater(len(blocks), 0)
+        for block in blocks:
+            for selector in re.findall(r'([^{}]+)\{', block):
+                self.assertIn(':root:not(.motion-on)', selector)
+
     @unittest_run_loop
     async def test_composed_ai_doc(self) -> None:
         """Every skill under `skills/` composes in — the doc globs the directory rather than

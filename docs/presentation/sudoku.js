@@ -9,7 +9,6 @@
   'use strict';
 
   const SVG = 'http://www.w3.org/2000/svg';
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const fmt = n => n.toLocaleString('en-GB');
 
@@ -177,7 +176,7 @@
     function show(s, animate) {
       step = s;
       const my = ++token;
-      const moving = animate && !reduceMotion;
+      const moving = animate && !window.DECK_MOTION.reduced;
       [stepEl.textContent, detailEl.textContent] = CAPTIONS[s];
       tallyEl.textContent = '';
       boardLayer.classList.toggle('on', s <= 2);
@@ -253,7 +252,7 @@
     function show(s, animate) {
       step = s;
       const my = ++token;
-      const moving = animate && !reduceMotion;
+      const moving = animate && !window.DECK_MOTION.reduced;
       [stepEl.textContent, detailEl.textContent] = CAPTIONS[s];
       tallyEl.textContent = '';
       compare.hidden = s !== 2;

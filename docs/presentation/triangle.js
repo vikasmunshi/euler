@@ -7,7 +7,6 @@
   'use strict';
 
   const SVG = 'http://www.w3.org/2000/svg';
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const VIEW = 700;
   const ROWS = [[3], [7, 4], [2, 4, 6], [8, 5, 9, 3]];   // Problem 18's worked example
   const DEPTH = ROWS.length - 1;
@@ -156,7 +155,7 @@
     function show(s, animate) {
       step = s;
       const my = ++token;
-      const moving = animate && !reduceMotion;
+      const moving = animate && !window.DECK_MOTION.reduced;
       caption(s);
       tallyEl.textContent = '';
       const isBig = s === 2 || s === last;

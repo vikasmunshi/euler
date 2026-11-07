@@ -5,7 +5,6 @@
 (() => {
   'use strict';
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const POWER = 1000;
   const ATOM_DIGITS = 81;                     // about 10⁸⁰ atoms in the observable universe
   const pow2 = k => (2n ** BigInt(k)).toString();
@@ -118,7 +117,7 @@
     function show(s, animate) {
       step = s;
       const my = ++token;
-      const moving = animate && !reduceMotion;
+      const moving = animate && !window.DECK_MOTION.reduced;
       [stepEl.textContent, detailEl.textContent] = CAPTIONS[s];
       tallyEl.textContent = '';
       for (const l of layers) l.classList.remove('on', 'play');

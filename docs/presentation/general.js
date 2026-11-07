@@ -7,7 +7,6 @@
   'use strict';
 
   const SVG = 'http://www.w3.org/2000/svg';
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const HISTORY = window.HISTORY || { problems: [], project: {} };
   const problems = HISTORY.problems.map(([n, title, level, pct, solvers, solved, date]) => ({
     n, title, solvers: Number.isInteger(solvers) ? solvers : null, solved, date: date ? new Date(date) : null,
@@ -34,7 +33,7 @@
   /* A controller with steps 0..last, built from a show(step, animate) function. */
   function stepped(last, show, leave = () => {}) {
     let step = 0;
-    const go = (s, animate) => { step = s; show(s, animate && !reduceMotion); };
+    const go = (s, animate) => { step = s; show(s, animate && !window.DECK_MOTION.reduced); };
     return {
       enter(direction) { go(direction < 0 ? last : 0, direction >= 0); },
       leave,

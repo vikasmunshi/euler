@@ -5,7 +5,6 @@
   'use strict';
 
   const SVG = 'http://www.w3.org/2000/svg';
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const N = 100, COLS = 10, PITCH = 70, CELL = 62;
   const PRIMES = [2, 3, 5, 7];          // every prime up to √100
   const RACE_LIMIT = 2_000_000;         // Problem 10's bound
@@ -103,7 +102,7 @@
       step = s;
       token++;
       caption(s);
-      paint(Math.min(s, PRIMES.length + 1), animate && !reduceMotion);
+      paint(Math.min(s, PRIMES.length + 1), animate && !window.DECK_MOTION.reduced);
       slide.classList.toggle('racing', s === last);
       race.hidden = s !== last;
       if (s === last) runRace(token);

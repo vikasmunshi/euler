@@ -5,7 +5,6 @@
 
   const SVG = 'http://www.w3.org/2000/svg';
   const DAY = 86400000;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------------------------------------------------------------- data
 
@@ -113,7 +112,7 @@
     const countEl = slide.querySelector('[data-role="count"]');
     const interlude = slide.querySelector('[data-role="interlude"]');
     interlude.classList.remove('show');
-    if (reduceMotion || !solves.length) { timelineFinal(slide); return; }
+    if (window.DECK_MOTION.reduced || !solves.length) { timelineFinal(slide); return; }
     dateEl.textContent = fmtDay(solves[0].date);
     countEl.textContent = '0 solved';
     await sleep(700);
@@ -399,6 +398,20 @@
     if (ctrl) ctrl.replay(); else show(current);
   };
 
+  /* The override of a system's reduced motion (motion.js): offered only where there is one.
+     The slide replays, so the choice shows at once. */
+  const motionButton = document.getElementById('toggle-motion');
+  const paintMotion = () => {
+    motionButton.hidden = !window.DECK_MOTION.asked;
+    motionButton.setAttribute('aria-pressed', String(window.DECK_MOTION.forced));
+  };
+  const toggleMotion = () => {
+    if (!window.DECK_MOTION.asked) return;
+    window.DECK_MOTION.toggle();
+    paintMotion();
+    replay();
+  };
+
   /* The slide index: a thumbnail per slide, numbered, named by the slide's heading. */
   const slideTitle = slide => {
     if (slide.dataset.title) return slide.dataset.title;
@@ -474,6 +487,7 @@
         else if (!notes.hidden) showNotes(false);
         else return;
         break;
+      case 'm': case 'M': toggleMotion(); break;
       case 'r': case 'R': replay(); break;
       case 'f': case 'F':
         if (document.fullscreenElement) document.exitFullscreen();
@@ -488,6 +502,7 @@
   notesButton.addEventListener('click', () => showNotes(notes.hidden));
   document.getElementById('notes-close').addEventListener('click', () => showNotes(false));
   indexButton.addEventListener('click', () => showIndex(index.hidden));
+  motionButton.addEventListener('click', toggleMotion);
   document.getElementById('index-close').addEventListener('click', () => showIndex(false));
   // a click anywhere else closes the index, and leaves the focus with whatever was clicked
   document.addEventListener('click', e => {
@@ -510,6 +525,7 @@
     if (dx < 0) forward(); else back();
   }, { passive: true });
 
+  paintMotion();
   fillStats();
   buildIndex();  // after the stats: some headings carry them
   slides.forEach(s => { const render = RENDER[s.dataset.viz]; if (render) render(s); });

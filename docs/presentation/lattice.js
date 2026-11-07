@@ -6,7 +6,6 @@
   'use strict';
 
   const SVG = 'http://www.w3.org/2000/svg';
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const VIEW = 700;
   const ROUTES_2x2 = ['RRDD', 'RDRD', 'RDDR', 'DRRD', 'DRDR', 'DDRR'];
   const SIZE = 6;                         // the counted grid: 6 × 6 squares, 7 × 7 corners
@@ -107,7 +106,7 @@
 
     function show(s, animate) {
       step = s;
-      const moving = animate && !reduceMotion;
+      const moving = animate && !window.DECK_MOTION.reduced;
       if (moving) {                       // drop the animation classes so a replay restarts them
         routes.classList.remove('play');
         big.classList.remove('play');

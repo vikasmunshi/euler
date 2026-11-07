@@ -1534,7 +1534,10 @@ symlink escape), so anything else in the folder is not. Every response is a `Fil
 gets `no-cache` and the baseline CSP like any other file. The deck is written to fit that
 CSP — every script is a file, no inline `<script>`, and its fonts are bundled
 (`docs/presentation/fonts/`, SIL OFL) because `default-src 'self'` refuses a Google Fonts
-stylesheet; `test_story_deck_fits_the_csp` holds it there. The git middleware skips
+stylesheet; `test_story_deck_fits_the_csp` holds it there. It honours a system that asks for
+reduced motion, and only there offers a **Motion** button (key `M`) to override that for the
+deck alone; `motion.js` makes that one decision, and `test_story_deck_motion_has_one_owner` holds
+every script and stylesheet rule to it. The git middleware skips
 `/story/` like the static trees: a deck load is a dozen files, none of them wearing the chip.
 The data it shows (`data/history.js`) is what `update-presentation-data` last generated and committed —
 public metadata only, never an answer.
