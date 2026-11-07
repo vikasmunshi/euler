@@ -76,10 +76,10 @@ a profile on each channel.
 | `solver.core.summary` | `mark` |  | ✓ | ✓ | ✓ |
 | `solver.core.summary` | `progress` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.summary` | `summary` |  |  | ✓ | ✓ |
-| `solver.core.tags` | `create-blog` |  |  | ✓ | ✓ |
-| `solver.core.tags` | `tags` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `blog` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `blogs` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `create-blog` |  |  | ✓ | ✓ |
+| `solver.core.tags` | `tags` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `update-tags` |  | ✓ | ✓ | ✓ |
 | `solver.core.test_cases` | `test-cases` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `edit` |  | ✓ | ✓ | ✓ |

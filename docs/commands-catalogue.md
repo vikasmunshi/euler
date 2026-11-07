@@ -25,6 +25,8 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
 | [`?`](commands-index.md#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
 | [`benchmark`](commands-index.md#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. |
+| [`blog`](commands-index.md#command-blog) | — | `reader` | List a blog article's declared tags and what each one maps to. |
+| [`blogs`](commands-index.md#command-blogs) | — | `reader` | List a problem's tags and the blog articles that cover them. |
 | [`check-commands`](commands-index.md#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. |
 | [`claude`](commands-index.md#command-claude) | — | `contributor` | Run Claude Code interactively in the repository root, returning its exit code. |
 | [`claude-api`](commands-index.md#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
@@ -72,8 +74,6 @@ it supports `--silent`, what it asks for — is in its index entry, one click al
 | [`tags`](commands-index.md#command-tags) | — | `reader` | Report over the central tag vocabulary (`blogs/tags.json`). |
 | [`test-cases`](commands-index.md#command-test-cases) | — | `reader` | List a problem's test cases. |
 | [`tool-setup`](commands-index.md#command-tool-setup) | — | `contributor` | Install, uninstall or reinstall a per-user tool in your own home. |
-| [`blog`](commands-index.md#command-blog) | — | `reader` | List a blog article's declared tags and what each one maps to. |
-| [`blogs`](commands-index.md#command-blogs) | — | `reader` | List a problem's tags and the blog articles that cover them. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
 | [`update-models`](commands-index.md#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
 | [`update-presentation-data`](commands-index.md#command-update-presentation-data) | — | `maintainer` | Refresh the presentation deck's data from the progress file. |

@@ -54,6 +54,8 @@ a parameter that accepts repetition.
 | [`!`](#command--sh-bash) | `sh`, `bash` | `contributor` | Run a shell command from the shell, returning its exit code. |
 | [`?`](#command--help) | `help` | `reader` | List every command, or show detailed help for one command. |
 | [`benchmark`](#command-benchmark) | — | `contributor` | Measure and record the execution time of the problem's solutions. |
+| [`blog`](#command-blog) | — | `reader` | List a blog article's declared tags and what each one maps to. |
+| [`blogs`](#command-blogs) | — | `reader` | List a problem's tags and the blog articles that cover them. |
 | [`check-commands`](#command-check-commands) | — | `admin` | Report every command docstring that breaks the documented standard. |
 | [`claude`](#command-claude) | — | `contributor` | Run Claude Code interactively in the repository root, returning its exit code. |
 | [`claude-api`](#command-claude-api) | — | `contributor` | Generate one of a problem's solution artifacts through the Claude API. |
@@ -101,8 +103,6 @@ a parameter that accepts repetition.
 | [`tags`](#command-tags) | — | `reader` | Report over the central tag vocabulary (`blogs/tags.json`). |
 | [`test-cases`](#command-test-cases) | — | `reader` | List a problem's test cases. |
 | [`tool-setup`](#command-tool-setup) | — | `contributor` | Install, uninstall or reinstall a per-user tool in your own home. |
-| [`blog`](#command-blog) | — | `reader` | List a blog article's declared tags and what each one maps to. |
-| [`blogs`](#command-blogs) | — | `reader` | List a problem's tags and the blog articles that cover them. |
 | [`update-docs`](#command-update-docs) | — | `admin` | Rebuild the registry-generated blocks in the `docs/` guides and the README. |
 | [`update-models`](#command-update-models) | — | `admin` | Refresh the model catalogue and its pricing. |
 | [`update-presentation-data`](#command-update-presentation-data) | — | `maintainer` | Refresh the presentation deck's data from the progress file. |
@@ -271,6 +271,64 @@ benchmarks use it to repeat the fast cases and average out noise. Passing
 `disable_timeout` overrides this and forces a single run.
 
 *Defined in* `solver.core.evaluate.benchmark`.
+
+---
+
+#### Command: `blog`
+
+List a blog article's declared tags and what each one maps to.
+
+* ⚑ needs reader or above.
+* ✎ asks for anything you leave out.
+
+Reads the article's `<!-- tags: [...] -->` declaration and, for each slug, prints its
+facet and the problem/solution refs recorded on the central vocabulary's leg — the
+other half of the double-entry graph `update-tags` keeps in step. Fails when no article
+matches.
+
+**usage**
+
+```
+blog
+[name=<str>] (asked)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `name` | The article to report on: a `folder/leaf` path under `blogs/`, or a bare leaf name when it is unambiguous. Offered as a menu when omitted; not strict, so a leaf name still works. |
+
+*Defined in* `solver.core.tags.blog`.
+
+---
+
+#### Command: `blogs`
+
+List a problem's tags and the blog articles that cover them.
+
+* ⚑ needs reader or above.
+* ❏ uses/sets current problem.
+
+Reads the problem's own `tags.json` — grouping the tags by facet (domain, technique per
+solution index, takeaway) — then names every article under `blogs/` that declares any
+of them. Fails when the problem has no `tags.json`; `update-tags` reports which
+problems are missing one.
+
+**usage**
+
+```
+blogs
+[problem=<n>] (default current)
+```
+
+**arguments**
+
+| argument | description |
+|----------|-------------|
+| `problem` | The problem whose tags to list. |
+
+*Defined in* `solver.core.tags.blogs`.
 
 ---
 
@@ -2026,64 +2084,6 @@ tool-setup
 | `action` | 'install', 'uninstall', or 'reinstall' (uninstall, then install). Defaults to 'install'. |
 
 *Defined in* `solver.utils.scripts.tool_setup`.
-
----
-
-#### Command: `blog`
-
-List a blog article's declared tags and what each one maps to.
-
-* ⚑ needs reader or above.
-* ✎ asks for anything you leave out.
-
-Reads the article's `<!-- tags: [...] -->` declaration and, for each slug, prints its
-facet and the problem/solution refs recorded on the central vocabulary's leg — the
-other half of the double-entry graph `update-tags` keeps in step. Fails when no article
-matches.
-
-**usage**
-
-```
-blog
-[name=<str>] (asked)
-```
-
-**arguments**
-
-| argument | description |
-|----------|-------------|
-| `name` | The article to report on: a `folder/leaf` path under `blogs/`, or a bare leaf name when it is unambiguous. Offered as a menu when omitted; not strict, so a leaf name still works. |
-
-*Defined in* `solver.core.tags.blog`.
-
----
-
-#### Command: `blogs`
-
-List a problem's tags and the blog articles that cover them.
-
-* ⚑ needs reader or above.
-* ❏ uses/sets current problem.
-
-Reads the problem's own `tags.json` — grouping the tags by facet (domain, technique per
-solution index, takeaway) — then names every article under `blogs/` that declares any
-of them. Fails when the problem has no `tags.json`; `update-tags` reports which
-problems are missing one.
-
-**usage**
-
-```
-blogs
-[problem=<n>] (default current)
-```
-
-**arguments**
-
-| argument | description |
-|----------|-------------|
-| `problem` | The problem whose tags to list. |
-
-*Defined in* `solver.core.tags.blogs`.
 
 ---
 
