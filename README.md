@@ -379,6 +379,7 @@ packages/site/euler_site/         — euler-site: the content site and the auth 
     config.py                     — Content-service runtime configuration, read from the environment.
     content.py                    — Config-free readers for the content trees the service renders.
     gitstate.py                   — The header chip's git state: three reads of this user's clone, by need.
+    icons.py                      — The account icon: what a signed-in user wears on the account page and in the header.
     render.py                     — The full-page-vs-block render contract (§4.5).
     validate.py                   — The save gate: the checks every write passes.
 packages/webshell/euler_webshell/ — euler-webshell: the solver shell, extended for the browser and the web host (docs/package-guide.md).
