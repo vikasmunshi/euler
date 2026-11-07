@@ -329,8 +329,8 @@
 
   // ---------------------------------------------------------------- statement numbers
 
-  function fillStats() {
-    const set = (key, value) => document.querySelectorAll(`[data-stat="${key}"]`)
+  function fillStats(root = document) {
+    const set = (key, value) => root.querySelectorAll(`[data-stat="${key}"]`)
       .forEach(node => { node.textContent = value; });
     if (!solves.length) return;
     set('first-date', fmtLongDay(solves[0].date));
@@ -343,6 +343,7 @@
 
   const stage = document.getElementById('stage');
   const slides = [...stage.querySelectorAll('.slide')];
+  const blanks = slides.map(s => s.cloneNode(true));  // as written: what a thumbnail starts from
   const counter = document.getElementById('counter');
   const notes = document.getElementById('notes');
   const notesBody = document.getElementById('notes-body');
@@ -398,7 +399,7 @@
     if (ctrl) ctrl.replay(); else show(current);
   };
 
-  /* The slide index: an icon per slide, numbered, named by the slide's heading. */
+  /* The slide index: a thumbnail per slide, numbered, named by the slide's heading. */
   const slideTitle = slide => {
     if (slide.dataset.title) return slide.dataset.title;
     const heading = slide.querySelector('h1, h2, .statement');
@@ -411,6 +412,7 @@
     index.hidden = !on;
     indexButton.setAttribute('aria-pressed', String(on));
     indexTitle.textContent = INDEX_PROMPT;
+    if (on) addThumbnails();
     if (on) indexGrid.children[current].focus();
     else if (refocus) indexButton.focus();
   };
@@ -419,7 +421,7 @@
     const label = title ? `${i + 1}: ${title}` : `Slide ${i + 1}`;
     const icon = document.createElement('button');
     icon.type = 'button';
-    icon.textContent = i + 1;
+    icon.append(Object.assign(document.createElement('span'), { className: 'index-number', textContent: i + 1 }));
     icon.setAttribute('aria-label', label);
     if (slide.dataset.theme) icon.dataset.theme = slide.dataset.theme;
     // the panel's head names the slide under the pointer, or under the keyboard's focus
@@ -434,6 +436,27 @@
       if (i !== current) show(i);
     });
     indexGrid.append(icon);
+  });
+
+  /* A thumbnail is its slide drawn a second time, by the same code, so it can never fall behind
+     the slide and the slide itself is left alone. A stepped slide stands at its last step, the
+     one that shows what it is about. Built the first time the panel opens, so a load pays nothing,
+     and in the open panel, since a step can measure what it draws. Scaled by the stylesheet;
+     inert, so the links and controls it copies are not there to reach. */
+  const addThumbnails = () => blanks.splice(0).forEach((copy, i) => {
+    copy.classList.add('active');
+    copy.querySelectorAll('.notes').forEach(n => n.remove());
+    [copy, ...copy.querySelectorAll('[id]')].forEach(n => n.removeAttribute('id'));
+    const frame = document.createElement('div');
+    frame.className = 'index-thumb';
+    frame.inert = true;
+    frame.append(copy);
+    indexGrid.children[i].prepend(frame);
+    const ctrl = (window.DECK_PARTS || {})[copy.dataset.viz]?.(copy);
+    fillStats(copy);
+    RENDER[copy.dataset.viz]?.(copy);
+    if (copy.dataset.problems !== undefined) problemRef(copy, copy.dataset.problems.split(/\s+/).filter(Boolean));
+    ctrl?.jump(Infinity);
   });
 
   document.addEventListener('keydown', e => {

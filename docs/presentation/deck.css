@@ -300,15 +300,15 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .notes-body p:last-child { margin-bottom: 0; }
 .notes-body p.pn { padding: 10px 12px; background: #16233B; border-left: 3px solid var(--heat-1); border-radius: 4px; }
 
-/* The slide index: one icon per slide, in the deck's order, popped up over the nav buttons
+/* The slide index: one thumbnail per slide, in the deck's order, popped up over the nav buttons
    as the notes are. A panel, not a strip along the bottom: it covers nothing while closed,
    and its grid wraps to a phone's width. */
 .index-panel {
   position: fixed;
   left: 16px;
   bottom: 64px;
-  width: min(560px, calc(100vw - 32px));
-  max-height: min(60vh, calc(100vh - 96px));
+  width: min(860px, calc(100vw - 32px));
+  max-height: min(70vh, calc(100vh - 96px));
   display: flex;
   flex-direction: column;
   background: #0F1726F7;
@@ -322,18 +322,21 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
 .index-panel[hidden] { display: none; }
 .index-panel .notes-head span { text-transform: none; letter-spacing: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .index-grid {
+  --thumb-width: 132px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  grid-template-columns: repeat(auto-fill, var(--thumb-width));
+  grid-auto-rows: calc(var(--thumb-width) * 9 / 16);
+  justify-content: center;
   gap: 8px;
   padding: 12px;
   overflow: auto;
 }
 /* A small slide: the paper of the story, or the dark of the developer section. */
 .index-grid button {
-  aspect-ratio: 16 / 10;
-  min-height: 34px;
+  position: relative;
+  overflow: hidden;
   padding: 0;
-  font: 15px var(--sans);
+  font: 13px var(--sans);
   font-variant-numeric: tabular-nums;
   background: var(--paper);
   color: var(--ink);
@@ -342,6 +345,28 @@ h2 { font-size: 60px; line-height: 1.08; max-width: 22ch; }
   cursor: pointer;
 }
 .index-grid button[data-theme="dev"] { background: var(--dev-bg); color: var(--dev-text); border-color: var(--dev-border); }
+/* The slide's own size, scaled down to the button's width: a thumbnail is the slide itself. */
+.index-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1600px;
+  height: 900px;
+  transform: scale(calc(132 / 1600));
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.index-thumb * { animation: none !important; transition: none !important; }
+.index-number {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  min-width: 20px;
+  padding: 0 4px;
+  background: #0F1726D9;
+  color: #E8ECF2;
+  border-radius: 3px;
+}
 .index-grid button:hover { border-color: var(--heat-1); }
 .index-grid button:focus-visible { outline: 3px solid var(--heat-1); outline-offset: 1px; }
 .index-grid button[aria-current="true"] { border-color: var(--heat-1); box-shadow: 0 0 0 2px var(--heat-1); }
