@@ -847,10 +847,14 @@ def _page_title(text: str, fallback: str) -> str:
     return fallback
 
 
+#: The filenames title-casing gets wrong: an acronym, and two words written as one.
+_HEADINGS: dict[str, str] = {'srp-guide': 'SRP Guide', 'gitfilter-guide': 'Git Filter Guide'}
+
+
 def _filename_heading(stem: str) -> str:
     """A readable title from a filename stem: `_`/`-` → space, title-cased
-    (e.g. `convention_c_translation` → `Convention C Translation`)."""
-    return stem.replace('_', ' ').replace('-', ' ').title()
+    (e.g. `convention_c_translation` → `Convention C Translation`), or :data:`_HEADINGS`."""
+    return _HEADINGS.get(stem) or stem.replace('_', ' ').replace('-', ' ').title()
 
 
 def _list_pages(tree: Path) -> list[DocEntry]:

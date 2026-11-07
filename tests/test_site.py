@@ -1066,6 +1066,11 @@ class DocGroupsTests(unittest.TestCase):
         self.assertEqual(groups['guides'], ['user-guide'])
         self.assertEqual(groups['other'], ['brand-new'])
 
+    def test_the_filenames_title_casing_gets_wrong(self) -> None:
+        headings = {e.name: e.heading for e in content.list_docs(self._REPO)}
+        self.assertEqual(headings['srp-guide'], 'SRP Guide')
+        self.assertEqual(headings['gitfilter-guide'], 'Git Filter Guide')
+
     def test_a_convention_card_drops_the_word(self) -> None:
         conventions = next(g for g in content.list_doc_groups(self._REPO) if g.name == 'conventions')
         self.assertFalse([e for e in conventions.entries if 'Convention' in e.heading])
