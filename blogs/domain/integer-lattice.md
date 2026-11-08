@@ -193,5 +193,6 @@ them, but the three facts do the heavy lifting elsewhere.
 - ○ [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0984](/solutions/0984/) — Knights and Horses
+- ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->

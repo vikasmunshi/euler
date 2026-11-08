@@ -220,5 +220,6 @@ targets.
 - ○ [0756](/solutions/0756/) — Approximating a Sum
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0931](/solutions/0931/) — Totient Graph
+- ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->

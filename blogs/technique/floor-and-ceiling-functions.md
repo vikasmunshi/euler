@@ -119,6 +119,7 @@ The [domain page on the floor function](/blogs/domain/floor-function) collects t
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [0994](/solutions/0994/) — Counting Triangles
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
 
 <!-- /problems -->

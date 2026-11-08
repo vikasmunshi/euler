@@ -316,5 +316,6 @@ factor. Here the first stage's strike order already provides them, so no second 
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
+- ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->

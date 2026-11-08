@@ -269,5 +269,6 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0984](/solutions/0984/) — Knights and Horses
+- ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->

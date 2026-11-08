@@ -475,6 +475,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
+- ● [0994](/solutions/0994/) — Counting Triangles
 - ● [1001](/solutions/1001/) — Connections I
 
 <!-- /problems -->

@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Combinatorial_
 ## Problems
 
 - ● [0957](/solutions/0957/) — Point Genesis
-- ○ [0994](/solutions/0994/) — Counting Triangles
+- ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->
