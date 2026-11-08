@@ -242,6 +242,7 @@ one's distribution separately and convolve.
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0866](/solutions/0866/) — Tidying Up B
+- ● [0930](/solutions/0930/) — The Gathering
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [1010](/solutions/1010/) — March of the Penguins
 

@@ -246,6 +246,7 @@ benchmark reflects the real cost.
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
+- ● [0930](/solutions/0930/) — The Gathering
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->

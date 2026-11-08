@@ -192,5 +192,6 @@ state the invariant that makes a class a class, and check that the boundary enfo
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0778](/solutions/0778/) — Freshman's Product
+- ● [0930](/solutions/0930/) — The Gathering
 
 <!-- /problems -->

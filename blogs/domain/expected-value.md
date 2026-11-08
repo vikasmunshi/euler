@@ -241,7 +241,7 @@ that read the same thing contribute the same amount, and can be counted together
 - ○ [0869](/solutions/0869/) — Prime Guessing
 - ○ [0898](/solutions/0898/) — Claire Voyant
 - ○ [0901](/solutions/0901/) — Well Drilling
-- ○ [0930](/solutions/0930/) — The Gathering
+- ● [0930](/solutions/0930/) — The Gathering
 - ○ [0959](/solutions/0959/) — Asymmetric Random Walk
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping

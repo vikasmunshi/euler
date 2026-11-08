@@ -366,6 +366,7 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0882](/solutions/0882/) — Removing Bits
+- ● [0930](/solutions/0930/) — The Gathering
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2

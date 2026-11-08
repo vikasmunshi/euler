@@ -194,7 +194,7 @@ For the machinery these problems share with non-positional processes, see
 - ○ [0683](/solutions/0683/) — The Chase II
 - ○ [0697](/solutions/0697/) — Randomly Decaying Sequence
 - ○ [0807](/solutions/0807/) — Loops of Ropes
-- ○ [0930](/solutions/0930/) — The Gathering
+- ● [0930](/solutions/0930/) — The Gathering
 - ○ [0959](/solutions/0959/) — Asymmetric Random Walk
 - ○ [0970](/solutions/0970/) — Kangaroo Hopping over Sixes
 - ○ [0978](/solutions/0978/) — Random Walk Skewness

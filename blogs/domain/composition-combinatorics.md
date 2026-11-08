@@ -121,6 +121,7 @@ on part sizes, run lengths or symmetry.
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
+- ● [0930](/solutions/0930/) — The Gathering
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0996](/solutions/0996/) — Overtakes
 
