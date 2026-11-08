@@ -616,7 +616,7 @@ of crossing it.
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
 - ○ [0928](/solutions/0928/) — Cribbage
 - ○ [0930](/solutions/0930/) — The Gathering
-- ○ [0936](/solutions/0936/) — Peerless Trees
+- ● [0936](/solutions/0936/) — Peerless Trees
 - ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ○ [0948](/solutions/0948/) — Left vs Right

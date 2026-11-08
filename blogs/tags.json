@@ -805,7 +805,7 @@
       "reference": "https://en.wikipedia.org/wiki/Degree_(graph_theory)",
       "additional-references": [],
       "summary": "The number of edges incident to a vertex, and the degree sequences a graph or multigraph can realise.",
-      "refs": ["p0996"]
+      "refs": ["p0936", "p0996"]
     },
     {
       "slug": "derangement",
@@ -4297,7 +4297,7 @@
       "reference": "https://en.wikipedia.org/wiki/Dynamic_programming",
       "additional-references": ["https://en.wikipedia.org/wiki/Dynamic_programming#Bottom-up_approach"],
       "summary": "",
-      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0150_s0", "p0151_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0232_s0", "p0240_s0", "p0249_s0", "p0252_s0", "p0253_s0", "p0259_s0", "p0269_s0", "p0290_s0", "p0301_s0", "p0333_s0", "p0345_s0", "p0395_s0", "p0400_s0", "p0475_s0", "p0549_s0", "p0637_s0", "p0642_s0", "p0679_s0", "p0682_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0866_s0", "p0882_s0", "p0885_s0", "p0938_s0", "p0951_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p0988_s0", "p0996_s0", "p1000_s0", "p1001_s0"]
+      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0150_s0", "p0151_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0232_s0", "p0240_s0", "p0249_s0", "p0252_s0", "p0253_s0", "p0259_s0", "p0269_s0", "p0290_s0", "p0301_s0", "p0333_s0", "p0345_s0", "p0395_s0", "p0400_s0", "p0475_s0", "p0549_s0", "p0637_s0", "p0642_s0", "p0679_s0", "p0682_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0866_s0", "p0882_s0", "p0885_s0", "p0936_s0", "p0938_s0", "p0951_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p0988_s0", "p0996_s0", "p1000_s0", "p1001_s0"]
     },
     {
       "slug": "eisenstein-integer",
@@ -4954,7 +4954,7 @@
       "reference": "https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0290_s0", "p0293_s0", "p0297_s0", "p0303_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0457_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0510_s0", "p0521_s0", "p0531_s0", "p0539_s0", "p0545_s0", "p0551_s0", "p0555_s0", "p0565_s0", "p0565_s1", "p0612_s0", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0659_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0839_s0", "p0853_s0", "p0862_s0", "p0866_s0", "p0875_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0935_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0955_s0", "p0957_s0", "p0963_s0", "p0967_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
+      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0080_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0180_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0233_s0", "p0234_s0", "p0236_s0", "p0241_s0", "p0248_s0", "p0250_s0", "p0255_s0", "p0259_s0", "p0271_s0", "p0272_s0", "p0276_s0", "p0277_s0", "p0288_s0", "p0290_s0", "p0293_s0", "p0297_s0", "p0303_s0", "p0304_s0", "p0304_s1", "p0319_s0", "p0351_s0", "p0359_s0", "p0387_s0", "p0457_s0", "p0473_s0", "p0487_s0", "p0493_s0", "p0510_s0", "p0521_s0", "p0531_s0", "p0539_s0", "p0545_s0", "p0551_s0", "p0555_s0", "p0565_s0", "p0565_s1", "p0612_s0", "p0615_s0", "p0632_s0", "p0641_s0", "p0650_s0", "p0659_s0", "p0686_s0", "p0698_s0", "p0731_s0", "p0745_s0", "p0839_s0", "p0853_s0", "p0862_s0", "p0866_s0", "p0875_s0", "p0882_s0", "p0926_s0", "p0932_s0", "p0934_s0", "p0935_s0", "p0936_s0", "p0943_s0", "p0944_s0", "p0950_s0", "p0951_s0", "p0955_s0", "p0957_s0", "p0963_s0", "p0967_s0", "p0974_s0", "p0996_s0", "p1000_s0"]
     },
     {
       "slug": "int64",
@@ -5098,7 +5098,7 @@
       "reference": "https://en.wikipedia.org/wiki/Knapsack_problem",
       "additional-references": ["https://en.wikipedia.org/wiki/Knapsack_problem#Unbounded_knapsack_problem"],
       "summary": "",
-      "refs": ["p0181_s0", "p0201_s0", "p0249_s0", "p0682_s0"]
+      "refs": ["p0181_s0", "p0201_s0", "p0249_s0", "p0682_s0", "p0936_s0"]
     },
     {
       "slug": "kruskals-algorithm",
@@ -5587,6 +5587,15 @@
       "refs": ["p0176_s0", "p0233_s0"]
     },
     {
+      "slug": "multiset-coefficient",
+      "facet": "technique",
+      "name": "Multiset coefficient",
+      "reference": "https://en.wikipedia.org/wiki/Multiset",
+      "additional-references": [],
+      "summary": "Choosing j items with repetition from b kinds in C(b + j - 1, j) ways.",
+      "refs": ["p0936_s0"]
+    },
+    {
       "slug": "namedtuple",
       "facet": "technique",
       "name": "NamedTuple",
@@ -5693,6 +5702,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0010_s2", "p0037_s0", "p0077_s0", "p0077_s1", "p0125_s0", "p0145_s0", "p0152_s0", "p0153_s0", "p0155_s0", "p0208_s0", "p0259_s0", "p0269_s0", "p0551_s0", "p0755_s0", "p0943_s0"]
+    },
+    {
+      "slug": "otters-dissimilarity-theorem",
+      "facet": "technique",
+      "name": "Otter's dissimilarity theorem",
+      "reference": "https://en.wikipedia.org/wiki/Otter%27s_theorem",
+      "additional-references": [],
+      "summary": "Counting unrooted trees as vertex-rooted minus edge-rooted plus symmetric-edge-rooted ones.",
+      "refs": ["p0936_s0"]
     },
     {
       "slug": "parallel-array",
@@ -6881,6 +6899,15 @@
       "additional-references": [],
       "summary": "Generators/laziness win on memory, not on a tight numeric loop.",
       "refs": ["p0001", "p0020", "p0074", "p0077", "p0104", "p0143", "p0501"]
+    },
+    {
+      "slug": "root-it-then-correct-the-overcount",
+      "facet": "takeaway",
+      "name": "Root it, then correct the overcount",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Unrooted objects are hard to count directly; count a rooted version, where recursion is natural, then subtract the overcount.",
+      "refs": ["p0936"]
     },
     {
       "slug": "run-the-process-backwards",
