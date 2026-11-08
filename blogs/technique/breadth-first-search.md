@@ -111,5 +111,6 @@ transition. Here BFS is used for its layer-completeness guarantee.
 - ● [0303](/solutions/0303/) — Multiples with Small Digits
 - ● [0387](/solutions/0387/) — Harshad Numbers
 - ● [0679](/solutions/0679/) — Freefarea
+- ● [1002](/solutions/1002/) — Connections II
 
 <!-- /problems -->

@@ -250,6 +250,6 @@ optimisation inside the loop.
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [0893](/solutions/0893/) — Matchsticks
 - ○ [0966](/solutions/0966/) — Triangle Circle Intersection
-- ○ [1002](/solutions/1002/) — Connections II
+- ● [1002](/solutions/1002/) — Connections II
 
 <!-- /problems -->
