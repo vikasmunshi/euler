@@ -8052,8 +8052,8 @@
     "level": 36,
     "pct": 91,
     "solvers": 199,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 12:12"
   },
   "1008": {
     "title": "Functional Inverse",
