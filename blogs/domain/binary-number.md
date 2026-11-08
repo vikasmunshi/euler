@@ -216,7 +216,6 @@ never shows.
 - ○ [0734](/solutions/0734/) — A Bit of Prime
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators
-- ○ [0767](/solutions/0767/) — Window into a Matrix II
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
 - ○ [0810](/solutions/0810/) — XOR-Primes

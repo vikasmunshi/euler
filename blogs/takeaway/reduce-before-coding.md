@@ -572,6 +572,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0778](/solutions/0778/) — Freshman's Product

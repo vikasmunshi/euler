@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fast_Fourier_t
 ## Problems
 
 - ● [0529](/solutions/0529/) — $10$-substrings
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 
 <!-- /problems -->

@@ -238,6 +238,7 @@ one's distribution separately and convolve.
 - ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
 - ● [0743](/solutions/0743/) — Window into a Matrix
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0866](/solutions/0866/) — Tidying Up B

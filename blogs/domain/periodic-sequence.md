@@ -152,6 +152,7 @@ They differ where the languages offer different shortcuts:
 - ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ○ [0729](/solutions/0729/) — Range of Periodic Sequence
 - ● [0743](/solutions/0743/) — Window into a Matrix
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 - ○ [0843](/solutions/0843/) — Periodic Circles
 - ○ [0908](/solutions/0908/) — Clock Sequence II
 - ○ [0947](/solutions/0947/) — Fibonacci Residues

@@ -156,6 +156,5 @@ The algorithms match; the differences are in arithmetic width and modular reduct
 - ○ [0654](/solutions/0654/) — Neighbourly Constraints
 - ● [0670](/solutions/0670/) — Colouring a Strip
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
-- ○ [0767](/solutions/0767/) — Window into a Matrix II
 
 <!-- /problems -->

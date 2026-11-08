@@ -391,6 +391,7 @@ disguise, so collapse the base first and exponentiate second.
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0822](/solutions/0822/) — Square the Smallest
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game

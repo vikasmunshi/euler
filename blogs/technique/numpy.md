@@ -546,6 +546,7 @@ both slower and harder to read.
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0921](/solutions/0921/) — Golden Recurrence

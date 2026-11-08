@@ -534,7 +534,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators
-- ○ [0767](/solutions/0767/) — Window into a Matrix II
+- ● [0767](/solutions/0767/) — Window into a Matrix II
 - ○ [0773](/solutions/0773/) — Ruff Numbers
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
 - ● [0778](/solutions/0778/) — Freshman's Product
