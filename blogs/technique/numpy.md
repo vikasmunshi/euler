@@ -558,6 +558,7 @@ both slower and harder to read.
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0986](/solutions/0986/) — Another Infinite Game
 - ● [0996](/solutions/0996/) — Overtakes
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 - ● [1001](/solutions/1001/) — Connections I
 
 <!-- /problems -->

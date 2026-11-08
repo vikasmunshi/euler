@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Formulas_for_g
 
 - ● [0309](/solutions/0309/) — Integer Ladders
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

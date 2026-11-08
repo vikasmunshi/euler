@@ -117,5 +117,6 @@ the library.
 - ● [0061](/solutions/0061/) — Cyclical Figurate Numbers
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0868](/solutions/0868/) — Belfry Maths
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

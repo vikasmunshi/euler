@@ -246,5 +246,6 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

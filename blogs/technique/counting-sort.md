@@ -100,5 +100,6 @@ quantity.
 - ● [0174](/solutions/0174/) — Hollow Square Laminae II
 - ● [0309](/solutions/0309/) — Integer Ladders
 - ● [0749](/solutions/0749/) — Near Power Sums
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

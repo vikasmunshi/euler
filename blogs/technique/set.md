@@ -119,5 +119,6 @@ one — the set *is* the loop's termination condition.
 - ● [0203](/solutions/0203/) — Squarefree Binomial Coefficients
 - ● [0346](/solutions/0346/) — Strong Repunits
 - ● [0757](/solutions/0757/) — Stealthy Numbers
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

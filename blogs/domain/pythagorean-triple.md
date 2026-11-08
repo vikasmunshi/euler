@@ -157,6 +157,6 @@ triple.
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
 - ○ [0904](/solutions/0904/) — Pythagorean Angle
 - ○ [0914](/solutions/0914/) — Triangles inside Circles
-- ○ [0998](/solutions/0998/) — Squaring the Triangle
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

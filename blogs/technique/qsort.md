@@ -228,6 +228,7 @@ too large or too structured to index directly.
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0963](/solutions/0963/) — Removing Trits
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->

@@ -10,5 +10,6 @@ _TODO: write this page. Start from <https://numpy.org/doc/stable/reference/gener
 - ● [0135](/solutions/0135/) — Same Differences
 - ● [0310](/solutions/0310/) — Nim Square
 - ● [0980](/solutions/0980/) — The Quaternion Group I
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->

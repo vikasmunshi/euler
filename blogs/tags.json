@@ -1669,7 +1669,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_triangle",
       "additional-references": [],
       "summary": "Triangles whose side lengths are all integers, counted by perimeter through Alcuin's sequence.",
-      "refs": ["p0276", "p0962"]
+      "refs": ["p0276", "p0962", "p0998"]
     },
     {
       "slug": "inversion-discrete-mathematics",
@@ -2021,6 +2021,15 @@
       "additional-references": [],
       "summary": "The smallest non-negative (or positive) integer not present in a set, used here to define the sequence-generating process.",
       "refs": ["p0310", "p0649", "p0832"]
+    },
+    {
+      "slug": "minimum-bounding-box",
+      "facet": "domain",
+      "name": "Minimum bounding box",
+      "reference": "https://en.wikipedia.org/wiki/Minimum_bounding_box",
+      "additional-references": [],
+      "summary": "The smallest axis-free box or square, over all orientations, that encloses a given shape.",
+      "refs": ["p0998"]
     },
     {
       "slug": "minimum-spanning-tree",
@@ -3802,7 +3811,7 @@
       "reference": "https://numpy.org/doc/stable/user/basics.broadcasting.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0934_s0", "p1010_s0"]
+      "refs": ["p0934_s0", "p0998_s0", "p1010_s0"]
     },
     {
       "slug": "brute-force-search",
@@ -4036,7 +4045,7 @@
       "reference": "https://en.wikipedia.org/wiki/Counting_sort",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0039_s0", "p0166_s0", "p0174_s0", "p0309_s0", "p0749_s0"]
+      "refs": ["p0039_s0", "p0166_s0", "p0174_s0", "p0309_s0", "p0749_s0", "p0998_s0"]
     },
     {
       "slug": "cramers-rule",
@@ -4360,7 +4369,7 @@
       "reference": "https://en.wikipedia.org/wiki/Formulas_for_generating_Pythagorean_triples",
       "additional-references": [],
       "summary": "Parametrising every primitive Pythagorean triple as (m^2-n^2, 2mn, m^2+n^2) with m > n coprime and of opposite parity.",
-      "refs": ["p0309_s0", "p0764_s0"]
+      "refs": ["p0309_s0", "p0764_s0", "p0998_s0"]
     },
     {
       "slug": "eulerian-number",
@@ -4945,7 +4954,7 @@
       "reference": "https://en.wikipedia.org/wiki/Insertion_sort",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0061_s0", "p0523_s0", "p0868_s0"]
+      "refs": ["p0061_s0", "p0523_s0", "p0868_s0", "p0998_s0"]
     },
     {
       "slug": "int128",
@@ -5647,7 +5656,7 @@
       "reference": "https://numpy.org/doc/stable/reference/generated/numpy.bincount.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0135_s0", "p0310_s0", "p0980_s0"]
+      "refs": ["p0135_s0", "p0310_s0", "p0980_s0", "p0998_s0"]
     },
     {
       "slug": "np-flatnonzero",
@@ -5674,7 +5683,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0767_s0", "p0782_s0", "p0804_s0", "p0921_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0996_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0767_s0", "p0782_s0", "p0804_s0", "p0921_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0996_s0", "p0998_s0", "p1001_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5890,7 +5899,7 @@
       "reference": "https://en.cppreference.com/w/c/algorithm/qsort",
       "additional-references": ["https://en.wikipedia.org/wiki/Qsort"],
       "summary": "",
-      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0346_s0", "p0348_s0", "p0464_s0", "p0749_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p0963_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0346_s0", "p0348_s0", "p0464_s0", "p0749_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p0963_s0", "p0998_s0", "p1000_s0"]
     },
     {
       "slug": "quadratic-formula",
@@ -6106,7 +6115,7 @@
       "reference": "https://docs.python.org/3/library/stdtypes.html#set",
       "additional-references": ["https://docs.python.org/3/tutorial/datastructures.html#sets", "https://en.wikipedia.org/wiki/Set_(abstract_data_type)"],
       "summary": "",
-      "refs": ["p0032_s0", "p0035_s0", "p0035_s1", "p0037_s0", "p0049_s0", "p0052_s0", "p0061_s0", "p0068_s0", "p0074_s1", "p0074_s2", "p0079_s0", "p0087_s0", "p0088_s0", "p0093_s0", "p0095_s0", "p0111_s0", "p0122_s0", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0155_s0", "p0180_s0", "p0203_s0", "p0346_s0", "p0757_s0"]
+      "refs": ["p0032_s0", "p0035_s0", "p0035_s1", "p0037_s0", "p0049_s0", "p0052_s0", "p0061_s0", "p0068_s0", "p0074_s1", "p0074_s2", "p0079_s0", "p0087_s0", "p0088_s0", "p0093_s0", "p0095_s0", "p0111_s0", "p0122_s0", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0155_s0", "p0180_s0", "p0203_s0", "p0346_s0", "p0757_s0", "p0998_s0"]
     },
     {
       "slug": "short-circuit-evaluation",
@@ -6484,7 +6493,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0921_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0994_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0921_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0994_s0", "p0998_s0", "p1001_s0"]
     },
     {
       "slug": "vieta-jumping",
@@ -6565,7 +6574,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the analysis is subtle, demand that it reproduce every given value exactly before trusting it on the unknown case.",
-      "refs": ["p0265", "p0336", "p0400", "p0455", "p0632", "p0670", "p0752", "p0761", "p0860", "p0866", "p0875", "p0882", "p0887", "p0963", "p0983"]
+      "refs": ["p0265", "p0336", "p0400", "p0455", "p0632", "p0670", "p0752", "p0761", "p0860", "p0866", "p0875", "p0882", "p0887", "p0963", "p0983", "p0998"]
     },
     {
       "slug": "cancel-divisors-before-reducing",
@@ -6709,7 +6718,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Solve the part with a closed form exactly and confine numerical approximation to the part that has none.",
-      "refs": ["p0363", "p0558", "p0779"]
+      "refs": ["p0363", "p0558", "p0779", "p0998"]
     },
     {
       "slug": "exploit-symmetry",
@@ -6997,7 +7006,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Exhaustively solve small instances, read a closed-form characterisation off the table, and check it against the brute force before using it at scale.",
-      "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0555", "p0561", "p0628", "p0684", "p0711", "p0739", "p0767", "p0782", "p0892", "p0950", "p0957", "p0963", "p0984", "p0994"]
+      "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0555", "p0561", "p0628", "p0684", "p0711", "p0739", "p0767", "p0782", "p0892", "p0950", "p0957", "p0963", "p0984", "p0994", "p0998"]
     },
     {
       "slug": "small-cases-reveal-recurrence",

@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Integer_triang
 
 - ● [0276](/solutions/0276/) — Primitive Triangles
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
+- ● [0998](/solutions/0998/) — Squaring the Triangle
 
 <!-- /problems -->
