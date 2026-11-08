@@ -7804,8 +7804,8 @@
     "level": 38,
     "pct": 95,
     "solvers": 186,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 17:31"
   },
   "977": {
     "title": "Iterated Functions",
