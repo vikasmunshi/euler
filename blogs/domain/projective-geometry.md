@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Projective_geo
 ## Problems
 
 - ● [0957](/solutions/0957/) — Point Genesis
+- ● [0972](/solutions/0972/) — Hyperbolic Plane
 
 <!-- /problems -->

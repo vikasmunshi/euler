@@ -263,7 +263,6 @@ near the root.
 - ● [0935](/solutions/0935/) — Rolling Square
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ○ [0966](/solutions/0966/) — Triangle Circle Intersection
-- ○ [0972](/solutions/0972/) — Hyperbolic Plane
 - ○ [0985](/solutions/0985/) — Telescoping Triangles
 - ● [0998](/solutions/0998/) — Squaring the Triangle
 

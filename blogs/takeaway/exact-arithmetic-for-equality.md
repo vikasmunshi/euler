@@ -209,5 +209,6 @@ decision.
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [0972](/solutions/0972/) — Hyperbolic Plane
 
 <!-- /problems -->

@@ -170,5 +170,6 @@ a whole ring of points as one masked NumPy expression.
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0478](/solutions/0478/) — Mixtures
+- ● [0972](/solutions/0972/) — Hyperbolic Plane
 
 <!-- /problems -->

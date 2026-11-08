@@ -139,7 +139,7 @@ scalar gcd.
 - ○ [0809](/solutions/0809/) — Rational Recurrence Relation
 - ○ [0880](/solutions/0880/) — Nested Radicals
 - ○ [0889](/solutions/0889/) — Rational Blancmange
-- ○ [0972](/solutions/0972/) — Hyperbolic Plane
+- ● [0972](/solutions/0972/) — Hyperbolic Plane
 - ○ [0991](/solutions/0991/) — Fruit Salad
 
 <!-- /problems -->
