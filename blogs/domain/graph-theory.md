@@ -241,7 +241,7 @@ counting walks.
 - ○ [0857](/solutions/0857/) — Beautiful Graphs
 - ○ [0881](/solutions/0881/) — Divisor Graph Width
 - ○ [0931](/solutions/0931/) — Totient Graph
-- ○ [0975](/solutions/0975/) — A Winding Path
+- ● [0975](/solutions/0975/) — A Winding Path
 - ○ [0979](/solutions/0979/) — Heptagon Hopping
 - ● [0984](/solutions/0984/) — Knights and Horses
 - ○ [0992](/solutions/0992/) — Another Frog Jumping

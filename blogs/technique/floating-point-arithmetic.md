@@ -199,5 +199,6 @@ its own.
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ● [0800](/solutions/0800/) — Hybrid Integers
+- ● [0975](/solutions/0975/) — A Winding Path
 
 <!-- /problems -->

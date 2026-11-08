@@ -121,5 +121,6 @@ That quantity is the axis along which you can stop early, halve, or discard whol
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0800](/solutions/0800/) — Hybrid Integers
+- ● [0975](/solutions/0975/) — A Winding Path
 
 <!-- /problems -->

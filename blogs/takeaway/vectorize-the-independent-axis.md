@@ -8,6 +8,7 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0564](/solutions/0564/) — Maximal Polygons
+- ● [0975](/solutions/0975/) — A Winding Path
 - ● [1001](/solutions/1001/) — Connections I
 
 <!-- /problems -->

@@ -1015,7 +1015,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ○ [0971](/solutions/0971/) — Modular Polynomial Composition
-- ○ [0975](/solutions/0975/) — A Winding Path
+- ● [0975](/solutions/0975/) — A Winding Path
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ● [0994](/solutions/0994/) — Counting Triangles
 - ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
