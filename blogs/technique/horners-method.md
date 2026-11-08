@@ -102,5 +102,6 @@ evaluation order would need the prefix value recomputed.
 - ● [0363](/solutions/0363/) — Bézier Curves
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0868](/solutions/0868/) — Belfry Maths
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

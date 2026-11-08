@@ -348,6 +348,7 @@ the repetition.
 - ● [0994](/solutions/0994/) — Counting Triangles
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
+- ● [1007](/solutions/1007/) — Alternating Difference
 - ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->

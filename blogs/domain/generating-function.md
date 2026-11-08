@@ -217,5 +217,6 @@ ask which coefficient you actually need.
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
 - ● [0996](/solutions/0996/) — Overtakes
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

@@ -368,5 +368,6 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ○ [0991](/solutions/0991/) — Fruit Salad
 - ○ [0998](/solutions/0998/) — Squaring the Triangle
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

@@ -115,6 +115,6 @@ capacity recurrence — and the tree itself never needs to exist in memory.
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0887](/solutions/0887/) — Bounded Binary Search
-- ○ [1007](/solutions/1007/) — Alternating Difference
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

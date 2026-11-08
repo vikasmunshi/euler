@@ -156,6 +156,6 @@ be found by descending through the lengths — never materialising a string of `
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 - ○ [0989](/solutions/0989/) — Fibonacci Sum
-- ○ [1007](/solutions/1007/) — Alternating Difference
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

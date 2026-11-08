@@ -10,6 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Catalan_number
 - ● [0106](/solutions/0106/) — Special Subset Sums: Meta-testing
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0892](/solutions/0892/) — Zebra Circles
-- ○ [1007](/solutions/1007/) — Alternating Difference
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

@@ -254,5 +254,6 @@ monotonicity do the inversion.
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0892](/solutions/0892/) — Zebra Circles
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

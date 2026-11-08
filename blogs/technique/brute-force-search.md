@@ -230,5 +230,6 @@ The combinatorial wall arrives abruptly, and three signals say you have reached 
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

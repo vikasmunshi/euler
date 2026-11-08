@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0374](/solutions/0374/) — Maximum Integer Partition Product
+- ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->
