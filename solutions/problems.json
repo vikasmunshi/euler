@@ -4508,8 +4508,8 @@
     "level": 25,
     "pct": 63,
     "solvers": 375,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 10:52"
   },
   "565": {
     "title": "Divisibility of Sum of Divisors",
