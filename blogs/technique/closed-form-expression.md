@@ -526,6 +526,7 @@ loop was never needed.
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0944](/solutions/0944/) — Sum of Elevisors

@@ -145,7 +145,7 @@ rather than row by row.
 - ○ [0671](/solutions/0671/) — Colouring a Loop
 - ○ [0677](/solutions/0677/) — Coloured Graphs
 - ○ [0857](/solutions/0857/) — Beautiful Graphs
-- ○ [0892](/solutions/0892/) — Zebra Circles
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ● [1002](/solutions/1002/) — Connections II
 
 <!-- /problems -->

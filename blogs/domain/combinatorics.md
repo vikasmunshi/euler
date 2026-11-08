@@ -600,7 +600,7 @@ of crossing it.
 - ○ [0886](/solutions/0886/) — Coprime Permutations
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
-- ○ [0892](/solutions/0892/) — Zebra Circles
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ○ [0895](/solutions/0895/) — Gold & Silver Coin Game II
 - ○ [0896](/solutions/0896/) — Divisible Ranges
 - ○ [0902](/solutions/0902/) — Permutation Powers

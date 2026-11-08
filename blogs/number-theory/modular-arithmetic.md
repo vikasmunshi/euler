@@ -1008,7 +1008,7 @@ handful of operations on small numbers.
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ○ [0889](/solutions/0889/) — Rational Blancmange
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
-- ○ [0892](/solutions/0892/) — Zebra Circles
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ○ [0902](/solutions/0902/) — Permutation Powers
 - ○ [0903](/solutions/0903/) — Total Permutation Powers
 - ○ [0909](/solutions/0909/) — L-expressions I

@@ -10,6 +10,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tree_(graph_th
 - ○ [0380](/solutions/0380/) — Amazing Mazes!
 - ○ [0677](/solutions/0677/) — Coloured Graphs
 - ● [0872](/solutions/0872/) — Recursive Tree
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ○ [0936](/solutions/0936/) — Peerless Trees
 
 <!-- /problems -->

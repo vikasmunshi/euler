@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Central_binomi
 ## Problems
 
 - ● [0015](/solutions/0015/) — Lattice Paths
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0951](/solutions/0951/) — A Game of Chance
 
 <!-- /problems -->

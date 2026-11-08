@@ -264,6 +264,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0782](/solutions/0782/) — Distinct Rows and Columns
+- ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0963](/solutions/0963/) — Removing Trits
