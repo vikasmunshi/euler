@@ -571,7 +571,7 @@
       "reference": "https://en.wikipedia.org/wiki/Component_(graph_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0186", "p0425", "p0553", "p0701", "p1002"]
+      "refs": ["p0186", "p0425", "p0553", "p0701", "p0984", "p1002"]
     },
     {
       "slug": "composite-number",
@@ -1660,7 +1660,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_lattice",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0091", "p0147", "p0184", "p0229", "p0233", "p0246", "p0264", "p0270", "p0279", "p0283", "p0289", "p0292", "p0295", "p0296", "p0299", "p0331", "p0332", "p0353", "p0360", "p0373", "p0385", "p0388", "p0403", "p0415", "p0450", "p0453", "p0465", "p0478", "p0507", "p0514", "p0562", "p0577", "p0579", "p0596", "p0604", "p0662", "p0664", "p0723", "p0736", "p0742", "p0763", "p0790", "p0804", "p0879", "p0883", "p0962", "p0983"]
+      "refs": ["p0091", "p0147", "p0184", "p0229", "p0233", "p0246", "p0264", "p0270", "p0279", "p0283", "p0289", "p0292", "p0295", "p0296", "p0299", "p0331", "p0332", "p0353", "p0360", "p0373", "p0385", "p0388", "p0403", "p0415", "p0450", "p0453", "p0465", "p0478", "p0507", "p0514", "p0562", "p0577", "p0579", "p0596", "p0604", "p0662", "p0664", "p0723", "p0736", "p0742", "p0763", "p0790", "p0804", "p0879", "p0883", "p0962", "p0983", "p0984"]
     },
     {
       "slug": "integer-triangle",
@@ -1742,6 +1742,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0212"]
+    },
+    {
+      "slug": "knight-chess",
+      "facet": "domain",
+      "name": "Knight (chess)",
+      "reference": "https://en.wikipedia.org/wiki/Knight_(chess)",
+      "additional-references": [],
+      "summary": "The chess piece that moves two squares one way and one square the other, whose move graph governs connectivity on a board.",
+      "refs": ["p0984"]
     },
     {
       "slug": "kolakoski-sequence",
@@ -2416,7 +2425,7 @@
       "reference": "https://en.wikipedia.org/wiki/Polynomial_interpolation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0101", "p0487"]
+      "refs": ["p0101", "p0487", "p0984"]
     },
     {
       "slug": "polyomino",
@@ -2660,6 +2669,15 @@
       "additional-references": [],
       "summary": "A tree data structure recursively partitioning a 2D region into four quadrants, used here to encode a black-and-white image.",
       "refs": ["p0287"]
+    },
+    {
+      "slug": "quasi-polynomial",
+      "facet": "domain",
+      "name": "Quasi-polynomial",
+      "reference": "https://en.wikipedia.org/wiki/Quasi-polynomial",
+      "additional-references": [],
+      "summary": "A function that is a polynomial on each residue class of its argument, typical of lattice-point counts in growing polytopes.",
+      "refs": ["p0984"]
     },
     {
       "slug": "radical-of-an-integer",
@@ -3685,7 +3703,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit_manipulation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0244_s0", "p0265_s0", "p0269_s0", "p0345_s0", "p0561_s0", "p0571_s0", "p0704_s0", "p0755_s0", "p0768_s0", "p0872_s0", "p0882_s0", "p0918_s0", "p0943_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0242_s0", "p0244_s0", "p0265_s0", "p0269_s0", "p0345_s0", "p0561_s0", "p0571_s0", "p0704_s0", "p0755_s0", "p0768_s0", "p0872_s0", "p0882_s0", "p0918_s0", "p0943_s0", "p0961_s0", "p0963_s0", "p0974_s0", "p0984_s0", "p1000_s0"]
     },
     {
       "slug": "bitwise-operation",
@@ -3748,7 +3766,7 @@
       "reference": "https://en.wikipedia.org/wiki/Breadth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0244_s0", "p0303_s0", "p0387_s0", "p0679_s0", "p1002_s0"]
+      "refs": ["p0244_s0", "p0303_s0", "p0387_s0", "p0679_s0", "p0984_s0", "p1002_s0"]
     },
     {
       "slug": "broadcasting",
@@ -4516,6 +4534,15 @@
       "refs": ["p0042_s0", "p0044_s0", "p0063_s0", "p0093_s0", "p0190_s0", "p0235_s0", "p0247_s0", "p0318_s0", "p0395_s0", "p0779_s0", "p0800_s0"]
     },
     {
+      "slug": "flood-fill",
+      "facet": "technique",
+      "name": "Flood fill",
+      "reference": "https://en.wikipedia.org/wiki/Flood_fill",
+      "additional-references": [],
+      "summary": "Growing the region reachable from a seed cell until it stops changing, here as whole-row bitmask shifts to test connectivity.",
+      "refs": ["p0984_s0"]
+    },
+    {
       "slug": "floor-and-ceiling-functions",
       "facet": "technique",
       "name": "Floor and ceiling functions",
@@ -4549,7 +4576,7 @@
       "reference": "https://docs.python.org/3/library/fractions.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0363_s0", "p0523_s0", "p0776_s0"]
+      "refs": ["p0033_s0", "p0065_s0", "p0066_s0", "p0071_s0", "p0101_s0", "p0101_s3", "p0180_s0", "p0198_s0", "p0236_s0", "p0363_s0", "p0523_s0", "p0776_s0", "p0984_s0"]
     },
     {
       "slug": "frequency-statistics",
@@ -4702,7 +4729,7 @@
       "reference": "https://gmplib.org/",
       "additional-references": ["https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library"],
       "summary": "",
-      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0", "p0523_s0", "p0558_s0", "p0581_s0", "p0582_s0", "p0605_s0", "p0776_s0", "p0844_s0", "p0988_s0", "p1006_s0"]
+      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0239_s0", "p0254_s0", "p0321_s0", "p0387_s0", "p0523_s0", "p0558_s0", "p0581_s0", "p0582_s0", "p0605_s0", "p0776_s0", "p0844_s0", "p0984_s0", "p0988_s0", "p1006_s0"]
     },
     {
       "slug": "golden-section-search",
@@ -5080,7 +5107,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lagrange_polynomial",
       "additional-references": ["https://en.wikipedia.org/wiki/Lagrange_polynomial#Barycentric_form"],
       "summary": "",
-      "refs": ["p0101_s0", "p0101_s3", "p0487_s0"]
+      "refs": ["p0101_s0", "p0101_s3", "p0487_s0", "p0984_s0"]
     },
     {
       "slug": "lattice-point",
@@ -6880,7 +6907,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Exhaustively solve small instances, read a closed-form characterisation off the table, and check it against the brute force before using it at scale.",
-      "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0555", "p0561", "p0628", "p0684", "p0711", "p0739", "p0767", "p0782", "p0892", "p0950", "p0957", "p0963"]
+      "refs": ["p0256", "p0276", "p0335", "p0336", "p0340", "p0359", "p0374", "p0523", "p0555", "p0561", "p0628", "p0684", "p0711", "p0739", "p0767", "p0782", "p0892", "p0950", "p0957", "p0963", "p0984"]
     },
     {
       "slug": "small-cases-reveal-recurrence",

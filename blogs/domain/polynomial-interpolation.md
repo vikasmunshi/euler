@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Polynomial_int
 
 - ● [0101](/solutions/0101/) — Optimum Polynomial
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0984](/solutions/0984/) — Knights and Horses
 
 <!-- /problems -->

@@ -11,6 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Component_(gra
 - ● [0425](/solutions/0425/) — Prime Connection
 - ○ [0553](/solutions/0553/) — Power Sets of Power Sets
 - ○ [0701](/solutions/0701/) — Random Connected Area
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ● [1002](/solutions/1002/) — Connections II
 
 <!-- /problems -->

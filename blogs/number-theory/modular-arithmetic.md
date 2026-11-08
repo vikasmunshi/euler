@@ -1039,7 +1039,7 @@ handful of operations on small numbers.
 - ○ [0977](/solutions/0977/) — Iterated Functions
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ○ [0981](/solutions/0981/) — The Quaternion Group II
-- ○ [0984](/solutions/0984/) — Knights and Horses
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ○ [0989](/solutions/0989/) — Fibonacci Sum
 - ○ [0990](/solutions/0990/) — Addition Equations
 - ○ [0992](/solutions/0992/) — Another Frog Jumping

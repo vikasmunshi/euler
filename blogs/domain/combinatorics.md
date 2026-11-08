@@ -631,7 +631,7 @@ of crossing it.
 - ○ [0977](/solutions/0977/) — Iterated Functions
 - ○ [0979](/solutions/0979/) — Heptagon Hopping
 - ○ [0981](/solutions/0981/) — The Quaternion Group II
-- ○ [0984](/solutions/0984/) — Knights and Horses
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ○ [0987](/solutions/0987/) — Straight Eight
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ○ [0990](/solutions/0990/) — Addition Equations

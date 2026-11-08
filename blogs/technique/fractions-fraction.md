@@ -188,5 +188,6 @@ the C never paid ([parity across languages](/blogs/takeaway/parity-across-langua
 - ● [0363](/solutions/0363/) — Bézier Curves
 - ● [0523](/solutions/0523/) — First Sort I
 - ● [0776](/solutions/0776/) — Digit Sum Division
+- ● [0984](/solutions/0984/) — Knights and Horses
 
 <!-- /problems -->

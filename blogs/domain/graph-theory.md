@@ -243,7 +243,7 @@ counting walks.
 - ○ [0931](/solutions/0931/) — Totient Graph
 - ○ [0975](/solutions/0975/) — A Winding Path
 - ○ [0979](/solutions/0979/) — Heptagon Hopping
-- ○ [0984](/solutions/0984/) — Knights and Horses
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ○ [0992](/solutions/0992/) — Another Frog Jumping
 - ● [1000](/solutions/1000/) — Problem $1000$
 - ● [1002](/solutions/1002/) — Connections II

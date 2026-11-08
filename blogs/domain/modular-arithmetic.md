@@ -605,7 +605,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ○ [0977](/solutions/0977/) — Iterated Functions
 - ○ [0981](/solutions/0981/) — The Quaternion Group II
-- ○ [0984](/solutions/0984/) — Knights and Horses
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ○ [0989](/solutions/0989/) — Fibonacci Sum
 - ○ [0990](/solutions/0990/) — Addition Equations
 - ○ [0992](/solutions/0992/) — Another Frog Jumping

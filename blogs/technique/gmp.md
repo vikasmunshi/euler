@@ -277,6 +277,7 @@ few dozen sums make exact arithmetic the simpler choice here.
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
 

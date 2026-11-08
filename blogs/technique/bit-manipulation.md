@@ -236,6 +236,7 @@ buy the most where the instructions are real.
 - ● [0961](/solutions/0961/) — Removing Digits
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->

@@ -153,7 +153,7 @@ fast you can get it.
 - ● [0189](/solutions/0189/) — Tri-colouring a Triangular Grid
 - ○ [0393](/solutions/0393/) — Migrating Ants
 - ○ [0701](/solutions/0701/) — Random Connected Area
-- ○ [0984](/solutions/0984/) — Knights and Horses
+- ● [0984](/solutions/0984/) — Knights and Horses
 - ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->
