@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-11-04T03:42Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -61,7 +61,11 @@ prime *sums* beside the counts, and shows where the update reads from. For `i·p
 value `⌊N/(ip)⌋` sits in the large table at index `i·p`, which is a strided slice
 `large[p::p]`. For larger `i` it lands in the small table at a computed index, so those
 entries are gathered with fancy indexing. One split point decides which form handles each
-entry.
+entry. [Problem 994](/solutions/0994/) sums over the blocks on which *two* quotients, `⌊M/e⌋`
+and `⌊N/e⌋`, are constant together. Each quotient's block ends form an array of `O(√N)` values.
+`np.unique` over the two arrays concatenated merges the breakpoints, and comparing `M // e`
+with `M // (e + 1)`, and the same for `N`, discards any that end neither block. Every block's
+contribution is then a closed-form power sum evaluated across the whole array.
 
 **Flatten ragged work.** A strided slice costs one Python call per progression, which is a
 bargain only while each progression is long. A
@@ -92,6 +96,18 @@ per step. A partial row with `r` digits left has `r + 1` children, so
 `np.repeat(rows, choices, axis=0)` copies the parents and the lane numbering supplies each
 child's count. Nine array steps walk a tree with two million leaves, level by level, with no
 recursion.
+
+Flattening is one of three ways to make ragged work rectangular. The bluntest is to pad.
+[Problem 564](/solutions/0564/) stores each multiset of polygon sides as a row of distinct
+lengths and their multiplicities, zero-filled to the widest row. The zeros are harmless because
+every per-row sum weights a column by its multiplicity, so a padded column counts zero times.
+Padding wastes the gap between the average row and the widest one, and when that gap is large,
+bucket instead. [Problem 998](/solutions/0998/) wants every pair of Pythagorean triples that
+share a leg, and the number of triples per leg varies widely. So it groups the legs by that
+count `k`. The legs with exactly `k` triples stack into a `(legs, k)` matrix, gathered through
+`bincount`/`cumsum` offsets, and `np.triu_indices(k)` lists the pairs within a row. One set of
+array expressions then tests every pair of every leg in the bucket. The Python loop runs once
+per distinct group size, a few dozen times, and nothing is padded.
 
 **Invert the loop nest.** When you have nested loops, vectorize the *inner* one and leave the
 outer in Python. This is the single most common shape across these problems, because it needs
@@ -176,7 +192,15 @@ one-dimensional `int64` arrays. A key can also forget order on purpose. Problem 
 digit multisets, so its key is the count vector read as a base-`(d + 1)` numeral: `counts @ weight`
 for the rows, and for a candidate number one `weight[digit]` gather per digit position, summed.
 Addition discards the order of the digits, so one integer comparison per lane decides whether
-two numbers are anagrams.
+two numbers are anagrams. When the fields are unbounded and will not pack, sort on them instead.
+[Problem 972](/solutions/0972/) groups points by the line that joins each one to an anchor,
+keyed on the line's direction `(w1, w2)` after dividing out `np.gcd` and fixing the sign.
+`np.lexsort` orders by both fields, comparing neighbours marks where each run begins, and
+`np.diff` of those starts gives every group's size, so `sizes * (sizes - 1) // 2` counts the
+pairs on each line. `np.unique(..., return_index=True)` gives the *first* occurrence of every
+key as well: [problem 995](/solutions/0995/) maps a sorted chunk of primes to their
+multiplicative orders by table lookup, and the first index of each order is the cheapest prime
+with that order.
 
 Sorting and searching in bulk also builds graphs. [Problem 425](/solutions/0425/) links primes
 that differ in one digit. Its edge list comes from array passes: one per digit position and
@@ -247,12 +271,47 @@ Problem 749 sorts its rows once by the last exponent each can use, so the rows s
 exponent `k` are always a prefix, and `counts[:live]` is a free view where a mask would copy two
 million rows.
 
+Lanes need not run for the same number of steps. [Problem 975](/solutions/0975/) traces a
+level-set path through a grid of cells for every pair of primes in a range, and the paths differ
+greatly in length. Each lane is a walker whose state is a cell `(i, j)`, a direction, and the
+distance covered so far. The per-pair height tables are padded into one 2-D array and read as
+`fv[rows, i - 1]`, where `rows` holds the original pair index of each live lane. Every step
+moves all the walkers by a branchless rule built from `np.where`. A walker that reaches its
+path's midpoint banks its distance and is compacted out. The loop lasts as long as the longest
+walk, but by then its arrays hold only the long walks.
+
+The lanes can also be *hypotheses*. [Problem 986](/solutions/0986/) wants the largest starting
+value whose forced recurrence dies out. Feasibility is monotone in that value, so the scalar
+method would be a binary search. But the recurrence runs as a `(time, candidates)` array, and
+simulating 64 candidates side by side costs little more than simulating one. So each round
+tests 64 evenly spaced guesses and narrows the bracket 65-fold instead of 2-fold. The
+recurrence `a(j) = (a(j−c−d) + a(j−d)) >> 1` has smallest lag `d`, so, like problem 149's
+generator, it advances `d` rows per vector step. It writes into a short ring buffer that stays
+in cache, and uses `int32` whenever the starting values allow. The batched rounds stop on a
+heuristic, so the final bracket is certified by one exact run of the two candidates on either
+side of it. That is problem 558's certify-the-fast-test move, applied to a search.
+
+A two-index DP can be serial along one index and independent along the other, and then the
+independent index is the array. [Problem 1001](/solutions/1001/) counts non-crossing subsets of
+intervals with a table `C_r[l]` that fills downward in `l` but treats each right end `r` on its
+own. It needs only the columns at interval ends, and sweeps them 512 at a time: one Python pass
+down `l` updates the whole block of columns as a vector. Where an update reads an earlier row,
+it reads it from a snapshot copied on the way past. The serial loop stays in Python, but each
+of its steps performs 512 updates.
+
 **Vectorize the modular arithmetic too.** Nothing about the technique is limited to `+` and
 `*`. [Problem 944](/solutions/0944/) computes `2**e mod m` for a whole array of exponents by
 running [square-and-multiply](https://en.wikipedia.org/wiki/Exponentiation_by_squaring) over
 the exponent *bits*, masking the odd-bit lanes at each step — 64 array operations instead of a
 per-element `pow`. The pattern generalises: any bounded, data-independent iteration can be
-unrolled across the array, with a boolean mask selecting which lanes act.
+unrolled across the array, with a boolean mask selecting which lanes act. Root finding is one
+such iteration. Problem 564 solves one circumradius equation per side multiset, about a million
+equations, by [bisection](https://en.wikipedia.org/wiki/Bisection_method) in lockstep. Every
+lane keeps its own bracket, and each of 64 steps evaluates every residual at its midpoint and
+moves one end per lane with `np.where`. The step count depends only on the precision, never on
+the data, so no lane waits for another. Even the equation is chosen per lane: a mask computed
+up front (does the circle's centre lie inside the polygon?) selects between two residuals with
+one more `np.where`.
 [Problem 455](/solutions/0455/) gives every lane its own exponent and iterates a power tower
 to its fixed point modulo `10**9`, for a million bases at once, stopping when
 `np.array_equal` says no lane moved. [Problem 721](/solutions/0721/) lifts the same loop into
@@ -264,7 +323,11 @@ ring to over a million unrelated exponents. It splits each exponent into its low
 rest, and tabulates the base's powers for each half, a few tens of thousands of serial
 multiplications. Then `high[x >> 15] * low[x & 0x7fff]` is two gathers and one ring product per
 lane, in place of about 29 squarings. Problem 980's power tables, below, use the same split to
-produce a consecutive run of powers; here it gives random access to them.
+produce a consecutive run of powers; here it gives random access to them. Problem 995 uses
+that consecutive run to list every power of a primitive root `g` modulo `p`, then inverts the
+list with one scatter. Since `g^i` visits each unit exactly once, `orders[powers] = n // np.gcd(i, n)`
+writes every unit's multiplicative order at its own index. That is a discrete-logarithm table,
+built without computing a single discrete logarithm.
 The lanes need not share a modulus either.
 [Problem 492](/solutions/0492/) gives every lane its own *prime* modulus, a whole sieved range of
 them. Each lane's exponent is reduced modulo `p − 1` or `p + 1`, and a quadratic-residue mask
@@ -316,7 +379,11 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   natural array form of an `O(N)` sum can be an `O(N)` allocation. Sweep the range in
   cache-sized blocks instead — problems 193 and 210 both accumulate over chunks of about four
   million entries, which keeps the working set inside cache *and* bounds memory. Chunking costs
-  one extra loop level and usually makes the code faster, not just smaller.
+  one extra loop level and usually makes the code faster, not just smaller. Chunks also buy an
+  early exit. Problem 995 scans primes 2048 at a time for the cheapest prime of each order.
+  After each chunk it prices the still-missing orders at the next prime, a lower bound on what
+  they can cost. Once even that bound cannot beat the solution already found, the scan stops. A
+  single whole-array pass would have paid for every prime in the table.
 - **Serial dependence is the real obstacle — and often only apparent.** If element `k` cannot
   be computed without element `k-1`, there is nothing to batch, and a genuinely serial scan
   (problem 165's [Blum Blum Shub](https://en.wikipedia.org/wiki/Blum_Blum_Shub) stream) stays a
