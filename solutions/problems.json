@@ -7900,8 +7900,8 @@
     "level": 22,
     "pct": 58,
     "solvers": 272,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 10:28"
   },
   "989": {
     "title": "Fibonacci Sum",
