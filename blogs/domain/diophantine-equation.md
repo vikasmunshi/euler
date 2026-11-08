@@ -397,7 +397,7 @@ discipline still shapes the search.
 - ○ [0945](/solutions/0945/) — XOR-Equation C
 - ● [0955](/solutions/0955/) — Finding Triangles
 - ○ [0962](/solutions/0962/) — Angular Bisector and Tangent 2
-- ○ [0988](/solutions/0988/) — Non-attacking Frogs
+- ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ○ [0991](/solutions/0991/) — Fruit Salad
 - ○ [0998](/solutions/0998/) — Squaring the Triangle
 

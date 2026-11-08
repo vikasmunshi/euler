@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Antichain>._
 ## Problems
 
 - ● [0333](/solutions/0333/) — Special Partitions
+- ● [0988](/solutions/0988/) — Non-attacking Frogs
 
 <!-- /problems -->

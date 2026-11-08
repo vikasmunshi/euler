@@ -10,5 +10,6 @@ _TODO: write this page. No reference on the tag._
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0776](/solutions/0776/) — Digit Sum Division
+- ● [0988](/solutions/0988/) — Non-attacking Frogs
 
 <!-- /problems -->

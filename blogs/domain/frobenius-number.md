@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Coin_problem>.
 
 - ○ [0278](/solutions/0278/) — Linear Combinations of Semiprimes
 - ● [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0988](/solutions/0988/) — Non-attacking Frogs
 
 <!-- /problems -->

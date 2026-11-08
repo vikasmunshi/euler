@@ -278,6 +278,6 @@ nothing about either number's factorisation beyond its disjointness from the oth
 - ● [0932](/solutions/0932/) — $2025$
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 - ○ [0975](/solutions/0975/) — A Winding Path
-- ○ [0988](/solutions/0988/) — Non-attacking Frogs
+- ● [0988](/solutions/0988/) — Non-attacking Frogs
 
 <!-- /problems -->

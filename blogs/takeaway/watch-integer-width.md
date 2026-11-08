@@ -370,6 +370,7 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
+- ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ● [1010](/solutions/1010/) — March of the Penguins
 
 <!-- /problems -->
