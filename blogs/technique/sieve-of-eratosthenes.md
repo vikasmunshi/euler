@@ -279,5 +279,6 @@ patterns recur.
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0975](/solutions/0975/) — A Winding Path
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->

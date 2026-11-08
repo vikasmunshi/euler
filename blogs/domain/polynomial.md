@@ -23,6 +23,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Polynomial>._
 - ○ [0813](/solutions/0813/) — XOR-Powers
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping
-- ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->

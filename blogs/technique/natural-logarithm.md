@@ -120,5 +120,6 @@ efficiently than a hand-written `Decimal` series.
 - ● [0183](/solutions/0183/) — Maximum Product of Parts
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0800](/solutions/0800/) — Hybrid Integers
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->

@@ -170,5 +170,6 @@ Problem 250 uses this to cut the `250250` terms of `nⁿ mod 250` down to a shor
 - ○ [0847](/solutions/0847/) — Jack's Bean
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->

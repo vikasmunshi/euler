@@ -142,5 +142,6 @@ you think about, and how much of the edge-case handling is explicit.
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->

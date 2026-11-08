@@ -441,7 +441,7 @@ clever was done with the primes themselves.
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
 - ○ [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0975](/solutions/0975/) — A Winding Path
-- ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 - ○ [1005](/solutions/1005/) — Median Prime List
 
 <!-- /problems -->

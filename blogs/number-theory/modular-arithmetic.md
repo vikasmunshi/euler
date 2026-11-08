@@ -1045,7 +1045,7 @@ handful of operations on small numbers.
 - ○ [0990](/solutions/0990/) — Addition Equations
 - ○ [0992](/solutions/0992/) — Another Frog Jumping
 - ● [0994](/solutions/0994/) — Counting Triangles
-- ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 - ● [0996](/solutions/0996/) — Overtakes
 - ○ [0999](/solutions/0999/) — Alternating Recurrence
 - ● [1000](/solutions/1000/) — Problem $1000$

@@ -557,6 +557,7 @@ both slower and harder to read.
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0986](/solutions/0986/) — Another Infinite Game
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [0998](/solutions/0998/) — Squaring the Triangle
 - ● [1001](/solutions/1001/) — Connections I

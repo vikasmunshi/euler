@@ -193,6 +193,6 @@ signature shortcut does not apply.
 - ○ [0931](/solutions/0931/) — Totient Graph
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ○ [0956](/solutions/0956/) — Super Duper Sum
-- ○ [0995](/solutions/0995/) — A Particular Pair of Polynomials
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->

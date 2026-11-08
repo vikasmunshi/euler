@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Primitive_root
 ## Problems
 
 - ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
+- ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->
