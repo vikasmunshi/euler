@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-02T22:20Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -140,6 +140,24 @@ denominator is assembled as exponents per hook length and inverted once. Both le
 guarantee — a prime modulus larger than every factor in the denominator, so nothing on the bottom
 line can vanish.
 
+Inverse factorials can also change the *shape* of a sum. Problem 0767 needs
+`F(K) = Σ_s C(K, s)^16` for every `K` up to `10⁵`, which is `O(k²)` term by term. Writing
+`C(K, s) = K! · (1/s!) · (1/(K−s)!)` splits each term into a factor in `s` and a factor in `K − s`.
+So with `u_s = (s!)^(−16)`, the whole family is `F(K) = (K!)^16 · (u * u)_K`, which is one
+[convolution](https://en.wikipedia.org/wiki/Convolution) for every `K` at once, done by FFT in
+`O(k log k)`. This is the [exponential generating function](https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function)
+idea: dividing by factorials makes a binomial convolution an ordinary one. Modulo a prime, the
+reciprocals are just a table of residues.
+
+The denominator need not even be rational. Problem 1007 ends at
+[Binet's formula](https://en.wikipedia.org/wiki/Fibonacci_sequence#Binet's_formula),
+`Fₙ = (φⁿ − ψⁿ) / √5` with `φ, ψ = (1 ± √5) · 2⁻¹`. Modulo a prime in which `5` is a
+[quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue), `√5` is an ordinary residue
+(from [Tonelli–Shanks](https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm)), and
+dividing by it is one more inverse. An irrational closed form becomes integer arithmetic. The only
+precondition is the residue check, which the solution makes explicit and refuses the modulus if it
+fails.
+
 Exactness is a property of the integer, not of the pieces you compute it from. Problem 0635's
 [roots-of-unity filter](https://en.wikipedia.org/wiki/Series_multisection) ends at
 `(C(qp, p) + q(p − 1)) / p`. The sum is divisible by `p`, but neither term has to be. Over the
@@ -225,9 +243,29 @@ the repetition.
       inv_fact[i - 1] = inv_fact[i] * i % p
   ```
 
+- **Grow the inverses of `1 … n` as you go, with no exponentiation at all.** Modulo a prime `p`,
+  write `p = ⌊p/i⌋·i + (p mod i)`. Reducing modulo `p` and dividing by `i·(p mod i)` gives
+  `i⁻¹ ≡ −⌊p/i⌋ · (p mod i)⁻¹`. Since `p mod i < i`, the entry on the right is already in the table,
+  so each new inverse costs one multiplication. Problem 0892 uses this. It walks the central binomial
+  `b_m = b_{m−1} · 2(2m−1) / m` up to `m = 5·10⁶`, extending the table by one entry per step, and
+  stores it in an `array('q')` so five million residues cost 8 bytes each instead of a Python
+  integer object each. Unlike the factorial sweep, it needs no fixed upper bound in advance.
+- **Or carry the denominator in the state and skip the table.** Problem 1007 runs order-two
+  recurrences that divide by `k + 1` at every step for `k` up to `10⁷`, and a table that size is the
+  memory cost 0892 had to work around. Instead it scales every coefficient by `k!`. With
+  `A_k = k!·a_k`, the division by `k + 1` disappears from the recurrence, and the scaled values
+  satisfy recurrences with integer coefficients only. One inverse of `(n + 1)!` (times a constant) at
+  the end undoes all the scaling. This is clearing denominators, the same algebra as multiplying a
+  rational recurrence through by its common denominator, applied to a sequence. It trades `n`
+  inverses, or an `n`-entry table, for one inverse and `O(1)` memory.
+
 - **Hoist loop-invariant inverses.** If the divisor depends on the outer index only, invert once
   outside — 0650 precomputes `(p − 1)⁻¹` per prime before the sweep, not per iteration of it. In
   0996 every binomial in the sum shares the same `n!` denominator, so one `(n!)⁻¹` serves them all.
+  The [Faulhaber](https://en.wikipedia.org/wiki/Faulhaber%27s_formula) sums `n(n+1)/2` and
+  `n(n+1)(2n+1)/6` are the commonest case. Problem 0994 evaluates them over whole NumPy arrays of
+  quotients inside a totient-sum recursion. `2⁻¹` and `6⁻¹` are computed once as constants, so
+  each element costs only multiplications.
 - **Invert the residues, not the operands.** When a small modulus `s` meets many large values `L`,
   `L⁻¹ mod s` depends only on `L mod s`. Problem 0407 builds one table of all `s` residues' inverses,
   then gathers `inv[L % s]` for thousands of `L` in a single indexed read.
@@ -294,7 +332,9 @@ the repetition.
   modulus. Problem 0718 inverts modulo `17^p` for the same reason. What primality buys is only the Fermat shortcut and the
   guarantee that *every* non-zero element is invertible — modulo `p²`, multiples of `p` are not.
   Using `pow(a, m - 2, m)` on a composite `m` returns a plausible-looking number that is not an
-  inverse.
+  inverse. Problem 0335 is the case where this matters in C. It divides geometric series by `2` and
+  `3` modulo `7⁹`, and since its port has no `pow(a, -1, m)`, it uses extended Euclid there rather
+  than a Fermat exponent.
 - **Normalise the sign, especially in C.** Python's `%` returns a non-negative result for a positive
   modulus; C's follows the dividend, so `((x % m) + m) % m` is the idiom, and it is needed on the
   differences you feed *into* an inverse (`r2 - r1` above) as much as on the result.
