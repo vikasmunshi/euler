@@ -7692,8 +7692,8 @@
     "level": 35,
     "pct": 89,
     "solvers": 189,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 12:55"
   },
   "963": {
     "title": "Removing Trits",
