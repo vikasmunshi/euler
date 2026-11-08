@@ -1,10 +1,10 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final 2026-11-04T08:07Z -->
+<!-- status: final -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
 arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
-collection under some rule. It is the largest domain in this archive — 272 problems carry the tag,
+collection under some rule. It is the largest domain in this archive — 271 problems carry the tag,
 more than any other — and that is not an accident of tagging. Project Euler's favourite question
 shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
 discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
@@ -82,6 +82,18 @@ convolved with itself $R$ times over the digits under multiplication mod 10 — 
 squaring, because the convolution is associative. Independence is a property of the model, not
 the code; a carry, or a prime shared between slots, would break it.
 
+Sometimes the independence is hidden, and a subtraction of two constraints brings it out. Problem 767
+asks for 16-row binary matrices in which every $2 \times k$ window sums to $k$. Two overlapping
+windows differ by one column at each end, so each pair of adjacent rows has column sums that are
+[periodic](/blogs/domain/periodic-sequence) with period $k$. The columns therefore fall into $k$
+residue classes that never interact. Each class is either "mixed", with the rows alternating, or
+constant across each row. With $K$ constant classes, flipping every other row leaves a
+$16 \times K$ matrix whose rows all have the same weight, which gives $\sum_s \binom{K}{s}^{16}$.
+That sum is needed for every $K$ up to $10^5$, and term by term it costs $O(k^2)$. Write
+$\binom{K}{s}^{16} = K!^{16}\,u_s\,u_{K-s}$ with $u_s = 1/s!^{16}$, and all of them come from one
+self-[convolution](/blogs/technique/convolution) of $u$. See
+[factorials turn binomial sums into convolutions](/blogs/takeaway/factorials-turn-binomial-sums-into-convolutions).
+
 The additive twin of the product rule is to **sum contributions, not configurations**. When the
 question is a total of some statistic over every configuration, swap the order of summation: for each
 small piece that can contribute, count the configurations in which it does. Problem 705 totals the
@@ -93,6 +105,25 @@ how often digit $x$ precedes digit $y$ — one linear pass to build the table, a
 touched. This is [double counting](/blogs/technique/double-counting-proof-technique), or
 [linearity of expectation](/blogs/domain/expected-value) read the other way round: the total is
 the count times the mean, and the mean splits over pairs.
+
+The model that counts well is sometimes not the one the statement describes. The move then is to
+**trade the object for one that is already understood**, through a [bijection](/blogs/domain/bijection).
+Problem 892 draws $n$ non-crossing chords in a circle and colours the pieces so that neighbours
+differ. Put a vertex in each piece and join the pieces that share a chord, and the result is a plane
+tree with $n$ edges. Every plane tree comes from exactly one cutting. The alternating colouring is
+colouring by depth parity, so "black minus white" becomes a count of odd-depth vertices, whose
+distribution is already tabulated: the [Narayana numbers](/blogs/domain/narayana-number).
+Problem 1007 puts brackets into $F_0 - F_1 - \dots - F_n$, one minus sign per pair. Each bracketing
+is a full binary tree with the Fibonacci numbers as its leaves, and a leaf's sign is the parity of
+the right turns on its path from the root. Problem 988's frogs look like additive number theory.
+Write each gap of the semigroup $\langle a, b \rangle$ as $ab - ia - jb$, and "one frog can reach
+the other" becomes componentwise dominance of $(i, j)$. A valid placement is then an
+[antichain](/blogs/domain/antichain) in a [Young diagram](/blogs/domain/young-diagram), and a
+row-by-row sweep counts it. Problem 1001's arrays, read as intervals, are connectable exactly when
+no two intervals cross. Such a family splits at any chosen interval into the part inside it and the
+part after it, which gives an interval DP. In each case the structure was in the original problem all
+along, and the bijection just makes it usable. Check it against a count you already know: 892's
+cuttings come out Catalan, five for $n = 3$, as the statement shows.
 
 ## The four shapes an answer takes
 
@@ -130,6 +161,15 @@ that, one coordinate per prime, but a number up to $b$ has at most one prime fac
 So each large prime is cleared by a single pivot, and
 [Gaussian elimination](/blogs/technique/gaussian-elimination) only ever sees the primes up to
 $\sqrt b$. See [count solutions by rank](/blogs/takeaway/count-solutions-by-rank).
+
+When the question asks for the *best* configuration rather than the number of them, bound the
+answer's range first. Problem 782 sums, over every $k$, the minimum complexity of an $n \times n$
+binary matrix with $k$ ones, where complexity is the number of distinct rows and columns. A short
+construction reaches every $k$ with complexity 4, so $c(n, k) \in \{1, 2, 3, 4\}$. The sum is then
+$4(n^2 + 1)$ minus the sizes of three sets: the $k$ reachable with complexity at most 1, 2 and 3. A
+matrix with few distinct rows and columns is a block matrix, so each set is a short union of
+two-parameter quadratic families in the block sizes. Marking them in a flag array costs $O(n^2)$.
+The minimisation has become three counts of a set of reachable values.
 
 **A recurrence, evaluated as a table.** When no formula exists, decompose by the last decision. It
 is the single most common shape here — [dynamic programming](/blogs/technique/dynamic-programming)
@@ -171,6 +211,18 @@ constant term in $x$. The poles of the result give a degree-40 denominator; a sm
 first 81 terms, multiplying by the denominator must zero out every coefficient past the numerator
 (a built-in check that no pole was missed), and [Bostan–Mori](/blogs/technique/bostan-mori-algorithm)
 then halves $n$ each round to read off one coefficient at $10^7$ — or at $10^{18}$, for the same cost.
+
+Rational is the best case but not the only good one. An **algebraic** generating function, one that
+satisfies a polynomial equation (typically through square roots of Catalan type), still has
+coefficients that obey a short recurrence with polynomial coefficients. Such sequences are
+[P-recursive](https://en.wikipedia.org/wiki/Holonomic_function), so one coefficient costs $O(n)$
+time and $O(1)$ memory, with no series to store. Problem 1007 needs the signed sum of the leaf
+weights $F_i$ over every one of the Catalan-many trees.
+[Binet's formula](/blogs/technique/binets-formula) turns the Fibonacci weights into two geometric
+weights $t^i$, since $\sqrt5$ exists modulo its prime. Splitting a tree at its root shifts and
+negates the right subtree's weights, which gives an algebraic equation for the series. After the
+square roots are rationalised away, each remaining piece has a recurrence of order one or two, and
+these are stepped together up to $n = 10^7$.
 
 That logarithm has two preconditions, and both can be engineered. The first is that the quantity
 must close under its own recurrence, and a total often does not. Problem 377 sums the zero-free
@@ -283,6 +335,25 @@ takes over. And $M$ then yields to the state quotient above: columns with equal 
 interchangeable, so a partial matrix is just a histogram of column fills, and
 [its invariants](/blogs/takeaway/invariant-bounds-the-state-space) leave two free counters per row.
 
+Where orbits vary in size, list one representative per orbit and weight it by the orbit's size.
+Problem 564 averages, over random integer splits of a segment, the area of the largest polygon with
+those sides in that order. The largest such polygon is the [cyclic](/blogs/domain/cyclic-polygon)
+one, and a cyclic polygon's area depends only on the multiset of its sides, because reordering the
+sides only reorders the isosceles triangles around the centre. So at $n = 50$ the
+$\binom{96}{49} \approx 6 \times 10^{27}$ ordered splits collapse to the
+$p(47) \approx 1.2 \times 10^5$ [partitions](/blogs/domain/partition-number-theory). Each partition
+is weighted by its multinomial orbit size, $n!/\prod_j m_j!$.
+
+When the symmetry is the automorphism group of a graph, there is no list of orbits to walk. The
+standard move is to count *rooted* objects, which have far less symmetry to worry about, and then
+correct for the rooting. Problem 936 counts unlabelled trees in which no edge joins two vertices of
+equal degree. A rooted tree is a root plus a [multiset](/blogs/technique/multiset-coefficient) of
+smaller rooted trees, so the rooted counts come from a knapsack over sizes, with the root's child
+count as the only extra state that the degree rule needs.
+[Otter's dissimilarity theorem](/blogs/technique/otters-dissimilarity-theorem) then removes the
+rooting: unrooted trees = vertex-rooted − edge-rooted + symmetric-edge-rooted. Here the last term is
+zero, since a symmetric edge always joins two vertices of equal degree.
+
 Symmetry also collapses a *filter*. A condition of the form "the sum is divisible by $n$" is
 picked out of a generating function by a [roots-of-unity filter](/blogs/technique/roots-of-unity-filter):
 evaluate at every $n$-th root of unity and average, since $\frac1n\sum_j \omega^{js}$ is $1$ when
@@ -295,7 +366,7 @@ count becomes a binomial plus a small correction, divided by $p$. See
 ## The counts themselves are the other hazard
 
 Combinatorial answers grow explosively, and this domain's most common companion tag is
-[modular arithmetic](/blogs/domain/modular-arithmetic) — 75 of these 272 problems carry it. That
+[modular arithmetic](/blogs/domain/modular-arithmetic) — 76 of these 271 problems carry it. That
 pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
 the deliverable and you work in the ring from line one), or it wants the honest integer and you
 need [arbitrary precision](/blogs/technique/arbitrary-precision-arithmetic). Python gives you the
@@ -329,6 +400,11 @@ paths, partitions — at a size where listing them is hopeless. When you catch i
 - **Fix the equivalence first.** Ordered or unordered, labelled or identical, set or multiset.
   Write the definition down before writing a loop; most wrong answers here are modelling errors,
   not bugs.
+- **Ask whether the object is a known one in disguise.** Chord diagrams, bracketings, interval
+  families and posets of gaps can turn into trees and antichains with tabulated counts. Confirm the
+  bijection on a count you already know.
+- **Where orbits differ in size, weight the representatives.** Count one shape per orbit, times
+  its orbit size. For graphs up to isomorphism, count rooted versions and correct for the rooting.
 - **Look for the bounded summary.** What is the least you must remember about a prefix to know how
   it may be extended? If that summary is small and finite, you have a DP state and the problem is
   essentially solved.
@@ -345,7 +421,11 @@ paths, partitions — at a size where listing them is hopeless. When you catch i
 - **When $n$ is astronomical, look for a rational generating function.** If the table you would
   fill obeys a fixed-order linear recurrence, the $n$-th term costs $\log n$, not $n$. Add to the
   state whatever the update needs, and if every prefix is treated alike, compose one table instead
-  of a matrix.
+  of a matrix. An algebraic one still gives an $O(n)$ recurrence with no storage.
+- **When the answer is a minimum over a tiny range, count the levels.** Bound the range, then sum
+  the sizes of the sets that reach each level.
+- **When the objects are lattice shapes with fixed parameters, expect a (quasi-)polynomial.**
+  Compute enough small values exactly and interpolate.
 - **When the constraints are linear, compute a rank.** Over a finite field the solutions form a
   subspace, so their number is a power of the field size and nothing needs listing.
 - **When there is no formula, look for a step.** A sum that resists closing may still move to its
@@ -365,7 +445,13 @@ was conjectured, then checked against a breadth-first search for every $n \le 7$
 also what catches the plausible wrong idea: in problem 768 the natural guess — a balanced chandelier
 is a union of regular polygons — is a theorem for moduli with two prime factors and false for 360,
 which has three; already on 30 sockets the polygon unions miss 30 of the 525 balanced 6-subsets.
-See [small cases reveal the closed form](/blogs/takeaway/small-cases-reveal-closed-form). Just
+Brute force can also find the *form* of the answer. Problem 984 counts sets of Chinese-chess
+horses that are knight-connected and never block one another. Exhausting all $2^{25}$ subsets of
+the $5 \times 5$ board showed that every valid set is a lattice octagon, cut out by eight linear
+inequalities. A family of lattice shapes with a fixed number of integer parameters has a count that
+is polynomial in the board size, here a [quasi-polynomial](/blogs/domain/quasi-polynomial) of
+degree 8 with one polynomial per parity. Ten exact values of each parity fix both polynomials, and
+[interpolation](/blogs/domain/polynomial-interpolation) carries them to $N = 10^{18}$. See [small cases reveal the closed form](/blogs/takeaway/small-cases-reveal-closed-form). Just
 never expect brute force to reach the answer. The domain is defined by the distance
 between what you can enumerate and what you are asked to count, and every technique here is a way
 of crossing it.
