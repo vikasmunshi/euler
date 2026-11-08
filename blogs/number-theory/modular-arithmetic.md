@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-04T08:19Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -294,6 +294,16 @@ $A(x, y) / (d(x)\,d(y))$, where $d$ counts divisors, and a fraction is just a re
 $10^9 + 7$. So the 42 million positions collapse to an 81-entry table of digit-pair counts, a few
 inverses of numbers up to 4, and $T$ as a product of powers.
 
+A field can even hold an irrational closed form, if the irrational has a residue. Problem 1007
+sums the values of every bracketing of $F_0 - F_1 - \dots - F_n$. Each leaf enters with a sign, so
+the sum is a signed sum of Fibonacci numbers. [Binet's formula](https://en.wikipedia.org/wiki/Fibonacci_sequence#Binet's_formula)
+$F_i = (\varphi^i - \psi^i)/\sqrt 5$ turns those weights into two geometric ones, and geometric
+weights are what a generating function handles. Over the reals that needs $\sqrt 5$. But 5 is a
+[quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue) modulo $10^9 + 9$, so
+$\sqrt 5$, $\varphi$ and $\psi$ are ordinary elements of $\mathbb{F}_p$, found by Tonelli–Shanks.
+The formula then holds there exactly. Before carrying a real-number identity into the residues,
+check that every irrational it uses has a residue.
+
 A field can also undo a symmetry. Problem 475 counts the ways to split $12n$ musicians into trios
 that never reuse a quartet. Unordered trios are awkward to count, so it labels them, which
 multiplies the count by exactly $(4n)!$ because the trios are distinct. A dynamic programme then
@@ -312,6 +322,18 @@ Problem 374's block sums need the [harmonic numbers](https://en.wikipedia.org/wi
 $H_j$, and as residues those cost one inverse per $j$. It carries $A_j = j!\,H_j$ instead. That is
 an integer (a [Stirling number of the first kind](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_first_kind))
 with $A_j = j A_{j-1} + (j-1)!$, so a loop of fourteen million steps takes no inverse at all.
+The same scaling works for any coefficient recurrence that divides by its index. The coefficients
+of an algebraic or [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) series typically
+obey $(k+1)c_{k+1} = \alpha_k c_k + \beta_k c_{k-1}$, which costs one inverse per step. Carry
+$d_k = k!\,c_k$ instead. The $k + 1$ cancels, and $d_{k+1} = \alpha_k d_k + k\beta_k d_{k-1}$ has
+polynomial coefficients and no division. Problem 976 advances three such sequences and a binomial
+numerator, all sharing the denominator $K!$, in one loop of $10^7$ steps. Problem 1007 does the
+same for the Catalan and square-root series in its generating function, and one inverse of
+$(n+1)!$ at the end undoes every scaling.
+When the inverses really are needed one by one, a table of them costs $O(1)$ each. Problem 892
+needs $1/m$ for every $m$ up to $5 \times 10^6$, and reads each off the identity
+$i^{-1} \equiv -\lfloor p/i \rfloor \cdot (p \bmod i)^{-1} \pmod p$. Since $p \bmod i < i$, that
+entry is already in the table, so the loop never exponentiates.
 Problem 675 cannot fold its inverses away: it needs the inverse of every odd number up to
 $2 \cdot 10^7 + 1$. It computes all of them at once, as $a^{p-2}$ by one vectorised
 square-and-multiply over a NumPy array, about thirty array multiplications for ten million inverses.
@@ -362,6 +384,19 @@ and the [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Hadamard_tran
 pointwise, but its inverse divides by the length 8, which has no inverse modulo $10^9$. With eight
 entries the direct convolution costs nothing and uses only $+$ and $\times$, so it is the right
 choice. A fast transform is only available when the modulus can undo it.
+
+The [number-theoretic transform](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_over_a_ring)
+has the same limit. It needs a $2^k$-th root of unity, so it works modulo primes like
+$998244353 = 119 \cdot 2^{23} + 1$, and not modulo $10^9 + 7$. Problem 767 needs a convolution
+of length $10^5$ modulo $10^9 + 7$, and gets round that by computing the *integer* convolution
+and reducing it afterwards. Each 30-bit residue is split into three 10-bit limbs. One limb product
+summed over $10^5$ terms stays below $2^{37}$, far inside a double's 53-bit mantissa, so a
+floating-point FFT of the limbs rounds back to exact integers. Nine limb products, gathered by
+shift into five spectra, rebuild the residue. The convolution itself comes from factorials. The
+problem needs $F(K) = \sum_s \binom{K}{s}^{16}$ for every $K \le k$. Writing
+$\binom{K}{s}^{16} = K!^{16} \cdot u_s u_{K-s}$ with $u_s = (s!)^{-16}$ makes $F(K)$ the $K$-th
+term of $u * u$, so all $k$ sums cost one transform. Inverse factorials separate a binomial
+into a factor for each index, and that is what lets a convolution compute it.
 
 The commonest version is also the easiest to miss: "the last nine digits" means modulo $10^9$, and
 $10^9$ is even. Both problems 340 and 401 end in closed forms with a small fixed denominator.
@@ -549,6 +584,20 @@ residue $r = (1 - b)/a$, and only if that residue really is a root. One ring pow
 both candidates at once. The failing residue is kept as the fraction $(1 - b, a)$ and compared by
 cross-multiplication, so the test never needs an inverse either.
 
+The unit group can also be the whole problem. Problem 995 wants the least $s$ for which the
+[cyclotomic polynomial](https://en.wikipedia.org/wiki/Cyclotomic_polynomial)
+$\Phi_p = 1 + x + \dots + x^{p-1}$ divides $1 + \sum_{d \mid s} x^d$. Substitute a primitive
+$p$-th root $\zeta$. Since $\zeta^p = 1$, the exponents are only residues mod $p$, and the only
+linear relation among the powers of $\zeta$ is that they sum to zero. The divisibility therefore
+says the divisors of $s$ hit every non-zero residue mod $p$ exactly once. Equivalently, the sets
+$\{1, q, \dots, q^e\}$, one for each prime power of $s$, *factor* the cyclic group
+$(\mathbb{Z}/p)^\times$. [Hajós's theorem](https://en.wikipedia.org/wiki/Haj%C3%B3s%27s_theorem)
+says that in such a factorisation one factor is a subgroup. Applying it repeatedly turns any
+valid $s$ into a chain of nested subgroups, each of order dividing $p - 1$, and each prime's exponent
+is fixed by its multiplicative order modulo the subgroup reached so far. The least $s$ is then a
+shortest path over the divisors of $p - 1$, priced by the smallest prime of each order. A
+polynomial divisibility has become a question about orders.
+
 ## Combining moduli: the Chinese Remainder Theorem
 
 When a modulus factors into coprime pieces, the
@@ -729,8 +778,12 @@ directly. When you see it:
   modulo $10^9$, and the division inside a fast transform's inverse. An exact division by a coprime
   divisor is still safe, and a stubborn $c$ can be divided out of a residue taken modulo $cm$, or
   the exact value kept until the division is done. Where you can, defer all the divisions to a single
-  inverse at the end or carry a scaled quantity ($j!\,H_j$, not $H_j$) that needs none, and remember that over a prime a negative exponent is just a residue mod
-  $p - 1$. Over a prime, a symmetry can be counted labelled and divided out once.
+  inverse at the end or carry a scaled quantity ($j!\,H_j$, not $H_j$; $k!\,c_k$ for a recurrence
+  that divides by $k + 1$) that needs none. A table of inverses costs $O(1)$ per entry. Over a
+  prime a negative exponent is just a residue mod $p - 1$, a symmetry can be counted labelled and
+  divided out once, and an irrational such as $\sqrt 5$ is usable if it has a residue.
+- Need a **convolution** modulo a prime with no $2^k$-th root of unity? Split the residues into
+  limbs small enough for a floating-point FFT to stay exact, and reduce afterwards.
 - Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
   $\mathbb{F}_{p^2}$) and strip primes while the power stays 1. Lift to $p^k$ by at most a factor
   $p$ per step, and take the lcm across a composite modulus. To test a root you cannot cheaply
