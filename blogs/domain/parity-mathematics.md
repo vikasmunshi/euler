@@ -175,6 +175,7 @@ is the natural lever: it lets the exponent be taken apart one binary digit at a 
 - ● [0868](/solutions/0868/) — Belfry Maths
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0974](/solutions/0974/) — Very Odd Numbers
+- ● [0976](/solutions/0976/) — XO Game
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ○ [0981](/solutions/0981/) — The Quaternion Group II
 - ○ [1003](/solutions/1003/) — Lonely Singles

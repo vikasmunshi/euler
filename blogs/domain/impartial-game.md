@@ -153,6 +153,5 @@ off-by-a-factor errors in this domain come from.
 - ○ [0949](/solutions/0949/) — Left vs Right II
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 - ● [0961](/solutions/0961/) — Removing Digits
-- ○ [0976](/solutions/0976/) — XO Game
 
 <!-- /problems -->

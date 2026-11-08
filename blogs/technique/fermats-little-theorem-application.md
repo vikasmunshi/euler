@@ -296,5 +296,6 @@ front of you is asking for.
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0926](/solutions/0926/) — Total Roundness
+- ● [0976](/solutions/0976/) — XO Game
 
 <!-- /problems -->

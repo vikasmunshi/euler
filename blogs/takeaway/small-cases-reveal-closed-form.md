@@ -268,6 +268,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0963](/solutions/0963/) — Removing Trits
+- ● [0976](/solutions/0976/) — XO Game
 - ● [0984](/solutions/0984/) — Knights and Horses
 - ● [0994](/solutions/0994/) — Counting Triangles
 - ● [0998](/solutions/0998/) — Squaring the Triangle

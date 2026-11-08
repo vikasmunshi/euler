@@ -26,6 +26,5 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Nimber>._
 - ○ [0900](/solutions/0900/) — DistribuNim II
 - ○ [0933](/solutions/0933/) — Paper Cutting
 - ○ [0953](/solutions/0953/) — Factorisation Nim
-- ○ [0976](/solutions/0976/) — XO Game
 
 <!-- /problems -->

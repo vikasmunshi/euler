@@ -245,6 +245,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0963](/solutions/0963/) — Removing Trits
+- ● [0976](/solutions/0976/) — XO Game
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0998](/solutions/0998/) — Squaring the Triangle
 

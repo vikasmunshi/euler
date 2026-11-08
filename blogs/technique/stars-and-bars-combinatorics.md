@@ -165,6 +165,7 @@ The combinatorics is the same in both languages. The binomial coefficient is not
 - ● [0452](/solutions/0452/) — Long Products
 - ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
+- ● [0976](/solutions/0976/) — XO Game
 - ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->
