@@ -140,6 +140,7 @@ decide whether a DP over totals or a recurrence on the generating function fits.
 - ● [0181](/solutions/0181/) — Grouping Two Different Coloured Objects
 - ● [0333](/solutions/0333/) — Special Partitions
 - ● [0374](/solutions/0374/) — Maximum Integer Partition Product
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum
 - ○ [0629](/solutions/0629/) — Scatterstone Nim

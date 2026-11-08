@@ -138,6 +138,7 @@ was additive all along.
 
 - ● [0030](/solutions/0030/) — Digit Fifth Powers
 - ● [0318](/solutions/0318/) — 2011 Nines
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0822](/solutions/0822/) — Square the Smallest
 - ● [0957](/solutions/0957/) — Point Genesis
 

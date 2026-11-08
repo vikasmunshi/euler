@@ -166,6 +166,7 @@ cheat.
 - ● [0109](/solutions/0109/) — Darts
 - ● [0152](/solutions/0152/) — Sums of Square Reciprocals
 - ● [0186](/solutions/0186/) — Connectedness of a Network
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 
 <!-- /problems -->

@@ -285,6 +285,7 @@ the loop.
 - ● [0531](/solutions/0531/) — Chinese Leftovers
 - ○ [0533](/solutions/0533/) — Minimum Values of the Carmichael Function
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
 - ○ [0614](/solutions/0614/) — Special Partitions 2
 - ○ [0618](/solutions/0618/) — Numbers with a Given Prime Factor Sum

@@ -204,7 +204,7 @@ that read the same thing contribute the same amount, and can be counted together
 - ● [0523](/solutions/0523/) — First Sort I
 - ○ [0527](/solutions/0527/) — Randomized Binary Search
 - ○ [0547](/solutions/0547/) — Distance of Random Points Within Hollow Square Laminae
-- ○ [0564](/solutions/0564/) — Maximal Polygons
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ○ [0567](/solutions/0567/) — Reciprocal Games I
 - ○ [0568](/solutions/0568/) — Reciprocal Games II
 - ○ [0573](/solutions/0573/) — Unfair Race

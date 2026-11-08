@@ -223,6 +223,7 @@ apart, and 706 shows the two working together.
 - ● [0255](/solutions/0255/) — Rounded Square Roots
 - ● [0257](/solutions/0257/) — Angular Bisectors
 - ● [0305](/solutions/0305/) — Reflexive Position
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0619](/solutions/0619/) — Square Subsets
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$

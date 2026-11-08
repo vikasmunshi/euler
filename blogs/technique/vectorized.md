@@ -450,6 +450,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0558](/solutions/0558/) — Irrational Base
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors

@@ -240,6 +240,7 @@ benchmark reflects the real cost.
 - ● [0463](/solutions/0463/) — A Weird Recurrence Relation
 - ● [0539](/solutions/0539/) — Odd Elimination
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0755](/solutions/0755/) — Not Zeckendorf

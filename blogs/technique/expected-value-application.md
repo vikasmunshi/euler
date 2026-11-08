@@ -106,6 +106,7 @@ def round_fraction(num: int, den: int, places: int) -> str:
 - ● [0253](/solutions/0253/) — Tidying Up A
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0523](/solutions/0523/) — First Sort I
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ● [0866](/solutions/0866/) — Tidying Up B

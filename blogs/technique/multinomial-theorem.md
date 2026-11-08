@@ -157,6 +157,7 @@ NumPy expression costs the same either way, while in a scalar loop the saving is
 
 - ● [0154](/solutions/0154/) — Exploring Pascal's Pyramid
 - ● [0240](/solutions/0240/) — Top Dice
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0885](/solutions/0885/) — Sorted Digits

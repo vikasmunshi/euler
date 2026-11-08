@@ -527,6 +527,7 @@ both slower and harder to read.
 - ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0549](/solutions/0549/) — Divisibility of Factorials
 - ● [0558](/solutions/0558/) — Irrational Base
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0625](/solutions/0625/) — Gcd Sum
 - ● [0632](/solutions/0632/) — Square Prime Factors

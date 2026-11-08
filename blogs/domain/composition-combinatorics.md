@@ -114,6 +114,7 @@ on part sizes, run lengths or symmetry.
 - ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ○ [0398](/solutions/0398/) — Cutting Rope
 - ○ [0502](/solutions/0502/) — Counting Castles
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ○ [0606](/solutions/0606/) — Gozinta Chains II
 - ● [0710](/solutions/0710/) — One Million Members
 - ● [0719](/solutions/0719/) — Number Splitting

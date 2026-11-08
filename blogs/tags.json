@@ -589,7 +589,7 @@
       "reference": "https://en.wikipedia.org/wiki/Composition_(combinatorics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0253", "p0377", "p0398", "p0502", "p0606", "p0710", "p0719", "p0845", "p0862", "p0929", "p0951", "p0996"]
+      "refs": ["p0253", "p0377", "p0398", "p0502", "p0564", "p0606", "p0710", "p0719", "p0845", "p0862", "p0929", "p0951", "p0996"]
     },
     {
       "slug": "computational-geometry",
@@ -2254,7 +2254,7 @@
       "reference": "https://en.wikipedia.org/wiki/Partition_(number_theory)",
       "additional-references": ["https://en.wikipedia.org/wiki/Partition_(number_theory)#Asymptotic_growth"],
       "summary": "",
-      "refs": ["p0031", "p0076", "p0077", "p0078", "p0181", "p0333", "p0374", "p0614", "p0618", "p0629", "p0688", "p0772", "p0840", "p0859", "p0890", "p0922", "p0939", "p1010"]
+      "refs": ["p0031", "p0076", "p0077", "p0078", "p0181", "p0333", "p0374", "p0564", "p0614", "p0618", "p0629", "p0688", "p0772", "p0840", "p0859", "p0890", "p0922", "p0939", "p1010"]
     },
     {
       "slug": "partizan-game",
@@ -3622,7 +3622,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0844_s0"]
+      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0844_s0"]
     },
     {
       "slug": "binomial-inversion",
@@ -4342,7 +4342,7 @@
       "reference": "https://en.wikipedia.org/wiki/Expected_value",
       "additional-references": ["https://en.wikipedia.org/wiki/Expected_value#Linearity"],
       "summary": "",
-      "refs": ["p0253_s0", "p0493_s0", "p0523_s0", "p0705_s0", "p0779_s0", "p0866_s0"]
+      "refs": ["p0253_s0", "p0493_s0", "p0523_s0", "p0564_s0", "p0705_s0", "p0779_s0", "p0866_s0"]
     },
     {
       "slug": "expm1",
@@ -4666,7 +4666,7 @@
       "reference": "https://docs.python.org/3/reference/expressions.html#generator-expressions",
       "additional-references": ["https://docs.python.org/3/glossary.html#term-generator", "https://docs.python.org/3/howto/functional.html#generators", "https://en.wikipedia.org/wiki/Generator_(computer_programming)", "https://docs.python.org/3/reference/expressions.html#yield-expressions", "https://wiki.python.org/moin/Generators"],
       "summary": "",
-      "refs": ["p0001_s3", "p0001_s4", "p0002_s0", "p0008_s0", "p0009_s0", "p0010_s2", "p0011_s0", "p0019_s0", "p0033_s0", "p0036_s0", "p0037_s0", "p0041_s0", "p0043_s0", "p0058_s0", "p0060_s0", "p0061_s0", "p0063_s0", "p0069_s0", "p0070_s0", "p0075_s0", "p0081_s0", "p0087_s0", "p0109_s0", "p0152_s0", "p0186_s0", "p0965_s0"]
+      "refs": ["p0001_s3", "p0001_s4", "p0002_s0", "p0008_s0", "p0009_s0", "p0010_s2", "p0011_s0", "p0019_s0", "p0033_s0", "p0036_s0", "p0037_s0", "p0041_s0", "p0043_s0", "p0058_s0", "p0060_s0", "p0061_s0", "p0063_s0", "p0069_s0", "p0070_s0", "p0075_s0", "p0081_s0", "p0087_s0", "p0109_s0", "p0152_s0", "p0186_s0", "p0564_s0", "p0965_s0"]
     },
     {
       "slug": "geometric-series",
@@ -5170,7 +5170,7 @@
       "reference": "https://en.wikipedia.org/wiki/Logarithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0318_s0", "p0822_s0", "p0957_s0"]
+      "refs": ["p0030_s0", "p0318_s0", "p0564_s0", "p0822_s0", "p0957_s0"]
     },
     {
       "slug": "long-division",
@@ -5503,7 +5503,7 @@
       "reference": "https://en.wikipedia.org/wiki/Multinomial_theorem",
       "additional-references": ["https://en.wikipedia.org/wiki/Multinomial_theorem#Multinomial_coefficients"],
       "summary": "",
-      "refs": ["p0154_s0", "p0240_s0", "p0698_s0", "p0743_s0", "p0885_s0"]
+      "refs": ["p0154_s0", "p0240_s0", "p0564_s0", "p0698_s0", "p0743_s0", "p0885_s0"]
     },
     {
       "slug": "multiplication-algorithm",
@@ -5602,7 +5602,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0782_s0", "p0804_s0", "p0921_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0782_s0", "p0804_s0", "p0921_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0", "p0983_s0", "p0996_s0", "p1001_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5917,7 +5917,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recursion_(computer_science)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0452_s0", "p0463_s0", "p0539_s0", "p0551_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0829_s0", "p0862_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0248_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0452_s0", "p0463_s0", "p0539_s0", "p0551_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0829_s0", "p0862_s0", "p1000_s0"]
     },
     {
       "slug": "regula-falsi",
@@ -6385,7 +6385,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0921_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0921_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0980_s0", "p0983_s0", "p1001_s0"]
     },
     {
       "slug": "vieta-jumping",
@@ -6601,7 +6601,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
-      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0310", "p0331", "p0346", "p0351", "p0395", "p0420", "p0475", "p0478", "p0565", "p0635", "p0670", "p0706", "p0761", "p0768", "p0782", "p0788", "p0804", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
+      "refs": ["p0012", "p0023", "p0027", "p0034", "p0041", "p0051", "p0053", "p0060", "p0068", "p0091", "p0092", "p0099", "p0107", "p0109", "p0110", "p0116", "p0118", "p0125", "p0128", "p0130", "p0154", "p0155", "p0156", "p0172", "p0177", "p0185", "p0187", "p0194", "p0199", "p0210", "p0219", "p0220", "p0223", "p0224", "p0227", "p0238", "p0243", "p0244", "p0246", "p0250", "p0253", "p0265", "p0310", "p0331", "p0346", "p0351", "p0395", "p0420", "p0475", "p0478", "p0564", "p0565", "p0635", "p0670", "p0706", "p0761", "p0768", "p0782", "p0788", "p0804", "p0862", "p0926", "p0951", "p0961", "p0983", "p1000"]
     },
     {
       "slug": "extract-digits-by-modular-shift",
@@ -6880,7 +6880,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a deterministic process must be run on every input in a huge range, carry whole intervals of inputs that behave identically and split them only where the behaviour diverges.",
-      "refs": ["p0255", "p0257", "p0305", "p0619", "p0706", "p0752", "p0764", "p0844", "p0963"]
+      "refs": ["p0255", "p0257", "p0305", "p0564", "p0619", "p0706", "p0752", "p0764", "p0844", "p0963"]
     },
     {
       "slug": "sum-of-representations-is-a-point-count",
@@ -6952,7 +6952,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a recurrence is sequential along one axis but each slice along the other only reads itself, sweep the sequential axis once and update a whole block of slices as one vector.",
-      "refs": ["p1001"]
+      "refs": ["p0564", "p1001"]
     },
     {
       "slug": "watch-integer-width",

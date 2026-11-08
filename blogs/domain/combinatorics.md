@@ -494,7 +494,7 @@ of crossing it.
 - ○ [0553](/solutions/0553/) — Power Sets of Power Sets
 - ○ [0557](/solutions/0557/) — Cutting Triangles
 - ○ [0559](/solutions/0559/) — Permuted Matrices
-- ○ [0564](/solutions/0564/) — Maximal Polygons
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ○ [0572](/solutions/0572/) — Idempotent Matrices
 - ○ [0573](/solutions/0573/) — Unfair Race
 - ○ [0577](/solutions/0577/) — Counting Hexagons

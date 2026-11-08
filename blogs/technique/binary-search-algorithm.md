@@ -268,6 +268,7 @@ more cheaply than you can enumerate it. Then, in order:
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0501](/solutions/0501/) — Eight Divisors
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
+- ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0686](/solutions/0686/) — Powers of Two
