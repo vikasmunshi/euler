@@ -111,6 +111,7 @@ order of magnitude cuts the work by about a thousand.
 - ● [0539](/solutions/0539/) — Odd Elimination
 - ● [0670](/solutions/0670/) — Colouring a Strip
 - ● [0761](/solutions/0761/) — Runner and Swimmer
+- ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 

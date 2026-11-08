@@ -236,7 +236,7 @@ optimisation inside the loop.
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
 - ○ [0765](/solutions/0765/) — Trillionaire
 - ○ [0775](/solutions/0775/) — Saving Paper
-- ○ [0782](/solutions/0782/) — Distinct Rows and Columns
+- ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ○ [0789](/solutions/0789/) — Minimal Pairing Modulo $p$
 - ○ [0794](/solutions/0794/) — Seventeen Points
 - ○ [0821](/solutions/0821/) — 123-Separable

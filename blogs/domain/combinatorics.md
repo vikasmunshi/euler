@@ -566,7 +566,7 @@ of crossing it.
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ○ [0780](/solutions/0780/) — Toriangulations
 - ○ [0781](/solutions/0781/) — Feynman Diagrams
-- ○ [0782](/solutions/0782/) — Distinct Rows and Columns
+- ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ○ [0783](/solutions/0783/) — Urns
 - ○ [0786](/solutions/0786/) — Billiard
 - ● [0788](/solutions/0788/) — Dominating Numbers

@@ -251,5 +251,6 @@ $\sqrt{N} \approx 316$ entries, and runs about nine times as slow.
 - ● [0421](/solutions/0421/) — Prime Factors of $n^{15}+1$
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0521](/solutions/0521/) — Smallest Prime Factor
+- ● [0782](/solutions/0782/) — Distinct Rows and Columns
 
 <!-- /problems -->

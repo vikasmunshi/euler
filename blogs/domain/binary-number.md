@@ -218,7 +218,6 @@ never shows.
 - ○ [0760](/solutions/0760/) — Sum over Bitwise Operators
 - ○ [0767](/solutions/0767/) — Window into a Matrix II
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
-- ○ [0782](/solutions/0782/) — Distinct Rows and Columns
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
 - ○ [0810](/solutions/0810/) — XOR-Primes
 - ○ [0811](/solutions/0811/) — Bitwise Recursion

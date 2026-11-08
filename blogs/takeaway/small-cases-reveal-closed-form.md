@@ -262,6 +262,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0711](/solutions/0711/) — Binary Blackboard
 - ● [0739](/solutions/0739/) — Summation of Summations
+- ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0963](/solutions/0963/) — Removing Trits

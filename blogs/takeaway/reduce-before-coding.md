@@ -576,6 +576,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0834](/solutions/0834/) — Add and Divide
 - ● [0853](/solutions/0853/) — Pisano Periods 1
