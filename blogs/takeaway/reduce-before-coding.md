@@ -1,5 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
-<!-- status: final 2026-11-03T22:36Z -->
+<!-- status: final -->
 # Reduce algebraically before coding
 
 Before you write a loop, ask what the loop is really computing — and whether the
@@ -82,7 +82,7 @@ all the way.
 
 The four degrees above simplify a computation that is already the right one.
 The harder problems on the list mostly need something earlier: a reduction that
-changes *what* is computed before any of it is simplified. Seven such moves
+changes *what* is computed before any of it is simplified. Eight such moves
 recur.
 
 **Restate the condition.** The question as posed is often the awkward form of
@@ -109,6 +109,20 @@ $n = d \cdot e$, and a per-$n$ search becomes a sweep over pairs.
 $2n + 1$, which pins $n \equiv -\tfrac12 \pmod p$, and substituting back leaves
 the condition $p \mid 4k^2 + 1$ — a search over $n$ for every $k$ becomes the
 largest prime factor of one polynomial value.
+A condition stated over a sliding window can be differenced. [Window into a
+Matrix II](/solutions/0767/) asks that every $2 \times k$ window of a 16-row
+binary matrix sum to $k$. Subtract two windows that overlap in all but one
+column and the condition becomes $c_{j+k} = c_j$ for the column sums of each
+pair of rows, so the columns fall into $k$ residue classes that behave
+independently. Flipping the bits of every other row then turns "adjacent rows
+sum to $K$" into "every row has the same weight", and a constraint on $10^{16}$
+columns becomes one convolution of length $k$.
+A limit can be restated too. [Prime Factor and Exponent](/solutions/0779/)
+averages a function over all integers, which is a
+[natural density](https://en.wikipedia.org/wiki/Natural_density). The Chinese
+remainder theorem makes divisibility by distinct primes independent events, so
+the average becomes a series over primes, and the statement's infinite sum over
+$K$ is a geometric series that moves inside it.
 [A Polynomial Modulo the Square of a Prime](/solutions/0457/) asks for the least
 root of $n^2 - 3n - 1$ modulo $p^2$; completing the square makes that a square
 root of 13, found modulo $p$ and lifted to $p^2$ by one
@@ -179,8 +193,30 @@ match after substitution: the equation is first-order
 [unification](https://en.wikipedia.org/wiki/Unification_(computer_science)),
 solved with union-find and an occurs check, and monotonicity makes the least
 value the most general unifier with every free variable set to zero. No number is
-ever searched. Once the object has a name, its theory comes with it, and the code
-implements a theorem rather than a search.
+ever searched. A physical process can turn out to be a known object as well.
+[Rolling Square](/solutions/0935/) rolls a small square around the inside of a
+larger one. Tracking only where its corners land near each corner of the large
+square reduces the whole motion to one map of the circle,
+$y \mapsto x - \sqrt{1 - y^2} \bmod 1$. That map is an orientation-preserving
+homeomorphism, so it has a
+[rotation number](https://en.wikipedia.org/wiki/Rotation_number). Each reduced
+fraction $p/q$ is realised by exactly one square, and its step count is a
+formula in $p$ and $q$. So a rolling simulation becomes a count of coprime
+pairs under a line, which Möbius inversion handles. A conflict relation between
+pieces is often an order or a graph. In [Non-attacking
+Frogs](/solutions/0988/) two positions attack when their difference lies in
+the [numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup)
+$\langle a, b \rangle$. Written in the gap coordinates $g = ab - ia - jb$,
+"attacks" is exactly componentwise dominance of $(i, j)$, so a valid
+configuration is an [antichain](https://en.wikipedia.org/wiki/Antichain) in a
+Young diagram, and $10^{15}$ subsets are counted by a DP over its cells.
+[Connections II](/solutions/1002/) draws arcs above or below a line; two arcs
+on the same side collide exactly when their intervals cross, so a valid drawing
+is a proper 2-colouring of the overlap graph. A connected bipartite graph has
+just two colourings, one the mirror of the other, so the maximisation splits
+into independent components, each taking its larger colour class. Once the
+object has a name, its theory comes with it, and the code implements a theorem
+rather than a search.
 
 **Turn it into squares, then read the sign.** A quadratic condition often
 becomes a statement about squares, and the sign between them decides which
@@ -205,6 +241,18 @@ than it sounds, because values of a polynomial factor better together than
 apart. A prime divides such a value only on at most two residue classes of the
 index, so one [sieve over the primes](/blogs/technique/polynomial-sieve)
 replaces all the separate factorisations.
+A difference factors over the integers only when its coefficients are squares.
+[Nearly Isosceles $120$ Degree Triangles](/solutions/0582/) asks for triangles
+with sides up to $10^{100}$, which no search reaches. The first step is to fix
+the parameter the statement keeps small, the difference $d = b - a \le 100$.
+Completing the square then gives $X^2 - 3Y^2 = d^2$. The coefficient 3 is not a
+square, so the difference does not factor over $\mathbb{Z}$, but it does factor
+in $\mathbb{Z}[\sqrt3]$. It is a
+[generalised Pell equation](https://en.wikipedia.org/wiki/Pell%27s_equation#Generalized_Pell's_equation),
+and because norms multiply, multiplying by the unit $2 + \sqrt3$ maps solutions
+to solutions. Every solution lies on the orbit of one of a few small seeds, and
+each orbit grows geometrically, so a bound of $10^{100}$ costs under two hundred
+steps per seed. The cost grows with the number of digits in the limit, not with the limit.
 
 **Keep only what the answer reads.** Most inputs carry far more information
 than the question uses, and finding the part it uses shrinks the state.
@@ -268,8 +316,17 @@ $16x^2 + y^4 = z^2$ as a Pythagorean triple with one leg a multiple of 4 and the
 other a square; Euclid's formula, plus the fact that coprime factors of a square
 are squares, yields two two-parameter families in which $z$ grows like a fourth
 power — so $z \le 10^{16}$ means about $3 \times 10^7$ coprime parameter pairs,
-each one a solution, and no search over $(x, y)$ or square test anywhere. Construction beats filtering whenever the answers are
-sparse and the space is not.
+each one a solution, and no search over $(x, y)$ or square test anywhere.
+Euclid's formula is one case of a general method: a conic with one rational
+point is parametrised by the lines through that point. [Angular Bisector and
+Tangent 2](/solutions/0962/) asks when a length $CE$ is an integer; a valuation
+argument reduces "$CE^2$ is a square" to $g^2 - w^2 = D m^2$, a conic through
+the obvious point $(1 : 1 : 0)$. Each reduced slope $\beta/\alpha$ gives one
+primitive solution, and the perimeter is linear in the remaining scale, so each
+shape contributes a single floor division's worth of triangles. Some $10^{10}$
+candidate triangles become a few million parameter tuples.
+Construction beats filtering whenever the answers are sparse and the space is
+not.
 
 **Divide out the scale.** When a condition survives multiplying every variable
 by a constant, the solutions lie on rays, and there is a standard way to find
@@ -296,6 +353,22 @@ integers, $k(a-b)(a^2+b^2)$, and it must be prime, so $k = 1$ and $a - b = 1$. A
 primality condition is weak until a factorisation appears, and then it is an
 equation: two variables with no stated bound collapse to one, and the answers are
 the primes among $n^2 + (n+1)^2$.
+
+**Bound the answer, then decide the boundary.** When the quantity asked for is
+small, prove how small it is before computing it. [Distinct Rows and
+Columns](/solutions/0782/) asks for the least *complexity* (the number of
+distinct strings among the rows and columns) of an $n \times n$ binary matrix
+with $k$ ones, summed over all $k \le n^2$. That looks like an optimisation over
+$2^{n^2}$ matrices for each $k$. Two explicit constructions, a square plus one
+partial row and a near-square rectangle plus one partial row, reach every $k$
+with complexity 4. Complexities 1 and 2 fall to a short case analysis. That
+leaves one yes/no question per $k$: is complexity 3 possible? With at most three
+row types and three column types, a matrix is a block matrix with finitely many
+patterns, and each pattern makes $k$ a quadratic form in the block sizes. The
+answer becomes the union of a few two-parameter quadratic families, marked in a
+flag array, and complementing the matrix ($k \mapsto n^2 - k$) halves the
+casework. Construction gives the upper bound and a finite classification
+settles the rest.
 
 **Trade the condition for a sum that collapses.** A congruence condition, "the
 total is $0 \bmod n$", is awkward to count directly but easy to *filter*: the
