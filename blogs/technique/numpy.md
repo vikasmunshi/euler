@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-11-04T18:17Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -136,6 +136,15 @@ scalar loop, and every exponent then costs two gathers and one multiply:
 coordinate arrays. The condition is the shared base. Where each element has its own base,
 as in [421](/solutions/0421/) below, there is no table to share and the ladder stays.
 
+The same split also gives *every* power in order. [995](/solutions/0995/) needs the
+multiplicative order of every residue mod $p$. With $g$ a primitive root and
+$t = \lceil\sqrt{p-1}\rceil$, `(big[:, None] * small[None, :] % p).ravel()` is the
+$t \times t$ outer product of $g^{tj}$ and $g^i$ read row by row, which is
+$g^0, g^1, \dots, g^{p-2}$. The powers of a generator are a permutation of the units, so
+the scatter `orders[powers] = n // np.gcd(np.arange(n), n)` cannot collide, and it writes
+$\operatorname{ord}(g^i) = n/\gcd(i, n)$ for every residue at once. That is a discrete-log
+table built from about $2\sqrt{p}$ scalar steps.
+
 **An index map is a transition, and a scatter must not collide.** When a DP keeps a
 distribution over states as a dense vector, a deterministic transition is just
 an index array: `dst[to] += src[from]`. [400](/solutions/0400/) pushes its weights
@@ -148,7 +157,12 @@ injective map, like this one, is safe; a many-to-one map needs
 [`np.add.at`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html)
 or `np.bincount(to, weights=src)`. Plain assignment is the exception: `a[idx] = True`
 lands the same value however often an index repeats, so a scatter of flags may collide
-freely.
+freely. [782](/solutions/0782/) is built on that: it marks which counts $k$ are reachable
+by scattering the values of about a dozen quadratic families into one $n^2$-entry flag
+array, with no thought for duplicates. The problem is symmetric under $k \mapsto n^2 - k$,
+and a reversed view *is* that map, so `flags |= flags[::-1]` closes the set under
+complement in one pass. Source and target overlap there, and NumPy detects it and buffers
+the read, just as it does for 249's knapsack slice below.
 
 **Push, don't pull — and `argmin` is a mex.** A [Grundy value](https://en.wikipedia.org/wiki/Mex_(mathematics))
 is the smallest value *not* among a position's options, and computing it by pulling —
@@ -257,6 +271,32 @@ for this $k$ cannot occur in any live row, so its entry in the power table is se
 rather than to a value `int64` cannot hold, and `counts[:live] @ powers` never reads it
 with a non-zero count.
 
+Instances of *different sizes* still fit one array if you pad them to a rectangle, and the
+padding value is chosen so that it does nothing. [564](/solutions/0564/) averages over every
+partition of $n - 3$, each a ragged list of (side, multiplicity) pairs, so it stores them as
+two zero-padded matrices. Each partition's circumradius solves a monotone equation in a sum of
+`mult * np.arcsin(side * x)` terms, and a padding cell has multiplicity 0 and $\arcsin 0 = 0$,
+so it adds nothing to any row's sum. The solve is then a
+[bisection](https://en.wikipedia.org/wiki/Bisection_method) on every row at once:
+64 rounds of `hi = np.where(above, mid, hi)` and its mirror. Which of the two equations a row
+obeys (circumcentre inside the polygon or not) is a mask fixed before the loop, and the
+residual is one `np.where`. A fixed round count means no lane ever drops out, so nothing needs
+compacting. [975](/solutions/0975/) pads ragged tables of extremal heights in the same way,
+but its lanes walk a path through their own table, each holding its own cell $(i, j)$ and
+reading `fv[rows, i]` with one paired gather per step. Walks end at different times, so it
+compacts with a `keep` mask as 437 does, and the loop runs as long as the longest walk, not
+once per walk.
+
+The axis can also run the other way: one instance, many *candidate parameters*.
+[986](/solutions/0986/) asks for the largest $M$ for which a forced recurrence started at $M$
+dies out. The answer is monotone in $M$, so a bisection would find it, but each probe is a
+long simulation whose cost is almost all per-step Python overhead. So 64 candidates run side
+by side, one per column of the state buffer, for about the price of one, and each round
+narrows the bracket 64-fold instead of 2-fold. The rounds are allowed to stop early, leaving
+slow columns undecided, because the final pair $M, M + 1$ is certified with an exact run.
+Wherever the per-step overhead dominates, a $k$-ary search costs about the same per round as
+a binary one and needs far fewer rounds.
+
 **A scan with no ufunc folds into a grid.** A running product mod $p$ has no
 vectorised form: `np.multiply.accumulate` cannot reduce between steps, so it overflows
 `uint64` after a couple of terms. [739](/solutions/0739/) needs exactly such prefix and
@@ -326,6 +366,30 @@ query's block, and inside a block the sequence's partial sum is a quadratic, so 
 vectorised quadratic solve finishes the job. The table is small and the queries are
 many, so the binary search is what joins the two.
 
+**Sort, then compare neighbours: that is a group-by.** NumPy has no hash table, but a sort
+does the same job for counting. [972](/solutions/0972/) counts collinear triples in the
+[Klein model](https://en.wikipedia.org/wiki/Beltrami%E2%80%93Klein_model), where geodesics
+are straight lines. For each anchor point, the line to every other point is a cross product
+that one broadcast computes. The line is then made *canonical*: divide by the gcd and fix the
+sign, so that two points on the same line produce equal integer pairs (252's lesson again).
+After `np.lexsort` on that key, a group starts wherever a key differs from its predecessor:
+`np.flatnonzero` of that comparison gives the starts, `np.diff` gives the group sizes, and
+$\sum s(s-1)/2$ is the number of pairs on a common line. That is a
+[run-length encoding](https://en.wikipedia.org/wiki/Run-length_encoding) of sorted data, and
+`np.unique(keys, return_index=True)` is the shortcut when you need only the first member of
+each group: it is how [995](/solutions/0995/) finds the least prime of every order in a
+chunk.
+
+Groups of unequal size are ragged again, and [998](/solutions/0998/) handles them by
+*bucketing by size*. It wants every pair of Pythagorean triples that share a leg $s$. With
+the triples sorted by leg, `np.bincount` gives each leg's count and `np.cumsum` its offset (a
+CSR index, as in 425). Every leg with exactly $k$ triples then stacks into one
+(legs × $k$) matrix, `np.triu_indices(k)` lists the pairs $i \le j$ within a row, and the
+pair tests run over the whole bucket at once. The Python loop runs over the distinct group
+sizes, which are few, rather than over the legs. Building the triples needs the same
+ragged expansion as 749: each primitive triple repeats $\lfloor n/\text{long leg} \rfloor$
+times, and `np.repeat` with the restarting-`arange` trick produces all its multiples.
+
 **`cumsum` is the prefix sum, `bincount` the histogram.** The
 [Mertens function](https://en.wikipedia.org/wiki/Mertens_function) is literally
 `np.cumsum(mu)`; the count of squarefree numbers up to each bound is
@@ -365,6 +429,19 @@ version, which skips the zero cells, runs about 36 times faster, against the fac
 two in 291. A dense table buys simplicity, and it is also fast only while most of it is
 occupied.
 
+A DP whose recurrence is inherently sequential along one axis can still be a vector along the
+other. [1001](/solutions/1001/) runs an interval DP: for each right end $r$, a column
+$C_r[l]$ is filled from $l = r$ downwards, and every step depends on the step before. But
+columns depend on each other only through values of shorter intervals, which are already
+known, so 512 columns can be swept together. One Python iteration per row $l$ updates the
+whole block as `cur[k:] = (cur[k:] + g * snapshot) % MOD`. Only the columns with $r \ge p$
+(where $p$ is the partner of $l$) take the term, and because the columns are sorted that is a
+suffix found by one `bisect`, so there is no mask, as in 521's split index. The cost is
+bookkeeping. The update needs the block as it stood at row $p + 1$, which the downward pass
+has since overwritten, so the pass copies a snapshot when it reaches that row and pops it
+when $l$ arrives. The Python loop then runs about once per (row, block) rather than once per
+DP cell.
+
 ## How to reason about it
 
 **Fixed-width dtypes are the price of the speed** — [watch the integer width](/blogs/takeaway/watch-integer-width). Python's `int` is arbitrary
@@ -395,6 +472,17 @@ mirror step up — a vectorised [integer square root](/blogs/technique/integer-s
 [252](/solutions/0252/) applies the same division of labour to angles: `arctan2`
 sorts directions, but equality is decided on gcd-reduced integers.
 
+A float can decide, but only where a bound proves it exact. [767](/solutions/0767/) needs
+polynomial products modulo $10^9 + 7$, and `np.fft` gives an $O(n \log n)$
+[convolution](https://en.wikipedia.org/wiki/Convolution_theorem) only in `float64`. Products
+of 30-bit residues summed over a long convolution would need far more than the 53 bits a
+double has. So each coefficient is split into three 10-bit limbs. A limb product is below
+$2^{20}$, a sum of up to $2^{17}$ of them stays below $2^{37}$, and the FFT's rounding error
+on values that size is far below $\tfrac12$, so `np.rint` of the inverse transform returns
+the exact integer. Six forward transforms give the five limb-pair spectra, and the five
+results are recombined mod $p$ in exact integers. The FFT does all the heavy work, and the
+limb width is what makes its output exact.
+
 [558](/solutions/0558/) pushes the division of labour furthest. It expands every square
 greedily in powers of the real root $r$ of $x^3 = x^2 + 1$. Each remainder is held
 *exactly*, as integer coefficients $(a, b, c)$ of $a + br + cr^2$ in three `int64`
@@ -415,7 +503,12 @@ so `int8` costs one byte per entry and a sieve to $2^{25}$ fits in 32 MB instead
 256 MB. When the range genuinely does not fit, chunk it: build `arange` a few million
 at a time and accumulate, which keeps the vectorisation and bounds the footprint —
 [401](/solutions/0401/) walks its $\sqrt{n} \approx 3 \times 10^7$ hyperbola terms in
-chunks of $2^{20}$.
+chunks of $2^{20}$. The dtype can even be chosen at run time:
+[986](/solutions/0986/) simulates in `int32` whenever its starting values fit, falling back to
+`int64` otherwise, and keeps its state in a short ring buffer, updated in place with
+`np.add(..., out=block)` and `np.right_shift(..., out=block)`. The working rows stay in cache
+and no temporaries are allocated, which matters when the arithmetic per step is a single add
+and shift.
 
 **Vectorising means *no Python per element*, not *NumPy somewhere*.**
 [`np.vectorize`](https://numpy.org/doc/stable/reference/generated/numpy.vectorize.html)
