@@ -7484,8 +7484,8 @@
     "level": 36,
     "pct": 92,
     "solvers": 194,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 12:59"
   },
   "937": {
     "title": "Equiproduct Partition",
