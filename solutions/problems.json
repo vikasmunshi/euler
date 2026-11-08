@@ -7868,8 +7868,8 @@
     "level": 28,
     "pct": 72,
     "solvers": 185,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 11:11"
   },
   "985": {
     "title": "Telescoping Triangles",
