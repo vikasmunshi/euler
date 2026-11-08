@@ -7436,8 +7436,8 @@
     "level": 40,
     "pct": 100,
     "solvers": 222,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 17:50"
   },
   "931": {
     "title": "Totient Graph",
