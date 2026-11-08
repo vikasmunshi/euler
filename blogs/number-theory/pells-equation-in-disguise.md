@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: final 2026-11-03T17:34Z -->
+<!-- status: final -->
 # Pell equation in disguise
 
 Some Euler problems are about a probability, some about triangles, some about tiling a floor, and
@@ -13,7 +13,9 @@ One more, smooth triangular numbers (581), wears the disguise the other way roun
 Pell equations at once, used to prove a search is finite rather than to walk a sequence. And two
 more, the $k$-Markov numbers (844) and a triangle-hunting sequence (955), keep the walk but change
 the step: one jumps across a tree instead of along a line, the other finds each next solution by
-factoring.
+factoring. Others take the disguise apart in other ways. One equation can turn out to be a hundred
+(582). A conic can be solved with a ruler rather than a unit (962). And a completed square can come
+out with the wrong sign for Pell (621).
 The [technique page](/blogs/technique/pells-equation) explains how to *solve* Pell equations.
 This page is about *recognising* one, and about why so many of these problems end up walking
 literally the same sequence of numbers.
@@ -41,6 +43,7 @@ Run that on each problem and they line up:
 | 224 — $a^2+b^2+1 = c^2$, on the diagonal $a=b$ | $2a^2 + 1 = c^2$ | $c^2 - 2a^2 = 1$ |
 | 321 — $n(n+2)$ moves is triangular | $8(n^2+2n)+1$ square | $(2k+1)^2 - 8(n+1)^2 = -7$ |
 | 94 — sides $a, a, a\pm1$, integral area | height$^2 = a^2 - h^2$, $a = 2h\mp1$ | $(3h\mp2)^2 - 3H^2 = 1$ |
+| 582 — $120°$ triangle, $b - a = d \le 100$ | $c^2 = a^2 + ab + b^2$ | $(2c)^2 - 3(2a+d)^2 = d^2$ |
 | 138 — isosceles, height $= b \pm 1$ | $L^2 = (2k\pm1)^2 + k^2$ | $(5k\pm2)^2 - 5L^2 = -1$ |
 | 137 — $A_F(x) = k$ has rational $x$ | discriminant $5k^2+2k+1$ square | $(5k+1)^2 - 5m^2 = -4$ |
 | 140 — the same for $A_G$ | discriminant $5k^2+14k+1$ square | $(5k+7)^2 - 5m^2 = 44$ |
@@ -51,6 +54,14 @@ be $1$. Problems 223 and 224 are not Pell problems as a whole: their full soluti
 under the [Barning–Hall matrices](/blogs/technique/tree-of-primitive-pythagorean-triples).
 But the symmetric spine $a = b$ of each tree is a Pell sequence, and the middle matrix restricted
 to that spine is exactly the Pell step $(c, a) \mapsto (3c + 4a,\ 2c + 3a)$.
+
+Problem 582 hides in a different place: in the angle rather than the sides. The
+[law of cosines](https://en.wikipedia.org/wiki/Law_of_cosines) at $120°$ gives the
+[Eisenstein](https://en.wikipedia.org/wiki/Eisenstein_triple) form $a^2 + ab + b^2$ instead of
+$a^2 + b^2$. Its discriminant is $-3$, and that is where the $D = 3$ comes from. The near-isosceles
+condition then fixes the *right-hand side* rather than the variables. Each difference $d$ gives
+its own equation with $N = d^2$, so "one Pell equation" is really a hundred of them. They all share
+one unit, though, and their seeds are easy to find (see *Count the families* below).
 
 ## One recurrence underneath
 
@@ -70,7 +81,9 @@ same recurrence plus a constant, $p_{k+1} = T p_k - p_{k-1} + c(T-2)/d$. That is
   $u_{k+1} = 6u_k - u_{k-1}$, because $8u^2 = 2(2u)^2$ puts it in the same ring.
 - **$D = 3$, unit $2 + \sqrt3$, $T = 4$.** Problem 94 has equal sides $5, 17, 65, 241$.
   Consecutive Pell solutions alternate between the two families (base $a+1$, base $a-1$), so a
-  single $T = 4$ recurrence with an alternating correction walks both.
+  single $T = 4$ recurrence with an alternating correction walks both. Problem 582 steps every one
+  of its hundred equations by the same unit, $(X, Y) \mapsto (2X + 3Y,\ X + 2Y)$. With a limit of
+  $10^{100}$ that still means only $O(\log n)$ steps per seed.
 - **$D = 5$, units built from the golden ratio $\varphi$.** Problem 138 steps by
   $\varphi^6 = 9 + 4\sqrt5$, so $T = 18$: legs $17, 305, \dots$ with $L_{k+1} = 18L_k - L_{k-1}$.
   The golden nuggets of 137 are $2, 15, 104, 714$, with $g_{k+1} = 7g_k - g_{k-1} + 1$. Here
@@ -84,7 +97,11 @@ denominators $1, 5, 29, 169, 985$. Those numbers are $2b - 1$ in Problem 100, th
 Problem 139 and the diagonal legs in Problem 223, all at once. The norm $+1$ convergents
 $\tfrac32, \tfrac{17}{12}, \tfrac{99}{70}$ are the diagonal of Problem 224. Four problems, one
 sequence. The $D = 5$ cluster is the same story with Fibonacci numbers: the nuggets are
-$F_{2n}F_{2n+1}$, and the legs in 138 are $F_{6k+3}/2$.
+$F_{2n}F_{2n+1}$, and the legs in 138 are $F_{6k+3}/2$. Problem 1007 uses that ring as a computing
+device rather than as a set of solutions. Its sum runs over Fibonacci leaves, and Binet's formula
+turns that into two geometric sums in $\varphi$ and $\psi$. The work is done modulo a prime $p$ for
+which $5$ is a quadratic residue. There $\sqrt5$, $\varphi$ and $\psi$ are ordinary elements of
+$\mathbb{F}_p$, so the irrational unit becomes a plain integer.
 
 The public solution to Problem 94 shows how little code is left once the disguise is off. It is
 the whole algorithm, with the two families folded into one sign alternator:
@@ -165,6 +182,36 @@ and merging the factorisations, since the two are coprime. The walk still jumps 
 solution without visiting the terms in between. But each step costs a factorisation, not a
 multiplication by a fixed unit, and the steps grow irregularly rather than geometrically.
 
+## Conics that are not Pell walks
+
+A Pell walk needs two things: an *indefinite* form ($D > 0$, not a square) and an equation whose
+scale is fixed by $N$. Take away either one and the conic is still there, but you solve it some
+other way.
+
+**Take away the scale.** In Problem 962 the perfect-square condition reduces to
+$g^2 - w^2 = D\,m^2$. All three unknowns are free, and the equation is homogeneous, so any multiple
+of a solution is a solution too. The question is then about *rational* points on a conic, and that
+has a classical one-line answer. Find one rational point, here the obvious $(1 : 1 : 0)$, and draw
+lines through it. A line with rational slope $\beta/\alpha$ meets the conic in exactly one more
+point, and that point is rational. Every rational point arises once this way, which gives
+$(g, w, m) \propto (D\beta^2 + \alpha^2,\ D\beta^2 - \alpha^2,\ 2\alpha\beta)$.
+[Euclid's formula](/blogs/technique/euclids-formula) is the same construction applied to
+$x^2 + y^2 = z^2$. The integer solutions are then multiples of these primitive ones, and the
+parameters run over a bounded region with no unit and no orbit. The extra work is bookkeeping.
+The common factor $\delta$ of the three coordinates depends only on $\gcd(\alpha, D)$ and on
+parity, so a coprimality count weighted by the Möbius function replaces a loop over $\alpha$.
+
+**Flip the sign.** In Problem 621, $T_b + T_c = m$ completes to
+$(2b+1)^2 + (2c+1)^2 = 8m + 2$. That is a square condition, but with $D = -1$. The form is
+[positive definite](https://en.wikipedia.org/wiki/Sum_of_two_squares_theorem), so it has only
+finitely many solutions, and no unit of infinite order exists to walk between them. Counting
+replaces walking. Jacobi's theorem reads the number of representations off the factorisation of
+$4m + 1$. The remaining work is to factor $\sqrt{2n}$ values of one quadratic in $a$. That is the
+polynomial sieve of Problem 291 again: the square is completed once more, $2f(a) = N - (2a+1)^2$,
+so that each prime hits only the residue classes given by the square roots of $N$ modulo $p$.
+In general, the sign of $D$ decides between "walk an infinite orbit" and "count a finite set by
+factoring".
+
 ## How to reason about it
 
 - **Smell it from the statement.** Watch for "integral area" or "integer height" (Heron's
@@ -189,13 +236,26 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
   convolves the sequence with itself, $E(N) = (2N-1)\sum E(i)E(N-1-i)$, which is quadratic in its
   own terms. Problem 718 is a min-plus recurrence over residues, $w_i = \min(b_i, w_{i-1} + z)$,
   and its equation $17^p a + 19^p b + 23^p c = n$ is linear: a Frobenius problem, with no square
-  anywhere. Problem 374's $A_j = j A_{j-1} + (j-1)!$ (factorial times harmonic number) has a
+  anywhere. Problem 988 lives on the gaps of the same kind of semigroup, $\langle a, b \rangle$,
+  and its linear equation turns "attacking" into a partial order, not a conic. Problem 374's $A_j = j A_{j-1} + (j-1)!$ (factorial times harmonic number) has a
   multiplier that changes with $j$, so no trace exists. Problem 539 halves its index as 463 does,
   and sums by carrying the pair $(P, S)$ down the halving together. Problem 423 is the closest
   miss. Pascal's rule gives $G(n+1) = 6G(n) - A(n) + [n+1 \text{ prime}]A(n+1)$, which has a constant
   multiplier but a forcing term that is neither constant nor periodic. Since nothing repeats, the
   solution does not walk it. It unrolls it: each increment reaches every later term with weight
   $6^{n-j}$, so the whole sum becomes one dot product against geometric weights.
+- **A multiplier that drifts linearly is holonomic, not Pell.** Some recurrences fail the fit in
+  a consistent way: the fitted "trace" grows steadily with $n$. That is the signature of a
+  [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) (P-recursive) sequence, whose
+  recurrence coefficients are polynomials in $n$. Problem 892 reduces to central binomials,
+  $b_m = b_{m-1} \cdot 2(2m-1)/m$. Problem 976 needs coefficients of
+  $(1-x)^{-\alpha}(1+x)^{-\beta}$, which follow
+  $(n+1)c_{n+1} = (\alpha-\beta)c_n + (\alpha+\beta+n-1)c_{n-1}$. Problem 1007's generating
+  function is algebraic, and it is rationalised until each piece has such a recurrence. These
+  recurrences still step in $O(1)$, like a Pell walk. But they produce the $n$-th *coefficient*,
+  not the $n$-th solution, so the cost is linear in $n$ rather than logarithmic. One practical
+  trick is shared by 976 and 1007. Every step divides by $n + 1$, so the code carries
+  $n!\,c_n$ instead, and the division-free recurrence needs a single modular inverse at the end.
 - **Check whether $D$ is a square.** A perfect-square condition is necessary for Pell, but not
   sufficient. If completing the square leaves $X^2 - s^2 Y^2 = N$, the left side factors as
   $(X - sY)(X + sY)$, and divisor arguments replace the Pell machinery. Problem 764 is the clean
@@ -205,7 +265,11 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
   pairs, with no unit and no orbit. Problem 518 is the same principle with nothing to complete:
   $a+1, b+1, c+1$ in geometric progression means $(b+1)^2 = (a+1)(c+1)$. Write the ratio in lowest
   terms, $q/p$, and the triple must be $kp^2, kpq, kq^2$. The search then runs over $(k, p, q)$,
-  not over pairs of primes. Problem 955 (above) is the walking version of this degenerate case.
+  not over pairs of primes. Problem 510 makes the same move in geometry. Three circles tangent to
+  a line satisfy $1/\sqrt{r_C} = 1/\sqrt{r_A} + 1/\sqrt{r_B}$. That forces $r_A/r_B$ to be the
+  square of a reduced fraction $u/v$, so every solution is
+  $t\,(u^2(u+v)^2,\ v^2(u+v)^2,\ u^2v^2)$, and the multiples of $t$ are summed in closed form.
+  Problem 955 (above) is the walking version of this degenerate case.
   Problem 581 meets the same degenerate case inside its family
   ($q = 2$ gives $d = 4$) and simply skips it, because $x^2 - 4y^2 = 1$ has no positive solution.
 - **A square in the statement need not be a condition.** Problem 674's operator
@@ -226,10 +290,19 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
   ladders give $x^2 = w^2 + a^2$ and $y^2 = w^2 + b^2$ with the same width $w$. Eliminating $w$
   leaves $x^2 - a^2 = y^2 - b^2$, a quadric in four unknowns rather than a conic in two. The working move is to generate every triple with
   [Euclid's formula](/blogs/technique/euclids-formula), group the triples by shared leg, and test
-  the third condition, $(a+b) \mid ab$, on pairs inside each group.
+  the third condition, $(a+b) \mid ab$, on pairs inside each group. Problem 998 has the same shape:
+  its triangles are two triples glued along a shared longer leg. It adds a lesson about exactness.
+  The geometric condition, an apex angle of at least $45°$, becomes the integer inequality
+  $s^2 - (x+y)s - xy \le 0$ via the tangent addition formula. A floating-point minimiser with a
+  $10^{-7}$ tolerance accepts the false candidate $(21, 23, 24)$, whose height is $20.9998\ldots$.
+  Once the square is removed, keep the final test in integers.
 - **Count the families.** For $N = \pm1$ there is one orbit. For $N = 44$ (Problem 140) or
   $N = -7$ (Problem 321) there are several, and a missed seed silently drops every answer in that
-  family. Compare the merged sequence against all the terms the statement gives.
+  family. Compare the merged sequence against all the terms the statement gives. Problem 582 shows
+  a systematic way to find every seed. The unit's step increases $Y$ along the branch, and it maps
+  $(d, 0)$ to $(2d, d)$. So the strip $0 \le Y < d$ is one full period, and every solution
+  descends to exactly one point in it. Testing $d$ values of $Y$ for a perfect square therefore
+  finds all the seeds, with no guessing.
 - **Filter on the original variables.** Divisibility ($5 \mid X \mp 2$), positivity and
   degeneracy ($k = 0$ in 138, $n = 0$ in 321) all belong to the problem, not to the Pell
   equation. Apply them after mapping back.
