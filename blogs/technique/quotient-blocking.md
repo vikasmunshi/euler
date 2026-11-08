@@ -165,5 +165,6 @@ interval, never per `n`.
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0926](/solutions/0926/) — Total Roundness
+- ● [0935](/solutions/0935/) — Rolling Square
 
 <!-- /problems -->

@@ -10,5 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Mertens_functi
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0935](/solutions/0935/) — Rolling Square
 
 <!-- /problems -->

@@ -260,7 +260,7 @@ near the root.
 - ○ [0904](/solutions/0904/) — Pythagorean Angle
 - ○ [0914](/solutions/0914/) — Triangles inside Circles
 - ○ [0919](/solutions/0919/) — Fortunate Triangles
-- ○ [0935](/solutions/0935/) — Rolling Square
+- ● [0935](/solutions/0935/) — Rolling Square
 - ○ [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ○ [0966](/solutions/0966/) — Triangle Circle Intersection
 - ○ [0972](/solutions/0972/) — Hyperbolic Plane

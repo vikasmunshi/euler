@@ -232,6 +232,7 @@ in the key.
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0935](/solutions/0935/) — Rolling Square
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ● [1000](/solutions/1000/) — Problem $1000$

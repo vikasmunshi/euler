@@ -478,7 +478,6 @@ induction will confirm. The shape picks the method.
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
-- ○ [0935](/solutions/0935/) — Rolling Square
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0943](/solutions/0943/) — Self Describing Sequences

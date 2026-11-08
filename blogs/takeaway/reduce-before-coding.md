@@ -591,6 +591,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0935](/solutions/0935/) — Rolling Square
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0951](/solutions/0951/) — A Game of Chance

@@ -529,6 +529,7 @@ loop was never needed.
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
+- ● [0935](/solutions/0935/) — Rolling Square
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis

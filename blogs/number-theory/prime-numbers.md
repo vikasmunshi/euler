@@ -1006,6 +1006,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0935](/solutions/0935/) — Rolling Square
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial

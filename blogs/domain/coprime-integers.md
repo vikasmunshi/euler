@@ -276,6 +276,7 @@ nothing about either number's factorisation beyond its disjointness from the oth
 - ○ [0841](/solutions/0841/) — Regular Star Polygons
 - ○ [0886](/solutions/0886/) — Coprime Permutations
 - ● [0932](/solutions/0932/) — $2025$
+- ● [0935](/solutions/0935/) — Rolling Square
 - ○ [0958](/solutions/0958/) — Euclid's Labour
 - ● [0975](/solutions/0975/) — A Winding Path
 - ● [0988](/solutions/0988/) — Non-attacking Frogs

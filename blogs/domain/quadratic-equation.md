@@ -199,6 +199,5 @@ bound that becomes an interval between two roots.
 - ● [0587](/solutions/0587/) — Concave Triangle
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0932](/solutions/0932/) — $2025$
-- ○ [0935](/solutions/0935/) — Rolling Square
 
 <!-- /problems -->
