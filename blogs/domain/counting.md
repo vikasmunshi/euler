@@ -260,6 +260,6 @@ reach for wide or arbitrary-precision types
 - ○ [0972](/solutions/0972/) — Hyperbolic Plane
 - ○ [0987](/solutions/0987/) — Straight Eight
 - ○ [0997](/solutions/0997/) — Dice Box
-- ○ [1001](/solutions/1001/) — Connections I
+- ● [1001](/solutions/1001/) — Connections I
 
 <!-- /problems -->

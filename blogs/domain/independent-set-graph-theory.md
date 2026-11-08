@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Independent_se
 
 - ● [0209](/solutions/0209/) — Circular Logic
 - ○ [0703](/solutions/0703/) — Circular Logic II
+- ● [1001](/solutions/1001/) — Connections I
 
 <!-- /problems -->

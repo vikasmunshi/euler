@@ -1047,7 +1047,7 @@ handful of operations on small numbers.
 - ● [0996](/solutions/0996/) — Overtakes
 - ○ [0999](/solutions/0999/) — Alternating Recurrence
 - ● [1000](/solutions/1000/) — Problem $1000$
-- ○ [1001](/solutions/1001/) — Connections I
+- ● [1001](/solutions/1001/) — Connections I
 - ○ [1004](/solutions/1004/) — Balanced Integer
 - ● [1006](/solutions/1006/) — Fibonacci Subwords
 - ● [1010](/solutions/1010/) — March of the Penguins

@@ -246,7 +246,6 @@ counting walks.
 - ○ [0984](/solutions/0984/) — Knights and Horses
 - ○ [0992](/solutions/0992/) — Another Frog Jumping
 - ● [1000](/solutions/1000/) — Problem $1000$
-- ○ [1001](/solutions/1001/) — Connections I
 - ○ [1002](/solutions/1002/) — Connections II
 
 <!-- /problems -->
