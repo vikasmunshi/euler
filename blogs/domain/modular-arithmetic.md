@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-11-04T03:28Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -101,7 +101,14 @@ found, and each $k$ contributes a plain geometric series in the ring. Problem 51
 $a = \sqrt n$. Unrolled, it counts lattice paths and telescopes to a sum of binomials
 $\binom{\lfloor x - ja \rfloor + j}{j}$, taken mod the prime from factorial tables. The real number
 survives only inside that floor, and an integer square root of $j^2 n$ computes it exactly, so
-floating point never touches the residue.
+floating point never touches the residue. Sometimes no extension ring is needed at all. Problem 1007
+reaches a signed sum of Fibonacci numbers, and
+[Binet's formula](https://en.wikipedia.org/wiki/Fibonacci_sequence#Binet's_formula) would turn it
+into two geometric series if only $\sqrt 5$ were available. Modulo its prime $10^9 + 9 \equiv 4
+\pmod 5$, $5$ is a [quadratic residue](https://en.wikipedia.org/wiki/Quadratic_residue). So
+$\sqrt 5$ and the golden ratio are ordinary elements of $\mathbb{F}_p$, and the real-number
+identity holds there word for word. Before you build $\mathbb{Z}_p[\sqrt d]$, ask whether $d$
+already has a square root mod $p$.
 
 **"… modulo $n + 1$" written into the definition.** A modulus that is part of the *object*,
 rather than of the deliverable, is often there to simplify it. Problem 512 defines
@@ -120,7 +127,11 @@ $\mathbb{Z}[x]$ but in $\mathbb{Z}[x]/(x^{250} - 1)$, where $x^{250} = 1$ makes 
 modulo $250$ by themselves: the state is $250$ counters, never a polynomial of growing degree. The
 smallest instance of the same trick is parity — problem 996 keeps only the even-total terms of a
 generating function as $\tfrac12\big(f(y) + f(-y)\big)$, the [root-of-unity
-filter](/blogs/domain/root-of-unity) for modulus $2$. The filter is cheapest when the modulus is
+filter](/blogs/domain/root-of-unity) for modulus $2$. The parity filtered can be the count of one
+*kind* of element. Problem 976 analyses a game and finds that the winner depends on whether the
+number of strips of length $3 \bmod 4$ is even. The multiset generating function gives each class
+its own factor, so that parity is filtered by averaging only the $3 \bmod 4$ factor over
+$x \mapsto \pm x$: $\tfrac12\big[(1-x)^{-c} + (1+x)^{-c}\big]$. The filter is cheapest when the modulus is
 prime. Problem 635 counts the $p$-element subsets of $\{1, \dots, qp\}$ whose sum is divisible by
 $p$. Averaging over the $p$th roots of unity $\omega^j$, every $j \ne 0$ gives a primitive root
 again, so $k \mapsto \omega^{jk}$ visits each root exactly $q$ times and all $p - 1$ non-trivial
@@ -165,6 +176,15 @@ $\lambda(125) = 100$, so a shift by $500$ leaves base and exponent alike unchang
 factor — a quarter-million exponentiations become one block of five hundred. Where no theorem hands
 you the period, detect it: problem 943 walks deterministic sequences of parity masks only until
 one repeats, then answers "the first $k$ terms" by counting whole periods.
+
+The period can also sit in the *input*, choosing the formula. Problem 984 counts certain lattice
+octagons on an $N \times N$ board. A count of shapes with a fixed number of integer parameters is
+polynomial in $N$, here of degree $8$. But one constraint changes form once a side reaches twice
+the other, so the count is a
+[quasi-polynomial](https://en.wikipedia.org/wiki/Quasi-polynomial): one polynomial for even $N$
+and another for odd $N$. Fitting each from small exact values of its own parity, and evaluating
+at $N = 10^{18}$, is just periodicity mod $2$ applied to the formula instead of the sequence. Fit
+across parities and you get a polynomial that matches neither class.
 
 The cycle can also hide in a physical process. In problem 641 each die face cycles with period $6$,
 so a die ends showing 1 exactly when its turn count, $d(k) - 1$, is a multiple of 6. That is
@@ -230,6 +250,14 @@ $\frac1n \sum_t |G(t, n)|^8$, where $G(t, n) = \sum_x e^{2\pi i t x^2 / n}$ is a
 closed form: $|G|^2 = m$ for an odd reduced modulus $m$, with a 2-adic exception. So the count is a
 Dirichlet convolution of multiplicative functions, and $n^8$ tuples become a totient sieve.
 
+A polynomial divisibility can be a congruence too. Problem 995 asks when the
+[cyclotomic polynomial](https://en.wikipedia.org/wiki/Cyclotomic_polynomial) $\Phi_p$ divides
+$1 + \sum_{d \mid s} x^d$. Substituting a primitive $p$th root $\zeta$ makes the exponents residues
+mod $p$, so the condition says the divisors of $s$ hit every non-zero residue exactly once. The
+prime powers of $s$ then *factor* the cyclic group $(\mathbb{Z}/p)^\times$, and the search runs
+over chains of subgroups, priced by multiplicative orders. Divisibility by $\Phi_m$ or by
+$x^m - 1$ always reads this way: as a statement about exponents mod $m$.
+
 ## What the modulus allows
 
 Addition and multiplication survive reduction modulo *any* $m$. Everything else depends on the
@@ -270,7 +298,20 @@ modulus, so read it before you write the first line:
   Problem 739 needs about $10^8$ binomials, so it multiplies the whole sum through by a factorial
   until every term is a prefix product times a suffix product, and takes a single inverse at the
   end. Problem 374 changes what it carries instead. Harmonic numbers would cost an inverse per step,
-  but the integer $j!\,H_j$ has a recurrence with no division in it.
+  but the integer $j!\,H_j$ has a recurrence with no division in it. Problems 976 and 1007 apply
+  the same scaling to series coefficients whose recurrence divides by the index $k + 1$: carrying
+  $k!\,c_k$ cancels it, and one inverse of a factorial at the end undoes every step. When the
+  inverses really are needed one by one, as in problem 892 with every $1/m$ up to
+  $5 \times 10^6$, the identity $i^{-1} \equiv -\lfloor p/i \rfloor \cdot (p \bmod i)^{-1}$
+  reads each from an entry already in the table.
+- **A prime decides which fast transforms exist.** The
+  [number-theoretic transform](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_over_a_ring)
+  needs a $2^k$th root of unity, so it works modulo $998244353 = 119 \cdot 2^{23} + 1$ and not
+  modulo $10^9 + 7$, whose $p - 1$ has only one factor of $2$. Problem 767 needs a length-$10^5$
+  convolution modulo $10^9 + 7$. It computes the *integer* convolution and reduces afterwards:
+  residues are split into $10$-bit limbs small enough that a floating-point FFT rounds back to
+  exact integers. That convolution exists only because inverse factorials separate a binomial,
+  $\binom{K}{s} = K!\,(s!)^{-1}((K-s)!)^{-1}$, into a factor per index, which needs the field again.
 - **A composite modulus is a product of smaller problems.** By the [Chinese Remainder
   Theorem](/blogs/technique/chinese-remainder-theorem) a squarefree $m = pqr$ splits into three
   prime fields, so you solve in each and glue. Problem 365 wants $\binom{10^{18}}{10^9}$ — over nine
@@ -320,7 +361,11 @@ modulus, so read it before you write the first line:
   64 bits, and a sum that is *not* reduced — problem 421's lands just under $2^{63}$ — leaves no
   headroom at all; estimate the magnitude before choosing the type. Problem 531 sums CRT solutions
   up to $\operatorname{lcm}(n, m) \approx 10^{12}$ without reduction, and a wider test window already
-  pushes the total past $2^{63}$, so its C port accumulates in 128 bits. The fixes (`__int128`, a split
+  pushes the total past $2^{63}$, so its C port accumulates in 128 bits. A modulus below $2^{30}$
+  works the other way. Problem 1001's DP runs modulo $1\,003\,443\,221$, so $a \cdot b + c$ fits a
+  signed 64-bit integer before reducing. That is what lets it run as whole-vector NumPy updates,
+  where there is no wider type to fall back on. Its recurrence uses only $+$ and $\times$, so
+  whether that modulus is prime never matters. The fixes (`__int128`, a split
   multiply, reducing the operands first) are in the
   [Modular Arithmetic](/blogs/number-theory/modular-arithmetic) note.
 
@@ -346,7 +391,8 @@ far too large to form directly. When you catch it:
   before you compute it.
 - **Keep roots formal.** A symmetric expression in a polynomial's roots is a function of its
   coefficients, and a power of a root reduces in the quotient ring by that polynomial. Neither needs
-  the root itself, whether it is complex or a modular square root.
+  the root itself, whether it is complex or a modular square root. And check whether the
+  irrational already has a residue: then it is a plain field element and needs no ring at all.
 - **Keep size outside the ring.** Orderings, comparisons, unreduced totals and the gcd of an
   irreducible fraction need the real magnitude or its structure, through logarithms, plain
   integers or a factorisation. Residues are only for the quantity the statement reduces.
@@ -361,7 +407,10 @@ far too large to form directly. When you catch it:
   $\mathbb{Z}[x]/(x^m - 1)$.
 - **Look for the cycle.** If a sequence is defined by adding or multiplying a constant, it is
   periodic mod $m$; prove the period from the factorisation of $m$, or detect it, and leap over an
-  astronomical number of steps.
+  astronomical number of steps. If a closed form is only polynomial on each residue class of the
+  input, fit one polynomial per class.
+- **Ask what the modulus lets you transform.** A fast convolution needs a prime with a large
+  power of $2$ in $p - 1$. Without one, convolve exactly in small limbs and reduce afterwards.
 - **Turn the sum around.** When a sum over $n$ asks which primes divide something, summing over
   the primes and asking which residue classes of $n$ each one divides is often the tractable
   direction.
