@@ -368,6 +368,7 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors
+- ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [0988](/solutions/0988/) — Non-attacking Frogs

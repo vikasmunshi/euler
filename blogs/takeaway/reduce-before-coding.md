@@ -596,6 +596,7 @@ optimise later; a loop written after it is often a loop you never write at all.
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0955](/solutions/0955/) — Finding Triangles
+- ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [0988](/solutions/0988/) — Non-attacking Frogs

@@ -277,6 +277,7 @@ patterns recur.
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0946](/solutions/0946/) — Continued Fraction Fraction
+- ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0975](/solutions/0975/) — A Winding Path
 
 <!-- /problems -->

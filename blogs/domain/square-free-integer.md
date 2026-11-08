@@ -179,6 +179,7 @@ The algorithms match one for one. The differences come from what each language m
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ○ [0864](/solutions/0864/) — Square + 1 = Squarefree
+- ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 
 <!-- /problems -->

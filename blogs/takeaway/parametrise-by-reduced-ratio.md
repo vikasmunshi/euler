@@ -9,5 +9,6 @@ _TODO: write this page. No reference on the tag._
 
 - ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
+- ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 
 <!-- /problems -->

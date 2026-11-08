@@ -1014,6 +1014,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0955](/solutions/0955/) — Finding Triangles
 - ○ [0956](/solutions/0956/) — Super Duper Sum
 - ○ [0958](/solutions/0958/) — Euclid's Labour
+- ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ○ [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0975](/solutions/0975/) — A Winding Path
