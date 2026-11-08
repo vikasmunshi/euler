@@ -7980,8 +7980,8 @@
     "level": 37,
     "pct": 94,
     "solvers": 185,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 17:19"
   },
   "999": {
     "title": "Alternating Recurrence",
