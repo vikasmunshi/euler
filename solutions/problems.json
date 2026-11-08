@@ -7948,8 +7948,8 @@
     "level": 29,
     "pct": 75,
     "solvers": 190,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 8 Nov 2026, 11:21"
   },
   "995": {
     "title": "A Particular Pair of Polynomials",
