@@ -222,5 +222,6 @@ entirely.
 - ● [0510](/solutions/0510/) — Tangent Circles
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0531](/solutions/0531/) — Chinese Leftovers
+- ● [0986](/solutions/0986/) — Another Infinite Game
 
 <!-- /problems -->

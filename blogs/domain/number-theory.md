@@ -715,7 +715,6 @@ show up there at once. See
 - ○ [0931](/solutions/0931/) — Totient Graph
 - ○ [0937](/solutions/0937/) — Equiproduct Partition
 - ○ [0954](/solutions/0954/) — Heptaphobia
-- ○ [0986](/solutions/0986/) — Another Infinite Game
 - ○ [0999](/solutions/0999/) — Alternating Recurrence
 
 <!-- /problems -->

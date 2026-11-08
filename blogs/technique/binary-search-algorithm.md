@@ -276,5 +276,6 @@ more cheaply than you can enumerate it. Then, in order:
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0986](/solutions/0986/) — Another Infinite Game
 
 <!-- /problems -->

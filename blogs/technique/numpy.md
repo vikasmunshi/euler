@@ -556,6 +556,7 @@ both slower and harder to read.
 - ● [0975](/solutions/0975/) — A Winding Path
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
+- ● [0986](/solutions/0986/) — Another Infinite Game
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1001](/solutions/1001/) — Connections I
 

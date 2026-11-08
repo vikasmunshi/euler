@@ -314,7 +314,7 @@ weighting each winning mask by how many integers wear it.
 - ● [0963](/solutions/0963/) — Removing Trits
 - ○ [0976](/solutions/0976/) — XO Game
 - ○ [0982](/solutions/0982/) — The Third Dice
-- ○ [0986](/solutions/0986/) — Another Infinite Game
+- ● [0986](/solutions/0986/) — Another Infinite Game
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->

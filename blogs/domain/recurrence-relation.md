@@ -485,6 +485,7 @@ induction will confirm. The shape picks the method.
 - ○ [0968](/solutions/0968/) — 5D Summation
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping
 - ○ [0985](/solutions/0985/) — Telescoping Triangles
+- ● [0986](/solutions/0986/) — Another Infinite Game
 - ○ [0993](/solutions/0993/) — Banana Beaver
 - ○ [0999](/solutions/0999/) — Alternating Recurrence
 - ● [1000](/solutions/1000/) — Problem $1000$

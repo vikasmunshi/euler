@@ -226,5 +226,6 @@ logic. They differ in the big-integer arithmetic underneath (`math.lcm` against 
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0986](/solutions/0986/) — Another Infinite Game
 
 <!-- /problems -->
