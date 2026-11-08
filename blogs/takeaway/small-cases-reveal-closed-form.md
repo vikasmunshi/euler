@@ -1,12 +1,13 @@
 <!-- tags: [small-cases-reveal-closed-form] -->
-<!-- status: final 2026-11-03T07:32Z -->
+<!-- status: final -->
 # Small cases reveal a closed form
 
 Some problems hide a simple rule behind a definition that is expensive to evaluate even once.
 Deciding whether one room can be tiled is a search. Settling one pirate vote needs the whole game
 below it. Seating one hotel guest needs every guest before them. Valuing one ternary game needs a
 canonical-form engine, and deciding one blackboard game needs every smaller budget. Growing one geometric
-configuration to day 16 needs about $4^{16}$ cells. Deriving the rule from first principles can
+configuration to day 16 needs about $4^{16}$ cells, and checking which sets of horses on a board leave
+each other alone means looking at every subset of the squares. Deriving the rule from first principles can
 take far longer than the problem is worth. The faster route is to solve the small instances
 *exhaustively*, lay the results out so the pattern can show itself, read a closed-form
 characterisation off the table, and check it against the brute force well beyond the range it was
@@ -36,7 +37,13 @@ The method has four parts, and each one matters:
    families of parallel lines on an integer lattice. The simulation then runs on exact integers
    (point by point, then on grids with [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform)
    convolution), and because it reproduces the statement's first two days, the model can be
-   trusted.
+   trusted. The oracle can also run on a *smaller* version of a parameter the problem fixes.
+   767's matrices have 16 rows, too many to enumerate, but the derivation is the same for any row
+   count, so the brute force runs on 2, 3 and 4 rows, and the 16-row formula only has to reproduce
+   the two given values. And sometimes the thing you enumerate is a finite space of *structures*
+   rather than instances. 782's matrices of complexity at most 3 are block matrices with at most
+   three row types and three column types. That leaves finitely many block patterns, and listing
+   all of them is a computer-assisted case analysis whose output is the rule.
 2. **A table with the right axes.** A pattern can only be seen if the data is laid out along the
    parameters that drive it. Problem 256 lists the untileable lengths *for each width*, and in that
    layout the bad lengths fall into bands that shrink step by step and then vanish. Problem 950
@@ -58,7 +65,12 @@ The method has four parts, and each one matters:
    in binary they fall into two rigid bit patterns, just as 963's coefficients only line up
    against ternary digits. Sometimes it is a *subfamily*. 335's cycle length $M(x)$ is irregular
    over all $x$, but the problem only asks about $x = 2^k + 1$, and tabulated along $k$ alone the
-   values grow by a clean factor that tends to $4$. And sometimes the stated instance is
+   values grow by a clean factor that tends to $4$. Sometimes it is a *partial sum*. 892's total
+   is a sum of $|n+1-2k|$ times a [Narayana number](https://en.wikipedia.org/wiki/Narayana_number),
+   and the absolute value gets in the way. Split the sum at the middle by symmetry and tabulate
+   the partial sums over $k \le m$ instead: each one is a product of two binomials, so the sum
+   [telescopes](https://en.wikipedia.org/wiki/Telescoping_series), and a two-line factorial
+   identity proves it. And sometimes the stated instance is
    *degenerate*. The McCarthy 91 function behind 555 is the constant $91$ on its whole lower
    range, which shows nothing. Free its three parameters and the outputs cycle with period
    $k - s$; the famous constant is just the period-one case. When the given instance looks too
@@ -76,11 +88,15 @@ The method has four parts, and each one matters:
    every $n \le 8$, exactly as rationals, and 359's with every one of the roughly 40 000 rooms the
    simulation seated. 957's recurrence was fixed by ten simulated terms, and three more confirmed
    it. 711's two families were read from the game table and checked against every start up to
-   $1100$, and 335's formula against the simulation up to $4097$ bowls.
+   $1100$, and 335's formula against the simulation up to $4097$ bowls. 782's simplified families
+   were checked against the full irreducible-pattern list for every $n \le 50$, and 976's parity
+   rule against an exact search of the reduced game for every tuple with $k \le 5$ and
+   $N \le 14$. That search used the *complete* value sets, not just the dominant options the rule
+   was read from, so the check also tests the simplification.
 
 ## Where the rule comes from
 
-You don't always have to see the pattern yourself. There are four routes, and it pays to try
+You don't always have to see the pattern yourself. There are five routes, and it pays to try
 them roughly in order of cost:
 
 - **Look it up.** Feed the small values to the [OEIS](https://oeis.org/). Problem 276 counts
@@ -103,6 +119,18 @@ them roughly in order of cost:
   $a \cdot 4^k + b \cdot 3^k + c \cdot 2^k + \dots$. A few terms fix the coefficients, and every
   remaining term is a free check. Thirteen tabulated values pinned down a three-term sum of
   exponentials, and the requested total became three geometric series.
+- **Bound the form, then fit it.** Sometimes a short argument tells you what *kind* of function
+  the answer is before you know any of its coefficients, and then a handful of exact small
+  values finishes the job. In 994, a valid triple of segments uses at most three distinct
+  values of each index, so the count must be a combination of $\binom{m}{a}\binom{n}{b}$ with
+  $a, b \le 3$. Brute force on tiny grids fixes the coefficients. 984 counts lattice octagons
+  described by a fixed number of integer parameters, so the count is a polynomial of degree 8 in
+  the board size, or in fact a
+  [quasi-polynomial](https://en.wikipedia.org/wiki/Quasi-polynomial): one polynomial for even
+  boards and another for odd ones. Ten exact values of each parity determine it, and
+  [Lagrange interpolation](https://en.wikipedia.org/wiki/Lagrange_polynomial) evaluates it at
+  $10^{18}$. You never have to write the polynomial down. The degree bound is what makes this
+  safe: it says how many values determine the answer, and every further value is a check.
 - **Recognise it, then explain it.** Some sequences of small values are familiar on sight. 336's
   maximix counts for $n = 3, \dots, 9$ come out as $1, 2, 6, 24, \dots$, which is $(n-2)!$. A
   factorial is a strong hint that a sequence of independent choices lies underneath. Here it is
@@ -111,7 +139,9 @@ them roughly in order of cost:
   $429$, a [Catalan number](https://en.wikipedia.org/wiki/Catalan_number). Catalan totals point to
   [ballot numbers](https://en.wikipedia.org/wiki/Bertrand%27s_ballot_theorem) as the individual
   weights, and the unit-vector table confirms it, because a unit can only reach the apex along a
-  lattice path that never crosses a diagonal. In 523 the per-insertion costs come out
+  lattice path that never crosses a diagonal. 892's cuttings are counted by Catalan numbers, which
+  points to plane trees, and splitting the trees by the colour of their vertices gives the
+  Narayana numbers. In 523 the per-insertion costs come out
   $1, 2, 4, 8, \dots$, and the recurrence behind them, $T(s) = 1 + \sum_{i<s} T(i)$, is the
   explanation of why they double.
 - **Derive it, then let the oracle audit it.** Sometimes a short argument gets you there first,
@@ -122,8 +152,14 @@ them roughly in order of cost:
   its divisor-pair count and takes 2-adic valuations through a thicket of parity cases. Each of
   these is plausible on paper, and each could be wrong in one quiet case. So the small instances
   still run: every $n \le 69$ for 374, every board up to $9 \times 9$ for 628, and every divisor
-  pair for small primorial powers in 561. The route is different, but the table and the check
-  are the same.
+  pair for small primorial powers in 561. 767's window condition forces the column sums of each
+  pair of rows to be periodic, and that decomposition is checked by enumerating whole matrices.
+  998's geometry says a minimum bounding square with an integer side comes from one of two kinds
+  of crossing between edge spans, and a numeric minimiser audits both families. The route is
+  different, but the table and the check are the same. Sometimes the oracle also gives the
+  converse that no argument supplied. 984's octagons are horse-disjoint by a two-line argument,
+  but that *every* horse-disjoint set is an octagon came from enumerating all $2^{25}$ subsets of
+  the $5 \times 5$ board.
 
 ## What the closed form buys
 
@@ -156,6 +192,24 @@ rule lets you **change algorithms**:
 - In **739**, closed-form weights turn an $n$-round triangle of prefix sums into one sum of $n$
   terms. The closed form also shapes how that sum is computed: rewriting each binomial as a
   running prefix product times a suffix product leaves a single modular inverse at the end.
+- In **782**, the rule is a short list of two-parameter quadratic families, and a list like that
+  is a sieve. Each family marks its values in a flag array, one parameter per loop with the other
+  scattered in a single vectorised write, and the complement symmetry $k \mapsto n^2 - k$ finishes
+  the array in one pass. As in 256, the characterisation is used to *mark* values, never to test
+  them one at a time.
+- In **976**, the closed form is a win rule for a game: X wins exactly when a pair of parity
+  conditions holds on the multiset of strip lengths. A question about play becomes a count of
+  multisets, which
+  [generating functions](https://en.wikipedia.org/wiki/Generating_function) handle. Their
+  coefficients follow a short
+  [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) recurrence, so the count costs
+  $O(K)$ time and constant memory.
+- A closed form can be exact and still too slow to evaluate term by term. **767**'s formula is a
+  sum over $K$ of terms that are themselves sums of $\binom{K}{s}^{16}$, about $5 \times 10^9$
+  terms in all. Splitting $\binom{K}{s}$ into $K!/(s!\,(K-s)!)$ makes the inner sums one
+  [convolution](https://en.wikipedia.org/wiki/Convolution) for every $K$ at once, so an FFT
+  replaces the quadratic loop. Once you have the formula, ask which standard fast operation it
+  matches.
 - In **950**, the early phase is a closed form, and the later phase's runs of failures have a
   length that can be computed. So the backward induction jumps a whole run per step instead of a
   pirate per step, and reaches $n = 10^{16}$ in a few dozen jumps.
@@ -168,7 +222,8 @@ rule lets you **change algorithms**:
   consistent. **340** is the same: per-block constants summed over whole blocks plus one partial
   block give an $O(1)$ answer for a threshold near $6 \times 10^{17}$, where the recursion could
   not finish a single call. **523**'s formula is a sum of thirty terms, and **335**, **561** and
-  **684** each finish in microseconds.
+  **684** each finish in microseconds. **984**'s interpolation costs the same whatever the board
+  size: ten exact sums over small boxes, then one evaluation of a polynomial.
 - "Closed" does not have to mean $O(1)$. **628** reduces to $(n-3)$ times the
   [left factorial](https://en.wikipedia.org/wiki/Left_factorial) plus a constant, and **374**'s
   block sums come down to $j!$ and $j!\,H_j$. Neither sequence has a closed form of its own, so
@@ -203,11 +258,21 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - **Keep the oracle's arithmetic exact.** A rule checked against floating-point output is only
   checked to within the rounding. 523 compares rationals, and that matters at the end as well:
   $E(10) = 115.725$ lies exactly on a rounding half, so the shipped solution sums exact fractions
-  and rounds in integers.
+  and rounds in integers. The danger also runs the other way: a floating-point oracle can be
+  the one that is wrong. 998's numeric minimiser, at a $10^{-7}$ tolerance, accepts a triangle
+  whose bounding square is $20.9998\ldots$ wide, and even at $10^{-11}$ it accepts a family that
+  misses an integer by about $10^{-13}$. The derived rule was right, and an exact integer test
+  (the tangent addition formula, cleared of denominators) is what ships. When the rule and the
+  oracle disagree, explain the disagreement before you decide which one to trust.
 - **Expect regimes and periods.** Closed forms often hold piecewise: below a threshold, inside a
   band, in an early phase, or modulo a small period (276's 12, 957's $(-1)^n$ and $(-2)^n$
   terms). Find the boundary from the data and make the code branch on it explicitly. Don't extend
-  the first regime's formula past where it was checked.
+  the first regime's formula past where it was checked. Interpolation runs into the same thing.
+  A quasi-polynomial count can be irregular on the smallest boards, so 984 takes its ten nodes
+  per parity from $N = 4$ and $5$ upwards, where both polynomials are known to hold. A node from
+  below the regime would quietly fit the wrong polynomial. Its connectivity defects are local in
+  the same way: they depend only on $|w - h|$ once the box is at least $6$ wide, and stop
+  changing once the longer side passes 12. So a finite table covers every box.
 - **Check the branches the problem never asks about.** A derivation with case splits can be
   right on the one case the statement exercises and wrong on the others, and then the next
   similar problem inherits the bug. 561's statement fixes an odd $m$, but its brute force covers
@@ -226,7 +291,12 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
   [Stirling number of the first kind](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_first_kind)),
   in place of the harmonic number itself, so the main loop never needs a modular inverse. 335's
   modulus $7^9$ is not prime, but the geometric series only divide by 2 and 3, which are units
-  modulo $7^9$. Before you commit to a form, check which divisions it needs.
+  modulo $7^9$. 976 tracks $n!$ times each generating-function coefficient, which turns the
+  recurrence's division by $n+1$ at every step into a single inverse of $K!$ at the end. 892
+  chooses between equivalent forms of its formula for the same reason: written with central
+  binomial coefficients $\binom{2m}{m}$, it advances by one multiplication and one tabulated
+  inverse per step, with no factorial tables. Before you commit to a form, check which divisions
+  it needs.
 - **Make the table bigger than you think you need.** A rule read from twenty cases often has a
   second-order term that only shows up at fifty. A recurrence of order $d$ needs $2d$ terms just to
   be determined, so only the terms after those count as evidence. Keep generating until the
@@ -242,8 +312,9 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
   answers you made yourself.
 - **Keep the oracle in the solution directory.** The scratch checker is the evidence for the
   rule. Leave it beside the solution (the `brute_force.py` of 276, 335, 336, 359, 374, 523, 555,
-  628 and 711, the `brute.py` of 340, 561 and 739, and 957's `simulate.py` and `pencils.py`), so
-  a later reader can re-run it rather than take the pattern on trust.
+  628, 711 and 892, the `brute.py` of 340, 561, 739, 767, 976, 994 and 998, 957's `simulate.py`
+  and `pencils.py`, 782's `irreducible.py` and `verify_families.py`, and 984's `brute_force.c`),
+  so a later reader can re-run it rather than take the pattern on trust.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
