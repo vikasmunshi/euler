@@ -247,6 +247,7 @@ benchmark reflects the real cost.
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0930](/solutions/0930/) — The Gathering
+- ● [0968](/solutions/0968/) — 5D Summation
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->

@@ -387,6 +387,7 @@ the repetition.
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
+- ● [0968](/solutions/0968/) — 5D Summation
 - ● [0976](/solutions/0976/) — XO Game
 - ● [0994](/solutions/0994/) — Counting Triangles
 - ● [0996](/solutions/0996/) — Overtakes

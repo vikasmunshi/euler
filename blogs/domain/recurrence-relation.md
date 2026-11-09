@@ -482,7 +482,7 @@ induction will confirm. The shape picks the method.
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0955](/solutions/0955/) — Finding Triangles
-- ○ [0968](/solutions/0968/) — 5D Summation
+- ● [0968](/solutions/0968/) — 5D Summation
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping
 - ○ [0985](/solutions/0985/) — Telescoping Triangles
 - ● [0986](/solutions/0986/) — Another Infinite Game
