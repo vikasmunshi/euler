@@ -341,7 +341,7 @@ reach for wide or arbitrary-precision types
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
 - ○ [0895](/solutions/0895/) — Gold & Silver Coin Game II
 - ○ [0907](/solutions/0907/) — Stacking Cups
-- ○ [0922](/solutions/0922/) — Young's Game A
+- ● [0922](/solutions/0922/) — Young's Game A
 - ● [0928](/solutions/0928/) — Cribbage
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0972](/solutions/0972/) — Hyperbolic Plane

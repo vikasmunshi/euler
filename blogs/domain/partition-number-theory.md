@@ -149,7 +149,6 @@ decide whether a DP over totals or a recurrence on the generating function fits.
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ○ [0859](/solutions/0859/) — Cookie Game
 - ○ [0890](/solutions/0890/) — Binary Partitions
-- ○ [0922](/solutions/0922/) — Young's Game A
 - ○ [0939](/solutions/0939/) — Partisan Nim
 - ● [1010](/solutions/1010/) — March of the Penguins
 

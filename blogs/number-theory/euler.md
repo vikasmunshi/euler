@@ -304,7 +304,6 @@ the loop.
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ○ [0911](/solutions/0911/) — Khinchin Exceptions
-- ○ [0922](/solutions/0922/) — Young's Game A
 - ○ [0931](/solutions/0931/) — Totient Graph
 - ● [0935](/solutions/0935/) — Rolling Square
 - ○ [0939](/solutions/0939/) — Partisan Nim

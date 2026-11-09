@@ -320,6 +320,7 @@ when it does not.
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
+- ● [0922](/solutions/0922/) — Young's Game A
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0944](/solutions/0944/) — Sum of Elevisors

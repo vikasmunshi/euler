@@ -1070,6 +1070,7 @@ handful of operations on small numbers.
 - ○ [0916](/solutions/0916/) — Restricted Permutations
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost
 - ● [0921](/solutions/0921/) — Golden Recurrence
+- ● [0922](/solutions/0922/) — Young's Game A
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ● [0926](/solutions/0926/) — Total Roundness

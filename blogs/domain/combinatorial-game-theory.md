@@ -302,7 +302,7 @@ weighting each winning mask by how many integers wear it.
 - ○ [0895](/solutions/0895/) — Gold & Silver Coin Game II
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ○ [0900](/solutions/0900/) — DistribuNim II
-- ○ [0922](/solutions/0922/) — Young's Game A
+- ● [0922](/solutions/0922/) — Young's Game A
 - ○ [0923](/solutions/0923/) — Young's Game B
 - ○ [0933](/solutions/0933/) — Paper Cutting
 - ○ [0939](/solutions/0939/) — Partisan Nim

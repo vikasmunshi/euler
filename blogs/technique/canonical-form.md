@@ -174,6 +174,7 @@ a partition.
 - ● [0259](/solutions/0259/) — Reachable Numbers
 - ● [0265](/solutions/0265/) — Binary Circles
 - ● [0749](/solutions/0749/) — Near Power Sums
+- ● [0922](/solutions/0922/) — Young's Game A
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 

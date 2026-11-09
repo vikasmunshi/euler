@@ -137,6 +137,7 @@ the history into the state before you look for a value.
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ○ [0900](/solutions/0900/) — DistribuNim II
+- ● [0922](/solutions/0922/) — Young's Game A
 - ○ [0933](/solutions/0933/) — Paper Cutting
 - ○ [0939](/solutions/0939/) — Partisan Nim
 - ○ [0949](/solutions/0949/) — Left vs Right II
