@@ -166,5 +166,6 @@ from the table above, made again.
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
 - ● [0961](/solutions/0961/) — Removing Digits
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

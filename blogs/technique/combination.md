@@ -150,5 +150,6 @@ is on [combinatorics](/blogs/domain/combinatorics).
 - ● [0184](/solutions/0184/) — Triangles Containing the Origin
 - ● [0247](/solutions/0247/) — Squares Under a Hyperbola
 - ● [0749](/solutions/0749/) — Near Power Sums
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

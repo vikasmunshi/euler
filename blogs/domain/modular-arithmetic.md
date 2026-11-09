@@ -657,7 +657,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0981](/solutions/0981/) — The Quaternion Group II
 - ● [0984](/solutions/0984/) — Knights and Horses
 - ○ [0989](/solutions/0989/) — Fibonacci Sum
-- ○ [0990](/solutions/0990/) — Addition Equations
+- ● [0990](/solutions/0990/) — Addition Equations
 - ○ [0992](/solutions/0992/) — Another Frog Jumping
 - ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 - ● [0996](/solutions/0996/) — Overtakes

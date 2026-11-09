@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0290](/solutions/0290/) — Digital Signature
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

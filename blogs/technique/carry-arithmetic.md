@@ -115,5 +115,6 @@ carry-propagating add and the arrays grow by doubling.
 - ● [0181](/solutions/0181/) — Grouping Two Different Coloured Objects
 - ● [0290](/solutions/0290/) — Digital Signature
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

@@ -207,5 +207,6 @@ points in neighbouring cells; the key is a coordinate pair, the table is the spa
 - ● [0928](/solutions/0928/) — Cribbage
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0987](/solutions/0987/) — Straight Eight
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

@@ -186,5 +186,6 @@ object" from the start.
 - ○ [0907](/solutions/0907/) — Stacking Cups
 - ● [0936](/solutions/0936/) — Peerless Trees
 - ● [0987](/solutions/0987/) — Straight Eight
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

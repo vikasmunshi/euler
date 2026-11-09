@@ -245,5 +245,6 @@ guessed bound never is.
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0921](/solutions/0921/) — Golden Recurrence
+- ● [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

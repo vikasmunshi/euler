@@ -335,6 +335,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [0987](/solutions/0987/) — Straight Eight
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
+- ● [0990](/solutions/0990/) — Addition Equations
 - ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1000](/solutions/1000/) — Problem $1000$

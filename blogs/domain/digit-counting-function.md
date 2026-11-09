@@ -135,6 +135,5 @@ enough; the log only earns its keep when it removes a loop, a big integer, or a 
 - ○ [0413](/solutions/0413/) — One-child Numbers
 - ○ [0419](/solutions/0419/) — Look and Say Sequence
 - ● [0731](/solutions/0731/) — A Stoneham Number
-- ○ [0990](/solutions/0990/) — Addition Equations
 
 <!-- /problems -->

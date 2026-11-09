@@ -718,7 +718,7 @@ of crossing it.
 - ● [0984](/solutions/0984/) — Knights and Horses
 - ● [0987](/solutions/0987/) — Straight Eight
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
-- ○ [0990](/solutions/0990/) — Addition Equations
+- ● [0990](/solutions/0990/) — Addition Equations
 - ○ [0992](/solutions/0992/) — Another Frog Jumping
 - ○ [0993](/solutions/0993/) — Banana Beaver
 - ● [0996](/solutions/0996/) — Overtakes

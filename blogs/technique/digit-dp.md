@@ -234,6 +234,7 @@ everything that does depend on $n$ costs $O(\log n)$ polynomial products.
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ● [0974](/solutions/0974/) — Very Odd Numbers
+- ● [0990](/solutions/0990/) — Addition Equations
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->
