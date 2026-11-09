@@ -383,6 +383,7 @@ the repetition.
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0922](/solutions/0922/) — Young's Game A
+- ● [0923](/solutions/0923/) — Young's Game B
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes

@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Young_tableau#
 ## Problems
 
 - ● [0922](/solutions/0922/) — Young's Game A
-- ○ [0923](/solutions/0923/) — Young's Game B
+- ● [0923](/solutions/0923/) — Young's Game B
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 - ● [1010](/solutions/1010/) — March of the Penguins
 

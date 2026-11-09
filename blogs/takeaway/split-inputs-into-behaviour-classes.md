@@ -229,6 +229,7 @@ apart, and 706 shows the two working together.
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0923](/solutions/0923/) — Young's Game B
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0963](/solutions/0963/) — Removing Trits

@@ -129,6 +129,7 @@ temperature rigorously.
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0922](/solutions/0922/) — Young's Game A
+- ● [0923](/solutions/0923/) — Young's Game B
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0976](/solutions/0976/) — XO Game
 

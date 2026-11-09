@@ -791,7 +791,7 @@ of crossing it.
 - ○ [0908](/solutions/0908/) — Clock Sequence II
 - ○ [0913](/solutions/0913/) — Row-major vs Column-major
 - ○ [0916](/solutions/0916/) — Restricted Permutations
-- ○ [0923](/solutions/0923/) — Young's Game B
+- ● [0923](/solutions/0923/) — Young's Game B
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
 - ● [0928](/solutions/0928/) — Cribbage

@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Generating_fun
 ## Problems
 
 - ● [0520](/solutions/0520/) — Simbers
+- ● [0923](/solutions/0923/) — Young's Game B
 
 <!-- /problems -->
