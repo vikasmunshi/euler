@@ -7380,8 +7380,8 @@
     "level": 38,
     "pct": 95,
     "solvers": 190,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 9 Nov 2026, 17:48"
   },
   "924": {
     "title": "Larger Digit Permutation II",
