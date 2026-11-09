@@ -6260,8 +6260,8 @@
     "level": 27,
     "pct": 68,
     "solvers": 292,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 9 Nov 2026, 07:45"
   },
   "784": {
     "title": "Reciprocal Pairs",
