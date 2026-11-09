@@ -6740,8 +6740,8 @@
     "level": 39,
     "pct": 99,
     "solvers": 225,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 9 Nov 2026, 17:57"
   },
   "844": {
     "title": "$k$-Markov Numbers",
