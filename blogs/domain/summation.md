@@ -501,7 +501,7 @@ problems are where the collection makes the point most bluntly.
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ○ [0830](/solutions/0830/) — Binomials and Powers
 - ○ [0831](/solutions/0831/) — Triple Product
-- ○ [0850](/solutions/0850/) — Fractions of Powers
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ○ [0884](/solutions/0884/) — Removing Cubes
 - ○ [0893](/solutions/0893/) — Matchsticks
 - ○ [0905](/solutions/0905/) — Now I Know

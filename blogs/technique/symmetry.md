@@ -113,6 +113,7 @@ order of magnitude cuts the work by about a thousand.
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0975](/solutions/0975/) — A Winding Path
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 

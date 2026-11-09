@@ -1047,6 +1047,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0841](/solutions/0841/) — Regular Star Polygons
 - ● [0845](/solutions/0845/) — Prime Digit Sum
 - ○ [0846](/solutions/0846/) — Magic Bracelets
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ○ [0861](/solutions/0861/) — Products of Bi-Unitary Divisors
 - ○ [0869](/solutions/0869/) — Prime Guessing

@@ -9,7 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fractional_par
 
 - ● [0731](/solutions/0731/) — A Stoneham Number
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
-- ○ [0850](/solutions/0850/) — Fractions of Powers
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 
 <!-- /problems -->

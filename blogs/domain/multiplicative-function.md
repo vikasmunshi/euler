@@ -308,6 +308,7 @@ difference needs no special case.
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ○ [0795](/solutions/0795/) — Alternating GCD Sum
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0853](/solutions/0853/) — Pisano Periods 1
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers

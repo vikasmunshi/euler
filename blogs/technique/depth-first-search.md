@@ -405,6 +405,7 @@ kept warm between them flatters the measurement.
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0928](/solutions/0928/) — Cribbage
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 

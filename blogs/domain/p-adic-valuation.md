@@ -110,5 +110,6 @@ the bottleneck.
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ● [0834](/solutions/0834/) — Add and Divide
+- ● [0850](/solutions/0850/) — Fractions of Powers
 
 <!-- /problems -->

@@ -613,7 +613,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0849](/solutions/0849/) — The Tournament
-- ○ [0850](/solutions/0850/) — Fractions of Powers
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ○ [0851](/solutions/0851/) — SOP and POS
 - ○ [0854](/solutions/0854/) — Pisano Periods 2
 - ○ [0858](/solutions/0858/) — LCM

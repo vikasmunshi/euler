@@ -149,6 +149,7 @@ whether adding $k$ and $n-k$ in base $p$ produces two or more carries. "Divisibl
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ● [0834](/solutions/0834/) — Add and Divide
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0926](/solutions/0926/) — Total Roundness
 
 <!-- /problems -->

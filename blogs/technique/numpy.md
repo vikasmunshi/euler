@@ -643,6 +643,7 @@ both slower and harder to read.
 - ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
