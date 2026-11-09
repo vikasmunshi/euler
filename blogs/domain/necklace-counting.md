@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Necklace_(comb
 ## Problems
 
 - ○ [0281](/solutions/0281/) — Pizza Toppings
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 
 <!-- /problems -->

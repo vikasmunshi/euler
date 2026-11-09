@@ -539,6 +539,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0938](/solutions/0938/) — Exhausting a Colour
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [0971](/solutions/0971/) — Modular Polynomial Composition

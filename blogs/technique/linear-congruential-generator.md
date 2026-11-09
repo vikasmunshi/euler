@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Linear_congrue
 ## Problems
 
 - ● [0150](/solutions/0150/) — Sub-triangle Sums
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 
 <!-- /problems -->

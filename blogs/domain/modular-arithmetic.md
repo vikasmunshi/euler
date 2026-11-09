@@ -640,7 +640,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
-- ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0944](/solutions/0944/) — Sum of Elevisors

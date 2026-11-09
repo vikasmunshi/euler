@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Affine_transfo
 
 - ● [0163](/solutions/0163/) — Cross-hatched Triangles
 - ● [0395](/solutions/0395/) — Pythagorean Tree
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 
 <!-- /problems -->

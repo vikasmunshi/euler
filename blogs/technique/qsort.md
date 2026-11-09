@@ -228,6 +228,7 @@ too large or too structured to index directly.
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0926](/solutions/0926/) — Total Roundness
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 - ● [0998](/solutions/0998/) — Squaring the Triangle

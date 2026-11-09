@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/De_Bruijn_sequ
 ## Problems
 
 - ● [0265](/solutions/0265/) — Binary Circles
-- ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 
 <!-- /problems -->

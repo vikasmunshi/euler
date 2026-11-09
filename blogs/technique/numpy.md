@@ -646,6 +646,7 @@ both slower and harder to read.
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
+- ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
