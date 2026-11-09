@@ -1,5 +1,5 @@
 <!-- tags: [graph-theory] -->
-<!-- status: final 2026-10-16T15:53Z -->
+<!-- status: final -->
 # Graph theory
 
 [Graph theory](https://en.wikipedia.org/wiki/Graph_theory) studies things joined by pairwise
@@ -30,7 +30,11 @@ varied that choice is:
 | **244** | a board (blank position + colours) | one slide of a tile | every shortest path in an unweighted graph |
 | **303** | a residue mod `n` | append a digit 0, 1 or 2 | the first time BFS reaches residue 0 |
 | **425** | a prime | change one digit, or prepend one | a path that minimises the *largest* vertex on it |
+| **475** | a quartet, or a trio | a musician in both | a count of bipartite graphs with every degree fixed |
 | **881**, **931** | a divisor of `n` | the quotient is prime | levels and weights in a product of paths |
+| **975** | a pair of monotone pieces, one per profile | the level set leaves one cell into the next | a walk that never branches |
+| **984** | a square of the board | a knight's move between two chosen squares | a count of connected induced subgraphs |
+| **1002** | a pair's interval | the two intervals cross | a 2-colouring of a graph too dense to build |
 
 Two habits pay off here. First, **count the vertices before choosing an algorithm.** 244 is
 tractable only because colouring the tiles shrinks the state space from roughly 10¹³ permutations
@@ -97,6 +101,26 @@ the goal. A DFS then walks from the start through states whose label drops by ex
 step. BFS supplies the distances, and DFS enumerates the paths along them. 303 is BFS in disguise: grow numbers digit by digit in increasing order, keep only the
 first number to reach each residue, and the first number to reach residue 0 is the least multiple.
 
+Two special cases make traversal cheaper than either general algorithm suggests.
+
+- **Every vertex has degree at most two.** Then there is nothing to search: a walk has one way
+  forward, so traversal is just following it. 975 is the clearest case. The curve where two
+  mountain profiles stand at equal heights looks like a continuous object, but cut each profile
+  into its monotone pieces and the curve inside one (piece, piece) cell is a single monotone arc.
+  It leaves the cell at whichever piece's extremum it reaches first. The cells form a graph whose
+  path from corner to corner is forced, so the solution is a loop with a current cell and a
+  direction, no `visited` set and no queue. A point symmetry of the profiles maps the path onto
+  itself, so walking half and doubling is exact.
+- **The graph is far too dense to store, but its neighbourhoods are range queries.** 1002's
+  crossing graph on 80,000 intervals can have billions of edges. An interval crossing `[a, b]`
+  either starts inside it and ends after `b`, or ends inside it and starts before `a`. Both are
+  "is there an unvisited interval whose endpoint falls in this range, with its other end beyond
+  a bound?" questions, which a [segment tree](https://en.wikipedia.org/wiki/Segment_tree) over
+  positions answers in `O(log n)`. The trick that makes BFS linear in *vertices* instead of edges
+  is to **delete each vertex from the index the moment it is discovered**. An edge back to a
+  visited vertex is then never reported, so each query either finds a new vertex or proves there
+  are none, and the whole search is `O(n log n)` whatever the edge count.
+
 A third tool replaces traversal entirely when edges arrive over time and the only question is
 "are these two connected?". A [disjoint-set](/blogs/technique/disjoint-set-data-structure)
 (union-find) structure answers it in near-constant amortised time and never stores an edge. 186
@@ -153,7 +177,26 @@ searching for one. Each structure has a classical theory behind it:
 - **Colourings and conflict graphs.** [Graph colouring](/blogs/domain/graph-coloring) problems
   (857, 1002) usually come down to building the right *conflict graph*. In 1002, two pairs whose arcs
   would cross cannot be drawn on the same side of the row, so a valid drawing exists exactly when
-  the crossing graph is bipartite, that is, 2-colourable. BFS finds out in linear time.
+  the crossing graph is bipartite, that is, 2-colourable. BFS finds out in linear time. Asking
+  for the *most* arcs above adds one more structural fact: a connected bipartite graph has
+  exactly two 2-colourings, one and its mirror, and separate components choose independently. So
+  the optimum is a sum over components of the larger colour class, with no search over
+  assignments at all.
+- **Bipartite graphs with prescribed degrees.** 475 hides its graph in the incidence between two
+  days' groupings: a quartet and a trio are joined when they share a musician, and the rule "never
+  play with a former partner" says no pair is joined twice. Label the trios, and each legal day
+  becomes a 0/1 [biadjacency matrix](https://en.wikipedia.org/wiki/Adjacency_matrix#Of_a_bipartite_graph)
+  with every row summing to 4 and every column to 3, times a fixed factor for which musician goes
+  where. Counting those matrices is a DP that fills one row at a time and remembers only *how
+  many* columns hold 0, 1, 2 and 3 ones, because columns with the same fill are interchangeable.
+  The vertex identities disappear, and only the degree histogram survives.
+- **Connected induced subgraphs.** 984 counts square sets that are connected under knight moves
+  and closed under a blocking rule. Enumerating sets is exponential. What works is the reverse
+  order: find what the closure rule forces the *shape* to be (a lattice octagon, a box with its
+  corners cut diagonally, confirmed exhaustively on a 5 × 5 board), count the shapes in closed
+  form, and use a [flood fill](https://en.wikipedia.org/wiki/Flood_fill) only to subtract the few
+  thin shapes that fall apart. Those defects turn out to be local, so a small table covers every
+  board size. Connectivity, which is hard to count in general, becomes a correction term.
 - **Small fixed shapes.** Triangles in 143, levels of the divisor graph in 881 and edge weights
   over it in 931. When the graph is sparse, "for each edge, intersect the endpoints' neighbour
   lists" finds every triangle in `O(E · d)`. When the graph has algebraic structure (a divisor
@@ -184,7 +227,15 @@ counting walks.
   BFS; least weight → DAG sweep or Dijkstra; cheapest connected backbone → MST; "how many" →
   a recursion, a transfer matrix, or a theorem, almost never enumeration.
 - **Prefer implicit graphs for state spaces.** A neighbour function plus a `visited` set builds
-  only the part of the graph that the search actually reaches.
+  only the part of the graph that the search actually reaches. When even the edges of the reached
+  part are too many, index the unvisited vertices so a neighbour query is a range query, and
+  delete on discovery (1002).
+- **Look at the degrees before writing a search.** Degree at most two means the traversal is a
+  walk (975). Interchangeable vertices mean a count can track a degree histogram instead of an
+  adjacency (475).
+- **To count connected structures, characterise the shape first.** Connectivity is a global
+  property and resists counting. If the other constraints pin the shape to a small family, count
+  the family and treat disconnection as a local defect (984).
 - **Check the hypotheses that make the fast algorithm correct.** A topological order needs no
   cycles (check, as 79's sink peeling does). Dijkstra needs non-negative weights and a cost that
   never decreases along a path. Kruskal needs an undirected graph. BFS distances are only shortest
