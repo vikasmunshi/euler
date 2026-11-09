@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-equation] -->
-<!-- status: final 2026-11-03T17:30Z -->
+<!-- status: final -->
 # Diophantine equation
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a
@@ -54,6 +54,19 @@ in each class form one arithmetic progression, and its count and sum have closed
 cost is linear in `x` and does not depend on how far the gaps extend. With three generators,
 walking the residues in steps of `z` reduces the Apéry set to a running minimum of one array.
 
+With two generators the gaps have more structure: they have coordinates.
+[Problem 988](/solutions/0988/) places frogs on gaps of `⟨a, b⟩` so that no frog can reach
+another, and asks for a weighted count of the valid placements. Every gap is uniquely
+`ab − ia − jb` with `i, j ≥ 1`. The difference of two gaps is `(i' − i)a + (j' − j)b`. The
+solutions of a linear equation in two unknowns are spaced by `(b, −a)`, and the coordinates are
+too small for that shift to help, so the difference is reachable exactly when `i' ≥ i` and
+`j' ≥ j`. Reachability is therefore componentwise dominance on a staircase of lattice points.
+A non-attacking placement is an [antichain](https://en.wikipedia.org/wiki/Antichain) in that
+order, and antichains of a staircase are counted by a row-by-row DP with suffix sums in
+`O(ab)`. About `10¹⁵` subsets are counted without listing any of them. Once the solution set
+of the linear equation is understood exactly, a question about a semigroup becomes a question
+about a partial order.
+
 ### Reduce to Pell's equation, then iterate a recurrence
 
 The workhorse pattern. Many geometric or probabilistic constraints, after
@@ -80,6 +93,20 @@ is eventually periodic, and one specific convergent (chosen by the parity of the
 length) is guaranteed to be it — the method Problem 66 uses. When `D` is large the numerators
 outrun 64 bits, so you reach for
 [arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic).
+
+When the right-hand side is not `±1`, one fundamental solution is no longer enough. A
+generalised Pell equation `x² − Dy² = N` usually has several orbits, and you need one seed
+from each. [Problem 582](/solutions/0582/) counts `120°` triangles with `b − a ≤ 100` up to
+`10¹⁰⁰`. The law of cosines gives the
+[Eisenstein triple](https://en.wikipedia.org/wiki/Eisenstein_triple) equation
+`c² = a² + ab + b²`. Fixing the difference `d = b − a` and completing the square gives
+`X² − 3Y² = d²`. The unit `2 + √3` maps solutions to solutions, and along the branch it
+moves `Y` forward by at least `d` each step. So the range `0 ≤ Y < d` is one full period,
+and every orbit has exactly one seed there. A hundred perfect-square tests per difference find
+all the seeds. Each orbit is then walked to the bound in `O(log n)` steps. Points whose
+parity does not give integer sides, or which give the degenerate `a = 0`, are filtered on the
+way. A useful rule is to filter each point as it is produced instead of working out which orbits
+qualify, because the per-point check is cheap and leaves no parity case to get wrong.
 
 Pell equations can also prove that a search is **finite**. [Problem 581](/solutions/0581/)
 needs every `n` for which `n` and `n + 1` are both 47-smooth. With `x = 2n + 1` and `q` the
@@ -131,6 +158,30 @@ divides some value only when `−1` is a square mod `q`, which means `q ≡ 1 (m
 `q` then strikes exactly two residue classes of `n`. This is Eratosthenes run over the values
 of `f(n)` instead of over the integers.
 
+### Count representations with a formula, not a search
+
+Sometimes the number of solutions is already a known arithmetic function of the right-hand
+side. Then you never need to find the solutions themselves. The standard case is
+`x² + y² = f`. By [Jacobi's two-square theorem](https://en.wikipedia.org/wiki/Sum_of_two_squares_theorem),
+for odd `f` the count `r₂(f)/4` is `∏(e + 1)` over the primes `p ≡ 1 (mod 4)` in `f`. It is
+zero if any prime `≡ 3 (mod 4)` appears to an odd power. The count is
+[multiplicative](https://en.wikipedia.org/wiki/Multiplicative_function), so it comes straight
+from the factorisation.
+
+[Problem 621](/solutions/0621/) counts the ways to write `n ≈ 1.75 × 10¹³` as a sum of three
+triangular numbers. A loop over pairs would take more than `10¹³` steps. Instead, fix the
+first term and multiply the other two by 8. The equation `T_b + T_c = m` becomes
+`(2b+1)² + (2c+1)² = 8m + 2`, so the remaining pairs are counted by `r₂(4m + 1)/4`. This
+leaves one search dimension and a function to evaluate at each point, and the problem
+becomes factoring about `√(2n)` values of one quadratic in the first index. That is
+Problem 291's polynomial sieve again. A prime `p` divides a value only in the residue classes
+given by the square roots of `8n + 3` mod `p`, which
+[Tonelli–Shanks](https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm) finds. The
+same identity also gives a free cross-check. It is Gauss's theorem that every number is a sum
+of three triangular numbers, and the full count is a
+[class number](https://en.wikipedia.org/wiki/Class_number_formula) that the analytic formula
+estimates to within parts per million.
+
 ### Parametrise, then count whole families by division
 
 When the question is *how many* solutions lie under a bound, generating them one by one is
@@ -160,6 +211,28 @@ is even) to be squares themselves. The result is two quartic families in a copri
 `(a, b)`. Because `z` grows like the fourth power of the parameters, the enumeration costs
 `O(N^{1/2})`.
 
+The same lemma works when the problem asks for a *sum* over solutions rather than a count.
+In [Problem 510](/solutions/0510/), three circles tangent to each other and to a line satisfy
+`1/√r_C = 1/√r_A + 1/√r_B`, which is the line case of
+[Descartes' theorem](https://en.wikipedia.org/wiki/Descartes%27_theorem). Rationality forces
+`r_A/r_B = (u/v)²` with `u` and `v` coprime. Coprimality then forces `(u + v)²` to divide
+the scale, which gives the complete family `t·(u²(u+v)², v²(u+v)², u²v²)`. The quantity asked
+for is linear in `t`, so the `m` multiples of a primitive solution contribute its total times
+`m(m+1)/2`. Looping over `t` would bring back the linear cost, because `u = v = 1` alone has
+`n/4` multiples.
+
+A quadratic with **one known rational point** gives a family by a different route.
+[Problem 962](/solutions/0962/) reduces a bisector-and-tangent condition to
+`g² − w² = D·m²`. The conic has the obvious point `(1 : 1 : 0)`, and every line through it
+with rational slope `β/α` meets the conic in exactly one other rational point. That is the
+[chord method](https://en.wikipedia.org/wiki/Rational_point), the same idea that produces
+Euclid's formula from the point `(1, 0)` on the unit circle. It yields
+`(Dβ² + α², Dβ² − α², 2αβ)/δ`, and each primitive solution is counted with `⌊N/L⌋` as before.
+The inner loop over `α` can also be removed. The divisor `δ` depends only on `gcd(α, D)` and
+the parity of the cofactor, so the admissible `α` in each class are counted by
+[Möbius](https://en.wikipedia.org/wiki/M%C3%B6bius_function) inclusion–exclusion over the
+primes of `(D/γ)β`. They are never enumerated one at a time.
+
 A parametrised family can also be **joined against itself**. In
 [Problem 309](/solutions/0309/), crossed ladders reduce to two Pythagorean triples that share a
 leg `w`, together with the condition `(a + b) | ab` on the other legs. You first show that
@@ -167,6 +240,16 @@ leg `w`, together with the condition `(a + b) | ab` on the other legs. You first
 generate every triple once with Euclid's formula, group the triples by their shared leg, and
 test pairs only within each group. Each leg belongs to only a handful of triples, so the
 quadratic pair test inside a group costs almost nothing.
+
+[Problem 998](/solutions/0998/) uses the same join and adds a lesson about where the integers
+come from. The minimum bounding square of a triangle has its side at the lowest point of an
+envelope of sinusoids. A single arc bottoms out at `L/√2`, which is never an integer, so an
+integer side can only appear where two arcs cross. That leaves two configurations, and each
+is a set of Pythagorean triples sharing their longer leg. The minimality condition is a
+condition on angles, `arctan(x/s) + arctan(y/s) ≥ 45°`. The tangent addition formula turns
+it into the integer inequality `s² − (x + y)s − xy ≤ 0`. That rewrite is necessary, not just
+neat. A floating-point minimiser with a `10⁻¹¹` tolerance still accepts a family of triangles
+whose true side misses an integer by `3.6 × 10⁻¹³`.
 
 [Problem 251](/solutions/0251/) goes one step further. A condition on nested cube roots
 reduces, through the cubic that `u + v` satisfies, to the integer equation
@@ -272,17 +355,23 @@ a Diophantine equation and work through these questions before writing any loop:
   something that factors.
 - **Is there a linear constraint to spend?** Each one eliminates a variable and a loop level.
   If the unknowns must be non-negative, it is a Frobenius problem: count the gaps per residue
-  class with the Apéry set, never one by one.
+  class with the Apéry set, never one by one. With two generators, give each gap coordinates
+  `(i, j)`. Reachability between gaps is then dominance, a partial order you can run a DP over.
 - **Does it become `x² - Dy² = N`?** Then the solutions form a recurrence-generated family;
   find the fundamental solution (by inspection, or via continued fractions) and iterate. Never
-  bound the loop by the size of the answer. A family of Pell equations with Lehmer's bounds
+  bound the loop by the size of the answer. If `N ≠ ±1`, there are several orbits: find one
+  seed per orbit within a single period of the unit's action. A family of Pell equations with Lehmer's bounds
   can also show that a smoothness search is finite.
 - **Does it factor?** If you can force a product `(…)(…) = k`, counting solutions becomes
   counting divisors of `k`, and the problem turns into a factorisation question. The divisor
   nearest the trivial one gives the least solution. A prime equal to a product forces every
   factor but one to be 1.
+- **Is the count a known arithmetic function?** Representations as a sum of two squares are
+  counted by a multiplicative formula. Factor the right-hand side, or sieve it across a
+  polynomial, and never list the representations.
 - **Do coprime factors multiply to a square?** Then each factor is a square, and the
-  solutions are parametrised by a coprime pair.
+  solutions are parametrised by a coprime pair. For a conic with one rational point, draw
+  lines through that point. Their rational slopes parametrise the other points.
 - **Is it quadratic in each variable?** Vieta jumping links the solutions into a tree rooted
   at a fundamental solution, and a pruned DFS walks all of it.
 - **Is the operation injective?** Then equality means the expression trees match: unify
@@ -292,7 +381,8 @@ a Diophantine equation and work through these questions before writing any loop:
   then becomes a few fixed ones.
 - **Counting, not listing?** Parametrise by primitive solutions, usually coprime pairs, and
   count each family's members with `⌊N / L⌋` or a residue-class count. Do not enumerate
-  them.
+  them. If you are summing a quantity linear in the scale, the multiples add up to a
+  triangular number.
 - **Is the unknown in the exponent of a congruence?** Look for a fixed point. Iterating
   `x ← nˣ mod m` settles quickly because the Carmichael chain `m, λ(m), λ(λ(m)), …` is
   short. Verify on small moduli that the limit is the solution the problem wants.
@@ -302,7 +392,9 @@ a Diophantine equation and work through these questions before writing any loop:
 - **Mind the integers themselves.** Solutions grow geometrically; a 64-bit type overflows
   fast. Know whether your language gives you big integers for free (Python) or whether you
   must carry them yourself (C), and prefer exact integer tests over floating-point ones — a
-  Diophantine equality checked with a tolerance is a bug waiting to happen. Watch the
+  Diophantine equality checked with a tolerance is a bug waiting to happen. Problem 998
+  shows that this is a real risk: near-miss triangles miss an integer by less than `10⁻¹²`,
+  so turn angle and root conditions into integer polynomial inequalities. Watch the
   intermediates too. The C port of Problem 251 silently wrapped a product `n₁²·e` used only
   in a bound test, and the count came out too high. The fix was to compare `n₁` with a
   precomputed integer-square-root cap so the product is never formed.
