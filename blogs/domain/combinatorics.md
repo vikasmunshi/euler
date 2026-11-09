@@ -1,10 +1,10 @@
 <!-- tags: [combinatorics] -->
-<!-- status: final 2026-11-08T12:03Z -->
+<!-- status: final -->
 # Combinatorics
 
 [Combinatorics](https://en.wikipedia.org/wiki/Combinatorics) is the mathematics of finite
 arrangements: how many ways are there to choose, order, tile, colour, or partition a finite
-collection under some rule. It is the largest domain in this archive — 271 problems carry the tag,
+collection under some rule. It is the largest domain in this archive — 268 problems carry the tag,
 more than any other — and that is not an accident of tagging. Project Euler's favourite question
 shape is "how many …?" asked at a size where the answer cannot be reached by listing. The whole
 discipline of the domain lives in that gap: **you are asked for a count you can never enumerate**,
@@ -94,6 +94,20 @@ $\binom{K}{s}^{16} = K!^{16}\,u_s\,u_{K-s}$ with $u_s = 1/s!^{16}$, and all of t
 self-[convolution](/blogs/technique/convolution) of $u$. See
 [factorials turn binomial sums into convolutions](/blogs/takeaway/factorials-turn-binomial-sums-into-convolutions).
 
+Full independence is rare. The next best case is two halves that interact through very little, and
+then the right move is to **split where the interface is narrow** and
+[meet in the middle](/blogs/technique/meet-in-the-middle-attack). Problem 928 scores cribbage hands
+drawn from a whole pack. The suits never matter, so a hand is a vector of rank counts weighted by
+$\prod_r \binom{4}{c_r}$, but $5^{13}$ vectors is still too many to score. The ten-valued ranks touch the
+low ranks in only two ways. A fifteen holds at most one ten-card, so it needs only the number of
+low subsets summing to 5. And a run crosses from 9 to 10 only through the run that is open at rank
+9, which is summarised by its length and the product of its counts. So the $5^9$ low vectors are
+filed under that small key, the $5^4$ high ones are grouped by what they offer it, and each pair
+of groups is matched by solving for the one low-half balance at which the hand's score equals its
+value, a single table lookup. Before you split,
+measure what crosses the cut. See
+[split where the interface is narrow](/blogs/takeaway/split-where-the-interface-is-narrow).
+
 The additive twin of the product rule is to **sum contributions, not configurations**. When the
 question is a total of some statistic over every configuration, swap the order of summation: for each
 small piece that can contribute, count the configurations in which it does. Problem 705 totals the
@@ -105,6 +119,18 @@ how often digit $x$ precedes digit $y$ — one linear pass to build the table, a
 touched. This is [double counting](/blogs/technique/double-counting-proof-technique), or
 [linearity of expectation](/blogs/domain/expected-value) read the other way round: the total is
 the count times the mean, and the mean splits over pairs.
+
+The piece that contributes may be geometric. Problem 842 totals the self-intersections of every
+star polygon on $n$ points, and at $n = 60$ there are about $10^{80}$ of them. Count polygons per
+crossing point instead. A point that lies on $k$ chords counts for a polygon exactly when the polygon
+uses at least two of them. Those $k$ chords share no endpoint, so the number of Hamiltonian cycles
+containing any $j$ of them is a closed form. Inclusion–exclusion for "at least two of $k$" then
+gives a weight that depends on $k$ alone. What is left is a histogram: how many interior points lie
+on exactly $k$ chords. Concurrent diagonals of a regular polygon are a famously delicate
+classification, but the histogram can also be measured. Intersect the chord pair of every 4-subset
+of vertices and snap the floating-point coordinates to a grid. A point on $k$ chords then appears
+exactly $\binom{k}{2}$ times, and any count that is not triangular shows that the snapping went
+wrong. See [histogram the values, not the items](/blogs/takeaway/histogram-the-values-not-the-items).
 
 The model that counts well is sometimes not the one the statement describes. The move then is to
 **trade the object for one that is already understood**, through a [bijection](/blogs/domain/bijection).
@@ -124,6 +150,16 @@ no two intervals cross. Such a family splits at any chosen interval into the par
 part after it, which gives an interval DP. In each case the structure was in the original problem all
 along, and the bijection just makes it usable. Check it against a count you already know: 892's
 cuttings come out Catalan, five for $n = 3$, as the statement shows.
+
+Sometimes it is a conservation law that finds the hidden object. In problem 960, $n$ piles of $n-1$
+stones are emptied by turns that each take $n$ stones from two piles. Record each turn as an edge
+between its two piles. A connected component of $k$ piles holds $k(n-1)$ stones, and its turns remove
+a multiple of $n$, so $n \mid k$. Every game is therefore a spanning tree, and the same bookkeeping
+applied to each side of an edge fixes how many stones that edge took. The score is then a sum over
+the tree's edges, independent of the order of play. Counting (tree, edge) pairs by the sizes of the
+two sides, with [Cayley's formula](/blogs/domain/cayleys-formula) for the tree on each side, turns
+a game search into a sum of $n$ terms. When every move removes a fixed total, ask what that total
+forces. See [conserved totals force the structure](/blogs/takeaway/conserved-totals-force-the-structure).
 
 ## The four shapes an answer takes
 
@@ -162,6 +198,21 @@ So each large prime is cleared by a single pivot, and
 [Gaussian elimination](/blogs/technique/gaussian-elimination) only ever sees the primes up to
 $\sqrt b$. See [count solutions by rank](/blogs/takeaway/count-solutions-by-rank).
 
+A closed form can also be built one variable at a time. Problem 968 sums a product of prime powers
+$2^{x_1}3^{x_2}\cdots11^{x_5}$ over the [lattice points](/blogs/technique/lattice-point) of a
+five-dimensional polytope cut out by $x_i + x_j \le X_{ij}$. The bounds are near $10^9$, so the
+polytope holds about $10^{40}$ points. Summing over one variable with the others fixed is a finite
+[geometric series](/blogs/technique/geometric-series) between its tightest lower and upper bounds.
+Each bound is $\pm y + k$ in a single other variable, so the result is again a sum of exponentials,
+only with new bases. Which bound is tightest depends on the region, so the sum splits into cases, and
+the case conditions are again two-variable inequalities. This is
+[Fourier–Motzkin elimination](/blogs/technique/fourier-motzkin-elimination) carried out on a sum
+rather than on a feasibility question. Five eliminations leave a constant, and the cost does not
+depend on the size of the bounds. The case tree only stays small because every region is first
+tightened to its closure and the bounds that can never be tightest are dropped, while the
+constraints they implied are kept. See
+[pruning must keep what it implied](/blogs/takeaway/pruning-must-keep-what-it-implied).
+
 When the question asks for the *best* configuration rather than the number of them, bound the
 answer's range first. Problem 782 sums, over every $k$, the minimum complexity of an $n \times n$
 binary matrix with $k$ ones, where complexity is the number of distinct rows and columns. A short
@@ -179,7 +230,22 @@ the two cases are disjoint and exhaustive, so $dp[i] = dp[i-1] + dp[i-L]$. Probl
 vary the same skeleton; problem 215 stacks it, encoding each brick row as a bitmask of its internal
 seams so that "no running crack" becomes `mask_a & mask_b == 0`, and the wall count becomes a
 layered walk over a compatibility graph. The pattern is always: define the state, enumerate the last
-move, sum the disjoint cases. The "last move" need not be the rightmost one, either. Problem 866 lays
+move, sum the disjoint cases.
+
+When the hard part is finding the state, look at how you would *check* a configuration by hand: the
+checker's working memory is often the state. Problem 990 counts strings like `12+7=19` of bounded
+length that are true equations. The terms can have 24 digits, so no table keyed by value can work.
+But an equation is checked on paper column by column from the units. Add the left digits, subtract
+the right digits and add the carry. The result must be a multiple of ten, and that multiple is the
+signed carry into the next column. The checker only remembers how many terms on each side still
+have digits, the carry, and the characters left. That is the whole [digit DP](/blogs/technique/digit-dp)
+state, and the values never appear. Subtraction made each column a convolution of two digit-sum
+distributions. Writing every right-hand digit $d$ as $9 - d'$ turns the column into a single sum,
+whose distribution is one product of polynomials. See
+[track the difference, not both quantities](/blogs/takeaway/track-the-difference-not-both-quantities)
+and [reflect subtracted digits into a sum](/blogs/takeaway/reflect-subtracted-digits-into-a-sum).
+
+The "last move" need not be the rightmost one, either. Problem 866 lays
 the pieces of a row down in random order, each placement scoring the segment it completes, and asks
 for the expected product of the scores. Condition on the *last piece placed* in time: until then no
 segment crosses it, so its left and right sides evolve as two independent smaller rows. The
@@ -280,6 +346,19 @@ per corner, the inclusion–exclusion has a handful of terms, and the sum telesc
 ($m \cdot m! = (m+1)! - m!$) down to one pass over the
 [left factorials](https://oeis.org/A003422).
 
+Inclusion–exclusion can also remove a constraint that is *non-local*, so that what remains
+factorises. Problem 987 counts the sets of eight disjoint straights in one pack, none of them a
+flush. "Not a flush" ties together all five ranks of a straight. With it, the suits at one rank
+depend on choices made four ranks away. Without it, the straights through a rank simply take distinct
+suits, a falling factorial per rank. So sum over the set of straights *forced* to be flushes, with
+alternating signs. A forced flush takes one suit across its whole span, and the other straights
+are left free, which is exactly what the alternating sum needs. Flushes that overlap a new starting
+rank all cross that rank, so they form a clique and only their number matters. A
+[DP](/blogs/technique/dynamic-programming) over the ten starting ranks carries that number and a short window
+of recent starts, plus one extra count for the ace, which closes the ranks into a circle. The
+inclusion–exclusion runs inside the DP, a few tens of thousands of states. When a constraint spans
+the whole configuration, turn it into a forced choice and let the signs do the rest.
+
 When the objects sort into few classes, the complement can be taken over the classes. Problem 612
 counts pairs of numbers below $10^{18}$ with a digit in common. That depends only on each number's
 digit *set*, so the numbers fall into at most $2^{10}$ classes, whose sizes $c_S$ a
@@ -366,7 +445,7 @@ count becomes a binomial plus a small correction, divided by $p$. See
 ## The counts themselves are the other hazard
 
 Combinatorial answers grow explosively, and this domain's most common companion tag is
-[modular arithmetic](/blogs/domain/modular-arithmetic) — 76 of these 271 problems carry it. That
+[modular arithmetic](/blogs/domain/modular-arithmetic) — 76 of these 268 problems carry it. That
 pairing is the point: either the problem hands you a modulus (`1_000_000_007`, so the residue *is*
 the deliverable and you work in the ring from line one), or it wants the honest integer and you
 need [arbitrary precision](/blogs/technique/arbitrary-precision-arithmetic). Python gives you the
@@ -392,6 +471,16 @@ average into a single short sum of fractions. The answer is wanted to two decima
 statement's own $E(10) = 115.725$ sits exactly on a half — so the sum is kept as exact rationals
 and rounded once, in integers, rather than trusting floating point to land on the right side.
 
+An expectation also changes what needs to be tracked. Problem 783 draws $2k$ balls per turn from an
+urn whose black count depends on every earlier draw. It asks for the expected sum of squared draws
+over a million turns. The full distribution of the black count is far too large to carry. But the
+[hypergeometric](/blogs/domain/hypergeometric-distribution) draw's second moment, given $b$ black
+balls, is a quadratic in $b$, and the update of the urn maps a quadratic in $b$ to another quadratic.
+So by the law of total expectation only $\mathbb{E}[b]$ and $\mathbb{E}[b^2]$ are needed, and the
+million turns become a two-variable linear recurrence. When the question asks for a low moment and
+every update is a polynomial of low degree, the moments close on themselves. See
+[propagate moments, not distributions](/blogs/takeaway/propagate-moments-not-distributions).
+
 ## How to reason about it
 
 The cue is a question that begins "how many" — arrangements, tilings, selections, colourings,
@@ -407,14 +496,20 @@ paths, partitions — at a size where listing them is hopeless. When you catch i
   its orbit size. For graphs up to isomorphism, count rooted versions and correct for the rooting.
 - **Look for the bounded summary.** What is the least you must remember about a prefix to know how
   it may be extended? If that summary is small and finite, you have a DP state and the problem is
-  essentially solved.
+  essentially solved. If you cannot see it, write down how you would check one configuration by
+  hand; what the check remembers is usually the state.
+- **When two halves barely interact, meet in the middle.** Measure what crosses the cut, key
+  each half by it, and join the two tables.
 - **Try to decompose by the last decision.** Cases that are disjoint and exhaustive give a
   recurrence directly; if they overlap, you need inclusion–exclusion instead.
 - **Ask whether a formula exists.** A binomial, a Catalan number, a product rule — a closed form
   beats any table. Check [OEIS](https://oeis.org/) with the first few hand-computed terms; a
   matching sequence often comes with the formula attached.
 - **Count the complement when "at least one" appears.** Constraints phrased as prohibitions are
-  usually cheaper counted the other way round.
+  usually cheaper counted the other way round. A constraint that spans the whole configuration
+  can be removed by inclusion–exclusion over the cases forced to break it.
+- **When only a moment is asked, carry moments.** If every update is a low-degree polynomial in
+  the state, the first few moments evolve on their own, and the distribution is never needed.
 - **Sum contributions when the question is a total.** A statistic summed over every configuration
   is usually a sum over small pieces (pairs, positions) of how many configurations each one
   scores in.
