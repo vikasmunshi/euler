@@ -1,5 +1,5 @@
 <!-- tags: [dynamic-programming] -->
-<!-- status: final 2026-11-02T22:21Z -->
+<!-- status: final -->
 # Dynamic programming
 
 [Dynamic programming](https://en.wikipedia.org/wiki/Dynamic_programming) (DP) solves a
@@ -117,6 +117,28 @@ whatever the recurrence combines, as long as the combining rule is fixed:
   soon as *one* split lands on a number already known to be at level `t − 1`, so a single
   witness settles each entry, and a bitset filter finds that witness for almost every
   number.
+- **A count and a running total, side by side.** Non-attacking Frogs (988) asks for the sum
+  of positions over all valid configurations, not their number. Each entry carries a pair:
+  how many configurations end at this cell, and the total of their positions. Appending a
+  cell to `cnt` configurations adds its own position once to each, so
+  `sum ← sum + g·cnt` rides along with the count update. Any additive statistic of the
+  objects being counted can be carried this way, one extra moment per entry.
+- **A signed term of an inclusion–exclusion.** Straight Eight (987) counts eight disjoint
+  straights, none of them a flush. "Not a flush" ties all five ranks of a straight
+  together, which no rank-by-rank state can see. So the DP does not enforce it. It sums
+  over sets of straights *forced* to be flushes, with sign `(−1)^|F|`, and once those are
+  fixed the count factorises rank by rank. The table holds signed weights, and the
+  [inclusion–exclusion](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
+  cancellation happens in the final sum. The general move: when a constraint is global,
+  turn its negation into a summed-over choice and let the DP carry the sign.
+- **A cost on a DAG — a shortest path.** In 995 the smallest integer whose divisors
+  factor a cyclic group is built along a chain of subgroups, and each step's cost is
+  fixed by the step. The states are the divisors of `p − 1`, every step goes to a proper
+  multiple, so filling them in increasing order relaxes every edge once: a
+  [shortest path in a DAG](https://en.wikipedia.org/wiki/Shortest_path_problem#Directed_acyclic_graphs)
+  is a min-plus DP. The integers involved have hundreds of thousands of digits, so the
+  entries hold `ln` of the product rather than the product: a multiplicative cost becomes
+  an additive one, and the path never has to build the number it minimises.
 
 ## How to reason about it
 
@@ -127,7 +149,7 @@ and you have silently broken the optimal-substructure property. The state is a
 *sufficient summary*, not the configuration: in 253 the set of placed pieces is
 exponential, but given the history the empty cells are a uniform composition across the
 gaps, so (pieces placed, segment count, which end gaps survive) carries everything the
-next step's odds depend on. Two more ways to find the state:
+next step's odds depend on. Four more ways to find the state:
 
 - **Keep only what the condition compares.** A *digit DP* walks a number one column at a
   time. In Digital Signature (290) the condition is `s(n) = s(137n)`, and long
@@ -144,6 +166,27 @@ next step's odds depend on. Two more ways to find the state:
   self-convolution, `E(N) = (2N−1) Σ E(i)·E(N−1−i)`, which fills bottom-up in `O(N²)`.
   This is the move behind interval DP in general: choose the step that cuts a problem
   into independent pieces, and the recurrence follows.
+- **Count the interchangeable things by class.** Music Festival (475) partitions musicians
+  into trios that never reuse a quartet. Tracking which people remain is exponential. A
+  [double-counting](https://en.wikipedia.org/wiki/Double_counting_(proof_technique)) step
+  first reduces the question to 0/1 matrices with fixed row and column sums. The matrix is
+  then filled one row at a time. Columns with the same number of ones are
+  interchangeable, so the state is the *histogram* of column fill levels, not the columns
+  themselves, and the row and column-sum invariants leave only two free counters. Each
+  transition picks how many of the new ones land on each fill level, weighted by a
+  product of binomials. Whenever the objects are interchangeable, the state should count
+  how many sit in each class, not name them.
+- **Build from the objects already counted.** Peerless Trees (936) counts unlabelled
+  trees in which adjacent vertices have different degrees. A rooted tree is a root plus a
+  *multiset* of smaller rooted trees, so the table of trees of size `< m` is the stock
+  of items for a bounded knapsack that produces the trees of size `m`. Choosing `j` copies
+  from `b` kinds contributes the
+  [multiset coefficient](https://en.wikipedia.org/wiki/Multiset#Counting_multisets)
+  `C(b+j−1, j)`, not `b^j`, which is what keeps unlabelled trees from being counted once
+  per ordering. The degree condition is local, so the root's child count is the only
+  extra coordinate. [Otter's theorem](https://en.wikipedia.org/wiki/Otter%27s_dissimilarity_theorem)
+  then turns rooted counts into unrooted ones. The table feeds itself: each size's output
+  becomes the next size's input.
 
 Once the state is fixed:
 
@@ -163,7 +206,19 @@ Once the state is fixed:
 - **Price the transitions, not just the states.** Total cost is states × transitions per
   state. In 252 the predecessors that keep a chain convex form a prefix of an angularly
   sorted list, so a running maximum over that list answers each state's "best
-  predecessor" in amortised constant time — `O(n³)` instead of `O(n⁴)`.
+  predecessor" in amortised constant time — `O(n³)` instead of `O(n⁴)`. In 988 the valid
+  configurations are exactly the antichains of a staircase-shaped grid, so each cell sums
+  over a quadrant "earlier rows, later columns". Per-column accumulators over finished
+  rows, scanned with a running suffix sum, answer that 2-D range in `O(1)` per cell.
+- **Compute only the states somebody reads.** Connections I (1001) counts the sets of
+  pairwise non-crossing arcs: an interval DP `C_r[l]` over every range `[l, r]`, which is
+  `N²` states for `N = 40 000`. Tracing which entries the recurrence actually reads shows
+  that only one column per right end is ever needed, and each only down to its left end.
+  That cuts the work to the sum of the interval lengths. The needed columns are also
+  independent of each other. So the Python solution sweeps `l` once per *block* of 512
+  columns and updates the whole block as a NumPy vector. Instead of storing the full
+  table, it keeps a snapshot of the block's row at each right end until the matching left
+  end consumes it.
 - **Shrink the table.** If each state depends only on the previous row or the last few
   states, you do not need the whole table — keep a rolling row (the coin loop above keeps
   exactly one), or overwrite the grid in place, as the right/down min-path sum does
@@ -177,7 +232,12 @@ Once the state is fixed:
   the dice above it while a multinomial and a power count the rest. In 951 a short
   argument first reduces "the deck is fair" to "some run has length exactly 2", and the DP
   then only counts run-length compositions that avoid it. And in 996 the DP runs over the
-  small dimension (players) while a closed form absorbs the large one (days).
+  small dimension (players) while a closed form absorbs the large one (days). Cribbage
+  (928) uses the DP as one stage inside a search. A depth-first enumeration of rank counts
+  carries a subset-sum table for the fifteens along the path, so each node does one
+  knapsack step that all its children share. A meet-in-the-middle split at the 9–10
+  boundary joins the two halves on a small interface, because the ten-valued cards
+  touch the low cards only through that table and the open run.
 - **Stop the table early when the recurrence is linear.** In 5-Smooth Pairs (682) a small
   knapsack table gives the first 81 terms of the count, and then the DP's job is done.
   Those terms show that the generating function is rational with a known denominator of
