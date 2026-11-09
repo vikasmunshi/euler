@@ -1,5 +1,5 @@
 <!-- tags: [diophantine-approximation, diophantine-equation] -->
-<!-- status: final 2026-11-03T17:31Z -->
+<!-- status: final -->
 # Diophantine Equations
 
 A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a polynomial
@@ -44,6 +44,16 @@ that class. Every value above it in the class is reachable and every value below
 gaps in each class form one arithmetic progression with a closed-form count and sum. The work is
 linear in the smallest generator, however far the gaps extend.
 
+With only two generators the gaps also have a **shape**. Problem 988 places frogs on the gaps of
+$\langle a, b \rangle$ so that no frog can hop to another, and sums positions over every such
+configuration. Every gap can be written uniquely as $ab - ia - jb$ with $i, j \ge 1$. Because the
+solutions of $xa + yb = n$ are spaced by $(b, -a)$ and the coordinates differ by less than that, one
+gap reaches another exactly when its $(i, j)$ dominates componentwise. The gaps fill a staircase
+[Young diagram](https://en.wikipedia.org/wiki/Young_tableau#Diagrams), "reachable" becomes a
+[partial order](https://en.wikipedia.org/wiki/Partially_ordered_set) on it, and the configurations
+are its antichains. Counting them is an $O(ab)$ row-by-row dynamic program. No membership test runs
+at all.
+
 **Parametrise the solution set.** Many classic families have a formula that generates *every*
 solution. Every primitive [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple) is
 $(m^2 - n^2,\, 2mn,\, m^2 + n^2)$ for coprime $m > n$ of opposite parity; iterating the parameters
@@ -58,13 +68,31 @@ search over pairs becomes a walk over three small parameters. Problem 764 applie
 It reads $16x^2 + y^4 = z^2$ as the Pythagorean triple $(4x, y^2, z)$, then asks the Euclid parameters
 to make the leg $y^2$ a square. Depending on the parity of $y$, that forces $m \pm n$, or $m$ and $2n$,
 to be squares themselves, and the result is two quartic families in a coprime pair. Since $z$ grows
-as the fourth power of the parameters, the enumeration costs only $O(N^{1/2})$.
+as the fourth power of the parameters, the enumeration costs only $O(N^{1/2})$. The lemma survives
+irrational-looking equations too. Problem 510's tangent circles satisfy
+$1/\sqrt{r_C} = 1/\sqrt{r_A} + 1/\sqrt{r_B}$. Clearing denominators shows $r_A/r_B$ must be the
+square of a reduced fraction $u/v$, and a three-parameter family follows.
+
+When no such lemma applies, a **conic with one rational point** still parametrises itself. Every
+line through a known rational point on a conic meets it in exactly one more rational point, and
+every rational point arises this way. So the slopes in lowest terms $\beta/\alpha$ enumerate the
+whole solution set ([rational parametrisation](https://en.wikipedia.org/wiki/Conic_section#Rational_points)).
+Problem 962 needs a bisector length, whose square is a rational function of the sides, to be a
+perfect square. Splitting $a, b$ by their gcd and taking the
+[square-free](https://en.wikipedia.org/wiki/Square-free_integer) part of one cofactor turns the
+condition into $g^2 - w^2 = D m^2$. That conic passes through $(1 : 1 : 0)$, and the line sweep
+from there gives every primitive solution as quadratics in $(\alpha, \beta)$. The test "is this a
+square?" has become a walk over slopes.
 
 A parametrised family can also be **joined against itself**. Problem 309's crossed ladders need two
 Pythagorean triples sharing a leg, with a divisibility condition linking their other legs. You
 generate every triple once, bucket the triples by leg, and pair them up only within a bucket. A leg
 belongs to only a handful of triples, so the pairwise test inside each bucket is nearly free, where a
-pairing over all triples would be quadratic.
+pairing over all triples would be quadratic. Problem 998 runs the same join for a geometric
+question: a triangle whose minimum bounding square has integer side turns out to be two Pythagorean
+triples glued along a shared leg, or three leg pairs meeting in a corner. What remains of the
+geometry, an angle of at least $45^\circ$, becomes the integer inequality
+$s^2 - (x + y)s - xy \le 0$ via the tangent addition formula.
 
 **Bound the unknown before solving for it.** Some equations have a free integer on one side, such
 as "the ratio is an integer $k$". An inequality can often pin $k$ to a few values before any search
@@ -84,7 +112,11 @@ $n$ and $b$ by their [gcd](https://en.wikipedia.org/wiki/Greatest_common_divisor
 coprime pair. For that pair the last free variable has a linear upper bound and must lie in a
 single residue class modulo $b_1^2$. The class has a
 [modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) as its first
-member, and the count is how many members of that progression fall under the bound. The gcd split
+member, and the count is how many members of that progression fall under the bound. The same
+habit applies inside a family. Problem 962 needs the numerators $t$ coprime to a known modulus, and
+it counts them by inclusion–exclusion with the
+[Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) over that modulus's
+square-free divisors rather than visiting each $t$. The gcd split
 is what makes the pair coprime, and coprimality is what makes the congruence solvable. Problem 251
 also shows that the loop order is part of the design. When $b_1$ is small the residue class is dense,
 so the solution walks the cofactor. When $b_1$ is large the class is nearly empty, so it walks the
@@ -107,6 +139,17 @@ The two-variable equation collapses to $p = n^2 + (n+1)^2$. Counting primes amon
 is then a [polynomial sieve](https://en.wikipedia.org/wiki/Sieve_theory): an odd prime $q$ divides
 some value only when $-1$ is a square mod $q$, and then it strikes exactly two residue classes of $n$.
 
+**Count representations from a factorisation.** For sums of squares, the number of solutions is
+itself an arithmetic function of the target.
+[Jacobi's two-square theorem](https://en.wikipedia.org/wiki/Sum_of_two_squares_theorem#Jacobi's_two-square_theorem)
+makes $r_2(f)/4$ multiplicative for odd $f$. It is the product of $e_p + 1$ over primes
+$p \equiv 1 \pmod 4$, and zero if any prime $p \equiv 3 \pmod 4$ has an odd exponent. Problem 621
+counts ordered ways to write $n$ as three triangular numbers. Fix the first, and
+$T_b + T_c = m$ becomes $(2b+1)^2 + (2c+1)^2 = 8m + 2$. So the last two terms are never searched:
+their count is $r_2(4m + 1)/4$. The problem becomes factoring about $\sqrt{2n}$ values of one
+quadratic in the first index, and the same polynomial sieve as problem 291 factors them all in a
+single sweep over the primes.
+
 **Pell's equation and its recurrence.** The equation $x^2 - D y^2 = \pm 1$ (for non-square $D$) is
 the workhorse. It has infinitely many integer solutions, and — this is the key fact — they are *not*
 scattered: from a small **fundamental** solution, every other is produced by a fixed linear
@@ -127,6 +170,17 @@ iterations cross $10^{12}$: the open-ended search has become an $O(\log T)$ walk
 solves a whole cluster of geometry problems — problem 94's almost-equilateral triangles reduce, via
 [Heron's formula](https://en.wikipedia.org/wiki/Heron%27s_formula), to a *Pell-like* equation
 $x^2 - 3y^2 = 1$ and are enumerated by an analogous recurrence.
+
+A right-hand side other than $\pm 1$ changes one thing: there is no longer a single orbit. The
+**generalised** Pell equation $X^2 - DY^2 = N$ still has its solutions closed under multiplication
+by a unit, here $2 + \sqrt 3$ of norm 1, but they split into several orbits. Each orbit needs its own
+seed. Problem 582 counts integer triangles with a $120^\circ$ angle and $b - a = d \le 100$.
+Completing the square gives $(2c)^2 - 3(2a + d)^2 = d^2$, one generalised Pell equation per $d$.
+The seeds are the solutions in one fundamental stretch of the hyperbola, because the unit maps that
+stretch onto the next. A short bounded search finds them, and every solution lies on exactly one
+seed's orbit. The bound is $10^{100}$ and yet the whole count is a few thousand big-integer steps.
+The lesson: list seeds up to one unit step, then iterate, and test the side conditions (parity,
+$a > 0$) on each point rather than deriving which orbits satisfy them.
 
 Pell equations can also prove that a search **ends**. Problem 581 wants every $n$ for which $n$ and
 $n + 1$ are both 47-smooth, with no bound given. Put $x = 2n + 1$ and let $q$ be the squarefree part
@@ -171,6 +225,18 @@ bound lists all of them. The values grow doubly exponentially, so the tree is ti
 a sum over $k$ up to $10^{18}$, and here the structure pays again. For large $k$ the tree has the
 same shape, with each node a fixed polynomial in $k$, so the sum over $k$ becomes a few dozen
 [power sums](https://en.wikipedia.org/wiki/Faulhaber%27s_formula).
+
+**Turn a near-equation into a forced recurrence.** An inequality such as
+$|a_i^2 - a_{i-1}a_{i+1}| \le 2$ looks looser than an equation, but integrality tightens it.
+Problem 771 counts sequences with that property up to $10^{18}$. Given two terms, the five candidates
+for the next lie in a window of width $4/a_{i-1}$, so once $a_{i-1} \ge 5$ at most one is an integer
+and the sequence is **forced**. Then structure is the whole question. A constant defect makes
+$(a_{i-1} + a_{i+1})/a_i$ constant, a fixed linear recurrence, and Vieta jumping classifies which
+ones exist. A zero defect is a geometric progression. Each family has closed-form window counts,
+with Euler's totient counting the reduced ratios. Everything else must start among numbers below 5,
+and a small depth-first search counts that irregular head. The pattern is general: when the
+tolerance shrinks faster than the terms grow, freedom exists only at the start, so search the start
+and count the rest by formula.
 
 **Check whether the arithmetic carries any information.** Problem 674 asks when two nested
 expressions built from $I(x, y) = (1 + x + y)^2 + y - x$ are equal. For fixed $s = x + y$ the values
@@ -231,28 +297,36 @@ stop searching and look for structure:
 
 - Is one constraint **linear**? Eliminate a variable and shrink the search (problem 9). If the
   unknowns must be non-negative, it is a coin problem: count the gaps per residue class through the
-  Apéry set, never one at a time (problem 718).
+  Apéry set, never one at a time (problem 718). With two generators, the gaps form a Young
+  diagram ordered by reachability (problem 988).
 - Does the solution family have a known **parametrisation** (Pythagorean triples, sums of two
   squares)? Generate solutions instead of testing candidates. Do coprime factors multiply to a
-  square? Then each is a square, and a coprime pair parametrises everything (problems 518, 764).
-  When two members of a family must share a part, bucket by that part and pair within the
-  buckets (problem 309).
+  square? Then each is a square, and a coprime pair parametrises everything (problems 510, 518,
+  764). A conic with one known rational point is parametrised by the slopes of the lines through it
+  (problem 962). When two members of a family must share a part, bucket by that part and pair
+  within the buckets (problems 309, 998).
 - Can you force a **product equal to a constant**? Solutions are then divisors. Count them from the
   exponents, take the divisor nearest the trivial one for the least solution, and if the constant
-  is prime, all factors but one are 1 (problems 108, 291, 955).
+  is prime, all factors but one are 1 (problems 108, 291, 955). For sums of two squares the
+  number of representations is multiplicative, so read it off the factorisation (problem 621).
 - Does the equation reduce to $x^2 - D y^2 = N$? It is **Pell** or Pell-like — find the fundamental
   solution (directly, or via the continued fraction of $\sqrt{D}$) and iterate the recurrence
-  (problems 66, 94, 100). A finite family of Pell equations can also prove an unbounded search
-  finite (problem 581).
+  (problems 66, 94, 100). If $N \ne \pm 1$ the solutions fall into several orbits, so find one seed
+  per orbit inside a single unit step (problem 582). A finite family of Pell equations can also
+  prove an unbounded search finite (problem 581).
 - Is it **quadratic in each variable**? Vieta jumping links the solutions into a tree rooted at a
   fundamental solution; walk it with a pruned DFS (problem 844).
+- Is it an **inequality** whose tolerance shrinks as the terms grow? Past a small threshold the
+  next term is forced, so classify the families, count them in closed form, and search only the
+  short irregular start (problem 771).
 - Is the operation **injective**? Then equality means the expressions match, and the equation is a
   unification problem, not an arithmetic one (problem 674).
 - Is there an integer unknown with **no obvious bound** (a ratio, a quotient)? Use the ordering of
   the variables to confine it to a few values, then solve each case (problem 257).
 - Is the question **how many**, not which? Parametrise by primitive solutions, usually coprime
   pairs. Count each family with $\lfloor N/L \rfloor$ or a residue-class count, and never list its
-  members (problems 251, 257).
+  members (problems 251, 257). Count coprime parameters with Möbius inclusion–exclusion, not a
+  loop (problem 962).
 - Is the question really about **best rational approximation**? Reach for continued-fraction
   convergents. If it is about powers drifting toward integers, pair each irrational with its
   conjugate so the sum is an integer (problem 318).
@@ -267,7 +341,8 @@ stop searching and look for structure:
   instead of forming the product, and keep equality tests exact rather than within a tolerance.
   Floating point has the same failure when two close quantities are subtracted. Square inequalities
   into integer tests, and rearrange near-cancelling differences before taking logarithms (problem
-  318).
+  318). A tolerance is never safe: in problem 998 a floating-point minimiser at $10^{-11}$ still
+  accepts a family whose true side misses an integer by $4 \times 10^{-13}$.
 
 The recurring mistake is to treat these as search problems by default, looping over candidate $x$ up
 to some bound and testing the equation. For a genuine Diophantine problem that bound is
