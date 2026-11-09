@@ -1,5 +1,5 @@
 <!-- tags: [hash-table] -->
-<!-- status: final 2026-10-16T15:16Z -->
+<!-- status: final -->
 # Hash table
 
 A [hash table](https://en.wikipedia.org/wiki/Hash_table) turns a key into an array index by
@@ -86,7 +86,7 @@ patterned, the multiply carries every input bit into the high end, and the shift
 
 ## What it is actually used for
 
-Four roles cover nearly every appearance below, and naming which one you are in tends to answer the
+Five roles cover nearly every appearance below, and naming which one you are in tends to answer the
 design questions that follow.
 
 **Membership and de-duplication.** The set is the whole data structure: problem 125 collects
@@ -102,6 +102,22 @@ groups primes into permutation families and then buckets the pairwise difference
 holding exactly three values *is* an arithmetic progression. The interesting work in all three is
 choosing the key, not the table.
 
+**Joining on a shared key.** Grouping has a second payoff when the question is about *pairs*: two
+items can only be related if they land in the same bucket, so the table cuts the candidate pairs
+before any test runs. Problem 309 wants pairs of Pythagorean triples that share a leg. It enumerates
+every triple once, files each one under its legs with `partners.setdefault(leg, []).append(other)`,
+and then compares pairs only inside a bucket. The cost drops from $N^2$ over all triples to
+$\sum_w d_w^2$ over the bucket sizes, and since most buckets hold a handful of triples that sum is
+small. Problem 928 joins two *different* collections the same way, as a
+[meet in the middle](/blogs/technique/meet-in-the-middle-attack). It counts cribbage hands. It splits
+the ranks into Ace–9 and 10–K, enumerates each half on its own, and collapses each half into a
+`Counter` keyed by what the other half needs to know: the low half's trailing run and its count of
+five-sums, the high half's leading run and its count of ten-cards. The join then makes one
+`balances.get(need, 0)` probe per pair of keys. Neither half ever sees the other's individual hands;
+the equality the hand must satisfy is solved by a lookup. It is the same move as a database hash
+join, and the design work is the same too: find the smallest interface the two halves have to share,
+and use it as the key.
+
 **Memoisation and sparse dynamic programming.** [Memoisation](/blogs/technique/memoization) is a
 hash table under a decorator — problem 14 caches Collatz chain lengths so that the shared tails of
 half a million sequences are each computed once:
@@ -111,12 +127,31 @@ half a million sequences are each computed once:
 def collatz_length(number: int) -> int:
 ```
 
+Collatz's key is the whole argument, so the cache hits only when a number repeats exactly. Problem
+551 shows what to do when that never happens. Its walk adds a number's digit sum to the number, about
+$10^{15}$ times, and no value occurs twice. The memo is keyed instead on
+`(k, c, low)`: the number of low digits, the digit sum of the high part, and the low part itself. A
+run of steps that carries the low $k$ digits past $10^k$ depends on nothing else, because the high
+digits only ever enter through their sum. Dropping $H$ from the key is what makes the same state
+come up again and again. The same dependency rule decides what may be stored: a run cut short by
+the step budget depends on that budget, so only completed runs are cached, and a cached run is
+reused only when it fits inside the caller's remaining limit. A memo key has to contain exactly what
+the answer depends on. If you leave out something it depends on, you get wrong answers. If you leave
+in something it does not depend on, you get no hits.
+
 The sparse-DP case is the more interesting one. When the state is a tuple and the *reachable* states
 are a vanishing fraction of the possible ones, a dense array indexed by state is unaffordable and a
 dict keyed by the tuple is the whole solution. Problem 208's robot walk carries a dict keyed on
 (direction, the four arc counts) and rolls it forward one step at a time; problems 153 and 259 key on
-values and frozensets that no array could be indexed by. The pattern to recognise: the state space is
-astronomical, the state *count* is not.
+values and frozensets that no array could be indexed by. Problem 987 follows the same plan, keyed on
+the last four straights that still overlap the current rank. Problem 990 shows what to do when the DP
+has no step counter to roll forward on. It counts balanced addition strings column by column, and a
+column consumes a variable number of characters. So it keeps a *list* of dicts indexed by remaining
+character budget, keys each dict on `(active left terms, active right terms, carry)`, and drains the
+buckets from the largest budget down. The budget strictly falls, so a bucket is never written after
+it has been read. Any dimension that only ever decreases can move out of the key and into the list
+index, and that gives you the processing order for nothing. The pattern to recognise: the state space
+is astronomical, the state *count* is not.
 
 **A map with no dense index available.** Problem 10's incremental sieve keeps composites mapped to
 the prime that will next strike them, and the keys it needs are scattered across the whole range with
@@ -141,6 +176,19 @@ points in neighbouring cells; the key is a coordinate pair, the table is the spa
   linear — the key of $u + v$ is the sum of the keys. Every relation it tests ("is this signed sum
   equal to $2u$ for some $u$?", "is it some $u + v$?") becomes plain integer addition followed by one
   probe, with no tuple ever built.
+- **A table can hand out identities, not just answers.** Problem 674 has to solve many equations
+  between deeply nested `I(…, …)` terms, and it parses every expression into one
+  [hash-consed](/blogs/technique/hash-consing) DAG. The table maps a variable name, or an
+  `(left id, right id)` pair, to a node id. A subterm that has been seen before gets its existing
+  id back instead of a new node. Because a node's children are interned before the node itself, two
+  subterms are structurally equal exactly when their ids are equal. So the
+  [unification](/blogs/technique/unification-computer-science) that follows only ever compares
+  integers, never trees, and work done on a shared subterm is done once. The table builds the
+  canonical form instead of just storing it. The same file has a second lesson in its union-find:
+  `parent` is a plain `dict`, made fresh for each pair of equations, and it holds only the nodes that
+  pair actually merges. That is the Python counterpart of problem 983's generation stamp. When most
+  of the structure goes unused on any one query, an empty sparse table is a cheaper reset than
+  clearing a dense array.
 - **Pre-size it, and use a power of two.** These tables are declared at their final size — `1 << 20`
   buckets for problem 60's pair cache, `1 << 22` for problem 29's set — because the entry count is roughly
   known and rehashing millions of entries mid-run is pure waste. Powers of two additionally allow the
