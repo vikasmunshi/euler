@@ -1,5 +1,5 @@
 <!-- tags: [watch-integer-width] -->
-<!-- status: final 2026-11-02T18:24Z -->
+<!-- status: final -->
 # Watch integer width
 
 Almost every one of these problems is trivial in Python and a trap in C, for the same reason: Python's
@@ -147,7 +147,12 @@ When the bignum is only needed some of the time, don't pay for it all of the tim
 candidate length reaches about $10^{51}$ for the largest inputs, so its C uses
 [GMP](https://gmplib.org/) `mpz_t` — but keeps a native `unsigned long long` fast path for every
 candidate of at most 19 digits, which covers the dense small cases, and falls back to GMP only on
-the sparse large ones where a candidate or two settles the answer. Problem 581 splits by *quantity*
+the sparse large ones where a candidate or two settles the answer. Problem 988 makes the opposite
+call. Its headline total sits just below $2^{63}$ — a `long long` would do — but the extra benchmark
+inputs produce 27- and 101-digit totals from the same $O(ab)$ dynamic programme, so the C runs that
+DP over GMP throughout. With a table of a few thousand cells, the bignum costs about a millisecond,
+and no fast path is worth the second code path. The test cases set the tier, not just the width
+inside one. Problem 581 splits by *quantity*
 instead of by case: its Pell equations $x^2 - d\,y^2 = 1$ have $d$ past $2^{64}$ and $d\,y^2$ near
 $4 \times 10^{41}$ — beyond even `__int128` — so the continued-fraction and recurrence arithmetic
 runs in GMP, but the hot smoothness test runs on $y$ alone, which a fixed cap holds below $10^{10}$,
@@ -194,6 +199,14 @@ an identity near $2.8 \times 10^{18}$, and `--show` checks that identity on ever
 total reaches $4 \times 10^{21}$, so its Python adds the high and low $10^9$-digit halves separately
 before taking the last 18 digits.
 
+Sometimes the value that overflows is one the computation would never use. Problem 749 sums the
+$k$-th powers of a number's digits as one `int64` matrix product over a table $(0^k, \dots, 9^k)$,
+and at large $k$ the entry $9^k$ alone passes $2^{63}$. But a digit whose $k$-th power exceeds
+$10^d$ cannot occur in any row still alive at that $k$, since its power alone would overshoot every
+$d$-digit target. So the table stores 0 there, and every sum that is actually formed stays below
+$d \cdot 10^d$. This is the bound-test lesson again: the large values are the ones the search
+rejects, so reject them before the arithmetic instead of after it.
+
 **Inside a float.** A `double` is a box too: its 53-bit significand holds every integer up to
 $2^{53} \approx 9 \times 10^{15}$ exactly, and beyond that it rounds. Problem 341 needs the least
 $i$ with $i(i+1) \ge c$ for a million values of $c$ at once, and takes it from the quadratic formula
@@ -207,8 +220,18 @@ i += i * (i + 1) < c        # float rounding: correct to the exact root
 
 The float gets within one; the integer comparison, done in a type that is exact, settles it. Problem
 632 does the same for an integer square root in C, starting from `sqrtl` (a `long double`, 64-bit
-significand) and correcting. Never let the float result stand unchecked once its argument nears
-$2^{53}$ — or past it, where consecutive integers share one `double`.
+significand) and correcting. Problem 962 needs the same root of a bound $Dx\beta^2$ that can
+exceed $2^{63}$ itself, so it forms the argument in `unsigned __int128` and only then hands it to
+`sqrtl`. Never let the float result stand unchecked once its argument nears $2^{53}$ — or past it,
+where consecutive integers share one `double`.
+
+When the answer itself is real, the job is to decide where exactness ends. Problem 930 sums
+expected hitting times over every $(n, m)$ pair. Each term weights an exact combinatorial count —
+up to $16^{16}$, past 64 bits, so the C keeps it in `unsigned __int128` — by a ratio of cosines that
+is irrational. The counts stay integers for as long as they can, and the conversion to floating point
+happens once per term, not once per multiply. The sum of many such terms then gets a better
+accumulator: Python uses `math.fsum`, which tracks the rounding error of every addition, and the C
+adds in `long double`. Width and precision are the same budget, spent in different units.
 
 ## How to reason about it
 
@@ -240,7 +263,9 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
   $2 \times 10^{45}$, and 6 has no inverse modulo $10^9$, so "reduce, then divide" is not an option.
   The fix is to divide *the factors* — 2 goes into $x$ or $x+1$, 3 into exactly one of the three,
   chosen by $x \bmod 3$ — leaving three integers that each fit in 64 bits and can be reduced before
-  they are multiplied.
+  they are multiplied. Problem 521 starts its tables at $v(v+1)/2$ for $v$ near $10^{12}$, and its
+  NumPy version halves whichever factor is even before multiplying, so the product never has to
+  exist at double size. The C takes the other road and forms the product in `__int128`.
 - **Some quantities must be exact before they are reduced.** Problem 632 multiplies together the
   *non-zero* counts $C_k$ modulo $10^9+7$ — and a count that happens to be a multiple of the modulus
   reduces to 0 while still being non-zero, so a "reduce first" version would silently drop a factor.
@@ -248,6 +273,16 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
   $\binom{j}{k} A_j$ approach $2^8 \cdot 10^{16}$ before they cancel down to the result: the
   intermediates outgrow the answer *because* of the cancellation. The C accumulates each $C_k$ in
   `__int128`, exactly, and reduces only after the sum is complete.
+- **Staying in integers costs width.** A count with a fraction in its formula can avoid rationals by
+  scaling the denominator out and dividing it back at the end, but every intermediate then carries
+  the scale factor. Problem 987 counts poker deals by inclusion–exclusion over straights that are
+  forced to be flushes. Its weights would include $1/(c-k)!$ for interchangeable straights, so the DP
+  multiplies in a binomial instead, scales each final state by a factorial and divides the grand
+  total by $m!$. The answer alone, about $1.1 \times 10^{19}$, already passes $2^{63}$. The total
+  before that division is larger still, and the inclusion–exclusion terms carry signs. An
+  `unsigned long long` would hold the answer but not the negative terms on the way to it, so the C
+  carries every weight in signed `__int128`. Count the sign bit when you size a type for an
+  alternating sum.
 - **Signed overflow is undefined, so it hides.** Unlike Python, a C overflow throws no error and
   may pass small tests. When a C port disagrees with a verified Python solution only on the large
   input, an overflowed intermediate is the first suspect — reach for `long long`, then `__int128`,
@@ -257,7 +292,7 @@ $2^{53}$ — or past it, where consecutive integers share one `double`.
   overflow, so arithmetic done in them is trustworthy by construction. Port to C for speed, but keep
   the Python solution as the reference the C output must match. That guarantee stops at the NumPy
   boundary: a vectorised solution needs the same width audit as its C port (problems 249, 341, 401,
-  421, 455, 659, 1010), and a brute force in plain Python ints is the better oracle for both.
+  421, 455, 521, 659, 749, 1010), and a brute force in plain Python ints is the better oracle for both.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
