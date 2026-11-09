@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic, modular-multiplicative-inverse, modular-arithmetic-application, modular-exponentiation, modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-08T17:04Z -->
+<!-- status: final -->
 # Modular Arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -66,6 +66,16 @@ in ascending order makes the first path to each remainder the smallest numeral t
 Two of the repunits $1, 11, \dots$ share a remainder within the first $n + 1$, and their difference
 is a 0-1 multiple of $n$, so no search runs past $n$ states.
 
+The state can be a carry instead of a remainder. Problem 990 counts the addition equations
+$x_1 + \dots + x_k = y_1 + \dots + y_m$ that fit in a bounded length, with terms of up to 24 digits.
+Checking one the way it is done on paper, column by column from the units, needs only a congruence
+per column. The left digits minus the right digits plus the incoming carry must be
+$\equiv 0 \pmod{10}$, and the quotient is the signed carry out. The values never matter, only the
+carry and how many terms on each side still have digits. So a digit DP over those few numbers
+replaces any table keyed by value. Writing each right-hand digit as $9 - d'$ makes every digit range
+over an interval again. A column's digit sum then has one generating function per count of terms,
+and the column condition picks its coefficients in one residue class mod 10.
+
 Give the residue walk weights and it computes a shortest path. Problem 718 needs every $n$ that is
 *not* $a x + b y + c z$ for three coprime powers. That is the gap set of a
 [numerical semigroup](https://en.wikipedia.org/wiki/Numerical_semigroup), and it is read off the
@@ -105,6 +115,14 @@ exponentiation. The remainders' fractions add up to a small carry, and the tail 
 to matter provably cannot cross an integer. It is the
 [Bailey–Borwein–Plouffe](https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula)
 trick for $\pi$, and it costs $O(\log^2 n)$ where writing the expansion out is impossible.
+
+Read the other way, a fractional part is a residue: $\{a/n\} = (a \bmod n)/n$. Problem 850 sums
+$\{i^k/n\}$ over $i$, over odd $k$ and over $n$ up to about $3 \times 10^{13}$. For odd $k$ the map
+$i \mapsto n - i$ sends $i^k$ to $-i^k \pmod n$, so the non-zero residues pair off into sums of
+exactly $n$. Only the $i$ with $n \mid i^k$ escape the pairing, and the inner sum is
+$(n - z_k(n))/2$. Here $z_k(n)$ counts the solutions of a congruence, so by CRT (below) it is
+multiplicative, and modulo $p^e$ it is a power of $p$ fixed by $\lceil e/k \rceil$. The fractions
+have become a count of roots, and the count is a multiplicative function.
 
 The catch is that congruence is preserved by $+$, $-$, and $\times$ **but not by division** — and
 not, in general, by exponentiation done naively. Those two operations are what most of this page is
@@ -226,6 +244,15 @@ to carry $10^{-r} N$ and $100^{-r} N^2$ instead. The changing scale is absorbed 
 inverse, and the update becomes linear with constant coefficients again. Dividing a state by a
 known power is a cheap way to make a step position-independent, and so composable.
 
+The same composition removes a sequential loop. Problem 960 draws ten million values from a
+[linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator)
+$a \mapsto \alpha a + \gamma \pmod{10^{12}}$, where each value needs the one before it. Affine maps
+compose into affine maps, so the step applied 4096 times is a single map $a \mapsto A a + C$. A row
+of 4096 consecutive values then advances to the next row in one vectorised multiply-add. $A a$
+reaches $10^{24}$, so $A$ is split into two $10^6$-sized halves to keep every partial product in
+64 bits. That is the generator's jump-ahead, and it works for the same reason square-and-multiply
+does.
+
 With a fixed base and many exponents, square-and-multiply is the wrong tool, because it repeats the
 same squarings for every exponent. Problem 921 raises the one element $\beta = 2 + \sqrt 5$ of
 $\mathbb{Z}[\sqrt 5]/M$ to over a million exponents below $M < 2^{29}$. Split each exponent as
@@ -309,7 +336,12 @@ that never reuse a quartet. Unordered trios are awkward to count, so it labels t
 multiplies the count by exactly $(4n)!$ because the trios are distinct. A dynamic programme then
 counts the labelled form in residues. Removing the labels is a division of a residue, one inverse
 at the end, and it is valid because the prime exceeds $4n$. When a group acts freely on what you
-are counting, count the labelled objects and divide by the group's size once.
+are counting, count the labelled objects and divide by the group's size once. Problem 923 goes
+the other way. It counts *ordered* tuples of staircases, but who wins depends only on the multiset
+of their game values. So each class of $c$ pieces drawn from one value class enters as $F^c / c!$,
+an [exponential generating function](https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function),
+and one factor $m!$ at the end puts the orderings back. Both directions need $c!$ to be a unit,
+which a prime larger than the counts guarantees.
 
 Even over a field an inverse costs a modular exponentiation, so how many you take is worth
 planning. Problem 739 needs about $10^8$ binomial coefficients modulo $10^9 + 7$. It multiplies
@@ -352,6 +384,15 @@ and summing over $n \le L$ gives it the weight $(6^{L-j+1} - 1)/5$. The running 
 What is left is a dot product of independent terms, each a few table lookups, with one inverse of
 5, and it vectorises over fifty million indices where the recurrence could only be walked.
 
+Geometric sums also nest. Problem 968 sums the weight $2^{x_1}3^{x_2}5^{x_3}7^{x_4}11^{x_5}$ over the
+lattice points of a five-dimensional polytope cut out by $x_i + x_j \le X_{ij}$, about $10^{40}$ of
+them. Summing out one variable between bounds that are linear in another is one geometric series.
+Its two end terms are again exponentials in the remaining variables, with new bases. The weight
+keeps its shape, so [Fourier–Motzkin elimination](https://en.wikipedia.org/wiki/Fourier%E2%80%93Motzkin_elimination),
+split into cases by which bound is tightest, reduces every piece to a constant. Each step costs a
+power and an inverse of $r - 1$, however large the bounds are. The one thing to check is that no
+base reaches $r \equiv 1$, where the closed form divides by zero.
+
 Over a prime, the *exponent* is a residue too, modulo $p - 1$, and that includes negative ones:
 $a^{-k} = a^{(-k) \bmod (p-1)}$. Problem 754 multiplies Gauss factorials, and Möbius inversion
 writes each as a product of factorials and powers raised to $\mu(d) = \pm 1$. Grouped by the
@@ -383,7 +424,12 @@ hidden inside a standard algorithm as well. Problem 649 needs an XOR-convolution
 and the [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Hadamard_transform) would make it
 pointwise, but its inverse divides by the length 8, which has no inverse modulo $10^9$. With eight
 entries the direct convolution costs nothing and uses only $+$ and $\times$, so it is the right
-choice. A fast transform is only available when the modulus can undo it.
+choice. A fast transform is only available when the modulus can undo it. Problem 922 has a
+modulus that can. It needs an XOR convolution power modulo the prime $10^9 + 7$, where dividing by
+the length is a single inverse. In the transformed domain each Walsh coefficient becomes a
+polynomial (the problem also carries an ordinary sum alongside the XOR), raised to the $m$-th power.
+Only the tuples whose XOR is 0 are wanted, so the inverse transform is evaluated at that one point,
+$S^{-1} \sum_s$, and never in full.
 
 The [number-theoretic transform](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_over_a_ring)
 has the same limit. It needs a $2^k$-th root of unity, so it works modulo primes like
@@ -397,6 +443,13 @@ problem needs $F(K) = \sum_s \binom{K}{s}^{16}$ for every $K \le k$. Writing
 $\binom{K}{s}^{16} = K!^{16} \cdot u_s u_{K-s}$ with $u_s = (s!)^{-16}$ makes $F(K)$ the $K$-th
 term of $u * u$, so all $k$ sums cost one transform. Inverse factorials separate a binomial
 into a factor for each index, and that is what lets a convolution compute it.
+
+Problem 922 multiplies its polynomials a third way, by
+[Kronecker substitution](https://en.wikipedia.org/wiki/Kronecker_substitution). The reduced
+coefficients are packed into fixed-width slots of one big integer. Each slot is wide enough that no
+coefficient of the exact product can spill into its neighbour. The two integers are multiplied, and
+the slots are unpacked and reduced. The big-integer library's sub-quadratic multiplication does the
+convolution, with no root of unity and no floating point.
 
 The commonest version is also the easiest to miss: "the last nine digits" means modulo $10^9$, and
 $10^9$ is even. Both problems 340 and 401 end in closed forms with a small fixed denominator.
@@ -423,7 +476,9 @@ replace $10^{14}$ terms. Factor the divisor as well as the modulus before reachi
 the divisor $c$ is not coprime, compute modulo $c \cdot m$ and divide the residue by $c$ at the
 end. If $x \equiv y \pmod{cm}$ and $c \mid x$, then $x / c \equiv y / c \pmod m$. Problem 875's
 C port evaluates a Faulhaber polynomial with denominator 24 this way, modulo $24m$ in `__int128`,
-with no inverse at all.
+with no inverse at all. The same move recovers a floor. Problem 850's answer is $\lfloor S \rfloor$
+for a half-integer total $S$. Its C port carries $2S$ modulo $2m$, which keeps its parity, so
+halving that residue with a floor gives $\lfloor S \rfloor \bmod m$ without a big integer.
 
 Problem 605 needs both repairs, and finding its divisor is a modular trick in its own right. Its
 probability is a fraction with denominator $(2^n - 1)^2$, $n \approx 10^8$, and the answer wants
@@ -482,6 +537,14 @@ $n \bmod Q$, where $Q \approx 3.2 \times 10^6$ is their product, so its partial 
 periodic prefix table. The convolution then runs only over the roughly $1.4 \times 10^6$ products
 of the large primes.
 
+At $n = 2$ the filter needs no roots at all, because $\omega = -1$ and the average is over signs.
+Problem 973 sums, over every composition of $n$, the XOR of its parts, and it does so bit by bit.
+Bit $b$ of an XOR is set when an odd number of parts have that bit. Giving each part the sign $-1$
+when its bit $b$ is set, the signed count $E$ gives the odd-parity count as
+$(2^{n-1} - E)/2$, one inverse of 2. The sign is periodic in the part, so the compositions'
+generating function $1/(1 - C(x))$ is rational with a sparse denominator. Each bit then costs one
+four-term recurrence.
+
 ## The unit group: roots of unity, and how many there are
 
 Some problems ask not for a residue but for **how many** residues solve a polynomial congruence, and
@@ -536,6 +599,18 @@ then lifts it to $p^2$. The lift fails exactly where the derivative $2r$ vanishe
 itself, and there a short divisibility argument shows there is no root modulo $169$ at all. The
 two exceptional primes, the one that divides 2 and the one that divides the discriminant, are the
 ones to check by hand.
+
+Cyclicity also gives the unit group useful quotients. When $r \mid p - 1$, the value
+$\chi(x) = x^{(p-1)/r}$ is an $r$-th root of unity, the
+[power residue symbol](https://en.wikipedia.org/wiki/Power_residue_symbol) that generalises Euler's
+criterion. It names the coset of $x$ modulo the subgroup of $r$-th powers, and every coset holds
+$(p-1)/r$ elements. Problem 971 counts the periodic points of $x \mapsto x^k \bmod p$ for primes
+$p = 5k - 4$. Then $k - 1 = (p-1)/5$, so the map is $x \mapsto x\,(1 + \chi(x))$ with a quintic
+symbol. Every element of coset $j$ is multiplied by the same $1 + \zeta^j$ and lands in one common
+coset, so the functional graph on $p$ points projects onto a map of five cosets. A coset on a cycle
+of that small map comes back multiplied by one fixed unit, and multiplying by a unit is a bijection,
+so every element of it is periodic. A graph walk over $p$ points becomes a few exponentiations per
+prime.
 
 ### Orders, and where they live
 
@@ -694,6 +769,13 @@ product is unchanged by permuting the roots, so
 [Vieta's formulas](https://en.wikipedia.org/wiki/Vieta%27s_formulas) express it through the cubic's
 coefficients, and it collapses to $1 - k^2$. The roots are never found.
 
+A practical habit follows from all this: make the modulus an input. Problems 941 and 960 take it as
+a parameter in which 0 means "do not reduce". So the statement's small unreduced examples run
+through the same code path as the reduced answer, and a reduction placed one level too high shows
+up as a failed example. In 941 the single division, halving a middle term whose
+$\binom{n}{n/2}$ is even, is an exact integer division in one mode and a multiplication by
+$2^{-1} = (p + 1)/2$ in the other.
+
 ## The overflow trap
 
 Modular arithmetic's other sharp edge is a language pitfall, not a mathematical one. Two residues
@@ -762,14 +844,18 @@ directly. When you see it:
   but only the quantity the statement actually reduces. A recursive state may be reduced while
   its updates are integer-linear. If a choice depends on order or distinctness, settle it before
   reducing. A modulus applied to something that looks irrational or complex promises an integer,
-  so look for the symmetry that makes it one.
+  so look for the symmetry that makes it one. Make the modulus a parameter, with 0 meaning exact,
+  so the statement's unreduced examples test the same code.
 - Searching for a number with a divisibility property? Its residue is a complete state, so search
   the $n$ residues, not the numbers. With weights, the least member of each class (an Apéry set)
-  describes everything the generators cannot reach.
+  describes everything the generators cannot reach. An equation between huge sums is checked
+  column by column, with the carry as the state. A fractional part $\{a/n\}$ is a residue over $n$.
 - Need a **power**? Use modular exponentiation ($O(\log b)$), and shrink the exponent itself with
   Fermat, Euler or Carmichael; a periodic exponent can make a whole sequence periodic. Any
   associative product (a ring extension, a convolution, a matrix per letter of a recursive word,
-  a table per block of digits joined by a factor $10^L$) can be powered the same way. A linear recurrence unrolls into geometric weights. A value used
+  a table per block of digits joined by a factor $10^L$, an affine step that jumps a generator
+  ahead) can be powered the same way. A linear recurrence unrolls into geometric weights, and
+  geometric sums nest across the variables of a polytope. A value used
   both as an exponent and as a factor is needed modulo $p - 1$ **and** modulo $p$. Many powers of
   one fixed base are two table lookups each, not a loop.
 - Need to **divide**? Multiply by the modular inverse — extended Euclid for any modulus, $a^{p-2}$
@@ -783,15 +869,17 @@ directly. When you see it:
   prime a negative exponent is just a residue mod $p - 1$, a symmetry can be counted labelled and
   divided out once, and an irrational such as $\sqrt 5$ is usable if it has a residue.
 - Need a **convolution** modulo a prime with no $2^k$-th root of unity? Split the residues into
-  limbs small enough for a floating-point FFT to stay exact, and reduce afterwards.
+  limbs small enough for a floating-point FFT to stay exact, or pack them into the slots of one big
+  integer (Kronecker substitution), and reduce afterwards.
 - Need an **order**? Start from the group order ($p - 1$; $p + 1$ for a norm-one element of
   $\mathbb{F}_{p^2}$) and strip primes while the power stays 1. Lift to $p^k$ by at most a factor
   $p$ per step, and take the lcm across a composite modulus. To test a root you cannot cheaply
-  find, power the formal root in $\mathbb{Z}_p[x]/(f)$.
+  find, power the formal root in $\mathbb{Z}_p[x]/(f)$. A map that multiplies by something
+  depending only on $x^{(p-1)/r}$ acts on $r$ cosets, not on $p$ points.
 - Need to **count** solutions? A linear congruence's solutions are a progression (two divisions);
   the roots of $x^r \equiv 1 \pmod p$ number $\gcd(r, p - 1)$. A condition "the sum is
   $\equiv 0 \pmod n$" is a roots-of-unity filter, or exactly a group-ring sum, and a closed form
-  may be hiding behind it. Exponent parities are vectors over $\mathbb{F}_2$, so "the product is a
+  may be hiding behind it. For a parity, the filter is a signed count. Exponent parities are vectors over $\mathbb{F}_2$, so "the product is a
   square" counts as $2^{n-r} - 1$. A
   quadratic congruence is a modular square root plus the quadratic formula, Hensel-lifted to
   $p^k$; check the primes dividing 2 and the discriminant by hand.
