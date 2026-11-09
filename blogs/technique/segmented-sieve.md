@@ -1,5 +1,5 @@
 <!-- tags: [segmented-sieve] -->
-<!-- status: final -->
+<!-- status: final 2026-11-09T06:58Z -->
 # Segmented sieve
 
 A [segmented sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve) runs the

@@ -9183,13 +9183,13 @@
     {
       "path": "technique/segmented-sieve",
       "title": "Segmented sieve",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-09T06:58Z",
       "solved": 6,
       "problems": 6,
       "tags": ["segmented-sieve"],
       "refs": ["p0256_s0", "p0531_s0", "p0619_s0", "p0632_s0", "p0754_s0", "p0971_s0"],
-      "covered": [],
+      "covered": ["p0256", "p0531", "p0619", "p0632", "p0754", "p0971"],
       "solved_after": []
     },
     {
