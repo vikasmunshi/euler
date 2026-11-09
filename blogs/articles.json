@@ -9676,13 +9676,13 @@
       "path": "technique/symmetry",
       "title": "Symmetry",
       "status": "final",
-      "written": "2026-10-30T06:43Z",
+      "written": "2026-11-09T17:07Z",
       "solved": 15,
       "problems": 15,
       "tags": ["symmetry"],
       "refs": ["p0053_s0", "p0126_s0", "p0210_s0", "p0224_s0", "p0246_s0", "p0331_s0", "p0475_s0", "p0539_s0", "p0670_s0", "p0761_s0", "p0782_s0", "p0804_s0", "p0850_s0", "p0975_s0", "p0983_s0"],
-      "covered": ["p0053", "p0126", "p0210", "p0224", "p0246", "p0331", "p0670", "p0761", "p0983"],
-      "solved_after": ["p0475", "p0539", "p0782", "p0804", "p0850", "p0975"]
+      "covered": ["p0053", "p0126", "p0210", "p0224", "p0246", "p0331", "p0475", "p0539", "p0670", "p0761", "p0782", "p0804", "p0850", "p0975", "p0983"],
+      "solved_after": []
     },
     {
       "path": "technique/system-of-linear-equations",
