@@ -6164,8 +6164,8 @@
     "level": 33,
     "pct": 83,
     "solvers": 220,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 9 Nov 2026, 13:27"
   },
   "772": {
     "title": "Balanceable $k$-bounded Partitions",
