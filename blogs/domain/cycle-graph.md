@@ -104,7 +104,6 @@ contributing $L_1 = 1$. A search over $2^{64}$ truth tables becomes a walk aroun
 - ○ [0781](/solutions/0781/) — Feynman Diagrams
 - ○ [0814](/solutions/0814/) — Mezzo-forte
 - ○ [0824](/solutions/0824/) — Chess Sliders
-- ○ [0843](/solutions/0843/) — Periodic Circles
 - ○ [0846](/solutions/0846/) — Magic Bracelets
 - ○ [0857](/solutions/0857/) — Beautiful Graphs
 

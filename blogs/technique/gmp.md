@@ -276,6 +276,7 @@ few dozen sums make exact arithmetic the simpler choice here.
 - ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
 - ● [0605](/solutions/0605/) — Pairwise Coin-Tossing Game
 - ● [0776](/solutions/0776/) — Digit Sum Division
+- ● [0843](/solutions/0843/) — Periodic Circles
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0984](/solutions/0984/) — Knights and Horses

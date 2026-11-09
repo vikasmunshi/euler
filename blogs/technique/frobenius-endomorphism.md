@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Frobenius_endo
 ## Problems
 
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0843](/solutions/0843/) — Periodic Circles
 
 <!-- /problems -->

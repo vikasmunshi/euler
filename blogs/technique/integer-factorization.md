@@ -176,6 +176,7 @@ calls, and a table built once at import is free on every run but the first.
 - ● [0357](/solutions/0357/) — Prime Generating Integers
 - ● [0443](/solutions/0443/) — GCD Sequence
 - ● [0619](/solutions/0619/) — Square Subsets
+- ● [0843](/solutions/0843/) — Periodic Circles
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 
 <!-- /problems -->

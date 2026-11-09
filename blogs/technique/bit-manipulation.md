@@ -229,6 +229,7 @@ buy the most where the instructions are real.
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0768](/solutions/0768/) — Chandelier
+- ● [0843](/solutions/0843/) — Periodic Circles
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation

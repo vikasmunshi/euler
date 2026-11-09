@@ -208,6 +208,7 @@ false "prime" would put a composite into the factorisation without any error, an
 - ● [0487](/solutions/0487/) — Sums of Power Sums
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0545](/solutions/0545/) — Faulhaber's Formulas
+- ● [0843](/solutions/0843/) — Periodic Circles
 - ● [0955](/solutions/0955/) — Finding Triangles
 - ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 

@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/GF(2)>._
 ## Problems
 
 - ● [0619](/solutions/0619/) — Square Subsets
+- ● [0843](/solutions/0843/) — Periodic Circles
 
 <!-- /problems -->

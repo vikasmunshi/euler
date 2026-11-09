@@ -102,6 +102,7 @@ tensor product of its per-prime vectors.
 - ● [0271](/solutions/0271/) — Modular Cubes, Part 1
 - ● [0768](/solutions/0768/) — Chandelier
 - ○ [0797](/solutions/0797/) — Cyclogenic Polynomials
+- ● [0843](/solutions/0843/) — Periodic Circles
 - ○ [0880](/solutions/0880/) — Nested Radicals
 - ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
