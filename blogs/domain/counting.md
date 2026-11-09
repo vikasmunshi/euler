@@ -325,7 +325,7 @@ reach for wide or arbitrary-precision types
 - ○ [0741](/solutions/0741/) — Binary Grid Colouring
 - ○ [0746](/solutions/0746/) — A Messy Dinner
 - ○ [0762](/solutions/0762/) — Amoebas in a 2D Grid
-- ○ [0771](/solutions/0771/) — Pseudo Geometric Sequences
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ○ [0780](/solutions/0780/) — Toriangulations
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ○ [0814](/solutions/0814/) — Mezzo-forte

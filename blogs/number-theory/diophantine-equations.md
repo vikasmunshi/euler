@@ -353,7 +353,7 @@ checked that no structure exists, and even then the integer view decides how to 
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
-- ○ [0771](/solutions/0771/) — Pseudo Geometric Sequences
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ○ [0784](/solutions/0784/) — Reciprocal Pairs
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
 - ○ [0791](/solutions/0791/) — Average and Variance

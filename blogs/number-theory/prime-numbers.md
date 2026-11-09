@@ -1023,6 +1023,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ○ [0773](/solutions/0773/) — Ruff Numbers
 - ○ [0777](/solutions/0777/) — Lissajous Curves

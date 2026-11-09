@@ -112,7 +112,7 @@ are consecutive terms of a progression.
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ○ [0542](/solutions/0542/) — Geometric Progression with Maximum Sum
 - ○ [0770](/solutions/0770/) — Delphi Flip
-- ○ [0771](/solutions/0771/) — Pseudo Geometric Sequences
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ○ [0894](/solutions/0894/) — Spiral of Circles
 
 <!-- /problems -->

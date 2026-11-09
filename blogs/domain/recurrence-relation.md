@@ -458,6 +458,7 @@ induction will confirm. The shape picks the method.
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ○ [0759](/solutions/0759/) — A Squared Recurrence Relation
 - ○ [0770](/solutions/0770/) — Delphi Flip
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ○ [0774](/solutions/0774/) — Conjunctive Sequences
 - ○ [0809](/solutions/0809/) — Rational Recurrence Relation
 - ○ [0811](/solutions/0811/) — Bitwise Recursion

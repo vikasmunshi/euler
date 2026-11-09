@@ -520,6 +520,7 @@ loop was never needed.
 - ● [0718](/solutions/0718/) — Unreachable Numbers
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations

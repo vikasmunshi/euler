@@ -402,6 +402,7 @@ kept warm between them flatters the measurement.
 - ● [0615](/solutions/0615/) — The Millionth Number with at Least One Million Prime Factors
 - ● [0642](/solutions/0642/) — Sum of Largest Prime Factors
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [0928](/solutions/0928/) — Cribbage

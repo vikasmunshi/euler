@@ -166,6 +166,7 @@ problems need a little more:
 - ● [0377](/solutions/0377/) — Sum of Digits - Experience #13
 - ● [0529](/solutions/0529/) — $10$-substrings
 - ● [0682](/solutions/0682/) — $5$-Smooth Pairs
+- ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0951](/solutions/0951/) — A Game of Chance
