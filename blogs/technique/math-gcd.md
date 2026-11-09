@@ -1,5 +1,5 @@
 <!-- tags: [math-gcd] -->
-<!-- status: final 2026-10-30T06:36Z -->
+<!-- status: final -->
 # math.gcd
 
 [`math.gcd`](https://docs.python.org/3/library/math.html#math.gcd) and its partner
@@ -9,8 +9,9 @@ why Euclid's algorithm is correct, why it's logarithmic, and what the gcd *means
 This page is about the call itself. What the Python functions accept and return, what I write in C
 where there is no such function, and the one situation where it's worth replacing Euclid with
 something cleverer. In most of the problems below, the gcd is never the answer. It's a guard (is
-this pair coprime?), a normaliser (put this fraction in lowest terms) or a detector (does this
-product share a factor with `n`?), called many times inside a loop. That's why the details of the
+this pair coprime?), a normaliser (put this fraction in lowest terms), a detector (does this
+product share a factor with `n`?) or a solvability test (can these two congruences hold at once?),
+called many times inside a loop. That's why the details of the
 call matter. The one exception, Problem 443, puts the gcd in the statement itself, and there the
 lesson runs the other way: the fastest gcd is the one an identity lets you skip.
 
@@ -54,7 +55,7 @@ big-number divisions. You won't beat that by hand.
 
 ## In the problems: guard, normaliser, detector
 
-Every use in the problems below is one of three patterns.
+Every use in the problems below is one of four patterns.
 
 **The coprimality guard.** You generate a parametrised family over pairs `(m, n)` and skip the
 pairs that would produce a scaled duplicate:
@@ -70,7 +71,38 @@ formula for Pythagorean triples. [Problem 141](/solutions/0141/) uses the same t
 terms. The gcd here is cheap compared with the work it lets you skip. Still, when there's a cheaper
 test, put it first. A parity check like `(m - n) % 2` is one operation. In
 [Problem 139](/solutions/0139/), ordering the parity test before the gcd skips the gcd on about half
-the pairs.
+the pairs. [Problem 309](/solutions/0309/) goes one step further and puts the parity rule into the
+loop itself, `range(1 + (m & 1), m, 2)`, so the pairs of the wrong parity are never generated and
+only the gcd is left to test.
+
+The guard picks out the *primitive* members of a family, and every other member is a multiple
+`t` of one of them. What you do with the multiples matters more than the gcd does. Problem 309
+lists each multiple, because it needs every triple to pair them up. [Problem 510](/solutions/0510/)
+only needs a sum over them. Its tangent-circle radii are `t·(u²(u+v)², v²(u+v)², u²v²)` for coprime
+`u ≤ v`, so the whole run of `t` adds up to a triangular number in closed form. The guard then runs
+once per primitive shape, about `√n` times, and no multiple is ever visited.
+
+When the candidates are already a NumPy array, use the ufunc
+[`np.gcd`](https://numpy.org/doc/stable/reference/generated/numpy.gcd.html) and let the guard become
+a mask. [Problem 518](/solutions/0518/) looks for primes `a < b < c` whose successors `a+1, b+1, c+1`
+form a geometric sequence. It writes each one by its ratio `q/p` in lowest terms, and for each `q` it filters every candidate `p` at once:
+
+```python
+ps = np.arange(1, q)
+ps = ps[np.gcd(ps, q) == 1]
+```
+
+That's one C loop instead of `q` interpreted calls. Like `math.gcd`, it broadcasts and folds
+(`np.gcd.reduce`).
+
+Sometimes you don't need to test the coprime values at all, only to count them. Once
+[Problem 962](/solutions/0962/) has fixed everything else, its innermost variable `t` contributes
+the same weight for every value that is coprime to a known set of primes. So it counts those values
+with [Möbius inclusion–exclusion](https://en.wikipedia.org/wiki/M%C3%B6bius_function) over the
+primes, `Σ μ(d)·⌊T/d⌋`, and the guard and the loop it protected are both replaced by a
+handful of floor divisions. The same problem shows a second saving. The gcd of its three
+parametrised numbers depends only on a fixed divisor and on whether `t` is even or odd, so it is
+worked out twice per class, once for an odd `t` and once for an even one, not once per `t`.
 
 **The normaliser.** You keep an exact rational as an integer pair and divide both parts by their gcd
 after every operation, so that equal values have equal representations. [Problem 155](/solutions/0155/)
@@ -83,6 +115,14 @@ of the method assumes it's in lowest terms. [Problem 183](/solutions/0183/) uses
 normaliser for a decision rather than for storage. Dividing `k` by `gcd(N, k)` gives the reduced
 denominator of `N/k`, and whether that fraction has a terminating decimal depends only on that
 denominator's prime factors.
+
+The normaliser also works as a **canonical key** that shrinks the parameter space.
+[Problem 986](/solutions/0986/) sums a game value `G(c, d)` over a grid of pairs. When
+`g = gcd(c, d) > 1` the board splits into `g` residue classes that never interact, so
+`G(c, d) = G(c/g, d/g)`. The solution counts how often each reduced pair `(c/g, d/g)` appears in the
+grid and runs the expensive simulation once per key, not once per pair. Look for this whenever a
+quantity is unchanged by scaling its inputs together. The gcd tells you which inputs are really the
+same case.
 
 When a pair of small arguments comes up millions of times, use a table: build `g[i][j]` once and
 look values up instead of calling gcd. [Problem 504](/solutions/0504/) does this. It needs four gcds
@@ -104,6 +144,21 @@ A product shares a factor with `n` as soon as any of its terms does, so the batc
 except, rarely, overshooting to `g == n`. The algorithm then backtracks and replays that batch one
 gcd at a time. This is the factoriser inside [Problem 443](/solutions/0443/). Batching turns
 the gcd from the dominant cost of each step into a rounding error.
+
+**The solvability test.** The textbook
+[Chinese remainder theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) needs coprime
+moduli. Its generalised form doesn't: `x ≡ a (mod n)` and `x ≡ b (mod m)` have a common solution
+exactly when `d = gcd(n, m)` divides `b − a`, and then the solutions form one residue class modulo
+`lcm(n, m)`. [Problem 531](/solutions/0531/) sums that least solution over every pair `n < m` in a
+window. For each pair the gcd decides whether there's a solution at all (if not, the pair
+contributes `0` and costs nothing more). If there is one, dividing through by `d` leaves a congruence
+with coprime moduli, which a single `pow(n // d, -1, m // d)` solves.
+
+The same problem gets its gcd cheaply with the identity from the next section,
+`gcd(n, m) = gcd(n, m − n)`. Both numbers are large, but `m − n` is smaller than the window width,
+so Euclid's first division brings the work down to small numbers immediately. When the gcd is
+inside a double loop, binding `gcd = math.gcd` to a local name also helps a little, because it
+saves an attribute lookup on every pair.
 
 ## Reasoning the call away
 
@@ -187,7 +242,9 @@ In practice, it's rarely the change that matters:
 - **Only when the gcd is the hot loop.** If a profile doesn't show the gcd dominating, swapping it
   for a binary version saves a fraction of a fraction. In every problem on this page, the gcd is a
   guard next to heavier work. Even Problem 443's Pollard rho, whose gcds take full 64-bit
-  operands, batches them so that the modular multiplications dominate.
+  operands, batches them so that the modular multiplications dominate. Problem 531 comes closest,
+  with a gcd on every pair, but the `m − n` rewrite makes one operand small, and a short Euclid
+  run on small numbers leaves a binary gcd nothing to win.
 - **Only in C.** In Python, `math.gcd` is already compiled C, so a hand-written binary gcd in Python
   would be far slower.
 - **Mostly for wide operands.** With small arguments, as in Problem 39 where `m, n < 30`, Euclid
@@ -197,7 +254,9 @@ In practice, it's rarely the change that matters:
 - **Generating less beats all three.** The domain page's closing point applies here too: a
   `gcd == 1` filter keeps about 61% of random pairs, so most of the time goes into the pairs you
   keep, not into the gcds. If speed matters, enumerating only coprime pairs (a Stern–Brocot or
-  Farey walk, or a tree of primitive triples) removes the guard altogether.
+  Farey walk, or a tree of primitive triples) removes the guard altogether. And if you only need
+  how many coprime values there are, Möbius counting (as in Problem 962) avoids enumerating them
+  at all.
 
 So: call `math.gcd` and `math.lcm` in Python and use the variadic form. In C, write the plain Euclid
 loop with unsigned types and divide before you multiply. Use a binary gcd only after a profile has
