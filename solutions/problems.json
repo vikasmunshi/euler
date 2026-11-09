@@ -6732,8 +6732,8 @@
     "level": 32,
     "pct": 81,
     "solvers": 212,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 9 Nov 2026, 13:19"
   },
   "843": {
     "title": "Periodic Circles",
