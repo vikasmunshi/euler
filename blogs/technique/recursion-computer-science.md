@@ -1,5 +1,5 @@
 <!-- tags: [recursion-computer-science] -->
-<!-- status: final 2026-10-30T06:41Z -->
+<!-- status: final -->
 # Recursion (computer science)
 
 [Recursion](https://en.wikipedia.org/wiki/Recursion_(computer_science)) is a function that solves
@@ -156,8 +156,78 @@ is the next section's concern from the other side: depth is the number of distin
 most nine below $10^9$, so the bound comes from the problem's structure rather than from
 `setrecursionlimit`.
 
-All three are worth internalising as a habit: before descending, ask whether the subtree's
+All three are worth making a habit as a habit: before descending, ask whether the subtree's
 *contribution* has a closed form or a duplicate elsewhere. Recursion with algebra attached beats recursion alone.
+
+Problem 551 shows what that looks like when the summary has to stop partway through. Its sequence
+adds each term's own digit sum, $a_n = a_{n-1} + s(a_{n-1})$, for $10^{15}$ steps. Write the value
+as $H \cdot 10^k + L$: until $L$ overflows $10^k$, the high part only contributes its digit sum, so
+"how many steps until the low block carries, and what is left behind" depends on $(k, s(H), L)$
+alone. A level-$k$ jump is about ten level-$(k-1)$ jumps, and the jumps repeat, so they are cached.
+The catch is the step budget: the final block is never finished. The fix is to cache only
+*completed* jumps and reuse one only when it fits in what is left. Otherwise the call descends
+again, so that it stops on exactly the right step. Only the $O(k)$ calls on the last, truncated path
+pay full price. Problem 220's budget check is the same thing, with a rigid transform where 551 has
+a memo.
+
+## Halve, and return what the parent needs
+
+A recursion on $\lfloor n/2 \rfloor$ has depth $\log_2 n$, which makes $n = 10^{18}$ cheap. The hard
+part is that the quantity asked for usually does not halve cleanly on its own. Problems 463 and 539
+both ask for a *prefix sum* of a recursively defined function up to about $10^{18}$, and both solve
+it the same way: sum the recurrence itself, and return more than one number from each call.
+
+In problem 539 the elimination game is self-similar. After one sweep the survivors are $2, 4,
+\dots$, read backwards, so the last survivor obeys
+$P(n) = 2(\lfloor n/2 \rfloor + 1 - P(\lfloor n/2 \rfloor))$. Summing that over $k \le n$ pairs up
+$k = 2m$ and $2m+1$. As a result $S(n)$ needs $S(M)$ *and* $P(M)$ at $M = \lfloor n/2 \rfloor$. On its own, neither
+quantity can be computed by halving; as a pair they can. The helper returns the tuple
+$(P, S)$, and 60 levels of constant work replace $10^{18}$ terms. Problem 463 is the same move for
+two mutually recursive sums, $S$ over all indices and $O$ over the odd ones, split by residue
+mod 4. Its $O(2n)$ needs four sub-calls, two of them at $n$ and two at $n-1$. Without a memo that
+branching is exponential. With one it is about two states per level, 115 of each in total. This is
+the general shape: when $f(n)$ needs $g(\lfloor n/2 \rfloor)$, make the recursion return $(f, g)$.
+If the calls fan out to neighbouring arguments, memoise, and the state count stays logarithmic.
+
+## Carry richer state down the descent
+
+The parameters of a recursive call need not be scalars. In problem 930 an expected hitting time
+becomes a spectral sum over $n^{m-1}$ characters. The summand depends only on how many coordinates
+fall in each cosine class, so the recursion walks the classes and chooses how many balls go into
+each one. That is a composition of $m$, and there are only thousands of them, not $10^{11}$. A
+side condition (the residues must sum to $0 \bmod n$) cannot be checked one class at a time, so the
+call carries a length-$n$ *vector* of counts indexed by residue sum. Each level combines it with a
+small vector by circular convolution, and the leaf reads entry 0. The recursion enumerates
+coarse structures, and the vector carries the fine-grained bookkeeping that would otherwise force
+enumeration of the fine ones. Problem 564 is a smaller example of the same coarsening. The area
+of a cyclic polygon depends only on the multiset of its sides, so a recursive *generator*
+enumerates partitions as `(part, multiplicity)` pairs and weights each one by a multinomial count.
+In Python, `yield`-ing from a recursion is the cheap way to stream such structures without
+building the list.
+
+## Normalise the state before you branch
+
+When a recursion's argument is a structure rather than a number, two things decide whether it is
+tractable. One is whether equal states are *recognised* as equal. The other is whether doomed or
+redundant branches are cut before they are explored.
+
+Problem 829 recurses over the *shapes* of factor trees. The numbers of shape $(L, R)$ are built
+from the lists for $L$ and $R$, so the recursion follows the tree's structure. The 30 target trees
+share many subtrees, so each shape is
+[hash-consed](https://en.wikipedia.org/wiki/Hash_consing) to an integer id. The memo is keyed on
+that id, which means equal subtrees really are one cache entry. Only 65 distinct shapes are ever
+reached. A second refinement is that the cached value is a list *complete up to a bound*. Later
+requests for a smaller bound binary-search the prefix, and larger ones double the bound and
+rebuild. The cache key is (state, how far we have looked), not just the state.
+
+Problem 968 shows the pruning half. It sums a weighted count over a five-dimensional polytope with
+about $10^{40}$ points by eliminating one variable at a time, in the manner of
+[Fourier–Motzkin](https://en.wikipedia.org/wiki/Fourier%E2%80%93Motzkin_elimination). Each
+elimination is a geometric series, and the recursion branches on which bound is the tightest.
+Left alone, that case tree explodes. Before every split the solution closes the region with
+Floyd–Warshall on a difference-bound matrix. Empty regions are dropped as negative cycles, and
+bounds that can never be the strict minimum are discarded. Most branches never come into being.
+A canonical form of the state, computed on entry, is what keeps the call tree small.
 
 ## The stack is a finite resource
 
@@ -192,8 +262,14 @@ dominates the total.
 4. **Return a number if a number is wanted.** Never accumulate the objects unless the objects are
    the answer.
 5. **Look for a summarisable subtree** — a rigid transform, a multiplicity, a closed form — before
-   accepting an exponential descent.
-6. **Check the depth** against the language you are writing in, and know which of the three fixes
+   accepting an exponential descent. If a budget can cut a subtree short, cache only the
+   completed ones.
+6. **When the argument halves, return a tuple.** If $f(n)$ needs some $g$ at $n/2$, recurse on
+   $(f, g)$ together.
+7. **Put the whole context in the key, and normalise it first.** Intern structural states,
+   carry vectors instead of enumerating what they count, and prune or close a state before
+   branching on it.
+8. **Check the depth** against the language you are writing in, and know which of the three fixes
    you will reach for.
 
 One repository-specific point, and it bites recursion harder than anything else: build every cache
