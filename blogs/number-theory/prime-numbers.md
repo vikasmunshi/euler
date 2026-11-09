@@ -1,5 +1,5 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: final 2026-11-04T03:39Z -->
+<!-- status: final -->
 # Prime Numbers
 
 A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
@@ -184,6 +184,15 @@ exists. The same coprimality drives the algorithm. The least member of each resi
 $x = 17^p$ (the Apéry set) determines every gap in that class. Because $\gcd(23^p, x) = 1$, the walk
 $i \cdot 23^p \bmod x$ passes through every class exactly once. Along that one cycle, adding a
 generator is a running minimum, which replaces Dijkstra's algorithm with a single linear pass.
+
+With only two coprime generators $a$ and $b$, the gaps have a coordinate system of their own. Problem
+988 places frogs on the gaps of $\langle a, b \rangle$ so that no frog can reach another with jumps of
+$a$ and $b$. Every gap is uniquely $ab - ia - jb$ with $i, j \ge 1$. Both coordinate differences are
+smaller than the generators, so no shift along $(b, -a)$ can help, and the difference of two gaps is
+payable exactly when one coordinate pair dominates the other. The gaps therefore fill a staircase under
+the line $ia + jb = ab$, and a valid placement is an antichain in it, the same partial order as
+problem 333 above. A row-by-row DP over the staircase counts the antichains in $O(ab)$ steps, though
+there are about $10^{15}$ of them.
 
 When the coprimality condition sits *inside* a product, the [Möbius
 function](https://en.wikipedia.org/wiki/M%C3%B6bius_function) removes it. Problem 754 multiplies, for
@@ -476,6 +485,18 @@ sum also leads into this recursion. In problem 625, the $i \le j$ with $\gcd(i, 
 $\varphi(j/d)$. Swapping the order of summation turns $\sum \gcd(i, j)$ into
 $\sum_k \varphi(k)\, T(\lfloor N/k \rfloor)$, which is a totient sum grouped by quotient.
 
+The recursion is not limited to $\varphi$ and $\mu$. It needs a function $f$ and a partner $g$ such
+that both $g$ and $f * g$ have prefix sums in closed form, and a completely multiplicative twist
+keeps that true. Problem 994 weights its gcd sum by $(m - a)(n - b)$, so on each quotient block the
+summand is a quadratic in $d$. It therefore needs $\Phi_k(x) = \sum_{d \le x} d^k \varphi(d)$ for
+$k = 0, 1, 2$. Twisting both sides of $\varphi * 1 = \mathrm{id}$ by $\mathrm{id}^k$ gives
+$\sum_{d \mid n} d^k \varphi(d)\,(n/d)^k = n^{k+1}$, a power sum, and the same recursion follows.
+Problem 935 counts coprime pairs split by one coordinate's residue modulo $4$. A common divisor
+divisible by $4$ has $\mu = 0$, and one that is twice an odd number only flips the sign, so every
+term becomes a Möbius sum over *odd* integers. The odd indicator $\chi_0$ is completely
+multiplicative, so $(\mu\chi_0) * \chi_0 = \varepsilon$, and the Mertens recursion runs over odd
+quotients alone, still in $O(N^{2/3})$.
+
 The same quotient set counts the primes themselves. The Lucy_Hedgehog sieve, a lightweight cousin of
 the [Meissel–Lehmer algorithm](https://en.wikipedia.org/wiki/Meissel%E2%80%93Lehmer_algorithm),
 starts with $S(v) = v - 1$ at each of the roughly $2\sqrt N$ stored values. Then, for each prime
@@ -645,6 +666,30 @@ $p - 1$, and that one structural fact answers a whole class of counting question
   it gives the classical $p^7 + p^4 - p^3$. The prime $2$ is the exception, as it so often is: the Gauss
   sum vanishes modulo $2$ and is larger at higher powers of $2$, and that case needs its own correction
   factor.
+- **A power residue symbol projects a map onto cosets.** When $5 \mid p - 1$, Fermat makes
+  $\chi(x) = x^{(p-1)/5}$ a fifth root of unity. This is the
+  [power residue symbol](https://en.wikipedia.org/wiki/Power_residue_symbol), the fifth-power
+  analogue of Euler's criterion, and it labels each nonzero residue by its coset of the subgroup of
+  fifth powers. Problem 971 iterates $x \mapsto x(1 + \chi(x))$ modulo $p$ and counts periodic
+  points. The multiplier depends only on the coset, so the functional graph on $p$ points projects
+  onto a map on five cosets. A coset on a cycle of length $L$ comes back multiplied by one fixed
+  unit. Multiplication by a unit is a bijection, so every element of that coset is periodic, and a
+  coset off the cycle holds no periodic point. Each prime then costs a few modular exponentiations,
+  not a walk over $p$ points.
+- **A cyclotomic divisibility is a factorisation of the group.** Problem 995 wants the least $s$ for
+  which $1 + x + \dots + x^{p-1}$ divides $1 + \sum_{d \mid s} x^d$. That polynomial is the
+  [cyclotomic polynomial](https://en.wikipedia.org/wiki/Cyclotomic_polynomial) $\Phi_p$, which is
+  irreducible. So the condition is a vanishing sum at a primitive $p$-th root of unity, and the only
+  relation among those powers is that all $p$ of them sum to zero. That forces the divisors of $s$
+  to hit every nonzero residue modulo $p$ exactly once. For $S(5) = 8$, the divisors $1, 2, 4, 8$
+  are $1, 2, 4, 3 \pmod 5$. Divisors of $\prod q_i^{e_i}$ are products of one element from each set
+  $\{1, q_i, \dots, q_i^{e_i}\}$, so those sets factor the cyclic group $(\mathbb{Z}/p)^\times$.
+  [Hajós's theorem](https://en.wikipedia.org/wiki/Haj%C3%B3s%27s_theorem) says one factor of such a
+  factorisation is a subgroup. Applied repeatedly, it turns the factors into a chain of subgroups,
+  one per divisor of $p - 1$, with each exponent fixed by its prime's multiplicative order. The
+  minimum becomes a shortest path over the divisors of $p - 1$, and only the least prime of each
+  order matters. $S(p)$ itself is far too large to build, so I add logarithms along the path and
+  never form it.
 
 The same structure, at cryptographic sizes, is what the next section turns into a lever.
 
@@ -708,7 +753,9 @@ that makes some larger quantity computable:
   binomially (problem 632). When it says "coprime to $n$", turn the condition into a Möbius sum over
   divisors, which sits in the exponent when the quantity is a product (problem 754). When coprime
   factors multiply to a square, each factor is a square (problem 764). When the generators of a
-  semigroup are coprime, a multiple of one walks every residue class of another (problem 718). A
+  semigroup are coprime, a multiple of one walks every residue class of another (problem 718). With
+  two generators, the gaps form a staircase in which "reachable" is coordinate dominance
+  (problem 988). A
 ratio in lowest terms forces a square divisor (problem 518). When the condition is divisibility
 between smooth numbers, think of antichains in exponent space (problem 333). When it is "the product
 is a square", the parities form a vector over $\mathbb{F}_2$, and the count is a kernel dimension
@@ -720,7 +767,10 @@ period table and enumerate only the large ones (problem 967).
   (problem 407). An exponent too large to write down reduces modulo the group order. That order is
   $p - 1$, or $p + 1$ for an irrational at an inert prime (problems 492, 752). To test for a primitive
   root, check the powers $(p - 1)/q$, and if the candidates are the roots of a polynomial, compute in
-  the quotient ring so that one power tests them all (problem 437). When a filter or an
+  the quotient ring so that one power tests them all (problem 437). When a map's behaviour depends
+  only on a residue's power-residue class, project it onto the cosets (problem 971). When residues
+  must be hit exactly once, as divisors or as products, think of a factorisation of the cyclic group
+  and its chain of subgroups (problem 995). When a filter or an
   exponential sum appears, ask which property of primality it needs. Every non-trivial root is
   primitive (problem 635), and a Gauss sum has modulus $\sqrt p$ (problem 875). A quadratic modulo
   $p^2$ is a square root modulo $p$ followed by a Hensel lift (problem 457). A number too large to
@@ -735,8 +785,10 @@ period table and enumerate only the large ones (problem 967).
   only $\sqrt N$ strides, because divisors come in pairs (problem 485).
 - **Need a total over $10^{10}$ or more** — $\sum \varphi$, $\sum \mu$, $\pi(x)$ — and a sieve will
   not reach. Work on the quotient set: the recursion at $O(n^{2/3})$ for $\Phi$ and $M$ (problems 319,
-  351, 512), Lucy_Hedgehog at $O(n^{3/4})$ for $\pi$ (problem 668), and Min_25 for a multiplicative
-  function that is simple on primes (problem 452). When the sum is over smallest prime factors, read
+  351, 512). A completely multiplicative twist on both sides of the identity extends it to weighted
+  or restricted variants, such as $d^k\varphi(d)$ or $\mu$ on the odd integers (problems 935, 994).
+  For $\pi$ use Lucy_Hedgehog at $O(n^{3/4})$ (problem 668), and for a multiplicative function that
+  is simple on primes use Min_25 (problem 452). When the sum is over smallest prime factors, read
   the Lucy tables mid-run, since step $p$ strikes exactly those numbers (problem 521).
 - **Need a bound or a density** — how many primes below $N$, how large the $n$-th prime, how many
   semiprimes in a range — and the prime number theorem ($\pi(x) \sim x/\ln x$, $p_n \sim n \ln n$) is
