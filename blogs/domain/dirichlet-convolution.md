@@ -1,5 +1,5 @@
 <!-- tags: [dirichlet-convolution] -->
-<!-- status: final -->
+<!-- status: final 2026-11-09T16:59Z -->
 # Dirichlet convolution
 
 [Dirichlet convolution](https://en.wikipedia.org/wiki/Dirichlet_convolution) is the

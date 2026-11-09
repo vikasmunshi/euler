@@ -1191,13 +1191,13 @@
     {
       "path": "domain/dirichlet-convolution",
       "title": "Dirichlet convolution",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-09T16:59Z",
       "solved": 6,
       "problems": 6,
       "tags": ["dirichlet-convolution"],
       "refs": ["p0484", "p0625", "p0745", "p0850", "p0875", "p0967"],
-      "covered": [],
+      "covered": ["p0484", "p0625", "p0745", "p0850", "p0875", "p0967"],
       "solved_after": []
     },
     {
