@@ -1,5 +1,5 @@
 <!-- tags: [vectorize-the-independent-axis] -->
-<!-- status: final -->
+<!-- status: final 2026-11-09T17:01Z -->
 # Vectorize the independent axis
 
 Almost every heavy computation is a loop nest, and almost every loop nest has two kinds of axis.

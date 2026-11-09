@@ -5703,13 +5703,13 @@
     {
       "path": "takeaway/vectorize-the-independent-axis",
       "title": "Vectorize the independent axis",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-09T17:01Z",
       "solved": 6,
       "problems": 6,
       "tags": ["vectorize-the-independent-axis"],
       "refs": ["p0564", "p0941", "p0971", "p0975", "p0986", "p1001"],
-      "covered": [],
+      "covered": ["p0564", "p0941", "p0971", "p0975", "p0986", "p1001"],
       "solved_after": []
     },
     {
