@@ -1,5 +1,5 @@
 <!-- tags: [double-counting-proof-technique] -->
-<!-- status: final -->
+<!-- status: final 2026-11-09T12:29Z -->
 # Double counting (proof technique)
 
 [Double counting](https://en.wikipedia.org/wiki/Double_counting_(proof_technique)) means

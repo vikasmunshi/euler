@@ -6735,13 +6735,13 @@
     {
       "path": "technique/double-counting-proof-technique",
       "title": "Double counting (proof technique)",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-09T12:29Z",
       "solved": 6,
       "problems": 6,
       "tags": ["double-counting-proof-technique"],
       "refs": ["p0475_s0", "p0842_s0", "p0926_s0", "p0944_s0", "p0960_s0", "p1006_s0"],
-      "covered": [],
+      "covered": ["p0475", "p0842", "p0926", "p0944", "p0960", "p1006"],
       "solved_after": []
     },
     {
