@@ -1,11 +1,12 @@
 <!-- tags: [geometry] -->
-<!-- status: final 2026-10-16T07:11Z -->
+<!-- status: final -->
 # Geometry
 
 [Geometry](https://en.wikipedia.org/wiki/Geometry) is the mathematics of shape, size, position and
-space. Seventy-one problems here carry the tag, and they look wildly unalike — a spider crossing a
+space. Seventy problems here carry the tag, and they look wildly unalike — a spider crossing a
 cuboid, a laser rattling around an ellipse, twenty-one balls stacked in a pipe, squares packed
-greedily under a hyperbola, a runner chasing a swimmer round the edge of a hexagonal pool. What they share is not a technique but a *posture*: **the figure is
+greedily under a hyperbola, a runner chasing a swimmer round the edge of a hexagonal pool, a square
+tumbling round the inside of a bigger one. What they share is not a technique but a *posture*: **the figure is
 never the answer.** You are asked for a count, a length, an extremum or a threshold index, and the
 drawing is only the statement of the constraint. The work is finding the algebraic object that the
 picture is secretly describing, and then computing with that instead.
@@ -94,6 +95,14 @@ $D \le 0$ or $Q > D^2$ — an exact predicate on lattice points, no trigonometry
 When a geometric condition must be tested billions of times, converting it to an integer inequality
 is usually the whole solution.
 
+Problem 998 shows why no tolerance can stand in for that conversion. It asks which integer-sided
+triangles fit a minimum bounding square of integer side. A brute-force minimiser with a $10^{-7}$
+tolerance accepts the triangle $(21, 23, 24)$, whose best square is $20.9998\ldots$; tighten it to
+$10^{-11}$ and it still accepts a whole family led by $(55, 61, 62)$, whose square falls short of
+$55$ by about $3.6 \times 10^{-13}$. Every epsilon has a near-miss below it. The fix was to show
+that the deciding condition, "the apex angle is at least $45^\circ$", is by the tangent addition
+formula the integer inequality $s^2 - (x+y)s - xy \le 0$, and to test that instead.
+
 **If the answer is a real number, control the error instead.** Problems 144 (reflections in an
 elliptical mirror), 177 (integer-angled quadrilaterals) and 587 are genuinely continuous, and
 `double` is the right tool. What makes them safe is that each avoids *accumulating* error: 144
@@ -102,6 +111,20 @@ costs one division and no square root; 177 precomputes a sine table indexed by w
 uses the tolerance the statement itself grants; 587 evaluates a closed form rather than integrating
 numerically. The discipline is the same in each — do the algebra symbolically, then evaluate once.
 See [floating-point arithmetic](/blogs/technique/floating-point-arithmetic).
+
+One problem can need both régimes, and the job is to sort its quantities between them
+([exact where possible, numeric where necessary](/blogs/takeaway/exact-where-possible-numeric-where-necessary)).
+Problem 363 fits a cubic [Bézier curve](https://en.wikipedia.org/wiki/B%C3%A9zier_curve) to a
+quarter circle and asks how much longer the curve is. The constraint is on *area*, and
+[Green's theorem](/blogs/technique/greens-theorem) makes area algebraic. Writing the area as
+$\tfrac12\oint (x\,dy - y\,dx)$, the two radial sides contribute nothing, so only the curve counts,
+and its integrand is a polynomial in $t$. The area is therefore an exact quadratic in the control
+parameter, and solving it is one use of the quadratic formula. *Length* is
+$\int \sqrt{x'^2 + y'^2}\,dt$: the square root of a quartic, with no elementary antiderivative.
+Only that integral is done numerically, with the [Romberg method](/blogs/technique/romberg-method),
+which reaches double precision on a smooth integrand and reports when it has converged. That
+matters here because the curve hugs the circle to within a few parts in $10^7$, so the length is
+needed to about twelve digits.
 
 **If a discrete answer rests on real comparisons, make them agree with each other.** Problem 247
 breaks the clean split. Squares are packed greedily under $y = 1/x$, and the answer is a *rank*: a
@@ -122,7 +145,7 @@ side with no epsilon. Comparisons do not need exact values; they need values com
 Reading across the list, nearly every problem is one of four kinds, and knowing which you are in
 tells you what to look for.
 
-**Lattice counting.** Sixteen of these also carry [integer lattice](/blogs/domain/integer-lattice).
+**Lattice counting.** Fifteen of these also carry [integer lattice](/blogs/domain/integer-lattice).
 The recurring machinery is primitive direction vectors reduced by $\gcd$, counting steps to a
 boundary, and quartering the work by the figure's mirror symmetries
 ([exploit symmetry](/blogs/takeaway/exploit-symmetry)). Problem 91's $O(N^2 \log N)$ count in place
@@ -133,7 +156,45 @@ of the obvious $O(N^4)$ is the archetype.
 angles, integer distances. Once the shape is written algebraically the constraint is arithmetic, and
 [Pythagorean triples](/blogs/domain/pythagorean-triple), [Heron's formula](/blogs/domain/herons-formula)
 and the [law of cosines](/blogs/domain/law-of-cosines) are the usual bridges from the figure to the
-equation.
+equation. The bridge is half the work; the other half is replacing a search over the equation's
+solutions with a *parametrised family* of them. The recent solves show three steps that keep
+recurring.
+
+1. *Show that rationality forces integrality.* In problem 309 (the
+   [crossed ladders](/blogs/domain/crossed-ladders-problem)) the crossing height satisfies
+   $1/h = 1/a + 1/b$, where $a$ and $b$ are the heights the ladders reach on the walls. Those heights
+   start out only as square roots. If $a$ were irrational, $1/a + 1/b$ could be rational only with
+   $a$ and $b$ sharing the same surd, and then $1/h$ would be irrational. So $a$ and $b$ are
+   integers, and the figure is two [Pythagorean triples](/blogs/domain/pythagorean-triple) sharing
+   the leg $w$. Problem 510 makes the same move: three circles tangent to a line satisfy
+   $1/\sqrt{r_C} = 1/\sqrt{r_A} + 1/\sqrt{r_B}$, a degenerate case of
+   [Descartes' theorem](/blogs/technique/descartes-circle-theorem) in which the line is a circle of
+   curvature zero. Integer radii force $\sqrt{r_A r_B}$ to be rational, so $r_A / r_B$ is the square
+   of a reduced ratio $u/v$.
+2. *Write the solutions down instead of searching for them.* Once the ratio is reduced, a short
+   coprimality argument gives problem 510 the complete family
+   $\bigl(t\,u^2(u+v)^2,\ t\,v^2(u+v)^2,\ t\,u^2v^2\bigr)$, with each solution appearing exactly once
+   ([parametrise by reduced ratio](/blogs/takeaway/parametrise-by-reduced-ratio)). Problem 962
+   needs a stronger tool. Its perfect-square condition on a bisector-and-tangent length reduces to
+   the conic $g^2 - w^2 = D m^2$, which has the obvious rational point $(1:1:0)$. Every line through
+   that point with rational slope $\beta/\alpha$ meets the conic in exactly one other rational
+   point, and that point is a quadratic polynomial in $(\alpha, \beta)$. This is the
+   [rational parametrisation of a conic](/blogs/technique/rational-parametrization-of-a-conic),
+   the same chord trick that yields [Euclid's formula](/blogs/technique/euclids-formula) for
+   Pythagorean triples, applied to a conic of a different shape.
+3. *Sum the scale factor in closed form.* Every family has a free multiplier, $t$ in problem 510 and
+   $\lambda$ in problem 962, and a loop over it brings back the linear cost the parametrisation
+   removed: problem 510's smallest pair alone has $n/4$ multiples. Instead, $\lfloor N/\text{base}
+   \rfloor$ counts the multiples and a triangular number sums them
+   ([closed form over iteration](/blogs/takeaway/closed-form-over-iteration)).
+
+Gluing two right triangles along a common leg is a shape in its own right. Problem 309 does it with
+the two ladders. Problem 998 does it with a triangle split by its height onto a base lying along a
+side of the square. Both reduce to the same computation: generate every triple once from Euclid's
+formula, bucket the triples by the shared leg, and test pairs within each bucket
+([aggregate by value](/blogs/takeaway/aggregate-by-value)). The cost is $\sum_w k_w^2$, where $k_w$
+is the number of triples with leg $w$. Most legs belong to only a few triples, so the sum stays
+small, and the search over all side lengths never happens.
 
 **Optimisation over an arrangement.** Packing, placing, cutting, maximising an area. Here the
 decisive step is proving a *structural* property before choosing an algorithm. Problem 222's gap
@@ -148,11 +209,28 @@ steps on its path. Sides shrink down every branch, so a
 [depth-first search](/blogs/technique/depth-first-search) can drop a whole subtree as soon as it
 falls below the threshold, and it never has to sort anything. Convexity, concavity, monotonicity or
 self-similarity is the licence for bisection, DP or pruning; without it you are guessing.
+Problem 998 replaces the search by listing where the optimum can be. A bounding square is fixed
+by its tilt $\theta$, and its side is the upper envelope of six sinusoidal arcs, one per edge and
+axis. The minimum of such an envelope sits either at the bottom of one arc or where two arcs cross.
+An arc's bottom gives side $L/\sqrt2$, which is never an integer, so only crossings remain. They
+come in two geometric kinds, height crossings and corner crossings, and each can be enumerated
+directly. No angle is ever searched.
 
 **Motion — simulated or played.** Reflections, rolling, rotation, pursuit. When the motion is a
 process, the trap is re-deriving the state from scratch each step. Solve one step in closed form,
 verify it is exact, and iterate; if the process is periodic, find the period instead of running it
-out. When the motion is a [differential game](/blogs/domain/differential-game), as in problem 761
+out. Problem 935 takes this furthest. A small square of side $b$ rolls around the inside of a unit
+square, and the question is how many steps it takes to return. The key is to stop following the
+square and record only its state at each corner: the offset $y$ at which it tips into the corner.
+One wall's worth of rolling is then the single map $y \mapsto 1/b - \sqrt{1 - y^2} \pmod 1$. That map
+is an orientation-preserving homeomorphism of the circle, so it has a
+[rotation number](/blogs/domain/rotation-number) that grows with $1/b$. The motion returns to its
+start exactly when $0$ is a [periodic point](/blogs/domain/periodic-point), and for each reduced
+rotation number $p/q$ there is exactly one such $b$. The step count is a simple formula in $p$ and
+$q$. The geometry has now become a count of coprime pairs in a triangle, a number-theory problem,
+which [Möbius inversion](/blogs/technique/mobius-function-application) handles in $O(N^{2/3})$. The
+literal rolling simulator was still worth writing, as a check on the reduction rather than as the
+algorithm. When the motion is a [differential game](/blogs/domain/differential-game), as in problem 761
 (a swimmer trying to leave a pool before the runner on its edge reaches her landing point), you do
 not simulate at all. The payoff does not depend on position, so optimal play is straight dashes at
 full speed. The best landing point obeys a refraction rule much like
@@ -173,6 +251,13 @@ near the root.
 - **Ask what is invariant.** A quantity unchanged by scale, affine shear, rotation or reflection
   lets you replace the problem with a tidier congruent copy — and the group of symmetries usually
   divides the search space too.
+- **Ask whether a root must be rational, then parametrise.** Integer sides that pass through a square
+  root usually force a rational ratio, and a rational ratio gives a family you can write down:
+  Euclid's formula, a reduced ratio $u/v$, or lines through a known point of a conic. Sum the free
+  multiplier in closed form; never loop over it.
+- **Find the candidate points of an extremum before you search.** An envelope of smooth arcs
+  bottoms out at an arc minimum or at a crossing. Listing those turns a continuous optimisation into
+  a finite, and often integer, case analysis.
 - **Ask what does *not* vary with the parameter.** Problem 587's constant L-section is the whole
   solution. Isolating the one thing that moves is often the entire reduction.
 - **Classify by where the special feature sits.** Right angle at $O$, at $P$, or at $Q$; tangent
