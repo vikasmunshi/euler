@@ -9,6 +9,7 @@ _TODO: write this page. No reference on the tag._
 
 - ● [0374](/solutions/0374/) — Maximum Integer Partition Product
 - ● [0976](/solutions/0976/) — XO Game
+- ● [0987](/solutions/0987/) — Straight Eight
 - ● [1007](/solutions/1007/) — Alternating Difference
 
 <!-- /problems -->

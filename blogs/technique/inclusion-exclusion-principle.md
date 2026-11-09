@@ -127,5 +127,6 @@ counts the repdigits twice, so it subtracts them once.
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
+- ● [0987](/solutions/0987/) — Straight Eight
 
 <!-- /problems -->

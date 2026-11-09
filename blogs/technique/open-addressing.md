@@ -171,5 +171,6 @@ write inline: without deletion, the hard part of open addressing disappears.
 - ● [0551](/solutions/0551/) — Sum of Digits Sequence
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0987](/solutions/0987/) — Straight Eight
 
 <!-- /problems -->

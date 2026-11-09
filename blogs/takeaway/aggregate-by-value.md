@@ -194,5 +194,6 @@ state the invariant that makes a class a class, and check that the boundary enfo
 - ● [0778](/solutions/0778/) — Freshman's Product
 - ● [0928](/solutions/0928/) — Cribbage
 - ● [0930](/solutions/0930/) — The Gathering
+- ● [0987](/solutions/0987/) — Straight Eight
 
 <!-- /problems -->
