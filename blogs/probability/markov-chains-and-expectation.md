@@ -1,5 +1,5 @@
 <!-- tags: [markov-chain, expected-value-application, stationary-distribution, random-walk] -->
-<!-- status: final 2026-10-29T08:07Z -->
+<!-- status: final -->
 # Markov chains and expected value
 
 A large share of the archive's probability problems ask for an *expected* something — turns until
@@ -67,6 +67,38 @@ the textbook case: a dense `(n−1) × (n−1)` system solved by Gaussian elimin
 instead of a matrix solve. Bozo sort (367), the ant carrying seeds (280) and the chases (683, 825)
 are all hitting-time questions too.
 
+The mean is not always the whole question. Problem 605 (a ring of players, coin-tossing in pairs,
+where the first to win twice in a row takes the game) asks *who* wins. That depends on the round
+the game ends in, modulo the number of players. So it needs the whole distribution of the
+absorption time, not just its mean. Once the rules are seen to matter only through one bit ("did
+the last winner carry over into this round?"), the chain has two live states. A two-state chain
+has a closed-form `P(T = m)`, and the winner's probability is a sum of that over an arithmetic
+progression of `m`: an
+[arithmetico-geometric series](https://en.wikipedia.org/wiki/Arithmetico-geometric_sequence).
+Shrink the state first, and the absorbing chain can become a formula instead of a linear system.
+
+### When the chain is a walk on a group: eigenvalues
+
+Some chains are too big for any linear system, but symmetric enough not to need one. In Problem
+930, `m` labelled balls sit in `n` bowls on a ring, and one ball at a time steps left or right
+until all of them share a bowl. The configuration is a point of the group `ℤₙᵐ`, and a move adds
+one of its generators, so the process is a random walk on a
+[Cayley graph](https://en.wikipedia.org/wiki/Cayley_graph). Rotating every ball together changes
+nothing, so the walk can be taken modulo the diagonal. There the absorbing set becomes a single
+point, and the uniform random start becomes the stationary distribution. For a walk like this, the
+expected time to hit a point from stationarity is a sum over the transition matrix's
+eigenvalues:
+
+$$ \mathbb{E}_\pi[\tau] = \sum_{\lambda \ne 1} \frac{1}{1 - \lambda} . $$
+
+On an abelian group, the eigenvectors are the group's
+[characters](https://en.wikipedia.org/wiki/Character_group), so every eigenvalue can be written
+down directly. The hitting time becomes an explicit sum, and the remaining work is grouping its
+terms (by how many coordinates fall in each cosine class) so that a sum over `nᵐ⁻¹` characters
+becomes a sum over a few thousand compositions. This is the
+[spectral](https://en.wikipedia.org/wiki/Spectral_graph_theory) answer to "the state space is
+astronomically large". You never build the chain. You diagonalise it by symmetry and sum.
+
 ### Linearity: decompose, then add
 
 For *any* random variables, dependent or not,
@@ -100,6 +132,24 @@ over a uniform rank, turns `n!` permutations into `n` terms. The same trick (cut
 per-element pieces, and notice that each piece only sees a uniform relative rank) is how the
 textbook average-case analyses of insertion sort and quicksort work.
 
+Some problems never mention probability at all. Problem 705 asks for the total inversion count
+over every "divided sequence", where each digit of a long string independently becomes one of its
+divisors. There are `T = ∏ d(xᵢ)` such sequences. A total over all of them is `T` times an
+expectation under a uniform choice, and an inversion count is a sum of pair indicators. So the
+answer is `T` times a sum over pairs `i < j` of `P(sᵢ > sⱼ)`. That probability depends only on
+the two digit values, which turns tens of millions of positions into a `9 × 9` table of ordered
+digit-pair counts, filled in one pass. Whenever a problem asks you to *sum something over all
+configurations*, first ask whether it is really an expectation.
+
+The probability space need not be finite, either. Problem 779 averages a function of each
+integer's smallest prime factor over all integers. "A random integer" is a perfectly good
+probability space if you read it as [natural density](https://en.wikipedia.org/wiki/Natural_density):
+divisibility by distinct primes is independent in the limit (the Chinese remainder theorem), so the
+smallest prime is `p` with probability `(1/p) ∏_{q<p} (1 − 1/q)`, and the extra powers of `p`
+follow a geometric distribution. After that, the expectation is a series over primes. The infinite
+sum over `K` in the statement disappears by swapping the order of summation, since every term is
+positive.
+
 ### They are the same idea, seen from two sides
 
 The two tools are not really rivals. The fundamental matrix of an absorbing chain is a linearity
@@ -110,6 +160,33 @@ Problem 151 asks for the expected *number of batches* at which the envelope hold
 It runs a chain forward to get each batch's distribution, then uses linearity to add the
 single-sheet probability batch by batch. The chain supplies the per-step probabilities, and
 linearity adds them up.
+
+### Beyond sums: squares and products
+
+Linearity handles `E[X]`, but some problems ask for `E[X²]` or `E[∏ Xᵢ]`. Neither is linear, and
+neither forces you back to the full distribution.
+
+**Track moments, not distributions.** In Problem 783, an urn gains black balls and loses
+`2k` drawn balls on every turn, and the question is the expected sum of *squares* of the black
+counts drawn. The black count in the urn is random and depends on the whole history, so carrying
+its distribution would cost `O(n²k²)`. But the hypergeometric draw's conditional mean and variance
+are polynomials of degree at most two in the current black count `b`. So `E[B²]` needs only
+`E[b]` and `E[b²]`, and both evolve by a fixed linear map, both when balls are added and when
+they are drawn. The process collapses to two numbers run forward for `n` steps. The general test:
+if every conditional moment up to the order you need is a polynomial of no higher order in the
+state, the moments *close*, and you can recur on them directly.
+
+**Products factorise under independence.** Problem 866 (Tidying Up B) places caterpillar pieces in
+a random order and asks for the expected *product* of a weight over the segments formed. Here the
+useful step is the last one, not the first. Condition on the last piece placed. No segment ever
+crosses it before then, so the pieces on its left and on its right evolve as two independent,
+smaller copies of the same process (each sub-order is itself uniform). Expectation of a product of
+independent factors is the product of expectations, so `E(N)` is a convolution of smaller `E`s,
+averaged over the last piece's position. It is the multiplicative counterpart of linearity:
+linearity needs no independence and works only for sums, while factorisation works for products
+but has to *earn* independence by finding the right event to condition on. Compare 253 (Tidying Up
+A), on the same caterpillar, where the quantity is a maximum. A maximum neither adds nor
+factorises, and that is why it has to go into the chain's state.
 
 ## How to reason about it
 
@@ -123,6 +200,11 @@ linearity adds them up.
 | a probability of ending in one outcome rather than another  | absorbing chain, absorption probabilities   |
 | a long-run frequency                                        | stationary distribution                     |
 | a count over a fixed horizon of a path-dependent process    | forward propagation, then linearity per step |
+| a total over every configuration                             | `#configurations × E`, then linearity       |
+| who absorbs, decided by the absorption *time*               | closed-form `P(T = m)`, summed as a series  |
+| a hitting time on a symmetric (group) walk                  | eigenvalues: `Σ 1/(1 − λ)` over characters  |
+| a second moment of a random count                           | a recurrence on the first two moments       |
+| a product over pieces of a random decomposition             | condition on a splitting event, factorise   |
 | a maximum, a record, or anything non-additive along a path  | a chain whose state carries that statistic  |
 
 The last row is the trap. Linearity works only for sums. The maximum number of segments in Problem
@@ -133,7 +215,7 @@ out, but you have done far more work than the problem needed.
 
 ### The real work is the state
 
-A Markov chain is only as good as its state, and you usually have to pick that state. Three moves
+A Markov chain is only as good as its state, and you usually have to pick that state. Four moves
 recur:
 
 - **Collapse by symmetry.** The two dice in 227 sit on a ring, and only the *gap* between them
@@ -146,6 +228,13 @@ recur:
   a productive move removes that self-loop and cancels a common factor from the recurrence. In 253,
   a counting argument shows the empty gaps' widths stay uniformly distributed whatever happened
   before. So they can be averaged out of the state instead of carried as an integer partition.
+- **Average over orbits, not outcomes.** If the quantity is invariant under some rearrangement,
+  group the outcomes by orbit and weight each orbit by its size. In Problem 564, a stick is broken
+  into a random composition of sides, and the expected area of the largest polygon is wanted. That
+  polygon is cyclic, and its area depends only on the *multiset* of sides, not their order. So the
+  average over all compositions becomes an average over integer partitions, each weighted by a
+  multinomial coefficient: about a million terms instead of an astronomically large binomial
+  count.
 
 If the state space is still in the millions, the model is usually wrong, not the hardware too slow.
 
@@ -159,11 +248,16 @@ If the state space is still in the millions, the model is usually wrong, not the
   Expectations over permutations are rationals with small denominators, so they can land exactly
   on a rounding boundary. 523's own worked example, `E(10) = 115.725`, sits on a half. Sum
   with `Fraction` and round in integers, not floats; Python's `round` also rounds halves to even.
+  When the answer has to be a float, as 779's prime series does, look at how close it lies to the
+  rounding boundary before choosing how to add. 779's lies close enough that hundreds of thousands
+  of tiny terms are summed with `math.fsum` (and `long double` in C), not a plain running total.
 - **Dense solves cost `O(s³)`.** That is fine for a few hundred states. Beyond that, use the
   structure: triangular systems become recurrences (938), local transitions become stencils (213),
   and a chain whose state only grows can be swept in topological order.
 - **Check that the chain is ergodic before trusting `π`.** A periodic chain (a bipartite random
   walk, for instance) has a stationary distribution that power iteration never converges to.
+  Hitting times are more forgiving. 930's walk is periodic for even `n`, so `−1` is an eigenvalue,
+  but the spectral formula still holds because a hitting time does not need the chain to mix.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
