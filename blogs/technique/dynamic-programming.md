@@ -1,5 +1,5 @@
 <!-- tags: [dynamic-programming] -->
-<!-- status: final -->
+<!-- status: final 2026-11-09T07:05Z -->
 # Dynamic programming
 
 [Dynamic programming](https://en.wikipedia.org/wiki/Dynamic_programming) (DP) solves a
