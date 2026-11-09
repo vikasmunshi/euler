@@ -171,5 +171,6 @@ problems need a little more:
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0957](/solutions/0957/) — Point Genesis
+- ● [0973](/solutions/0973/) — Random Dealings
 
 <!-- /problems -->

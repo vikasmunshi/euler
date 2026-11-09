@@ -300,7 +300,7 @@ If the state space is still in the millions, the model is usually wrong, not the
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ○ [0959](/solutions/0959/) — Asymmetric Random Walk
 - ○ [0970](/solutions/0970/) — Kangaroo Hopping over Sixes
-- ○ [0973](/solutions/0973/) — Random Dealings
+- ● [0973](/solutions/0973/) — Random Dealings
 - ○ [0978](/solutions/0978/) — Random Walk Skewness
 - ○ [0979](/solutions/0979/) — Heptagon Hopping
 

@@ -202,6 +202,6 @@ For the closely related question of what you *do* with the resulting distributio
 - ○ [0852](/solutions/0852/) — Coins in a Box
 - ● [0930](/solutions/0930/) — The Gathering
 - ● [0938](/solutions/0938/) — Exhausting a Colour
-- ○ [0973](/solutions/0973/) — Random Dealings
+- ● [0973](/solutions/0973/) — Random Dealings
 
 <!-- /problems -->

@@ -123,6 +123,7 @@ on part sizes, run lengths or symmetry.
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
 - ● [0930](/solutions/0930/) — The Gathering
 - ● [0951](/solutions/0951/) — A Game of Chance
+- ● [0973](/solutions/0973/) — Random Dealings
 - ● [0996](/solutions/0996/) — Overtakes
 
 <!-- /problems -->

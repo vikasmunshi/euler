@@ -128,7 +128,7 @@ safely. The other differences are in what surrounds XOR:
 - ○ [0877](/solutions/0877/) — XOR-Equation A
 - ○ [0878](/solutions/0878/) — XOR-Equation B
 - ○ [0945](/solutions/0945/) — XOR-Equation C
-- ○ [0973](/solutions/0973/) — Random Dealings
+- ● [0973](/solutions/0973/) — Random Dealings
 - ● [1000](/solutions/1000/) — Problem $1000$
 
 <!-- /problems -->

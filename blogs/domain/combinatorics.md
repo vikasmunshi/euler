@@ -805,7 +805,6 @@ of crossing it.
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ○ [0964](/solutions/0964/) — Musical Chairs Revisited
 - ● [0968](/solutions/0968/) — 5D Summation
-- ○ [0973](/solutions/0973/) — Random Dealings
 - ○ [0977](/solutions/0977/) — Iterated Functions
 - ○ [0979](/solutions/0979/) — Heptagon Hopping
 - ○ [0981](/solutions/0981/) — The Quaternion Group II

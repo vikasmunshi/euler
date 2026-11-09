@@ -166,5 +166,6 @@ not style but necessity (see below).
 - ● [0679](/solutions/0679/) — Freefarea
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0944](/solutions/0944/) — Sum of Elevisors
+- ● [0973](/solutions/0973/) — Random Dealings
 
 <!-- /problems -->

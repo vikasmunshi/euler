@@ -216,6 +216,7 @@ ask which coefficient you actually need.
 - ○ [0881](/solutions/0881/) — Divisor Graph Width
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
+- ● [0973](/solutions/0973/) — Random Dealings
 - ● [0976](/solutions/0976/) — XO Game
 - ● [0996](/solutions/0996/) — Overtakes
 - ● [1007](/solutions/1007/) — Alternating Difference

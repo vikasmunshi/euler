@@ -400,6 +400,7 @@ disguise, so collapse the base first and exponentiate second.
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0968](/solutions/0968/) — 5D Summation
 - ● [0971](/solutions/0971/) — Modular Polynomial Composition
+- ● [0973](/solutions/0973/) — Random Dealings
 - ● [0976](/solutions/0976/) — XO Game
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [1010](/solutions/1010/) — March of the Penguins
