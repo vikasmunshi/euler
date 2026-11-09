@@ -3,9 +3,10 @@
 """Config-free readers for the content trees the service renders.
 
 Every function takes the repo working tree (`SiteConfig.repo_root`) explicitly
-and imports nothing from :mod:`solver.config` (the one `solver.core` import,
-:mod:`solver.core.progress`, is config-free for exactly this reason) (which resolves the shell's
-identity + per-user state — paths the service uid cannot use). The service reads
+and imports nothing from :mod:`solver.config` (which resolves the shell's identity + per-user
+state — paths the service uid cannot use); the two `solver.core` imports,
+:mod:`solver.core.progress` and :mod:`solver.core.listing`, are config-free for exactly this
+reason. The service reads
 exactly the declared content trees — `solutions/` · `docs/` · `blogs/` ·
 `packages/site/euler_site/content/` — plus, best-effort, the AI reference sources under
 `packages/solver/solver/` for the composed `ai` doc, which degrade to a note when the uid may
@@ -27,7 +28,6 @@ __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'BlogGroup', 'SectionState',
            'save_progress']
 
 import json
-import mimetypes
 import posixpath
 import re
 import subprocess
@@ -38,7 +38,8 @@ from typing import Any, NamedTuple
 
 from markdown_it import MarkdownIt
 
-# Config-free by design (its module docstring), which is what makes this import allowed here.
+# Config-free by design (their module docstrings), which is what makes these imports allowed here.
+from solver.core.listing import listable
 from solver.core.progress import parse_progress
 
 #: Markdown renderer for the guides/blogs (GitHub-flavoured: tables + strikethrough).
@@ -172,15 +173,14 @@ def centuries(problems: dict[int, ProblemInfo]) -> list[Century]:
 
 
 def problem_files(sdir: Path) -> list[str]:
-    """The problem's viewable files (mimetype-guessable, as `ls` lists them),
+    """The problem's viewable files (the ones `ls` lists: :func:`~solver.core.listing.listable`),
     as POSIX paths relative to the solution directory. **Zero-size files are
     hidden** (web-server-guide § The site) — an empty stub says nothing worth a link."""
     if not sdir.is_dir():
         return []
     return sorted(
         p.relative_to(sdir).as_posix() for p in sdir.rglob('*')
-        if p.is_file() and p.stat().st_size > 0
-        and mimetypes.guess_type(p.name)[0] is not None
+        if p.is_file() and p.stat().st_size > 0 and listable(p, sdir)
     )
 
 

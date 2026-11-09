@@ -1507,7 +1507,7 @@ List the files in a problem's solution directory.
 
 Walks the directory recursively and prints each file's canonical path, size, modified
 time and MIME type, sorted by path; a solution file (`pNNNN_sK.*`) is flagged with a
-trailing `*`. Files with no extension are skipped. Fails when the directory holds
+trailing `*`. Files with no extension, and anything under `__pycache__`, are skipped. Fails when the directory holds
 nothing to list.
 
 **usage**

@@ -21,6 +21,7 @@ solver.core.download,
 solver.core.evaluate,True
 solver.core.git,True
 solver.core.list,True
+solver.core.listing,
 solver.core.new,True
 solver.core.notices,
 solver.core.problems,

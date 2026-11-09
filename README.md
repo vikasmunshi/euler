@@ -292,6 +292,7 @@ packages/solver/solver/           — euler-solver: the solver shell — standal
     evaluate.py                   — Solution evaluation: runs standalone scripts against test cases and reports results.
     git.py                        — Git and GitHub (gh) commands and helpers — the repository workflow.
     list.py                       — List solution directory contents.
+    listing.py                    — Which of a problem's files a listing shows — shared by `ls` and the site's files table.
     new.py                        — The `new` command and solution-file formatting (black / isort / autoflake).
     notices.py                    — Notices: what a command tells the people who act on it — through whatever carries it.
     problems.py                   — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
