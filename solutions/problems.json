@@ -7420,8 +7420,8 @@
     "level": 24,
     "pct": 62,
     "solvers": 325,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 9 Nov 2026, 07:42"
   },
   "929": {
     "title": "Odd-Run Compositions",
