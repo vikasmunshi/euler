@@ -1084,7 +1084,7 @@ handful of operations on small numbers.
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
 - ○ [0952](/solutions/0952/) — Order Modulo Factorial
 - ○ [0956](/solutions/0956/) — Super Duper Sum
-- ○ [0960](/solutions/0960/) — Stone Game Solitaire
+- ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ○ [0968](/solutions/0968/) — 5D Summation
 - ○ [0971](/solutions/0971/) — Modular Polynomial Composition

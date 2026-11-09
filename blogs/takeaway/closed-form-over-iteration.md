@@ -463,6 +463,7 @@ Five cautions earn their keep:
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0944](/solutions/0944/) — Sum of Elevisors
+- ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 - ● [1000](/solutions/1000/) — Problem $1000$

@@ -309,7 +309,6 @@ weighting each winning mask by how many integers wear it.
 - ○ [0948](/solutions/0948/) — Left vs Right
 - ○ [0949](/solutions/0949/) — Left vs Right II
 - ○ [0953](/solutions/0953/) — Factorisation Nim
-- ○ [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0961](/solutions/0961/) — Removing Digits
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0976](/solutions/0976/) — XO Game

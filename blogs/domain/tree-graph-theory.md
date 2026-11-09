@@ -12,5 +12,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Tree_(graph_th
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0936](/solutions/0936/) — Peerless Trees
+- ● [0960](/solutions/0960/) — Stone Game Solitaire
 
 <!-- /problems -->

@@ -533,6 +533,7 @@ loop was never needed.
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0950](/solutions/0950/) — Pirate Treasure
 - ● [0957](/solutions/0957/) — Point Genesis
+- ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 - ● [1000](/solutions/1000/) — Problem $1000$
 

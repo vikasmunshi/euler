@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Spanning_tree>
 ## Problems
 
 - ○ [0380](/solutions/0380/) — Amazing Mazes!
+- ● [0960](/solutions/0960/) — Stone Game Solitaire
 
 <!-- /problems -->
