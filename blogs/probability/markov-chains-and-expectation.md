@@ -196,6 +196,7 @@ If the state space is still in the millions, the model is usually wrong, not the
 - ○ [0697](/solutions/0697/) — Randomly Decaying Sequence
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
+- ● [0783](/solutions/0783/) — Urns
 - ○ [0807](/solutions/0807/) — Loops of Ropes
 - ○ [0819](/solutions/0819/) — Iterative Sampling
 - ○ [0825](/solutions/0825/) — Chasing Game

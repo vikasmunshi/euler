@@ -913,7 +913,7 @@
       "reference": "https://en.wikipedia.org/wiki/Discrete_uniform_distribution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0205", "p0285", "p0298", "p0316", "p0371", "p0389", "p0398", "p0430", "p0436", "p0469", "p0503", "p0514", "p0527", "p0567", "p0568", "p0573", "p0584", "p0589", "p0640", "p0645", "p0695", "p0724", "p0744", "p0783", "p0819", "p0863", "p0901", "p0906", "p0964", "p0969", "p0970", "p0978", "p0982"]
+      "refs": ["p0205", "p0285", "p0298", "p0316", "p0371", "p0389", "p0398", "p0430", "p0436", "p0469", "p0503", "p0514", "p0527", "p0567", "p0568", "p0573", "p0584", "p0589", "p0640", "p0645", "p0695", "p0724", "p0744", "p0819", "p0863", "p0901", "p0906", "p0964", "p0969", "p0970", "p0978", "p0982"]
     },
     {
       "slug": "divisibility-rule",
@@ -3442,7 +3442,7 @@
       "reference": "https://en.wikipedia.org/wiki/Variance",
       "additional-references": [],
       "summary": "A measure of the spread of a set of numbers, defined as the average of squared deviations from the mean.",
-      "refs": ["p0791"]
+      "refs": ["p0783", "p0791"]
     },
     {
       "slug": "vigenere-cipher",
@@ -4306,7 +4306,7 @@
       "reference": "https://en.wikipedia.org/wiki/Double-precision_floating-point_format",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0197_s0", "p0210_s0", "p0232_s0", "p0253_s0", "p0808_s0"]
+      "refs": ["p0197_s0", "p0210_s0", "p0232_s0", "p0253_s0", "p0783_s0", "p0808_s0"]
     },
     {
       "slug": "doubly-linked-list",
@@ -4441,7 +4441,7 @@
       "reference": "https://en.wikipedia.org/wiki/Expected_value",
       "additional-references": ["https://en.wikipedia.org/wiki/Expected_value#Linearity"],
       "summary": "",
-      "refs": ["p0253_s0", "p0493_s0", "p0523_s0", "p0564_s0", "p0705_s0", "p0779_s0", "p0866_s0"]
+      "refs": ["p0253_s0", "p0493_s0", "p0523_s0", "p0564_s0", "p0705_s0", "p0779_s0", "p0783_s0", "p0866_s0"]
     },
     {
       "slug": "expm1",
@@ -6070,7 +6070,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0374_s0", "p0423_s0", "p0463_s0", "p0539_s0", "p0582_s0", "p0650_s0", "p0692_s0", "p0720_s0", "p0866_s0", "p0887_s0", "p0892_s0", "p0976_s0", "p1007_s0"]
+      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0374_s0", "p0423_s0", "p0463_s0", "p0539_s0", "p0582_s0", "p0650_s0", "p0692_s0", "p0720_s0", "p0783_s0", "p0866_s0", "p0887_s0", "p0892_s0", "p0976_s0", "p1007_s0"]
     },
     {
       "slug": "recursion-computer-science",
@@ -6926,6 +6926,15 @@
       "additional-references": [],
       "summary": "Amortise an expensive table across many queries when inputs share structure.",
       "refs": ["p0014", "p0017", "p0023", "p0035", "p0050", "p0067", "p0074", "p0077", "p0081", "p0087", "p0095", "p0096", "p0103", "p0105", "p0114", "p0115", "p0117", "p0118", "p0124", "p0127", "p0130", "p0133", "p0150", "p0153", "p0154", "p0159", "p0171", "p0179", "p0199", "p0220", "p0233", "p0254", "p0315", "p0357", "p0365", "p0407", "p0461", "p0504", "p0517", "p0549", "p0642", "p0650", "p0710", "p0829", "p0967"]
+    },
+    {
+      "slug": "propagate-moments-not-distributions",
+      "facet": "takeaway",
+      "name": "Propagate moments, not distributions",
+      "reference": null,
+      "additional-references": [],
+      "summary": "When the target is a low moment and each step's conditional moments are polynomial in the state, carry those few moments forward instead of the whole probability distribution.",
+      "refs": ["p0783"]
     },
     {
       "slug": "query-neighbours-instead-of-building-edges",

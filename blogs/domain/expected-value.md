@@ -229,7 +229,7 @@ that read the same thing contribute the same amount, and can be counted together
 - ○ [0744](/solutions/0744/) — What? Where? When?
 - ○ [0756](/solutions/0756/) — Approximating a Sum
 - ○ [0765](/solutions/0765/) — Trillionaire
-- ○ [0783](/solutions/0783/) — Urns
+- ● [0783](/solutions/0783/) — Urns
 - ○ [0796](/solutions/0796/) — A Grand Shuffle
 - ○ [0815](/solutions/0815/) — Group by Value
 - ○ [0819](/solutions/0819/) — Iterative Sampling

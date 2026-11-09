@@ -251,6 +251,7 @@ monotonicity do the inversion.
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0692](/solutions/0692/) — Siegbert and Jo
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
+- ● [0783](/solutions/0783/) — Urns
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0892](/solutions/0892/) — Zebra Circles

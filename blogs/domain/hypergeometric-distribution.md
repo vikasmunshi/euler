@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hypergeometric
 ## Problems
 
 - ● [0493](/solutions/0493/) — Under the Rainbow
-- ○ [0783](/solutions/0783/) — Urns
+- ● [0783](/solutions/0783/) — Urns
 
 <!-- /problems -->

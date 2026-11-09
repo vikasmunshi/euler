@@ -30,7 +30,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Discrete_unifo
 - ○ [0695](/solutions/0695/) — Random Rectangles
 - ○ [0724](/solutions/0724/) — Drone Delivery
 - ○ [0744](/solutions/0744/) — What? Where? When?
-- ○ [0783](/solutions/0783/) — Urns
 - ○ [0819](/solutions/0819/) — Iterative Sampling
 - ○ [0863](/solutions/0863/) — Different Dice
 - ○ [0901](/solutions/0901/) — Well Drilling

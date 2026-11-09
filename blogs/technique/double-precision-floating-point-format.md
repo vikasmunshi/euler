@@ -138,6 +138,7 @@ whenever the bound on `r` is not obvious.
 - ● [0210](/solutions/0210/) — Obtuse Angled Triangles
 - ● [0232](/solutions/0232/) — The Race
 - ● [0253](/solutions/0253/) — Tidying Up A
+- ● [0783](/solutions/0783/) — Urns
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 
 <!-- /problems -->
