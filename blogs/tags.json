@@ -1471,7 +1471,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hamiltonian_path",
       "additional-references": [],
       "summary": "A cycle that visits every vertex of a graph exactly once before returning to its start.",
-      "refs": ["p0312"]
+      "refs": ["p0312", "p0842"]
     },
     {
       "slug": "hamiltonian-path",
@@ -2884,7 +2884,7 @@
       "reference": "https://en.wikipedia.org/wiki/Self-intersection",
       "additional-references": [],
       "summary": "A point where a curve crosses itself, common in the study of parametric curves.",
-      "refs": ["p0777"]
+      "refs": ["p0777", "p0842"]
     },
     {
       "slug": "self-similarity",
@@ -4099,7 +4099,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cramer%27s_rule",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0163_s0"]
+      "refs": ["p0163_s0", "p0842_s0"]
     },
     {
       "slug": "cross-multiplication",
@@ -4306,7 +4306,7 @@
       "reference": "https://en.wikipedia.org/wiki/Double_counting_(proof_technique)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0475_s0", "p0926_s0", "p0944_s0", "p0960_s0", "p1006_s0"]
+      "refs": ["p0475_s0", "p0842_s0", "p0926_s0", "p0944_s0", "p0960_s0", "p1006_s0"]
     },
     {
       "slug": "double-precision-floating-point-format",
@@ -5026,7 +5026,7 @@
       "reference": "https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0001_s2", "p0001_s3", "p0001_s4", "p0113_s0", "p0162_s0", "p0184_s0", "p0193_s0", "p0202_s0", "p0234_s0", "p0239_s0", "p0269_s0", "p0319_s0", "p0628_s0", "p0710_s0", "p0725_s0", "p0957_s0", "p0962_s0", "p0987_s0"]
+      "refs": ["p0001_s0", "p0001_s2", "p0001_s3", "p0001_s4", "p0113_s0", "p0162_s0", "p0184_s0", "p0193_s0", "p0202_s0", "p0234_s0", "p0239_s0", "p0269_s0", "p0319_s0", "p0628_s0", "p0710_s0", "p0725_s0", "p0842_s0", "p0957_s0", "p0962_s0", "p0987_s0"]
     },
     {
       "slug": "insertion-sort",
@@ -5773,7 +5773,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0767_s0", "p0782_s0", "p0804_s0", "p0921_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0995_s0", "p0996_s0", "p0998_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0767_s0", "p0782_s0", "p0804_s0", "p0842_s0", "p0921_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0995_s0", "p0996_s0", "p0998_s0", "p1001_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5998,7 +5998,7 @@
       "reference": "https://en.cppreference.com/w/c/algorithm/qsort",
       "additional-references": ["https://en.wikipedia.org/wiki/Qsort"],
       "summary": "",
-      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0346_s0", "p0348_s0", "p0464_s0", "p0749_s0", "p0757_s0", "p0768_s0", "p0926_s0", "p0963_s0", "p0972_s0", "p0998_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0054_s0", "p0062_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0118_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0143_s0", "p0152_s0", "p0165_s0", "p0177_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0212_s0", "p0221_s0", "p0248_s0", "p0252_s0", "p0321_s0", "p0336_s0", "p0346_s0", "p0348_s0", "p0464_s0", "p0749_s0", "p0757_s0", "p0768_s0", "p0842_s0", "p0926_s0", "p0963_s0", "p0972_s0", "p0998_s0", "p1000_s0"]
     },
     {
       "slug": "quadratic-formula",
@@ -6169,7 +6169,7 @@
       "reference": "https://en.wikipedia.org/wiki/Rounding",
       "additional-references": ["https://en.wikipedia.org/wiki/Rounding#Round_half_to_even"],
       "summary": "",
-      "refs": ["p0177_s0", "p0239_s0", "p0255_s0", "p0395_s0", "p0493_s0", "p0751_s0"]
+      "refs": ["p0177_s0", "p0239_s0", "p0255_s0", "p0395_s0", "p0493_s0", "p0751_s0", "p0842_s0"]
     },
     {
       "slug": "run-length-encoding",
@@ -6592,7 +6592,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0921_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0994_s0", "p0995_s0", "p0998_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0842_s0", "p0921_s0", "p0938_s0", "p0944_s0", "p0967_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0994_s0", "p0995_s0", "p0998_s0", "p1001_s0"]
     },
     {
       "slug": "vieta-jumping",
@@ -6835,7 +6835,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Solve the part with a closed form exactly and confine numerical approximation to the part that has none.",
-      "refs": ["p0363", "p0558", "p0779", "p0998"]
+      "refs": ["p0363", "p0558", "p0779", "p0842", "p0998"]
     },
     {
       "slug": "exploit-symmetry",
@@ -6871,7 +6871,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a condition depends only on a small per-item value, bucket the items by that value and count over the value alphabet instead of over item tuples.",
-      "refs": ["p0310", "p0649", "p0705"]
+      "refs": ["p0310", "p0649", "p0705", "p0842"]
     },
     {
       "slug": "injective-maps-make-equality-structural",

@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cramer%27s_rul
 ## Problems
 
 - ● [0163](/solutions/0163/) — Cross-hatched Triangles
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 
 <!-- /problems -->

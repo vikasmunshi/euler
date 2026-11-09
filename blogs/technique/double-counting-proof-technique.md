@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Double_countin
 ## Problems
 
 - ● [0475](/solutions/0475/) — Music Festival
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0960](/solutions/0960/) — Stone Game Solitaire

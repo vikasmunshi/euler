@@ -226,6 +226,7 @@ too large or too structured to index directly.
 - ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0757](/solutions/0757/) — Stealthy Numbers
 - ● [0768](/solutions/0768/) — Chandelier
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0972](/solutions/0972/) — Hyperbolic Plane

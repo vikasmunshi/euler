@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Self-intersect
 ## Problems
 
 - ○ [0777](/solutions/0777/) — Lissajous Curves
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 
 <!-- /problems -->

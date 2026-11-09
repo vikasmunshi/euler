@@ -220,7 +220,7 @@ tell is a problem that counts permutations
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
 - ○ [0796](/solutions/0796/) — A Grand Shuffle
 - ○ [0837](/solutions/0837/) — Amidakuji
-- ○ [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0868](/solutions/0868/) — Belfry Maths

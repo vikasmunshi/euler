@@ -307,7 +307,7 @@ Mixing them is how a provably correct algorithm returns a wrong count.
 - ○ [0742](/solutions/0742/) — Minimum Area of a Convex Grid Polygon
 - ○ [0786](/solutions/0786/) — Billiard
 - ○ [0807](/solutions/0807/) — Loops of Ropes
-- ○ [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ○ [0879](/solutions/0879/) — Touch-screen Password
 - ○ [0897](/solutions/0897/) — Maximal $n$-gon in a region
 - ● [0957](/solutions/0957/) — Point Genesis

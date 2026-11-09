@@ -160,5 +160,6 @@ plain division.
 - ● [0395](/solutions/0395/) — Pythagorean Tree
 - ● [0493](/solutions/0493/) — Under the Rainbow
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 
 <!-- /problems -->

@@ -667,7 +667,7 @@ of crossing it.
 - ○ [0824](/solutions/0824/) — Chess Sliders
 - ○ [0828](/solutions/0828/) — Numbers Challenge
 - ○ [0837](/solutions/0837/) — Amidakuji
-- ○ [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ○ [0847](/solutions/0847/) — Jack's Bean
 - ○ [0848](/solutions/0848/) — Guessing with Sets
 - ○ [0849](/solutions/0849/) — The Tournament

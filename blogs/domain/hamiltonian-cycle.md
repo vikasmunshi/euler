@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hamiltonian_pa
 ## Problems
 
 - ○ [0312](/solutions/0312/) — Cyclic Paths on Sierpiński Graphs
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 
 <!-- /problems -->

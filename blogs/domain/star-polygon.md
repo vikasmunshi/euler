@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Star_polygon>.
 ## Problems
 
 - ○ [0841](/solutions/0841/) — Regular Star Polygons
-- ○ [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0842](/solutions/0842/) — Irregular Star Polygons
 
 <!-- /problems -->
