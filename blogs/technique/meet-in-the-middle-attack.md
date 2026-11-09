@@ -129,5 +129,6 @@ The bitmask enumeration that builds each half's table is on
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
 - ● [0768](/solutions/0768/) — Chandelier
+- ● [0928](/solutions/0928/) — Cribbage
 
 <!-- /problems -->

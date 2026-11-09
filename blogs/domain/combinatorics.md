@@ -700,7 +700,7 @@ of crossing it.
 - ○ [0923](/solutions/0923/) — Young's Game B
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ○ [0927](/solutions/0927/) — Prime-ary Tree
-- ○ [0928](/solutions/0928/) — Cribbage
+- ● [0928](/solutions/0928/) — Cribbage
 - ● [0936](/solutions/0936/) — Peerless Trees
 - ○ [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0944](/solutions/0944/) — Sum of Elevisors

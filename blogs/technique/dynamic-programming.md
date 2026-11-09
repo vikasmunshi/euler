@@ -266,6 +266,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0885](/solutions/0885/) — Sorted Digits
+- ● [0928](/solutions/0928/) — Cribbage
 - ● [0936](/solutions/0936/) — Peerless Trees
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0951](/solutions/0951/) — A Game of Chance

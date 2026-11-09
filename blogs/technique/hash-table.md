@@ -204,6 +204,7 @@ points in neighbouring cells; the key is a coordinate pair, the table is the spa
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0816](/solutions/0816/) — Shortest Distance Among Points
+- ● [0928](/solutions/0928/) — Cribbage
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 
 <!-- /problems -->

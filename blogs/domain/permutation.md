@@ -233,7 +233,6 @@ tell is a problem that counts permutations
 - ○ [0916](/solutions/0916/) — Restricted Permutations
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
-- ○ [0928](/solutions/0928/) — Cribbage
 - ○ [0964](/solutions/0964/) — Musical Chairs Revisited
 - ● [0996](/solutions/0996/) — Overtakes
 

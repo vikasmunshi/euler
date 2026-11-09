@@ -136,5 +136,6 @@ in more depth.
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls
 - ● [0755](/solutions/0755/) — Not Zeckendorf
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
+- ● [0928](/solutions/0928/) — Cribbage
 
 <!-- /problems -->
