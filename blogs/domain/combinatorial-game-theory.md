@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-game-theory] -->
-<!-- status: final 2026-10-29T07:07Z -->
+<!-- status: final -->
 # Combinatorial game theory
 
 [Combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) studies
@@ -8,7 +8,7 @@ moves alternate, play is finite, and under the usual
 [normal play convention](https://en.wikipedia.org/wiki/Normal_play_convention) the player who
 cannot move loses. That is narrow enough to be a real theory — every position is a win or a loss
 for whoever is to move, decided before a single stone is lifted — and broad enough to cover the
-seventy-odd problems below, which arrive dressed as Nim, stone games, coin games, strip games,
+nearly seventy problems below, which arrive dressed as Nim, stone games, coin games, strip games,
 card games and board games. The archive's twist is that it almost never asks you to *play*. It
 asks you to **count** the positions of a given outcome over a range far too large to enumerate,
 so the actual work is turning "the first player wins" into arithmetic.
@@ -83,9 +83,21 @@ The same template covers games that do not look like heaps at all. Gaps between 
 are heaps (344, the silver dollar game). A token that may move in either of two directions is
 itself the sum of two one-dimensional games, so its value is the XOR of a row value and a column
 value (649). Coin-turning games — flip a rectangle of disks subject to a shape rule (459) — are
-sums of one-coin games, and the two-dimensional ones are governed by nim-*multiplication*. A game
-on a recursively built tree (400) decomposes into subtrees. The skill being trained is seeing the
-independent parts.
+sums of one-coin games, and the two-dimensional ones are governed by nim-*multiplication*. The
+skill being trained is seeing the independent parts.
+
+Trees are the case worth singling out. In 400, removing a node and its subtree is cutting an edge in
+[Green Hackenbush](https://en.wikipedia.org/wiki/Hackenbush), and the subtrees hanging from one
+node are independent games. The *colon principle* says an edge with a subtree of value $v$ on top
+is worth $v + 1$, so a node's value is the XOR over its children of (child value $+ 1$). For the
+Fibonacci tree that is a one-line recurrence on the level. 400 also asks a different question from
+"who wins": it asks *how many winning first moves* there are, in a tree with more than two thousand
+digits' worth of nodes. A winning move is one that leaves the whole tree at value $0$, and that
+target can be pushed down. If the root must end at $t$, a move in one child must leave that child
+at the value that XORs with its sibling's to give $t$. So you count moves by *(level, target value)*
+rather than by node. Because the Grundy values stay small, the table is level count × a few thousand
+targets, and since XOR with a constant permutes the targets, each level is a gather with no
+collisions.
 
 ## When the decomposition fails
 
@@ -105,9 +117,20 @@ a [Zeckendorf representation](/blogs/domain/zeckendorfs-theorem) (692), a
 losing positions with the brute force, stare at them in binary and in their factorisations, and
 conjecture.
 
+Before you stare, shrink the state. In 711 (Binary Blackboard) the players write numbers whose sum
+is capped by the first one, and a win depends on the parity of the total count of 1 bits. The
+history looks unbounded, but only two quantities ever affect the future: the budget left and
+whether the parity currently suits the player to move. That pair makes the brute force quadratic
+instead of exponential, which is enough to tabulate a thousand starting numbers. The table shows
+that the first player's winning starts form two rigid binary families: the all-ones numbers, and
+numbers built from isolated 1 bits at even positions with an optional even-length tail of ones.
+The bound is $2^{12\,345\,678}$, so the count cannot be a walk over the family either. It becomes a
+sum of geometric and arithmetico-geometric series, and the work grows only with the *bit length* of
+the bound.
+
 **Partisan games.** If the two players have *different* moves — Left removes from the left, Right
 from the right (948, 949); one player deletes gold coins, the other silver (860, 895); a player may
-only strip their own piles (939); X and O place different symbols (976); Dr. One deletes a binary
+only strip their own piles (939); X and O place different symbols (976); one player slides a counter right, the other down (922); Dr. One deletes a binary
 1 while Dr. Zero deletes a 0 (882) — Sprague–Grundy does not apply. These are
 [partizan games](/blogs/domain/partizan-game), and a position must be classified by *four*
 outcomes (Left wins whoever starts, Right wins whoever starts, first player wins, second player
@@ -125,7 +148,7 @@ induction with the terminal condition flipped rather than adjust the answer at t
 If each move still touches one component but the players differ, Conway's theory replaces the
 nimber with a general game value $G = \{\,\text{Left's options} \mid \text{Right's options}\,\}$, and
 the value of a sum is still the sum of the values. What changes is the arithmetic those values live
-in, and three problems show the range of it.
+in, and five problems show the range of it.
 
 The gentlest entry is 860, the gold-and-silver coin game. Taking a coin removes everything stacked
 above it, which is exactly cutting an edge of a stalk in
@@ -167,9 +190,30 @@ written as a vector of coefficients over independent infinitesimals — with the
 882's table for the string with the 2s deleted. Once values are vectors, game equality is vector
 equality and game addition is vector addition, and the count is ordinary bucketing.
 
-The lesson across the three: in a partisan sum, first find out *what kind of value* the components
-take. Numbers give you a total order and plain arithmetic; anything hotter or fuzzier needs a
-canonical representation before you can even test equality, let alone count.
+Problem 922 (Young's Game A) lands between 882 and 963. The same kind of canonical-form engine, run
+on every small staircase diagram, showed each one is worth an integer plus a nimber,
+$(b - a) + {*}(k - 1)$. The width surplus counts free moves, and the $k$ steps act as a Nim heap,
+so impartial values turn up inside a partisan game. A sum of such values is $N + {*}X$, with $N$ added as an integer and $X$ combined by XOR.
+Its outcome comes from a short sign rule: positive or negative by the sign of $N$, and when $N = 0$,
+zero if $X = 0$ and fuzzy (a first-player win) otherwise. So the value lives on two axes with two
+different additions, and the counting step later has to respect both.
+
+Problem 976 (XO Game) shows a different payoff from knowing the values. After an opening phase the
+board breaks into gaps between marks. Their values are numbers or numbers plus $*$, and the
+opening move on a strip is worth $0$, $*$ or $\pm 2^{1 - n/2}$ depending on the strip's length mod 4.
+Odd strips are free tempo moves. Even strips cost whoever opens them a *power of two*. Powers of two
+behave like binary digits, so the largest weight left unmatched decides the sign of the total, and
+that weight falls on whoever makes the last forced opening. The only escape is when every even
+length occurs an even number of times and the weights cancel. A sum of game values thus becomes a
+parity rule on the multiset of strip lengths, and the count becomes a
+[generating function](/blogs/domain/generating-function) over multisets.
+
+The lesson across the five: in a partisan sum, first find out *what kind of value* the components
+take. Numbers give you a total order and plain arithmetic. Number-plus-nimber values give you a
+sign rule over two axes. Values that are powers of two let the largest one decide. Anything hotter
+or fuzzier needs a canonical representation before you can even test equality, let alone count.
+In every case the values were *found* by a small exact engine and only then proved or tested,
+never guessed.
 
 ## Beyond win-or-lose
 
@@ -189,9 +233,15 @@ core, and they need different machinery — worth naming so you do not reach for
 - **Pursuit and economics.** Catching a mouse on a graph (690, 825, 761) is a fixed-point
   computation over the set of positions still consistent with the search so far; the pirates of 950
   are pure backward induction from the last surviving proposer.
-- **Solitaires and invariants.** Single-player token games (426, 664, 986) are usually settled by a
+- **Solitaires and invariants.** Single-player token games (426, 664) are usually settled by a
   **weight function**: assign each square a value so that no move can increase the total, and the
-  invariant caps what is reachable; then exhibit a construction that attains the cap.
+  invariant caps what is reachable; then exhibit a construction that attains the cap. 986 shows
+  the other route: stop tracking tokens and count *moves per square*. Conservation then becomes a
+  system of linear inequalities on those counts, and in it each count helps exactly one constraint.
+  So the cheapest plan is forced square by square, as a floored-average
+  [recurrence](https://en.wikipedia.org/wiki/Recurrence_relation). Feasibility is
+  [monotone](/blogs/technique/monotonic-function) in the target, which makes the best reachable pile a
+  [binary search](/blogs/technique/binary-search-algorithm) over whether that recurrence dies out.
 
 ## The Euler twist: from a game to a count
 
@@ -214,6 +264,32 @@ pipeline is nearly always the same three stages:
    the zero coefficient of a power of the per-stack value polynomial (860), or the number of
    equal pair sums (963), which is cheap because only a few thousand distinct
    values occur among $10^5$ components.
+
+Three refinements of stage 3 recur often enough to name:
+
+- **Count over values, not positions.** Grundy values are tiny next to the range: in 310 the
+  largest value among $10^5$ heaps is 74. A histogram over a 128-value alphabet turns the triple
+  count into an XOR self-convolution of that histogram. When the statement wants *unordered* heaps
+  ($a \le b \le c$), count ordered triples and divide out the symmetry exactly with
+  [Burnside's lemma](/blogs/technique/burnside-lemma). The losing condition is symmetric, and
+  the fixed points of a transposition are triples with two equal heaps, which lose exactly when the
+  third has value zero. That avoids a case split on which heaps coincide.
+- **Powers of a histogram, and the modulus.** Placing $c$ independent tokens (649) is the $c$-fold
+  XOR-convolution power of one token's histogram. Raise it by
+  [exponentiation by squaring](/blogs/technique/exponentiation-by-squaring), and the cost no longer
+  depends on the board size. The [Walsh–Hadamard transform](/blogs/technique/walsh-hadamard-transform)
+  is the usual accelerator, but its inverse divides by the transform length. Modulo $10^9$ the length
+  8 has no inverse, so the direct $8 \times 8$ convolution is the correct choice there, not merely
+  the simple one.
+- **Mixed axes.** When values are integer-plus-nimber (922), a tuple's $(N, X)$ combines by ordinary
+  convolution in $N$ and XOR convolution in $X$. Transform only the nimber axis. Each Walsh index
+  then carries an ordinary polynomial in $N$, raised to the $m$-th power. You also need only one
+  point of the inverse transform, $X = 0$, so you never invert the whole thing.
+
+The closed forms at the end vary as much as the games. 711 ends in geometric and
+arithmetico-geometric series. 976 ends in multiset generating functions whose coefficients satisfy an
+order-two [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) recurrence, so $10^7$
+terms take one division-free linear pass.
 
 Problem 961 is a compact illustration of the whole arc: the game is played on the decimal digits of
 an integer, but only the pattern of zero and non-zero slots matters, so a position is a small
