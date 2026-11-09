@@ -1,5 +1,5 @@
 <!-- tags: [generating-function] -->
-<!-- status: final 2026-10-29T07:18Z -->
+<!-- status: final -->
 # Generating function
 
 A [generating function](https://en.wikipedia.org/wiki/Generating_function) is a whole infinite
@@ -30,7 +30,19 @@ used any number of times" is `1/(1 - x^k)`, and the product over all `k` is the 
 generating function — the object behind problem 78, and behind its variants with restricted parts
 (problem 614's distinct summands, problem 890's powers of two).
 
-Then you have to get a number back out, and that is the part with real technique in it.
+Two more constructions round out the toolkit:
+
+- **Ordered sequences invert.** If one part is drawn from a class with series `C(x)`, then a
+  *sequence* of any number of parts is `1 + C + C² + … = 1/(1 - C(x))`. That is how
+  [compositions](/blogs/domain/composition-combinatorics) work. The zero-free numbers with digit sum
+  *n* in problem 377 are compositions of *n* into parts 1–9, so their series is
+  `1/(1 - x - x² - … - x⁹)`.
+- **A second statistic gets a second variable.** Problem 682 pairs 5-smooth numbers `2ᵃ3ᵇ5ᶜ` on two
+  statistics at once: `y` marks the sum of prime factors, and `x` marks how many there are. Each
+  prime contributes `1/(1 - x·yᵖ)`. To require two numbers with *equal* factor counts, mark one with
+  `x` and the other with `x⁻¹`, then keep the **constant term in `x`**. This is the same move as
+  problem 860's returning walk, now used as a filter on a bivariate series. The general rule: a
+  constraint "these two statistics agree" becomes "the exponent of the marker variable is zero"., and that is the part with real technique in it.
 
 **Extract by dynamic programming.** Multiplying the running polynomial by `1 + x^p` is the array
 update `c[s] += c[s-p]`, which is why 0/1 knapsack and subset-sum counting are the same thing as a
@@ -106,6 +118,16 @@ rationals.
 
 The rule of thumb: if swapping two chosen items gives a different object, you want an EGF.
 
+Problem 520 shows an EGF that collapses completely. A "simber" puts a parity condition on how often
+each digit occurs: even digits an even number of times, and odd digits an odd number of times or not
+at all. Those series are named functions: `Σ x²ʲ/(2j)! = cosh x` and `1 + sinh x`, so the count of
+length-*L* strings is `L![xᴸ] cosh⁵x·(1 + sinh x)⁵`. The useful step is to substitute `y = eˣ`.
+Then `cosh` and `sinh` become `(y ± y⁻¹)/2`, the whole product becomes a Laurent polynomial
+`Σ c_k y^k` with *k* in −10…10, and `L![xᴸ] e^{kx} = kᴸ`. The count is therefore an exact
+**power sum** `Σ c_k kᴸ`, and summing it over every length up to *n* gives 21
+[geometric series](/blogs/technique/geometric-series). So an EGF that is a polynomial in `eˣ` leads
+to a closed form that costs O(log *n*), even for *n* = 2³⁹.
+
 ## Rational generating functions
 
 A sequence satisfying a linear recurrence of order *r* has a generating function that is a ratio of
@@ -136,6 +158,69 @@ polynomial `N(y)` of degree 2*n*, built by a left-to-right DP whose states are p
 left is `(1 - y²)ⁿ(1 - y)`, and its coefficients come in closed form (stars and bars, then the
 hockey-stick identity). So the answer is a sum of 2*n* + 1 products `Nᵢ·C(⌊(k-i)/2⌋ + n, n)`.
 Never expand the series to degree *k*: here *k* is only a binomial argument.
+
+When the target index is astronomical and no closed form shows up, a rational generating function
+still gives you **one far coefficient in O(log *n*)**. There are two standard ways to get it.
+
+- **Matrix power.** A recurrence of order *r* is a fixed *r* × *r*
+  [transition matrix](/blogs/technique/matrix-exponentiation), and `[xⁿ]` is one entry of `Mⁿ`.
+  Problem 377 needs the *sum* of the numbers counted above, not only how many there are. The sum
+  alone is not closed, because appending digit *d* maps *v* to `10v + d` and so needs the count.
+  Carrying the sum and the count together makes an 18-dimensional state that *is* closed. Its
+  targets are 13ⁱ, so it chains the powers as `M^{13ⁱ} = (M^{13ⁱ⁻¹})¹³`, and the exponent is never
+  written down as a number.
+- **[Bostan–Mori](/blogs/technique/bostan-mori-algorithm).** To compute `[yⁿ] N(y)/D(y)`, multiply
+  the top and the bottom by `D(-y)`. The denominator becomes even, and only the half of the
+  numerator with the parity of *n* can reach `yⁿ`, so *n* halves while the degrees stay at *d*. That
+  is O(*d*² log *n*), compared with O(*d*³ log *n*) for the matrix. Problem 682 uses it after a
+  residue argument shows that its constant-term series is rational with a known degree-40
+  denominator. The code then **checks that claim**: it computes 81 terms, multiplies them by `D`,
+  and asserts that every coefficient from 40 to 80 vanishes. A missed pole would make the assertion
+  fail instead of producing a quietly wrong answer.
+
+Rational functions also handle **parity**. Problem 973 sums the XOR of the parts over all
+compositions of *n*, which is 2ⁿ⁻¹ of them for *n* = 10⁴. Split the XOR by bit. Bit *b* is set when an
+odd number of parts have it, so give each part the sign `−1` if it has bit *b* and `+1` if not.
+The signed count, the [sequence construction](/blogs/domain/composition-combinatorics) applied to
+these signed parts, is the gap between the even and odd cases. The sign has period `2·2ᵇ`, so
+`C_b(x)` sums to a rational function, and `1/(1 - C_b)` has a four-term denominator, which is a
+four-term recurrence. The `±1` weight is the same filter as `½(f(y) + f(-y))` in problem 996:
+assign `−1` to whatever you want to count mod 2, and the signed sum gives the difference between
+the even and odd cases.
+
+## Algebraic and holonomic generating functions
+
+Past rational come *algebraic* functions (series involving square roots) and, more generally,
+[holonomic](https://en.wikipedia.org/wiki/Holonomic_function) ones: series that satisfy a linear
+differential equation with polynomial coefficients. Their coefficients satisfy a linear recurrence
+whose coefficients are polynomial in *n*. That is not enough for O(log *n*), but it gives an O(*n*)
+loop in O(1) memory with no array.
+
+Problem 1007 shows this in full. It sums a signed Fibonacci expression over all
+[Catalan](/blogs/domain/catalan-number)-many bracketings, which is too many to enumerate at
+*n* = 10⁷. It needs three steps:
+
+1. [Binet](/blogs/technique/binets-formula) turns the Fibonacci leaf weights into two
+   *geometric* weights `tⁱ`. With `t = φ` and `t = ψ`, both live in `𝔽_p`, because 5 is a quadratic
+   residue modulo the prime.
+2. Splitting a binary tree at its root gives a functional equation. The right subtree's leaves are
+   shifted (a factor `t^k`) and negated. Solving it gives a series built from `√(1−4w)` and
+   `√(1−4tw)`.
+3. Rationalising twice leaves one linear denominator and a numerator made of the radicals and their
+   product. Each radical `g = √P` satisfies `2P·g′ = P′·g`, and that differential equation is the
+   recurrence for its coefficients.
+
+Problem 976 reaches the same point from another direction. After a combinatorial-game argument has
+reduced the game to a parity rule, what remains is reading `[x^K]` of
+`(1−x)^{−α}(1+x)^{−β}` at *K* = 10⁷. The series satisfies `(1−x²)f′ = (α(1+x) − β(1−x))f`, which
+gives an order-two recurrence for its coefficients. An extra factor `(1−x)⁻¹` turns each coefficient
+into a prefix sum over `k ≤ K` at no cost.
+
+Both problems hit the same practical obstacle: a holonomic recurrence divides by *n* + 1 at every
+step. Ten million modular inverses are slow, and a table of them is large. In both, the fix is to
+track `n!·cₙ`. The division disappears, every sequence carries the same factorial, and **one**
+inverse at the end removes it. The general version of this idea is on
+[its own page](/blogs/takeaway/scale-fraction-sums-to-integer-recurrences).
 
 ## Working modulo something
 
@@ -177,8 +262,17 @@ becomes an array of 250 machine words.
   escapes from expanding at all: a sparse reciprocal (problem 78), a closed-form coefficient
   (problem 743), a base that factors into binomials (problem 860), a periodicity that makes the input census O(1) (problem 250), a rational form that
   hands the problem to number theory (problems 137, 140), a known denominator that takes the target
-  degree out of the cost (problem 996). Write the generating function down first; then look hard at
-  what it *is* before you start multiplying.
+  degree out of the cost (problem 996), an EGF that is secretly a polynomial in `eˣ` (problem 520).
+  Write the generating function down first; then look hard at what it *is* before you start
+  multiplying.
+- **Classify it, and the classification gives the cost.** Polynomial: closed-form coefficients.
+  Rational: O(log *n*) for any single coefficient, by Bostan–Mori or a matrix power
+  (problems 377, 682). Algebraic or holonomic: an O(*n*) recurrence in O(1) memory
+  (problems 976, 1007). Anything else: expand it and truncate.
+- **Verify the class on small terms.** A claimed denominator is easy to check: multiply it by enough
+  computed terms and confirm the tail vanishes (problem 682). Problem 973's composition formula was
+  found the same way, by solving its Markov chain exactly for small *n*, noticing that every
+  expected visit count was an integer, and then confirming the pattern before relying on it.
 
 The tell is a counting question whose brute force is a product of independent ranges, or a sequence
 defined by a recurrence you cannot see past. Write one factor per independent choice, multiply, and
