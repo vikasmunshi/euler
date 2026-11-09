@@ -398,6 +398,7 @@ disguise, so collapse the base first and exponentiate second.
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
+- ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0976](/solutions/0976/) — XO Game
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [1010](/solutions/1010/) — March of the Penguins

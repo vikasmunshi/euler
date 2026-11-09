@@ -256,6 +256,7 @@ computed once at import, so the timed `--runs` loop never pays for it.
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ● [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->

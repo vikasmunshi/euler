@@ -170,7 +170,7 @@ theory has to tell me how.
 - ○ [0522](/solutions/0522/) — Hilbert's Blackout
 - ○ [0703](/solutions/0703/) — Circular Logic II
 - ○ [0871](/solutions/0871/) — Drifting Subsets
-- ○ [0971](/solutions/0971/) — Modular Polynomial Composition
+- ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ○ [0977](/solutions/0977/) — Iterated Functions
 
 <!-- /problems -->

@@ -1087,7 +1087,7 @@ handful of operations on small numbers.
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ○ [0968](/solutions/0968/) — 5D Summation
-- ○ [0971](/solutions/0971/) — Modular Polynomial Composition
+- ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 - ● [0976](/solutions/0976/) — XO Game
 - ○ [0977](/solutions/0977/) — Iterated Functions

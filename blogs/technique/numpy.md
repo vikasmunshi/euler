@@ -646,6 +646,7 @@ both slower and harder to read.
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0944](/solutions/0944/) — Sum of Elevisors
+- ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 - ● [0975](/solutions/0975/) — A Winding Path
 - ● [0980](/solutions/0980/) — The Quaternion Group I

@@ -118,6 +118,7 @@ number of roots, and that uniformity is what lets the Python side treat the clas
 - ○ [0902](/solutions/0902/) — Permutation Powers
 - ○ [0903](/solutions/0903/) — Total Permutation Powers
 - ● [0930](/solutions/0930/) — The Gathering
+- ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 
 <!-- /problems -->
