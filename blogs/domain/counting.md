@@ -1,11 +1,12 @@
 <!-- tags: [counting] -->
-<!-- status: final 2026-10-16T07:32Z -->
+<!-- status: final -->
 # Counting
 
 [Counting](https://en.wikipedia.org/wiki/Counting) is the plainest question in the archive — *how
 many?* — and the answer is always a single integer. The problems carrying this tag have almost
 nothing else in common: dart checkouts, lattice triangles, squarefree integers, words over a
-four-letter alphabet, rolls of twenty dice, grids of digits, opening positions of a two-player game.
+four-letter alphabet, rolls of twenty dice, grids of digits, opening positions of a two-player game,
+cribbage hands, arcs drawn over a row of numbers, points on a hyperbolic plane.
 About two thirds of them also carry
 [combinatorics](/blogs/domain/combinatorics); the rest count number-theoretic or geometric objects
 — solutions of a Diophantine equation, integers with a given factorisation shape, triangles with
@@ -74,6 +75,12 @@ The discipline that makes this safe is **bijection**: the reparametrisation must
 exactly once. In problem 173 the symmetry of a frame forces $s - h$ to be even, which is precisely
 what makes $t$ an integer, and $(t, h)$ with $t, h \ge 1$ is exactly the set of laminae — no
 duplicates, no omissions. In problem 800, insisting on $p < q$ counts each unordered pair once.
+Problem 309 (crossed ladders) gets the same guarantee from a classical generator: once a short
+argument shows the two wall heights must be integers, each ladder is a Pythagorean triple, and
+[Euclid's formula](https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple) with a
+multiplier $k$ produces every triple exactly once. You generate the two million triples, group them
+by the leg they share (the street width), and test pairs only inside each group. You never search
+over (ladder, ladder, width) at all.
 
 The public problem 91 shows the same move combined with a case split. It counts right triangles
 $OPQ$ with lattice vertices in an $N \times N$ box, partitioned by *where the right angle sits*:
@@ -96,6 +103,49 @@ step $(-y/m,\ x/m)$ with $m = \gcd(x, y)$, and the number of lattice points reac
 at $Q$. Disjoint cases, each counted by formula: nothing is enumerated except the $O(N^2)$ choices
 of $P$. See [closed-form expression](/blogs/technique/closed-form-expression) and
 [exploit symmetry](/blogs/takeaway/exploit-symmetry).
+
+## Count a different set, at a known exchange rate
+
+Sometimes the set you are asked about is awkward, but a nearby set is easy to count and relates to
+it by a **fixed multiplier**. Then you count the nearby set and convert. This is
+[double counting](https://en.wikipedia.org/wiki/Double_counting_(proof_technique)), and it shows
+up in four forms.
+
+**Label, then divide.** Problem 475 splits $12n$ musicians, $n$ quartets of four, into trios with
+no two members from the same quartet. Unordered trios are what make it hard. So you label them:
+there are exactly $(4n)!$ labelled arrangements per unlabelled one. A labelled arrangement maps to a
+0/1 incidence matrix, with quartets as rows, trios as columns, row sums 4 and column sums 3. Each
+matrix comes from exactly $4!$ arrangements per row. So the answer is $24^{3n} M / (4n)!$, where $M$
+counts matrices, and $M$ is a short DP. The people are gone; only the incidence pattern is left.
+
+**Count representatives, weighted by their fibre.** Problem 928 scores cribbage hands, and every
+score depends on how many cards of each rank you hold, never on the suits. A rank-count vector
+$(c_1, \dots, c_{13})$ therefore stands for $\prod_r \binom{4}{c_r}$ real hands. You enumerate
+$5^{13}$ vectors instead of $2^{52}$ hands, carrying that product as a weight. The quotient is
+still too big, so the solution also cuts it at the 9–10 boundary and meets in the middle (see
+problem 166 below). But the first factor of a million comes from asking what the score can
+actually see.
+
+**Count from every anchor, divide by the overcount.** Problem 972 counts triples of points on a
+common geodesic of the Poincaré disc. After moving to Klein coordinates, geodesics become
+straight chords, so the question is just which triples of rational points are collinear. From each anchor point, you group the other points by a canonical
+key for the line through the anchor, and each group of size $g$ adds $\binom{g}{2}$. Every triple
+is seen once from each of its three points, so the total is exactly three times too big, which you
+fix by dividing. The same problem layers a second exchange rate on top: the point set has the
+eight symmetries of the square, so you only anchor in one octant and weight each anchor by its
+orbit size (1, 4 or 8).
+
+**Count the complement.** Problem 612 counts unordered pairs of numbers below $10^{18}$ that share
+a digit. Sharing a digit is an OR over ten digits; being disjoint is one subset condition. So you
+count the disjoint ordered pairs $D$, and the answer is $(T^2 - D - T)/2$: subtract $D$ from all
+ordered pairs, remove the $T$ self-pairs, and halve. The awkward predicate is never evaluated
+directly.
+
+All four have the same risk. The exchange rate has to be **exact**, the same for every object, and
+it has to be proved, not assumed. Labelling works because the trios are distinct non-empty sets.
+The overcount in 972 is exactly three because three points determine at most one line. Check the
+rate on the statement's small case before trusting it: $n = 1$ in problem 475 must give the
+statement's 576.
 
 ## When there is no parameter, count states
 
@@ -124,12 +174,37 @@ disjoint and exhaustive, and within a class each die is unambiguously above, equ
 pivot — a multinomial. *Inventing an auxiliary variable whose values partition the space into
 disjoint, individually-countable classes* is the single most transferable idea on this page.
 
+When the parts of a partial object are interchangeable, the state can be a **histogram**: you
+record how many parts are in each condition, not which ones. In problem 475's incidence matrix,
+columns with the same number of ones behave identically. So the state after each row is just how
+many columns hold 0, 1, 2 or 3 ones. Two of those four counters are fixed by invariants, so the
+table is $O(n^2)$ instead of $2^{4n}$. Each row moves the histogram by one of fifteen splits, each
+weighted by a product of binomials.
+
+Problem 1001 shows another shape: **decide what happens to the first element, and the rest falls
+apart into independent pieces.** It counts subsets of $n$ intervals with no two crossing (a
+[laminar family](https://en.wikipedia.org/wiki/Laminar_set_family)). The crossing graph is far too
+dense to split up. But look at the leftmost position $l$ of a range. Either the interval starting
+there is left out, which leaves the range $[l+1, r]$, or it is chosen. If it is chosen, nothing can
+cross it, so the remaining choices are whatever lies strictly inside it times whatever lies after
+it. That gives
+
+$$C_r[l] = C_r[l+1] + g(l)\, C_r[p+1].$$
+
+It uses the [product rule](https://en.wikipedia.org/wiki/Rule_of_product) for independent pieces
+and the sum rule for exclusive cases. Interval DP, and most "Catalan-like" counts, come from this
+same recurrence shape. The remaining work is engineering. Only one column per right end is ever
+read, so the total cost is the sum of the interval lengths, not $N^2$.
+
 Problem 166 shows the last shape: when the state is too wide, cut the object in half. Its $4 \times
 4$ grids with equal row, column and diagonal sums have too many degrees of freedom to enumerate, but
 the top and bottom halves interact through only a handful of shared partial sums — so tabulate every
 top half by its interface, then look up each bottom half's complement. That is
 [meet in the middle](/blogs/technique/meet-in-the-middle-attack): $O(|R|^2)$ instead of
-$O(|R|^4)$, bought with memory.
+$O(|R|^4)$, bought with memory. The skill is choosing the cut where the interface is narrowest.
+Problem 928 cuts cribbage ranks between 9 and 10. A fifteen can hold at most one ten-valued card,
+and only one run can cross the cut. So the two halves interact through a few small numbers: the
+number of low-card subsets that sum to 5, and the length and product of the open run.
 
 ## When the predicate is an equality, count collisions
 
@@ -155,6 +230,15 @@ The lesson generalises past games: when the predicate is an equality, look for t
 the coarsest key that still decides it — before you look for an algorithm. See
 [split inputs into behaviour classes](/blogs/takeaway/split-inputs-into-behaviour-classes).
 
+The same tally works when the predicate is **containment** instead of equality. Problem 612 sorts
+every number below the bound into one of 1024 classes, keyed by its set of decimal digits. A
+[digit DP](https://codeforces.com/blog/entry/53960) gives the class sizes $c_S$ in time that grows
+only with the number of digits. Two numbers are disjoint when one's set is a subset of the other's
+complement, so the pair count is $\sum_S c_S F(\overline S)$, where $F(M) = \sum_{S' \subseteq M}
+c_{S'}$. One [zeta transform](https://en.wikipedia.org/wiki/Incidence_algebra) builds every $F$ in
+$10 \cdot 2^{10}$ additions. Where $\sum M(v)^2$ pairs classes on equal keys, the subset-sum
+transform pairs them on nested keys.
+
 ## Getting the number right
 
 Counting fails silently. There is no exception, no crash, no wrong type — just a number that is a
@@ -169,6 +253,9 @@ form for its game values came from a small canonical-form engine, which reproduc
 brute force and then confirmed the formula for every number up to $10^6$ — ten times past the input
 — before the formula was trusted
 ([calibrate theory on known answers](/blogs/takeaway/calibrate-theory-on-known-answers)).
+The strongest check uses a method that **does not share your reduction**. Problem 475's
+matrix-and-divide formula was checked against a direct count that builds trios one at a time and
+never forms a matrix. A shared mistake in the exchange rate cannot pass a check that never uses it.
 
 **Decide explicitly when two objects are the same.** Is order significant? Problem 240's statement
 spells out that two rolls with the same multiset count separately; problem 109's does the opposite
