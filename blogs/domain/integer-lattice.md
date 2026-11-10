@@ -1,5 +1,5 @@
 <!-- tags: [integer-lattice] -->
-<!-- status: final 2026-10-16T07:34Z -->
+<!-- status: final -->
 # Integer lattice
 
 The [integer lattice](https://en.wikipedia.org/wiki/Integer_lattice) $\mathbb{Z}^n$ is the set of
@@ -7,8 +7,8 @@ points whose coordinates are all integers. It is the most natural place a geomet
 live on a computer: no rounding, no tolerance, every coordinate an exact `int`. That is why Project
 Euler keeps returning to it. Put a circle, a triangle or a parabola on the grid and ask how many
 lattice points it touches, and a continuous question becomes a counting question, which you can
-answer *exactly*. The forty-seven problems below vary a great deal on the surface, from right
-triangles and tilted rectangles to hyperballs, tangent ellipses and hexagonal orchards. Underneath,
+answer *exactly*. The problems below vary a great deal on the surface, from right triangles and
+tilted rectangles to hyperballs, tangent ellipses, hexagonal orchards and chess pieces. Underneath,
 they lean on a short list of facts about the grid, and this page is about those facts.
 
 ## Three facts the grid gives you for free
@@ -41,6 +41,20 @@ the origin in a cube) and Problem 351 (points hidden from the centre of a
 the same fact in a different role: they group lattice points by primitive ray, so that an angular
 sweep can deal with collinear points as a whole group instead of tripping over ties.
 
+The same gcd counts *collinear triples*, and Problem 994 shows how far that goes. Its picture is a
+fan of segments joining two rows of points, and three segments that meet pairwise fail to make a
+triangle when all three meet in one point: a shared endpoint, or a common crossing inside. Under
+[projective duality](/blogs/domain/projective-geometry), lines through a common point become
+points on a common line, so the segment $(i, j)$ becomes the cell $(i, j)$ of an $m \times n$
+index grid, and the defect is the number of collinear lattice triples in that box. Fix the two
+outer points at offset $(a, b)$. There are $\gcd(a, b) - 1$ lattice points strictly between them,
+so the count is $\sum (m-a)(n-b)\bigl(\gcd(a,b) - 1\bigr)$. With $m$ and $n$ near $10^{11}$ you
+cannot loop over offsets. But $\gcd(a,b) = \sum_{d \mid a,\ d \mid b} \varphi(d)$
+([Euler's totient](/blogs/domain/eulers-totient-function)) separates the coordinates: the sum
+becomes $\sum_d \varphi(d)\,F(d)\,G(d)$, where $F$ depends only on $m$ and $G$ only on $n$. That
+is a sum over floor-quotient blocks, finished in sublinear time by the
+[totient summatory recursion](/blogs/technique/totient-summatory-recursion).
+
 **2. Points in a region are a sum over columns; points on a curve are a number-theory function.**
 The number of lattice points inside the disc $x^2 + y^2 \le r^2$ is
 $\sum_{x=-r}^{r} \bigl(2\lfloor\sqrt{r^2 - x^2}\rfloor + 1\bigr)$. That is one exact
@@ -58,6 +72,28 @@ the divisors of $n$ that are $k \bmod 4$. So "how many lattice points lie on thi
 "how is the squared radius factored?". Problem 233 is that translation and nothing else; the
 geometry disappears once you have written the equation down. More general shapes
 $a x^2 + b xy + c y^2 = n$ lead to [binary quadratic forms](/blogs/domain/binary-quadratic-form).
+
+Summing over $n$ turns the second question back into the first. If $g(n)$ counts the solutions of
+$Q(x, y) = n$, then $\sum_{n \le N} g(n)$ counts each lattice point with $0 < Q(x, y) \le N$ exactly
+once: it is the number of points inside an ellipse. Problem 804 asks for that sum with
+$Q = x^2 + xy + 41y^2$ and $N = 10^{16}$, and never needs a single $g(n)$.
+[Completing the square](/blogs/domain/completing-the-square) gives
+$4Q = (2x + y)^2 + 163y^2$, so each row $y$ is a symmetric interval of $u = 2x + y$, one integer
+square root per row. The substitution is not unimodular, so only the $u$ with the parity of $y$
+map back to lattice points (the parity check from the next section). The ellipse's area,
+$2\pi N/\sqrt{163}$, predicts the leading digits before you run anything.
+
+When the curve is a conic and one rational point on it is known, there is a third way to reach its
+points: [parametrise them](/blogs/technique/rational-parametrization-of-a-conic). Every line
+through the known point with rational slope $\beta/\alpha$ meets the conic in exactly one more
+rational point. Clearing denominators then lists the primitive integer solutions, one per reduced
+slope, which is where [Pythagorean triples](/blogs/domain/pythagorean-triple) come from. In
+Problem 962, "this length is an integer" reduces, after the gcds and square-free parts are split
+off, to $g^2 - w^2 = D m^2$. The line through $(1 : 1 : 0)$ turns a search for perfect squares
+among $10^{10}$ triangles into a loop over slopes, and each slope contributes a whole family of
+multiples in one step. Fact 1 is back here as well: the gcd of the three coordinates depends only
+on $\gcd(\alpha, D)$ and the parity of $\alpha$, so the admissible slopes can be counted by Möbius
+inclusion–exclusion instead of walked.
 
 Problem 983 uses the same count in a different role. It doesn't ask for the count; it uses it as
 a *budget*. Equal circles of radius $\sqrt{N}$ centred on lattice points meet at two lattice points
@@ -107,9 +143,54 @@ basis changes (the [Lagrange–Gauss](https://en.wikipedia.org/wiki/Lattice_redu
 step in two dimensions) that never changes which points are in the lattice, only how short the
 basis vectors are.
 
+Sometimes the lattice is more than a group: it is a ring. $\mathbb{Z}^2$ is the
+[Gaussian integers](/blogs/technique/gaussian-integer) $\mathbb{Z}[i]$, and the hexagonal lattice
+is the [Eisenstein integers](/blogs/technique/eisenstein-integer) $\mathbb{Z}[\omega]$, whose
+squared length is the norm $a^2 - ab + b^2$. In a ring, rotating and scaling a lattice vector is a
+multiplication, so you can see at once which directions are lattice directions. Problem 883 asks
+for hexagonal-lattice triangles with a $60^\circ$ angle whose incentre is also a lattice point.
+Pinning the incentre at the origin removes translations, leaving one representative per class. The
+two sides at the $60^\circ$ vertex $\alpha$ run $30^\circ$ either side of $-\alpha$, and
+multiplying by $1 - \omega = \sqrt{3}\,e^{-i\pi/6}$ is exactly that rotation, so both sides are
+lattice directions for every $\alpha$. What is left is a divisor count on the *content* of
+$\alpha(1 - \omega)$, the largest integer dividing it, which is the ring's version of the gcd in
+fact 1. The Möbius grouping over primitive points then carries over with one twist: the prime
+$1 - \omega$ lying over 3 has to be split out separately, and it turns into an alternating series
+over $Y/3^j$.
+
 A few of the tagged problems (331, 289, 763, 790) use the grid mostly as a *board*, cells with
 neighbours, and the lattice structure there is just indexing. The habits below still apply to
 them, but the three facts do the heavy lifting elsewhere.
+
+## When the count is a polynomial in N
+
+Some lattice counts need no number theory at all, because each object being counted is described
+by a fixed number of integer parameters, each bounded linearly in $N$. The lattice points of a polytope
+scaled by $N$ are counted by a polynomial in $N$
+([Ehrhart's theorem](https://en.wikipedia.org/wiki/Ehrhart_polynomial)), or by a
+[quasi-polynomial](/blogs/domain/quasi-polynomial), one polynomial per residue class of $N$, when
+the vertices are rational rather than integral. The practical move is to establish that the count
+has this shape, compute enough exact small values, and
+[interpolate](/blogs/domain/polynomial-interpolation).
+
+Problem 984 is the clearest case. The sets it counts look combinatorial: knight-connected, and
+closed under the blocking rule of the Chinese-chess horse. An exhaustive search of the $5 \times 5$
+board shows that every one of them is a *lattice octagon*, the squares cut out by lower and upper
+bounds on the four forms $r$, $c$, $r + c$ and $r - c$. An octagon on the board is fixed by eight
+numbers (box size, position, four corner cuts), so the count is a degree-8 quasi-polynomial, one
+polynomial for each parity of $N$, and ten exact values per parity carry it to $N = 10^{18}$. That
+is [small cases reveal the closed form](/blogs/takeaway/small-cases-reveal-closed-form), with the
+lattice telling you the degree in advance.
+
+The same octagons drive Problem 968 from the other side. Its constraints $x_i + x_j \le X_{ij}$
+on five non-negative variables cut out a polytope of about $10^{40}$ points, each weighted by a
+product of prime powers. Constraints of the form $\pm x_i \pm x_j \le k$ are octagonal, and the
+class is closed under projection. Summing one variable out is a
+[geometric series](/blogs/technique/geometric-series) between its tightest lower and upper bounds,
+and the case split on *which* bound is tightest leaves only octagonal constraints on the variables
+that remain. That is [Fourier–Motzkin elimination](/blogs/technique/fourier-motzkin-elimination)
+applied to a weighted sum. Five eliminations reach a closed form whose cost does not depend on the
+size of the bounds at all.
 
 ## How to reason about it
 
@@ -134,7 +215,14 @@ them, but the three facts do the heavy lifting elsewhere.
   enumerating the points is the slow path. That is
   [reduce before coding](/blogs/takeaway/reduce-before-coding) in its lattice form: a problem
   that asks about $10^{10}$ or $10^{12}$ is telling you the answer is a sum over divisors, not
-  over points.
+  over points. If the question has no number-theoretic structure but its objects have a fixed
+  number of linearly bounded parameters, the answer is a (quasi-)polynomial in $N$ instead.
+- **Eliminate from the closure, not from the original constraints.** When you sum a variable out
+  of a region and prune the bounds that can never be tightest, a bound that is redundant for one
+  variable can still be the only cap on another. Problem 968's first version dropped such a bound
+  and summed over far too large a range. Rebuilding the child region from the tight closure's
+  projection keeps every consequence, and a randomised check against direct enumeration is what
+  found the bug.
 - **Brute-force the small case.** Every problem here ships small worked values. A triple loop over
   a $10 \times 10$ grid is the reference that catches a missing axis point or a gcd that should
   have been a gcd minus one. Brute force can also tell you what *shape* to search for, not just
