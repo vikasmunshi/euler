@@ -338,7 +338,7 @@ near the root.
 - ○ [0786](/solutions/0786/) — Billiard
 - ○ [0841](/solutions/0841/) — Regular Star Polygons
 - ○ [0855](/solutions/0855/) — Delphi Paper
-- ○ [0883](/solutions/0883/) — Remarkable Triangles
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
 - ○ [0894](/solutions/0894/) — Spiral of Circles
 - ○ [0897](/solutions/0897/) — Maximal $n$-gon in a region

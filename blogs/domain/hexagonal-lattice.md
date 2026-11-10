@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hexagonal_latt
 ## Problems
 
 - ● [0351](/solutions/0351/) — Hexagonal Orchards
-- ○ [0883](/solutions/0883/) — Remarkable Triangles
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 
 <!-- /problems -->

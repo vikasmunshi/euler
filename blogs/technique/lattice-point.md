@@ -148,6 +148,7 @@ provides.
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0313](/solutions/0313/) — Sliding Game
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 - ● [0994](/solutions/0994/) — Counting Triangles
 

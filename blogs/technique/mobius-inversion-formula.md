@@ -139,5 +139,6 @@ totals cancel down to a much smaller answer.
 - ● [0319](/solutions/0319/) — Bounded Sequences
 - ● [0478](/solutions/0478/) — Mixtures
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 
 <!-- /problems -->

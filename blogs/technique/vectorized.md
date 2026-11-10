@@ -538,6 +538,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0850](/solutions/0850/) — Fractions of Powers
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock

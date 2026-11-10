@@ -337,7 +337,7 @@ reach for wide or arbitrary-precision types
 - ○ [0864](/solutions/0864/) — Square + 1 = Squarefree
 - ○ [0878](/solutions/0878/) — XOR-Equation B
 - ○ [0879](/solutions/0879/) — Touch-screen Password
-- ○ [0883](/solutions/0883/) — Remarkable Triangles
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
 - ○ [0895](/solutions/0895/) — Gold & Silver Coin Game II
 - ○ [0907](/solutions/0907/) — Stacking Cups

@@ -11,7 +11,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Incircle_and_e
 - ○ [0471](/solutions/0471/) — Triangle Inscribed in Ellipse
 - ○ [0482](/solutions/0482/) — The Incenter of a Triangle
 - ○ [0496](/solutions/0496/) — Incenter and Circumcenter of Triangle
-- ○ [0883](/solutions/0883/) — Remarkable Triangles
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ○ [0914](/solutions/0914/) — Triangles inside Circles
 
 <!-- /problems -->

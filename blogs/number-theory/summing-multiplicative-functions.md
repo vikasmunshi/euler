@@ -315,6 +315,7 @@ factor. Here the first stage's strike order already provides them, so no second 
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
 - ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0875](/solutions/0875/) — Quadruple Congruence
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0935](/solutions/0935/) — Rolling Square
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2

@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Eisenstein_int
 ## Problems
 
 - ● [0143](/solutions/0143/) — Torricelli Triangles
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 
 <!-- /problems -->

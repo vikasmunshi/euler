@@ -201,6 +201,7 @@ composites one smallest prime factor at a time, in roughly $O(m^{3/4})$ total.
 - ○ [0827](/solutions/0827/) — Pythagorean Triple Occurrence
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ○ [0861](/solutions/0861/) — Products of Bi-Unitary Divisors
+- ● [0883](/solutions/0883/) — Remarkable Triangles
 - ○ [0920](/solutions/0920/) — Tau Numbers
 - ○ [0956](/solutions/0956/) — Super Duper Sum
 
