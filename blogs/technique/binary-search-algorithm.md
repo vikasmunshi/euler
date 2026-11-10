@@ -1,5 +1,5 @@
 <!-- tags: [binary-search-algorithm] -->
-<!-- status: final 2026-10-29T12:10Z -->
+<!-- status: final -->
 # Binary search algorithm
 
 [Binary search](https://en.wikipedia.org/wiki/Binary_search_algorithm) is the first non-trivial
@@ -73,7 +73,25 @@ total += m * prefix[bisect_right(hamming, limit // m)]
 The proportions are what make this the right shape. There are only about 3,400 Hamming numbers below
 $10^{12}$, so the array fits in L1 cache, but there are millions of products $m$. Each query costs a
 dozen probes, and nobody ever lists the $n$ themselves. Problem 565's first solution has the same
-shape, a sum of $g(p)$ over primes up to $x$, read from a prefix array at a bisected index.
+shape, a sum of $g(p)$ over primes up to $x$, read from a prefix array at a bisected index. Problem
+678 uses the array as a multiset: for each $b$ it forms the whole row of sums $a^e + b^e$ and looks
+the row up in one `searchsorted` call against the sorted table of targets $c^f$, so a value that is
+a perfect power two ways ($2^6 = 4^3$) counts twice.
+
+The search can also be the coarse half of a two-level lookup. Problem 341 evaluates the Golomb
+sequence at $10^6$ cubes up to $10^{18}$. A table of $G$ that far is out of the question, but the
+sequence is constant on long blocks, and inside a block the prefix sum it needs is a quadratic in
+the index. So the solution stores only the block ends, about $2.6 \times 10^4$ of them. One
+vectorised `searchsorted` places every query in its block, and the quadratic formula, followed by a
+one-step integer correction, finds the exact position inside the block. **Search the coarse table,
+solve inside the block.** The table can be small because each entry covers a stretch where the
+quantity has a closed form.
+
+A sorted list also makes a good cache. Problem 829 builds, for each tree shape, the sorted list of
+every number of that shape up to some bound, which is expensive to generate. It keeps the list
+together with the largest bound computed so far. A later request for a smaller bound is a
+`bisect_right` on that list's prefix, and only a larger bound regenerates. Because the list is sorted,
+one cache answers "everything up to $x$" for every $x$ below its high-water mark.
 
 **Searching the answer** is the interesting one, and the array is imaginary. All you need is a
 monotone predicate over the integers (or the reals) and a cheap way to evaluate it:
@@ -84,9 +102,12 @@ monotone predicate over the integers (or the reals) and a cheap way to evaluate 
 | 156 | $n$ over $[0, 10^{12}]$ | $f(n,d)$, the digit-$d$ tally, non-decreasing in $n$ |
 | 235 | the real ratio $r$ | the closed-form partial sum $s(5000)$, strictly falling |
 | 305 | the integer $N$ of the concatenation | $C(N)$, occurrences of a digit string starting inside $1..N$, non-decreasing |
+| 564 | $x = a_{\max}/2R \in (0, 1]$ | the half-angle residual of a cyclic polygon, increasing |
 | 587 | the count $n$ of circles | the area ratio $\rho(n)$, strictly falling |
 | 686 | the index $J$ | $\mathrm{count}(J)$, the hits so far, non-decreasing |
 | 800 | the prime index $j$ | $q\ln p + p\ln q$, increasing in its larger argument |
+| 844 | the parameter $k$ | a node polynomial $f(k)$, increasing for $k \ge T$ (checked, not assumed) |
+| 986 | the move count $M$ | feasibility of a forced move plan, true then false |
 
 The pattern is always the same two ingredients, and it is worth naming them because finding them is
 the actual work: an **$O(\text{cheap})$ evaluator** for a quantity you would otherwise have to
@@ -144,6 +165,17 @@ density of hits ($\approx 1/L$ per index), then doubles until $\mathrm{count}(hi
 trusting it. The estimate makes the doubling short; the doubling makes the estimate safe. Problem
 305 skips the estimate entirely and doubles from `hi = 1`. Each $C(N)$ costs only $O(L^2)$
 arithmetic, so the forty-odd extra evaluations are cheaper than deriving a density bound would be.
+Problem 829 starts the doubling from a proved *lower* bound instead: the smallest number of a given
+tree shape is at least the product of its two subtrees' minima, so it doubles up from there until
+the generator finds a candidate. Problem 986 solves a chain of instances, so it warm-starts each one.
+Its bracket is the previous answer scaled by the known growth rate, $(k/(k-1))^3$, plus a 10%
+margin. A neighbouring instance is usually the best estimate you have.
+
+Sometimes the best bracket comes from changing variables. Problem 564 needs the circumradius $R$ of
+a cyclic polygon, and $R$ has no natural upper end. In the normalised variable
+$x = a_{\max}/2R$ the interval is exactly $(0, 1]$, and both of the problem's cases (centre inside or
+outside the polygon) give a residual that is increasing in $x$. One substitution supplies the
+bracket and the monotonicity together.
 
 Problem 156 is the same instinct applied in reverse, and worth studying as the general form. It
 wants *every* fixed point of $f(n,d) = n$, not the single crossing of a threshold, so there is no
@@ -152,6 +184,44 @@ kill each one wholesale: if $f(lo,d) > hi$ then $f(n,d) > n$ everywhere inside, 
 $f(hi,d) < lo$ then $f(n,d) < n$ everywhere inside. Anything that survives both tests is split at
 the midpoint and re-examined. That is binary search with the "one root" assumption removed — the
 halving and the monotone pruning survive, the uniqueness does not.
+
+## Many searches at once, and trusting the result
+
+A textbook binary search is sequential: each probe depends on the one before. Two of these problems
+break that, in different directions.
+
+**Many equations, one loop.** Problem 564 solves the circumradius equation for every integer
+partition of $n - 3$, more than a hundred thousand of them for the largest $n$. Bisection with a
+**fixed** step count does the same thing to every row: the same number of halvings, the same
+comparison, then `np.where` to keep the correct half. So all the rows advance together as arrays,
+and nothing has to wait for the slowest row to converge:
+
+```python
+for _ in range(64):
+    mid = (lo + hi) / 2
+    up = residual(mid) < 0
+    lo, hi = np.where(up, mid, lo), np.where(up, hi, mid)
+```
+
+Newton's method would converge in fewer steps per row, but each row would need a different number
+of steps. A loop that runs a fixed number of times is what makes vectorisation possible.
+
+**One search, many probes per round.** Problem 986 wants the largest feasible move count $M$, and
+each test is a long simulation. The simulation is vectorised across columns, so testing 64
+candidates costs about as much as testing one. The search is therefore a binary search with 64
+evenly spaced probes per round instead of one midpoint
+(a $k$-ary search), and each round shrinks the bracket
+64-fold. The two kinds of verdict also cost different amounts. An infeasible $M$ shows itself
+early, and a feasible one only after a much longer run. So each round stops the simulation once no
+new infeasible verdict has appeared for a while, and treats the columns still running as feasible.
+
+That cut-off is a heuristic, and the search does not rely on it. The rule that makes it safe:
+**certify the answer, don't trust the loop.** When the bracket closes, one exact run must find $M$
+feasible and $M + 1$ infeasible. By monotonicity, those two facts *are* the proof that $M$ is the
+threshold, however the bracket was found. If the check fails, the bracket widens and the search runs
+again. Once a final two-point check guarantees correctness, the loop that gets there can be as
+aggressive and approximate as you like. The same applies to any search whose probes are cheap but
+inexact, such as floating-point evaluators, sampled tests, or early-terminated simulations.
 
 ## The awkward parts
 
@@ -182,7 +252,10 @@ not, because it consumes only the **sign** of the residual — the one quantity 
 likely to corrupt. Problem 235 chooses bisection over [Newton's
 method](https://en.wikipedia.org/wiki/Newton%27s_method) deliberately for that reason: with values
 spanning eleven orders of magnitude, Newton's quadratic convergence buys nothing that sixty halvings
-have not already delivered, while bisection cannot diverge and needs no derivative. Two habits go
+have not already delivered, while bisection cannot diverge and needs no derivative. Problem 564
+makes the same choice for a sharper reason. Its residual contains an arcsine, whose derivative blows
+up at $x = 1$, and that is where the roots of nearly degenerate polygons lie, so Newton would be
+least reliable exactly where it is needed. Two habits go
 with it. Stop on a tolerance several guard digits below the precision the answer is reported to, so
 the residual interval cannot disturb the final rounding. And where a comparison decides membership
 rather than a limit, widen it by a small epsilon — problem 461 admits pairs within `pi + 1e-6`
@@ -194,6 +267,15 @@ balanceable — and it is not: the property is not monotone in $N$, since a larg
 Binary searching that axis would return a confident wrong number. The solve comes from a divisibility
 characterisation instead, and the binary search survives only in its proper role, finding a boundary
 in a sorted prime array. Before you bisect, say out loud what is monotone and why.
+
+When the predicate is generated rather than written by hand, have the program check it. Problem 844
+reduces a family of trees to 75 integer polynomials in $k$, and for each one binary searches for the
+last $k$ at which $f(k) \le N$. That search, and the pruning that produced the list, are sound only
+if every $f$ is increasing for $k \ge T$. The solution does not assume this. It
+Taylor-shifts the derivative to $k = T + u$ and
+asserts that every coefficient is positive, which proves the monotonicity it is about to rely on in
+a few lines of exact integer arithmetic. A monotonicity assumption that fails silently gives a
+confident wrong answer. A failed assertion just stops the run.
 
 ## When binary search is the wrong tool
 
@@ -237,7 +319,8 @@ more cheaply than you can enumerate it. Then, in order:
 1. **Name the axis and the predicate.** Write the predicate so it is false below the answer and true
    at and above it. If you cannot write that sentence, you do not have a binary search.
 2. **Prove the monotonicity** on that axis — not on the quantity the problem talks about. This is
-   where wrong answers come from, and it costs one paragraph of thought.
+   where wrong answers come from, and it costs one paragraph of thought. If the predicate is
+   generated, assert it in code. If no axis is obviously monotone, try changing variables.
 3. **Make the evaluator cheap.** A closed form, a floor-sum recursion, a prefix-sum lookup. The
    search contributes $\log$; the evaluator sets the constant. If you want the $n$-th item, the
    evaluator is a count, and the axis is whatever unit makes that count a formula.
@@ -246,7 +329,11 @@ more cheaply than you can enumerate it. Then, in order:
 5. **State the invariant in the loop**, halt on `hi - lo > 1`, and return the endpoint the invariant
    names. If that endpoint is a bucket, get the rank inside it by subtraction, $n - C(hi - 1)$.
 6. **Check the neighbours** if the question was "nearest" rather than "equal".
-7. **Then ask whether you need it at all** — sorted queries want two pointers, structured keys want
+7. **Certify the endpoint** if the probes were approximate: the predicate false at the answer and
+   true one step past it settles it, whatever the loop did to get there.
+8. **Batch the probes** when the evaluator vectorises: lockstep fixed-step bisection for many
+   equations, $k$-ary probing for one expensive equation.
+9. **Then ask whether you need it at all** — sorted queries want two pointers, structured keys want
    direct indexing.
 
 <!-- problems (generated by update-tags) -->
