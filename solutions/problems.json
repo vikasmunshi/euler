@@ -8020,8 +8020,8 @@
     "level": 31,
     "pct": 78,
     "solvers": 218,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 10 Nov 2026, 19:38"
   },
   "1004": {
     "title": "Balanced Integer",
