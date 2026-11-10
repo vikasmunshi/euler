@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-expression] -->
-<!-- status: final 2026-11-03T22:33Z -->
+<!-- status: final -->
 # Closed-form expression
 
 A [closed-form expression](https://en.wikipedia.org/wiki/Closed-form_expression) computes a
@@ -135,6 +135,30 @@ corner. A permutation has at most one block of each corner kind, so inclusion–
 a few exact terms. The identity $m \cdot m! = (m+1)! - m!$ then telescopes the weighted sum into
 the [left factorial](https://oeis.org/A003422) $!n = \sum_{m<n} m!$.
 
+Some processes count as *orders × weight*. This works when every step's number of variants is
+fixed in advance, whatever state the process is in. Problem 726 takes bottles from a triangular
+stack, and each removal can collapse in several ways. Read backwards, though, a collapse is a
+downward path from the bottle that actually leaves the shape. A bottle in row $r$ has
+$2^{n-r+1} - 1$ such paths whatever the rest of the stack looks like. That weight is the same in
+every state, so it factors out as one fixed product. What remains is the number of legal removal
+orders. Those orders are the linear extensions of the triangle, which a shear turns into the
+standard Young tableaux of a staircase, so the
+[hook length formula](https://en.wikipedia.org/wiki/Hook_length_formula) counts them in closed
+form. The simulation never runs.
+
+Problem 960 needs an *invariant* first, before it can count. A stone-removal game looks like a
+search over sequences of moves. A divisibility argument, though, forces every successful game to
+be a [spanning tree](https://en.wikipedia.org/wiki/Spanning_tree) on the piles. Each edge's score
+is fixed by the sizes of the two sides it separates, and it does not depend on the order of play.
+So the sum over trees of a sum over edges is counted from the other end: pick the split, a tree on
+each side ([Cayley's formula](https://en.wikipedia.org/wiki/Cayley%27s_formula)), and the
+connecting edge. That gives one sum of $n$ terms. Counting *(object, part)* pairs by the part is the
+double-counting move from Problem 944, applied to trees. Problem 892 also finds a tree. The pieces
+of a disc cut by non-crossing chords form the dual graph of a plane tree. The two colours are the
+two depth parities, and their counts are distributed by the
+[Narayana numbers](https://en.wikipedia.org/wiki/Narayana_number). The absolute-value sum over
+that distribution then telescopes to a product of two binomials.
+
 Probability is counting with weights, and the same trick applies.
 [Linearity of expectation](https://en.wikipedia.org/wiki/Expected_value#Linearity) turns Problem
 493's expected number of colours into seven copies of one ratio of binomials. Problem 253 shows
@@ -201,6 +225,8 @@ Many problems look computational until one classical theorem reduces them to a f
 | [Conjugate](https://en.wikipedia.org/wiki/Conjugate_(square_roots)) pairs | $x^{2n} + y^{2n}$ to an integer, so $\{x^{2n}\} = 1 - y^{2n}$ | 318 |
 | [Fermat's Last Theorem](https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem) | an exponent search to $\lvert n\rvert \le 2$, once the expression is factored | 180 |
 | [Vieta's formulas](https://en.wikipedia.org/wiki/Vieta%27s_formulas) | a symmetric function of a polynomial's roots to its coefficients, so no root is ever found | 479 |
+| [Hook length formula](https://en.wikipedia.org/wiki/Hook_length_formula) | the linear extensions of a staircase poset to $N!$ over a product of hooks | 726 |
+| [Cayley's formula](https://en.wikipedia.org/wiki/Cayley%27s_formula) | labelled trees on $s$ vertices to $s^{s-2}$, so trees can be summed by the split at an edge | 960 |
 
 The step before the theorem is usually **algebra on the statement itself**:
 
@@ -245,6 +271,17 @@ with FFT sumsets) reaches day 13 before the sets grow too large. On those values
 finds an order-five linear recurrence whose characteristic roots are $4, 2, -2, 1, -1$; solving it
 gives the count as a polynomial in $4^n$, $2^n$, $(-2)^n$ and $(-1)^n$ over 864. Day 16, or day
 1000, is then $O(1)$ big-integer arithmetic.
+
+A recurrence can also be *forced* rather than given. Problem 771 counts increasing sequences with
+$\lvert a_i^2 - a_{i-1}a_{i+1} \rvert \le 2$ up to $10^{18}$. The next term is
+$(a_i^2 - c)/a_{i-1}$ for one of five defects $c$, and once $a_{i-1} \ge 5$ at most one of those
+five values is an integer. So past a tiny head, every sequence is determined by its first two
+terms, and it falls into one of three families: geometric progressions, $a_{i+1} = t a_i - a_{i-1}$,
+and $a_{i+1} = k a_i + a_{i-1}$ ([Vieta jumping](https://en.wikipedia.org/wiki/Vieta_jumping)
+classifies the last two). Each family is counted in closed form. The geometric runs give a totient
+sum over ratios, and a chain with $m$ terms under $N$ holds $\binom{m-3}{2}$ windows of length at
+least five. Only the irregular heads, which start at $a_0 \le 4$, are searched. Forcing turns
+"count the sequences" into "count the windows of a few explicit chains".
 
 Non-linear and bitwise recurrences have closed forms more often than one expects:
 
@@ -338,6 +375,17 @@ $d \mid s$, that does not mention $n$: either the whole window is fixed or none 
 formula also names the right coordinates. Written in $(d, j)$ with $s = jd$, the answer is a
 polynomial in $j$ for each $d$, so each $d$ costs $O(1)$ and the whole sum costs $O(p)$.
 
+The furthest form of inversion is to count solutions without ever finding them. Problem 935's
+rolling square returns home only for special side lengths $b$. The statement's examples are
+nested surds like $2 + \sqrt2 - \sqrt{2 + 4\sqrt2}$, and nothing gives them in general. They are
+never needed. From one corner of the big square to the next, the motion is a single
+[circle homeomorphism](https://en.wikipedia.org/wiki/Rotation_number) in $y = u/b$. Its rotation
+number increases with $1/b$, so each reduced fraction $p/q$ has exactly one periodic $b$. The
+first-return step count is a closed form in $p$ and $q$ alone,
+$(p+q-1)\cdot 4/\gcd(q,4)$. Counting the values of $b$ is therefore counting coprime pairs in three
+triangles, and Möbius inversion does that in $O(N^{2/3})$. Existence and uniqueness come from
+monotonicity, and the formula only has to describe the *label*, never the object.
+
 ## How to reason about it
 
 Reach for a closed form when the naive program is a sum, a count of arrangements, a recurrence or
@@ -356,11 +404,21 @@ derivation effort and it brings some standing hazards.
   induction, and then tested on 400 random small parameter sets. Problem 711's winning families
   were read off an exhaustive game table up to $n = 1100$. Problem 628's blocking criterion was
   checked against exhaustive search for every $n \le 9$ before anything was counted with it.
-  Where you sample matters too. Problem 335's $M(x)$ is jagged over all $x$, roughly doubling just
+  A guessed *partial sum* has a cheap proof: take its difference. Problem 892's
+  $T(m) = \binom{n-1}{m-1}\binom{n-1}{m}$ was read off small cases. Expanding $T(m) - T(m-1)$
+  into factorials gives back the summand, and $T(0) = 0$, which settles the identity for every $n$.
+  This is the idea behind [Gosper's algorithm](https://en.wikipedia.org/wiki/Gosper%27s_algorithm)
+  and WZ certificates. A guess can also be a *per-component invariant* rather than a count.
+  Problem 923's staircases each have a combinatorial-game value. A canonical-form engine showed
+  that the value is periodic in $k$ with period $(a+b)/\gcd(a,b)$: an integer
+  $(kb \bmod (a+b)) - a$, or a switch $\{b-1 \mid 1-a\}$ when the period divides $k$. That collapses
+  some $4 \times 10^4$ staircases into a handful of value classes, and the count runs over the
+  classes. Where you sample matters too. Problem 335's $M(x)$ is jagged over all $x$, roughly doubling just
   past each $2^k + 1$, but along the family the statement asks about it is an exact sum of three
   exponentials in $k$. Tabulate on the statement's own index, not the natural one. Not every
-  formula here reaches the proof: Problems 335 and 555 rest on their checks alone, and that should
-  be said out loud rather than left implied.
+  formula here reaches the proof. Problems 335 and 555 rest on their checks alone, and so does
+  Problem 923, whose value formula was verified for every staircase of weight up to 24. That
+  should be said out loud rather than left implied.
 - **Keep the slow method behind a flag.** Several solutions keep the obvious $O(N^2)$ version,
   such as Problem 28's spiral walk, behind `--show`. It runs on small inputs purely to confirm the
   formula, because a sign slip is invisible once the loop is gone.
