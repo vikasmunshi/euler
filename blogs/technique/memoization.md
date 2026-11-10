@@ -1,5 +1,5 @@
 <!-- tags: [memoization] -->
-<!-- status: final 2026-10-29T07:05Z -->
+<!-- status: final -->
 # Memoization
 
 [Memoization](https://en.wikipedia.org/wiki/Memoization) is the substitution of a table lookup for a
@@ -52,7 +52,14 @@ form $\lfloor N/k \rfloor$, of which there are $O(\sqrt N)$ however large $N$ is
 on the same fact for the [Mertens function](https://en.wikipedia.org/wiki/Mertens_function): the
 recursion $M(x) = 1 - \sum_{k \ge 2} M(\lfloor x/k \rfloor)$ only ever recurses on quotients of $x$,
 and a quotient of a quotient is again a quotient, so evaluating $M$ near $10^9$ fills only a few
-hundred memo entries before it bottoms out. Problem 549 keeps a
+hundred memo entries before it bottoms out. Problems 787 and 935 reuse that same Mertens memo, and
+935 shares one cache across five different Möbius sums, because they all ask about the same
+quotients. Halving recursions are the narrowest form of this. Problem 463 wants the prefix sum
+$S(n)$ of a recurrence defined on $n/2$ and $n/4$ at $n = 3^{37}$. $S$ alone does not recur, but
+paired with a second sum $O$ over the odd indices the two do, each on $\lfloor n/2 \rfloor$ and its
+neighbour. That is about two states per level, 115 of each for the whole input. Without the memo,
+the four-way branching is exponential. The trick is general: if a quantity will not recur on
+itself, look for the companion sum that closes the system. Problem 549 keeps a
 per-prime list of $s(p^e)$, extended on demand as larger exponents appear, because the same prime
 powers recur all the way up a linear sieve. Neither cache is a dynamic program; both convert a
 quadratic-looking sweep into a linear one.
@@ -76,7 +83,20 @@ $N^{\log 2 / \log(a+b)}$: a few million for the densest pair and a few dozen onc
 hundreds. That is roughly $10^{13}$ leaves served from $10^6$ table entries, and the answer becomes
 one root-to-leaf descent that adds up the cached totals of every whole subtree to the left.
 
-## Four ways to write the table
+**A walk too long to take.** Sometimes the thing to cache is not a value but a *jump*: where a
+process ends up after a stretch of steps, and what it collected on the way. Problem 551 steps
+$a_n = a_{n-1} + s(a_{n-1})$ (add your own digit sum) $10^{15}$ times. Write the current value as
+$H \cdot 10^k + L$. Until $L$ overflows $10^k$, the high part matters only through its digit sum
+$c$. So "how many steps until the low $k$ digits carry, and what is left behind" is a function of
+$(k, c, L)$ alone. A level-$k$ jump is about ten level-$(k-1)$ jumps, one per leading digit, and the
+memo holds 27,324 jumps at $n = 10^{20}$. Problem 946 is the finite version. Gosper's continued-fraction
+arithmetic is a 32-state machine, and the solution caches each (state, input term) transition
+once. With every edge cached, the memo *is* the state graph, so a long run of identical inputs can
+be [cycle-detected](https://en.wikipedia.org/wiki/Cycle_detection), and whole cycles are skipped
+with one multiplication. Both problems memoise the step function, not the answer, and then ask
+questions of the result that the original walk could never have answered in time.
+
+## Writing the table
 
 **A decorator.** `@functools.lru_cache(maxsize=None)` (or `functools.cache`) in Python — the default,
 and the subject of its own page: [functools.lru_cache](/blogs/technique/functools-lru-cache), which
@@ -96,13 +116,28 @@ reachable digit-factorial value stays below $7 \times 9! = 2540160$), using `0` 
 marker; problem 115's C sibling keeps a `cache[]` alongside a parallel `cache_valid[]` flag array,
 which is what you need when `0` is a legitimate stored value. Problem 887's C port is the in-between
 case: a fixed $64 \times 64$ table where `0` can safely mean "empty", because every capacity it
-stores is at least 1. This is
+stores is at least 1. Even a sparse key can sometimes be turned into an index. Problem 787's C port
+stores the large Mertens values $M(\lfloor N/i \rfloor)$ in an array indexed by $i$, since every
+argument above the sieve bound $L$ has that form with $i < N/L$. The floor set becomes a dense
+array with no hashing at all. This is
 [direct addressing](/blogs/technique/direct-addressing), and it is the reason the C solutions here
 are typically an order of magnitude faster than the Python ones rather than merely twice as fast —
 no hashing, no boxing, perfect
 [locality](/blogs/technique/locality-of-reference). Where the keys are large or sparse, C has to
 build what Python handed you for free: problem 153's C solution hand-writes a 65,536-slot
 open-addressing [hash table](/blogs/technique/hash-table) purely to mirror one Python dict.
+
+**An interned key.** When the natural key is a *structure* — a tree shape, a game form, a matrix —
+first give every distinct structure a small integer id
+([hash consing](https://en.wikipedia.org/wiki/Hash_consing)). Then key the memo on the ids.
+Problem 829 interns factor-tree shapes as `(left id, right id)` pairs. Only 65 distinct shapes
+occur across thirty target trees, and the shared subtrees are computed once. Problem 949 interns
+canonical combinatorial-game forms, about 35,000 of them, and memoises the order test $G \le H$
+on pairs of ids. That predicate is the inner loop of canonicalisation and would otherwise
+re-compare deep trees recursively. Problem 946's C port interns its 32 matrix states the same way,
+so the transition table becomes a plain array. Interning gives you equality in $O(1)$ and keys
+that are cheap to hash or index. It also merges two equal structures built by different routes,
+which is the canonical-form rule applied to the key.
 
 **Back-propagation along a walk.** The form worth knowing because it is not recursion at all.
 Problem 74 walks forward from each start until it meets a node it already knows (or closes a cycle),
@@ -170,7 +205,8 @@ memo is valid for one pair only, and the Python solution rebuilds it inside the 
 roughly fifty thousand times per call. The C port does not free and reallocate fifty thousand
 tables. It stamps every slot with a generation counter and bumps the counter between pairs, so a
 slot from an earlier pair reads as empty. That invalidates the whole cache in $O(1)$ with no clearing
-pass. Problem 887 is the opposite case, and the same rule explains it. It sums over every bound $d$
+pass. Problem 946's C port uses the same stamp for its per-run "seen" markers, so each run costs
+only its own short walk. Problem 887 is the opposite case, and the same rule explains it. It sums over every bound $d$
 with a single memo, created in `solve()` and shared across the whole loop over $d$. That is sound
 because $d$ never hides in the function: it enters only as the starting slack, which is part of
 the key. A table can outlive a loop iteration exactly when everything that iteration changes is
@@ -186,6 +222,15 @@ in the key.
   entries that should have merged. To find the key, ask what *fixes* the result, not what
   describes it. Problem 943's subtrees look like they depend on (value, height), but they actually
   depend on a parity mask as well.
+- **Leave a parameter out of the key only if the stored value cannot depend on it.** Problem 551's
+  jump takes a step `limit` so it can stop exactly on step $n$. Putting `limit` in the key would
+  destroy the hit rate. So the solution stores only jumps that *completed*, where the limit never
+  bound, and reuses a hit only when its step count fits under the current limit. Only the $O(k)$
+  calls on the final, truncated path miss. Problem 829 handles a bound the other way. Each shape
+  caches *every* number of that shape up to the largest bound asked so far, with the bound stored
+  beside the list. A smaller request is a binary search into the list, and only a larger one
+  recomputes. Both obey the same rule: when the result is monotone in a parameter, store the
+  parameter with the result, not in the key.
 - **Let the base cases bound the key space.** An argument that can grow without limit does not have
   to make the table grow too. Problem 887's tree capacity $F(h, c)$ recurses with a right-hand slack
   of $c - 1 + F(h-1, c-1)$, which grows exponentially. But once $c \ge h$ the constraint stops
@@ -197,7 +242,11 @@ in the key.
   array is the fast one, and in C it is usually the only one you get without writing a hash table
   yourself.
 - **Never mutate what the cache handed you** — the stored object is shared with every future hit.
-  Returning an immutable value removes the hazard.
+  Returning an immutable value removes the hazard. The reverse hazard is the cache changing under
+  a reader. Problem 829's C port reads a shape's cached list while computing a sibling. When the
+  two subshapes are the same, that computation can grow and free the very list being read. Python
+  keeps the old list alive while it is referenced, but C does not, so the port copies the list
+  first.
 - **Top-down memoization is still recursion**, with Python's ~1000-frame limit and a frame's cost per
   miss. If every state will be visited anyway, a bottom-up table (problem 78) or a walk with
   back-propagation (problem 74) is faster and cannot overflow; top-down wins when the *reachable*
