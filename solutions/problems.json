@@ -7060,8 +7060,8 @@
     "level": 39,
     "pct": 97,
     "solvers": 193,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 10 Nov 2026, 08:47"
   },
   "884": {
     "title": "Removing Cubes",
