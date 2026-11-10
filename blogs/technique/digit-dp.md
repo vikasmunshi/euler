@@ -1,5 +1,5 @@
 <!-- tags: [digit-dp] -->
-<!-- status: final -->
+<!-- status: final 2026-11-10T13:03Z -->
 # Digit DP
 
 [Digit DP](https://en.wikipedia.org/wiki/Digit_DP) counts numbers by walking their digits instead of
