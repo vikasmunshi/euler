@@ -7852,8 +7852,8 @@
     "level": 35,
     "pct": 89,
     "solvers": 241,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 11 Nov 2026, 00:19"
   },
   "983": {
     "title": "Consonant Circle Crossing",
