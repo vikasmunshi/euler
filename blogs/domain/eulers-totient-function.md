@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function] -->
-<!-- status: final 2026-10-29T02:06Z -->
+<!-- status: final -->
 # Euler's totient function
 
 [Euler's totient function](https://en.wikipedia.org/wiki/Euler%27s_totient_function) $\varphi(n)$
@@ -42,7 +42,14 @@ $$\sum_{d \mid n} \varphi(d) = n, \qquad \varphi = \mu * \mathrm{id},
 The first says the integers $1..n$ partition by their $\gcd$ with $n$: each $d \mid n$ contributes
 the $\varphi(n/d)$ values whose gcd is exactly $d$. That partition is why gcd- and lcm-flavoured
 sums keep resolving into $\varphi$ — problem 625 sums $\gcd(i,j)$ and lands on
-$\sum_{d \mid n} d\,\varphi(n/d)$; problem 448 does the same for $\operatorname{lcm}$. The second
+$\sum_{d \mid n} d\,\varphi(n/d)$; problem 448 does the same for $\operatorname{lcm}$. Read
+backwards, the same identity *linearises* a gcd: $\gcd(a, b) = \sum_{d \mid a,\, d \mid b} \varphi(d)$.
+Problem 994 counts triangles cut out by segments between two rows of points. The awkward part is a
+weighted double sum of $\gcd(a, b) - 1$ over lattice offsets, which counts the lattice points strictly
+between two cells. Substituting that sum for the gcd and swapping the order turns it into
+$\sum_d \varphi(d)\,F(d)\,G(d)$, where $F$ and $G$ each depend on only one side of the grid. A gcd
+inside a sum is rarely something to compute; it is an invitation to rewrite it as a sum over $\varphi$
+and swap. The second
 is the [Möbius](/blogs/domain/mobius-function) view: $\varphi$ is inclusion–exclusion over the
 primes dividing $n$, which is exactly what "coprime to $n$" means. It also makes $\varphi$ a
 [Dirichlet convolution](/blogs/domain/dirichlet-convolution) of two simple functions, which is
@@ -68,6 +75,16 @@ Cost is $O(N \log \log N)$; a [linear sieve](/blogs/technique/linear-sieve) gets
 $\log \log$ matters. This is the right tool when you need *individual* values $\varphi(n)$ for every
 $n$ up to some $10^7$–$10^8$, and it is what problems 72, 214 and 337 are built on.
 
+**A window $[A, A + W)$** far from the origin does not need the table from 1. Problem 531 needs
+$\varphi$ only on 5000 consecutive integers just above $10^6$, and the same idea scales to much higher
+windows. Run a [segmented sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve)
+with the primes up to $\sqrt{A + W}$. Each prime applies its factor to its multiples in the window,
+and you divide its powers out of a residual copy of each number. Whatever residual is left above 1
+is the single large prime factor, which gets one final correction. The cost is the window plus
+$\sqrt{A}$, not $A$. In that problem the totients are just data, the residues of a generalised CRT
+system per pair. The window sieve is what keeps the data cheap enough that the quadratic pair loop
+dominates.
+
 **A single $\varphi(n)$** needs a factorisation, so it costs whatever factoring costs — fine for
 one number, hopeless for $10^{11}$ of them.
 
@@ -80,7 +97,7 @@ The identity has a counting reading worth keeping: the $N(N+1)/2$ pairs $1 \le a
 have exactly one reduced form, and the pairs whose gcd is $q$ are the coprime pairs below
 $\lfloor N/q \rfloor$. With [quotient blocking](/blogs/technique/quotient-blocking) (only
 $O(\sqrt N)$ distinct values of $\lfloor N/q \rfloor$ exist) and a sieved base case it evaluates in
-about $O(N^{2/3})$. That is the standard escape for problems 432, 512 and 931, and the same skeleton
+about $O(N^{2/3})$. That is the standard escape for problems 432, 512, 625 and 931, and the same skeleton
 as the [Meissel–Lehmer](/blogs/domain/meissel-lehmer-algorithm) prime count.
 
 Problem 351 is the cleanest worked instance, and it shows three details the formula hides. First,
@@ -109,9 +126,30 @@ and every $\lfloor N/2^k \rfloor$ is already one of the quotients the recursion 
 restriction costs $\log_2 N$ extra lookups. Before writing a new recurrence for a filtered sum, check
 whether the filter is a prime acting on $\varphi$, and so on arguments the table already holds.
 
+The recurrence generalises along two axes, and recent problems need both.
+
+- **Weights.** Problem 994's block sum needs $\Phi_k(x) = \sum_{d \le x} d^k\varphi(d)$ for
+  $k = 0, 1, 2$, because $F(d)G(d)$ is a quadratic in $d$ on each quotient block. The recursion
+  carries over unchanged once you find the right convolution partner:
+  $(\mathrm{id}^k\varphi) * \mathrm{id}^k = \mathrm{id}^{k+1}$, so
+  $$\Phi_k(x) = \sum_{j \le x} j^{k+1} - \sum_{i=2}^{x} i^k\,\Phi_k\!\left(\lfloor x/i \rfloor\right).$$
+  This is the general shape of "Du's sieve": find a $g$ with an easy prefix sum such that $f * g$ also
+  has an easy prefix sum. A second wrinkle is that the problem has two independent bounds, $m$ and $n$,
+  so the block ends come from two families of quotients and the large-value table is built twice.
+- **Twists.** Problem 787 is a game on pile pairs $(a, b)$. A move turns out to be a step to a parent
+  in the [Stern–Brocot tree](https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree), so the
+  positions with $a + b = n$ are the $\varphi(n)$ coprime splits. The losing ones number
+  $\bigl(\varphi(n) + e(n)\bigr)/2$, where $e = \mu * \chi_4$ is the Möbius function convolved with
+  the non-principal [Dirichlet character](https://en.wikipedia.org/wiki/Dirichlet_character) mod 4.
+  Neither sum needs a recursion of its own. Both $\Phi(x) = \tfrac12\bigl(1 + \sum_d \mu(d)\lfloor x/d \rfloor^2\bigr)$
+  and $\sum e$ are block sums over the [Mertens function](https://en.wikipedia.org/wiki/Mertens_function),
+  and so is the odd-only totient sum from problem 512. Computing one summatory function, $M$, on the
+  quotient set feeds every other one. When a problem needs several $\varphi$-like sums at once,
+  express each as $\mu * (\text{something with a closed-form prefix})$ and share the $M$ table.
+
 ## How a problem reaches it
 
-Three routes, and it is worth learning to recognise which one you are on.
+Four routes, and it is worth learning to recognise which one you are on.
 
 **Counting coprime things.** The statement is about reduced fractions, visible lattice points, or
 directions — problems 72, 243, 245, 351, 228, 441. Nothing here needs group theory; you need the
@@ -143,6 +181,19 @@ function](/blogs/technique/carmichael-function) $\lambda(m)$, not necessarily eq
 harmless when you only need *some* period, fatal when the problem asks for the smallest
 (problem 533).
 
+**Grouping by reduced denominator.** Here $\varphi$ is a multiplicity. A sum over all residues
+$t \bmod n$ often depends on $t/n$ only through its reduced form $u/m$, with $m \mid n$ and
+$\gcd(u, m) = 1$. Grouping the terms by $m$ then gives each group exactly $\varphi(m)$ members.
+Problem 875 counts the zeros mod $n$ of an eight-variable quadratic form. The roots-of-unity filter
+turns that count into $\frac1n\sum_t |G(t, n)|^8$, where $G$ is a [quadratic Gauss
+sum](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum). Since $|G|$ depends only on the reduced
+denominator, the count becomes a Dirichlet convolution $\sum_{m \mid n} (n/m)^7\,w(m)$ with
+$w(m) = \varphi(m)\,m^3$ up to a 2-adic correction. The hard-looking exponential sum ends as a
+totient sieve plus quotient blocks. The tell is a filter $[z \equiv 0 \bmod n]$ written as a sum of
+roots of unity. Whenever the summand depends only on the *order* of $e(t/n)$, $\varphi$ is the count
+of each order. (This is also where [Ramanujan sums](https://en.wikipedia.org/wiki/Ramanujan%27s_sum)
+come from.)
+
 **$\varphi$ as the object of study.** The statement asks about $\varphi$'s own behaviour: iterate
 it (problem 214 — $\varphi(n) < n$ always, so the chain descends to $1$, and chain length is a
 [dynamic-programming](/blogs/technique/dynamic-programming) table over the sieve, with
@@ -164,6 +215,19 @@ Hamming numbers. The same move, putting the condition on each prime-power factor
 then on the primes that can supply it, is what problems 248 and 342 need, only with less forgiving
 targets.
 
+Problem 342 adds the idea that makes those searches tractable when the condition does not split
+cleanly: **the coupling between primes runs one way**. It asks for $n$ with $\varphi(n^2)$ a cube,
+and $\varphi(n^2) = \prod p^{2e_p - 1}(p - 1)$. Each prime $p$ of $n$ sets its own exponent, but its
+$p - 1$ leaks exponent into *strictly smaller* primes. So walk the primes of $n$ from the largest
+down, and track only each prime's exponent mod 3. Once the search passes a prime $q$, nothing chosen
+later can change $q$'s residue, so any $q$ still "owed" must be settled at that point or the branch
+dies. The top prime receives nothing from anyone, which forces its exponent to $2 \bmod 3$ and puts
+every prime under $\sqrt N$. The tree that remains is output-sensitive. One warning from that search
+generalises. A pruning bound that multiplies in every owed prime at its forced exponent looks
+natural but is *wrong*, because a smaller owed prime can be cancelled by a later $p - 1$ instead of
+entering $n$. Only the largest owed prime is truly committed. Test prunes like that against brute
+force at small $N$.
+
 ## How to reason about it
 
 - **Look for $\varphi$ before you look for a sieve.** Most of these problems are a two-step: an
@@ -183,10 +247,13 @@ targets.
   this point first. If the problem only needs the *sum* $\Phi(N)$, reach for the recurrence well
   before that ceiling: problem 351 uses it at $10^8$, where a sieve would still fit, because a
   $2 \times 10^5$-entry table beats a $10^8$-entry one.
-- **A modulus in the question does not license a modulus in the middle.** When a problem asks for
-  $\Phi(N) \bmod m$, reduce only the final additive accumulation. $\varphi$ itself is defined by
-  divisibility and factorisation, and comparisons, divisions and gcds inside the derivation are all
-  invalid on residues.
+- **A modulus in the question does not license a modulus everywhere.** The summatory recursions use
+  only additions, subtractions and multiplications, so problems 625, 875 and 994 keep every table
+  entry reduced. That is safe and keeps products within 64 bits. What must stay exact is anything
+  that divides, compares or factors: the sieve's $\varphi \leftarrow \varphi - \varphi/p$, the
+  halving in $N(N+1)/2$, and Faulhaber's denominators. Do those on true integers (or divide by an
+  exact multiple, as 875's C port does by reducing $S_7$ modulo $24$ times the modulus and then
+  dividing by $24$) before reducing.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
