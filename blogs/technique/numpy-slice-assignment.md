@@ -293,6 +293,7 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers

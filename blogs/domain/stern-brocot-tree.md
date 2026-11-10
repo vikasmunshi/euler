@@ -9,6 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Stern%E2%80%93
 
 - ● [0071](/solutions/0071/) — Ordered Fractions
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
-- ○ [0787](/solutions/0787/) — Bézout's Game
+- ● [0787](/solutions/0787/) — Bézout's Game
 
 <!-- /problems -->

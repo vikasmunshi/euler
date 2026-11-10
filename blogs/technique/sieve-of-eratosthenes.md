@@ -271,6 +271,7 @@ patterns recur.
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ● [0829](/solutions/0829/) — Integral Fusion
 - ● [0834](/solutions/0834/) — Add and Divide

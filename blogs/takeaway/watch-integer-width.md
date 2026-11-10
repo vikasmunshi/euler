@@ -396,6 +396,7 @@ adds in `long double`. Width and precision are the same budget, spent in differe
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0751](/solutions/0751/) — Concatenation Coincidence
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0862](/solutions/0862/) — Larger Digit Permutation

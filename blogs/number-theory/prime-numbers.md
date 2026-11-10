@@ -1030,7 +1030,7 @@ keep the world's secrets. The problems below all turn on that fit.
 - ● [0779](/solutions/0779/) — Prime Factor and Exponent
 - ○ [0784](/solutions/0784/) — Reciprocal Pairs
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
-- ○ [0787](/solutions/0787/) — Bézout's Game
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0800](/solutions/0800/) — Hybrid Integers
 - ○ [0801](/solutions/0801/) — $x^y \equiv y^x$
 - ○ [0805](/solutions/0805/) — Shifted Multiples

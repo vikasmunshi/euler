@@ -313,6 +313,7 @@ factor. Here the first stage's strike order already provides them, so no second 
 - ● [0694](/solutions/0694/) — Cube-full Divisors
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0883](/solutions/0883/) — Remarkable Triangles

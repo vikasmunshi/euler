@@ -156,7 +156,6 @@ distinct slopes, the cheapest of which are coprime pairs, i.e. Farey fractions t
 - ● [0073](/solutions/0073/) — Counting Fractions in a Range
 - ● [0198](/solutions/0198/) — Ambiguous Numbers
 - ○ [0604](/solutions/0604/) — Convex Path in Square
-- ○ [0787](/solutions/0787/) — Bézout's Game
 - ● [0965](/solutions/0965/) — Expected Minimal Fractional Value
 
 <!-- /problems -->

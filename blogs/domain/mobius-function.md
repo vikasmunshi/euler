@@ -130,6 +130,7 @@ summing it fast.
 - ● [0464](/solutions/0464/) — Möbius Function and Intervals
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0935](/solutions/0935/) — Rolling Square
 
 <!-- /problems -->

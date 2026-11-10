@@ -269,7 +269,7 @@ nothing about either number's factorisation beyond its disjointness from the oth
 - ○ [0777](/solutions/0777/) — Lissajous Curves
 - ○ [0784](/solutions/0784/) — Reciprocal Pairs
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
-- ○ [0787](/solutions/0787/) — Bézout's Game
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ○ [0805](/solutions/0805/) — Shifted Multiples
 - ● [0834](/solutions/0834/) — Add and Divide
 - ○ [0838](/solutions/0838/) — Not Coprime

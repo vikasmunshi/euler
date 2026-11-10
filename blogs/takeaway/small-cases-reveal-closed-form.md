@@ -336,6 +336,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0782](/solutions/0782/) — Distinct Rows and Columns
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0923](/solutions/0923/) — Young's Game B

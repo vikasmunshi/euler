@@ -298,6 +298,7 @@ the loop.
 - ● [0745](/solutions/0745/) — Sum of Squares II
 - ○ [0756](/solutions/0756/) — Approximating a Sum
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ○ [0799](/solutions/0799/) — Pentagonal Puzzle
 - ○ [0840](/solutions/0840/) — Sum of Products
 - ○ [0859](/solutions/0859/) — Cookie Game

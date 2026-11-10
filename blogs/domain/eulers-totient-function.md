@@ -218,6 +218,7 @@ targets.
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0715](/solutions/0715/) — Sextuplet Norms
 - ○ [0756](/solutions/0756/) — Approximating a Sum
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ○ [0931](/solutions/0931/) — Totient Graph
 - ● [0994](/solutions/0994/) — Counting Triangles

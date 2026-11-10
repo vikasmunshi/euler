@@ -363,7 +363,7 @@ weighting each winning mask by how many integers wear it.
 - ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0758](/solutions/0758/) — Buckets of Water
 - ○ [0770](/solutions/0770/) — Delphi Flip
-- ○ [0787](/solutions/0787/) — Bézout's Game
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ○ [0798](/solutions/0798/) — Card Stacking Game
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
 - ○ [0825](/solutions/0825/) — Chasing Game

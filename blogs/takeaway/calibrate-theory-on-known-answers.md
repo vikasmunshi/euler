@@ -239,6 +239,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0670](/solutions/0670/) — Colouring a Strip
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0761](/solutions/0761/) — Runner and Swimmer
+- ● [0787](/solutions/0787/) — Bézout's Game
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0875](/solutions/0875/) — Quadruple Congruence
