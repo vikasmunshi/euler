@@ -1,5 +1,5 @@
 <!-- tags: [impartial-game, nimber, mex-function-set-theory, fibonacci-nim] -->
-<!-- status: final 2026-10-14T07:42Z -->
+<!-- status: final -->
 # Impartial games and nim-values
 
 An [impartial game](https://en.wikipedia.org/wiki/Impartial_game) is a two-player game where both
@@ -10,8 +10,10 @@ strips, coins on a line, digits on a blackboard — because one theorem turns ev
 arithmetic. The [Sprague–Grundy theorem](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
 says each position is equivalent to a single Nim heap of some size, its **nim-value** (or
 [nimber](https://en.wikipedia.org/wiki/Nimber)), and that a sum of independent games is worth the
-XOR of their values. The problems below then split into two families: those where you *compute*
-the Grundy table, and those where the table hides a closed form that you have to *find*.
+XOR of their values. The problems below then split three ways: those where you *compute* the
+Grundy table, those where the table hides a closed form that you have to *find*, and those where
+the game is the easy part and the question is a *count* — of losing positions, of winning moves —
+that the XOR structure lets you take over values instead of over positions.
 
 ## The idea
 
@@ -25,6 +27,15 @@ boolean is all you need. [Problem 961](/solutions/0961/) (remove a digit; whoeve
 non-zero digit wins) is solved exactly this way: the state compresses to a bitmask of
 zero/non-zero digit slots, every move produces a strictly smaller mask, so a single forward sweep
 over the masks fills the win/lose array with no recursion at all.
+
+The boolean is also the right tool when the game is *not* a sum. In
+[Problem 711](/solutions/0711/) the players write numbers on a board and the winner is decided by
+the parity of the total count of binary ones, so the state is one budget plus one parity bit —
+nothing splits, and there is no nim-value to add. The tabulated win/lose pattern is still the key,
+it just describes the *set of winning starts*: here two rigid binary families (all-ones numbers,
+and isolated ones at even bit positions with a short all-ones tail). Once a winning set has that
+much structure, summing over it is algebra — geometric and arithmetico-geometric series — not a
+search.
 
 ### Nim-values: mex over the options
 
@@ -50,10 +61,32 @@ def grundy_table(n_max: int, moves) -> list[int]:
 ```
 
 `mex` of a set of size `s` is at most `s`, so the `range(len(seen) + 1)` bound is always enough.
+The same bound allows a *push* formulation that vectorises well: keep a boolean table
+`reach[n][v]` ("heap `n` has an option of value `v`"), only `max-options + 1` columns wide; when
+heap `n` is finalised, its value is the first `False` in its row, and it then marks
+`reach[n + k][g(n)]` for every legal take `k`. [Problem 310](/solutions/0310/) (take a square
+number of stones) does exactly this, one NumPy row-scan and one fancy-indexed store per heap.
+
 Positions that **split** into independent parts — painting two adjacent squares in a strip
 ([Problem 306](/solutions/0306/)), cutting a rectangle into four ([Problem 933](/solutions/0933/))
 — fit the same mould: an option's value is the XOR of its parts' values, and the mex runs over
 those XORs.
+
+### Finding the sum hidden in the game
+
+The theorem only pays off once you see the game *as* a sum, and the decomposition is not always
+the one the statement draws:
+
+- **Products of moves.** A coin on a grid that moves either left or up — never both — is the sum
+  of a row game and a column game, so its value is `g(x) ⊕ g(y)`. In
+  [Problem 649](/solutions/0649/) each coin decomposes this way *and* the coins are independent, so
+  the whole board is a sum of `2c` one-dimensional subtraction games.
+- **Trees.** Cutting a node off a rooted tree and dropping its subtree is
+  [Green Hackenbush](https://en.wikipedia.org/wiki/Hackenbush). Its **colon principle** says a stalk
+  of one edge on top of a subtree of value `v` is worth `v + 1`, and the branches at a node are
+  independent, so a node's value is the XOR over its children of `(child value + 1)`. That is what
+  makes [Problem 400](/solutions/0400/) (the game on a Fibonacci tree) a two-term recurrence instead
+  of a search over a tree with thousands of digits' worth of nodes.
 
 ### The nim-sum
 
@@ -76,7 +109,29 @@ they label — a few dozen or a few hundred distinct values over a range of `10�
 have `g`, build a histogram `cnt[v]` of how many heaps take value `v`, and count P-positions of a
 multi-heap sum as `Σ cnt[x]·cnt[y]·cnt[x ⊕ y]` over value pairs (with care over ordering if the
 heaps are sorted). That is the step that turns an `O(N³)` triple loop into something linear in `N`
-plus a small square in the number of values.
+plus a small square in the number of values. The sum is an **XOR convolution** of the histogram
+with itself, and the rest of the toolkit follows from that one word:
+
+- *Sorted heaps.* When the problem counts `a ≤ b ≤ c`, count ordered triples and divide out the
+  symmetry with [Burnside's lemma](https://en.wikipedia.org/wiki/Burnside%27s_lemma): a transposition
+  fixes `(a, a, c)`, which is losing iff `g(c) = 0` because `g(a) ⊕ g(a) = 0`; a 3-cycle fixes only
+  `(a, a, a)`. Problem 310 needs nothing more than that — no case split over coinciding heaps.
+- *Many components.* `c` independent tokens give the `c`-fold XOR-convolution power of one token's
+  histogram, so raise it by [exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring)
+  — Problem 649 does `O(log c)` products of length-8 vectors, independent of the board size.
+- *Diagonalise.* The [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Fast_Walsh%E2%80%93Hadamard_transform)
+  turns XOR convolution into pointwise products, the way the FFT does for ordinary convolution. It
+  is the tool when the value alphabet is large or another axis rides along, but its inverse divides
+  by the alphabet size: under a modulus like `10⁹` that size has no inverse, which is why 649 keeps
+  the direct convolution and 922 (prime modulus) can use the transform.
+
+**Count winning moves by target value.** A move in component `i` wins exactly when it takes that
+component from `gᵢ` to `gᵢ ⊕ G`, where `G` is the total — so "how many winning moves?" is "how many
+moves reach a given value?". When components nest, the target propagates down: in Problem 400 a
+move inside a child wins when the child's new value `g'` satisfies `g' + 1 = t ⊕ (sibling term)`,
+so the count `W(k, t)` of moves in the depth-`k` tree that reach value `t` obeys a recurrence over
+levels and target values. Values stay far smaller than the tree, so the table is `levels × values`,
+not `nodes`.
 
 **Print the table before you trust it — then look for the closed form.** The Grundy table is the
 honest algorithm, but most of these problems ask about bounds like `10¹⁶` where no table fits. The
@@ -87,11 +142,26 @@ the structure. The shapes that keep turning up:
 | --- | --- | --- |
 | Depends on the **binary** digits of `n` | a move rule tied to doubling or halving | divisor-style piles (509), [Problem 899](/solutions/0899/): P exactly when the low bits of the larger pile are all ones, at a width set by the smaller pile's bit length |
 | Depends on the **Zeckendorf** digits | a move bound tied to the previous move | [Fibonacci nim](https://en.wikipedia.org/wiki/Fibonacci_nim) in [Problem 692](/solutions/0692/): the minimal winning take is the smallest term of `n`'s [Zeckendorf representation](https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem) |
-| **Eventually periodic** | finite move sets on a line ([octal games](https://en.wikipedia.org/wiki/Octal_game)) | the strip-painting game in 306 is [Dawson's Kayles](https://en.wikipedia.org/wiki/Dawson%27s_Kayles), whose values settle into a period after a short irregular prefix |
+| Depends on a **generalised Zeckendorf** basis | a take bound of `r ×` the previous take | [Problem 870](/solutions/0870/): the losing piles obey `H_{j+1} = H_j + H_{l_j}`, `l_j` the first index with `r·H_l ≥ H_j` — Fibonacci for `r = 2`, powers of two for `r = 1` |
+| **Eventually periodic** | finite move sets on a line ([octal games](https://en.wikipedia.org/wiki/Octal_game), [subtraction games](https://en.wikipedia.org/wiki/Subtraction_game)) | the strip-painting game in 306 is [Dawson's Kayles](https://en.wikipedia.org/wiki/Dawson%27s_Kayles), whose values settle into a period after a short irregular prefix; the subtraction set `{2, 3, 5, 7}` in 649 has period 9 from the start |
+| **Structured winning set** | a non-additive win condition, e.g. a parity of bit counts | Problem 711: two binary families, summed in closed form |
 | A **mex recurrence** with arithmetic structure | the "write the smallest unused number" constructions | [Problem 832](/solutions/0832/): the mex-and-XOR sequence groups into blocks by powers of four |
 
 Once the pattern has a name, the answer usually falls to a [digit DP](https://en.wikipedia.org/wiki/Dynamic_programming)
 or a sum over bit lengths in `O(log n)` — the game theory was only the doorway.
+
+**Detect a period; don't hard-code it.** For a subtraction game whose largest take is `s`, `g(n)`
+depends only on the previous `s` values, so the first time the opening window `g(0..s-1)`
+reappears the sequence is periodic from there on. Checking for that window is a few lines of
+[cycle detection](https://en.wikipedia.org/wiki/Cycle_detection), and it turns "count heaps of each
+value up to `10⁷`" into `q` copies of one period plus a remainder.
+
+**When the rule has a real parameter, sweep its breakpoints.** Problem 870 asks how the losing
+positions change as the ratio `r` in "take at most `r ×` the last take" grows. The only place `r`
+enters is the comparison `r·H_l ≥ H_j`, so the whole sequence is constant between *critical
+ratios* `H_j / H_{l_j − 1}`; the next change is the smallest critical ratio above the current `r`.
+That is an event sweep along the `r` axis — exact fractions and cross-multiplication for the ties,
+and only the suffix after the first changed term rebuilt at each event.
 
 **Prove the pattern, or at least cross-check it.** A pattern read off a table is a conjecture. The
 cheap insurance is to keep the brute-force Grundy solver and compare it with the closed form over
@@ -103,7 +173,13 @@ independent components. [Misère play](https://en.wikipedia.org/wiki/Mis%C3%A8re
 (last mover loses) breaks the XOR rule outside a few special cases. *Partisan* games, where the
 players' moves differ — [Problem 939](/solutions/0939/) "Partisan Nim", [Problem 949](/solutions/0949/)
 "Left vs Right II" — need [combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory)
-proper (surreal values, temperature) rather than nimbers. And a move whose legality depends on
+proper (surreal values, temperature) rather than nimbers. Nimbers do not vanish there, though:
+they are the impartial part of a partizan value. In [Problem 922](/solutions/0922/) the canonical
+form of every staircase diagram, computed for small cases, came out as an integer plus a nimber,
+`(b − a) + *(k − 1)`; a sum of them is `N + *X` with `N` an ordinary sum and `X` an XOR, and the
+first player (Right) wins iff `N > 0`, or `N = 0` and `X ≠ 0`. The count is then an ordinary convolution
+in `N` crossed with an XOR convolution in `X` — Walsh–Hadamard on one axis, polynomial powers on
+the other. And a move whose legality depends on
 history (Fibonacci nim's "at most twice the last take") makes the *state* bigger than the heap: fold
 the history into the state before you look for a value.
 
