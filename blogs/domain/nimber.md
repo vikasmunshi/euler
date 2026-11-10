@@ -1,5 +1,5 @@
 <!-- tags: [nimber] -->
-<!-- status: final -->
+<!-- status: final 2026-11-10T23:25Z -->
 # Nimber
 
 A [nimber](https://en.wikipedia.org/wiki/Nimber) `*n` is the value of a single Nim heap of size

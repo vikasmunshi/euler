@@ -2919,13 +2919,13 @@
     {
       "path": "domain/nimber",
       "title": "Nimber",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-10T23:25Z",
       "solved": 6,
       "problems": 19,
       "tags": ["nimber"],
       "refs": ["p0260", "p0301", "p0306", "p0310", "p0400", "p0459", "p0488", "p0509", "p0550", "p0560", "p0629", "p0649", "p0665", "p0798", "p0806", "p0888", "p0922", "p0933", "p0953"],
-      "covered": [],
+      "covered": ["p0301", "p0310", "p0400", "p0649", "p0922", "p0933"],
       "solved_after": []
     },
     {
