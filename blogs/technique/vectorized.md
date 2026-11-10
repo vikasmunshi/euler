@@ -1,5 +1,5 @@
 <!-- tags: [vectorized] -->
-<!-- status: final 2026-11-08T17:06Z -->
+<!-- status: final -->
 # Vectorized computation
 
 Python's per-operation overhead is the tax that decides most of these problems. An
@@ -53,6 +53,15 @@ with primes up to `√N` only, and alongside `phi` keeps a `rest` array from whi
 divide out each small prime's powers. Whatever survives in `rest` is `1` or the one prime factor
 above `√N`, so a single masked statement, `phi[big] -= phi[big] // rest[big]`, applies every
 large prime at once.
+[Problem 883](/solutions/0883/) builds two multiplicative functions, `d(n²)` and a restricted
+divisor count, without factorising anything. At each prime power `p^e` it divides out the
+factor the previous power contributed and multiplies in the new one, as
+`d[q::q] = d[q::q] // (2e - 1) * (2e + 1)` with `q = p^e`. It then Möbius-inverts the
+table with one line per prime, `out[p::p] -= out[1:limit // p + 1]`. That line looks like a bug,
+because the slice being written overlaps the slice being read. NumPy detects the overlap and
+reads from a copy, so every entry is updated from the *old* values, which is exactly the
+Dirichlet factor `(1 − p^−s)`. A C loop running upward would read entries it had already
+updated. It would compute `1 / (1 + p^−s)` instead, and give a wrong answer with no error.
 [Problem 668](/solutions/0668/)'s
 [Lucy_Hedgehog prime count](https://en.wikipedia.org/wiki/Prime-counting_function#Algorithms_for_evaluating_%CF%80(x))
 is the same shape on the `√N` table of `π(N // k)`: each sieving prime updates the whole
@@ -122,7 +131,14 @@ survives — it just runs `√N` times instead of `N` times, and that is enough.
 need not even be a loop: [problem 983](/solutions/0983/) runs a
 [depth-first search](/blogs/technique/depth-first-search) in plain Python, but each node
 carries the array of every signed subset sum chosen so far, so the test that decides whether
-to descend is a handful of array operations over all of them. When you want to erase *both* levels,
+to descend is a handful of array operations over all of them. A recursion can also hand only its
+last level to the array. [Problem 850](/solutions/0850/) walks the powerful numbers `m ≤ N`
+depth-first, prime by prime, and most of the tree's nodes are leaves. A prime `p` with
+`p⁴ > N/m` can only extend `m` by `p²` or `p³`, and those children have no children. So
+instead of recursing into them, each node takes the slice of the prime array where they live
+and sums their contributions in one expression, `((a - 1) * (x // (a * a))).sum()`. The Python
+recursion visits only the few internal nodes, and the leaves, which outnumber them, are summed
+in bulk. When you want to erase *both* levels,
 [broadcasting](https://numpy.org/doc/stable/user/basics.broadcasting.html) does it: an
 `(m, 1)` column against a `(1, n)` row produces the full `m × n` grid of combinations in one
 expression, at the price of materialising it. The two styles combine: [problem 518](/solutions/0518/)
@@ -174,7 +190,14 @@ does a whole vector of binary searches in one call, which quietly converts "for 
 semiprimes by turning the prime-counting function `π` into two array lookups over a sorted
 prime array; [problem 461](/solutions/0461/) uses it as the join step of a
 [meet-in-the-middle](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack) search, locating
-the nearest partner for every candidate at once. The lookup can also choose *which formula* a
+the nearest partner for every candidate at once. Two searches give a *range*, and a range
+combined with a prefix sum aggregates everything in it. [Problem 1003](/solutions/1003/) is
+also a meet in the middle, over numbers `a + b·α` in a quadratic ring. Each high-half value
+needs every low-half partner with the opposite `b` and with `a` above a threshold. The low half
+is sorted on the packed key `(b, a)`, which makes each such set of partners one contiguous run
+of the sorted array. Two `searchsorted` calls find where every query's run starts and stops,
+and `prefix[stop] - prefix[start]` sums the partners' `a` values. So all the pairs are counted
+and summed without being listed. The lookup can also choose *which formula* a
 lane evaluates. [Problem 341](/solutions/0341/) builds a few tens of thousands of block tables
 serially, in exact Python integers, then answers a million queries without returning to Python:
 one `searchsorted` finds each query's block, fancy indexing gathers that block's coefficients,
@@ -223,7 +246,12 @@ The bulk forms of "group by" and "for each subset" are just as short.
 [Problem 967](/solutions/0967/) needs every squarefree product of the large primes below a
 bound. It grows that set one prime at a time: `ds = np.concatenate((ds, ds[keep] * p))`
 appends every product that still fits, so the Python loop runs once per prime, not once per
-product. Each product carries a class label, and
+product. The order of the growth can do some of the work. Problem 1003 needs the subsets of
+`[0, h)` whose elements are at least 3 apart, and lays them out by their largest element. The
+subsets with largest element at most `j` are then a prefix of the array, so the block with
+largest element `i` is the prefix for `i − 3` with `α^i` added to every entry: one slice and
+one addition, with no test of the gap rule. Back in problem 967, each product carries a class
+label, and
 [`np.add.at`](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html)`(acc, cls, values)`
 sums the values class by class in one unbuffered scatter. A plain `acc[cls] += values` would
 keep only one write per repeated index. The same problem turns a *periodic* function into a
@@ -255,6 +283,17 @@ Unreachable states have impossible coordinates, some of them negative, so `np.cl
 into range before the gather. The nonsense weight fetched for such a state is multiplied by a
 table entry of zero. When the lanes a clamp corrupts are already dead, it does the work of a
 mask for less.
+
+Each lane can also carry its own small *function*. [Problem 971](/solutions/0971/) reduces a
+polynomial map modulo each prime `p` to a map on five classes, `j → j + b_j (mod 5)`, where
+the shifts `b_j` depend on `p`. Every prime in a sieve segment becomes a row of an `(n, 5)`
+table of shifts, and `cur = (cur + shift[rows, cur]) % 5` applies every row's map to every
+class at once. Five applications carry every class onto a cycle, so scattering `True` at
+`[rows, cur]` marks each prime's cyclic classes. A functional-graph question has become five
+gathers over a table, run for every prime at once. The table itself comes from a per-lane
+search. Each prime needs its least non-quintic-residue `h`. The search tries `h = 2, 3, …` for
+every lane still lacking one, and keeps an index array `todo` of those lanes that shrinks with
+each round, so a candidate is only ever tested on the primes that still need it.
 
 A recurrence that looks serial along its own index can still be stepped in blocks, if every
 entry depends only on entries well below it. [Problem 333](/solutions/0333/) counts partitions
@@ -352,7 +391,10 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   [arbitrary-precision integers](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic),
   and `int64` overflow wraps **silently** — no exception, just a wrong answer. Before writing a
   product into an array, bound it: keep every intermediate under `2**63`, reduce modulo `m`
-  before multiplying when `m*m` fits, and say so in a comment. See
+  before multiplying when `m*m` fits, and say so in a comment. When it does not fit, split one
+  factor. Problem 941 multiplies modulo `10¹²`, where a product can reach `10²⁴`, so it writes
+  the constant multiplier as `hi·10⁶ + lo` and computes `(((x·hi) mod 10⁶)·10⁶ + x·lo) mod 10¹²`. Every
+  partial product stays below `2⁶³`. See
   [watch integer width](/blogs/takeaway/watch-integer-width). Better still, put the bound in
   code: problem 348 scans palindromes by digit count and raises `OverflowError` past 18
   digits, the last length whose sums still fit, instead of letting a 19th band wrap silently.
@@ -408,12 +450,23 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   shifted into one. [Problem 718](/solutions/0718/) walks a residue cycle on which
   `w_i = min(base_i, w_{i−1} + z)`; subtracting `i·z` from both sides gives
   `t_i = min(base_i − i·z, t_{i−1})`, a plain running minimum that `np.minimum.accumulate`
-  computes chunk by chunk, carrying the last value into the next chunk. Better still, look for
+  computes chunk by chunk, carrying the last value into the next chunk. In a two-dimensional
+  table, a recurrence along a row is often a running sum of terms taken from *earlier* rows.
+  [Problem 939](/solutions/0939/) counts partitions of `d` into at most `c` parts with
+  `P(d, c) = P(d, c − 1) + P(d − c, c)`. That is serial along `c`, but the added term lives in
+  a row already finished. One fancy-index gather, `table[d - cols, cols]`, fetches the added
+  terms for the whole row, and a `cumsum` over them builds the row. Better still, look for
   a closed form. A
   [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator)
   looks hopelessly sequential, yet its `k`-th term is `a**k` times the seed, so
   [problem 980](/solutions/0980/) generates its stream in bulk with a baby-step/giant-step
   outer product of power tables — the serial recurrence becomes one broadcast multiply.
+  [Problem 941](/solutions/0941/) breaks the same chain without power tables. An affine step
+  `a ↦ A·a + C` composed with itself `B` times is another affine step, so it composes the step
+  4096 times with scalar arithmetic and lays the stream out as rows of 4096 terms. The first row
+  is generated serially. Each later row is the previous row pushed through the composed step,
+  one vector expression per row. The recurrence still runs serially, but it now advances 4096
+  terms at a time, as problem 149's lag lets it advance 24.
   Whenever the recurrence is linear, the dependence chain can usually be broken.
   A scan NumPy cannot run directly can still be split. A *modular* prefix product has no
   ufunc (`np.multiply.accumulate` would overflow long before it reduced), so
@@ -449,6 +502,16 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
   [Problem 641](/solutions/0641/) uses the same split for roots: `np.cbrt` makes a guess for
   every `⌊∛x⌋` at once, and two masked integer corrections (`cs -= cs**3 > x`,
   `cs += (cs+1)**3 <= x`) make each one exact.
+  Floats can also be *grouped*, if they are first snapped to integers.
+  [Problem 842](/solutions/0842/) computes the crossing point of every pair of diagonals of a
+  regular polygon, from every 4-subset of its vertices at once, by Cramer's rule. Several
+  diagonals often pass through one point, and the float coordinates of that point differ
+  slightly from pair to pair. Rounding `x · 10⁹` and `y · 10⁹` to integers and packing them
+  into one `int64` key makes those copies equal, while distinct crossings stay far more than
+  `10⁻⁹` apart. `np.unique(keys, return_counts=True)` then counts how many pairs meet at each
+  point. A point on `k` diagonals is met by `C(k, 2)` pairs, so the count gives `k` back, and
+  a count that is not triangular means the snapping failed. The solution raises an error then
+  instead of returning a wrong answer.
   When an approximate test is fast but occasionally wrong, *certify* it rather than abandoning
   it. Problem 558 expands every square greedily in an irrational base. The remainder is held
   exactly as three integer coefficients over `(1, r, r²)`, and each digit decision is made by a
