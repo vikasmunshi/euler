@@ -8,6 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Blancmange_cur
 ## Problems
 
 - ● [0226](/solutions/0226/) — A Scoop of Blancmange
-- ○ [0889](/solutions/0889/) — Rational Blancmange
+- ● [0889](/solutions/0889/) — Rational Blancmange
 
 <!-- /problems -->

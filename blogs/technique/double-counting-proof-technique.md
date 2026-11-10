@@ -114,6 +114,7 @@ two possible positions, and the split between them is itself a count with a clos
 
 - ● [0475](/solutions/0475/) — Music Festival
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0960](/solutions/0960/) — Stone Game Solitaire

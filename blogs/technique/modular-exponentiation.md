@@ -395,6 +395,7 @@ disguise, so collapse the base first and exponentiate second.
 - ● [0820](/solutions/0820/) — $N$thDigit of Reciprocals
 - ● [0822](/solutions/0822/) — Square the Smallest
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0960](/solutions/0960/) — Stone Game Solitaire

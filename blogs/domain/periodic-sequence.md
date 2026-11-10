@@ -154,6 +154,7 @@ They differ where the languages offer different shortcuts:
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0843](/solutions/0843/) — Periodic Circles
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ○ [0908](/solutions/0908/) — Clock Sequence II
 - ○ [0947](/solutions/0947/) — Fibonacci Residues
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers

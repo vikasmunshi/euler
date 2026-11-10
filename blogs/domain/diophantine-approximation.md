@@ -159,7 +159,6 @@ depends on how well the step is approximated by fractions, through the
 - ○ [0576](/solutions/0576/) — Irrational Jumps
 - ○ [0591](/solutions/0591/) — Best Approximations by Quadratic Integers
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
-- ○ [0889](/solutions/0889/) — Rational Blancmange
 - ○ [0904](/solutions/0904/) — Pythagorean Angle
 
 <!-- /problems -->

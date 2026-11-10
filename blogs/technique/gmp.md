@@ -278,6 +278,7 @@ few dozen sums make exact arithmetic the simpler choice here.
 - ● [0776](/solutions/0776/) — Digit Sum Division
 - ● [0843](/solutions/0843/) — Periodic Circles
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0982](/solutions/0982/) — The Third Dice
 - ● [0984](/solutions/0984/) — Knights and Horses

@@ -138,7 +138,7 @@ scalar gcd.
 - ○ [0450](/solutions/0450/) — Hypocycloid and Lattice Points
 - ○ [0809](/solutions/0809/) — Rational Recurrence Relation
 - ● [0870](/solutions/0870/) — Stone Game IV
-- ○ [0889](/solutions/0889/) — Rational Blancmange
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 - ○ [0991](/solutions/0991/) — Fruit Salad
 

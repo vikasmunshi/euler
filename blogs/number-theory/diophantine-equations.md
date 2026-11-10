@@ -440,7 +440,6 @@ checked that no structure exists, and even then the integer view decides how to 
 - ○ [0877](/solutions/0877/) — XOR-Equation A
 - ● [0880](/solutions/0880/) — Nested Radicals
 - ● [0883](/solutions/0883/) — Remarkable Triangles
-- ○ [0889](/solutions/0889/) — Rational Blancmange
 - ○ [0904](/solutions/0904/) — Pythagorean Angle
 - ○ [0919](/solutions/0919/) — Fortunate Triangles
 - ● [0932](/solutions/0932/) — $2025$

@@ -458,6 +458,7 @@ Five cautions earn their keep:
 - ● [0868](/solutions/0868/) — Belfry Maths
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0880](/solutions/0880/) — Nested Radicals
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation

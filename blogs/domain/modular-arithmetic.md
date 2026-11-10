@@ -674,7 +674,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0874](/solutions/0874/) — Maximal Prime Score
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0885](/solutions/0885/) — Sorted Digits
-- ○ [0889](/solutions/0889/) — Rational Blancmange
+- ● [0889](/solutions/0889/) — Rational Blancmange
 - ○ [0891](/solutions/0891/) — Ambiguous Clock
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0900](/solutions/0900/) — DistribuNim II
