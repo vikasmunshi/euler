@@ -1,5 +1,5 @@
 <!-- tags: [modular-arithmetic] -->
-<!-- status: final 2026-11-08T17:09Z -->
+<!-- status: final -->
 # Modular arithmetic
 
 [Modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic) is the arithmetic of
@@ -40,6 +40,14 @@ multiplies numbers digit by digit, keeping each column's product mod $10$. With 
 every decimal place is its own copy of $\mathbb{Z}/10\mathbb{Z}$. One column is a ten-entry
 histogram of digits, and combining $R$ factors is a convolution of histograms under
 multiplication mod $10$. That convolution can be raised to the $R$th power by squaring.
+Problem 990 puts the carries back. It counts addition equations $x_1 + \dots + x_k = y_1 + \dots + y_m$
+of bounded length, with terms of up to $24$ digits, so no table keyed by value can work. Check
+the equation the way it is done on paper. In each column the left digits, minus the right digits,
+plus the incoming carry, must be $\equiv 0 \pmod{10}$, and the quotient is the signed carry into
+the next column. The equation holds exactly when the terms run out with carry $0$. So a
+[digit DP](/blogs/technique/dynamic-programming) needs only the carry and how many terms are
+still active, and the values never appear. Writing each right-hand digit as $9 - d'$ turns the
+subtraction into an addition, so both sides draw from the same digit distributions.
 
 **"Is this divisible by …?"** is a residue-is-zero question. Problem 78 (public,
 `solutions/public/p0078/`) asks for the first $n$ whose partition count $p(n)$ is divisible by one
@@ -117,6 +125,14 @@ $\varphi(n^i) = n^{i-1}\varphi(n)$, so the terms alternate in sign and cancel in
 $\varphi(n)$ for odd $n$ and $0$ for even $n$. Substitute the residue of the base before you compute
 anything.
 
+**"The fractional part of $a/n$."** A fractional part is a residue divided by $n$:
+$\{a/n\} = (a \bmod n)/n$. Problem 850 sums $\{i^k/n\}$ over $i$, and this turns it into a sum of
+residues of $i^k$. For odd $k$, $i \mapsto n - i$ sends $i^k$ to $-i^k$, so every non-zero
+residue pairs with its negative and each pair contributes exactly $n$. Only the residues that are
+$0$ escape the pairing. The sum becomes $(n - z)/2$, where $z$ counts the $i$ with $n \mid i^k$, and
+$z$ is a question about each prime power of $n$ separately. A sum of residues over a symmetric set
+is often a count of the residues that are fixed by the symmetry.
+
 **"How many of these sum to a multiple of $m$?"** When the question counts objects by the residue
 of a total, put the residue in the exponent. Problem 250 counts the subsets of
 $\{1^1, 2^2, \dots, 250250^{250250}\}$ whose sum is divisible by $250$ — out of $2^{250250}$
@@ -175,7 +191,13 @@ repeats every $500$ values of $k$ (for $k \ge 3$), because $250 = 2 \cdot 5^3$ a
 $\lambda(125) = 100$, so a shift by $500$ leaves base and exponent alike unchanged modulo each
 factor — a quarter-million exponentiations become one block of five hundred. Where no theorem hands
 you the period, detect it: problem 943 walks deterministic sequences of parity masks only until
-one repeats, then answers "the first $k$ terms" by counting whole periods.
+one repeats, then answers "the first $k$ terms" by counting whole periods. Even without a period,
+a step of the form $x \mapsto ax + c \pmod m$ can be jumped. Affine maps compose into affine
+maps, so $s$ steps of a
+[linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator) are
+one map $x \mapsto Ax + C$, found by squaring. Problem 941 uses this to produce ten million
+generator values a row at a time: it applies the $4096$-step map to $4096$ consecutive values at
+once, so the sequential recurrence becomes vector arithmetic.
 
 The period can also sit in the *input*, choosing the formula. Problem 984 counts certain lattice
 octagons on an $N \times N$ board. A count of shapes with a fixed number of integer parameters is
@@ -257,6 +279,25 @@ mod $p$, so the condition says the divisors of $s$ hit every non-zero residue ex
 prime powers of $s$ then *factor* the cyclic group $(\mathbb{Z}/p)^\times$, and the search runs
 over chains of subgroups, priced by multiplicative orders. Divisibility by $\Phi_m$ or by
 $x^m - 1$ always reads this way: as a statement about exponents mod $m$.
+
+The same subgroup structure can collapse a whole dynamical system. Problem 971 iterates
+$x \mapsto x + x^k$ modulo primes $p = 5k - 4$ and counts the periodic points. With
+$m = (p - 1)/5$, the map is $x(1 + \chi(x))$, where $\chi(x) = x^m$ is the quintic
+[power residue symbol](https://en.wikipedia.org/wiki/Power_residue_symbol). By Fermat it is always
+a fifth root of unity. It splits the cyclic unit group into five cosets of $m$ elements each, and
+multiplying by $1 + \zeta^j$ moves a whole coset to another coset. So the $p$-point functional
+graph projects onto a five-node map. Each class on a cycle of that map returns multiplied by a
+constant, which is a bijection, so all of its elements are periodic. Each prime costs a few
+exponentiations instead of a walk over $p$ points. When a map acts through a character, work on
+the cosets of its kernel.
+
+A congruence can also be the proof that decides the structure. Problem 960 is a solitaire game
+in which every turn removes exactly $n$ stones from two of $n$ piles of $n - 1$. Record the game as
+a graph with one edge per turn. A connected component of $k$ piles holds $k(n-1)$ stones and its
+turns removed a multiple of $n$, so $n \mid k(n - 1)$. Since $\gcd(n, n-1) = 1$, that forces
+$k = n$. The graph is a spanning tree, and the game becomes a sum over labelled trees, counted by
+[Cayley's formula](https://en.wikipedia.org/wiki/Cayley%27s_formula). One line of arithmetic mod
+$n$ replaces a simulation.
 
 ## What the modulus allows
 
@@ -340,7 +381,10 @@ modulus, so read it before you write the first line:
   modulo $m$, carry the residue modulo $km$. Problem 684 needs $q = (f - r)/9$ for Fibonacci
   numbers $f$ with $10^{18}$-scale values, reduced mod $p$ for a linear term and mod $p - 1$ for an
   exponent. Running the recurrence modulo $9p$ and $9(p-1)$ keeps $r = f \bmod 9$ visible.
-  Subtracting it leaves a multiple of $9$, and dividing yields $q$ exactly in each ring.
+  Subtracting it leaves a multiple of $9$, and dividing yields $q$ exactly in each ring. A floor
+  works the same way. Problem 850 wants $\lfloor S \rfloor \bmod M$ where $2S$ is an integer, so
+  its C port carries $2S$ modulo $2M$. That keeps the parity that decides the floor, and every
+  product still fits in 64 bits.
 - **A residue forgets size.** Once a value is reduced you can no longer compare it with another
   or count how often a sum wrapped. Problem 822 must repeatedly pick the *smallest* of numbers
   squared a trillion times. It decides the order with the real-valued key
@@ -401,7 +445,12 @@ far too large to form directly. When you catch it:
   equation modulo $p^k$, solve it modulo $p$ and Hensel-lift the root.
 - **Make the residue the state.** When a number is built digit by digit and only its remainder
   matters, prefixes with equal remainders are interchangeable. Search or count over the $m$
-  remainders, not over the numbers.
+  remainders, not over the numbers. When an equation between numbers is checked column by
+  column, the carry is the state.
+- **Work on cosets.** A power residue symbol $x^{(p-1)/d}$ sorts the units into $d$ classes. A
+  map that acts through the class can be studied on $d$ nodes instead of $p$.
+- **Use a congruence as an invariant.** A total that is conserved mod $n$ can force a structure,
+  such as a component size, before anything is counted.
 - **Collapse inputs to their residues.** If only the residue of a total matters, a quarter-million
   elements are a census over $m$ buckets, and their generating function can live in
   $\mathbb{Z}[x]/(x^m - 1)$.
