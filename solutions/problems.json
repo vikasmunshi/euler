@@ -6292,8 +6292,8 @@
     "level": 23,
     "pct": 59,
     "solvers": 308,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 10 Nov 2026, 09:51"
   },
   "788": {
     "title": "Dominating Numbers",
