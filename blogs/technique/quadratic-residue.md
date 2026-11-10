@@ -209,6 +209,7 @@ Things to keep in mind:
 - ● [0492](/solutions/0492/) — Exploding Sequence
 - ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [1007](/solutions/1007/) — Alternating Difference

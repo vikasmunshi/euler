@@ -3190,7 +3190,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sum_of_two_squares_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0142", "p0153", "p0221", "p0229", "p0233", "p0273", "p0291", "p0596", "p0611", "p0621", "p0659", "p0723", "p0846", "p0983"]
+      "refs": ["p0142", "p0153", "p0221", "p0229", "p0233", "p0273", "p0291", "p0596", "p0611", "p0621", "p0659", "p0678", "p0723", "p0846", "p0983"]
     },
     {
       "slug": "summation",
@@ -3730,7 +3730,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0844_s0", "p0986_s0"]
+      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0678_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0844_s0", "p0986_s0"]
     },
     {
       "slug": "binets-formula",
@@ -4091,6 +4091,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0092_s0", "p0205_s0", "p0240_s0", "p0250_s0", "p0294_s0", "p0520_s0", "p0649_s0", "p0682_s0", "p0743_s0", "p0767_s0", "p0768_s0", "p0778_s0", "p0866_s0", "p0922_s0", "p0923_s0", "p0930_s0", "p0949_s0", "p0980_s0", "p1010_s0"]
+    },
+    {
+      "slug": "cornacchias-algorithm",
+      "facet": "technique",
+      "name": "Cornacchia's algorithm",
+      "reference": "https://en.wikipedia.org/wiki/Cornacchia%27s_algorithm",
+      "additional-references": [],
+      "summary": "Solving x\u00b2 + dy\u00b2 = m \u2014 for d = 1, splitting a prime p \u2261 1 (mod 4) into two squares by running Euclid on p and a square root of \u22121.",
+      "refs": ["p0678_s0"]
     },
     {
       "slug": "counting-sort",
@@ -4801,7 +4810,7 @@
       "reference": "https://en.wikipedia.org/wiki/Gaussian_integer",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0153_s0", "p0220_s0"]
+      "refs": ["p0153_s0", "p0220_s0", "p0678_s0"]
     },
     {
       "slug": "generate-and-test",
@@ -5116,7 +5125,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_square_root",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0291_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0501_s0", "p0510_s0", "p0517_s0", "p0521_s0", "p0632_s0", "p0668_s0", "p0721_s0", "p0764_s0", "p0804_s0", "p0808_s0", "p0932_s0", "p0950_s0", "p0962_s0", "p1006_s0"]
+      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0152_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0236_s0", "p0246_s0", "p0276_s0", "p0291_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0501_s0", "p0510_s0", "p0517_s0", "p0521_s0", "p0632_s0", "p0668_s0", "p0678_s0", "p0721_s0", "p0764_s0", "p0804_s0", "p0808_s0", "p0932_s0", "p0950_s0", "p0962_s0", "p1006_s0"]
     },
     {
       "slug": "integral",
@@ -5818,7 +5827,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0767_s0", "p0782_s0", "p0804_s0", "p0842_s0", "p0850_s0", "p0883_s0", "p0921_s0", "p0923_s0", "p0934_s0", "p0938_s0", "p0941_s0", "p0944_s0", "p0949_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0995_s0", "p0996_s0", "p0998_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0249_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0310_s0", "p0315_s0", "p0319_s0", "p0331_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0420_s0", "p0420_s1", "p0421_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0487_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0549_s0", "p0558_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0650_s0", "p0659_s0", "p0668_s0", "p0678_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0720_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0767_s0", "p0782_s0", "p0804_s0", "p0842_s0", "p0850_s0", "p0883_s0", "p0921_s0", "p0923_s0", "p0934_s0", "p0938_s0", "p0941_s0", "p0944_s0", "p0949_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0995_s0", "p0996_s0", "p0998_s0", "p1001_s0"]
     },
     {
       "slug": "numpy-linalg-solve",
@@ -5998,7 +6007,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "Decomposing a number into its prime power components to compute multiplicative properties like divisor counts.",
-      "refs": ["p0029_s0", "p0029_s1", "p0108_s0", "p0110_s0", "p0221_s0", "p0342_s0", "p0347_s0", "p0545_s0", "p0752_s0", "p0932_s0", "p0955_s0"]
+      "refs": ["p0029_s0", "p0029_s1", "p0108_s0", "p0110_s0", "p0221_s0", "p0342_s0", "p0347_s0", "p0545_s0", "p0678_s0", "p0752_s0", "p0932_s0", "p0955_s0"]
     },
     {
       "slug": "primesieve",
@@ -6088,7 +6097,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_residue",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0216_s0", "p0221_s0", "p0245_s0", "p0291_s0", "p0457_s0", "p0492_s0", "p0621_s0", "p0659_s0", "p0752_s0", "p0921_s0", "p1007_s0"]
+      "refs": ["p0216_s0", "p0221_s0", "p0245_s0", "p0291_s0", "p0457_s0", "p0492_s0", "p0621_s0", "p0659_s0", "p0678_s0", "p0752_s0", "p0921_s0", "p1007_s0"]
     },
     {
       "slug": "quaternion-group",
@@ -6286,7 +6295,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
       "additional-references": ["https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler%27s_sieve"],
       "summary": "",
-      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0291_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0333_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0425_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0619_s0", "p0650_s0", "p0752_s0", "p0771_s0", "p0772_s0", "p0787_s0", "p0800_s0", "p0829_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0", "p0946_s0", "p0962_s0", "p0975_s0", "p0995_s0"]
+      "refs": ["p0010_s0", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0136_s0", "p0152_s0", "p0157_s0", "p0171_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0233_s0", "p0234_s0", "p0239_s0", "p0241_s0", "p0245_s0", "p0249_s0", "p0251_s0", "p0291_s0", "p0304_s0", "p0313_s0", "p0315_s0", "p0319_s0", "p0333_s0", "p0347_s0", "p0351_s0", "p0357_s0", "p0365_s0", "p0425_s0", "p0429_s0", "p0464_s0", "p0478_s1", "p0501_s0", "p0512_s0", "p0545_s0", "p0565_s0", "p0619_s0", "p0650_s0", "p0678_s0", "p0752_s0", "p0771_s0", "p0772_s0", "p0787_s0", "p0800_s0", "p0829_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0", "p0946_s0", "p0962_s0", "p0975_s0", "p0995_s0"]
     },
     {
       "slug": "sieve-of-sundaram",
@@ -6646,7 +6655,7 @@
       "reference": "https://numpy.org/doc/stable/glossary.html",
       "additional-references": ["https://numpy.org/doc/stable/glossary.html#term-vectorization"],
       "summary": "",
-      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0842_s0", "p0850_s0", "p0883_s0", "p0921_s0", "p0938_s0", "p0941_s0", "p0944_s0", "p0967_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0994_s0", "p0995_s0", "p0998_s0", "p1001_s0"]
+      "refs": ["p0023_s0", "p0135_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0159_s0", "p0165_s0", "p0177_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0229_s0", "p0231_s0", "p0252_s0", "p0257_s0", "p0274_s0", "p0291_s0", "p0304_s0", "p0315_s0", "p0333_s0", "p0341_s0", "p0348_s0", "p0357_s0", "p0365_s0", "p0381_s0", "p0400_s0", "p0401_s0", "p0407_s0", "p0423_s0", "p0425_s0", "p0429_s0", "p0437_s0", "p0455_s0", "p0461_s0", "p0464_s0", "p0475_s0", "p0478_s1", "p0485_s0", "p0492_s0", "p0501_s0", "p0517_s0", "p0518_s0", "p0521_s0", "p0558_s0", "p0564_s0", "p0621_s0", "p0625_s0", "p0632_s0", "p0635_s0", "p0637_s0", "p0641_s0", "p0668_s0", "p0675_s0", "p0678_s0", "p0688_s0", "p0705_s0", "p0718_s0", "p0721_s0", "p0739_s0", "p0749_s0", "p0754_s0", "p0757_s0", "p0764_s0", "p0804_s0", "p0842_s0", "p0850_s0", "p0883_s0", "p0921_s0", "p0938_s0", "p0941_s0", "p0944_s0", "p0967_s0", "p0971_s0", "p0972_s0", "p0975_s0", "p0980_s0", "p0983_s0", "p0986_s0", "p0994_s0", "p0995_s0", "p0998_s0", "p1001_s0"]
     },
     {
       "slug": "vieta-jumping",
@@ -6772,7 +6781,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Test cheap necessary conditions before expensive ones so failing candidates are pruned before paying for costly checks.",
-      "refs": ["p0103", "p0200", "p0206", "p0216", "p0236", "p0237", "p0241", "p0245", "p0331", "p0347", "p0348", "p0357", "p0518", "p0581", "p0637", "p0719", "p0749", "p0808", "p0983"]
+      "refs": ["p0103", "p0200", "p0206", "p0216", "p0236", "p0237", "p0241", "p0245", "p0331", "p0347", "p0348", "p0357", "p0518", "p0581", "p0637", "p0678", "p0719", "p0749", "p0808", "p0983"]
     },
     {
       "slug": "closed-form-over-iteration",
@@ -7141,7 +7150,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Generators/laziness win on memory, not on a tight numeric loop.",
-      "refs": ["p0001", "p0020", "p0074", "p0077", "p0104", "p0143", "p0501"]
+      "refs": ["p0001", "p0020", "p0074", "p0077", "p0104", "p0143", "p0501", "p0678"]
     },
     {
       "slug": "root-it-then-correct-the-overcount",
@@ -7285,7 +7294,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a deterministic process must be run on every input in a huge range, carry whole intervals of inputs that behave identically and split them only where the behaviour diverges.",
-      "refs": ["p0255", "p0257", "p0305", "p0564", "p0619", "p0706", "p0752", "p0764", "p0844", "p0923", "p0941", "p0949", "p0962", "p0963"]
+      "refs": ["p0255", "p0257", "p0305", "p0564", "p0619", "p0678", "p0706", "p0752", "p0764", "p0844", "p0923", "p0941", "p0949", "p0962", "p0963"]
     },
     {
       "slug": "split-where-the-interface-is-narrow",

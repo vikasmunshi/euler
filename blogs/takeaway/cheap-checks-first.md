@@ -200,6 +200,7 @@ array between stages, because the language will not short-circuit for you.
 - ● [0518](/solutions/0518/) — Prime Triples and Geometric Sequences
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0637](/solutions/0637/) — Flexible Digit Sum
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0808](/solutions/0808/) — Reversible Prime Squares

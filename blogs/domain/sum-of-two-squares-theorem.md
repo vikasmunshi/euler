@@ -142,6 +142,7 @@ The theorem is rarely named in a problem statement. Usually you recognise it aft
 - ○ [0611](/solutions/0611/) — Hallway of Square Steps
 - ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ● [0659](/solutions/0659/) — Largest Prime
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0723](/solutions/0723/) — Pythagorean Quadrilaterals
 - ○ [0846](/solutions/0846/) — Magic Bracelets
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing

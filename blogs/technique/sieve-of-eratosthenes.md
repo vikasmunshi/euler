@@ -268,6 +268,7 @@ patterns recur.
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0619](/solutions/0619/) — Square Subsets
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions

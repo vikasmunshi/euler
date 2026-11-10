@@ -8,7 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fermat%27s_Las
 ## Problems
 
 - ● [0180](/solutions/0180/) — Golden Triplets
-- ○ [0678](/solutions/0678/) — Fermat-like Equations
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0753](/solutions/0753/) — Fermat Equation
 
 <!-- /problems -->

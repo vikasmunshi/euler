@@ -629,6 +629,7 @@ both slower and harder to read.
 - ● [0650](/solutions/0650/) — Divisors of Binomial Product
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0718](/solutions/0718/) — Unreachable Numbers

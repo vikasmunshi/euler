@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Gaussian_integ
 
 - ● [0153](/solutions/0153/) — Investigating Gaussian Integers
 - ● [0220](/solutions/0220/) — Heighway Dragon
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 
 <!-- /problems -->

@@ -526,6 +526,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0641](/solutions/0641/) — A Long Row of Dice
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
 - ● [0675](/solutions/0675/) — $2^{\omega(n)}$
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0688](/solutions/0688/) — Piles of Plates
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0718](/solutions/0718/) — Unreachable Numbers

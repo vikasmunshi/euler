@@ -465,7 +465,7 @@ discipline still shapes the search.
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ○ [0660](/solutions/0660/) — Pandigital Triangles
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
-- ○ [0678](/solutions/0678/) — Fermat-like Equations
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ○ [0681](/solutions/0681/) — Maximal Area
 - ● [0718](/solutions/0718/) — Unreachable Numbers
 - ○ [0730](/solutions/0730/) — Shifted Pythagorean Triples

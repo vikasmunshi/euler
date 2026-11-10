@@ -316,7 +316,7 @@ reach for wide or arbitrary-precision types
 - ○ [0651](/solutions/0651/) — Patterned Cylinders
 - ○ [0652](/solutions/0652/) — Distinct Values of a Proto-logarithmic Function
 - ○ [0657](/solutions/0657/) — Incomplete Words
-- ○ [0678](/solutions/0678/) — Fermat-like Equations
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0679](/solutions/0679/) — Freefarea
 - ○ [0696](/solutions/0696/) — Mahjong
 - ○ [0726](/solutions/0726/) — Falling Bottles

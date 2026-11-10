@@ -225,6 +225,7 @@ apart, and 706 shows the two working together.
 - ● [0305](/solutions/0305/) — Reflexive Position
 - ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0619](/solutions/0619/) — Square Subsets
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0706](/solutions/0706/) — $3$-Like Numbers
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation

@@ -108,5 +108,6 @@ right container is not universal; it follows the cost model of the language it r
 - ● [0104](/solutions/0104/) — Pandigital Fibonacci Ends
 - ● [0143](/solutions/0143/) — Torricelli Triangles
 - ● [0501](/solutions/0501/) — Eight Divisors
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 
 <!-- /problems -->

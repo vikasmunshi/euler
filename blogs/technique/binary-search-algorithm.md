@@ -271,6 +271,7 @@ more cheaply than you can enumerate it. Then, in order:
 - ● [0564](/solutions/0564/) — Maximal Polygons
 - ● [0565](/solutions/0565/) — Divisibility of Sum of Divisors
 - ● [0587](/solutions/0587/) — Concave Triangle
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0686](/solutions/0686/) — Powers of Two
 - ● [0772](/solutions/0772/) — Balanceable $k$-bounded Partitions
 - ● [0800](/solutions/0800/) — Hybrid Integers

@@ -111,7 +111,7 @@ Three pitfalls are worth naming:
 - ○ [0411](/solutions/0411/) — Uphill Paths
 - ○ [0616](/solutions/0616/) — Creative Numbers
 - ○ [0617](/solutions/0617/) — Mirror Power Sequence
-- ○ [0678](/solutions/0678/) — Fermat-like Equations
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0749](/solutions/0749/) — Near Power Sums
 - ○ [0801](/solutions/0801/) — $x^y \equiv y^x$
 - ○ [0830](/solutions/0830/) — Binomials and Powers

@@ -283,6 +283,7 @@ the same idea, implemented once, in C.
 - ● [0521](/solutions/0521/) — Smallest Prime Factor
 - ● [0632](/solutions/0632/) — Square Prime Factors
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0764](/solutions/0764/) — Asymmetric Diophantine Equation
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
