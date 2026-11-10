@@ -1,14 +1,16 @@
 <!-- tags: [parity-mathematics] -->
-<!-- status: final 2026-10-29T07:54Z -->
+<!-- status: final -->
 # Parity (mathematics)
 
 [Parity](https://en.wikipedia.org/wiki/Parity_(mathematics)) is whether an integer is even or odd —
 its remainder mod 2. It is the coarsest thing you can know about a number, and that is its power:
 it throws away almost everything, but what it keeps survives addition, multiplication and every
-recurrence built from them. Across the problems below, parity does four distinct jobs — it exposes
-a **pattern** you can skip along, it **splits** a problem into two cases of which one is trivial,
-it is an **invariant** that forbids or forces an outcome, and it is a cheap **state bit** in a
-counting DP. Seeing which job it is doing is usually the step that turns brute force into a formula.
+recurrence built from them. Across the problems below, parity does five distinct jobs. It exposes
+a **pattern** you can skip along. It **splits** a problem into two cases of which one is trivial.
+It is the **lowest binary digit**, which you can peel off before recursing on half the problem. It
+is an **invariant** that forbids or forces an outcome. And it is a **filter** on a count — a state
+bit in a DP, or a sign flip in a generating function. Seeing which job it is doing is usually the
+step that turns brute force into a formula.
 
 ## The idea
 
@@ -79,6 +81,45 @@ border of whole thickness `(outer − hole)/2`, so the outer and hole sides must
 share parity. Building the condition into the loop — step by 2, start at the matching parity —
 halves the search and removes a filter.
 
+The split can also choose between two different parametrisations. Problem 764 solves
+`16x² + y⁴ = z²` as a Pythagorean triple `(4x, y², z)` and branches on the parity of `y`. For odd `y`
+the triple is primitive and `y²` is its odd leg `m² − n²`. For even `y` the condition
+`gcd(x, y, z) = 1` forces `x` to be odd, which moves the square onto the even leg `2mn`. The two
+branches give two unrelated two-parameter families. Parity also proves that the code's division is
+exact, and here it says more than one bit. An odd number is `1 (mod 2)`, but its square is
+`1 (mod 8)` and its fourth power `1 (mod 16)`. So for odd `a` and `b`, `(5a⁴ + 3b⁴)/8` is always an
+integer. Knowing that a number is odd often fixes several of its low bits, not just the last one.
+
+### The lowest binary digit: peel it off and halve
+
+Parity is the last bit of `n`, and `n = 2⌊n/2⌋ + (n mod 2)`. When a problem's even part is a scaled
+copy of the whole problem, you can recurse on `⌊n/2⌋` and finish in `log₂ n` steps.
+
+Problem 333 counts partitions of `n` into terms `2^i 3^j` where no term divides another. The odd
+terms are the pure powers of three, and any two of those divide one another, so a valid partition
+holds **at most one** odd term. The parity of `n` says how many it holds. If `n` is even it holds
+none, every term is even, and halving every term is a bijection onto the partitions of `n/2`. If `n`
+is odd it holds exactly one, some `3^b`. The remaining terms are even, and halving them leaves a
+partition of `(n − 3^b)/2` restricted to exponents `j < b`. Every right-hand index is below `n/2`,
+so the table fills in doubling blocks `[2^k, 2^{k+1})`, each depending only on earlier blocks. That
+dependence pattern is what lets a whole block be computed in one vectorised step.
+
+Problem 539's elimination game halves itself literally. The first left-to-right pass deletes every
+odd number, which leaves `2, 4, …, 2M` with `M = ⌊n/2⌋`, a mirrored copy of the game on `M` items.
+So the survivor satisfies `P(n) = 2(M + 1 − P(M))`. The problem then asks for the **sum** of `P(k)`
+up to `10^18`, and parity handles that too. The indices `2m` and `2m + 1` share the half `m`, so they
+contribute the same term. The sum over `k ≤ n` therefore folds into a sum over `m ≤ n/2`, with a
+one-term correction when `n` is even, and the pair `(P, S)` follows a single halving recurrence.
+Pairing indices by parity is how you sum a halving recurrence without visiting its terms.
+
+Problem 1003 does the same peeling in a base other than two. Its stone move turns two stones at
+position `i` into one at `i + 1` and one at `i + 3`. That move conserves `Σ cᵢ xⁱ` whenever
+`x² + x + 2 = 0`, and one root of that quadratic is, 2-adically, a [uniformizer](https://en.wikipedia.org/wiki/Uniformizer).
+So every integer has a unique expansion in base `x` with digits 0 and 1, and at each step the
+parity of the pile at position `i` is forced to be the next digit. This is the binary-expansion
+loop — take `n mod 2`, subtract it, divide — with `x` in place of 2. Once you see that, you stop
+simulating the process and enumerate digit patterns instead.
+
 ### An invariant that forbids or forces
 
 Where an operation changes some quantity by a fixed parity, that quantity's parity is an
@@ -100,20 +141,42 @@ order ([Steinhaus–Johnson–Trotter](https://en.wikipedia.org/wiki/Steinhaus%E
 sweeps left or right according to the parity of the rank built up so far, which is what lets a
 rank be computed instead of simulated.
 
+In two-player games the invariant is often **tempo**: who moves last. Problem 976's partizan strip
+game reduces, once its canonical values are computed, to free moves, moves that cost a power of
+two, and copies of `*`. Since `* + * = 0`, the star is its own inverse, so it lives in GF(2) too. A
+sum of stars is `*` or `0` depending on the parity of how many there are. The winner then depends
+only on the parity of the number of opening moves and the parity of the number of strips of length
+`3 (mod 4)`.
+
 Parity also splits a set into two classes that cannot interact. Problem 720 builds permutations
 free of three-term arithmetic progressions by placing all odd values and all even values in separate
 blocks: the middle of an AP is the average of its ends, and an odd and an even end have a
 non-integer average, so no progression can straddle the seam.
 
-### A state bit in a counting DP
+### A filter on a count: a state bit, or `x → −x`
 
 When a condition reads "occurs an odd number of times", you do not need the count — only its
 parity, one bit per tracked symbol. Problem 974 carries a bitmask with one bit per odd digit,
 flipped by XOR as each digit is placed; the target state is a fixed mask, and the DP over
-`(position, mask, residues)` stays tiny where a vector of counts would explode. Problem 520's
-simbers impose exactly this kind of per-digit parity condition, over all ten digits. Problem 145 tracks whether
-each column sum of `n + reverse(n)` is odd, together with the carry, which is a parity-of-a-sum
-question by another name.
+`(position, mask, residues)` stays tiny where a vector of counts would explode. Problem 145 tracks
+whether each column sum of `n + reverse(n)` is odd, together with the carry, which is a
+parity-of-a-sum question by another name.
+
+A generating function can filter by parity with no state at all. Substituting `x → −x` flips the
+sign of exactly the odd-index terms, so `(f(x) + f(−x))/2` keeps the even terms and
+`(f(x) − f(−x))/2` keeps the odd ones. This is the order-2 case of
+[series multisection](https://en.wikipedia.org/wiki/Series_multisection). Apply it to `eˣ`, the
+[exponential generating function](https://en.wikipedia.org/wiki/Exponential_generating_function)
+of a symbol that may appear any number of times, and you get `cosh x` for "an even number of times"
+and `sinh x` for "an odd number of times". Problem 520's simbers require each even digit to appear
+an even number of times and each odd digit an odd number of times or not at all, so the strings
+are counted by `cosh⁵x · (1 + sinh x)⁵`. The DP would carry ten parity bits; this product carries
+none. It pays off a second time. Since `cosh` and `sinh` are combinations of `e^{±x}`, the product
+is a short polynomial in `eˣ` and `e^{−x}`. Each `e^{kx}` contributes `kᴸ` strings of length `L`,
+so a total over every length up to `2^39` becomes a handful of geometric series. Problem 976 uses
+the same filter on an ordinary generating function. Once the game theory has reduced winning to
+"the number of strips of length `3 (mod 4)` is even", the multisets that satisfy it are counted by
+`½[(1 − x)^{−c} + (1 + x)^{−c}]`.
 
 Counting **odd coefficients** is the same idea applied to polynomials. Reducing mod 2, the binomial
 coefficient `C(a, j)` is odd exactly when the binary digits of `j` are a subset of those of `a`
@@ -134,7 +197,11 @@ is the natural lever: it lets the exponent be taken apart one binary digit at a 
   match only proves it is not ruled out. Problem 331 still has to minimise over the boards that pass
   the parity test.
 - **Prefer `(−1)^n` over case analysis when you need to sum or average.** A signed sum is linear
-  and often factors; "probability of odd" usually does not.
+  and often factors; "probability of odd" usually does not. In a generating function the same
+  move is `x → −x`. Try it before adding a parity bit to a DP's state.
+- **Check whether the even case is a smaller copy.** If removing or halving the even part gives
+  back the original problem, recurse on `⌊n/2⌋`. Sums over `n` then fold the same way, because
+  `2m` and `2m + 1` share the half `m`.
 - **Mind the implementation.** In C, `-3 % 2` is `-1`, not `1`, so test oddness with `n & 1` (or
   `n % 2 != 0`). For a multiset of parities, an integer bitmask with XOR beats an array of
   counters.
