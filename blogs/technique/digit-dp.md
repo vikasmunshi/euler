@@ -1,5 +1,5 @@
 <!-- tags: [digit-dp] -->
-<!-- status: final 2026-10-16T15:10Z -->
+<!-- status: final -->
 # Digit DP
 
 [Digit DP](https://en.wikipedia.org/wiki/Digit_DP) counts numbers by walking their digits instead of
@@ -9,9 +9,10 @@ but the property being asked about can be decided while reading the digits left 
 only a small amount of information forward. The bound stops being a count of candidates and becomes a
 count of *positions*: a limit of $10^{40}$ is forty steps, not $10^{40}$ tests. That trade is why
 this tag recurs across the problems below, which otherwise have nothing in common — balanced numbers,
-step numbers, Nim, Pascal's triangle modulo 7. And when even the positions are too many — problem 529
-asks about numbers with up to $10^{18}$ digits — the same DP, read as a fixed automaton, turns into a
-linear recurrence that can be jumped along instead of walked.
+step numbers, Nim, Pascal's triangle modulo 7, whole addition equations. And when even the positions
+are too many — problem 529 asks about numbers with up to $10^{18}$ digits, problem 294 about
+$11^{12}$ — the same DP turns into something you can jump along instead of walk: a linear recurrence
+in one case, a table that doubles in the other.
 
 ## The idea
 
@@ -62,7 +63,10 @@ What these problems carry is worth reading as a catalogue of the moves available
 | 217 (balanced) | [digit sum](/blogs/domain/digit-sum) of a half-block | $\le 9m$ |
 | 725 (DS-numbers) | digit sum, capped at 18 | 19 |
 | 974 (very odd) | value mod 7, digit sum mod 3, five occurrence parities | $7 \cdot 3 \cdot 2^5 = 672$ |
+| 612 (friend numbers) | the set of digits used so far | $2^{10}$ |
+| 290 (digital signature) | carry of $137n$, signed digit-sum difference | $\le 137 \cdot 18L$ |
 | 145 (reversible) | carry, plus a stack of pending mirror-column sums | small |
+| 990 (addition equations) | active terms per side, signed column carry | $O(T^3)$ |
 | 269 (integer roots) | one running quotient per candidate root | hundreds |
 | 301 (Nim) | previous bit | 2 |
 | 529 (10-substrings) | mask of suffix sums $\le 10$, sum since the earliest uncovered digit | 5630 reachable |
@@ -74,7 +78,10 @@ subset mask. But a step number's digits move by $\pm 1$, so the set of digits vi
 contiguous interval — containing all ten is therefore just *touched 0* and *touched 9*, two booleans
 instead of a mask. Problem 974 has the mirror-image experience: it genuinely needs five parity bits,
 because "each odd digit occurs an odd number of times" is five independent facts, and 32 is small
-enough to pay for. Knowing which case you are in is the skill.
+enough to pay for. Problem 612 pays the full $2^{10}$ without complaint: two numbers are "friends" when
+they share a digit, so the digit set is exactly what the question is about and there is nothing to
+collapse — 1024 states across eighteen positions is still trivial. Knowing which case you are in is the
+skill.
 
 Problem 529 shows the reduction working on a condition that does not look digit-local at all: every
 digit must lie inside *some* contiguous run summing to 10. Two observations make it finite. Any future
@@ -97,6 +104,35 @@ either divides exactly or kills the branch, so the divisibility test doubles as 
 the state space finite. It then wraps the DP in
 [inclusion–exclusion](/blogs/technique/inclusion-exclusion-principle) over the eleven possible
 integer roots, because "has at least one root" is a union.
+
+## Reading several numbers at once
+
+The carry is also how a digit DP reads more than one number in the same pass — and then the direction
+flips. Arithmetic propagates carries from the least significant digit upward, so a DP that simulates
+arithmetic walks the columns **low to high**, where the tight flag has nothing to hug and the bound is
+simply a length.
+
+Problem 290 asks how many $n < 10^{18}$ satisfy $s(n) = s(137n)$, a comparison between a number and a
+function of itself. Reading $n$ from the bottom, one digit $d$ and the incoming carry fix exactly one
+output digit of $137n$ — $(137d + \text{carry}) \bmod 10$ — and the next carry. So the state is the
+carry (below 137) and a **signed difference** of the two running digit sums, rather than both sums:
+the question is whether they agree, and one integer says that. When the digits of $n$ run out, the
+leftover carry *is* the top of $137n$, and its digit sum settles the last of the difference. The same
+move — track the gap, not the two quantities — is what makes any "is $f(n)$ like $n$?" question a
+small DP.
+
+Problem 990 takes this as far as it goes: it counts strings like `77=7+70` that form true addition
+equations, which means summing an unknown number of terms of unknown lengths on both sides. Right-align
+every term and walk the columns from the bottom: a column adds the left-hand digits, subtracts the
+right-hand ones, and passes a signed carry; the equation balances when every term has ended and the
+carry is zero. The state is *how many terms are still active on each side* plus the carry — never the
+terms' values or even their lengths. Which of the active terms ends in this column is a binomial
+choice, which is what keeps the ordered lists of terms counted exactly once, and a no-leading-zero rule
+is simply "a term's last digit is nonzero". The column's digit sum is then one lookup in a precomputed
+polynomial, after a reflection ($d \mapsto 9 - d$ on the right-hand side) turns "sum of left minus sum of
+right" into a plain sum of digits. Problem 145's number-plus-its-reversal and problem 1000's three
+coordinates are the same pattern on a fixed number of operands; 990 shows the operand count can itself
+be part of the state.
 
 ## Carrying more than a count
 
@@ -123,6 +159,24 @@ entirely, and convolves the two halves by equal digit sum — $\sum_s (\text{val
 digit sum is $2h$, then counts "contains at least one $h$" by complementary counting: all numbers of
 that digit sum, minus those built from the other nine digits.
 
+The linearity restriction is weaker than it looks, because it only binds *inside* a state. Problem 776
+wants $\sum_{n \le N} n / s(n)$, and dividing by the digit sum is not linear in anything — but within
+the class of numbers whose digit sum is $s$ it is a constant factor. So the DP collects
+$T(s) = \sum \{ n \le N : s(n) = s \}$ with the count-and-value pair above, and the nonlinear weight is
+applied once per final state: $\sum_s T(s)/s$, about $9L$ terms, computed as exact rationals. The
+general move: **make whatever the weight depends on part of the state**, and the weight becomes a
+post-processing step over a short histogram.
+
+That histogram is often the real output. Problem 612 counts unordered pairs $p < q < 10^{18}$ sharing a
+digit, which is not a property of one number at all. The DP never sees a pair: it only sorts the
+numbers below the bound into 1023 classes by exact digit set. Pairs are then a question about classes
+— two numbers are strangers exactly when their sets are disjoint, i.e. one set lies inside the
+complement of the other — and a [subset-sum (zeta) transform](https://codeforces.com/blog/entry/45223)
+over the masks answers "how many numbers have a digit set inside $M$?" for every $M$ at once, so the
+disjoint pairs, and by complement the friends, cost $10 \cdot 2^{10}$ more operations. The
+leading-zero subtlety shows up here in a clean form: a leading zero must leave the set empty rather
+than add digit 0, so the empty mask doubles as "no digit placed yet".
+
 ## From counting to constructing
 
 A digit DP that counts also *unranks*. If you can answer "how many valid numbers have this prefix?",
@@ -133,6 +187,16 @@ it is how problems 845 and 974 answer "give me the $10^{16}$-th number such that
 is built once; the construction is one pass of $L \times B$ table lookups. The prerequisite is that the
 DP counts *completions* of a prefix (a suffix-indexed table) rather than prefixes reaching a state —
 the same recurrence, indexed from the other end.
+
+The two ideas combine. Problem 912 lists the binary strings without three consecutive ones and asks
+for $\sum n^2$ over the ranks $n \le 10^{16}$ whose string is odd — a sum over *ranks*, not over values.
+Unranking the $10^{16}$-th string walks down the bits, and every time it takes the 1-branch it steps
+over the entire 0-branch: a block of consecutive ranks, all below the target. The suffix table carries,
+besides the count, the count of odd strings and the sums $\sum o$ and $\sum o^2$ of their ordinals
+within the block, so a skipped block starting at offset $c$ contributes
+$\sum (c + o)^2 = c^2 \cdot \#\text{odd} + 2c \sum o + \sum o^2$ in closed form. This is the
+count-and-value pair one moment further: a quadratic needs the zeroth, first and second moments, and
+shifting moments is just a binomial expansion.
 
 ## It is not only base 10
 
@@ -178,6 +242,18 @@ still the part that encodes the problem; it has simply become a term generator f
 [small-cases-reveal-the-recurrence](/blogs/takeaway/small-cases-reveal-recurrence) pipeline, and
 everything that does depend on $n$ costs $O(\log n)$ polynomial products.
 
+Problem 294 has the same shape with a twist that rules out the matrix view: it counts $k < 10^{n}$,
+$n = 11^{12}$, with digit sum 23 and $k \equiv 0 \pmod{23}$. The state is (residue mod 23, digit sum
+$\le 23$), but the digit at position $i$ contributes $d \cdot 10^i$ to the residue, so the transition
+*does* depend on the position and there is no single $A$ to raise to a power. What survives is
+**associativity of concatenation**. Summarise a block of $L$ digit positions by its whole table — how
+many length-$L$ strings land on each (residue, sum) — and two blocks join by a convolution: residues
+of the upper block are scaled by $10^{L} \bmod 23$ and added cyclically, digit sums add and truncate
+at 23. A table for length $2L$ is one join of the length-$L$ table with itself, so
+[binary exponentiation](/blogs/technique/exponentiation-by-squaring) over $n$'s bits reaches length
+$11^{12}$ in about eighty joins. The lesson generalises: when the per-step transition varies, look for
+a *block* summary that composes, and double the block instead of powering the step.
+
 ## How to reason about it
 
 - **Ask whether the property is digit-local first.** If deciding it needs the whole number — its
@@ -189,7 +265,10 @@ everything that does depend on $n$ costs $O(\log n)$ polynomial products.
 - **Count the positions too.** $O(L)$ is only cheap while $L$ is a digit count of a bound you were
   handed. If the problem hands you the length itself and it is huge, check that the transition is
   position-independent (no tight flag, no per-position rule) and go looking for the recurrence instead
-  of the loop, as 529 does.
+  of the loop, as 529 does; if it is not, look for a block summary that composes and double it, as
+  294 does.
+- **Pick the direction from the arithmetic.** Most-significant-first is natural for a bound and for
+  unranking; least-significant-first is forced as soon as the DP simulates a carry (290, 990).
 - **You may not need the tight flag at all.** It is only for hugging an arbitrary bound. Half of these
   problems ask about "all numbers with at most $L$ digits", which — with leading zeros allowed — is
   exactly "all length-$L$ digit strings", so the DP is a plain
