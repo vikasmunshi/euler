@@ -631,7 +631,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0903](/solutions/0903/) — Total Permutation Powers
 - ○ [0909](/solutions/0909/) — L-expressions I
 - ○ [0910](/solutions/0910/) — L-expressions II
-- ○ [0912](/solutions/0912/) — Where are the Odds?
+- ● [0912](/solutions/0912/) — Where are the Odds?
 - ○ [0916](/solutions/0916/) — Restricted Permutations
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost
 - ● [0921](/solutions/0921/) — Golden Recurrence

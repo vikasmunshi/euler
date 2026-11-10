@@ -455,7 +455,6 @@ what matters here is what replaces the extraction loop).
 - ○ [0865](/solutions/0865/) — Triplicate Numbers
 - ● [0885](/solutions/0885/) — Sorted Digits
 - ○ [0893](/solutions/0893/) — Matchsticks
-- ○ [0912](/solutions/0912/) — Where are the Odds?
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ● [0926](/solutions/0926/) — Total Roundness

@@ -228,7 +228,7 @@ never shows.
 - ● [0882](/solutions/0882/) — Removing Bits
 - ○ [0890](/solutions/0890/) — Binary Partitions
 - ● [0899](/solutions/0899/) — DistribuNim I
-- ○ [0912](/solutions/0912/) — Where are the Odds?
+- ● [0912](/solutions/0912/) — Where are the Odds?
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ○ [0945](/solutions/0945/) — XOR-Equation C
 - ○ [0948](/solutions/0948/) — Left vs Right

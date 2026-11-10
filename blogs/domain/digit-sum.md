@@ -351,7 +351,6 @@ checksum at the end. Recognising which family you are in is the first decision.
 - ○ [0805](/solutions/0805/) — Shifted Multiples
 - ○ [0817](/solutions/0817/) — Digits in Squares
 - ● [0845](/solutions/0845/) — Prime Digit Sum
-- ○ [0912](/solutions/0912/) — Where are the Odds?
 - ○ [0924](/solutions/0924/) — Larger Digit Permutation II
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 - ○ [0954](/solutions/0954/) — Heptaphobia

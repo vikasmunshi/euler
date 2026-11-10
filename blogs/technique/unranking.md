@@ -124,6 +124,7 @@ construction.
 - ● [0024](/solutions/0024/) — Lexicographic Permutations
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0845](/solutions/0845/) — Prime Digit Sum
+- ● [0912](/solutions/0912/) — Where are the Odds?
 - ● [0974](/solutions/0974/) — Very Odd Numbers
 
 <!-- /problems -->

@@ -11,5 +11,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Generalization
 - ○ [0382](/solutions/0382/) — Generating Polygons
 - ○ [0507](/solutions/0507/) — Shortest Lattice Vector
 - ○ [0663](/solutions/0663/) — Sums of Subarrays
+- ● [0912](/solutions/0912/) — Where are the Odds?
 
 <!-- /problems -->

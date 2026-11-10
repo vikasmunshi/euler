@@ -122,6 +122,7 @@ order total, so the k-th element is the same on every run.
 - ● [0698](/solutions/0698/) — 123 Numbers
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0845](/solutions/0845/) — Prime Digit Sum
+- ● [0912](/solutions/0912/) — Where are the Odds?
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 
 <!-- /problems -->

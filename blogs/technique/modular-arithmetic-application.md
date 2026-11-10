@@ -298,6 +298,7 @@ crash, and neither shows up on small test inputs.
 - ● [0788](/solutions/0788/) — Dominating Numbers
 - ● [0866](/solutions/0866/) — Tidying Up B
 - ● [0885](/solutions/0885/) — Sorted Digits
+- ● [0912](/solutions/0912/) — Where are the Odds?
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [1000](/solutions/1000/) — Problem $1000$

@@ -859,7 +859,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_sum",
       "additional-references": ["https://en.wikipedia.org/wiki/Digit_sum#Digital_root"],
       "summary": "",
-      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0051", "p0056", "p0065", "p0080", "p0092", "p0112", "p0119", "p0159", "p0164", "p0171", "p0217", "p0238", "p0254", "p0284", "p0290", "p0294", "p0315", "p0358", "p0377", "p0387", "p0391", "p0442", "p0467", "p0474", "p0506", "p0508", "p0520", "p0529", "p0538", "p0551", "p0637", "p0676", "p0684", "p0685", "p0706", "p0711", "p0714", "p0719", "p0725", "p0749", "p0776", "p0778", "p0788", "p0805", "p0817", "p0845", "p0912", "p0924", "p0925", "p0954", "p0974", "p1004"]
+      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0051", "p0056", "p0065", "p0080", "p0092", "p0112", "p0119", "p0159", "p0164", "p0171", "p0217", "p0238", "p0254", "p0284", "p0290", "p0294", "p0315", "p0358", "p0377", "p0387", "p0391", "p0442", "p0467", "p0474", "p0506", "p0508", "p0520", "p0529", "p0538", "p0551", "p0637", "p0676", "p0684", "p0685", "p0706", "p0711", "p0714", "p0719", "p0725", "p0749", "p0776", "p0778", "p0788", "p0805", "p0817", "p0845", "p0924", "p0925", "p0954", "p0974", "p1004"]
     },
     {
       "slug": "digital-root",
@@ -3352,7 +3352,7 @@
       "reference": "https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers",
       "additional-references": ["https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers#Tribonacci_numbers"],
       "summary": "A generalization of the Fibonacci sequence in which each term is the sum of the preceding three terms.",
-      "refs": ["p0225", "p0382", "p0507", "p0663"]
+      "refs": ["p0225", "p0382", "p0507", "p0663", "p0912"]
     },
     {
       "slug": "trigonometric-functions",
@@ -4216,7 +4216,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_DP",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0290_s0", "p0294_s0", "p0301_s0", "p0529_s0", "p0612_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0974_s0", "p0990_s0", "p1000_s0"]
+      "refs": ["p0145_s0", "p0148_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0242_s0", "p0269_s0", "p0290_s0", "p0294_s0", "p0301_s0", "p0529_s0", "p0612_s0", "p0725_s0", "p0776_s0", "p0845_s0", "p0912_s0", "p0974_s0", "p0990_s0", "p1000_s0"]
     },
     {
       "slug": "dijkstras-algorithm",
@@ -5287,7 +5287,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lexicographic_order",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0303_s0", "p0336_s0", "p0571_s0", "p0698_s0", "p0720_s0", "p0845_s0", "p0941_s0"]
+      "refs": ["p0030_s0", "p0041_s0", "p0054_s0", "p0068_s0", "p0124_s0", "p0254_s0", "p0303_s0", "p0336_s0", "p0571_s0", "p0698_s0", "p0720_s0", "p0845_s0", "p0912_s0", "p0941_s0"]
     },
     {
       "slug": "lifting-the-exponent-lemma",
@@ -5647,7 +5647,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0374_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0463_s0", "p0512_s0", "p0521_s0", "p0539_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0649_s0", "p0674_s0", "p0682_s0", "p0684_s0", "p0688_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0138_s0", "p0146_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0202_s0", "p0206_s0", "p0217_s0", "p0225_s0", "p0237_s0", "p0244_s0", "p0249_s0", "p0277_s0", "p0288_s0", "p0305_s0", "p0340_s0", "p0342_s0", "p0374_s0", "p0400_s0", "p0401_s0", "p0429_s0", "p0463_s0", "p0512_s0", "p0521_s0", "p0539_s0", "p0565_s0", "p0565_s1", "p0625_s0", "p0628_s0", "p0642_s0", "p0649_s0", "p0674_s0", "p0682_s0", "p0684_s0", "p0688_s0", "p0700_s0", "p0706_s0", "p0710_s0", "p0720_s0", "p0725_s0", "p0764_s0", "p0772_s0", "p0788_s0", "p0866_s0", "p0885_s0", "p0912_s0", "p0940_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -6628,7 +6628,7 @@
       "reference": "https://en.wikipedia.org/wiki/Unranking",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0024_s0", "p0698_s0", "p0845_s0", "p0974_s0"]
+      "refs": ["p0024_s0", "p0698_s0", "p0845_s0", "p0912_s0", "p0974_s0"]
     },
     {
       "slug": "vectorized",
@@ -6745,7 +6745,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a counting DP must also total the counted objects' values, carry a (count, sum) pair per state and update the sum with the same linear rule that builds the value, so the totals come for free.",
-      "refs": ["p0463", "p0521", "p0776", "p0988"]
+      "refs": ["p0463", "p0521", "p0776", "p0912", "p0988"]
     },
     {
       "slug": "certify-the-heuristic-boundary",

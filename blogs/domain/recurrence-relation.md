@@ -471,7 +471,7 @@ induction will confirm. The shape picks the method.
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ○ [0909](/solutions/0909/) — L-expressions I
 - ○ [0910](/solutions/0910/) — L-expressions II
-- ○ [0912](/solutions/0912/) — Where are the Odds?
+- ● [0912](/solutions/0912/) — Where are the Odds?
 - ○ [0915](/solutions/0915/) — Giant GCDs
 - ○ [0917](/solutions/0917/) — Minimal Path Using Additive Cost
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
