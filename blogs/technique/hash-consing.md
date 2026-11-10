@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Hash_consing>.
 
 - ● [0674](/solutions/0674/) — Solving $\mathcal{I}$-equations
 - ● [0829](/solutions/0829/) — Integral Fusion
+- ● [0949](/solutions/0949/) — Left vs Right II
 
 <!-- /problems -->

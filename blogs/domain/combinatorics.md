@@ -799,7 +799,7 @@ of crossing it.
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ○ [0948](/solutions/0948/) — Left vs Right
-- ○ [0949](/solutions/0949/) — Left vs Right II
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ○ [0954](/solutions/0954/) — Heptaphobia
 - ● [0960](/solutions/0960/) — Stone Game Solitaire

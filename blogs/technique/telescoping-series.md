@@ -140,5 +140,6 @@ rewritten until it is not a loop at all.
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0949](/solutions/0949/) — Left vs Right II
 
 <!-- /problems -->

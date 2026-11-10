@@ -245,6 +245,7 @@ one's distribution separately and convolve.
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0923](/solutions/0923/) — Young's Game B
 - ● [0930](/solutions/0930/) — The Gathering
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0980](/solutions/0980/) — The Quaternion Group I
 - ● [1010](/solutions/1010/) — March of the Penguins
 

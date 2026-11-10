@@ -232,6 +232,5 @@ never shows.
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ○ [0945](/solutions/0945/) — XOR-Equation C
 - ○ [0948](/solutions/0948/) — Left vs Right
-- ○ [0949](/solutions/0949/) — Left vs Right II
 
 <!-- /problems -->

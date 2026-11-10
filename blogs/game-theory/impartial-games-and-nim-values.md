@@ -140,7 +140,6 @@ the history into the state before you look for a value.
 - ● [0922](/solutions/0922/) — Young's Game A
 - ○ [0933](/solutions/0933/) — Paper Cutting
 - ○ [0939](/solutions/0939/) — Partisan Nim
-- ○ [0949](/solutions/0949/) — Left vs Right II
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 - ● [0961](/solutions/0961/) — Removing Digits
 

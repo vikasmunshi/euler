@@ -263,6 +263,7 @@ over a small alphabet, and it needs neither a Fenwick tree nor a merge sort.
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 

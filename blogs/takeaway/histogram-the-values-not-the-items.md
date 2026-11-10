@@ -11,5 +11,6 @@ _TODO: write this page. No reference on the tag._
 - ● [0649](/solutions/0649/) — Low-Prime Chessboard Nim
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
+- ● [0949](/solutions/0949/) — Left vs Right II
 
 <!-- /problems -->

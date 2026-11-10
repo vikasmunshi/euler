@@ -176,6 +176,7 @@ a partition.
 - ● [0749](/solutions/0749/) — Near Power Sums
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0923](/solutions/0923/) — Young's Game B
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 

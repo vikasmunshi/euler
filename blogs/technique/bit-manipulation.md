@@ -234,6 +234,7 @@ buy the most where the instructions are real.
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0943](/solutions/0943/) — Self Describing Sequences
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0961](/solutions/0961/) — Removing Digits
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0974](/solutions/0974/) — Very Odd Numbers

@@ -651,6 +651,7 @@ both slower and harder to read.
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ● [0944](/solutions/0944/) — Sum of Elevisors
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0971](/solutions/0971/) — Modular Polynomial Composition
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 - ● [0975](/solutions/0975/) — A Winding Path

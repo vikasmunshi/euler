@@ -231,6 +231,7 @@ apart, and 706 shows the two working together.
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [0923](/solutions/0923/) — Young's Game B
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
+- ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2
 - ● [0963](/solutions/0963/) — Removing Trits
 
