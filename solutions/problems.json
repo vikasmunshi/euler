@@ -7036,8 +7036,8 @@
     "level": 34,
     "pct": 87,
     "solvers": 192,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 11 Nov 2026, 00:12"
   },
   "881": {
     "title": "Divisor Graph Width",
