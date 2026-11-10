@@ -1,5 +1,5 @@
 <!-- tags: [binary-search-algorithm] -->
-<!-- status: final -->
+<!-- status: final 2026-11-10T13:08Z -->
 # Binary search algorithm
 
 [Binary search](https://en.wikipedia.org/wiki/Binary_search_algorithm) is the first non-trivial
