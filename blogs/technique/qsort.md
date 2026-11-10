@@ -1,5 +1,5 @@
 <!-- tags: [qsort] -->
-<!-- status: final 2026-10-16T07:02Z -->
+<!-- status: final -->
 # qsort
 
 [`qsort`](https://en.cppreference.com/w/c/algorithm/qsort) is the only sort the C standard
@@ -33,11 +33,17 @@ them:
 - **Count or collapse duplicates.** C has no `set` and no `dict`. When the Python sibling wrote
   `len(set(values))`, the C port sorts the array and counts the places where an element differs
   from its predecessor. Problems 757, 221 and 165 all end this way; problem 203 does it over GMP
-  integers, summing each distinct value once as it scans. The same scan counts *multiplicities*
+  integers, and problem 749 over plain `long long`s, summing each distinct value once as it scans
+  (749's search finds some numbers more than once). The same scan counts *multiplicities*
   as easily as distinct values: after the sort, how many times a value occurred is the length of
   its run. Problem 348 wants the sums reachable in exactly a given number of ways, and where its
   Python sibling asked `np.unique` for counts, the C port sorts the hits and reads each run's
-  length — a `Counter` with no hash table.
+  length — a `Counter` with no hash table. Sometimes the run length *encodes* the answer rather
+  than being it. Problem 842 generates one crossing per pair of crossing diagonals, so a point
+  where `k` diagonals meet shows up as a run of `m = C(k, 2)` equal keys. The port inverts that
+  to recover `k`, and a run whose length is not a triangular number means the snapping went
+  wrong (more on that below), so the port returns an error. Problem 972 goes the other way: a
+  run of `s` points on one line through an anchor contributes `C(s, 2)` collinear pairs.
 - **Bring equal keys into contiguous runs.** Once sorted by a key, a `while` loop can walk one
   group at a time. Problems 142, 926 and 1000 all use this run-scan: gather the block of records
   sharing a key, process it as a unit, advance. Problem 1000 depends on it for *correctness*: it
@@ -54,6 +60,13 @@ them:
   meet-in-the-middle table so they can be joined by one two-pointer merge instead of an all-pairs
   sweep. The sort's `n log n` is bought to change the *inner* loop's asymptotics, not to tidy the
   data.
+- **Rank.** Sometimes the answer needs each element's *position* in some order, and the
+  order is expensive to construct but cheap to compare. Problem 941 weights each of `N`
+  pseudo-random windows by its rank when the windows are ordered by where they occur in a huge
+  de Bruijn sequence. The port never
+  builds the sequence or finds a position. It computes a key per window that sorts in the same
+  order as the windows appear (which necklace's block, then the offset inside it), sorts on
+  that key, and reads off each rank as `i + 1`. The sort does the work of locating every window.
 
 Problem 52 is the smallest complete example, and it is public, so here it is whole. The digits of
 `n` are extracted least-significant-first and sorted into a canonical fingerprint — order out of
@@ -75,6 +88,42 @@ is just `memcmp` over `n` bytes. That is Python's `sorted(list_of_strings)` with
 allocation and no pointer array: for fixed-width byte strings, `memcmp` order *is* lexicographic
 order.
 
+## Make equivalent things equal first
+
+A sort groups elements that compare *equal*. Usually, though, what the problem cares about is
+elements that are *equivalent*: the same line, the same triangle, the same point. So the step
+before the sort is to rewrite every element into a canonical form, so that two equivalent
+elements end up identical. Three versions of this appear here, depending on where the
+ambiguity comes from:
+
+- **Scale and sign.** Problem 972 identifies the line through an anchor point and each other
+  point by its integer normal `(w1, w2)`, but `(2, -4)` and `(-1, 2)` describe the same line. The
+  port divides by the gcd and fixes the sign before storing the key, and after that two points on
+  one line share a key byte for byte. That is Python's `Fraction` normalisation done by hand.
+- **Order within the element.** Problem 998 finds some triangles twice, once from each of two
+  corners. Each side-triple is sorted with a three-element `sort3` first, then the triples are
+  sorted as 3-`long long` rows (`qsort(corners, n, 3 * sizeof *corners, cmp_tri)`, the same trick
+  as 336's rows). The duplicate scan calls `cmp_tri` itself, as 963 does, and each triangle is
+  counted once. Problem 949 does the same thing for *sets*. A game form is a pair of option sets,
+  and C has no `frozenset`, so `sort_unique` sorts and deduplicates each option list in place.
+  After that, two equal sets are equal arrays, which can be hashed and compared with `memcmp`.
+  This is what makes 949's interning table work.
+- **Floating point.** Problem 842's crossing points come out of a `double` division, so two
+  computations of the same point differ in the last bits, and a comparator on raw `double`s
+  would split one run into several. The port rounds each coordinate to a `1e-9` grid with
+  `llrint`. That is only safe because distinct crossings are known to be much further apart than
+  the grid spacing, and the triangular-run-length check above is what catches the case where that
+  assumption fails.
+
+842 also shows the other half of the habit, which is **packing a composite key into one
+integer**. Its snapped coordinates are both below `2^30`, so `x * 2^32 + y` is exact and
+injective. The point then sorts with the same plain `long long` comparator as everything else,
+and the run walk compares with `==`. Problem 941 packs (necklace, offset) the same way, as
+`value * SHIFT + offset`. The alternative is a struct with a field-by-field comparator, which is
+what 972 and 949 use for their two-field keys. That is fine, but every equality test in the scan
+then has to repeat the field list, and that duplication is exactly what can drift out of sync.
+Packing works when you can prove the bounds. When you can't, use the struct.
+
 ## Writing the comparator
 
 **Do not subtract, except on small types.** `return *(int *)a - *(int *)b;` is the textbook
@@ -89,8 +138,8 @@ return (x > y) - (x < y);   /* -1, 0, or +1 — no subtraction, no overflow */
 ```
 
 Both parenthesised comparisons yield `0` or `1`, so the difference is exactly the sign, and the
-compiler emits it without a branch. Problems 118, 757, 221, 926, 768, 1000, 348 and 963 all carry
-this exact line. On *unsigned* keys subtraction does not even overflow — it wraps, so `x - y`
+compiler emits it without a branch. Problems 118, 757, 221, 926, 768, 1000, 348, 963, 749, 842,
+941 and 949 all carry this exact line. On *unsigned* keys subtraction does not even overflow — it wraps, so `x - y`
 cast to `int` gives garbage signs — which is why problem 963's comparator on its `unsigned long
 long` field compares explicitly too. It is worth making a habit — it costs nothing and removes an entire class of bug.
 
@@ -132,14 +181,14 @@ for (size_t i = 0; i < len; i++)
 ```
 
 and compacting in place, which is the same loop writing as it goes (`if (i == 0 || v[i] != v[u-1])
-v[u++] = v[i];`, leaving `u` as the new length). Problems 221, 180 and 143 use the compacting form
-because they need the deduplicated array afterwards; 757, 165 and 203 only need the count or the
-sum, so they scan without writing.
+v[u++] = v[i];`, leaving `u` as the new length). Problems 221, 180, 143 and 949 use the
+compacting form because they need the deduplicated array afterwards; 757, 165, 203, 749 and 998
+only need the count or the sum, so they scan without writing.
 
 The third shape is the run walk: an outer `while` that finds the end of the current key's block
 with an inner `while`, handles the block, then jumps `i` to the block's end. It costs one pass and
-it is how 142, 926, 1000, 464, 348 and 963 all consume their sorted arrays — 348 needs nothing
-from the block but its length `j - i`.
+it is how 142, 926, 1000, 464, 348, 963, 842 and 972 all consume their sorted arrays — 348, 842
+and 972 need nothing from the block but its length `j - i`.
 
 The shapes combine. Problem 963's single post-sort pass compacts in place, keeps a weight per
 surviving element (how many duplicates it absorbed), and notes each outer-key boundary — and it
@@ -167,6 +216,12 @@ and a comparator you can no longer reuse for `bsearch`, bought with one saved in
 comparison. Almost never worth it; measure before you believe it. Keep the elements small
 for the same reason: `qsort` physically moves `size` bytes per swap, so sorting an array of fat
 structs is slower than sorting indices into them.
+
+The opposite case, many *tiny* sorts, also argues against `qsort`. Problem 998 sorts each of
+its many per-leg buckets (a few hundred entries at most) with a hand-written insertion sort
+instead. At that size the call overhead and the indirect comparisons dominate, and the loop
+moves the bucket's two parallel arrays together, with no index array and no context global. The
+one `qsort` in the port is for the large, flat duplicate scan at the end.
 
 **Elements must survive a byte-wise move.** `qsort` relocates elements with raw copies, so
 anything holding a pointer *into itself* breaks. GMP's `mpz_t` is fine — it is a struct holding a
