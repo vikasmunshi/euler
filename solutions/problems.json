@@ -7508,8 +7508,8 @@
     "level": 28,
     "pct": 72,
     "solvers": 202,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 10 Nov 2026, 19:07"
   },
   "940": {
     "title": "Two-Dimensional Recurrence",
