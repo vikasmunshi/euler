@@ -817,7 +817,7 @@ of crossing it.
 - ● [0996](/solutions/0996/) — Overtakes
 - ○ [0997](/solutions/0997/) — Dice Box
 - ● [1001](/solutions/1001/) — Connections I
-- ○ [1003](/solutions/1003/) — Lonely Singles
+- ● [1003](/solutions/1003/) — Lonely Singles
 - ○ [1004](/solutions/1004/) — Balanced Integer
 - ○ [1005](/solutions/1005/) — Median Prime List
 - ● [1007](/solutions/1007/) — Alternating Difference

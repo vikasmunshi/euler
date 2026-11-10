@@ -289,5 +289,6 @@ too large or too structured to index directly.
 - ● [0972](/solutions/0972/) — Hyperbolic Plane
 - ● [0998](/solutions/0998/) — Squaring the Triangle
 - ● [1000](/solutions/1000/) — Problem $1000$
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

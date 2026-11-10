@@ -111,5 +111,6 @@ the bottleneck.
 - ○ [0792](/solutions/0792/) — Too Many Twos
 - ● [0834](/solutions/0834/) — Add and Divide
 - ● [0850](/solutions/0850/) — Fractions of Powers
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

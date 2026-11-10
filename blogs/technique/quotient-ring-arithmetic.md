@@ -10,5 +10,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Quotient_ring>
 - ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
 - ● [0843](/solutions/0843/) — Periodic Circles
 - ● [0921](/solutions/0921/) — Golden Recurrence
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

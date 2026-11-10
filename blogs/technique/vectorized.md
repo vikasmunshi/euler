@@ -556,5 +556,6 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0995](/solutions/0995/) — A Particular Pair of Polynomials
 - ● [0998](/solutions/0998/) — Squaring the Triangle
 - ● [1001](/solutions/1001/) — Connections I
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

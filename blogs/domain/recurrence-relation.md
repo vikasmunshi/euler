@@ -489,6 +489,5 @@ induction will confirm. The shape picks the method.
 - ○ [0993](/solutions/0993/) — Banana Beaver
 - ○ [0999](/solutions/0999/) — Alternating Recurrence
 - ● [1000](/solutions/1000/) — Problem $1000$
-- ○ [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

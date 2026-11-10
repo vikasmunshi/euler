@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Non-integer_ba
 ## Problems
 
 - ● [0558](/solutions/0558/) — Irrational Base
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

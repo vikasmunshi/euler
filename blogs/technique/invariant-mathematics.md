@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Invariant_(mat
 
 - ● [0098](/solutions/0098/) — Anagramic Squares
 - ● [0223](/solutions/0223/) — Almost Right-angled Triangles I
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

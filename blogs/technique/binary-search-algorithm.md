@@ -366,5 +366,6 @@ more cheaply than you can enumerate it. Then, in order:
 - ● [0833](/solutions/0833/) — Square Triangle Products
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [0986](/solutions/0986/) — Another Infinite Game
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

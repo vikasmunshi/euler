@@ -8,5 +8,6 @@ _TODO: write this page. No reference on the tag._
 ## Problems
 
 - ● [0336](/solutions/0336/) — Maximix Arrangements
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

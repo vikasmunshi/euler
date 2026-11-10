@@ -298,5 +298,6 @@ and close to C speed: one line per loop, matching the C file line for line.
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [1001](/solutions/1001/) — Connections I
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

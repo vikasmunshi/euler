@@ -131,5 +131,6 @@ The bitmask enumeration that builds each half's table is on
 - ● [0768](/solutions/0768/) — Chandelier
 - ● [0928](/solutions/0928/) — Cribbage
 - ● [0949](/solutions/0949/) — Left vs Right II
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

@@ -323,5 +323,6 @@ instead of recomputing it.
 - ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->

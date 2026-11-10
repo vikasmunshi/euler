@@ -151,5 +151,6 @@ whether adding $k$ and $n-k$ in base $p$ produces two or more carries. "Divisibl
 - ● [0834](/solutions/0834/) — Add and Divide
 - ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0926](/solutions/0926/) — Total Roundness
+- ● [1003](/solutions/1003/) — Lonely Singles
 
 <!-- /problems -->
