@@ -1,5 +1,5 @@
 <!-- tags: [numpy] -->
-<!-- status: final 2026-11-08T17:02Z -->
+<!-- status: final -->
 # NumPy
 
 [NumPy](https://numpy.org/doc/stable/) is what I reach for when a problem's work is
@@ -287,6 +287,16 @@ reading `fv[rows, i]` with one paired gather per step. Walks end at different ti
 compacts with a `keep` mask as 437 does, and the loop runs as long as the longest walk, not
 once per walk.
 
+A walk of fixed length needs no compaction, and on a small map it finds cycles without
+looking for them. [971](/solutions/0971/) reduces each prime $p \equiv 1 \pmod 5$ to a map on
+five classes, a [functional graph](https://en.wikipedia.org/wiki/Pseudoforest#Graphs_of_functions)
+on five nodes, and needs to know how many of them lie on a cycle. On $k$ nodes, $k$ steps
+carry every node onto its cycle, and a cycle maps onto itself, so the image of $f^5$ is
+exactly the periodic set. The state is a (primes × 5) array with `arange(5)` in every row.
+Five paired gathers, `cur = (cur + shift[rows, cur]) % 5`, advance every node of every
+prime, then scattering `True` at `[rows, cur]` and summing each row counts its cycle nodes.
+That is cycle detection for millions of graphs with no visited set and no branch.
+
 The axis can also run the other way: one instance, many *candidate parameters*.
 [986](/solutions/0986/) asks for the largest $M$ for which a forced recurrence started at $M$
 dies out. The answer is monotone in $M$, so a bisection would find it, but each probe is a
@@ -366,6 +376,14 @@ query's block, and inside a block the sequence's partial sum is a quadratic, so 
 vectorised quadratic solve finishes the job. The table is small and the queries are
 many, so the binary search is what joins the two.
 
+It is also NumPy's set lookup with a payload. `np.isin` says *whether* a value is present;
+`searchsorted` says *where*, so a hit can carry data. [678](/solutions/0678/) counts sums
+$a^e + b^e$ that land on a perfect power $c^f$. The targets go through
+`np.unique(..., return_counts=True)` into a sorted table with each value's multiplicity, and
+a whole row of candidate sums is located with one `searchsorted`. An index past the end is
+reset to 0, `values[idx] == sums` is the hit mask, and `multiplicity[idx[hit]].sum()` counts
+each hit as many times as its target occurs.
+
 **Sort, then compare neighbours: that is a group-by.** NumPy has no hash table, but a sort
 does the same job for counting. [972](/solutions/0972/) counts collinear triples in the
 [Klein model](https://en.wikipedia.org/wiki/Beltrami%E2%80%93Klein_model), where geodesics
@@ -390,6 +408,22 @@ sizes, which are few, rather than over the legs. Building the triples needs the 
 ragged expansion as 749: each primitive triple repeats $\lfloor n/\text{long leg} \rfloor$
 times, and `np.repeat` with the restarting-`arange` trick produces all its multiples.
 
+**Sort by a key, and the rank is the position.** Sometimes the order is easy to decide
+even though the positions are hard to compute. [941](/solutions/0941/) needs the place of
+each of ten million 12-digit windows in a
+[de Bruijn sequence](https://en.wikipedia.org/wiki/De_Bruijn_sequence) built by
+concatenating Lyndon words in lexicographic order. Computing any single place is awkward. But
+that sequence walks the necklaces in order, so one window comes before another exactly when
+its (necklace, offset in that necklace's block) pair is smaller. The least rotation and the
+period come from $n$ array passes, each rotation one line of digit arithmetic,
+`(w % 10**(n - s)) * 10**s + w // 10**(n - s)`, with a mask updating the running minimum.
+The pair is packed into one `int64` key, and `argsort` turns keys into ranks without any
+position ever being computed. The few windows that straddle a block boundary need a different
+key. One mask finds them and a scalar loop re-keys them: 558's split between the common case
+and the rare one. Even the input is vectorised: the generator is a linear congruential
+recurrence, so one row is stepped in Python and each later row is the previous one pushed
+through the map composed `block` times, which is 739's row jump.
+
 **`cumsum` is the prefix sum, `bincount` the histogram.** The
 [Mertens function](https://en.wikipedia.org/wiki/Mertens_function) is literally
 `np.cumsum(mu)`; the count of squarefree numbers up to each bound is
@@ -397,6 +431,16 @@ times, and `np.repeat` with the restarting-`arange` trick produces all its multi
 [464](/solutions/0464/), which then needs a
 [Fenwick tree](https://en.wikipedia.org/wiki/Fenwick_tree) — and deliberately does
 *not* build it in NumPy (see below).
+
+A prefix sum also answers a threshold question for every value at once.
+[949](/solutions/0949/) counts $k$-tuples whose sum is below $T$, by
+[meeting in the middle](https://en.wikipedia.org/wiki/Meet-in-the-middle_attack). The
+distributions of the $h$-fold and $(k-h)$-fold sums are dense arrays built by shifted slices
+(996's polynomial move, below). The pairs with $x + y < T$ then number
+$\sum_x \mathrm{lo}[x] \cdot \#\{y < T - x\}$, and the second factor is `cumsum(hi)` read
+at an index array, $T - x$ shifted to the table's offset. Indices past either end are
+clipped, with the low side masked to zero by `np.where`, so each threshold costs one
+gather and one dot product.
 
 **Shifted slices are stencils and DP layers.** A grid diffusion step is four
 boundary-clipped additions of offset slices — `nxt[:, 1:, :] += share[:, :-1, :]` and
@@ -412,6 +456,15 @@ generating function as its coefficient array and multiplying by $y^s$ is
 `out[s:] = p[:-s]`. [996](/solutions/0996/) advances a whole transfer recurrence of
 polynomials that way — each step a few shifted sums, every coefficient updated
 together.
+
+The same buffered read multiplies a [Dirichlet series](https://en.wikipedia.org/wiki/Dirichlet_series)
+by an Euler factor. [883](/solutions/0883/) needs $f * \mu$, which is $f$ times
+$\prod_p (1 - p^{-s})$, and one factor is one line: `out[p::p] -= out[1:limit // p + 1]`.
+Every multiple $n$ of $p$ loses the value at $n/p$. Target and source overlap, and the
+buffered read supplies the values from *before* this prime's pass, which is the single
+factor the product asks for. An ascending Python loop would subtract entries it had already
+updated and compute a different series. The whole Möbius inversion is one slice per prime, so
+it costs the same as a sieve.
 
 A shift can carry a per-cell weight, and then the question is what to do with the cells
 where that weight means nothing. [475](/solutions/0475/) counts 0/1 matrices row by row
@@ -481,7 +534,21 @@ $2^{20}$, a sum of up to $2^{17}$ of them stays below $2^{37}$, and the FFT's ro
 on values that size is far below $\tfrac12$, so `np.rint` of the inverse transform returns
 the exact integer. Six forward transforms give the five limb-pair spectra, and the five
 results are recombined mod $p$ in exact integers. The FFT does all the heavy work, and the
-limb width is what makes its output exact.
+limb width is what makes its output exact. When the polynomials are short enough for direct
+convolution, the float drops out entirely: [923](/solutions/0923/) multiplies with
+`np.convolve` on `int64`, which is exact as long as nothing wraps, so its 15-bit halves are
+purely an overflow argument — four convolutions, recombined by shifts mod $p$.
+
+Equality can come from a float too, by rounding onto a grid. [842](/solutions/0842/) counts
+the points where diagonals of a regular polygon cross, and several diagonals may pass
+through one point. Every one of the $\binom{n}{4}$ crossings is computed at once in
+`float64` by Cramer's rule, snapped to a $10^{-9}$ grid, and packed into one `int64` key
+(983's packing, above), so `np.unique(keys, return_counts=True)` groups the coincident ones.
+The rounding is sound only if distinct crossings lie much further apart than the float
+error, and that is a claim about geometry, not something the code can prove. So the code
+checks the one consequence it can test: $k$ chords through a point make $\binom{k}{2}$
+crossing pairs, so every group size must be triangular, and a size that is not raises an
+error instead of returning a wrong count.
 
 [558](/solutions/0558/) pushes the division of labour furthest. It expands every square
 greedily in powers of the real root $r$ of $x^3 = x^2 + 1$. Each remainder is held
@@ -533,6 +600,13 @@ The converse split works too: [983](/solutions/0983/) is a
 plain Python, but each node carries the table of every signed sum of its chosen
 vectors as an array (tripled per level with one `concatenate`), so the pruning test
 at each node is a couple of `np.isin` calls rather than a nested loop.
+[850](/solutions/0850/) splits a depth-first search at its last level instead. It recurses
+over [powerful numbers](https://en.wikipedia.org/wiki/Powerful_number) by increasing prime,
+but below a node with quotient $x$, a prime with $p^4 > x$ can only end the chain, as $p^2$
+or $p^3$, and those children's weights are closed forms in $p$. Two `searchsorted` calls on
+the prime array bound the slice $x^{1/4} < p \le \sqrt{x}$, and that node's whole fringe of
+leaves is one expression such as `((a - 1) * (x // (a * a))).sum()`. Python visits only the
+inner nodes, and the leaves, which are most of the tree, are array elements.
 
 **It is a constant factor, not a complexity class.** A $50\times$ speedup never
 rescues the wrong exponent; see [algorithm beats language](/blogs/takeaway/algorithm-beats-language).
