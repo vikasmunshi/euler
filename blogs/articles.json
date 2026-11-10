@@ -5031,13 +5031,13 @@
     {
       "path": "takeaway/count-the-complement",
       "title": "Count the complement",
-      "status": "draft",
-      "written": null,
+      "status": "final",
+      "written": "2026-11-10T18:40Z",
       "solved": 6,
       "problems": 6,
       "tags": ["count-the-complement"],
       "refs": ["p0520", "p0612", "p0628", "p0668", "p0833", "p0994"],
-      "covered": [],
+      "covered": ["p0520", "p0612", "p0628", "p0668", "p0833", "p0994"],
       "solved_after": []
     },
     {

@@ -1,5 +1,5 @@
 <!-- tags: [count-the-complement] -->
-<!-- status: final -->
+<!-- status: final 2026-11-10T18:40Z -->
 # Count the complement
 
 Some sets are hard to count directly. Their members share no structure, or the defining
