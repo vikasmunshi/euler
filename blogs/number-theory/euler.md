@@ -1,5 +1,5 @@
 <!-- tags: [eulers-totient-function, partition-number-theory, pentagonal-number-theorem, continued-fraction, amicable-numbers, eulerian-path, eulerian-number, linear-sieve] -->
-<!-- status: final 2026-11-02T22:25Z -->
+<!-- status: final -->
 # Euler
 
 More of the mathematics behind these problems traces to one man than to any other. [Leonhard
@@ -55,7 +55,20 @@ eight-variable quadratic form mod `n`, and a roots-of-unity filter turns that co
 [quadratic Gauss sums](https://en.wikipedia.org/wiki/Quadratic_Gauss_sum) over `t mod n`. A Gauss
 sum's size depends only on the reduced denominator of `t/n`, so grouping by that denominator
 contributes a factor `φ(m)`. The count collapses to a convolution of two multiplicative functions,
-and what remains is one totient sieve.
+and what remains is one totient sieve. Problem 994 (Counting Triangles) gets there by geometry. It
+counts triangles cut out by segments between two parallel rows of points, and the only hard part is
+discarding triples of segments that pass through one point. Under the duality that sends a segment
+`(i, j)` to the cell `(i, j)` of an index grid, concurrent segments become *collinear* cells, and the
+number of lattice cells strictly between two cells at offset `(a, b)` is `gcd(a, b) - 1`. So the
+correction is a gcd sum again, `Σ (m-a)(n-b)·gcd(a, b)`, and `gcd = Σ_{d|·} φ(d)` turns it into a
+sum over `d` of `φ(d)` times a weight that is a *quadratic in `d`* on each quotient block.
+
+A gcd hides behind a geometric question more often than you would expect. In problem 787 (Bézout's
+Game) a move splits the vector `(a, b)` into two pieces of determinant ±1. That makes the pieces
+neighbours in the [Stern–Brocot tree](https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree) and
+`(a, b)` their mediant, so the positions with pile total `n` are exactly the `φ(n)` coprime splits
+of `n`. The game's losing positions turn out to be a fixed fraction of those `φ(n)`, corrected by a
+small multiplicative term.
 
 Evaluating `φ` at one point is the easy direction. The problems push it three other ways, and each
 needs a different tool:
@@ -82,6 +95,24 @@ needs a different tool:
   arguments. The restriction is also free. From `φ(2m) = φ(m)` for odd `m` and `2φ(m)` for even
   `m`, the odd-only sum is `Φ(N) - Σ_k Φ(⌊N/2^k⌋)`, and every `⌊N/2^k⌋` is a quotient the recursion
   has already computed.
+- **Summed with a twist.** The same quotient machinery survives a weight, a congruence condition
+  or a character, as long as you can name the Dirichlet convolution that cancels it. Problem 994
+  needs `Φ_k(x) = Σ d^k·φ(d)` for `k = 0, 1, 2`. Because `(d^k·φ) * id^k = id^(k+1)`, each `Φ_k`
+  obeys the same recursion as `Φ` with power sums in place of triangular numbers (often called Du's
+  sieve). Problem 935 (Rolling Square) reduces a rolling square's return time to a
+  [rotation number](https://en.wikipedia.org/wiki/Rotation_number) `p/q`, and the answer counts
+  coprime pairs in a triangle with the bound depending on `q mod 4`. Removing coprimality by
+  [Möbius inversion](https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula) is the standard
+  move. The residue condition is what changes it: an odd common divisor keeps `q` in its class, a
+  divisor `2e` moves it predictably, and multiples of 4 have `μ = 0`. Every term becomes a sum over
+  *odd* `e` only, and that needs an odd-only
+  [Mertens function](https://en.wikipedia.org/wiki/Mertens_function), which has its own convolution
+  identity. Problem 787 goes one step further. Its correction term is `μ * χ₄`, the Möbius function
+  convolved with the non-principal
+  [Dirichlet character](https://en.wikipedia.org/wiki/Dirichlet_character) mod 4. You can only find
+  it by tabulating small cases and reading off the prime powers. Once you have it, swapping the order
+  of summation leaves `Σ μ(d)·X(⌊N/d⌋)`, where `X` is the trivial partial sum of `χ₄`, and that is one
+  more block loop over the Mertens values that `Φ` already needed.
 - **Backwards.** Problem 248 asks for every `n` with `φ(n) = 13!`. The product form
   `φ(n) = ∏ p^(a-1)(p-1)` turns this inversion into a factorisation of the *target*: a prime can
   occur in `n` only if `p-1` divides it, so the alphabet is "divisors plus one that are prime" (a
@@ -162,6 +193,29 @@ single `3^b`, then halve the rest, with a cap on the 3-exponents. Every index on
 (distinct parts ↔ odd parts) still holds: when a product formula is missing, look for a map that
 shrinks the problem.
 
+Some problems *optimise* over partitions instead of counting them, and the useful structure there is
+the staircase `m, m+1, …, m+k-1`, the cheapest way to write `k` distinct parts. Problem 688 (Piles
+of Plates) only needs its total `km + k(k-1)/2`. Any leftover goes on the top pile, so the largest
+feasible bottom pile is a single floor, and swapping the order of summation leaves `O(√N)` closed-form
+terms. Problem 374 (Maximum Integer Partition Product) asks for the distinct-part partition with the
+largest product, and two
+[exchange arguments](https://en.wikipedia.org/wiki/Greedy_algorithm#Correctness_proofs) settle it.
+A part 1 is better merged into the largest part, and a gap of two or more between neighbours closes
+profitably, because `(a+1)(b-1) > ab` when `b - a ≥ 2`. The optimum is therefore a staircase with at
+most one value missing. That turns `f(n)` into a factorial divided by the missing value, and a block
+of `n` sums to a harmonic number times a factorial. The product `j!·H_j` is the
+[Stirling number](https://en.wikipedia.org/wiki/Stirling_numbers_of_the_first_kind) `[j+1, 2]`. It
+has an integer recurrence, so the sum over 10¹⁴ values of `n` needs no modular inverses in its loop.
+
+Partitions also appear as the *orbits* of a symmetry. Problem 564 (Maximal Polygons) averages the
+largest area of a polygon over random compositions of its perimeter into sides. The maximum is the
+[cyclic polygon](https://en.wikipedia.org/wiki/Cyclic_polygon), and permuting its sides only
+reorders isosceles triangles around the centre. So the area depends on the *multiset* of sides, which
+is a partition of the excess length, and each partition stands for `n!/∏ m_j!` compositions. A sum
+over `C(2n-4, n-1)` orderings becomes a weighted sum over `p(n-3)` partitions. Whenever a statistic
+is symmetric in its arguments, enumerate the partitions and weight each one by a multinomial,
+rather than enumerating the compositions.
+
 ## Continued fractions
 
 In *De fractionibus continuis* Euler put [continued
@@ -207,8 +261,9 @@ Euler's fingerprints are wider than number theory:
   their number of ascents; they surface in problem 158.
 - **The linear sieve.** Euler's refinement of Eratosthenes crosses off each composite *exactly
   once*, via its smallest prime factor, giving both the primes and a smallest-prime-factor table in
-  a genuine `O(n)` pass — the workhorse behind problems 153, 549 and 745, and in 342 the table
-  that factors every `p-1` the totient search needs.
+  a genuine `O(n)` pass — the workhorse behind problems 153, 549 and 745, in 342 the table
+  that factors every `p-1` the totient search needs, and in 935 the bottom tier (a sieve of `μ`
+  up to `N^(2/3)`) under the odd Mertens recursion.
 
 ## How to reason about it
 
@@ -229,7 +284,13 @@ The lesson is not "memorise Euler's results" but recognising the shape that invi
 - A **huge exponent modulo `n`** — reduce the exponent mod `φ(n)` by Euler's theorem before you
   compute anything.
 - A **sum of a multiplicative function** to a bound too large to sieve — look for an identity over
-  the quotients `⌊n/d⌋` and evaluate it sublinearly.
+  the quotients `⌊n/d⌋` and evaluate it sublinearly. If the sum carries a **polynomial weight, a
+  congruence condition or a character**, find the convolution partner that cancels it: `id^k` for
+  `d^k·φ`, an odd-only Mertens function for a mod-4 split.
+- An **optimisation over partitions**: use exchange arguments to pin the optimum down to a
+  staircase, then sum the closed form block by block.
+- An **average over orderings** of a symmetric statistic: enumerate partitions instead, each
+  weighted by its multinomial count.
 - A multiplicative function **run backwards** or used as a **constraint** — enumerate factorisations
   of the target (or of a whole family of targets, such as the smooth numbers), or derive the structural facts (squarefree, parity, a ratio bound) that let you
   build candidates instead of scanning for them.
