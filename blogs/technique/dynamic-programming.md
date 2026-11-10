@@ -330,6 +330,7 @@ The problems below are all that collapse in one guise or another.
 - ● [0928](/solutions/0928/) — Cribbage
 - ● [0936](/solutions/0936/) — Peerless Trees
 - ● [0938](/solutions/0938/) — Exhausting a Colour
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0951](/solutions/0951/) — A Game of Chance
 - ● [0961](/solutions/0961/) — Removing Digits

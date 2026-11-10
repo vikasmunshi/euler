@@ -130,6 +130,7 @@ temperature rigorously.
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0923](/solutions/0923/) — Young's Game B
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0976](/solutions/0976/) — XO Game

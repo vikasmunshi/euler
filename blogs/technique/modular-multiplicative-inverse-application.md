@@ -388,6 +388,7 @@ the repetition.
 - ● [0926](/solutions/0926/) — Total Roundness
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0968](/solutions/0968/) — 5D Summation
 - ● [0973](/solutions/0973/) — Random Dealings

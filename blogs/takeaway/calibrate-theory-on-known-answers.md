@@ -245,6 +245,7 @@ brute-force script and a few test cases, and it protects the expensive part of t
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0887](/solutions/0887/) — Bounded Binary Search
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0963](/solutions/0963/) — Removing Trits
 - ● [0976](/solutions/0976/) — XO Game

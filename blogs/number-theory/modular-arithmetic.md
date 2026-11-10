@@ -1167,6 +1167,7 @@ handful of operations on small numbers.
 - ○ [0929](/solutions/0929/) — Odd-Run Compositions
 - ● [0932](/solutions/0932/) — $2025$
 - ● [0934](/solutions/0934/) — Unlucky Primes
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0940](/solutions/0940/) — Two-Dimensional Recurrence
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root

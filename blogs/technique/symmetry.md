@@ -167,6 +167,7 @@ the right-to-left pass is a different game, and each direction would need its ow
 - ● [0782](/solutions/0782/) — Distinct Rows and Columns
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0850](/solutions/0850/) — Fractions of Powers
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0975](/solutions/0975/) — A Winding Path
 - ● [0983](/solutions/0983/) — Consonant Circle Crossing
 

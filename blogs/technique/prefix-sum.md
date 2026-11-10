@@ -318,6 +318,7 @@ instead of recomputing it.
 - ● [0839](/solutions/0839/) — Beans in Bowls
 - ● [0875](/solutions/0875/) — Quadruple Congruence
 - ● [0922](/solutions/0922/) — Young's Game A
+- ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0943](/solutions/0943/) — Self Describing Sequences
 - ● [0949](/solutions/0949/) — Left vs Right II
 - ● [0967](/solutions/0967/) — $B$-Trivisible Numbers
