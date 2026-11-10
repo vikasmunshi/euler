@@ -1,15 +1,15 @@
 <!-- tags: [prefix-sum] -->
-<!-- status: final 2026-11-02T18:28Z -->
+<!-- status: final -->
 # Prefix sum
 
 A [prefix sum](https://en.wikipedia.org/wiki/Prefix_sum) is the running total of a sequence:
 $P_0 = 0$ and $P_k = a_0 + a_1 + \dots + a_{k-1}$. Build it once in $O(n)$ and every contiguous
 range sum collapses to one subtraction, $\sum_{i \le t < j} a_t = P_j - P_i$. That identity is the
 whole technique. What earns it a tag across problems that share nothing else is that the same array
-answers five quite different questions, and knowing which one you are asking is what tells you
+answers seven quite different questions, and knowing which one you are asking is what tells you
 whether to build it at all.
 
-## Five jobs
+## Seven jobs
 
 **Range sums in constant time.** The textbook use, and the one to recognise first: a sum over a
 contiguous window, asked many times over values that never change. Problem 50 searches for the
@@ -39,6 +39,17 @@ The grid is $80 \times 80$, so the extra factor never shows in the benchmark and
 would be more code for no measured gain. Recognising when the technique is not worth its build cost
 is part of knowing it.
 
+**Run backwards: the difference array.** The prefix sum has an inverse, and it does the opposite
+job. Where the prefix array makes range *reads* cheap, its inverse, the
+[difference array](https://en.wikipedia.org/wiki/Prefix_sum#Applications) $D_i = a_i - a_{i-1}$,
+makes range *writes* cheap: adding 1 to every $a_t$ with $lo \le t \le hi$ touches two cells,
+`diff[lo] += 1; diff[hi + 1] -= 1`, and one prefix scan at the end turns the differences back into
+values. Problem 922 tallies game positions by the value $d = b - a$. For a fixed $k$ and $a$, the
+admissible $b$ form a contiguous run, so the values they produce are a contiguous run of $d$. Each
+$(k, a)$ is then one range increment instead of a loop over $b$, and one scan per $k$ fills the
+row. That turns a cubic count into a quadratic one. Reach for this whenever the input arrives as
+intervals and the output is wanted pointwise.
+
 **The cumulative array as an index.** When the values are non-negative the prefix array is sorted,
 and a sorted array is something you can search — so a cumulative sum turns "which block does
 position $n$ land in?" into a walk or a [binary search](/blogs/technique/bisect). Problem 40 locates
@@ -52,6 +63,15 @@ Problem 516 asks that function many times. Every $n$ with a 5-smooth totient fac
 "good" primes, so the sum over all such $n \le L$ becomes, for each $m$, $m$ times the sum of the
 Hamming numbers up to $\lfloor L/m \rfloor$. One sorted list and one prefix array serve every $m$
 with a single `bisect` each. The Hamming numbers themselves are never multiplied out.
+
+The same index can be an allocator. Problem 309 groups Pythagorean triples by a shared leg, and
+the Python solution does it with a dict of lists. The C port has no dict, so it uses the layout of a
+[counting sort](/blogs/technique/counting-sort). A first pass only counts each leg's partners. An
+*exclusive* prefix sum of those counts gives every leg its starting offset in one flat array, and a
+second pass fills the slots. This is the
+[compressed sparse row](https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format))
+layout. It makes no small allocations, and it keeps each group contiguous for the pair scan that
+follows. Here the prefix array is never queried for a sum; its entries are addresses.
 
 Problem 341 applies the index job to a sequence that describes itself.
 [Golomb's sequence](https://oeis.org/A001462) is constant on runs, and the value $v$ fills exactly
@@ -69,6 +89,13 @@ Problem 205 shows the probabilistic form. Each player's dice total is
 [convolved](/blogs/technique/convolution) into an exact integer count distribution, and a prefix
 sum over one distribution is its cumulative distribution function — so "how often does Peter beat
 Colin?" becomes one lookup per outcome instead of enumerating the $4^9 \times 6^6$ joint space.
+Problem 949 uses the same lookup to split one large convolution in two. It counts ordered
+$k$-tuples of game values whose sum falls below a threshold $T$. Convolving all $k$ factors is the
+expensive part, so it builds only the $h$-fold and the $(k-h)$-fold sum distributions, with
+$h = \lfloor k/2 \rfloor$, and takes a cumulative sum of the second. The count is then
+$\sum_x \text{lo}[x] \cdot \text{CDF}_{\text{hi}}(T - x - 1)$, one vectorised pass per threshold.
+This is [meet in the middle](/blogs/technique/meet-in-the-middle-attack), and the CDF is what lets the
+two halves meet with an inequality rather than an equality.
 
 Problem 943 asks for the sum of the first $N \approx 2 \times 10^{13}$ terms of a self-describing
 ([Kolakoski-style](https://en.wikipedia.org/wiki/Kolakoski_sequence)) sequence, and uses the index
@@ -82,7 +109,11 @@ whole periods:
 $$P(k) = P(\mu + r) + q \bigl(P(\mu + p) - P(\mu)\bigr), \qquad k - \mu = qp + r.$$
 
 That is a prefix sum of an unbounded sequence in $O(1)$ space per chain — the arithmetic version of
-the periodic stream in problem 238.
+the periodic stream in problem 238. Problem 967 applies the same formula with $\mu = 0$. Its
+indicator depends only on which small primes divide $m$, so it is periodic with period $Q$, their
+product. One table of $Q$ cumulative counts (one per residue class mod 3) gives the count up to any
+$x$ as $\lfloor x/Q \rfloor$ full periods plus `prefix[x % Q]`. It is evaluated at about 1.4 million
+arguments $x = \lfloor N/d \rfloor$, all in one fancy-indexed NumPy read.
 
 **When the prefix sum *is* the answer.** For a [multiplicative
 function](/blogs/domain/multiplicative-function) $f$, the object of interest is almost always the
@@ -164,6 +195,19 @@ $P_t + k$ is itself a prefix sum, so the question becomes membership in the *set
 held as one machine-word [bitset](/blogs/technique/bit-array) and tested by a rotation. The prefix
 sums stop being an intermediate and become the data structure.
 
+Problem 839 goes one step further: the prefix sums become the *state* of a process. Beans move one
+at a time from a bowl to its right-hand neighbour until the bowls are non-descending, and the
+question is how many moves that takes, with tens of millions of beans in each of ten million bowls.
+Moving one bean from bowl $n$ to bowl $n+1$ lowers $P_{n+1}$ by exactly one and leaves every other
+prefix alone. So the prefix sums are a
+[potential function](https://en.wikipedia.org/wiki/Potential_method), and the move count is
+$\sum_k (P_k - F_k)$, where $F$ is the prefix array of the final arrangement, whatever order the
+moves came in. Summed by parts, that is $\sum_i i\,(f_i - a_i)$, so the moves are never simulated.
+The same view finds $F$: an arrangement is non-descending exactly when its prefix sums are
+[convex](https://en.wikipedia.org/wiki/Convex_function), and since prefixes can only fall, the
+final state levels the bowls into runs, found by an $O(n)$ stack of merged blocks. When each step of
+a process changes one prefix by one, count the steps by comparing the start and end prefix arrays.
+
 **Counting pairs through the prefixes.** Problem 238's inversion has a counting form, and it is the
 reason prefix sums show up in so many "how many substrings" questions. A window $[i, j)$ has
 property $X$ exactly when the pair $(P_i, P_j)$ does. So counting windows means counting pairs of
@@ -179,6 +223,18 @@ come before here" at every position. Summing that at the positions of $y$ is the
 $\#(x \text{ before } y)$, so nine cumsums produce the whole $9 \times 9$ table. This is the
 textbook way to count [inversions](https://en.wikipedia.org/wiki/Inversion_(discrete_mathematics))
 over a small alphabet, and it needs neither a Fenwick tree nor a merge sort.
+
+**Summing a DP's predecessors.** A dynamic program whose transition is "add up the states over a
+range of predecessors" pays for that range on every cell, unless the range is a prefix or suffix of
+something already computed. Problem 988 counts antichains in a staircase grid: sets of cells with
+strictly rising $i$ and strictly falling $j$. It also sums a weight over them. The number of
+antichains whose last cell is $(i, j)$ is one plus the sum over all earlier rows and all columns
+$j' > j$. Done directly, that sum costs $O(ab)$ per cell. Instead, the DP keeps per-column totals
+across rows and walks $j$ downwards within a row, carrying a running suffix sum. Each transition
+is then $O(1)$ and the whole grid is $O(ab)$. The weight rides along as a second suffix sum beside
+the count, just as problem 943 keeps sums beside counts. This is the usual way to speed up a DP
+whose recurrence ranges over an interval: make the interval a prefix, then keep its sum running
+instead of recomputing it.
 
 ## How to reason about it
 
