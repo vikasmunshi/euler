@@ -1,5 +1,5 @@
 <!-- tags: [periodic-sequence] -->
-<!-- status: final -->
+<!-- status: final 2026-11-10T23:29Z -->
 # Periodic sequence
 
 A [periodic sequence](https://en.wikipedia.org/wiki/Periodic_sequence) satisfies

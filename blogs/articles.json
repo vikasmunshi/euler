@@ -3208,13 +3208,13 @@
       "path": "domain/periodic-sequence",
       "title": "Periodic sequence",
       "status": "final",
-      "written": "2026-10-17T07:27Z",
+      "written": "2026-11-10T23:29Z",
       "solved": 11,
       "problems": 19,
       "tags": ["periodic-sequence"],
       "refs": ["p0019", "p0167", "p0225", "p0238", "p0306", "p0349", "p0426", "p0506", "p0617", "p0649", "p0729", "p0743", "p0767", "p0843", "p0889", "p0908", "p0947", "p0967", "p0993"],
-      "covered": ["p0019", "p0167", "p0225", "p0238", "p0743"],
-      "solved_after": ["p0506", "p0649", "p0767", "p0843", "p0889", "p0967"]
+      "covered": ["p0019", "p0167", "p0225", "p0238", "p0506", "p0649", "p0743", "p0767", "p0843", "p0889", "p0967"],
+      "solved_after": []
     },
     {
       "path": "domain/permutation",
