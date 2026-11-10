@@ -231,7 +231,6 @@ optimisation inside the loop.
 - ○ [0554](/solutions/0554/) — Centaurs on a Chess Board
 - ○ [0594](/solutions/0594/) — Rhombus Tilings
 - ○ [0667](/solutions/0667/) — Moving Pentagon
-- ○ [0726](/solutions/0726/) — Falling Bottles
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls
 - ○ [0750](/solutions/0750/) — Optimal Card Stacking
 - ○ [0765](/solutions/0765/) — Trillionaire

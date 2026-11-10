@@ -1086,6 +1086,7 @@ handful of operations on small numbers.
 - ● [0720](/solutions/0720/) — Unpredictable Permutations
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ○ [0728](/solutions/0728/) — Circle of Coins
 - ● [0731](/solutions/0731/) — A Stoneham Number
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls

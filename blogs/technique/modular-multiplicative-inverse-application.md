@@ -376,6 +376,7 @@ the repetition.
 - ● [0705](/solutions/0705/) — Total Inversion Count of Divided Sequences
 - ● [0711](/solutions/0711/) — Binary Blackboard
 - ● [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ● [0731](/solutions/0731/) — A Stoneham Number
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0754](/solutions/0754/) — Product of Gauss Factorials

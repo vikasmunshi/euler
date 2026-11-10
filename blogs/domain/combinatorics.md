@@ -726,7 +726,7 @@ of crossing it.
 - ○ [0716](/solutions/0716/) — Grid Graphs
 - ○ [0724](/solutions/0724/) — Drone Delivery
 - ● [0725](/solutions/0725/) — Digit Sum Numbers
-- ○ [0726](/solutions/0726/) — Falling Bottles
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ○ [0728](/solutions/0728/) — Circle of Coins
 - ○ [0733](/solutions/0733/) — Ascending Subsequences
 - ○ [0734](/solutions/0734/) — A Bit of Prime

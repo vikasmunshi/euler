@@ -618,6 +618,7 @@ arithmetic turns out to be a handful of operations on small numbers.
 - ○ [0717](/solutions/0717/) — Summation of a Modular Formula
 - ● [0719](/solutions/0719/) — Number Splitting
 - ● [0721](/solutions/0721/) — High Powers of Irrational Numbers
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ○ [0728](/solutions/0728/) — Circle of Coins
 - ○ [0732](/solutions/0732/) — Standing on the Shoulders of Trolls
 - ○ [0733](/solutions/0733/) — Ascending Subsequences

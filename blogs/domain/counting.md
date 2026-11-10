@@ -319,7 +319,7 @@ reach for wide or arbitrary-precision types
 - ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0679](/solutions/0679/) — Freefarea
 - ○ [0696](/solutions/0696/) — Mahjong
-- ○ [0726](/solutions/0726/) — Falling Bottles
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ○ [0733](/solutions/0733/) — Ascending Subsequences
 - ○ [0740](/solutions/0740/) — Secret Santa
 - ○ [0741](/solutions/0741/) — Binary Grid Colouring

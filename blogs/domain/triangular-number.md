@@ -130,7 +130,7 @@ apart, and a triangular-style quadratic falls out.
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0621](/solutions/0621/) — Expressing an Integer as the Sum of Triangular Numbers
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
-- ○ [0726](/solutions/0726/) — Falling Bottles
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ○ [0747](/solutions/0747/) — Triangular Pizza
 - ○ [0833](/solutions/0833/) — Square Triangle Products
 - ● [0944](/solutions/0944/) — Sum of Elevisors

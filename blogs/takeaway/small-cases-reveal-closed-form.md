@@ -332,6 +332,7 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0684](/solutions/0684/) — Inverse Digit Sum
 - ● [0711](/solutions/0711/) — Binary Blackboard
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences

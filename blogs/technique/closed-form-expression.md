@@ -518,6 +518,7 @@ loop was never needed.
 - ● [0704](/solutions/0704/) — Factors of Two in Binomial Coefficients
 - ● [0711](/solutions/0711/) — Binary Blackboard
 - ● [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0726](/solutions/0726/) — Falling Bottles
 - ● [0739](/solutions/0739/) — Summation of Summations
 - ● [0743](/solutions/0743/) — Window into a Matrix
 - ● [0771](/solutions/0771/) — Pseudo Geometric Sequences
