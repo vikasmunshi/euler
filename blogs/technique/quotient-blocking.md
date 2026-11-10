@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking] -->
-<!-- status: final 2026-10-29T02:04Z -->
+<!-- status: final -->
 # quotient blocking
 
 Quotient blocking is the observation that `⌊n/k⌋`, as `k` runs from `1` to `n`, takes only about
@@ -56,6 +56,25 @@ each block contributes `g(q)·(M(k_end) − M(k−1))`. Problems 0319 and 0478 b
 `Σ_d μ(d)·g(⌊n/d⌋)`; 0319 then needs `M` at every point of `V(n)`, which is itself a
 quotient-blocked recursion, `M(v) = 1 − Σ_{j≥2} M(⌊v/j⌋)`.
 
+Blocking pays even when it does not set the asymptotics. Problem 0875 reduces a count of zeros of
+a quadratic form, via Gauss sums, to `Σ_m w(m)·S₇(⌊N/m⌋)` with `w` multiplicative and `S₇` the
+[Faulhaber](https://en.wikipedia.org/wiki/Faulhaber%27s_formula) sum of seventh powers. `w` comes
+from a linear totient sieve, so the run is `O(N)` regardless — but blocking means the degree-8
+polynomial `S₇` is evaluated a few thousand times instead of ten million. When `g` is the
+expensive part, blocking is how you ration it.
+
+**Blocking a product.** Nothing in the run structure cares whether the terms are added. Problem
+0754 multiplies Gauss factorials, and after Möbius inversion the whole thing becomes
+`Π_d (d^{T(M)}·F(M))^{μ(d)}` with `M = ⌊N/d⌋` — a product whose exponents, not terms, depend on `d`
+through the quotient. Over one run of `d`, the factor `F(M)` is raised to a Mertens difference,
+and `Π d^{μ(d)}` is a ratio of running products, so each run costs two modular powers. Working
+modulo a prime `p > N`, exponents reduce modulo `p − 1` by
+[Fermat](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem), and a negative Mertens
+difference needs no special case. Two engineering points generalise. The running products are
+recorded only at the checkpoints `x ∈ V(N)` during one linear pass, since those are the only
+arguments the assembly ever reads. And keeping separate products for `μ(d) = +1` and `μ(d) = −1`
+means one modular inverse per run, not one per `d`.
+
 **Inverting "every object is a multiple of a primitive one".** That Mertens recursion is one
 instance of a pattern common enough to recognise on sight. Suppose `S(N)` counts all objects of
 size at most `N` and is cheap — a closed form — while `P(N)` counts only the primitive ones. If every
@@ -78,6 +97,22 @@ is already stored, with no call stack and no memo dictionary. Problem 0512 shows
 buys beyond its headline value: it needs `φ` summed over *odd* `n` only, and since `φ(2m)` is `φ(m)`
 or `2φ(m)` by the parity of `m`, the even part unrolls to `Σ_{k≥1} Φ(⌊N/2ᵏ⌋)`. Every one of those
 arguments is already in `V(N)`, so the restriction costs `log₂ N` table reads and nothing else.
+Problem 0625 is the textbook use of that table: the gcd sum is the Dirichlet convolution
+`Id * φ`, and swapping the order of summation gives `Σ_k φ(k)·T(⌊N/k⌋)` — one blocked sum whose
+weights' prefix sums are exactly the `Φ` the recursion has just tabulated.
+
+**Twisting the inversion by a character.** The restriction to odd numbers recurs, and it need not
+be unrolled after the fact. If `χ` is completely multiplicative — the indicator of odd numbers,
+say, or the [character modulo 4](https://en.wikipedia.org/wiki/Dirichlet_character) — then
+`(μχ) * χ = ε`, and the inversion recursion carries over word for word:
+`Σ_{k≤x} χ(k)·M_χ(⌊x/k⌋) = 1`, solved for the `k = 1` term. Problem 0935 counts coprime pairs
+split by `q mod 4`, so every term becomes `Σ_{e odd} μ(e)·g(⌊M/e⌋)`, and it computes the odd
+Mertens function `M_odd` by exactly this twisted recursion, one memo shared by five sums. Problem
+0787 needs the same odd-`d` Möbius sums and reaches them the other way, from `μ(2m) = −μ(m)`:
+`M_odd(x) = Σ_{k≥0} M(⌊x/2ᵏ⌋)`, `log₂ x` reads of the plain table. Its game analysis also produces
+`Σ_n (μ * χ₄)(n)`, and swapping the order of summation leaves `Σ_{d odd} μ(d)·X(⌊N/d⌋)`, where the
+prefix sum `X` of a periodic character is a lookup on `y mod 4`. A periodic weight is the cheapest
+`F` there is.
 
 **Sieving at the key values only.** The Lucy_Hedgehog prime-counting DP — a cousin of the
 [Meissel–Lehmer algorithm](https://en.wikipedia.org/wiki/Meissel%E2%80%93Lehmer_algorithm) and the
@@ -91,6 +126,15 @@ function `dₙ`, which is multiplicative and equals the constant `n` on every pr
 contribute `n·π(x)` and the composites come from a recursion over smallest prime factors whose
 arguments `⌊x/pᵉ⌋` never leave `V(m)` — each `π` it asks for is a single lookup. The closure
 property is what makes this work.
+
+The DP's *intermediate* states are worth reading too, not just its final table. Just before the
+step for prime `p`, the entry at `v` counts the integers in `[2, v]` that survive sieving by every
+prime below `p` — the primes, plus everything whose smallest factor is at least `p`. Problem 0521
+sums smallest prime factors up to `10¹²`, and the composites with smallest factor `p` are exactly
+`p` times such a survivor in `[p, ⌊n/p⌋]`. So it reads `large[p]` at the start of step `p`,
+subtracts the primes below `p`, multiplies by `p`, and moves on: the answer is accumulated
+*during* the sieve, from counts the sieve was computing anyway, with a parallel table of prime
+sums supplying the prime term.
 
 **Iterate over the quotient, not the index.** When the outer loop is over large primes `p > √T` that
 each appear once, the interesting quantity `⌊T/p⌋` again takes few values. Problem 0272 flips the
@@ -123,9 +167,16 @@ interval, never per `n`.
   = O(n^{3/4})`; 0276 runs that pure form, and its timings grow by about 35× from `N = 10⁷` to
   `10⁹`, close to the predicted `100^{3/4} ≈ 32`; 0452's Min_25 tracks the same bound, about 5–6×
   per tenfold step in `m`. Sieving every argument below a cutoff `L` and recursing only above it
-  costs `O(L + n/√L)`, which balances at `L = n^{2/3}` — 0351's and 0512's choice, and 0512's
-  timings rise by about the predicted `4^{2/3} ≈ 2.5` when `N` quadruples. Budget for that, not for
-  the `O(√n)` outer loop.
+  costs `O(L + n/√L)`, which balances at `L = n^{2/3}` — the choice of 0351, 0512, 0625, 0787 and
+  0935; 0512's timings rise by about the predicted `4^{2/3} ≈ 2.5` when `N` quadruples, and 0787's
+  by about `10^{2/3} ≈ 4.6` per decade. Budget for that, not for the `O(√n)` outer loop.
+- **Split each sum at `√v` and treat the halves differently.** Inside one recursion step,
+  the `d` below about `√v` give distinct quotients and are cheapest taken one at a time, while the
+  `d` above give quotients `q ≤ √v`, each repeated `⌊v/q⌋ − ⌊v/(q+1)⌋` times. 0625 splits at
+  `c = ⌊v/(⌊√v⌋+1)⌋` and runs `d ≤ ⌊v/(c+1)⌋` explicitly, then `q ≤ c` grouped: the ranges meet
+  exactly, both are about `√v` long, and each half vectorises as one NumPy expression. That is the
+  [hyperbola method](/blogs/technique/dirichlet-hyperbola-method) in miniature, and it removes the
+  per-run `n // q` divisions from the hot loop.
 - **Recognise the inversion from the counting story.** "All objects" versus "primitive objects",
   with scaling by `g` mapping one to the other, is a Dirichlet convolution with `1`; it inverts by
   the recursion above whether the objects are triangles, lattice directions or fractions. If `S`
