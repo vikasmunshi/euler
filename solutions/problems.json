@@ -7460,8 +7460,8 @@
     "level": 32,
     "pct": 82,
     "solvers": 227,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Wed, 11 Nov 2026, 00:02"
   },
   "934": {
     "title": "Unlucky Primes",
