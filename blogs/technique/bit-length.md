@@ -107,5 +107,6 @@ four ports use.
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ● [0882](/solutions/0882/) — Removing Bits
 - ● [0899](/solutions/0899/) — DistribuNim I
+- ● [0900](/solutions/0900/) — DistribuNim II
 
 <!-- /problems -->

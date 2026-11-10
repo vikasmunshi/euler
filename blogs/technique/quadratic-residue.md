@@ -211,6 +211,7 @@ Things to keep in mind:
 - ● [0659](/solutions/0659/) — Largest Prime
 - ● [0678](/solutions/0678/) — Fermat-like Equations
 - ● [0752](/solutions/0752/) — Powers of $1+\sqrt 7$
+- ● [0900](/solutions/0900/) — DistribuNim II
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [1007](/solutions/1007/) — Alternating Difference
 

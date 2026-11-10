@@ -142,6 +142,7 @@ undefined at $x = 0$.
 - ○ [0811](/solutions/0811/) — Bitwise Recursion
 - ● [0872](/solutions/0872/) — Recursive Tree
 - ○ [0890](/solutions/0890/) — Binary Partitions
+- ● [0900](/solutions/0900/) — DistribuNim II
 - ○ [0942](/solutions/0942/) — Mersenne's Square Root
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 

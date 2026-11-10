@@ -434,6 +434,7 @@ factoring".
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0892](/solutions/0892/) — Zebra Circles
+- ● [0900](/solutions/0900/) — DistribuNim II
 - ○ [0904](/solutions/0904/) — Pythagorean Angle
 - ○ [0914](/solutions/0914/) — Triangles inside Circles
 - ○ [0919](/solutions/0919/) — Fortunate Triangles

@@ -423,6 +423,7 @@ the repetition.
 - ● [0767](/solutions/0767/) — Window into a Matrix II
 - ● [0860](/solutions/0860/) — Gold and Silver Coin Game
 - ● [0892](/solutions/0892/) — Zebra Circles
+- ● [0900](/solutions/0900/) — DistribuNim II
 - ● [0922](/solutions/0922/) — Young's Game A
 - ● [0923](/solutions/0923/) — Young's Game B
 - ● [0926](/solutions/0926/) — Total Roundness
