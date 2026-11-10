@@ -1,9 +1,9 @@
 <!-- tags: [modular-exponentiation] -->
-<!-- status: final 2026-11-04T18:15Z -->
+<!-- status: final -->
 # Modular exponentiation
 
 [Modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation) computes
-`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in some fifty
+`b^e mod m` without ever forming `b^e`. That one sentence is why it turns up in some sixty
 problems below: over and over, the quantity a problem asks for is a *residue* — the last ten digits, a count
 modulo `10^9+7`, whether some power lands on `1` — while the power itself has more digits than
 there are atoms in the universe. The naive route computes a number you cannot store to answer a
@@ -50,19 +50,20 @@ precision integers, and a hand-rolled version is strictly slower. The same probl
 ## The roles it plays
 
 The reason this tag lands on so many solutions is that `pow(b, e, m)` is rarely the *answer* — it
-is the primitive that other number-theoretic machinery is built from. Ten recurring roles:
+is the primitive that other number-theoretic machinery is built from. Eleven recurring roles:
 
 | Role | Shape | Seen in |
 | --- | --- | --- |
 | Direct residue | `pow(b, e, m)` | 48, 97, 194, 615, 731, 820 |
 | [Modular inverse](/blogs/domain/modular-multiplicative-inverse) | `pow(a, m-2, m)` for prime `m`, or `pow(a, -1, m)` | 365, 374, 487, 545, 635, 650, 675, 743, 860, 926 |
-| [Geometric series](https://en.wikipedia.org/wiki/Geometric_series) | `(pow(x, n, m) - 1) · (x - 1)⁻¹` | 335, 479, 506, 520, 711 |
+| [Geometric series](https://en.wikipedia.org/wiki/Geometric_series) | `(pow(x, n, m) - 1) · (x - 1)⁻¹` | 335, 479, 506, 520, 711, 889, 968 |
 | Primality witness | `pow(a, d, n)` then repeated squaring — [Miller–Rabin](/blogs/technique/miller-rabin-primality-test) | 111, 146, 216, 271, 293, 516 |
 | [Multiplicative order](/blogs/domain/multiplicative-order) | `pow(10, k, n) == 1` | 130, 132, 133, 752 |
 | Modular root | `pow(a, (p+1)//4, p)`, `pow(g, (p-1)//k, p)`, [Tonelli–Shanks](/blogs/technique/tonelli-shanks-algorithm) | 200, 271, 291, 457, 659, 745 |
+| [Power-residue class](https://en.wikipedia.org/wiki/Power_residue_symbol) | `pow(x, (p-1)//k, p)` names the coset of `x` | 971 |
 | Exponent reduction | `pow(x, pow(2, k, p-1), p)`, or `λ(m)` bounds the exponent | 188, 250, 455, 492, 684, 754, 822 |
 | Product by multiplicity | `∏ pow(b, count[b], m)` | 705, 754, 1010 |
-| Size of a solution space | `pow(q, n - rank, m)` | 619 |
+| Size of a solution space | `pow(q, n - rank, m)`, [Cayley's](https://en.wikipedia.org/wiki/Cayley%27s_formula) `n^(n-2)` trees | 619, 960 |
 | Power in a ring extension | `(a + b√d)^n` by square-and-multiply on pairs | 492, 752 |
 
 The inverse row deserves a note, because it is the most common use by volume. By [Fermat's little
@@ -92,7 +93,11 @@ Problem 374 goes further and barely inverts at all. Its block sums contain the
 holding `H_j` as a residue costs an inverse of every `j`, about `1.4 × 10^7` of them. But the sums
 multiply `H_j` by `j!` anyway, and `A_j = j!·H_j` is an integer with a division-free recurrence,
 `A_j = j·A_(j-1) + (j-1)!`. Carry the numerator instead of the fraction and the denominators never
-appear; the only `pow` left is one inverse for a truncated last block. Some inverses need no `pow`
+appear; the only `pow` left is one inverse for a truncated last block. Problem 976 makes the
+same move on a [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) recurrence, whose
+step `(n+1)·c_(n+1) = …` would divide by `n + 1` ten million times. Tracking `d_n = n!·c_n`
+clears the denominator, so the recurrence runs on integers, and one inverse of `K!` at the end
+undoes the scaling for every sequence that shares it. Some inverses need no `pow`
 because they have a closed form: `2⁻¹ ≡ (m+1)/2` for any odd `m`. Problem 374 takes its one constant
 half that way, and problem 291 halves modulo two million different primes at once with no
 exponentiation.
@@ -115,6 +120,22 @@ geometric series, with `k = 0` and `k = 1` handled separately because the denomi
 there. When `x − 1` is not invertible at all, fall back to doubling: `S(2n) = S(n)·(1 + x^n)` is
 square-and-multiply on the pair `(x^n, S(n))`, and it never divides.
 
+A geometric series also closes a *run*, and that lets you pay per run instead of per term.
+Problem 889 sums `c_q · 2^(-q)` over a binary expansion about `2 × 10^18` digits long. The weight
+`c_q` counts earlier digits that disagree with digit `q`, so it stays constant along any run of
+equal digits, and the digits are long runs of zeros with a few thousand short clusters. A run
+from `u` to `v` then contributes `c_u · (2^(N-u+1) − 2^(N-v))`, so the whole sum costs two `pow`
+calls per run boundary, however long the runs are. Problem 968 uses the geometric series as an
+elimination step. It sums a monomial weight `2^(x₁)·3^(x₂)·…` over the lattice points of a
+five-dimensional polytope with bounds near `10^9`. Summing out one variable between two linear
+bounds `±y + k` gives `(r^(U+1) − r^L)/(r − 1)`, and that is again a monomial in the remaining
+variables, with each base multiplied by `r` or `r⁻¹`. Exponentials are closed under summation
+over a variable, so [Fourier–Motzkin
+elimination](https://en.wikipedia.org/wiki/Fourier%E2%80%93Motzkin_elimination) can carry them
+through all five variables, case by case. The concrete `pow` calls only ever see the constant
+offsets `k`; the variables stay symbolic exponents. The division needs `r ≠ 1`, which holds here
+because each variable's prime appears only in its own base until that variable is gone.
+
 The root row is the same power map read the other way. In a cyclic group of order `p - 1`,
 raising to `(p-1)/k` lands in the subgroup of `k`-th roots of unity, so problem 271 — cube roots of
 `1` modulo a primorial — gets a primitive cube root modulo each prime from `pow(g, (p-1)//3, p)`
@@ -123,6 +144,20 @@ for any `g` that is not a cubic residue, then lifts it to higher prime powers wi
 inverse. Problem 659 is the `k = 4` case: a polynomial sieve over `4k² + 1` needs the roots of that
 quadratic modulo every prime `p ≡ 1 (mod 4)`, which is `√-1` halved — and `c^((p-1)/4)` is a square
 root of `-1` for any non-residue `c`, recognised by its square landing on `p - 1`.
+
+Read the same map as a *label* rather than a root, and it sorts the group. When `k | p − 1`,
+`χ(x) = x^((p-1)/k)` is always a `k`-th root of unity, and it is the same for exactly the `x` in
+one coset of the `k`-th powers. It is the [power residue
+symbol](https://en.wikipedia.org/wiki/Power_residue_symbol), the generalisation of [Euler's
+criterion](https://en.wikipedia.org/wiki/Euler%27s_criterion) from `k = 2`. Problem 971 iterates
+`x ↦ x^k + x` modulo `p = 5k − 4`. Since `k − 1 = (p−1)/5`, `x^k = x · χ(x)` with `χ` the quintic
+symbol, so the map multiplies each `x` by `1 + χ(x)`. That factor depends only on `x`'s class, so the functional graph on `p`
+points projects onto a map on five classes, each holding `(p−1)/5` elements. Its five images
+`(1 + ζ^j)^((p-1)/5)` cost five `pow` calls, and they decide every point's fate: a class on a
+cycle of the small map is made entirely of periodic points. The per-prime cost drops from a walk
+of `p` points to a handful of exponentiations. When a map is multiplicative up to a factor that
+depends only on a power-residue class, exponentiate to find the class, and solve the problem on
+the quotient.
 
 The direct-residue row hides a pattern worth naming: reading digits far to the right of a
 decimal point. The `n`-th digit of `1/k` is a function of `10^(n-1) mod k` alone (problem 820),
@@ -294,6 +329,12 @@ disguise, so collapse the base first and exponentiate second.
   divides by `g²` at the end. Finding `g` uses the same idea from the other side. Any common prime
   divides `gcd(n, 2^n − 1) = gcd(n, pow(2, n, n) − 1)`, and its exact multiplicity comes from
   residues modulo a high power `p^64` of it. Neither step ever forms the `n`-bit number `2^n − 1`.
+- **A power of a product is a product of powers — so a powered sum can become a convolution.**
+  Problem 767 needs `F(K) = ∑_s C(K, s)^16` for every `K` up to `10^5`, which is `5 × 10^9` terms
+  if each `F(K)` is summed on its own. But `C(K, s)^16 = K!^16 · u_s · u_(K-s)` with
+  `u_s = (s!)^(-16)`, so every `F(K)` is `K!^16` times one coefficient of the self-convolution
+  `u * u`. One FFT then serves all `K` together. Raising to the 16th power never got in the way;
+  it carried the factorial factorisation straight through.
 - **`O(log e)` is not always necessary.** Problem 97's linear doubling loop is `7.8 × 10^6`
   iterations — 23 with square-and-multiply, but both finish instantly, and the linear one is easier
   to read. Square-and-multiply earns its keep when the exponent is genuinely large (`10^18`), or
@@ -331,7 +372,10 @@ disguise, so collapse the base first and exponentiate second.
 - **`pow` is not free.** Each call is `O(log e)` multiplications of `O(log² m)` bit-cost. A sweep
   that calls it per candidate is `O(n log n)` at best; if you find yourself calling it inside two
   nested loops, look for a way to hoist it — usually by exponentiating once and multiplying
-  incrementally. Or change what you call it on. Problem 291 counts the primes among about
+  incrementally. Hoisting needs a shared base or a shared exponent, though. Problem 960's
+  Cayley-formula sum has terms `s^(s-1) · (n-s)^(n-s-1)`, where base and exponent both move with
+  `s`, so `n` independent `pow` calls at `O(n log n)` is the honest cost, and that is what the
+  `n = 10^6` case spends its time on. Or change what you call it on. Problem 291 counts the primes among about
   `5 × 10^7` values of a quadratic, and a primality test on each is tens of millions of
   exponentiations on numbers near `5 × 10^15`. Asking which primes can *divide* the quadratic
   instead takes a [polynomial sieve](/blogs/technique/polynomial-sieve): a `√-1` for each of two
