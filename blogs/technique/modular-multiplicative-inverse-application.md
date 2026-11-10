@@ -1,5 +1,5 @@
 <!-- tags: [modular-multiplicative-inverse-application] -->
-<!-- status: final 2026-11-08T12:07Z -->
+<!-- status: final -->
 # Modular multiplicative inverse (application)
 
 A [modular multiplicative inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse) is
@@ -169,6 +169,20 @@ fractions with denominators `d(x)·d(y) ≤ 16`. Each fraction becomes a residue
 `T` is the count. Linearity of expectation is often the easy way to set up a count, and modular
 inverses let you use it without leaving integer arithmetic.
 
+Another common denominator is the size of a group you average over. A filter that keeps only the
+terms with some property usually sums over a few "twists" and divides by how many there are. The
+simplest twist is a sign. Problems 0973 and 0976 both count by parity. 0973 gets a signed count
+`E = (#even) − (#odd)` from a rational generating function, and the total is `2^(n−1)`, so the odd
+count is `(2^(n−1) − E) · 2⁻¹`. 0976 keeps the even part of a series with
+`½ [f(x) + f(−x)]`, which is the two-term [roots-of-unity filter](https://en.wikipedia.org/wiki/Series_multisection).
+Problem 0922 uses the same idea at a larger size. It combines game values by XOR, so it counts
+tuples with a [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Hadamard_transform) over
+`S` nimber slots, and the inverse transform divides by `S`. The solution needs it at only one point,
+`X = 0`, where it is `S⁻¹ · Σ_s` of the transformed counts, so the whole inverse transform reduces
+to one sum and one inverse. In each case the normaliser is the order of the group, which is `2` or
+a power of `2`. It is a unit modulo any odd modulus, so the filter needs no prime-specific
+reasoning.
+
 The modulus does not need to be prime, either. Problem 0731 wants ten digits of a decimal expansion
 starting near position `10¹⁶`, which is an integer part taken modulo `10¹⁰`. Each term needs the
 quotient `q = (10^e − r) / 3^i`, an integer with about `10¹⁶` digits. Since `3^i` is a unit modulo
@@ -204,6 +218,17 @@ divisor. Problem 0711's closed form needs `Σ 2^(−m)` and `Σ m·2^(−m)` alo
 `2^m`. Modulo a prime, `2^(−m)` is `(2⁻¹)^m`, so these are ordinary geometric and
 arithmetico-geometric series with ratio `2⁻¹`. The function that sums powers of `2` sums powers of
 `2⁻¹` unchanged. Negative exponents need no separate code path.
+
+Problem 0968 takes this further, into symbolic algebra. It sums a weight
+`2^(x₁) 3^(x₂) 5^(x₃) 7^(x₄) 11^(x₅)` over the lattice points of a five-dimensional polytope with
+about `10⁴⁰` points, and removes one variable at a time
+([Fourier–Motzkin](https://en.wikipedia.org/wiki/Fourier%E2%80%93Motzkin_elimination) style). Each
+step is a geometric sum, `Σ_{x=L}^{U} r^x = (r^(U+1) − r^L) · (r − 1)⁻¹`. The bounds are linear in
+the remaining variables, so substituting `x = k − y` turns the base `r` into a base `r⁻¹` on `y`.
+So the integrand is always a list of monomials whose bases are residues, products of the five
+primes and their inverses. Each elimination multiplies some coefficients by `(r − 1)⁻¹` and
+some bases by `r` or `r⁻¹`. The inverse appears both as a divisor and as a base, and the algebra
+never needs to know which.
 
 Problem 1006 uses an inverse power to make a state update *linear*. It walks the Fibonacci word
 letter by letter and tracks `N(r) = Σ_{i<r} gᵢ·10^i`, a number that grows at its high end. That step,
@@ -257,7 +282,10 @@ the repetition.
   satisfy recurrences with integer coefficients only. One inverse of `(n + 1)!` (times a constant) at
   the end undoes all the scaling. This is clearing denominators, the same algebra as multiplying a
   rational recurrence through by its common denominator, applied to a sequence. It trades `n`
-  inverses, or an `n`-entry table, for one inverse and `O(1)` memory.
+  inverses, or an `n`-entry table, for one inverse and `O(1)` memory. Problem 0976 shows that the
+  scale factor can be shared. Its three holonomic sequences divide by `n + 1` at each step, and the
+  binomial `C(N + K, K)` it also needs has `K!` as its denominator. Scaled by `n!`, all four advance
+  in one loop, and a single `(K!)⁻¹`, together with the filter's `2⁻¹`, finishes all of them.
 
 - **Hoist loop-invariant inverses.** If the divisor depends on the outer index only, invert once
   outside — 0650 precomputes `(p − 1)⁻¹` per prime before the sweep, not per iteration of it. In
@@ -301,6 +329,12 @@ the repetition.
   chosen by `p mod 6`, and it is applied to half a million primes as one array expression. When the
   modulus varies but the *inverted value* is a small constant,
   look for the integer identity before reaching for the general machinery.
+  Symmetry can remove a division as well. Problem 0960's tree-counting formula has a leading
+  `½` over a sum whose terms at `s` and `n − s` are equal. Adding each term with `s < n/2` once,
+  instead of adding both and halving, leaves only the middle term at `s = n/2` to halve. That term
+  is an even binomial, so the halving is exact integer division with no modulus, and `(p + 1)/2`
+  modulo a prime. Because of this, the solution runs with modulus `0` meaning exact arithmetic,
+  and the statement's unreduced examples check the same code path as the reduced answer.
 
 ## Getting it right
 
@@ -320,6 +354,12 @@ the repetition.
   `pow(0, −1, p)` raises an exception, but a hand-written extended Euclid in C usually returns some
   value without any error, so handle the degenerate values explicitly before applying the closed form. The same check applies modulo
   `p` to any ratio `k ≡ 1 (mod p)`, not only to `k = 1`.
+  Problem 0968 is the opposite case. It divides by `r − 1` for every base the elimination builds,
+  with no special case. The argument is structural: a variable's own prime appears only in its own
+  base until that variable is eliminated, so its base is never the integer `1`. That rules out
+  `r = 1` exactly, but it only makes `r ≡ 1 (mod p)` unlikely. The Python solution is still safe,
+  because `pow(r − 1, −1, p)` would raise rather than return a wrong residue. This is another reason
+  to prefer it over a hand-written inverse.
   When non-units can't be excluded, handle them on purpose. Problem 0407's inverse table stores 0 for
   every non-unit, and the CRT formula then gives the trivial idempotents 0 and 1 for those splits,
   which the maximum discards. It never yields a wrong one. Problem 0531 handles them by dividing:
