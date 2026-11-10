@@ -248,6 +248,7 @@ conversion altogether, and is usually faster besides.
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0957](/solutions/0957/) — Point Genesis
 - ● [0974](/solutions/0974/) — Very Odd Numbers
+- ● [0982](/solutions/0982/) — The Third Dice
 - ● [0988](/solutions/0988/) — Non-attacking Frogs
 
 <!-- /problems -->

@@ -38,6 +38,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Discrete_unifo
 - ○ [0969](/solutions/0969/) — Kangaroo Hopping
 - ○ [0970](/solutions/0970/) — Kangaroo Hopping over Sixes
 - ○ [0978](/solutions/0978/) — Random Walk Skewness
-- ○ [0982](/solutions/0982/) — The Third Dice
+- ● [0982](/solutions/0982/) — The Third Dice
 
 <!-- /problems -->

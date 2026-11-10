@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Multiset>._
 ## Problems
 
 - ● [0936](/solutions/0936/) — Peerless Trees
+- ● [0982](/solutions/0982/) — The Third Dice
 
 <!-- /problems -->

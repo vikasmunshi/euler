@@ -248,6 +248,6 @@ that read the same thing contribute the same amount, and can be counted together
 - ○ [0970](/solutions/0970/) — Kangaroo Hopping over Sixes
 - ● [0973](/solutions/0973/) — Random Dealings
 - ○ [0978](/solutions/0978/) — Random Walk Skewness
-- ○ [0982](/solutions/0982/) — The Third Dice
+- ● [0982](/solutions/0982/) — The Third Dice
 
 <!-- /problems -->

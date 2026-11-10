@@ -78,5 +78,6 @@ the backward pass awkward.
 - ● [0232](/solutions/0232/) — The Race
 - ● [0761](/solutions/0761/) — Runner and Swimmer
 - ● [0950](/solutions/0950/) — Pirate Treasure
+- ● [0982](/solutions/0982/) — The Third Dice
 
 <!-- /problems -->

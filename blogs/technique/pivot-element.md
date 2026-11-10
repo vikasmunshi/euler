@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Pivot_element>
 ## Problems
 
 - ● [0227](/solutions/0227/) — The Chase
+- ● [0982](/solutions/0982/) — The Third Dice
 
 <!-- /problems -->
