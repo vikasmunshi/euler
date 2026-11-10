@@ -5804,8 +5804,8 @@
     "level": 26,
     "pct": 67,
     "solvers": 303,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Tue, 10 Nov 2026, 18:54"
   },
   "727": {
     "title": "Triangle of Circular Arcs",
