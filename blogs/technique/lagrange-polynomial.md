@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Lagrange_polyn
 
 - ● [0101](/solutions/0101/) — Optimum Polynomial
 - ● [0487](/solutions/0487/) — Sums of Power Sums
+- ● [0833](/solutions/0833/) — Square Triangle Products
 - ● [0984](/solutions/0984/) — Knights and Horses
 
 <!-- /problems -->

@@ -151,7 +151,7 @@ identity — inverse test, difference of squares, the odd-number gap — has alr
 - ○ [0769](/solutions/0769/) — Binary Quadratic Form II
 - ● [0808](/solutions/0808/) — Reversible Prime Squares
 - ○ [0817](/solutions/0817/) — Digits in Squares
-- ○ [0833](/solutions/0833/) — Square Triangle Products
+- ● [0833](/solutions/0833/) — Square Triangle Products
 - ○ [0864](/solutions/0864/) — Square + 1 = Squarefree
 - ○ [0925](/solutions/0925/) — Larger Digit Permutation III
 

@@ -430,6 +430,15 @@
       "refs": ["p0040", "p0305"]
     },
     {
+      "slug": "chebyshev-polynomials",
+      "facet": "domain",
+      "name": "Chebyshev polynomials",
+      "reference": "https://en.wikipedia.org/wiki/Chebyshev_polynomials",
+      "additional-references": [],
+      "summary": "The polynomial sequences T_n and U_n defined by T_n(cos t) = cos(nt), which also give the powers of a Pell equation's fundamental solution.",
+      "refs": ["p0833"]
+    },
+    {
       "slug": "chromatic-polynomial",
       "facet": "domain",
       "name": "Chromatic polynomial",
@@ -3019,7 +3028,7 @@
       "reference": "https://en.wikipedia.org/wiki/Square-free_integer",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0193", "p0203", "p0273", "p0357", "p0362", "p0399", "p0464", "p0536", "p0556", "p0580", "p0591", "p0619", "p0632", "p0633", "p0634", "p0641", "p0694", "p0745", "p0864", "p0962", "p0967"]
+      "refs": ["p0193", "p0203", "p0273", "p0357", "p0362", "p0399", "p0464", "p0536", "p0556", "p0580", "p0591", "p0619", "p0632", "p0633", "p0634", "p0641", "p0694", "p0745", "p0833", "p0864", "p0962", "p0967"]
     },
     {
       "slug": "square-number",
@@ -3730,7 +3739,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_search_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0678_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0844_s0", "p0986_s0"]
+      "refs": ["p0049_s0", "p0080_s1", "p0085_s1", "p0122_s0", "p0156_s0", "p0184_s0", "p0187_s0", "p0231_s0", "p0235_s0", "p0241_s0", "p0252_s0", "p0305_s0", "p0341_s0", "p0461_s0", "p0501_s0", "p0516_s0", "p0564_s0", "p0565_s0", "p0565_s1", "p0587_s0", "p0678_s0", "p0686_s0", "p0686_s1", "p0772_s0", "p0800_s0", "p0829_s0", "p0833_s0", "p0844_s0", "p0986_s0"]
     },
     {
       "slug": "binets-formula",
@@ -4495,7 +4504,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponential_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0587_s0", "p0615_s0", "p0829_s0"]
+      "refs": ["p0587_s0", "p0615_s0", "p0829_s0", "p0833_s0"]
     },
     {
       "slug": "exponentiation-by-squaring",
@@ -5116,7 +5125,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_overflow",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0006_s0", "p0027_s0", "p0063_s0", "p0108_s1", "p0110_s0", "p0119_s0", "p0221_s0", "p0251_s0", "p0259_s0", "p0421_s0", "p0429_s0", "p0484_s0", "p0516_s0", "p0558_s0"]
+      "refs": ["p0006_s0", "p0027_s0", "p0063_s0", "p0108_s1", "p0110_s0", "p0119_s0", "p0221_s0", "p0251_s0", "p0259_s0", "p0421_s0", "p0429_s0", "p0484_s0", "p0516_s0", "p0558_s0", "p0833_s0"]
     },
     {
       "slug": "integer-square-root",
@@ -5278,7 +5287,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lagrange_polynomial",
       "additional-references": ["https://en.wikipedia.org/wiki/Lagrange_polynomial#Barycentric_form"],
       "summary": "",
-      "refs": ["p0101_s0", "p0101_s3", "p0487_s0", "p0984_s0"]
+      "refs": ["p0101_s0", "p0101_s3", "p0487_s0", "p0833_s0", "p0984_s0"]
     },
     {
       "slug": "lattice-point",
@@ -5899,7 +5908,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pell%27s_equation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0066_s0", "p0094_s0", "p0100_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0140_s0", "p0224_s0", "p0321_s0", "p0581_s0", "p0582_s0"]
+      "refs": ["p0066_s0", "p0094_s0", "p0100_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0140_s0", "p0224_s0", "p0321_s0", "p0581_s0", "p0582_s0", "p0833_s0"]
     },
     {
       "slug": "pivot-element",
@@ -6853,7 +6862,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When the objects you want are hard to enumerate, count the ones you don't want and subtract from the total.",
-      "refs": ["p0520", "p0612", "p0628", "p0668", "p0994"]
+      "refs": ["p0520", "p0612", "p0628", "p0668", "p0833", "p0994"]
     },
     {
       "slug": "decompose-overlap",

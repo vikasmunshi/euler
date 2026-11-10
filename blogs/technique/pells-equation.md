@@ -126,5 +126,6 @@ be a square, and the result is a $D = 5$ Pell equation whose solutions are expre
 - ● [0321](/solutions/0321/) — Swapping Counters
 - ● [0581](/solutions/0581/) — $47$-smooth Triangular Numbers
 - ● [0582](/solutions/0582/) — Nearly Isosceles $120$ Degree Triangles
+- ● [0833](/solutions/0833/) — Square Triangle Products
 
 <!-- /problems -->

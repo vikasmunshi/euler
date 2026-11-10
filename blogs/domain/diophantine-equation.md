@@ -478,7 +478,7 @@ discipline still shapes the search.
 - ○ [0785](/solutions/0785/) — Symmetric Diophantine Equation
 - ○ [0791](/solutions/0791/) — Average and Variance
 - ○ [0799](/solutions/0799/) — Pentagonal Puzzle
-- ○ [0833](/solutions/0833/) — Square Triangle Products
+- ● [0833](/solutions/0833/) — Square Triangle Products
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0876](/solutions/0876/) — Triplet Tricks

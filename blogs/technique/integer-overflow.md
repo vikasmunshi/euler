@@ -133,5 +133,6 @@ its siblings (GCC and Clang) compute the operation and report whether it overflo
 - ● [0484](/solutions/0484/) — Arithmetic Derivative
 - ● [0516](/solutions/0516/) — $5$-smooth Totients
 - ● [0558](/solutions/0558/) — Irrational Base
+- ● [0833](/solutions/0833/) — Square Triangle Products
 
 <!-- /problems -->

@@ -132,7 +132,7 @@ apart, and a triangular-style quadratic falls out.
 - ○ [0647](/solutions/0647/) — Linear Transformations of Polygonal Numbers
 - ● [0726](/solutions/0726/) — Falling Bottles
 - ○ [0747](/solutions/0747/) — Triangular Pizza
-- ○ [0833](/solutions/0833/) — Square Triangle Products
+- ● [0833](/solutions/0833/) — Square Triangle Products
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0955](/solutions/0955/) — Finding Triangles
 - ○ [0985](/solutions/0985/) — Telescoping Triangles

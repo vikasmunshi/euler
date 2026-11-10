@@ -11,6 +11,7 @@ _TODO: write this page. No reference on the tag._
 - ● [0612](/solutions/0612/) — Friend Numbers
 - ● [0628](/solutions/0628/) — Open Chess Positions
 - ● [0668](/solutions/0668/) — Square Root Smooth Numbers
+- ● [0833](/solutions/0833/) — Square Triangle Products
 - ● [0994](/solutions/0994/) — Counting Triangles
 
 <!-- /problems -->
