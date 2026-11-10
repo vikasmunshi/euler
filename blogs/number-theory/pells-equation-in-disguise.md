@@ -430,7 +430,7 @@ factoring".
 - ● [0870](/solutions/0870/) — Stone Game IV
 - ○ [0876](/solutions/0876/) — Triplet Tricks
 - ○ [0877](/solutions/0877/) — XOR-Equation A
-- ○ [0880](/solutions/0880/) — Nested Radicals
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0892](/solutions/0892/) — Zebra Circles

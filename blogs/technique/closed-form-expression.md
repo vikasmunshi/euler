@@ -585,6 +585,7 @@ loop was never needed.
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0862](/solutions/0862/) — Larger Digit Permutation
 - ● [0872](/solutions/0872/) — Recursive Tree
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ● [0887](/solutions/0887/) — Bounded Binary Search
 - ● [0892](/solutions/0892/) — Zebra Circles
 - ● [0899](/solutions/0899/) — DistribuNim I

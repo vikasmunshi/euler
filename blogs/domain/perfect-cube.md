@@ -9,6 +9,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Cube_(algebra)
 
 - ● [0342](/solutions/0342/) — The Totient of a Square Is a Cube
 - ● [0348](/solutions/0348/) — Sum of a Square and a Cube
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ○ [0884](/solutions/0884/) — Removing Cubes
 
 <!-- /problems -->

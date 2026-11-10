@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Field_norm>._
 ## Problems
 
 - ● [0558](/solutions/0558/) — Irrational Base
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 
 <!-- /problems -->

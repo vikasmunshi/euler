@@ -706,7 +706,7 @@ show up there at once. See
 - ○ [0858](/solutions/0858/) — LCM
 - ○ [0864](/solutions/0864/) — Square + 1 = Squarefree
 - ○ [0876](/solutions/0876/) — Triplet Tricks
-- ○ [0880](/solutions/0880/) — Nested Radicals
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ○ [0884](/solutions/0884/) — Removing Cubes
 - ○ [0908](/solutions/0908/) — Clock Sequence II
 - ○ [0915](/solutions/0915/) — Giant GCDs

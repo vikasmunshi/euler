@@ -720,6 +720,7 @@ both slower and harder to read.
 - ● [0804](/solutions/0804/) — Counting Binary Quadratic Representations
 - ● [0842](/solutions/0842/) — Irregular Star Polygons
 - ● [0850](/solutions/0850/) — Fractions of Powers
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0923](/solutions/0923/) — Young's Game B

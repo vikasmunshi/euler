@@ -483,7 +483,7 @@ discipline still shapes the search.
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ○ [0876](/solutions/0876/) — Triplet Tricks
 - ○ [0877](/solutions/0877/) — XOR-Equation A
-- ○ [0880](/solutions/0880/) — Nested Radicals
+- ● [0880](/solutions/0880/) — Nested Radicals
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ○ [0919](/solutions/0919/) — Fortunate Triangles
 - ● [0932](/solutions/0932/) — $2025$
