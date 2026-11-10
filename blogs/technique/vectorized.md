@@ -604,6 +604,7 @@ fancy indexing as `inv[large % s]` — a lookup table, as above.
 - ● [0850](/solutions/0850/) — Fractions of Powers
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0921](/solutions/0921/) — Golden Recurrence
+- ● [0933](/solutions/0933/) — Paper Cutting
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0939](/solutions/0939/) — Partisan Nim
 - ● [0941](/solutions/0941/) — de Bruijn's Combination Lock

@@ -723,6 +723,7 @@ both slower and harder to read.
 - ● [0883](/solutions/0883/) — Remarkable Triangles
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0923](/solutions/0923/) — Young's Game B
+- ● [0933](/solutions/0933/) — Paper Cutting
 - ● [0934](/solutions/0934/) — Unlucky Primes
 - ● [0938](/solutions/0938/) — Exhausting a Colour
 - ● [0939](/solutions/0939/) — Partisan Nim

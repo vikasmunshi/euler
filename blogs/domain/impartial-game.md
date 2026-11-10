@@ -148,7 +148,7 @@ off-by-a-factor errors in this domain come from.
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ● [0900](/solutions/0900/) — DistribuNim II
-- ○ [0933](/solutions/0933/) — Paper Cutting
+- ● [0933](/solutions/0933/) — Paper Cutting
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 - ● [0961](/solutions/0961/) — Removing Digits
 

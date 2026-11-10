@@ -462,6 +462,7 @@ Five cautions earn their keep:
 - ● [0918](/solutions/0918/) — Recursive Sequence Summation
 - ● [0921](/solutions/0921/) — Golden Recurrence
 - ● [0932](/solutions/0932/) — $2025$
+- ● [0933](/solutions/0933/) — Paper Cutting
 - ● [0944](/solutions/0944/) — Sum of Elevisors
 - ● [0960](/solutions/0960/) — Stone Game Solitaire
 - ● [0962](/solutions/0962/) — Angular Bisector and Tangent 2

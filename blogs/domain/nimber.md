@@ -24,7 +24,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Nimber>._
 - ○ [0806](/solutions/0806/) — Nim on Towers of Hanoi
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ● [0922](/solutions/0922/) — Young's Game A
-- ○ [0933](/solutions/0933/) — Paper Cutting
+- ● [0933](/solutions/0933/) — Paper Cutting
 - ○ [0953](/solutions/0953/) — Factorisation Nim
 
 <!-- /problems -->
