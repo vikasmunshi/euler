@@ -8,5 +8,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Fibonacci_nim>
 ## Problems
 
 - ● [0692](/solutions/0692/) — Siegbert and Jo
+- ● [0870](/solutions/0870/) — Stone Game IV
 
 <!-- /problems -->

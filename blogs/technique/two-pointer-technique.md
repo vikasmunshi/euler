@@ -147,5 +147,6 @@ two-dimensional cousin of the chasing window.
 - ● [0331](/solutions/0331/) — Cross Flips
 - ● [0461](/solutions/0461/) — Almost Pi
 - ● [0478](/solutions/0478/) — Mixtures
+- ● [0870](/solutions/0870/) — Stone Game IV
 
 <!-- /problems -->

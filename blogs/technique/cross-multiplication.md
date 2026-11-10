@@ -94,5 +94,6 @@ decision never depends on floating-point accuracy.
 - ● [0112](/solutions/0112/) — Bouncy Numbers
 - ● [0246](/solutions/0246/) — Tangents to an Ellipse
 - ● [0437](/solutions/0437/) — Fibonacci Primitive Roots
+- ● [0870](/solutions/0870/) — Stone Game IV
 
 <!-- /problems -->

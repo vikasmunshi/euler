@@ -9,5 +9,6 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Prefix_sum>._
 
 - ● [0252](/solutions/0252/) — Convex Holes
 - ● [0718](/solutions/0718/) — Unreachable Numbers
+- ● [0870](/solutions/0870/) — Stone Game IV
 
 <!-- /problems -->

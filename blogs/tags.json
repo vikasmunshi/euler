@@ -1174,7 +1174,7 @@
       "reference": "https://en.wikipedia.org/wiki/Fibonacci_nim",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0692"]
+      "refs": ["p0692", "p0870"]
     },
     {
       "slug": "fibonacci-sequence",
@@ -2776,7 +2776,7 @@
       "reference": "https://en.wikipedia.org/wiki/Rational_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0033", "p0155", "p0180", "p0236", "p0257", "p0259", "p0343", "p0422", "p0450", "p0809", "p0880", "p0889", "p0972", "p0991"]
+      "refs": ["p0033", "p0155", "p0180", "p0236", "p0257", "p0259", "p0343", "p0422", "p0450", "p0809", "p0870", "p0880", "p0889", "p0972", "p0991"]
     },
     {
       "slug": "recurrence-relation",
@@ -4135,7 +4135,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cross-multiplication",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0033_s0", "p0112_s0", "p0246_s0", "p0437_s0"]
+      "refs": ["p0033_s0", "p0112_s0", "p0246_s0", "p0437_s0", "p0870_s0"]
     },
     {
       "slug": "cross-product",
@@ -6007,7 +6007,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prefix_sum",
       "additional-references": [],
       "summary": "Replacing a nested search for a dominating element with one running-maximum pass over an ordered sequence.",
-      "refs": ["p0252_s0", "p0718_s0"]
+      "refs": ["p0252_s0", "p0718_s0", "p0870_s0"]
     },
     {
       "slug": "prefix-sum",
@@ -6187,7 +6187,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0374_s0", "p0423_s0", "p0463_s0", "p0539_s0", "p0582_s0", "p0650_s0", "p0692_s0", "p0720_s0", "p0783_s0", "p0866_s0", "p0887_s0", "p0892_s0", "p0976_s0", "p1007_s0"]
+      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0100_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0148_s0", "p0154_s0", "p0169_s0", "p0209_s0", "p0230_s0", "p0288_s0", "p0297_s0", "p0321_s0", "p0346_s0", "p0374_s0", "p0423_s0", "p0463_s0", "p0539_s0", "p0582_s0", "p0650_s0", "p0692_s0", "p0720_s0", "p0783_s0", "p0866_s0", "p0870_s0", "p0887_s0", "p0892_s0", "p0976_s0", "p1007_s0"]
     },
     {
       "slug": "recursion-computer-science",
@@ -6502,7 +6502,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sweep_line_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0212_s0", "p0926_s0"]
+      "refs": ["p0212_s0", "p0870_s0", "p0926_s0"]
     },
     {
       "slug": "switch-statement",
@@ -6646,7 +6646,7 @@
       "reference": "https://en.wikipedia.org/wiki/Two-pointer_technique",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0143_s0", "p0184_s0", "p0252_s0", "p0331_s0", "p0461_s0", "p0478_s0"]
+      "refs": ["p0004_s0", "p0143_s0", "p0184_s0", "p0252_s0", "p0331_s0", "p0461_s0", "p0478_s0", "p0870_s0"]
     },
     {
       "slug": "unification-computer-science",
@@ -6907,7 +6907,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Represent computed geometric or numeric values as exact integers or reduced fractions when the answer depends on testing equality, since floating point can spuriously merge or split truly equal values.",
-      "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0239", "p0241", "p0243", "p0246", "p0252", "p0259", "p0331", "p0473", "p0493", "p0517", "p0751", "p0768", "p0800", "p0950", "p0972"]
+      "refs": ["p0009", "p0033", "p0042", "p0044", "p0057", "p0062", "p0063", "p0064", "p0102", "p0112", "p0121", "p0152", "p0155", "p0163", "p0165", "p0168", "p0179", "p0180", "p0183", "p0195", "p0205", "p0211", "p0239", "p0241", "p0243", "p0246", "p0252", "p0259", "p0331", "p0473", "p0493", "p0517", "p0751", "p0768", "p0800", "p0870", "p0950", "p0972"]
     },
     {
       "slug": "exact-sums-resist-modular-shortcuts",
@@ -7006,7 +7006,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "When a process idles predictably between rare events, compute where the next event falls and skip straight to it instead of stepping through the quiet stretch.",
-      "refs": ["p0443", "p0955"]
+      "refs": ["p0443", "p0870", "p0955"]
     },
     {
       "slug": "keep-candidates-not-just-optima",

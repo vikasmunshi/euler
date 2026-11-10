@@ -427,6 +427,7 @@ factoring".
 - ○ [0835](/solutions/0835/) — Supernatural Triangles
 - ● [0844](/solutions/0844/) — $k$-Markov Numbers
 - ● [0866](/solutions/0866/) — Tidying Up B
+- ● [0870](/solutions/0870/) — Stone Game IV
 - ○ [0876](/solutions/0876/) — Triplet Tricks
 - ○ [0877](/solutions/0877/) — XOR-Equation A
 - ○ [0880](/solutions/0880/) — Nested Radicals

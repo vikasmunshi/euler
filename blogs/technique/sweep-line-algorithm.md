@@ -8,6 +8,7 @@ _TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sweep_line_alg
 ## Problems
 
 - ● [0212](/solutions/0212/) — Combined Volume of Cuboids
+- ● [0870](/solutions/0870/) — Stone Game IV
 - ● [0926](/solutions/0926/) — Total Roundness
 
 <!-- /problems -->

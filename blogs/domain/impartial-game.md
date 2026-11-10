@@ -144,7 +144,7 @@ off-by-a-factor errors in this domain come from.
 - ● [0711](/solutions/0711/) — Binary Blackboard
 - ○ [0798](/solutions/0798/) — Card Stacking Game
 - ○ [0859](/solutions/0859/) — Cookie Game
-- ○ [0870](/solutions/0870/) — Stone Game IV
+- ● [0870](/solutions/0870/) — Stone Game IV
 - ○ [0888](/solutions/0888/) — 1249 Nim
 - ● [0899](/solutions/0899/) — DistribuNim I
 - ○ [0900](/solutions/0900/) — DistribuNim II
