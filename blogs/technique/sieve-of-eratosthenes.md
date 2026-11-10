@@ -1,5 +1,5 @@
 <!-- tags: [sieve-of-eratosthenes] -->
-<!-- status: final 2026-11-02T22:26Z -->
+<!-- status: final -->
 # Sieve of Eratosthenes
 
 The [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) finds
@@ -74,6 +74,16 @@ one `lcm` per number, no factorisation loop at all. And computing an order at a 
 needs the factorisation of the group order, `p − 1` or `p + 1`, so the same table is
 queried at the *neighbours* of primes — which is why it runs to `N + 1`, not `N`.
 
+The table also reaches further than its own bound if you factor the *pieces*, not the
+product. The primes of `ab` are the primes of `a` together with those of `b`, and the
+factorisation of `c^f` is that of `c` with every exponent multiplied by `f`. Problem 678
+counts solutions of `a^e + b^e = c^f` with `c^f` up to `10¹⁸`. Its sums-of-two-powers counts
+need the full factorisation of each target, but every target is a power of a base
+`c ≤ N^(1/3)`, so a table of a million entries factors a quintillion-sized range. Problem
+962's Möbius inclusion–exclusion runs over the primes of a product `(D/γ)·β`. It looks up the
+factors separately and merges their prime sets, so the table only has to cover the largest
+factor.
+
 Sometimes the oracle is queried about numbers the problem never names. Problem 249 counts
 the subsets of the primes below 5000 whose sum is prime: the subset sums are tabulated by a
 0/1-knapsack pass, and the sieve exists to answer "is this *total* prime?" — so it runs to
@@ -120,6 +130,36 @@ column of their own: the first number carrying one becomes its pivot and is XORe
 every later carrier, so each adds exactly one to the rank, and the Gaussian elimination
 runs over the `π(√b)` small-prime columns alone.
 
+## Sieve the values of a polynomial
+
+The sieve's index does not have to be the number being tested. Problem 291 reduces to
+counting the `n` for which `f(n) = 2n² + 2n + 1` is prime and below `5·10¹⁵`. That is about
+fifty million candidates scattered across a range far too large to sieve directly. But a prime
+`q` divides `f(n)` exactly when `n` is a root of `f` modulo `q`, and the roots of a quadratic
+modulo a prime form at most two residue classes. So the array is indexed by `n`, not by
+`f(n)`, and for each `q` you strike two arithmetic progressions instead of one. The rest of
+the argument is the familiar one: every composite value below the bound has a prime factor
+`≤ √bound`, so sieving with those primes leaves only primes. The one cell to spare is the
+`n` whose value *is* `q`.
+
+This is a [polynomial (or quadratic)
+sieve](https://en.wikipedia.org/wiki/Quadratic_sieve) in its simplest use, and it has two
+new costs and one bonus:
+
+- **Finding the roots.** Here `2f(n) = (2n + 1)² + 1`, so the roots come from a square root
+  of `−1` modulo `q`, which is a modular square-root computation for each prime rather than a
+  free stride.
+- **The bonus: most primes do no work.** `−1` is a square modulo `q` only for
+  `q ≡ 1 (mod 4)`, so the other half of the primes never divide any `f(n)` and are skipped
+  entirely. Which primes can divide a polynomial's values is decided by
+  [quadratic reciprocity](https://en.wikipedia.org/wiki/Quadratic_reciprocity), and
+  checking that first is cheap.
+- **Strides longer than the array.** The primes go up to `√bound ≈ 7·10⁷`, but the array
+  holds only `√(bound/2) ≈ 5·10⁷` cells, so most primes hit it once or not at all. One
+  slice assignment per prime is then nearly all overhead. The fix is to group the large
+  primes into bands `[L, 2L)`, where each prime hits the array at most `N/L + 1` times, and
+  strike the `k`-th multiple of every prime in the band with one vectorised scatter.
+
 ## Variants, and when you need them
 
 - **Bounded array** — the default above. You know `N`, it fits in memory, you want a table.
@@ -138,6 +178,15 @@ runs over the `π(√b)` small-prime columns alone.
   feeds primes, in order, as run lengths into a continued-fraction engine and cannot know
   how many it will consume; problem 829 needs all primes below bounds that its own search
   keeps doubling. Both start small and grow.
+- **Guess, then fall back** — when a generous fixed bound almost always suffices and the
+  rare miss can be handled another way. Problem 995 prices, for each prime `p`, the cheapest
+  prime `q` in each class of multiplicative order modulo `p`. It scans a sieve sized to a
+  fixed multiple of its input, in vectorised chunks of primes, reducing each chunk modulo
+  `p` in a single pass. It stops as soon as every order is priced, or as soon as the next
+  prime could no longer improve the result. If the table runs out with an order still
+  missing, it walks that order's residue classes past the end, using a deterministic
+  Miller–Rabin test in place of the table. The table handles nearly all of the work, and
+  the fallback guarantees correctness for the rest.
 - **Segmented** — when `N` is known but the array will not fit: sieve `[1, √N]` once for
   the small primes, then sweep the range in cache-sized windows, marking each window with
   those primes. Same primes, bounded memory. Problem 619's window `[a, b]` is the same
@@ -196,7 +245,8 @@ patterns recur.
   prime is near `n·ln n` and sieve that far. When it gives a value bound, sieve to the
   bound — or to the largest number you will actually *query*, which is not always the
   input (problem 249's subset sums, problem 752's `p + 1`), and not always all of it (the
-  roots and `n^(2/3)` above). When you cannot know it at all, double.
+  roots and `n^(2/3)` above, problem 678's cube root, problem 291's index range rather than
+  its value range). When you cannot know it at all, double, or guess and fall back.
 - **Know whether it is the bottleneck.** In problem 365 the sieve covers primes below
   10 000 and is then followed by twenty million Chinese-remainder lifts; a segmented or
   wheel sieve there would be effort spent on nothing. In problem 315 the sieve *is* the
