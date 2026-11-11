@@ -1,5 +1,5 @@
 <!-- tags: [gmp] -->
-<!-- status: final 2026-11-04T03:33Z -->
+<!-- status: final -->
 # GMP
 
 [GMP](https://gmplib.org/) — the GNU Multiple Precision Arithmetic Library — is the bignum library
@@ -9,7 +9,7 @@ announces that it needs big integers; the translation to C does, loudly, at the 
 overflow. `__int128` buys about 38 digits and stops there. Past that line the honest options are to
 [hand-roll a bignum](/blogs/technique/arbitrary-precision-arithmetic) or to link GMP, and every
 problem below took the second one — because each needs not just addition but division, exact
-comparison, modular exponentiation, binomials or rationals, and a library that has been tuned since
+comparison, modular exponentiation, binomials, rationals or a sub-quadratic multiply, and a library that has been tuned since
 1991 beats what you will write in an afternoon.
 
 ## The idea
@@ -63,7 +63,9 @@ hard part of the port, and these are exactly the ones the problems below reach f
 | `mpz_set_str`, `mpz_get_str` | decimal string ↔ value, any base | writing a bound like $10^{100}$ or $10^{25}$ as a literal, and printing the result (Problems 168, 169) |
 | `mpz_sqrt`, `mpz_perfect_square_p` | exact $\lfloor\sqrt{x}\rfloor$, and a perfect-square test | the first term of a continued fraction, and rejecting a square $d$ before a Pell search (Problem 581) |
 | `mpz_sizeinbase` | digit or bit count without materialising the string: exact in a power-of-two base, possibly one too many otherwise | checking that the answer fits its output buffer before `mpz_get_str` writes it (Problem 254). It is a bound, not a count, so Problem 776, whose decimal exponent must be right, counts the digits `mpz_get_str` actually wrote |
-| `mpz_import` | a value from an array of raw words | moving an `unsigned __int128` total into an `mpz_t` in one call, as its two 64-bit halves (Problem 844) |
+| `mpz_import`, `mpz_export` | a value from an array of raw words, and back | moving an `unsigned __int128` total into an `mpz_t` in one call, as its two 64-bit halves (Problem 844); packing a whole polynomial into one integer and unpacking the product (Problem 922) |
+| `mpz_tstbit`, `mpz_sizeinbase(x, 2)` | read one bit; count the bits | driving square-and-multiply in a group GMP knows nothing about (Problem 843); reading the binary digits of a value whose digits are the question (Problem 889) |
+| `mpz_submul`, `mpz_divexact` | fused $d \mathrel{-}= ab$; division known to be exact | a fraction-free pivot step, $(a \cdot p - f \cdot b) / \det$, with no GCD anywhere (Problem 982) |
 | `mpz_ui_pow_ui`, `mpz_pow_ui` | exact powers | scaling a probability to an integer before dividing (Problem 239) |
 | `mpq_*` with `mpq_canonicalize` | exact rationals, kept in lowest terms | a sum of fractions that must be compared for exact equality (Problem 180), or rounded only once, at the end (Problem 523) |
 | `gmp_printf`, `gmp_snprintf` | `printf` with `%Zd` / `%Qd` conversions for `mpz_t` / `mpq_t` | printing a fixed-point decimal straight into the answer buffer, and a `--show` trace of the exact rational (Problem 523) |
@@ -105,6 +107,34 @@ DP therefore runs on arrays of `mpz_t` and pays for no GCD. `mpq_t` appears only
 would reduce on every update for no benefit, and a `double` at the end could misround the 13th
 significant digit. Keep integers for as long as the state is integral, and convert to `mpq_t` at the
 one point where the division happens.
+
+Problem 982 shows how far that rule goes. It solves a [linear programme](https://en.wikipedia.org/wiki/Simplex_algorithm) exactly, which looks like a job for `mpq_t` in every cell of the tableau. It uses `mpz_t` instead, with
+[Bareiss's fraction-free elimination](https://en.wikipedia.org/wiki/Bareiss_algorithm) driving the
+simplex pivots. Every entry is kept multiplied by the current basis determinant, and a pivot updates
+a cell as
+
+```c
+mpz_mul(tmp, cell, piv);            /* cell·p                       */
+mpz_submul(tmp, f, pivot_row_cell); /*        − f·b                 */
+mpz_divexact(cell, tmp, det);       /* ÷ previous pivot: always exact */
+```
+
+[Sylvester's identity](https://en.wikipedia.org/wiki/Sylvester%27s_determinant_identity) guarantees
+that last division leaves no remainder, so `mpz_divexact` can skip computing one. The entries grow
+only as fast as the minors they are, and no GCD runs. The ratio test cross-multiplies, as Problem 192
+does. The rational appears once, at the end: the objective cell over $\det \cdot f^d$, rounded to six
+decimals in integers, as in Problem 523. With `mpq_t`, every touched cell would run its own GCD on every
+pivot, only to arrive at denominators the determinant already names.
+
+`mpq_t` is still right when the work is small and the rational is incidental. Problem 984
+evaluates a degree-8 polynomial at a huge $n$ by
+[Lagrange interpolation](https://en.wikipedia.org/wiki/Lagrange_polynomial) through ten exact
+values. That is ninety `mpq_mul`s in total, so their cost does not matter. Two details are worth
+copying. `mpq_set_si` takes an *unsigned* denominator, so a negative $x_i - x_j$ goes in as its
+absolute value followed by `mpq_neg`, and then `mpq_canonicalize`, which is the rule above again. The
+port then reads the answer from `mpq_numref` alone, because $f$ takes integer values, so the
+denominator must be 1. That is a proof obligation hidden in a field access. A one-line check that
+`mpq_denref` is 1 would turn a wrong interpolation degree into an error instead of a wrong number.
 
 In this repository the build glue is already done: `scripts/c/compile.sh` greps the source for
 `#include <gmp.h>` and appends `-lgmp` to the `gcc` line (and `-lmpfr -lgmp`, in that order, for
@@ -172,6 +202,36 @@ $k = 10^{1000}$, so `mpz_t` holds $k$, the block lengths and the exponents. Only
 which says how far to walk, needs a bignum, and that is why the port stays fast at that size. Ask of
 each variable which of the two it is, because often only the control path has to be wide.
 
+Problem 843 takes the same split into an algebra GMP does not know about. It needs the
+[multiplicative order](https://en.wikipedia.org/wiki/Order_(group_theory)) of elements of the
+[finite field](https://en.wikipedia.org/wiki/Finite_field) $\mathrm{GF}(2^k)$. The elements are
+polynomials over $\mathrm{GF}(2)$ of degree below 256, so the port gives them their own type, four
+64-bit words with XOR for addition and shift-and-reduce for multiplication. The *exponents*, divisors
+of $2^k - 1$ with $k$ up to 196, are `mpz_t`. Square-and-multiply needs only one thing from an
+exponent, its bits, so `mpz_sizeinbase(e, 2)` and `mpz_tstbit` drive a loop whose arithmetic is all
+custom. GMP has a second job here, finding the prime factors of $2^k - 1$, which the order computation
+divides out one at a time. Miller–Rabin and
+[Pollard–Brent rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm) on `mpz_t` do the
+splitting. It does not hand them $2^k - 1$ whole. It walks the divisors $j$ of $k$ in increasing
+order and, with one `mpz_gcd` each, keeps only the part of $2^j - 1$ that smaller divisors have not
+already covered. Each prime is then found in the smallest piece that contains it, which matters
+because the cost of rho depends on the number it has to split.
+
+**GMP's multiplier works on more than numbers.** Problem 922 raises polynomials with coefficients
+modulo $10^9 + 7$ to the $m$-th power, and its C port has no convolution loop. It uses
+[Kronecker substitution](https://en.wikipedia.org/wiki/Kronecker_substitution): write each
+coefficient into its own fixed-width slot of one huge integer, multiply the two integers once, and
+read the product's coefficients back out of the slots. The slot only has to be wide enough that no
+coefficient of the exact product spills into its neighbour. With $\ell$ terms below $M$, a product
+coefficient is at most $\ell (M-1)^2$, under $2^{128}$, so each slot is two 64-bit words.
+`mpz_import` packs a slot array into an `mpz_t`, a single `mpz_mul` performs the whole convolution,
+and `mpz_export` unpacks it for `unsigned __int128` reductions. The payoff is that GMP switches to
+Toom-Cook and then FFT multiplication as operands grow, so the polynomial product becomes
+sub-quadratic without anyone writing an
+[NTT](https://en.wikipedia.org/wiki/Number-theoretic_transform). On the larger benchmark, 256
+polynomial powers of degree around 20 000, the port takes 2.6 s against Python's 25.6 s for the same
+trick on CPython's `int`. The big-integer products dominate both runs.
+
 Inputs like that fail before any arithmetic starts. The runner's `parse_int` returns a `long long`, so
 Problems 582, 776 and 1006 each parse their own argument into an `mpz_t`, `10**100` notation included.
 When the input does not fit a word, the first GMP call in the port is in the parser.
@@ -211,13 +271,20 @@ initialise once outside the loop and reuse, since a re-`set` value costs nothing
 quietly. Two smaller traps: the `NULL` terminator on `mpz_inits`/`mpz_clears`, and `mpz_get_str`,
 which allocates with GMP's own allocator when passed a `NULL` buffer — either free it through
 `mp_get_memory_functions` or, more simply, size a stack buffer with `mpz_sizeinbase(x, 10) + 2` and
-pass that.
+pass that. Problem 988 takes the first route. Its answer's length depends on the input, so it keeps the
+GMP-allocated string in a static pointer and releases the previous run's string through GMP's own
+free function, the one `mp_get_memory_functions` returns, at the start of the next. Without that,
+`--runs=N` leaks one answer per run.
 
 **Leaving `mpz_t` is the one unchecked step.** `mpz_get_ui` keeps only the low bits of a value that
 does not fit, and it says nothing. Every exit to a machine word therefore needs a reason, written
 down or tested with `mpz_fits_ulong_p`. Problem 581 is a clean example: at $p = 59$ its $d$ is past
 $2^{64}$, yet it calls `mpz_get_ui` on the Pell $y$, because the search has already stopped any $y$
-above $10^{10}$. The cap is what makes the conversion safe, so the two belong together.
+above $10^{10}$. The cap is what makes the conversion safe, so the two belong together. Problem
+843 makes the same exit with a proof instead of a cap. Its element orders divide $2^k - 1$ for $k$ up
+to 196, but at the problem's bound every element it measures lies in a subfield of degree at most 99, so the order is below
+$2^{99}$. The port reads the two low limbs with `mpz_getlimbn` into an `unsigned __int128`, and all
+the lcm work that follows runs natively.
 
 **Keep the numbers small before you make them big.** GMP's cost grows with the operand size, so the
 reductions that matter most are the ones that stop growth: work modulo something and the values
@@ -226,7 +293,17 @@ count instead of the digits; carry the last $k$ digits when the question only as
 Problem 254 is the extreme case. The number it reasons about has about $10^{10}$ digits, far too
 many to build even with GMP. So the solution stores it as a pair: how many nines it starts with,
 plus a residue below $9!$ that encodes the remaining digits. The only bignum is that count of nines,
-and the answer, a digit sum, follows from the pair directly. A
+and the answer, a digit sum, follows from the pair directly.
+
+Problem 889 is a digit question too, in base 2. Its quantity depends on the runs of equal bits of
+$(2^t + 1)^r \bmod (2^k + 1)$, so the bignum is read as a bit string rather than used as a value.
+The answer is then a sum over runs, each a geometric span taken modulo a one-word prime, so the
+cost is the number of set bits rather than $k$. The general path builds the residue with
+`mpz_powm_ui` and lists its set bits with `mpz_tstbit`. The fast path never builds it. When the
+binomials $\binom{r}{i}$ are narrower than $t$ bits and the whole expansion fits below $2^k$, the
+terms of $\sum_i \binom{r}{i} 2^{ti}$ occupy separate bit fields. The set bits are then those of each
+`mpz_bin_uiui` result, offset by $ti$, and a $k$-bit number is never formed. A
+
 `mpz_t` that exists because nobody
 [reduced the problem before coding](/blogs/takeaway/reduce-before-coding) is a self-inflicted
 constant factor.
