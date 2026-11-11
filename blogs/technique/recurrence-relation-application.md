@@ -1,10 +1,10 @@
 <!-- tags: [recurrence-relation-application] -->
-<!-- status: final 2026-11-04T08:04Z -->
+<!-- status: final -->
 # Recurrence relation (application)
 
 This is the **technique** side of the [recurrence relation](/blogs/domain/recurrence-relation) —
 not problems that are *about* a sequence, but problems about binomial coefficients, Pell equations,
-tilings, permutations, factorials and elimination games, whose solutions all reach for the same
+tilings, permutations, factorials, urns and games, whose solutions all reach for the same
 implementation move: stop evaluating a quantity at each index and start *stepping* it from the
 previous one. The recurrence is nowhere in the statement. Finding one is the optimisation.
 
@@ -47,6 +47,17 @@ $$A_j = j\,A_{j-1} + (j-1)!,$$
 so one pass that carries $j!$ alongside it produces both, with no division anywhere in a loop of
 some $10^7$ steps. A sequence of fractions is expensive because of its denominators, so multiply
 them out before you recur, not after.
+
+When the division cannot be scaled away, the inverses can be stepped too. Problem 892 reduces to the
+central binomials $b_m = \binom{2m}{m}$, which advance by $b_m = b_{m-1} \cdot 2(2m-1)/m$, a ratio
+recurrence that needs $m^{-1}$ modulo a prime $p$ at every step. The inverses obey a recurrence of
+their own:
+
+$$i^{-1} \equiv -\left\lfloor p/i \right\rfloor \cdot (p \bmod i)^{-1} \pmod p.$$
+
+It does not read the previous entry. It reads entry $p \bmod i$, which is smaller than $i$ and so
+already filled. A recurrence only needs its dependencies computed first; they do not have to be
+adjacent. One table of $O(1)$ steps replaces a modular exponentiation per index.
 
 A formula with two indices steps too, one axis at a time. Problem 423 needs the truncated binomial
 sum $F(m, k) = \sum_{c \le k} \binom{m}{c} x^{m-c}$ for every $n$ up to $5 \times 10^7$, at
@@ -141,6 +152,16 @@ contribute the same term, so summing the recurrence over $k \le n$ expresses $S(
 $P(M)$ and a triangular number. The pair $(P, S)$ is closed under halving, and the whole computation
 is one chain of sixty levels.
 
+The halving can act on the modulus rather than on the index. Problem 900 is a game whose losing
+positions reduce to a residue modulo $2^{e}$, and the requested sum runs over every $n$ up to
+$2^{10^4}$, in dyadic blocks. Each block needs $\sum_{x \bmod 2^e} (-x^2) \bmod 2^e$, and that sum
+splits by the parity of $x$. The odd squares modulo $2^e$ are exactly the residues $\equiv 1 \pmod 8$,
+each hit four times, so their half has a closed form. The even half, with $x = 2y$, is a fixed multiple of the
+*same* sum at modulus $2^{e-2}$: each term scales by four, and $y$ runs over two full periods. That gives a depth-two recurrence in the exponent $e$, which is
+$\log_2$ of the index range. Ten thousand steps then cover numbers of ten thousand bits. Reading the
+digits of $n$ and peeling off the low bit of $x$ are the same self-similarity, applied to different
+things.
+
 Problem 463 is the same move on harder ground. Its sum does not close on its own: the substitution
 produces a sum over the odd indices, which has to join the state as a companion, and the arguments
 now touch both $n$ and $n - 1$. The chain widens to two values per level and needs a memo to stay
@@ -184,6 +205,59 @@ sum over the few dozen heights — $\sum_h \max(0, M - F(h, c_0))$. The move gen
 answer is "the smallest resource that suffices", recur on what each resource level buys, and let the
 monotonicity do the inversion.
 
+## Carry the moments, not the distribution
+
+A random process is a recurrence on *distributions*: the state after a step depends on the whole
+distribution before it. Problem 783 draws balls from an urn whose black count $b$ depends on every
+earlier draw, and propagating the distribution of $b$ over a million turns is quadratic or worse.
+The question, though, asks only for $\mathbb{E}[B_t^2]$, a second moment. For a hypergeometric draw,
+every conditional moment involved is a polynomial of degree at most two in $b$. The
+[law of total expectation](https://en.wikipedia.org/wiki/Law_of_total_expectation) therefore maps
+$(\mathbb{E}[b], \mathbb{E}[b^2])$ linearly to the same pair after the draw, and adding balls is
+linear in the pair too. The distribution collapses to two numbers stepped $n$ times. The test is
+whether the update of every moment you carry involves only moments of the same or lower order. If it
+does, the state closes, and it closes at the order the question asks about.
+
+## Sweep a parameter through the recurrence
+
+Sometimes the recurrence is fixed and the parameter in it moves. Problem 870 generalises
+[Fibonacci nim](https://en.wikipedia.org/wiki/Fibonacci_nim) to a real ratio $r$. The losing pile
+sizes satisfy $H_{j+1} = H_j + H_{l_j}$, where $l_j$ is the least index with $r H_l \ge H_j$. That is
+a Zeckendorf-style sequence whose look-back depends on $r$, and the question asks for the values of
+$r$ where the sequence changes. As $r$ grows, nothing happens until some comparison flips at a
+critical ratio $H_j / H_{l_j - 1}$. The next transition is therefore the least critical ratio of the
+current sequence, and everything before its index is still valid. So the sweep jumps from breakpoint
+to breakpoint, truncates the arrays at the first affected index, and rebuilds only the tail. Most
+transitions change a deep term, so most rebuilds are short. The comparisons run on exact fractions,
+because each breakpoint is by definition a tie.
+
+## Read the recurrence off a generating function
+
+For the counts in some problems there is no combinatorial "last piece" to condition on, but there is
+a [generating function](/blogs/domain/generating-function), and that is enough. A series that
+satisfies a linear differential equation with polynomial coefficients is
+[holonomic](https://en.wikipedia.org/wiki/Holonomic_function), and comparing the coefficients of
+$x^n$ on both sides of the equation gives a recurrence of fixed order for the series coefficients.
+Problem 976 reduces a partizan game to counting multisets, and the counts are coefficients of
+$f = (1-x)^{-\alpha}(1+x)^{-\beta}$. Taking the logarithmic derivative gives
+$(1 - x^2) f' = \bigl(\alpha(1+x) - \beta(1-x)\bigr) f$, so
+
+$$(n+1)\,c_{n+1} = (\alpha - \beta)\,c_n + (\alpha + \beta + n - 1)\,c_{n-1},$$
+
+an order-two recurrence that reaches the $K$-th coefficient in $O(K)$ steps and $O(1)$ memory.
+
+Problem 1007 shows how far the move reaches. Its sum over all $C_n$ bracketings has an
+*algebraic* generating function with two nested square roots. Rationalising the denominator twice
+leaves square-root series and a linear denominator. Each root has a step rule of its own: the
+Catalan ratio for $\sqrt{1-4w}$, and $2Pg' = P'g$ for $g = \sqrt{P}$. Dividing by the linear factor
+is a Horner fold that accumulates one coefficient at a time. No series is ever stored, because only
+one coefficient is wanted.
+
+Both problems then apply problem 374's rescaling at scale. Every one of these recurrences divides by
+$n + 1$. Carrying $d_n = n!\,c_n$ instead makes the step division-free, for example
+$d_{n+1} = (\alpha - \beta)\,d_n + n(\alpha + \beta + n - 1)\,d_{n-1}$. A single inverse of the final
+factorial then undoes the scaling for all $10^7$ steps.
+
 ## How to reason about it
 
 - **The design decision is the state, not the formula.** Ask what the update needs that the previous
@@ -191,8 +265,9 @@ monotonicity do the inversion.
   pair because a single value cannot advance itself. If it is "something I discarded", carry that
   too; the state is usually two or three integers regardless. Problem 887 widens it differently: a
   slack parameter makes every subtree look like the whole problem, so one function recurs on itself.
-  Problem 866 is the honest exception: a convolution reads every earlier term, so the state is the
-  table.
+  Problem 783 narrows it instead: a whole distribution reduces to the two moments the question
+  needs. Problem 866 is the honest exception: a convolution reads every earlier term, so the state
+  is the table.
 - **Write the update as a tuple assignment.** `a, b = b, a + b` evaluates the whole right-hand side
   first, which removes the temporaries and the classic sequential-assignment bug where the second
   line reads the value the first line just overwrote.
@@ -201,7 +276,9 @@ monotonicity do the inversion.
   answer is quietly wrong a hundred terms later. If in doubt, run the first twenty terms against a
   direct computation. Better still, choose a form with no division to check. Problem 374's scaled
   $A_j$ is one, and problem 866's weight happens to be divisible by $N$, so its $1/N$ cancels and the
-  recurrence stays in integers under the modulus.
+  recurrence stays in integers under the modulus. Under a prime modulus the choice is about cost
+  rather than correctness: scale by $n!$ and invert once (problems 976 and 1007), or step a linear
+  inverse table (problem 892), but never pay a modular exponentiation per step.
 - **Seed from an index you have checked.** These recurrences frequently do not hold at the first one
   or two terms, and the small cases are exactly the ones a test case will not cover.
 - **Watch the growth, in both languages.** The terms usually grow geometrically, so an $O(n)$ loop is
