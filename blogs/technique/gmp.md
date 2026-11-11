@@ -1,5 +1,5 @@
 <!-- tags: [gmp] -->
-<!-- status: final -->
+<!-- status: final 2026-11-11T09:09Z -->
 # GMP
 
 [GMP](https://gmplib.org/) — the GNU Multiple Precision Arithmetic Library — is the bignum library
