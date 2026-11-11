@@ -1,5 +1,5 @@
 <!-- tags: [expected-value] -->
-<!-- status: final 2026-10-29T07:16Z -->
+<!-- status: final -->
 # Expected value
 
 The [expected value](https://en.wikipedia.org/wiki/Expected_value) of a random quantity is
@@ -68,6 +68,20 @@ enumerated. The general move: when a random process runs in stages, ask whether 
 *decomposes by stage*, and whether each stage's cost depends only on a variable whose distribution
 you know. You do not need the stages to be independent — only to be able to average each one alone.
 
+The same identity works over *states* instead of stages. If a process scores a reward $r(s)$ each
+time it sits in state $s$, the expected total is $\sum_s r(s)\,\mathbb{E}[\text{visits to } s]$, and
+for an [absorbing chain](/blogs/technique/absorbing-markov-chain) those visit counts are one row of
+the fundamental matrix $(I-Q)^{-1}$. Problem 973 (a card game scored by the XOR of its pile sizes) has
+a state space of partitions of $10^4$ — some $10^{106}$ of them — so the matrix is out of reach. But
+solving it exactly for $n \le 11$ shows the visit counts are *integers*, and recognisable ones: each
+partition is visited, on average, once per distinct ordering of its parts. So every
+[composition](/blogs/domain/composition-combinatorics) of $n$ is visited exactly once in expectation,
+and the expectation becomes a plain sum of the score over compositions — a counting problem, finished
+by [splitting the XOR by bit](/blogs/takeaway/split-xor-sums-by-bit) and a rational generating
+function per bit. The probabilistic structure was only ever needed to *discover* the weights; the
+lesson is to [let small exact cases show you the closed form](/blogs/takeaway/small-cases-reveal-closed-form)
+before you try to derive it.
+
 ## Conditioning and recursion
 
 The other half of these problems are not counts but *processes*: a game or walk that unfolds
@@ -120,6 +134,47 @@ equal to $1$ with probability $(P-1)/(E-1)$. This is the same instinct as linear
 level up: [find the symmetry](/blogs/takeaway/exploit-symmetry) that lets a high-dimensional
 variable be replaced by its average, and make sure the quantity you replace it in is linear in it.
 
+Carrying the full distribution is the general answer, but two non-linear statistics have cheaper
+escapes.
+
+**Low moments close on themselves.** Problem 783 asks for $\mathbb{E}[\sum_t B_t^2]$, where $B_t$ is
+the number of black balls drawn from an urn on turn $t$ and the urn's black count $b$ depends on every
+earlier draw. A square is not linear, so the mean of $b$ is not enough — but the
+[hypergeometric](/blogs/domain/hypergeometric-distribution) draw makes $\mathbb{E}[B_t^2 \mid b]$ a
+quadratic in $b$, and both the draw and the refill map $(b, b^2)$ to quadratics in $b$ again. So the
+pair $(\mathbb{E}[b], \mathbb{E}[b^2])$ evolves by a two-variable linear recurrence, and a million
+turns cost a million steps and constant memory instead of a distribution over millions of values. The test is closure: if the statistic is a polynomial of degree $d$ in the state, and each
+transition maps degree-$\le d$ polynomials to degree-$\le d$ polynomials, then
+[the first $d$ moments are a complete state](/blogs/takeaway/propagate-moments-not-distributions).
+[Variance](/blogs/domain/variance) is the commonest case, $d = 2$.
+
+**Products split under independence.** Problem 866 — the sibling of 253, the same caterpillar
+assembled in random order — scores the *product* of a number per placement. The expectation of a
+product is the product of expectations only for independent factors, so the move is to manufacture
+independence. [Conditioning on the last step](/blogs/takeaway/condition-on-the-last-step) does it:
+whichever piece is placed last, nothing could join across it before then, so its left and right sides
+are two smaller caterpillars evolving independently, each in a uniform sub-order. The expected product
+factorises into $E(j-1)\,E(N-j)$, and averaging over the last position gives a Catalan-shaped
+convolution recurrence — whose $1/N$ cancels exactly, which is why the statement can promise an
+integer. A max needed its distribution carried; a product needed only a cut that left independent
+halves.
+
+## When the chain lives on a group: go spectral
+
+First-step analysis turns a hitting time into a linear system, one unknown per state; sometimes the
+states number $10^{12}$ and no system is solvable. Problem 930 (balls hopping between bowls on a
+circle until they all coincide) is such a case, but its walk has a special shape: each move adds
+$\pm 1$ to one coordinate of a point in $\mathbb{Z}_n^m$, so the chain is a random walk on an
+[abelian group](/blogs/domain/cyclic-group). Two moves follow. First, quotient out the symmetry —
+rotating every ball together changes nothing — so the absorbing diagonal collapses to a single point,
+and the random start becomes the stationary distribution. Second, a walk on an abelian group is
+[diagonalised by the group's characters](/blogs/technique/group-character-diagonalisation): their
+eigenvalues are explicit cosine sums, and the expected hitting time from stationarity becomes
+$\sum_{\chi \ne 1} 1/(1 - \lambda_\chi)$ — no linear system at all. That sum still has $n^{m-1}$
+terms, but the summand reads only how many coordinates fall in each cosine class, so it groups into
+a few thousand class compositions. When a Markov chain's moves are translations, think Fourier before
+Gaussian elimination.
+
 ## When the "random" input is just every input
 
 Sometimes the probability is a veneer. "The average number of iterations over all fourteen-digit
@@ -135,6 +190,33 @@ roughly $\sqrt{10^{14}}$ nodes rather than $10^{14}$. When an expectation is def
 over an enumerable population, ask what the computation actually *reads* from each input — inputs
 that read the same thing contribute the same amount, and can be counted together.
 
+Problem 564 is the same move made by symmetry rather than by arithmetic. A segment is split uniformly
+into an ordered sequence of integer sides, and the expected area of the largest polygon on them is
+wanted — an average over $\binom{2n-4}{n-1}$ compositions. But the maximal polygon is the
+[cyclic polygon](/blogs/domain/cyclic-polygon), and its area depends only on the *multiset* of sides:
+reordering them just permutes isosceles triangles around the centre. So the uniform average over
+compositions is a weighted average over [partitions](/blogs/domain/partition-number-theory), each
+weighted by its multinomial count of orderings — a hundred thousand shapes instead of $10^{13}$
+sequences. Whenever the statistic is invariant under a rearrangement the sampling distribution does
+not care about, [average over orbits](/blogs/takeaway/exploit-symmetry), weighting each
+representative by its orbit's size.
+
+## When someone chooses: the expectation is an objective
+
+Everything above computes an expectation under fixed rules. In a game the rules include the players'
+strategies, and the expected payoff is what each is optimising against the other. Problem 982 is a
+dice game of hidden information: Alice sees three dice and reveals two, Bob takes one, Alice pays its
+value. Asking for "the expected payment at a [Nash equilibrium](/blogs/domain/nash-equilibrium)"
+sounds underdetermined — which equilibrium? — but the game is zero-sum, so by the
+[minimax theorem](https://en.wikipedia.org/wiki/Minimax_theorem) every equilibrium pays the same
+value. And the value is the optimum of a [linear programme](/blogs/takeaway/zero-sum-game-as-linear-program):
+Bob's mixed strategy is one probability per revealed pair, Alice's best response to it is a minimum
+over the dice she might hide, and each such minimum becomes an auxiliary variable bounded by linear
+constraints. The expectation is still a weighted sum over roll multisets — it is just maximised over
+strategy variables rather than evaluated. An exact simplex (fraction-free, via
+[Bareiss](/blogs/technique/bareiss-algorithm) updates) returns the value as a rational; Alice's
+equilibrium strategy comes free as the dual solution.
+
 ## How to reason about it
 
 - **Try to avoid enumerating.** Before summing over a joint outcome space, ask whether the answer
@@ -144,9 +226,20 @@ that read the same thing contribute the same amount, and can be counted together
 - **Indicators for counts, first-step for processes.** "Expected number of X" → write X as
   $\sum$ indicators and add probabilities. "Expected value/length of a game or walk" → define
   $E[\text{state}]$ and relate each state to its neighbours.
+- **Rewards over a chain are visits times rewards.** An additive score along a trajectory is
+  $\sum_s r(s)\,\mathbb{E}[\text{visits}]$; when the chain is too large to solve, solve it small and
+  exactly, and look for a pattern in the visit counts (problem 973).
 - **Check that the statistic is linear before using linearity.** Maxima, minima, products and
   "ever reached" questions are not sums. For those, propagate the full distribution with the
-  statistic folded into the state (problem 253's running peak), and take the expectation last.
+  statistic folded into the state (problem 253's running peak), and take the expectation last —
+  unless a cheaper exit applies: a polynomial statistic whose moments close under the dynamics needs
+  only those moments (783), and a product needs only a conditioning that splits it into independent
+  factors (866).
+- **Look for algebra in the state space.** A walk by translations on a group is diagonalised by its
+  characters (930); a statistic invariant under reordering is averaged over orbits weighted by size
+  (564).
+- **If a player chooses, it is an optimisation.** A zero-sum game's expected payoff is a unique
+  value, and it is a linear programme's optimum (982).
 - **Keep it exact when the output demands it.** Many of these ask for an answer to six, nine, or
   thirteen decimal places. An expectation is a sum or ratio of rationals, so the exact answer is a
   fraction; carrying it as integers (Python's arbitrary precision, or `__int128` / a rational type
