@@ -1,5 +1,5 @@
 <!-- tags: [arbitrary-precision-arithmetic] -->
-<!-- status: final -->
+<!-- status: final 2026-11-11T09:04Z -->
 # Arbitrary-precision arithmetic
 
 [Arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) is
