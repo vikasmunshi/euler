@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking, mobius-inversion-formula, mobius-function-application, dirichlet-convolution, divisor-summatory-function, totient-summatory-recursion] -->
-<!-- status: final 2026-11-04T13:23Z -->
+<!-- status: final -->
 # Summing multiplicative functions fast
 
 A whole family of Project Euler problems asks for $\sum_{n \le N} f(n)$, where $f$ is a
@@ -75,8 +75,25 @@ for i in range(1, max_d + 1):
         data[j] -= data[i]                       # remove the non-reduced ones
 ```
 
-That is $O(N \log N)$. The rest of this page is about reaching the same answer in less than
-linear time.
+That is $O(N \log N)$. When the table only has to reach $\sqrt X$ there is a cheaper eager form.
+Convolving with $\mu$ multiplies the Dirichlet series by $\prod_p (1 - p^{-s})$, so you can apply
+one prime factor at a time. Each factor is a single in-place pass that subtracts $f(n)$ from
+$f(pn)$, and the total is $O(M \log\log M)$. Problem 883 inverts its divisor-count weights this way,
+as a NumPy slice per prime. The pass must read the *old* values, so a scalar loop runs $n$
+downwards:
+
+```python
+for p in primes:                          # out = f * mu, one Euler factor (1 - p^-s) at a time
+    out[p::p] -= out[1 : M // p + 1]      # NumPy copies the right side first
+```
+
+Möbius inversion can also be finite. To count the $t \le T$ coprime to a fixed $n$, the sum
+$\sum_{d \mid \mathrm{rad}(n)} \mu(d) \lfloor T/d \rfloor$ has only $2^{\omega(n)}$ terms. Problem 962
+uses that inside an enumeration loop. It splits $t$ into odd and even classes, because the
+denominator it divides by depends only on parity, and then counts each class in one step rather
+than walking it.
+
+The rest of this page is about reaching these answers in less than linear time.
 
 **Dirichlet hyperbola: when neither side is free, or one side is sparse.** You need not sum all of
 $a$ first. Split the hyperbola at a point $(y, x/y)$ and count each half along its own short axis,
@@ -103,13 +120,26 @@ sparse set, so the sum over $a$ is short even though it runs all the way to $x$:
   summed one at a time. Above $L$ only a few dozen $c$ survive, and each needs the number of
   squarefree $q$ with an even number of prime factors. Because $\mu = \pm 1$ on squarefree numbers,
   that count is $\tfrac12\bigl(Q(x) + M(x)\bigr)$: the squarefree count plus the Mertens function,
-  which are two of this page's summatory functions used together.
+  which are two of this page's summatory functions used together. In Problem 883, $H$ is not
+  arithmetic at all. Each lattice point of the Eisenstein lattice is $c\gamma$ with $\gamma$
+  primitive, and grouping by the content $c$ gives $\sum_{m \le \sqrt X} F(m)\, A(X/m^2)$, where
+  $A(Y)$ counts the lattice points of norm at most $Y$. That is a geometric count, one integer
+  square root per row, so it costs $O(\sqrt Y)$ rather than $O(1)$, and the total is
+  $O(\sqrt X \log X)$. Most arguments are small, so a prefix table of norms covers them, and only the
+  arguments for the first thousand or so $m$ are counted row by row.
 - **Powerful-supported $g$.** If $f$ agrees with a function you can sum easily on every prime,
   then $f = \mathbf 1 * h$, where $h(p) = 0$. A multiplicative function that vanishes on primes
   is nonzero only on [powerful numbers](https://en.wikipedia.org/wiki/Powerful_number), and there
   are only $O(\sqrt x)$ of those. Problem 484 does exactly this with $g(k) = \gcd(k, k')$, which is
   $1$ on squarefree $k$. Problem 694's cube-full divisors are sparser still, at $O(x^{1/3})$. This
-  is the "powerful number trick", and it is the natural approach for 639.
+  is the "powerful number trick", and it is the natural approach for 639. Problem 850 needs it for
+  a whole *family* $z_k$, one function for every odd $k$ up to $N$, and two observations make that
+  affordable. First, $k$ enters only through $\lceil e/k \rceil$, and no exponent exceeds
+  $\log_2 N$. So every $k$ above that bound gives the same function, and about $10^{13}$ parameters
+  collapse into about twenty special ones plus one generic class with a multiplicity. Second, a sum
+  of multiplicative functions is not multiplicative. So the depth-first search over powerful $m$
+  carries a *vector* of the $g_k(m)$, multiplies each component separately as it attaches a prime,
+  and collapses the vector to one weight only when it adds the term $W(m)\lfloor N/m \rfloor$.
 - **Smooth-supported $g$, periodic $h$.** The split need not be by size. It can be by primes.
   Problem 967 sums a ring-valued multiplicative function that depends only on which primes up to
   $B$ divide $n$. Let $h$ be the part that sees the few smallest primes. It depends only on
@@ -193,6 +223,47 @@ $c$ near $\sqrt v$ both are about $\sqrt v$ long, and both are plain ranges, so 
 expression. There is no rectangle to subtract, as there is in the hyperbola formula, because the cut
 partitions the terms and nothing is counted twice.
 
+### Twisting: one recursion, many sums
+
+If $\chi$ is *completely* multiplicative, then $\chi(ab) = \chi(a)\chi(b)$ for every split of $n$,
+so it distributes over a convolution:
+
+$$(f\chi) * (g\chi) = (f * g)\,\chi.$$
+
+So every identity the recursion uses has a twisted copy, and the twisted copy is just as cheap
+whenever the summatory function of $g\chi$ is. Three kinds of twist keep coming up:
+
+- **A residue class.** Let $\chi_0$ mark the odd integers. Then $(\mu\chi_0) * \chi_0 = \varepsilon$,
+  so the odd Mertens function $\sum_{e \le x,\ e \text{ odd}} \mu(e)$ has its own Du recursion,
+  quotient-blocked over odd $k$. Problem 935 counts coprime pairs split by $q \bmod 4$. Every term
+  becomes $\sum_{e \text{ odd}} \mu(e)\, g(\lfloor M/e \rfloor)$, with $g$ a closed-form
+  arithmetic-series count, and all five such sums share one memo. Problem 787 reaches the same
+  function without a new recursion. Since $\mu(2m) = -\mu(m)$, the odd part is
+  $\sum_{k \ge 0} M(\lfloor x/2^k \rfloor)$, read from keys already stored, as in Problem 512.
+- **A Dirichlet character.** Problem 787 found that its count of losing positions involves
+  $e = \mu * \chi_4$, with $\chi_4$ the non-principal character mod 4. Swap the order of summation as
+  in the opening identity. The summatory function of $\chi_4$ is periodic, just
+  $[\,y \bmod 4 \in \{1, 2\}\,]$, so $\sum e$ is one more blocked loop against odd Mertens values.
+  That is the same cheap periodic $H$ as Problem 967's. The problem's other sums also come from $M$:
+  $\Phi(x) = \bigl(1 + \sum_d \mu(d) \lfloor x/d \rfloor^2\bigr)/2$ by counting coprime pairs. One
+  Mertens table at the keys then supplies every piece of the answer.
+- **A power of $n$.** Twisting by $\mathrm{id}^k$ gives
+  $(\varphi\,\mathrm{id}^k) * \mathrm{id}^k = \mathrm{id}^{k+1}$, so
+  $\Phi_k(x) = \sum_{d \le x} d^k \varphi(d)$ has the recursion
+  $\Phi_k(x) = \sum_{j \le x} j^{k+1} - \sum_{i \ge 2} i^k\, \Phi_k(\lfloor x/i \rfloor)$, with
+  [Faulhaber](/blogs/technique/faulhabers-formula) sums on both sides. Problem 994 needs these
+  *moments*. Writing $\gcd(a, b) = \sum_{d \mid a,\, d \mid b} \varphi(d)$ separates its double sum
+  of $(m - a)(n - b)\gcd(a, b)$ into $\sum_d \varphi(d)\, F(d)\, G(d)$. On each quotient block,
+  $F$ and $G$ are linear in $d$. So the block's contribution is a quadratic in $d$ weighted by
+  $\varphi$, which needs $\Delta\Phi_0$, $\Delta\Phi_1$ and $\Delta\Phi_2$ at the block ends. The
+  general rule is that a summand polynomial in $d$ on each block needs one moment prefix sum per
+  degree.
+
+Problem 994 also breaks the closure that the key set relies on. Its blocks end where *either*
+$\lfloor (m-1)/d \rfloor$ or $\lfloor (n-1)/d \rfloor$ changes, and those two key sets are not
+closed under each other's division. So it runs the recursion twice, once per family, and looks each
+block end up in whichever table holds it.
+
 ## Outside the four walks
 
 Some problems on this list use the blocks without the sublinear payoff, or without a convolution.
@@ -244,6 +315,9 @@ factor. Here the first stage's strike order already provides them, so no second 
   already one of the factors. If $f$ counts solutions mod $n$, a
   [roots-of-unity filter](/blogs/technique/roots-of-unity-filter) can hand you the factorisation:
   grouping the filter's $t$ by $\gcd(t, n)$ is what produces Problem 875's $\mathrm{id}^7 * w$.
+  If $f$ is restricted to a residue class, or weighted by a character or a power of $n$, twist a
+  known identity rather than looking for a new one. If the brute-force table shows a correction
+  term, read it off the prime powers. That is how Problem 787 found $\mu * \chi_4$.
 - **Choose the walk by what is cheap.** If $N$ is small enough to sieve, sieve, and block only to save
   evaluations. If both summatory functions have closed forms, block the
   sum for $O(\sqrt x)$. If one factor is sparse, use a lopsided hyperbola, with cost equal to the
