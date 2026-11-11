@@ -1,5 +1,5 @@
 <!-- tags: [small-cases-reveal-closed-form] -->
-<!-- status: final 2026-11-08T17:11Z -->
+<!-- status: final -->
 # Small cases reveal a closed form
 
 Some problems hide a simple rule behind a definition that is expensive to evaluate even once.
@@ -7,7 +7,8 @@ Deciding whether one room can be tiled is a search. Settling one pirate vote nee
 below it. Seating one hotel guest needs every guest before them. Valuing one ternary game needs a
 canonical-form engine, and deciding one blackboard game needs every smaller budget. Growing one geometric
 configuration to day 16 needs about $4^{16}$ cells, and checking which sets of horses on a board leave
-each other alone means looking at every subset of the squares. Deriving the rule from first principles can
+each other alone means looking at every subset of the squares. Scoring one random card game means
+solving a Markov chain whose states are all the partitions of $n$. Deriving the rule from first principles can
 take far longer than the problem is worth. The faster route is to solve the small instances
 *exhaustively*, lay the results out so the pattern can show itself, read a closed-form
 characterisation off the table, and check it against the brute force well beyond the range it was
@@ -32,7 +33,10 @@ The method has four parts, and each one matters:
    memoisation, 628 tries every pawn placement on boards up to $9 \times 9$, and 711 solves its
    blackboard game by the plain win/lose recursion over (budget, parity) states. Problem 963
    runs a small [canonical-form](/blogs/technique/canonical-form) engine that removes dominated
-   options and bypasses reversible ones, so equal games come out identical. Problem 957 shows the
+   options and bypasses reversible ones, so equal games come out identical, and 922 and 923 run
+   the same kind of engine over every cell of their staircases. 973 solves its absorbing Markov
+   chain's [fundamental matrix](https://en.wikipedia.org/wiki/Absorbing_Markov_chain#Fundamental_matrix)
+   exactly, in rationals, for every $n \le 11$. Problem 957 shows the
    reformulated kind. A projective map and a logarithm turn its three pencils of lines into three
    families of parallel lines on an integer lattice. The simulation then runs on exact integers
    (point by point, then on grids with [FFT](https://en.wikipedia.org/wiki/Fast_Fourier_transform)
@@ -74,7 +78,16 @@ The method has four parts, and each one matters:
    *degenerate*. The McCarthy 91 function behind 555 is the constant $91$ on its whole lower
    range, which shows nothing. Free its three parameters and the outputs cycle with period
    $k - s$; the famous constant is just the period-one case. When the given instance looks too
-   simple to learn from, vary the parameters it fixes.
+   simple to learn from, vary the parameters it fixes. For a count indexed by an integer $n$, the
+   right axis is often *arithmetic*. 787 counts losing positions of a game whose piles sum to $n$,
+   and against $n$ the counts are noise. On primes they are $(p-1)/2$ or one fewer, depending on
+   $p \bmod 4$, and on prime powers the correction is a clean sign. That is the signature of a
+   [multiplicative function](https://en.wikipedia.org/wiki/Multiplicative_function), which is fixed
+   by its prime powers, so the whole rule is read off those few columns. And sometimes the table
+   should not hold the answer at all. 973's expected XOR score is opaque, but the quantity behind
+   it, the expected number of rounds that end in each state, comes out as an *integer* in every
+   exact solve: the number of distinct orderings of that partition's parts. Exact rationals that
+   keep landing on integers are telling you that something is being counted.
 3. **A rule stated as code.** Write the guess as a function, such as `is_tatami_free(a, b)`, the
    closed form for the early phase, `game_key(x)`, or a constructor that builds every member. A
    pattern only becomes testable once it is a function you can call.
@@ -92,11 +105,19 @@ The method has four parts, and each one matters:
    were checked against the full irreducible-pattern list for every $n \le 50$, and 976's parity
    rule against an exact search of the reduced game for every tuple with $k \le 5$ and
    $N \le 14$. That search used the *complete* value sets, not just the dominant options the rule
-   was read from, so the check also tests the simplification.
+   was read from, so the check also tests the simplification. When the rule has two levels, check
+   both. 923 reads one closed form for each staircase's value (an integer, or a switch, periodic
+   in the step count) and takes a second rule from the theory for who wins a *sum* of them. The
+   first was checked against the engine for every staircase of weight up to 24, and the second
+   against the engine's exact comparison on thousands of random sums. And when the shipped code
+   sits several transformations away from the rule, check each layer against the one below it.
+   900's modular loop was compared with an exact big-integer version of the same formulas for
+   every $N < 40$, and that version with a direct sum of the game rule for $N \le 17$, while the
+   rule itself had been checked against the game tree on every small position.
 
 ## Where the rule comes from
 
-You don't always have to see the pattern yourself. There are five routes, and it pays to try
+You don't always have to see the pattern yourself. There are six routes, and it pays to try
 them roughly in order of cost:
 
 - **Look it up.** Feed the small values to the [OEIS](https://oeis.org/). Problem 276 counts
@@ -143,7 +164,23 @@ them roughly in order of cost:
   points to plane trees, and splitting the trees by the colour of their vertices gives the
   Narayana numbers. In 523 the per-insertion costs come out
   $1, 2, 4, 8, \dots$, and the recurrence behind them, $T(s) = 1 + \sum_{i<s} T(i)$, is the
-  explanation of why they double.
+  explanation of why they double. Sometimes what you recognise is an *object*, not a sequence.
+  726's bottle removals carry a weight that depends only on the row, not on the state, so it
+  factors out and leaves a count of valid removal orders. Sheared, the triangle is a staircase
+  [Young diagram](https://en.wikipedia.org/wiki/Young_tableau), and its orders are standard
+  tableaux, which the [hook length formula](https://en.wikipedia.org/wiki/Hook_length_formula)
+  counts outright. 787's prime-power table identifies the correction term by its
+  [Dirichlet series](https://en.wikipedia.org/wiki/Dirichlet_series): it is the Möbius function
+  convolved with the non-principal character modulo 4.
+- **Classify it, and let the search mop up.** Sometimes the data shows a few *families* plus
+  scattered exceptions, and the closed form is a structure theorem. 771's pseudo-geometric
+  sequences are forced once their terms pass 4. Brute force over small windows found three
+  families: geometric progressions, and two kinds of second-order recurrence.
+  [Vieta jumping](https://en.wikipedia.org/wiki/Vieta_jumping) then proves that every recurrence
+  chain descends to a seed $(1, k)$, which makes the list complete. Everything else has to start
+  below the forcing point, so the exceptions are a *finite* set, and a small search counts them
+  at full scale. The families get closed-form sums, and the oracle survives in the shipped code,
+  confined to the region where no rule applies.
 - **Derive it, then let the oracle audit it.** Sometimes a short argument gets you there first,
   and the brute force turns from a source into an auditor. 374's exchange arguments say the best
   distinct-part partition is a run of consecutive integers with at most one hole. 628 claims a
@@ -215,14 +252,34 @@ rule lets you **change algorithms**:
   pirate per step, and reaches $n = 10^{16}$ in a few dozen jumps.
 - In **963**, a value becomes a short integer vector, and two games are equal exactly when their
   vectors are equal. Equality of games, which is a question about play, becomes equality of
-  tuples, which can be grouped and counted.
+  tuples, which can be grouped and counted. The *shape* of the closed form also tells you which
+  algebra to count in. **922**'s staircases are each an integer plus a
+  [nimber](https://en.wikipedia.org/wiki/Nimber), and a sum of them is the sum of the integers plus
+  the XOR of the nimbers. So counting winning tuples is an ordinary convolution on one axis and an
+  XOR convolution on the other, and the
+  [Walsh–Hadamard transform](https://en.wikipedia.org/wiki/Fast_Walsh%E2%80%93Hadamard_transform)
+  reduces the second to independent polynomial powers. **923**'s values come in three kinds, and its
+  winning rule plays the hottest switch first, so the count becomes a dynamic programme over
+  temperature classes in exactly that order.
+- In **973**, the closed form changes *what is summed over*. The fundamental matrix spans about
+  $10^{106}$ partitions. Once each composition is known to end exactly one round, the score is a
+  sum over compositions, and compositions are sequences, with a rational generating function for
+  each bit of the XOR. **900** does the same with a game rule on general positions: restricted to
+  the family the problem asks about, each dyadic block of $n$ sweeps half of a complete residue
+  system modulo a power of two, so a sum to $2^{10^4}$ collapses to a depth-two recurrence over
+  the exponent.
+- In **787**, a per-$n$ count that is a Dirichlet convolution of the Möbius function has a
+  summatory function that the [Mertens function](https://en.wikipedia.org/wiki/Mertens_function)
+  computes over the floor quotients $\lfloor N/k \rfloor$, in $O(N^{2/3})$ time and without visiting
+  each $n$. Recognising the multiplicative structure is what makes a sublinear method possible.
 - In **957** the closed form *is* the solution: a handful of big-integer operations, where the
   simulation it replaces grows fourfold per day. The divisibility of the numerator by the
   formula's denominator is asserted at run time, a cheap check that the formula is still
   consistent. **340** is the same: per-block constants summed over whole blocks plus one partial
   block give an $O(1)$ answer for a threshold near $6 \times 10^{17}$, where the recursion could
   not finish a single call. **523**'s formula is a sum of thirty terms, and **335**, **561** and
-  **684** each finish in microseconds. **984**'s interpolation costs the same whatever the board
+  **684** each finish in microseconds. **726**'s hook-length product turns a removal game into a
+  handful of running products, advanced together as $n$ grows. **984**'s interpolation costs the same whatever the board
   size: ten exact sums over small boxes, then one evaluation of a polynomial.
 - "Closed" does not have to mean $O(1)$. **628** reduces to $(n-3)$ times the
   [left factorial](https://en.wikipedia.org/wiki/Left_factorial) plus a constant, and **374**'s
@@ -297,6 +354,13 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
   binomial coefficients $\binom{2m}{m}$, it advances by one multiplication and one tabulated
   inverse per step, with no factorial tables. Before you commit to a form, check which divisions
   it needs.
+- **A classification has to be complete, disjoint, and not truncated.** When the closed form is
+  a list of families, a missing family undercounts, and two overlapping families double count. 771
+  argues both: Vieta descent shows the list is complete, and the defect patterns of the three
+  families (all zero, constant nonzero, alternating sign) cannot share a five-term window. Its
+  exception search has a seed bound, and a bound is a guess too, so the answer was rerun with
+  bounds 40, 200 and 2000 and did not change. The decomposition was also compared with a layered
+  brute force at thirteen values of $N$ from 5 to 3000, as well as the four stated values.
 - **Make the table bigger than you think you need.** A rule read from twenty cases often has a
   second-order term that only shows up at fifty. A recurrence of order $d$ needs $2d$ terms just to
   be determined, so only the terms after those count as evidence. Keep generating until the
@@ -304,16 +368,19 @@ supplies its coefficients. Here nothing promises a formula, so the check carries
 - **Explain it if you can, but test it regardless.** Problem 950's phases and 336's bijection come
   with an argument for why they look the way they do. 340's block formula was spotted first and
   then proved by induction on the block index, and 523's was derived (the sort is insertion sort
-  in disguise) and still checked. The same goes for 374's exchange arguments and 628's
-  anti-diagonal claim. Problem 256's bands, 711's bit patterns and 555's per-$n$ formula are,
-  here, experimental facts that were never proved. All of them are equally safe *only because*
+  in disguise) and still checked. The same goes for 374's exchange arguments, 628's
+  anti-diagonal claim and 726's hook-length count, which was confirmed by exhaustive search one
+  size past the statement's values. Problem 256's bands, 711's bit patterns, 555's per-$n$ formula,
+  900's losing-position rule, 922's integer-plus-nimber values and 973's one-round-per-composition
+  law are, here, experimental facts that were never proved. All of them are equally safe *only because*
   they were checked against the oracle. That's
   [calibrating theory on known answers](/blogs/takeaway/calibrate-theory-on-known-answers) with
   answers you made yourself.
 - **Keep the oracle in the solution directory.** The scratch checker is the evidence for the
   rule. Leave it beside the solution (the `brute_force.py` of 276, 335, 336, 359, 374, 523, 555,
-  628, 711 and 892, the `brute.py` of 340, 561, 739, 767, 976, 994 and 998, 957's `simulate.py`
-  and `pencils.py`, 782's `irreducible.py` and `verify_families.py`, and 984's `brute_force.c`),
+  628, 711 and 892, the `brute.py` of 340, 561, 726, 739, 767, 771, 787, 900, 976, 994 and 998,
+  the `analysis_brute.py` of 922 and 973, 923's `explore_cgt.py`, 957's `simulate.py` and
+  `pencils.py`, 782's `irreducible.py` and `verify_families.py`, and 984's `brute_force.c`),
   so a later reader can re-run it rather than take the pattern on trust.
 
 <!-- problems (generated by update-tags) -->
