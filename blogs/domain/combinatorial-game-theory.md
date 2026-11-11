@@ -1,5 +1,5 @@
 <!-- tags: [combinatorial-game-theory] -->
-<!-- status: final 2026-11-09T12:31Z -->
+<!-- status: final -->
 # Combinatorial game theory
 
 [Combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) studies
@@ -86,6 +86,17 @@ value (649). Coin-turning games — flip a rectangle of disks subject to a shape
 sums of one-coin games, and the two-dimensional ones are governed by nim-*multiplication*. The
 skill being trained is seeing the independent parts.
 
+Splitting games add a twist to the template: the move itself *creates* the sum. In 933 a cut
+through a $w \times h$ sheet leaves four sheets, so a sheet's Grundy value is the mex over cuts of
+the XOR of four smaller values. A table over a height of a million is out of reach, but each row
+$g(w, \cdot)$ turns out to be **eventually constant**, and this can be proved, not just observed.
+Once both strips of a cut are past their thresholds, the four pieces pair up as $G_a \oplus G_{w-a}
+\oplus G_a \oplus G_{w-a} = 0$. The mirror images cancel, so a tall sheet can only reach $0$ plus a
+bounded set of values from the short strips. That bounds the row's threshold by twice the largest
+threshold before it. Everything above that height is one constant and is summed as an arithmetic
+series, so the cost no longer depends on $h$ at all. Periodicity is the usual hope for a Grundy
+sequence. A symmetry that forces cancellation is a stronger fact, and worth looking for first.
+
 Trees are the case worth singling out. In 400, removing a node and its subtree is cutting an edge in
 [Green Hackenbush](https://en.wikipedia.org/wiki/Hackenbush), and the subtrees hanging from one
 node are independent games. The *colon principle* says an edge with a subtree of value $v$ on top
@@ -112,10 +123,31 @@ look for instead is a direct characterisation of the whole $\mathcal{P}$-positio
 almost always something startlingly clean: a condition on the low bits of one pile relative to the
 bit length of the other (899), a [Beatty](https://en.wikipedia.org/wiki/Beatty_sequence)-like pair
 of sequences in the style of [Wythoff's game](https://en.wikipedia.org/wiki/Wythoff%27s_game) (665),
-a [Zeckendorf representation](/blogs/domain/zeckendorfs-theorem) (692), a
-[continued fraction](https://en.wikipedia.org/wiki/Continued_fraction) expansion (787). Generate the
+a [Zeckendorf representation](/blogs/domain/zeckendorfs-theorem) (692) or its generalisation
+(870), a position's place in the
+[Stern–Brocot tree](/blogs/domain/stern-brocot-tree) (787). Generate the
 losing positions with the brute force, stare at them in binary and in their factorisations, and
 conjecture.
+
+Sometimes a better reading of the *move* shrinks the game before any pattern hunting starts. In
+787 you remove $(c, d)$ from piles $(a, b)$ subject to $ad - bc = \pm 1$, which looks like a large,
+arithmetic move set. But two vectors with unit determinant are exactly Stern–Brocot neighbours, and
+$(a, b)$ is their mediant. So every position has exactly two moves, one to each parent in the tree,
+and the game is a two-way recursion $W(X) = \lnot(W(P) \land W(Q))$. The structure then showed up
+in a factorisation, not in binary. For an odd sum $n$, the number of losing positions is
+$(\varphi(n) + e(n))/2$, where $e = \mu * \chi_4$ is a
+[multiplicative function](/blogs/domain/multiplicative-function). A count of
+$\mathcal{P}$-positions that is multiplicative means the game question has become a question in
+analytic number theory.
+
+870 changes which axis you search along. It is Fibonacci nim with the "twice the previous move" cap
+replaced by a real ratio $r$. Its losing pile sizes follow the classical take-away recurrence
+$H_{j+1} = H_j + H_{l_j}$, with $l_j$ the first index where $r H_l \ge H_j$. The question is not
+about any position. It asks *at which values of $r$ the losing set changes*. The sequence depends on
+$r$ only through those comparisons, so it is piecewise constant in $r$, and the breakpoints are
+critical ratios $H_j / H_{l_j - 1}$. You can then sweep $r$ from one event to the next. Hold each
+breakpoint as an exact fraction, since a floating-point tie at the breakpoint is precisely the case
+that matters. Rebuild only the tail of the sequence past the first term that moved.
 
 Before you stare, shrink the state. In 711 (Binary Blackboard) the players write numbers whose sum
 is capped by the first one, and a win depends on the parity of the total count of 1 bits. The
@@ -129,8 +161,8 @@ sum of geometric and arithmetico-geometric series, and the work grows only with 
 the bound.
 
 **Partisan games.** If the two players have *different* moves — Left removes from the left, Right
-from the right (948, 949); one player deletes gold coins, the other silver (860, 895); a player may
-only strip their own piles (939); X and O place different symbols (976); one player slides a counter right, the other down (922); Dr. One deletes a binary
+from the right (948, 949); one player deletes gold coins, the other silver (860, 895); a player
+clears a whole pile only on their own side, but nibbles single stones from the opponent's (939); X and O place different symbols (976); one player slides a counter right, the other down (922); Dr. One deletes a binary
 1 while Dr. Zero deletes a 0 (882) — Sprague–Grundy does not apply. These are
 [partizan games](/blogs/domain/partizan-game), and a position must be classified by *four*
 outcomes (Left wins whoever starts, Right wins whoever starts, first player wins, second player
@@ -148,7 +180,7 @@ induction with the terminal condition flipped rather than adjust the answer at t
 If each move still touches one component but the players differ, Conway's theory replaces the
 nimber with a general game value $G = \{\,\text{Left's options} \mid \text{Right's options}\,\}$, and
 the value of a sum is still the sum of the values. What changes is the arithmetic those values live
-in, and five problems show the range of it.
+in, and the problems below show the range of it.
 
 The gentlest entry is 860, the gold-and-silver coin game. Taking a coin removes everything stacked
 above it, which is exactly cutting an edge of a stalk in
@@ -174,7 +206,16 @@ of skips $\lceil V \rceil$ — no search over the board at all. Because the deno
 two bounded by the bit length, the values can be held as integers scaled by $2^B$, and the simplest
 number between $\ell$ and $r$ is a bit-clearing trick rather than a loop.
 
-Problem 963 plays the same game in ternary, with one change: a digit 2 may be deleted by *either*
+Problem 939 (Partisan Nim) is the gentlest way into infinitesimals. A player may remove a whole
+pile on their own side, or one stone from a pile on the opponent's side. For a pile on A's side
+that gives $G_n = \{0 \mid G_{n-1}\}$, so $G_1 = * = \{0 \mid 0\}$, $G_2 = \uparrow = \{0 \mid *\}$,
+and in general $G_n = (n-1)\uparrow$, plus $*$ when $n$ is odd. A whole setting therefore collapses
+to $k\uparrow$ or $k\uparrow + *$, where $k$ is a difference of stone counts net of pile counts. The
+outcome is a two-line rule: $k\uparrow > 0$ iff $k \ge 1$, but $\uparrow + *$ is confused with
+zero, so with the star present A needs $k \ge 2$. These infinitesimals never need a canonical-form
+engine. They are integer multiples of one element, plus a parity bit.
+
+Problem 963 plays 882's game in ternary, with one change: a digit 2 may be deleted by *either*
 player. That single shared move is enough to break the numbers. The values pick up
 [infinitesimals](https://en.wikipedia.org/wiki/Infinitesimal) — star $* = \{0 \mid 0\}$, up
 $\uparrow = \{0 \mid *\}$ and a tower of smaller ones — which are neither positive, negative nor zero
@@ -208,10 +249,37 @@ length occurs an even number of times and the weights cancel. A sum of game valu
 parity rule on the multiset of strip lengths, and the count becomes a
 [generating function](/blogs/domain/generating-function) over multisets.
 
-The lesson across the five: in a partisan sum, first find out *what kind of value* the components
-take. Numbers give you a total order and plain arithmetic. Number-plus-nimber values give you a
-sign rule over two axes. Values that are powers of two let the largest one decide. Anything hotter
-or fuzzier needs a canonical representation before you can even test equality, let alone count.
+Every value so far has been *cold*: a number, or a number plus an infinitesimal, where nobody
+gains by moving first. Problem 923 (Young's Game B) is the hot case. Its staircases turn out to be
+worth either an integer or a **switch** $\{x \mid y\}$ with $x > y$, a game both players want to
+move in, of [temperature](https://en.wikipedia.org/wiki/Hot_game) $(x - y)/2$. Switches cannot be
+added like numbers. For a sum of integers, switches and stars, though, there is an exact strategy:
+always play the hottest switch. Taking switches in decreasing temperature, the player to move
+collects $x$ from every other one and the opponent collects $y$ from the rest. What is left is an
+integer, and the turn plus the star parity settle a zero total. So the value is no longer one
+number. It is the result of a *play order*, and the counting step has to follow that order. The
+DP walks the temperature classes from hottest to coldest and tracks the parity of switches played
+so far, which decides who collects the larger side of the next class.
+
+Problem 949 (Left vs Right II) breaks a rule the whole section relies on. On each turn a player
+moves in *any non-empty subset* of the words at once, so the position is not a disjunctive sum.
+The way back is temperature again. Value each word as an ordinary game ($\mathrm{L} = 1$,
+$\mathrm{R} = -1$, options are the proper suffixes and prefixes). Exhaustive search then shows
+that Left's first turn turns every contested word into a number. Once every component is a
+number, moving in several at once never helps, because there is no tempo to gain in a cold game.
+From the second turn on, play is an ordinary sum. All the simultaneous-move effect is concentrated
+in one opening, which reduces each word to a pair: the best number Left can make of it, and the
+penalty if she is forced to spend a real move there. The outcome is a sign test on the total plus
+the *largest* penalty. Bear in mind that the reduction is established empirically, against brute
+force on thousands of tuples and the statement's values, and not proved.
+
+The lesson across these problems: in a partisan sum, first find out *what kind of value* the
+components take. Numbers give you a total order and plain arithmetic. Multiples of $\uparrow$
+plus a star give you a sign rule with a one-step correction. Number-plus-nimber values give you a
+sign rule over two axes. Values that are powers of two let the largest one decide. Switches give
+you a play order by temperature. Anything fuzzier needs a canonical representation before you can
+even test equality, let alone count. And when the rules are not quite a sum, check whether play
+*cools* into one after a turn or two.
 In every case the values were *found* by a small exact engine and only then proved or tested,
 never guessed.
 
@@ -285,11 +353,32 @@ Three refinements of stage 3 recur often enough to name:
   convolution in $N$ and XOR convolution in $X$. Transform only the nimber axis. Each Walsh index
   then carries an ordinary polynomial in $N$, raised to the $m$-th power. You also need only one
   point of the inverse transform, $X = 0$, so you never invert the whole thing.
+- **Symmetry before counting.** A partisan count is often half a count. In 939, swapping the two
+  sides negates $k$, so the settings with $k \ge 1$ and with $k \le -1$ are equally many. The answer
+  is half of (all settings minus the $k = 0$ diagonal), minus a correction on the $k = 1$ diagonal
+  for the star. Only two diagonals of a two-dimensional
+  [partition](/blogs/domain/partition-number-theory) table are ever built, which is quadratic work
+  where a full convolution would be cubic.
+- **A maximum inside the condition.** When the losing test involves $\max_i \delta_i$ (949),
+  group the tuples by which penalty level is the maximum, and
+  [telescope](/blogs/technique/telescoping-series). Count the tuples whose penalties all lie at or
+  below level $r$, minus those strictly below. Each term is then an ordinary $k$-fold sum
+  condition, cheap to count by [meet in the middle](/blogs/technique/meet-in-the-middle-attack) over
+  half-size sum tables.
 
 The closed forms at the end vary as much as the games. 711 ends in geometric and
 arithmetico-geometric series. 976 ends in multiset generating functions whose coefficients satisfy an
 order-two [holonomic](https://en.wikipedia.org/wiki/Holonomic_function) recurrence, so $10^7$
-terms take one division-free linear pass.
+terms take one division-free linear pass. 900 sums its losing threshold, a residue modulo
+$2^{\text{bitlen}(n)}$, over every $n$ up to $2^{10^4}$. Within a dyadic block $[2^j, 2^{j+1})$
+the residues form a complete system, and the block sum becomes a sum of negated squares modulo
+$2^e$. Odd squares mod $2^e$ are exactly the residues $\equiv 1 \pmod 8$, so that sum obeys a
+depth-two recurrence, and the work is linear in the *exponent*. 787 lands in multiplicative
+number theory instead. Its count is a totient sum plus the summatory function of $\mu * \chi_4$,
+and both reduce to the [Mertens function](/blogs/technique/mertens-function-application) at the
+values $\lfloor N/k \rfloor$. That gives the usual $O(N^{2/3})$ sieve-plus-memoised-recursion. A
+game whose losing positions are counted by a multiplicative function inherits the whole sublinear
+toolkit.
 
 Problem 961 is a compact illustration of the whole arc: the game is played on the decimal digits of
 an integer, but only the pattern of zero and non-zero slots matters, so a position is a small
@@ -313,6 +402,12 @@ weighting each winning mask by how many integers wear it.
   [Dawson's Kayles](https://en.wikipedia.org/wiki/Dawson%27s_Kayles) — and a period lets you answer
   for $10^6$ from a table of a few hundred. Confirm the period over a long stretch, not the first
   repeat you see.
+- **Read the move set geometrically before tabulating it.** A determinant condition that is really
+  a step up the Stern–Brocot tree (787), or a cut that is really a sum of four games (933), can
+  shrink the game more than any table will.
+- **Check the temperature.** Cold values add, and hot values (switches) are played hottest first. A
+  rule that breaks the sum, such as moving in several components at once, may stop mattering once
+  everything has cooled (949).
 - **Encode the state canonically.** Sort the heaps, pack the board into an integer, quotient by the
   symmetry the rules allow. Most of these state spaces are only tractable once identical positions
   stop being counted twice.
