@@ -1,5 +1,5 @@
 <!-- tags: [quotient-blocking, mobius-inversion-formula, mobius-function-application, dirichlet-convolution, divisor-summatory-function, totient-summatory-recursion] -->
-<!-- status: final -->
+<!-- status: final 2026-11-11T08:58Z -->
 # Summing multiplicative functions fast
 
 A whole family of Project Euler problems asks for $\sum_{n \le N} f(n)$, where $f$ is a
