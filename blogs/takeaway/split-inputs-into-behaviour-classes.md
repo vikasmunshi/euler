@@ -1,5 +1,5 @@
 <!-- tags: [split-inputs-into-behaviour-classes] -->
-<!-- status: final 2026-11-04T13:11Z -->
+<!-- status: final -->
 # Split inputs into behaviour classes
 
 Many problems ask about a deterministic process run on *every* input in a huge range: the
@@ -12,8 +12,8 @@ inputs at once, usually intervals, arithmetic progressions or groups with a mult
 split a class only at the point where its members' behaviour actually diverges. The work then
 scales with the number of distinct behaviours, not the number of inputs. The same move also goes
 further than intervals: classes can merge as well as split, can share a shape instead of a value,
-can choose the method instead of the count, and can divide the coordinates of a problem instead of
-its inputs.
+can choose the method instead of the count, can divide the coordinates of a problem instead of
+its inputs, can be the components of a game sum, and can need nothing more than a sort key.
 
 ## The idea: follow what the process reads
 
@@ -57,6 +57,18 @@ Python's `//` rounds toward $-\infty$, which is what this formula needs. C's `/`
 zero, so a C port needs its own floor-division helper wherever a bound can go negative. Problem
 305's C port carries exactly that helper.
 
+When the class is defined by coprimality rather than by an interval, the count becomes
+[inclusion–exclusion](/blogs/technique/inclusion-exclusion-principle) instead: the integers up to
+$X$ coprime to $q$ number $\sum_{d \mid q} \mu(d) \lfloor X/d \rfloor$, a sum over the square-free
+divisors weighted by the [Möbius function](/blogs/domain/mobius-function). Problem 962 needs this.
+Its inner loop runs over numerators $t$, and each one's contribution depends on a gcd $\delta$.
+Computing that gcd for every $t$ was the obvious cost. But $\delta$ depends only on whether $t$ is
+odd or even, so there are just two classes. I compute $\delta$ once at a representative of each
+class, $t = 1$ and $t = 2$, and count the members of each class by Möbius: the odd class is the
+count coprime to $2q$, and the even class is the count coprime to $q$ minus that. The summand is
+evaluated twice per loop instead of once per $t$. That is the general shape: find the coarse
+class that a costly quantity depends on, evaluate it at one member, and count the rest.
+
 When the classes come from a process that runs for several steps, the skeleton is a worklist of
 classes:
 
@@ -71,10 +83,10 @@ while stack:
             stack.append((sub_lo, sub_hi, nxt))
 ```
 
-## Beyond intervals: four other kinds of class
+## Beyond intervals: other kinds of class
 
-The problems above all carry a set of inputs and count it. Four later ideas keep the question,
-*what does the process actually read?*, and change what a class is.
+The problems above all carry a set of inputs and count it. The later ideas below keep the
+question, *what does the process actually read?*, and change what a class is.
 
 ### Classes that merge: the state of a prefix
 
@@ -165,6 +177,31 @@ family, and the even class's two sub-cases collapse into one. The code has no pe
 all: it is two loops, each [generating only its own class](/blogs/takeaway/reduce-before-coding),
 over $O(N^{1/2})$ parameter pairs. A class that can be derived should be generated, not filtered.
 
+Problem 678 splits on a *parameter* of the problem, and the classes differ in more than their
+algebra. It counts $a^e + b^e = c^f \le 10^{18}$, and each exponent $e$ gets its own tool. For
+$e = 2$ the [sum of two squares theorem](/blogs/domain/sum-of-two-squares-theorem) gives the count
+as a product over the factorisation of $c$, so the class costs constant work per target. For
+$e = 3$ the factor $a + b$ is a divisor of $c^f$ in a narrow window. For $e = 4$ the
+representations are enumerated in the [Gaussian integers](/blogs/technique/gaussian-integer). For
+$e \ge 5$ there are so few pairs $(a, b)$ that it is cheaper to enumerate them and look the sums up
+than to walk the targets. So the classes also decide *which side to iterate*: the roughly $10^6$
+targets where the left side has many candidates, the few million pairs where it has few. And some
+classes are empty by theorem.
+[Fermat's Last Theorem](/blogs/domain/fermats-last-theorem) removes every $(e, f)$ with
+$\gcd(e, f) \ge 3$, and Fermat's own result on $x^4 + y^4 = z^2$ removes $e = 4$ with even $f$. A
+class proved empty is the cheapest class of all, and it is worth asking of every class whether it
+can be.
+
+Problem 564 shows the class choosing the method twice. It averages the area of the maximal polygon
+over every way to split a stick into sides. The maximal polygon is cyclic, and a cyclic polygon's
+area depends only on the *multiset* of its sides, so the compositions collapse into
+[integer partitions](/blogs/domain/partition-number-theory), each weighted by its
+[multinomial](/blogs/technique/multinomial-theorem) count of orderings. That is the orbit
+weighting from [exploiting symmetry](/blogs/takeaway/exploit-symmetry). Then each partition falls
+into one of two geometric classes, centre inside the polygon or centre outside, and the two need
+different equations for the circumradius. One test, at the smallest possible radius, decides
+which class a partition is in before any solving begins.
+
 ### Classes of coordinates, not inputs
 
 Problem 619 counts subsets of an interval whose product is a perfect square. A number matters only
@@ -178,13 +215,61 @@ becomes its pivot and the others absorb that pivot's small-prime part. General
 $\sqrt b$, just 186 of them for the target range. The large class needs no elimination, because its structure has already decided
 the outcome, and the hard algorithm runs only on the class that needs it.
 
+### Classes of components: what a game sum reads
+
+A [disjunctive sum](/blogs/technique/disjunctive-game-sum) of games reads each component only
+through its [game value](/blogs/domain/combinatorial-game-theory). So the components can be classed
+by value, and a count over tuples of components becomes a count over tuples of values. Problem 963
+already did this with a multiplicity. Problems 923 and 949 add two ideas to it.
+
+In Problem 923 the components are tens of thousands of staircases, and only three kinds of value
+occur: integers, stars, and switches $\{x \mid y\}$. The winner of a sum of those is decided by a
+known strategy, which plays the switches hottest first. So the classes come with an *order*, and
+the counting dynamic programme walks them in that order. Its state then needs only the parity of
+switches played so far to know which player takes each copy. Ties in temperature can be taken in
+any order, because the outcome depends only on how many copies each player gets. The question asks
+about ordered tuples, but the winner depends only on the multiset, so each class enters as an
+[exponential generating function](/blogs/technique/exponential-generating-function) $F^c / c!$,
+with $m!$ restoring the orders at the end.
+
+Problem 949 is not quite a disjunctive sum, because a player moves in several words at once. The
+first split is by the last letter: a word that ends in L is Left's to lock on her first turn, and
+only the words that end in R are contested. The simultaneous-move rule turns out to matter only on
+that first turn. After it every component is a number, numbers are cold, and the sum is ordinary
+again. So each word reduces to a pair $(a, \delta)$: the value Left can give it, and the cost if she
+must spend her compulsory move there. The winning test involves $\sum a + \max \delta$, and a
+maximum is awkward to count. So the count splits once more, by the value of the maximum. For each
+penalty threshold I count the tuples whose penalties all lie at or below it, and
+[telescope](/blogs/technique/telescoping-series) the differences. Inside each threshold class the
+condition is a plain sum, which a [meet-in-the-middle](/blogs/technique/meet-in-the-middle-attack)
+count handles.
+
+Both reductions were found by experiment rather than proved. I computed canonical forms for small
+cases, saw the classes, and then checked the rule against exhaustive game search on thousands of
+random sums. That is a legitimate way to find classes, provided the check reaches every class.
+
+### Classes that need only a sort key
+
+Problem 941 asks for the *order* in which ten million combinations first appear in a
+[de Bruijn sequence](/blogs/domain/de-bruijn-sequence) of length $10^{12}$, not their positions. The
+sequence is a concatenation of Lyndon words, one block per
+[necklace](/blogs/domain/necklace-counting), and every window falls into one of three classes. It
+lies inside its own necklace's block, it borrows a tail from the next block after a run of 9s, or it
+runs off the end into the appended digits. Each class has a cheap key: (necklace, offset), (next
+prenecklace, negative offset), and "after everything". Exact positions would need a ranking
+algorithm that counts necklaces below a bound. Keys only need to agree with position, so the
+requirement on each class drops to one thing: its keys must interleave correctly with the other
+classes' keys. The rare class, the borrowed tails, is handled in a plain loop after the vectorised
+pass. The weaker the question, the coarser the class can be.
+
 ## How to reason about it
 
 Reach for this when the input range is far larger than the number of things that can *happen*.
 Signs of it are floors and ceilings of $n / x$, behaviour that depends on digit length or a
 prefix, a value function with a small image, or a family generated by scaling. Others are a future
 that depends on a small summary of the past, a parameter that changes values without changing the
-branching, and a case split that changes which theorem applies. The gain is the ratio of inputs to
+branching, a case split that changes which theorem applies, a sum of games read through
+their values, and a question that asks for an order rather than positions. The gain is the ratio of inputs to
 classes, often the difference between $10^{14}$ and $10^7$.
 
 - **Find the coarsest function the process depends on.** Split on what the next step *reads*,
@@ -205,7 +290,13 @@ classes, often the difference between $10^{14}$ and $10^7$.
   number, and the question asks for distinct ones.
 - **Test every class, not just a range.** A check that never enters a class says nothing about it.
   752's given values matter because they reach split, inert and ramified primes as well as lifts to
-  higher prime powers such as $5^4$ and $7^3$.
+  higher prime powers such as $5^4$ and $7^3$. 678's per-exponent counts were each checked against
+  an exhaustive scan, so a fault in one tool could not hide behind the others' totals.
+- **Ask whether a class is empty.** A theorem that rules a class out, as Fermat does for most of
+  678's exponent pairs, is free work saved. Ask too whether a quantity is constant on a class, as
+  962's gcd is on each parity, so that one evaluation serves every member.
+- **Split again on an awkward aggregate.** A maximum or a threshold inside the condition, as in
+  949, is itself a class label: fix it, count each class with a plain condition, and telescope.
 - **Look for the size where behaviour simplifies.** 619's primes above $\sqrt b$ and 844's $k$ from
   $T$ upward are both regimes where a strong structural fact holds. Past that point a cheap rule
   covers everything, and below it there is little enough left for the general method.
