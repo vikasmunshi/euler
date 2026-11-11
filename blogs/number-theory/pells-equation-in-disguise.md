@@ -1,5 +1,5 @@
 <!-- tags: [pells-equation, recurrence-relation-application, pythagorean-triple, diophantine-equation] -->
-<!-- status: final 2026-11-08T16:59Z -->
+<!-- status: final -->
 # Pell equation in disguise
 
 Some Euler problems are about a probability, some about triangles, some about tiling a floor, and
@@ -15,7 +15,9 @@ more, the $k$-Markov numbers (844) and a triangle-hunting sequence (955), keep t
 the step: one jumps across a tree instead of along a line, the other finds each next solution by
 factoring. Others take the disguise apart in other ways. One equation can turn out to be a hundred
 (582). A conic can be solved with a ruler rather than a unit (962). And a completed square can come
-out with the wrong sign for Pell (621).
+out with the wrong sign for Pell (621, 678, 883). Every Pell equation can be summed at once, by
+making the fundamental solution the variable instead of $D$ (833). And a square can live in a
+ring larger than the integers (880).
 The [technique page](/blogs/technique/pells-equation) explains how to *solve* Pell equations.
 This page is about *recognising* one, and about why so many of these problems end up walking
 literally the same sequence of numbers.
@@ -145,6 +147,22 @@ a cap, on the grounds that a huge $y_1$ has essentially no chance of being smoot
 assume that: the notes check that the answers don't change when the cap is raised by twenty orders
 of magnitude.
 
+Problem 833 starts from the same place and goes the other way. It asks for $c^2 = T_a T_b$, and
+with $x = 2a + 1$ that says $(x_a^2 - 1)(x_b^2 - 1)$ is a square. So the two factors share a
+squarefree part $s$, and $x_a, x_b$ solve the same equation $X^2 - sY^2 = 1$. There is no smoothness
+to filter on here: every $s$ counts, and there are far too many of them to expand one by one. The
+fix is to change which variable indexes the family. Every integer $f \ge 2$ is the $X$ of *some*
+Pell equation, the one with $s$ the squarefree part of $f^2 - 1$. Its orbit is then
+$X_k = T_k(f)$, $Y_k = Y_1 U_{k-1}(f)$, given by the
+[Chebyshev polynomials](https://en.wikipedia.org/wiki/Chebyshev_polynomials). Their recurrence
+$T_{k+1} = 2f\,T_k - T_{k-1}$ is the trace recurrence from above, with the trace kept as a
+symbol. Because $sY_1^2 = f^2 - 1$, the quantity $c$ for the pair of members $(i, j)$ is a
+polynomial in $f$ alone: $s$ and $Y_1$ drop out. Summing a polynomial over a range of $f$ is a
+closed form, done with Lagrange interpolation. The only correction is for values of $f$ that are not
+fundamental, because they are themselves later members $T_m(y)$. Those are sparse, so they are
+listed and subtracted. Problem 581 filters millions of Pell equations one by one. Problem 833 never
+looks at any single one: the whole family is written as a polynomial in its seed.
+
 ## The step itself, undisguised
 
 Why does a Pell orbit obey $s_{k+1} = T s_k - s_{k-1}$? Look at consecutive pairs. The recurrence
@@ -185,8 +203,8 @@ multiplication by a fixed unit, and the steps grow irregularly rather than geome
 ## Conics that are not Pell walks
 
 A Pell walk needs two things: an *indefinite* form ($D > 0$, not a square) and an equation whose
-scale is fixed by $N$. Take away either one and the conic is still there, but you solve it some
-other way.
+scale is fixed by $N$, both over the ordinary integers. Take away any of these and the square
+condition is still there, but you solve it some other way.
 
 **Take away the scale.** In Problem 962 the perfect-square condition reduces to
 $g^2 - w^2 = D\,m^2$. All three unknowns are free, and the equation is homogeneous, so any multiple
@@ -211,6 +229,33 @@ polynomial sieve of Problem 291 again: the square is completed once more, $2f(a)
 so that each prime hits only the residue classes given by the square roots of $N$ modulo $p$.
 In general, the sign of $D$ decides between "walk an infinite orbit" and "count a finite set by
 factoring".
+
+Problem 883 shows this with the same form as Problem 582. The hexagonal lattice is the ring of
+[Eisenstein integers](https://en.wikipedia.org/wiki/Eisenstein_integer), and squared distance is
+the norm $a^2 - ab + b^2$. In 582 the near-isosceles condition subtracts a square from that form
+and leaves an indefinite Pell equation with $D = 3$. In 883 nothing is subtracted. The form stays
+definite, a lattice point's norm is a bound and not an equation, and the work is counting points in
+a disc. The tangency condition that remains, $(3k - 2n)(3m - 2n) = n^2$, is a product equal to a
+square, which is a divisor count rather than a conic to walk. Problem 678 makes the opposite choice
+inside the definite case: it counts when it can and enumerates when it must. For
+$a^2 + b^2 = c^f$ the number of representations is a product over the factorisation of $c$, so no
+representation is ever built. For $a^4 + b^4 = c^f$ the count is not enough, because both parts must
+also be squares. So the solution lists the Gaussian integers of norm $c^f$ explicitly, one choice
+of $\pi$ or $\bar\pi$ for each split prime, and keeps those whose parts are squares. The cubic case
+is not a norm form over $\mathbb{Z}[i]$ at all. It factors as
+$a^3 + b^3 = (a + b)(a^2 - ab + b^2)$, which restricts $a + b$ to divisors of $c^f$ in a narrow
+window. And Fermat's descent ($x^4 + y^4 = z^2$ has no solutions) removes whole exponent classes
+before any search starts.
+
+**Change the ring.** Problem 880 asks when $\sqrt{\sqrt[3]{x} + \sqrt[3]{y}}$ denests into
+cube roots. Put $w = \sqrt[3]{x/y}$. The question becomes whether $(1 + w)/y$ is a square in the
+cubic field $\mathbb{Q}(w)$. The [field norm](https://en.wikipedia.org/wiki/Field_norm) turns that
+into a familiar condition: the norm of a square is a square, so $x + y$ must be a perfect square.
+That is a necessary condition, not a solution, and Pell plays no part. Writing out
+$(p + qw + rw^2)^2$ and matching coefficients gives one quadratic constraint, $q^2 + 2pr = 0$.
+That is again a conic with an obvious rational point, so, as in 962, it has a one-parameter
+rational family. Clearing denominators gives an integer parametrisation in two coprime parameters
+and a scale, and the scale is summed in closed form.
 
 ## How to reason about it
 
@@ -256,6 +301,20 @@ factoring".
   not the $n$-th solution, so the cost is linear in $n$ rather than logarithmic. One practical
   trick is shared by 976 and 1007. Every step divides by $n + 1$, so the code carries
   $n!\,c_n$ instead, and the division-free recurrence needs a single modular inverse at the end.
+- **Ask what the recurrence walks over.** A Pell recurrence walks over *solutions*. Some newer
+  neighbours have a clean linear recurrence over something else. Problem 783 draws balls from an
+  urn whose black count is random. Its full distribution is far too large to track, but the
+  quantity asked for is a second moment, and every conditional moment involved is a polynomial of
+  degree at most two in the black count. So the pair $(\mathbb{E}[b], \mathbb{E}[b^2])$ is closed
+  under a turn, and the process becomes a two-variable linear recurrence over the turns. Its
+  coefficients change each turn, so there is no trace. Problem 900 walks over the *scale*. Its
+  losing positions reduce to $-(n^2 + [n \text{ odd}]) \bmod 2^{\text{bitlen}(n)}$, and the
+  required sum of squares modulo $2^e$ obeys a depth-two recurrence in $e$, $G(e) = \dots + 8G(e-2)$.
+  That reaches $2^{10^4}$ in $10^4$ steps: logarithmic in the bound, like a Pell walk, but with
+  the exponent as the index. Problem 870 generalises Fibonacci nim. Its losing piles satisfy
+  $H_{j+1} = H_j + H_{l_j}$, which is Fibonacci at $r = 2$, but the lag $l_j$ depends on the
+  sequence's own values. No fixed recurrence fits, and the solution sweeps $r$ across the
+  breakpoints where a lag changes.
 - **Check whether $D$ is a square.** A perfect-square condition is necessary for Pell, but not
   sufficient. If completing the square leaves $X^2 - s^2 Y^2 = N$, the left side factors as
   $(X - sY)(X + sY)$, and divisor arguments replace the Pell machinery. Problem 764 is the clean
