@@ -1,5 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
-<!-- status: final 2026-11-04T08:13Z -->
+<!-- status: final -->
 # Prefer closed form over iteration
 
 A loop that adds up a structured sequence is doing arithmetic the sequence has
@@ -56,7 +56,7 @@ structure do the counting.
 
 In the harder problems the formula rarely *is* the answer. It is a component —
 the part of the computation that would otherwise be the inner loop — and the
-surrounding algorithm is designed around having it. Nine shapes recur.
+surrounding algorithm is designed around having it. Eleven shapes recur.
 
 **A formula per item, in place of a search per item.**
 [Divisibility Multipliers](/solutions/0274/) asks, for every prime $p$ coprime
@@ -82,6 +82,22 @@ $D$-digit integer at a fixed offset leave the other digits free, a power of 10
 apiece, and only the top length needs a comparison against $N$. This is the
 skeleton of a [digit DP](https://en.wikipedia.org/wiki/Dynamic_programming),
 with the closed form doing the work the memo table would.
+
+**A formula for the tail, iteration only for the transient.** Some sequences are
+irregular at first and then settle down. [Paper Cutting](/solutions/0933/) is a
+cutting game whose positions are sums of independent sheets, so the
+[Sprague–Grundy theorem](https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem)
+gives each $w \times h$ sheet a nimber. Counting the winning moves needs those
+nimbers for heights up to $1.2 \times 10^6$, and each one is a mex over $O(wh)$
+cuts, so the full table is out of reach. But every row $g(w, \cdot)$ is
+eventually constant, and induction on the width proves it: once both strips of
+a cut are past their thresholds, the four pieces cancel in pairs under XOR. So
+each row has to be computed only up to twice the largest threshold among its
+splits. Past that point the count of winning cuts at height $h$ follows a fixed
+linear rule, and the remaining million heights are one arithmetic series. The
+cost no longer depends on $H$. The same split works for any sequence that
+settles into a constant, linear or periodic pattern: compute the transient
+honestly, and prove where it ends.
 
 **A cheap count you can invert.** Once "how many up to $N$" costs
 $O(\log N)$, "where is the $n$-th one" is a
@@ -163,6 +179,30 @@ matrix does the same for a linear recurrence, which is why
 exists. Here the trick reaches a nonlinear one, and the article on
 [recurrence relations](/blogs/domain/recurrence-relation) takes up how to spot it.
 
+**A bijection to a family that is already counted.** Sometimes the objects being
+summed are a well-known combinatorial family in disguise. Once you see which
+family it is, a classical count does the work. [Zebra Circles](/solutions/0892/)
+sums over non-crossing chord diagrams. Put a vertex in each piece and join pieces
+that share a chord, and each diagram becomes exactly one plane tree. The colour
+difference then compares the tree's vertices at odd and even depth. Plane trees
+counted by their odd-depth vertices are the
+[Narayana numbers](https://en.wikipedia.org/wiki/Narayana_number), so $D(n)$
+becomes a weighted sum of $n$ of them. Even that short sum closes. On small $n$
+its partial sums turned out to be products of two binomials, and a guess of that
+kind proves itself: check that consecutive products differ by the summand, the
+same test [Gosper's algorithm](https://en.wikipedia.org/wiki/Gosper%27s_algorithm)
+automates. Each $D(n)$ is then one binomial product, and ten million of them come
+from a single recurrence for the central binomial coefficients.
+[Stone Game Solitaire](/solutions/0960/) reaches a family from a process. Counting
+stones shows that every successful game has $n-1$ turns, that the pairs of piles
+the turns touch form a spanning tree, and that the tree alone fixes how many
+stones each turn takes, and so its score, in any order of play. The sum over
+games becomes $(n-1)!$ times a sum over labelled trees and their edges, which is
+a double sum to turn on its side (see below). Count the (tree, edge) pairs by the
+sizes of the two parts the edge separates, using
+[Cayley's formula](https://en.wikipedia.org/wiki/Cayley%27s_formula) for the trees
+on each side, and $n$ terms are left.
+
 **A formula you solve, not just evaluate.** An expression can do something a
 process cannot: it can stand in an equation. [McCarthy 91 Function](/solutions/0555/)
 starts as Crazy Function did, with memoised runs on small parameters showing
@@ -210,6 +250,22 @@ The radii are linear in $t$, so a pair's multiples sum as one triangular number.
 A loop over $t$ would bring back the linear cost, since the smallest pair alone
 has $\lfloor n/4 \rfloor$ multiples.
 
+Both halves of that move generalise. [Nested Radicals](/solutions/0880/) gets its
+parametrisation from algebra in a cubic field. The radical denests exactly when a
+certain element is a square, and that condition comes out as two quartic forms in
+a coprime pair $(\alpha, \gamma)$, times a scale $s^2$. Because the scale enters
+squared, a primitive pair's multiples sum as a square-pyramidal number instead of
+a triangular one. [Angular Bisector and Tangent 2](/solutions/0962/) gets its
+family from geometry. Asking for an integer $CE$ turns into a conic
+$g^2 - w^2 = Dm^2$ with an obvious rational point, and the
+[lines through that point](https://en.wikipedia.org/wiki/Rational_point)
+meet every other rational point exactly once. It then closes a third count as
+well. The numerators of those slopes run over integers coprime to a known number,
+up to a bound one integer square root gives, so the solution counts them by
+[inclusion–exclusion](/blogs/technique/inclusion-exclusion-principle) over that number's
+primes, split by parity, instead of visiting them. Neither the scales nor the
+numerators are ever enumerated one by one.
+
 The plainest variant is a sum that is short rather than constant.
 [Twenty-two Foolish Primes](/solutions/0239/) asks a probability over all $100!$
 permutations; [inclusion–exclusion](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)
@@ -227,7 +283,7 @@ $\sum_{k<K} x^k = (x^K - 1)/(x - 1)$. Under any modulus coprime to $x - 1$ that
 is one [modular exponentiation](https://en.wikipedia.org/wiki/Modular_exponentiation)
 and one [modular inverse](https://en.wikipedia.org/wiki/Modular_multiplicative_inverse),
 so $K$ can be $10^{18}$. The hard part is turning the problem into geometric
-series in the first place, and five different routes lead there.
+series in the first place, and six different routes lead there.
 
 **Periodicity, split into residue classes.** [Clock Sequence](/solutions/0506/)
 reads terms off a digit stream with period 6. Because a full period always sums
@@ -281,6 +337,21 @@ does as the largest base takes over, and the table fits three such powers
 exactly. Each power is then its own geometric series. If a sequence grows at a
 steady ratio, try that form before anything cleverer.
 
+**Runs in a sparse digit string.** [Rational Blancmange](/solutions/0889/)
+evaluates the [blancmange function](https://en.wikipedia.org/wiki/Blancmange_curve)
+at a rational number whose binary period is about $2 \times 10^{18}$ digits long.
+Regrouping the defining series by digit position gives
+$T(x) = \sum_q 2^{-q} c_q$, where $c_q$ counts the earlier digits that disagree
+with digit $q$. Every later period adds the same amount to each $c_q$, so the
+infinite tail is one geometric series and only a single period is left to sum.
+That period is almost all zeros, because the
+[binomial theorem](https://en.wikipedia.org/wiki/Binomial_theorem) spreads the
+numerator into about sixty short clusters of bits. And $c_q$ stays constant along
+any run of equal digits, so a run from $u$ to $v$ contributes one geometric
+segment, $c_u\,(2^{N-u+1} - 2^{N-v})$. Two quintillion digits become about four
+thousand runs. When a summand changes at only a few places, sum it in closed form
+between them.
+
 Two edge cases come with the formula. Watch for the degenerate ratios: $x = 1$
 sums to the number of terms and $x = 0$ to its $x^0$ term alone, and Simbers
 hits both among its 21 series. And keep $x - 1$ invertible. Clock Sequence
@@ -298,8 +369,11 @@ a count over all numbers with a fixed number of digits or bits, a term that
 is a polynomial up to a periodic wobble (floors and rounds of $k^2/c$), a
 periodic sequence, a recursion whose unrolling is a path count, a random
 process with only a few states, a quantity symmetric in roots you cannot write
-down, a rational map that may be a power map in disguise, or a double sum that
-is simple in one of its indices.
+down, a rational map that may be a power map in disguise, a double sum that
+is simple in one of its indices, a sequence that settles after a transient, a
+summand that changes at only a few places, a conic with one rational point on it,
+or a set of objects (or of successful runs of a process) that is a known
+combinatorial family, such as trees, in disguise.
 When the summand is genuinely irregular — the rectangle counts scanned in
 [Counting Rectangles](/solutions/0085/), where the search stops at the shape
 nearest a target — no formula collapses the whole thing, and iteration is the
@@ -353,7 +427,11 @@ Five cautions earn their keep:
   numerator has thirty million digits. The structure of the formula confines
   any common factor to $\gcd(n, 2^n - 1)$, which needs only $2^n \bmod n$. That
   factor may not be invertible modulo $10^8$, so the solution divides it out
-  exactly under a raised modulus $10^8 g^2$.
+  exactly under a raised modulus $10^8 g^2$. The trap also hides in
+  bookkeeping. Rational Blancmange first checked that its binomial blocks
+  could not overlap with `max(coefficients) < (1 << t)`, and that tried to
+  allocate a number with $10^{14}$ bits. Comparing bit lengths asks the same
+  question for free.
 - **A formula is worth deriving once and reusing.** The triangular and
   pyramidal-number identities recur across many of the problems below; naming
   them as small helpers, as these solutions do, keeps each new use a one-liner
