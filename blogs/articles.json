@@ -5668,13 +5668,13 @@
       "path": "takeaway/split-inputs-into-behaviour-classes",
       "title": "Split inputs into behaviour classes",
       "status": "final",
-      "written": "2026-11-04T13:11Z",
+      "written": "2026-11-11T09:02Z",
       "solved": 15,
       "problems": 15,
       "tags": ["split-inputs-into-behaviour-classes"],
       "refs": ["p0255", "p0257", "p0305", "p0564", "p0619", "p0678", "p0706", "p0752", "p0764", "p0844", "p0923", "p0941", "p0949", "p0962", "p0963"],
-      "covered": ["p0255", "p0257", "p0305", "p0619", "p0706", "p0752", "p0764", "p0844", "p0963"],
-      "solved_after": ["p0564", "p0678", "p0923", "p0941", "p0949", "p0962"]
+      "covered": ["p0255", "p0257", "p0305", "p0564", "p0619", "p0678", "p0706", "p0752", "p0764", "p0844", "p0923", "p0941", "p0949", "p0962", "p0963"],
+      "solved_after": []
     },
     {
       "path": "takeaway/split-where-the-interface-is-narrow",
