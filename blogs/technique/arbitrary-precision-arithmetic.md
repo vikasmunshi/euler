@@ -1,5 +1,5 @@
 <!-- tags: [arbitrary-precision-arithmetic] -->
-<!-- status: final 2026-10-29T12:09Z -->
+<!-- status: final -->
 # Arbitrary-precision arithmetic
 
 [Arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) is
@@ -45,7 +45,7 @@ machine word.
 
 Above a certain complexity you stop hand-rolling. Several private solutions link
 [GMP](https://gmplib.org/) and work in `mpz_t` — problems 168, 169, 172, 176, 178, 180, 192, 203,
-239, 321, 387 and 768 all do — because once you need division, comparison, exact binomials and a
+239, 321, 387, 558, 581, 582, 768, 776, 982 and 988 all do — because once you need division, comparison, exact binomials and a
 sort over big values, a library that has already been tuned (with sub-quadratic multiplication above
 a threshold) beats anything you will write in an afternoon. GMP also says what you mean:
 Problem 239's port divides its rolling factorial and binomial with `mpz_divexact_ui`, which both
@@ -98,6 +98,26 @@ asks whether two quantities are equal, a well-chosen invariant often decides it 
 either. A big integer that exists only because you did not think about reduction first is a cost you
 chose.
 
+**Or refuse the big number outright.** Problem 66 needs a Pell equation's fundamental solution in
+full, however many digits it has. Problem 581 meets the same equations, one for each squarefree
+smooth $q$, and most of their fundamental solutions are astronomically large. But it only wants
+solutions whose $y$ is [smooth](https://en.wikipedia.org/wiki/Smooth_number), and a number with
+hundreds of digits has essentially no chance of that. So the continued-fraction walk gives up once
+$y$ passes a cap of $10^{10}$, and it never builds the huge solutions at all. A cap like that is a
+claim about the problem, so the solution tests it: raising the cap to $10^{30}$ or $10^{40}$ gives the
+same answer. Even inside the cap, the C port cannot stay in machine integers: $d\,y^2$ reaches about
+$4 \times 10^{41}$, past the `unsigned __int128` ceiling, so the Pell check runs in GMP. The cap
+limits how *many* big numbers you build. It does not make the ones you keep small.
+
+**A huge bound is not huge work.** Problem 582 takes $10^{100}$ as its *input*. The C port's first
+job is to parse `10**100` into an `mpz_t`, because no machine type can hold it. Even so, the search
+is cheap. Each family of solutions is the orbit of a seed under the unit $2 + \sqrt 3$ of a
+[Pell-type equation](https://en.wikipedia.org/wiki/Pell%27s_equation), so its values grow
+geometrically, and the orbit passes $10^{100}$ after about 175 steps. The big numbers set the cost
+of each step, and the geometry keeps the number of steps small. When an orbit, a doubling or a
+continued fraction stands between you and a 100-digit bound, the bound's size is a parsing problem
+and not a running-time problem.
+
 **Division is where reduction gets hard.** Problem 250 wants a count modulo $10^{16}$ and builds it
 from rows of binomials $\binom{c}{i}$. Python takes the easy road: it runs the exact recurrence
 `b = b * (c - i) // (i + 1)` in big integers and reduces only when folding each coefficient in. The C
@@ -108,6 +128,32 @@ multiplying with a [modular inverse](/blogs/technique/modular-multiplicative-inv
 with `__int128` products keeping each step exact. Python's big integers are buying the *right to
 divide*, and the C port has to earn it back with number theory; the reward is $24$ ms against
 Python's $0.95$ s.
+
+**Exact rationals: keep the denominator out of the inner loop.** A `Fraction` is exact, but it pays
+for a [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor) on every operation, and that
+cost multiplies when every cell of a matrix is a fraction. Problem 982 is a zero-sum game, and it
+solves the game as a [linear programme](https://en.wikipedia.org/wiki/Linear_programming) by exact
+simplex. Instead of a tableau of `Fraction`s, it keeps a tableau of integers that all share one
+implicit denominator: the previous pivot. This is the
+[Bareiss](https://en.wikipedia.org/wiki/Bareiss_algorithm) fraction-free update,
+`(x * piv - f * y) // det`. The division is always exact, because Sylvester's identity guarantees
+that `det` divides the numerator. So nothing is normalised, the entries stay as small as the
+determinants they really are, and the answer comes out as one rational, rounded only at the end.
+The C port does the same in GMP, with `mpz_submul` and `mpz_divexact`, which is again the call that
+says "this division has no remainder". The reverse also works: put the denominators in only at the
+end. Problem 776 sums $n / d(n)$ over every $n \le N$, but groups the terms by digit sum $s$, so a
+digit DP builds a handful of exact integer totals $T(s)$ (around $10^{40}$, which needs GMP in C).
+Only the final $\sum_s T(s)/s$, with fewer than $9 \times$(digits of $N$) terms, is a rational at all.
+That problem also takes the exact-rounding idea from Problem 239 to scientific notation. The exponent
+is the digit count of $\lfloor x \rfloor$ minus one. The mantissa is
+$\lfloor x / 10^{e-12} + \tfrac12 \rfloor$. A rounding carry into a fourteenth digit is caught
+and shifts the exponent. All three steps are integer operations, so every printed digit is exact.
+
+The same counting DPs explain most of the GMP in the newer C ports. A DP that adds up values
+(776) or counts configurations (Problem 988 counts antichains in a staircase grid, and the number
+grows exponentially with the grid) produces totals far larger than anything in its input. The code
+is plain addition, and the only thing the port has to decide is how wide the accumulator must be.
+For 988, `__int128` would not be enough: the totals outgrow 128 bits on the larger test inputs.
 
 **When you do need it, the base and the algorithm dominate — not the language.** The benchmarks here
 make that unusually vivid. For Problem 25 (repeated addition, base-$10^9$ limbs), C runs in
@@ -156,6 +202,31 @@ The check costs one comparison per pair and almost never triggers, and the resul
 `decimal` and counts the nines, an independent oracle for the closed form on small inputs. Keeping
 the slow exact computation for the borderline cases and for testing, and the fast approximate one for
 everything else, is often the right split.
+
+**When the numbers are irrational, make the state exact and only the comparison approximate.**
+Problem 558 expands integers greedily in base $r$, the real root of $x^3 = x^2 + 1$. Floating point
+fails here: each greedy step subtracts a power of $r$ from the remainder, and the rounding error
+builds up step after step. Higher precision only moves that failure further out. The fix is to
+leave the reals entirely. Since $r^3 = r^2 + 1$, every power of $r$, and therefore every remainder,
+is exactly $a + br + cr^2$ with integer coordinates in the ring $\mathbb Z[r]$, and multiplying by
+$r$ is the coordinate rotation $(a, b, c) \mapsto (c, a, b + c)$. The state can no longer drift.
+What still needs care is the sign of each difference, and the decision is split three ways:
+
+- A fixed-point evaluation $a \cdot 2^p + bF + cG$ with $F$, $G$ the rounded values of $r$ and $r^2$.
+  These come from a 200-bit value of $r$ found by integer bisection, which is Problem 80's
+  scale-and-take-an-integer-root trick again. The 64-bit products are *allowed to wrap*:
+  two's-complement overflow is exact modulo $2^{64}$, and the true value is known to fit, so the
+  wrapped result is the right one. NumPy's int64 wraps silently. C has to use `uint64_t`, because
+  signed overflow is undefined behaviour there.
+- An explicit error bound that marks the narrow band where that rounding could change the sign.
+- Inside the band, the exact [field norm](https://en.wikipedia.org/wiki/Field_norm): a 3×3
+  determinant with the same sign as the difference. It is cubic in coefficients of about $2^{47}$,
+  so it is computed in big integers (GMP in C). It fires on about $3375$ of roughly $10^9$
+  decisions.
+
+This is the same filter-then-certify split as in Problem 318, with one difference. The certificate
+is not "the same computation at more bits" but an exact algebraic identity, so it cannot itself be
+wrong.
 
 **Two pitfalls specific to Python.** First, `int` being free is exactly why the C translation
 surprises you — the overflow you never saw is now yours to handle, and the port is not a
